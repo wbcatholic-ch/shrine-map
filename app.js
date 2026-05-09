@@ -584,6 +584,8 @@ const AppState = {
   activeDio:          null, // 현재 마커 펼쳐진 교구 코드
   parishSysInited:    false,
   parishIdleListener: null, // 뷰포트 필터링용 idle 이벤트 리스너
+  parishDioUserZoomTouched: false, // 사용자가 성당 교구 지도에서 직접 확대/축소했는지
+  parishDioProgrammaticMoveUntil: 0, // 앱이 조정한 줌 변경을 사용자 조작으로 오인하지 않기 위한 보호 시간
 
   // ── 검색 디바운스 ──
   smPlaceDebounce: null,
@@ -637,6 +639,8 @@ const AppState = {
     ['_activeDio',           'activeDio'],
     ['_parishSysInited',     'parishSysInited'],
     ['_parishIdleListener',  'parishIdleListener'],
+    ['_parishDioUserZoomTouched', 'parishDioUserZoomTouched'],
+    ['_parishDioProgrammaticMoveUntil', 'parishDioProgrammaticMoveUntil'],
     ['_smPlaceDebounce',  'smPlaceDebounce'],
     ['_smTab',            'smTab'],
   ];
@@ -865,6 +869,8 @@ function _resetMapState(){
   _dioOverlays={};
   _activeDio=null;
   _parishSysInited=false;
+  _parishDioUserZoomTouched=false;
+  _parishDioProgrammaticMoveUntil=0;
   if(_parishIdleListener){ try{kakao.maps.event.removeListener(_parishIdleListener);}catch(e){ console.warn('[클로드정리]',e); } _parishIdleListener=null; }
   _paSelMkr=null;
   _myMkr=null;
@@ -1583,6 +1589,39 @@ function _dioLabelSize(lvl){
   if(lvl===8) return 13; return 12;
 }
 
+function _markParishDioProgrammaticMove(ms){
+  try{
+    _parishDioProgrammaticMoveUntil=(Date.now?Date.now():new Date().getTime())+(ms||1400);
+  }catch(e){ console.warn('[클로드정리]',e); }
+}
+
+function _parishDioCenter(code){
+  if(!_map||typeof _LL==='undefined') return null;
+  const parishes=_PA_BY_DIO[code]||[];
+  let minLat=Infinity,maxLat=-Infinity,minLng=Infinity,maxLng=-Infinity,count=0;
+  parishes.forEach(function(p){
+    if(!p||!p.lat||!p.lng||p.lat===0||p.lng===0) return;
+    minLat=Math.min(minLat,p.lat); maxLat=Math.max(maxLat,p.lat);
+    minLng=Math.min(minLng,p.lng); maxLng=Math.max(maxLng,p.lng);
+    count++;
+  });
+  if(count>0) return new _LL((minLat+maxLat)/2,(minLng+maxLng)/2);
+  const cfg=_DIO_CFG[code];
+  return cfg ? new _LL(cfg.lat,cfg.lng) : null;
+}
+
+function _centerParishDioWithoutZoom(code){
+  if(_mode!=='parish'||!_map) return false;
+  const center=_parishDioCenter(code);
+  if(!center) return false;
+  try{
+    if(typeof _map.panTo==='function') _map.panTo(center);
+    else _map.setCenter(center);
+    return true;
+  }catch(e){ console.warn('[클로드정리]',e); }
+  return false;
+}
+
 function _buildParishDioSystem(){
   if(_parishSysInited) { _showDioOverlays(); return; }
   _parishSysInited=true;
@@ -1617,6 +1656,12 @@ function _buildParishDioSystem(){
     document.querySelectorAll('.dio-label').forEach(el2=>{
       el2.style.fontSize=fs2+'px';
     });
+    try{
+      const now=Date.now?Date.now():new Date().getTime();
+      if(_mode==='parish' && now>_parishDioProgrammaticMoveUntil){
+        _parishDioUserZoomTouched=true;
+      }
+    }catch(e){ console.warn('[클로드정리]',e); }
   });
 }
 
@@ -1640,10 +1685,16 @@ function _toggleParishDio(code){
   const clickedEl=_dioOverlays[code]?.getContent?.();
   if(clickedEl){clickedEl.style.display='none';}
   _showParishDioMkrs(code);
-  _focusParishDio(code);
+  _focusParishDio(code,{fromLabel:true});
 }
 
-function _focusParishDio(code){
+function _focusParishDio(code, opts){
+  opts=opts||{};
+  // 성당 카테고리의 교구명 클릭은 처음에는 교구 전체 보기로 맞추고,
+  // 사용자가 직접 확대/축소한 뒤에는 현재 줌을 유지한 채 교구 중심만 이동한다.
+  if(opts.fromLabel && _parishDioUserZoomTouched){
+    if(_centerParishDioWithoutZoom(code)) return;
+  }
   _fitParishDioBounds(code,{reason:'dio-click'});
 }
 
@@ -1664,6 +1715,7 @@ function _fitParishDioBounds(code, opts){
     if(count>1 && bounds){
       /* 성당 카테고리의 교구 선택/성당 선택은 해당 교구 성당 전체 범위를 기준으로 맞춘다.
          한 성당의 노란 마커 중심 이동이 bounds를 다시 빼앗지 않도록 이 함수로 기준을 통일한다. */
+      _markParishDioProgrammaticMove(1700);
       try{ _map.setBounds(bounds, 86, 64, 126, 64); }
       catch(e1){ _map.setBounds(bounds); }
       setTimeout(function(){
@@ -1671,7 +1723,7 @@ function _fitParishDioBounds(code, opts){
           if(_mode==='parish' && _activeDio===code && typeof _map.getLevel==='function' && typeof _map.setLevel==='function'){
             var lvl=_map.getLevel();
             // 너무 가까이 확대되어 일부 성당만 보이는 경우만 한 단계 안전하게 물러난다.
-            if(lvl<8) _map.setLevel(8);
+            if(lvl<8){ _markParishDioProgrammaticMove(1200); _map.setLevel(8); }
           }
         }catch(e2){ console.warn('[클로드정리]',e2); }
       }, opts.delay || 90);
@@ -1679,13 +1731,13 @@ function _fitParishDioBounds(code, opts){
     }
     if(count===1 && only){
       _map.setCenter(new _LL(only.lat,only.lng));
-      if(typeof _map.setLevel==='function') _map.setLevel(8);
+      if(typeof _map.setLevel==='function'){ _markParishDioProgrammaticMove(1200); _map.setLevel(8); }
       return true;
     }
     const cfg=_DIO_CFG[code];
     if(cfg){
       _map.setCenter(new _LL(cfg.lat,cfg.lng));
-      if(typeof _map.setLevel==='function') _map.setLevel(8);
+      if(typeof _map.setLevel==='function'){ _markParishDioProgrammaticMove(1200); _map.setLevel(8); }
       return true;
     }
   }catch(e){ console.warn('[클로드정리]',e); }
@@ -1695,7 +1747,7 @@ function _fitParishDioBounds(code, opts){
 function _ensureParishMarkerZoom(){
   if(_mode!=='parish'||!_map||typeof _map.getLevel!=='function'||typeof _map.setLevel!=='function') return;
   try{
-    if(_map.getLevel()>=9) _map.setLevel(8);
+    if(_map.getLevel()>=9){ _markParishDioProgrammaticMove(1200); _map.setLevel(8); }
   }catch(e){ console.warn('[클로드정리]',e); }
 }
 function _showParishDioMkrs(code){
