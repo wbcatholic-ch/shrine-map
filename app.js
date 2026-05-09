@@ -23,15 +23,16 @@ function hideCoverAndRun(callback) {
 
 
 function markExternalReturnStabilize(kind){
-  // 외부사이트 이동 안내 화면은 사용하지 않는다.
-  // 복귀 후 잔여 상태 정리 여부만 가볍게 기록한다.
-  try{ sessionStorage.setItem('oai_external_return_stabilize', kind || 'external'); }catch(e){ console.warn("[가톨릭길동무]", e); }
+  // v1-11: 외부사이트 이동은 브라우저 기본 이동에 맡긴다.
+  // 이동중 화면/상태를 저장하지 않는다.
 }
 
 function oaiClearExternalNavigationState(){
+  // 이전 버전에서 남을 수 있는 이동중 보호막/클래스만 제거한다.
   try{
     var html = document.documentElement;
     html.classList.remove('oai-navigating-out','oai-external-return-prepaint','oai-external-return-stabilize','oai-missa-return-stabilize');
+    sessionStorage.removeItem('oai_external_return_stabilize');
     sessionStorage.removeItem('oai_external_nav_started_at');
     sessionStorage.removeItem('oai_external_nav_pagehide');
   }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -42,81 +43,22 @@ function oaiClearExternalNavigationState(){
 }
 
 function oaiSmoothNavigate(url, kind){
+  // 호환용 이름만 유지한다. 실제 이동은 지연/가로채기 없이 즉시 수행한다.
   if(!url) return;
   try{ document.activeElement && document.activeElement.blur && document.activeElement.blur(); }catch(e){ console.warn("[가톨릭길동무]", e); }
-  try{ markExternalReturnStabilize(kind || 'external'); }catch(e){ console.warn("[가톨릭길동무]", e); }
-  // 보호막/이동중 문구를 만들지 않고 브라우저 기본 이동에 맡긴다.
-  // 이전 버전에서 남은 이동중 화면이 있으면 먼저 제거한다.
   try{ oaiClearExternalNavigationState(); }catch(e){ console.warn("[가톨릭길동무]", e); }
-  setTimeout(function(){
-    try{ location.assign(url); }catch(e){ location.href = url; }
-  }, 0);
-}
-
-function oaiResetExternalPopupResidue(){
-  try{ if(document.activeElement && typeof document.activeElement.blur === 'function') document.activeElement.blur(); }catch(e){ console.warn("[가톨릭길동무]", e); }
-  try{
-    document.documentElement.style.scrollBehavior = 'auto';
-    document.body.style.scrollBehavior = 'auto';
-    document.body.style.overflow = '';
-    document.body.style.position = '';
-    document.body.style.top = '';
-    document.body.style.left = '';
-    document.body.style.right = '';
-    document.body.style.width = '';
-    document.body.style.transform = '';
-    document.body.style.willChange = '';
-  }catch(e){ console.warn("[가톨릭길동무]", e); }
+  try{ location.href = url; }catch(e){ try{ location.assign(url); }catch(_){ } }
 }
 
 function applyExternalReturnStabilize(){
-  try{ sessionStorage.removeItem('oai_external_return_stabilize'); }catch(e){ console.warn("[가톨릭길동무]", e); }
+  // v1-11: 복귀 시 화면 재계산을 만들지 않고, 이전 버전 잔여 상태만 제거한다.
   try{ oaiClearExternalNavigationState(); }catch(e){ console.warn("[가톨릭길동무]", e); }
-  try{ oaiResetExternalPopupResidue(); }catch(e){ console.warn("[가톨릭길동무]", e); }
 }
 
 window.addEventListener('pageshow', function(){ applyExternalReturnStabilize(); }, true);
-document.addEventListener('visibilitychange', function(){
-  if(document.visibilityState === 'visible') applyExternalReturnStabilize();
-}, true);
-window.addEventListener('focus', function(){ applyExternalReturnStabilize(); }, true);
 
 function oaiBindExternalLinkGuard(){
-  if(window.__OAI_EXTERNAL_LINK_GUARD__) return;
-  window.__OAI_EXTERNAL_LINK_GUARD__ = true;
-  document.addEventListener('click', function(e){
-    var a = null;
-    try{ a = e.target && e.target.closest ? e.target.closest('a[href]') : null; }catch(err){ a = null; }
-    if(!a) return;
-
-    var raw = (a.getAttribute('href') || '').trim();
-    if(!raw || raw === '#') return;
-    if(/^(tel:|mailto:|sms:|kakaomap:|kakaonavi:|intent:|javascript:)/i.test(raw)) return;
-    if(/^(index\.html|\.\/index\.html|qa-firebase\.html|\.\/qa-firebase\.html|diocese\.html|\.\/diocese\.html)(\?|#|$)/i.test(raw)) return;
-
-    var url = raw;
-    try{ url = new URL(raw, location.href).href; }catch(err){ return; }
-    try{ if(new URL(url).origin === location.origin && !/^https?:\/\//i.test(raw)) return; }catch(err){}
-
-    var shouldHandle = false;
-    try{
-      shouldHandle = !!(
-        a.id === 'goodnews-prayer-btn' ||
-        a.classList.contains('ric-map-link') ||
-        a.closest('#prayer-detail-content') ||
-        a.closest('#prayer-view') ||
-        a.closest('#info-card')
-      );
-    }catch(err){ shouldHandle = false; }
-    if(!shouldHandle) return;
-
-    try{ e.preventDefault(); e.stopPropagation(); }catch(err){}
-    var label = '';
-    var kind = 'external';
-    if(a.id === 'goodnews-prayer-btn' || (a.closest && a.closest('#prayer-view'))){ kind = 'prayer'; label = '기도문 '; }
-    else if(a.classList && a.classList.contains('ric-map-link')){ kind = 'map'; }
-    oaiSmoothNavigate(url, kind, label);
-  }, true);
+  // v1-11: 외부 링크 전역 가로채기 제거. 브라우저 기본 이동을 사용한다.
 }
 if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', oaiBindExternalLinkGuard, {once:true});
 else oaiBindExternalLinkGuard();
@@ -134,8 +76,7 @@ function openMissa(){
   const url='https://missa.cbck.or.kr/DailyMissa/'+yyyy+mm+dd;
   try{ localStorage.setItem('oai_last_missa_url', url); }catch(e){ console.warn("[가톨릭길동무]", e); }
   /* 외부 브라우저로 이동 — 화면 전환 페이드 후 location.href 방식 유지 */
-  if(typeof oaiSmoothNavigate==='function') oaiSmoothNavigate(url, 'missa');
-  else location.href = url;
+  location.href = url;
 }
 function closeMissa(){
   const view=$('missa-view');
@@ -191,7 +132,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=v1-10';
+    frame.src='diocese.html?v=v1-11';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -265,8 +206,7 @@ function openCoreExternalUrl(url, extra){
   if(!url) return;
   saveCoreReturnState(extra);
   // location.href 방식: PWA/모바일에서 팝업 차단 우회, 뒤로가기로 복귀 가능
-  if(typeof oaiSmoothNavigate==='function') oaiSmoothNavigate(url, 'core');
-  else location.href = url;
+  location.href = url;
 }
 
 function clearRouteNoFocus(){
@@ -1250,7 +1190,9 @@ function _showInfoCard(item, idx){
   const hp=$('ic-hp');
   if(item.hp){
     hp.href=normalizeCatholicExternalUrl(item.hp);
-    hp.onclick=(e)=>{e.preventDefault(); openCoreExternalUrl(item.hp,{infoIdx:idx});};
+    hp.removeAttribute('onclick');
+    hp.onclick = null;
+    hp.target = '_self';
     _show(hp);
   }
   else _hide(hp);

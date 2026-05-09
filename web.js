@@ -196,8 +196,7 @@
     }
     saveReturnState(payload);
     // location.href 방식: PWA/모바일 팝업 차단 우회, 뒤로가기로 복귀 가능
-    if(typeof oaiSmoothNavigate==='function') oaiSmoothNavigate(url, payload.module || 'external');
-    else location.href = url;
+    location.href = url;
     return;
   }
 
