@@ -23,7 +23,7 @@ function hideCoverAndRun(callback) {
 
 
 function markExternalReturnStabilize(kind){
-  // V38: 외부 사이트 이동은 브라우저 기본 동작에 맡긴다.
+  // V39: 외부 사이트 이동은 브라우저 기본 동작에 맡긴다.
   // 이전 버전 호환을 위해 함수명만 유지하고, 이동 상태는 저장하지 않는다.
 }
 
@@ -43,7 +43,7 @@ function oaiClearExternalNavigationState(){
 }
 
 function oaiSmoothNavigate(url, kind){
-  // V38: 호환용 함수. 보호막/지연/전역 가로채기 없이 즉시 이동한다.
+  // V39: 호환용 함수. 보호막/지연/전역 가로채기 없이 즉시 이동한다.
   if(!url) return;
   try{ document.activeElement && document.activeElement.blur && document.activeElement.blur(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   try{ oaiClearExternalNavigationState(); }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -51,7 +51,7 @@ function oaiSmoothNavigate(url, kind){
 }
 
 function applyExternalReturnStabilize(){
-  // V38: 복귀 시 화면을 재계산하지 않고, 예전 이동중 잔여 상태만 제거한다.
+  // V39: 복귀 시 화면을 재계산하지 않고, 예전 이동중 잔여 상태만 제거한다.
   try{ oaiClearExternalNavigationState(); }catch(e){ console.warn("[가톨릭길동무]", e); }
 }
 window.addEventListener('pageshow', applyExternalReturnStabilize, true);
@@ -106,7 +106,7 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || 'V38';
+    var target = btn.getAttribute('data-target-version') || 'V39';
     var current = '';
     if(window.APP_VERSION) current = String(window.APP_VERSION).trim();
     if(!current && marker) current = String(marker.textContent || '').trim();
@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', function(){
 }, true);
 window.addEventListener('load', syncCoverUpdateVersionState, true);
 
-// V38: 커버 전용 주요 기능 안내. 별도 파일 없이 작은 자동 안내 + 자세한 카드형 팝업을 제공한다.
+// V39: 커버 전용 주요 기능 안내. 별도 파일 없이 작은 자동 안내 + 자세한 카드형 팝업을 제공한다.
 (function(){
   'use strict';
   var HIDE_DAYS = 7;
@@ -283,7 +283,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V38';
+    frame.src='diocese.html?v=V39';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -409,7 +409,7 @@ function restoreCoreReturnState(){
     _loadMap();
   }
   const restoreDelay = needMapLoad ? 650 : 30;
-  // V38: 외부사이트 복귀 시 지도 중심을 두 단계로 움직이지 않는다.
+  // V39: 외부사이트 복귀 시 지도 중심을 두 단계로 움직이지 않는다.
   // 인포카드가 있었던 경우에는 처음부터 인포카드 기준 중심으로 복원한다.
   setTimeout(()=>{
     _restoreMapMarkers();
@@ -1073,7 +1073,9 @@ function openTab(name){
     _closeSheetOnly(prevName);
   }
 
-  if(name!=='route') closeInfoCard();
+  // 새 시트(내주변/찾기/지역검색/길찾기)를 열 때는 기존 인포카드를 먼저 정리한다.
+  // 단순 z-index 보정이 아니라 상태 전환 순서에서 겹침을 없애며, 지도 중심은 흔들리지 않게 유지한다.
+  closeInfoCard({keepMap:true});
   _curFromRegion=false;
   if(name!=='route') resetRoute();
   _exitRouteMode();
@@ -1187,6 +1189,8 @@ function _resetTabWork(name){
 
 function toggleTab(name){
   if(_activeTab===name){
+    // 같은 탭을 다시 눌러 목록을 다시 올릴 때도 인포카드는 남기지 않는다.
+    closeInfoCard({keepMap:true});
     _resetTabWork(name);
     if(name==='nearby') _loadNearby();
     else if(name==='list') renderList();
@@ -1217,7 +1221,7 @@ function _updateTabBtns(active){
 }
 
 function _getInfoCardCenterTargetY(mapH){
-  // V38: 성지·성당·피정 지도 중심은 항상 인포카드가 올라왔을 때의 기준으로 통일한다.
+  // V39: 성지·성당·피정 지도 중심은 항상 인포카드가 올라왔을 때의 기준으로 통일한다.
   // 실제 인포카드가 아직 없거나 목록 시트만 떠 있어도 같은 시각 중심을 사용해 덜컹거림을 줄인다.
   return Math.round((mapH || 700) * 0.34);
 }
@@ -1389,17 +1393,20 @@ function _showInfoCard(item, idx){
   setTimeout(_fitInfoCardButtons, 80);
 }
 
-function closeInfoCard(){
+function closeInfoCard(opts){
+  opts = opts || {};
   const wasItem = _curInfoItem; // 닫기 전에 저장
-  $('info-card').classList.remove('open');
+  const card = $('info-card');
+  if(card) card.classList.remove('open');
   _curInfoItem=null;
   _curFromRegion=false;
   if(_mode==='shrine') _clearShrineMarkerSel();
   else {
     if(_paSelMkr){try{_paSelMkr.setMap(null);}catch(e){ console.warn("[가톨릭길동무]", e); }  _paSelMkr=null;}
   }
-  // V38: 인포카드 닫힘/열림에 따라 지도 중심 기준이 달라지지 않게 같은 기준을 유지한다.
-  if(wasItem && wasItem.item && wasItem.item.lat && _map){
+  // V39: 시트 전환으로 닫을 때는 지도 중심을 다시 움직이지 않는다.
+  // 사용자가 X/지도 터치로 인포카드만 닫을 때는 기존 V39 기준 중심을 유지한다.
+  if(!opts.keepMap && wasItem && wasItem.item && wasItem.item.lat && _map){
     try{ _focusMarkerAboveInfoCard(wasItem.item); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
 }
@@ -1680,7 +1687,7 @@ function _fitParishNearbyBounds(items, lat, lng){
 function _showParishNearbyMarkersOnMap(items, lat, lng, phase){
   if(_mode!=='parish' || !_map || !Array.isArray(items) || !items.length || typeof _LL==='undefined') return;
   try{
-    /* V38
+    /* V39
        성당 카테고리 첫 진입/내주변 목록에서는 지도에 10개 주변 마커만 올리지 않는다.
        목록은 지금처럼 현재 위치 주변 10곳을 보여주고, 지도에는 그 주변 성당 중
        가장 가까운 성당이 속한 교구의 성당 마커 전체를 표시한다.
@@ -1849,7 +1856,7 @@ function _focusParishPointAround(lat, lng, opts){
         _map.setLevel(targetLevel);
       }
     }
-    // V38: 현재 위치/내 주변/선택 성당 모두 인포카드 기준 중심으로 통일한다.
+    // V39: 현재 위치/내 주변/선택 성당 모두 인포카드 기준 중심으로 통일한다.
     if(typeof _setMapCenterByInfoCardStandard==='function'){
       return _setMapCenterByInfoCardStandard(pos);
     }
@@ -2917,6 +2924,7 @@ function selectFromPlaceModal(lat,lng,name,addr){
   if(_map) _map.panTo(new _LL(lat,lng));
 }
 function openSearchModal(role){
+  closeInfoCard({keepMap:true});
   _smRole=role;_smDio='all';
   _smTab='cat';
   // 탭 이름 카테고리별 설정
