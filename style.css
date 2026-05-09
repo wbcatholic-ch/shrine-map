@@ -1065,13 +1065,6 @@ html.retreat-mode #srch-modal .sm-filter{background:linear-gradient(135deg,#3f7e
 #info-card #ic-hp.ic-link-btn{font-size:16px!important;padding-left:4px!important;padding-right:4px!important}
 /* 최소 수정: 기존 닫기 버튼만 공통 표시. JS/이벤트/뒤로가기 추가 없음 */
 .sheet-x,.sm-x,.ic-close-btn,#missa-close,#prayer-close,#web-view .module-close,#trail-view .module-close,.trail-sh-close{display:flex!important;align-items:center!important;justify-content:center}
-#cv-pull-modern{position:fixed;top:92px!important;left:50%!important;transform:translateX(-50%) scale(var(--pull-scale,.74))!important;display:flex!important;align-items:center!important;justify-content:center;padding:0!important;background:#fff!important;border:1px solid rgba(227,52,47,.18)!important;box-shadow:0 8px 22px rgba(31,42,68,.16)!important;z-index:10060;opacity:0;pointer-events:none;transition:opacity .1s ease,transform .08s linear;will-change:transform,opacity;right:auto!important;bottom:auto!important;transform-origin:center;color:#e3342f!important;border-radius:999px!important;width:54px!important;height:54px!important;min-width:54px!important;min-height:54px!important;gap:0!important}
-#cv-pull-modern.show{opacity:1;transform:translate(-50%,-50%)}
-.cv-pull-ring{width:51px;height:51px;display:flex;align-items:center;justify-content:center;background:transparent}
-.cv-pull-icon{width:30px;height:30px;display:block;transform:rotate(0deg);transition:transform .18s ease;color:#22c55e}
-#cv-pull-modern.ready .cv-pull-icon{transform:rotate(180deg)}
-#cv-pull-modern.refreshing .cv-pull-icon{animation:cv-pull-spin .7s linear infinite}
-@keyframes cv-pull-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 .cover-header{flex:0 0 auto;padding:6vh 20px 2vh;text-align:center;z-index:10}
 .cover-title{font-size:clamp(28px,8vw,36px);font-weight:800;letter-spacing:-0.5px;color:var(--text-main);margin:0}
 .cover-subtitle{font-size:clamp(12px,3vw,14px);font-weight:500;color:var(--color-3);margin-bottom:8px;letter-spacing:1px}
@@ -1224,13 +1217,6 @@ html.app-active
 #cover #qna-cover-btn{position:relative;right:auto;bottom:auto;z-index:10;display:flex;align-items:center;justify-content:center;min-height:40px;padding:0 14px;border:0;border-radius:999px;background:linear-gradient(135deg,#1f2a44,#31446c);color:#fff;font-family:inherit;font-size:12.5px;font-weight:900;line-height:1;box-shadow:0 10px 24px rgba(31,42,68,.25);opacity:1;visibility:visible;pointer-events:auto;align-self:flex-end;margin-top:8px;margin-bottom:calc(5vh + env(safe-area-inset-bottom,0px))}#cover #pwa-install-btn{left:12px;right:auto;bottom:calc(50px + env(safe-area-inset-bottom,0px));z-index:10020}}
 @media (max-height:720px){
 #cover #qna-cover-btn{position:relative;right:auto;bottom:auto;z-index:10;display:flex;align-items:center;justify-content:center;min-height:40px;padding:0 14px;border:0;border-radius:999px;background:linear-gradient(135deg,#1f2a44,#31446c);color:#fff;font-family:inherit;font-size:12.5px;font-weight:900;line-height:1;box-shadow:0 10px 24px rgba(31,42,68,.25);opacity:1;visibility:visible;pointer-events:auto;align-self:flex-end;margin-top:8px;margin-bottom:calc(5vh + env(safe-area-inset-bottom,0px))}#cover #pwa-install-btn{left:12px;right:auto;bottom:calc(50px + env(safe-area-inset-bottom,0px));z-index:10020}}
-/* 새로고침 표시: 화면 고정, 흰색 원형 배경 + 빨간 원형화살표 */
-#cover,#cover.pulling,#cover.refreshing{transform:none;top:0!important;overscroll-behavior-y:contain!important}
-#cv-pull-modern.show,#cv-pull-modern.ready,#cv-pull-modern.refreshing{opacity:1}
-#cv-pull-modern .cv-pull-ring{width:54px;height:54px;display:flex;align-items:center;justify-content:center;background:transparent}
-#cv-pull-modern .cv-pull-icon{width:31px;height:31px;color:#e3342f;stroke:currentColor}
-#cv-pull-modern::after{content:'';display:none!important}
-#cv-pull-modern.ready{box-shadow:0 10px 26px rgba(227,52,47,.22)}
 .li-info,.nearby-info,.sm-info,.sm-place-info,.region-item .li-info,.list-item .li-info{min-width:0!important;overflow:visible!important}
 .li-name,.li-sub,.nearby-name,.nearby-addr,.sm-name,.sm-sub,.sm-place-name,.sm-place-addr,.region-item .li-name,.region-item .li-sub,.list-item .li-name,.list-item .li-sub{white-space:normal;overflow:visible!important;text-overflow:clip;display:block!important;-webkit-line-clamp:unset!important;-webkit-box-orient:unset!important;word-break:keep-all;overflow-wrap:anywhere!important;line-height:1.38!important;max-height:none!important}
 .nearby-item,.list-item,.region-item,.sm-item,.sm-place-item{align-items:flex-start!important}
@@ -1254,7 +1240,6 @@ html.retreat-mode .nearby-meta{width:74px!important;min-width:74px!important;max
 html.retreat-mode .nearby-type,
 html.retreat-mode .nearby-dist,
 html.retreat-mode .li-badge{font-size:10.5px!important;line-height:1.12!important;white-space:normal;text-align:center!important;padding:3px 5px!important;max-width:74px!important;box-sizing:border-box}
-@keyframes cv-pull-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 /* 커버 이모지 중복 방지: 실제 span 한 개만 표시 */
 #cc-2 .cover-emoji::before,
 #cc-3 .cover-emoji::before{content:none;display:none!important}
@@ -1615,7 +1600,7 @@ html.retreat-mode #sm-tab-bar .sm-tab.active{
   box-shadow:none!important;
 }
 
-/* V15: 외부 복귀/화면 진입 CSS 정리
+/* V16: 외부 복귀/화면 진입 CSS 정리
    외부 이동 보호막을 제거한 현재 구조에서는 복귀 전용 강제 고정 CSS를 두지 않는다.
    화면 진입 중 필요한 최소 전환만 유지하고, app/viewport 전체를 흔드는 전역 보정은 금지한다. */
 html:not(.app-active),html:not(.app-active) body{scroll-behavior:auto!important;}
@@ -1700,32 +1685,61 @@ html.retreat-mode #region-body .nearby-dist span{
   margin-left:4px!important;
 }
 
-/* 커버 전용 당겨서 새로고침: 기능은 유지, 표시만 GitHub/브라우저식 원형 스피너 느낌으로 정리 */
+/* 커버 전용 당겨서 새로고침 — V16 단일 기준 */
+#cover{
+  overscroll-behavior-y:contain!important;
+}
 #cv-pull-modern{
+  position:fixed!important;
   top:calc(50px + env(safe-area-inset-top,0px))!important;
+  left:50%!important;
+  right:auto!important;
+  bottom:auto!important;
   width:44px!important;
   height:44px!important;
   min-width:44px!important;
   min-height:44px!important;
-  background:#ffffff!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:0!important;
+  border-radius:999px!important;
+  background:#fff!important;
   border:1px solid #d0d7de!important;
   box-shadow:0 8px 18px rgba(27,31,36,.14)!important;
   color:#57606a!important;
-  transition:opacity .12s ease, transform .10s linear;
+  z-index:10060!important;
+  opacity:0;
+  pointer-events:none!important;
+  transform:translate(-50%,0) scale(1)!important;
+  transform-origin:center!important;
+  transition:opacity .10s ease,transform .08s linear;
+  will-change:opacity,transform;
+}
+#cv-pull-modern.show,
+#cv-pull-modern.ready,
+#cv-pull-modern.refreshing{
+  opacity:1!important;
 }
 #cv-pull-modern .cv-pull-ring{
   width:44px!important;
   height:44px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  background:transparent!important;
 }
 #cv-pull-modern .cv-pull-icon{
   width:25px!important;
   height:25px!important;
+  display:block!important;
   color:#57606a!important;
   stroke:currentColor!important;
   transition:transform .16s ease,color .16s ease;
 }
 #cv-pull-modern.ready .cv-pull-icon{
   color:#0969da!important;
+  transform:rotate(180deg);
 }
 #cv-pull-modern.refreshing .cv-pull-icon{
   color:#0969da!important;
@@ -1735,9 +1749,10 @@ html.retreat-mode #region-body .nearby-dist span{
   box-shadow:0 10px 24px rgba(9,105,218,.20)!important;
 }
 html.app-active #cv-pull-modern{
-  opacity:0;
+  opacity:0!important;
   display:none!important;
 }
+@keyframes cv-pull-spin{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
 
 /* ================================================================
    ▌ 모듈 헤더·탭·버튼 표준화 (최종 덮어쓰기)
@@ -1999,7 +2014,7 @@ html.app-active #cv-pull-modern{
 #qna-view  .qna-tab.on        { background: var(--navy, #0e1535) !important; }
 
 /* ── 6. 헤더 배경색 (모듈별) ─────────────────────────────────────── */
-/* V15: 기도문 헤더를 기준으로 주요 모듈 헤더 단색 통일 */
+/* V16: 기도문 헤더를 기준으로 주요 모듈 헤더 단색 통일 */
 #prayer-bar,
 #trail-view .module-bar,
 #web-view .module-bar,
@@ -2207,7 +2222,7 @@ html.oai-font-global #cover #cover-bottom-note,
   z-index:5;
 }
 
-/* V15: 출발 검색 모달 색상 기준 재정리
+/* V16: 출발 검색 모달 색상 기준 재정리
    - 성지/성당/피정 + 일반장소 탭: 활성은 금색, 비활성은 고유색 배경 위의 은은한 반투명 버튼
    - 검색창을 감싸는 영역은 성지/성당/피정 각 카테고리 고유색으로 통일
    - 실제 검색 입력창(.sm-si)은 기존 아이보리 계열 유지 */
@@ -2278,7 +2293,7 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab:not(.active){
 html #srch-modal #sm-tab-bar .sm-tab.active,
 html.parish-mode #srch-modal #sm-tab-bar .sm-tab.active,
 html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active{
-  /* V15: 바로 위 교구 활성화 버튼(.sm-fb.on)과 같은 금색 기준 사용 */
+  /* V16: 바로 위 교구 활성화 버튼(.sm-fb.on)과 같은 금색 기준 사용 */
   background:var(--gold,#d4aa6a)!important;
   background-image:none!important;
   color:#1F2937!important;
@@ -2290,7 +2305,7 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active{
 
 
 /* ══════════════════════════════════════════════════════════════════
-   V15 모듈 표준화
+   V16 모듈 표준화
    - 헤더: 기도문 헤더 기준 단색 네이비(그라데이션 제거)
    - 탭바/탭버튼: 관구·교구 탭 기준 높이·형태 통일
    - 활성 탭의 고유 색상은 각 모듈 기존 색상을 유지
