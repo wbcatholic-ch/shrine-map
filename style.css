@@ -1614,7 +1614,7 @@ html.retreat-mode #sm-tab-bar .sm-tab.active{
   box-shadow:none!important;
 }
 
-/* v1-12: 외부사이트 복귀 흔들림 원인 제거
+/* V7: 외부사이트 복귀 흔들림 원인 제거
    이전 정리 과정에서 html/body까지 position:fixed로 묶던 보정 CSS가 남아
    외부사이트 복귀 시 상단 주소창·지도·웹사이트 화면이 재계산되며 흔들렸다.
    커버 스타일은 기존 #cover 규칙에서 이미 관리하므로 여기서는 전역 고정을 하지 않는다. */

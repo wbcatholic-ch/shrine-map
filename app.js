@@ -23,12 +23,12 @@ function hideCoverAndRun(callback) {
 
 
 function markExternalReturnStabilize(kind){
-  // v1-12: 외부사이트 이동은 브라우저 기본 이동에 맡긴다.
-  // 이동중 화면/상태를 저장하지 않는다.
+  // V7: 외부 사이트 이동은 브라우저 기본 동작에 맡긴다.
+  // 이전 버전 호환을 위해 함수명만 유지하고, 이동 상태는 저장하지 않는다.
 }
 
 function oaiClearExternalNavigationState(){
-  // 이전 버전에서 남을 수 있는 이동중 보호막/클래스만 제거한다.
+  // 이전 버전에서 남았을 수 있는 외부 이동 보호막/클래스만 조용히 제거한다.
   try{
     var html = document.documentElement;
     html.classList.remove('oai-navigating-out','oai-external-return-prepaint','oai-external-return-stabilize','oai-missa-return-stabilize');
@@ -43,7 +43,7 @@ function oaiClearExternalNavigationState(){
 }
 
 function oaiSmoothNavigate(url, kind){
-  // 호환용 이름만 유지한다. 실제 이동은 지연/가로채기 없이 즉시 수행한다.
+  // V7: 호환용 함수. 보호막/지연/전역 가로채기 없이 즉시 이동한다.
   if(!url) return;
   try{ document.activeElement && document.activeElement.blur && document.activeElement.blur(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   try{ oaiClearExternalNavigationState(); }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -51,17 +51,10 @@ function oaiSmoothNavigate(url, kind){
 }
 
 function applyExternalReturnStabilize(){
-  // v1-12: 복귀 시 화면 재계산을 만들지 않고, 이전 버전 잔여 상태만 제거한다.
+  // V7: 복귀 시 화면을 재계산하지 않고, 예전 이동중 잔여 상태만 제거한다.
   try{ oaiClearExternalNavigationState(); }catch(e){ console.warn("[가톨릭길동무]", e); }
 }
-
-window.addEventListener('pageshow', function(){ applyExternalReturnStabilize(); }, true);
-
-function oaiBindExternalLinkGuard(){
-  // v1-12: 외부 링크 전역 가로채기 제거. 브라우저 기본 이동을 사용한다.
-}
-if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', oaiBindExternalLinkGuard, {once:true});
-else oaiBindExternalLinkGuard();
+window.addEventListener('pageshow', applyExternalReturnStabilize, true);
 
 /* ── 뒤로가기 핸들러는 principle-back-controller-20260424 에서 통합 관리 ── */
 
@@ -132,7 +125,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=v1-12';
+    frame.src='diocese.html?v=V7';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
