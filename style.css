@@ -1614,7 +1614,7 @@ html.retreat-mode #sm-tab-bar .sm-tab.active{
   box-shadow:none!important;
 }
 
-/* V10: 외부 복귀/화면 진입 CSS 정리
+/* V11: 외부 복귀/화면 진입 CSS 정리
    외부 이동 보호막을 제거한 현재 구조에서는 복귀 전용 강제 고정 CSS를 두지 않는다.
    화면 진입 중 필요한 최소 전환만 유지하고, app/viewport 전체를 흔드는 전역 보정은 금지한다. */
 html:not(.app-active),html:not(.app-active) body{scroll-behavior:auto!important;}
@@ -2210,7 +2210,7 @@ html.oai-font-global #cover #cover-bottom-note,
   z-index:5;
 }
 
-/* V10: 출발 검색 모달 색상 기준 재정리
+/* V11: 출발 검색 모달 색상 기준 재정리
    - 성지/성당/피정 + 일반장소 탭: 활성은 금색, 비활성은 고유색 배경 위의 은은한 반투명 버튼
    - 검색창을 감싸는 영역은 성지/성당/피정 각 카테고리 고유색으로 통일
    - 실제 검색 입력창(.sm-si)은 기존 아이보리 계열 유지 */
@@ -2281,10 +2281,11 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab:not(.active){
 html #srch-modal #sm-tab-bar .sm-tab.active,
 html.parish-mode #srch-modal #sm-tab-bar .sm-tab.active,
 html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active{
-  background:var(--oai-gold,#d4aa6a)!important;
+  /* V11: 바로 위 교구 활성화 버튼(.sm-fb.on)과 같은 금색 기준 사용 */
+  background:var(--gold,#d4aa6a)!important;
   background-image:none!important;
   color:#1F2937!important;
-  border-color:var(--oai-gold-border,#c49a57)!important;
+  border-color:var(--gold2,#b8965a)!important;
   box-shadow:none!important;
   font-weight:900!important;
 }
