@@ -3324,8 +3324,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   on('region-close-btn', 'click', function(e) { e.stopPropagation(); closeSheetPanelOnly('region'); });
   on('route-close-btn',  'click', function(e) { e.stopPropagation(); closeRouteSheetByX(); });
   on('map-category-close-btn', 'click', function(e) { e.stopPropagation(); closeCategoryToCoverFromMap(); });
-  on('map-zoom-in',  'click', function(e) { e.stopPropagation(); zoomCategoryMap(-1); });
-  on('map-zoom-out', 'click', function(e) { e.stopPropagation(); zoomCategoryMap(1); });
 
   // ── 내 위치 ──
   on('loc-btn', 'click', function() { goMyLoc(); });
