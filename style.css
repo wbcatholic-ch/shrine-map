@@ -636,7 +636,8 @@ html.parish-mode .sheet-hd,html.parish-mode .filter-bar,html.parish-mode .region
 html.retreat-mode .sheet-hd,html.retreat-mode .filter-bar,html.retreat-mode .region-wrap,html.retreat-mode .sm-hd,html.retreat-mode .sm-filter{background:var(--oai-retreat-header)!important}
 .srch-inner input,.srch-inner input::placeholder,.srch-x{color:#4b5563!important}
 .sheet-title,.sm-title{color:#c49b56!important;font-weight:800!important}
-.sheet-x,.sm-x{color:#c49b56!important;border-color:rgba(255,255,255,.28)!important;background:rgba(255,255,255,.78)!important;border:1px solid rgba(196,155,86,.22)!important}
+.sheet-x{color:#c49b56!important;border-color:rgba(255,255,255,.28)!important;background:rgba(255,255,255,.78)!important;border:1px solid rgba(196,155,86,.22)!important}
+.sm-x{color:#c49b56!important;border-color:rgba(212,170,106,.58)!important;background:rgba(14,21,53,.88)!important;border:1px solid rgba(212,170,106,.58)!important}
 .filter-btn,.sm-fb{background:#fff!important;color:#7b8794!important;border:1.5px solid var(--ui-line-strong)!important;box-shadow:none!important}
 .filter-btn.active,.sm-fb.on,html:not(.parish-mode):not(.retreat-mode) .filter-btn.active,html:not(.parish-mode):not(.retreat-mode) .sm-fb.on,html.parish-mode .filter-btn.active,html.parish-mode .sm-fb.on,html.retreat-mode .filter-btn.active,html.retreat-mode .sm-fb.on{background:var(--oai-gold)!important;color:#1f2937!important;border-color:var(--oai-gold-border)!important}
 #sm-tab-bar,html:not(.parish-mode):not(.retreat-mode) #sm-tab-bar,html.parish-mode #sm-tab-bar,html.retreat-mode #sm-tab-bar{background:inherit!important;border-bottom:1px solid rgba(255,255,255,.14)!important;padding:10px 14px!important;height:55px!important;align-items:center!important;gap:8px!important}
@@ -1065,6 +1066,10 @@ html.retreat-mode #srch-modal .sm-filter{background:linear-gradient(135deg,#3f7e
 #info-card #ic-hp.ic-link-btn{font-size:16px!important;padding-left:4px!important;padding-right:4px!important}
 /* 최소 수정: 기존 닫기 버튼만 공통 표시. JS/이벤트/뒤로가기 추가 없음 */
 .sheet-x,.sm-x,.ic-close-btn,#missa-close,#prayer-close,#web-view .module-close,#trail-view .module-close,.trail-sh-close{display:flex!important;align-items:center!important;justify-content:center}
+.sheet-hd{min-height:48px!important;padding:8px 14px!important}
+.sheet-title{font-size:15px!important;line-height:1.2!important}
+.sheet-x{width:30px!important;height:30px!important;min-width:30px!important;flex:0 0 30px!important}
+#srch-modal .sm-x{width:30px!important;height:30px!important;min-width:30px!important;flex:0 0 30px!important}
 .cover-header{flex:0 0 auto;padding:6vh 20px 2vh;text-align:center;z-index:10}
 .cover-title{font-size:clamp(28px,8vw,36px);font-weight:800;letter-spacing:-0.5px;color:var(--text-main);margin:0}
 .cover-subtitle{font-size:clamp(12px,3vw,14px);font-weight:500;color:var(--color-3);margin-bottom:8px;letter-spacing:1px}
@@ -1600,7 +1605,7 @@ html.retreat-mode #sm-tab-bar .sm-tab.active{
   box-shadow:none!important;
 }
 
-/* V10: 외부 복귀/화면 진입 CSS 정리
+/* V11: 외부 복귀/화면 진입 CSS 정리
    외부 이동 보호막을 제거한 현재 구조에서는 복귀 전용 강제 고정 CSS를 두지 않는다.
    화면 진입 중 필요한 최소 전환만 유지하고, app/viewport 전체를 흔드는 전역 보정은 금지한다. */
 html:not(.app-active),html:not(.app-active) body{scroll-behavior:auto!important;}
@@ -1685,7 +1690,7 @@ html.retreat-mode #region-body .nearby-dist span{
   margin-left:4px!important;
 }
 
-/* 커버 전용 당겨서 새로고침 — V10 단일 기준 */
+/* 커버 전용 당겨서 새로고침 — V11 단일 기준 */
 #cover{
   overscroll-behavior-y:contain!important;
 }
@@ -2014,7 +2019,7 @@ html.app-active #cv-pull-modern{
 #qna-view  .qna-tab.on        { background: var(--navy, #0e1535) !important; }
 
 /* ── 6. 헤더 배경색 (모듈별) ─────────────────────────────────────── */
-/* V10: 기도문 헤더를 기준으로 주요 모듈 헤더 단색 통일 */
+/* V11: 기도문 헤더를 기준으로 주요 모듈 헤더 단색 통일 */
 #prayer-bar,
 #trail-view .module-bar,
 #web-view .module-bar,
@@ -2270,7 +2275,7 @@ html.oai-font-global #cover #cover-bottom-note,
   z-index:5;
 }
 
-/* V10: 출발 검색 모달 색상 기준 재정리
+/* V11: 출발 검색 모달 색상 기준 재정리
    - 성지/성당/피정 + 일반장소 탭: 활성은 금색, 비활성은 고유색 배경 위의 은은한 반투명 버튼
    - 검색창을 감싸는 영역은 성지/성당/피정 각 카테고리 고유색으로 통일
    - 실제 검색 입력창(.sm-si)은 기존 아이보리 계열 유지 */
@@ -2341,7 +2346,7 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab:not(.active){
 html #srch-modal #sm-tab-bar .sm-tab.active,
 html.parish-mode #srch-modal #sm-tab-bar .sm-tab.active,
 html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active{
-  /* V10: 바로 위 교구 활성화 버튼(.sm-fb.on)과 같은 금색 기준 사용 */
+  /* V11: 바로 위 교구 활성화 버튼(.sm-fb.on)과 같은 금색 기준 사용 */
   background:var(--gold,#d4aa6a)!important;
   background-image:none!important;
   color:#1F2937!important;
@@ -2353,7 +2358,7 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active{
 
 
 /* ══════════════════════════════════════════════════════════════════
-   V10 모듈 표준화
+   V11 모듈 표준화
    - 헤더: 기도문 헤더 기준 단색 네이비(그라데이션 제거)
    - 탭바/탭버튼: 관구·교구 탭 기준 높이·형태 통일
    - 활성 탭의 고유 색상은 각 모듈 기존 색상을 유지
@@ -2437,7 +2442,7 @@ html.oai-font-global #trail-view .trail-tab{
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   V10 주요 기능 안내 — 커버 전용, 별도 파일 없음
+   V11 주요 기능 안내 — 커버 전용, 별도 파일 없음
    ══════════════════════════════════════════════════════════════════ */
 #cover #cover-guide-btn{
   position:absolute;
