@@ -1528,6 +1528,18 @@ html.oai-external-return-prepaint::before{
   backface-visibility:hidden;
 }
 
+html.oai-navigating-out::before{
+  content:"";
+  position:fixed;
+  inset:-1px;
+  z-index:2147482999;
+  display:block;
+  background:#f5f0e8;
+  pointer-events:auto;
+  transform:translate3d(0,0,0);
+  backface-visibility:hidden;
+}
+
 #oai-nav-veil{
   position:fixed;
   inset:-1px;
@@ -1549,6 +1561,13 @@ html.oai-external-return-prepaint::before{
 @supports (height:100dvh){#oai-nav-veil{min-height:calc(100dvh + 2px)}}
 @supports (height:100svh){#oai-nav-veil{min-height:calc(100svh + 2px)}}
 #oai-nav-veil.show{opacity:1;pointer-events:auto}
+html.oai-navigating-out #oai-nav-veil{
+  display:flex!important;
+  opacity:1!important;
+  pointer-events:auto!important;
+  transition:none!important;
+  visibility:visible!important;
+}
 #oai-nav-veil.oai-return-veil{background:#f5f0e8;transition:opacity .08s ease}
 #oai-nav-veil.oai-return-veil .oai-nav-card{box-shadow:0 8px 22px rgba(15,23,42,.10)}
 .oai-nav-card{display:flex;align-items:center;gap:10px;background:#fffaf2;border:1px solid #ddd5c8;border-radius:999px;padding:12px 18px;box-shadow:0 10px 26px rgba(15,23,42,.14);color:#1f2a44;font-size:14px;font-weight:800;letter-spacing:-.02em}

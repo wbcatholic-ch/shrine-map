@@ -66,17 +66,36 @@ function setExternalNavVisualState(mode, label){
   return veil;
 }
 
+var __oaiExternalNavInProgress = false;
+var __oaiExternalNavLabel = '';
 function oaiSmoothNavigate(url, kind, label){
-  if(!url) return;
+  if(!url || __oaiExternalNavInProgress) return;
+  __oaiExternalNavInProgress = true;
+  __oaiExternalNavLabel = label || '외부 사이트로 이동 중입니다';
   markExternalReturnStabilize(kind || 'external');
   try{ document.activeElement && document.activeElement.blur && document.activeElement.blur(); }catch(e){ console.warn("[가톨릭길동무]", e); }
-  setExternalNavVisualState('out', label || '외부 사이트로 이동 중입니다');
+  var veil = setExternalNavVisualState('out', __oaiExternalNavLabel);
+  try{
+    if(veil){
+      veil.style.transition = 'none';
+      veil.style.opacity = '1';
+      veil.style.pointerEvents = 'auto';
+      veil.getBoundingClientRect();
+    }
+  }catch(e){ console.warn("[가톨릭길동무]", e); }
 
-  // 이동 대기 화면은 실제 페이지 이탈 전까지 유지한다.
+  // 느린 본당/성지 홈페이지에서도 클릭 전 화면이 다시 보이지 않도록
+  // 보호막을 먼저 실제로 그린 뒤 페이지 이동을 시작한다.
   requestAnimationFrame(function(){
-    setTimeout(function(){ location.href = url; }, 60);
+    requestAnimationFrame(function(){
+      try{ location.assign(url); }catch(e){ location.href = url; }
+    });
   });
 }
+window.addEventListener('pagehide', function(){
+  if(!__oaiExternalNavInProgress) return;
+  try{ setExternalNavVisualState('out', __oaiExternalNavLabel || '외부 사이트로 이동 중입니다'); }catch(e){ console.warn("[가톨릭길동무]", e); }
+}, true);
 
 function oaiResetExternalPopupResidue(){
   try{ if(document.activeElement && typeof document.activeElement.blur === 'function') document.activeElement.blur(); }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -253,7 +272,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=v1-6';
+    frame.src='diocese.html?v=v1-7';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
