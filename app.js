@@ -23,7 +23,7 @@ function hideCoverAndRun(callback) {
 
 
 function markExternalReturnStabilize(kind){
-  // V8: 외부 사이트 이동은 브라우저 기본 동작에 맡긴다.
+  // V9: 외부 사이트 이동은 브라우저 기본 동작에 맡긴다.
   // 이전 버전 호환을 위해 함수명만 유지하고, 이동 상태는 저장하지 않는다.
 }
 
@@ -43,7 +43,7 @@ function oaiClearExternalNavigationState(){
 }
 
 function oaiSmoothNavigate(url, kind){
-  // V8: 호환용 함수. 보호막/지연/전역 가로채기 없이 즉시 이동한다.
+  // V9: 호환용 함수. 보호막/지연/전역 가로채기 없이 즉시 이동한다.
   if(!url) return;
   try{ document.activeElement && document.activeElement.blur && document.activeElement.blur(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   try{ oaiClearExternalNavigationState(); }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -51,7 +51,7 @@ function oaiSmoothNavigate(url, kind){
 }
 
 function applyExternalReturnStabilize(){
-  // V8: 복귀 시 화면을 재계산하지 않고, 예전 이동중 잔여 상태만 제거한다.
+  // V9: 복귀 시 화면을 재계산하지 않고, 예전 이동중 잔여 상태만 제거한다.
   try{ oaiClearExternalNavigationState(); }catch(e){ console.warn("[가톨릭길동무]", e); }
 }
 window.addEventListener('pageshow', applyExternalReturnStabilize, true);
@@ -125,7 +125,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V8';
+    frame.src='diocese.html?v=V9';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -251,48 +251,38 @@ function restoreCoreReturnState(){
     _loadMap();
   }
   const restoreDelay = needMapLoad ? 650 : 30;
-  // 지도 복원 후 center/level/tab/infocard 복원
+  // V9: 외부사이트 복귀 시 지도 중심을 두 단계로 움직이지 않는다.
+  // 인포카드가 있었던 경우에는 처음부터 인포카드 기준 중심으로 복원한다.
   setTimeout(()=>{
-    // 저장된 지도 위치로 복귀
-    if(state.mapCenter && _map){
-      try{
-        _map.setCenter(new _LL(state.mapCenter.lat, state.mapCenter.lng));
-        if(state.mapLevel) _map.setLevel(state.mapLevel);
-      }catch(e){ console.warn("[가톨릭길동무]", e); }
-    }
     _restoreMapMarkers();
-    // 인포카드가 열려 있던 경우 복원
     if(Number.isInteger(state.infoIdx) && state.infoIdx>=0){
-      setTimeout(()=>{
+      try{
+        const _item = _getCurrentItems()[state.infoIdx];
+        if(_item){
+          _curFromRegion = !!state.fromRegion;
+          if(_mode==='shrine') _selectShrineMarker(state.infoIdx);
+          else if(_mode==='parish') _selectParishMarker(_item);
+          else _selectRetreatMarker(_item);
+          const ic=$('info-card');
+          if(ic){ ic.classList.add('no-anim'); }
+          _showInfoCard(_item, state.infoIdx);
+          _focusMarkerAboveInfoCard(_item);
+          requestAnimationFrame(()=>{ if(ic) ic.classList.remove('no-anim'); });
+        }
+      }catch(e){ console.warn("[가톨릭길동무]", e); }
+    } else {
+      // 인포카드가 없는 복귀도 같은 시각 기준을 유지하기 위해 저장된 중심만 한 번 복원한다.
+      if(state.mapCenter && _map){
         try{
-          const _item = _getCurrentItems()[state.infoIdx];
-          if(_item){
-            _curFromRegion = !!state.fromRegion;
-            if(_mode==='shrine') _selectShrineMarker(state.infoIdx);
-            else if(_mode==='parish') _selectParishMarker(_item);
-            else _selectRetreatMarker(_item);
-            // 인포카드 표시 (복귀 시 애니 없이)
-            const ic=$('info-card');
-            if(ic){ ic.classList.add('no-anim'); }
-            _showInfoCard(_item, state.infoIdx);
-            requestAnimationFrame(()=>{ if(ic) ic.classList.remove('no-anim'); });
-            // 저장된 위치로 유지 (selectItem이 center 이동하므로 재보정)
-            if(state.mapCenter && _map){
-              setTimeout(()=>{
-                try{
-                  _map.setCenter(new _LL(state.mapCenter.lat, state.mapCenter.lng));
-                  if(state.mapLevel) _map.setLevel(state.mapLevel);
-                }catch(e){ console.warn("[가톨릭길동무]", e); }
-              },100);
-            }
-          }
+          _map.setCenter(new _LL(state.mapCenter.lat, state.mapCenter.lng));
+          if(state.mapLevel) _map.setLevel(state.mapLevel);
         }catch(e){ console.warn("[가톨릭길동무]", e); }
-      },400);
-    } else if(state.activeTab){
-      // 탭이 열려 있던 경우 복원
-      setTimeout(()=>{ try{ openTab(state.activeTab); }catch(e){ console.warn("[가톨릭길동무]", e); } },300);
+      }
+      if(state.activeTab){
+        setTimeout(()=>{ try{ openTab(state.activeTab); }catch(e){ console.warn("[가톨릭길동무]", e); } },120);
+      }
     }
-    setTimeout(()=>{ document.documentElement.classList.remove('oai-returning'); }, 950);
+    setTimeout(()=>{ document.documentElement.classList.remove('oai-returning'); }, 520);
   },restoreDelay);
   return true;
 }
@@ -1214,11 +1204,9 @@ function closeInfoCard(){
   else {
     if(_paSelMkr){try{_paSelMkr.setMap(null);}catch(e){ console.warn("[가톨릭길동무]", e); }  _paSelMkr=null;}
   }
-  // 인포카드를 닫으면 해당 마커 위치를 지도 중앙으로 복귀
+  // V9: 인포카드 닫힘/열림에 따라 지도 중심 기준이 달라지지 않게 같은 기준을 유지한다.
   if(wasItem && wasItem.item && wasItem.item.lat && _map){
-    try{
-      _map.setCenter(new _LL(wasItem.item.lat, wasItem.item.lng));
-    }catch(e){ console.warn("[가톨릭길동무]", e); }
+    try{ _focusMarkerAboveInfoCard(wasItem.item); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
 }
 

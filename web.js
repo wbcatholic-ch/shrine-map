@@ -183,24 +183,9 @@
     url = (typeof normalizeCatholicExternalUrl === 'function') ? normalizeCatholicExternalUrl(url) : String(url||'').trim();
     if(!url) return;
 
-    const payload = Object.assign({}, state||{});
-
-    // V8: 웹사이트/교구 홈페이지는 브라우저의 기본 복귀(bfcache)에 맡긴다.
-    // sessionStorage 복원으로 다시 렌더링하면 복귀 순간 지도와 웹사이트 목록이 겹쳐 보이며 흔들린다.
-    // 순례길처럼 지도 상태가 필요한 경우만 최소 저장한다.
-    if(payload.module==='trail'){
-      if(trailState.map && window.kakao && window.kakao.maps){
-        try{
-          const center = trailState.map.getCenter();
-          payload.center = {lat:center.getLat(), lng:center.getLng()};
-          payload.level = trailState.map.getLevel();
-        }catch(e){ console.warn("[가톨릭길동무]", e); }
-      }
-      saveReturnState(payload);
-    }else{
-      try{ sessionStorage.removeItem(RETURN_KEY); }catch(e){ console.warn("[가톨릭길동무]", e); }
-    }
-
+    // V9: 웹사이트와 순례길 모두 외부 복귀는 브라우저의 기본 복원에 맡긴다.
+    // 별도 sessionStorage 복원/지도 재초기화가 복귀 순간 덜컹거림을 만들 수 있어 저장하지 않는다.
+    try{ sessionStorage.removeItem(RETURN_KEY); }catch(e){ console.warn("[가톨릭길동무]", e); }
     location.href = url;
     return;
   }
@@ -283,29 +268,21 @@
     if(!state || !state.module) return;
 
     if(state.module === 'web'){
-      // V8: 웹사이트 화면은 브라우저가 돌아온 화면을 그대로 복원하게 둔다.
+      // V9: 웹사이트 화면은 브라우저가 돌아온 화면을 그대로 복원하게 둔다.
       // 여기서 openWebView/renderWebList를 다시 호출하면 복귀 순간 배경 지도와 목록이 겹쳐 보인다.
       return;
     }
 
     if(state.module === 'trail'){
-      trailState.pendingOpenIndex = Number.isInteger(state.openIndex) ? state.openIndex : null;
-      trailState.restoreCenter = state.center || null;
-      trailState.restoreLevel = Number.isFinite(Number(state.level)) ? Number(state.level) : null;
-      trailState.needsHardReset = true;
-      openTrailView({restore:true, forceRebuild:true});
-      trailSetView(state.view === 'list' ? 'list' : 'map');
-      requestAnimationFrame(function(){
-        const list = ig$('trail-list');
-        if(list && state.view === 'list') list.scrollTop = Number(state.scroll||0);
-      });
+      // V9: 순례길도 외부 복귀 시 강제 재오픈/지도 재생성을 하지 않는다.
+      return;
     }
   }
 
   window.addEventListener('pageshow', function(){
+    // V9: 외부사이트 복귀 시 순례길 지도 relayout을 강제로 반복하지 않는다.
+    // 브라우저 bfcache가 복원한 화면을 그대로 두는 것이 가장 덜 흔들린다.
     setTimeout(restoreIntegratedState, 0);
-    setTimeout(function(){ relayoutTrailMap(0); }, 180);
-    setTimeout(function(){ relayoutTrailMap(0); }, 420);
   });
 
   function resetWebTransientState(){
@@ -463,7 +440,7 @@
           if(webState.curCat==='⭐ 즐겨찾기') renderWebList();
           return;
         }
-        // V8: 교구 카드도 저장/복원 없이 즉시 이동한다.
+        // V9: 교구 카드도 저장/복원 없이 즉시 이동한다.
         if(isDioceseCard){
           openExternalUrl(s.url, { module:'web' });
           return;
