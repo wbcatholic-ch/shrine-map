@@ -162,6 +162,8 @@ html.retreat-mode .tab-btn.active{color:#fff;background:var(--retreat-active, #0
 .leg-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 #route-guide{display:none;position:absolute;top:12px;left:50%;transform:translateX(-50%);background:var(--navy);color:#fff;padding:8px 18px;border-radius:22px;font-size:13px;font-weight:700;z-index:500;white-space:nowrap;border:1px solid rgba(212,170,106,.4);pointer-events:none}
 #route-guide.on{display:block}
+.map-category-close{position:absolute;top:12px;right:12px;z-index:650;width:34px;height:34px;border-radius:50%;border:1px solid rgba(31,42,68,.22);background:rgba(31,42,68,.88);color:#fff;font-size:22px;font-weight:900;line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:0 3px 12px rgba(0,0,0,.22);cursor:pointer;font-family:inherit}
+.map-category-close:active{transform:scale(.96)}
 .sheet{position:fixed;top:calc(var(--tab-h) + env(safe-area-inset-top,0));left:0;right:0;bottom:0;background:linear-gradient(180deg,#fbf7f1 0%,#f4efe6 100%);z-index:800;display:flex;flex-direction:column;transform:translateY(100%);transition:transform .25s cubic-bezier(.4,0,.2,1);overflow:hidden;will-change:transform}
 .sheet.open{transform:translate(0,0)}
 .sheet-hd{background:var(--navy);padding:13px 16px;display:flex;align-items:center;justify-content:space-between;flex-shrink:0}
@@ -170,7 +172,9 @@ html.retreat-mode .sheet-hd{background:var(--retreat-bg)}
 .sheet-title{font-size:16px;font-weight:700;color:var(--gold);letter-spacing:.04em}
 .sheet-x{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.2);border-radius:50%;color:rgba(212,170,106,.9);font-size:20px;font-weight:900;width:32px;height:32px;display:flex;align-items:center;justify-content:center;cursor:pointer}
 .sheet-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;background:var(--bg-unified)!important}
-#sheet-route{top:auto!important;max-height:52vh;border-radius:16px 16px 0 0;border-top:2px solid var(--gold2);box-shadow:0 -3px 16px rgba(0,0,0,.25);padding-bottom:env(safe-area-inset-bottom,0);overflow-y:auto}
+#sheet-route{top:auto!important;max-height:52vh;border-radius:16px 16px 0 0;border-top:2px solid var(--gold2);box-shadow:0 -3px 16px rgba(0,0,0,.25);padding-bottom:env(safe-area-inset-bottom,0);overflow-y:auto;position:fixed}
+.route-sheet-x{position:absolute;top:10px;right:12px;z-index:3;width:32px;height:32px;border-radius:50%;border:1px solid rgba(31,42,68,.18);background:rgba(31,42,68,.86);color:#fff;font-size:21px;font-weight:900;line-height:1;display:flex;align-items:center;justify-content:center;box-shadow:0 2px 9px rgba(0,0,0,.16);cursor:pointer;font-family:inherit}
+.route-sheet-x:active{transform:scale(.96)}
 .srch-bar{padding:8px 12px 6px;background:var(--oai-ivory)!important;flex-shrink:0;border-bottom:1px solid var(--oai-ivory-border)!important}
 html.parish-mode .srch-bar{background:var(--parish-bg)}
 html.retreat-mode .srch-bar{background:var(--retreat-bg)}
@@ -213,7 +217,7 @@ html.retreat-mode .region-wrap{background:var(--retreat-bg)}
 #info-card.open{display:block}
 .ic-header{display:flex;align-items:center;justify-content:space-between;padding:16px 16px 8px}
 .ic-name{font-size:16px!important;font-weight:700!important;color:var(--ink);flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ic-close-btn{background:#efe6d8;border:none;border-radius:50%;width:30px;height:30px;font-size:17px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:8px;color:#6c5b48}
+.ic-close-btn{background:rgba(31,42,68,.86);border:1px solid rgba(31,42,68,.18);border-radius:50%;width:30px;height:30px;font-size:17px;font-weight:900;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-left:8px;color:#fff;box-shadow:0 2px 8px rgba(0,0,0,.14)}
 .ic-meta{display:flex;align-items:center;justify-content:space-between;padding:0 14px 8px}
 .ic-sub{font-size:10px!important;color:#9CA3AF!important;font-weight:600!important}
 .ic-type-badge{font-size:12px;font-weight:700;padding:3px 9px;border-radius:10px;background:#f0f0f0;color:#555;white-space:nowrap;flex-shrink:0}
@@ -1493,6 +1497,8 @@ html.retreat-mode #sm-tab-bar .sm-tab.active{
 #diocese-view .module-close,
 #missa-close,
 .sheet-x,
+.route-sheet-x,
+.map-category-close,
 .ic-close-btn,
 .pr-back{
   display:flex!important;
@@ -1605,7 +1611,7 @@ html.retreat-mode #sm-tab-bar .sm-tab.active{
   box-shadow:none!important;
 }
 
-/* V11: 외부 복귀/화면 진입 CSS 정리
+/* V13: 외부 복귀/화면 진입 CSS 정리
    외부 이동 보호막을 제거한 현재 구조에서는 복귀 전용 강제 고정 CSS를 두지 않는다.
    화면 진입 중 필요한 최소 전환만 유지하고, app/viewport 전체를 흔드는 전역 보정은 금지한다. */
 html:not(.app-active),html:not(.app-active) body{scroll-behavior:auto!important;}
@@ -1690,7 +1696,7 @@ html.retreat-mode #region-body .nearby-dist span{
   margin-left:4px!important;
 }
 
-/* 커버 전용 당겨서 새로고침 — V11 단일 기준 */
+/* 커버 전용 당겨서 새로고침 — V13 단일 기준 */
 #cover{
   overscroll-behavior-y:contain!important;
 }
@@ -2019,7 +2025,7 @@ html.app-active #cv-pull-modern{
 #qna-view  .qna-tab.on        { background: var(--navy, #0e1535) !important; }
 
 /* ── 6. 헤더 배경색 (모듈별) ─────────────────────────────────────── */
-/* V11: 기도문 헤더를 기준으로 주요 모듈 헤더 단색 통일 */
+/* V13: 기도문 헤더를 기준으로 주요 모듈 헤더 단색 통일 */
 #prayer-bar,
 #trail-view .module-bar,
 #web-view .module-bar,
@@ -2107,7 +2113,7 @@ html.app-active #cover {
   width       : 100% !important;
   max-width   : min(440px, calc(100vw - 32px)) !important;
   margin      : 0 auto !important;
-  padding     : 0 16px calc(9vh + env(safe-area-inset-bottom,0px)) !important;
+  padding     : 0 16px 10px !important;
   display     : flex !important;
   flex-direction: column ;
   align-items : stretch !important;
@@ -2152,7 +2158,7 @@ html.app-active #cover {
   width          : 100% !important;
   margin         : 8px 0 0 !important;
   display        : flex !important;
-  align-items    : center !important;
+  align-items    : flex-end !important;
   justify-content: space-between !important;
   gap            : 8px !important;
   z-index        : 10;
@@ -2164,6 +2170,7 @@ html.app-active #cover {
   align-items    : flex-start !important;
   justify-content: center !important;
   min-width      : 0;
+  max-width      : calc(100% - 128px);
 }
 #cover #cover-update-btn {
   border         : 0 !important;
@@ -2195,7 +2202,9 @@ html.app-active #cover {
   font-size      : 9.5px !important;
   font-weight    : 800 !important;
   line-height    : 1.15 !important;
-  white-space    : nowrap !important;
+  white-space    : normal !important;
+  max-width      : 100%;
+  word-break     : keep-all;
 }
 #cover #cover-update-box.update-needed #cover-update-hint { display:block !important; }
 #cover #qna-cover-btn {
@@ -2243,7 +2252,7 @@ html.app-active #qna-cover-btn, html.app-active #cover-action-row { display: non
   #cover #cover-update-btn { min-height: 34px !important; height:34px !important; font-size: calc(10.5px * var(--app-font-scale,1)) !important; padding:0 12px!important; }
   #cover #cover-update-hint { font-size:8.5px!important; }
   #cover-main-block {
-    padding-bottom: calc(9vh + env(safe-area-inset-bottom,0px)) !important;
+    padding-bottom: 8px !important;
   }
 }
 /* 7. 하단 안내 문구 — 레이아웃 계산에서 제외하고 화면 하단에 고정 */
@@ -2257,14 +2266,12 @@ html.app-active #qna-cover-btn, html.app-active #cover-action-row { display: non
 html.oai-font-global #cover #cover-bottom-note,
 #cover #cover-bottom-note,
 #cover-bottom-note{
-  position:fixed;
-  left:0;
-  right:0;
-  bottom:calc(env(safe-area-inset-bottom, 0px) + 14px);
+  position:relative;
+  flex:0 0 auto;
   width:100%;
   max-width:720px;
   margin:0 auto;
-  padding:0 22px;
+  padding:4px 22px calc(10px + env(safe-area-inset-bottom, 0px));
   text-align:center;
   font-size:9px !important;
   font-weight:500 !important;
@@ -2273,9 +2280,17 @@ html.oai-font-global #cover #cover-bottom-note,
   color:rgba(96,86,76,.72);
   pointer-events:none;
   z-index:5;
+  box-sizing:border-box;
+}
+#cover #oai-build-marker{
+  bottom:calc(env(safe-area-inset-bottom,0px) + 34px) !important;
+}
+@media (max-height:650px){
+  #cover #oai-build-marker{bottom:calc(env(safe-area-inset-bottom,0px) + 30px) !important;}
 }
 
-/* V11: 출발 검색 모달 색상 기준 재정리
+
+/* V13: 출발 검색 모달 색상 기준 재정리
    - 성지/성당/피정 + 일반장소 탭: 활성은 금색, 비활성은 고유색 배경 위의 은은한 반투명 버튼
    - 검색창을 감싸는 영역은 성지/성당/피정 각 카테고리 고유색으로 통일
    - 실제 검색 입력창(.sm-si)은 기존 아이보리 계열 유지 */
@@ -2346,7 +2361,7 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab:not(.active){
 html #srch-modal #sm-tab-bar .sm-tab.active,
 html.parish-mode #srch-modal #sm-tab-bar .sm-tab.active,
 html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active{
-  /* V11: 바로 위 교구 활성화 버튼(.sm-fb.on)과 같은 금색 기준 사용 */
+  /* V13: 바로 위 교구 활성화 버튼(.sm-fb.on)과 같은 금색 기준 사용 */
   background:var(--gold,#d4aa6a)!important;
   background-image:none!important;
   color:#1F2937!important;
@@ -2358,7 +2373,7 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active{
 
 
 /* ══════════════════════════════════════════════════════════════════
-   V11 모듈 표준화
+   V13 모듈 표준화
    - 헤더: 기도문 헤더 기준 단색 네이비(그라데이션 제거)
    - 탭바/탭버튼: 관구·교구 탭 기준 높이·형태 통일
    - 활성 탭의 고유 색상은 각 모듈 기존 색상을 유지
@@ -2442,7 +2457,7 @@ html.oai-font-global #trail-view .trail-tab{
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   V11 주요 기능 안내 — 커버 전용, 별도 파일 없음
+   V13 주요 기능 안내 — 커버 전용, 별도 파일 없음
    ══════════════════════════════════════════════════════════════════ */
 #cover #cover-guide-btn{
   position:absolute;
