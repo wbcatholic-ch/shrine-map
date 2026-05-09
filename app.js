@@ -1123,11 +1123,7 @@ function _focusMarkerAboveInfoCard(item){
   if(!_map || !item || !item.lat || !item.lng) return;
   try{
     if(_mode==='parish' && !_routeMode){
-      const dioCode=(typeof _parishDioCodeOf==='function') ? _parishDioCodeOf(item) : null;
-      if(dioCode && _activeDio===dioCode && typeof _fitParishDioBounds==='function'){
-        _fitParishDioBounds(dioCode,{reason:'parish-info-card'});
-        return;
-      }
+      if(typeof _focusParishPointAround==='function' && _focusParishPointAround(item.lat,item.lng,{level:6,aboveInfoCard:true})) return;
     }
     const pos = new _LL(item.lat,item.lng);
     const mapEl = $('map-wrap') || $('map');
@@ -1533,8 +1529,8 @@ function _selectParishMarker(p){
     document.querySelectorAll('.dio-label').forEach(e=>{e.style.transform='';e.style.display='';});
     const clickedEl=_dioOverlays[dioCode]?.getContent?.();
     if(clickedEl){clickedEl.style.display='none';}
-    // 성당 선택 시에도 선택 성당 1곳으로 지도를 당기지 않고, 해당 교구 성당 전체 범위를 기준으로 맞춘다.
-    _fitParishDioBounds(dioCode,{reason:'parish-select'});
+    // 성당 선택의 노란 마커는 교구 전체 bounds로 축소하지 않고, 선택 지점 주변만 보이도록 한다.
+    // 실제 중심/확대는 인포카드 표시 후 _focusMarkerAboveInfoCard()에서 한 번만 처리한다.
   }else if(dioCode){
     _ensureParishMarkerZoom();
   }
@@ -1617,6 +1613,43 @@ function _centerParishDioWithoutZoom(code){
   try{
     if(typeof _map.panTo==='function') _map.panTo(center);
     else _map.setCenter(center);
+    return true;
+  }catch(e){ console.warn('[클로드정리]',e); }
+  return false;
+}
+
+function _focusParishPointAround(lat, lng, opts){
+  opts=opts||{};
+  if(_mode!=='parish'||!_map||!lat||!lng||typeof _LL==='undefined') return false;
+  const targetLevel = opts.level || 6;
+  const pos = new _LL(lat,lng);
+  try{
+    if(typeof _map.getLevel==='function' && typeof _map.setLevel==='function'){
+      const lvl = _map.getLevel();
+      // 현재 위치/노란 마커 기준 이동은 교구 전체 bounds로 축소하지 않는다.
+      // 화면이 멀리 빠져 있을 때만 주변이 보이도록 확대하고, 이미 더 확대된 상태는 유지한다.
+      if(lvl > targetLevel){
+        _markParishDioProgrammaticMove(1300);
+        _map.setLevel(targetLevel);
+      }
+    }
+    if(opts.aboveInfoCard){
+      const mapEl = $('map-wrap') || $('map');
+      const mapH = (mapEl && (mapEl.clientHeight || mapEl.offsetHeight)) || window.innerHeight || 700;
+      const proj = _map.getProjection && _map.getProjection();
+      if(proj && proj.containerPointFromCoords && proj.coordsFromContainerPoint){
+        const p = proj.containerPointFromCoords(pos);
+        const centerY = Math.round(mapH / 2);
+        const targetY = Math.round(mapH * 0.34);
+        const point = (window.kakao && kakao.maps && kakao.maps.Point)
+          ? new kakao.maps.Point(p.x, p.y + (centerY - targetY))
+          : {x:p.x, y:p.y + (centerY - targetY)};
+        const newCenter = proj.coordsFromContainerPoint(point);
+        if(newCenter){ _map.setCenter(newCenter); return true; }
+      }
+    }
+    if(typeof _map.panTo==='function') _map.panTo(pos);
+    else _map.setCenter(pos);
     return true;
   }catch(e){ console.warn('[클로드정리]',e); }
   return false;
@@ -1747,7 +1780,7 @@ function _fitParishDioBounds(code, opts){
 function _ensureParishMarkerZoom(){
   if(_mode!=='parish'||!_map||typeof _map.getLevel!=='function'||typeof _map.setLevel!=='function') return;
   try{
-    if(_map.getLevel()>=9){ _markParishDioProgrammaticMove(1200); _map.setLevel(8); }
+    if(_map.getLevel()>6){ _markParishDioProgrammaticMove(1200); _map.setLevel(6); }
   }catch(e){ console.warn('[클로드정리]',e); }
 }
 function _showParishDioMkrs(code){
@@ -1866,7 +1899,7 @@ function _autoLocate(){
    _map.setLevel(8);
   } else if(_mode==='parish'){
    _map.setCenter(new _LL(p.coords.latitude,p.coords.longitude));
-   _map.setLevel(8);
+   _map.setLevel(6);
   } else if(_mode==='retreat'){
    _map.setCenter(new _LL(p.coords.latitude,p.coords.longitude));
    _map.setLevel(9);
@@ -1900,6 +1933,7 @@ function _showCurrentParishDioIfIdle(){
     _ensureParishMarkerZoom();
     _activeDio=code;
     _showParishDioMkrs(code);
+    if(typeof _focusParishPointAround==='function') _focusParishPointAround(_myLat,_myLng,{level:6});
     document.querySelectorAll('.dio-label').forEach(e=>{e.style.transform='';e.style.display='';});
     const clickedEl=_dioOverlays[code]?.getContent?.();
     if(clickedEl){clickedEl.style.display='none';}
