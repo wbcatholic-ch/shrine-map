@@ -185,7 +185,7 @@
 
     const payload = Object.assign({}, state||{});
 
-    // V7: 웹사이트/교구 홈페이지는 브라우저의 기본 복귀(bfcache)에 맡긴다.
+    // V8: 웹사이트/교구 홈페이지는 브라우저의 기본 복귀(bfcache)에 맡긴다.
     // sessionStorage 복원으로 다시 렌더링하면 복귀 순간 지도와 웹사이트 목록이 겹쳐 보이며 흔들린다.
     // 순례길처럼 지도 상태가 필요한 경우만 최소 저장한다.
     if(payload.module==='trail'){
@@ -283,7 +283,7 @@
     if(!state || !state.module) return;
 
     if(state.module === 'web'){
-      // V7: 웹사이트 화면은 브라우저가 돌아온 화면을 그대로 복원하게 둔다.
+      // V8: 웹사이트 화면은 브라우저가 돌아온 화면을 그대로 복원하게 둔다.
       // 여기서 openWebView/renderWebList를 다시 호출하면 복귀 순간 배경 지도와 목록이 겹쳐 보인다.
       return;
     }
@@ -463,7 +463,7 @@
           if(webState.curCat==='⭐ 즐겨찾기') renderWebList();
           return;
         }
-        // V7: 교구 카드도 저장/복원 없이 즉시 이동한다.
+        // V8: 교구 카드도 저장/복원 없이 즉시 이동한다.
         if(isDioceseCard){
           openExternalUrl(s.url, { module:'web' });
           return;

@@ -1520,7 +1520,7 @@ html.retreat-mode #sm-tab-bar .sm-tab.active{
 .tab.on,.tab.on:active{transform:none}
 .oai-enter-ready{opacity:0;transform:none!important}
 .oai-enter-ready.oai-enter-show{opacity:1;transform:none!important;transition:opacity .24s cubic-bezier(.22,.61,.36,1)}
-html.oai-returning .oai-enter-ready,html.oai-external-return-stabilize .oai-enter-ready{opacity:1;transform:none!important;transition:none!important}
+html.oai-returning .oai-enter-ready{opacity:1;transform:none!important;transition:none!important}
 #oai-category-entry-veil{position:fixed;left:0;right:0;top:var(--tab-h,72px);bottom:0;z-index:790;display:none;align-items:center;justify-content:center;pointer-events:none;opacity:0;transition:opacity .22s cubic-bezier(.22,.61,.36,1);transform:translateZ(0);backface-visibility:hidden}
 html.oai-category-entering #oai-category-entry-veil{display:flex;opacity:1}
 #oai-category-entry-veil.shrine{background:#1f2a44}
@@ -1530,7 +1530,7 @@ html.oai-category-entering #oai-category-entry-veil{display:flex;opacity:1}
 @keyframes oaiCategoryVeilSpin{to{transform:rotate(360deg)}}
 html.oai-category-entering .sheet.open{z-index:810}
 html.oai-category-entering #tabbar{z-index:950}
-html.oai-returning #oai-category-entry-veil,html.oai-external-return-stabilize #oai-category-entry-veil{display:none;opacity:0}
+html.oai-returning #oai-category-entry-veil{display:none;opacity:0}
 #cover .cover-card.app-pressing,#cover .cv-btn.app-pressing,#cover .cv-extra-btn.app-pressing{transform:translateY(8px) scale(.974);filter:brightness(.94)!important;transition:transform .16s ease,filter .16s ease}
 
 /* 피정의집 색상 최종 통일: 상단 탭바는 흰색, 활성 탭은 녹색, 검색/필터 영역은 단색 녹색, 활성 필터는 금색 */
@@ -1614,10 +1614,9 @@ html.retreat-mode #sm-tab-bar .sm-tab.active{
   box-shadow:none!important;
 }
 
-/* V7: 외부사이트 복귀 흔들림 원인 제거
-   이전 정리 과정에서 html/body까지 position:fixed로 묶던 보정 CSS가 남아
-   외부사이트 복귀 시 상단 주소창·지도·웹사이트 화면이 재계산되며 흔들렸다.
-   커버 스타일은 기존 #cover 규칙에서 이미 관리하므로 여기서는 전역 고정을 하지 않는다. */
+/* V8: 외부 복귀/화면 진입 CSS 정리
+   외부 이동 보호막을 제거한 현재 구조에서는 복귀 전용 강제 고정 CSS를 두지 않는다.
+   화면 진입 중 필요한 최소 전환만 유지하고, app/viewport 전체를 흔드는 전역 보정은 금지한다. */
 html:not(.app-active),html:not(.app-active) body{scroll-behavior:auto!important;}
 #web-view.module-view.open,
 #trail-view.module-view.open,
