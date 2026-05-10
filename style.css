@@ -2086,7 +2086,7 @@ html:not(.app-active) #cover {
   min-height     : 100dvh !important;
   max-height     : 100dvh !important;
   padding-top    : calc(4.5vh + env(safe-area-inset-top,0px)) !important;
-  padding-bottom : 0 !important;
+  padding-bottom : calc(104px + env(safe-area-inset-bottom,0px)) !important;
   padding-left   : 0 !important;
   padding-right  : 0 !important;
   box-sizing     : border-box ;
@@ -2113,7 +2113,7 @@ html.app-active #cover {
   width       : 100% !important;
   max-width   : min(440px, calc(100vw - 32px)) !important;
   margin      : 0 auto !important;
-  padding     : 0 16px calc(62px + env(safe-area-inset-bottom,0px)) !important;
+  padding     : 0 16px 0 !important;
   display     : flex !important;
   flex-direction: column ;
   align-items : stretch !important;
@@ -2356,7 +2356,7 @@ html.app-active #qna-cover-btn, html.app-active #cover-action-row { display: non
 
 /* 작은 화면 보정 */
 @media (max-height:650px) {
-  #cover { padding-top: calc(3.5vh + env(safe-area-inset-top,0px)) !important; }
+  #cover { padding-top: calc(3vh + env(safe-area-inset-top,0px)) !important; padding-bottom:calc(92px + env(safe-area-inset-bottom,0px)) !important; }
   #cover .cover-header { padding-bottom: 4px !important; }
   #cover .cover-header .cover-title { font-size: clamp(18px,5vw,24px) !important; }
   #cover .cover-header .cover-subtitle { font-size: 10px !important; }
@@ -2368,7 +2368,7 @@ html.app-active #qna-cover-btn, html.app-active #cover-action-row { display: non
   #cover #cover-update-btn { min-height: 34px !important; height:34px !important; font-size: calc(10.5px * var(--app-font-scale,1)) !important; padding:0 12px!important; }
   #cover #cover-update-hint { font-size:8.5px!important; }
   #cover-main-block {
-    padding-bottom: calc(54px + env(safe-area-inset-bottom,0px)) !important;
+    padding-bottom:0 !important;
   }
   #cover #cover-action-row{
     bottom:calc(10px + env(safe-area-inset-bottom,0px))!important;
@@ -2380,20 +2380,18 @@ html.app-active #qna-cover-btn, html.app-active #cover-action-row { display: non
 
 /* 커버 하단 안내문구 — 짧은 2줄, 화면 하단 고정 */
 
-/* 커버 하단 안내문구 — 사진 기준 자연스러운 2줄 */
-
-/* 커버 하단 안내문구 — 사진처럼 작고 자연스럽게 고정 */
+/* 커버 하단 안내문구 — 하단 버튼 위 고정 */
 html.oai-font-global #cover #cover-bottom-note,
 #cover #cover-bottom-note,
 #cover-bottom-note{
   position:fixed !important;
   left:50% !important;
-  bottom:calc(58px + env(safe-area-inset-bottom, 0px)) !important;
+  bottom:calc(62px + env(safe-area-inset-bottom, 0px)) !important;
   transform:translateX(-50%) !important;
   width:100%;
   max-width:720px;
   margin:0 auto;
-  padding:0 22px 0 60px;
+  padding:0 22px 0 72px;
   text-align:center;
   font-size:8.5px !important;
   font-weight:500 !important;
@@ -2401,7 +2399,7 @@ html.oai-font-global #cover #cover-bottom-note,
   letter-spacing:-0.02em;
   color:rgba(96,86,76,.62);
   pointer-events:none;
-  z-index:5;
+  z-index:90;
   box-sizing:border-box;
 }
 #cover #oai-build-marker{
