@@ -2085,7 +2085,7 @@ html:not(.app-active) #cover {
   height         : 100dvh !important;
   min-height     : 100dvh !important;
   max-height     : 100dvh !important;
-  padding-top    : calc(9vh + env(safe-area-inset-top,0px)) !important;
+  padding-top    : calc(4.5vh + env(safe-area-inset-top,0px)) !important;
   padding-bottom : 0 !important;
   padding-left   : 0 !important;
   padding-right  : 0 !important;
@@ -2113,7 +2113,7 @@ html.app-active #cover {
   width       : 100% !important;
   max-width   : min(440px, calc(100vw - 32px)) !important;
   margin      : 0 auto !important;
-  padding     : 0 16px 10px !important;
+  padding     : 0 16px calc(62px + env(safe-area-inset-bottom,0px)) !important;
   display     : flex !important;
   flex-direction: column ;
   align-items : stretch !important;
@@ -2155,14 +2155,20 @@ html.app-active #cover {
 
 /* 6. 커버 보조 기능줄 — 왼쪽 업데이트, 오른쪽 문의·건의 */
 #cover #cover-action-row {
-  width          : 100% !important;
-  margin         : 8px 0 0 !important;
+  position       : fixed !important;
+  left           : 50% !important;
+  bottom         : calc(12px + env(safe-area-inset-bottom,0px)) !important;
+  transform      : translateX(-50%) !important;
+  width          : min(440px, calc(100vw - 32px)) !important;
+  margin         : 0 !important;
+  padding-left   : 54px !important;
   display        : flex !important;
-  align-items    : flex-end !important;
+  align-items    : center !important;
   justify-content: space-between !important;
   gap            : 8px !important;
-  z-index        : 10;
+  z-index        : 110 !important;
   flex-shrink    : 0;
+  box-sizing     : border-box;
 }
 #cover #cover-update-box {
   display        : flex !important;
@@ -2235,7 +2241,7 @@ html.app-active #cover {
 }
 
 
-/* V19: Safari 안내 배너 — 확인용으로 크게 표시 */
+/* V19: Safari 안내 배너 — iPhone 카카오톡 인앱 브라우저 전용 */
 #cover .ios-safari-banner{
   display:none;
 }
@@ -2350,7 +2356,7 @@ html.app-active #qna-cover-btn, html.app-active #cover-action-row { display: non
 
 /* 작은 화면 보정 */
 @media (max-height:650px) {
-  #cover { padding-top: calc(9vh + env(safe-area-inset-top,0px)) !important; }
+  #cover { padding-top: calc(3.5vh + env(safe-area-inset-top,0px)) !important; }
   #cover .cover-header { padding-bottom: 4px !important; }
   #cover .cover-header .cover-title { font-size: clamp(18px,5vw,24px) !important; }
   #cover .cover-header .cover-subtitle { font-size: 10px !important; }
@@ -2362,7 +2368,11 @@ html.app-active #qna-cover-btn, html.app-active #cover-action-row { display: non
   #cover #cover-update-btn { min-height: 34px !important; height:34px !important; font-size: calc(10.5px * var(--app-font-scale,1)) !important; padding:0 12px!important; }
   #cover #cover-update-hint { font-size:8.5px!important; }
   #cover-main-block {
-    padding-bottom: 8px !important;
+    padding-bottom: calc(54px + env(safe-area-inset-bottom,0px)) !important;
+  }
+  #cover #cover-action-row{
+    bottom:calc(10px + env(safe-area-inset-bottom,0px))!important;
+    padding-left:50px!important;
   }
 }
 /* 7. 하단 안내 문구 — 레이아웃 계산에서 제외하고 화면 하단에 고정 */
@@ -2376,18 +2386,20 @@ html.app-active #qna-cover-btn, html.app-active #cover-action-row { display: non
 html.oai-font-global #cover #cover-bottom-note,
 #cover #cover-bottom-note,
 #cover-bottom-note{
-  position:relative;
-  flex:0 0 auto;
+  position:fixed !important;
+  left:50% !important;
+  bottom:calc(58px + env(safe-area-inset-bottom, 0px)) !important;
+  transform:translateX(-50%) !important;
   width:100%;
   max-width:720px;
   margin:0 auto;
-  padding:4px 22px calc(12px + env(safe-area-inset-bottom, 0px)) 60px;
+  padding:0 22px 0 60px;
   text-align:center;
-  font-size:9px !important;
+  font-size:8.5px !important;
   font-weight:500 !important;
-  line-height:1.35 !important;
+  line-height:1.25 !important;
   letter-spacing:-0.02em;
-  color:rgba(96,86,76,.72);
+  color:rgba(96,86,76,.62);
   pointer-events:none;
   z-index:5;
   box-sizing:border-box;
