@@ -72,13 +72,36 @@ function openMissa(){
   location.href = url;
 }
 
-// 앱 파일 캐시만 삭제하고 최신 파일을 다시 받는다. 즐겨찾기/localStorage는 건드리지 않는다.
-async function refreshAppFilesOnly(){
-  var msg = '앱 파일 캐시를 삭제하고 최신 버전으로 다시 불러올까요?\n즐겨찾기와 글자 크기 설정은 삭제되지 않습니다.';
+// 안정형 새로고침: 캐시/서비스워커를 지우지 않고 현재 화면만 다시 불러온다.
+// 즐겨찾기/localStorage는 물론, Service Worker와 Cache Storage도 건드리지 않는다.
+function refreshAppFilesOnly(){
+  var msg = '앱 화면을 안정형으로 다시 불러올까요?\n캐시와 설치 상태는 삭제하지 않습니다.';
   if(!window.confirm(msg)) return;
   var btn = document.getElementById('cover-update-btn');
   try{
-    if(btn){ btn.disabled = true; btn.textContent = '새로고침 중'; }
+    if(btn){
+      btn.disabled = true;
+      btn.textContent = '새로고침 중';
+    }
+    if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    sessionStorage.setItem('oai_soft_refresh_requested', String(Date.now ? Date.now() : new Date().getTime()));
+  }catch(e){
+    console.warn('[가톨릭길동무]', e);
+  }
+  try{
+    location.reload();
+  }catch(e){
+    location.href = location.href.split('#')[0];
+  }
+}
+window.refreshAppFilesOnly = refreshAppFilesOnly;
+
+// 관리용 완전 정리 함수: 일반 새로고침 버튼에서는 호출하지 않는다.
+// 캐시가 심하게 꼬였을 때만 콘솔/별도 호출로 사용한다.
+async function clearAppFilesCacheCompletely(){
+  var msg = '앱 파일 캐시와 서비스워커를 완전히 삭제할까요?\n일반 새로고침보다 강한 정리입니다.';
+  if(!window.confirm(msg)) return;
+  try{
     if(window.caches && caches.keys){
       var keys = await caches.keys();
       await Promise.all(keys.map(function(k){ return caches.delete(k); }));
@@ -98,7 +121,7 @@ async function refreshAppFilesOnly(){
     location.reload();
   }
 }
-window.refreshAppFilesOnly = refreshAppFilesOnly;
+window.clearAppFilesCacheCompletely = clearAppFilesCacheCompletely;
 
 function syncCoverUpdateVersionState(){
   try{
