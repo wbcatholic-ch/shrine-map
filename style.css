@@ -910,7 +910,7 @@ html.retreat-mode .ic-route-btn{background:#1565c0;color:#fff!important;border-c
 /* cover fixed, not linked to font zoom */
 html.oai-font-global #cover .cover-title,html.oai-font-global #cover .cv-title{font-size:clamp(32px,8.6vw,42px)}
 /* category headers fixed against zoom */
-#cover .cover-header{flex:0 0 auto!important;width:100%!important;padding:0 4px 18px!important;margin:0!important;text-align:center!important}
+#cover .cover-header{flex:0 0 auto!important;width:100%!important;padding:0 4px 20px!important;margin:0!important;text-align:center!important}
 #cover .cover-title{font-size:clamp(30px,8.2vw,38px)!important;line-height:1.14!important;font-weight:800!important;letter-spacing:-.03em;margin:0!important;color:#3E362E!important}
 #cover .cover-subtitle{font-size:16px!important;line-height:1.45!important;margin:0 0 8px!important;color:#81B29A!important;font-weight:600!important}
 #cover .cover-grid{flex:1 1 auto;width:100%;max-width:min(420px,calc(100vw - 38px));margin:0 auto;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(4,1fr);row-gap:clamp(3px,1vh,6px);column-gap:clamp(4px,1.2vw,7px);align-content:stretch;box-sizing:border-box;min-height:0}
@@ -1052,7 +1052,7 @@ html.retreat-mode #srch-modal .sm-filter{background:linear-gradient(135deg,#3f7e
 
 /* 미사·기도·성가 빠른 메뉴: 커버 위에만 뜨는 내부 선택창 */
 .mass-quick-panel{
-  width:min(620px,calc(100vw - 16px));
+  width:min(640px,calc(100vw - 14px));
   padding:44px 26px 32px;
   border-radius:32px;
   text-align:center;
@@ -1060,53 +1060,53 @@ html.retreat-mode #srch-modal .sm-filter{background:linear-gradient(135deg,#3f7e
   border:1px solid #e5ded3;
   box-shadow:0 26px 76px rgba(31,42,68,.28);
   max-height:min(90dvh,800px);
-  font-size:calc(16px * var(--app-font-scale,1));
 }
 .mass-quick-panel h2{display:none!important}
 .mass-quick-lead{display:none!important}
 .mass-quick-actions{display:flex;flex-direction:column;gap:16px;width:100%;margin-top:6px}
-.mass-quick-btn{
+.mass-quick-btn,
+.mass-quick-btn.mass-quick-primary{
   width:100%;
-  min-height:104px;
-  border:1.5px solid #d6b06c;
-  border-radius:22px;
-  background:#fff8e8;
-  color:#1f2937;
+  min-height:110px;
+  border:1.5px solid #d6b06c!important;
+  border-radius:24px;
+  background:#fff8e8!important;
+  color:#1f2937!important;
   display:grid;
-  grid-template-columns:58px 1fr;
+  grid-template-columns:68px 1fr;
   grid-template-rows:1fr;
   align-items:center;
   text-align:left;
-  padding:18px 20px;
+  padding:20px 22px;
   box-shadow:0 9px 22px rgba(31,42,68,.10);
   font-family:inherit;
   cursor:pointer;
 }
 .mass-quick-btn span{
-  width:48px;
-  height:48px;
-  border-radius:16px;
+  width:56px;
+  height:56px;
+  border-radius:18px;
   background:#f5efe4;
   display:flex;
   align-items:center;
   justify-content:center;
-  font-size:calc(25px * var(--app-font-scale,1));
+  font-size:calc(34px * var(--app-font-scale,1))!important;
+  line-height:1;
 }
 .mass-quick-btn strong{
-  font-size:calc(16px * var(--app-font-scale,1));
-  line-height:1.25;
-  font-weight:900;
-  letter-spacing:-.035em;
-  color:#1f2937;
+  font-size:calc(16px * var(--app-font-scale,1))!important;
+  line-height:1.22!important;
+  font-weight:850!important;
+  letter-spacing:-.02em;
+  color:#1a1a1a!important;
 }
 .mass-quick-btn em{display:none!important}
-.mass-quick-primary{border-color:#d6b06c;background:#fff8e8}
 .mass-quick-panel .guide-badge{
   min-height:44px;
   padding:9px 20px;
   margin-bottom:20px;
   border-radius:17px;
-  font-size:calc(18px * var(--app-font-scale,1));
+  font-size:calc(18px * var(--app-font-scale,1))!important;
   line-height:1.25;
   font-weight:900;
   letter-spacing:-.04em;
@@ -1114,26 +1114,28 @@ html.retreat-mode #srch-modal .sm-filter{background:linear-gradient(135deg,#3f7e
   color:#6f4f23;
 }
 @media (max-height:680px){
-  .mass-quick-panel{padding:34px 20px 24px;width:min(590px,calc(100vw - 16px))}
+  .mass-quick-panel{padding:34px 20px 24px;width:min(600px,calc(100vw - 14px))}
   .mass-quick-actions{gap:12px}
-  .mass-quick-btn{min-height:86px;padding:15px 17px;grid-template-columns:52px 1fr}
-  .mass-quick-btn span{width:42px;height:42px;font-size:calc(22px * var(--app-font-scale,1))}
-  .mass-quick-panel .guide-badge{font-size:calc(18px * var(--app-font-scale,1));min-height:40px;margin-bottom:16px}
+  .mass-quick-btn,.mass-quick-btn.mass-quick-primary{min-height:92px;padding:16px 18px;grid-template-columns:62px 1fr}
+  .mass-quick-btn span{width:50px;height:50px;font-size:calc(30px * var(--app-font-scale,1))!important}
+  .mass-quick-btn strong{font-size:calc(16px * var(--app-font-scale,1))!important}
+  .mass-quick-panel .guide-badge{font-size:calc(18px * var(--app-font-scale,1))!important;min-height:40px;margin-bottom:16px}
 }
 
-/* V19-10: 커버 하단 여백은 3vh 기준으로 고정 */
+/* V19-12: 커버 하단은 V19-7 안정 구조를 유지하고, 최종 cover padding-bottom만 3vh 기준으로 적용 */
 #cover,
 html:not(.app-active) #cover{
   padding-bottom:calc(3vh + env(safe-area-inset-bottom,0px))!important;
 }
 #cover-main-block{
-  padding-bottom:calc(3vh + env(safe-area-inset-bottom,0px))!important;
+  padding-bottom:8px!important;
 }
 #cover #cover-action-row{
-  margin-bottom:calc(3vh + env(safe-area-inset-bottom,0px))!important;
+  margin:7px 0 0!important;
 }
 @media (max-height:650px){
-  #cover-main-block{padding-bottom:calc(3vh + env(safe-area-inset-bottom,0px))!important;}
+  #cover{padding-bottom:calc(3vh + env(safe-area-inset-bottom,0px))!important;}
+  #cover-main-block{padding-bottom:8px!important;}
 }
 
 /* 카테고리 내부 리스트 글자 규격 통일 */
@@ -1699,7 +1701,7 @@ html.retreat-mode #sm-tab-bar .sm-tab.active{
   box-shadow:none!important;
 }
 
-/* V19-10: 외부 복귀/화면 진입 CSS 정리
+/* V19-12: 외부 복귀/화면 진입 CSS 정리
    외부 이동 보호막을 제거한 현재 구조에서는 복귀 전용 강제 고정 CSS를 두지 않는다.
    화면 진입 중 필요한 최소 전환만 유지하고, app/viewport 전체를 흔드는 전역 보정은 금지한다. */
 html:not(.app-active),html:not(.app-active) body{scroll-behavior:auto!important;}
@@ -1784,7 +1786,7 @@ html.retreat-mode #region-body .nearby-dist span{
   margin-left:4px!important;
 }
 
-/* 커버 전용 당겨서 새로고침 — V19-10 단일 기준 */
+/* 커버 전용 당겨서 새로고침 — V19-12 단일 기준 */
 #cover{
   overscroll-behavior-y:contain!important;
 }
@@ -2113,7 +2115,7 @@ html.app-active #cv-pull-modern{
 #qna-view  .qna-tab.on        { background: var(--navy, #0e1535) !important; }
 
 /* ── 6. 헤더 배경색 (모듈별) ─────────────────────────────────────── */
-/* V19-10: 기도문 헤더를 기준으로 주요 모듈 헤더 단색 통일 */
+/* V19-12: 기도문 헤더를 기준으로 주요 모듈 헤더 단색 통일 */
 #prayer-bar,
 #trail-view .module-bar,
 #web-view .module-bar,
@@ -2188,7 +2190,7 @@ html.app-active #cover {
 #cover .cover-header {
   flex-shrink : 0 ;
   width       : 100% !important;
-  padding     : 0 18px 8px !important;
+  padding     : 0 18px 20px !important;
   margin      : 0 !important;
   text-align  : center !important;
   box-sizing  : border-box ;
@@ -2203,7 +2205,7 @@ html.app-active #cover {
   width       : 100% !important;
   max-width   : min(440px, calc(100vw - 32px)) !important;
   margin      : 0 auto !important;
-  padding     : 0 16px calc(3vh + env(safe-area-inset-bottom,0px)) !important;
+  padding     : 0 16px 8px !important;
   display     : flex !important;
   flex-direction: column ;
   align-items : stretch !important;
@@ -2246,7 +2248,7 @@ html.app-active #cover {
 /* 6. 커버 보조 기능줄 — 왼쪽 업데이트, 오른쪽 문의·건의 */
 #cover #cover-action-row {
   width          : 100% !important;
-  margin         : 7px 0 calc(3vh + env(safe-area-inset-bottom,0px)) !important;
+  margin         : 7px 0 0 !important;
   display        : flex !important;
   align-items    : flex-end !important;
   justify-content: space-between !important;
@@ -2325,7 +2327,7 @@ html.app-active #cover {
 }
 
 
-/* V19-10: iPhone 카카오톡 인앱 브라우저 Safari 안내 배너 */
+/* V19-12: iPhone 카카오톡 인앱 브라우저 Safari 안내 배너 */
 #cover .ios-safari-banner{
   display:none;
 }
@@ -2441,7 +2443,7 @@ html.app-active #qna-cover-btn, html.app-active #cover-action-row { display: non
 /* 작은 화면 보정 */
 @media (max-height:650px) {
   #cover { padding-top: calc(8vh + env(safe-area-inset-top,0px)) !important; padding-bottom: calc(3vh + env(safe-area-inset-bottom,0px)) !important; }
-  #cover .cover-header { padding-bottom: 4px !important; }
+  #cover .cover-header { padding-bottom: 12px !important; }
   #cover .cover-header .cover-title { font-size: clamp(18px,5vw,24px) !important; }
   #cover .cover-header .cover-subtitle { font-size: 10px !important; }
   #cover .cover-grid,#cover .cv-grid { row-gap: clamp(2px,0.5vh,4px) !important; }
@@ -2496,7 +2498,7 @@ html.oai-font-global #cover #cover-bottom-note,
 }
 
 
-/* V19-10: 출발 검색 모달 색상 기준 재정리
+/* V19-12: 출발 검색 모달 색상 기준 재정리
    - 성지/성당/피정 + 일반장소 탭: 활성은 금색, 비활성은 고유색 배경 위의 은은한 반투명 버튼
    - 검색창을 감싸는 영역은 성지/성당/피정 각 카테고리 고유색으로 통일
    - 실제 검색 입력창(.sm-si)은 기존 아이보리 계열 유지 */
@@ -2567,7 +2569,7 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab:not(.active){
 html #srch-modal #sm-tab-bar .sm-tab.active,
 html.parish-mode #srch-modal #sm-tab-bar .sm-tab.active,
 html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active{
-  /* V19-10: 바로 위 교구 활성화 버튼(.sm-fb.on)과 같은 금색 기준 사용 */
+  /* V19-12: 바로 위 교구 활성화 버튼(.sm-fb.on)과 같은 금색 기준 사용 */
   background:var(--gold,#d4aa6a)!important;
   background-image:none!important;
   color:#1F2937!important;
@@ -2579,7 +2581,7 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active{
 
 
 /* ══════════════════════════════════════════════════════════════════
-   V19-10 모듈 표준화
+   V19-12 모듈 표준화
    - 헤더: 기도문 헤더 기준 단색 네이비(그라데이션 제거)
    - 탭바/탭버튼: 관구·교구 탭 기준 높이·형태 통일
    - 활성 탭의 고유 색상은 각 모듈 기존 색상을 유지
@@ -2663,7 +2665,7 @@ html.oai-font-global #trail-view .trail-tab{
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   V19-10 주요 기능 안내 — 커버 전용, 별도 파일 없음
+   V19-12 주요 기능 안내 — 커버 전용, 별도 파일 없음
    ══════════════════════════════════════════════════════════════════ */
 #cover #cover-guide-btn{
   position:absolute;
