@@ -2085,7 +2085,7 @@ html:not(.app-active) #cover {
   height         : 100dvh !important;
   min-height     : 100dvh !important;
   max-height     : 100dvh !important;
-  padding-top    : calc(9vh + env(safe-area-inset-top,0px)) !important;
+  padding-top    : calc(6vh + env(safe-area-inset-top,0px)) !important;
   padding-bottom : 0 !important;
   padding-left   : 0 !important;
   padding-right  : 0 !important;
@@ -2108,12 +2108,14 @@ html.app-active #cover {
 
 /* 3. 메인 블록 (그리드 + 문의버튼 한 몸체) */
 #cover-main-block {
-  flex        : 1 1 0 !important;
+  flex        : 0 1 auto !important;
+  height      : calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 222px) !important;
+  max-height  : 620px !important;
   min-height  : 0 !important;
   width       : 100% !important;
   max-width   : min(440px, calc(100vw - 32px)) !important;
   margin      : 0 auto !important;
-  padding     : 0 16px 10px !important;
+  padding     : 0 16px 8px !important;
   display     : flex !important;
   flex-direction: column ;
   align-items : stretch !important;
@@ -2131,7 +2133,7 @@ html.app-active #cover {
   display              : grid !important;
   grid-template-columns: repeat(2, minmax(0,1fr)) !important;
   grid-template-rows   : repeat(4, 1fr) !important;
-  row-gap              : clamp(3px, 0.9vh, 7px) !important;
+  row-gap              : clamp(3px, 0.7vh, 6px) !important;
   column-gap           : clamp(4px, 1.2vw, 8px) !important;
   align-content        : stretch ;
   box-sizing           : border-box ;
@@ -2156,7 +2158,7 @@ html.app-active #cover {
 /* 6. 커버 보조 기능줄 — 왼쪽 업데이트, 오른쪽 문의·건의 */
 #cover #cover-action-row {
   width          : 100% !important;
-  margin         : 8px 0 0 !important;
+  margin         : 7px 0 0 !important;
   display        : flex !important;
   align-items    : flex-end !important;
   justify-content: space-between !important;
@@ -2381,7 +2383,7 @@ html.oai-font-global #cover #cover-bottom-note,
   width:100%;
   max-width:720px;
   margin:0 auto;
-  padding:4px 22px calc(12px + env(safe-area-inset-bottom, 0px)) 60px;
+  padding:4px 22px calc(10px + env(safe-area-inset-bottom, 0px)) 60px;
   text-align:center;
   font-size:9px !important;
   font-weight:500 !important;
