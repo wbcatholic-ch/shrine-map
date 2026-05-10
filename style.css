@@ -2085,7 +2085,7 @@ html:not(.app-active) #cover {
   height         : 100dvh !important;
   min-height     : 100dvh !important;
   max-height     : 100dvh !important;
-  padding-top    : calc(6vh + env(safe-area-inset-top,0px)) !important;
+  padding-top    : calc(7.5vh + env(safe-area-inset-top,0px)) !important;
   padding-bottom : 0 !important;
   padding-left   : 0 !important;
   padding-right  : 0 !important;
@@ -2378,7 +2378,10 @@ html.app-active #qna-cover-btn, html.app-active #cover-action-row { display: non
 html.oai-font-global #cover #cover-bottom-note,
 #cover #cover-bottom-note,
 #cover-bottom-note{
-  position:relative;
+  position:fixed !important;
+  left:0 !important;
+  right:0 !important;
+  bottom:0 !important;
   flex:0 0 auto;
   width:100%;
   max-width:720px;
@@ -2391,7 +2394,7 @@ html.oai-font-global #cover #cover-bottom-note,
   letter-spacing:-0.02em;
   color:rgba(96,86,76,.72);
   pointer-events:none;
-  z-index:5;
+  z-index:118;
   box-sizing:border-box;
 }
 #cover #oai-build-marker{
