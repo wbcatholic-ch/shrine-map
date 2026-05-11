@@ -534,7 +534,7 @@ function showDetailView(post) {
 }
 
 /* ═══════════════════ 운영자 답변 관리 ═══════════════════
-   V37: 공개 HTML 안의 운영자 인증/답변/삭제 기능 제거.
+   V38: 공개 HTML 안의 운영자 인증/답변/삭제 기능 제거.
    답변과 삭제는 Firebase 콘솔 또는 별도 서버 인증 관리자 도구에서 처리합니다.
 */
 
@@ -639,7 +639,7 @@ subscribeList();
 <script id="oai-cache-lifecycle-V23">
 (function(){
   'use strict';
-  var APP_VERSION = 'V37';
+  var APP_VERSION = 'V38';
   if('serviceWorker' in navigator){
     try{ navigator.serviceWorker.register('./sw.js?v=' + encodeURIComponent(APP_VERSION)).then(function(reg){try{reg.update();}catch(e){}}).catch(function(){}); }catch(e){}
   }
