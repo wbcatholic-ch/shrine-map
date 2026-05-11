@@ -93,15 +93,13 @@
 
   /* ── 필터 ── */
   #filter-bar {
-    position: fixed; top: calc(70px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); z-index: 90;
-    width: 100%; max-width: 720px;
+    position: sticky; top: calc(70px + env(safe-area-inset-top, 0px)); z-index: 90;
     height: 50px; min-height: 50px; max-height: 50px;
     display: flex; align-items: center; gap: 5px; padding: 7px 8px;
     background: rgba(255,255,255,.96);
     border-bottom: 1px solid rgba(0,0,0,.08);
     overflow: hidden; scrollbar-width: none;
     box-sizing: border-box;
-    touch-action: pan-y;
   }
   #filter-bar::-webkit-scrollbar { display: none; }
   .filter-btn {
@@ -115,7 +113,7 @@
   .filter-btn.active { background: #0e1535; color: #fff; border-color: transparent; font-weight: 800; box-shadow: 0 4px 12px rgba(14,21,53,.16); }
 
   /* ── 게시글 목록 ── */
-  #post-list { padding: 54px 14px 4px; }
+  #post-list { padding: 4px 14px; }
   .card {
     background: #fffaf2; border:1px solid #e6dccb; border-radius: var(--radius); padding: 14px 16px;
     margin-bottom: 10px; box-shadow: var(--shadow); cursor: pointer;
@@ -246,7 +244,7 @@
   .view { padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px)); }
   #post-list, #write-view, #detail-view { width: 100%; max-width: 680px; margin: 0 auto; }
   @media (min-width: 600px) {
-    #filter-bar { max-width: 680px; width: 100%; }
+    #filter-bar { max-width: 680px; margin: 0 auto; width: 100%; }
     .card { padding: 16px 18px; }
   }
   @media (min-width: 720px) {
@@ -453,49 +451,30 @@ function buildFilterBar() {
 
 function bindFilterBarSwipe() {
   const bar = document.getElementById('filter-bar');
-  const list = document.getElementById('list-view');
   if(!bar || bar.__filterSwipeBound) return;
   bar.__filterSwipeBound = true;
   let sx = 0;
   let sy = 0;
-  let tracking = false;
-
-  function moveFilter(dir){
-    const cur = Math.max(0, FILTERS.indexOf(currentFilter));
-    const next = Math.max(0, Math.min(FILTERS.length - 1, cur + dir));
-    if(next === cur) return;
-    currentFilter = FILTERS[next];
-    buildFilterBar();
-    renderList(window._cachedPosts || []);
-  }
-  function start(e){
+  bar.addEventListener('touchstart', function(e){
     const t = e.touches && e.touches[0];
     if(!t) return;
-    const target = e.target;
-    if(target && target.closest && target.closest('input, textarea, select')) return;
     sx = t.clientX;
     sy = t.clientY;
-    tracking = true;
-  }
-  function end(e){
-    if(!tracking) return;
-    tracking = false;
+  }, {passive:true});
+  bar.addEventListener('touchend', function(e){
     const t = e.changedTouches && e.changedTouches[0];
     if(!t) return;
     const dx = t.clientX - sx;
     const dy = t.clientY - sy;
-    if(Math.abs(dx) < 32) return;
-    if(Math.abs(dx) < Math.abs(dy) * 1.25) return;
-    moveFilter(dx < 0 ? 1 : -1);
-  }
-
-  bar.addEventListener('touchstart', start, {passive:true});
-  bar.addEventListener('touchend', end, {passive:true});
-  if(list && !list.__filterSwipeBound){
-    list.__filterSwipeBound = true;
-    list.addEventListener('touchstart', start, {passive:true});
-    list.addEventListener('touchend', end, {passive:true});
-  }
+    if(Math.abs(dx) < 38) return;
+    if(Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    const cur = Math.max(0, FILTERS.indexOf(currentFilter));
+    const next = Math.max(0, Math.min(FILTERS.length - 1, cur + (dx < 0 ? 1 : -1)));
+    if(next === cur) return;
+    currentFilter = FILTERS[next];
+    buildFilterBar();
+    renderList(window._cachedPosts || []);
+  }, {passive:true});
 }
 
 /* ═══════════════════ 목록 렌더링 ═══════════════════ */
