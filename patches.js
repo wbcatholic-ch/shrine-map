@@ -47,6 +47,67 @@
       history.pushState({_p:1}, '', href);
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
+
+  /* ── 커버 뒤로가기 토스트 & 종료 ── */
+  window._showBackToast = function(){
+    if(window._exitReady){
+      // 2회차: 앱 종료
+      window._exitReady = false;
+      if(window._exitTimer){ clearTimeout(window._exitTimer); window._exitTimer = null; }
+      var t = $b('_bt');
+      if(t && t.parentNode) t.parentNode.removeChild(t);
+      try{
+        if(window.navigator && window.navigator.app && typeof window.navigator.app.exitApp === 'function'){
+          window.navigator.app.exitApp();
+          return true;
+        }
+      }catch(e){ console.warn('[가톨릭길동무]', e); }
+      /* PWA/브라우저 fallback */
+      try{ if(window.appExitApp && typeof window.appExitApp === 'function'){ window.appExitApp(); return true; } }catch(e){}
+      try{ window.close(); }catch(e){}
+      return true;
+    }
+    // 1회차: 종료 안내 토스트 표시
+    window._exitReady = true;
+    var old = $b('_bt');
+    if(old && old.parentNode) old.parentNode.removeChild(old);
+    var toast = document.createElement('div');
+    toast.id = '_bt';
+    toast.setAttribute('role','alert');
+    toast.setAttribute('aria-live','assertive');
+    toast.textContent = '한 번 더 누르면 앱이 종료됩니다';
+    toast.style.cssText = [
+      'position:fixed',
+      'bottom:calc(36px + env(safe-area-inset-bottom,0px))',
+      'left:50%',
+      'transform:translateX(-50%)',
+      'background:rgba(14,21,53,.88)',
+      'color:#fff',
+      'padding:13px 26px',
+      'border-radius:30px',
+      'font-size:14px',
+      'font-weight:700',
+      'font-family:inherit',
+      'letter-spacing:-.01em',
+      'z-index:99999',
+      'white-space:nowrap',
+      'pointer-events:none',
+      'box-shadow:0 4px 18px rgba(0,0,0,.28)',
+      'opacity:1',
+      'transition:opacity .3s'
+    ].join(';');
+    document.body.appendChild(toast);
+    window._exitTimer = setTimeout(function(){
+      window._exitReady = false;
+      var el = $b('_bt');
+      if(el){
+        el.style.opacity = '0';
+        setTimeout(function(){ if(el.parentNode) el.parentNode.removeChild(el); }, 320);
+      }
+    }, 2500);
+    return false;
+  };
+
   function isMassQuickOpen(){
     var m = $b('mass-quick-modal');
     return !!(m && m.classList.contains('show'));

@@ -453,19 +453,40 @@ function bindFilterBarSwipe() {
   const bar = document.getElementById('filter-bar');
   if(!bar || bar.__filterSwipeBound) return;
   bar.__filterSwipeBound = true;
-  let sx = 0;
-  let sy = 0;
+
+  let sx = 0, sy = 0, tracking = false, lockDir = null;
+
   bar.addEventListener('touchstart', function(e){
     const t = e.touches && e.touches[0];
     if(!t) return;
     sx = t.clientX;
     sy = t.clientY;
-  }, {passive:true});
-  bar.addEventListener('touchend', function(e){
-    const t = e.changedTouches && e.changedTouches[0];
+    tracking = true;
+    lockDir = null;
+  }, {passive: true});
+
+  /* passive:false 로 등록 → 수평 제스처일 때 preventDefault() 가능 */
+  bar.addEventListener('touchmove', function(e){
+    if(!tracking) return;
+    const t = e.touches && e.touches[0];
     if(!t) return;
+    const dx = Math.abs(t.clientX - sx);
+    const dy = Math.abs(t.clientY - sy);
+    if(!lockDir && (dx > 4 || dy > 4)){
+      lockDir = dx >= dy ? 'h' : 'v';
+    }
+    /* 수평 방향으로 판정되면 페이지 스크롤 차단 */
+    if(lockDir === 'h') e.preventDefault();
+  }, {passive: false});
+
+  bar.addEventListener('touchend', function(e){
+    if(!tracking){ tracking = false; lockDir = null; return; }
+    tracking = false;
+    const t = e.changedTouches && e.changedTouches[0];
+    if(!t){ lockDir = null; return; }
     const dx = t.clientX - sx;
     const dy = t.clientY - sy;
+    lockDir = null;
     if(Math.abs(dx) < 38) return;
     if(Math.abs(dx) < Math.abs(dy) * 1.5) return;
     const cur = Math.max(0, FILTERS.indexOf(currentFilter));
@@ -474,7 +495,11 @@ function bindFilterBarSwipe() {
     currentFilter = FILTERS[next];
     buildFilterBar();
     renderList(window._cachedPosts || []);
-  }, {passive:true});
+  }, {passive: true});
+
+  bar.addEventListener('touchcancel', function(){
+    tracking = false; lockDir = null;
+  }, {passive: true});
 }
 
 /* ═══════════════════ 목록 렌더링 ═══════════════════ */
