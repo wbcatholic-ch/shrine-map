@@ -552,12 +552,12 @@ html.retreat-mode .region-item .nearby-num{background:#4f46e5!important}
 .sheet.exit-left{transform:translateX(-100%)}
 .sheet.exit-right{transform:translateX(100%)}
 #diocese-view{display:none;position:fixed;inset:0;z-index:10000;background:#F8F6F2;flex-direction:column}
-#diocese-view.open{display:flex}
+#diocese-view.open{display:flex;inset:0;bottom:0;height:auto;min-height:0}
 #diocese-bar{background:linear-gradient(135deg,#1f2a44,#2f4167);padding:env(safe-area-inset-top,0) 14px 0;display:flex;align-items:center;justify-content:space-between;min-height:calc(52px + env(safe-area-inset-top,0));flex-shrink:0;border-bottom:2px solid var(--gold)}
 #diocese-bar-title{font-size:16px;font-weight:700;color:var(--gold);letter-spacing:.05em}
 #diocese-close{position:fixed;top:calc(env(safe-area-inset-top,0px) + 10px);right:14px;background:rgba(15,21,53,.72);border:1px solid rgba(255,255,255,.28);border-radius:50%;color:rgba(212,170,106,.9);font-size:20px;font-weight:900;width:38px;height:38px;display:flex;align-items:center;justify-content:center;cursor:pointer;z-index:2100;flex-shrink:0}
 #prayer-view{display:none;position:fixed;inset:0;z-index:20000;flex-direction:column;background:#EDE8E0;font-family:'Noto Sans KR',sans-serif}
-#prayer-view.open{display:flex;left:0!important;right:0!important;width:100vw!important;position:fixed;top:0!important;bottom:0!important;transform:none!important}
+#prayer-view.open{display:flex;left:0!important;right:0!important;width:100vw!important;position:fixed;top:0!important;bottom:0!important;height:auto!important;min-height:0!important;transform:none!important}
 #prayer-bar{background:#0e1535;border-bottom:2px solid var(--gold);gap:12px}
 #prayer-bar-brand{display:flex;align-items:center;gap:10px}
 #prayer-bar-ico{width:44px;height:44px;border-radius:14px;background:rgba(255,255,255,.14);border:1px solid rgba(255,255,255,.22);display:flex;align-items:center;justify-content:center;font-size:22px;flex-shrink:0}
@@ -657,7 +657,7 @@ html.oai-font-global #region-body .li-sub,
 html.oai-font-global #region-body .region-item .nearby-addr{font-size:calc(12px * var(--app-font-scale))!important}
 /* 관구교구 iframe 내부에 주입될 수 없을 때를 대비한 부모 쪽 기본값 */
 #diocese-view{}
-#web-view.module-view.open,#trail-view.module-view.open,#qna-view.module-view.open{position:fixed;inset:0;width:100vw!important;height:100svh!important;max-width:none!important;max-height:none!important;display:flex!important;align-items:stretch!important;justify-content:flex-start;overflow:hidden!important;z-index:1800;flex-direction:column}
+#web-view.module-view.open,#trail-view.module-view.open,#qna-view.module-view.open{position:fixed;inset:0;width:100vw!important;height:auto!important;min-height:0!important;max-width:none!important;max-height:none!important;display:flex!important;align-items:stretch!important;justify-content:flex-start;overflow:hidden!important;z-index:1800;flex-direction:column}
 #web-view .module-bar,#trail-view .module-bar,#qna-view .module-bar,#web-view .web-body,#trail-view .trail-body,#qna-view .qna-body{width:100%;max-width:none!important}
 #web-view .web-body,#trail-view .trail-body,#qna-view .qna-body{flex:1 1 auto!important;min-height:0!important;height:auto!important;overflow:hidden!important}
 #web-view .web-list,#trail-view #trail-list,#qna-view .qna-list{flex:1 1 auto!important;min-height:0!important;overflow-y:auto!important}
@@ -704,7 +704,7 @@ html.app-active #qna-cover-btn{display:none!important}
 #prayer-view.open,
 #web-view.module-view.open,
 #trail-view.module-view.open,
-#diocese-view.open{position:fixed;inset:0;width:100vw!important;height:100svh!important;max-width:none!important;max-height:none!important;overflow:hidden!important}
+#diocese-view.open{position:fixed;inset:0;width:100vw!important;height:auto!important;min-height:0!important;max-width:none!important;max-height:none!important;overflow:hidden!important}
 #web-view.module-view.open,
 #trail-view.module-view.open{display:flex!important;flex-direction:column;align-items:stretch!important}
 /* 2) 헤더 통일 → 하단 패치에서 처리 */
@@ -730,7 +730,7 @@ html.oai-font-global body,html.oai-font-global button,html.oai-font-global input
 html.oai-font-global .nearby-name,html.oai-font-global .region-item .nearby-name,html.oai-font-global #region-body .nearby-name,html.oai-font-global .li-name,html.oai-font-global #region-body .li-name,html.oai-font-global .sm-name,html.oai-font-global .sm-place-name{font-size:calc(16px * var(--app-font-scale,1))!important;line-height:1.32!important;font-weight:700!important}
 html.oai-font-global .nearby-addr,html.oai-font-global .region-item .nearby-addr,html.oai-font-global #region-body .nearby-addr,html.oai-font-global .li-sub,html.oai-font-global #region-body .li-sub,html.oai-font-global .sm-sub,html.oai-font-global .sm-place-addr{font-size:calc(12px * var(--app-font-scale,1))!important;line-height:1.35!important}
 html.oai-font-global .web-card-badge,html.oai-font-global .web-card-url{font-size:calc(13px * var(--app-font-scale,1))!important}
-#web-view.module-view.open,#trail-view.module-view.open,#qna-view.module-view.open,#diocese-view.open,#prayer-view.open{position:fixed;inset:0;width:100vw!important;height:100svh!important;max-width:none!important;max-height:none!important;overflow:hidden!important;display:flex!important;flex-direction:column}
+#web-view.module-view.open,#trail-view.module-view.open,#qna-view.module-view.open,#diocese-view.open,#prayer-view.open{position:fixed;inset:0;width:100vw!important;height:auto!important;min-height:0!important;max-width:none!important;max-height:none!important;overflow:hidden!important;display:flex!important;flex-direction:column}
 #region-body .nearby-item,
 #region-body .region-place-cand{min-height:72px;font-size:calc(17px * var(--app-font-scale,1))!important}
 #region-body .region-item .nearby-name,
@@ -1550,7 +1550,7 @@ html.retreat-mode #sm-tab-bar .sm-tab.active{
 #web-view.module-view.open,
 #trail-view.module-view.open,
 #qna-view.module-view.open,
-#diocese-view.open{left:0!important;right:0!important;top:0!important;bottom:0!important;width:100vw!important;max-width:none!important;min-width:0!important;height:100svh!important;display:flex!important;flex-direction:column;align-items:stretch!important;overflow:hidden!important;box-sizing:border-box;}
+#diocese-view.open{left:0!important;right:0!important;top:0!important;bottom:0!important;width:100vw!important;max-width:none!important;min-width:0!important;height:auto!important;min-height:0!important;display:flex!important;flex-direction:column;align-items:stretch!important;overflow:hidden!important;box-sizing:border-box;}
 
 
 /* 순례길 활성 탭 색상 남색 통일 */
@@ -1686,7 +1686,7 @@ html.retreat-mode #sm-tab-bar .sm-tab.active{
   box-shadow:none!important;
 }
 
-/* V20-19: 외부 복귀/화면 진입 CSS 정리
+/* V21-1: 외부 복귀/화면 진입 CSS 정리
    외부 이동 보호막을 제거한 현재 구조에서는 복귀 전용 강제 고정 CSS를 두지 않는다.
    화면 진입 중 필요한 최소 전환만 유지하고, app/viewport 전체를 흔드는 전역 보정은 금지한다. */
 html:not(.app-active),html:not(.app-active) body{scroll-behavior:auto!important;}
@@ -1695,10 +1695,10 @@ html:not(.app-active),html:not(.app-active) body{scroll-behavior:auto!important;
 #qna-view.module-view.open,
 #diocese-view.open,
 #prayer-view.open{
-  height:100svh!important;
-  min-height:100svh!important;
+  height:auto!important;
+  min-height:0!important;
   top:0!important;
-  bottom:auto!important;
+  bottom:0!important;
   transform:none!important;
 }
 html.oai-returning,
@@ -1771,7 +1771,7 @@ html.retreat-mode #region-body .nearby-dist span{
   margin-left:4px!important;
 }
 
-/* 커버 전용 당겨서 새로고침 — V20-19 단일 기준 */
+/* 커버 전용 당겨서 새로고침 — V21-1 단일 기준 */
 #cover{
   overscroll-behavior-y:contain!important;
 }
@@ -2100,7 +2100,7 @@ html.app-active #cv-pull-modern{
 #qna-view  .qna-tab.on        { background: var(--navy, #0e1535) !important; }
 
 /* ── 6. 헤더 배경색 (모듈별) ─────────────────────────────────────── */
-/* V20-19: 기도문 헤더를 기준으로 주요 모듈 헤더 단색 통일 */
+/* V21-1: 기도문 헤더를 기준으로 주요 모듈 헤더 단색 통일 */
 #prayer-bar,
 #trail-view .module-bar,
 #web-view .module-bar,
@@ -2143,7 +2143,7 @@ html.oai-font-global #qna-view  .qna-tab {
 
 
 /* ══════════════════════════════════════════════════════════════════
-   V20-19 커버 레이아웃 안정 복원
+   V21-1 커버 레이아웃 안정 복원
    구조: #cover > cover-header / #cover-main-block / #cover-bottom-note
    #cover-main-block: cover-grid + cover-action-row 한 몸체
    V19 완료 기준 커버 구조로 복원
@@ -2313,7 +2313,7 @@ html.app-active #cover {
 }
 
 
-/* V20-19: iPhone 카카오톡 인앱 브라우저 Safari 설치 안내
+/* V21-1: iPhone 카카오톡 인앱 브라우저 Safari 설치 안내
    - 커버 레이아웃을 밀지 않고, 커버 위 레이어로 표시한다.
    - 카테고리를 일부 가려도 Safari 설치 안내가 먼저 보이도록 한다. */
 #cover .ios-safari-banner{
@@ -2546,7 +2546,7 @@ html.oai-font-global #cover #cover-bottom-note,
 }
 
 
-/* V20-19: 출발 검색 모달 색상 기준 재정리
+/* V21-1: 출발 검색 모달 색상 기준 재정리
    - 성지/성당/피정 + 일반장소 탭: 활성은 금색, 비활성은 고유색 배경 위의 은은한 반투명 버튼
    - 검색창을 감싸는 영역은 성지/성당/피정 각 카테고리 고유색으로 통일
    - 실제 검색 입력창(.sm-si)은 기존 아이보리 계열 유지 */
@@ -2617,7 +2617,7 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab:not(.active){
 html #srch-modal #sm-tab-bar .sm-tab.active,
 html.parish-mode #srch-modal #sm-tab-bar .sm-tab.active,
 html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active{
-  /* V20-19: 바로 위 교구 활성화 버튼(.sm-fb.on)과 같은 금색 기준 사용 */
+  /* V21-1: 바로 위 교구 활성화 버튼(.sm-fb.on)과 같은 금색 기준 사용 */
   background:var(--gold,#d4aa6a)!important;
   background-image:none!important;
   color:#1F2937!important;
@@ -2629,7 +2629,7 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active{
 
 
 /* ══════════════════════════════════════════════════════════════════
-   V20-19 모듈 표준화
+   V21-1 모듈 표준화
    - 헤더: 기도문 헤더 기준 단색 네이비(그라데이션 제거)
    - 탭바/탭버튼: 관구·교구 탭 기준 높이·형태 통일
    - 활성 탭의 고유 색상은 각 모듈 기존 색상을 유지
@@ -2713,7 +2713,7 @@ html.oai-font-global #trail-view .trail-tab{
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   V20-19 주요 기능 안내 — 커버 전용, 별도 파일 없음
+   V21-1 주요 기능 안내 — 커버 전용, 별도 파일 없음
    ══════════════════════════════════════════════════════════════════ */
 #cover #cover-guide-btn{
   position:absolute;
