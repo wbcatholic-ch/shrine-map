@@ -274,57 +274,90 @@
 }
 </style>
 
-
-<style id="oai-v21-qa-tabs-fixed-style">
-  /* V21: 문의·건의 탭바 고정 + 관구·교구 느낌의 높이/색상 */
-  .qa-cat-row, .qa-tabs, #qa-tabs, .tab-bar, .tabs, .category-tabs, .filter-tabs, [role="tablist"] {
-    position: sticky !important;
-    top: 0 !important;
-    z-index: 30 !important;
-    height: 72px !important;
-    min-height: 72px !important;
-    padding: 10px 16px !important;
-    display: flex !important;
-    align-items: center !important;
-    gap: 10px !important;
-    overflow-x: auto !important;
-    overflow-y: hidden !important;
-    background: #F8F6F2 !important;
-    border-bottom: 1px solid rgba(31,42,68,.14) !important;
-    box-sizing: border-box !important;
-    -webkit-overflow-scrolling: touch !important;
-    scroll-snap-type: x proximity !important;
-    touch-action: pan-x pan-y !important;
+<style id="oai-v22-qa-header-tabs-style">
+  #header{
+    height:70px !important;
+    min-height:70px !important;
+    padding:0 16px !important;
+    display:flex !important;
+    align-items:center !important;
+    gap:10px !important;
+    background:#1F2A44 !important;
+    border-bottom:none !important;
+    box-shadow:none !important;
   }
-  .qa-cat-row::-webkit-scrollbar, .qa-tabs::-webkit-scrollbar, #qa-tabs::-webkit-scrollbar,
-  .tab-bar::-webkit-scrollbar, .tabs::-webkit-scrollbar, .category-tabs::-webkit-scrollbar,
-  .filter-tabs::-webkit-scrollbar, [role="tablist"]::-webkit-scrollbar { display: none; }
-  .qa-cat-row button, .qa-tabs button, #qa-tabs button, .tab-bar button, .tabs button,
-  .category-tabs button, .filter-tabs button, [role="tablist"] button,
-  .qa-cat-btn, .qa-tab, .filter-btn, .tab-btn, [role="tab"] {
-    height: 48px !important;
-    min-height: 48px !important;
-    padding: 0 20px !important;
-    border-radius: 14px !important;
-    border: 2px solid #1F2A44 !important;
-    background: #F8F6F2 !important;
-    color: #1F2A44 !important;
-    font-size: 17px !important;
-    font-weight: 800 !important;
-    white-space: nowrap !important;
-    flex: 0 0 auto !important;
-    scroll-snap-align: center !important;
-    box-sizing: border-box !important;
+  #qna-cross-icon{
+    width:35px !important;
+    height:35px !important;
+    min-width:35px !important;
+    flex:0 0 35px !important;
+    border-radius:12px !important;
+    font-size:15px !important;
+    background:rgba(255,255,255,.18) !important;
+    border:1px solid rgba(255,255,255,.28) !important;
   }
-  .qa-cat-row button.active, .qa-tabs button.active, #qa-tabs button.active,
-  .tab-bar button.active, .tabs button.active, .category-tabs button.active,
-  .filter-tabs button.active, [role="tablist"] button.active,
-  .qa-cat-btn.active, .qa-tab.active, .filter-btn.active, .tab-btn.active,
-  [role="tab"][aria-selected="true"], button[aria-selected="true"] {
-    background: #1F2A44 !important;
-    color: #fff !important;
-    border-color: #1F2A44 !important;
-    box-shadow: 0 6px 14px rgba(31,42,68,.16) !important;
+  #header-texts .title{
+    font-size:22px !important;
+    font-weight:700 !important;
+    line-height:1.2 !important;
+    letter-spacing:-.03em !important;
+  }
+  #header-texts .sub{
+    font-size:10px !important;
+    font-weight:500 !important;
+    line-height:1.2 !important;
+    margin-top:1px !important;
+  }
+  #close-btn{
+    width:35px !important;
+    height:35px !important;
+    min-width:35px !important;
+    flex:0 0 35px !important;
+  }
+  #write-btn{
+    height:44px !important;
+    min-height:44px !important;
+    font-size:14px !important;
+  }
+  #filter-bar{
+    position:sticky !important;
+    top:70px !important;
+    z-index:90 !important;
+    height:55px !important;
+    min-height:55px !important;
+    max-height:55px !important;
+    padding:0 10px !important;
+    gap:6px !important;
+    display:flex !important;
+    align-items:center !important;
+    background:#FFFBF2 !important;
+    border-top:1px solid #DDD5C8 !important;
+    border-bottom:2px solid #DDD5C8 !important;
+    overflow-x:auto !important;
+    overflow-y:hidden !important;
+    scrollbar-width:none !important;
+    -webkit-overflow-scrolling:touch !important;
+    touch-action:pan-x pan-y !important;
+  }
+  #filter-bar::-webkit-scrollbar{display:none !important;}
+  #filter-bar .filter-btn{
+    height:40px !important;
+    min-height:40px !important;
+    padding:0 13px !important;
+    border-radius:10px !important;
+    border:1.5px solid #1F2A44 !important;
+    background:#F5F0E8 !important;
+    color:#1F2A44 !important;
+    font-size:15px !important;
+    font-weight:700 !important;
+    flex:0 0 auto !important;
+    white-space:nowrap !important;
+    box-shadow:none !important;
+  }
+  #filter-bar .filter-btn.active{
+    background:#1F2A44 !important;
+    color:#fff !important;
+    border-color:#1F2A44 !important;
   }
 </style>
 
@@ -486,14 +519,53 @@ function goDetail() { showView('detail-view-wrap', { historyMode:'push' }); }
 /* ═══════════════════ 필터 바 ═══════════════════ */
 function buildFilterBar() {
   const bar = document.getElementById('filter-bar');
+  if(!bar) return;
   bar.innerHTML = '';
   FILTERS.forEach(f => {
     const btn = document.createElement('button');
     btn.className = 'filter-btn' + (f === currentFilter ? ' active' : '');
     btn.textContent = f;
-    btn.onclick = () => { currentFilter = f; buildFilterBar(); renderList(window._cachedPosts || []); };
+    btn.setAttribute('type','button');
+    btn.onclick = () => {
+      currentFilter = f;
+      buildFilterBar();
+      renderList(window._cachedPosts || []);
+    };
     bar.appendChild(btn);
   });
+  bindFilterSwipeBar();
+}
+
+function bindFilterSwipeBar() {
+  const bar = document.getElementById('filter-bar');
+  if(!bar || bar.__oaiFilterSwipeBound) return;
+  bar.__oaiFilterSwipeBound = true;
+  let sx = 0, sy = 0;
+  bar.addEventListener('touchstart', function(e){
+    const t = e.touches && e.touches[0];
+    if(!t) return;
+    sx = t.clientX;
+    sy = t.clientY;
+  }, {passive:true});
+  bar.addEventListener('touchend', function(e){
+    const t = e.changedTouches && e.changedTouches[0];
+    if(!t) return;
+    const dx = t.clientX - sx;
+    const dy = t.clientY - sy;
+    if(Math.abs(dx) < 42) return;
+    if(Math.abs(dx) < Math.abs(dy) * 1.5) return;
+    const idx = FILTERS.indexOf(currentFilter);
+    const cur = idx >= 0 ? idx : 0;
+    const next = Math.max(0, Math.min(FILTERS.length - 1, cur + (dx < 0 ? 1 : -1)));
+    if(next === cur) return;
+    currentFilter = FILTERS[next];
+    buildFilterBar();
+    renderList(window._cachedPosts || []);
+    setTimeout(function(){
+      const active = bar.querySelector('.filter-btn.active');
+      if(active) active.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
+    }, 0);
+  }, {passive:true});
 }
 
 /* ═══════════════════ 목록 렌더링 ═══════════════════ */
@@ -589,7 +661,7 @@ function showDetailView(post) {
 }
 
 /* ═══════════════════ 운영자 답변 관리 ═══════════════════
-   V21: 공개 HTML 안의 운영자 인증/답변/삭제 기능 제거.
+   V22: 공개 HTML 안의 운영자 인증/답변/삭제 기능 제거.
    답변과 삭제는 Firebase 콘솔 또는 별도 서버 인증 관리자 도구에서 처리합니다.
 */
 
@@ -694,7 +766,7 @@ subscribeList();
 <script id="oai-cache-lifecycle-V23">
 (function(){
   'use strict';
-  var APP_VERSION = 'V21';
+  var APP_VERSION = 'V22';
   if('serviceWorker' in navigator){
     try{ navigator.serviceWorker.register('./sw.js?v=' + encodeURIComponent(APP_VERSION)).then(function(reg){try{reg.update();}catch(e){}}).catch(function(){}); }catch(e){}
   }
@@ -795,108 +867,5 @@ subscribeList();
   }catch(e){}
 })();
 </script>
-
-
-<script id="oai-v21-qa-swipe-final">
-(function(){
-  'use strict';
-  if(window.__OAI_V21_QA_SWIPE_FINAL__) return;
-  window.__OAI_V21_QA_SWIPE_FINAL__ = true;
-
-  function visible(el){
-    if(!el) return false;
-    var r = el.getBoundingClientRect();
-    return r.width > 0 && r.height > 0;
-  }
-
-  function findTabBar(){
-    var selectors = ['.qa-cat-row','.qa-tabs','#qa-tabs','.tab-bar','.tabs','.category-tabs','.filter-tabs','[role="tablist"]'];
-    for(var i=0;i<selectors.length;i++){
-      var nodes = document.querySelectorAll(selectors[i]);
-      for(var j=0;j<nodes.length;j++){
-        if(visible(nodes[j]) && getTabs(nodes[j]).length >= 2) return nodes[j];
-      }
-    }
-    // fallback: a top visible container with inquiry category buttons
-    var labels = ['전체','문의','수정','개선','칭찬','답변'];
-    var all = Array.prototype.slice.call(document.querySelectorAll('div,nav,section,header'));
-    for(var k=0;k<all.length;k++){
-      var el = all[k];
-      if(!visible(el)) continue;
-      var btns = getTabs(el);
-      if(btns.length < 2) continue;
-      var text = btns.map(function(b){return (b.textContent||'').trim();}).join('|');
-      if(labels.some(function(x){return text.indexOf(x) >= 0;})) return el;
-    }
-    return null;
-  }
-
-  function getTabs(bar){
-    if(!bar) return [];
-    return Array.prototype.slice.call(bar.querySelectorAll('button,.qa-tab,.tab-btn,.filter-btn,[role="tab"]'))
-      .filter(visible)
-      .filter(function(el){ return (el.textContent||'').trim().length > 0; });
-  }
-
-  function activeIndex(tabs){
-    for(var i=0;i<tabs.length;i++){
-      var t=tabs[i];
-      if(t.classList.contains('active') || t.classList.contains('selected') || t.getAttribute('aria-selected') === 'true') return i;
-    }
-    return 0;
-  }
-
-  function moveTab(dir){
-    var bar = findTabBar();
-    var tabs = getTabs(bar);
-    if(!bar || tabs.length < 2) return false;
-    var cur = activeIndex(tabs);
-    var next = Math.max(0, Math.min(tabs.length - 1, cur + dir));
-    if(next === cur) return false;
-    try{ tabs[next].click(); }catch(e){ console.warn('[가톨릭길동무]', e); }
-    try{ tabs[next].scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'}); }catch(e){}
-    return true;
-  }
-
-  var sx=0, sy=0, targetOk=false;
-
-  function start(e){
-    var t = e.touches && e.touches[0];
-    if(!t) return;
-    sx = t.clientX; sy = t.clientY;
-    targetOk = !!findTabBar();
-  }
-
-  function end(e){
-    if(!targetOk) return;
-    var t = (e.changedTouches && e.changedTouches[0]) || null;
-    if(!t) return;
-    var dx = t.clientX - sx;
-    var dy = t.clientY - sy;
-
-    // 좌우 스와이프만 탭 이동. 세로 스크롤은 절대 가로 탭으로 해석하지 않는다.
-    if(Math.abs(dx) < 70) return;
-    if(Math.abs(dx) < Math.abs(dy) * 1.7) return;
-
-    if(dx < 0) moveTab(1);
-    else moveTab(-1);
-  }
-
-  // 탭바 위뿐 아니라 문의 화면 전체에서 좌우 스와이프를 받되, 세로 스크롤과 충돌하지 않게 엄격히 판정한다.
-  document.addEventListener('touchstart', start, {passive:true});
-  document.addEventListener('touchend', end, {passive:true});
-
-  function init(){
-    var bar = findTabBar();
-    if(!bar) return;
-    try{ bar.style.touchAction = 'pan-x pan-y'; }catch(e){}
-  }
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', init, {once:true});
-  else init();
-  window.addEventListener('pageshow', init);
-  setTimeout(init, 400);
-})();
-</script>
-
 </body>
 </html>
