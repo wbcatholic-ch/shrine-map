@@ -75,15 +75,14 @@
   }
 
   function callGTC(){
-    resetExitToast();
     if(typeof window.goToCover === 'function') window.goToCover();
     else {
       document.documentElement.classList.remove('app-active','parish-mode','retreat-mode');
       var cv = $b('cover'); if(cv) cv.style.display = '';
     }
     resetExitToast();
-    rearmCoverTrap();
-    setTimeout(function(){ resetExitToast(); rearmCoverTrap(); }, 80);
+    setTimeout(rearmCoverTrap, 80);
+    setTimeout(rearmCoverTrap, 220);
   }
 
   /* ── 외부·모듈 뷰 닫기 (닫으면 항상 goToCover) ── */
@@ -1005,11 +1004,19 @@
     }
     lastCover=now;
   }
+  function rearmCoverBackTrapOnCoverEntry(){
+    if(!isCover()) return;
+    try{
+      var href=location.href.split('#')[0];
+      history.replaceState({_p:0}, '', href);
+      history.pushState({_p:1}, '', href);
+    }catch(e){ console.warn("[가톨릭길동무]", e); }
+  }
   var oldGTC=window.goToCover;
   if(typeof oldGTC==='function'){
     window.goToCover=function(){
       var r=oldGTC.apply(this,arguments);
-      setTimeout(function(){fixRetreatTabLabel();resetNativeExitToastOnCoverEntry();},0);
+      setTimeout(function(){fixRetreatTabLabel();resetNativeExitToastOnCoverEntry();rearmCoverBackTrapOnCoverEntry();},120);
       return r;
     };
   }

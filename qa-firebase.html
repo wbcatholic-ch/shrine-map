@@ -30,8 +30,6 @@
     --gray-400:#94A3B8; --gray-500:#64748B; --gray-700:#374151;
     --gray-900:#0F172A;
     --radius: 14px; --shadow: 0 2px 12px rgba(0,0,0,0.08);
-    --qa-header-h: calc(70px + env(safe-area-inset-top, 0px));
-    --qa-filter-h: 50px;
   }
   body {
     font-family: 'Noto Sans KR', sans-serif;
@@ -46,11 +44,11 @@
 
   /* ── 헤더 ── */
   #header {
-    width: 100%; max-width: 720px; box-sizing: border-box;
+    width: 100%; max-width: none; box-sizing: border-box;
     background: #0e1535; color: #fff;
-    height: var(--qa-header-h); min-height: var(--qa-header-h); padding: env(safe-area-inset-top, 0px) 16px 10px;
+    height: calc(70px + env(safe-area-inset-top, 0px)); min-height: calc(70px + env(safe-area-inset-top, 0px)); padding: env(safe-area-inset-top, 0px) 16px 10px;
     display: flex; align-items: center; gap: 12px;
-    position: fixed; top: 0; left: 50%; transform: translateX(-50%); z-index: 100;
+    position: sticky; top: 0; z-index: 100;
     border-radius: 0; border-bottom: 2px solid var(--gold); box-shadow: 0 12px 28px rgba(18,24,38,.18);
   }
   #qna-cross-icon {
@@ -90,22 +88,20 @@
   #write-btn:active { transform: scale(.97); }
 
   /* ── 뷰 전환 ── */
-  .view { display: none; padding: var(--qa-header-h) 0 80px; }
+  .view { display: none; padding: 0 0 80px; }
   .view.active { display: block; }
-  #list-view { padding-top: calc(var(--qa-header-h) + var(--qa-filter-h)); }
 
   /* ── 필터 ── */
   #filter-bar {
-    position: fixed; top: var(--qa-header-h); left: 50%; transform: translateX(-50%); z-index: 90;
+    position: fixed; top: calc(70px + env(safe-area-inset-top, 0px)); left: 50%; transform: translateX(-50%); z-index: 90;
     width: 100%; max-width: 720px;
-    height: var(--qa-filter-h); min-height: var(--qa-filter-h); max-height: var(--qa-filter-h);
+    height: 50px; min-height: 50px; max-height: 50px;
     display: flex; align-items: center; gap: 5px; padding: 7px 8px;
     background: rgba(255,255,255,.96);
     border-bottom: 1px solid rgba(0,0,0,.08);
     overflow: hidden; scrollbar-width: none;
     box-sizing: border-box;
-    touch-action: pan-x;
-    overscroll-behavior: contain;
+    touch-action: pan-y;
   }
   #filter-bar::-webkit-scrollbar { display: none; }
   .filter-btn {
@@ -119,7 +115,7 @@
   .filter-btn.active { background: #0e1535; color: #fff; border-color: transparent; font-weight: 800; box-shadow: 0 4px 12px rgba(14,21,53,.16); }
 
   /* ── 게시글 목록 ── */
-  #post-list { padding: 4px 14px; }
+  #post-list { padding: 54px 14px 4px; }
   .card {
     background: #fffaf2; border:1px solid #e6dccb; border-radius: var(--radius); padding: 14px 16px;
     margin-bottom: 10px; box-shadow: var(--shadow); cursor: pointer;
@@ -250,7 +246,7 @@
   .view { padding-bottom: calc(92px + env(safe-area-inset-bottom, 0px)); }
   #post-list, #write-view, #detail-view { width: 100%; max-width: 680px; margin: 0 auto; }
   @media (min-width: 600px) {
-    #filter-bar { max-width: 680px; }
+    #filter-bar { max-width: 680px; width: 100%; }
     .card { padding: 16px 18px; }
   }
   @media (min-width: 720px) {
@@ -457,42 +453,49 @@ function buildFilterBar() {
 
 function bindFilterBarSwipe() {
   const bar = document.getElementById('filter-bar');
+  const list = document.getElementById('list-view');
   if(!bar || bar.__filterSwipeBound) return;
   bar.__filterSwipeBound = true;
   let sx = 0;
   let sy = 0;
-  let horizontal = false;
-  bar.addEventListener('touchstart', function(e){
-    const t = e.touches && e.touches[0];
-    if(!t) return;
-    sx = t.clientX;
-    sy = t.clientY;
-    horizontal = false;
-  }, {passive:true});
-  bar.addEventListener('touchmove', function(e){
-    const t = e.touches && e.touches[0];
-    if(!t) return;
-    const dx = t.clientX - sx;
-    const dy = t.clientY - sy;
-    if(Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy)){
-      horizontal = true;
-      e.preventDefault();
-    }
-  }, {passive:false});
-  bar.addEventListener('touchend', function(e){
-    const t = e.changedTouches && e.changedTouches[0];
-    if(!t) return;
-    const dx = t.clientX - sx;
-    const dy = t.clientY - sy;
-    if(Math.abs(dx) < 34) return;
-    if(!horizontal && Math.abs(dx) < Math.abs(dy)) return;
+  let tracking = false;
+
+  function moveFilter(dir){
     const cur = Math.max(0, FILTERS.indexOf(currentFilter));
-    const next = Math.max(0, Math.min(FILTERS.length - 1, cur + (dx < 0 ? 1 : -1)));
+    const next = Math.max(0, Math.min(FILTERS.length - 1, cur + dir));
     if(next === cur) return;
     currentFilter = FILTERS[next];
     buildFilterBar();
     renderList(window._cachedPosts || []);
-  }, {passive:true});
+  }
+  function start(e){
+    const t = e.touches && e.touches[0];
+    if(!t) return;
+    const target = e.target;
+    if(target && target.closest && target.closest('input, textarea, select')) return;
+    sx = t.clientX;
+    sy = t.clientY;
+    tracking = true;
+  }
+  function end(e){
+    if(!tracking) return;
+    tracking = false;
+    const t = e.changedTouches && e.changedTouches[0];
+    if(!t) return;
+    const dx = t.clientX - sx;
+    const dy = t.clientY - sy;
+    if(Math.abs(dx) < 32) return;
+    if(Math.abs(dx) < Math.abs(dy) * 1.25) return;
+    moveFilter(dx < 0 ? 1 : -1);
+  }
+
+  bar.addEventListener('touchstart', start, {passive:true});
+  bar.addEventListener('touchend', end, {passive:true});
+  if(list && !list.__filterSwipeBound){
+    list.__filterSwipeBound = true;
+    list.addEventListener('touchstart', start, {passive:true});
+    list.addEventListener('touchend', end, {passive:true});
+  }
 }
 
 /* ═══════════════════ 목록 렌더링 ═══════════════════ */
