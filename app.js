@@ -1962,6 +1962,10 @@ function _showParishNearbyMarkersOnMap(items, lat, lng, phase){
       if(AppState) AppState.nearbyParishDioCode = code;
       _fitParishNearbyBounds(items, lat, lng);
     }
+    // 지도 bounds/center 조정 직후에도 교구 라벨을 한 번 더 동기화한다.
+    // 일부 모바일 브라우저에서는 지도 이동 직후 CustomOverlay 표시가 늦게 반영될 수 있다.
+    setTimeout(_syncParishDioLabels, 80);
+    setTimeout(_syncParishDioLabels, 260);
   }catch(e){ console.warn('[가톨릭길동무]',e); }
 }
 
@@ -2163,8 +2167,9 @@ function _buildParishDioSystem(){
       zIndex:100
     });
     _dioOverlays[code]=ov;
-    // 성당 기본/내주변 화면에서는 전국 교구 라벨을 띄우지 않는다.
-    ov.setMap(null);
+    // 성당 카테고리에서는 교구명이 지도 위 선택 버튼 역할을 하므로 기본 표시한다.
+    // 선택되어 성당 마커가 펼쳐진 교구 라벨만 _syncParishDioLabels()에서 숨긴다.
+    try{ ov.setMap(_map); if(typeof ov.setZIndex==='function') ov.setZIndex(10000); }catch(e){ console.warn('[가톨릭길동무]',e); }
   });
   // 줌 변경 시 폰트 크기 반응형 업데이트
   kakao.maps.event.addListener(_map,'zoom_changed',function(){
@@ -2192,10 +2197,18 @@ function _hideDioOverlays(){
 function _syncParishDioLabels(){
   if(_mode!=='parish' || !_map || !_parishSysInited) return;
   Object.entries(_dioOverlays).forEach(([code,ov])=>{
-    try{ ov.setMap(_map); }catch(e){ console.warn("[가톨릭길동무]", e); }
+    try{
+      ov.setMap(_map);
+      if(typeof ov.setZIndex==='function') ov.setZIndex(10000);
+    }catch(e){ console.warn("[가톨릭길동무]", e); }
     const el = ov && typeof ov.getContent==='function' ? ov.getContent() : null;
     if(el){
       el.style.transform='';
+      el.style.visibility='visible';
+      el.style.opacity='1';
+      el.style.pointerEvents='auto';
+      el.style.zIndex='10000';
+      // 성당 마커가 펼쳐진 교구명만 숨기고, 나머지 교구명은 지도 위 선택 버튼으로 남긴다.
       el.style.display = (code===_activeDio) ? 'none' : '';
     }
   });
@@ -2384,8 +2397,8 @@ function _clearParishMarkers(){
   if(_paSelMkr){try{_paSelMkr.setMap(null);}catch(e){ console.warn("[가톨릭길동무]", e); }  _paSelMkr=null;}
   // 교구 마커 숨기기
   if(_activeDio){ _hideParishDioMkrs(_activeDio); _activeDio=null; }
-  document.querySelectorAll('.dio-label').forEach(e=>e.style.transform='');
-  // 교구 라벨도 숨기기 (shrine 모드 전환 시)
+  document.querySelectorAll('.dio-label').forEach(e=>{e.style.transform='';e.style.display='';});
+  // 교구 라벨도 숨기기 (shrine/retreat 등 성당 외 모드 전환 시)
   _hideDioOverlays();
 }
 
