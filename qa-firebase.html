@@ -258,6 +258,42 @@
     textarea { min-height: 96px; }
   }
 
+
+  /* 문의 헤더/탭바 기준 정리 */
+  #header {
+    height: calc(70px + env(safe-area-inset-top, 0px));
+    min-height: calc(70px + env(safe-area-inset-top, 0px));
+    padding: env(safe-area-inset-top, 0px) 16px 10px;
+    gap: 12px;
+  }
+  #qna-cross-icon {
+    width: 42px; height: 42px; min-width: 42px; flex: 0 0 42px;
+    font-size: 22px;
+  }
+  #header-texts .title { font-size: 20px; font-weight: 800; line-height: 1.24; }
+  #header-texts .sub { font-size: 11px; font-weight: 600; line-height: 1.25; }
+  #close-btn { width: 36px; height: 36px; min-width: 36px; flex: 0 0 36px; }
+
+  #filter-bar {
+    position: sticky;
+    top: calc(70px + env(safe-area-inset-top, 0px));
+    z-index: 90;
+    height: 50px; min-height: 50px; max-height: 50px;
+    display: flex; align-items: center; gap: 5px;
+    padding: 7px 8px;
+    overflow: hidden;
+    background: rgba(255,255,255,.96);
+  }
+  .filter-btn {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 36px; min-height: 36px;
+    padding: 0 4px;
+    font-size: 12px;
+    border-radius: 12px;
+    white-space: nowrap;
+  }
+
 </style>
 
 
@@ -273,94 +309,6 @@
   will-change:transform;
 }
 </style>
-
-<style id="oai-v22-qa-header-tabs-style">
-  #header{
-    height:70px !important;
-    min-height:70px !important;
-    padding:0 16px !important;
-    display:flex !important;
-    align-items:center !important;
-    gap:10px !important;
-    background:#1F2A44 !important;
-    border-bottom:none !important;
-    box-shadow:none !important;
-  }
-  #qna-cross-icon{
-    width:35px !important;
-    height:35px !important;
-    min-width:35px !important;
-    flex:0 0 35px !important;
-    border-radius:12px !important;
-    font-size:15px !important;
-    background:rgba(255,255,255,.18) !important;
-    border:1px solid rgba(255,255,255,.28) !important;
-  }
-  #header-texts .title{
-    font-size:22px !important;
-    font-weight:700 !important;
-    line-height:1.2 !important;
-    letter-spacing:-.03em !important;
-  }
-  #header-texts .sub{
-    font-size:10px !important;
-    font-weight:500 !important;
-    line-height:1.2 !important;
-    margin-top:1px !important;
-  }
-  #close-btn{
-    width:35px !important;
-    height:35px !important;
-    min-width:35px !important;
-    flex:0 0 35px !important;
-  }
-  #write-btn{
-    height:44px !important;
-    min-height:44px !important;
-    font-size:14px !important;
-  }
-  #filter-bar{
-    position:sticky !important;
-    top:70px !important;
-    z-index:90 !important;
-    height:55px !important;
-    min-height:55px !important;
-    max-height:55px !important;
-    padding:0 10px !important;
-    gap:6px !important;
-    display:flex !important;
-    align-items:center !important;
-    background:#FFFBF2 !important;
-    border-top:1px solid #DDD5C8 !important;
-    border-bottom:2px solid #DDD5C8 !important;
-    overflow-x:auto !important;
-    overflow-y:hidden !important;
-    scrollbar-width:none !important;
-    -webkit-overflow-scrolling:touch !important;
-    touch-action:pan-x pan-y !important;
-  }
-  #filter-bar::-webkit-scrollbar{display:none !important;}
-  #filter-bar .filter-btn{
-    height:40px !important;
-    min-height:40px !important;
-    padding:0 13px !important;
-    border-radius:10px !important;
-    border:1.5px solid #1F2A44 !important;
-    background:#F5F0E8 !important;
-    color:#1F2A44 !important;
-    font-size:15px !important;
-    font-weight:700 !important;
-    flex:0 0 auto !important;
-    white-space:nowrap !important;
-    box-shadow:none !important;
-  }
-  #filter-bar .filter-btn.active{
-    background:#1F2A44 !important;
-    color:#fff !important;
-    border-color:#1F2A44 !important;
-  }
-</style>
-
 </head>
 <body>
 
@@ -525,7 +473,7 @@ function buildFilterBar() {
     const btn = document.createElement('button');
     btn.className = 'filter-btn' + (f === currentFilter ? ' active' : '');
     btn.textContent = f;
-    btn.setAttribute('type','button');
+    btn.type = 'button';
     btn.onclick = () => {
       currentFilter = f;
       buildFilterBar();
@@ -533,14 +481,15 @@ function buildFilterBar() {
     };
     bar.appendChild(btn);
   });
-  bindFilterSwipeBar();
+  bindFilterBarSwipe();
 }
 
-function bindFilterSwipeBar() {
+function bindFilterBarSwipe() {
   const bar = document.getElementById('filter-bar');
-  if(!bar || bar.__oaiFilterSwipeBound) return;
-  bar.__oaiFilterSwipeBound = true;
-  let sx = 0, sy = 0;
+  if(!bar || bar.__filterSwipeBound) return;
+  bar.__filterSwipeBound = true;
+  let sx = 0;
+  let sy = 0;
   bar.addEventListener('touchstart', function(e){
     const t = e.touches && e.touches[0];
     if(!t) return;
@@ -552,19 +501,14 @@ function bindFilterSwipeBar() {
     if(!t) return;
     const dx = t.clientX - sx;
     const dy = t.clientY - sy;
-    if(Math.abs(dx) < 42) return;
+    if(Math.abs(dx) < 38) return;
     if(Math.abs(dx) < Math.abs(dy) * 1.5) return;
-    const idx = FILTERS.indexOf(currentFilter);
-    const cur = idx >= 0 ? idx : 0;
+    const cur = Math.max(0, FILTERS.indexOf(currentFilter));
     const next = Math.max(0, Math.min(FILTERS.length - 1, cur + (dx < 0 ? 1 : -1)));
     if(next === cur) return;
     currentFilter = FILTERS[next];
     buildFilterBar();
     renderList(window._cachedPosts || []);
-    setTimeout(function(){
-      const active = bar.querySelector('.filter-btn.active');
-      if(active) active.scrollIntoView({behavior:'smooth', inline:'center', block:'nearest'});
-    }, 0);
   }, {passive:true});
 }
 
@@ -763,7 +707,7 @@ showView('list-view', { historyMode:'replace' });
 subscribeList();
 </script>
 
-<script id="oai-cache-lifecycle-V23">
+<script id="oai-cache-lifecycle-V22">
 (function(){
   'use strict';
   var APP_VERSION = 'V22';

@@ -123,14 +123,15 @@ function openMassQuickMenu(opts){
 function closeMassQuickMenu(){
   const modal=document.getElementById('mass-quick-modal');
   _setMassQuickReturn(false);
+  try{
+    window._exitReady = false;
+    if(window._exitTimer) clearTimeout(window._exitTimer);
+    const bt=document.getElementById('_bt');
+    if(bt) bt.remove();
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
   if(!modal) return;
   modal.classList.remove('show');
   modal.setAttribute('aria-hidden','true');
-  try{
-    if(typeof window.oaiEnsureCoverBackTrap === 'function'){
-      setTimeout(function(){ window.oaiEnsureCoverBackTrap('closeMassQuickMenu-app'); }, 20);
-    }
-  }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 function openCatholicHymn(){
   const url='https://maria.catholic.or.kr/mobile/sungga/sungga.asp';
@@ -730,14 +731,13 @@ function _getModeMarkerColor(item){return _mode==='shrine'?(TC[item.type]||'#555
 function _getRouteGuideTarget(){return _mode==='shrine'?'성지':(_mode==='retreat'?'피정의 집':'성당');}
 
 // ─── API 키 및 REST 프록시 설정 ─────────────────────────────────────
-// V22: 카카오 REST 호출은 Cloudflare Worker 프록시를 사용합니다.
-// JavaScript Key는 지도 SDK 로딩에 필요하므로 앱에 남기고, 카카오 개발자센터에서 도메인 제한을 걸어야 합니다.
+// 카카오 REST 호출은 Cloudflare Worker 프록시를 사용합니다.
 const JSKEY = (window.APP_CONFIG && window.APP_CONFIG.KAKAO_JS_KEY) || '';
 const REST_PROXY = (window.APP_CONFIG && window.APP_CONFIG.KAKAO_REST_PROXY_URL) || '';
 
 (function(){
   if(!JSKEY || !REST_PROXY){
-    console.warn('[가톨릭길동무] KAKAO_JS_KEY 또는 KAKAO_REST_PROXY_URL이 비어 있습니다. 카카오 JavaScript 키와 Cloudflare Worker 주소를 확인하세요.');
+    console.warn('[가톨릭길동무] KAKAO_JS_KEY 또는 KAKAO_REST_PROXY_URL이 비어 있습니다.');
   }
 })();
 
@@ -765,7 +765,7 @@ SHRINES.forEach(s=>{
   if(s.hp&&_URL_T[s.hp.slice(0,2)]) s.hp=_URL_T[s.hp.slice(0,2)]+s.hp.slice(2);
   else if(s.hp&&_URL_T[s.hp[0]]) s.hp=_URL_T[s.hp[0]]+s.hp.slice(1);
 });
-/* V22: 카카오 REST 호출은 Cloudflare Worker 프록시로 처리합니다. */
+/* 카카오 REST 호출은 Cloudflare Worker 프록시로 처리합니다. */
 
 /* ── Mobility API 동시 호출 제한 + 결과 캐시 ──────────────────────
    - 동시 최대 5개 fetch (카카오 무료 쿼터 보호)
@@ -1202,12 +1202,6 @@ function goToCover(){
     _coverEl.style.pointerEvents='';
     _coverEl.scrollTop=0;
   }
-  try{
-    if(typeof window.oaiEnsureCoverBackTrap === 'function'){
-      setTimeout(function(){ window.oaiEnsureCoverBackTrap('goToCover-app'); }, 20);
-      setTimeout(function(){ window.oaiEnsureCoverBackTrap('goToCover-app-late'); }, 180);
-    }
-  }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 
 function _loadMap(){
