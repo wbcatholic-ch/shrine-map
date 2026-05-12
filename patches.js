@@ -38,6 +38,10 @@
   function closeGuideModals(){
     try{
       document.querySelectorAll('.guide-modal.show').forEach(function(el){
+        if(el && el.id === 'mass-quick-modal' && typeof window.closeMassQuickMenu === 'function'){
+          window.closeMassQuickMenu();
+          return;
+        }
         el.classList.remove('show');
         el.setAttribute('aria-hidden','true');
       });
@@ -427,8 +431,8 @@
 (function(){
   if(window.__APP_FONT_SCALE_GUARD__) return;
   window.__APP_FONT_SCALE_GUARD__=true;
-  // V37: 문의·건의는 qa-firebase.html 한 경로로만 통일한다.
-  var QA_URL="qa-firebase.html?v=V37";
+  // V39: 문의·건의는 qa-firebase.html 한 경로로만 통일한다.
+  var QA_URL="qa-firebase.html?v=V39";
   var FONT_KEY='prayer_font_size', BASE=16, SIZES=[15,16,17,18,19,20,21,22,24,26,28];
   function el(id){return document.getElementById(id)}
   function getPx(){var px=parseInt(localStorage.getItem(FONT_KEY)||BASE,10);return (px>=15&&px<=28)?px:BASE;}
@@ -838,6 +842,10 @@
   function closeGuideModals(){
     try{
       document.querySelectorAll('.guide-modal.show').forEach(function(el){
+        if(el && el.id === 'mass-quick-modal' && typeof window.closeMassQuickMenu === 'function'){
+          window.closeMassQuickMenu();
+          return;
+        }
         el.classList.remove('show');
         el.setAttribute('aria-hidden','true');
       });
