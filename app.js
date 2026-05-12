@@ -318,7 +318,7 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || 'V37-9';
+    var target = btn.getAttribute('data-target-version') || 'V37-10';
     var current = '';
     if(window.APP_VERSION) current = String(window.APP_VERSION).trim();
     if(!current && marker) current = String(marker.textContent || '').trim();
@@ -599,7 +599,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V37-9';
+    frame.src='diocese.html?v=V37-10';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -3667,6 +3667,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   on('pr-lg-btn-2',   'click', function() { prAdjustFont(1); });
   on('pr-detail-star','click', function(e) { prToggleDetailFav(e); });
   on('pr-back-btn',   'click', function() { prCloseDetail(); });
+  on('pr-detail-floating-back', 'click', function() { prCloseDetail(); });
 
   // ── 커버 글자크기 ──
   on('cover-sm-btn',  'click', function(e) { e.stopPropagation(); prAdjustFont(-1); });
