@@ -219,16 +219,14 @@
 
 (function(){
   'use strict';
-  if(window.__APP_PRAYER_BACK_GUARD__) return;
-  window.__APP_PRAYER_BACK_GUARD__ = true;
+  if(window.__APP_PRAYER_VIEW_HELPER__) return;
+  window.__APP_PRAYER_VIEW_HELPER__ = true;
 
   function el(id){ return document.getElementById(id); }
-  function baseUrl(){ return location.href.split('#')[0]; }
-  function isPrayerOpen(){ var p=el('prayer-view'); return !!(p && p.classList.contains('open')); }
-  function isPrayerDetailOpen(){ var d=el('prayer-detail'); return !!(d && d.classList.contains('show')); }
   function blurActive(){ try{ var a=document.activeElement; if(a && /INPUT|TEXTAREA|SELECT/.test(a.tagName)) a.blur(); }catch(_){ console.warn("[가톨릭길동무] silent catch"); } }
-  function safePush(state){ try{ history.pushState(state||{oai:1}, '', baseUrl()); }catch(_){ console.warn("[가톨릭길동무] silent catch"); } }
 
+  /* 통합 뒤로가기 컨트롤러가 기도문을 처리하므로, 여기서는 목록 초기화만 담당한다.
+     기도문 전용 history.pushState / 별도 popstate / 별도 backbutton은 사용하지 않는다. */
   function showPrayerListOnly(){
     blurActive();
     var d=el('prayer-detail');
@@ -238,66 +236,8 @@
       try{ lv.style.scrollBehavior='auto'; lv.scrollTop=0; lv.style.scrollBehavior=''; }catch(_){ console.warn("[가톨릭길동무] silent catch"); }
     }
   }
-  function closePrayerToCover(){
-    blurActive();
-    var d=el('prayer-detail'); if(d) d.classList.remove('show');
-    var p=el('prayer-view'); if(p) p.classList.remove('open');
-    if(typeof window._shouldMassQuickReturn === 'function' && window._shouldMassQuickReturn() && typeof window._returnToMassQuickMenu === 'function'){
-      try{ window._returnToMassQuickMenu(); }catch(_){ console.warn("[가톨릭길동무] silent catch"); }
-      return;
-    }
-    if(typeof window.goToCover === 'function'){
-      try{ window.goToCover(); }catch(_){ console.warn("[가톨릭길동무] silent catch"); }
-    }else{
-      document.documentElement.classList.remove('app-active','parish-mode','retreat-mode');
-      var c=el('cover'); if(c){ c.style.display=''; c.style.opacity=''; c.style.pointerEvents=''; }
-    }
-    setTimeout(function(){ safePush({oai_cover_trap:1}); }, 20);
-  }
-  function handlePrayerBack(e){
-    if(!isPrayerOpen()) return false;
-    try{ e && e.preventDefault && e.preventDefault(); e && e.stopPropagation && e.stopPropagation(); e && e.stopImmediatePropagation && e.stopImmediatePropagation(); }catch(_){ console.warn("[가톨릭길동무] silent catch"); }
-    if(isPrayerDetailOpen()){
-      showPrayerListOnly();
-      /* 본문에서 목록으로 돌아온 뒤, 다음 뒤로가기는 목록→커버가 되도록 한 단계만 다시 무장 */
-      setTimeout(function(){ safePush({oai_prayer_list:1}); }, 20);
-    }else{
-      closePrayerToCover();
-    }
-    return true;
-  }
-
-  /* 기도문 진입/본문 진입 때 history 상태를 명확히 만든다. */
-  var oldOpenPrayerBook = window.openPrayerBook;
-  if(typeof oldOpenPrayerBook === 'function' && !oldOpenPrayerBook.__oai_final_wrapped){
-    var wrappedOpenPrayerBook=function(){
-      var r=oldOpenPrayerBook.apply(this, arguments);
-      setTimeout(function(){ showPrayerListOnly(); safePush({oai_prayer_list:1}); }, 60);
-      return r;
-    };
-    wrappedOpenPrayerBook.__oai_final_wrapped=true;
-    window.openPrayerBook=wrappedOpenPrayerBook;
-  }
-  var oldPrOpenDetail = window.prOpenDetail;
-  if(typeof oldPrOpenDetail === 'function' && !oldPrOpenDetail.__oai_final_wrapped){
-    var wrappedPrOpenDetail=function(){
-      var r=oldPrOpenDetail.apply(this, arguments);
-      setTimeout(function(){ safePush({oai_prayer_detail:1}); }, 20);
-      return r;
-    };
-    wrappedPrOpenDetail.__oai_final_wrapped=true;
-    window.prOpenDetail=wrappedPrOpenDetail;
-  }
-
-  /* 기존 뒤로가기 컨트롤러보다 먼저 처리해야 하므로 capture 단계에서 막는다. */
-  /* disabled duplicate prayer popstate handler */
-  // window.addEventListener('popstate', function(e){ handlePrayerBack(e); }, true);
-  /* disabled duplicate prayer backbutton handler */
-  // document.addEventListener('backbutton', function(e){ handlePrayerBack(e); }, true);
-
-  /* 관구교구 iframe 글자크기 강제 주입 제거: diocese.html 원본 스타일을 사용 */
+  try{ window.showPrayerListOnly = showPrayerListOnly; }catch(_){ console.warn("[가톨릭길동무] silent catch"); }
 })();
-
 
 
 

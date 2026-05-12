@@ -117,6 +117,11 @@ function _resetCoverExitReady(){
     if(toast) toast.classList.remove('show');
   }catch(e){ console.warn("[가톨릭길동무]", e); }
 }
+function _armMassQuickHistoryTrap(){
+  try{
+    history.pushState({_p:1, oai_mass_quick:1}, '', location.href.split('#')[0]);
+  }catch(e){ console.warn("[가톨릭길동무]", e); }
+}
 function _returnToMassQuickMenu(){
   if(typeof goToCover==='function') goToCover();
   _resetCoverExitReady();
@@ -129,6 +134,7 @@ function openMassQuickMenu(opts){
   if(!modal) return;
   if(!(opts && opts.keepReturn)) _setMassQuickReturn(false);
   _resetCoverExitReady();
+  _armMassQuickHistoryTrap();
   modal.classList.add('show');
   modal.setAttribute('aria-hidden','false');
 }
