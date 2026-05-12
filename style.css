@@ -3086,3 +3086,16 @@ html.ios-device .trail-sh-head{padding-left:12px!important;padding-right:12px!im
 html.ios-device .qna-tab{height:36px!important;border-radius:10px!important;}
 html.ios-device .qna-card,
 html.ios-device .qna-panel{border-radius:13px!important;}
+
+
+/* V37-6-3: 외부 복귀 후 빠른메뉴 팝업 표시 흔들림 완화 */
+html.oai-massquick-resuming #cover{
+  will-change:auto;
+}
+.mass-quick-modal .guide-backdrop{
+  transition:opacity .12s ease;
+}
+.mass-quick-modal .guide-panel{
+  transition:opacity .14s ease, transform .14s ease;
+  transform:translate3d(0,0,0);
+}
