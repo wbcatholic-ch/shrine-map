@@ -171,7 +171,12 @@
 
     if(isGuideModalOpen()){
       closeGuideModals();
-      try{ history.pushState({_p:1}, '', _href); }catch(e){ console.warn("[가톨릭길동무]", e); }
+      try{
+        // 팝업에서 뒤로가기 후에는 반드시 커버 trap을 다시 세워
+        // 다음 뒤로가기가 앱 종료가 아니라 커버 종료 토스트로 이어지게 한다.
+        history.replaceState({_p:1, oai_cover_trap:1}, '', _href);
+        history.pushState({_p:1, oai_cover_trap:1}, '', _href);
+      }catch(e){ console.warn("[가톨릭길동무]", e); }
       return;
     }
 
@@ -373,8 +378,8 @@
 (function(){
   if(window.__APP_FONT_SCALE_GUARD__) return;
   window.__APP_FONT_SCALE_GUARD__=true;
-  // V37-14: 문의·건의는 qa-firebase.html 한 경로로만 통일한다.
-  var QA_URL="qa-firebase.html?v=V37-14";
+  // V37-15: 문의·건의는 qa-firebase.html 한 경로로만 통일한다.
+  var QA_URL="qa-firebase.html?v=V37-15";
   var FONT_KEY='prayer_font_size', BASE=16, SIZES=[15,16,17,18,19,20,21,22,24,26,28];
   function el(id){return document.getElementById(id)}
   function getPx(){var px=parseInt(localStorage.getItem(FONT_KEY)||BASE,10);return (px>=15&&px<=28)?px:BASE;}
