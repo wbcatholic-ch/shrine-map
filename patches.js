@@ -37,10 +37,15 @@
   }
   function closeGuideModals(){
     try{
-      document.querySelectorAll('.guide-modal.show').forEach(function(el){
-        el.classList.remove('show');
-        el.setAttribute('aria-hidden','true');
-      });
+      var mq = $b('mass-quick-modal');
+      if(mq && mq.classList.contains('show') && typeof window.closeMassQuickMenu === 'function'){
+        window.closeMassQuickMenu();
+      } else {
+        document.querySelectorAll('.guide-modal.show').forEach(function(el){
+          el.classList.remove('show');
+          el.setAttribute('aria-hidden','true');
+        });
+      }
       if(typeof window.resetGuideManualScroll === 'function') window.resetGuideManualScroll();
       if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady();
     }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -778,10 +783,15 @@
   }
   function closeGuideModals(){
     try{
-      document.querySelectorAll('.guide-modal.show').forEach(function(el){
-        el.classList.remove('show');
-        el.setAttribute('aria-hidden','true');
-      });
+      var mq = $b('mass-quick-modal');
+      if(mq && mq.classList.contains('show') && typeof window.closeMassQuickMenu === 'function'){
+        window.closeMassQuickMenu();
+      } else {
+        document.querySelectorAll('.guide-modal.show').forEach(function(el){
+          el.classList.remove('show');
+          el.setAttribute('aria-hidden','true');
+        });
+      }
       if(typeof window.resetGuideManualScroll === 'function') window.resetGuideManualScroll();
       if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady();
     }catch(e){ console.warn('[가톨릭길동무]', e); }
