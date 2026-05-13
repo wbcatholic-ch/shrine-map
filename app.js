@@ -210,13 +210,16 @@ function _returnToMassQuickMenu(){
   _resetCoverExitReady();
   _clearCoverExitArmed();
   _clearMassQuickReturnForReload();
+  /* go(1) 복원 popstate 처리 중에 pushState(openMassQuickMenu 내부)를 동기로 실행하면
+     그 pushState가 즉시 popstate를 다시 트리거해 팝업이 바로 닫혀버린다.
+     replaceState(스택 정리)는 동기로, openMassQuickMenu는 현재 콜스택이 끝난 후 실행한다. */
   try{
     var st = history.state;
     if(st && st._p === 1 && !st.oai_mass_quick){
       history.replaceState({_p:0}, '', location.href.split('#')[0]);
     }
   }catch(e){ console.warn('[가톨릭길동무]', e); }
-  try{ openMassQuickMenu(); }catch(e){ console.warn('[가톨릭길동무]', e); }
+  setTimeout(function(){ try{ openMassQuickMenu(); }catch(e){ console.warn('[가톨릭길동무]', e); } }, 0);
 }
 function openMassQuickMenu(opts){
   const modal=document.getElementById('mass-quick-modal');
@@ -373,7 +376,7 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || 'V38-9';
+    var target = btn.getAttribute('data-target-version') || 'V37-6-13';
     var current = '';
     if(window.APP_VERSION) current = String(window.APP_VERSION).trim();
     if(!current && marker) current = String(marker.textContent || '').trim();
@@ -656,7 +659,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V38-9';
+    frame.src='diocese.html?v=V37-6-13';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
