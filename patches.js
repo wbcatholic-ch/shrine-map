@@ -1007,6 +1007,14 @@
     el.classList.add('app-touchable','app-pressing');
     setTimeout(function(){ clearPress(el); }, FEEDBACK_MS);
   }
+
+  var instantPressSelectors = '#mass-quick-modal .mass-quick-btn';
+  document.addEventListener('pointerdown', function(e){
+    var el = closest(e.target, instantPressSelectors);
+    if(!el) return;
+    press(el);
+  }, true);
+
   function cancelActive(){
     if(!activeTouch) return;
     activeTouch.canceled = true;
