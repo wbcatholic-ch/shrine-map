@@ -69,6 +69,16 @@ window.oaiSetMainMapLayerHidden = oaiSetMainMapLayerHidden;
 /* OAI removed old pull-to-refresh handler: unified final handler below */
 
 
+function _prepareCoverReturnBeforeExternal(){
+  try{
+    // 커버에서 외부 사이트로 바로 이동하면 현재 history 트랩 칸이 외부 URL로 대체되어
+    // 복귀 후 커버 첫 뒤로가기가 앱 종료로 빠질 수 있다.
+    // 정상 카테고리처럼 돌아올 커버 트랩 한 칸을 먼저 남긴 뒤 외부로 이동한다.
+    var href = location.href.split('#')[0];
+    if(document.documentElement.classList.contains('app-active')) return;
+    history.pushState({_p:1, oai_external_cover_return:1}, '', href);
+  }catch(e){ console.warn("[가톨릭길동무]", e); }
+}
 function openMissa(){
   const today=new Date();
   const yyyy=today.getFullYear();
@@ -76,6 +86,7 @@ function openMissa(){
   const dd=String(today.getDate()).padStart(2,'0');
   const url='https://missa.cbck.or.kr/DailyMissa/'+yyyy+mm+dd;
   try{ localStorage.setItem('oai_last_missa_url', url); }catch(e){ console.warn("[가톨릭길동무]", e); }
+  try{ if(!_shouldMassQuickReturn()) _prepareCoverReturnBeforeExternal(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   /* 외부 브라우저로 이동 — 화면 전환 페이드 후 location.href 방식 유지 */
   location.href = url;
 }
@@ -239,7 +250,7 @@ var _massQuickResumeBusy = false;
 function _resumeMassQuickReturnIfNeeded(){
   try{
     // 매일미사/성가 외부 사이트에서 돌아온 경우에만 빠른메뉴 팝업을 복구한다.
-    // V37-6-14: pageshow에서 reload 판정으로 먼저 지워버리면 외부 복귀 플래그가 사라질 수 있으므로,
+    // V37-6-15: pageshow에서 reload 판정으로 먼저 지워버리면 외부 복귀 플래그가 사라질 수 있으므로,
     // 복귀 플래그 확인을 가장 먼저 하고 실제 복구는 한 번만 예약한다.
     if(!_shouldMassQuickReturn()) return false;
     if(document.documentElement.classList.contains('app-active')) return false;
@@ -362,7 +373,7 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || 'V37-6-14';
+    var target = btn.getAttribute('data-target-version') || 'V37-6-15';
     var current = '';
     if(window.APP_VERSION) current = String(window.APP_VERSION).trim();
     if(!current && marker) current = String(marker.textContent || '').trim();
@@ -552,6 +563,11 @@ function _closePrayerAndReturn(){
   else {
     try{ if(typeof _setMassQuickReturn === 'function') _setMassQuickReturn(false); }catch(e){ console.warn("[가톨릭길동무]", e); }
     if(typeof goToCover==='function') goToCover();
+    try{
+      // 주요기도문은 지도 카테고리와 달리 독립 뷰만 닫고 커버로 돌아오므로
+      // history.go(1) 복원 타이밍 뒤에도 커버 트랩이 남아 있는지 한 번 더 확인한다.
+      setTimeout(function(){ if(typeof _forceCoverBackTrap === 'function' && !document.documentElement.classList.contains('app-active')) _forceCoverBackTrap(); }, 80);
+    }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
 }
 
@@ -643,7 +659,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V37-6-14';
+    frame.src='diocese.html?v=V37-6-15';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -3726,14 +3742,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 
   // ── 커버 카드 ──
   on('cc-1', 'click', function() {
-    // V37-6-14: 매일미사는 빠른메뉴 팝업을 거치지 않고 독립 카테고리처럼 즉시 이동한다.
+    // V37-6-15: 매일미사는 빠른메뉴 팝업을 거치지 않고 독립 카테고리처럼 즉시 이동한다.
     try{ if (typeof _setMassQuickReturn === 'function') _setMassQuickReturn(false); }catch(e){ console.warn('[가톨릭길동무]', e); }
     try{ if (typeof _resetCoverExitReady === 'function') _resetCoverExitReady(); }catch(e){ console.warn('[가톨릭길동무]', e); }
     try{ if (typeof _clearCoverExitArmed === 'function') _clearCoverExitArmed(); }catch(e){ console.warn('[가톨릭길동무]', e); }
     if (typeof openMissa === 'function') openMissa();
   });
   on('cc-8', 'click', function() {
-    // V37-6-14: 주요기도문도 빠른메뉴 복귀 플래그 없이 별도 카테고리로 연다.
+    // V37-6-15: 주요기도문도 빠른메뉴 복귀 플래그 없이 별도 카테고리로 연다.
     try{ if (typeof _setMassQuickReturn === 'function') _setMassQuickReturn(false); }catch(e){ console.warn('[가톨릭길동무]', e); }
     window.__MASS_QUICK_FROM_PRAYER__ = false;
     hideCoverAndRun(function() { if (typeof openPrayerBook === 'function') openPrayerBook(); else alert('기도문 기능이 연결되지 않았습니다.'); });
