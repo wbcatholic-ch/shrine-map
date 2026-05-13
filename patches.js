@@ -213,7 +213,6 @@
   // 트랩이 소실되면 다음 뒤로가기에서 앱이 탈출된다.
   window.addEventListener('pageshow', function(){
     try{
-      if(!appActive() && typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady();
       var st = history.state;
       if(st && st._p === 1) return;  // 트랩 유지 중이면 스킵
       history.replaceState({_p:0}, '', _href);
@@ -914,13 +913,16 @@
   var lastCover=false;
   function isCover(){var c=$('cover');return !!(c && !document.documentElement.classList.contains('app-active') && getComputedStyle(c).display!=='none');}
   function clearNativeExitToast(){
-    try{window._exitReady=false; clearTimeout(window._exitTimer); try{sessionStorage.removeItem('oai_cover_exit_armed_ts');}catch(_e){}}catch(e){ console.warn("[가톨릭길동무]", e); }
+    try{window._exitReady=false; clearTimeout(window._exitTimer);}catch(e){ console.warn("[가톨릭길동무]", e); }
     try{var t=$('_bt'); if(t) t.remove(); var t2=$('oai-cover-exit-toast'); if(t2) t2.classList.remove('show');}catch(e){ console.warn("[가톨릭길동무]", e); }
   }
   if(typeof window._resetCoverExitReady !== 'function') window._resetCoverExitReady = clearNativeExitToast;
   function resetNativeExitToastOnCoverEntry(){
     var now=isCover();
-    if(now && !lastCover) clearNativeExitToast();
+    if(now && !lastCover){
+      clearNativeExitToast();
+      try{ if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed(); }catch(e){ console.warn("[가톨릭길동무]", e); }
+    }
     lastCover=now;
   }
   function resetNativeExitToastIfCover(){
@@ -934,6 +936,7 @@
       // 팝업/기도문 흐름은 이미 커버 위에서 움직여 lastCover가 true인 경우가 있으므로
       // '커버가 아니었다가 커버가 됨' 조건에만 의존하면 첫 뒤로가기에서 바로 종료될 수 있다.
       clearNativeExitToast();
+      try{ if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       setTimeout(function(){fixRetreatTabLabel();resetNativeExitToastIfCover();},0);
       return r;
     };
