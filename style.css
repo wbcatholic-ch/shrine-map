@@ -1087,10 +1087,10 @@ html.retreat-mode #srch-modal .sm-filter{background:linear-gradient(135deg,#3f7e
 }
 .mass-quick-btn.app-pressing,
 .mass-quick-btn.mass-quick-primary.app-pressing{
-  transform:translateY(8px) scale(.974);
-  filter:brightness(.94)!important;
-  box-shadow:0 2px 3px rgba(31,42,68,.04)!important;
-  transition:transform .16s ease,filter .16s ease,box-shadow .16s ease;
+  transform:translateY(2px) scale(.992);
+  filter:brightness(.97)!important;
+  box-shadow:0 5px 10px rgba(31,42,68,.07)!important;
+  transition:transform .08s ease,filter .08s ease,box-shadow .08s ease;
 }
 .mass-quick-btn span{
   width:56px;
@@ -3110,7 +3110,7 @@ html.ios-device .qna-panel{border-radius:13px!important;}
 }
 
 
-/* V37-6-9: 빠른메뉴 버튼 눌림 효과 복원
+/* V37-6-10: 빠른메뉴 버튼 눌림 효과 복원
    - 외부사이트 이동 반응은 지연하지 않고, 버튼 자체만 작게 눌리는 느낌을 준다. */
 #mass-quick-modal .mass-quick-btn.app-pressing,
 #mass-quick-modal .mass-quick-btn.mass-quick-primary.app-pressing,
@@ -3122,3 +3122,14 @@ html.ios-device .qna-panel{border-radius:13px!important;}
   transition:transform .08s ease,filter .08s ease,box-shadow .08s ease!important;
 }
 
+
+
+/* V37-6-10: 외부 사이트 복귀 시 브라우저 스크롤 복원이 화면을 아래로 밀지 않도록 앱 루트를 고정 */
+html,body{
+  position:fixed!important;
+  inset:0!important;
+  width:100%!important;
+  height:100%!important;
+  max-height:100%!important;
+  overflow:hidden!important;
+}
