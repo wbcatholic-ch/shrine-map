@@ -188,9 +188,6 @@ function _hideMassQuickMenuOnly(){
   if(!modal) return;
   modal.classList.remove('show');
   modal.setAttribute('aria-hidden','true');
-  /* 팝업 UI만 숨기고 기도문으로 진입할 때, _armMassQuickHistoryTrap()이 추가한
-     oai_mass_quick state가 스택에 남으면 기도문 뒤로가기 시 트랩이 하나 더 소진되어
-     커버에서 종료 문구 없이 앱이 탈출된다. replaceState로 mq state를 일반 트랩으로 교체한다. */
   try{
     var st = history.state;
     if(st && st.oai_mass_quick){
@@ -205,25 +202,17 @@ function _isCoverAlreadyVisibleForQuickMenu(){
   }catch(e){ return false; }
 }
 function _returnToMassQuickMenu(){
-  // 외부 사이트에서 돌아온 뒤에는 화면 구조를 다시 재배치하지 않는다.
-  // 이미 커버가 보이면 goToCover()를 부르지 않고, 다음 프레임에 팝업만 복원한다.
   if(!_isCoverAlreadyVisibleForQuickMenu() && typeof goToCover==='function') goToCover();
   _resetCoverExitReady();
   _clearCoverExitArmed();
   _clearMassQuickReturnForReload();
-  /* 기도문(내부 카테고리)에서 복귀 시, closeExtOrModule() 내 go(1) 복원으로
-     _p:1 state가 스택에 잔류한다. openMassQuickMenu() → _armMassQuickHistoryTrap()이
-     pushState를 추가하기 전에 이 잔여 state를 replaceState로 _p:0으로 눌러
-     최종 스택이 [_p:0, _p:1(mq)] 형태가 되도록 정리한다. */
   try{
     var st = history.state;
     if(st && st._p === 1 && !st.oai_mass_quick){
       history.replaceState({_p:0}, '', location.href.split('#')[0]);
     }
   }catch(e){ console.warn('[가톨릭길동무]', e); }
-  var open = function(){ try{ openMassQuickMenu(); }catch(e){ console.warn('[가톨릭길동무]', e); } };
-  if(window.requestAnimationFrame) requestAnimationFrame(open);
-  else setTimeout(open, 0);
+  try{ openMassQuickMenu(); }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 function openMassQuickMenu(opts){
   const modal=document.getElementById('mass-quick-modal');
