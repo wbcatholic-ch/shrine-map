@@ -168,10 +168,6 @@
   window.addEventListener('popstate', function(){
     if(window._appExiting) return;
 
-    /* _returnToMassQuickMenu가 스택 재구성(replaceState)을 할 때
-       replaceState 자체가 popstate를 트리거한다. 이 popstate는 무시한다. */
-    if(window._oaiReturningToQuickMenu){ window._oaiReturningToQuickMenu = false; return; }
-
     /* 빠른메뉴/안내 팝업이 열려 있으면 어떤 복원 상태보다 먼저 닫는다.
        _restoring이 남은 상태에서 이 검사를 건너뛰면 Android PWA가 팝업을 닫지 못하고
        바로 앱 종료 흐름으로 빠질 수 있다. */
@@ -1109,7 +1105,7 @@
 /* ── DEBUG OVERLAY ── */
 (function(){
   'use strict';
-  var log=[], MAX=20;
+  var log=[], MAX=22;
   function ts(){ return new Date().toISOString().substr(11,8); }
   function addLog(msg,color){ log.push({t:ts(),msg:msg,color:color||'#fff'}); if(log.length>MAX) log.shift(); render(); }
   var box=document.createElement('div');
@@ -1122,7 +1118,7 @@
   function ac(){ return document.documentElement.classList.contains('app-active')?'APP':'CVR'; }
   function mo(){ try{ var m=document.querySelector('.guide-modal.show'); return m?'MODAL:'+m.id:'no-modal'; }catch(e){ return '?'; } }
   function render(){ var h=''; for(var i=0;i<log.length;i++){ var e=log[i]; h+='<div style="color:'+e.color+'"><b>['+e.t+']</b> '+e.msg+'</div>'; } box.innerHTML=h; box.scrollTop=box.scrollHeight; }
-  window.addEventListener('popstate',function(){ addLog('POPSTATE|'+ac()+'|'+mo()+'|'+ss()+'|retFlag='+!!window._oaiReturningToQuickMenu,'#7ef'); },true);
+  window.addEventListener('popstate',function(){ addLog('POPSTATE|'+ac()+'|'+mo()+'|'+ss(),'#7ef'); },true);
   var oP=history.pushState.bind(history), oR=history.replaceState.bind(history);
   history.pushState=function(s,t,u){ oP(s,t,u); addLog('PUSH '+JSON.stringify(s)+' len='+history.length,'#af8'); };
   history.replaceState=function(s,t,u){ oR(s,t,u); addLog('RPLC '+JSON.stringify(s)+' len='+history.length,'#fa8'); };
