@@ -50,6 +50,38 @@
       if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady();
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
+  function isMassQuickModalOpen(){
+    try{
+      var mq = $b('mass-quick-modal');
+      return !!(mq && mq.classList.contains('show'));
+    }catch(e){ return false; }
+  }
+  function forceCoverBackTrap(){
+    try{
+      history.replaceState({_p:0}, '', _href);
+      history.pushState({_p:1}, '', _href);
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }
+  function closeMassQuickModalToCover(){
+    try{
+      var mq = $b('mass-quick-modal');
+      if(!mq || !mq.classList.contains('show')) return false;
+      if(typeof window._clearMassQuickReturnForReload === 'function') window._clearMassQuickReturnForReload();
+      mq.classList.remove('show');
+      mq.setAttribute('aria-hidden','true');
+      if(typeof window.resetGuideManualScroll === 'function') window.resetGuideManualScroll();
+      if(appActive()) callGTC();
+      else {
+        var cv = $b('cover');
+        if(cv){ cv.style.display=''; cv.style.opacity=''; cv.style.pointerEvents=''; }
+        document.documentElement.classList.remove('app-active','parish-mode','retreat-mode');
+      }
+      if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady();
+      if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed();
+      forceCoverBackTrap();
+      return true;
+    }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
+  }
 
   function callGTC(){
     if(typeof window.goToCover === 'function') window.goToCover();
@@ -164,21 +196,33 @@
 
   /* ── popstate 핸들러 ── */
   var _restoring = false;
+  var _restoreUntil = 0;
 
   window.addEventListener('popstate', function(){
     if(window._appExiting) return;
 
-    /* 빠른메뉴/안내 팝업이 열려 있으면 어떤 복원 상태보다 먼저 닫는다.
-       _restoring이 남은 상태에서 이 검사를 건너뛰면 Android PWA가 팝업을 닫지 못하고
-       바로 앱 종료 흐름으로 빠질 수 있다. */
-    if(isGuideModalOpen()){
+    /* history.go(1)로 트랩을 복원하는 popstate는 UI 처리 대상이 아니다.
+       이 검사가 팝업 닫기보다 뒤에 있으면 기도문 → 팝업 복귀 직후 늦게 도착한
+       복원 popstate가 새로 열린 팝업을 다시 닫아 버릴 수 있다. */
+    if(_restoring){
+      var freshRestore = !_restoreUntil || (Date.now ? Date.now() : new Date().getTime()) <= _restoreUntil;
       _restoring = false;
-      closeGuideModals();
-      try{ history.replaceState({_p:1}, '', _href); }catch(e){ console.warn("[가톨릭길동무]", e); }
+      _restoreUntil = 0;
+      if(freshRestore) return;
+    }
+
+    /* 빠른메뉴 팝업은 커버 위 전용 단계다. 여기서 뒤로가기는 항상 팝업 → 커버이며,
+       즉시 커버용 history 트랩을 다시 세워 다음 뒤로가기가 앱 탈출로 새지 않게 한다. */
+    if(isMassQuickModalOpen()){
+      closeMassQuickModalToCover();
       return;
     }
 
-    if(_restoring){ _restoring = false; return; }
+    if(isGuideModalOpen()){
+      closeGuideModals();
+      forceCoverBackTrap();
+      return;
+    }
 
     /* 커버: 토스트 → 두 번째에 종료. go(1) 재복원 없이 바로 트랩만 다시 심어 2번으로 끝낸다. */
     if(!appActive()){
@@ -190,6 +234,7 @@
 
     /* 앱 활성: go(1) 복원 후 처리 */
     _restoring = true;
+    _restoreUntil = (Date.now ? Date.now() : new Date().getTime()) + 700;
     history.go(1);
 
     if(closeExtOrModule()) return;  /* 닫으면서 goToCover() 이미 호출됨 */
@@ -199,7 +244,8 @@
 
   /* Cordova 물리 백버튼 */
   document.addEventListener('backbutton', function(){
-    if(isGuideModalOpen()){ closeGuideModals(); return; }
+    if(isMassQuickModalOpen()){ closeMassQuickModalToCover(); return; }
+    if(isGuideModalOpen()){ closeGuideModals(); forceCoverBackTrap(); return; }
     if(!appActive()){
       if(typeof window._showBackToast==='function') window._showBackToast();
       return;
@@ -378,7 +424,7 @@
   if(window.__APP_FONT_SCALE_GUARD__) return;
   window.__APP_FONT_SCALE_GUARD__=true;
   // V37: 문의·건의는 qa-firebase.html 한 경로로만 통일한다.
-  var QA_URL="qa-firebase.html?v=V37-4";
+  var QA_URL="qa-firebase.html?v=V38-7";
   var FONT_KEY='prayer_font_size', BASE=16, SIZES=[15,16,17,18,19,20,21,22,24,26,28];
   function el(id){return document.getElementById(id)}
   function getPx(){var px=parseInt(localStorage.getItem(FONT_KEY)||BASE,10);return (px>=15&&px<=28)?px:BASE;}
