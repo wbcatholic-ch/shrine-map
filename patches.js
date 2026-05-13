@@ -213,10 +213,7 @@
   // 트랩이 소실되면 다음 뒤로가기에서 앱이 탈출된다.
   window.addEventListener('pageshow', function(){
     try{
-      // pageshow에서는 history 트랩만 복구한다.
-      // 종료 대기값(_exitReady)은 건드리지 않는다.
-      // 일부 Android PWA에서 뒤로가기 1회 후 pageshow성 이벤트가 들어오면
-      // 여기서 _exitReady가 지워져 커버 2회 종료가 실패한다.
+      if(!appActive() && typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady();
       var st = history.state;
       if(st && st._p === 1) return;  // 트랩 유지 중이면 스킵
       history.replaceState({_p:0}, '', _href);

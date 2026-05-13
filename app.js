@@ -199,7 +199,7 @@ var _massQuickResumeBusy = false;
 function _resumeMassQuickReturnIfNeeded(){
   try{
     // 매일미사/성가 외부 사이트에서 돌아온 경우에만 빠른메뉴 팝업을 복구한다.
-    // V37-6-10: pageshow에서 reload 판정으로 먼저 지워버리면 외부 복귀 플래그가 사라질 수 있으므로,
+    // V37-6-11: pageshow에서 reload 판정으로 먼저 지워버리면 외부 복귀 플래그가 사라질 수 있으므로,
     // 복귀 플래그 확인을 가장 먼저 하고 실제 복구는 한 번만 예약한다.
     if(!_shouldMassQuickReturn()) return false;
     if(document.documentElement.classList.contains('app-active')) return false;
@@ -322,7 +322,7 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || 'V37-6-10';
+    var target = btn.getAttribute('data-target-version') || 'V37-6-11';
     var current = '';
     if(window.APP_VERSION) current = String(window.APP_VERSION).trim();
     if(!current && marker) current = String(marker.textContent || '').trim();
@@ -603,7 +603,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V37-6-10';
+    frame.src='diocese.html?v=V37-6-11';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1156,22 +1156,13 @@ function triggerPwaInstall(){
 
 
 function _showBackToast(){
-  var now = Date.now();
-  var armedAt = 0;
-  try{ armedAt = parseInt(sessionStorage.getItem('oai_cover_exit_armed_ts') || '0', 10) || 0; }catch(e){ armedAt = 0; }
-  var armedFresh = armedAt && (now - armedAt < 2500);
-
-  // 커버에서 첫 번째 back 이후 일부 Android PWA 이벤트가 window._exitReady를 건드려도
-  // 같은 2.5초 안의 두 번째 back은 반드시 종료 시도로 들어가게 한다.
-  if(_exitReady || armedFresh){
+  if(_exitReady){
     _exitReady=false;
-    try{ sessionStorage.removeItem('oai_cover_exit_armed_ts'); }catch(e){}
     clearTimeout(_exitTimer);
     doExit();
     return true; // 두 번째 뒤로가기: popstate 트랩을 다시 심지 않도록 알림
   }
   _exitReady=true;
-  try{ sessionStorage.setItem('oai_cover_exit_armed_ts', String(now)); }catch(e){}
   const old=$('_bt');
   if(old) old.remove();
   const t=document.createElement('div');
@@ -1179,11 +1170,7 @@ function _showBackToast(){
   t.textContent='한 번 더 누르면 앱을 종료합니다';
   t.style.cssText='position:fixed;bottom:calc(env(safe-area-inset-bottom,0px)+32px);left:50%;transform:translateX(-50%);background:rgba(14,21,53,.92);color:#fff;padding:10px 22px;border-radius:22px;font-size:13px;font-weight:600;z-index:99999;white-space:nowrap;pointer-events:none;box-shadow:0 4px 16px rgba(0,0,0,.3);';
   document.body.appendChild(t);
-  _exitTimer=setTimeout(()=>{
-    _exitReady=false;
-    try{ sessionStorage.removeItem('oai_cover_exit_armed_ts'); }catch(e){}
-    if(t.parentNode)t.remove();
-  },2500);
+  _exitTimer=setTimeout(()=>{_exitReady=false;if(t.parentNode)t.remove();},2500);
   return false; // 첫 번째 뒤로가기: 토스트만 표시
 }
 
@@ -1198,13 +1185,10 @@ function attemptAppExit(){
   // Cordova/WebView 계열에서는 네이티브 종료를 우선 시도한다.
   try{ if(navigator.app && typeof navigator.app.exitApp === 'function'){ navigator.app.exitApp(); return; } }catch(e){ console.warn("[가톨릭길동무]", e); }
 
-  // 설치형 PWA/Android WebView에서는 window.close()가 무시될 수 있다.
-  // 커버 두 번째 뒤로가기에서는 더 이상 트랩을 심지 않고, 루트 밖으로 한 칸 더 보내 앱 종료 흐름을 허용한다.
+  // 중요: 여기서 history.back()을 호출하면 외부사이트 방문 기록으로 되돌아갈 수 있다.
+  // 따라서 종료 시도는 window.close까지만 하고, 히스토리 트랩은 다시 심지 않는다.
   try{ window.open('', '_self'); window.close(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   try{ document.documentElement.classList.add('app-exiting'); }catch(e){ console.warn("[가톨릭길동무]", e); }
-  setTimeout(function(){
-    try{ history.back(); }catch(e){ console.warn("[가톨릭길동무]", e); }
-  }, 80);
 }
 function closeExitDlg(){
   _exitReady=false;

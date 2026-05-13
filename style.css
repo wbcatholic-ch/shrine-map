@@ -3110,7 +3110,7 @@ html.ios-device .qna-panel{border-radius:13px!important;}
 }
 
 
-/* V37-6-10: 빠른메뉴 버튼 눌림 효과 복원
+/* V37-6-11: 빠른메뉴 버튼 눌림 효과 복원
    - 외부사이트 이동 반응은 지연하지 않고, 버튼 자체만 작게 눌리는 느낌을 준다. */
 #mass-quick-modal .mass-quick-btn.app-pressing,
 #mass-quick-modal .mass-quick-btn.mass-quick-primary.app-pressing,
@@ -3122,14 +3122,3 @@ html.ios-device .qna-panel{border-radius:13px!important;}
   transition:transform .08s ease,filter .08s ease,box-shadow .08s ease!important;
 }
 
-
-
-/* V37-6-10: 외부 사이트 복귀 시 브라우저 스크롤 복원이 화면을 아래로 밀지 않도록 앱 루트를 고정 */
-html,body{
-  position:fixed!important;
-  inset:0!important;
-  width:100%!important;
-  height:100%!important;
-  max-height:100%!important;
-  overflow:hidden!important;
-}
