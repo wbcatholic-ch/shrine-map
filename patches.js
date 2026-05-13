@@ -174,7 +174,11 @@
     if(isGuideModalOpen()){
       _restoring = false;
       closeGuideModals();
-      try{ history.pushState({_p:1}, '', _href); }catch(e){ console.warn("[가톨릭길동무]", e); }
+      /* 팝업 닫기 후 현재 위치를 트랩(_p:1)으로 확정한다.
+         pushState를 쓰면 팝업을 열고 닫을 때마다 트랩이 1개씩 순증가하고,
+         커버에서 뒤로가기 시 중간 popstate가 연속 발생해 _exitReady=true로
+         종료 문구 없이 앱이 탈출된다. replaceState로 현재 엔트리만 교체한다. */
+      try{ history.replaceState({_p:1}, '', _href); }catch(e){ console.warn("[가톨릭길동무]", e); }
       return;
     }
 
