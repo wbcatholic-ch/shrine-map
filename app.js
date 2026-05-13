@@ -76,8 +76,6 @@ function openMissa(){
   const dd=String(today.getDate()).padStart(2,'0');
   const url='https://missa.cbck.or.kr/DailyMissa/'+yyyy+mm+dd;
   try{ localStorage.setItem('oai_last_missa_url', url); }catch(e){ console.warn("[가톨릭길동무]", e); }
-  /* 외부 이동 전 종료 대기 상태 초기화: 커버에서 뒤로가기 1회 후 바로 이동하면
-     sessionStorage에 armed 값이 남아 복귀 시 첫 뒤로가기에서 바로 종료될 수 있다. */
   try{ if(typeof _resetCoverExitReady==='function') _resetCoverExitReady(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   try{ if(typeof _clearCoverExitArmed==='function') _clearCoverExitArmed(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   /* 외부 브라우저로 이동 — 화면 전환 페이드 후 location.href 방식 유지 */
@@ -231,7 +229,6 @@ function closeMassQuickMenu(){
 function openCatholicHymn(){
   const url='https://maria.catholic.or.kr/mobile/sungga/sungga.asp';
   try{ localStorage.setItem('oai_last_hymn_url', url); }catch(e){ console.warn("[가톨릭길동무]", e); }
-  /* 외부 이동 전 종료 대기 상태 초기화 */
   try{ if(typeof _resetCoverExitReady==='function') _resetCoverExitReady(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   try{ if(typeof _clearCoverExitArmed==='function') _clearCoverExitArmed(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   location.href = url;
@@ -526,8 +523,6 @@ function openPrayerBook(opts){
       window.__MASS_QUICK_FROM_PRAYER__ = true;
     }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
-  /* 카테고리 진입 전 종료 대기 상태 초기화: 커버에서 뒤로가기 1회 후 바로 진입하면
-     armed 값이 남아 커버 복귀 후 첫 뒤로가기에서 바로 종료될 수 있다. */
   try{ if(typeof _resetCoverExitReady==='function') _resetCoverExitReady(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   try{ if(typeof _clearCoverExitArmed==='function') _clearCoverExitArmed(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   const view=$('prayer-view');
