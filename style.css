@@ -910,7 +910,7 @@ html.retreat-mode .ic-route-btn{background:#1565c0;color:#fff!important;border-c
 /* cover fixed, not linked to font zoom */
 html.oai-font-global #cover .cover-title,html.oai-font-global #cover .cv-title{font-size:clamp(32px,8.6vw,42px)}
 /* category headers fixed against zoom */
-#cover .cover-header{flex:0 0 auto!important;width:100%!important;padding:0 4px 20px!important;margin:0!important;text-align:center!important}
+#cover .cover-header{flex:0 0 auto!important;width:100%!important;padding:0 4px 18px!important;margin:0!important;text-align:center!important}
 #cover .cover-title{font-size:clamp(30px,8.2vw,38px)!important;line-height:1.14!important;font-weight:800!important;letter-spacing:-.03em;margin:0!important;color:#3E362E!important}
 #cover .cover-subtitle{font-size:16px!important;line-height:1.45!important;margin:0 0 8px!important;color:#81B29A!important;font-weight:600!important}
 #cover .cover-grid{flex:1 1 auto;width:100%;max-width:min(420px,calc(100vw - 38px));margin:0 auto;padding:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(4,1fr);row-gap:clamp(3px,1vh,6px);column-gap:clamp(4px,1.2vw,7px);align-content:stretch;box-sizing:border-box;min-height:0}
@@ -1049,80 +1049,6 @@ html.retreat-mode #srch-modal .sm-filter{background:linear-gradient(135deg,#3f7e
 .missa-external-desc{font-size:14px;font-weight:500;color:#6B7280;line-height:1.7;margin-bottom:20px;word-break:keep-all}
 .missa-open-link{display:flex;align-items:center;justify-content:center;width:100%;height:48px;border-radius:12px;background:#0e1535;color:#d4aa6a;text-decoration:none;font-size:16px;font-weight:800}
 
-
-/* 미사·기도·성가 빠른 메뉴: 커버 위에만 뜨는 내부 선택창 */
-.mass-quick-panel{
-  width:min(640px,calc(100vw - 14px));
-  padding:44px 26px 32px;
-  border-radius:32px;
-  text-align:center;
-  background:#fffaf1;
-  border:1px solid #e5ded3;
-  box-shadow:0 26px 76px rgba(31,42,68,.28);
-  max-height:min(90dvh,800px);
-}
-.mass-quick-panel h2{display:none!important}
-.mass-quick-lead{display:none!important}
-.mass-quick-actions{display:flex;flex-direction:column;gap:16px;width:100%;margin-top:6px}
-.mass-quick-btn,
-.mass-quick-btn.mass-quick-primary{
-  width:100%;
-  min-height:110px;
-  border:1.5px solid #d6b06c!important;
-  border-radius:24px;
-  background:#fff8e8!important;
-  color:#1f2937!important;
-  display:grid;
-  grid-template-columns:68px 1fr;
-  grid-template-rows:1fr;
-  align-items:center;
-  text-align:left;
-  padding:20px 22px;
-  box-shadow:0 9px 22px rgba(31,42,68,.10);
-  font-family:inherit;
-  cursor:pointer;
-}
-.mass-quick-btn span{
-  width:56px;
-  height:56px;
-  border-radius:18px;
-  background:#f5efe4;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  font-size:calc(34px * var(--app-font-scale,1))!important;
-  line-height:1;
-}
-.mass-quick-btn strong{
-  font-size:calc(16px * var(--app-font-scale,1))!important;
-  line-height:1.22!important;
-  font-weight:850!important;
-  letter-spacing:-.02em;
-  color:#1a1a1a!important;
-}
-.mass-quick-btn em{display:none!important}
-.mass-quick-panel .guide-badge{
-  min-height:44px;
-  padding:9px 20px;
-  margin-bottom:20px;
-  border-radius:17px;
-  font-size:calc(18px * var(--app-font-scale,1))!important;
-  line-height:1.25;
-  font-weight:900;
-  letter-spacing:-.04em;
-  background:#efe4d2;
-  color:#6f4f23;
-}
-@media (max-height:680px){
-  .mass-quick-panel{padding:34px 20px 24px;width:min(600px,calc(100vw - 14px))}
-  .mass-quick-actions{gap:12px}
-  .mass-quick-btn,.mass-quick-btn.mass-quick-primary{min-height:92px;padding:16px 18px;grid-template-columns:62px 1fr}
-  .mass-quick-btn span{width:50px;height:50px;font-size:calc(30px * var(--app-font-scale,1))!important}
-  .mass-quick-btn strong{font-size:calc(16px * var(--app-font-scale,1))!important}
-  .mass-quick-panel .guide-badge{font-size:calc(18px * var(--app-font-scale,1))!important;min-height:40px;margin-bottom:16px}
-}
-
-
 /* 카테고리 내부 리스트 글자 규격 통일 */
 .list-item,.nearby-item,.region-item,.sm-item,.sm-place-item{align-items:center;box-sizing:border-box}
 .li-name,.nearby-name,.region-item .li-name,.sm-name,.sm-place-name{font-size:16px;font-weight:800!important;line-height:1.35!important;letter-spacing:-.03em;white-space:normal;overflow:visible!important;text-overflow:clip;word-break:keep-all}
@@ -1152,7 +1078,6 @@ html.retreat-mode #srch-modal .sm-filter{background:linear-gradient(135deg,#3f7e
 .cover-title{font-size:clamp(28px,8vw,36px);font-weight:800;letter-spacing:-0.5px;color:var(--text-main);margin:0}
 .cover-subtitle{font-size:clamp(12px,3vw,14px);font-weight:500;color:var(--color-3);margin-bottom:8px;letter-spacing:1px}
 .cover-grid{flex:1 1 auto;display:grid;grid-template-columns:repeat(2,1fr);grid-template-rows:repeat(4,1fr);gap:8px;padding:0 20px 4vh;box-sizing:border-box;width:100%;max-width:600px;margin:0 auto}
-.cover-card-wide{grid-column:1/-1}
 .cover-card{background:var(--card-bg);border-radius:18px;display:flex;flex-direction:column;align-items:center;justify-content:center;text-decoration:none;color:var(--text-main);cursor:pointer;transition:transform 0.1s,box-shadow 0.2s;border:1px solid rgba(0,0,0,0.05);box-shadow:0 4px 6px rgba(0,0,0,0.02);outline:none;padding:0;margin:0}
 .cover-card.app-pressing{transform:translateY(8px) scale(.974);box-shadow:0 2px 3px rgba(0,0,0,0.02);filter:brightness(.94);transition:transform .16s ease,filter .16s ease}
 .cover-icon-wrap{width:clamp(50px,14vw,65px);height:clamp(50px,14vw,65px);border-radius:50%;display:flex;align-items:center;justify-content:center;margin-bottom:12px;background:transparent!important;background-color:transparent!important;box-shadow:none!important;border:none!important}
@@ -1294,13 +1219,13 @@ html,body{overflow-x:hidden!important;overscroll-behavior-x:none!important}
 #trail-list.oai-swipe-left,#trail-list.oai-swipe-right,
 .sheet-body.oai-swipe-left,.sheet-body.oai-swipe-right{animation:none}
 #prayer-view,#web-view,#trail-view,.sheet{overflow-x:hidden}
-#cover #qna-cover-btn{position:relative;right:auto;bottom:auto;z-index:10;display:flex;align-items:center;justify-content:center;min-height:40px;padding:0 14px;border:0;border-radius:999px;background:linear-gradient(135deg,#1f2a44,#31446c);color:#fff;font-family:inherit;font-size:12.5px;font-weight:900;line-height:1;box-shadow:0 10px 24px rgba(31,42,68,.25);opacity:1;visibility:visible;pointer-events:auto;align-self:flex-end;margin-top:8px;margin-bottom:0}
+#cover #qna-cover-btn{position:relative;right:auto;bottom:auto;z-index:10;display:flex;align-items:center;justify-content:center;min-height:40px;padding:0 14px;border:0;border-radius:999px;background:linear-gradient(135deg,#1f2a44,#31446c);color:#fff;font-family:inherit;font-size:12.5px;font-weight:900;line-height:1;box-shadow:0 10px 24px rgba(31,42,68,.25);opacity:1;visibility:visible;pointer-events:auto;align-self:flex-end;margin-top:8px;margin-bottom:calc(5vh + env(safe-area-inset-bottom,0px))}
 html.app-active
 #cover #pwa-install-btn{left:12px;right:auto;bottom:calc(50px + env(safe-area-inset-bottom,0px));z-index:10020}
 @media (max-width:380px){#cover .cover-grid{max-width:calc(100vw - 34px);}
-#cover #qna-cover-btn{position:relative;right:auto;bottom:auto;z-index:10;display:flex;align-items:center;justify-content:center;min-height:40px;padding:0 14px;border:0;border-radius:999px;background:linear-gradient(135deg,#1f2a44,#31446c);color:#fff;font-family:inherit;font-size:12.5px;font-weight:900;line-height:1;box-shadow:0 10px 24px rgba(31,42,68,.25);opacity:1;visibility:visible;pointer-events:auto;align-self:flex-end;margin-top:8px;margin-bottom:0}#cover #pwa-install-btn{left:12px;right:auto;bottom:calc(50px + env(safe-area-inset-bottom,0px));z-index:10020}}
+#cover #qna-cover-btn{position:relative;right:auto;bottom:auto;z-index:10;display:flex;align-items:center;justify-content:center;min-height:40px;padding:0 14px;border:0;border-radius:999px;background:linear-gradient(135deg,#1f2a44,#31446c);color:#fff;font-family:inherit;font-size:12.5px;font-weight:900;line-height:1;box-shadow:0 10px 24px rgba(31,42,68,.25);opacity:1;visibility:visible;pointer-events:auto;align-self:flex-end;margin-top:8px;margin-bottom:calc(5vh + env(safe-area-inset-bottom,0px))}#cover #pwa-install-btn{left:12px;right:auto;bottom:calc(50px + env(safe-area-inset-bottom,0px));z-index:10020}}
 @media (max-height:720px){
-#cover #qna-cover-btn{position:relative;right:auto;bottom:auto;z-index:10;display:flex;align-items:center;justify-content:center;min-height:40px;padding:0 14px;border:0;border-radius:999px;background:linear-gradient(135deg,#1f2a44,#31446c);color:#fff;font-family:inherit;font-size:12.5px;font-weight:900;line-height:1;box-shadow:0 10px 24px rgba(31,42,68,.25);opacity:1;visibility:visible;pointer-events:auto;align-self:flex-end;margin-top:8px;margin-bottom:0}#cover #pwa-install-btn{left:12px;right:auto;bottom:calc(50px + env(safe-area-inset-bottom,0px));z-index:10020}}
+#cover #qna-cover-btn{position:relative;right:auto;bottom:auto;z-index:10;display:flex;align-items:center;justify-content:center;min-height:40px;padding:0 14px;border:0;border-radius:999px;background:linear-gradient(135deg,#1f2a44,#31446c);color:#fff;font-family:inherit;font-size:12.5px;font-weight:900;line-height:1;box-shadow:0 10px 24px rgba(31,42,68,.25);opacity:1;visibility:visible;pointer-events:auto;align-self:flex-end;margin-top:8px;margin-bottom:calc(5vh + env(safe-area-inset-bottom,0px))}#cover #pwa-install-btn{left:12px;right:auto;bottom:calc(50px + env(safe-area-inset-bottom,0px));z-index:10020}}
 .li-info,.nearby-info,.sm-info,.sm-place-info,.region-item .li-info,.list-item .li-info{min-width:0!important;overflow:visible!important}
 .li-name,.li-sub,.nearby-name,.nearby-addr,.sm-name,.sm-sub,.sm-place-name,.sm-place-addr,.region-item .li-name,.region-item .li-sub,.list-item .li-name,.list-item .li-sub{white-space:normal;overflow:visible!important;text-overflow:clip;display:block!important;-webkit-line-clamp:unset!important;-webkit-box-orient:unset!important;word-break:keep-all;overflow-wrap:anywhere!important;line-height:1.38!important;max-height:none!important}
 .nearby-item,.list-item,.region-item,.sm-item,.sm-place-item{align-items:flex-start!important}
@@ -1686,7 +1611,7 @@ html.retreat-mode #sm-tab-bar .sm-tab.active{
   box-shadow:none!important;
 }
 
-/* V20-19: 외부 복귀/화면 진입 CSS 정리
+/* V18: 외부 복귀/화면 진입 CSS 정리
    외부 이동 보호막을 제거한 현재 구조에서는 복귀 전용 강제 고정 CSS를 두지 않는다.
    화면 진입 중 필요한 최소 전환만 유지하고, app/viewport 전체를 흔드는 전역 보정은 금지한다. */
 html:not(.app-active),html:not(.app-active) body{scroll-behavior:auto!important;}
@@ -1771,7 +1696,7 @@ html.retreat-mode #region-body .nearby-dist span{
   margin-left:4px!important;
 }
 
-/* 커버 전용 당겨서 새로고침 — V20-19 단일 기준 */
+/* 커버 전용 당겨서 새로고침 — V18 단일 기준 */
 #cover{
   overscroll-behavior-y:contain!important;
 }
@@ -2100,7 +2025,7 @@ html.app-active #cv-pull-modern{
 #qna-view  .qna-tab.on        { background: var(--navy, #0e1535) !important; }
 
 /* ── 6. 헤더 배경색 (모듈별) ─────────────────────────────────────── */
-/* V20-19: 기도문 헤더를 기준으로 주요 모듈 헤더 단색 통일 */
+/* V18: 기도문 헤더를 기준으로 주요 모듈 헤더 단색 통일 */
 #prayer-bar,
 #trail-view .module-bar,
 #web-view .module-bar,
@@ -2141,12 +2066,11 @@ html.oai-font-global #qna-view  .qna-tab {
 
 /* ── 끝 ─────────────────────────────────────────────────────────── */
 
-
 /* ══════════════════════════════════════════════════════════════════
-   V20-19 커버 레이아웃 안정 복원
+   커버 레이아웃 재설계 v3
    구조: #cover > cover-header / #cover-main-block / #cover-bottom-note
-   #cover-main-block: cover-grid + cover-action-row 한 몸체
-   V19 완료 기준 커버 구조로 복원
+   #cover-main-block: cover-grid + qna-cover-btn 한 몸체
+   스크롤 없음, 100dvh 고정
    ══════════════════════════════════════════════════════════════════ */
 
 /* 1. #cover — flex column, 스크롤 없음 */
@@ -2158,11 +2082,11 @@ html:not(.app-active) #cover {
   justify-content: flex-start ;
   overflow       : hidden !important;
   overflow-y     : hidden !important;
-  height         : calc(var(--cover-vh, 1dvh) * 100) !important;
-  min-height     : calc(var(--cover-vh, 1dvh) * 100) !important;
-  max-height     : calc(var(--cover-vh, 1dvh) * 100) !important;
-  padding-top    : calc((var(--cover-vh, 1vh) * 8) + env(safe-area-inset-top,0px)) !important;
-  padding-bottom : calc((var(--cover-vh, 1vh) * 3) + env(safe-area-inset-bottom,0px)) !important;
+  height         : 100dvh !important;
+  min-height     : 100dvh !important;
+  max-height     : 100dvh !important;
+  padding-top    : calc(9vh + env(safe-area-inset-top,0px)) !important;
+  padding-bottom : 0 !important;
   padding-left   : 0 !important;
   padding-right  : 0 !important;
   box-sizing     : border-box ;
@@ -2176,7 +2100,7 @@ html.app-active #cover {
 #cover .cover-header {
   flex-shrink : 0 ;
   width       : 100% !important;
-  padding     : 0 18px 20px !important;
+  padding     : 0 18px 8px !important;
   margin      : 0 !important;
   text-align  : center !important;
   box-sizing  : border-box ;
@@ -2184,14 +2108,12 @@ html.app-active #cover {
 
 /* 3. 메인 블록 (그리드 + 문의버튼 한 몸체) */
 #cover-main-block {
-  flex        : 0 1 auto !important;
-  height      : calc((var(--cover-vh, 1dvh) * 100) - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 222px) !important;
-  max-height  : 620px !important;
+  flex        : 1 1 0 !important;
   min-height  : 0 !important;
   width       : 100% !important;
   max-width   : min(440px, calc(100vw - 32px)) !important;
   margin      : 0 auto !important;
-  padding     : 0 16px 8px !important;
+  padding     : 0 16px 10px !important;
   display     : flex !important;
   flex-direction: column ;
   align-items : stretch !important;
@@ -2209,7 +2131,7 @@ html.app-active #cover {
   display              : grid !important;
   grid-template-columns: repeat(2, minmax(0,1fr)) !important;
   grid-template-rows   : repeat(4, 1fr) !important;
-  row-gap              : clamp(3px, calc(var(--cover-vh, 1vh) * 0.7), 6px) !important;
+  row-gap              : clamp(3px, 0.9vh, 7px) !important;
   column-gap           : clamp(4px, 1.2vw, 8px) !important;
   align-content        : stretch ;
   box-sizing           : border-box ;
@@ -2222,7 +2144,7 @@ html.app-active #cover {
   height         : 100% !important;
   min-height     : 0 !important;
   max-height     : none !important;
-  padding        : clamp(6px, calc(var(--cover-vh, 1vh) * 1.4), 14px) 8px !important;
+  padding        : clamp(6px,1.4vh,14px) 8px !important;
   flex           : unset !important;
   display        : flex !important;
   flex-direction : column ;
@@ -2231,10 +2153,10 @@ html.app-active #cover {
   box-sizing     : border-box ;
 }
 
-/* 6. 커버 보조 기능줄 — 카테고리 그리드 바로 아래에서 함께 움직임 */
+/* 6. 커버 보조 기능줄 — 왼쪽 업데이트, 오른쪽 문의·건의 */
 #cover #cover-action-row {
   width          : 100% !important;
-  margin         : 7px 0 0 !important;
+  margin         : 8px 0 0 !important;
   display        : flex !important;
   align-items    : flex-end !important;
   justify-content: space-between !important;
@@ -2313,189 +2235,119 @@ html.app-active #cover {
 }
 
 
-/* V20-19: iPhone 카카오톡 인앱 브라우저 Safari 설치 안내
-   - 커버 레이아웃을 밀지 않고, 커버 위 레이어로 표시한다.
-   - 카테고리를 일부 가려도 Safari 설치 안내가 먼저 보이도록 한다. */
+/* V18: iPhone 카카오톡 인앱 브라우저 Safari 안내 배너 */
 #cover .ios-safari-banner{
   display:none;
 }
 html.ios-kakao-inapp #cover .ios-safari-banner{
-  position:fixed!important;
-  left:max(18px,calc(env(safe-area-inset-left,0px) + 18px))!important;
-  right:max(18px,calc(env(safe-area-inset-right,0px) + 18px))!important;
-  top:50%!important;
-  transform:translateY(-38%)!important;
-  z-index:520!important;
-  display:flex;
-  flex-direction:column;
-  align-items:stretch;
-  justify-content:center;
-  gap:12px;
-  width:auto;
-  max-width:520px;
-  margin:0 auto;
-  padding:24px 18px 20px;
-  border:2.5px solid rgba(212,170,106,.72);
-  border-radius:28px;
-  background:rgba(255,248,232,.98);
-  color:#1f2a44;
-  box-shadow:0 22px 54px rgba(31,42,68,.24);
-  box-sizing:border-box;
-  pointer-events:auto;
-}
-#cover .ios-safari-banner[hidden]{display:none!important;}
-#cover .ios-safari-banner-x{
-  position:absolute;
-  top:10px;
-  right:10px;
-  width:34px;
-  height:34px;
-  border:0;
-  border-radius:50%;
-  background:rgba(31,42,68,.10);
-  color:#1f2a44;
-  font-family:inherit;
-  font-size:24px;
-  font-weight:900;
-  line-height:1;
   display:flex;
   align-items:center;
-  justify-content:center;
-  box-shadow:0 4px 12px rgba(31,42,68,.10);
+  justify-content:space-between;
+  gap:8px;
+  width:100%;
+  margin:8px 0 0;
+  padding:9px 10px;
+  border:1px solid rgba(212,170,106,.45);
+  border-radius:14px;
+  background:#fff8e8;
+  color:#1f2a44;
+  box-shadow:0 8px 18px rgba(31,42,68,.08);
+  box-sizing:border-box;
+  flex:0 0 auto;
 }
+#cover .ios-safari-banner[hidden]{display:none!important;}
 #cover .ios-safari-banner-text{
   min-width:0;
   display:flex;
   flex-direction:column;
-  align-items:center;
-  gap:8px;
-  text-align:center;
-  line-height:1.28;
-  padding:8px 28px 0;
+  gap:2px;
+  line-height:1.2;
 }
 #cover .ios-safari-banner-text strong{
-  font-size:calc(24px * var(--app-font-scale,1));
+  font-size:calc(11.5px * var(--app-font-scale,1));
   font-weight:900;
-  letter-spacing:-.04em;
-  word-break:keep-all;
+  letter-spacing:-.03em;
 }
 #cover .ios-safari-banner-text span{
-  font-size:calc(16px * var(--app-font-scale,1));
-  font-weight:850;
-  color:rgba(31,42,68,.72);
+  font-size:calc(9.5px * var(--app-font-scale,1));
+  font-weight:700;
+  color:rgba(31,42,68,.68);
   word-break:keep-all;
 }
 #cover #ios-kakao-safari-help{
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  width:100%;
-  min-height:62px;
-  padding:0 18px;
+  flex:0 0 auto;
+  height:32px;
+  padding:0 10px;
   border:0;
-  border-radius:20px;
+  border-radius:999px;
   background:#1f2a44;
   color:#fff;
   font-family:inherit;
-  font-size:calc(21px * var(--app-font-scale,1));
+  font-size:calc(10px * var(--app-font-scale,1));
   font-weight:900;
-  line-height:1.18;
-  white-space:normal;
-  box-shadow:0 12px 24px rgba(31,42,68,.26);
+  white-space:nowrap;
+  box-shadow:0 6px 14px rgba(31,42,68,.18);
 }
-#cover #ios-kakao-safari-help:active,
-#cover .ios-safari-banner-x:active{transform:scale(.985);}
-.ios-safari-guide-panel{
-  display:flex;
-  flex-direction:column;
-  width:min(94vw,520px);
-  max-height:min(88dvh,820px);
-}
+#cover #ios-kakao-safari-help:active{transform:scale(.985);}
 .ios-safari-guide-panel .guide-lead{
-  min-height:0;
-  margin-bottom:10px;
+  min-height:46px;
 }
 .ios-safari-steps{
   width:100%;
   display:flex;
   flex-direction:column;
-  gap:10px;
-  margin-top:8px;
-  overflow:auto;
-  -webkit-overflow-scrolling:touch;
-  padding:2px 2px 4px;
+  gap:8px;
+  margin-top:10px;
 }
-.ios-safari-step{
-  display:grid!important;
-  grid-template-columns:28px 1fr;
-  grid-template-rows:auto auto;
-  align-items:start!important;
-  gap:8px 10px!important;
-  padding:12px 12px!important;
-  border-radius:16px!important;
-  background:#fffaf2!important;
-  border:1px solid rgba(212,170,106,.32)!important;
+.ios-safari-steps div{
+  display:flex;
+  align-items:flex-start;
+  gap:9px;
+  padding:10px 11px;
+  border-radius:13px;
+  background:#fffaf2;
+  border:1px solid rgba(212,170,106,.28);
 }
-.ios-safari-step b{
+.ios-safari-steps b{
   display:flex;
   align-items:center;
   justify-content:center;
-  width:28px;
-  height:28px;
+  flex:0 0 22px;
+  width:22px;
+  height:22px;
   border-radius:50%;
   background:#1f2a44;
   color:#fff;
-  font-size:14px;
+  font-size:12px;
   line-height:1;
 }
-.ios-safari-step span{
+.ios-safari-steps span{
+  flex:1;
   min-width:0;
-  font-size:calc(14px * var(--app-font-scale,1));
-  font-weight:800;
+  font-size:13px;
+  font-weight:700;
   line-height:1.45;
   color:#3E362E;
   word-break:keep-all;
 }
-.ios-safari-step img{
-  grid-column:1 / 3;
-  justify-self:center;
-  display:block;
-  max-width:100%;
-  max-height:180px;
-  object-fit:contain;
-  border-radius:14px;
-  background:#fff;
-  box-shadow:0 6px 18px rgba(31,42,68,.10);
-}
-.ios-safari-step:nth-child(1) img{max-height:150px;}
-.ios-safari-step:nth-child(2) img{max-height:210px;}
-.ios-safari-step:nth-child(3) img{max-height:225px;}
-.ios-safari-step:nth-child(4) img{max-height:245px;}
-@media (max-height:700px){
-  html.ios-kakao-inapp #cover .ios-safari-banner{
-    top:49%!important;
-    transform:translateY(-36%)!important;
-    padding:20px 16px 16px;
-    gap:10px;
-    border-radius:24px;
-  }
-  #cover .ios-safari-banner-text strong{font-size:calc(22px * var(--app-font-scale,1));}
-  #cover .ios-safari-banner-text span{font-size:calc(14px * var(--app-font-scale,1));}
-  #cover #ios-kakao-safari-help{min-height:56px;font-size:calc(19px * var(--app-font-scale,1));}
-  .ios-safari-step img{max-height:120px;}
+@media (max-height:650px){
+  html.ios-kakao-inapp #cover .ios-safari-banner{padding:7px 9px;margin-top:6px;}
+  #cover .ios-safari-banner-text span{display:none;}
+  #cover #ios-kakao-safari-help{height:30px;padding:0 9px;}
 }
 
+/* 7. 하단 안내 문구 — 레이아웃 계산에서 제외하고 화면 하단에 고정 */
 /* app-active 시 qna-cover-btn 숨김 */
 html.app-active #qna-cover-btn, html.app-active #cover-action-row { display: none !important; }
 
 /* 작은 화면 보정 */
 @media (max-height:650px) {
-  #cover { padding-top: calc((var(--cover-vh, 1vh) * 8) + env(safe-area-inset-top,0px)) !important; padding-bottom: calc((var(--cover-vh, 1vh) * 3) + env(safe-area-inset-bottom,0px)) !important; }
-  #cover .cover-header { padding-bottom: 12px !important; }
+  #cover { padding-top: calc(9vh + env(safe-area-inset-top,0px)) !important; }
+  #cover .cover-header { padding-bottom: 4px !important; }
   #cover .cover-header .cover-title { font-size: clamp(18px,5vw,24px) !important; }
   #cover .cover-header .cover-subtitle { font-size: 10px !important; }
-  #cover .cover-grid,#cover .cv-grid { row-gap: clamp(2px, calc(var(--cover-vh, 1vh) * 0.5), 4px) !important; }
-  #cover .cover-card,#cover .cv-btn { padding: clamp(4px, calc(var(--cover-vh, 1vh) * 0.8), 8px) 6px !important; }
+  #cover .cover-grid,#cover .cv-grid { row-gap: clamp(2px,0.5vh,4px) !important; }
+  #cover .cover-card,#cover .cv-btn { padding: clamp(4px,0.8vh,8px) 6px !important; }
   #cover .cover-emoji { font-size: 18px !important; }
   #cover .cover-name,#cover .cv-btn-label { font-size: 12px !important; }
   #cover #qna-cover-btn { min-height: 34px !important; font-size: calc(10.5px * var(--app-font-scale,1)) !important; }
@@ -2516,15 +2368,12 @@ html.app-active #qna-cover-btn, html.app-active #cover-action-row { display: non
 html.oai-font-global #cover #cover-bottom-note,
 #cover #cover-bottom-note,
 #cover-bottom-note{
-  position:fixed !important;
-  left:0 !important;
-  right:0 !important;
-  bottom:0 !important;
-  flex:none !important;
+  position:relative;
+  flex:0 0 auto;
   width:100%;
   max-width:720px;
   margin:0 auto;
-  padding:4px 22px calc(10px + env(safe-area-inset-bottom, 0px)) 60px;
+  padding:4px 22px calc(12px + env(safe-area-inset-bottom, 0px)) 60px;
   text-align:center;
   font-size:9px !important;
   font-weight:500 !important;
@@ -2532,7 +2381,7 @@ html.oai-font-global #cover #cover-bottom-note,
   letter-spacing:-0.02em;
   color:rgba(96,86,76,.72);
   pointer-events:none;
-  z-index:130 !important;
+  z-index:5;
   box-sizing:border-box;
 }
 #cover #oai-build-marker{
@@ -2546,7 +2395,7 @@ html.oai-font-global #cover #cover-bottom-note,
 }
 
 
-/* V20-19: 출발 검색 모달 색상 기준 재정리
+/* V18: 출발 검색 모달 색상 기준 재정리
    - 성지/성당/피정 + 일반장소 탭: 활성은 금색, 비활성은 고유색 배경 위의 은은한 반투명 버튼
    - 검색창을 감싸는 영역은 성지/성당/피정 각 카테고리 고유색으로 통일
    - 실제 검색 입력창(.sm-si)은 기존 아이보리 계열 유지 */
@@ -2617,7 +2466,7 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab:not(.active){
 html #srch-modal #sm-tab-bar .sm-tab.active,
 html.parish-mode #srch-modal #sm-tab-bar .sm-tab.active,
 html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active{
-  /* V20-19: 바로 위 교구 활성화 버튼(.sm-fb.on)과 같은 금색 기준 사용 */
+  /* V18: 바로 위 교구 활성화 버튼(.sm-fb.on)과 같은 금색 기준 사용 */
   background:var(--gold,#d4aa6a)!important;
   background-image:none!important;
   color:#1F2937!important;
@@ -2629,7 +2478,7 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active{
 
 
 /* ══════════════════════════════════════════════════════════════════
-   V20-19 모듈 표준화
+   V18 모듈 표준화
    - 헤더: 기도문 헤더 기준 단색 네이비(그라데이션 제거)
    - 탭바/탭버튼: 관구·교구 탭 기준 높이·형태 통일
    - 활성 탭의 고유 색상은 각 모듈 기존 색상을 유지
@@ -2713,7 +2562,7 @@ html.oai-font-global #trail-view .trail-tab{
 }
 
 /* ══════════════════════════════════════════════════════════════════
-   V20-19 주요 기능 안내 — 커버 전용, 별도 파일 없음
+   V18 주요 기능 안내 — 커버 전용, 별도 파일 없음
    ══════════════════════════════════════════════════════════════════ */
 #cover #cover-guide-btn{
   position:absolute;
