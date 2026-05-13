@@ -186,14 +186,18 @@ function _hideMassQuickMenuOnly(){
   _resetCoverExitReady();
   _clearCoverExitArmed();
   if(!modal) return;
-  modal.classList.remove('show');
-  modal.setAttribute('aria-hidden','true');
+  /* aria-hidden 전 포커스 해제: 포커스가 남은 채 aria-hidden=true 되면
+     브라우저 강제 포커스 이동 이벤트가 끼어들어 replaceState 타이밍이 틀어진다. */
+  try{ var f=modal.querySelector(':focus'); if(f) f.blur(); }catch(e){ console.warn('[가톨릭길동무]',e); }
+  /* UI 숨기기 전에 history state 먼저 정리 */
   try{
     var st = history.state;
     if(st && st.oai_mass_quick){
       history.replaceState({_p:1}, '', location.href.split('#')[0]);
     }
   }catch(e){ console.warn('[가톨릭길동무]', e); }
+  modal.classList.remove('show');
+  modal.setAttribute('aria-hidden','true');
 }
 function _isCoverAlreadyVisibleForQuickMenu(){
   try{
