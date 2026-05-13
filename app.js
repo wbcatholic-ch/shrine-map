@@ -216,6 +216,9 @@ function _returnToMassQuickMenu(){
   try{
     var st = history.state;
     if(st && st._p === 1 && !st.oai_mass_quick){
+      /* replaceState가 popstate를 트리거하므로, patches.js popstate 핸들러에서
+         이 popstate를 무시하도록 플래그를 먼저 세운다. */
+      window._oaiReturningToQuickMenu = true;
       history.replaceState({_p:0}, '', location.href.split('#')[0]);
     }
   }catch(e){ console.warn('[가톨릭길동무]', e); }
