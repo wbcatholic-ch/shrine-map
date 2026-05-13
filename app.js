@@ -295,10 +295,7 @@ window.addEventListener('pageshow', function(){
       // 주요기도문은 외부 사이트가 아니라 앱 내부 화면이다.
       // 빠른메뉴에서 주요기도문으로 들어간 직후 pageshow가 한 번 더 들어와도
       // 복귀 플래그를 지우면 뒤로가기가 팝업이 아니라 커버/앱 종료로 빠진다.
-      var prayerFromQuick = window.__MASS_QUICK_FROM_PRAYER__ === true &&
-        document.documentElement.classList.contains('app-active') &&
-        document.getElementById('prayer-view') &&
-        document.getElementById('prayer-view').classList.contains('open');
+      var prayerFromQuick = window.__MASS_QUICK_FROM_PRAYER__ === true;
       if(!prayerFromQuick) _clearMassQuickReturnForReload();
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
