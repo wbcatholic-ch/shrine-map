@@ -231,16 +231,32 @@ function _isCoverAlreadyVisibleForQuickMenu(){
     return !!(cover && !document.documentElement.classList.contains('app-active') && getComputedStyle(cover).display !== 'none');
   }catch(e){ return false; }
 }
+function _repairMassQuickBackTrap(){
+  try{
+    var modal=document.getElementById('mass-quick-modal');
+    if(!modal || !modal.classList.contains('show')) return;
+    var st=history.state;
+    if(st && st.oai_mass_quick) return;
+    history.pushState({_p:1, oai_mass_quick:1}, '', location.href.split('#')[0]);
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+}
 function _returnToMassQuickMenu(){
-  // 외부 사이트에서 돌아온 뒤에는 화면 구조를 다시 재배치하지 않는다.
-  // 이미 커버가 보이면 goToCover()를 부르지 않고, 다음 프레임에 팝업만 복원한다.
+  // 기도문 뒤로가기 직후에는 patches.js가 history.go(1)로 트랩을 복원하는 중일 수 있다.
+  // 그 popstate가 끝나기 전에 팝업을 열면 복원 popstate가 새 팝업을 다시 닫아
+  // 다음 뒤로가기에서 앱이 바로 빠지는 흐름이 생긴다.
+  // 그래서 먼저 커버 상태를 확정하고, 짧게 지연한 뒤 팝업과 팝업 전용 트랩을 세운다.
   if(!_isCoverAlreadyVisibleForQuickMenu() && typeof goToCover==='function') goToCover();
   _resetCoverExitReady();
   _clearCoverExitArmed();
   _clearMassQuickReturnForReload();
-  var open = function(){ try{ openMassQuickMenu(); }catch(e){ console.warn('[가톨릭길동무]', e); } };
-  if(window.requestAnimationFrame) requestAnimationFrame(open);
-  else setTimeout(open, 0);
+  var open = function(){
+    try{
+      openMassQuickMenu();
+      setTimeout(_repairMassQuickBackTrap, 80);
+      setTimeout(_repairMassQuickBackTrap, 220);
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+  };
+  setTimeout(open, 90);
 }
 function openMassQuickMenu(opts){
   const modal=document.getElementById('mass-quick-modal');
@@ -251,16 +267,27 @@ function openMassQuickMenu(opts){
   _armMassQuickHistoryTrap();
   modal.classList.add('show');
   modal.setAttribute('aria-hidden','false');
+  setTimeout(_repairMassQuickBackTrap, 120);
 }
 function closeMassQuickMenu(){
   const modal=document.getElementById('mass-quick-modal');
   _setMassQuickReturn(false);
   _resetCoverExitReady();
   _clearCoverExitArmed();
-  if(!modal) return;
-  modal.classList.remove('show');
-  modal.setAttribute('aria-hidden','true');
-  _ensureCoverBackTrap();
+  if(modal){
+    modal.classList.remove('show');
+    modal.setAttribute('aria-hidden','true');
+  }
+  // 빠른메뉴 팝업을 닫는 모든 경로는 커버에 남겨야 한다.
+  // 팝업 상태에서 브라우저 히스토리가 루트로 내려와도, 커버 트랩을 즉시 다시 세운다.
+  try{ if(typeof goToCover === 'function') goToCover(); }catch(e){ console.warn('[가톨릭길동무]', e); }
+  try{
+    var href=location.href.split('#')[0];
+    history.replaceState({_p:0}, '', href);
+    history.pushState({_p:1}, '', href);
+  }catch(e){
+    try{ _ensureCoverBackTrap(); }catch(_e){ console.warn('[가톨릭길동무]', _e); }
+  }
 }
 function openCatholicHymn(){
   const url='https://maria.catholic.or.kr/mobile/sungga/sungga.asp';
@@ -274,7 +301,7 @@ var _massQuickResumeBusy = false;
 function _resumeMassQuickReturnIfNeeded(){
   try{
     // 매일미사/성가 외부 사이트에서 돌아온 경우에만 빠른메뉴 팝업을 복구한다.
-    // V38-1: pageshow에서 reload 판정으로 먼저 지워버리면 외부 복귀 플래그가 사라질 수 있으므로,
+    // V38-2: pageshow에서 reload 판정으로 먼저 지워버리면 외부 복귀 플래그가 사라질 수 있으므로,
     // 복귀 플래그 확인을 가장 먼저 하고 실제 복구는 한 번만 예약한다.
     if(!_shouldMassQuickReturn()) return false;
     if(document.documentElement.classList.contains('app-active')) return false;
@@ -335,7 +362,7 @@ window.addEventListener('focus', function(){
 if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(_tryResumeMassQuickSoon, 80); }, {once:true});
 else setTimeout(_tryResumeMassQuickSoon, 80);
 window.addEventListener('load', function(){ setTimeout(_tryResumeMassQuickSoon, 80); }, {once:true});
-try{ window._shouldMassQuickReturn=_shouldMassQuickReturn; window._clearMassQuickReturnForReload=_clearMassQuickReturnForReload; window._returnToMassQuickMenu=_returnToMassQuickMenu; window._closePrayerAndReturn=_closePrayerAndReturn; window._resetCoverExitReady=_resetCoverExitReady; window._clearCoverExitArmed=_clearCoverExitArmed; window._ensureCoverBackTrap=_ensureCoverBackTrap; window._hideMassQuickMenuOnly=_hideMassQuickMenuOnly; window._setQuickPrayerToCover=_setQuickPrayerToCover; window._shouldQuickPrayerToCover=_shouldQuickPrayerToCover; window._armQuickPrayerHistoryTrap=_armQuickPrayerHistoryTrap; window.openMassQuickMenu=openMassQuickMenu; window.closeMassQuickMenu=closeMassQuickMenu; }catch(e){ console.warn('[가톨릭길동무]', e); }
+try{ window._shouldMassQuickReturn=_shouldMassQuickReturn; window._clearMassQuickReturnForReload=_clearMassQuickReturnForReload; window._returnToMassQuickMenu=_returnToMassQuickMenu; window._closePrayerAndReturn=_closePrayerAndReturn; window._resetCoverExitReady=_resetCoverExitReady; window._clearCoverExitArmed=_clearCoverExitArmed; window._ensureCoverBackTrap=_ensureCoverBackTrap; window._hideMassQuickMenuOnly=_hideMassQuickMenuOnly; window._repairMassQuickBackTrap=_repairMassQuickBackTrap; window._setQuickPrayerToCover=_setQuickPrayerToCover; window._shouldQuickPrayerToCover=_shouldQuickPrayerToCover; window._armQuickPrayerHistoryTrap=_armQuickPrayerHistoryTrap; window.openMassQuickMenu=openMassQuickMenu; window.closeMassQuickMenu=closeMassQuickMenu; }catch(e){ console.warn('[가톨릭길동무]', e); }
 
 // 안정형 새로고침: 캐시/서비스워커를 지우지 않고 현재 화면만 다시 불러온다.
 // 즐겨찾기/localStorage는 물론, Service Worker와 Cache Storage도 건드리지 않는다.
@@ -397,7 +424,7 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || 'V38-1';
+    var target = btn.getAttribute('data-target-version') || 'V38-2';
     var current = '';
     if(window.APP_VERSION) current = String(window.APP_VERSION).trim();
     if(!current && marker) current = String(marker.textContent || '').trim();
@@ -553,7 +580,7 @@ function missaLoaded(){
 
 function openPrayerBook(opts){
   // 주요기도문은 앱 내부 화면이다. 빠른메뉴에서 들어와도 외부복귀 팝업 플래그를 쓰지 않고,
-  // 뒤로가기 기준을 '기도문 → 커버'로 고정한다.
+  // 뒤로가기 기준을 '기도문 → 빠른메뉴 팝업 → 커버'로 고정한다.
   if(opts && opts.fromMassQuick){
     try{
       _setMassQuickReturn(false);
@@ -587,20 +614,12 @@ function closePrayerView(){
 function _closePrayerAndReturn(){
   closePrayerView();
   if(_shouldQuickPrayerToCover()){
+    // 빠른메뉴 팝업에서 주요기도문으로 들어온 경우:
+    // 기도문 목록 → 빠른메뉴 팝업 → 커버 흐름을 복원한다.
     try{ _setQuickPrayerToCover(false); }catch(e){ console.warn("[가톨릭길동무]", e); }
     try{ _setMassQuickReturn(false); }catch(e){ console.warn("[가톨릭길동무]", e); }
-    if(typeof goToCover==='function') goToCover();
-    /* 빠른메뉴에서 주요기도문으로 들어온 경우:
-       기도문 목록 → 빠른메뉴 팝업 → 커버 순서를 유지한다.
-       팝업은 커버 위에 다시 띄우고, openMassQuickMenu()가 팝업용 history trap을 새로 심는다. */
-    var reopenQuick = function(){
-      try{
-        if(typeof openMassQuickMenu === 'function') openMassQuickMenu({keepReturn:true});
-        else if(typeof _ensureCoverBackTrap==='function') _ensureCoverBackTrap();
-      }catch(e){ console.warn("[가톨릭길동무]", e); }
-    };
-    if(window.requestAnimationFrame) requestAnimationFrame(reopenQuick);
-    else setTimeout(reopenQuick, 0);
+    if(typeof _returnToMassQuickMenu === 'function') _returnToMassQuickMenu();
+    else if(typeof goToCover==='function') goToCover();
     return;
   }
   if(_shouldMassQuickReturn()) _returnToMassQuickMenu();
@@ -699,7 +718,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V38-1';
+    frame.src='diocese.html?v=V38-2';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -3796,7 +3815,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   });
   on('mass-quick-prayer', 'click', function() {
     // 주요기도문은 외부 사이트가 아니므로 매일미사/성가 복귀 플래그를 쓰지 않는다.
-    // 빠른메뉴에서 들어와도 뒤로가기는 항상 커버로 보낸다.
+    // 빠른메뉴에서 들어오면 뒤로가기는 빠른메뉴 팝업을 한 번 거친 뒤 커버로 보낸다.
     _setMassQuickReturn(false);
     if (typeof _setQuickPrayerToCover === 'function') _setQuickPrayerToCover(true);
     if (typeof _hideMassQuickMenuOnly === 'function') _hideMassQuickMenuOnly();
