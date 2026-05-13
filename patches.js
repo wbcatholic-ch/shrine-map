@@ -917,7 +917,7 @@
   var lastCover=false;
   function isCover(){var c=$('cover');return !!(c && !document.documentElement.classList.contains('app-active') && getComputedStyle(c).display!=='none');}
   function clearNativeExitToast(){
-    try{window._exitReady=false; clearTimeout(window._exitTimer);}catch(e){ console.warn("[가톨릭길동무]", e); }
+    try{window._exitReady=false; clearTimeout(window._exitTimer); try{sessionStorage.removeItem('oai_cover_exit_armed_ts');}catch(_e){}}catch(e){ console.warn("[가톨릭길동무]", e); }
     try{var t=$('_bt'); if(t) t.remove(); var t2=$('oai-cover-exit-toast'); if(t2) t2.classList.remove('show');}catch(e){ console.warn("[가톨릭길동무]", e); }
   }
   if(typeof window._resetCoverExitReady !== 'function') window._resetCoverExitReady = clearNativeExitToast;

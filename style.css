@@ -3108,3 +3108,15 @@ html.ios-device .qna-panel{border-radius:13px!important;}
   box-shadow:0 7px 16px rgba(31,42,68,.08)!important;
   transition:transform .10s ease,filter .10s ease,box-shadow .10s ease!important;
 }
+
+
+/* V37-6-8: 빠른메뉴 팝업 버튼은 눌림/출렁임 효과를 사용하지 않는다. */
+#mass-quick-modal .mass-quick-btn.app-pressing,
+#mass-quick-modal .mass-quick-btn.mass-quick-primary.app-pressing,
+#mass-quick-modal .mass-quick-btn:active,
+#mass-quick-modal .mass-quick-btn.mass-quick-primary:active{
+  transform:none!important;
+  filter:none!important;
+  box-shadow:0 9px 22px rgba(31,42,68,.10)!important;
+  transition:none!important;
+}
