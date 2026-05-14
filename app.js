@@ -189,8 +189,13 @@ function _hideMassQuickMenuOnly(){
   /* aria-hidden 전 포커스 해제: 포커스가 남은 채 aria-hidden=true 되면
      브라우저 강제 포커스 이동 이벤트가 끼어들어 replaceState 타이밍이 틀어진다. */
   try{ var f=modal.querySelector(':focus'); if(f) f.blur(); }catch(e){ console.warn('[가톨릭길동무]',e); }
-  /* oai_mass_quick state는 patches.js popstate 핸들러의 isGuideModalOpen 분기에서
-     처리된다. 여기서 replaceState를 하면 popstate가 트리거되어 흐름이 꼬인다. */
+  /* UI 숨기기 전에 history state 먼저 정리 */
+  try{
+    var st = history.state;
+    if(st && st.oai_mass_quick){
+      history.replaceState({_p:1}, '', location.href.split('#')[0]);
+    }
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
   modal.classList.remove('show');
   modal.setAttribute('aria-hidden','true');
 }
@@ -205,13 +210,13 @@ function _returnToMassQuickMenu(){
   _resetCoverExitReady();
   _clearCoverExitArmed();
   _clearMassQuickReturnForReload();
-  /* go(1) 복원 popstate 처리 중에 pushState(openMassQuickMenu 내부)를 동기로 실행하면
-     그 pushState가 즉시 popstate를 다시 트리거해 팝업이 바로 닫혀버린다.
-     replaceState(스택 정리)는 동기로, openMassQuickMenu는 현재 콜스택이 끝난 후 실행한다. */
-  /* replaceState는 popstate를 트리거하므로 사용하지 않는다.
-     현재 스택이 [_p:0, _p:1] 상태에서 openMassQuickMenu → pushState(mq) 하면
-     [_p:0, _p:1, _p:1(mq)] 이 되고, 팝업 뒤로가기 시 isGuideModalOpen=true 로 정상 처리된다. */
-  setTimeout(function(){ try{ openMassQuickMenu(); }catch(e){ console.warn('[가톨릭길동무]', e); } }, 0);
+  try{
+    var st = history.state;
+    if(st && st._p === 1 && !st.oai_mass_quick){
+      history.replaceState({_p:0}, '', location.href.split('#')[0]);
+    }
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+  try{ openMassQuickMenu(); }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 function openMassQuickMenu(opts){
   const modal=document.getElementById('mass-quick-modal');
@@ -368,7 +373,7 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || 'V37-6-13';
+    var target = btn.getAttribute('data-target-version') || 'V38-9';
     var current = '';
     if(window.APP_VERSION) current = String(window.APP_VERSION).trim();
     if(!current && marker) current = String(marker.textContent || '').trim();
@@ -651,7 +656,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V37-6-13';
+    frame.src='diocese.html?v=V38-9';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
