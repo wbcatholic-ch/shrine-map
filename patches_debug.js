@@ -168,6 +168,10 @@
   window.addEventListener('popstate', function(){
     if(window._appExiting) return;
 
+    /* _hideMassQuickMenuOnly가 oai_mass_quick state를 history.back()으로 제거할 때
+       발생하는 popstate는 무시한다. */
+    if(window.__oaiHidingMqState){ window.__oaiHidingMqState = false; return; }
+
     /* 빠른메뉴/안내 팝업이 열려 있으면 어떤 복원 상태보다 먼저 닫는다.
        _restoring이 남은 상태에서 이 검사를 건너뛰면 Android PWA가 팝업을 닫지 못하고
        바로 앱 종료 흐름으로 빠질 수 있다. */
@@ -1118,7 +1122,7 @@
   function ac(){ return document.documentElement.classList.contains('app-active')?'APP':'CVR'; }
   function mo(){ try{ var m=document.querySelector('.guide-modal.show'); return m?'MODAL:'+m.id:'no-modal'; }catch(e){ return '?'; } }
   function render(){ var h=''; for(var i=0;i<log.length;i++){ var e=log[i]; h+='<div style="color:'+e.color+'"><b>['+e.t+']</b> '+e.msg+'</div>'; } box.innerHTML=h; box.scrollTop=box.scrollHeight; }
-  window.addEventListener('popstate',function(){ addLog('POPSTATE|'+ac()+'|'+mo()+'|'+ss(),'#7ef'); },true);
+  window.addEventListener('popstate',function(){ addLog('POPSTATE|'+ac()+'|'+mo()+'|'+ss()+'|hidingMq='+!!window.__oaiHidingMqState,'#7ef'); },true);
   var oP=history.pushState.bind(history), oR=history.replaceState.bind(history);
   history.pushState=function(s,t,u){ oP(s,t,u); addLog('PUSH '+JSON.stringify(s)+' len='+history.length,'#af8'); };
   history.replaceState=function(s,t,u){ oR(s,t,u); addLog('RPLC '+JSON.stringify(s)+' len='+history.length,'#fa8'); };
@@ -1128,5 +1132,6 @@
   wrap('closeGuideModals','#c8f');
   wrap('_closePrayerAndReturn','#0ff');
   wrap('openMassQuickMenu','#f0f');
+  wrap('_hideMassQuickMenuOnly','#fa0');
   addLog('DBG ON|'+ss(),'#0f0');
 })();

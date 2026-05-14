@@ -186,13 +186,21 @@ function _hideMassQuickMenuOnly(){
   _resetCoverExitReady();
   _clearCoverExitArmed();
   if(!modal) return;
-  /* aria-hidden 전 포커스 해제: 포커스가 남은 채 aria-hidden=true 되면
-     브라우저 강제 포커스 이동 이벤트가 끼어들어 replaceState 타이밍이 틀어진다. */
   try{ var f=modal.querySelector(':focus'); if(f) f.blur(); }catch(e){ console.warn('[가톨릭길동무]',e); }
-  /* oai_mass_quick state는 patches.js popstate 핸들러의 isGuideModalOpen 분기에서
-     처리된다. 여기서 replaceState를 하면 popstate가 트리거되어 흐름이 꼬인다. */
   modal.classList.remove('show');
   modal.setAttribute('aria-hidden','true');
+  /* oai_mass_quick state를 스택에서 제거한다.
+     이 state가 남아있으면 기도문에서 뒤로가기 시 go(1)이 mq 위치로 복원되어
+     두 번째 popstate가 발생하고 isGuideModalOpen=false 상태에서 앱이 탈출된다.
+     history.back()으로 직접 pop하되, popstate가 트리거되므로
+     _restoring 플래그를 세워 patches.js에서 무시하게 한다. */
+  try{
+    var st = history.state;
+    if(st && st.oai_mass_quick){
+      window.__oaiHidingMqState = true;
+      history.back();
+    }
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 function _isCoverAlreadyVisibleForQuickMenu(){
   try{
