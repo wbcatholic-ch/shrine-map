@@ -1324,10 +1324,15 @@ html.app-active
 html.retreat-mode .region-row{display:grid;grid-template-columns:minmax(0,1fr) auto!important;align-items:center!important;gap:8px!important;width:100%!important}
 html.retreat-mode .region-row .srch-inner{width:100%!important;min-width:0!important;height:42px!important;box-sizing:border-box}
 html.retreat-mode .region-search-btn{width:74px;min-width:74px!important;max-width:74px!important;height:42px!important;padding:0 6px!important;box-sizing:border-box;display:flex!important;align-items:center!important;justify-content:center;text-align:center!important;white-space:normal;word-break:keep-all;line-height:1.08!important;font-size:11px!important;letter-spacing:-.04em;border-radius:21px!important}
-/* 피정 리스트 카드: 오른쪽 배지/거리 때문에 본문 박스가 밀리지 않게 고정 */
+/* 피정 리스트 카드: 오른쪽 배지/거리 때문에 본문 박스가 밀리지 않게 고정
+   기존 width:100% + 좌우 margin 10px 조합은 실제 폭을 100%+20px로 만들어
+   내 주변/지역검색 10개 목록이 좌우로 흔들리는 원인이 되므로 카드 폭을 margin만큼 뺀다. */
+html.retreat-mode #list-body,
+html.retreat-mode #nearby-body,
+html.retreat-mode #region-body{overflow-x:hidden!important}
 html.retreat-mode .nearby-item,
 html.retreat-mode .list-item,
-html.retreat-mode .region-item{width:100%!important;min-width:0!important;box-sizing:border-box;align-items:flex-start!important}
+html.retreat-mode .region-item{width:calc(100% - 20px)!important;max-width:calc(100% - 20px)!important;min-width:0!important;margin-left:10px!important;margin-right:10px!important;box-sizing:border-box;align-items:flex-start!important}
 html.retreat-mode .nearby-info,
 html.retreat-mode .li-info{flex:1 1 auto!important;min-width:0!important}
 html.retreat-mode .nearby-meta{width:74px!important;min-width:74px!important;max-width:74px!important;flex:0 0 74px!important}
@@ -2344,7 +2349,8 @@ html.app-active #cover {
 #cover .ios-safari-banner{
   display:none;
 }
-html.ios-kakao-inapp #cover .ios-safari-banner{
+html.ios-kakao-inapp #cover .ios-safari-banner,
+html.ios-install-preview-mode #cover .ios-safari-banner{
   position:fixed!important;
   left:max(18px,calc(env(safe-area-inset-left,0px) + 18px))!important;
   right:max(18px,calc(env(safe-area-inset-right,0px) + 18px))!important;
@@ -2360,11 +2366,11 @@ html.ios-kakao-inapp #cover .ios-safari-banner{
   max-width:520px;
   margin:0 auto;
   padding:24px 18px 20px;
-  border:2.5px solid rgba(212,170,106,.72);
+  border:3px solid rgba(212,170,106,.96);
   border-radius:28px;
-  background:rgba(255,248,232,.98);
+  background:linear-gradient(180deg,#ffffff 0%,#fffaf1 100%);
   color:#1f2a44;
-  box-shadow:0 22px 54px rgba(31,42,68,.24);
+  box-shadow:0 30px 70px rgba(14,21,53,.34),0 0 0 1px rgba(31,42,68,.08);
   box-sizing:border-box;
   pointer-events:auto;
 }
@@ -2435,10 +2441,47 @@ html.ios-kakao-inapp #cover .ios-safari-banner{
   flex-direction:column;
   width:min(94vw,520px);
   max-height:min(88dvh,820px);
+  background:linear-gradient(180deg,#ffffff 0%,#fffdf8 100%)!important;
+  border:3px solid #d4aa6a!important;
+  box-shadow:0 30px 80px rgba(14,21,53,.42),0 0 0 1px rgba(255,255,255,.85) inset!important;
 }
 .ios-safari-guide-panel .guide-lead{
   min-height:0;
   margin-bottom:10px;
+}
+
+/* V38-34: iPhone 설치 안내 팝업 구분감 강화 */
+#ios-safari-guide-modal .guide-backdrop{
+  background:rgba(14,21,53,.58)!important;
+  -webkit-backdrop-filter:blur(3px);
+  backdrop-filter:blur(3px);
+}
+#ios-safari-guide-modal .guide-x{
+  background:#1f2a44!important;
+  color:#fff!important;
+  box-shadow:0 8px 18px rgba(14,21,53,.22)!important;
+}
+.ios-safari-guide-panel .guide-badge{
+  background:#1f2a44!important;
+  color:#fff!important;
+  border:1.5px solid #d4aa6a!important;
+  box-shadow:0 6px 14px rgba(31,42,68,.16)!important;
+}
+.ios-safari-guide-panel h2{
+  color:#0e1535!important;
+}
+.ios-safari-guide-panel .guide-lead{
+  color:#374151!important;
+  font-weight:800!important;
+}
+.ios-safari-guide-panel .guide-primary{
+  background:linear-gradient(135deg,#1f2a44,#31446c)!important;
+  color:#fff!important;
+  border:1.5px solid #d4aa6a!important;
+}
+#cover #ios-kakao-safari-help{
+  background:linear-gradient(135deg,#1f2a44,#31446c)!important;
+  border:1.5px solid rgba(212,170,106,.82)!important;
 }
 .ios-safari-steps{
   width:100%;
@@ -2458,8 +2501,8 @@ html.ios-kakao-inapp #cover .ios-safari-banner{
   gap:8px 10px!important;
   padding:12px 12px!important;
   border-radius:16px!important;
-  background:#fffaf2!important;
-  border:1px solid rgba(212,170,106,.32)!important;
+  background:#ffffff!important;
+  border:1.5px solid rgba(212,170,106,.50)!important;
 }
 .ios-safari-step b{
   display:flex;
@@ -2492,10 +2535,49 @@ html.ios-kakao-inapp #cover .ios-safari-banner{
   background:#fff;
   box-shadow:0 6px 18px rgba(31,42,68,.10);
 }
+.ios-safari-shot{
+  grid-column:1 / 3;
+  justify-self:center;
+  position:relative;
+  display:block;
+  max-width:100%;
+  border-radius:14px;
+  background:#fff;
+  box-shadow:0 6px 18px rgba(31,42,68,.10);
+  overflow:hidden;
+}
+.ios-safari-shot img{
+  grid-column:auto!important;
+  justify-self:auto!important;
+  width:100%;
+  height:auto;
+  max-width:100%!important;
+  max-height:none!important;
+  border-radius:14px!important;
+  box-shadow:none!important;
+  background:transparent!important;
+}
+.ios-safari-shot-more{
+  width:100%;
+  max-width:480px;
+}
+.ios-gold-highlight{
+  position:absolute;
+  right:2.6%;
+  top:8%;
+  width:24.5%;
+  height:84%;
+  border:4px solid #d4aa6a;
+  border-radius:28px;
+  box-shadow:0 0 0 1px rgba(255,255,255,.75) inset, 0 2px 8px rgba(31,42,68,.16);
+  pointer-events:none;
+  box-sizing:border-box;
+}
 .ios-safari-step:nth-child(1) img{max-height:150px;}
 .ios-safari-step:nth-child(2) img{max-height:210px;}
-.ios-safari-step:nth-child(3) img{max-height:225px;}
-.ios-safari-step:nth-child(4) img{max-height:245px;}
+.ios-safari-step:nth-child(3) img{max-height:260px;}
+.ios-safari-step:nth-child(4) img{max-height:225px;}
+.ios-safari-step:nth-child(5) img{max-height:245px;}
 @media (max-height:700px){
   html.ios-kakao-inapp #cover .ios-safari-banner{
     top:49%!important;
@@ -3005,14 +3087,14 @@ html.app-active #cover-guide-btn{ display:none!important; }
    - 커버/설치 배너/지도 컨테이너는 그대로 두고, 내부 카드·버튼·여백만 조밀하게 조정한다.
    - transform scale을 쓰지 않아 가장자리 빈 공간과 지도 터치 좌표 문제를 피한다. */
 html.ios-device{
-  --ios-ui-density:.92;
-  --mod-header-h:62px;
-  --module-tab-h:43px;
-  --mod-tabbar-h:47px;
-  --tab-btn-h:36px;
-  --oai-std-header-h:62px;
-  --oai-std-tab-h:32px;
-  --oai-std-btn-h:32px;
+  --ios-ui-density:.90;
+  --mod-header-h:60px;
+  --module-tab-h:40px;
+  --mod-tabbar-h:44px;
+  --tab-btn-h:34px;
+  --oai-std-header-h:60px;
+  --oai-std-tab-h:30px;
+  --oai-std-btn-h:30px;
   --oai-std-gap:6px;
 }
 html.ios-device #app .module-bar,
@@ -3021,7 +3103,7 @@ html.ios-device #web-view .module-bar,
 html.ios-device #trail-view .module-bar,
 html.ios-device #diocese-view .module-bar,
 html.ios-device #qna-view .module-bar{
-  padding:calc(env(safe-area-inset-top,0px) + 10px) 12px 10px!important;
+  padding:calc(env(safe-area-inset-top,0px) + 8px) 12px 8px!important;
   gap:9px!important;
 }
 html.ios-device #app .module-bar-main,
@@ -3035,21 +3117,21 @@ html.ios-device #prayer-view .module-bar-ico,
 html.ios-device #web-view .module-bar-ico,
 html.ios-device #trail-view .module-bar-ico,
 html.ios-device #diocese-view .module-bar-ico,
-html.ios-device #qna-view .module-bar-ico{width:36px!important;height:36px!important;}
+html.ios-device #qna-view .module-bar-ico{width:34px!important;height:34px!important;}
 html.ios-device .module-close,
 html.ios-device #diocese-close-btn,
 html.ios-device #prayer-close,
 html.ios-device #web-close,
-html.ios-device #trail-close{width:34px!important;height:34px!important;min-width:34px!important;}
-html.ios-device #app .tab-btn{min-height:43px!important;padding:7px 0 6px!important;gap:4px!important;border-radius:10px!important;}
-html.ios-device #app .tab-icon{font-size:18px!important;}
-html.ios-device #app .tab-btn.active .tab-icon{font-size:20px!important;}
+html.ios-device #trail-close{width:32px!important;height:32px!important;min-width:32px!important;}
+html.ios-device #app .tab-btn{min-height:40px!important;padding:5px 0 4px!important;gap:3px!important;border-radius:10px!important;}
+html.ios-device #app .tab-icon{font-size:17px!important;}
+html.ios-device #app .tab-btn.active .tab-icon{font-size:18px!important;}
 html.ios-device #app .filter-btn,
 html.ios-device #app .region-search-btn,
 html.ios-device #app .sm-fb,
 html.ios-device #app .sm-tab,
 html.ios-device .web-cat-btn,
-html.ios-device .trail-tab{min-height:32px!important;padding:4px 10px!important;border-radius:13px!important;}
+html.ios-device .trail-tab{min-height:30px!important;padding:3px 9px!important;border-radius:12px!important;}
 html.ios-device #app .sheet-hd{padding:10px 12px!important;}
 html.ios-device #app .sheet-title{letter-spacing:.02em!important;}
 html.ios-device #app .sheet-x,
@@ -3122,3 +3204,302 @@ html.ios-device .qna-panel{border-radius:13px!important;}
   transition:transform .08s ease,filter .08s ease,box-shadow .08s ease!important;
 }
 
+
+
+/* V38-23 주요기도문 헤더 구조 정리: 이모지 제거, 닫기 왼쪽, 굿뉴스 기도문 오른쪽 */
+#prayer-bar{
+  justify-content:flex-start!important;
+}
+#prayer-bar .module-bar-ico{
+  display:none!important;
+}
+#prayer-bar .module-bar-main{
+  flex:1 1 auto!important;
+  min-width:0!important;
+  gap:0!important;
+}
+#prayer-close,
+#prayer-bar .module-close{
+  order:0!important;
+  margin-left:0!important;
+  margin-right:12px!important;
+  color:#fff!important;
+}
+#prayer-bar .module-bar-main{order:1!important;}
+#goodnews-prayer-btn{
+  order:2!important;
+  margin-left:auto!important;
+  margin-right:0!important;
+  max-width:118px!important;
+  padding:8px 10px!important;
+  font-size:12px!important;
+  border-radius:11px!important;
+}
+#prayer-detail-hd{
+  justify-content:flex-start!important;
+}
+#prayer-detail-hd #pr-back-btn{
+  order:0!important;
+  margin-left:0!important;
+  margin-right:8px!important;
+  flex:0 0 42px!important;
+  color:#1f2a44!important;
+}
+#prayer-detail-hd .pr-font-ctrl{
+  margin-left:auto!important;
+}
+#prayer-detail-hd #pr-detail-star{
+  margin-left:6px!important;
+  margin-right:0!important;
+}
+
+
+/* V38-34: iPhone 설치 안내 팝업 가독성 보정
+   - 팝업 패널은 더 어둡게, 안내 카드 내부는 아이보리로 분리
+   - 제목/리드 문구가 이미지 카드와 겹치지 않도록 flex 영역 고정 */
+#ios-safari-guide-modal .guide-backdrop{
+  background:rgba(14,21,53,.76)!important;
+  -webkit-backdrop-filter:blur(4px)!important;
+  backdrop-filter:blur(4px)!important;
+}
+.ios-safari-guide-panel{
+  display:flex!important;
+  flex-direction:column!important;
+  max-height:min(88dvh,820px)!important;
+  background:linear-gradient(180deg,#172347 0%,#0e1535 100%)!important;
+  border:3px solid #d4aa6a!important;
+  box-shadow:0 34px 90px rgba(0,0,0,.50),0 0 0 1px rgba(255,255,255,.10) inset!important;
+  color:#fffaf1!important;
+  padding:20px 16px 16px!important;
+}
+.ios-safari-guide-panel .guide-badge,
+.ios-safari-guide-panel h2,
+.ios-safari-guide-panel .guide-actions{
+  flex:0 0 auto!important;
+}
+.ios-safari-guide-panel .guide-badge{
+  background:#fffaf1!important;
+  color:#1f2a44!important;
+  border:1.5px solid #d4aa6a!important;
+}
+.ios-safari-guide-panel h2{
+  color:#fffaf1!important;
+  margin-bottom:6px!important;
+  padding-right:24px!important;
+}
+.ios-safari-guide-panel .guide-lead{
+  display:block!important;
+  position:relative!important;
+  z-index:2!important;
+  margin:0 0 12px!important;
+  padding:8px 10px!important;
+  border-radius:12px!important;
+  background:rgba(255,250,241,.10)!important;
+  color:#fff4de!important;
+  font-weight:850!important;
+  line-height:1.45!important;
+  box-sizing:border-box!important;
+}
+
+/* V38-34: 설치 안내 팝업은 제목까지 고정하고, 안내 문구부터 단계 카드까지 함께 스크롤한다. */
+.ios-safari-scroll{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+  overscroll-behavior:contain!important;
+  -webkit-overflow-scrolling:touch!important;
+  padding:0 2px 8px!important;
+  margin-top:2px!important;
+  box-sizing:border-box!important;
+}
+.ios-safari-scroll .guide-lead{
+  margin:0 0 12px!important;
+}
+.ios-safari-scroll .ios-safari-steps{
+  overflow:visible!important;
+  flex:0 0 auto!important;
+  min-height:auto!important;
+  padding:0 0 2px!important;
+}
+
+.ios-safari-steps{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  margin-top:0!important;
+  padding:2px 2px 8px!important;
+  gap:10px!important;
+  overflow:auto!important;
+  -webkit-overflow-scrolling:touch!important;
+}
+.ios-safari-step{
+  background:#fffaf1!important;
+  border:2px solid rgba(212,170,106,.70)!important;
+  box-shadow:0 8px 20px rgba(0,0,0,.13)!important;
+}
+.ios-safari-step span{
+  color:#3E362E!important;
+}
+.ios-safari-step img,
+.ios-safari-shot{
+  background:#fffaf1!important;
+}
+.ios-safari-guide-panel .guide-actions{
+  margin-top:12px!important;
+  padding-top:8px!important;
+  border-top:1px solid rgba(212,170,106,.45)!important;
+}
+.ios-safari-guide-panel .guide-primary{
+  background:#fffaf1!important;
+  color:#1f2a44!important;
+  border:2px solid #d4aa6a!important;
+  box-shadow:0 10px 22px rgba(0,0,0,.26)!important;
+}
+
+/* V38-34: 커버 뒤로가기 종료 안내문을 화면 중앙으로 이동 */
+#oai-cover-exit-toast{
+  top:50%!important;
+  bottom:auto!important;
+  left:50%!important;
+  transform:translate(-50%,-50%) scale(.98)!important;
+  min-height:48px!important;
+  padding:0 22px!important;
+  border-radius:999px!important;
+  background:rgba(31,42,68,.96)!important;
+  color:#fff!important;
+  font-size:14px!important;
+  box-shadow:0 16px 36px rgba(14,21,53,.34)!important;
+}
+#oai-cover-exit-toast.show{
+  opacity:1!important;
+  transform:translate(-50%,-50%) scale(1)!important;
+}
+
+/* V38-34: iPhone 설치 안내 팝업 X 버튼 색상과 커버 종료 안내 중앙 고정 */
+#ios-safari-guide-modal .guide-x{
+  background:#fffaf1!important;
+  color:#111!important;
+  border:2px solid #111!important;
+  box-shadow:0 8px 18px rgba(0,0,0,.24)!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+}
+#_bt{
+  top:50%!important;
+  left:50%!important;
+  bottom:auto!important;
+  transform:translate(-50%,-50%)!important;
+}
+
+
+/* V38-34: iPhone 1차 화면 높이 축소
+   Android 공통 구조는 유지하고, iPhone 내부 화면의 헤더·탭 세로 밀도만 소폭 줄인다. */
+html.ios-device #app .module-title,
+html.ios-device #prayer-view .module-title,
+html.ios-device #web-view .module-title,
+html.ios-device #trail-view .module-title,
+html.ios-device #qna-view .module-title{
+  line-height:1.12!important;
+}
+html.ios-device #prayer-view .pr-tab,
+html.ios-device #prayer-view .pr-cat,
+html.ios-device #prayer-view .pr-filter-btn{
+  min-height:30px!important;
+  padding-top:3px!important;
+  padding-bottom:3px!important;
+}
+
+/* V38-34: iPhone 1차 탭 높이 직접 보정
+   기존 Android/공통 탭 규칙은 유지하고, iPhone에서 실제 크게 보였던 #tabbar 높이만 소폭 낮춘다. */
+html.ios-device{
+  --tab-h:64px;
+}
+html.ios-device #tabbar{
+  height:calc(var(--tab-h) + env(safe-area-inset-top,0px))!important;
+  min-height:calc(var(--tab-h) + env(safe-area-inset-top,0px))!important;
+  padding:calc(env(safe-area-inset-top,0px) + 4px) 6px 5px!important;
+  gap:5px!important;
+}
+html.ios-device #tabbar .tab-btn{
+  height:40px!important;
+  min-height:40px!important;
+  padding:4px 2px 4px!important;
+  gap:2px!important;
+}
+html.ios-device #prayer-tabs{
+  padding:7px 10px!important;
+  gap:5px!important;
+}
+html.ios-device #prayer-tabs .pr-tab{
+  height:32px!important;
+  min-height:32px!important;
+  padding:5px 10px!important;
+  gap:6px!important;
+}
+
+/* V38-35: iPhone 커버 비율 1차 보정
+   Android 공통 구조는 건드리지 않고, iPhone/확인용 ios-device 상태에서만 커버 카드 글자와 하단 안내문 균형을 조정한다. */
+html.ios-device #cover,
+html.ios-install-preview-mode #cover{
+  padding-bottom:calc((var(--cover-vh, 1vh) * 2.2) + env(safe-area-inset-bottom,0px))!important;
+}
+html.ios-device #cover .cover-header,
+html.ios-install-preview-mode #cover .cover-header{
+  padding-bottom:16px!important;
+}
+html.ios-device #cover-main-block,
+html.ios-install-preview-mode #cover-main-block{
+  height:calc((var(--cover-vh, 1dvh) * 100) - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 210px)!important;
+  padding-bottom:4px!important;
+}
+html.ios-device #cover .cover-card,
+html.ios-device #cover .cv-btn,
+html.ios-install-preview-mode #cover .cover-card,
+html.ios-install-preview-mode #cover .cv-btn{
+  padding:7px 7px!important;
+  gap:8px!important;
+}
+html.ios-device #cover .cover-emoji,
+html.ios-device #cover .cover-icon-wrap,
+html.ios-install-preview-mode #cover .cover-emoji,
+html.ios-install-preview-mode #cover .cover-icon-wrap{
+  font-size:29px!important;
+}
+html.ios-device #cover .cover-name,
+html.ios-device #cover .cv-btn-label,
+html.ios-install-preview-mode #cover .cover-name,
+html.ios-install-preview-mode #cover .cv-btn-label{
+  font-size:calc(14px * var(--app-font-scale,1))!important;
+  line-height:1.14!important;
+  letter-spacing:-.035em!important;
+}
+html.ios-device #cover #cc-1 .cover-name,
+html.ios-install-preview-mode #cover #cc-1 .cover-name{
+  font-size:calc(13.6px * var(--app-font-scale,1))!important;
+}
+html.ios-device #cover #cover-action-row,
+html.ios-install-preview-mode #cover #cover-action-row{
+  margin-top:6px!important;
+}
+html.ios-device #cover #cover-update-btn,
+html.ios-device #cover #qna-cover-btn,
+html.ios-install-preview-mode #cover #cover-update-btn,
+html.ios-install-preview-mode #cover #qna-cover-btn{
+  min-height:37px!important;
+  height:37px!important;
+  font-size:calc(11px * var(--app-font-scale,1))!important;
+  padding-left:13px!important;
+  padding-right:13px!important;
+}
+html.ios-device #cover #cover-bottom-note,
+html.ios-install-preview-mode #cover #cover-bottom-note{
+  padding:3px 16px calc(8px + env(safe-area-inset-bottom,0px)) 16px!important;
+  font-size:8.35px!important;
+  line-height:1.32!important;
+  letter-spacing:-.045em!important;
+  max-width:430px!important;
+}
+html.ios-device #cover #oai-build-marker,
+html.ios-install-preview-mode #cover #oai-build-marker{
+  bottom:calc(env(safe-area-inset-bottom,0px) + 7px)!important;
+}
