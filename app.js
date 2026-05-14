@@ -534,7 +534,7 @@ var _massQuickResumeBusy = false;
 function _resumeMassQuickReturnIfNeeded(){
   try{
     // 매일미사/성가 외부 사이트에서 돌아온 경우에만 빠른메뉴 팝업을 복구한다.
-    // V37-6-12: pageshow에서 reload 판정으로 먼저 지워버리면 외부 복귀 플래그가 사라질 수 있으므로,
+    // 기존 보정: pageshow에서 reload 판정으로 먼저 지워버리면 외부 복귀 플래그가 사라질 수 있으므로,
     // 복귀 플래그 확인을 가장 먼저 하고 실제 복구는 한 번만 예약한다.
     if(!_shouldMassQuickReturn()) return false;
     if(document.documentElement.classList.contains('app-active')) return false;
@@ -724,7 +724,7 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || 'V38-44';
+    var target = btn.getAttribute('data-target-version') || 'V1';
     var current = '';
     if(window.APP_VERSION) current = String(window.APP_VERSION).trim();
     if(!current && marker) current = String(marker.textContent || '').trim();
@@ -946,16 +946,12 @@ function _closePrayerAndReturn(){
     return /iphone|ipad|ipod/.test(u) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
   }
   function isKakao(){ return ua().indexOf('kakaotalk') > -1; }
-  function isAndroid(){ return ua().indexOf('android') > -1; }
   function isStandalone(){
     try{ if(window.navigator.standalone === true) return true; }catch(e){ console.warn('[가톨릭길동무]', e); }
     try{ return window.matchMedia && window.matchMedia('(display-mode: standalone)').matches; }catch(e){ console.warn('[가톨릭길동무]', e); }
     return false;
   }
   function shouldShow(){
-    // V38-44 임시 확인용: iPhone 설치 안내를 Android에서도 확인할 수 있게 한다.
-    // 실제 배포 확정 후에는 아래 Android 조건만 제거하면 된다.
-    if(isAndroid()) return true;
     return isIOS() && isKakao() && !isStandalone();
   }
   function showModal(){
@@ -975,10 +971,9 @@ function _closePrayerAndReturn(){
     var banner = document.getElementById('ios-kakao-safari-banner');
     if(!banner) return;
     var show = shouldShow();
-    var preview = show && isAndroid();
     if(show){
-      document.documentElement.classList.toggle('ios-install-preview-mode', !!preview);
-      document.documentElement.classList.toggle('ios-kakao-inapp', !preview);
+      document.documentElement.classList.add('ios-kakao-inapp');
+      document.documentElement.classList.remove('ios-install-preview-mode');
       banner.hidden = false;
       banner.setAttribute('aria-hidden','false');
     }else{
@@ -1029,7 +1024,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V38-44';
+    frame.src='diocese.html?v=V1';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -2308,7 +2303,7 @@ function _mkrImgRetreat(color,big){
 }
 function _mkrImg(color,big){
   const w=big?40:28,h=big?52:36;
-  // V38-44: iPhone/Android marker cross uses SVG bars, not an emoji/text glyph.
+  // V1: iPhone/Android marker cross uses SVG bars, not an emoji/text glyph.
   // This removes the purple emoji background and keeps a plain white cross.
   const crossBig = `<g fill="#fff" opacity="0.96"><rect x="18.45" y="10.5" width="3.1" height="18.5" rx="1.1"/><rect x="13.4" y="16.3" width="13.2" height="3.1" rx="1.1"/></g>`;
   const crossSmall = `<g fill="#fff" opacity="0.96"><rect x="12.85" y="7.8" width="2.3" height="12.8" rx="0.8"/><rect x="9.6" y="11.7" width="8.8" height="2.3" rx="0.8"/></g>`;
