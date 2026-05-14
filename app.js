@@ -76,6 +76,8 @@ function openMissa(){
   const dd=String(today.getDate()).padStart(2,'0');
   const url='https://missa.cbck.or.kr/DailyMissa/'+yyyy+mm+dd;
   try{ localStorage.setItem('oai_last_missa_url', url); }catch(e){ console.warn("[가톨릭길동무]", e); }
+  try{ if(typeof _resetCoverExitReady==='function') _resetCoverExitReady(); }catch(e){ console.warn("[가톨릭길동무]", e); }
+  try{ if(typeof _clearCoverExitArmed==='function') _clearCoverExitArmed(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   /* 외부 브라우저로 이동 — 화면 전환 페이드 후 location.href 방식 유지 */
   location.href = url;
 }
@@ -184,6 +186,11 @@ function _hideMassQuickMenuOnly(){
   _resetCoverExitReady();
   _clearCoverExitArmed();
   if(!modal) return;
+  /* aria-hidden 전 포커스 해제: 포커스가 남은 채 aria-hidden=true 되면
+     브라우저 강제 포커스 이동 이벤트가 끼어들어 replaceState 타이밍이 틀어진다. */
+  try{ var f=modal.querySelector(':focus'); if(f) f.blur(); }catch(e){ console.warn('[가톨릭길동무]',e); }
+  /* oai_mass_quick state는 patches.js popstate 핸들러의 isGuideModalOpen 분기에서
+     처리된다. 여기서 replaceState를 하면 popstate가 트리거되어 흐름이 꼬인다. */
   modal.classList.remove('show');
   modal.setAttribute('aria-hidden','true');
 }
@@ -194,15 +201,17 @@ function _isCoverAlreadyVisibleForQuickMenu(){
   }catch(e){ return false; }
 }
 function _returnToMassQuickMenu(){
-  // 외부 사이트에서 돌아온 뒤에는 화면 구조를 다시 재배치하지 않는다.
-  // 이미 커버가 보이면 goToCover()를 부르지 않고, 다음 프레임에 팝업만 복원한다.
   if(!_isCoverAlreadyVisibleForQuickMenu() && typeof goToCover==='function') goToCover();
   _resetCoverExitReady();
   _clearCoverExitArmed();
   _clearMassQuickReturnForReload();
-  var open = function(){ try{ openMassQuickMenu(); }catch(e){ console.warn('[가톨릭길동무]', e); } };
-  if(window.requestAnimationFrame) requestAnimationFrame(open);
-  else setTimeout(open, 0);
+  /* go(1) 복원 popstate 처리 중에 pushState(openMassQuickMenu 내부)를 동기로 실행하면
+     그 pushState가 즉시 popstate를 다시 트리거해 팝업이 바로 닫혀버린다.
+     replaceState(스택 정리)는 동기로, openMassQuickMenu는 현재 콜스택이 끝난 후 실행한다. */
+  /* replaceState는 popstate를 트리거하므로 사용하지 않는다.
+     현재 스택이 [_p:0, _p:1] 상태에서 openMassQuickMenu → pushState(mq) 하면
+     [_p:0, _p:1, _p:1(mq)] 이 되고, 팝업 뒤로가기 시 isGuideModalOpen=true 로 정상 처리된다. */
+  setTimeout(function(){ try{ openMassQuickMenu(); }catch(e){ console.warn('[가톨릭길동무]', e); } }, 0);
 }
 function openMassQuickMenu(opts){
   const modal=document.getElementById('mass-quick-modal');
@@ -227,6 +236,8 @@ function closeMassQuickMenu(){
 function openCatholicHymn(){
   const url='https://maria.catholic.or.kr/mobile/sungga/sungga.asp';
   try{ localStorage.setItem('oai_last_hymn_url', url); }catch(e){ console.warn("[가톨릭길동무]", e); }
+  try{ if(typeof _resetCoverExitReady==='function') _resetCoverExitReady(); }catch(e){ console.warn("[가톨릭길동무]", e); }
+  try{ if(typeof _clearCoverExitArmed==='function') _clearCoverExitArmed(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   location.href = url;
 }
 var _massQuickResumeTimer = null;
@@ -357,7 +368,7 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || 'V37-6-12';
+    var target = btn.getAttribute('data-target-version') || 'V37-6-13';
     var current = '';
     if(window.APP_VERSION) current = String(window.APP_VERSION).trim();
     if(!current && marker) current = String(marker.textContent || '').trim();
@@ -519,6 +530,8 @@ function openPrayerBook(opts){
       window.__MASS_QUICK_FROM_PRAYER__ = true;
     }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
+  try{ if(typeof _resetCoverExitReady==='function') _resetCoverExitReady(); }catch(e){ console.warn("[가톨릭길동무]", e); }
+  try{ if(typeof _clearCoverExitArmed==='function') _clearCoverExitArmed(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   const view=$('prayer-view');
   if(!view) return;
   const cv=$('cover');
@@ -638,7 +651,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V37-6-12';
+    frame.src='diocese.html?v=V37-6-13';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
