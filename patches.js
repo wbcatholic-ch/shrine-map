@@ -39,13 +39,7 @@
     try{
       var mq = $b('mass-quick-modal');
       if(mq && mq.classList.contains('show') && typeof window.closeMassQuickMenu === 'function'){
-        var fromPrayer = false;
-        try{ fromPrayer = !!(mq.dataset && mq.dataset.returnSource === 'prayer'); }catch(e){}
-        try{ if(typeof window._isPrayerPopupReturnSource === 'function' && window._isPrayerPopupReturnSource()) fromPrayer = true; }catch(e){}
         window.closeMassQuickMenu();
-        if(fromPrayer && typeof window._forceCoverAfterPrayerQuickPopup === 'function'){
-          window._forceCoverAfterPrayerQuickPopup();
-        }
       } else {
         document.querySelectorAll('.guide-modal.show').forEach(function(el){
           el.classList.remove('show');
@@ -79,17 +73,8 @@
     if(prayer && prayer.classList.contains('open')){
       var prayerDetail = $b('prayer-detail');
       if(prayerDetail && prayerDetail.classList.contains('show')){
-        // 기도문 본문은 내부 레이어이므로 첫 뒤로가기는 본문만 닫고 목록을 유지한다.
-        // 닫은 뒤 다음 뒤로가기에서 목록 → 빠른메뉴 팝업 흐름을 탈 수 있도록 앱용 trap만 조용히 확인한다.
         window.__APP_PRAYER_DETAIL_TS__ = Date.now();
-        if(typeof window.prCloseDetail === 'function') window.prCloseDetail();
-        else prayerDetail.classList.remove('show');
-        if(typeof window.showPrayerListOnly === 'function'){
-          try{ window.showPrayerListOnly(); }catch(e){ console.warn('[가톨릭길동무]', e); }
-        }
-        setTimeout(function(){
-          try{ if(typeof window._ensureAppBackTrap === 'function') window._ensureAppBackTrap('prayer-detail-to-list'); }catch(e){ console.warn('[가톨릭길동무]', e); }
-        }, 0);
+        prayerDetail.classList.remove('show');
         return true;
       }
       if(typeof window._closePrayerAndReturn === 'function') window._closePrayerAndReturn();
@@ -183,80 +168,36 @@
   window.addEventListener('popstate', function(){
     if(window._appExiting) return;
 
-    /* 주요기도문에서 돌아온 빠른메뉴 팝업을 닫은 직후 Android/PWA가
-       popstate를 한 번 더 보내면, 커버 상태를 앱 종료로 오판하지 말고
-       커버 트랩만 다시 고정한다. */
-    try{
-      var coverGuardUntil = Number(window.__OAI_PRAYER_POPUP_COVER_GUARD_UNTIL__ || 0);
-      if(coverGuardUntil && Date.now() < coverGuardUntil){
-        var freshPrayerCover = false;
-        try{ freshPrayerCover = window.__OAI_PRAYER_COVER_NEEDS_FIRST_TOAST__ === true || sessionStorage.getItem('oai_prayer_cover_needs_first_toast') === '1'; }catch(_e){}
-        if(!(freshPrayerCover && !appActive() && !isGuideModalOpen())){
-          _restoring = false;
-          if(typeof window._resetCoverBackTrap === 'function') window._resetCoverBackTrap('prayer-popup-cover-guard');
-          else if(typeof window._ensureCoverBackTrap === 'function') window._ensureCoverBackTrap();
-          else history.pushState({_p:1}, '', _href);
-          return;
-        }
-        window.__OAI_PRAYER_POPUP_COVER_GUARD_UNTIL__ = 0;
-      }
-    }catch(e){ console.warn('[가톨릭길동무]', e); }
-
-    /* 주요기도문에서 복귀한 빠른메뉴 팝업은 일반 안내팝업과 달리
-       닫히는 결과가 반드시 커버여야 한다. guide-modal 판정보다 먼저
-       출처 플래그를 확인해서 앱 종료/토스트 흐름으로 빠지는 것을 막는다. */
-    try{
-      var mqForPrayer = $b('mass-quick-modal');
-      var prayerPopupOpen = !!(mqForPrayer && mqForPrayer.classList.contains('show'));
-      var prayerPopupSource = false;
-      if(typeof window._isPrayerPopupReturnSource === 'function') prayerPopupSource = window._isPrayerPopupReturnSource();
-      try{ if(mqForPrayer && mqForPrayer.dataset && mqForPrayer.dataset.returnSource === 'prayer') prayerPopupSource = true; }catch(_e){}
-      if(prayerPopupOpen && prayerPopupSource){
-        _restoring = false;
-        if(typeof window._forceCoverAfterPrayerQuickPopup === 'function') window._forceCoverAfterPrayerQuickPopup();
-        else closeGuideModals();
-        return;
-      }
-    }catch(e){ console.warn('[가톨릭길동무]', e); }
-
-    /* 빠른메뉴에서 주요기도문으로 진입하기 위해 팝업용 mq history state를
-       직접 pop하는 중이면, 이것은 사용자의 뒤로가기 명령이 아니다.
-       기존 back 컨트롤러가 go(1) 복원이나 커버 종료 판단을 하지 않도록 여기서 흡수한다. */
-    try{
-      var mqPopUntil = Number(window.__OAI_MQ_STATE_POPPING__ || 0);
-      if(mqPopUntil && Date.now() < mqPopUntil){
-        _restoring = false;
-        window.__OAI_MQ_STATE_POPPING__ = 0;
-        var cb = window.__OAI_AFTER_MQ_STATE_POP__;
-        window.__OAI_AFTER_MQ_STATE_POP__ = null;
-        if(typeof cb === 'function') setTimeout(cb, 0);
-        return;
-      }
-    }catch(e){ console.warn('[가톨릭길동무]', e); }
-
     /* 빠른메뉴/안내 팝업이 열려 있으면 어떤 복원 상태보다 먼저 닫는다.
        _restoring이 남은 상태에서 이 검사를 건너뛰면 Android PWA가 팝업을 닫지 못하고
        바로 앱 종료 흐름으로 빠질 수 있다. */
     if(isGuideModalOpen()){
       _restoring = false;
       closeGuideModals();
-      try{ if(typeof window._ensureCoverBackTrap === 'function') window._ensureCoverBackTrap(); else history.replaceState({_p:1}, '', _href); }catch(e){ console.warn("[가톨릭길동무]", e); }
+      try{ history.pushState({_p:1}, '', _href); }catch(e){ console.warn("[가톨릭길동무]", e); }
       return;
     }
 
     if(_restoring){ _restoring = false; return; }
 
-    /* 커버: 토스트 → 두 번째에 종료. go(1) 재복원 없이 바로 트랩만 다시 심어 2번으로 끝낸다. */
+    /* 커버: 토스트 → 두 번째에 종료. go(1) 재복원 없이 바로 트랩만 다시 심어 2번으로 끝낸다.
+       단, _returnToMassQuickMenu가 setTimeout(0)으로 팝업 복원을 예약한 경우
+       아직 팝업이 열리지 않은 상태이므로 토스트/종료 흐름을 건너뛴다. */
     if(!appActive()){
+      if(window.__oaiReturningToQuickMenuPending){ window.__oaiReturningToQuickMenuPending = false; return; }
       var exiting = false;
       if(typeof window._showBackToast==='function') exiting = window._showBackToast() === true;
       if(!exiting){ try{ history.pushState({_p:1}, '', _href); }catch(e){ console.warn("[가톨릭길동무]", e); } }
       return;
     }
 
-    /* 앱 활성: go(1) 복원 후 처리 */
+    /* 앱 활성: go(1) 복원 후 처리
+       팝업에서 기도문으로 진입 시 mq state가 스택에 남아있어
+       go(1)만 하면 mq state 위치로 복원돼 popstate가 2번 발생한다.
+       __oaiMqStateInStack 플래그가 있으면 go(2)로 mq state까지 건너뛴다. */
     _restoring = true;
-    history.go(1);
+    if(window.__oaiMqStateInStack){ window.__oaiMqStateInStack = false; history.go(2); }
+    else history.go(1);
 
     if(closeExtOrModule()) return;  /* 닫으면서 goToCover() 이미 호출됨 */
     if(closeLayer()) return;        /* 레이어만 닫기, 앱 유지 */
@@ -444,7 +385,7 @@
   if(window.__APP_FONT_SCALE_GUARD__) return;
   window.__APP_FONT_SCALE_GUARD__=true;
   // V37: 문의·건의는 qa-firebase.html 한 경로로만 통일한다.
-  var QA_URL="qa-firebase.html?v=V38-18";
+  var QA_URL="qa-firebase.html?v=V37-4";
   var FONT_KEY='prayer_font_size', BASE=16, SIZES=[15,16,17,18,19,20,21,22,24,26,28];
   function el(id){return document.getElementById(id)}
   function getPx(){var px=parseInt(localStorage.getItem(FONT_KEY)||BASE,10);return (px>=15&&px<=28)?px:BASE;}
