@@ -170,7 +170,7 @@ const PrayerState = {
     });
   });
 })();
-const PR_FONT_SIZES = [13,14,15,16,17,18,19,20,21,22,24,26,28,30];
+const PR_FONT_SIZES = [13,14,15,16,17,18,19,20,21,22,24];
 const PR_FONT_KEY = 'prayer_font_size';
 
 function prG(id){ return document.getElementById(id); }
@@ -423,14 +423,6 @@ function prOpenDetail(prayer){
   ttl.textContent = prayer.title;
   content.innerHTML = ((prayer.content||prayer.body||'')+'').replace(/class="symbol"/g,'class="pr-symbol"');
   detail.classList.add('show');
-  try{
-    // 본문은 기도문 전용 history state(detail)만 추가한다.
-    // 공통 앱 back trap과 섞지 않는다.
-    if(typeof window._oaiPrayerPushDetailState === 'function') window._oaiPrayerPushDetailState('prayer-detail-open');
-    else if(typeof window._oaiArmPrayerBackTrap === 'function') window._oaiArmPrayerBackTrap('prayer-detail-open');
-  }catch(e){
-    console.warn('[가톨릭길동무]', e);
-  }
   // 현재 기도문 ID 저장 → 본문 즐겨찾기 버튼에 반영
   detail.dataset.pid = prayer.id || '';
   var starBtn = prG('pr-detail-star');
@@ -444,19 +436,9 @@ function prOpenDetail(prayer){
   setTimeout(function(){ if(body) body.scrollTop=0; }, 50);
 }
 
-window.prCloseDetail = function(opts){
+window.prCloseDetail = function(){
   const detail = prG('prayer-detail');
   if(detail) detail.classList.remove('show');
-  if(!(opts && opts.skipTrap)){
-    try{
-      // 버튼으로 본문을 닫는 경우 현재 history state가 detail일 수 있으므로
-      // 현재 state만 list로 바꾼다. 새 state를 push하지 않는다.
-      if(typeof window._oaiPrayerReplaceListState === 'function') window._oaiPrayerReplaceListState('prayer-detail-button-to-list');
-      else if(typeof window._oaiArmPrayerBackTrap === 'function') window._oaiArmPrayerBackTrap('prayer-detail-button-to-list');
-    }catch(e){
-      console.warn('[가톨릭길동무]', e);
-    }
-  }
 };
 
 /* ── IIFE 스코프 외부 노출 ── */
