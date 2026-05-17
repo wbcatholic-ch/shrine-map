@@ -1683,7 +1683,7 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, #2d4a0a, #3d5c1a
   border-radius: 13px;
   box-shadow: 0 1px 8px rgba(0,0,0,.06);
   cursor: pointer;
-  margin-bottom: 12px;
+  margin-bottom: 4px;
   transition: transform .12s, box-shadow .12s;
 }
 .web-card.app-pressing { transform: translateY(6px) scale(.982); box-shadow: none; filter: brightness(.96); }
@@ -2212,7 +2212,7 @@ html.app-active #qna-cover-btn { display: none; }
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 13px;
+  gap: 7px;
   text-align: center;
   cursor: pointer;
   background: var(--card-bg);
@@ -2903,7 +2903,7 @@ html.ios-device #cover-main-block {
   max-height: 700px;
   padding-bottom: 4px;
 }
-html.ios-device #cover .cover-card, html.ios-device #cover .cv-btn { padding: 7px; gap: 8px; }
+html.ios-device #cover .cover-card, html.ios-device #cover .cv-btn { padding: 7px; gap: 5px; }
 html.ios-device #cover .cover-emoji, html.ios-device #cover .cover-icon-wrap { font-size: 34px; }
 html.ios-device #cover .cover-name { font-size: calc(14px * var(--app-font-scale)); line-height: 1.14; letter-spacing: -.035em; }
 html.ios-device #cover #cover-action-row { margin-top: 6px; }
