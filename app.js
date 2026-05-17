@@ -837,7 +837,7 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || 'V1-S-A3';
+    var target = btn.getAttribute('data-target-version') || 'V1-S-A4';
     var current = '';
     if(window.APP_VERSION) current = String(window.APP_VERSION).trim();
     if(!current && marker) current = String(marker.textContent || '').trim();
@@ -1172,7 +1172,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V1-S-A3';
+    frame.src='diocese.html?v=V1-S-A4';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -2739,7 +2739,10 @@ function openInAppRoute(){
   if(!item.lat||!item.lng) return;
 
   function doRoute(spLat, spLng, spName){
-  closeInfoCard();
+  // 길찾기 시작 시 인포카드 닫힘 때문에 지도 중심이 먼저 움직이면,
+  // 곧바로 이어지는 경로 bounds 보정과 겹쳐 화면이 크게 흔들린다.
+  // 길찾기 흐름에서는 지도를 움직이지 않고 카드만 닫는다.
+  closeInfoCard({keepMap:true});
   openTab('route');
   _rS={idx:-1, name:spName, lat:spLat, lng:spLng};
   _rE={idx, name:item.name, lat:item.lat, lng:item.lng};
@@ -4184,6 +4187,23 @@ function _hideParishMarkersForRouteDisplay(){
   try{ if(_paSelMkr) _paSelMkr.setMap(null); }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 
+function _hideRetreatMarkersForRouteDisplay(){
+  if(_mode!=='retreat') return;
+  try{
+    (_retreatMarkers||[]).forEach(function(o){
+      if(!o || !o.marker) return;
+      // 피정의집 길찾기는 성당과 동일하게 출발/도착 임시 마커와 경로선만 남긴다.
+      // 원래 초록 마커들은 경로 표시 중 숨기고, resetRoute/closeTab의 기존 복구 흐름에 맡긴다.
+      o.marker.setMap(null);
+    });
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+}
+
+function _hideCategoryMarkersForRouteDisplay(){
+  if(_mode==='parish') _hideParishMarkersForRouteDisplay();
+  else if(_mode==='retreat') _hideRetreatMarkersForRouteDisplay();
+}
+
 async function _calcRoute(){
   if(!_rS||!_rE) return;
   _hideRouteGuide();
@@ -4205,7 +4225,9 @@ async function _calcRoute(){
   note.textContent='';note.style.display='none';
   }
 
-  _drawLine(_rS, navDest, null);
+  // API 응답 전 임시 직선은 지도 중심을 움직이지 않는다.
+  // 실제 경로 또는 추정 경로 확정 시 한 번만 bounds를 맞춰 화면 흔들림을 줄인다.
+  _drawLine(_rS, navDest, null, {fit:false});
 
   try{
   const res=await _kakaoDirectionsFetch(`${_rS.lng},${_rS.lat}`, `${navDest.lng},${navDest.lat}`);
@@ -4231,10 +4253,12 @@ async function _calcRoute(){
   if(!isJuk){
    note.textContent='* 직선거리 기반 추정값';note.style.display='block';
   }
+  _drawLine(_rS, navDest, null, {fit:true});
   }
 }
 
-function _drawLine(s1,s2,path){
+function _drawLine(s1,s2,path,opts){
+  opts = opts || {};
   _hideRouteGuide();
   if(_polyline) _polyline.setMap(null);
   _clearRouteTmpMarkers();
@@ -4244,12 +4268,7 @@ function _drawLine(s1,s2,path){
   strokeOpacity:path?0.88:0.7,strokeStyle:path?'solid':'dashed'});
   _polyline.setMap(_map);
   _refreshRouteTmpMarkers();
-  if(_mode==='parish'){
-    _hideParishMarkersForRouteDisplay();
-    // setBounds/idle 후 교구 마커·라벨이 다시 붙는 경우까지 한 번 더 정리한다.
-    setTimeout(_hideParishMarkersForRouteDisplay, 60);
-    setTimeout(_hideParishMarkersForRouteDisplay, 180);
-  }
+  _hideCategoryMarkersForRouteDisplay();
 
   if(path){
   _markers.forEach((m,i)=>{
@@ -4276,8 +4295,12 @@ function _drawLine(s1,s2,path){
   if(_endTmpMkr) bounds.extend(new _LL(s2.lat,s2.lng));
   // 길찾기 결과는 아래 route 시트에 가려지기 쉬우므로,
   // 일반 인포카드 중심 보정 대신 실제 route 시트 높이를 반영한 전용 bounds를 사용한다.
-  if(typeof _fitRouteBounds==='function') _fitRouteBounds(bounds, {repeat:true});
-  else { try{_map.setBounds(bounds,80,52,190,52);}catch(e){ console.warn("[가톨릭길동무]", e); } }
+  // 단, 여러 번 setBounds를 반복하면 성당/피정의집 경로 표시 순간 화면이 크게 흔들린다.
+  // 경로가 확정되는 시점에 한 번만 맞추고, API 대기용 임시 직선은 fit:false로 넘긴다.
+  if(opts.fit !== false){
+    if(typeof _fitRouteBounds==='function') _fitRouteBounds(bounds, {repeat:false});
+    else { try{_map.setBounds(bounds,80,52,190,52);}catch(e){ console.warn("[가톨릭길동무]", e); } }
+  }
 }
 
 function _showJukrimgulParkingMkr(show){
