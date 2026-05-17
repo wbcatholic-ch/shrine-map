@@ -837,7 +837,7 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || 'V1-S-A22';
+    var target = btn.getAttribute('data-target-version') || 'V1-S-A23';
     var current = '';
     if(window.APP_VERSION) current = String(window.APP_VERSION).trim();
     if(!current && marker) current = String(marker.textContent || '').trim();
@@ -1091,9 +1091,20 @@ function _closePrayerAndReturn(){
   function shouldShow(){
     return isIOS() && isKakao() && !isStandalone();
   }
+  function loadIosSafariGuideImages(){
+    var m = document.getElementById('ios-safari-guide-modal');
+    if(!m || m.__iosSafariGuideImagesLoaded) return;
+    m.__iosSafariGuideImagesLoaded = true;
+    try{
+      m.querySelectorAll('img[data-src]').forEach(function(img){
+        if(!img.getAttribute('src')) img.setAttribute('src', img.getAttribute('data-src'));
+      });
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }
   function showModal(){
     var m = document.getElementById('ios-safari-guide-modal');
     if(!m) return;
+    loadIosSafariGuideImages();
     m.classList.add('show');
     m.setAttribute('aria-hidden','false');
     try{ document.activeElement && document.activeElement.blur && document.activeElement.blur(); }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -1172,7 +1183,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V1-S-A22';
+    frame.src='diocese.html?v=V1-S-A23';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
