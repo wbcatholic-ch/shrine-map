@@ -642,7 +642,7 @@
   if(window.__APP_FONT_SCALE_GUARD__) return;
   window.__APP_FONT_SCALE_GUARD__=true;
   // V37: 문의·건의는 qa-firebase.html 한 경로로만 통일한다.
-  var QA_URL="qa-firebase.html?v=V1-S-A21";
+  var QA_URL="qa-firebase.html?v=V1-S-A22";
   var FONT_KEY='prayer_font_size', BASE=16;
   function el(id){return document.getElementById(id)}
   function getPx(){var px=parseInt(localStorage.getItem(FONT_KEY)||BASE,10);return (px>=13&&px<=30)?px:BASE;}
@@ -891,7 +891,8 @@
   }
 
   function init(){
-    // 웹사이트 목록 세로 스크롤 우선: web-list 스와이프 전환 리스너는 붙이지 않는다.
+    // 웹사이트는 세로 스크롤을 CSS flex 컨테이너로 보장하고, 탭 전환은 touchend에서만 처리한다.
+    bindWebSwipe();
     wrapRouteReset();
     watchRouteSheet();
   }
