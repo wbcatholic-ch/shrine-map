@@ -642,7 +642,7 @@
   if(window.__APP_FONT_SCALE_GUARD__) return;
   window.__APP_FONT_SCALE_GUARD__=true;
   // V37: 문의·건의는 qa-firebase.html 한 경로로만 통일한다.
-  var QA_URL="qa-firebase.html?v=V1-S-A17";
+  var QA_URL="qa-firebase.html?v=V1-S-A18";
   var FONT_KEY='prayer_font_size', BASE=16;
   function el(id){return document.getElementById(id)}
   function getPx(){var px=parseInt(localStorage.getItem(FONT_KEY)||BASE,10);return (px>=13&&px<=30)?px:BASE;}
@@ -803,14 +803,14 @@
     }, {passive:false, capture:true});
   }
 
-  /* 웹사이트 좌우 스와이프 탭 이동 — 기도문과 동일 감도 */
+  /* 웹사이트 좌우 스와이프 탭 이동 — 세로 스크롤을 우선 보장한다. */
   function bindWebSwipe(){
     var el=$('web-list');
     if(!el || el.__oaiFinalWebSwipe) return;
     el.__oaiFinalWebSwipe = true;
     var sx=0, sy=0;
-    var THRESHOLD = 32;
-    var HORIZONTAL_RATIO = 1.03;
+    var THRESHOLD = 40;
+    var HORIZONTAL_RATIO = 1.35;
     function isHorizontalSwipe(dx, dy){
       return Math.abs(dx) >= THRESHOLD && Math.abs(dx) >= Math.abs(dy) * HORIZONTAL_RATIO;
     }
@@ -818,11 +818,7 @@
       if(!e.touches || !e.touches[0]) return;
       sx=e.touches[0].clientX; sy=e.touches[0].clientY;
     }, {passive:true});
-    el.addEventListener('touchmove', function(e){
-      if(!e.touches || !e.touches[0]) return;
-      var dx=e.touches[0].clientX-sx, dy=e.touches[0].clientY-sy;
-      if(Math.abs(dx)>7 && Math.abs(dx)>Math.abs(dy)*HORIZONTAL_RATIO && e.cancelable) e.preventDefault();
-    }, {passive:false});
+    /* 세로 스크롤 방해 방지를 위해 touchmove에서는 preventDefault 하지 않는다. */
     el.addEventListener('touchend', function(e){
       if(!e.changedTouches || !e.changedTouches[0]) return;
       var dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
@@ -835,7 +831,6 @@
       var nextCat = tabs[next].dataset.webCat || tabs[next].id.replace('web-cat_','');
       if(typeof window.setWebCat==='function') window.setWebCat(nextCat);
       else tabs[next].click();
-      /* 기도문과 동일하게 overlay 방식 시각 피드백 사용 */
       if(typeof window.oaiSwipeAction==='function') window.oaiSwipeAction($('web-list'), dx<0?'left':'right');
     }, {passive:true});
   }
@@ -902,8 +897,7 @@
     bindHorizontalGuard($('prayer-view'));
     bindHorizontalGuard($('prayer-list-view'));
     bindHorizontalGuard($('prayer-detail'));
-    bindHorizontalGuard($('web-view'));
-    bindHorizontalGuard($('web-list'));
+    /* 웹사이트 목록은 세로 스크롤을 우선해야 하므로 별도 스와이프 함수만 적용한다. */
     bindWebSwipe();
     wrapRouteReset();
     watchRouteSheet();
