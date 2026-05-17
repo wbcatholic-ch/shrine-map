@@ -682,7 +682,7 @@
   if(window.__APP_FONT_SCALE_GUARD__) return;
   window.__APP_FONT_SCALE_GUARD__=true;
   // V37: 문의·건의는 qa-firebase.html 한 경로로만 통일한다.
-  var QA_URL="qa-firebase.html?v=V1-S-A13";
+  var QA_URL="qa-firebase.html?v=V1-S-A14";
   var FONT_KEY='prayer_font_size', BASE=16, SIZES=[13,14,15,16,17,18,19,20,21,22,24,26,28,30];
   function el(id){return document.getElementById(id)}
   function getPx(){var px=parseInt(localStorage.getItem(FONT_KEY)||BASE,10);return (px>=13&&px<=30)?px:BASE;}
@@ -692,7 +692,6 @@
   window.prAdjustFont=function(delta){var cur=getPx(),i=SIZES.indexOf(cur);if(i<0)i=SIZES.indexOf(BASE);i+=(delta>0?1:-1);if(i<0)i=0;if(i>=SIZES.length)i=SIZES.length-1;setPx(SIZES[i]);applyScale();setTimeout(applyScale,80);setTimeout(applyScale,220);};
   function ensureCoverControls(){var cover=el('cover');if(!cover)return;var box=el('cover-font-controls');if(!box){box=document.createElement('div');box.id='cover-font-controls';cover.appendChild(box);}box.className='pr-font-ctrl';box.innerHTML='<button class="pr-font-btn pr-sm" type="button" aria-label="글자 작게">가</button><div class="pr-font-divider"></div><button class="pr-font-btn pr-lg" type="button" aria-label="글자 크게">가</button>';var sm=box.querySelector('.pr-sm'),lg=box.querySelector('.pr-lg');if(sm)sm.onclick=function(e){e.preventDefault();e.stopPropagation();window.prAdjustFont(-1)};if(lg)lg.onclick=function(e){e.preventDefault();e.stopPropagation();window.prAdjustFont(1)};}
   function setEmojiIcons(){var icons={'cc-1':'✝️','cc-2':'⛪','cc-3':'🙏','cc-4':'🌿','cc-5':'🥾','cc-6':'🌐','cc-7':'🧭'};Object.keys(icons).forEach(function(id){var btn=el(id);if(!btn)return;var wrap=btn.querySelector('.cover-icon-wrap');if(wrap)wrap.innerHTML='<span class="cover-emoji" aria-hidden="true">'+icons[id]+'</span>';});}
-  function normalizeLabels(root){root=root||document;try{root.querySelectorAll('button,a,span,div').forEach(function(n){if(!n||!n.childNodes||n.childNodes.length!==1||n.childNodes[0].nodeType!==3)return;var t=n.textContent,nt=t;nt=nt.replace(/카카오\s*맵/g,'카카오내비').replace(/카카오\s*나비/g,'카카오내비').replace(/Kakao\s*Map/gi,'카카오내비').replace(/Kakao\s*Navi/gi,'카카오내비');nt=nt.replace(/상장예식\s*\(\s*위령기도1\s*\)/g,'위령기도1(상장예식)').replace(/^위령기도1$/g,'위령기도1(상장예식)').replace(/Memorial Prayer 1\s*\(\s*Courting Ceremony\s*\)/gi,'위령기도1(상장예식)');nt=nt.replace(/위령\s*기도2\s*\(\s*짧은\s*위령기도\s*\)/g,'위령기도2 (짧은 위령기도)').replace(/^위령기도2$/g,'위령기도2 (짧은 위령기도)').replace(/Memorial Prayer 2\s*\(\s*short Memorial Prayer\s*\)/gi,'위령기도2 (짧은 위령기도)');if(nt!==t)n.textContent=nt;});}catch(e){ console.warn("[가톨릭길동무]", e); }}
   function configureQna(){
     window.QNA_FORM_URL=QA_URL;
     window.QNA_ANSWER_URL=QA_URL;
@@ -703,28 +702,11 @@
   }
   window.qnaOpenFormUrl=function(){ if(typeof window.goQaFirebase==='function') window.goQaFirebase(); else location.href=QA_URL; };
   window.qnaOpenAnswerUrl=function(){ if(typeof window.goQaFirebase==='function') window.goQaFirebase(); else location.href=QA_URL; };
-  function ll(lat,lng){try{if(typeof _LL==='function')return new _LL(lat,lng);}catch(e){ console.warn("[가톨릭길동무]", e); }try{if(window.kakao&&kakao.maps)return new kakao.maps.LatLng(lat,lng);}catch(e){ console.warn("[가톨릭길동무]", e); }return null;}
-  function getMap(){try{if(typeof _map!=='undefined'&&_map)return _map;}catch(e){ console.warn("[가톨릭길동무]", e); }return window._map||null;}
-  function getLatLng(item){if(!item)return null;var lat=item.lat,lng=item.lng;if((lat==null||lng==null)&&item.coords){lat=item.coords.latitude||item.coords.lat;lng=item.coords.longitude||item.coords.lng;}lat=Number(lat);lng=Number(lng);return(isFinite(lat)&&isFinite(lng))?{lat:lat,lng:lng}:null;}
-  function pan(map,pos){try{if(map&&typeof map.panTo==='function')map.panTo(pos);else if(map)map.setCenter(pos);}catch(e){try{map.setCenter(pos)}catch(_){ console.warn("[가톨릭길동무] silent catch"); }}}
-  function ensureMilitaryParish(){try{if(typeof _RAW!=='undefined'&&Array.isArray(_RAW)&&!_RAW.some(function(r){return r&&r[1]==='ML';})){_RAW.push(['천주교 국군중앙주교좌성당','ML','서울 용산구 한강대로40길 46','02-798-2457','','https://www.gunjong.or.kr/',37.5295394,126.9717368]);}}catch(e){ console.warn("[가톨릭길동무]", e); }}
-  function ensureQnaButton(){
-    var cover=el('cover'); if(!cover) return;
-    var btn=el('qna-cover-btn');
-    if(!btn){
-      btn=document.createElement('button');
-      btn.id='qna-cover-btn';
-      btn.type='button';
-      btn.setAttribute('aria-label','문의·건의');
-      btn.textContent='💬 문의·건의';
-      cover.appendChild(btn);
-    }
-    btn.onclick=function(ev){ if(ev) ev.preventDefault(); window.openQnaView(); };
-  }
+  function wireQnaButton(){var btn=el('qna-cover-btn');if(btn)btn.onclick=function(ev){if(ev)ev.preventDefault();window.openQnaView();};}
   window.openQnaView=function(){ location.href=QA_URL; };
   window.goQaFirebase=function(){ location.href=QA_URL; };
-  function boot(){ensureMilitaryParish();ensureCoverControls();setEmojiIcons();normalizeLabels(document);configureQna();ensureQnaButton();applyScale();}
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();window.addEventListener('load',function(){boot();setTimeout(boot,250);setTimeout(boot,900);},{once:true});window.addEventListener('pageshow',boot);document.addEventListener('click',function(){setTimeout(function(){normalizeLabels(document);configureQna();ensureQnaButton();},80);},true);
+  function boot(){ensureCoverControls();setEmojiIcons();configureQna();wireQnaButton();applyScale();}
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();window.addEventListener('load',function(){boot();setTimeout(boot,250);setTimeout(boot,900);},{once:true});window.addEventListener('pageshow',boot);
 })();
 
 // user-cache mode: keep app cache stable; refresh changed files through versioned URLs.
