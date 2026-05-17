@@ -642,7 +642,7 @@
   if(window.__APP_FONT_SCALE_GUARD__) return;
   window.__APP_FONT_SCALE_GUARD__=true;
   // V37: 문의·건의는 qa-firebase.html 한 경로로만 통일한다.
-  var QA_URL="qa-firebase.html?v=V1-S-A18";
+  var QA_URL="qa-firebase.html?v=V1-S-A19";
   var FONT_KEY='prayer_font_size', BASE=16;
   function el(id){return document.getElementById(id)}
   function getPx(){var px=parseInt(localStorage.getItem(FONT_KEY)||BASE,10);return (px>=13&&px<=30)?px:BASE;}
@@ -786,7 +786,15 @@
   window.__APP_BACK_ROUTE_GUARD__ = true;
 
   function $(id){return document.getElementById(id);}
-  /* 가로 스와이프 중 브라우저/웹뷰 화면이 함께 밀리는 것을 막는다. */
+  function flash(el, dir){
+    if(!el) return;
+    el.classList.remove('oai-swipe-left','oai-swipe-right');
+    void el.offsetWidth;
+    el.classList.add(dir==='right'?'oai-swipe-right':'oai-swipe-left');
+    setTimeout(function(){try{el.classList.remove('oai-swipe-left','oai-swipe-right');}catch(e){ console.warn("[가톨릭길동무]", e); }},240);
+  }
+  /* 가로로 밀 때 브라우저/웹뷰 자체 화면이 옆으로 밀리는 현상 차단 */
+  /* 가로 스와이프 중 브라우저 화면이 함께 밀리는 것을 막는다. */
   function bindHorizontalGuard(el){
     if(!el || el.__oaiPreciseGuard) return;
     el.__oaiPreciseGuard = true;
@@ -803,14 +811,14 @@
     }, {passive:false, capture:true});
   }
 
-  /* 웹사이트 좌우 스와이프 탭 이동 — 세로 스크롤을 우선 보장한다. */
+  /* 웹사이트 좌우 스와이프 탭 이동 — 기도문과 동일 감도 */
   function bindWebSwipe(){
     var el=$('web-list');
     if(!el || el.__oaiFinalWebSwipe) return;
     el.__oaiFinalWebSwipe = true;
     var sx=0, sy=0;
-    var THRESHOLD = 40;
-    var HORIZONTAL_RATIO = 1.35;
+    var THRESHOLD = 32;
+    var HORIZONTAL_RATIO = 1.03;
     function isHorizontalSwipe(dx, dy){
       return Math.abs(dx) >= THRESHOLD && Math.abs(dx) >= Math.abs(dy) * HORIZONTAL_RATIO;
     }
@@ -818,7 +826,11 @@
       if(!e.touches || !e.touches[0]) return;
       sx=e.touches[0].clientX; sy=e.touches[0].clientY;
     }, {passive:true});
-    /* 세로 스크롤 방해 방지를 위해 touchmove에서는 preventDefault 하지 않는다. */
+    el.addEventListener('touchmove', function(e){
+      if(!e.touches || !e.touches[0]) return;
+      var dx=e.touches[0].clientX-sx, dy=e.touches[0].clientY-sy;
+      if(Math.abs(dx)>7 && Math.abs(dx)>Math.abs(dy)*HORIZONTAL_RATIO && e.cancelable) e.preventDefault();
+    }, {passive:false});
     el.addEventListener('touchend', function(e){
       if(!e.changedTouches || !e.changedTouches[0]) return;
       var dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
@@ -831,7 +843,9 @@
       var nextCat = tabs[next].dataset.webCat || tabs[next].id.replace('web-cat_','');
       if(typeof window.setWebCat==='function') window.setWebCat(nextCat);
       else tabs[next].click();
+      /* 기도문과 동일하게 overlay 방식 시각 피드백 사용 */
       if(typeof window.oaiSwipeAction==='function') window.oaiSwipeAction($('web-list'), dx<0?'left':'right');
+      else flash($('web-list'), dx<0?'left':'right');
     }, {passive:true});
   }
 
@@ -896,8 +910,8 @@
   function init(){
     bindHorizontalGuard($('prayer-view'));
     bindHorizontalGuard($('prayer-list-view'));
-    bindHorizontalGuard($('prayer-detail'));
-    /* 웹사이트 목록은 세로 스크롤을 우선해야 하므로 별도 스와이프 함수만 적용한다. */
+    bindHorizontalGuard($('web-view'));
+    bindHorizontalGuard($('web-list'));
     bindWebSwipe();
     wrapRouteReset();
     watchRouteSheet();
@@ -911,11 +925,14 @@
   if(window.__APP_PRECISE_GUARD__) return;
   window.__APP_PRECISE_GUARD__ = true;
   function byId(id){ return document.getElementById(id); }
+  function openNewTab(url){ if(!url) return; try{ var w=window.open(url,'_blank','noopener'); if(w) return; }catch(e){ console.warn("[가톨릭길동무]", e); } try{ var a=document.createElement('a'); a.href=url; a.target='_blank'; a.rel='noopener'; document.body.appendChild(a); a.click(); setTimeout(function(){try{a.remove();}catch(e){ console.warn("[가톨릭길동무]", e); }},300); }catch(e){ alert('새창 열기가 차단되었습니다. 브라우저의 팝업 허용을 확인해 주세요.'); } }
   /* openDioceseExternal 중복 덮어쓰기 제거: 위쪽의 상태보존/복귀안정화 버전을 그대로 사용 */
   function rememberRouteDest(){ try{ if(_rE&&_rE.lat) return {lat:_rE.lat,lng:_rE.lng,idx:_rE.idx,name:_rE.name}; if(_curInfoItem&&_curInfoItem.item) return {lat:_curInfoItem.item.lat,lng:_curInfoItem.item.lng,idx:_curInfoItem.idx,item:_curInfoItem.item,name:_curInfoItem.item.name}; }catch(e){ console.warn("[가톨릭길동무]", e); } return null; }
   function restoreDest(dest){ if(!dest||!dest.lat) return; setTimeout(function(){ try{ var items=(typeof _getCurrentItems==='function')?_getCurrentItems():[]; var idx=(typeof dest.idx==='number'&&dest.idx>=0)?dest.idx:items.findIndex(function(p){return Number(p.lat)===Number(dest.lat)&&Number(p.lng)===Number(dest.lng);}); var item=idx>=0?items[idx]:dest.item; if(item&&typeof _showInfoCard==='function') _showInfoCard(item,idx); if(item&&typeof _focusMarkerAboveInfoCard==='function') _focusMarkerAboveInfoCard(item); }catch(e){ console.warn("[가톨릭길동무]", e); } },80); }
   window.oaiResetRouteThenClose=function(){ var dest=rememberRouteDest(); try{ if(typeof window.resetRoute==='function') window.resetRoute(); }catch(e){ console.warn("[가톨릭길동무]", e); } try{_routeMode=false;}catch(e){ console.warn("[가톨릭길동무]", e); } var rs=byId('sheet-route'); if(rs) rs.classList.remove('open'); restoreDest(dest); };
-  /* 가로 스와이프 보호는 __APP_BACK_ROUTE_GUARD__의 bindHorizontalGuard 한 곳에서 담당한다. */
+  function guardHorizontal(el){ if(!el||el.__oaiPreciseGuard) return; el.__oaiPreciseGuard=true; var sx=0,sy=0,h=false; el.addEventListener('touchstart',function(e){if(!e.touches||!e.touches[0])return; sx=e.touches[0].clientX; sy=e.touches[0].clientY; h=false;},{passive:true}); el.addEventListener('touchmove',function(e){if(!e.touches||!e.touches[0])return; var dx=e.touches[0].clientX-sx,dy=e.touches[0].clientY-sy; if(Math.abs(dx)>10&&Math.abs(dx)>Math.abs(dy)*1.15) h=true; if(h&&e.cancelable)e.preventDefault();},{passive:false}); }
+  function init(){ ['prayer-view','prayer-list-view','prayer-detail','web-view','web-list'].forEach(function(id){guardHorizontal(byId(id));}); }
+  if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',init); else init(); window.addEventListener('load',init); window.addEventListener('pageshow',init);
 })();
 (function(){
   'use strict';
@@ -1150,8 +1167,6 @@
   var MOVE_CANCEL_PX = 7;
 
   /* 스크롤/당겨서 새로고침 중 눌림 방지 적용 대상: 목록형 요소만 */
-  var massQuickButtonSelector = '#mass-quick-modal .mass-quick-btn';
-
   var delayedSelectors = [
     '#cover .cover-card','#cover .cv-hotspot','#cover .cv-btn',
     '#prayer-list-view .pr-item','#prayer-list-view .prayer-item','#prayer-list-view .prayer-card','#prayer-list-view .prayer-list-item','#prayer-list-view .pr-list-item',
@@ -1165,7 +1180,7 @@
 
   var directSelectors = [
     'a','input','textarea','select','label',
-    massQuickButtonSelector,
+    '#mass-quick-modal .mass-quick-btn',
     '.ic-link-btn','.ic-hp-btn','.ic-guide-btn',
     '.btn-kakao-route','.btn-kakao-nav','.c-btn',
     '.trail-foot','.web-card-foot','.trail-sh-foot','.trail-sh-body',
@@ -1193,8 +1208,9 @@
     setTimeout(function(){ clearPress(el); }, FEEDBACK_MS);
   }
 
+  var instantPressSelectors = '#mass-quick-modal .mass-quick-btn';
   document.addEventListener('pointerdown', function(e){
-    var el = closest(e.target, massQuickButtonSelector);
+    var el = closest(e.target, instantPressSelectors);
     if(!el) return;
     press(el);
   }, true);
