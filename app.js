@@ -837,7 +837,7 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || 'V1-S-A5';
+    var target = btn.getAttribute('data-target-version') || 'V1-S-A7';
     var current = '';
     if(window.APP_VERSION) current = String(window.APP_VERSION).trim();
     if(!current && marker) current = String(marker.textContent || '').trim();
@@ -1172,7 +1172,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V1-S-A5';
+    frame.src='diocese.html?v=V1-S-A7';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -3865,7 +3865,7 @@ function doRegionSearch(){
     docs.forEach(d=>{
       const nm=d.place_name||'', ad=d.road_address_name||d.address_name||'';
       const cat=d.category_name||'', url=d.place_url||'';
-      html+=`<div class="region-place-cand" data-lat="${parseFloat(d.y)}" data-lng="${parseFloat(d.x)}" data-name="${_regionAttrEsc(nm)}" data-addr="${_regionAttrEsc(ad)}" data-cat="${_regionAttrEsc(cat)}" data-url="${_regionAttrEsc(url)}" style="padding:11px 14px;border-bottom:1px solid #f0f0f0;cursor:pointer;background:#fff;display:flex;align-items:center;gap:10px;"><div style="font-size:20px">📍</div><div><div style="font-size:14px;font-weight:600;color:#1F2937">${_regionHtmlEsc(nm)}</div>${ad?`<div style="font-size:12px;color:#888;margin-top:2px">${_regionHtmlEsc(ad)}</div>`:''}</div></div>`;
+      html+=`<div class="region-place-cand nearby-item" data-lat="${parseFloat(d.y)}" data-lng="${parseFloat(d.x)}" data-name="${_regionAttrEsc(nm)}" data-addr="${_regionAttrEsc(ad)}" data-cat="${_regionAttrEsc(cat)}" data-url="${_regionAttrEsc(url)}"><div class="sm-place-icon" aria-hidden="true">📍</div><div class="nearby-info"><div class="nearby-name">${_regionHtmlEsc(nm)}</div>${ad?`<div class="nearby-addr">${_regionHtmlEsc(ad)}</div>`:''}</div></div>`;
     });
     body.innerHTML=html;
     body.onclick=function(e){
