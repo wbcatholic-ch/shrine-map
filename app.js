@@ -837,7 +837,7 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || 'V1-S-A1';
+    var target = btn.getAttribute('data-target-version') || 'V1-S-A2';
     var current = '';
     if(window.APP_VERSION) current = String(window.APP_VERSION).trim();
     if(!current && marker) current = String(marker.textContent || '').trim();
@@ -1172,7 +1172,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V1-S-A1';
+    frame.src='diocese.html?v=V1-S-A2';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -3147,6 +3147,17 @@ function _parishDioCodeOf(p){
   return p && p.diocese ? (_PARISH_DIO_CODE_MAP[p.diocese] || null) : null;
 }
 
+function _isParishDioBoundsOutlier(p, code){
+  if(!p) return false;
+  const name=String(p.name||'');
+  const addr=String(p.addr||'');
+  // 교구 전체 보기의 중심/범위 계산에서만 섬 지역을 제외한다.
+  // 목록·검색·개별 성당 선택·길찾기 데이터는 그대로 유지한다.
+  if(code==='IC' && (name.indexOf('백령')>=0 || addr.indexOf('백령')>=0)) return true;
+  if(code==='DG' && (addr.indexOf('울릉')>=0 || name.indexOf('울릉')>=0)) return true;
+  return false;
+}
+
 // 교구별 성당 목록 (코드 기준 분류)
 const _PA_BY_DIO = (function(){
   const m={};
@@ -3177,6 +3188,7 @@ function _parishDioCenter(code){
   let minLat=Infinity,maxLat=-Infinity,minLng=Infinity,maxLng=-Infinity,count=0;
   parishes.forEach(function(p){
     if(!p||!p.lat||!p.lng||p.lat===0||p.lng===0) return;
+    if(_isParishDioBoundsOutlier(p, code)) return;
     minLat=Math.min(minLat,p.lat); maxLat=Math.max(maxLat,p.lat);
     minLng=Math.min(minLng,p.lng); maxLng=Math.max(maxLng,p.lng);
     count++;
@@ -3324,6 +3336,7 @@ function _fitParishDioBounds(code, opts){
   try{
     parishes.forEach(function(p){
       if(!p||!p.lat||!p.lng||p.lat===0||p.lng===0) return;
+      if(_isParishDioBoundsOutlier(p, code)) return;
       only=p;
       const pos=new _LL(p.lat,p.lng);
       if(!bounds) bounds=new _LB();
@@ -4116,6 +4129,24 @@ function _selectRouteItem(idx){
   }
 }
 
+function _hideParishMarkersForRouteDisplay(){
+  if(_mode!=='parish') return;
+  try{ _clearParishNearbyMarkers(); }catch(e){ console.warn('[가톨릭길동무]', e); }
+  try{ _hideDioOverlays(); }catch(e){ console.warn('[가톨릭길동무]', e); }
+  try{
+    Object.keys(_dioMkrs||{}).forEach(function(code){
+      (_dioMkrs[code]||[]).forEach(function(mk){
+        try{ mk.setMap(null); }catch(e){ console.warn('[가톨릭길동무]', e); }
+      });
+    });
+    if(_parishIdleListener){
+      try{ kakao.maps.event.removeListener(_parishIdleListener); }catch(e){ console.warn('[가톨릭길동무]', e); }
+      _parishIdleListener=null;
+    }
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+  try{ if(_paSelMkr) _paSelMkr.setMap(null); }catch(e){ console.warn('[가톨릭길동무]', e); }
+}
+
 async function _calcRoute(){
   if(!_rS||!_rE) return;
   _hideRouteGuide();
@@ -4176,6 +4207,7 @@ function _drawLine(s1,s2,path){
   strokeOpacity:path?0.88:0.7,strokeStyle:path?'solid':'dashed'});
   _polyline.setMap(_map);
   _refreshRouteTmpMarkers();
+  if(_mode==='parish') _hideParishMarkersForRouteDisplay();
 
   if(path){
   _markers.forEach((m,i)=>{
