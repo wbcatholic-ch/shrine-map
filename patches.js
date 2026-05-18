@@ -109,6 +109,24 @@
   try{ window._oaiCloseGeneralModuleToCover = closeGeneralModuleToCover; }catch(_e){}
 
   /* ── 외부·모듈 뷰 닫기 */
+  /* ── 모듈 내부 레이어 닫기: Step 9-4 범위
+     순례길 상세 시트가 열려 있으면 모듈 전체를 닫기 전에 상세 시트만 먼저 닫는다. */
+  function closeModuleInnerLayer(){
+    var trailSheet = null;
+    try{ trailSheet = document.querySelector('.trail-sheet.open'); }catch(_e){}
+    if(trailSheet){
+      try{
+        if(typeof window.trailCloseSheet === 'function') window.trailCloseSheet();
+        else trailSheet.classList.remove('open');
+      }catch(e){
+        try{ trailSheet.classList.remove('open'); }catch(_e){}
+        console.warn('[가톨릭길동무]', e);
+      }
+      return true;
+    }
+    return false;
+  }
+
   function closeExtOrModule(){
     /* 매일미사 */
     var missa = $b('missa-view');
@@ -513,6 +531,7 @@
     try{ history.go(1); }catch(e){ _restoring = false; console.warn("[가톨릭길동무]", e); }
 
     if(handlePrayerBack('prayer-popstate')) return;
+    if(closeModuleInnerLayer()) return;
     if(closeExtOrModule()) return;
     if(closeLayer()) return;
     callGTC();
@@ -525,6 +544,7 @@
       if(typeof window._showBackToast==='function') window._showBackToast();
       return;
     }
+    if(closeModuleInnerLayer()) return;
     if(closeExtOrModule()) return;
     if(closeLayer()) return;
     callGTC();
@@ -674,7 +694,7 @@
   window.__APP_FONT_SCALE_GUARD__=true;
   // V1-S: 커버 글자 크기 조절은 prayer.js에 의존하지 않는 공통 함수가 담당한다.
   // prayer.js는 기도문 화면이 열렸을 때 같은 localStorage 값을 읽어 자체 UI를 맞춘다.
-  var QA_URL="qa-firebase.html?v=V1-S-A36";
+  var QA_URL="qa-firebase.html?v=V1-S-A37";
   var FONT_KEY='prayer_font_size';
   var BASE=16;
   var FONT_SIZES=[13,14,15,16,17,18,19,20,21,22,24,26,28,30];
