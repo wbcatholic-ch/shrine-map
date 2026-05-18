@@ -837,7 +837,7 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || 'V1-S-A25';
+    var target = btn.getAttribute('data-target-version') || 'V1-S-A26';
     var current = '';
     if(window.APP_VERSION) current = String(window.APP_VERSION).trim();
     if(!current && marker) current = String(marker.textContent || '').trim();
@@ -1170,7 +1170,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V1-S-A25';
+    frame.src='diocese.html?v=V1-S-A26';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1534,6 +1534,8 @@ function _unpack(raw){return raw.map((r,i)=>({_idx:i,name:r[0],diocese:_DIO[r[1]
 let PARISHES=[];
 let _parishRawLoaded=false;
 let _parishDioIndexReady=false;
+let _parishDataLoadPromise=null;
+const _PARISH_ASSET_VERSION='V1-S-A26';
 function _buildParishList(raw){
   raw = Array.isArray(raw) ? raw : [];
   return raw.map(r=>{
@@ -1545,14 +1547,51 @@ function _buildParishList(raw){
        lat:r[6],lng:r[7]};
   });
 }
-function _setParishRawData(raw){
+function _getParishRawGlobal(){
+  try{ if(Array.isArray(window._PA_RAW)) return window._PA_RAW; }catch(e){ console.warn('[가톨릭길동무]', e); }
+  try{ if(typeof _PA_RAW!=='undefined' && Array.isArray(_PA_RAW)) return _PA_RAW; }catch(e){ console.warn('[가톨릭길동무]', e); }
+  return null;
+}
+function _setParishRawData(raw, loaded){
+  raw = Array.isArray(raw) ? raw : [];
   PARISHES=_buildParishList(raw);
-  _parishRawLoaded=Array.isArray(raw);
+  _parishRawLoaded=loaded !== false && raw.length > 0;
   if(_parishDioIndexReady && typeof _rebuildParishDioIndex==='function') _rebuildParishDioIndex();
   return PARISHES;
 }
 function _initParishDataFromGlobal(){
-  return _setParishRawData((typeof _PA_RAW!=='undefined' && Array.isArray(_PA_RAW)) ? _PA_RAW : []);
+  const raw=_getParishRawGlobal();
+  return _setParishRawData(raw || [], !!raw);
+}
+function _ensureParishDataLoaded(){
+  const existingRaw=_getParishRawGlobal();
+  if(existingRaw && (!_parishRawLoaded || !PARISHES.length)) _setParishRawData(existingRaw, true);
+  if(_parishRawLoaded && PARISHES.length) return Promise.resolve(PARISHES);
+  if(_parishDataLoadPromise) return _parishDataLoadPromise;
+  _parishDataLoadPromise=new Promise(function(resolve,reject){
+    const already=document.querySelector('script[data-parish-loader="true"],script[src*="parishes.js"]');
+    function finish(){
+      const raw=_getParishRawGlobal();
+      if(raw && raw.length){ resolve(_setParishRawData(raw, true)); }
+      else reject(new Error('성당 데이터가 비어 있습니다.'));
+    }
+    if(already){
+      already.addEventListener('load', finish, {once:true});
+      already.addEventListener('error', function(){ reject(new Error('성당 데이터 로드 실패')); }, {once:true});
+      setTimeout(function(){ try{ if(_getParishRawGlobal()) finish(); }catch(_e){} }, 0);
+      return;
+    }
+    const sc=document.createElement('script');
+    sc.src='parishes.js?v='+_PARISH_ASSET_VERSION;
+    sc.dataset.parishLoader='true';
+    sc.onload=finish;
+    sc.onerror=function(){ reject(new Error('성당 데이터 로드 실패')); };
+    document.head.appendChild(sc);
+  }).catch(function(err){
+    _parishDataLoadPromise=null;
+    throw err;
+  });
+  return _parishDataLoadPromise;
 }
 _initParishDataFromGlobal();
 
@@ -2095,6 +2134,26 @@ function oaiPreopenNearbySheetForCategory(){
 }
 
 function startApp(mode){
+  if(mode==='parish' && (!_parishRawLoaded || !PARISHES.length)){
+    _mode='parish';
+    try{
+      const cover=$('cover');
+      if(cover) cover.style.display='none';
+      if(typeof oaiSetMainMapLayerHidden==='function') oaiSetMainMapLayerHidden(false);
+      document.documentElement.classList.add('app-active','parish-mode');
+      document.documentElement.classList.remove('retreat-mode');
+      const mapEl=$('map');
+      if(mapEl) mapEl.innerHTML='<div class="map-loading"><div class="map-loading-icon">✝</div><div class="map-loading-txt">성당 정보를 불러오는 중...</div></div>';
+      if(typeof oaiShowCategoryEntryVeil==='function') oaiShowCategoryEntryVeil('parish');
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+    _ensureParishDataLoaded().then(function(){ startApp('parish'); }).catch(function(err){
+      console.warn('[가톨릭길동무] 성당 데이터 로드 실패', err);
+      try{ alert('성당 정보를 불러오지 못했습니다. 새로고침 후 다시 시도해 주세요.'); }catch(_e){}
+      try{ if(typeof goToCover==='function') goToCover(); }catch(_e){}
+      try{ if(typeof oaiHideCategoryEntryVeil==='function') oaiHideCategoryEntryVeil(); }catch(_e){}
+    });
+    return;
+  }
   _mode=mode;
   _filterDio='all';
   _listSrch='';
