@@ -14,10 +14,10 @@
  *  - 아무것도 없고 앱 활성 → goToCover()
  *  - 커버 상태 → 토스트 → 두 번째 → 앱 종료
  *
- *  Step 9-1 기준:
+ *  Step 9-1~9-2 기준:
  *  - 이 파일의 popstate 순서가 현재 정상 흐름의 기준입니다.
  *  - goToCover/startApp/history 통합은 아직 하지 않습니다.
- *  - 일반 정리는 이 순서와 기존 화면 상태 판별을 바꾸지 않는 범위에서만 진행합니다.
+ *  - Step 9-2에서는 커버/앱 활성 판별만 실제 DOM 표시 상태 기준으로 보강합니다.
  * ═══════════════════════════════════════════════════════════
  */
 (function(){
@@ -34,7 +34,21 @@
   }catch(e){ console.warn("[가톨릭길동무]", e); }
 
   function $b(id){ return document.getElementById(id); }
-  function appActive(){ return document.documentElement.classList.contains('app-active'); }
+  function coverVisible(){
+    try{
+      if(typeof window._isCoverScreenVisible === 'function') return window._isCoverScreenVisible();
+      var cover = $b('cover');
+      if(!cover) return !document.documentElement.classList.contains('app-active');
+      if(cover.classList.contains('hidden')) return false;
+      var st = window.getComputedStyle ? window.getComputedStyle(cover) : null;
+      if(st && (st.display === 'none' || st.visibility === 'hidden')) return false;
+      return true;
+    }catch(e){ return false; }
+  }
+  function appActive(){
+    try{ if(typeof window._isAppScreenActive === 'function') return window._isAppScreenActive(); }catch(e){}
+    return document.documentElement.classList.contains('app-active') && !coverVisible();
+  }
 
   function isGuideModalOpen(){
     try{ return !!document.querySelector('.guide-modal.show'); }catch(e){ return false; }
@@ -648,7 +662,7 @@
   window.__APP_FONT_SCALE_GUARD__=true;
   // V1-S: 커버 글자 크기 조절은 prayer.js에 의존하지 않는 공통 함수가 담당한다.
   // prayer.js는 기도문 화면이 열렸을 때 같은 localStorage 값을 읽어 자체 UI를 맞춘다.
-  var QA_URL="qa-firebase.html?v=V1-S-A34";
+  var QA_URL="qa-firebase.html?v=V1-S-A35";
   var FONT_KEY='prayer_font_size';
   var BASE=16;
   var FONT_SIZES=[13,14,15,16,17,18,19,20,21,22,24,26,28,30];
