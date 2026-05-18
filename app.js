@@ -837,7 +837,7 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || 'V1-S-A32';
+    var target = btn.getAttribute('data-target-version') || 'V1-S-A33';
     var current = '';
     if(window.APP_VERSION) current = String(window.APP_VERSION).trim();
     if(!current && marker) current = String(marker.textContent || '').trim();
@@ -1181,7 +1181,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V1-S-A32';
+    frame.src='diocese.html?v=V1-S-A33';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1520,7 +1520,7 @@ window.addEventListener('pageshow', function(e){
 //   GJ=광주대교구, IC=인천, BS=부산, JJ=전주, UJ=의정부,
 //   CJ=청주, MS=마산, CC=춘천, WJ=원주, AD=안동, JE=제주, ML=군종
 //
-// 【성당 데이터 - _PA_RAW 배열】 【피정의 집 - _RT_RAW 배열】
+// 【성당 데이터 - parishes.js의 window._PA_RAW 배열】 【피정의 집 - retreats.js의 window._RT_RAW 배열】
 //  각 항목 형식: ['이름','교구코드','주소','전화','hp단축','url단축',위도,경도]
 //  (빈 필드는 ''로 표기, tel 없으면 '' 유지)
 //  hp 단축: 1=http://cafe.daum.net/ 2=https://cafe.daum.net/
@@ -1531,7 +1531,7 @@ window.addEventListener('pageshow', function(e){
 //   P5=caincheon, P6=catholicbusan, P7=jcatholic, P8=ucatholic
 //   P9=cdcj, PA=cathms, PC=diocesejeju, PD=gunjong, PE=sd.uca.or.kr
 //
-// 【항목 추가】성지는 shrines.js의 window._SH_RAW, 성당은 parishes.js의 _PA_RAW 배열 끝에 콤마 후 새 항목 추가
+// 【항목 추가】성지는 shrines.js의 window._SH_RAW, 성당은 parishes.js의 window._PA_RAW 배열 끝에 콤마 후 새 항목 추가
 // 【항목 수정】해당 항목 직접 편집
 // 【항목 삭제】해당 항목 줄 전체 삭제 (앞뒤 콤마 주의)
 // ════════════════════════════════════════════════
@@ -1546,7 +1546,7 @@ let PARISHES=[];
 let _parishRawLoaded=false;
 let _parishDioIndexReady=false;
 let _parishDataLoadPromise=null;
-const _PARISH_ASSET_VERSION='V1-S-A32';
+const _PARISH_ASSET_VERSION='V1-S-A33';
 function _buildParishList(raw){
   raw = Array.isArray(raw) ? raw : [];
   return raw.map(r=>{
@@ -1606,7 +1606,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V1-S-A32';
+const _PRAYER_ASSET_VERSION='V1-S-A33';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -1651,7 +1651,7 @@ try{ window.ensurePrayerModuleLoaded=ensurePrayerModuleLoaded; }catch(e){ consol
 let _RT_RAW = [];
 let _retreatRawLoaded = false;
 let _retreatDataLoadPromise = null;
-const _RETREAT_ASSET_VERSION='V1-S-A32';
+const _RETREAT_ASSET_VERSION='V1-S-A33';
 
 let RETREATS = [];
 function _buildRetreatList(raw){
@@ -1891,7 +1891,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V1-S-A32';
+const _SHRINE_ASSET_VERSION='V1-S-A33';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -4917,7 +4917,7 @@ function _fmtTime(s){
     }
 
     /* ── 웹사이트 ──
-       최종 하단 패치(bindWebSwipe)가 웹사이트 탭 이동을 전담한다.
+       하단 웹사이트 스와이프 보조 코드(bindWebSwipe)가 웹사이트 탭 이동을 전담한다.
        여기서도 처리하면 touchend가 두 번 적용되어 한 칸을 건너뛰는 현상이 생긴다. */
     const wv = document.getElementById('web-view');
     if(wv?.classList.contains('open')){
