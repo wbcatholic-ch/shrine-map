@@ -856,7 +856,7 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || 'V1-S-A35';
+    var target = btn.getAttribute('data-target-version') || 'V1-S-A36';
     var current = '';
     if(window.APP_VERSION) current = String(window.APP_VERSION).trim();
     if(!current && marker) current = String(marker.textContent || '').trim();
@@ -1200,7 +1200,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V1-S-A35';
+    frame.src='diocese.html?v=V1-S-A36';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1565,7 +1565,7 @@ let PARISHES=[];
 let _parishRawLoaded=false;
 let _parishDioIndexReady=false;
 let _parishDataLoadPromise=null;
-const _PARISH_ASSET_VERSION='V1-S-A35';
+const _PARISH_ASSET_VERSION='V1-S-A36';
 function _buildParishList(raw){
   raw = Array.isArray(raw) ? raw : [];
   return raw.map(r=>{
@@ -1625,7 +1625,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V1-S-A35';
+const _PRAYER_ASSET_VERSION='V1-S-A36';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -1670,7 +1670,7 @@ try{ window.ensurePrayerModuleLoaded=ensurePrayerModuleLoaded; }catch(e){ consol
 let _RT_RAW = [];
 let _retreatRawLoaded = false;
 let _retreatDataLoadPromise = null;
-const _RETREAT_ASSET_VERSION='V1-S-A35';
+const _RETREAT_ASSET_VERSION='V1-S-A36';
 
 let RETREATS = [];
 function _buildRetreatList(raw){
@@ -1910,7 +1910,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V1-S-A35';
+const _SHRINE_ASSET_VERSION='V1-S-A36';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -5209,21 +5209,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   on('sm-inp', 'keyup', function(e) { if (e.key === 'Enter') { if (typeof _blurAll === 'function') _blurAll(); } });
 
   // ── 웹·순례길·Q&A 닫기 ──
-  on('web-close-btn', 'click', function() {
-    var v = document.getElementById('web-view');
+  function closeGeneralModuleByButton(viewId){
+    try{
+      if(typeof window._oaiCloseGeneralModuleToCover === 'function' && window._oaiCloseGeneralModuleToCover(viewId + '-close-button')) return;
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+    var v = document.getElementById(viewId);
     if (v) v.classList.remove('open');
     if (typeof goToCover === 'function') goToCover();
-  });
-  on('trail-close-btn', 'click', function() {
-    var v = document.getElementById('trail-view');
-    if (v) v.classList.remove('open');
-    if (typeof goToCover === 'function') goToCover();
-  });
-  on('qna-close-btn', 'click', function() {
-    var v = document.getElementById('qna-view');
-    if (v) v.classList.remove('open');
-    if (typeof goToCover === 'function') goToCover();
-  });
+  }
+  on('web-close-btn', 'click', function() { closeGeneralModuleByButton('web-view'); });
+  on('trail-close-btn', 'click', function() { closeGeneralModuleByButton('trail-view'); });
+  on('qna-close-btn', 'click', function() { closeGeneralModuleByButton('qna-view'); });
 
   // ── 순례길 ──
   on('trail-sh-close-btn', 'click', function() { trailCloseSheet(); });

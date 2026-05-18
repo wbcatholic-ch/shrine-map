@@ -83,7 +83,32 @@
     }
   }
 
-  /* ── 외부·모듈 뷰 닫기 (닫으면 항상 goToCover) ── */
+  /* ── 일반 모듈 뷰 닫기: Step 9-3 범위
+     웹사이트·순례길·문의·관구교구 기본 화면은 모두 커버로 복귀한다.
+     기도문/매일미사/성가는 각각 전용 흐름이 있으므로 여기서 처리하지 않는다. */
+  function closeGeneralModuleToCover(reason){
+    var diocese = $b('diocese-view');
+    if(diocese && diocese.classList.contains('open')){
+      if(typeof window.closeDioceseView === 'function') window.closeDioceseView();
+      else {
+        diocese.classList.remove('open');
+        callGTC();
+      }
+      return true;
+    }
+
+    var mods = document.querySelectorAll('.module-view.open');
+    if(mods.length){
+      mods[mods.length-1].classList.remove('open');
+      callGTC();
+      return true;
+    }
+    return false;
+  }
+
+  try{ window._oaiCloseGeneralModuleToCover = closeGeneralModuleToCover; }catch(_e){}
+
+  /* ── 외부·모듈 뷰 닫기 */
   function closeExtOrModule(){
     /* 매일미사 */
     var missa = $b('missa-view');
@@ -101,20 +126,7 @@
       callGTC();
       return true;
     }
-    /* 교구지도 */
-    var diocese = $b('diocese-view');
-    if(diocese && diocese.classList.contains('open')){
-      if(typeof window.closeDioceseView === 'function') window.closeDioceseView();
-      else diocese.classList.remove('open');
-      callGTC(); return true;
-    }
-    /* module-view (웹/순례길) */
-    var mods = document.querySelectorAll('.module-view.open');
-    if(mods.length){
-      mods[mods.length-1].classList.remove('open');
-      callGTC(); return true;
-    }
-    return false;
+    return closeGeneralModuleToCover('back-general-module');
   }
 
   /* ── 카테고리 레이어 닫기 (하나씩) ── */
@@ -662,7 +674,7 @@
   window.__APP_FONT_SCALE_GUARD__=true;
   // V1-S: 커버 글자 크기 조절은 prayer.js에 의존하지 않는 공통 함수가 담당한다.
   // prayer.js는 기도문 화면이 열렸을 때 같은 localStorage 값을 읽어 자체 UI를 맞춘다.
-  var QA_URL="qa-firebase.html?v=V1-S-A35";
+  var QA_URL="qa-firebase.html?v=V1-S-A36";
   var FONT_KEY='prayer_font_size';
   var BASE=16;
   var FONT_SIZES=[13,14,15,16,17,18,19,20,21,22,24,26,28,30];
