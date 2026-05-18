@@ -2520,12 +2520,6 @@ html.app-active #cover-guide-btn { display: none; }
 }
 @media (display-mode: standalone) { #pwa-install-btn { display: none; } }
 html.app-active #pwa-install-btn { display: none; }
-@keyframes install-glow {
-  0%,100% { box-shadow: 0 0 0 3px rgba(212,170,106,.25), 0 8px 24px rgba(14,21,53,.45), inset 0 1px 0 rgba(255,255,255,.12); }
-  50%      { box-shadow: 0 0 0 4px rgba(212,170,106,.55), 0 12px 36px rgba(14,21,53,.55), inset 0 1px 0 rgba(255,255,255,.12); }
-}
-@keyframes install-shimmer { 0% { left: -60%; } 60%,100% { left: 130%; } }
-
 /* 빠른 메뉴 */
 .mass-quick-panel {
   width: min(640px, calc(100vw - 14px));
@@ -3417,7 +3411,6 @@ html.app-active #qna-cover-btn{display:none}
 /* ============================================================
    14. 기타 누락 블록
    ============================================================ */
-#pwa-install-btn{display:none;width:calc(100vw - 32px);max-width:380px;margin:0;padding:0 20px;height:72px;background:linear-gradient(135deg, #ff6b35 0%, #f7931e 40%, #ffcc02 100%);color:#1a0a00;border:1px solid rgba(255,255,255,.66);border-radius:22px;font-size:18px;font-weight:900;font-family:inherit;letter-spacing:-0.3px;cursor:pointer;box-shadow:0 0 0 100vmax rgba(244,239,228,.34), 0 6px 0 rgba(180,80,0,.35), 0 12px 32px rgba(255,107,53,.55), 0 4px 12px rgba(255,107,53,.30);-webkit-tap-highlight-color:transparent;animation:pwa-install-bounce 2s ease-in-out infinite;text-align:center;position:fixed;left:50%;top:50%;z-index:10020;transform:translate(-50%,-50%);overflow:hidden;align-items:center;justify-content:center;gap:10px}
 @keyframes pwa-install-bounce {
   0%,100% { transform: translate(-50%,-50%); box-shadow: 0 0 0 100vmax rgba(244,239,228,.34), 0 6px 0 rgba(180,80,0,.35), 0 12px 32px rgba(255,107,53,.55), 0 4px 12px rgba(255,107,53,.30); }
   45%      { transform: translate(-50%,calc(-50% - 5px)); box-shadow: 0 0 0 100vmax rgba(244,239,228,.34), 0 11px 0 rgba(180,80,0,.20), 0 20px 44px rgba(255,107,53,.65), 0 8px 18px rgba(255,107,53,.34); }
