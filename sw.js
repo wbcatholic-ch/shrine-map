@@ -1,16 +1,16 @@
-/* 가톨릭길동무 Service Worker - V1-S-A31
+/* 가톨릭길동무 Service Worker - V1-S-A32
    캐시를 매번 삭제하지 않고, 버전 변경 시 오래된 캐시만 정리합니다.
    localStorage/사용자 설정은 건드리지 않습니다. */
-const CACHE_VERSION = 'catholic-way-V1-S-A31';
+const CACHE_VERSION = 'catholic-way-V1-S-A32';
 const APP_SHELL = [
   './',
   './index.html',
-  './style.css?v=V1-S-A31',
-  './app.js?v=V1-S-A31',
-  './web.js?v=V1-S-A31',
-  './patches.js?v=V1-S-A31',
-  './sw-update.js?v=V1-S-A31',
-  './manifest.json?v=V1-S-A31',
+  './style.css?v=V1-S-A32',
+  './app.js?v=V1-S-A32',
+  './web.js?v=V1-S-A32',
+  './patches.js?v=V1-S-A32',
+  './sw-update.js?v=V1-S-A32',
+  './manifest.json?v=V1-S-A32',
   './icon-192x192.png',
   './icon-512x512.png',
   './icon-512x512-maskable.png',
@@ -42,7 +42,7 @@ function isVersionedAsset(request) {
   try {
     const url = new URL(request.url);
     return url.searchParams.has('v') ||
-      /parishes\.js|prayer\.js|retreats\.js|app\.js|style\.css|web\.js|patches\.js|sw-update\.js/.test(url.pathname);
+      /parishes\.js|prayer\.js|retreats\.js|shrines\.js|app\.js|style\.css|web\.js|patches\.js|sw-update\.js/.test(url.pathname);
   } catch (e) { return false; }
 }
 async function networkFirst(request) {
