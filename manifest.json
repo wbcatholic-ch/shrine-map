@@ -6,10 +6,13 @@
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait-primary",
-  "background_color": "#0e1535",
-  "theme_color": "#0e1535",
+  "background_color": "#f7f0e5",
+  "theme_color": "#f7f0e5",
   "lang": "ko",
-  "categories": ["religion", "lifestyle"],
+  "categories": [
+    "religion",
+    "lifestyle"
+  ],
   "icons": [
     {
       "src": "icon-192x192.png",
