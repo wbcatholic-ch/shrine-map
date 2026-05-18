@@ -3645,3 +3645,108 @@ html.kb-open .sheet.open { bottom: 0; }
     height: clamp(35px, calc(var(--cover-vh, 1vh) * 4.6), 42px);
   }
 }
+
+
+/* ============================================================
+   A61 cover photo feedback fix
+   - Top fixed: main function + A
+   - Middle: title + category cards + refresh/inquiry
+   - Bottom fixed: bottom note
+   - Fix Fold small/medium screen: middle block must be centered and wide enough.
+   ============================================================ */
+#cover-main-block{
+  justify-self: center;
+  align-self: stretch;
+  box-sizing: border-box;
+  width: min(calc(100vw - clamp(18px, 5vw, 64px)), 720px);
+  max-width: 720px;
+  height: 100%;
+  max-height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+#cover .cover-header{
+  width: 100%;
+  max-width: 100%;
+  text-align: center;
+  overflow: visible;
+}
+
+#cover .cover-title{
+  white-space: nowrap;
+  word-break: keep-all;
+  overflow-wrap: normal;
+  font-size: clamp(30px, 5.2vw, 48px);
+  line-height: 1.03;
+  letter-spacing: -0.055em;
+}
+
+#cover .cover-subtitle{
+  word-break: keep-all;
+  overflow-wrap: normal;
+  font-size: clamp(14px, 2.55vw, 18px);
+  line-height: 1.12;
+  letter-spacing: -0.045em;
+}
+
+#cover .cover-grid{
+  width: 100%;
+  max-width: 100%;
+  height: 100%;
+  min-height: 0;
+  grid-template-rows: minmax(0, 1.16fr) repeat(3, minmax(0, 1fr));
+}
+
+#cover .cover-card-wide .cover-name{
+  white-space: nowrap;
+  word-break: keep-all;
+  overflow-wrap: normal;
+}
+
+@media (max-width: 760px){
+  #cover-main-block{
+    width: min(calc(100vw - 24px), 680px);
+    max-width: 680px;
+  }
+  #cover .cover-title{
+    font-size: clamp(29px, 6.2vw, 43px);
+  }
+}
+
+@media (max-width: 520px){
+  #cover-main-block{
+    width: min(calc(100vw - 16px), 500px);
+    max-width: 500px;
+  }
+  #cover .cover-title{
+    font-size: clamp(25px, 7.15vw, 34px);
+    letter-spacing: -0.06em;
+  }
+  #cover .cover-subtitle{
+    font-size: clamp(11.5px, 3.35vw, 15px);
+  }
+  #cover .cover-card-wide .cover-name{
+    white-space: normal;
+  }
+}
+
+@media (max-height: 720px){
+  #cover .cover-title{
+    font-size: clamp(24px, 5.8vw, 36px);
+  }
+  #cover .cover-subtitle{
+    font-size: clamp(10.5px, 2.6vw, 14px);
+  }
+  #cover .cover-card{
+    padding-top: clamp(3px, calc(var(--cover-vh, 1vh) * .55), 6px);
+    padding-bottom: clamp(3px, calc(var(--cover-vh, 1vh) * .55), 6px);
+  }
+  #cover .cover-emoji,
+  #cover .cover-icon-wrap{
+    font-size: clamp(20px, calc(var(--cover-vh, 1vh) * 3.6), 32px);
+  }
+}
+
