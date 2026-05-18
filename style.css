@@ -139,7 +139,7 @@
   --bg-color:   #f7f0e5;
   /* 커버 화면 비율 기준 보호 영역 */
   --cover-top-safe: calc(env(safe-area-inset-top, 0px) + clamp(60px, calc(var(--cover-vh, 1vh) * 9.2), 82px));
-  --cover-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + clamp(40px, calc(var(--cover-vh, 1vh) * 5.9), 56px));
+  --cover-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + clamp(52px, calc(var(--cover-vh, 1vh) * 7.6), 72px));
   --cover-h:    calc(var(--cover-vh, 1vh) * 100);
   --text-main:  #3e362e;
   --text-sub:   #7a7065;
@@ -2948,7 +2948,7 @@ html.ios-device #prayer-view.open #prayer-tabs {
   overflow-y: hidden;
   display: flex;
 }
-html.ios-device #cover { padding-bottom: calc((var(--cover-vh, 1vh) * 2.2) + env(safe-area-inset-bottom, 0px)); }
+html.ios-device #cover { padding-bottom: var(--cover-bottom-safe); }
 html.ios-device #cover .cover-header { padding-bottom: 16px; }
 html.ios-device #cover-main-block {
   height: calc((var(--cover-vh, 1vh) * 100) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - clamp(178px, calc(var(--cover-vh, 1vh) * 24), 222px));
@@ -3091,7 +3091,7 @@ html.oai-font-global #region-body .dio-hd { font-size: calc(17px * var(--app-inn
   .mass-quick-panel .guide-badge { font-size: calc(18px * var(--app-font-scale)); min-height: 40px; margin-bottom: 16px; }
 }
 @media (max-height: 650px) {
-  #cover { --cover-top-safe: calc(env(safe-area-inset-top, 0px) + clamp(58px, calc(var(--cover-vh, 1vh) * 9.4), 74px)); --cover-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + clamp(38px, calc(var(--cover-vh, 1vh) * 6.0), 50px)); padding-top: var(--cover-top-safe); padding-bottom: var(--cover-bottom-safe); }
+  #cover { --cover-top-safe: calc(env(safe-area-inset-top, 0px) + clamp(58px, calc(var(--cover-vh, 1vh) * 9.4), 74px)); --cover-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + clamp(48px, calc(var(--cover-vh, 1vh) * 7.2), 64px)); padding-top: var(--cover-top-safe); padding-bottom: var(--cover-bottom-safe); }
   #cover .cover-header { padding-bottom: 12px; }
   #cover .cover-title { font-size: clamp(18px, 5vw, 24px); }
   #cover .cover-subtitle { font-size: 10px; }
