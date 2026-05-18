@@ -1,16 +1,16 @@
-/* 가톨릭길동무 Service Worker - V2-S-r3
+/* 가톨릭길동무 Service Worker - V2-S-r4
    캐시를 매번 삭제하지 않고, 버전 변경 시 오래된 캐시만 정리합니다.
    localStorage/사용자 설정은 건드리지 않습니다. */
-const CACHE_VERSION = 'catholic-way-V2-S-r3';
+const CACHE_VERSION = 'catholic-way-V2-S-r4';
 const APP_SHELL = [
   './',
   './index.html',
-  './style.css?v=V2-S-r3',
-  './app.js?v=V2-S-r3',
-  './web.js?v=V2-S-r3',
-  './patches.js?v=V2-S-r3',
-  './sw-update.js?v=V2-S-r3',
-  './manifest.json?v=V2-S-r3',
+  './style.css?v=V2-S-r4',
+  './app.js?v=V2-S-r4',
+  './web.js?v=V2-S-r4',
+  './patches.js?v=V2-S-r4',
+  './sw-update.js?v=V2-S-r4',
+  './manifest.json?v=V2-S-r4',
   './icon-192x192.png',
   './icon-512x512.png',
   './icon-512x512-maskable.png',
