@@ -563,13 +563,13 @@ html.retreat-mode #tabbar .tab-btn.active {
   top: 10px;
   right: 12px;
   z-index: 3;
-  width: 40px;
-  height: 40px;
+  width: 34px;
+  height: 34px;
   border-radius: 50%;
   border: 1px solid rgba(31,42,68,.18);
   background: rgba(31,42,68,.86);
   color: #fff;
-  font-size: 28px;
+  font-size: 24px;
   font-weight: 900;
   line-height: 1;
   display: flex;
@@ -2599,7 +2599,7 @@ html.app-active #pwa-install-btn { display: none; }
 .guide-mini-list dd { margin: 0; color: #5f6675; font-weight: 600; word-break: keep-all; }
 .guide-ok { flex: 0 0 auto; width: 100%; margin-top: 12px; min-height: 40px; }
 
-/* V2-S-r1: 즐겨찾기 초기화 1회 안내 배너 */
+/* V2-S-r3: 즐겨찾기 초기화 1회 안내 배너 */
 #cover .favorites-reset-banner {
   position: fixed;
   left: max(20px, calc(env(safe-area-inset-left, 0px) + 20px));
@@ -2946,7 +2946,8 @@ html.ios-device #app .sm-tab,
 html.ios-device .web-cat-btn,
 html.ios-device .trail-tab { min-height: 30px; padding: 3px 9px; border-radius: 12px; }
 html.ios-device #app .sheet-hd { padding: 10px 12px; }
-html.ios-device #app .sheet-x, html.ios-device #app .route-sheet-x { width: 40px; height: 40px; min-width:40px; font-size: 28px; line-height:1; }
+html.ios-device #app .sheet-x { width: 40px; height: 40px; min-width:40px; font-size: 28px; line-height:1; }
+html.ios-device #app .route-sheet-x { width: 34px; height: 34px; min-width:34px; font-size: 24px; line-height:1; }
 html.ios-device #app #info-card { border-radius: 20px 20px 0 0; max-height: 48vh; }
 html.ios-device #app .ic-header { padding: 11px 12px 5px; }
 html.ios-device #app .ic-close-btn { width: 30px; height: 30px; font-size: 20px; line-height:1; }
