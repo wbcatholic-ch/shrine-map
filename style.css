@@ -299,7 +299,7 @@ html.app-active #app { display: block; }
   height: calc(var(--tab-h) + env(safe-area-inset-top, 0px));
   min-height: calc(var(--tab-h) + env(safe-area-inset-top, 0px));
   padding: calc(env(safe-area-inset-top, 0px) + 5px) 7px 6px;
-  gap: 7px;
+  gap: 5px;
   align-items: stretch;
   overflow: hidden;
   background: rgba(255,255,255,.97);
@@ -2211,17 +2211,18 @@ html.oai-cover-booting #cover > * {
 
 #cover-main-block {
   flex: 0 1 auto;
-  height: calc((var(--cover-vh, 1vh) * 100) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - clamp(172px, calc(var(--cover-vh, 1vh) * 22), 214px));
-  max-height: 720px;
+  height: calc((var(--cover-vh, 1vh) * 100) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - clamp(188px, calc(var(--cover-vh, 1vh) * 24), 232px));
+  max-height: 690px;
   min-height: 0;
   width: 100%;
   contain: layout paint;
   max-width: min(468px, calc(100vw - 20px));
   margin: 0 auto;
-  padding: 0 10px 8px;
+  padding: 0 10px 6px;
   display: flex;
   flex-direction: column;
   align-items: stretch;
+  gap: clamp(6px, calc(var(--cover-vh, 1vh) * 0.9), 10px);
   box-sizing: border-box;
 }
 
@@ -2243,7 +2244,7 @@ html.oai-cover-booting #cover > * {
   width: 100%;
   height: 100%;
   min-height: 0;
-  padding: clamp(6px, calc(var(--cover-vh, 1vh) * 1.4), 14px) 8px;
+  padding: clamp(5px, calc(var(--cover-vh, 1vh) * 1.05), 10px) 7px;
   border-radius: 18px;
   display: flex;
   flex-direction: column;
@@ -2261,14 +2262,14 @@ html.oai-cover-booting #cover > * {
 .cover-card.app-pressing { transform: translateY(8px) scale(.974); box-shadow: 0 2px 3px rgba(0,0,0,.02); filter: brightness(.94); transition: transform .16s, filter .16s; }
 
 .cover-icon-wrap {
-  width: clamp(50px, 14vw, 65px);
-  min-width: clamp(50px, 14vw, 65px);
-  height: clamp(50px, 14vw, 65px);
+  width: clamp(44px, 12.6vw, 58px);
+  min-width: clamp(44px, 12.6vw, 58px);
+  height: clamp(44px, 12.6vw, 58px);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
-  margin-bottom: 12px;
+  margin-bottom: 6px;
   background: transparent;
   box-shadow: none;
   border: none;
@@ -2310,7 +2311,7 @@ html.oai-cover-booting #cover > * {
 /* 커버 액션 줄 */
 #cover-action-row {
   width: 100%;
-  margin: clamp(7px, calc(var(--cover-vh, 1vh) * 1), 12px) 0 0;
+  margin: 0;
   display: flex;
   align-items: flex-end;
   justify-content: space-between;
@@ -2325,9 +2326,9 @@ html.app-active #cover-action-row { display: none; }
   flex-direction: column;
   align-items: flex-start;
   justify-content: center;
-  flex: 0 0 168px;
-  min-width: 168px;
-  max-width: 168px;
+  flex: 0 0 154px;
+  min-width: 154px;
+  max-width: 154px;
 }
 #cover-update-btn {
   width: 100%;
@@ -2336,13 +2337,13 @@ html.app-active #cover-action-row { display: none; }
   background: rgba(31,42,68,.10);
   color: #1f2a44;
   font-family: inherit;
-  font-size: calc(12px * var(--app-font-scale));
+  font-size: calc(11.5px * var(--app-font-scale));
   font-weight: 900;
   line-height: 1;
-  min-height: 40px;
-  height: 40px;
-  padding: 0 14px;
-  box-shadow: inset 0 0 0 1px rgba(31,42,68,.16);
+  min-height: 36px;
+  height: 36px;
+  padding: 0 12px;
+  box-shadow: inset 0 0 0 1px rgba(31,42,68,.12);
   cursor: pointer;
   user-select: none;
   -webkit-user-select: none;
@@ -2366,9 +2367,9 @@ html.app-active #cover-action-row { display: none; }
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 40px;
-  padding: 0 14px;
-  font-size: calc(12px * var(--app-font-scale));
+  min-height: 36px;
+  padding: 0 13px;
+  font-size: calc(11.5px * var(--app-font-scale));
 }
 
 /* 커버 하단 고정 요소 */
@@ -2946,16 +2947,16 @@ html.ios-device #prayer-view.open #prayer-tabs {
 html.ios-device #cover { padding-bottom: calc((var(--cover-vh, 1vh) * 2.2) + env(safe-area-inset-bottom, 0px)); }
 html.ios-device #cover .cover-header { padding-bottom: 16px; }
 html.ios-device #cover-main-block {
-  height: calc((var(--cover-vh, 1vh) * 100) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - clamp(164px, calc(var(--cover-vh, 1vh) * 22), 204px));
-  max-height: 700px;
+  height: calc((var(--cover-vh, 1vh) * 100) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - clamp(178px, calc(var(--cover-vh, 1vh) * 24), 222px));
+  max-height: 670px;
   padding-bottom: 4px;
 }
 html.ios-device #cover .cover-card, html.ios-device #cover .cv-btn { padding: 7px; gap: 5px; }
 html.ios-device #cover .cover-emoji, html.ios-device #cover .cover-icon-wrap { font-size: 34px; }
 html.ios-device #cover .cover-name { font-size: calc(14px * var(--app-font-scale)); line-height: 1.14; letter-spacing: -.035em; }
-html.ios-device #cover #cover-action-row { margin-top: 6px; }
+html.ios-device #cover #cover-action-row { margin-top: 0; }
 html.ios-device #cover #cover-update-btn,
-html.ios-device #cover #qna-cover-btn { min-height: 37px; height: 37px; font-size: calc(11px * var(--app-font-scale)); padding-left: 13px; padding-right: 13px; }
+html.ios-device #cover #qna-cover-btn { min-height: 34px; height: 34px; font-size: calc(10.6px * var(--app-font-scale)); padding-left: 12px; padding-right: 12px; }
 html.ios-device #cover #cover-bottom-note { padding: 3px 16px calc(8px + env(safe-area-inset-bottom, 0px)) 16px; font-size: 8.35px; line-height: 1.32; letter-spacing: -.045em; max-width: 430px; }
 html.ios-device #prayer-bar-ttl,
 html.ios-device #prayer-bar .module-bar-title,
@@ -3064,8 +3065,8 @@ html.oai-font-global #region-body .dio-hd { font-size: calc(17px * var(--app-inn
 @media (min-width: 720px) {
   #cover-main-block {
     max-width: min(468px, calc(100vw - 80px));
-    max-height: 760px;
-    height: calc((var(--cover-vh, 1vh) * 100) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - clamp(166px, calc(var(--cover-vh, 1vh) * 20), 204px));
+    max-height: 730px;
+    height: calc((var(--cover-vh, 1vh) * 100) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - clamp(182px, calc(var(--cover-vh, 1vh) * 22), 222px));
   }
   #cover-bottom-note { padding-left: 110px; padding-right: 110px; }
   #prayer-bar, #diocese-bar, .module-bar { width: 100vw; max-width: 100vw; }
@@ -3073,10 +3074,10 @@ html.oai-font-global #region-body .dio-hd { font-size: calc(17px * var(--app-inn
 @media (max-height: 720px) {
   #cover .cover-header { padding-bottom: 12px; }
   #cover-main-block {
-    height: calc((var(--cover-vh, 1vh) * 100) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - clamp(154px, calc(var(--cover-vh, 1vh) * 21), 190px));
-    max-height: 590px;
+    height: calc((var(--cover-vh, 1vh) * 100) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - clamp(166px, calc(var(--cover-vh, 1vh) * 23), 206px));
+    max-height: 570px;
   }
-  #cover #cover-action-row { margin-top: 7px; }
+  #cover #cover-action-row { margin-top: 0; }
 }
 @media (max-height: 720px) and (max-width: 420px) {
   .mass-quick-panel { padding: 34px 20px 24px; width: min(600px, calc(100vw - 14px)); }
@@ -3096,7 +3097,7 @@ html.oai-font-global #region-body .dio-hd { font-size: calc(17px * var(--app-inn
   #cover .cover-emoji { font-size: 22px; }
   #cover .cover-name { font-size: 12px; }
   #cover #qna-cover-btn { min-height: 34px; font-size: calc(10.5px * var(--app-font-scale)); }
-  #cover #cover-update-btn { min-height: 34px; height: 34px; font-size: calc(10.5px * var(--app-font-scale)); padding: 0 12px; }
+  #cover #cover-update-btn { min-height: 32px; height: 32px; font-size: calc(10.2px * var(--app-font-scale)); padding: 0 10px; }
   #cover #cover-update-hint { font-size: 8.5px; }
   #cover #cover-guide-btn { height: 34px; min-height: 34px; font-size: calc(10.5px * var(--app-font-scale)); padding: 0 10px; }
   .guide-panel { max-height: 90dvh; padding: 16px 14px 14px; }

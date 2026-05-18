@@ -21,6 +21,8 @@ const PR_CAT_STYLE = {
 
 // 기도문 목록에서 좌우 스와이프 직후 즐겨찾기 별 오작동을 막는 공통 차단 시간
 let prSwipeBlockUntil = 0;
+// 첫 진입 때 활성 탭을 부드럽게 스크롤하면 탭바가 살짝 흔들려 보일 수 있어 첫 1회만 즉시 정렬한다.
+let prTabsFirstAlign = true;
 
 // 기도문 데이터 (항목 추가 시 여기에 추가)
 const PR_DATA = { 
@@ -245,7 +247,11 @@ function prApplyTabColors(){
     btn.classList.toggle('on', on);
     if(on) activeBtn = btn;
   });
-  if(activeBtn) activeBtn.scrollIntoView({behavior:'smooth', block:'nearest', inline:'center'});
+  if(activeBtn){
+    var behavior = prTabsFirstAlign ? 'auto' : 'smooth';
+    activeBtn.scrollIntoView({behavior:behavior, block:'nearest', inline:'center'});
+  }
+  prTabsFirstAlign = false;
   try{ if(typeof window.oaiKeepActiveTabsVisible === 'function') window.oaiKeepActiveTabsVisible('prayer'); }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 
