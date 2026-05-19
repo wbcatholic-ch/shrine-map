@@ -42,6 +42,7 @@
   --oai-std-icon-sz:   28px;
   --oai-std-close-sz:  40px;
   --oai-category-enter-ms: 700ms;
+  --oai-popup-enter-ms: 500ms;
   --oai-std-hdr-pad:   calc(10px + env(safe-area-inset-top, 0px));
 
   /* ── 타이포그래피 */
@@ -2830,11 +2831,49 @@ html.oai-external-return-freeze::after { content: ""; position: fixed; left: 50%
 html.oai-returning *, html.oai-diocese-returning * { transition: none; animation: none; scroll-behavior: auto; }
 html.oai-cover-resizing #cover, html.oai-cover-resizing #cover * { transition: none; animation: none; }
 
-/* 진입 fade-in */
-.oai-enter-ready { opacity: .01; transform: none; transition: none; will-change: opacity; }
-.oai-enter-ready.oai-enter-show { opacity: 1; transform: none; transition: opacity var(--oai-category-enter-ms) ease-out; }
-html.oai-returning .oai-enter-ready { opacity: 1; transform: none; transition: none; }
-@media (prefers-reduced-motion: reduce) { .oai-enter-ready, .oai-enter-ready.oai-enter-show { opacity: 1; transition: none; } }
+/* 진입 fade-in: 카테고리/문의 화면은 0.7초, 팝업은 0.5초. 위치 이동 효과는 사용하지 않는다. */
+#app.oai-enter-ready,
+#prayer-view.oai-enter-ready,
+#diocese-view.oai-enter-ready,
+.module-view.oai-enter-ready,
+.oai-enter-ready {
+  opacity: .01 !important;
+  transform: none !important;
+  transition: none !important;
+  will-change: opacity;
+}
+#app.oai-enter-ready.oai-enter-show,
+#prayer-view.oai-enter-ready.oai-enter-show,
+#diocese-view.oai-enter-ready.oai-enter-show,
+.module-view.oai-enter-ready.oai-enter-show,
+.oai-enter-ready.oai-enter-show {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: opacity var(--oai-category-enter-ms) ease-out !important;
+}
+.oai-popup-ready {
+  opacity: .01 !important;
+  transform: none !important;
+  transition: none !important;
+  will-change: opacity;
+}
+.oai-popup-ready.oai-popup-show {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: opacity var(--oai-popup-enter-ms) ease-out !important;
+}
+html.oai-returning .oai-enter-ready,
+html.oai-returning .oai-popup-ready {
+  opacity: 1 !important;
+  transform: none !important;
+  transition: none !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .oai-enter-ready,
+  .oai-enter-ready.oai-enter-show,
+  .oai-popup-ready,
+  .oai-popup-ready.oai-popup-show { opacity: 1 !important; transition: none !important; }
+}
 
 /* 내주변 preopen */
 .sheet.oai-preopen-nearby { transform: none; transition: none; animation: none; will-change: auto; }

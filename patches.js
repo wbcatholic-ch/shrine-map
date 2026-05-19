@@ -30,7 +30,7 @@
   var _href = location.href.split('#')[0];
 
   /* history 초기화
-     V3-12: 일반 첫 진입 때만 root/trap 한 쌍을 만든다.
+     V3-13: 일반 첫 진입 때만 root/trap 한 쌍을 만든다.
      새로고침 직후에는 현재 히스토리 항목을 trap으로 정리하고 새 항목을 push하지 않는다.
      새로고침마다 root/trap을 다시 push하면 종료 토스트 뒤 이전 커버 문서로 되돌아갈 수 있다. */
   try{
@@ -718,7 +718,7 @@
   window.__APP_FONT_SCALE_GUARD__=true;
   // V2-S-r8: 커버 글자 크기 조절은 prayer.js에 의존하지 않는 공통 함수가 담당한다.
   // prayer.js는 기도문 화면이 열렸을 때 같은 localStorage 값을 읽어 자체 UI를 맞춘다.
-  var QA_URL="qa-firebase.html?v=V3-12";
+  var QA_URL="qa-firebase.html?v=V3-13";
   var FONT_KEY='prayer_font_size';
   var BASE=16;
   var FONT_SIZES=[13,14,15,16,17,18,19,20,21,22,24,26,28,30];
@@ -790,14 +790,33 @@
   function configureQna(){
     window.QNA_FORM_URL=QA_URL;
     var q=el('qna-list');
-    if(q&&q.innerHTML.indexOf('Google Form')>=0){
+    if(q && (!q.innerHTML.trim() || q.innerHTML.indexOf('Google Form')>=0 || q.innerHTML.indexOf('qna-card')<0)){
       q.innerHTML='<div class="qna-card"><div class="qna-kicker">문의 · 수정건의</div><div class="qna-title">문의·건의 페이지 연결</div><div class="qna-text">문의와 수정건의는 가톨릭길동무 문의·건의 페이지에서 작성하고 확인합니다.</div><div class="qna-actions"><button class="primary" type="button" onclick="goQaFirebase()">문의 작성하기</button></div></div>';
     }
   }
   window.qnaOpenFormUrl=function(){ if(typeof window.goQaFirebase==='function') window.goQaFirebase(); else location.href=QA_URL; };
   function wireQnaButton(){var btn=el('qna-cover-btn');if(btn)btn.onclick=function(ev){if(ev)ev.preventDefault();window.openQnaView();};}
-  window.openQnaView=function(){ location.href=QA_URL; };
+  window.openQnaView=function(){
+    try{
+      configureQna();
+      document.querySelectorAll('.module-view.open,#prayer-view.open,#diocese-view.open,#missa-view.open').forEach(function(v){v.classList.remove('open');});
+      var cover=el('cover');
+      if(cover){ cover.style.display='none'; cover.style.opacity=''; cover.style.pointerEvents=''; }
+      document.documentElement.classList.add('app-active');
+      document.documentElement.classList.remove('parish-mode','retreat-mode');
+      if(typeof window.oaiSetMainMapLayerHidden==='function') window.oaiSetMainMapLayerHidden(true);
+      var q=el('qna-view');
+      if(q){
+        q.classList.add('open');
+        try{ if(typeof window.oaiEnterView==='function') window.oaiEnterView(q); }catch(_e){}
+        var list=el('qna-list'); if(list) list.scrollTop=0;
+        return;
+      }
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+    location.href=QA_URL;
+  };
   window.goQaFirebase=function(){ location.href=QA_URL; };
+  window.qnaShowTab=function(){ configureQna(); };
   function boot(){ensureCoverControls();setEmojiIcons();configureQna();wireQnaButton();applyScale();}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();window.addEventListener('load',function(){boot();setTimeout(boot,250);setTimeout(boot,900);},{once:true});window.addEventListener('pageshow',boot);
 })();
