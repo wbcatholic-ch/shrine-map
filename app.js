@@ -549,30 +549,55 @@ function _isAppScreenActive(){
   try{ if(_isCoverScreenVisible()) return false; }catch(e){ console.warn('[가톨릭길동무]', e); }
   try{ return document.documentElement.classList.contains('app-active'); }catch(e){ return false; }
 }
-function _ensureCoverBackTrap(){
+function _oaiMergeHistoryState(st, extra){
+  var next = {};
+  try{
+    if(st && typeof st === 'object'){
+      Object.keys(st).forEach(function(k){ next[k] = st[k]; });
+    }
+    Object.keys(extra || {}).forEach(function(k){ next[k] = extra[k]; });
+  }catch(_e){
+    next = extra || {};
+  }
+  return next;
+}
+function _oaiMarkExistingTrap(extra){
+  try{
+    var st = history.state;
+    if(!(st && st._p === 1)) return false;
+    history.replaceState(_oaiMergeHistoryState(st, extra || {}), '', location.href.split('#')[0]);
+    return true;
+  }catch(e){ console.warn("[가톨릭길동무]", e); return true; }
+}
+function _ensureCoverBackTrap(reason){
   try{
     if(_isAppScreenActive()) return;
     var modal=document.getElementById('mass-quick-modal');
     if(modal && modal.classList.contains('show')) return;
     var st = history.state;
-    if(st && st._p === 1) return;
+    if(st && st._p === 1){
+      if(reason) _oaiMarkExistingTrap({oai_cover_trap:reason});
+      return;
+    }
     var href = location.href.split('#')[0];
-    history.replaceState({_p:0}, '', href);
-    history.pushState({_p:1}, '', href);
+    history.replaceState({_p:0, oai_cover_root:reason||'cover-ensure'}, '', href);
+    history.pushState({_p:1, oai_cover_trap:reason||'cover-ensure'}, '', href);
   }catch(e){ console.warn("[가톨릭길동무]", e); }
 }
 
 function _resetCoverBackTrap(reason){
-  /* 주요기도문 → 빠른메뉴 팝업 → 커버로 돌아온 직후에는 현재 history.state가 _p:1처럼 보여도
-     바로 뒤 항목이 앱 내부 루트(_p:0)라고 보장할 수 없다. 커버에서 첫 Back이 앱 종료로 빠지지 않도록
-     현재 항목을 커버 루트로 바꾸고 새 트랩을 한 칸 다시 심는다. */
+  /* S-2: 뒤로가기 기준은 patches.js의 공통 popstate 컨트롤러다.
+     이미 _p:1 trap이 살아 있으면 app.js가 다시 replaceState+pushState를 만들지 않고
+     현재 trap 메타 정보만 갱신한다. 중복 root/trap이 쌓이면 새로고침 후 커버 문서로
+     되돌아가거나 팝업→커버 뒤로가기 흐름이 흔들릴 수 있다. */
   try{
     if(_isAppScreenActive()) return;
     var modal=document.getElementById('mass-quick-modal');
     if(modal && modal.classList.contains('show')) return;
+    if(_oaiMarkExistingTrap({oai_cover_trap:reason||'cover-reset'})) return;
     var href = location.href.split('#')[0];
-    history.replaceState({_p:0, oai_cover_root:reason||'cover'}, '', href);
-    history.pushState({_p:1, oai_cover_trap:reason||'cover'}, '', href);
+    history.replaceState({_p:0, oai_cover_root:reason||'cover-reset'}, '', href);
+    history.pushState({_p:1, oai_cover_trap:reason||'cover-reset'}, '', href);
   }catch(e){ console.warn("[가톨릭길동무]", e); }
 }
 function _ensureAppBackTrap(reason){
@@ -582,19 +607,22 @@ function _ensureAppBackTrap(reason){
      p1 트랩으로 고정해, 본문 → 목록 → 팝업/커버 단계가 반드시 JS에서 처리되게 한다. */
   try{
     if(!_isAppScreenActive()) return;
-    var href = location.href.split('#')[0];
     var st = history.state;
-    if(st && st._p === 1) return;
+    if(st && st._p === 1){
+      if(reason) _oaiMarkExistingTrap({oai_app_trap:reason});
+      return;
+    }
+    var href = location.href.split('#')[0];
     history.replaceState({_p:0, oai_app_trap_from:reason||'app'}, '', href);
     history.pushState({_p:1, oai_app_trap:reason||'app'}, '', href);
   }catch(e){ console.warn("[가톨릭길동무]", e); }
 }
 function _resetAppBackTrap(reason){
-  /* 기도문 본문을 닫아 목록으로 돌아온 직후에는 방금 Back으로 p1 트랩이 소비된 상태일 수 있다.
-     이때 목록에서 한 번 더 Back을 눌러도 앱이 바로 닫히지 않고
-     목록 → 빠른메뉴 팝업/커버 순서로 공통 컨트롤러가 다시 받도록 트랩을 새로 세운다. */
+  /* S-2: 앱 내부 trap도 이미 살아 있으면 새 root/trap을 더 만들지 않는다.
+     이 함수는 호환용으로 남기되, 실제 판단은 patches.js popstate 순서에 맡긴다. */
   try{
     if(!_isAppScreenActive()) return;
+    if(_oaiMarkExistingTrap({oai_app_trap:reason||'app-reset'})) return;
     var href = location.href.split('#')[0];
     history.replaceState({_p:0, oai_app_root:reason||'app-reset'}, '', href);
     history.pushState({_p:1, oai_app_trap:reason||'app-reset'}, '', href);
@@ -610,6 +638,8 @@ function _armMassQuickHistoryTrap(opts){
       // history.go(1) 복원 타이밍과 충돌해 팝업 → 커버 단계가 앱 종료로 오판될 수 있다.
       return;
     }
+    var st = history.state;
+    if(st && st.oai_mass_quick) return;
     history.pushState({_p:1, oai_mass_quick:1}, '', href);
   }catch(e){ console.warn("[가톨릭길동무]", e); }
 }
