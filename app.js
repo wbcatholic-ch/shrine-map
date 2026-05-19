@@ -140,7 +140,7 @@ function oaiPrepareRefreshVeil(reason, duration, carryDuration, preNavigationHol
     var preHold = Math.max(d, preNavigationHold || OAI_REFRESH_PRE_NAV_HOLD_MS || d);
     var now = Date.now ? Date.now() : new Date().getTime();
     /*
-       V3-5: 새로고침 보호막은 끊김 없이 한 흐름으로 유지한다.
+       V3-6: 새로고침 보호막은 끊김 없이 한 흐름으로 유지한다.
        - 현재 문서: 실제 reload가 시작될 때까지 보호막을 길게 유지
        - 새 문서: index.html 조기 스크립트가 먼저 보호막을 올리고, app.js가 한 번만 해제
        종료 히스토리는 여기서 임의로 늘리거나 history.go로 건너뛰지 않는다.
@@ -1015,7 +1015,7 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || 'V3-5';
+    var target = btn.getAttribute('data-target-version') || 'V3-6';
     var current = '';
     if(window.APP_VERSION) current = String(window.APP_VERSION).trim();
     if(!current && marker) current = String(marker.textContent || '').trim();
@@ -1425,7 +1425,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V3-5';
+    frame.src='diocese.html?v=V3-6';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1815,7 +1815,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V3-5';
+const _PARISH_ASSET_VERSION='V3-6';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -1978,7 +1978,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V3-5';
+const _PRAYER_ASSET_VERSION='V3-6';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2023,7 +2023,7 @@ try{ window.ensurePrayerModuleLoaded=ensurePrayerModuleLoaded; }catch(e){ consol
 let _RT_RAW = [];
 let _retreatRawLoaded = false;
 let _retreatDataLoadPromise = null;
-const _RETREAT_ASSET_VERSION='V3-5';
+const _RETREAT_ASSET_VERSION='V3-6';
 
 let RETREATS = [];
 function _buildRetreatList(raw){
@@ -2264,7 +2264,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V3-5';
+const _SHRINE_ASSET_VERSION='V3-6';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
