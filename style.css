@@ -242,7 +242,7 @@ html.ios-device {
 html, body {
   width: 100%;
   height: 100%;
-  background: var(--bg-color);
+  background: #0e1535; /* body/html은 항상 navy 유지 — Android 네비게이션바 색상 안정화 */
   font-family: 'Noto Sans KR', sans-serif;
   overscroll-behavior: none;
   overflow: hidden;
@@ -2185,7 +2185,19 @@ html.oai-cover-booting #cover, html.oai-cover-booting #cover * {
   scroll-behavior: auto;
 }
 html.oai-cover-booting #cover > * {
-  visibility: hidden;
+  opacity: 0;
+}
+/* booting 해제 후 자식 요소 부드럽게 등장 */
+#cover > * {
+  animation: oaiCoverIn 0.18s ease-out both;
+}
+@keyframes oaiCoverIn {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+html.oai-cover-booting #cover > *,
+html.oai-cover-resizing #cover > * {
+  animation: none;
 }
 
 .cover-header {

@@ -111,7 +111,8 @@
   }
   function afterStableFirstPaint(fn){
     if(window.requestAnimationFrame){
-      requestAnimationFrame(fn);
+      /* rAF 2번: 첫 번째로 레이아웃 확정, 두 번째에 실제 공개 — 십자가 처짐 방지 */
+      requestAnimationFrame(function(){ requestAnimationFrame(fn); });
     }else{ fn(); }
   }
   function settleCoverSize(reason){
@@ -190,7 +191,7 @@ window.APP_CONFIG = {
 <meta http-equiv="Cache-Control" content="no-cache, max-age=0, must-revalidate">
 <meta http-equiv="Pragma" content="no-cache">
 <meta http-equiv="Expires" content="0">
-<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="apple-mobile-web-app-title" content="가톨릭길동무">
