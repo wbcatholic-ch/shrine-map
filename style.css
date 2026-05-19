@@ -3506,22 +3506,24 @@ html.kb-open .sheet.open { bottom: 0; }
 /* 기본 스타일은 inline style로 처리, opacity 초기화만 여기서 보장 */
 #oai-splash { opacity: 1; }
 
-/* 스플래시 십자가: 남색 화면 후 서서히 커지며 등장 */
+/* 스플래시 십자가: 남색 화면 후 서서히 커지며 등장
+   inline style이 초기 opacity:0 / scale(0.15) 을 보장하므로
+   CSS 로드 전 깜빡임 없음 */
 #oai-splash-cross {
   position: absolute;
   top: 50%;
   left: 50%;
-  font-size: 60px;
+  font-size: 90px;
   color: #d4aa6a;
   line-height: 1;
   transform: translate(-50%, -50%) scale(0.15);
   opacity: 0;
-  animation: oaiSplashCrossGrow 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.35s forwards;
+  animation: oaiSplashCrossGrow 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.2s forwards;
   will-change: transform, opacity;
 }
 @keyframes oaiSplashCrossGrow {
   0%   { opacity: 0;   transform: translate(-50%, -50%) scale(0.15); }
-  18%  { opacity: 0.7; }
+  15%  { opacity: 0.6; }
   100% { opacity: 1;   transform: translate(-50%, -50%) scale(1); }
 }
 
