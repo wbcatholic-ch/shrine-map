@@ -28,40 +28,57 @@
   window.__BACK_CTRL__ = true;
   window.__OAI_FULL_BACK_CTRL_ACTIVE__ = true;
 
-  var _href = location.href.split('#')[0];
-  var _coverTrapHash = '#oai-cover-trap';
-  var _trapHref = _href + _coverTrapHash;
-  var _coverHashArming = false;
+  var _coverTrapKey = 'oai_cover_trap';
+  var _href = coverBaseHref();
+  var _trapHref = coverTrapHref();
+  var _coverHashArming = false; // 이름은 호환용으로 유지. 실제로는 query trap arming 상태.
+
+  function coverBaseHref(){
+    try{
+      var u = new URL(location.href);
+      u.hash = '';
+      u.searchParams.delete(_coverTrapKey);
+      return u.toString();
+    }catch(_e){ return location.href.split('#')[0]; }
+  }
+  function coverTrapHref(){
+    try{
+      var u = new URL(coverBaseHref());
+      u.searchParams.set(_coverTrapKey, '1');
+      return u.toString();
+    }catch(_e){ return coverBaseHref(); }
+  }
+  function isCoverTrapUrl(){
+    try{ return new URL(location.href).searchParams.get(_coverTrapKey) === '1'; }
+    catch(_e){ return false; }
+  }
 
   function armCoverHashTrap(reason){
     try{
-      _href = location.href.split('#')[0];
-      _trapHref = _href + _coverTrapHash;
+      _href = coverBaseHref();
+      _trapHref = coverTrapHref();
       _coverHashArming = true;
-      window.__OAI_COVER_HASH_ARMING__ = true;
-      if(location.hash !== _coverTrapHash){
-        try{ history.replaceState({_p:0, oai_cover_root:reason||'cover-root'}, '', _href); }catch(_e){}
-        location.hash = _coverTrapHash.substring(1);
-        setTimeout(function(){
-          try{ history.replaceState({_p:1, oai_cover_trap:reason||'cover-trap'}, '', _trapHref); }catch(_e){}
-          _coverHashArming = false;
-          window.__OAI_COVER_HASH_ARMING__ = false;
-        }, 0);
-      }else{
+      window.__OAI_COVER_QUERY_ARMING__ = true;
+      if(isCoverTrapUrl()){
         history.replaceState({_p:1, oai_cover_trap:reason||'cover-trap'}, '', _trapHref);
-        _coverHashArming = false;
-        window.__OAI_COVER_HASH_ARMING__ = false;
+      }else{
+        history.replaceState({_p:0, oai_cover_root:reason||'cover-root'}, '', _href);
+        history.pushState({_p:1, oai_cover_trap:reason||'cover-trap'}, '', _trapHref);
       }
+      setTimeout(function(){
+        _coverHashArming = false;
+        window.__OAI_COVER_QUERY_ARMING__ = false;
+      }, 30);
     }catch(e){
       _coverHashArming = false;
-      window.__OAI_COVER_HASH_ARMING__ = false;
+      window.__OAI_COVER_QUERY_ARMING__ = false;
       console.warn("[가톨릭길동무]", e);
     }
   }
 
   /* history 초기화
-     V2-6: 첫 표지 Back은 일부 Android/PWA에서 같은 URL pushState가 무시될 수 있어
-     실제 hash 항목(#oai-cover-trap)을 사용한다. 뒤로가기 최종 판단은 이 파일에서만 한다. */
+     V2-S: 첫 표지 Back은 일부 Android/PWA에서 같은 URL/hash 트랩이 약하게 잡힐 수 있어
+     query 기반 별도 history 항목(oai_cover_trap=1)을 사용한다. 뒤로가기 최종 판단은 이 파일에서만 한다. */
   try{
     var refreshReason = '';
     try{
@@ -263,7 +280,7 @@
 
 
   /* ─────────────────────────────────────────────
-     V2-6 기도문 전용 뒤로가기 컨트롤러 — history 단계 분리 제거
+     V2-S 기도문 전용 뒤로가기 컨트롤러 — history 단계 분리 제거
 
      원칙:
      1) 다른 정상 카테고리처럼 실제 history는 공통 root/trap 한 쌍만 사용한다.
@@ -315,7 +332,7 @@
     return !!yes;
   }
   function armPrayerBackTrap(reason){
-    /* 호환용 함수. V2-6부터 기도문 detail/list용 별도 pushState는 만들지 않는다.
+    /* 호환용 함수. V2-S부터 기도문 detail/list용 별도 pushState는 만들지 않는다.
        공통 컨트롤러가 이미 갖고 있는 root/trap을 유지하는 것만 필요하다. */
     try{
       if(isPrayerOpen() && typeof window._ensureAppBackTrap === 'function'){
@@ -370,7 +387,7 @@
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
   function settleCoverTrapAfterPrayer(reason){
-    // V2-6: 기도문 팝업 → 커버 후에는 이미 공통 컨트롤러가 history.go(1)로 trap을 복원한 상태다.
+    // V2-S: 기도문 팝업 → 커버 후에는 이미 공통 컨트롤러가 history.go(1)로 trap을 복원한 상태다.
     // 여기서 replaceState/pushState를 강제로 반복하면 Android/PWA에서 다음 Back이 앱 종료로 오판될 수 있다.
     // 따라서 현재 trap이 살아 있으면 그대로 두고, 없을 때만 최소한으로 보강한다.
     function run(tag){
@@ -430,7 +447,7 @@
       var fromQuick = isPrayerQuickSource();
       if(!fromQuick) return resetPrayerToCover(reason || 'prayer-list-cover');
 
-      /* V2-6: 기도문 목록 → 빠른메뉴 팝업 복귀는 직접 팝업을 띄우지 않는다.
+      /* V2-S: 기도문 목록 → 빠른메뉴 팝업 복귀는 직접 팝업을 띄우지 않는다.
          사용자의 Back으로 공통 trap이 일단 소비된 직후라, 이 자리에서 openMassQuickMenu()를
          바로 호출하면 Android/PWA에서 history.go(1) 복원 타이밍과 겹쳐 팝업 Back이 앱 종료로
          먹힐 수 있다. 기존 안정 함수 _returnToMassQuickMenu('prayer')에게 맡기면,
@@ -575,7 +592,7 @@
 
     /* 커버: 토스트 → 두 번째에 종료. */
     if(!appActive()){
-      if(_coverHashArming || window.__OAI_COVER_HASH_ARMING__) return;
+      if(_coverHashArming || window.__OAI_COVER_QUERY_ARMING__) return;
       var exiting = false;
       if(typeof window._showBackToast==='function') exiting = window._showBackToast() === true;
       if(!exiting){ armCoverHashTrap('cover-toast'); }
@@ -621,9 +638,9 @@
   window.addEventListener('hashchange', function(){
     try{
       if(window._appExiting) return;
-      if(_coverHashArming || window.__OAI_COVER_HASH_ARMING__) return;
+      if(_coverHashArming || window.__OAI_COVER_QUERY_ARMING__) return;
       if(appActive()) return;
-      if(location.hash === _coverTrapHash) return;
+      if(isCoverTrapUrl()) return;
       var exiting = false;
       if(typeof window._showBackToast === 'function') exiting = window._showBackToast() === true;
       if(!exiting) armCoverHashTrap('hash-cover-toast');
@@ -761,9 +778,9 @@
 (function(){
   if(window.__APP_FONT_SCALE_GUARD__) return;
   window.__APP_FONT_SCALE_GUARD__=true;
-  // V2-6: 커버 글자 크기 조절은 prayer.js에 의존하지 않는 공통 함수가 담당한다.
+  // V2-S: 커버 글자 크기 조절은 prayer.js에 의존하지 않는 공통 함수가 담당한다.
   // prayer.js는 기도문 화면이 열렸을 때 같은 localStorage 값을 읽어 자체 UI를 맞춘다.
-  var QA_URL="qa-firebase.html?v=V2-6";
+  var QA_URL="qa-firebase.html?v=V2-S";
   var FONT_KEY='prayer_font_size';
   var BASE=16;
   var FONT_SIZES=[13,14,15,16,17,18,19,20,21,22,24,26,28,30];
@@ -833,7 +850,7 @@
   }
   function setEmojiIcons(){var icons={'cc-1':'✝️','cc-2':'⛪','cc-3':'🙏','cc-4':'🌿','cc-5':'🥾','cc-6':'🌐','cc-7':'🧭'};Object.keys(icons).forEach(function(id){var btn=el(id);if(!btn)return;var wrap=btn.querySelector('.cover-icon-wrap');if(wrap)wrap.innerHTML='<span class="cover-emoji" aria-hidden="true">'+icons[id]+'</span>';});}
   function configureQna(){
-    // V2-6: 문의·건의 버튼은 중간 안내 카드를 만들지 않고 실제 문의 페이지로 바로 이동한다.
+    // V2-S: 문의·건의 버튼은 중간 안내 카드를 만들지 않고 실제 문의 페이지로 바로 이동한다.
     window.QNA_FORM_URL=QA_URL;
     var q=el('qna-list');
     if(q) q.innerHTML='';
