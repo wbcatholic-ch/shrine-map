@@ -29,6 +29,9 @@ var OAI_EXTERNAL_LEAVE_HARD_MS = 22000;
 var OAI_REFRESH_VEIL_MS = 1000; // refresh veil must remain visible for at least 1s
 var OAI_REFRESH_CARRY_MS = 12000;
 var OAI_REFRESH_PROGRESS_HOLD_MS = 15000;
+// 새로고침 직전 문서에서 보호막이 먼저 꺼지면 원래 화면이 잠깐 노출되므로,
+// 실제 navigation이 새 문서로 넘어갈 때까지 충분히 길게 잡는다.
+var OAI_REFRESH_PRE_NAV_HOLD_MS = 8000;
 
 function markExternalReturnStabilize(kind){
   // 외부 사이트로 나가기 직전부터, 다시 돌아온 직후까지 화면 재배치가 보이지 않게 표시한다.
@@ -130,16 +133,21 @@ function oaiMarkRefreshHistoryCompact(reason){
     sessionStorage.setItem('oai_refresh_history_compact_reason', reason || 'refresh');
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
-function oaiPrepareRefreshVeil(reason, duration, carryDuration){
+function oaiPrepareRefreshVeil(reason, duration, carryDuration, preNavigationHold){
   try{
     var d = Math.max(260, duration || OAI_REFRESH_VEIL_MS);
     var carry = Math.max(d, carryDuration || OAI_REFRESH_CARRY_MS || d);
+    var preHold = Math.max(d, preNavigationHold || OAI_REFRESH_PRE_NAV_HOLD_MS || d);
     var now = Date.now ? Date.now() : new Date().getTime();
-    /* oai_refresh_veil_until은 “새 문서가 이 시간 안에 뜨면 보호막을 보이라”는 감지 기한이다.
-       실제 표시 시간은 oai_refresh_veil_hold_ms로 따로 저장해, 긴 새로고침에서도 첫 페인트 후 1초만 부드럽게 유지한다. */
+    /*
+       V3-4: 새로고침 보호막을 두 단계로 분리한다.
+       1) 현재 문서: location.reload/replace가 실제 새 문서로 넘어갈 때까지 보호막을 길게 유지한다.
+          여기서 1초 타이머로 먼저 꺼지면 사용자가 본 것처럼 원래 화면이 잠깐 드러난다.
+       2) 새 문서: index.html 조기 스크립트가 oai_refresh_veil_hold_ms(d)를 읽어 첫 페인트 후 약 1초만 표시한다.
+    */
     sessionStorage.setItem('oai_refresh_veil_until', String(now + carry));
     sessionStorage.setItem('oai_refresh_veil_hold_ms', String(d));
-    sessionStorage.setItem('oai_refresh_veil_visible_until', String(now + d));
+    sessionStorage.setItem('oai_refresh_veil_visible_until', String(now + preHold));
     sessionStorage.setItem('oai_refresh_veil_reason', reason || 'refresh');
     try{
       var rr = String(reason || 'refresh');
@@ -150,7 +158,7 @@ function oaiPrepareRefreshVeil(reason, duration, carryDuration){
       }
     }catch(_e){}
     oaiMarkRefreshHistoryCompact(reason || 'refresh');
-    oaiHoldStabilityVeil(reason || 'refresh', d);
+    oaiHoldStabilityVeil(reason || 'refresh', preHold);
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 function oaiApplyPendingRefreshVeil(){
@@ -1000,7 +1008,7 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || 'V3-3';
+    var target = btn.getAttribute('data-target-version') || 'V3-4';
     var current = '';
     if(window.APP_VERSION) current = String(window.APP_VERSION).trim();
     if(!current && marker) current = String(marker.textContent || '').trim();
@@ -1410,7 +1418,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V3-3';
+    frame.src='diocese.html?v=V3-4';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1800,7 +1808,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V3-3';
+const _PARISH_ASSET_VERSION='V3-4';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -1963,7 +1971,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V3-3';
+const _PRAYER_ASSET_VERSION='V3-4';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2008,7 +2016,7 @@ try{ window.ensurePrayerModuleLoaded=ensurePrayerModuleLoaded; }catch(e){ consol
 let _RT_RAW = [];
 let _retreatRawLoaded = false;
 let _retreatDataLoadPromise = null;
-const _RETREAT_ASSET_VERSION='V3-3';
+const _RETREAT_ASSET_VERSION='V3-4';
 
 let RETREATS = [];
 function _buildRetreatList(raw){
@@ -2249,7 +2257,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V3-3';
+const _SHRINE_ASSET_VERSION='V3-4';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
