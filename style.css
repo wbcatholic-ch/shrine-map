@@ -2831,7 +2831,7 @@ html.oai-external-return-freeze::after { content: ""; position: fixed; left: 50%
 html.oai-returning *, html.oai-diocese-returning * { transition: none; animation: none; scroll-behavior: auto; }
 html.oai-cover-resizing #cover, html.oai-cover-resizing #cover * { transition: none; animation: none; }
 
-/* 진입 fade-in: 카테고리/문의 화면은 0.7초, 팝업은 0.5초. 위치 이동 효과는 사용하지 않는다. */
+/* 진입 fade-in: 기도문·순례길·웹사이트·관구교구·문의는 0.7초, 팝업은 0.5초. 지도형 3개는 제외한다. */
 #app.oai-enter-ready,
 #prayer-view.oai-enter-ready,
 #diocese-view.oai-enter-ready,
