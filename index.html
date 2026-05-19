@@ -92,6 +92,8 @@
     var sr = parseInt(sessionStorage.getItem('oai_soft_refresh_requested') || '0', 10) || 0;
     softRefreshRecent = !!sr && (now() - sr < 120000);
   }catch(e){}
+  /* 새로고침으로 진입한 경우 스플래시를 아이보리로 전환 */
+  if(softRefreshRecent){ root.classList.add('oai-soft-refresh-mode'); }
   var widthMatches = !!(stored.width && currentWidth && Math.abs(stored.width - currentWidth) < 24);
   // 새로고침뿐 아니라 같은 화면 폭의 일반 재진입에서도 직전 커버 높이를 먼저 써서
   // 첫 페인트와 로딩 후 페인트의 상하 위치가 달라지는 것을 막는다.
