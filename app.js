@@ -140,50 +140,56 @@ function oaiPrepareRefreshVeil(reason, duration, carryDuration, preNavigationHol
     var preHold = Math.max(d, preNavigationHold || OAI_REFRESH_PRE_NAV_HOLD_MS || d);
     var now = Date.now ? Date.now() : new Date().getTime();
     /*
-       V3-4: 새로고침 보호막을 두 단계로 분리한다.
-       1) 현재 문서: location.reload/replace가 실제 새 문서로 넘어갈 때까지 보호막을 길게 유지한다.
-          여기서 1초 타이머로 먼저 꺼지면 사용자가 본 것처럼 원래 화면이 잠깐 드러난다.
-       2) 새 문서: index.html 조기 스크립트가 oai_refresh_veil_hold_ms(d)를 읽어 첫 페인트 후 약 1초만 표시한다.
+       V3-5: 새로고침 보호막은 끊김 없이 한 흐름으로 유지한다.
+       - 현재 문서: 실제 reload가 시작될 때까지 보호막을 길게 유지
+       - 새 문서: index.html 조기 스크립트가 먼저 보호막을 올리고, app.js가 한 번만 해제
+       종료 히스토리는 여기서 임의로 늘리거나 history.go로 건너뛰지 않는다.
     */
     sessionStorage.setItem('oai_refresh_veil_until', String(now + carry));
     sessionStorage.setItem('oai_refresh_veil_hold_ms', String(d));
     sessionStorage.setItem('oai_refresh_veil_visible_until', String(now + preHold));
     sessionStorage.setItem('oai_refresh_veil_reason', reason || 'refresh');
-    try{
-      var rr = String(reason || 'refresh');
-      if(oaiIsRefreshVeilReason(rr)){
-        var key = 'oai_refresh_exit_extra_depth';
-        var n = parseInt(sessionStorage.getItem(key) || '0', 10) || 0;
-        sessionStorage.setItem(key, String(Math.min(n + 1, 12)));
-      }
-    }catch(_e){}
     oaiMarkRefreshHistoryCompact(reason || 'refresh');
     oaiHoldStabilityVeil(reason || 'refresh', preHold);
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 function oaiApplyPendingRefreshVeil(){
   try{
+    var root = document.documentElement;
     var now = Date.now ? Date.now() : new Date().getTime();
     var until = parseInt(sessionStorage.getItem('oai_refresh_veil_until') || '0', 10) || 0;
     var holdMs = parseInt(sessionStorage.getItem('oai_refresh_veil_hold_ms') || '0', 10) || 0;
     var reason = sessionStorage.getItem('oai_refresh_veil_reason') || 'refresh-return';
     if(until > now){
       var showFor = Math.max(260, holdMs || Math.min(1200, Math.max(260, until - now)));
-      try{ sessionStorage.setItem('oai_refresh_veil_visible_until', String(now + showFor)); }catch(_e){}
-      oaiHoldStabilityVeil(reason || 'refresh-return', showFor);
+      var visibleUntil = parseInt(sessionStorage.getItem('oai_refresh_veil_visible_until') || '0', 10) || 0;
+      if(!visibleUntil) visibleUntil = now + showFor;
+      try{ sessionStorage.setItem('oai_refresh_veil_visible_until', String(visibleUntil)); }catch(_e){}
+
+      if(root.classList.contains('oai-stability-veil') && oaiIsRefreshVeilReason(root.getAttribute('data-oai-stability-reason') || reason)){
+        root.classList.remove('oai-stability-veil-releasing');
+        root.setAttribute('data-oai-stability-reason', reason || 'refresh-return');
+        root.removeAttribute('data-oai-refresh-early-veil');
+        clearTimeout(window.__oaiStabilityVeilTimer);
+        window.__oaiStabilityVeilTimer = setTimeout(oaiReleaseStabilityVeil, Math.max(0, visibleUntil - now));
+        clearTimeout(window.__oaiStabilityVeilHardTimer);
+        window.__oaiStabilityVeilHardTimer = setTimeout(oaiReleaseStabilityVeil, Math.max(1600, visibleUntil - now + 900));
+      }else{
+        try{ sessionStorage.setItem('oai_refresh_veil_visible_until', String(now + showFor)); }catch(_e){}
+        oaiHoldStabilityVeil(reason || 'refresh-return', showFor);
+      }
       setTimeout(function(){
         try{
           sessionStorage.removeItem('oai_refresh_veil_until');
           sessionStorage.removeItem('oai_refresh_veil_hold_ms');
           sessionStorage.removeItem('oai_refresh_veil_reason');
-          sessionStorage.removeItem('oai_refresh_veil_visible_until');
         }catch(_e){}
-      }, Math.max(300, showFor + 260));
+      }, Math.max(300, Math.max(visibleUntil - now, showFor) + 320));
     }else if(until){
       sessionStorage.removeItem('oai_refresh_veil_until');
       sessionStorage.removeItem('oai_refresh_veil_hold_ms');
       sessionStorage.removeItem('oai_refresh_veil_reason');
-          sessionStorage.removeItem('oai_refresh_veil_visible_until');
+      sessionStorage.removeItem('oai_refresh_veil_visible_until');
     }
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
@@ -957,11 +963,12 @@ async function _runClearAppFilesCacheCompletely(){
   try{ if(typeof oaiPrepareRefreshVeil === 'function') oaiPrepareRefreshVeil('long-refresh-reload', OAI_REFRESH_VEIL_MS, OAI_REFRESH_CARRY_MS); }catch(e){ console.warn('[가톨릭길동무]', e); }
   setTimeout(function(){
     try{
-      var url = new URL(location.href);
-      url.searchParams.set('refresh', String(Date.now ? Date.now() : new Date().getTime()));
-      location.replace(url.toString());
-    }catch(e){
+      // 긴 새로고침도 현재 히스토리 항목을 그대로 reload한다.
+      // location.replace(?refresh=...)는 이전 root 항목과 URL이 갈라져
+      // 종료 토스트 뒤 이전 커버 문서로 되돌아가는 원인이 된다.
       location.reload();
+    }catch(e){
+      location.href = location.href.split('#')[0];
     }
   }, 120);
 }
@@ -1008,7 +1015,7 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || 'V3-4';
+    var target = btn.getAttribute('data-target-version') || 'V3-5';
     var current = '';
     if(window.APP_VERSION) current = String(window.APP_VERSION).trim();
     if(!current && marker) current = String(marker.textContent || '').trim();
@@ -1418,7 +1425,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V3-4';
+    frame.src='diocese.html?v=V3-5';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1808,7 +1815,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V3-4';
+const _PARISH_ASSET_VERSION='V3-5';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -1971,7 +1978,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V3-4';
+const _PRAYER_ASSET_VERSION='V3-5';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2016,7 +2023,7 @@ try{ window.ensurePrayerModuleLoaded=ensurePrayerModuleLoaded; }catch(e){ consol
 let _RT_RAW = [];
 let _retreatRawLoaded = false;
 let _retreatDataLoadPromise = null;
-const _RETREAT_ASSET_VERSION='V3-4';
+const _RETREAT_ASSET_VERSION='V3-5';
 
 let RETREATS = [];
 function _buildRetreatList(raw){
@@ -2257,7 +2264,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V3-4';
+const _SHRINE_ASSET_VERSION='V3-5';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -2577,20 +2584,6 @@ function attemptAppExit(){
   // 따라서 종료 시도는 window.close까지만 하고, 히스토리 트랩은 다시 심지 않는다.
   try{ window.open('', '_self'); window.close(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   try{ document.documentElement.classList.add('app-exiting'); }catch(e){ console.warn("[가톨릭길동무]", e); }
-  /* 새로고침을 여러 번 하면 브라우저 세션 뒤쪽에 이전 커버 root가 남을 수 있다.
-     window.close()가 막히는 Android/PWA 환경에서는 두 번째 Back 후에도 그 root들로 돌아가며
-     앱 종료가 어려워지므로, 새로고침으로 추가된 내부 root 수만큼 한 번에 건너뛴다. */
-  setTimeout(function(){
-    try{
-      var key='oai_refresh_exit_extra_depth';
-      var depth=parseInt(sessionStorage.getItem(key) || '0', 10) || 0;
-      if(depth > 0){
-        sessionStorage.removeItem(key);
-        var jump = Math.min(depth + 1, 15);
-        history.go(-jump);
-      }
-    }catch(e){ console.warn("[가톨릭길동무]", e); }
-  }, 120);
 }
 function closeExitDlg(){
   _exitReady=false;
