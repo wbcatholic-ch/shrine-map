@@ -2175,46 +2175,35 @@ html.app-active #qna-cover-btn { display: none; }
    6. 커버 화면
    ============================================================ */
 #cover { overscroll-behavior-y: contain; }
-html.oai-cover-booting body { background: var(--navy); }
-html.oai-cover-booting #cover {
-  background-color: var(--navy);
-}
-html.oai-cover-booting #cover, html.oai-cover-booting #cover * {
-  transition: none;
-  animation: none;
-  scroll-behavior: auto;
-}
-html.oai-cover-booting #cover > * {
-  visibility: hidden;
-}
-html.oai-cover-revealing:not(.app-active) #cover {
-  background-color: var(--bg-color);
-}
-html.oai-cover-revealing:not(.app-active) #cover::before {
-  content: "";
+#oai-navy-intro-overlay {
   position: fixed;
   inset: 0;
-  z-index: 30;
+  z-index: 2147482800;
+  display: none;
+  align-items: center;
+  justify-content: center;
   background: var(--navy);
   pointer-events: none;
-  animation: oaiNavyIntroFade .40s ease-out forwards;
+  opacity: 1;
+  transform: translateZ(0);
+  will-change: opacity;
 }
-html.oai-cover-revealing:not(.app-active) #cover > * {
-  animation: oaiCoverIntroFade .38s ease-out both;
+html.oai-navy-intro-active #oai-navy-intro-overlay,
+html.oai-navy-intro-releasing #oai-navy-intro-overlay {
+  display: flex;
 }
-@keyframes oaiNavyIntroFade {
-  from { opacity: 1; }
-  to { opacity: 0; }
+html.oai-navy-intro-releasing #oai-navy-intro-overlay {
+  opacity: 0;
+  transition: opacity .24s ease-out;
 }
-@keyframes oaiCoverIntroFade {
-  from { opacity: .01; }
-  to { opacity: 1; }
+#oai-navy-intro-overlay img {
+  width: clamp(96px, 28vw, 148px);
+  height: clamp(96px, 28vw, 148px);
+  object-fit: contain;
+  display: block;
 }
 @media (prefers-reduced-motion: reduce) {
-  html.oai-cover-revealing:not(.app-active) #cover::before,
-  html.oai-cover-revealing:not(.app-active) #cover > * {
-    animation-duration: .16s;
-  }
+  html.oai-navy-intro-releasing #oai-navy-intro-overlay { transition-duration: .12s; }
 }
 
 .cover-header {
@@ -2628,7 +2617,7 @@ html.app-active #pwa-install-btn { display: none; }
 .guide-mini-list dd { margin: 0; color: #5f6675; font-weight: 600; word-break: keep-all; }
 .guide-ok { flex: 0 0 auto; width: 100%; margin-top: 12px; min-height: 40px; }
 
-/* V2-S-r11: 즐겨찾기 초기화 1회 안내 배너 */
+/* V2-S-r12: 즐겨찾기 초기화 1회 안내 배너 */
 #cover .favorites-reset-banner {
   position: fixed;
   left: max(20px, calc(env(safe-area-inset-left, 0px) + 20px));
