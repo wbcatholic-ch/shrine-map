@@ -56,7 +56,11 @@ function oaiIsRefreshVeilReason(reason){
   return /refresh|reload|background/i.test(String(reason || ''));
 }
 function oaiRefreshVeilVisibleUntil(){
-  try{ return parseInt(sessionStorage.getItem('oai_refresh_veil_visible_until') || '0', 10) || 0; }catch(_e){ return 0; }
+  try{
+    var stored = parseInt(sessionStorage.getItem('oai_refresh_veil_visible_until') || '0', 10) || 0;
+    var local = parseInt(window.__oaiRefreshVeilLocalVisibleUntil || '0', 10) || 0;
+    return Math.max(stored, local);
+  }catch(_e){ return parseInt(window.__oaiRefreshVeilLocalVisibleUntil || '0', 10) || 0; }
 }
 function oaiReleaseStabilityVeil(){
   try{
@@ -101,13 +105,13 @@ function oaiReleaseStabilityVeil(){
         try{
           root.classList.remove('oai-stability-veil','oai-external-return-freeze','oai-external-leaving','oai-stability-veil-releasing');
           root.removeAttribute('data-oai-stability-reason');
-          try{ sessionStorage.removeItem('oai_refresh_veil_visible_until'); }catch(_e){}
+          try{ sessionStorage.removeItem('oai_refresh_veil_visible_until'); window.__oaiRefreshVeilLocalVisibleUntil = 0; }catch(_e){}
         }catch(_e){}
       }, 180);
     }else{
       root.classList.remove('oai-stability-veil','oai-external-return-freeze','oai-external-leaving','oai-stability-veil-releasing');
       root.removeAttribute('data-oai-stability-reason');
-      try{ sessionStorage.removeItem('oai_refresh_veil_visible_until'); }catch(_e){}
+      try{ sessionStorage.removeItem('oai_refresh_veil_visible_until'); window.__oaiRefreshVeilLocalVisibleUntil = 0; }catch(_e){}
     }
   }catch(e){ console.warn("[가톨릭길동무]", e); }
 }
@@ -136,24 +140,34 @@ function oaiMarkRefreshHistoryCompact(reason){
     sessionStorage.setItem('oai_refresh_history_compact_reason', reason || 'refresh');
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
-function oaiPrepareRefreshVeil(reason, duration, carryDuration, showBeforeNavigation, beforeNavigationHold){
+function oaiPrepareRefreshVeil(reason, duration, carryDuration, showBeforeNavigation, beforeNavigationHold, carryToNextDocument){
   try{
     var d = Math.max(260, duration || OAI_REFRESH_VEIL_MS);
     var carry = Math.max(d + 1200, carryDuration || OAI_REFRESH_CARRY_MS || d);
     var now = Date.now ? Date.now() : new Date().getTime();
     /*
-       V3-15: 짧은/긴 새로고침 모두 사용자가 OK를 누른 직후 현재 문서에서
-       아이보리 보호막을 먼저 그린 다음 실제 reload/캐시 정리를 시작한다.
-       새 문서 첫 페인트도 같은 sessionStorage 플래그로 1초 이상 덮는다.
+       V3-16: 수동 짧은/긴 새로고침은 OK 직후 현재 문서 보호막을 먼저 보여 주되,
+       새 문서 첫 페인트 보호막을 다시 예약하지 않는다.
+       두 문서가 각각 1번씩 보호창을 켜서 '두 번 열림'처럼 보이던 흐름을 끊는다.
+       자동/백그라운드 reload처럼 현재 문서에서 먼저 보여 줄 수 없는 경우만 carryToNextDocument 기본값(true)을 사용한다.
     */
-    sessionStorage.setItem('oai_refresh_veil_until', String(now + carry));
-    sessionStorage.setItem('oai_refresh_veil_hold_ms', String(d));
-    sessionStorage.removeItem('oai_refresh_veil_visible_until');
-    sessionStorage.setItem('oai_refresh_veil_reason', reason || 'refresh');
+    var carryToNext = (carryToNextDocument !== false);
+    if(carryToNext){
+      sessionStorage.setItem('oai_refresh_veil_until', String(now + carry));
+      sessionStorage.setItem('oai_refresh_veil_hold_ms', String(d));
+      sessionStorage.removeItem('oai_refresh_veil_visible_until');
+      sessionStorage.setItem('oai_refresh_veil_reason', reason || 'refresh');
+    }else{
+      sessionStorage.removeItem('oai_refresh_veil_until');
+      sessionStorage.removeItem('oai_refresh_veil_hold_ms');
+      sessionStorage.removeItem('oai_refresh_veil_reason');
+      sessionStorage.removeItem('oai_refresh_veil_visible_until');
+    }
     oaiMarkRefreshHistoryCompact(reason || 'refresh');
     if(showBeforeNavigation === true){
       var preHold = Math.max(d, beforeNavigationHold || d);
-      sessionStorage.setItem('oai_refresh_veil_visible_until', String(now + d));
+      window.__oaiRefreshVeilLocalVisibleUntil = now + d;
+      if(carryToNext) sessionStorage.setItem('oai_refresh_veil_visible_until', String(now + d));
       oaiHoldStabilityVeil(reason || 'refresh', preHold);
     }
   }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -967,7 +981,7 @@ function _runRefreshAppFilesOnly(){
   }
   try{
     if(typeof oaiPrepareRefreshVeil === 'function')
-      oaiPrepareRefreshVeil('short-refresh', OAI_REFRESH_VEIL_MS, OAI_REFRESH_CARRY_MS, true, OAI_REFRESH_PRE_NAV_HOLD_MS);
+      oaiPrepareRefreshVeil('short-refresh', OAI_REFRESH_VEIL_MS, OAI_REFRESH_CARRY_MS, true, OAI_REFRESH_PRE_NAV_HOLD_MS, false);
   }catch(e){ console.warn('[가톨릭길동무]', e); }
   oaiAfterRefreshVeilPaint(function(){
     try{
@@ -1042,7 +1056,7 @@ window.refreshAppFilesOnly = refreshAppFilesOnly;
 async function _runClearAppFilesCacheCompletely(){
   try{
     if(typeof oaiPrepareRefreshVeil === 'function')
-      oaiPrepareRefreshVeil('long-refresh-progress', OAI_REFRESH_VEIL_MS, OAI_REFRESH_CARRY_MS, true, OAI_REFRESH_PROGRESS_HOLD_MS);
+      oaiPrepareRefreshVeil('long-refresh-progress', OAI_REFRESH_VEIL_MS, OAI_REFRESH_CARRY_MS, true, OAI_REFRESH_PROGRESS_HOLD_MS, false);
   }catch(e){ console.warn('[가톨릭길동무]', e); }
   try{
     if(typeof oaiMarkRefreshHistoryCompact === 'function') oaiMarkRefreshHistoryCompact('long-refresh-progress');
@@ -1060,10 +1074,8 @@ async function _runClearAppFilesCacheCompletely(){
   }catch(e){
     console.warn('[가톨릭길동무]', e);
   }
-  try{
-    // 현재 문서 보호막은 유지하고, 새 문서 첫 페인트용 플래그만 다시 최신화한다.
-    if(typeof oaiPrepareRefreshVeil === 'function') oaiPrepareRefreshVeil('long-refresh', OAI_REFRESH_VEIL_MS, OAI_REFRESH_CARRY_MS, false);
-  }catch(e){ console.warn('[가톨릭길동무]', e); }
+  // V3-16: 긴 새로고침은 현재 문서 보호막 하나만 사용한다.
+  // 새 문서 첫 페인트 보호막을 다시 예약하면 보호창이 두 번 열린 것처럼 보인다.
   oaiAfterRefreshVeilPaint(function(){
     try{
       // 긴 새로고침도 현재 히스토리 항목을 그대로 reload한다.
@@ -1118,7 +1130,7 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || 'V3-15';
+    var target = btn.getAttribute('data-target-version') || 'V3-16';
     var current = '';
     if(window.APP_VERSION) current = String(window.APP_VERSION).trim();
     if(!current && marker) current = String(marker.textContent || '').trim();
@@ -1530,7 +1542,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V3-15';
+    frame.src='diocese.html?v=V3-16';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1918,7 +1930,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V3-15';
+const _PARISH_ASSET_VERSION='V3-16';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -2081,7 +2093,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V3-15';
+const _PRAYER_ASSET_VERSION='V3-16';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2126,7 +2138,7 @@ try{ window.ensurePrayerModuleLoaded=ensurePrayerModuleLoaded; }catch(e){ consol
 let _RT_RAW = [];
 let _retreatRawLoaded = false;
 let _retreatDataLoadPromise = null;
-const _RETREAT_ASSET_VERSION='V3-15';
+const _RETREAT_ASSET_VERSION='V3-16';
 
 let RETREATS = [];
 function _buildRetreatList(raw){
@@ -2368,7 +2380,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V3-15';
+const _SHRINE_ASSET_VERSION='V3-16';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -2706,7 +2718,7 @@ function oaiEnterView(el){
   try{
     var root=document.documentElement;
     if(root.classList.contains('oai-returning')) return;
-    // V3-15: 카테고리 진입은 화면 자체를 fade하지 않고, 완성된 화면 위의
+    // V3-16: 카테고리 진입은 화면 자체를 fade하지 않고, 완성된 화면 위의
     // 얇은 아이보리 overlay가 0.7초 동안 사라지는 dissolve 방식으로 통일한다.
     // 성지·성당·피정의집 지도형 화면(#app)은 진입 효과를 적용하지 않는다.
     el.classList.remove('oai-enter-ready','oai-enter-show','oai-popup-ready','oai-popup-show','oai-prepaint-view');
