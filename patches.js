@@ -73,7 +73,7 @@
   }
   function closeGuideModals(){
     try{
-      var mq = $('mass-quick-modal');
+      var mq = $b('mass-quick-modal');
       if(mq && mq.classList.contains('show') && typeof window.closeMassQuickMenu === 'function'){
         var fromPrayer = false;
         try{ fromPrayer = !!(mq.dataset && mq.dataset.returnSource === 'prayer'); }catch(e){}

@@ -2134,7 +2134,7 @@ function ensurePrayerModuleLoaded(){
 }
 try{ window.ensurePrayerModuleLoaded=ensurePrayerModuleLoaded; }catch(e){ console.warn('[가톨릭길동무]', e); }
 
-// ─── 피정의 집 데이터 [190개] ───
+// ─── 피정의 집 데이터 [195개] ───
 let _RT_RAW = [];
 let _retreatRawLoaded = false;
 let _retreatDataLoadPromise = null;
