@@ -2616,7 +2616,7 @@ html.app-active #pwa-install-btn { display: none; }
 .guide-mini-list dd { margin: 0; color: #5f6675; font-weight: 600; word-break: keep-all; }
 .guide-ok { flex: 0 0 auto; width: 100%; margin-top: 12px; min-height: 40px; }
 
-/* V2-S-r22: 즐겨찾기 초기화 1회 안내 배너 */
+/* V2-S-r24: 즐겨찾기 초기화 1회 안내 배너 */
 
 /* iOS Safari 설치 안내 */
 #cover .ios-safari-banner { display: none; }
@@ -3463,13 +3463,9 @@ html.kb-open .sheet.open { bottom: 0; }
 /* 기본 스타일은 inline style로 처리, opacity 초기화만 여기서 보장 */
 #oai-splash { opacity: 1; }
 
-/* 스플래시 십자가: 즉시 큰 크기로 정적 표시 (OS 스플래시와 자연스럽게 연결) */
 /* ── 새로고침 진입 시 스플래시를 아이보리로 변경 ── */
 html.oai-soft-refresh-mode #oai-splash {
   background: #f5f0e8 !important;
-}
-html.oai-soft-refresh-mode #oai-splash-cross {
-  display: none;
 }
 html.oai-soft-refresh-mode,
 html.oai-soft-refresh-mode body {
