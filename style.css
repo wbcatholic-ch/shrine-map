@@ -2616,7 +2616,7 @@ html.app-active #pwa-install-btn { display: none; }
 .guide-mini-list dd { margin: 0; color: #5f6675; font-weight: 600; word-break: keep-all; }
 .guide-ok { flex: 0 0 auto; width: 100%; margin-top: 12px; min-height: 40px; }
 
-/* V2-S-r27: 즐겨찾기 초기화 1회 안내 배너 */
+/* V2-S-r28: 즐겨찾기 초기화 1회 안내 배너 */
 
 /* iOS Safari 설치 안내 */
 #cover .ios-safari-banner { display: none; }
@@ -3459,9 +3459,9 @@ html.ios-device #app #sheet-list .sheet-hd { bottom: 0; }
 /* 키보드 오픈 시 sheet 위치 보정 */
 html.kb-open .sheet.open { bottom: 0; }
 
-/* ── 짧은 새로고침 보호 화면 ── */
+/* ── 새로고침 보호 화면 ── */
 /* 첫 진입에는 별도 HTML 십자가/이미지 스플래시를 띄우지 않고,
-   짧은 새로고침으로 다시 들어올 때만 아이보리 보호 화면을 잠깐 보여준다. */
+   짧은/긴 새로고침으로 다시 들어올 때만 아이보리 보호 화면을 잠깐 보여준다. */
 #oai-splash { opacity: 0; }
 html.oai-soft-refresh-mode #oai-splash {
   display: block;
