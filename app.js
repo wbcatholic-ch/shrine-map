@@ -24,10 +24,10 @@ function hideCoverAndRun(callback) {
 }
 
 
-var OAI_EXTERNAL_LEAVE_HOLD_MS = 16000;
-var OAI_EXTERNAL_LEAVE_HARD_MS = 22000;
+var OAI_EXTERNAL_LEAVE_HOLD_MS = 45000;
+var OAI_EXTERNAL_LEAVE_HARD_MS = 60000;
 var OAI_REFRESH_VEIL_MS = 1000; // refresh veil must remain visible for at least 1s
-var OAI_REFRESH_CARRY_MS = 12000;
+var OAI_REFRESH_CARRY_MS = 15000;
 var OAI_REFRESH_PROGRESS_HOLD_MS = 15000;
 // 새로고침 직전 문서에서 보호막이 먼저 꺼지면 원래 화면이 잠깐 노출되므로,
 // 실제 navigation이 새 문서로 넘어갈 때까지 충분히 길게 잡는다.
@@ -139,10 +139,10 @@ function oaiPrepareRefreshVeil(reason, duration, carryDuration, showBeforeNaviga
     var carry = Math.max(d + 1200, carryDuration || OAI_REFRESH_CARRY_MS || d);
     var now = Date.now ? Date.now() : new Date().getTime();
     /*
-       V3-7: 새로고침 보호막은 두 번 보이지 않도록 한쪽에서만 표시한다.
-       - 짧은 새로고침: 현재 문서에서는 보호막을 켜지 않고, 새 문서 첫 페인트에서 1초만 표시
-       - 긴 새로고침: 캐시 정리 중 progress 보호막을 이미 보여 주므로 새 문서 보호막은 중복 표시하지 않음
-       - first-entry 커버 fade와 새로고침 보호막은 서로 분리한다.
+       V3-8: 새로고침 보호막은 같은 클래스 한 벌만 사용한다.
+       - 짧은 새로고침: 현재 문서에서는 플래그만 저장하고 새 문서 첫 페인트에서 표시
+       - 긴 새로고침: 캐시 정리 중 현재 문서 보호막을 유지하고, 새 문서에서도 1초 최소 표시
+       - 첫 진입 커버 fade와 새로고침 보호막은 별도 조건으로 분리한다.
     */
     sessionStorage.setItem('oai_refresh_veil_until', String(now + carry));
     sessionStorage.setItem('oai_refresh_veil_hold_ms', String(d));
@@ -165,7 +165,10 @@ function oaiApplyPendingRefreshVeil(){
     if(until > now){
       var showFor = Math.max(260, holdMs || Math.min(1200, Math.max(260, until - now)));
       var visibleUntil = parseInt(sessionStorage.getItem('oai_refresh_veil_visible_until') || '0', 10) || 0;
-      if(!visibleUntil) visibleUntil = now + showFor;
+      // early script가 이미 보호막을 켰더라도 app.js가 실제로 붙은 뒤부터 최소 1초를 보장한다.
+      // 그래야 긴 새로고침처럼 리소스 로딩이 느린 경우에도 보호창이 1초보다 짧게 느껴지지 않는다.
+      var minVisibleUntil = now + showFor;
+      if(!visibleUntil || visibleUntil < minVisibleUntil) visibleUntil = minVisibleUntil;
       try{ sessionStorage.setItem('oai_refresh_veil_visible_until', String(visibleUntil)); }catch(_e){}
 
       if(root.classList.contains('oai-stability-veil') && oaiIsRefreshVeilReason(root.getAttribute('data-oai-stability-reason') || reason)){
@@ -224,12 +227,18 @@ function oaiClearExternalNavigationState(){
 }
 
 function oaiSmoothNavigate(url, kind){
-  // 모든 외부 http(s) 이동은 이 함수 하나에서 보호막·복귀 안정화·실제 이동을 통일한다.
+  // 모든 외부 http(s) 이동은 웹사이트 카테고리와 같은 경로로 통일한다.
+  // 1) URL 보정  2) 외부 이동 상태 기록  3) 보호창 유지  4) 같은 탭 이동
+  if(!url) return;
+  try{
+    if(typeof normalizeCatholicExternalUrl === 'function') url = normalizeCatholicExternalUrl(url);
+    else url = String(url || '').trim();
+  }catch(_e){ url = String(url || '').trim(); }
   if(!url) return;
   try{ document.activeElement && document.activeElement.blur && document.activeElement.blur(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   try{ markExternalReturnStabilize(kind || 'external'); }catch(e){ console.warn("[가톨릭길동무]", e); }
   setTimeout(function(){
-    try{ location.href = url; }catch(e){ try{ location.assign(url); }catch(_){ } }
+    try{ location.assign(url); }catch(e){ try{ location.href = url; }catch(_){ } }
   }, 70);
 }
 
@@ -963,10 +972,9 @@ async function _runClearAppFilesCacheCompletely(){
     console.warn('[가톨릭길동무]', e);
   }
   try{
-    sessionStorage.removeItem('oai_refresh_veil_until');
-    sessionStorage.removeItem('oai_refresh_veil_hold_ms');
-    sessionStorage.removeItem('oai_refresh_veil_reason');
-    sessionStorage.removeItem('oai_refresh_veil_visible_until');
+    // 긴 새로고침은 캐시를 지운 뒤 새 문서가 다시 뜨므로,
+    // 새 문서 첫 페인트에서도 같은 아이보리 보호창을 1초 이상 이어가야 한다.
+    if(typeof oaiPrepareRefreshVeil === 'function') oaiPrepareRefreshVeil('long-refresh', OAI_REFRESH_VEIL_MS, OAI_REFRESH_CARRY_MS, false);
   }catch(e){ console.warn('[가톨릭길동무]', e); }
   setTimeout(function(){
     try{
@@ -1022,7 +1030,7 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || 'V3-7';
+    var target = btn.getAttribute('data-target-version') || 'V3-8';
     var current = '';
     if(window.APP_VERSION) current = String(window.APP_VERSION).trim();
     if(!current && marker) current = String(marker.textContent || '').trim();
@@ -1432,7 +1440,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V3-7';
+    frame.src='diocese.html?v=V3-8';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1822,7 +1830,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V3-7';
+const _PARISH_ASSET_VERSION='V3-8';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -1985,7 +1993,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V3-7';
+const _PRAYER_ASSET_VERSION='V3-8';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2030,7 +2038,7 @@ try{ window.ensurePrayerModuleLoaded=ensurePrayerModuleLoaded; }catch(e){ consol
 let _RT_RAW = [];
 let _retreatRawLoaded = false;
 let _retreatDataLoadPromise = null;
-const _RETREAT_ASSET_VERSION='V3-7';
+const _RETREAT_ASSET_VERSION='V3-8';
 
 let RETREATS = [];
 function _buildRetreatList(raw){
@@ -2271,7 +2279,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V3-7';
+const _SHRINE_ASSET_VERSION='V3-8';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
