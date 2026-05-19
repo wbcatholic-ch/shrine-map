@@ -2,6 +2,8 @@
    캐시를 매번 삭제하지 않고, 버전 변경 시 오래된 캐시만 정리합니다.
    localStorage/사용자 설정은 건드리지 않습니다. */
 const CACHE_VERSION = 'catholic-way-V2-S';
+/* 다이어트 1: 첫 실행에 꼭 필요한 앱 셸만 선캐시합니다.
+   성당/성지/피정의집/기도문/관구교구/문의 페이지는 versioned fetch 시 cacheFirst로 저장됩니다. */
 const APP_SHELL = [
   './',
   './index.html',
@@ -11,31 +13,11 @@ const APP_SHELL = [
   './patches.js?v=V2-S',
   './sw-update.js?v=V2-S',
   './manifest.json?v=V2-S',
-  './diocese.html?v=V2-S',
-  './qa-firebase.html?v=V2-S',
-  './prayer.js?v=V2-S',
-  './retreats.js?v=V2-S',
-  './shrines.js?v=V2-S',
-  './parishes-seoul.js?v=V2-S',
-  './parishes-incheon.js?v=V2-S',
-  './parishes-suwon.js?v=V2-S',
-  './parishes-uijeongbu.js?v=V2-S',
-  './parishes-chuncheon.js?v=V2-S',
-  './parishes-wonju.js?v=V2-S',
-  './parishes-daejeon.js?v=V2-S',
-  './parishes-cheongju.js?v=V2-S',
-  './parishes-daegu.js?v=V2-S',
-  './parishes-busan.js?v=V2-S',
-  './parishes-andong.js?v=V2-S',
-  './parishes-masan.js?v=V2-S',
-  './parishes-gwangju.js?v=V2-S',
-  './parishes-jeonju.js?v=V2-S',
-  './parishes-jeju.js?v=V2-S',
-  './parishes-military.js?v=V2-S',
   './icon-192x192.png',
   './icon-512x512.png',
   './icon-512x512-maskable.png',
 ];
+
 
 self.addEventListener('install', (event) => {
   event.waitUntil(

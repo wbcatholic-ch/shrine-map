@@ -28,55 +28,33 @@
   window.__BACK_CTRL__ = true;
   window.__OAI_FULL_BACK_CTRL_ACTIVE__ = true;
 
-  var _coverTrapKey = 'oai_cover_trap';
-  var _href = coverBaseHref();
-  var _trapHref = coverTrapHref();
-  var _coverHashArming = false; // 이름은 호환용으로 유지. 실제로는 query trap arming 상태.
+  var _href = location.href.split('#')[0];
+  var _coverTrapArming = false;
 
-  function coverBaseHref(){
+  function armCoverBackTrap(reason, opts){
     try{
-      var u = new URL(location.href);
-      u.hash = '';
-      u.searchParams.delete(_coverTrapKey);
-      return u.toString();
-    }catch(_e){ return location.href.split('#')[0]; }
-  }
-  function coverTrapHref(){
-    try{
-      var u = new URL(coverBaseHref());
-      u.searchParams.set(_coverTrapKey, '1');
-      return u.toString();
-    }catch(_e){ return coverBaseHref(); }
-  }
-  function isCoverTrapUrl(){
-    try{ return new URL(location.href).searchParams.get(_coverTrapKey) === '1'; }
-    catch(_e){ return false; }
-  }
-
-  function armCoverHashTrap(reason){
-    try{
-      _href = coverBaseHref();
-      _trapHref = coverTrapHref();
-      _coverHashArming = true;
-      window.__OAI_COVER_QUERY_ARMING__ = true;
-      // V2-S: 현재 URL이 이미 trap이어도 항상 base → trap 한 쌍을 다시 보장한다.
-      // trap URL로 앱이 시작된 경우 replace만 하면 첫 Back을 받을 history 항목이 부족해질 수 있다.
-      history.replaceState({_p:0, oai_cover_root:reason||'cover-root'}, '', _href);
-      history.pushState({_p:1, oai_cover_trap:reason||'cover-trap'}, '', _trapHref);
-      setTimeout(function(){
-        _coverHashArming = false;
-        window.__OAI_COVER_QUERY_ARMING__ = false;
-      }, 30);
+      opts = opts || {};
+      var href = location.href.split('#')[0];
+      _href = href;
+      if(!opts.force){
+        var st = history.state;
+        if(st && st._p === 1) return;
+      }
+      _coverTrapArming = true;
+      history.replaceState({_p:0, oai_cover_root:reason||'cover-root'}, '', href);
+      history.pushState({_p:1, oai_cover_trap:reason||'cover-trap'}, '', href);
+      setTimeout(function(){ _coverTrapArming = false; }, 30);
     }catch(e){
-      _coverHashArming = false;
-      window.__OAI_COVER_QUERY_ARMING__ = false;
+      _coverTrapArming = false;
       console.warn("[가톨릭길동무]", e);
     }
   }
 
   /* history 초기화
-     V2-S: 첫 표지 Back은 일부 Android/PWA에서 같은 URL/hash 트랩이 약하게 잡힐 수 있어
-     query 기반 별도 history 항목(oai_cover_trap=1)을 사용한다. 뒤로가기 최종 판단은 이 파일에서만 한다. */
+     V2-S: 뒤로가기 최종 판단은 patches.js 한 곳에서만 처리한다.
+     사용자의 첫 터치 전 자동으로 만든 history 항목은 일부 Android/PWA에서 뒤로가기 스택으로
+     인정되지 않을 수 있으므로, 자동 초기화는 기존 호환용으로만 유지하고 첫 사용자 조작 후
+     커버 trap을 한 번 더 확정한다. */
   try{
     var refreshReason = '';
     try{
@@ -87,16 +65,22 @@
       sessionStorage.removeItem('oai_refresh_history_compact_until');
       sessionStorage.removeItem('oai_refresh_history_compact_reason');
     }catch(_e){}
-    if(!appActive()){
-      armCoverHashTrap(refreshReason || 'init');
+    if(refreshReason){
+      history.replaceState({_p:1, oai_cover_trap: refreshReason}, '', _href);
     }else{
-      var st = history.state;
-      if(!(st && st._p === 1)){
-        history.replaceState({_p:0, oai_app_root:'init'}, '', _href);
-        history.pushState({_p:1, oai_app_trap:'init'}, '', _href);
-      }
+      armCoverBackTrap('init', {force:true});
     }
   }catch(e){ console.warn("[가톨릭길동무]", e); }
+
+  function armCoverTrapAfterUserActivation(){
+    try{
+      if(appActive()) return;
+      armCoverBackTrap('user-activation', {force:true});
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }
+  ['pointerdown','touchstart','keydown'].forEach(function(type){
+    try{ window.addEventListener(type, armCoverTrapAfterUserActivation, {once:true, capture:true, passive:true}); }catch(_e){}
+  });
 
   function $b(id){ return document.getElementById(id); }
   function coverVisible(){
@@ -117,6 +101,15 @@
 
   function isRefreshDialogOpen(){
     try{ return !!document.getElementById('oai-refresh-content-dialog'); }catch(e){ return false; }
+  }
+  function closeRefreshDialog(){
+    try{
+      var el = document.getElementById('oai-refresh-content-dialog');
+      if(!el) return false;
+      if(el.parentNode) el.parentNode.removeChild(el);
+      if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady();
+      return true;
+    }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
   }
   function isGuideModalOpen(){
     try{ return !!document.querySelector('.guide-modal.show') || isRefreshDialogOpen(); }catch(e){ return false; }
@@ -586,19 +579,25 @@
       return;
     }
 
+    /* 새로고침 확인창이 열려 있으면 종료 안내로 넘기지 말고 확인창만 닫는다. */
+    if(closeRefreshDialog()){
+      try{ armCoverBackTrap('refresh-dialog-close', {force:true}); }catch(e){ console.warn('[가톨릭길동무]', e); }
+      return;
+    }
+
     /* 빠른메뉴/안내 팝업이 열려 있으면 먼저 닫는다. */
     if(isGuideModalOpen()){
       closeGuideModals();
-      try{ if(typeof window._ensureCoverBackTrap === 'function') window._ensureCoverBackTrap('guide-modal'); else armCoverHashTrap('guide-modal'); }catch(e){ console.warn("[가톨릭길동무]", e); }
+      try{ if(typeof window._ensureCoverBackTrap === 'function') window._ensureCoverBackTrap('guide-modal'); else armCoverBackTrap('guide-modal'); }catch(e){ console.warn("[가톨릭길동무]", e); }
       return;
     }
 
     /* 커버: 토스트 → 두 번째에 종료. */
     if(!appActive()){
-      if(_coverHashArming || window.__OAI_COVER_QUERY_ARMING__) return;
+      if(_coverTrapArming) return;
       var exiting = false;
       if(typeof window._showBackToast==='function') exiting = window._showBackToast() === true;
-      if(!exiting){ armCoverHashTrap('cover-toast'); }
+      if(!exiting){ armCoverBackTrap('cover-toast'); }
       return;
     }
 
@@ -616,6 +615,7 @@
   /* Cordova 물리 백버튼 */
   document.addEventListener('backbutton', function(){
     if(handlePrayerBack('prayer-hardware-back')) return;
+    if(closeRefreshDialog()){ try{ armCoverBackTrap('refresh-dialog-hardware', {force:true}); }catch(e){} return; }
     if(isGuideModalOpen()){ closeGuideModals(); return; }
     if(!appActive()){
       if(typeof window._showBackToast==='function') window._showBackToast();
@@ -633,22 +633,11 @@
     try{
       var st = history.state;
       if(st && st._p === 1) return;  // 트랩 유지 중이면 스킵
-      if(!appActive()) armCoverHashTrap('pageshow-cover');
+      if(!appActive()) armCoverBackTrap('pageshow-cover');
       else { history.replaceState({_p:0}, '', _href); history.pushState({_p:1}, '', _href); }
     }catch(e){ console.warn("[가톨릭길동무]", e); }
   }, true);
 
-  window.addEventListener('hashchange', function(){
-    try{
-      if(window._appExiting) return;
-      if(_coverHashArming || window.__OAI_COVER_QUERY_ARMING__) return;
-      if(appActive()) return;
-      if(isCoverTrapUrl()) return;
-      var exiting = false;
-      if(typeof window._showBackToast === 'function') exiting = window._showBackToast() === true;
-      if(!exiting) armCoverHashTrap('hash-cover-toast');
-    }catch(e){ console.warn("[가톨릭길동무]", e); }
-  }, false);
 
 })();
 

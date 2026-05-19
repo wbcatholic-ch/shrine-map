@@ -18,11 +18,6 @@ function hideCoverAndRun(callback) {
   window._noAutoNearby = false;
   var cv = document.getElementById('cover');
   if (cv) cv.style.display = 'none';
-  try{
-    if(location.hash === '#oai-cover-trap'){
-      history.replaceState(history.state || {_p:1, oai_app_from:'cover'}, '', location.href.split('#')[0]);
-    }
-  }catch(e){ console.warn('[가톨릭길동무]', e); }
   document.documentElement.classList.add('app-active');
   // RAF로 커버 숨김 후 다음 프레임에 콜백 실행 → 버벅거림 방지
   if (callback) requestAnimationFrame(function(){ setTimeout(callback, 0); });
