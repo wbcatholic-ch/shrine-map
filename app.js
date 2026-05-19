@@ -136,16 +136,15 @@ function oaiMarkRefreshHistoryCompact(reason){
     sessionStorage.setItem('oai_refresh_history_compact_reason', reason || 'refresh');
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
-function oaiPrepareRefreshVeil(reason, duration, carryDuration, showBeforeNavigation){
+function oaiPrepareRefreshVeil(reason, duration, carryDuration, showBeforeNavigation, beforeNavigationHold){
   try{
     var d = Math.max(260, duration || OAI_REFRESH_VEIL_MS);
     var carry = Math.max(d + 1200, carryDuration || OAI_REFRESH_CARRY_MS || d);
     var now = Date.now ? Date.now() : new Date().getTime();
     /*
-       V3-14: 새로고침 보호막은 같은 클래스 한 벌만 사용한다.
-       - 짧은 새로고침: 현재 문서에서는 플래그만 저장하고 새 문서 첫 페인트에서 표시
-       - 긴 새로고침: 캐시 정리 중 현재 문서 보호막을 유지하고, 새 문서에서도 1초 최소 표시
-       - 첫 진입 커버 fade와 새로고침 보호막은 별도 조건으로 분리한다.
+       V3-15: 짧은/긴 새로고침 모두 사용자가 OK를 누른 직후 현재 문서에서
+       아이보리 보호막을 먼저 그린 다음 실제 reload/캐시 정리를 시작한다.
+       새 문서 첫 페인트도 같은 sessionStorage 플래그로 1초 이상 덮는다.
     */
     sessionStorage.setItem('oai_refresh_veil_until', String(now + carry));
     sessionStorage.setItem('oai_refresh_veil_hold_ms', String(d));
@@ -153,10 +152,20 @@ function oaiPrepareRefreshVeil(reason, duration, carryDuration, showBeforeNaviga
     sessionStorage.setItem('oai_refresh_veil_reason', reason || 'refresh');
     oaiMarkRefreshHistoryCompact(reason || 'refresh');
     if(showBeforeNavigation === true){
+      var preHold = Math.max(d, beforeNavigationHold || d);
       sessionStorage.setItem('oai_refresh_veil_visible_until', String(now + d));
-      oaiHoldStabilityVeil(reason || 'refresh', d);
+      oaiHoldStabilityVeil(reason || 'refresh', preHold);
     }
   }catch(e){ console.warn('[가톨릭길동무]', e); }
+}
+
+function oaiAfterRefreshVeilPaint(callback){
+  // OK 직후 보호창이 실제로 한 번 그려진 다음 새로고침/캐시 작업을 시작한다.
+  try{
+    var run=function(){ setTimeout(function(){ try{ callback(); }catch(e){ console.warn('[가톨릭길동무]', e); } }, 90); };
+    if(window.requestAnimationFrame){ requestAnimationFrame(function(){ requestAnimationFrame(run); }); }
+    else setTimeout(run, 32);
+  }catch(e){ try{ callback(); }catch(_e){} }
 }
 function oaiApplyPendingRefreshVeil(){
   try{
@@ -956,14 +965,17 @@ function _runRefreshAppFilesOnly(){
   }catch(e){
     console.warn('[가톨릭길동무]', e);
   }
-  try{ if(typeof oaiPrepareRefreshVeil === 'function') oaiPrepareRefreshVeil('short-refresh', OAI_REFRESH_VEIL_MS, OAI_REFRESH_CARRY_MS); }catch(e){ console.warn('[가톨릭길동무]', e); }
-  setTimeout(function(){
+  try{
+    if(typeof oaiPrepareRefreshVeil === 'function')
+      oaiPrepareRefreshVeil('short-refresh', OAI_REFRESH_VEIL_MS, OAI_REFRESH_CARRY_MS, true, OAI_REFRESH_PRE_NAV_HOLD_MS);
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+  oaiAfterRefreshVeilPaint(function(){
     try{
       location.reload();
     }catch(e){
       location.href = location.href.split('#')[0];
     }
-  }, 60);
+  });
 }
 function _showRefreshContentDialog(onConfirm){
   try{
@@ -1029,8 +1041,13 @@ window.refreshAppFilesOnly = refreshAppFilesOnly;
 // 캐시가 심하게 꼬였을 때만 새로고침 버튼 길게 누르기 또는 별도 호출로 사용한다.
 async function _runClearAppFilesCacheCompletely(){
   try{
+    if(typeof oaiPrepareRefreshVeil === 'function')
+      oaiPrepareRefreshVeil('long-refresh-progress', OAI_REFRESH_VEIL_MS, OAI_REFRESH_CARRY_MS, true, OAI_REFRESH_PROGRESS_HOLD_MS);
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+  try{
     if(typeof oaiMarkRefreshHistoryCompact === 'function') oaiMarkRefreshHistoryCompact('long-refresh-progress');
   }catch(e){ console.warn('[가톨릭길동무]', e); }
+  await new Promise(function(resolve){ oaiAfterRefreshVeilPaint(resolve); });
   try{
     if(window.caches && caches.keys){
       var keys = await caches.keys();
@@ -1044,12 +1061,10 @@ async function _runClearAppFilesCacheCompletely(){
     console.warn('[가톨릭길동무]', e);
   }
   try{
-    // 긴 새로고침은 현재 문서에서 보호창을 한 번 더 켜지 않는다.
-    // 캐시 정리 후 새 문서 첫 페인트에서만 아이보리 보호창을 표시해야
-    // “현재 문서 멈춤 + 새 문서 멈춤”처럼 두 번 굳는 느낌이 생기지 않는다.
+    // 현재 문서 보호막은 유지하고, 새 문서 첫 페인트용 플래그만 다시 최신화한다.
     if(typeof oaiPrepareRefreshVeil === 'function') oaiPrepareRefreshVeil('long-refresh', OAI_REFRESH_VEIL_MS, OAI_REFRESH_CARRY_MS, false);
   }catch(e){ console.warn('[가톨릭길동무]', e); }
-  setTimeout(function(){
+  oaiAfterRefreshVeilPaint(function(){
     try{
       // 긴 새로고침도 현재 히스토리 항목을 그대로 reload한다.
       // location.replace(?refresh=...)는 이전 root 항목과 URL이 갈라져
@@ -1058,7 +1073,7 @@ async function _runClearAppFilesCacheCompletely(){
     }catch(e){
       location.href = location.href.split('#')[0];
     }
-  }, 80);
+  });
 }
 function _showCacheClearDialog(onConfirm){
   try{
@@ -1103,7 +1118,7 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || 'V3-14';
+    var target = btn.getAttribute('data-target-version') || 'V3-15';
     var current = '';
     if(window.APP_VERSION) current = String(window.APP_VERSION).trim();
     if(!current && marker) current = String(marker.textContent || '').trim();
@@ -1515,7 +1530,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V3-14';
+    frame.src='diocese.html?v=V3-15';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1903,7 +1918,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V3-14';
+const _PARISH_ASSET_VERSION='V3-15';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -2066,7 +2081,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V3-14';
+const _PRAYER_ASSET_VERSION='V3-15';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2111,7 +2126,7 @@ try{ window.ensurePrayerModuleLoaded=ensurePrayerModuleLoaded; }catch(e){ consol
 let _RT_RAW = [];
 let _retreatRawLoaded = false;
 let _retreatDataLoadPromise = null;
-const _RETREAT_ASSET_VERSION='V3-14';
+const _RETREAT_ASSET_VERSION='V3-15';
 
 let RETREATS = [];
 function _buildRetreatList(raw){
@@ -2353,7 +2368,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V3-14';
+const _SHRINE_ASSET_VERSION='V3-15';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -2691,18 +2706,31 @@ function oaiEnterView(el){
   try{
     var root=document.documentElement;
     if(root.classList.contains('oai-returning')) return;
-    // 카테고리/문의 진입 fade: display/open 적용 직후에도 반드시 첫 프레임을 만든 뒤 opacity만 전환한다.
-    // 이동/확대/슬라이드 효과는 사용하지 않는다.
+    // V3-15: 카테고리 진입은 화면 자체를 fade하지 않고, 완성된 화면 위의
+    // 얇은 아이보리 overlay가 0.7초 동안 사라지는 dissolve 방식으로 통일한다.
+    // 성지·성당·피정의집 지도형 화면(#app)은 진입 효과를 적용하지 않는다.
     el.classList.remove('oai-enter-ready','oai-enter-show','oai-popup-ready','oai-popup-show','oai-prepaint-view');
-    el.classList.add('oai-enter-ready');
-    try{ void el.offsetHeight; }catch(_e){}
+    if(el.id === 'app') return;
+    var veil=document.getElementById('oai-category-entry-veil');
+    if(!veil) return;
     var ms=parseInt(getComputedStyle(root).getPropertyValue('--oai-category-enter-ms'),10) || 700;
+    clearTimeout(window.__oaiCategoryDissolveTimer);
+    clearTimeout(window.__oaiCategoryVeilTimer);
+    veil.style.opacity='1';
+    veil.className='soft';
+    root.classList.remove('oai-category-dissolving');
+    root.classList.add('oai-category-entering','oai-category-dissolve');
+    try{ void veil.offsetHeight; }catch(_e){}
     var show=function(){
       try{
-        el.classList.add('oai-enter-show');
-        clearTimeout(el.__oaiEnterTimer);
-        el.__oaiEnterTimer=setTimeout(function(){
-          try{ el.classList.remove('oai-enter-ready','oai-enter-show','oai-prepaint-view'); }catch(e){ console.warn("[가톨릭길동무]", e); }
+        root.classList.add('oai-category-dissolving');
+        veil.style.opacity='0';
+        window.__oaiCategoryDissolveTimer=setTimeout(function(){
+          try{
+            root.classList.remove('oai-category-entering','oai-category-dissolve','oai-category-dissolving');
+            veil.style.opacity='';
+            veil.className='';
+          }catch(e){ console.warn("[가톨릭길동무]", e); }
         }, ms + 120);
       }catch(e){ console.warn("[가톨릭길동무]", e); }
     };

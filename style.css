@@ -2791,6 +2791,15 @@ html.oai-category-entering #oai-category-entry-veil { display: flex; opacity: 1;
 #oai-category-entry-veil.shrine { background: #1f2a44; }
 #oai-category-entry-veil.parish,
 #oai-category-entry-veil.retreat { background: #f5f0e8; }
+html.oai-category-dissolve #oai-category-entry-veil {
+  top: 0;
+  z-index: 2147480000;
+  background: #f5f0e8;
+  transition: none;
+}
+html.oai-category-dissolve.oai-category-dissolving #oai-category-entry-veil {
+  transition: opacity var(--oai-category-enter-ms) ease-out;
+}
 #oai-category-entry-veil::after {
   content: '';
   width: 30px; height: 30px;
@@ -2799,6 +2808,7 @@ html.oai-category-entering #oai-category-entry-veil { display: flex; opacity: 1;
   border-top-color: #d4aa6a;
   animation: oaiCategoryVeilSpin .8s linear infinite;
 }
+#oai-category-entry-veil.soft::after { display: none; }
 #oai-category-entry-veil.parish::after,
 #oai-category-entry-veil.retreat::after { border-color: rgba(31,42,68,.18); border-top-color: #1f2a44; }
 @keyframes oaiCategoryVeilSpin { to { transform: rotate(360deg); } }
@@ -2831,7 +2841,7 @@ html.oai-external-return-freeze::after { content: ""; position: fixed; left: 50%
 html.oai-returning *, html.oai-diocese-returning * { transition: none; animation: none; scroll-behavior: auto; }
 html.oai-cover-resizing #cover, html.oai-cover-resizing #cover * { transition: none; animation: none; }
 
-/* 진입 fade-in: 기도문·순례길·웹사이트·관구교구·문의는 0.7초, 팝업은 0.5초. 지도형 3개는 제외한다. */
+/* 진입 효과: 카테고리/문의는 0.7초 overlay dissolve, 팝업은 0.5초 fade. 지도형 3개는 제외한다. */
 #app.oai-enter-ready,
 #prayer-view.oai-enter-ready,
 #diocese-view.oai-enter-ready,
