@@ -30,9 +30,10 @@
   var _href = location.href.split('#')[0];
 
   /* history 초기화
-     V2-S: 일반 첫 진입 때만 root/trap 한 쌍을 만든다.
-     새로고침 직후에는 현재 히스토리 항목을 trap으로 정리하고 새 항목을 push하지 않는다.
-     새로고침마다 root/trap을 다시 push하면 종료 토스트 뒤 이전 커버 문서로 되돌아갈 수 있다. */
+     V2-S-2-1: 커버 첫 Back은 반드시 JS popstate가 받을 수 있게 root/trap 한 쌍을 보장한다.
+     S-2에서 새로고침 compact 때 현재 항목만 trap으로 바꾸면, 앱 첫 진입/재진입처럼
+     뒤 항목이 부족한 환경에서 커버 Back이 popstate 없이 즉시 앱 종료로 빠질 수 있었다.
+     따라서 refresh compact 상태도 현재 문서를 root로 정리한 뒤 trap을 한 칸만 만든다. */
   try{
     var refreshReason = '';
     try{
@@ -43,12 +44,8 @@
       sessionStorage.removeItem('oai_refresh_history_compact_until');
       sessionStorage.removeItem('oai_refresh_history_compact_reason');
     }catch(_e){}
-    if(refreshReason){
-      history.replaceState({_p:1, oai_cover_trap: refreshReason}, '', _href);
-    }else{
-      history.replaceState({_p:0, oai_cover_root:'init'}, '', _href);
-      history.pushState({_p:1, oai_cover_trap:'init'}, '', _href);
-    }
+    history.replaceState({_p:0, oai_cover_root: refreshReason ? ('compact-' + refreshReason) : 'init'}, '', _href);
+    history.pushState({_p:1, oai_cover_trap: refreshReason || 'init'}, '', _href);
   }catch(e){ console.warn("[가톨릭길동무]", e); }
 
   function $b(id){ return document.getElementById(id); }
@@ -231,7 +228,7 @@
 
 
   /* ─────────────────────────────────────────────
-     V2-S 기도문 전용 뒤로가기 컨트롤러 — history 단계 분리 제거
+     V2-S-2-1 기도문 전용 뒤로가기 컨트롤러 — history 단계 분리 제거
 
      원칙:
      1) 다른 정상 카테고리처럼 실제 history는 공통 root/trap 한 쌍만 사용한다.
@@ -283,7 +280,7 @@
     return !!yes;
   }
   function armPrayerBackTrap(reason){
-    /* 호환용 함수. V2-S부터 기도문 detail/list용 별도 pushState는 만들지 않는다.
+    /* 호환용 함수. V2-S-2-1부터 기도문 detail/list용 별도 pushState는 만들지 않는다.
        공통 컨트롤러가 이미 갖고 있는 root/trap을 유지하는 것만 필요하다. */
     try{
       if(isPrayerOpen() && typeof window._ensureAppBackTrap === 'function'){
@@ -338,7 +335,7 @@
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
   function settleCoverTrapAfterPrayer(reason){
-    // V2-S: 기도문 팝업 → 커버 후에는 이미 공통 컨트롤러가 history.go(1)로 trap을 복원한 상태다.
+    // V2-S-2-1: 기도문 팝업 → 커버 후에는 이미 공통 컨트롤러가 history.go(1)로 trap을 복원한 상태다.
     // 여기서 replaceState/pushState를 강제로 반복하면 Android/PWA에서 다음 Back이 앱 종료로 오판될 수 있다.
     // 따라서 현재 trap이 살아 있으면 그대로 두고, 없을 때만 최소한으로 보강한다.
     function run(tag){
@@ -398,7 +395,7 @@
       var fromQuick = isPrayerQuickSource();
       if(!fromQuick) return resetPrayerToCover(reason || 'prayer-list-cover');
 
-      /* V2-S: 기도문 목록 → 빠른메뉴 팝업 복귀는 직접 팝업을 띄우지 않는다.
+      /* V2-S-2-1: 기도문 목록 → 빠른메뉴 팝업 복귀는 직접 팝업을 띄우지 않는다.
          사용자의 Back으로 공통 trap이 일단 소비된 직후라, 이 자리에서 openMassQuickMenu()를
          바로 호출하면 Android/PWA에서 history.go(1) 복원 타이밍과 겹쳐 팝업 Back이 앱 종료로
          먹힐 수 있다. 기존 안정 함수 _returnToMassQuickMenu('prayer')에게 맡기면,
@@ -716,9 +713,9 @@
 (function(){
   if(window.__APP_FONT_SCALE_GUARD__) return;
   window.__APP_FONT_SCALE_GUARD__=true;
-  // V2-S: 커버 글자 크기 조절은 prayer.js에 의존하지 않는 공통 함수가 담당한다.
+  // V2-S-2-1: 커버 글자 크기 조절은 prayer.js에 의존하지 않는 공통 함수가 담당한다.
   // prayer.js는 기도문 화면이 열렸을 때 같은 localStorage 값을 읽어 자체 UI를 맞춘다.
-  var QA_URL="qa-firebase.html?v=V2-S";
+  var QA_URL="qa-firebase.html?v=V2-S-2-1";
   var FONT_KEY='prayer_font_size';
   var BASE=16;
   var FONT_SIZES=[13,14,15,16,17,18,19,20,21,22,24,26,28,30];
@@ -788,31 +785,16 @@
   }
   function setEmojiIcons(){var icons={'cc-1':'✝️','cc-2':'⛪','cc-3':'🙏','cc-4':'🌿','cc-5':'🥾','cc-6':'🌐','cc-7':'🧭'};Object.keys(icons).forEach(function(id){var btn=el(id);if(!btn)return;var wrap=btn.querySelector('.cover-icon-wrap');if(wrap)wrap.innerHTML='<span class="cover-emoji" aria-hidden="true">'+icons[id]+'</span>';});}
   function configureQna(){
+    // V2-S-2-1: 문의·건의 버튼은 중간 안내 카드를 만들지 않고 실제 문의 페이지로 바로 이동한다.
+    // 기존 qna-view DOM은 호환을 위해 남기지만, 첫 화면에 추가 페이지처럼 보이는 qna-card는 비운다.
     window.QNA_FORM_URL=QA_URL;
     var q=el('qna-list');
-    if(q && (!q.innerHTML.trim() || q.innerHTML.indexOf('Google Form')>=0 || q.innerHTML.indexOf('qna-card')<0)){
-      q.innerHTML='<div class="qna-card"><div class="qna-kicker">문의 · 수정건의</div><div class="qna-title">문의·건의 페이지 연결</div><div class="qna-text">문의와 수정건의는 가톨릭길동무 문의·건의 페이지에서 작성하고 확인합니다.</div><div class="qna-actions"><button class="primary" type="button" onclick="goQaFirebase()">문의 작성하기</button></div></div>';
-    }
+    if(q) q.innerHTML='';
   }
   window.qnaOpenFormUrl=function(){ if(typeof window.goQaFirebase==='function') window.goQaFirebase(); else location.href=QA_URL; };
   function wireQnaButton(){var btn=el('qna-cover-btn');if(btn)btn.onclick=function(ev){if(ev)ev.preventDefault();window.openQnaView();};}
   window.openQnaView=function(){
-    try{
-      configureQna();
-      document.querySelectorAll('.module-view.open,#prayer-view.open,#diocese-view.open,#missa-view.open').forEach(function(v){v.classList.remove('open');});
-      var cover=el('cover');
-      if(cover){ cover.style.display='none'; cover.style.opacity=''; cover.style.pointerEvents=''; }
-      document.documentElement.classList.add('app-active');
-      document.documentElement.classList.remove('parish-mode','retreat-mode');
-      if(typeof window.oaiSetMainMapLayerHidden==='function') window.oaiSetMainMapLayerHidden(true);
-      var q=el('qna-view');
-      if(q){
-        q.classList.add('open');
-        try{ if(typeof window.oaiEnterView==='function') window.oaiEnterView(q); }catch(_e){}
-        var list=el('qna-list'); if(list) list.scrollTop=0;
-        return;
-      }
-    }catch(e){ console.warn('[가톨릭길동무]', e); }
+    try{ configureQna(); }catch(e){ console.warn('[가톨릭길동무]', e); }
     location.href=QA_URL;
   };
   window.goQaFirebase=function(){ location.href=QA_URL; };
