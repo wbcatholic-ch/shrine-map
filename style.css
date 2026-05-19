@@ -2205,18 +2205,6 @@ html.oai-cover-resizing #cover > * {
   animation: none;
 }
 
-/* ── 새로고침 진입 시 스플래시를 아이보리로 변경 ── */
-html.oai-soft-refresh-mode #oai-splash {
-  background: #f5f0e8 !important;
-}
-html.oai-soft-refresh-mode #oai-splash-cross {
-  display: none;
-}
-html.oai-soft-refresh-mode,
-html.oai-soft-refresh-mode body {
-  background: #f5f0e8 !important;
-}
-
 .cover-header {
   flex: 0 0 auto;
   width: 100%;
@@ -3517,3 +3505,34 @@ html.kb-open .sheet.open { bottom: 0; }
 /* ── 스플래시 오버레이 (커버 초기 진입 흔들림 차단) ── */
 /* 기본 스타일은 inline style로 처리, opacity 초기화만 여기서 보장 */
 #oai-splash { opacity: 1; }
+
+/* 스플래시 십자가: 남색 화면 후 서서히 커지며 등장 */
+#oai-splash-cross {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  font-size: 60px;
+  color: #d4aa6a;
+  line-height: 1;
+  transform: translate(-50%, -50%) scale(0.15);
+  opacity: 0;
+  animation: oaiSplashCrossGrow 0.85s cubic-bezier(0.22, 1, 0.36, 1) 0.35s forwards;
+  will-change: transform, opacity;
+}
+@keyframes oaiSplashCrossGrow {
+  0%   { opacity: 0;   transform: translate(-50%, -50%) scale(0.15); }
+  18%  { opacity: 0.7; }
+  100% { opacity: 1;   transform: translate(-50%, -50%) scale(1); }
+}
+
+/* ── 새로고침 진입 시 스플래시를 아이보리로 변경 ── */
+html.oai-soft-refresh-mode #oai-splash {
+  background: #f5f0e8 !important;
+}
+html.oai-soft-refresh-mode #oai-splash-cross {
+  display: none;
+}
+html.oai-soft-refresh-mode,
+html.oai-soft-refresh-mode body {
+  background: #f5f0e8 !important;
+}
