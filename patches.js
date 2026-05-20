@@ -57,8 +57,13 @@
       if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed();
     }catch(e){ console.warn('[가톨릭길동무]', e); }
     try{
-      armCoverBackTrap(reason || 'cover-return', {force:true});
-    }catch(e){ console.warn('[가톨릭길동무]', e); }
+      var href = location.href.split('#')[0];
+      history.replaceState({_p:0, oai_cover_root:reason||'cover-return'}, '', href);
+      history.pushState({_p:1, oai_cover_trap:reason||'cover-return-trap'}, '', href);
+    }catch(e){
+      try{ armCoverBackTrap(reason || 'cover-return', {force:true}); }catch(_e){}
+      console.warn('[가톨릭길동무]', e);
+    }
   }
   try{ window._oaiNormalizeCoverBackAfterReturn = normalizeCoverBackAfterReturn; }catch(_e){}
 
@@ -530,7 +535,7 @@
   window.addEventListener('popstate', function(){
     if(window._appExiting) return;
 
-    /* V1-20: 메뉴 팝업이 열려 있으면 종료 안내보다 먼저 메뉴만 닫고 이벤트를 소비한다. */
+    /* V1-22: 메뉴 팝업이 열려 있으면 종료 안내보다 먼저 메뉴만 닫고 이벤트를 소비한다. */
     try{
       var menuConsumedUntil = Number(window.__oaiCoverMenuBackConsumedUntil || 0);
       if(menuConsumedUntil && Date.now && Date.now() < menuConsumedUntil){
@@ -546,6 +551,18 @@
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
 
+
+
+    /* V1-22: 주요기능 화면에서 뒤로가기는 팝업만 닫고 커버 뒤로가기 2단계를 즉시 복구한다. */
+    try{
+      var guideManual = document.getElementById('guide-manual-modal');
+      if(guideManual && guideManual.classList.contains('show') && guideManual.getAttribute('aria-hidden') !== 'true'){
+        guideManual.classList.remove('show');
+        guideManual.setAttribute('aria-hidden','true');
+        normalizeCoverBackAfterReturn('guide-manual-back');
+        return;
+      }
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
 
     /* history.go(1)로 공통 trap을 복원하면서 발생한 popstate는
        어떤 화면 처리도 하지 않고 여기서 끝낸다. 이 순서가 중요하다. */
@@ -601,21 +618,7 @@
       try{ armCoverBackTrap('refresh-dialog-close', {force:true}); }catch(e){ console.warn('[가톨릭길동무]', e); }
       return;
     }
-
-
-    /* V1-20: 주요기능 팝업 뒤로가기는 확인 버튼과 같은 함수로 닫는다. */
-    try{
-      if(window.oaiIsGuideManualOpen && window.oaiIsGuideManualOpen()){
-        if(window.oaiCloseGuideManualLikeConfirm) window.oaiCloseGuideManualLikeConfirm();
-        else {
-          closeGuideModals();
-          normalizeCoverBackAfterReturn('guide-manual-fallback');
-        }
-        return;
-      }
-    }catch(e){ console.warn('[가톨릭길동무]', e); }
-
-    /* 빠른메뉴/안내 팝업이 열려 있으면 먼저 닫는다. */
+/* 빠른메뉴/안내 팝업이 열려 있으면 먼저 닫는다. */
     if(isGuideModalOpen()){
       closeGuideModals();
       normalizeCoverBackAfterReturn('guide-modal');
@@ -673,6 +676,16 @@
           closeGuideModals();
           normalizeCoverBackAfterReturn('guide-manual-hardware-fallback');
         }
+        return;
+      }
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+
+    try{
+      var guideManual = document.getElementById('guide-manual-modal');
+      if(guideManual && guideManual.classList.contains('show') && guideManual.getAttribute('aria-hidden') !== 'true'){
+        guideManual.classList.remove('show');
+        guideManual.setAttribute('aria-hidden','true');
+        normalizeCoverBackAfterReturn('guide-manual-hardware-back');
         return;
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -841,7 +854,7 @@
   window.__APP_FONT_SCALE_GUARD__=true;
   // V3-S: 커버 글자 크기 조절은 prayer.js에 의존하지 않는 공통 함수가 담당한다.
   // prayer.js는 기도문 화면이 열렸을 때 같은 localStorage 값을 읽어 자체 UI를 맞춘다.
-  var QA_URL="qa-firebase.html?v=V1-20";
+  var QA_URL="qa-firebase.html?v=V1-22";
   var FONT_KEY='prayer_font_size';
   var BASE=16;
   var FONT_SIZES=[13,14,15,16,17,18,19,20,21,22,24,26,28,30];
