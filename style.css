@@ -141,7 +141,7 @@
   --bg-color:   #f7f0e5;
   /* 커버 화면 비율 기준 보호 영역 */
   --cover-top-safe: calc(env(safe-area-inset-top, 0px) + clamp(60px, calc(var(--cover-vh, 1vh) * 9.2), 82px));
-  --cover-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + clamp(52px, calc(var(--cover-vh, 1vh) * 7.6), 72px));
+  --cover-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + clamp(34px, calc(var(--cover-vh, 1vh) * 5.0), 50px));
   --cover-h:    calc(var(--cover-vh, 1vh) * 100);
   --text-main:  #3e362e;
   --text-sub:   #7a7065;
@@ -2260,6 +2260,9 @@ html.oai-cover-booting #cover > * {
   outline: none;
   box-sizing: border-box;
 }
+#cover .cover-grid > #cc-1.cover-card-wide {
+  grid-column: 1 / -1 !important;
+}
 .cover-card.app-pressing { transform: translateY(8px) scale(.974); box-shadow: 0 2px 3px rgba(0,0,0,.02); filter: brightness(.94); transition: transform .16s, filter .16s; }
 
 .cover-icon-wrap {
@@ -2436,12 +2439,13 @@ html.app-active #cover-action-row { display: none; }
 /* 커버 하단 고정 요소 */
 #cover-bottom-note {
   position: fixed;
-  left: 0; right: 0; bottom: 0;
+  left: 0; right: 0;
+  bottom: clamp(14px, calc(var(--cover-vh, 1vh) * 2.0), 26px);
   flex: none;
   width: 100%;
   max-width: 720px;
   margin: 0 auto;
-  padding: 3px 22px calc(7px + env(safe-area-inset-bottom, 0px)) 60px;
+  padding: 3px 22px 0 60px;
   text-align: center;
   font-size: clamp(7.8px, calc(var(--cover-vh, 1vh) * 1.1), 9px);
   font-weight: 500;
@@ -3097,7 +3101,7 @@ html.oai-font-global #region-body .dio-hd { font-size: calc(17px * var(--app-inn
   .mass-quick-panel .guide-badge { font-size: calc(18px * var(--app-font-scale)); min-height: 40px; margin-bottom: 16px; }
 }
 @media (max-height: 650px) {
-  #cover { --cover-top-safe: calc(env(safe-area-inset-top, 0px) + clamp(58px, calc(var(--cover-vh, 1vh) * 9.4), 74px)); --cover-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + clamp(48px, calc(var(--cover-vh, 1vh) * 7.2), 64px)); padding-top: var(--cover-top-safe); padding-bottom: var(--cover-bottom-safe); }
+  #cover { --cover-top-safe: calc(env(safe-area-inset-top, 0px) + clamp(58px, calc(var(--cover-vh, 1vh) * 9.4), 74px)); --cover-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + clamp(32px, calc(var(--cover-vh, 1vh) * 4.8), 48px)); padding-top: var(--cover-top-safe); padding-bottom: var(--cover-bottom-safe); }
   #cover .cover-header { padding-bottom: 12px; }
   #cover .cover-title { font-size: clamp(18px, 5vw, 24px); }
   #cover .cover-subtitle { font-size: 10px; }
@@ -3327,14 +3331,9 @@ html.oai-font-global .trail-nm,html.oai-font-global .trail-sh-name{font-size:cal
 html.oai-font-global .trail-reg,html.oai-font-global .trail-url,html.oai-font-global .trail-sh-sub,html.oai-font-global .trail-sh-url{font-size:calc(12px * var(--app-inner-font-scale,1))!important}
 .lv-parish-count,.oai-parish-count{font-size:calc(8px * var(--app-inner-font-scale,1))!important;font-weight:400!important;letter-spacing:0;white-space:nowrap;gap:0!important}
 .lv-parish-count b,.oai-parish-count b{font-weight:400!important;margin:0!important}
-   OAI 표준화: 주요기도문·웹사이트·순례길·관구교구 공통 규격
-   - 기능/데이터/색상 변경 없음
-   - 높이, 제목/서브 글자, 탭/버튼 높이와 디자인만 통일
-========================================================= */
 /* ============================================================
    14. 기타 누락 블록
    ============================================================ */
-.cover-card-wide{grid-column:1/-1}
 @keyframes oaiSwipeSoftFlash{0%{opacity:1}100%{opacity:1}}
 .route-restore-marker{background:var(--gold, #d4aa6a);border-color:var(--gold2, #b8965a)!important}
 @keyframes oaiFinalSwipeFlash{0%{opacity:1}100%{opacity:1}}
