@@ -63,8 +63,8 @@
 
   /* ── 컴포넌트 색상 */
   --oai-shrine-header:  #1f2a44;
-  --oai-parish-header:  #1D4E89;
-  --oai-retreat-header: #7fb39a;
+  --oai-parish-header:  #2563EB;
+  --oai-retreat-header: #15803D;
   --oai-gold:           #d4aa6a;
   --oai-gold-border:    #c49a57;
   --oai-btn:            #eef1f4;
@@ -105,33 +105,33 @@
   --shrine-soft-2:  #e8dcc8;
 
   /* ── 성당 모드 */
-  --parish-bg:      #123A63;
-  --parish-active:  #1D4E89;
-  --parish-accent:  #E8F2FB;
-  --church-main:    #1D4E89;
-  --church-main-2:  #2563A6;
-  --church-soft:    #E8F2FB;
-  --church-soft-2:  #F3F8FD;
+  --parish-bg:      #2563EB;
+  --parish-active:  #2563EB;
+  --parish-accent:  #DBEAFE;
+  --church-main:    #2563EB;
+  --church-main-2:  #1D4ED8;
+  --church-soft:    #DBEAFE;
+  --church-soft-2:  #EFF6FF;
 
   /* ── 피정의집 모드 */
-  --retreat-bg:      #3f7e5b;
-  --retreat-main:    #3f7e5b;
-  --retreat-main-2:  #2e6b4a;
-  --retreat-soft:    #e8f3ec;
-  --retreat-active:  #3f7e5b;
-  --retreat-accent:  #e8f3ec;
-  --retreat-soft-2:  #f5faf7;
-  --dist-retreat:    #3f7e5b;
+  --retreat-bg:      #15803D;
+  --retreat-main:    #15803D;
+  --retreat-main-2:  #166534;
+  --retreat-soft:    #DCFCE7;
+  --retreat-active:  #15803D;
+  --retreat-accent:  #DCFCE7;
+  --retreat-soft-2:  #F0FDF4;
+  --dist-retreat:    #15803D;
 
   /* ── 거리 표시 */
   --addr-color:   #6b7280;
-  --dist-parish:  #1D4E89;
+  --dist-parish:  #2563EB;
 
   /* ── 커버 카드 아이콘 배경 */
   --color-1: #8b2020;
   --color-2: #1f2a44;
   --color-3: #b8965a;
-  --color-4: #1D4E89;
+  --color-4: #1D4ED8;
   --color-5: #3f7e5b;
   --color-6: #5c4a37;
   --color-7: #1a3560;
@@ -181,42 +181,49 @@
 
 /* ── 성당 모드 변수 재정의 */
 html.parish-mode {
-  --mode-header-bg:    linear-gradient(135deg, #123A63, #1D4E89);
-  --mode-header-solid: #1D4E89;
+  --mode-header-bg:    linear-gradient(135deg, #1D4ED8, #2563EB);
+  --mode-header-solid: #2563EB;
   --mode-active-bg:    var(--parish-active);
-  --mode-filter-active-bg:    var(--church-soft);
-  --mode-filter-active-color: #123A63;
-  --mode-filter-active-border: var(--church-soft);
-  --mode-tab-active-bg:  linear-gradient(135deg, #123A63, #1D4E89);
-  --mode-badge-bg:    #DCEBFA;
-  --mode-badge-color: #0F3D68;
-  --mode-dist-color:  #1D4E89;
-  --mode-num-bg:      #1D4E89;
-  --mode-sm-tab-inactive-bg:    #EEF5FC;
-  --mode-sm-tab-inactive-color: #1D4E89;
-  --mode-sm-tab-inactive-border: rgba(29,78,137,.24);
-  --mode-srch-modal-bg: #1D4E89;
+  --mode-filter-bg:    rgba(255,255,255,.14);
+  --mode-filter-color: rgba(255,255,255,.92);
+  --mode-filter-border: rgba(255,255,255,.30);
+  --mode-filter-active-bg:    #2563EB;
+  --mode-filter-active-color: #fff;
+  --mode-filter-active-border: #1D4ED8;
+  --mode-tab-active-bg:  linear-gradient(135deg, #1D4ED8, #2563EB);
+  --mode-badge-bg:    #DBEAFE;
+  --mode-badge-color: #1D4ED8;
+  --mode-dist-color:  #2563EB;
+  --mode-name-color:  #1D4ED8;
+  --mode-num-bg:      #2563EB;
+  --mode-sm-tab-inactive-bg:    #EFF6FF;
+  --mode-sm-tab-inactive-color: #1D4ED8;
+  --mode-sm-tab-inactive-border: rgba(37,99,235,.24);
+  --mode-srch-modal-bg: #2563EB;
 }
 
 /* ── 피정의집 모드 변수 재정의 */
 html.retreat-mode {
-  --mode-header-bg:    linear-gradient(135deg, #2e6b4a, #3f7e5b);
-  --mode-header-solid: #3f7e5b;
+  --mode-header-bg:    linear-gradient(135deg, #166534, #15803D);
+  --mode-header-solid: #15803D;
   --mode-active-bg:    var(--retreat-active);
-  --mode-filter-active-bg:    var(--gold);
-  --mode-filter-active-color: #1f2937;
-  --mode-filter-active-border: var(--gold2);
-  --mode-tab-active-bg:  #3f7e5b;
-  --mode-tab-active-border: #c49a57;
+  --mode-filter-bg:    rgba(255,255,255,.14);
+  --mode-filter-color: rgba(255,255,255,.92);
+  --mode-filter-border: rgba(255,255,255,.30);
+  --mode-filter-active-bg:    #15803D;
+  --mode-filter-active-color: #fff;
+  --mode-filter-active-border: #166534;
+  --mode-tab-active-bg:  linear-gradient(135deg, #166534, #15803D);
+  --mode-tab-active-border: transparent;
   --mode-badge-bg:    var(--retreat-soft);
-  --mode-badge-color: #3f7e5b;
-  --mode-dist-color:  #3f7e5b;
-  --mode-name-color:  #111827;
-  --mode-num-bg:      #3f7e5b;
-  --mode-sm-tab-inactive-bg:    #ffffff;
-  --mode-sm-tab-inactive-color: #0f766e;
-  --mode-sm-tab-inactive-border: #dde3ee;
-  --mode-srch-modal-bg: #3f7e5b;
+  --mode-badge-color: #166534;
+  --mode-dist-color:  #15803D;
+  --mode-name-color:  #166534;
+  --mode-num-bg:      #15803D;
+  --mode-sm-tab-inactive-bg:    #F0FDF4;
+  --mode-sm-tab-inactive-color: #166534;
+  --mode-sm-tab-inactive-border: rgba(21,128,61,.22);
+  --mode-srch-modal-bg: #15803D;
 }
 
 /* ── iOS */
@@ -354,22 +361,22 @@ html:not(.parish-mode):not(.retreat-mode) #tabbar .tab-btn.active {
   box-shadow: 0 4px 12px rgba(31,47,107,.18);
 }
 html.parish-mode #tabbar .tab-btn.active {
-  background: linear-gradient(135deg, #123A63, #1D4E89);
+  background: linear-gradient(135deg, #1D4ED8, #2563EB);
   color: #fff;
   border-color: transparent;
-  box-shadow: none;
+  box-shadow: 0 4px 12px rgba(37,99,235,.18);
 }
 html.retreat-mode #tabbar .tab-btn {
   background: #ffffff;
-  color: #0f766e;
-  border: 1.5px solid #dde3ee;
+  color: #166534;
+  border: 1.5px solid #cfe8d8;
   box-shadow: none;
 }
 html.retreat-mode #tabbar .tab-btn.active {
-  background: #3f7e5b;
+  background: linear-gradient(135deg, #166534, #15803D);
   color: #ffffff;
-  border-color: #c49a57;
-  box-shadow: none;
+  border-color: transparent;
+  box-shadow: 0 4px 12px rgba(21,128,61,.16);
 }
 .tab-icon {
   font-size: 20px;
@@ -798,69 +805,55 @@ html.retreat-mode .region-search-btn {
 .nearby-meta { text-align: right; flex-shrink: 0; line-height: 1.6; min-width: 68px; }
 .nearby-dist { font-size: 16px; color: var(--mode-dist-color, #b07a3d); font-weight: 900; margin-top: 4px; line-height: 1.2; }
 
-/* 피정의집 목록 오른쪽 메타 */
-html.retreat-mode #nearby-body .nearby-meta,
-html.retreat-mode #region-body .nearby-meta {
-  width: 116px;
-  min-width: 116px;
-  max-width: 116px;
-  flex: 0 0 116px;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  justify-content: flex-start;
-  gap: 6px;
-  text-align: right;
-  line-height: 1.15;
-  margin-top: 1px;
-}
-html.retreat-mode #nearby-body .nearby-type,
-html.retreat-mode #region-body .nearby-type {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+/* 피정의집 목록 오른쪽 메타 — 성지/성당 내주변 목록 구조와 통일 */
+html.retreat-mode #nearby-body .nearby-meta {
   width: auto;
-  min-width: 88px;
+  min-width: 68px;
+  max-width: none;
+  flex: 0 0 auto;
+  display: block;
+  text-align: right;
+  line-height: 1.6;
+  margin-top: 0;
+}
+html.retreat-mode #nearby-body .nearby-type {
+  display: inline-block;
+  width: auto;
+  min-width: 0;
+  max-width: none;
   white-space: nowrap;
   font-size: 12px;
   line-height: 1;
-  padding: 5px 10px;
+  padding: 5px 12px;
   border-radius: 999px;
   box-sizing: border-box;
 }
-html.retreat-mode #nearby-body .nearby-dist,
-html.retreat-mode #region-body .nearby-dist {
+html.retreat-mode #nearby-body .nearby-dist {
   display: block;
-  width: 116px;
-  max-width: 116px;
+  width: auto;
+  max-width: none;
   white-space: nowrap;
   text-align: right;
-  font-size: 13px;
-  line-height: 1.05;
+  font-size: 16px;
+  line-height: 1.2;
   padding: 0;
-  margin-top: 0;
+  margin-top: 4px;
 }
-html.retreat-mode #nearby-body .nearby-dist span,
-html.retreat-mode #region-body .nearby-dist span {
+html.retreat-mode #nearby-body .nearby-dist span {
   white-space: nowrap;
   display: inline;
-  margin-left: 4px;
+  margin-left: 0;
 }
 html.retreat-mode #nearby-body .nearby-item,
-html.retreat-mode #nearby-body .list-item,
-html.retreat-mode #region-body .nearby-item,
-html.retreat-mode #region-body .list-item,
-html.retreat-mode #region-body .region-item {
-  width: calc(100% - 20px);
-  max-width: calc(100% - 20px);
+html.retreat-mode #nearby-body .list-item {
+  width: auto;
+  max-width: none;
   min-width: 0;
   margin-left: 10px;
   margin-right: 10px;
   box-sizing: border-box;
 }
-html.retreat-mode #list-body,
-html.retreat-mode #nearby-body,
-html.retreat-mode #region-body { overflow-x: hidden; }
+html.retreat-mode #nearby-body { overflow-x: hidden; }
 
 /* 지역검색 목록 */
 #region-body .nearby-num,
@@ -1092,7 +1085,7 @@ html:not(.parish-mode):not(.retreat-mode) #srch-modal #sm-tab-bar {
   background: linear-gradient(135deg, #1f2f6b, #243a83);
 }
 html.parish-mode #srch-modal #sm-tab-bar {
-  background: linear-gradient(135deg, #123A63, #1D4E89);
+  background: linear-gradient(135deg, #3f5d7b, #2563EB);
 }
 html.retreat-mode #srch-modal #sm-tab-bar {
   background: linear-gradient(135deg, #3f7e5b, #4f8f6a);
@@ -1125,9 +1118,9 @@ html:not(.parish-mode):not(.retreat-mode) #srch-modal #sm-tab-bar .sm-tab.active
   font-weight: 900;
 }
 html.parish-mode #srch-modal #sm-tab-bar .sm-tab.active {
-  background: linear-gradient(135deg, #123A63, #1D4E89);
+  background: var(--parish-active, #446e93);
   color: #fff;
-  border-color: #1D4E89;
+  border-color: var(--parish-active, #446e93);
   box-shadow: none;
   font-weight: 900;
 }
@@ -1312,7 +1305,7 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active {
 /* 지역 인포카드 */
 .region-info-card { margin: 7px 12px 8px; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 1px 7px rgba(14,21,53,.08); border: 1px solid rgba(21,101,192,.15); }
 .ric-hd { background: linear-gradient(135deg, #0e1535, #1a2456); padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
-html.parish-mode .ric-hd { background: linear-gradient(135deg, #123A63, #1D4E89); }
+html.parish-mode .ric-hd { background: linear-gradient(135deg, #1D4ED8, #446e93); }
 html.retreat-mode .ric-hd { background: linear-gradient(135deg, #2d4a0a, #3d5c1a); }
 .ric-icon { width: 38px; height: 38px; border-radius: 50%; background: rgba(212,170,106,.15); border: 1px solid rgba(212,170,106,.4); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
 .ric-name-wrap { flex: 1; min-width: 0; }
@@ -2606,7 +2599,7 @@ html.app-active #pwa-install-btn { display: none; }
 .guide-mini-list dd { margin: 0; color: #5f6675; font-weight: 600; word-break: keep-all; }
 .guide-ok { flex: 0 0 auto; width: 100%; margin-top: 12px; min-height: 40px; }
 
-/* V2-S-8P: 즐겨찾기 초기화 1회 안내 배너 */
+/* V2-S-8: 즐겨찾기 초기화 1회 안내 배너 */
 #cover .favorites-reset-banner {
   position: fixed;
   left: max(20px, calc(env(safe-area-inset-left, 0px) + 20px));
@@ -3305,14 +3298,14 @@ html:not(.app-active), html:not(.app-active) body { scroll-behavior: auto; }
 .cv-extra-btn.cv-btn-diocese .cv-btn-icon{background:rgba(255,255,255,.34);color:#334c6a}
 @media (max-width:420px){#cover{position:fixed;top:0;left:0;right:0;bottom:auto;z-index:9999;background:#f4efe4;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0);overflow:hidden;overflow-y:hidden;background-color:var(--bg-color);color:var(--text-main);font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;transition:none;padding-top:var(--cover-top-safe);padding-bottom:var(--cover-bottom-safe)}.cv-shell-stage{position:relative;z-index:2;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;gap:10px;width:min(100%,560px);height:var(--cover-h);min-height:var(--cover-h);padding:calc(env(safe-area-inset-top,0) + 9vh) 0 calc(9vh + env(safe-area-inset-bottom,0));margin:0 auto;box-sizing:border-box}.cv-stage,.cv-extra-row{width:min(100%,calc((var(--cover-h) - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 112px) * .5625))}.cv-extra-row{gap:8px}.cv-extra-btn{min-height:78px;border-radius:18px;padding:8px 7px;gap:5px}.cv-extra-btn::before{inset:3px;border-radius:14px}.cv-extra-btn .cv-btn-icon{width:32px;height:32px;font-size:16px;border-radius:11px}.cv-extra-btn .cv-btn-label{font-size:10.4px}}
 @media (max-height:760px){.cv-shell-stage{position:relative;z-index:2;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;gap:10px;width:min(100%,560px);height:var(--cover-h);min-height:var(--cover-h);padding:calc(env(safe-area-inset-top,0) + 9vh) 0 calc(9vh + env(safe-area-inset-bottom,0));margin:0 auto;box-sizing:border-box}.cv-stage,.cv-extra-row{width:min(100%,calc((var(--cover-h) - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 98px) * .5625))}.cv-extra-row{gap:7px}.cv-extra-btn{min-height:70px;border-radius:16px;padding:7px 6px;gap:4px}.cv-extra-btn::before{inset:3px;border-radius:13px}.cv-extra-btn .cv-btn-icon{width:28px;height:28px;font-size:14px;border-radius:10px}.cv-extra-btn .cv-btn-label{font-size:9.6px;line-height:1.06}}
-html.parish-mode .srch-bar,html.parish-mode .filter-bar,html.parish-mode .sheet-hd{background:#123A63!important}
-html.parish-mode .ric-lbl,html.parish-mode .region-list-hd{color:#1D4E89!important}
-html.parish-mode .dio-hd{color:#123A63!important;background:#EEF5FC!important}
-html.parish-mode .filter-btn.active{background:#1D4E89!important;color:#fff!important;border-color:#1D4E89!important}
-html.parish-mode .sheet-hd,html.parish-mode .region-wrap,html.parish-mode .ric-hd{background:linear-gradient(135deg,#123A63,#1D4E89)!important}
-html.parish-mode .li-name,html.parish-mode .nearby-name{color:#123A63!important}
-html.parish-mode .li-sub,html.parish-mode .nearby-addr{color:#5E7892!important}
-html.parish-mode .li-badge,html.parish-mode .nearby-type{background:#DCEBFA!important;color:#0F3D68!important}
+html.parish-mode .srch-bar,html.parish-mode .filter-bar,html.parish-mode .sheet-hd{background:#1D4ED8!important}
+html.parish-mode .ric-lbl,html.parish-mode .region-list-hd{color:#2563EB!important}
+html.parish-mode .dio-hd{color:#1D4ED8!important;background:#f0f6fb!important}
+html.parish-mode .filter-btn.active{background:#1D4ED8!important;color:#fff!important;border-color:#1D4ED8!important}
+html.parish-mode .sheet-hd,html.parish-mode .region-wrap,html.parish-mode .ric-hd{background:linear-gradient(135deg,#1D4ED8,#2563EB)!important}
+html.parish-mode .li-name,html.parish-mode .nearby-name{color:#1D4ED8!important}
+html.parish-mode .li-sub,html.parish-mode .nearby-addr{color:#64748B!important}
+html.parish-mode .li-badge,html.parish-mode .nearby-type{background:#e7f1fb!important;color:#1D4ED8!important}
 .cv-title-only{font-size:clamp(34px,8vw,56px)!important;letter-spacing:.02em;line-height:1.18!important;margin-bottom:18px!important}
 .cv-shell-min{padding-top:calc(env(safe-area-inset-top,0) + 24px)!important;padding-bottom:40px!important}
 .cv-grid-big{gap:12px!important;max-width:440px!important}
@@ -3325,32 +3318,32 @@ html:not(.parish-mode):not(.retreat-mode) .tab-btn.active{background:linear-grad
 .web-body,.trail-body{background:var(--bg-unified)!important}
 html.parish-mode .sheet-body,html.parish-mode #list-body,html.parish-mode #nearby-body,html.parish-mode #region-body{background:var(--bg-unified)!important}
 html.retreat-mode .sheet-body,html.retreat-mode #list-body,html.retreat-mode #nearby-body,html.retreat-mode #region-body{background:var(--bg-unified)!important}
-html.parish-mode .srch-bar,html.parish-mode .filter-bar,html.parish-mode .sheet-hd,html.parish-mode .region-wrap{background:linear-gradient(135deg,#123A63,#1D4E89)!important}
-html.retreat-mode .srch-bar,html.retreat-mode .filter-bar,html.retreat-mode .sheet-hd,html.retreat-mode .region-wrap{background:linear-gradient(135deg,#1a6e4a,#248f62)!important}
+html.parish-mode .srch-bar,html.parish-mode .filter-bar,html.parish-mode .sheet-hd,html.parish-mode .region-wrap{background:linear-gradient(135deg,#1D4ED8,#2563EB)!important}
+html.retreat-mode .srch-bar,html.retreat-mode .filter-bar,html.retreat-mode .sheet-hd,html.retreat-mode .region-wrap{background:linear-gradient(135deg,#166534,#15803D)!important}
 .web-cat-btn[data-cat-color="전체"].on{background:#0e1a3a!important}
 
 
 .list-item,.nearby-item,.region-item{margin:0 10px 6px;padding:12px 14px!important;border:1px solid #e8edf5!important;border-radius:13px!important;background:#fff!important;box-shadow:0 2px 8px rgba(14,21,53,.06)!important;display:flex!important;align-items:center!important;gap:12px!important;transition:transform .12s,box-shadow .12s;min-height:72px!important;box-sizing:border-box}
 .li-info,.nearby-info{flex:1;min-width:0}
-html.parish-mode .nearby-dist{color:#1D4E89!important}
+html.parish-mode .nearby-dist{color:#2563EB!important}
 .li-badge[style*="c0392b"],.nearby-type[style*="c0392b"]{background:#fde8e8!important;color:#c0392b!important}
 .li-badge[style*="1565c0"],.nearby-type[style*="1565c0"]{background:#e3eeff!important;color:#1565c0!important}
 .li-badge[style*="1b7a3e"],.nearby-type[style*="1b7a3e"]{background:#e8f5ee!important;color:#1b7a3e!important}
-html.parish-mode .li-badge{background:#DCEBFA!important;color:#0F3D68!important}
-html.parish-mode .nearby-type{background:#DCEBFA!important;color:#0F3D68!important}
-html.retreat-mode .li-badge{background:#e6f4ec!important;color:#1a6e4a!important}
-html.retreat-mode .nearby-type{background:#e6f4ec!important;color:#1a6e4a!important}
-html.retreat-mode .dio-hd{color:#1a6e4a!important;background:#f0f7f4!important}
+html.parish-mode .li-badge{background:#dbeeff!important;color:#1D4ED8!important}
+html.parish-mode .nearby-type{background:#dbeeff!important;color:#1D4ED8!important}
+html.retreat-mode .li-badge{background:#DCFCE7!important;color:#166534!important}
+html.retreat-mode .nearby-type{background:#DCFCE7!important;color:#166534!important}
+html.retreat-mode .dio-hd{color:#166534!important;background:#F0FDF4!important}
 .web-cat-btn[data-cat-color="중앙기구"].on{background:#8B1C2A!important}
 .web-cat-btn[data-cat-color="신앙 포털"].on{background:#1A6B3C!important}
 .web-cat-btn[data-cat-color="미디어"].on{background:#1A4F8B!important}
 .web-cat-btn[data-cat-color="뉴스"].on{background:#5A3E8B!important}
 .web-cat-btn[data-cat-color="출판·교육"].on{background:#7A5230!important}
 .web-cat-btn[data-cat-color="교구"].on{background:#2e5a3a!important}
-html.retreat-mode .nearby-num{background:#81C784!important;color:#ffffff!important}
-html.retreat-mode .region-item .nearby-num{background:#4f46e5!important}
+html.retreat-mode .nearby-num{background:#15803D!important;color:#ffffff!important}
+html.retreat-mode .region-item .nearby-num{background:#15803D!important}
 #trail-list>.trail-card{flex:0 0 auto!important;min-height:118px!important;width:100%!important;display:block!important}
-html.retreat-mode .filter-btn.active{background:#4f46e5!important;color:#fff!important;border-color:#4f46e5!important}
+html.retreat-mode .filter-btn.active{background:#15803D!important;color:#fff!important;border-color:#15803D!important}
 html.parish-mode .sm-fb.on{background:var(--gold)!important;color:var(--navy)!important;border-color:var(--gold)!important}
 html.retreat-mode .sm-fb.on{background:var(--gold)!important;color:var(--navy)!important;border-color:var(--gold)!important}
 html:not(.parish-mode):not(.retreat-mode) .sm-tab.active{background:linear-gradient(135deg,var(--shrine-main),var(--shrine-main-2))!important;color:#ffffff!important;border-color:transparent!important}
@@ -3382,10 +3375,15 @@ html.parish-mode .sheet-hd,html.parish-mode .filter-bar,html.parish-mode .region
 .sm-x{color:#c49b56!important;border-color:rgba(212,170,106,.58)!important;background:rgba(14,21,53,.88)!important;border:1px solid rgba(212,170,106,.58)!important}
 .filter-btn,.sm-fb{background:#fff!important;color:#7b8794!important;border:1.5px solid var(--ui-line-strong)!important;box-shadow:none!important}
 .filter-btn.active,.sm-fb.on,html:not(.parish-mode):not(.retreat-mode) .filter-btn.active,html:not(.parish-mode):not(.retreat-mode) .sm-fb.on,html.parish-mode .filter-btn.active,html.parish-mode .sm-fb.on,html.retreat-mode .filter-btn.active,html.retreat-mode .sm-fb.on{background:var(--oai-gold)!important;color:#1f2937!important;border-color:var(--oai-gold-border)!important}
+html.parish-mode .filter-btn.active,html.parish-mode .sm-fb.on{background:#2563EB!important;color:#fff!important;border-color:#1D4ED8!important}
+html.retreat-mode .filter-btn.active,html.retreat-mode .sm-fb.on{background:#15803D!important;color:#fff!important;border-color:#166534!important}
+html.parish-mode #tabbar .tab-btn.active{background:linear-gradient(135deg,#1D4ED8,#2563EB)!important;color:#fff!important;border-color:transparent!important}
+html.retreat-mode #tabbar .tab-btn.active{background:linear-gradient(135deg,#166534,#15803D)!important;color:#fff!important;border-color:transparent!important}
+
 /* sm-tab-bar 레이아웃은 상단에서 정의됨 */
-html.retreat-mode .region-list-hd,html.retreat-mode .ric-lbl,html.retreat-mode .dio-hd,html.retreat-mode .li-name,html.retreat-mode .nearby-name,html.retreat-mode .nearby-dist{color:#4e7f67!important}
+html.retreat-mode .region-list-hd,html.retreat-mode .ric-lbl,html.retreat-mode .dio-hd,html.retreat-mode .li-name,html.retreat-mode .nearby-name,html.retreat-mode .nearby-dist{color:#166534!important}
 html.retreat-mode #sheet-nearby #nearby-body .nearby-item .nearby-info>.nearby-name{color:#111827!important}
-html.retreat-mode .li-badge,html.retreat-mode .nearby-type,html.retreat-mode .ic-type-badge{background:var(--retreat-soft)!important;color:#5f8b74!important}
+html.retreat-mode .li-badge,html.retreat-mode .nearby-type,html.retreat-mode .ic-type-badge{background:var(--retreat-soft)!important;color:#166534!important}
 /* 지역검색 리스트 제목 글자 = 내주변 리스트 제목 글자, 전역 글자크기와 연동 */
 html.oai-font-global #region-body .nearby-name,
 html.oai-font-global #region-body .li-name,
@@ -3448,3 +3446,11 @@ html.oai-font-global .trail-reg,html.oai-font-global .trail-url,html.oai-font-gl
 html.ios-device #app #sheet-list .sheet-hd { bottom: 0; }
 /* 키보드 오픈 시 sheet 위치 보정 */
 html.kb-open .sheet.open { bottom: 0; }
+
+/* V2-S-8: 성당·피정의집 카테고리 고유색/활성색 통일 */
+html.parish-mode #srch-modal #sm-tab-bar .sm-tab.active{background:linear-gradient(135deg,#1D4ED8,#2563EB)!important;color:#fff!important;border-color:transparent!important}
+html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active{background:linear-gradient(135deg,#166534,#15803D)!important;color:#fff!important;border-color:transparent!important}
+html.parish-mode .nearby-num{background:#2563EB!important;color:#fff!important}
+html.retreat-mode .nearby-num{background:#15803D!important;color:#fff!important}
+html.parish-mode .nearby-dist,html.parish-mode .region-list-hd,html.parish-mode .ric-lbl{color:#2563EB!important}
+html.retreat-mode .nearby-dist,html.retreat-mode .region-list-hd,html.retreat-mode .ric-lbl{color:#15803D!important}
