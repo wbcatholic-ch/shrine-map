@@ -4130,7 +4130,7 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active{
 }
 
 /* ============================================================
-   Google Play 커버 메뉴 + 하단 단일 새로고침 (V1-3)
+   Google Play 커버 메뉴 + 하단 단일 새로고침 (V1-4)
    ============================================================ */
 #cover #oai-build-marker,
 #oai-build-marker {
@@ -4390,5 +4390,195 @@ html.app-active #cover-menu-btn { display: none !important; }
     max-width: min(122px, 35vw);
     min-width: 102px;
   }
+}
+
+/* ============================================================
+   V1-4 커버 상단/하단 안정화
+   ============================================================ */
+#cover #oai-build-marker,
+#oai-build-marker {
+  position: fixed !important;
+  left: 12px !important;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 8px) !important;
+  z-index: 160 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  min-width: 56px !important;
+  height: 22px !important;
+  padding: 0 9px !important;
+  border-radius: 999px !important;
+  background: rgba(31,42,68,.62) !important;
+  color: #fff !important;
+  font-size: 10.5px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  letter-spacing: -.02em !important;
+  opacity: .9 !important;
+  visibility: visible !important;
+  pointer-events: none !important;
+  box-sizing: border-box !important;
+}
+
+#cover-font-controls {
+  right: 12px !important;
+  top: calc(env(safe-area-inset-top, 0px) + 12px) !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  max-height: 38px !important;
+  max-width: min(142px, calc(50vw - 18px)) !important;
+  padding: 2px 3px !important;
+  border-radius: 16px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+}
+#cover-font-controls .pr-font-btn,
+#cover-font-controls button {
+  flex: 0 0 34px !important;
+  width: 34px !important;
+  min-width: 34px !important;
+  max-width: 34px !important;
+  height: 30px !important;
+  min-height: 30px !important;
+  max-height: 30px !important;
+  padding: 0 !important;
+  overflow: hidden !important;
+  box-sizing: border-box !important;
+}
+#cover-font-controls #cover-sm-btn { font-size: 11px !important; }
+#cover-font-controls #cover-lg-btn { font-size: 22px !important; }
+#cover-font-controls .pr-font-divider { flex: 0 0 1px !important; }
+
+#cover #cover-menu-btn.cover-menu-btn {
+  left: 12px !important;
+  top: calc(env(safe-area-inset-top, 0px) + 12px) !important;
+  height: 38px !important;
+  min-height: 38px !important;
+  max-height: 38px !important;
+  width: auto !important;
+  max-width: min(142px, calc(50vw - 18px)) !important;
+  padding: 0 13px !important;
+  border-radius: 16px !important;
+  box-sizing: border-box !important;
+  overflow: hidden !important;
+  white-space: nowrap !important;
+}
+#cover #cover-menu-btn .cover-menu-label {
+  font-size: calc(12.5px * var(--app-font-scale)) !important;
+  line-height: 1 !important;
+  max-width: 50px !important;
+  overflow: hidden !important;
+}
+#cover #cover-menu-btn .cover-menu-hamburger {
+  width: 16px !important;
+  height: 14px !important;
+  flex: 0 0 16px !important;
+  gap: 3px !important;
+}
+#cover #cover-menu-btn .cover-menu-hamburger span {
+  width: 16px !important;
+  height: 2px !important;
+}
+
+/* 새로고침은 커버 카드 흐름에서 분리해 중앙 블록을 위로 밀지 않게 고정 */
+#cover #cover-action-row.cover-action-single {
+  position: fixed !important;
+  right: 38px !important;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 64px) !important;
+  z-index: 150 !important;
+  width: auto !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  pointer-events: auto !important;
+  box-sizing: border-box !important;
+}
+#cover #cover-action-row.cover-action-single #cover-update-box {
+  flex: 0 0 auto !important;
+  width: clamp(104px, 24vw, 124px) !important;
+  min-width: 104px !important;
+  max-width: 124px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+#cover .cover-refresh-main-btn {
+  width: 100% !important;
+  min-height: 34px !important;
+  height: 34px !important;
+  max-height: 34px !important;
+  padding: 0 14px !important;
+  border-radius: 13px !important;
+  background: linear-gradient(180deg, #ece7de 0%, #ddd6c9 100%) !important;
+  color: #1f2a44 !important;
+  border: 1.5px solid rgba(31,42,68,.16) !important;
+  font-size: calc(15px * var(--app-font-scale)) !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  box-shadow: 0 6px 12px rgba(31,42,68,.08) !important;
+  box-sizing: border-box !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+}
+
+#cover-bottom-note {
+  position: fixed !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 26px) !important;
+  transform: translateX(-50%) !important;
+  width: min(620px, calc(100vw - 36px)) !important;
+  max-width: min(620px, calc(100vw - 36px)) !important;
+  margin: 0 !important;
+  padding: 0 18px !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-height: 740px) {
+  #cover #cover-action-row.cover-action-single {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 58px) !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    max-height: 32px !important;
+  }
+  #cover #cover-action-row.cover-action-single #cover-update-box {
+    width: clamp(98px, 25vw, 116px) !important;
+    min-width: 98px !important;
+    max-width: 116px !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    max-height: 32px !important;
+  }
+  #cover .cover-refresh-main-btn {
+    min-height: 32px !important;
+    height: 32px !important;
+    font-size: calc(14px * var(--app-font-scale)) !important;
+    padding: 0 12px !important;
+  }
+  #cover-bottom-note {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 22px) !important;
+    width: min(620px, calc(100vw - 34px)) !important;
+    padding: 0 17px !important;
+  }
+}
+
+@media (max-width: 390px) {
+  #cover-font-controls,
+  #cover #cover-menu-btn.cover-menu-btn {
+    max-width: calc(50vw - 18px) !important;
+  }
+  #cover #cover-menu-btn.cover-menu-btn { padding: 0 11px !important; }
+  #cover #cover-menu-btn .cover-menu-label { font-size: calc(11.5px * var(--app-font-scale)) !important; }
+  #cover #cover-action-row.cover-action-single { right: 32px !important; }
 }
 
