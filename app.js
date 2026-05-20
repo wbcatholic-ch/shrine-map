@@ -1174,7 +1174,7 @@ function syncCoverUpdateVersionState(){
     if(!current && marker) current = String(marker.textContent || '').trim();
     if(!current) current = target;
     var mismatch = current !== target;
-    btn.textContent = mismatch ? (target + ' 업데이트 필요') : (target + ' 새로고침');
+    btn.textContent = mismatch ? '업데이트 필요' : '새로고침';
     box.classList.toggle('update-needed', mismatch);
     if(marker) marker.textContent = current;
   }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -1298,7 +1298,7 @@ window.addEventListener('load', syncCoverUpdateVersionState, true);
       if(localStorage.getItem(FAVORITES_RESET_NOTICE_KEY) === '1') return false;
     }catch(e){ return false; }
     if(!isCoverVisible()) return false;
-    if(isGuideModalOpen('guide-intro-modal') || isGuideModalOpen('guide-manual-modal') || isGuideModalOpen('ios-safari-guide-modal')) return false;
+    if(isGuideModalOpen('guide-intro-modal') || isGuideModalOpen('guide-manual-modal')) return false;
     return true;
   }
   function maybeShowFavoritesResetNotice(){
@@ -1328,7 +1328,6 @@ window.addEventListener('load', syncCoverUpdateVersionState, true);
       skipAutoPopupsThisLoad = true;
       try{ if(typeof closeMassQuickMenu === 'function') closeMassQuickMenu(); }catch(e){ console.warn('[가톨릭길동무]', e); }
       try{ hideModal('guide-intro-modal'); hideModal('guide-manual-modal'); hideFavoritesResetNotice(); }catch(e){ console.warn('[가톨릭길동무]', e); }
-      try{ var ios=document.getElementById('ios-safari-guide-modal'); if(ios){ ios.classList.remove('show'); ios.setAttribute('aria-hidden','true'); } }catch(e){ console.warn('[가톨릭길동무]', e); }
       clearSoftRefreshRequest();
       return;
     }
@@ -1483,83 +1482,7 @@ function _closePrayerAndReturn(){
 
 
 
-// V37: iPhone 카카오톡 인앱 브라우저에서만 Safari 설치 안내 배너를 표시한다.
-(function(){
-  'use strict';
-  function ua(){ return (navigator.userAgent || '').toLowerCase(); }
-  function isIOS(){
-    var u = ua();
-    return /iphone|ipad|ipod/.test(u) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  }
-  function isKakao(){ return ua().indexOf('kakaotalk') > -1; }
-  function isStandalone(){
-    try{ if(window.navigator.standalone === true) return true; }catch(e){ console.warn('[가톨릭길동무]', e); }
-    try{ return window.matchMedia && window.matchMedia('(display-mode: standalone)').matches; }catch(e){ console.warn('[가톨릭길동무]', e); }
-    return false;
-  }
-  function shouldShow(){
-    return isIOS() && isKakao() && !isStandalone();
-  }
-  function loadIosSafariGuideImages(){
-    var m = document.getElementById('ios-safari-guide-modal');
-    if(!m || m.__iosSafariGuideImagesLoaded) return;
-    m.__iosSafariGuideImagesLoaded = true;
-    try{
-      m.querySelectorAll('img[data-src]').forEach(function(img){
-        if(!img.getAttribute('src')) img.setAttribute('src', img.getAttribute('data-src'));
-      });
-    }catch(e){ console.warn('[가톨릭길동무]', e); }
-  }
-  function showModal(){
-    var m = document.getElementById('ios-safari-guide-modal');
-    if(!m) return;
-    loadIosSafariGuideImages();
-    m.classList.add('show');
-    m.setAttribute('aria-hidden','false');
-    try{ if(typeof oaiEnterPopup==='function') oaiEnterPopup(m); }catch(e){ console.warn('[가톨릭길동무]', e); }
-    try{ document.activeElement && document.activeElement.blur && document.activeElement.blur(); }catch(e){ console.warn('[가톨릭길동무]', e); }
-  }
-  function hideModal(){
-    var m = document.getElementById('ios-safari-guide-modal');
-    if(!m) return;
-    m.classList.remove('show');
-    m.setAttribute('aria-hidden','true');
-  }
-  function init(){
-    var banner = document.getElementById('ios-kakao-safari-banner');
-    var modal = document.getElementById('ios-safari-guide-modal');
-    if(!banner) return;
-    var show = shouldShow();
-    if(show){
-      document.documentElement.classList.add('ios-kakao-inapp');
-      banner.hidden = false;
-      banner.setAttribute('aria-hidden','false');
-    }else{
-      document.documentElement.classList.remove('ios-kakao-inapp');
-      banner.hidden = true;
-      banner.setAttribute('aria-hidden','true');
-      hideModal();
-    }
-    function bindTap(el, flag, handler){
-      if(!el || el[flag]) return;
-      el[flag] = true;
-      var fn = function(e){ e.preventDefault(); e.stopPropagation(); handler(e); };
-      el.addEventListener('click', fn, true);
-      el.addEventListener('touchend', fn, true);
-    }
-    bindTap(document.getElementById('ios-kakao-safari-help'), '__iosSafariBound', showModal);
-    bindTap(document.getElementById('ios-kakao-safari-close'), '__iosSafariBannerCloseBound', function(){
-      banner.hidden = true;
-      banner.setAttribute('aria-hidden','true');
-    });
-    document.querySelectorAll('[data-ios-safari-close]').forEach(function(el){
-      bindTap(el, '__iosSafariCloseBound', hideModal);
-    });
-  }
-  document.addEventListener('DOMContentLoaded', init, true);
-  window.addEventListener('pageshow', init, true);
-})();
-
+// Google Play Android 정리본: iPhone 카카오톡 Safari 설치 안내 컨트롤러는 제거했습니다.
 function openDioceseView(opts){
   var view=document.getElementById('diocese-view');
   var frame=document.getElementById('diocese-frame');
@@ -1580,7 +1503,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V3-S-GP3';
+    frame.src='diocese.html?v=V3-S-GP4';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1971,7 +1894,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V3-S-GP3';
+const _PARISH_ASSET_VERSION='V3-S-GP4';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -2134,7 +2057,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V3-S-GP3';
+const _PRAYER_ASSET_VERSION='V3-S-GP4';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2179,7 +2102,7 @@ try{ window.ensurePrayerModuleLoaded=ensurePrayerModuleLoaded; }catch(e){ consol
 let _RT_RAW = [];
 let _retreatRawLoaded = false;
 let _retreatDataLoadPromise = null;
-const _RETREAT_ASSET_VERSION='V3-S-GP3';
+const _RETREAT_ASSET_VERSION='V3-S-GP4';
 
 let RETREATS = [];
 function _buildRetreatList(raw){
@@ -2424,7 +2347,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V3-S-GP3';
+const _SHRINE_ASSET_VERSION='V3-S-GP4';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){

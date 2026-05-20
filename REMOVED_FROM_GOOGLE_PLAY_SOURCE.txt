@@ -1,0 +1,8 @@
+Google Play Android/TWA 정리본에서 제거한 iPhone 설치 안내 전용 파일:
+- ios-install-step1-kakao-bottom-buttons.png
+- ios-install-step2-safari-open.png
+- ios-install-step3-share-menu.png
+- ios-install-step4-home-screen.png
+- KakaoTalk_20260514_134255658_04.jpg
+
+주의: 현재 정리본은 Android/Google Play 제출용 소스입니다. iPhone 웹 배포까지 같은 저장소에서 계속 유지하려면 iPhone 안내 제거 여부를 다시 결정해야 합니다.
