@@ -2548,40 +2548,6 @@ html.app-active #cover-guide-btn { display: none; }
   transition: opacity .16s, transform .16s;
 }
 #oai-cover-exit-toast.show { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-
-/* PWA 설치 버튼 */
-#pwa-install-btn {
-  display: none;
-  width: calc(100vw - 32px);
-  max-width: 380px;
-  margin: 0;
-  padding: 0 20px;
-  height: 72px;
-  background: linear-gradient(135deg, #ff6b35 0%, #f7931e 40%, #ffcc02 100%);
-  color: #1a0a00;
-  border: 1px solid rgba(255,255,255,.66);
-  border-radius: 22px;
-  font-size: 18px;
-  font-weight: 900;
-  font-family: inherit;
-  letter-spacing: -.3px;
-  cursor: pointer;
-  box-shadow: 0 0 0 100vmax rgba(244,239,228,.34), 0 6px 0 rgba(180,80,0,.35), 0 12px 32px rgba(255,107,53,.55), 0 4px 12px rgba(255,107,53,.30);
-  text-align: center;
-  position: fixed;
-  left: 50%;
-  top: 50%;
-  z-index: 10020;
-  transform: translate(-50%, -50%);
-  overflow: hidden;
-  align-items: center;
-  justify-content: center;
-  gap: 10px;
-  -webkit-tap-highlight-color: transparent;
-  animation: pwa-install-bounce 2s ease-in-out infinite;
-}
-@media (display-mode: standalone) { #pwa-install-btn { display: none; } }
-html.app-active #pwa-install-btn { display: none; }
 /* 빠른 메뉴 */
 .mass-quick-panel {
   width: min(640px, calc(100vw - 14px));
@@ -3368,11 +3334,6 @@ html.oai-font-global .trail-reg,html.oai-font-global .trail-url,html.oai-font-gl
 /* ============================================================
    14. 기타 누락 블록
    ============================================================ */
-@keyframes pwa-install-bounce {
-  0%,100% { transform: translate(-50%,-50%); box-shadow: 0 0 0 100vmax rgba(244,239,228,.34), 0 6px 0 rgba(180,80,0,.35), 0 12px 32px rgba(255,107,53,.55), 0 4px 12px rgba(255,107,53,.30); }
-  45%      { transform: translate(-50%,calc(-50% - 5px)); box-shadow: 0 0 0 100vmax rgba(244,239,228,.34), 0 11px 0 rgba(180,80,0,.20), 0 20px 44px rgba(255,107,53,.65), 0 8px 18px rgba(255,107,53,.34); }
-  55%      { transform: translate(-50%,calc(-50% - 5px)); box-shadow: 0 0 0 100vmax rgba(244,239,228,.34), 0 11px 0 rgba(180,80,0,.20), 0 20px 44px rgba(255,107,53,.65), 0 8px 18px rgba(255,107,53,.34); }
-}
 .cover-card-wide{grid-column:1/-1}
 @keyframes oaiSwipeSoftFlash{0%{opacity:1}100%{opacity:1}}
 .route-restore-marker{background:var(--gold, #d4aa6a);border-color:var(--gold2, #b8965a)!important}
