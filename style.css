@@ -64,7 +64,7 @@
   /* ── 컴포넌트 색상 */
   --oai-shrine-header:  #1f2a44;
   --oai-parish-header:  #4B5563;
-  --oai-retreat-header: #6B8F71;
+  --oai-retreat-header: #7A8F7A;
   --oai-gold:           #d4aa6a;
   --oai-gold-border:    #c49a57;
   --oai-btn:            #eef1f4;
@@ -114,14 +114,14 @@
   --church-soft-2:  #F8FAFC;
 
   /* ── 피정의집 모드 */
-  --retreat-bg:      #6B8F71;
-  --retreat-main:    #6B8F71;
+  --retreat-bg:      #7A8F7A;
+  --retreat-main:    #7A8F7A;
   --retreat-main-2:  #557A5C;
   --retreat-soft:    #E6F0E8;
-  --retreat-active:  #6B8F71;
+  --retreat-active:  #7A8F7A;
   --retreat-accent:  #E6F0E8;
   --retreat-soft-2:  #F7FBF8;
-  --dist-retreat:    #6B8F71;
+  --dist-retreat:    #6F836F;
 
   /* ── 거리 표시 */
   --addr-color:   #6b7280;
@@ -132,7 +132,7 @@
   --color-2: #1f2a44;
   --color-3: #b8965a;
   --color-4: #374151;
-  --color-5: #6B8F71;
+  --color-5: #7A8F7A;
   --color-6: #5c4a37;
   --color-7: #1a3560;
   --color-8: #374151;
@@ -2596,7 +2596,7 @@ html.app-active #pwa-install-btn { display: none; }
 .guide-mini-list dd { margin: 0; color: #5f6675; font-weight: 600; word-break: keep-all; }
 .guide-ok { flex: 0 0 auto; width: 100%; margin-top: 12px; min-height: 40px; }
 
-/* V2-S-10: 즐겨찾기 초기화 1회 안내 배너 */
+/* V2-S-11: 즐겨찾기 초기화 1회 안내 배너 */
 #cover .favorites-reset-banner {
   position: fixed;
   left: max(20px, calc(env(safe-area-inset-left, 0px) + 20px));
@@ -3444,10 +3444,179 @@ html.ios-device #app #sheet-list .sheet-hd { bottom: 0; }
 /* 키보드 오픈 시 sheet 위치 보정 */
 html.kb-open .sheet.open { bottom: 0; }
 
-/* V2-S-10: 성당 글로시 슬레이트 그레이 · 피정의집 세이지 그린 재조정 */
+/* V2-S-11: 성당 글로시 슬레이트 그레이 · 피정의집 세이지 그린 재조정 */
 html.parish-mode #srch-modal #sm-tab-bar .sm-tab.active{background:linear-gradient(135deg,#374151,#4B5563)!important;color:#fff!important;border-color:transparent!important}
 html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active{background:linear-gradient(135deg,#557A5C,#6B8F71)!important;color:#fff!important;border-color:transparent!important}
 html.parish-mode .nearby-num{background:#4B5563!important;color:#fff!important}
 html.retreat-mode .nearby-num{background:#6B8F71!important;color:#fff!important}
 html.parish-mode .nearby-dist,html.parish-mode .region-list-hd,html.parish-mode .ric-lbl{color:#4B5563!important}
 html.retreat-mode .nearby-dist,html.retreat-mode .region-list-hd,html.retreat-mode .ric-lbl{color:#6B8F71!important}
+
+/* ============================================================
+   V2-S-11 색상 정리 — 성지 고유색 유지 / 성당 그레이 / 피정의집 세이지
+   - 기능·HTML·JS 변경 없음
+   - 성지의 기존 고유색(red/green/blue)은 건드리지 않음
+   - 모든 목록 이름은 검정으로 통일
+   - 성당 교구 탭/출발·도착 성당 검색 탭 활성색은 금색으로 통일
+   - 카테고리 진입 직후 네이비 노출을 줄이기 위해 로딩 배경은 아이보리로 통일
+   ============================================================ */
+:root{
+  --cathedral-primary:#475569;
+  --cathedral-secondary:#64748B;
+  --cathedral-dark:#374151;
+  --cathedral-soft:#F1F5F9;
+  --cathedral-badge:#E5E7EB;
+  --retreat-primary:#7A8F7A;
+  --retreat-secondary:#8FA390;
+  --retreat-dark:#6B7F6B;
+  --retreat-soft-final:#EFF4EF;
+  --retreat-badge-final:#E8F0E8;
+}
+
+/* 첫 카테고리 진입 때 보이는 로딩/빈 배경은 네이비 대신 아이보리 */
+#app,
+#map-wrap,
+.map-loading{
+  background:var(--bg-unified,#f5f0e8)!important;
+}
+.map-loading-txt{color:#6B7280!important;}
+.map-loading-icon{color:var(--gold,#d4aa6a)!important;}
+
+/* 성당: 고급 슬레이트 그레이로 통일 */
+html.parish-mode{
+  --mode-header-bg:linear-gradient(135deg,var(--cathedral-dark),var(--cathedral-primary));
+  --mode-header-solid:var(--cathedral-primary);
+  --mode-active-bg:linear-gradient(135deg,var(--cathedral-dark),var(--cathedral-primary));
+  --mode-tab-active-bg:linear-gradient(135deg,var(--cathedral-dark),var(--cathedral-primary));
+  --mode-badge-bg:var(--cathedral-badge);
+  --mode-badge-color:var(--cathedral-primary);
+  --mode-dist-color:var(--cathedral-primary);
+  --mode-name-color:#111827;
+  --mode-num-bg:var(--cathedral-primary);
+  --mode-srch-modal-bg:var(--cathedral-primary);
+}
+html.parish-mode #tabbar .tab-btn.active,
+html.parish-mode .srch-bar,
+html.parish-mode .filter-bar,
+html.parish-mode .sheet-hd,
+html.parish-mode .region-wrap,
+html.parish-mode .sm-hd,
+html.parish-mode #srch-modal #sm-tab-bar,
+html.parish-mode .ric-hd{
+  background:linear-gradient(135deg,var(--cathedral-dark),var(--cathedral-primary))!important;
+  color:#fff!important;
+  border-color:transparent!important;
+}
+html.parish-mode .nearby-num,
+html.parish-mode #region-body .nearby-num,
+html.parish-mode #region-body .region-item .nearby-num{
+  background:var(--cathedral-primary)!important;
+  color:#fff!important;
+}
+html.parish-mode .nearby-dist,
+html.parish-mode #region-body .nearby-dist,
+html.parish-mode .region-list-hd,
+html.parish-mode .ric-lbl,
+html.parish-mode .dio-hd{
+  color:var(--cathedral-primary)!important;
+}
+html.parish-mode .li-badge,
+html.parish-mode .nearby-type,
+html.parish-mode #region-body .nearby-type,
+html.parish-mode #region-body .region-item .nearby-type,
+html.parish-mode .ic-type-badge{
+  background:var(--cathedral-badge)!important;
+  color:var(--cathedral-primary)!important;
+}
+
+/* 피정의집: 진초록 대신 부드러운 세이지 그린으로 통일 */
+html.retreat-mode{
+  --mode-header-bg:linear-gradient(135deg,var(--retreat-dark),var(--retreat-primary));
+  --mode-header-solid:var(--retreat-primary);
+  --mode-active-bg:linear-gradient(135deg,var(--retreat-dark),var(--retreat-primary));
+  --mode-tab-active-bg:linear-gradient(135deg,var(--retreat-dark),var(--retreat-primary));
+  --mode-badge-bg:var(--retreat-badge-final);
+  --mode-badge-color:var(--retreat-dark);
+  --mode-dist-color:var(--retreat-dark);
+  --mode-name-color:#111827;
+  --mode-num-bg:var(--retreat-primary);
+  --mode-srch-modal-bg:var(--retreat-primary);
+}
+html.retreat-mode #tabbar .tab-btn.active,
+html.retreat-mode .srch-bar,
+html.retreat-mode .filter-bar,
+html.retreat-mode .sheet-hd,
+html.retreat-mode .region-wrap,
+html.retreat-mode .sm-hd,
+html.retreat-mode #srch-modal #sm-tab-bar,
+html.retreat-mode .ric-hd{
+  background:linear-gradient(135deg,var(--retreat-dark),var(--retreat-primary))!important;
+  color:#fff!important;
+  border-color:transparent!important;
+}
+html.retreat-mode .nearby-num,
+html.retreat-mode #region-body .nearby-num,
+html.retreat-mode #region-body .region-item .nearby-num{
+  background:var(--retreat-primary)!important;
+  color:#fff!important;
+}
+html.retreat-mode .nearby-dist,
+html.retreat-mode #region-body .nearby-dist,
+html.retreat-mode .region-list-hd,
+html.retreat-mode .ric-lbl,
+html.retreat-mode .dio-hd{
+  color:var(--retreat-dark)!important;
+}
+html.retreat-mode .li-badge,
+html.retreat-mode .nearby-type,
+html.retreat-mode #region-body .nearby-type,
+html.retreat-mode #region-body .region-item .nearby-type,
+html.retreat-mode .ic-type-badge{
+  background:var(--retreat-badge-final)!important;
+  color:var(--retreat-dark)!important;
+}
+
+/* 모든 목록/검색 결과 이름은 검정으로 통일 */
+#app .li-name,
+#app .nearby-name,
+#app #region-body .li-name,
+#app #region-body .nearby-name,
+#app #region-body .region-item .nearby-name,
+#app .sm-name,
+#app .sm-place-name,
+#app .ic-name{
+  color:#111827!important;
+}
+#app .li-sub,
+#app .nearby-addr,
+#app #region-body .li-sub,
+#app #region-body .nearby-addr,
+#app .sm-sub,
+#app .sm-place-addr{
+  color:#6B7280!important;
+}
+
+/* 성당 찾기·출발/도착 성당 검색의 교구 탭 활성색은 금색 */
+.filter-btn.active,
+.sm-fb.on,
+html.parish-mode .filter-btn.active,
+html.parish-mode .sm-fb.on,
+html.retreat-mode .filter-btn.active,
+html.retreat-mode .sm-fb.on{
+  background:var(--gold,#d4aa6a)!important;
+  color:#1f2937!important;
+  border-color:var(--gold2,#b8965a)!important;
+}
+
+/* 성당/피정의집 검색 모달의 큰 탭은 카테고리 주색 유지 */
+html.parish-mode #srch-modal #sm-tab-bar .sm-tab.active{
+  background:linear-gradient(135deg,var(--cathedral-dark),var(--cathedral-primary))!important;
+  color:#fff!important;
+  border-color:transparent!important;
+}
+html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active{
+  background:linear-gradient(135deg,var(--retreat-dark),var(--retreat-primary))!important;
+  color:#fff!important;
+  border-color:transparent!important;
+}
+
