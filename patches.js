@@ -530,7 +530,7 @@
   window.addEventListener('popstate', function(){
     if(window._appExiting) return;
 
-    /* V1-18: 메뉴 팝업이 열려 있으면 종료 안내보다 먼저 메뉴만 닫고 이벤트를 소비한다. */
+    /* V1-20: 메뉴 팝업이 열려 있으면 종료 안내보다 먼저 메뉴만 닫고 이벤트를 소비한다. */
     try{
       var menuConsumedUntil = Number(window.__oaiCoverMenuBackConsumedUntil || 0);
       if(menuConsumedUntil && Date.now && Date.now() < menuConsumedUntil){
@@ -602,6 +602,19 @@
       return;
     }
 
+
+    /* V1-20: 주요기능 팝업 뒤로가기는 확인 버튼과 같은 함수로 닫는다. */
+    try{
+      if(window.oaiIsGuideManualOpen && window.oaiIsGuideManualOpen()){
+        if(window.oaiCloseGuideManualLikeConfirm) window.oaiCloseGuideManualLikeConfirm();
+        else {
+          closeGuideModals();
+          normalizeCoverBackAfterReturn('guide-manual-fallback');
+        }
+        return;
+      }
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+
     /* 빠른메뉴/안내 팝업이 열려 있으면 먼저 닫는다. */
     if(isGuideModalOpen()){
       closeGuideModals();
@@ -652,9 +665,20 @@
         return;
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
+
+    try{
+      if(window.oaiIsGuideManualOpen && window.oaiIsGuideManualOpen()){
+        if(window.oaiCloseGuideManualLikeConfirm) window.oaiCloseGuideManualLikeConfirm();
+        else {
+          closeGuideModals();
+          normalizeCoverBackAfterReturn('guide-manual-hardware-fallback');
+        }
+        return;
+      }
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
     if(handlePrayerBack('prayer-hardware-back')) return;
     if(closeRefreshDialog()){ try{ armCoverBackTrap('refresh-dialog-hardware', {force:true}); }catch(e){} return; }
-    if(isGuideModalOpen()){ closeGuideModals(); return; }
+    if(isGuideModalOpen()){ closeGuideModals(); normalizeCoverBackAfterReturn('guide-modal-hardware'); return; }
     if(!appActive()){
       if(typeof window._showBackToast==='function') window._showBackToast();
       return;
@@ -817,7 +841,7 @@
   window.__APP_FONT_SCALE_GUARD__=true;
   // V3-S: 커버 글자 크기 조절은 prayer.js에 의존하지 않는 공통 함수가 담당한다.
   // prayer.js는 기도문 화면이 열렸을 때 같은 localStorage 값을 읽어 자체 UI를 맞춘다.
-  var QA_URL="qa-firebase.html?v=V1-18";
+  var QA_URL="qa-firebase.html?v=V1-20";
   var FONT_KEY='prayer_font_size';
   var BASE=16;
   var FONT_SIZES=[13,14,15,16,17,18,19,20,21,22,24,26,28,30];
