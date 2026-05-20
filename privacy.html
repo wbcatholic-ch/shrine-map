@@ -262,7 +262,11 @@
 
 
 <script>
+function markPrivacyReturn(){
+  try{ sessionStorage.setItem('oai_returned_from_privacy','1'); }catch(e){}
+}
 function privacyCloseToApp(){
+  markPrivacyReturn();
   try{
     if(window.history && window.history.length > 1){
       window.history.back();
@@ -287,6 +291,8 @@ var back = document.getElementById('privacy-back-app-link');
     }, {capture:true});
   }
 })();
+window.addEventListener('pagehide', function(){ markPrivacyReturn(); });
+window.addEventListener('beforeunload', function(){ markPrivacyReturn(); });
 </script>
 
 </body>

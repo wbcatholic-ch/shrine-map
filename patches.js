@@ -49,6 +49,20 @@
   }
   try{ window._oaiArmCoverBackTrap = armCoverBackTrap; }catch(_e){}
 
+  function normalizeCoverBackAfterReturn(reason){
+    try{
+      if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady();
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+    try{
+      if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed();
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+    try{
+      armCoverBackTrap(reason || 'cover-return', {force:true});
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }
+  try{ window._oaiNormalizeCoverBackAfterReturn = normalizeCoverBackAfterReturn; }catch(_e){}
+
+
   /* history 초기화
      V3-S: 첫 커버 뒤로가기 실패를 만들던 hash/query trap 흔적을 제거하고,
      최종 뒤로가기 판단은 이 patches.js popstate 컨트롤러로 단일화한다. */
@@ -516,7 +530,7 @@
   window.addEventListener('popstate', function(){
     if(window._appExiting) return;
 
-    /* V1-17: 메뉴 팝업이 열려 있으면 종료 안내보다 먼저 메뉴만 닫고 이벤트를 소비한다. */
+    /* V1-18: 메뉴 팝업이 열려 있으면 종료 안내보다 먼저 메뉴만 닫고 이벤트를 소비한다. */
     try{
       var menuConsumedUntil = Number(window.__oaiCoverMenuBackConsumedUntil || 0);
       if(menuConsumedUntil && Date.now && Date.now() < menuConsumedUntil){
@@ -591,7 +605,7 @@
     /* 빠른메뉴/안내 팝업이 열려 있으면 먼저 닫는다. */
     if(isGuideModalOpen()){
       closeGuideModals();
-      try{ if(typeof window._ensureCoverBackTrap === 'function') window._ensureCoverBackTrap('guide-modal'); else armCoverBackTrap('guide-modal'); }catch(e){ console.warn("[가톨릭길동무]", e); }
+      normalizeCoverBackAfterReturn('guide-modal');
       return;
     }
 
@@ -599,7 +613,7 @@
     if(!appActive()){
       var exiting = false;
       if(typeof window._showBackToast==='function') exiting = window._showBackToast() === true;
-      if(!exiting){ armCoverBackTrap('cover-toast'); }
+      if(!exiting){ armCoverBackTrap('cover-toast', {force:true}); }
       return;
     }
 
@@ -654,6 +668,13 @@
   // 외부 사이트 방문 후 복귀 시 history 트랩 강제 재확립.
   // 트랩이 소실되면 다음 뒤로가기에서 앱이 탈출된다.
   window.addEventListener('pageshow', function(){
+    try{
+      if(sessionStorage.getItem('oai_returned_from_privacy') === '1'){
+        sessionStorage.removeItem('oai_returned_from_privacy');
+        normalizeCoverBackAfterReturn('privacy-return');
+        return;
+      }
+    }catch(_e){}
     try{
       var st = history.state;
       if(st && st._p === 1) return;  // 트랩 유지 중이면 스킵
@@ -796,7 +817,7 @@
   window.__APP_FONT_SCALE_GUARD__=true;
   // V3-S: 커버 글자 크기 조절은 prayer.js에 의존하지 않는 공통 함수가 담당한다.
   // prayer.js는 기도문 화면이 열렸을 때 같은 localStorage 값을 읽어 자체 UI를 맞춘다.
-  var QA_URL="qa-firebase.html?v=V1-17";
+  var QA_URL="qa-firebase.html?v=V1-18";
   var FONT_KEY='prayer_font_size';
   var BASE=16;
   var FONT_SIZES=[13,14,15,16,17,18,19,20,21,22,24,26,28,30];
@@ -1255,6 +1276,7 @@
       // '커버가 아니었다가 커버가 됨' 조건에만 의존하면 첫 뒤로가기에서 바로 종료될 수 있다.
       clearNativeExitToast();
       try{ if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed(); }catch(e){ console.warn("[가톨릭길동무]", e); }
+      try{ if(typeof window._oaiNormalizeCoverBackAfterReturn === 'function') window._oaiNormalizeCoverBackAfterReturn('goToCover-return'); }catch(e){ console.warn('[가톨릭길동무]', e); }
       fixRetreatTabLabel();
       resetNativeExitToastIfCover();
       return r;
