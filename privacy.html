@@ -115,7 +115,31 @@
       box-shadow: 0 6px 15px rgba(31,42,68,.2);
     }
   
-    /* V1-31 privacy confirm button */
+    /* V1-32 privacy confirm button */
+    #privacy-back-app-link.privacy-confirm-button {
+      width: min(360px, 100%);
+      min-height: 52px;
+      height: 52px;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      margin: 18px auto 0;
+      padding: 0 18px;
+      border-radius: 16px;
+      background: linear-gradient(135deg, #1f2a44 0%, #263a63 100%);
+      color: #fffaf0 !important;
+      border: 1.5px solid rgba(212,170,106,.45);
+      box-shadow: 0 8px 20px rgba(31,42,68,.18);
+      font-size: 16px;
+      font-weight: 900;
+      line-height: 1;
+      letter-spacing: -.02em;
+      text-decoration: none;
+      box-sizing: border-box;
+    }
+
+  
+    /* V1-32 privacy confirm button solid */
     #privacy-back-app-link.privacy-confirm-button {
       width: min(360px, 100%);
       min-height: 52px;
@@ -270,6 +294,8 @@
 function markPrivacyMenuReturn(){
   try{ sessionStorage.setItem('oai_returned_from_privacy','1'); }catch(e){}
   try{ localStorage.setItem('oai_returned_from_privacy','1'); }catch(e){}
+  try{ sessionStorage.setItem('oai_force_first_cover_toast','1'); }catch(e){}
+  try{ localStorage.setItem('oai_force_first_cover_toast','1'); }catch(e){}
 }
 function privacyCloseToApp(){
   markPrivacyMenuReturn();

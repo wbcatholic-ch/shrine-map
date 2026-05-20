@@ -670,6 +670,8 @@ function escHtml(str) {
 function markQnaMenuReturn(){
   try{ sessionStorage.setItem('oai_returned_from_qna','1'); }catch(e){}
   try{ localStorage.setItem('oai_returned_from_qna','1'); }catch(e){}
+  try{ sessionStorage.setItem('oai_force_first_cover_toast','1'); }catch(e){}
+  try{ localStorage.setItem('oai_force_first_cover_toast','1'); }catch(e){}
 }
 function handleQaBack(){
   markQnaMenuReturn();
@@ -708,7 +710,7 @@ subscribeList();
 <script id="oai-cache-lifecycle-V23">
 (function(){
   'use strict';
-  var APP_VERSION = 'V1-31';
+  var APP_VERSION = 'V1-32';
   if('serviceWorker' in navigator){
     try{ navigator.serviceWorker.register('./sw.js?v=' + encodeURIComponent(APP_VERSION)).then(function(reg){try{reg.update();}catch(e){}}).catch(function(){}); }catch(e){}
   }
