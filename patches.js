@@ -29,34 +29,36 @@
   window.__OAI_FULL_BACK_CTRL_ACTIVE__ = true;
 
   var _href = location.href.split('#')[0];
+  var COVER_TRAP_HASH = '#oai-cover-back-trap';
+
+  function coverBaseHref(){
+    try{ return location.href.split('#')[0]; }catch(_e){ return _href || location.href; }
+  }
+  function coverTrapHref(){ return coverBaseHref() + COVER_TRAP_HASH; }
 
   function armCoverBackTrap(reason, opts){
-    /* V2-S-3: 실패한 hash/query cover trap을 제거하고,
-       뒤로가기는 다시 공통 root/trap 한 쌍으로 단순화한다.
-       index.html의 조기 guard가 이미 준비되어 있으면 그 함수를 우선 사용하고,
-       아니면 patches.js가 같은 원칙으로 trap을 보장한다. */
     try{
       opts = opts || {};
-      if(typeof window.__oaiArmEarlyCoverBackGuard === 'function'){
-        window.__oaiArmEarlyCoverBackGuard(reason || 'patches-cover-trap', !!opts.force);
-        return;
-      }
-      var href = location.href.split('#')[0];
-      _href = href;
+      var baseHref = coverBaseHref();
+      var trapHref = coverTrapHref();
+      _href = baseHref;
       if(!opts.force){
         var st = history.state;
-        if(st && st._p === 1 && st.oai_cover_trap) return;
+        if(st && st._p === 1 && st.oai_cover_trap && location.href.split('#')[0] === baseHref) return;
       }
-      history.replaceState({_p:0, oai_cover_root:reason||'cover-root'}, '', href);
-      history.pushState({_p:1, oai_cover_trap:reason||'cover-trap'}, '', href);
+      /* 같은 URL pushState는 일부 Android/PWA 첫 커버에서 뒤로가기 항목으로 인정되지 않는다.
+         커버에서는 실제 URL이 다른 hash trap 항목을 사용해 첫 Back을 확실히 JS로 받는다. */
+      history.replaceState({_p:0, oai_cover_root:reason||'cover-root'}, '', baseHref);
+      history.pushState({_p:1, oai_cover_trap:reason||'cover-trap'}, '', trapHref);
     }catch(e){
       console.warn("[가톨릭길동무]", e);
     }
   }
 
   /* history 초기화
-     V2-S-3: 첫 커버 뒤로가기 실패를 만들던 hash/query trap 흔적을 제거하고,
-     최종 뒤로가기 판단은 이 patches.js popstate 컨트롤러로 단일화한다. */
+     V2-S: 뒤로가기 최종 판단은 patches.js 한 곳에서만 처리한다.
+     커버에서는 같은 URL trap 대신 hash가 붙은 별도 history 항목을 사용해
+     Android/PWA에서도 첫 Back을 popstate/hashchange로 받을 수 있게 한다. */
   try{
     var refreshReason = '';
     try{
@@ -73,6 +75,49 @@
       armCoverBackTrap('init', {force:true});
     }
   }catch(e){ console.warn("[가톨릭길동무]", e); }
+
+  /* ★ 첫 진입 Back 즉시 탈출 버그 수정 (2가지 원인 대응)
+     원인 1: 일부 Android/PWA 환경에서 스크립트 실행 중 pushState가
+             navigation history에 등록되지 않아 Back이 popstate 없이 앱 종료로 빠짐.
+             → DOMContentLoaded 이후 트랩 재확인 및 재등록으로 대응.
+     원인 2: 이전 세션에서 종료 대기 상태(oai_cover_exit_armed_until)가
+             sessionStorage에 남아 복귀 시 첫 Back에서 즉시 종료로 오판.
+             → 시작 시 만료된 armed 상태 즉시 정리. */
+  try{
+    // 이전 세션 종료 대기 상태가 남아 있으면 정리 (세션 재개 시 오판 방지)
+    var _armedUntil = Number(sessionStorage.getItem('oai_cover_exit_armed_until') || 0);
+    if(!_armedUntil || (Date.now && Date.now() > _armedUntil)){
+      sessionStorage.removeItem('oai_cover_exit_armed_until');
+      window.__oaiCoverExitUntil = 0;
+    }
+  }catch(_e){}
+  (function(){
+    function _rearmCoverTrapIfNeeded(){
+      try{
+        if(appActive()) return;
+        var st = history.state;
+        // 트랩이 이미 정상 등록돼 있으면 스킵
+        if(st && st._p === 1 && st.oai_cover_trap) return;
+        // 미등록 상태 → 재시도 (DOMContentLoaded 후라면 pushState 정상 작동)
+        armCoverBackTrap('init-rearm', {force:true});
+      }catch(e){ console.warn('[가톨릭길동무]', e); }
+    }
+    if(document.readyState === 'loading'){
+      document.addEventListener('DOMContentLoaded', _rearmCoverTrapIfNeeded, {once:true});
+    } else {
+      setTimeout(_rearmCoverTrapIfNeeded, 0);
+    }
+  })();
+
+  function armCoverTrapAfterUserActivation(){
+    try{
+      if(appActive()) return;
+      armCoverBackTrap('user-activation', {force:true});
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }
+  ['pointerdown','touchstart','keydown'].forEach(function(type){
+    try{ window.addEventListener(type, armCoverTrapAfterUserActivation, {once:true, capture:true, passive:true}); }catch(_e){}
+  });
 
   function $b(id){ return document.getElementById(id); }
   function coverVisible(){
@@ -268,7 +313,7 @@
 
 
   /* ─────────────────────────────────────────────
-     V2-S-3 기도문 전용 뒤로가기 컨트롤러 — history 단계 분리 제거
+     V2-S 기도문 전용 뒤로가기 컨트롤러 — history 단계 분리 제거
 
      원칙:
      1) 다른 정상 카테고리처럼 실제 history는 공통 root/trap 한 쌍만 사용한다.
@@ -320,7 +365,7 @@
     return !!yes;
   }
   function armPrayerBackTrap(reason){
-    /* 호환용 함수. V2-S-3부터 기도문 detail/list용 별도 pushState는 만들지 않는다.
+    /* 호환용 함수. V2-S부터 기도문 detail/list용 별도 pushState는 만들지 않는다.
        공통 컨트롤러가 이미 갖고 있는 root/trap을 유지하는 것만 필요하다. */
     try{
       if(isPrayerOpen() && typeof window._ensureAppBackTrap === 'function'){
@@ -375,7 +420,7 @@
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
   function settleCoverTrapAfterPrayer(reason){
-    // V2-S-3: 기도문 팝업 → 커버 후에는 이미 공통 컨트롤러가 history.go(1)로 trap을 복원한 상태다.
+    // V2-S: 기도문 팝업 → 커버 후에는 이미 공통 컨트롤러가 history.go(1)로 trap을 복원한 상태다.
     // 여기서 replaceState/pushState를 강제로 반복하면 Android/PWA에서 다음 Back이 앱 종료로 오판될 수 있다.
     // 따라서 현재 trap이 살아 있으면 그대로 두고, 없을 때만 최소한으로 보강한다.
     function run(tag){
@@ -435,7 +480,7 @@
       var fromQuick = isPrayerQuickSource();
       if(!fromQuick) return resetPrayerToCover(reason || 'prayer-list-cover');
 
-      /* V2-S-3: 기도문 목록 → 빠른메뉴 팝업 복귀는 직접 팝업을 띄우지 않는다.
+      /* V2-S: 기도문 목록 → 빠른메뉴 팝업 복귀는 직접 팝업을 띄우지 않는다.
          사용자의 Back으로 공통 trap이 일단 소비된 직후라, 이 자리에서 openMassQuickMenu()를
          바로 호출하면 Android/PWA에서 history.go(1) 복원 타이밍과 겹쳐 팝업 Back이 앱 종료로
          먹힐 수 있다. 기존 안정 함수 _returnToMassQuickMenu('prayer')에게 맡기면,
@@ -605,6 +650,21 @@
   }, false);
 
 
+  /* 일부 모바일 WebView/PWA는 hash가 포함된 pushState를 Back으로 소비할 때
+     popstate 대신 hashchange만 전달하는 경우가 있다. 커버 trap hash가 빠지는
+     상황에서는 같은 원칙으로 종료 안내를 표시하고 trap을 다시 심는다. */
+  window.addEventListener('hashchange', function(ev){
+    try{
+      if(appActive()) return;
+      var oldURL = (ev && ev.oldURL) || '';
+      var newURL = (ev && ev.newURL) || location.href;
+      if(oldURL.indexOf(COVER_TRAP_HASH) === -1) return;
+      if(newURL.indexOf(COVER_TRAP_HASH) !== -1) return;
+      var exiting = false;
+      if(typeof window._showBackToast === 'function') exiting = window._showBackToast() === true;
+      if(!exiting) armCoverBackTrap('cover-hashchange-toast', {force:true});
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }, false);
   /* Cordova 물리 백버튼 */
   document.addEventListener('backbutton', function(){
     if(handlePrayerBack('prayer-hardware-back')) return;
@@ -763,9 +823,9 @@
 (function(){
   if(window.__APP_FONT_SCALE_GUARD__) return;
   window.__APP_FONT_SCALE_GUARD__=true;
-  // V2-S-3: 커버 글자 크기 조절은 prayer.js에 의존하지 않는 공통 함수가 담당한다.
+  // V2-S: 커버 글자 크기 조절은 prayer.js에 의존하지 않는 공통 함수가 담당한다.
   // prayer.js는 기도문 화면이 열렸을 때 같은 localStorage 값을 읽어 자체 UI를 맞춘다.
-  var QA_URL="qa-firebase.html?v=V2-S-3";
+  var QA_URL="qa-firebase.html?v=V2-S";
   var FONT_KEY='prayer_font_size';
   var BASE=16;
   var FONT_SIZES=[13,14,15,16,17,18,19,20,21,22,24,26,28,30];
@@ -835,7 +895,7 @@
   }
   function setEmojiIcons(){var icons={'cc-1':'✝️','cc-2':'⛪','cc-3':'🙏','cc-4':'🌿','cc-5':'🥾','cc-6':'🌐','cc-7':'🧭'};Object.keys(icons).forEach(function(id){var btn=el(id);if(!btn)return;var wrap=btn.querySelector('.cover-icon-wrap');if(wrap)wrap.innerHTML='<span class="cover-emoji" aria-hidden="true">'+icons[id]+'</span>';});}
   function configureQna(){
-    // V2-S-3: 문의·건의 버튼은 중간 안내 카드를 만들지 않고 실제 문의 페이지로 바로 이동한다.
+    // V2-S: 문의·건의 버튼은 중간 안내 카드를 만들지 않고 실제 문의 페이지로 바로 이동한다.
     window.QNA_FORM_URL=QA_URL;
     var q=el('qna-list');
     if(q) q.innerHTML='';
