@@ -2596,7 +2596,7 @@ html.app-active #pwa-install-btn { display: none; }
 .guide-mini-list dd { margin: 0; color: #5f6675; font-weight: 600; word-break: keep-all; }
 .guide-ok { flex: 0 0 auto; width: 100%; margin-top: 12px; min-height: 40px; }
 
-/* V2-S-12: 즐겨찾기 초기화 1회 안내 배너 */
+/* V2-S: 즐겨찾기 초기화 1회 안내 배너 */
 #cover .favorites-reset-banner {
   position: fixed;
   left: max(20px, calc(env(safe-area-inset-left, 0px) + 20px));
@@ -3444,7 +3444,7 @@ html.ios-device #app #sheet-list .sheet-hd { bottom: 0; }
 /* 키보드 오픈 시 sheet 위치 보정 */
 html.kb-open .sheet.open { bottom: 0; }
 
-/* V2-S-12: 성당 글로시 슬레이트 그레이 · 피정의집 세이지 그린 재조정 */
+/* V2-S: 성당 글로시 슬레이트 그레이 · 피정의집 세이지 그린 재조정 */
 html.parish-mode #srch-modal #sm-tab-bar .sm-tab.active{background:linear-gradient(135deg,#374151,#4B5563)!important;color:#fff!important;border-color:transparent!important}
 html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active{background:linear-gradient(135deg,#557A5C,#6B8F71)!important;color:#fff!important;border-color:transparent!important}
 html.parish-mode .nearby-num{background:#4B5563!important;color:#fff!important}
@@ -3453,7 +3453,7 @@ html.parish-mode .nearby-dist,html.parish-mode .region-list-hd,html.parish-mode 
 html.retreat-mode .nearby-dist,html.retreat-mode .region-list-hd,html.retreat-mode .ric-lbl{color:#6B8F71!important}
 
 /* ============================================================
-   V2-S-12 색상 정리 — 성지 고유색 유지 / 성당 그레이 / 피정의집 세이지
+   V2-S 색상 정리 — 성지 고유색 유지 / 성당 그레이 / 피정의집 세이지
    - 기능·HTML·JS 변경 없음
    - 성지의 기존 고유색(red/green/blue)은 건드리지 않음
    - 모든 목록 이름은 검정으로 통일
@@ -3623,7 +3623,7 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active{
 
 
 /* ============================================================
-   V2-S-12 색상 보정 — 목록명 검정 / 제목 흰색 / 검색 탭바 흰색 / 번호색 통일
+   V2-S 색상 보정 — 목록명 검정 / 제목 흰색 / 검색 탭바 흰색 / 번호색 통일
    - 기능·HTML·JS 변경 없음
    - 성지 고유색(red/green/blue)은 유지
    ============================================================ */
@@ -3743,4 +3743,126 @@ html.retreat-mode .sm-fb.on{
   background:var(--gold,#d4aa6a)!important;
   color:#1f2937!important;
   border-color:var(--gold2,#b8965a)!important;
+}
+
+
+/* ============================================================
+   V2-S 최종 색상 보정
+   - 성지 고유색은 유지하되 상단 활성 탭만 성지 카테고리색으로 통일
+   - 성당 내주변 번호색은 성당 카테고리색으로 통일
+   - 피정의집 카테고리색과 내주변 번호색을 동일 기준으로 통일
+   - 출발지 현재위치 기능은 JS에서 유지하고 표시 텍스트만 숨김
+   ============================================================ */
+:root{
+  --cathedral-category-final:#475569;
+  --cathedral-category-dark:#374151;
+  --cathedral-category-soft-final:#E5E7EB;
+  --retreat-category-final:#7A8F7A;
+  --retreat-category-soft-final:#E8F0E8;
+}
+
+/* 성지 상단 탭 활성색은 성지 카테고리 네이비 기준으로 통일 */
+html:not(.parish-mode):not(.retreat-mode) #tabbar .tab-btn.active{
+  background:linear-gradient(135deg,var(--shrine-main,#1f2a44),var(--shrine-main-2,#2d3a5f))!important;
+  color:#fff!important;
+  border-color:transparent!important;
+}
+
+/* 성당 카테고리색: 글로시 그레이 기준 */
+html.parish-mode{
+  --mode-header-bg:linear-gradient(135deg,var(--cathedral-category-dark),var(--cathedral-category-final));
+  --mode-header-solid:var(--cathedral-category-final);
+  --mode-active-bg:linear-gradient(135deg,var(--cathedral-category-dark),var(--cathedral-category-final));
+  --mode-tab-active-bg:linear-gradient(135deg,var(--cathedral-category-dark),var(--cathedral-category-final));
+  --mode-badge-bg:var(--cathedral-category-soft-final);
+  --mode-badge-color:var(--cathedral-category-final);
+  --mode-dist-color:var(--cathedral-category-final);
+  --mode-num-bg:var(--cathedral-category-final);
+  --mode-srch-modal-bg:var(--cathedral-category-final);
+}
+html.parish-mode #nearby-body .nearby-num,
+html.parish-mode .nearby-num{
+  background:var(--cathedral-category-final)!important;
+  color:#fff!important;
+}
+
+/* 피정의집 카테고리색과 내주변 번호색을 같은 색으로 통일 */
+html.retreat-mode{
+  --retreat-primary:var(--retreat-category-final);
+  --retreat-dark:var(--retreat-category-final);
+  --mode-header-bg:var(--retreat-category-final);
+  --mode-header-solid:var(--retreat-category-final);
+  --mode-active-bg:var(--retreat-category-final);
+  --mode-tab-active-bg:var(--retreat-category-final);
+  --mode-badge-bg:var(--retreat-category-soft-final);
+  --mode-badge-color:var(--retreat-category-final);
+  --mode-dist-color:var(--retreat-category-final);
+  --mode-num-bg:var(--retreat-category-final);
+  --mode-srch-modal-bg:var(--retreat-category-final);
+}
+html.retreat-mode #tabbar .tab-btn.active,
+html.retreat-mode .srch-bar,
+html.retreat-mode .filter-bar,
+html.retreat-mode .sheet-hd,
+html.retreat-mode .region-wrap,
+html.retreat-mode .sm-hd,
+html.retreat-mode .ric-hd{
+  background:var(--retreat-category-final)!important;
+  color:#fff!important;
+  border-color:transparent!important;
+}
+html.retreat-mode #nearby-body .nearby-num,
+html.retreat-mode .nearby-num{
+  background:var(--retreat-category-final)!important;
+  color:#fff!important;
+}
+html.retreat-mode .nearby-dist,
+html.retreat-mode #region-body .nearby-dist,
+html.retreat-mode .region-list-hd,
+html.retreat-mode .ric-lbl,
+html.retreat-mode .dio-hd{
+  color:var(--retreat-category-final)!important;
+}
+html.retreat-mode .li-badge,
+html.retreat-mode .nearby-type,
+html.retreat-mode #region-body .nearby-type,
+html.retreat-mode #region-body .region-item .nearby-type,
+html.retreat-mode .ic-type-badge{
+  background:var(--retreat-category-soft-final)!important;
+  color:var(--retreat-category-final)!important;
+}
+
+/* X와 같은 줄 제목은 성지·성당·피정의집 모두 흰색 유지 */
+#app .sheet-hd .sheet-title,
+#srch-modal .sm-hd .sm-title{
+  color:#fff!important;
+}
+
+/* 출발/도착 검색의 성당·피정의집 탭바 흰색 + 아래 구분선 유지 */
+html.parish-mode #srch-modal #sm-tab-bar,
+html.retreat-mode #srch-modal #sm-tab-bar{
+  background:#fff!important;
+  border-bottom:1.5px solid #E5E7EB!important;
+  border-top:0!important;
+}
+
+/* 교구/필터 선택 활성색은 금색 유지 */
+.filter-btn.active,
+.sm-fb.on,
+html.parish-mode .filter-btn.active,
+html.parish-mode .sm-fb.on,
+html.retreat-mode .filter-btn.active,
+html.retreat-mode .sm-fb.on{
+  background:var(--gold,#d4aa6a)!important;
+  color:#1f2937!important;
+  border-color:var(--gold2,#b8965a)!important;
+}
+
+/* 모든 목록/검색 결과 이름은 검정 유지 */
+#app .li-name,
+#app .nearby-name,
+#app .sm-name,
+#app .sm-place-name,
+#app .ic-name{
+  color:#111827!important;
 }
