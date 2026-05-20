@@ -63,8 +63,8 @@
 
   /* ── 컴포넌트 색상 */
   --oai-shrine-header:  #1f2a44;
-  --oai-parish-header:  #4B5563;
-  --oai-retreat-header: #6B8F71;
+  --oai-parish-header:  #3F4752;
+  --oai-retreat-header: #556B4E;
   --oai-gold:           #d4aa6a;
   --oai-gold-border:    #c49a57;
   --oai-btn:            #eef1f4;
@@ -107,21 +107,21 @@
   /* ── 성당 모드 */
   --parish-bg:      #4B5563;
   --parish-active:  #4B5563;
-  --parish-accent:  #F1F5F9;
+  --parish-accent:  #F1F3F5;
   --church-main:    #4B5563;
   --church-main-2:  #374151;
   --church-soft:    #ECEFF3;
   --church-soft-2:  #F8FAFC;
 
   /* ── 피정의집 모드 */
-  --retreat-bg:      #6B8F71;
-  --retreat-main:    #6B8F71;
-  --retreat-main-2:  #557A5C;
-  --retreat-soft:    #E6F0E8;
-  --retreat-active:  #6B8F71;
-  --retreat-accent:  #E6F0E8;
+  --retreat-bg:      #556B4E;
+  --retreat-main:    #556B4E;
+  --retreat-main-2:  #465A40;
+  --retreat-soft:    #E4EADB;
+  --retreat-active:  #556B4E;
+  --retreat-accent:  #E4EADB;
   --retreat-soft-2:  #F7FBF8;
-  --dist-retreat:    #6F836F;
+  --dist-retreat:    #556B4E;
 
   /* ── 거리 표시 */
   --addr-color:   #6b7280;
@@ -3628,10 +3628,10 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active{
    - 성지 고유색(red/green/blue)은 유지
    ============================================================ */
 :root{
-  --retreat-category-final:#6B8F71;
-  --retreat-category-soft-final:#E8F0E8;
-  --cathedral-category-final:#475569;
-  --cathedral-category-soft-final:#E5E7EB;
+  --retreat-category-final:#556B4E;
+  --retreat-category-soft-final:#E4EADB;
+  --cathedral-category-final:#3F4752;
+  --cathedral-category-soft-final:#ECEFF3;
 }
 
 /* X와 같은 줄의 제목 문구: 성지·성당·피정의집 모두 흰색 */
@@ -3754,11 +3754,11 @@ html.retreat-mode .sm-fb.on{
    - 출발지 현재위치 기능은 JS에서 유지하고 현재 위치 문구를 표시
    ============================================================ */
 :root{
-  --cathedral-category-final:#475569;
-  --cathedral-category-dark:#374151;
-  --cathedral-category-soft-final:#E5E7EB;
-  --retreat-category-final:#6B8F71;
-  --retreat-category-soft-final:#E8F0E8;
+  --cathedral-category-final:#3F4752;
+  --cathedral-category-dark:#2F3742;
+  --cathedral-category-soft-final:#ECEFF3;
+  --retreat-category-final:#556B4E;
+  --retreat-category-soft-final:#E4EADB;
 }
 
 /* 성지 상단 탭 활성색은 성지 카테고리 네이비 기준으로 통일 */
@@ -3874,8 +3874,8 @@ html.retreat-mode .sm-fb.on{
    - 현재 위치는 출발지 라벨에 표시
    ============================================================ */
 :root{
-  --retreat-category-final:#6B8F71;
-  --retreat-category-soft-final:#E8F0E8;
+  --retreat-category-final:#556B4E;
+  --retreat-category-soft-final:#E4EADB;
 }
 html.retreat-mode{
   --retreat-primary:var(--retreat-category-final);
@@ -3932,10 +3932,10 @@ html.retreat-mode .ic-type-badge{
    - 피정의집 카테고리 색을 파스텔이 아닌 고급 세이지 그린으로 통일
    ============================================================ */
 :root{
-  --retreat-category-final:#4F6F57;
-  --retreat-category-dark:#3F5F47;
-  --retreat-category-secondary:#5F7F67;
-  --retreat-category-soft-final:#E3ECE5;
+  --retreat-category-final:#556B4E;
+  --retreat-category-dark:#465A40;
+  --retreat-category-secondary:#6B8063;
+  --retreat-category-soft-final:#E4EADB;
 }
 
 /* 인포카드 텍스트 1px 확대 */
@@ -4027,3 +4027,120 @@ html.retreat-mode .sm-fb.on{
   border-color:var(--gold2,#b8965a)!important;
 }
 
+
+
+/* ============================================================
+   V2-S 럭셔리 색상 최종 보강
+   - 성당: 글로시 차콜 그레이
+   - 피정의집: 글로시 올리브 세이지
+   - 성지 고유색은 변경하지 않음
+   ============================================================ */
+:root{
+  --cathedral-category-final:#3F4752;
+  --cathedral-category-dark:#2F3742;
+  --cathedral-category-soft-final:#ECEFF3;
+  --retreat-category-final:#556B4E;
+  --retreat-category-dark:#465A40;
+  --retreat-category-secondary:#6B8063;
+  --retreat-category-soft-final:#E4EADB;
+}
+html.parish-mode{
+  --parish-bg:var(--cathedral-category-final);
+  --parish-active:var(--cathedral-category-dark);
+  --mode-header-solid:var(--cathedral-category-final);
+  --mode-active-bg:linear-gradient(135deg,var(--cathedral-category-dark),var(--cathedral-category-final));
+  --mode-tab-active-bg:linear-gradient(135deg,var(--cathedral-category-dark),var(--cathedral-category-final));
+  --mode-badge-bg:var(--cathedral-category-soft-final);
+  --mode-badge-color:var(--cathedral-category-final);
+  --mode-dist-color:var(--cathedral-category-final);
+  --mode-num-bg:var(--cathedral-category-final);
+  --mode-srch-modal-bg:var(--cathedral-category-final);
+}
+html.parish-mode #tabbar .tab-btn.active,
+html.parish-mode .srch-bar,
+html.parish-mode .filter-bar,
+html.parish-mode .sheet-hd,
+html.parish-mode .region-wrap,
+html.parish-mode .sm-hd,
+html.parish-mode .ric-hd{
+  background:linear-gradient(135deg,var(--cathedral-category-dark),var(--cathedral-category-final))!important;
+  color:#fff!important;
+}
+html.parish-mode #nearby-body .nearby-num,
+html.parish-mode .nearby-num,
+html.parish-mode #region-body .nearby-num,
+html.parish-mode #region-body .region-item .nearby-num{
+  background:var(--cathedral-category-final)!important;
+  color:#fff!important;
+}
+html.parish-mode .nearby-dist,
+html.parish-mode #region-body .nearby-dist,
+html.parish-mode .region-list-hd,
+html.parish-mode .ric-lbl,
+html.parish-mode .dio-hd{
+  color:var(--cathedral-category-final)!important;
+}
+html.parish-mode .li-badge,
+html.parish-mode .nearby-type,
+html.parish-mode #region-body .nearby-type,
+html.parish-mode #region-body .region-item .nearby-type,
+html.parish-mode .ic-type-badge{
+  background:var(--cathedral-category-soft-final)!important;
+  color:var(--cathedral-category-final)!important;
+}
+html.retreat-mode{
+  --retreat-bg:var(--retreat-category-final);
+  --retreat-main:var(--retreat-category-final);
+  --retreat-main-2:var(--retreat-category-dark);
+  --retreat-active:var(--retreat-category-final);
+  --mode-header-solid:var(--retreat-category-final);
+  --mode-active-bg:linear-gradient(135deg,var(--retreat-category-dark),var(--retreat-category-final));
+  --mode-tab-active-bg:linear-gradient(135deg,var(--retreat-category-dark),var(--retreat-category-final));
+  --mode-badge-bg:var(--retreat-category-soft-final);
+  --mode-badge-color:var(--retreat-category-final);
+  --mode-dist-color:var(--retreat-category-final);
+  --mode-num-bg:var(--retreat-category-final);
+  --mode-srch-modal-bg:var(--retreat-category-final);
+}
+html.retreat-mode #tabbar .tab-btn.active,
+html.retreat-mode .srch-bar,
+html.retreat-mode .filter-bar,
+html.retreat-mode .sheet-hd,
+html.retreat-mode .region-wrap,
+html.retreat-mode .sm-hd,
+html.retreat-mode .ric-hd{
+  background:linear-gradient(135deg,var(--retreat-category-dark),var(--retreat-category-final))!important;
+  color:#fff!important;
+}
+html.retreat-mode #nearby-body .nearby-num,
+html.retreat-mode .nearby-num,
+html.retreat-mode #region-body .nearby-num,
+html.retreat-mode #region-body .region-item .nearby-num{
+  background:var(--retreat-category-final)!important;
+  color:#fff!important;
+}
+html.retreat-mode .nearby-dist,
+html.retreat-mode #region-body .nearby-dist,
+html.retreat-mode .region-list-hd,
+html.retreat-mode .ric-lbl,
+html.retreat-mode .dio-hd{
+  color:var(--retreat-category-final)!important;
+}
+html.retreat-mode .li-badge,
+html.retreat-mode .nearby-type,
+html.retreat-mode #region-body .nearby-type,
+html.retreat-mode #region-body .region-item .nearby-type,
+html.retreat-mode .ic-type-badge{
+  background:var(--retreat-category-soft-final)!important;
+  color:var(--retreat-category-final)!important;
+}
+html.parish-mode #srch-modal #sm-tab-bar .sm-tab.active{
+  background:linear-gradient(135deg,var(--cathedral-category-dark),var(--cathedral-category-final))!important;
+  color:#fff!important;
+  border-color:transparent!important;
+}
+html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active{
+  background:linear-gradient(135deg,var(--retreat-category-dark),var(--retreat-category-final))!important;
+  color:#fff!important;
+  border-color:transparent!important;
+}
