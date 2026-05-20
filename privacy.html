@@ -235,20 +235,38 @@
       <h2>11. 문의처</h2>
       <p>개인정보 관련 문의, 삭제 요청, 정정 요청은 아래 연락처 또는 앱 내 문의 기능을 통해 접수할 수 있습니다.</p>
       <p><strong>개발자 연락처:</strong> catholicgildongmu@gmail.com</p>
-      <a id="privacy-back-app-link" id="privacy-back-app-link" class="back-link" href="index.html" onclick="event.preventDefault(); window.location.replace(\'index.html\');" href="index.html" onclick="event.preventDefault(); window.location.replace(\'index.html\');">앱으로 돌아가기</a>
+      <a id="privacy-back-app-link" href="javascript:void(0)" onclick="event.preventDefault(); privacyCloseToApp();">앱으로 돌아가기</a>
     </section>
 
     <p class="footer">© 가톨릭길동무</p>
   </main>
 
+
 <script>
-(function privacyBackToAppReplace(){
-  var el = document.getElementById('privacy-back-app-link');
-  if(!el) return;
-  el.addEventListener('click', function(e){
-    e.preventDefault();
-    window.location.replace('index.html');
-  }, {capture:true});
+function privacyCloseToApp(){
+  try{
+    if(window.history && window.history.length > 1){
+      window.history.back();
+      return;
+    }
+  }catch(e){}
+  window.location.href = 'index.html';
+}
+(function(){
+  var closeTargets = document.querySelectorAll('[data-privacy-close], .privacy-close, #privacy-close-btn');
+  closeTargets.forEach(function(el){
+    el.addEventListener('click', function(e){
+      e.preventDefault();
+      privacyCloseToApp();
+    }, {capture:true});
+  });
+  var back = document.getElementById('privacy-back-app-link');
+  if(back){
+    back.addEventListener('click', function(e){
+      e.preventDefault();
+      privacyCloseToApp();
+    }, {capture:true});
+  }
 })();
 </script>
 
