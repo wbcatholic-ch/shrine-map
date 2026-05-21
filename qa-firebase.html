@@ -288,7 +288,7 @@
   #qna-cross-icon::before{ top:50%; width:3px; height:24px; transform:translate(-50%,-50%); }
   #qna-cross-icon::after{ top:42%; width:14px; height:3px; transform:translate(-50%,-50%); }
 
-  /* V1-43 qna no return effect */
+  /* V1-44 qna no return effect */
   html.returning-to-cover *,
   body.returning-to-cover * {
     transition: none !important;
@@ -673,15 +673,6 @@ function escHtml(str) {
 }
 
 /* ═══════════════════ 뒤로가기 처리 ═══════════════════ */
-function returnQnaToIndex(){
-  try{ sessionStorage.setItem('oai_direct_index_return','qna'); }catch(e){}
-  try{
-    location.replace('index.html');
-    return;
-  }catch(e){}
-  location.href='index.html';
-}
-
 function handleQaBack(){
   var active = document.querySelector('.view.active');
   if(active && active.id !== 'list-view'){
@@ -689,7 +680,11 @@ function handleQaBack(){
     return;
   }
   try{ document.activeElement && document.activeElement.blur && document.activeElement.blur(); }catch(e){}
-  returnQnaToIndex();
+  if(document.referrer && document.referrer.indexOf(location.hostname)>=0){
+    history.back();
+  } else {
+    location.href='index.html';
+  }
 }
 
 window.addEventListener('popstate', function(){
@@ -714,7 +709,7 @@ subscribeList();
 <script id="oai-cache-lifecycle-V23">
 (function(){
   'use strict';
-  var APP_VERSION = 'V1-43';
+  var APP_VERSION = 'V1-44';
   if('serviceWorker' in navigator){
     try{ navigator.serviceWorker.register('./sw.js?v=' + encodeURIComponent(APP_VERSION)).then(function(reg){try{reg.update();}catch(e){}}).catch(function(){}); }catch(e){}
   }
@@ -813,44 +808,6 @@ subscribeList();
     });
     mo.observe(document.documentElement,{childList:true,subtree:true});
   }catch(e){}
-})();
-</script>
-
-<script>
-(function(){
-  if(window.__OAI_QNA_DIRECT_INDEX_RETURN__) return;
-  window.__OAI_QNA_DIRECT_INDEX_RETURN__ = true;
-  var returning = false;
-
-  function returnToIndexOnce(){
-    if(returning) return;
-    returning = true;
-    try{ sessionStorage.setItem('oai_direct_index_return','qna'); }catch(e){}
-    try{
-      location.replace('index.html');
-      return;
-    }catch(e){}
-    location.href='index.html';
-  }
-
-  try{
-    if(window.history && window.history.pushState){
-      window.history.replaceState({oai_qna_page:true}, '', location.href);
-      window.history.pushState({oai_qna_back_guard:true}, '', location.href);
-    }
-  }catch(e){}
-
-  window.addEventListener('popstate', function(e){
-    try{ if(e && e.stopImmediatePropagation) e.stopImmediatePropagation(); }catch(_e){}
-    var active = document.querySelector('.view.active');
-    if(active && active.id !== 'list-view'){
-      try{ suppressQaHistory = true; goList({history:false}); suppressQaHistory = false; }catch(_e){}
-      try{ history.pushState({oai_qna_back_guard:true}, '', location.href); }catch(_e){}
-      returning = false;
-      return;
-    }
-    returnToIndexOnce();
-  }, true);
 })();
 </script>
 
