@@ -4175,7 +4175,7 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active{
   border-color:transparent!important;
 }
 
-/* V3-S: 커버 하단 안정화 / 하단 버전 표시 유지 / 안내문구 중앙 정렬 */
+/* V3-S: 커버 하단 안정화 / 하단 버전 표시 숨김 / 안내문구 중앙 정렬 */
 #cover-bottom-note {
   left: 50% !important;
   right: auto !important;
@@ -4192,4 +4192,12 @@ html.ios-device #cover #cover-bottom-note {
   padding-left: max(18px, env(safe-area-inset-left, 0px)) !important;
   padding-right: max(18px, env(safe-area-inset-right, 0px)) !important;
   text-align: center !important;
+}
+
+/* V3-S: 하단 버전 배지는 내부 비교용으로만 유지하고 화면에서는 숨김 */
+#cover #oai-build-marker {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
 }
