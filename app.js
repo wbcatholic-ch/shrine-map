@@ -1006,7 +1006,7 @@ function _runRefreshAppFilesOnly(){
   try{
     if(btn){
       btn.disabled = true;
-      btn.textContent = ((btn.getAttribute('data-target-version') || 'V1-42') + ' 새로고침 중');
+      btn.textContent = ((btn.getAttribute('data-target-version') || 'V1-43') + ' 새로고침 중');
     }
     if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
     // V37: 새로고침 전에는 레이아웃/스크롤/모달 DOM을 건드리지 않고,
@@ -1168,7 +1168,7 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-        var target = btn.getAttribute('data-target-version') || 'V1-42';
+        var target = btn.getAttribute('data-target-version') || 'V1-43';
     var current = '';
     if(window.APP_VERSION) current = String(window.APP_VERSION).trim();
     if(!current && marker) current = String(marker.textContent || '').trim();
@@ -1177,7 +1177,7 @@ function syncCoverUpdateVersionState(){
     btn.textContent = mismatch ? (target + ' 업데이트 필요') : (target + ' 새로고침');
     box.classList.toggle('update-needed', mismatch);
     if(marker){
-      marker.textContent = target || 'V1-42';
+      marker.textContent = target || 'V1-43';
       marker.setAttribute('hidden', 'hidden');
       marker.setAttribute('aria-hidden','true');
       marker.style.display = 'none';
@@ -1374,7 +1374,7 @@ var favOk=document.getElementById('favorites-reset-notice-ok');
       });
     });
 
-    // V1-42 cover menu popstate close
+    // V1-43 cover menu popstate close
     window.addEventListener('popstate', function(){
       if(modal.classList.contains('show')){
         closeMenu();
@@ -1521,7 +1521,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V1-42';
+    frame.src='diocese.html?v=V1-43';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1912,7 +1912,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V1-42';
+const _PARISH_ASSET_VERSION='V1-43';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -2075,7 +2075,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V1-42';
+const _PRAYER_ASSET_VERSION='V1-43';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2120,7 +2120,7 @@ try{ window.ensurePrayerModuleLoaded=ensurePrayerModuleLoaded; }catch(e){ consol
 let _RT_RAW = [];
 let _retreatRawLoaded = false;
 let _retreatDataLoadPromise = null;
-const _RETREAT_ASSET_VERSION='V1-42';
+const _RETREAT_ASSET_VERSION='V1-43';
 
 let RETREATS = [];
 function _buildRetreatList(raw){
@@ -2365,7 +2365,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V1-42';
+const _SHRINE_ASSET_VERSION='V1-43';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -2624,32 +2624,6 @@ function triggerPwaInstall(){ return false; }
 
 
 
-function oaiMarkMenuItemPageReturn(kind){
-  try{ sessionStorage.setItem('oai_menu_item_needs_cover_trap', kind || 'menu-item'); }catch(e){}
-}
-function oaiConsumeMenuItemPageReturn(reason){
-  var hit = '';
-  try{
-    hit = sessionStorage.getItem('oai_menu_item_needs_cover_trap') || '';
-    if(hit) sessionStorage.removeItem('oai_menu_item_needs_cover_trap');
-  }catch(e){}
-  if(!hit) return false;
-  try{ if(typeof _resetCoverExitReady === 'function') _resetCoverExitReady(); }catch(e){ console.warn('[가톨릭길동무]', e); }
-  try{ if(typeof _clearCoverExitArmed === 'function') _clearCoverExitArmed(); }catch(e){ console.warn('[가톨릭길동무]', e); }
-  try{
-    if(typeof _resetCoverBackTrap === 'function') _resetCoverBackTrap(reason || ('menu-item-return-' + hit));
-    else if(typeof _ensureCoverBackTrap === 'function') _ensureCoverBackTrap(reason || ('menu-item-return-' + hit));
-  }catch(e){ console.warn('[가톨릭길동무]', e); }
-  return true;
-}
-try{ window.oaiMarkMenuItemPageReturn = oaiMarkMenuItemPageReturn; }catch(_e){}
-window.addEventListener('pageshow', function(){ oaiConsumeMenuItemPageReturn('menu-item-pageshow'); }, true);
-window.addEventListener('focus', function(){ oaiConsumeMenuItemPageReturn('menu-item-focus'); }, true);
-document.addEventListener('visibilitychange', function(){
-  if(document.visibilityState === 'visible') oaiConsumeMenuItemPageReturn('menu-item-visible');
-}, true);
-setTimeout(function(){ oaiConsumeMenuItemPageReturn('menu-item-load-0'); }, 0);
-setTimeout(function(){ oaiConsumeMenuItemPageReturn('menu-item-load-80'); }, 80);
 
 function _showBackToast(){
   try{
@@ -5903,12 +5877,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     });
     on('cover-menu-qna-btn', 'click', function(e){
       if(e && e.preventDefault) e.preventDefault();
-      try{ if(typeof oaiMarkMenuItemPageReturn === 'function') oaiMarkMenuItemPageReturn('qna'); }catch(_e){}
       closeMenu();
       try{ openQnaView(); }catch(err){ console.warn('[가톨릭길동무]', err); }
     });
     on('cover-menu-privacy-link', 'click', function(){
-      try{ if(typeof oaiMarkMenuItemPageReturn === 'function') oaiMarkMenuItemPageReturn('privacy'); }catch(_e){}
       closeMenu();
     });
     document.addEventListener('keydown', function(e){
@@ -6007,7 +5979,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 });
 
 
-// V1-42 cover menu hardware back guard
+// V1-43 cover menu hardware back guard
 (function(){
   window.addEventListener('popstate', function(){
     try{
