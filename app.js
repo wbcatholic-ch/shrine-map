@@ -1006,7 +1006,7 @@ function _runRefreshAppFilesOnly(){
   try{
     if(btn){
       btn.disabled = true;
-      btn.textContent = ((btn.getAttribute('data-target-version') || 'V1-51') + ' 새로고침 중');
+      btn.textContent = ((btn.getAttribute('data-target-version') || 'V1-52') + ' 새로고침 중');
     }
     if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
     // V37: 새로고침 전에는 레이아웃/스크롤/모달 DOM을 건드리지 않고,
@@ -1168,7 +1168,7 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-        var target = btn.getAttribute('data-target-version') || 'V1-51';
+        var target = btn.getAttribute('data-target-version') || 'V1-52';
     var current = '';
     if(window.APP_VERSION) current = String(window.APP_VERSION).trim();
     if(!current && marker) current = String(marker.textContent || '').trim();
@@ -1177,7 +1177,7 @@ function syncCoverUpdateVersionState(){
     btn.textContent = mismatch ? (target + ' 업데이트 필요') : (target + ' 새로고침');
     box.classList.toggle('update-needed', mismatch);
     if(marker){
-      marker.textContent = target || 'V1-51';
+      marker.textContent = target || 'V1-52';
       marker.setAttribute('hidden', 'hidden');
       marker.setAttribute('aria-hidden','true');
       marker.style.display = 'none';
@@ -1374,7 +1374,7 @@ var favOk=document.getElementById('favorites-reset-notice-ok');
       });
     });
 
-    // V1-51 cover menu popstate close
+    // V1-52 cover menu popstate close
     window.addEventListener('popstate', function(){
       if(modal.classList.contains('show')){
         closeMenu();
@@ -1521,7 +1521,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V1-51';
+    frame.src='diocese.html?v=V1-52';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1912,7 +1912,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V1-51';
+const _PARISH_ASSET_VERSION='V1-52';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -2075,7 +2075,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V1-51';
+const _PRAYER_ASSET_VERSION='V1-52';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2120,7 +2120,7 @@ try{ window.ensurePrayerModuleLoaded=ensurePrayerModuleLoaded; }catch(e){ consol
 let _RT_RAW = [];
 let _retreatRawLoaded = false;
 let _retreatDataLoadPromise = null;
-const _RETREAT_ASSET_VERSION='V1-51';
+const _RETREAT_ASSET_VERSION='V1-52';
 
 let RETREATS = [];
 function _buildRetreatList(raw){
@@ -2365,7 +2365,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V1-51';
+const _SHRINE_ASSET_VERSION='V1-52';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -2626,7 +2626,7 @@ function triggerPwaInstall(){ return false; }
 
 
 
-/* V1-51: 개인정보/문의건의에서 index로 돌아온 뒤 커버 trap을 새로 시작 */
+/* V1-52: 개인정보/문의건의에서 index로 돌아온 뒤 커버 trap을 새로 시작 */
 (function(){
   if(window.__OAI_EXTERNAL_MENU_RETURN_TRAP_FIX__) return;
   window.__OAI_EXTERNAL_MENU_RETURN_TRAP_FIX__ = true;
@@ -5948,11 +5948,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       closeMenu();
       try{ openQnaView(); }catch(err){ console.warn('[가톨릭길동무]', err); }
     });
-    on('cover-menu-privacy-link', 'click', function(e){
-      if(e && e.preventDefault) e.preventDefault();
-      closeMenu();
-      location.href = 'privacy.html?v=V1-51';
-    });
+    on('cover-menu-privacy-link', 'click', function(){ closeMenu(); });
     document.addEventListener('keydown', function(e){
       if(e && e.key === 'Escape' && modal.classList.contains('show')) closeMenu();
     });
@@ -6049,7 +6045,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 });
 
 
-// V1-51 cover menu hardware back guard
+// V1-52 cover menu hardware back guard
 (function(){
   window.addEventListener('popstate', function(){
     try{
