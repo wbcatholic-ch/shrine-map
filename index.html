@@ -100,8 +100,14 @@ html.oai-stability-veil::after { content:""; position:fixed; left:50%; top:50%; 
       var href = baseHref();
       var st = history.state;
       // force 호출이어도 이미 커버 trap 상태라면 다시 root/trap을 쌓지 않는다.
+      // 다른 trap 위에서 커버로 돌아온 경우에는 pushState 대신 replaceState로 역할만 교체한다.
       // 중복 trap이 쌓이면 종료 안내 뒤에도 Back을 여러 번 더 눌러야 한다.
       if(st && st._p === 1 && st.oai_cover_trap){
+        window.__OAI_EARLY_COVER_BACK_TRAP_READY__ = true;
+        return;
+      }
+      if(st && st._p === 1){
+        history.replaceState({_p:1, oai_cover_trap:reason || 'early-cover-trap'}, '', href);
         window.__OAI_EARLY_COVER_BACK_TRAP_READY__ = true;
         return;
       }
@@ -627,7 +633,7 @@ window.APP_CONFIG = {
         <span class="cover-menu-icon">📘</span>
         <span class="cover-menu-text">주요기능</span>
       </button>
-      <a id="cover-menu-privacy-link" class="cover-menu-item" href="privacy.html?v=V1-55">
+      <a id="cover-menu-privacy-link" class="cover-menu-item" href="privacy.html">
         <span class="cover-menu-icon">🛡</span>
         <span class="cover-menu-text">개인정보처리방침</span>
       </a>
@@ -639,6 +645,8 @@ window.APP_CONFIG = {
   </div>
 </div>
 
+<script src="constants.js?v=V1-55"></script>
+<script src="core.js?v=V1-55"></script>
 <script src="app.js?v=V1-55"></script>
 <div id="oai-category-entry-veil" aria-hidden="true"></div>
 <div id="app"><div id="tabbar"><button id="tab-btn-nearby" class="tab-btn" data-tab="nearby"><span class="tab-icon">📍</span><span id="tab-nearby-lbl">내주변</span></button><button id="tab-btn-list" class="tab-btn" data-tab="list"><span class="tab-icon">📋</span><span id="tab-list-lbl">목록</span></button><button id="tab-btn-region" class="tab-btn" data-tab="region"><span class="tab-icon">🔍</span>지역검색

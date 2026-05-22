@@ -7,6 +7,8 @@ const CACHE_VERSION = 'catholic-way-V1-55';
 const APP_SHELL = [
   './',
   './index.html',
+  './constants.js?v=V1-55',
+  './core.js?v=V1-55',
   './style.css?v=V1-55',
   './app.js?v=V1-55',
   './web.js?v=V1-55',
