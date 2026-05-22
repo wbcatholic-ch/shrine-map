@@ -2,8 +2,8 @@
   "name": "가톨릭길동무",
   "short_name": "가톨릭길동무",
   "description": "가톨릭 신앙생활 종합 앱 (성지 167곳 · 성당 1697곳 · 순례길 · 기도문)",
-  "start_url": "./",
-  "scope": "./",
+  "start_url": "/shrine-map/",
+  "scope": "/shrine-map/",
   "display": "standalone",
   "orientation": "portrait-primary",
   "background_color": "#0e1535",
@@ -35,5 +35,5 @@
   ],
   "screenshots": [],
   "prefer_related_applications": false,
-  "id": "./"
+  "id": "https://wbcatholic-ch.github.io/shrine-map/"
 }
