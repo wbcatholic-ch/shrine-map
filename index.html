@@ -310,29 +310,6 @@ html.oai-stability-veil::after { content:""; position:fixed; left:50%; top:50%; 
 })();
 </script>
 <script>
-/* 커버 하단 안내 바 실제 높이를 CSS 변수로 설정
-   position:fixed 안내 바가 새로고침 버튼과 겹치지 않도록
-   실제 offsetHeight를 측정해서 --cover-note-h에 반영한다. */
-(function(){
-  var root = document.documentElement;
-  function measureNoteHeight(){
-    var note = document.getElementById('cover-bottom-note');
-    var h = note ? note.offsetHeight : 0;
-    root.style.setProperty('--cover-note-h', (h || 36) + 'px');
-  }
-  if(document.readyState === 'loading'){
-    document.addEventListener('DOMContentLoaded', measureNoteHeight, {once:true});
-  } else {
-    measureNoteHeight();
-  }
-  window.addEventListener('load', measureNoteHeight, {once:true});
-  window.addEventListener('resize', measureNoteHeight, {passive:true});
-  window.addEventListener('orientationchange', function(){
-    setTimeout(measureNoteHeight, 200);
-  }, {passive:true});
-})();
-</script>
-<script>
 /* 외부 사이트 복귀 직후 첫 페인트 안정막.
    app.js가 붙기 전 화면 높이/헤더 재계산이 보이지 않게 먼저 덮고,
    실제 해제는 app.js의 공통 외부복귀 안정화 함수가 담당한다. */
@@ -556,13 +533,11 @@ window.APP_CONFIG = {
           <div id="cover-update-hint" role="status" aria-live="polite"></div>
         </div>
       </div>
+      <div id="cover-bottom-note" aria-label="앱 안내문구">
+        본 앱은 가톨릭 신자들의 신앙생활을 돕기 위해 만든 비공식 개인 앱입니다.
+        정보는 CBCK, 굿뉴스 및 각 교구 홈페이지를 참고했습니다.
+      </div>
     </div>
-
-<!-- 커버 하단 안내문구 — 화면 최하단 고정 바 -->
-<div id="cover-bottom-note" aria-label="앱 안내문구">
-  본 앱은 가톨릭 신자들의 신앙생활을 돕기 위해 만든 비공식 개인 앱입니다.
-  정보는 CBCK, 굿뉴스 및 각 교구 홈페이지를 참고했습니다.
-</div>
 
 <!-- 주요 기능 안내 팝업 (커버 전용, 별도 파일 없음) -->
 <div id="guide-intro-modal" class="guide-modal" role="dialog" aria-modal="true" aria-labelledby="guide-intro-title" aria-hidden="true">
