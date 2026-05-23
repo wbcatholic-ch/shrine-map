@@ -1,20 +1,20 @@
 /* 가톨릭길동무 Service Worker - V3-S
    캐시를 매번 삭제하지 않고, 버전 변경 시 오래된 캐시만 정리합니다.
    localStorage/사용자 설정은 건드리지 않습니다. */
-const CACHE_VERSION = 'catholic-way-V1-60';
+const CACHE_VERSION = 'catholic-way-V1-62';
 /* 다이어트 1: 첫 실행에 꼭 필요한 앱 셸만 선캐시합니다.
    성당/성지/피정의집/기도문/관구교구/문의 페이지는 versioned fetch 시 cacheFirst로 저장됩니다. */
 const APP_SHELL = [
   './',
   './index.html',
-  './constants.js?v=V1-60',
-  './core.js?v=V1-60',
-  './style.css?v=V1-60',
-  './app.js?v=V1-60',
-  './web.js?v=V1-60',
-  './patches.js?v=V1-60',
-  './sw-update.js?v=V1-60',
-  './manifest.json?v=V1-60',
+  './constants.js?v=V1-62',
+  './core.js?v=V1-62',
+  './style.css?v=V1-62',
+  './app.js?v=V1-62',
+  './web.js?v=V1-62',
+  './patches.js?v=V1-62',
+  './sw-update.js?v=V1-62',
+  './manifest.json?v=V1-62',
   './icon-192x192.png',
   './icon-512x512.png',
   './icon-512x512-maskable.png',
