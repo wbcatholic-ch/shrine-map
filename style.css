@@ -4698,7 +4698,7 @@ html.app-active #cover-menu-btn { display: none !important; }
 
 #cover {
   --cover-top-safe: calc(env(safe-area-inset-top, 0px) + clamp(60px, calc(var(--cover-vh, 1vh) * 8.2), 76px)) !important;
-  --cover-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + clamp(46px, calc(var(--cover-vh, 1vh) * 6.0), 58px)) !important;
+  --cover-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + clamp(58px, calc(var(--cover-vh, 1vh) * 7.0), 72px)) !important;
   padding-top: var(--cover-top-safe) !important;
   padding-bottom: var(--cover-bottom-safe) !important;
   box-sizing: border-box !important;
@@ -4847,27 +4847,30 @@ html.app-active #cover-menu-btn { display: none !important; }
 }
 
 #cover-bottom-note {
-  position: relative !important;
-  left: auto !important;
-  right: auto !important;
-  bottom: auto !important;
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
   transform: none !important;
-  flex: 0 0 auto !important;
   width: 100% !important;
   max-width: 100% !important;
-  margin: 4px 0 0 !important;
-  padding: 0 16px !important;
+  margin: 0 !important;
+  padding: 5px 20px calc(env(safe-area-inset-bottom, 0px) + 5px) !important;
+  background: var(--bg-color, #f4efe4) !important;
+  border-top: 1px solid rgba(0,0,0,.06) !important;
   text-align: center !important;
   box-sizing: border-box !important;
-  line-height: 1.28 !important;
+  font-size: clamp(8px, 2.1vw, 9px) !important;
+  line-height: 1.45 !important;
+  color: rgba(96,86,76,.65) !important;
   pointer-events: none !important;
-  z-index: auto !important;
+  z-index: 140 !important;
 }
 
 @media (max-height: 740px) {
   #cover {
     --cover-top-safe: calc(env(safe-area-inset-top, 0px) + clamp(54px, calc(var(--cover-vh, 1vh) * 7.2), 66px)) !important;
-    --cover-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + clamp(42px, calc(var(--cover-vh, 1vh) * 5.7), 52px)) !important;
+    --cover-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + clamp(52px, calc(var(--cover-vh, 1vh) * 6.5), 64px)) !important;
   }
   #cover-font-controls,
   #cover #cover-menu-btn.cover-menu-btn {
@@ -4909,8 +4912,7 @@ html.app-active #cover-menu-btn { display: none !important; }
     padding: 0 10px !important;
   }
   #cover-bottom-note {
-    margin-top: 3px !important;
-    padding: 0 14px !important;
+    padding: 4px 16px calc(env(safe-area-inset-bottom, 0px) + 4px) !important;
   }
 }
 
