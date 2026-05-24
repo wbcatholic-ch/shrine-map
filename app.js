@@ -909,7 +909,7 @@ function _runRefreshAppFilesOnly(){
   try{
     if(btn){
       btn.disabled = true;
-      btn.textContent = ((btn.getAttribute('data-target-version') || 'V1-75') + ' 새로고침 중');
+      btn.textContent = ((btn.getAttribute('data-target-version') || 'V1-76') + ' 새로고침 중');
     }
     if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
     // V37: 새로고침 전에는 레이아웃/스크롤/모달 DOM을 건드리지 않고,
@@ -1015,7 +1015,7 @@ async function _runClearAppFilesCacheCompletely(){
   }catch(e){
     console.warn('[가톨릭길동무]', e);
   }
-  // V1-75: 긴 새로고침도 보호막을 다시 예약하지 않고 현재 문서에서 1회만 유지한다.
+  // V1-76: 긴 새로고침도 보호막을 다시 예약하지 않고 현재 문서에서 1회만 유지한다.
   try{
     // 현재 히스토리 항목을 그대로 reload한다.
     // location.replace(?refresh=...)는 이전 root 항목과 URL이 갈라져
@@ -1068,7 +1068,7 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-        var target = btn.getAttribute('data-target-version') || 'V1-75';
+        var target = btn.getAttribute('data-target-version') || 'V1-76';
     var current = '';
     if(window.APP_VERSION) current = String(window.APP_VERSION).trim();
     if(!current && marker) current = String(marker.textContent || '').trim();
@@ -1077,7 +1077,7 @@ function syncCoverUpdateVersionState(){
     btn.textContent = mismatch ? (target + ' 업데이트 필요') : (target + ' 새로고침');
     box.classList.toggle('update-needed', mismatch);
     if(marker){
-      marker.textContent = target || 'V1-75';
+      marker.textContent = target || 'V1-76';
       marker.setAttribute('hidden', 'hidden');
       marker.setAttribute('aria-hidden','true');
       marker.style.display = 'none';
@@ -1213,16 +1213,9 @@ window.addEventListener('load', syncCoverUpdateVersionState, true);
     if(wasOpen) setVal(FAVORITES_RESET_NOTICE_KEY, '1');
   }
   function shouldShowFavoritesResetNotice(){
-    try{
-      // 설치 유도/브라우저/카카오에서는 표시하지 않고, 설치된 앱에서만 표시한다.
-      if(isKakaoBrowser()) return false;
-      if(!isStandaloneApp()) return false;
-      // 처음 사용하는 사용자는 최초 안내에서 확인 처리한다.
-      if(localStorage.getItem(FAVORITES_RESET_NOTICE_KEY) === '1') return false;
-    }catch(e){ return false; }
-    if(!isCoverVisible()) return false;
-    if(isGuideModalOpen('guide-intro-modal') || isGuideModalOpen('guide-manual-modal')) return false;
-    return true;
+    // 업데이트 안내 배너는 자동 표시하지 않는다.
+    // 사용자가 이전에 삭제 요청한 흐름을 유지하기 위해 기존 자동 조건을 닫아 둔다.
+    return false;
   }
   function maybeShowFavoritesResetNotice(){
     if(shouldShowFavoritesResetNotice()){
@@ -1234,15 +1227,9 @@ window.addEventListener('load', syncCoverUpdateVersionState, true);
     }
   }
   function shouldShowIntro(forceRefresh){
-    if(forceRefresh) return false;
-    try{
-      // 주요기능 자동 안내는 카카오/일반 브라우저에서는 띄우지 않고,
-      // Google Play/TWA 앱에서 처음 열린 경우에만 1회 표시한다.
-      if(isKakaoBrowser()) return false;
-      if(!isStandaloneApp()) return false;
-      if(localStorage.getItem(KEY_INSTALLED_SHOWN) === '1') return false;
-    }catch(e){ return false; }
-    return isCoverVisible();
+    // 주요기능 안내는 앱 첫 진입 때 자동 표시하지 않는다.
+    // 커버의 주요기능 버튼을 눌렀을 때만 수동으로 열린다.
+    return false;
   }
   function maybeShowIntro(){
     var forceRefresh = hasRecentSoftRefreshRequest();
@@ -1290,8 +1277,7 @@ window.addEventListener('load', syncCoverUpdateVersionState, true);
       hideModal('guide-manual-modal');
       closeFavoritesResetNotice();
     });
-    setTimeout(maybeShowIntro, 650);
-    setTimeout(maybeShowFavoritesResetNotice, 1150);
+    // 자동 주요기능/업데이트 배너 표시 제거: 수동 버튼 동작만 유지한다.
   }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', bindGuide, {once:true});
   else bindGuide();
@@ -1427,7 +1413,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V1-75';
+    frame.src='diocese.html?v=V1-76';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1824,7 +1810,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V1-75';
+const _PARISH_ASSET_VERSION='V1-76';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -1987,7 +1973,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V1-75';
+const _PRAYER_ASSET_VERSION='V1-76';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2032,7 +2018,7 @@ try{ window.ensurePrayerModuleLoaded=ensurePrayerModuleLoaded; }catch(e){ consol
 let _RT_RAW = [];
 let _retreatRawLoaded = false;
 let _retreatDataLoadPromise = null;
-const _RETREAT_ASSET_VERSION='V1-75';
+const _RETREAT_ASSET_VERSION='V1-76';
 
 let RETREATS = [];
 function _buildRetreatList(raw){
@@ -2280,7 +2266,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V1-75';
+const _SHRINE_ASSET_VERSION='V1-76';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
