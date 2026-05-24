@@ -213,19 +213,33 @@ html.oai-stability-veil::after { content:""; position:fixed; left:50%; top:50%; 
     }catch(e){ return {vh:0,width:0}; }
   }
   function measure(){
-    var values = [];
-    function add(v){
+    /*
+       V1-74: 커버 높이는 실제로 보이는 viewport를 우선한다.
+       카카오/Chrome Custom Tab 첫 진입에서는 layout viewport가 실제 화면보다 크게
+       잡히는 순간이 있어 하단 새로고침/안내문이 밀릴 수 있다.
+       visualViewport가 신뢰 가능한 값이면 그 값을 우선하고, 없을 때만 layout 값을 사용한다.
+    */
+    function norm(v){
       v = parseFloat(v || 0);
-      if(v > 300 && v < 2000) values.push(v);
+      return (v > 300 && v < 2000) ? v : 0;
     }
-    // Google Play/TWA용 커버는 주소창 변화가 아니라 실제 레이아웃 뷰포트를 기준으로 고정한다.
-    // 첫 진입 때 visualViewport가 순간적으로 작게 잡히면 커버 카드가 위로 당겨지고,
-    // 새로고침 후에는 다시 아래로 내려가는 차이가 생기므로 layout viewport 값을 우선한다.
-    try{ add(document.documentElement && document.documentElement.clientHeight); }catch(e){}
-    try{ add(window.innerHeight); }catch(e){}
-    if(!values.length){ try{ add(window.visualViewport && window.visualViewport.height); }catch(e){} }
-    if(!values.length) return 0;
-    var h = Math.max.apply(Math, values);
+    var docH = 0, innerH = 0, visualH = 0;
+    try{ docH = norm(document.documentElement && document.documentElement.clientHeight); }catch(e){}
+    try{ innerH = norm(window.innerHeight); }catch(e){}
+    try{ visualH = norm(window.visualViewport && window.visualViewport.height); }catch(e){}
+    var layoutH = 0;
+    if(docH && innerH) layoutH = Math.min(docH, innerH);
+    else layoutH = docH || innerH || 0;
+    var h = 0;
+    if(visualH && layoutH){
+      // visualViewport가 layout보다 작으면 실제 보이는 영역이므로 반드시 visual 값을 사용한다.
+      // visualViewport가 순간적으로 더 크게 보고되면 layout 값으로 제한한다.
+      h = Math.min(visualH, layoutH);
+      // 두 값이 거의 같으면 불필요한 소수점 흔들림을 줄이기 위해 layout 값을 유지한다.
+      if(Math.abs(visualH - layoutH) < 8) h = layoutH;
+    }else{
+      h = visualH || layoutH || 0;
+    }
     return h ? (h * 0.01) : 0;
   }
   function measureWidth(){
@@ -251,12 +265,14 @@ html.oai-stability-veil::after { content:""; position:fixed; left:50%; top:50%; 
     softRefreshRecent = !!sr && (now() - sr < 120000);
   }catch(e){}
   var widthMatches = !!(stored.width && currentWidth && Math.abs(stored.width - currentWidth) < 24);
-  // Google Play 정리본: 이전 빌드/이전 새로고침에서 저장된 커버 높이가
-  // 현재 커버 위치를 끌고 가지 않도록, 실제 측정값을 우선 적용한다.
+  // V1-74: 이전에 저장된 커버 높이는 현재 측정값이 없을 때만 보조값으로 사용한다.
+  // 첫 진입/외부 브라우저 상단바 상태에서는 현재 visualViewport 기준값을 우선해야 한다.
   var useStored = false;
-  var firstVh = measured || stored.vh || 0;
+  var firstVh = measured || ((widthMatches || softRefreshRecent) ? stored.vh : 0) || 0;
   if(firstVh) apply(firstVh, true, currentWidth);
   var baseCoverWidth = currentWidth;
+  var firstCoverHeightSettleUntil = now() + 5000;
+  var didHeightRepair = false;
 
   function isCoverVisible(){
     try{
@@ -279,14 +295,20 @@ html.oai-stability-veil::after { content:""; position:fixed; left:50%; top:50%; 
     var width = measureWidth();
     var widthChanged = !!(baseCoverWidth && width && Math.abs(width - baseCoverWidth) >= 24);
     var orientationChanged = r.indexOf('orientation') >= 0;
-    // 주소창/브라우저 UI가 접히며 생기는 세로 viewport resize는 커버를 흔들리게 하므로 무시한다.
-    if(!widthChanged && !orientationChanged) return;
     var next = measure();
     if(!next) return;
     var cur = parseFloat(getComputedStyle(root).getPropertyValue('--cover-vh')) || 0;
-    if(cur && Math.abs(next - cur) < 0.35) return;
+    var diff = cur ? Math.abs(next - cur) : 99;
+    if(cur && diff < 0.25) return;
+
+    // V1-74: 첫 진입 때 layout viewport가 실제 화면보다 크게 잡힌 경우만,
+    // 가로폭 변화가 없어도 한 번 줄여서 복구한다. 일반 주소창 접힘에 따른 확대는 막는다.
+    var earlyHeightRepair = !!(cur && next < cur && diff >= 0.25 && !didHeightRepair && now() < firstCoverHeightSettleUntil);
+    if(!widthChanged && !orientationChanged && !earlyHeightRepair) return;
+
     apply(next, true, width);
     if(width) baseCoverWidth = width;
+    if(earlyHeightRepair) didHeightRepair = true;
     try{
       root.classList.add('oai-cover-resizing');
       clearTimeout(settleTimer);
@@ -295,17 +317,25 @@ html.oai-stability-veil::after { content:""; position:fixed; left:50%; top:50%; 
   }
   function scheduleSettle(reason){
     clearTimeout(settleTimer);
-    settleTimer = setTimeout(function(){ settleCoverSize(reason); }, 120);
-    setTimeout(function(){ settleCoverSize(reason + '-late'); }, 360);
+    settleTimer = setTimeout(function(){ settleCoverSize(reason); }, 90);
+    setTimeout(function(){ settleCoverSize(reason + '-late'); }, 260);
+    setTimeout(function(){ settleCoverSize(reason + '-final'); }, 720);
   }
   window.addEventListener('orientationchange', function(){ scheduleSettle('orientation'); }, {passive:true});
   window.addEventListener('resize', function(){ scheduleSettle('resize'); }, {passive:true});
   if(window.visualViewport){
     window.visualViewport.addEventListener('resize', function(){ scheduleSettle('visualViewport'); }, {passive:true});
   }
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ afterStableFirstPaint(releaseBooting); }, {once:true});
-  else afterStableFirstPaint(releaseBooting);
-  window.addEventListener('load', function(){ afterStableFirstPaint(releaseBooting); }, {once:true});
+  function bootReady(reason){
+    scheduleSettle(reason || 'boot');
+    afterStableFirstPaint(releaseBooting);
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ bootReady('domcontentloaded'); }, {once:true});
+  else bootReady('dom-ready');
+  window.addEventListener('load', function(){ bootReady('load'); }, {once:true});
+  window.addEventListener('pageshow', function(){ scheduleSettle('pageshow'); }, {passive:true});
+  setTimeout(function(){ settleCoverSize('first-paint'); }, 160);
+  setTimeout(function(){ settleCoverSize('first-paint-late'); }, 520);
   window.oaiSettleCoverSize = settleCoverSize;
 })();
 </script>
@@ -370,21 +400,21 @@ window.APP_CONFIG = {
 <meta name="application-name" content="가톨릭길동무">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#0e1535">
-<link rel="manifest" href="manifest.json?v=V1-73">
-<link rel="apple-touch-icon" href="icon-192x192.png?v=V1-73">
+<link rel="manifest" href="manifest.json?v=V1-74">
+<link rel="apple-touch-icon" href="icon-192x192.png?v=V1-74">
 <meta name="format-detection" content="telephone=no">
 <meta name="description" content="가톨릭길동무 - 가톨릭 신앙생활 종합 앱">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="가톨릭길동무">
 <meta property="og:title" content="가톨릭길동무">
 <meta property="og:description" content="성지 · 성당 · 기도문 · 순례길 · 가톨릭 웹사이트 안내">
-<meta property="og:image" content="icon-512x512.png?v=V1-73">
+<meta property="og:image" content="icon-512x512.png?v=V1-74">
 <meta property="og:image:width" content="512">
 <meta property="og:image:height" content="512">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="가톨릭길동무">
 <meta name="twitter:description" content="성지 · 성당 · 기도문 · 순례길 · 가톨릭 웹사이트 안내">
-<meta name="twitter:image" content="icon-512x512.png?v=V1-73">
+<meta name="twitter:image" content="icon-512x512.png?v=V1-74">
 <title>가톨릭길동무</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 fill=%22%230e1535%22/%3E%3Ctext x=%226%22 y=%2226%22 font-size=%2224%22 fill=%22%23d4aa6a%22%3E%E2%9C%9D%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -392,7 +422,7 @@ window.APP_CONFIG = {
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style id="oai-initial-bg">html,body{margin:0;width:100%;height:100%;min-height:100%;background:#0e1535;overflow:hidden;color-scheme:light;}#cover{background:#0e1535;min-height:100%;}#app{background:#f8f6f2;display:none;}</style>
-<link rel="stylesheet" href="style.css?v=V1-73">
+<link rel="stylesheet" href="style.css?v=V1-74">
 </head>
 <body>
 <div id="missa-view" role="dialog" aria-modal="true" aria-label="매일미사">
@@ -463,7 +493,7 @@ window.APP_CONFIG = {
   </div>
 </div>
 <div id="cover">
-<div id="oai-build-marker" aria-label="현재 버전" role="status" hidden aria-hidden="true">V1-73</div>
+<div id="oai-build-marker" aria-label="현재 버전" role="status" hidden aria-hidden="true">V1-74</div>
   <div id="cv-pull-modern" aria-hidden="true">
   <div class="cv-pull-ring">
     <svg viewBox="0 0 24 24" class="cv-pull-icon">
@@ -529,8 +559,8 @@ window.APP_CONFIG = {
       <div id="cover-action-row" class="cover-action-single">
         <div id="cover-update-box">
           <button id="cover-update-btn" class="cover-refresh-main-btn" type="button"
-                  data-target-version="V1-73"
-                  aria-label="V1-73 앱 새로고침">V1-73 새로고침</button>
+                  data-target-version="V1-74"
+                  aria-label="V1-74 앱 새로고침">V1-74 새로고침</button>
           <div id="cover-update-hint" role="status" aria-live="polite"></div>
         </div>
       </div>
@@ -643,9 +673,9 @@ window.APP_CONFIG = {
   </div>
 </div>
 
-<script src="constants.js?v=V1-73"></script>
-<script src="core.js?v=V1-73"></script>
-<script src="app.js?v=V1-73"></script>
+<script src="constants.js?v=V1-74"></script>
+<script src="core.js?v=V1-74"></script>
+<script src="app.js?v=V1-74"></script>
 <div id="oai-category-entry-veil" aria-hidden="true"></div>
 <div id="app"><div id="tabbar"><button id="tab-btn-nearby" class="tab-btn" data-tab="nearby"><span class="tab-icon">📍</span><span id="tab-nearby-lbl">내주변</span></button><button id="tab-btn-list" class="tab-btn" data-tab="list"><span class="tab-icon">📋</span><span id="tab-list-lbl">목록</span></button><button id="tab-btn-region" class="tab-btn" data-tab="region"><span class="tab-icon">🔍</span>지역검색
     </button><button id="tab-btn-route" class="tab-btn" data-tab="route"><span class="tab-icon">🧭</span>길찾기
@@ -721,13 +751,13 @@ window.APP_CONFIG = {
     </div>
   </div>
 </div>
-<script src="web.js?v=V1-73"></script>
+<script src="web.js?v=V1-74"></script>
 
 <div id="qna-view" role="dialog" aria-modal="true" aria-label="문의·건의" class="module-view"><div class="module-bar qna"><div class="module-bar-main"><div class="module-bar-ico">✝</div><div class="module-bar-txt"><div class="module-bar-title">문의·건의</div><div class="module-bar-sub">질문, 오류, 수정요청을 남겨주세요</div></div></div><button id="qna-close-btn" class="module-close" aria-label="문의·건의 닫기">×</button></div><div class="qna-body"><div class="qna-tabs"><button id="qna-tab-write" class="qna-tab on" type="button">작성</button></div><div class="qna-list" id="qna-list"></div></div></div>
 
-<script src="patches.js?v=V1-73"></script>
+<script src="patches.js?v=V1-74"></script>
 
-<script src="sw-update.js?v=V1-73"></script>
+<script src="sw-update.js?v=V1-74"></script>
 
 </body>
 </html>
