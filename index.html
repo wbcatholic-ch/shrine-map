@@ -328,7 +328,7 @@ html.oai-stability-veil::after { content:""; position:fixed; left:50%; top:50%; 
   }
   function bootReady(reason){
     scheduleSettle(reason || 'boot');
-    afterStableFirstPaint(releaseBooting);
+    setTimeout(releaseBooting, 400);
   }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ bootReady('domcontentloaded'); }, {once:true});
   else bootReady('dom-ready');
