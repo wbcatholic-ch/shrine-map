@@ -4958,7 +4958,7 @@ body.gp-info-page #privacy-back-app-link {
   line-height: 1;
 }
 
-/* V1-10: Google Play 커버 하단 문구를 PWA처럼 화면 하단에 고정하고, 새로고침 버튼과 간격 확보 */
+/* V1-11: Google Play 커버 하단 문구를 PWA처럼 화면 하단에 고정하고, 새로고침 버튼과 간격 확보 */
 #cover {
   --cover-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + clamp(52px, calc(var(--cover-vh, 1vh) * 7.6), 72px)) !important;
   padding-bottom: var(--cover-bottom-safe) !important;
@@ -4998,7 +4998,7 @@ body.gp-info-page #privacy-back-app-link {
 }
 
 
-/* V1-10: 성지 화면 안에 CBCK 참고 출처 문구를 작게 표시 */
+/* V1-11: 성지 화면 안에 CBCK 참고 출처 문구를 작게 표시 */
 .shrine-source-note {
   display: none;
   flex-shrink: 0;
@@ -5018,4 +5018,107 @@ html.app-active:not(.parish-mode):not(.retreat-mode) .shrine-source-note {
 html.parish-mode .shrine-source-note,
 html.retreat-mode .shrine-source-note {
   display: none !important;
+}
+
+
+/* V1-11: Google Play 커버 하단 안내문구와 새로고침 버튼 분리 고정 */
+#cover {
+  --cover-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + clamp(112px, calc(var(--cover-vh, 1vh) * 13.2), 142px)) !important;
+  padding-bottom: var(--cover-bottom-safe) !important;
+}
+
+#cover-main-block {
+  padding-bottom: 0 !important;
+}
+
+#cover #cover-action-row.cover-action-single {
+  position: fixed !important;
+  left: auto !important;
+  right: max(18px, calc((100vw - 720px) / 2 + 18px)) !important;
+  top: auto !important;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(58px, calc(var(--cover-vh, 1vh) * 6.4), 72px)) !important;
+  width: auto !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  flex: none !important;
+  z-index: 150 !important;
+  pointer-events: auto !important;
+  box-sizing: border-box !important;
+}
+
+#cover #cover-action-row.cover-action-single #cover-update-box {
+  flex: 0 0 auto !important;
+  width: clamp(126px, 32vw, 150px) !important;
+  min-width: 126px !important;
+  max-width: 150px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+
+#cover .cover-refresh-main-btn {
+  min-height: 34px !important;
+  height: 34px !important;
+  max-height: 34px !important;
+  font-size: calc(13.2px * var(--app-font-scale)) !important;
+  padding: 0 12px !important;
+}
+
+#cover-bottom-note {
+  position: fixed !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 8px) !important;
+  transform: translateX(-50%) !important;
+  width: min(100vw, 720px) !important;
+  max-width: min(100vw, 720px) !important;
+  margin: 0 !important;
+  padding: 0 18px !important;
+  text-align: center !important;
+  font-size: clamp(8px, 2.1vw, 9.2px) !important;
+  line-height: 1.35 !important;
+  letter-spacing: -.02em !important;
+  color: rgba(96,86,76,.72) !important;
+  pointer-events: none !important;
+  z-index: 130 !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-height: 740px) {
+  #cover {
+    --cover-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + clamp(102px, calc(var(--cover-vh, 1vh) * 12.6), 128px)) !important;
+  }
+  #cover #cover-action-row.cover-action-single {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(52px, calc(var(--cover-vh, 1vh) * 6.0), 64px)) !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    max-height: 32px !important;
+  }
+  #cover #cover-action-row.cover-action-single #cover-update-box {
+    width: clamp(118px, 32vw, 140px) !important;
+    min-width: 118px !important;
+    max-width: 140px !important;
+    height: 32px !important;
+    min-height: 32px !important;
+    max-height: 32px !important;
+  }
+  #cover .cover-refresh-main-btn {
+    min-height: 32px !important;
+    height: 32px !important;
+    font-size: calc(12.5px * var(--app-font-scale)) !important;
+    padding: 0 10px !important;
+  }
+  #cover-bottom-note {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 7px) !important;
+    font-size: clamp(7.7px, 2.0vw, 8.8px) !important;
+    line-height: 1.32 !important;
+  }
 }
