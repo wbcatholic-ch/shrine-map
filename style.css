@@ -330,7 +330,7 @@ html.app-active #app { display: block; }
   border: 1.5px solid var(--oai-btn-border);
   background: var(--oai-btn);
   color: var(--oai-btn-text);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
   font-family: inherit;
   cursor: pointer;
@@ -3021,7 +3021,7 @@ html.oai-font-global .trail-sh-sub,
 html.oai-font-global .trail-sh-url,
 
 
-html.oai-font-global .tab-btn { font-size: 13px; }
+html.oai-font-global .tab-btn { font-size: 14px; }
 html.oai-font-global .web-cat-btn,
 html.oai-font-global .trail-tab { font-size: calc(15px * var(--app-inner-font-scale)); }
 html.oai-font-global .tab-icon { font-size: 20px; }
@@ -3259,7 +3259,7 @@ html:not(.parish-mode):not(.retreat-mode) .sm-tab.active{background:linear-gradi
 .sm-filter{min-height:48px!important;padding-top:6px!important;padding-bottom:6px!important;align-items:center!important}
 
 .filter-btn,
-.sm-fb{height:34px!important;min-height:34px!important;padding:0 12px!important;display:flex!important;align-items:center!important;justify-content:center;border-radius:12px!important;font-size:14px!important;line-height:1.15!important;white-space:nowrap}
+.sm-fb{height:34px!important;min-height:34px!important;padding:0 12px!important;display:flex!important;align-items:center!important;justify-content:center;border-radius:12px!important;font-size:15px!important;line-height:1.15!important;white-space:nowrap}
 .trail-tab,
 .region-search-btn{height:46px!important;min-height:46px!important;padding:0 16px!important;display:flex!important;align-items:center!important;justify-content:center;border-radius:16px!important;font-size:16px!important;line-height:1.2!important;white-space:nowrap}
 html.retreat-mode #list-body .li-name{color:#111827!important}
@@ -3269,7 +3269,7 @@ html.retreat-mode #list-body .li-name{color:#111827!important}
 #sm-tab-bar{display:flex;gap:10px;padding:10px 12px;height:55px;align-items:center;background:#f5efe5;border-bottom:1px solid var(--ui-line);box-sizing:border-box}
 /* 일반 sm-tab-bar (srch-modal 밖) 배경 */
 #trail-panel-list:not(.on){display:none}
-@media (min-width:600px){.sm-tab{font-size:16px!important}.tab-btn{font-size:12px!important}#sm-tab-bar{height:60px!important}}
+@media (min-width:600px){.sm-tab{font-size:16px!important}.tab-btn{font-size:13px!important}#sm-tab-bar{height:60px!important}}
 html:not(.parish-mode):not(.retreat-mode) #tabbar,html.parish-mode #tabbar,html.retreat-mode #tabbar{background:rgba(255,255,255,.96)!important;border-bottom:1px solid #d8dee6!important}
 .tab-btn .tab-icon{color:inherit!important}
 html:not(.parish-mode):not(.retreat-mode) .sheet-hd,html:not(.parish-mode):not(.retreat-mode) .filter-bar,html:not(.parish-mode):not(.retreat-mode) .region-wrap,html:not(.parish-mode):not(.retreat-mode) .sm-hd,html:not(.parish-mode):not(.retreat-mode) .sm-filter{background:var(--oai-shrine-header)!important}
@@ -3311,7 +3311,7 @@ html.oai-font-global .nearby-type,html.oai-font-global .li-badge{font-size:calc(
 html.oai-font-global .nearby-dist{font-size:calc(13px * var(--app-inner-font-scale,1))!important}
 html.oai-font-global .sheet-title,html.oai-font-global .module-bar-title{font-size:calc(18px * var(--app-inner-font-scale,1))!important}
 html.oai-font-global .module-bar-sub{font-size:calc(12px * var(--app-inner-font-scale,1))!important}
-html.oai-font-global .filter-btn,html.oai-font-global .region-search-btn,html.oai-font-global .sm-fb,html.oai-font-global .sm-tab,html.oai-font-global .web-cat-btn,html.oai-font-global .trail-tab{font-size:calc(14px * var(--app-inner-font-scale,1))!important}
+html.oai-font-global .filter-btn,html.oai-font-global .region-search-btn,html.oai-font-global .sm-fb,html.oai-font-global .sm-tab,html.oai-font-global .web-cat-btn,html.oai-font-global .trail-tab{font-size:calc(15px * var(--app-inner-font-scale,1))!important}
 
 html.oai-font-global .web-card-name{font-size:calc(17px * var(--app-inner-font-scale,1))!important}
 html.oai-font-global .web-card-desc{font-size:calc(15px * var(--app-inner-font-scale,1))!important}
@@ -3534,7 +3534,9 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active{
 /* 모든 목록/검색 결과 이름은 검정 유지 */
 #app .li-name,
 #app .nearby-name,
-#app #region-body .li-name,
+#app #region-body .li-name{
+  color:#111827!important;
+}
 
 /* 성당 내주변 목록 번호는 성당 카테고리 색 */
 html.parish-mode #nearby-body .nearby-num{
@@ -3829,7 +3831,7 @@ html.retreat-mode .ic-type-badge{
 #app #info-card .ic-tel-btn,
 #app #info-card .ic-route-btn,
 #app #info-card .ic-link-btn,
-#app #info-card .btn-kakao-nav{font-size:calc(17px * var(--app-inner-font-scale,1))!important}
+#app #info-card .btn-kakao-nav{font-size:17px!important}
 
 /* 피정의집: 파스텔 대신 글로시 세이지 그린으로 최종 통일 */
 html.retreat-mode{
