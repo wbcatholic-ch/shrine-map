@@ -4958,7 +4958,7 @@ body.gp-info-page #privacy-back-app-link {
   line-height: 1;
 }
 
-/* V1-12: Google Play 커버 하단 구조 정리
+/* V1-13: Google Play 커버 하단 구조 정리
    - 안내 문구는 커버의 최하단에 고정한다.
    - 새로고침 버튼은 하단 안내 문구와 분리해 카테고리 카드 묶음 아래에 둔다. */
 #cover {
@@ -5064,7 +5064,7 @@ body.gp-info-page #privacy-back-app-link {
   }
 }
 
-/* V1-12: 성지 화면 안에 CBCK 참고 출처 문구를 작게 표시 */
+/* V1-13: 성지 화면 안에 CBCK 참고 출처 문구를 작게 표시 */
 .shrine-source-note {
   display: none;
   flex-shrink: 0;
@@ -5086,3 +5086,110 @@ html.retreat-mode .shrine-source-note {
   display: none !important;
 }
 
+
+
+/* V1-13: Google Play 커버 하단 최종 정렬
+   - 새로고침은 카테고리 카드 묶음의 일부로 유지한다.
+   - 새로고침과 마지막 카테고리 카드 사이 간격은 카드 간 세로 간격과 맞춘다.
+   - 안내 문구는 별도 최하단 고정이며, 문구 줄 간격을 조금 넓힌다. */
+#cover {
+  --cover-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + clamp(54px, calc(var(--cover-vh, 1vh) * 6.8), 72px)) !important;
+  padding-bottom: var(--cover-bottom-safe) !important;
+}
+
+#cover-main-block {
+  padding-bottom: 0 !important;
+}
+
+#cover #cover-action-row.cover-action-single {
+  position: relative !important;
+  left: auto !important;
+  right: auto !important;
+  top: auto !important;
+  bottom: auto !important;
+  width: 100% !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  margin: clamp(4px, calc(var(--cover-vh, 1vh) * 0.75), 7px) 0 0 !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-end !important;
+  flex: 0 0 36px !important;
+  z-index: 12 !important;
+  pointer-events: auto !important;
+  box-sizing: border-box !important;
+}
+
+#cover #cover-action-row.cover-action-single #cover-update-box {
+  flex: 0 0 auto !important;
+  width: clamp(126px, 32vw, 150px) !important;
+  min-width: 126px !important;
+  max-width: 150px !important;
+  height: 36px !important;
+  min-height: 36px !important;
+  max-height: 36px !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+
+#cover .cover-refresh-main-btn {
+  min-height: 36px !important;
+  height: 36px !important;
+  max-height: 36px !important;
+  font-size: calc(13.2px * var(--app-font-scale)) !important;
+  padding: 0 12px !important;
+}
+
+#cover-bottom-note {
+  position: fixed !important;
+  left: 50% !important;
+  right: auto !important;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 10px) !important;
+  transform: translateX(-50%) !important;
+  width: min(100vw, 720px) !important;
+  max-width: min(100vw, 720px) !important;
+  margin: 0 !important;
+  padding: 0 20px !important;
+  text-align: center !important;
+  font-size: clamp(8px, 2.1vw, 9.4px) !important;
+  line-height: 1.55 !important;
+  letter-spacing: -.02em !important;
+  color: rgba(96,86,76,.72) !important;
+  pointer-events: none !important;
+  z-index: 130 !important;
+  box-sizing: border-box !important;
+}
+
+@media (max-height: 740px) {
+  #cover {
+    --cover-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + clamp(50px, calc(var(--cover-vh, 1vh) * 6.4), 66px)) !important;
+  }
+  #cover #cover-action-row.cover-action-single {
+    height: 34px !important;
+    min-height: 34px !important;
+    max-height: 34px !important;
+    flex-basis: 34px !important;
+    margin-top: clamp(3px, calc(var(--cover-vh, 1vh) * 0.55), 5px) !important;
+  }
+  #cover #cover-action-row.cover-action-single #cover-update-box {
+    width: clamp(118px, 32vw, 140px) !important;
+    min-width: 118px !important;
+    max-width: 140px !important;
+    height: 34px !important;
+    min-height: 34px !important;
+    max-height: 34px !important;
+  }
+  #cover .cover-refresh-main-btn {
+    min-height: 34px !important;
+    height: 34px !important;
+    font-size: calc(12.5px * var(--app-font-scale)) !important;
+    padding: 0 10px !important;
+  }
+  #cover-bottom-note {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 9px) !important;
+    font-size: clamp(7.7px, 2.0vw, 8.9px) !important;
+    line-height: 1.48 !important;
+  }
+}
