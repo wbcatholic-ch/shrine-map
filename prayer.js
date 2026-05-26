@@ -322,8 +322,8 @@ window.prRenderList = function(){
       '</div>'+
       '<div class="pr-item-right">'+
       '<button type="button" class="pr-star '+(isFav?'on':'')+'" data-pid="'+prayer.id+'" aria-label="즐겨찾기">'+
-        '<i class="fa-solid fa-star"></i></button>'+
-      '<i class="fa-solid fa-chevron-right pr-chevron"></i>'+
+        '<span aria-hidden="true">★</span></button>'+
+      '<span class="pr-chevron" aria-hidden="true">›</span>'+
       '</div>';
     const starBtn = li.querySelector('.pr-star');
     let ignoreListClickUntil = 0;
