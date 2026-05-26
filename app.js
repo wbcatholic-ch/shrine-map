@@ -2255,9 +2255,9 @@ function _navFetch(origin, dest) {
 const $=id=>document.getElementById(id);
 const $$=s=>document.querySelectorAll(s);
 const _GEO=navigator.geolocation;
-const _GO1={enableHighAccuracy:true,timeout:12000,maximumAge:30000};
-const _GO2={enableHighAccuracy:false,timeout:7000,maximumAge:300000};
-const _GO3={enableHighAccuracy:false,timeout:15000,maximumAge:600000};
+const _GO1={enableHighAccuracy:true,timeout:30000,maximumAge:30000};
+const _GO2={enableHighAccuracy:false,timeout:20000,maximumAge:0};
+const _GO3={enableHighAccuracy:false,timeout:40000,maximumAge:600000};
 const _EC=encodeURIComponent;
 const _NS='xmlns="http://www.w3.org/2000/svg"';
 const _svgUrl=s=>'data:image/svg+xml;charset=utf-8,'+_EC(s);
