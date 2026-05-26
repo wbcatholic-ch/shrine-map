@@ -3000,12 +3000,10 @@ html.oai-font-global .region-item .nearby-name,
 html.oai-font-global #region-body .li-name,
 html.oai-font-global #region-body .nearby-name,
 html.oai-font-global .sm-name,
-html.oai-font-global .sm-place-name,
-html.oai-font-global .ic-name { font-size: var(--app-fs-title); line-height: 1.34; }
+html.oai-font-global .sm-place-name { font-size: var(--app-fs-title); line-height: 1.34; }
 
 html.oai-font-global .pr-content-card,
-html.oai-font-global .web-card-desc,
-html.oai-font-global .ic-addr-val { font-size: var(--app-fs-body); line-height: 1.6; }
+html.oai-font-global .web-card-desc { font-size: var(--app-fs-body); line-height: 1.6; }
 html.oai-font-global .pr-content-card { line-height: 2.05; }
 
 html.oai-font-global .li-sub,
@@ -3021,9 +3019,7 @@ html.oai-font-global .trail-reg,
 html.oai-font-global .trail-url,
 html.oai-font-global .trail-sh-sub,
 html.oai-font-global .trail-sh-url,
-html.oai-font-global .ic-sub,
-html.oai-font-global .ic-addr-lbl,
-html.oai-font-global .ic-dist-lbl { font-size: var(--app-fs-sub); line-height: 1.35; }
+
 
 html.oai-font-global .tab-btn { font-size: 13px; }
 html.oai-font-global .web-cat-btn,
@@ -3032,8 +3028,8 @@ html.oai-font-global .tab-icon { font-size: 20px; }
 html.oai-font-global .tab-btn.active .tab-icon { font-size: 22px; }
 html.oai-font-global .nearby-type,
 html.oai-font-global .li-badge,
-html.oai-font-global .ic-type-badge,
 html.oai-font-global .web-card-badge { font-size: calc(11px * var(--app-inner-font-scale)); }
+
 html.oai-font-global .pr-icon-dot { width: calc(36px * var(--app-inner-font-scale)); height: calc(36px * var(--app-inner-font-scale)); flex-basis: calc(36px * var(--app-inner-font-scale)); font-size: calc(17px * var(--app-inner-font-scale)); }
 html.oai-font-global .nearby-dist { font-size: calc(13px * var(--app-inner-font-scale)); }
 html.oai-font-global .sheet-title, html.oai-font-global .module-bar-title { font-size: calc(18px * var(--app-inner-font-scale)); }
@@ -3270,8 +3266,6 @@ html.retreat-mode #list-body .li-name{color:#111827!important}
 /* ===== /OAI ===== */
 .nearby-name,.li-name,.sm-name,.sm-place-name{font-size:16px;font-weight:800;line-height:1.35;letter-spacing:-.03em;white-space:normal;overflow:visible;word-break:keep-all}
 .nearby-addr,.li-sub,.sm-sub,.sm-place-addr{font-size:13px;line-height:1.45;letter-spacing:-.02em;white-space:normal;overflow:visible;word-break:keep-all}
-.ic-sub,.ic-type-badge,.ic-addr-lbl{font-size:12px}
-.ic-tel-btn,.ic-route-btn,.ic-link-btn,.btn-kakao-nav{font-size:16px!important}
 #sm-tab-bar{display:flex;gap:10px;padding:10px 12px;height:55px;align-items:center;background:#f5efe5;border-bottom:1px solid var(--ui-line);box-sizing:border-box}
 /* 일반 sm-tab-bar (srch-modal 밖) 배경 */
 #trail-panel-list:not(.on){display:none}
@@ -3313,13 +3307,12 @@ html.oai-font-global .cv-title{font-size:calc(32px * var(--app-inner-font-scale,
 html.oai-font-global .cv-sub{font-size:calc(15px * var(--app-inner-font-scale,1))!important}
 html.oai-font-global .nearby-name,html.oai-font-global #region-body .nearby-name,html.oai-font-global #region-body .li-name,html.oai-font-global .region-item .nearby-name,html.oai-font-global .li-name,html.oai-font-global .sm-name,html.oai-font-global .sm-place-name{font-size:calc(16px * var(--app-inner-font-scale,1))!important;line-height:1.3!important}
 html.oai-font-global .nearby-addr,html.oai-font-global #region-body .nearby-addr,html.oai-font-global #region-body .li-sub,html.oai-font-global .region-item .nearby-addr,html.oai-font-global .li-sub,html.oai-font-global .sm-sub,html.oai-font-global .sm-place-addr{font-size:calc(12px * var(--app-inner-font-scale,1))!important;line-height:1.35!important}
-html.oai-font-global .nearby-type,html.oai-font-global .li-badge,html.oai-font-global .ic-type-badge{font-size:calc(11px * var(--app-inner-font-scale,1))!important}
+html.oai-font-global .nearby-type,html.oai-font-global .li-badge{font-size:calc(11px * var(--app-inner-font-scale,1))!important}
 html.oai-font-global .nearby-dist{font-size:calc(13px * var(--app-inner-font-scale,1))!important}
 html.oai-font-global .sheet-title,html.oai-font-global .module-bar-title{font-size:calc(18px * var(--app-inner-font-scale,1))!important}
 html.oai-font-global .module-bar-sub{font-size:calc(12px * var(--app-inner-font-scale,1))!important}
 html.oai-font-global .filter-btn,html.oai-font-global .region-search-btn,html.oai-font-global .sm-fb,html.oai-font-global .sm-tab,html.oai-font-global .web-cat-btn,html.oai-font-global .trail-tab{font-size:calc(14px * var(--app-inner-font-scale,1))!important}
-html.oai-font-global .ic-name{font-size:calc(17px * var(--app-inner-font-scale,1))!important}
-html.oai-font-global .ic-addr-val,html.oai-font-global .ic-sub,html.oai-font-global .ic-addr-lbl,html.oai-font-global .ic-dist-lbl,html.oai-font-global .ic-dist-box{font-size:calc(14px * var(--app-inner-font-scale,1))!important}
+
 html.oai-font-global .web-card-name{font-size:calc(17px * var(--app-inner-font-scale,1))!important}
 html.oai-font-global .web-card-desc{font-size:calc(15px * var(--app-inner-font-scale,1))!important}
 html.oai-font-global .trail-nm,html.oai-font-global .trail-sh-name{font-size:calc(16px * var(--app-inner-font-scale,1))!important}
@@ -3481,15 +3474,6 @@ html.retreat-mode .ic-type-badge{
 
 /* 모든 목록/검색 결과 이름은 검정으로 통일 */
 #app .li-name,
-#app .nearby-name,
-#app #region-body .li-name,
-#app #region-body .nearby-name,
-#app #region-body .region-item .nearby-name,
-#app .sm-name,
-#app .sm-place-name,
-#app .ic-name{
-  color:#111827!important;
-}
 #app .li-sub,
 #app .nearby-addr,
 #app #region-body .li-sub,
@@ -3551,13 +3535,6 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active{
 #app .li-name,
 #app .nearby-name,
 #app #region-body .li-name,
-#app #region-body .nearby-name,
-#app #region-body .region-item .nearby-name,
-#app .sm-name,
-#app .sm-place-name,
-#app .ic-name{
-  color:#111827!important;
-}
 
 /* 성당 내주변 목록 번호는 성당 카테고리 색 */
 html.parish-mode #nearby-body .nearby-num{
@@ -3841,32 +3818,18 @@ html.retreat-mode .ic-type-badge{
   --retreat-category-soft-final:#DDECE5;
 }
 
-/* 인포카드 텍스트 1px 확대 */
-#app #info-card .ic-name{
-  font-size:17px!important;
-  line-height:1.35!important;
-}
-#app #info-card .ic-addr-val{
-  font-size:17px!important;
-  line-height:1.5!important;
-}
+/* 인포카드 글자 크기: 기본 1px 확대 + 글자 크기 설정 연동 */
+#app #info-card .ic-name{font-size:calc(17px * var(--app-inner-font-scale,1))!important;line-height:1.35!important}
+#app #info-card .ic-addr-val{font-size:calc(17px * var(--app-inner-font-scale,1))!important;line-height:1.5!important}
 #app #info-card .ic-sub,
 #app #info-card .ic-addr-lbl,
-#app #info-card .ic-dist-lbl{
-  font-size:13px!important;
-}
-#app #info-card .ic-type-badge{
-  font-size:13px!important;
-}
-#app #info-card .ic-dist-box{
-  font-size:15px!important;
-}
+#app #info-card .ic-dist-lbl{font-size:calc(13px * var(--app-inner-font-scale,1))!important}
+#app #info-card .ic-type-badge{font-size:calc(13px * var(--app-inner-font-scale,1))!important}
+#app #info-card .ic-dist-box{font-size:calc(15px * var(--app-inner-font-scale,1))!important}
 #app #info-card .ic-tel-btn,
 #app #info-card .ic-route-btn,
 #app #info-card .ic-link-btn,
-#app #info-card .btn-kakao-nav{
-  font-size:17px!important;
-}
+#app #info-card .btn-kakao-nav{font-size:calc(17px * var(--app-inner-font-scale,1))!important}
 
 /* 피정의집: 파스텔 대신 글로시 세이지 그린으로 최종 통일 */
 html.retreat-mode{
