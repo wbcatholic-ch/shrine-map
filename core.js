@@ -47,7 +47,10 @@ function _suppressCoverBackToast(reason, ms){
 }
 function _isCoverBackToastSuppressed(){
   try{
-    var until = Number(window.__OAI_SUPPRESS_COVER_BACK_TOAST_UNTIL__ || 0);
+    var until = Math.max(
+      Number(window.__OAI_SUPPRESS_COVER_BACK_TOAST_UNTIL__ || 0),
+      Number(window.__OAI_EARLY_COVER_BACK_SUPPRESS_UNTIL__ || 0)
+    );
     return !!(until && Date.now() < until);
   }catch(e){ return false; }
 }
@@ -229,14 +232,14 @@ window.doExit                 = doExit;
 window._exitReady = false;
 window.__oaiCoverExitUntil = 0;
 try{ sessionStorage.removeItem(SS.COVER_EXIT_ARMED_UNTIL); }catch(_e){}
-_suppressCoverBackToast('core-load', 1600);
+_suppressCoverBackToast('core-load', 2600);
 try{
   window.addEventListener('pagehide', function(){
     _resetCoverExitReady();
     _clearCoverExitArmed();
   }, true);
   window.addEventListener('pageshow', function(){
-    _suppressCoverBackToast('core-pageshow', 1400);
+    _suppressCoverBackToast('core-pageshow', 2200);
   }, true);
   document.addEventListener('visibilitychange', function(){
     try{
@@ -244,7 +247,7 @@ try{
         _resetCoverExitReady();
         _clearCoverExitArmed();
       }else if(document.visibilityState === 'visible'){
-        _suppressCoverBackToast('core-visible', 1400);
+        _suppressCoverBackToast('core-visible', 2000);
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }, true);

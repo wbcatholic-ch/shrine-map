@@ -5226,3 +5226,22 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
   transition: none !important;
   animation: none !important;
 }
+
+
+/* V1-33: 커버 카테고리 박스와 새로고침 버튼 사이 간격 재정리
+   - V1-32에서 새로고침이 아래로 멀어 보이는 문제를 줄인다.
+   - 하단 안내 문구는 기존처럼 최하단 고정으로 유지한다. */
+#cover-main-block {
+  gap: clamp(2px, calc(var(--cover-vh, 1vh) * 0.45), 4px) !important;
+}
+#cover #cover-action-row.cover-action-single {
+  margin-top: clamp(2px, calc(var(--cover-vh, 1vh) * 0.45), 4px) !important;
+}
+@media (max-height: 740px) {
+  #cover-main-block {
+    gap: clamp(1px, calc(var(--cover-vh, 1vh) * 0.35), 3px) !important;
+  }
+  #cover #cover-action-row.cover-action-single {
+    margin-top: clamp(1px, calc(var(--cover-vh, 1vh) * 0.35), 3px) !important;
+  }
+}
