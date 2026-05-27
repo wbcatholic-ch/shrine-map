@@ -1413,7 +1413,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V1-27';
+    frame.src='diocese.html?v=V1-29';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1810,7 +1810,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V1-27';
+const _PARISH_ASSET_VERSION='V1-29';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -1973,7 +1973,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V1-27';
+const _PRAYER_ASSET_VERSION='V1-29';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2018,7 +2018,7 @@ try{ window.ensurePrayerModuleLoaded=ensurePrayerModuleLoaded; }catch(e){ consol
 let _RT_RAW = [];
 let _retreatRawLoaded = false;
 let _retreatDataLoadPromise = null;
-const _RETREAT_ASSET_VERSION='V1-27';
+const _RETREAT_ASSET_VERSION='V1-29';
 
 let RETREATS = [];
 function _buildRetreatList(raw){
@@ -2267,7 +2267,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V1-27';
+const _SHRINE_ASSET_VERSION='V1-29';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -4717,11 +4717,12 @@ function _loadNearbyWithDist(lat,lng,items,getIdx,getColor,getLabel){
 function _renderNearbyDone(prelim,results,getIdx,getColor,getLabel,phase){
   const sorted=prelim.map((x,i)=>({x,r:results[i]||{km:x.d*1.35,dur:null}})).sort((a,b)=>a.r.km-b.r.km).slice(0,10);
   _nearbyCache=sorted.map(o=>o.x.p);
-  if(phase==='final'&&_mode==='shrine'&&_map) _showAllShrinesOnMapWithNearbyBounds(_nearbyCache,_myLat,_myLng);
+  const shouldUpdateShrineMap = phase==='final'&&_mode==='shrine'&&_map;
   if(phase==='final'&&_mode==='parish'&&_map) _showParishNearbyMarkersOnMap(_nearbyCache,_myLat,_myLng,phase);
   const body=$('nearby-body');
   if(!body) return;
   const scrollTop=body.scrollTop||0;
+  if(shouldUpdateShrineMap) body.classList.add('oai-nearby-render-stable');
   body.innerHTML=sorted.map((o,i)=>{
     const idx=getIdx(o.x.p);
     const c=getColor(o.x.p);
@@ -4733,6 +4734,16 @@ function _renderNearbyDone(prelim,results,getIdx,getColor,getLabel,phase){
     return `<div class="nearby-item" onclick="selectItem(${idx},{fromNearby:true})"><div class="nearby-num" style="background:${c}!important">${i+1}</div><div class="nearby-info"><div class="nearby-name">${o.x.p.name}</div><div class="nearby-addr">${o.x.p.addr.substring(0,26)}${o.x.p.addr.length>26?'…':''}</div></div><div class="nearby-meta"><div class="nearby-type" style="background:${c}18!important;color:${c}!important">${lbl}</div><div class="nearby-dist" style="color:${isEst?'#aaa':c}!important">${distTxt}${dur}</div></div></div>`;
   }).join('');
   if(phase==='final') body.scrollTop=scrollTop;
+  if(shouldUpdateShrineMap){
+    // 성지 내주변 목록은 먼저 안정적으로 표시하고, 지도 전체 성지 마커/범위 조정은 다음 프레임에 실행한다.
+    // 목록 렌더링과 지도 bounds 변경이 같은 프레임에 겹치며 두 번 깜빡이는 현상을 줄이기 위한 순서 정리이다.
+    const run=function(){
+      try{ _showAllShrinesOnMapWithNearbyBounds(_nearbyCache,_myLat,_myLng); }catch(e){ console.warn('[가톨릭길동무]', e); }
+      setTimeout(function(){ try{ body.classList.remove('oai-nearby-render-stable'); }catch(_e){} }, 180);
+    };
+    if(window.requestAnimationFrame) requestAnimationFrame(function(){ setTimeout(run, 80); });
+    else setTimeout(run, 100);
+  }
 }
 function _loadNearbyShrines(lat,lng){
   _loadNearbyWithDist(lat,lng,SHRINES,p=>SHRINES.indexOf(p),p=>TC[p.type]||'#555',p=>p.type);

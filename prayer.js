@@ -571,9 +571,10 @@ window.prOpenDetail = prOpenDetail;
 window.prCloseDetail = window.prCloseDetail;
 
 /* ── 기도문 좌우 스와이프 (순환) — 웹사이트 기준 감도와 동일화 */
-(function(){
+function prBindSwipeTabs(){
   var el = document.getElementById('prayer-list-view');
-  if (!el) return;
+  if (!el || el.__prSwipeTabsBound) return;
+  el.__prSwipeTabsBound = true;
   var sx = 0, sy = 0;
   var THRESHOLD = 32;
   var HORIZONTAL_RATIO = 1.03;
@@ -622,7 +623,9 @@ window.prCloseDetail = window.prCloseDetail;
     if (!isHorizontalSwipe(dx, dy)) return;
     if (dx < 0) goNext(); else goPrev();
   }, { passive: true });
-})();
+}
+window.prBindSwipeTabs = prBindSwipeTabs;
+prBindSwipeTabs();
 /* lyTabColors: 미선언 전역 변수 - 참조하는 코드 없음, 제거 */
 
 window.initPrayerView = function(){
@@ -632,6 +635,7 @@ window.initPrayerView = function(){
   prApplyFont();
   prEnsureTabsVisible();
   prRenderList();
+  prBindSwipeTabs();
   // 상세뷰 초기화
   const detail = prG('prayer-detail');
   const listView = prG('prayer-list-view');
