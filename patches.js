@@ -627,8 +627,18 @@
       return;
     }
 
-    /* 커버: 토스트 → 두 번째에 종료. */
+    /* 커버: 토스트 → 두 번째에 종료.
+       단, WebView가 앱 재진입/복원 직후 발생시키는 오래된 popstate는
+       사용자의 실제 뒤로가기 명령이 아니므로 종료 안내를 띄우지 않는다. */
     if(!appActive()){
+      try{
+        if(typeof window._isCoverBackToastSuppressed === 'function' && window._isCoverBackToastSuppressed()){
+          if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady();
+          if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed();
+          armCoverBackTrap('cover-toast-suppressed', {force:true});
+          return;
+        }
+      }catch(e){ console.warn('[가톨릭길동무]', e); }
       var exiting = false;
       if(typeof window._showBackToast==='function') exiting = window._showBackToast() === true;
       if(!exiting){ armCoverBackTrap('cover-toast'); }
