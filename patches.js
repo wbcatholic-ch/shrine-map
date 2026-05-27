@@ -133,6 +133,22 @@
     }
   }
 
+  function handleExitResumeCover(reason){
+    try{
+      var pending = false;
+      if(typeof window._hasExitResumeCover === 'function') pending = window._hasExitResumeCover();
+      if(!pending && typeof window._isExitResumeSuppressing === 'function') pending = window._isExitResumeSuppressing();
+      if(!pending) return false;
+      var forced = false;
+      if(typeof window._forceCoverAfterExitResume === 'function') forced = window._forceCoverAfterExitResume(reason || 'exit-resume') === true;
+      if(!forced) callGTC();
+      try{ if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady(); }catch(_e){}
+      try{ if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed(); }catch(_e){}
+      try{ armCoverBackTrap((reason || 'exit-resume') + '-trap'); }catch(_e){}
+      return true;
+    }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
+  }
+
   /* ── 일반 모듈 뷰 닫기: Step 9-3 범위
      웹사이트·순례길·문의·관구교구 기본 화면은 모두 커버로 복귀한다.
      기도문/매일미사/성가는 각각 전용 흐름이 있으므로 여기서 처리하지 않는다. */
@@ -514,7 +530,11 @@
   }
 
   window.addEventListener('popstate', function(){
-    if(window._appExiting) return;
+    if(window._appExiting){
+      if(handleExitResumeCover('popstate-app-exiting')) return;
+      return;
+    }
+    if(handleExitResumeCover('popstate-exit-resume')) return;
 
     /* history.go(1)로 공통 trap을 복원하면서 발생한 popstate는
        어떤 화면 처리도 하지 않고 여기서 끝낸다. 이 순서가 중요하다. */
@@ -629,6 +649,7 @@
 
     /* 커버: 토스트 → 두 번째에 종료. */
     if(!appActive()){
+      if(handleExitResumeCover('cover-popstate-exit-resume')) return;
       var exiting = false;
       if(typeof window._showBackToast==='function') exiting = window._showBackToast() === true;
       if(!exiting){ armCoverBackTrap('cover-toast'); }
@@ -650,6 +671,7 @@
 
   /* Cordova 물리 백버튼 */
   document.addEventListener('backbutton', function(){
+    if(handleExitResumeCover('hardware-exit-resume')) return;
     if(handlePrayerBack('prayer-hardware-back')) return;
     if(closeRefreshDialog()){ try{ armCoverBackTrap('refresh-dialog-hardware', {force:true}); }catch(e){} return; }
     if(isGuideModalOpen()){
@@ -677,6 +699,7 @@
   // 트랩이 소실되면 다음 뒤로가기에서 앱이 탈출된다.
   window.addEventListener('pageshow', function(){
     try{
+      if(handleExitResumeCover('pageshow-exit-resume')) return;
       var st = history.state;
       if(st && st._p === 1) return;  // 트랩 유지 중이면 스킵
       if(!appActive()) armCoverBackTrap('pageshow-cover');
