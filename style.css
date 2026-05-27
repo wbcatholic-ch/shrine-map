@@ -2145,7 +2145,7 @@ html.oai-cover-booting #cover > * {
   flex-direction: column;
   align-items: stretch;
   justify-content: center;
-  gap: clamp(5px, calc(var(--cover-vh, 1vh) * 0.8), 10px);
+  gap: clamp(3px, calc(var(--cover-vh, 1vh) * 0.7), 6px);
   box-sizing: border-box;
 }
 
@@ -2864,6 +2864,7 @@ html.ios-device #cover-main-block {
   height: calc((var(--cover-vh, 1vh) * 100) - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - clamp(178px, calc(var(--cover-vh, 1vh) * 24), 222px));
   max-height: 670px;
   padding-bottom: 4px;
+  gap: clamp(3px, calc(var(--cover-vh, 1vh) * 0.7), 6px);
 }
 html.ios-device #cover .cover-card, html.ios-device #cover .cv-btn { padding: 7px; gap: 5px; }
 html.ios-device #cover .cover-emoji, html.ios-device #cover .cover-icon-wrap { font-size: 34px; }

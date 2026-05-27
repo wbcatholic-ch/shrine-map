@@ -626,6 +626,42 @@ function prBindSwipeTabs(){
 }
 window.prBindSwipeTabs = prBindSwipeTabs;
 prBindSwipeTabs();
+
+/* V1-31: 기도문 본문 좌우 스와이프 시 웹사이트와 같은 화살표 피드백만 복구.
+   본문 이동/뒤로가기/탭 전환 로직은 변경하지 않는다. */
+function prBindDetailSwipeArrow(){
+  var body = document.getElementById('prayer-detail-body');
+  if (!body || body.__prDetailSwipeArrowBound) return;
+  body.__prDetailSwipeArrowBound = true;
+
+  var sx = 0, sy = 0;
+  var THRESHOLD = 44;
+  var HORIZONTAL_RATIO = 1.18;
+
+  body.addEventListener('touchstart', function(e){
+    if(!e.touches || !e.touches[0]) return;
+    sx = e.touches[0].clientX;
+    sy = e.touches[0].clientY;
+  }, { passive: true });
+
+  body.addEventListener('touchend', function(e){
+    if (!e.changedTouches || !e.changedTouches[0]) return;
+    var detail = document.getElementById('prayer-detail');
+    if (!detail || !detail.classList.contains('show')) return;
+
+    var dx = e.changedTouches[0].clientX - sx;
+    var dy = e.changedTouches[0].clientY - sy;
+    if (Math.abs(dx) < THRESHOLD) return;
+    if (Math.abs(dx) < Math.abs(dy) * HORIZONTAL_RATIO) return;
+
+    if (typeof window.oaiSwipeAction === 'function') {
+      window.oaiSwipeAction(body, dx < 0 ? 'left' : 'right');
+    }
+  }, { passive: true });
+}
+window.prBindDetailSwipeArrow = prBindDetailSwipeArrow;
+prBindDetailSwipeArrow();
+
 /* lyTabColors: 미선언 전역 변수 - 참조하는 코드 없음, 제거 */
 
 window.initPrayerView = function(){
@@ -636,6 +672,7 @@ window.initPrayerView = function(){
   prEnsureTabsVisible();
   prRenderList();
   prBindSwipeTabs();
+  prBindDetailSwipeArrow();
   // 상세뷰 초기화
   const detail = prG('prayer-detail');
   const listView = prG('prayer-list-view');
