@@ -191,7 +191,8 @@ function attemptAppExit(){
   try{ if(navigator.app && typeof navigator.app.exitApp === 'function'){ navigator.app.exitApp(); return; } }catch(e){ console.warn('[가톨릭길동무]', e); }
   try{ window.open('', '_self'); window.close(); }catch(e){ console.warn('[가톨릭길동무]', e); }
   try{ document.documentElement.classList.add('app-exiting'); }catch(e){ console.warn('[가톨릭길동무]', e); }
-  setTimeout(function(){ try{ history.back(); }catch(_e){} }, 40);
+  // 타이머 ID를 전역에 보관한다. pagehide 시 취소하여 bfcache 복귀 후 history.back()이 재발화하는 것을 막는다.
+  window._appExitBackTimer = setTimeout(function(){ try{ history.back(); }catch(_e){} }, 40);
 }
 function closeExitDlg(){
   window._exitReady = false;
@@ -232,10 +233,20 @@ try{ sessionStorage.removeItem(SS.COVER_EXIT_ARMED_UNTIL); }catch(_e){}
 _suppressCoverBackToast('core-load', 1600);
 try{
   window.addEventListener('pagehide', function(){
+    // bfcache 진입 직전에 종료 상태를 완전히 초기화한다.
+    // 특히 attemptAppExit의 history.back() 타이머를 취소하지 않으면
+    // bfcache 복귀 후 타이머가 재개되어 이전 종료 흐름이 재연된다.
     _resetCoverExitReady();
     _clearCoverExitArmed();
+    try{ clearTimeout(window._appExitBackTimer); }catch(e){ console.warn('[가톨릭길동무]', e); }
+    try{ window._appExiting = false; }catch(e){ console.warn('[가톨릭길동무]', e); }
+    try{ var bt = document.getElementById('_bt'); if(bt) bt.remove(); }catch(e){ console.warn('[가톨릭길동무]', e); }
   }, true);
   window.addEventListener('pageshow', function(){
+    // bfcache 복귀 시 혹시 남은 종료 상태도 재확인하여 제거한다.
+    try{ clearTimeout(window._appExitBackTimer); }catch(e){ console.warn('[가톨릭길동무]', e); }
+    try{ window._appExiting = false; }catch(e){ console.warn('[가톨릭길동무]', e); }
+    try{ var bt = document.getElementById('_bt'); if(bt) bt.remove(); }catch(e){ console.warn('[가톨릭길동무]', e); }
     _suppressCoverBackToast('core-pageshow', 1400);
   }, true);
   document.addEventListener('visibilitychange', function(){
