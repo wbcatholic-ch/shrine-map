@@ -1413,7 +1413,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V1-14';
+    frame.src='diocese.html?v=V1-15';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1810,7 +1810,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V1-14';
+const _PARISH_ASSET_VERSION='V1-15';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -1973,7 +1973,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V1-14';
+const _PRAYER_ASSET_VERSION='V1-15';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2018,7 +2018,7 @@ try{ window.ensurePrayerModuleLoaded=ensurePrayerModuleLoaded; }catch(e){ consol
 let _RT_RAW = [];
 let _retreatRawLoaded = false;
 let _retreatDataLoadPromise = null;
-const _RETREAT_ASSET_VERSION='V1-14';
+const _RETREAT_ASSET_VERSION='V1-15';
 
 let RETREATS = [];
 function _buildRetreatList(raw){
@@ -2256,7 +2256,7 @@ const $=id=>document.getElementById(id);
 const $$=s=>document.querySelectorAll(s);
 const _GEO=navigator.geolocation;
 const _GO1={enableHighAccuracy:true,timeout:30000,maximumAge:30000};
-const _GO2={enableHighAccuracy:false,timeout:20000,maximumAge:0};
+const _GO2={enableHighAccuracy:false,timeout:25000,maximumAge:600000};
 const _GO3={enableHighAccuracy:false,timeout:40000,maximumAge:600000};
 const _EC=encodeURIComponent;
 const _NS='xmlns="http://www.w3.org/2000/svg"';
@@ -2267,7 +2267,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V1-14';
+const _SHRINE_ASSET_VERSION='V1-15';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -4390,6 +4390,34 @@ function _geoErrorMessage(err){
   if(err && err.code===3) return '위치 확인 시간이 초과되었습니다.\n' + _geoRuntimeGuideText();
   return '위치를 가져올 수 없습니다.\n' + _geoRuntimeGuideText();
 }
+const OAI_LAST_GEO_KEY='oai_catholic_way_last_geo_v1';
+function _saveLastGeo(lat,lng){
+  try{
+    const la=Number(lat), ln=Number(lng);
+    if(!isFinite(la)||!isFinite(ln)) return;
+    localStorage.setItem(OAI_LAST_GEO_KEY, JSON.stringify({lat:la,lng:ln,t:Date.now()}));
+  }catch(_e){}
+}
+function _readLastGeo(maxAgeMs){
+  try{
+    const raw=localStorage.getItem(OAI_LAST_GEO_KEY);
+    if(!raw) return null;
+    const o=JSON.parse(raw);
+    const la=Number(o&&o.lat), ln=Number(o&&o.lng), t=Number(o&&o.t||0);
+    if(!isFinite(la)||!isFinite(ln)||!t) return null;
+    if(maxAgeMs && Date.now()-t>maxAgeMs) return null;
+    return {lat:la,lng:ln,t:t};
+  }catch(_e){ return null; }
+}
+function _warmRefreshNearbyLocation(go){
+  if(!_GEO) return;
+  _requestCurrentPositionStable(function(p){
+    try{
+      _setMyLoc(p.coords.latitude,p.coords.longitude);
+      if(typeof go==='function') go(p.coords.latitude,p.coords.longitude);
+    }catch(e){ console.warn('[가톨릭길동무] 위치 배경 갱신 실패', e); }
+  }, function(){}, {noRefine:true});
+}
 function _requestCurrentPositionStable(onSuccess,onError,opts){
   opts = opts || {};
   if(!_GEO){ if(onError) onError({code:0,message:'geolocation unavailable'}); return; }
@@ -4515,6 +4543,7 @@ function _showCurrentParishDioIfIdle(){
 }
 function _setMyLoc(lat,lng){
   _myLat=lat;_myLng=lng;
+  _saveLastGeo(lat,lng);
   if(typeof kakao==='undefined'||!_map) return;  // 지도 미로드 시 무시
   if(_myMkr) _myMkr.setMap(null);
   const svg=`<svg ${_NS} width='28' height='28' viewBox='0 0 28 28'><circle cx='14' cy='14' r='12' fill='#1a73e8' opacity='.18'/><circle cx='14' cy='14' r='7' fill='#1a73e8'/><circle cx='14' cy='14' r='3.5' fill='white'/></svg>`;
@@ -4556,22 +4585,35 @@ function _loadNearby(opts){
 
   const go=(lat,lng)=>{
     _myLat=lat;_myLng=lng;
+    _saveLastGeo(lat,lng);
     if(_mode==='shrine') _loadNearbyShrines(lat,lng);
     else if(_mode==='retreat') _loadNearbyRetreats(lat,lng);
     else _loadNearbyParishes(lat,lng);
   };
 
-  if(_myLat) { go(_myLat,_myLng); return; }
+  if(_myLat && _myLng) { go(_myLat,_myLng); return; }
 
   if(!opts.request){
     body.innerHTML='<div class="empty-msg">📍 위치 권한 상태를 확인하는 중...</div>';
     _geoPermissionState().then(function(state){
-      if(_myLat){ go(_myLat,_myLng); return; }
+      if(_myLat && _myLng){ go(_myLat,_myLng); return; }
       if(state==='granted'){
+        const cached=_readLastGeo(12*60*60*1000);
+        if(cached){
+          go(cached.lat,cached.lng);
+          setTimeout(function(){ try{ _warmRefreshNearbyLocation(go); }catch(e){ console.warn('[가톨릭길동무] 저장 위치 갱신 실패', e); } }, 500);
+          return;
+        }
+        body.innerHTML='<div class="empty-msg">📍 현재 위치를 준비하는 중입니다...<br>잠시만 기다려 주세요.</div>';
         setTimeout(function(){
-          if(_myLat && _myLng){ go(_myLat,_myLng); return; }
-          _loadNearby({request:true, granted:true});
-        }, 600);
+          try{
+            if(_myLat && _myLng){ go(_myLat,_myLng); return; }
+            _loadNearby({request:true, granted:true, retryCount:0, fromInitial:true});
+          }catch(e){
+            console.warn('[가톨릭길동무] 첫 위치 확인 시작 실패', e);
+            body.innerHTML=_nearbyGeoActionHtml('unknown');
+          }
+        }, 1800);
       }else{
         body.innerHTML=_nearbyGeoActionHtml(state);
       }
@@ -4581,7 +4623,11 @@ function _loadNearby(opts){
     return;
   }
 
-  body.innerHTML='<div class="empty-msg">📍 위치를 확인하는 중...</div>';
+  const retryCount = Number(opts.retryCount || 0);
+  body.innerHTML = retryCount
+    ? '<div class="empty-msg">📍 위치 응답이 늦어 자동으로 다시 확인하는 중입니다...<br>잠시만 기다려 주세요.</div>'
+    : '<div class="empty-msg">📍 위치를 확인하는 중...</div>';
+
   _requestCurrentPositionStable(function(p){
     _setMyLoc(p.coords.latitude,p.coords.longitude);
     go(p.coords.latitude,p.coords.longitude);
@@ -4590,17 +4636,25 @@ function _loadNearby(opts){
       go(_myLat,_myLng);
       return;
     }
-    if(!opts.autoRetryDone && err && (err.code===2 || err.code===3)){
-      body.innerHTML='<div class="empty-msg">📍 위치 응답이 늦어 다시 확인하는 중...</div>';
+    const cached=_readLastGeo(12*60*60*1000);
+    if(cached && retryCount>=1){
+      go(cached.lat,cached.lng);
+      setTimeout(function(){ try{ _warmRefreshNearbyLocation(go); }catch(e){ console.warn('[가톨릭길동무] 저장 위치 갱신 실패', e); } }, 800);
+      return;
+    }
+    if(err && (err.code===2 || err.code===3) && retryCount<3){
+      const delays=[2200,4500,8000];
+      const delay=delays[Math.min(retryCount,delays.length-1)];
+      body.innerHTML='<div class="empty-msg">📍 위치 응답이 늦어 자동으로 다시 확인하는 중입니다...<br>잠시만 기다려 주세요.</div>';
       setTimeout(function(){
         try{
           if(_myLat && _myLng){ go(_myLat,_myLng); return; }
-          _loadNearby({request:true, granted:opts.granted===true, autoRetryDone:true});
+          _loadNearby({request:true, granted:opts.granted===true, retryCount:retryCount+1});
         }catch(e){
           console.warn('[가톨릭길동무] 위치 자동 재시도 실패', e);
           body.innerHTML=_nearbyGeoActionHtml(null, err);
         }
-      }, 1400);
+      }, delay);
       return;
     }
     body.innerHTML=_nearbyGeoActionHtml(null, err);
