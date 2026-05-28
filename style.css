@@ -5568,3 +5568,53 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
 #sheet-route .rs-lbl.empty{
   font-size:12px!important;
 }
+
+
+/* V1-46: 일반 인포카드 하단 안정화 + 길찾기 결과 카드 글자 축소 + 전화 외 이모지 제거 후 버튼 정렬 */
+#app #info-card {
+  background: linear-gradient(180deg, #fffdf9 0%, #f9f2e9 78%, #f6efe6 100%) !important;
+}
+#app #info-card::after {
+  content: "" !important;
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  height: calc(env(safe-area-inset-bottom, 0px) + 18px) !important;
+  background: #f6efe6 !important;
+  pointer-events: none !important;
+  z-index: -1 !important;
+}
+#app #info-card .ic-body {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 14px) !important;
+}
+#app #info-card .ic-btn-row,
+#app #info-card .ic-links {
+  gap: 8px !important;
+}
+#app #info-card .ic-tel-btn,
+#app #info-card .ic-route-btn,
+#app #info-card .ic-link-btn,
+#app #info-card .btn-kakao-nav {
+  font-size: 14px !important;
+  letter-spacing: -.03em !important;
+}
+#app #sheet-route .rs-stat {
+  padding: 11px 8px !important;
+}
+#app #sheet-route .rs-stat-lbl {
+  font-size: 10.5px !important;
+  margin-bottom: 5px !important;
+}
+#app #sheet-route .rs-stat-val {
+  font-size: 21px !important;
+  line-height: 1.04 !important;
+}
+#app #sheet-route .rs-stat-unit {
+  font-size: 12px !important;
+}
+#app #sheet-route .btn-kakao-route,
+#app #sheet-route .btn-route-reset {
+  font-size: 13.5px !important;
+  font-weight: 800 !important;
+}
