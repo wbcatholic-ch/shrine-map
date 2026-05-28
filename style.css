@@ -5570,7 +5570,7 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
 }
 
 
-/* V1-47: 일반 인포카드 하단 안정화 + 길찾기 결과 카드 글자 축소 + 전화 외 이모지 제거 후 버튼 정렬 */
+/* V1-48: 일반 인포카드 하단 안정화 + 길찾기 결과 카드 글자 축소 + 전화 외 이모지 제거 후 버튼 정렬 */
 #app #info-card {
   background: linear-gradient(180deg, #fffdf9 0%, #f9f2e9 78%, #f6efe6 100%) !important;
 }
@@ -5580,13 +5580,13 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
   left: 0 !important;
   right: 0 !important;
   bottom: 0 !important;
-  height: calc(env(safe-area-inset-bottom, 0px) + 18px) !important;
+  height: calc(env(safe-area-inset-bottom, 0px) + 5px) !important;
   background: #f6efe6 !important;
   pointer-events: none !important;
   z-index: -1 !important;
 }
 #app #info-card .ic-body {
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 14px) !important;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 5px) !important;
 }
 #app #info-card .ic-btn-row,
 #app #info-card .ic-links {
@@ -5620,7 +5620,7 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
 }
 
 
-/* V1-47: 요청 6항목 UI 미세 조정
+/* V1-48: 요청 6항목 UI 미세 조정
    1) 성당·성지·피정의집 일반 인포카드 장소명 확대
    2) 첫 진입 십자가는 index.html의 intro CSS에서 30% 확대
    3) 피정의집 지도 로딩 아이콘은 app.js에서 십자가로 통일
