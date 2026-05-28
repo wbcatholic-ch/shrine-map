@@ -1,7 +1,7 @@
 <!DOCTYPE html>
-<html lang="ko" class="oai-font-global" style="background:#0e1535;">
+<html lang="ko" class="oai-font-global" style="background:#f5f0e8;">
 <head>
-<style id="oai-first-entry-bg">html,body{margin:0;width:100%;min-height:100%;background:#0e1535;color-scheme:light;}body{background:#0e1535;}</style>
+<style id="oai-first-entry-bg">html,body{margin:0;width:100%;min-height:100%;background:#f5f0e8;color-scheme:light;}body{background:#f5f0e8;}</style>
 <style id="oai-refresh-veil-early-style">
 
 html.oai-stability-veil { background:#f5f0e8 !important; }
@@ -14,6 +14,13 @@ html.oai-stability-veil::after { content:""; position:fixed; left:50%; top:50%; 
 @keyframes oaiStabilityVeilIn { from { opacity:0; } to { opacity:1; } }
 @keyframes oaiStabilityVeilOut { from { opacity:1; } to { opacity:0; } }
 @keyframes oaiStabilitySpin { to { transform:rotate(360deg); } }
+</style>
+<style id="oai-first-entry-intro-style">
+html.oai-first-entry-intro, html.oai-first-entry-intro body { background:#f5f0e8 !important; }
+html.oai-first-entry-intro::before { content:""; position:fixed; inset:0; z-index:2147483400; background:#f5f0e8; pointer-events:none; opacity:1; animation:oaiFirstIntroBg 1.42s ease-in-out both; }
+html.oai-first-entry-intro::after { content:"✝"; position:fixed; left:50%; top:50%; z-index:2147483401; transform:translate(-50%,-50%) scale(.92); color:#b7791f; font-size:clamp(86px,24vw,132px); line-height:1; font-weight:800; text-shadow:0 10px 26px rgba(80,55,16,.13); pointer-events:none; opacity:0; animation:oaiFirstIntroCross 1.42s ease-in-out both; }
+@keyframes oaiFirstIntroBg { 0%,72%{opacity:1;} 100%{opacity:0;} }
+@keyframes oaiFirstIntroCross { 0%{opacity:0; transform:translate(-50%,-50%) scale(.88);} 18%{opacity:1; transform:translate(-50%,-50%) scale(1);} 66%{opacity:1; transform:translate(-50%,-50%) scale(1);} 100%{opacity:0; transform:translate(-50%,-50%) scale(1.04);} }
 </style>
 
 <script>
@@ -209,10 +216,34 @@ html.oai-stability-veil::after { content:""; position:fixed; left:50%; top:50%; 
     isInternalNoEffectReturn = sessionStorage.getItem('oai_internal_return_no_effect_once') === '1' || (internalUntil && internalNow < internalUntil);
   }catch(_e){}
 
+  function storageFlag(key){ try{ return sessionStorage.getItem(key); }catch(_e){ return null; } }
+  function storageSet(key, value){ try{ sessionStorage.setItem(key, value); }catch(_e){} }
+  function shouldShowFirstIntro(){
+    try{
+      if(isInternalNoEffectReturn) return false;
+      if(storageFlag('oai_first_intro_seen_session') === '1') return false;
+      var nowTs = Date.now ? Date.now() : new Date().getTime();
+      var refreshUntil = parseInt(storageFlag('oai_refresh_veil_until') || '0', 10) || 0;
+      if(refreshUntil && refreshUntil > nowTs) return false;
+      var extTs = parseInt(storageFlag('oai_external_nav_started_at') || '0', 10) || 0;
+      var extPending = storageFlag('oai_external_nav_pending') === '1' || storageFlag('oai_external_nav_pagehide') === '1';
+      if(extPending || (extTs && (nowTs - extTs) < 10 * 60 * 1000)) return false;
+      return true;
+    }catch(_e){ return !isInternalNoEffectReturn; }
+  }
+
+  var showFirstIntro = shouldShowFirstIntro();
   if(!isInternalNoEffectReturn){
     root.classList.add('oai-cover-booting');
+    if(showFirstIntro){
+      storageSet('oai_first_intro_seen_session', '1');
+      root.classList.add('oai-first-entry-intro');
+      setTimeout(function(){
+        try{ root.classList.remove('oai-first-entry-intro'); }catch(_e){}
+      }, 1500);
+    }
   }else{
-    root.classList.remove('oai-cover-booting');
+    root.classList.remove('oai-cover-booting','oai-first-entry-intro');
     root.classList.add('oai-internal-no-return-effect');
     setTimeout(function(){
       try{ root.classList.remove('oai-internal-no-return-effect'); }catch(_e){}
@@ -371,7 +402,7 @@ window.APP_CONFIG = {
 <meta name="theme-color" content="#0e1535">
 <meta name="theme-color" media="(prefers-color-scheme: light)" content="#0e1535">
 <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0e1535">
-<script id="oai-status-bar-theme-lock-V1-40">
+<script id="oai-status-bar-theme-lock-V1-41">
 (function(){
   'use strict';
   var COLOR='#0e1535';
@@ -387,28 +418,28 @@ window.APP_CONFIG = {
   window.addEventListener('focus', lockStatusTheme, {passive:true});
 })();
 </script>
-<link rel="manifest" href="manifest.json?v=V1-40">
-<link rel="apple-touch-icon" href="icon-192x192.png?v=V1-40">
+<link rel="manifest" href="manifest.json?v=V1-41">
+<link rel="apple-touch-icon" href="icon-192x192.png?v=V1-41">
 <meta name="format-detection" content="telephone=no">
 <meta name="description" content="가톨릭길동무 - 가톨릭 신앙생활 종합 앱">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="가톨릭길동무">
 <meta property="og:title" content="가톨릭길동무">
 <meta property="og:description" content="성지 · 성당 · 기도문 · 순례길 · 가톨릭 웹사이트 안내">
-<meta property="og:image" content="icon-512x512.png?v=V1-40">
+<meta property="og:image" content="icon-512x512.png?v=V1-41">
 <meta property="og:image:width" content="512">
 <meta property="og:image:height" content="512">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="가톨릭길동무">
 <meta name="twitter:description" content="성지 · 성당 · 기도문 · 순례길 · 가톨릭 웹사이트 안내">
-<meta name="twitter:image" content="icon-512x512.png?v=V1-40">
+<meta name="twitter:image" content="icon-512x512.png?v=V1-41">
 <title>가톨릭길동무</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 fill=%22%230e1535%22/%3E%3Ctext x=%226%22 y=%2226%22 font-size=%2224%22 fill=%22%23d4aa6a%22%3E%E2%9C%9D%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
 
-<style id="oai-initial-bg">html,body{margin:0;width:100%;height:100%;min-height:100%;background:#0e1535;overflow:hidden;color-scheme:light;}#cover{background:#0e1535;min-height:100%;}#app{background:#f8f6f2;display:none;}</style>
-<link rel="stylesheet" href="style.css?v=V1-40">
+<style id="oai-initial-bg">html,body{margin:0;width:100%;height:100%;min-height:100%;background:#f5f0e8;overflow:hidden;color-scheme:light;}#cover{background:#f5f0e8;min-height:100%;}#app{background:#f8f6f2;display:none;}</style>
+<link rel="stylesheet" href="style.css?v=V1-41">
 </head>
 <body>
 <div id="missa-view" role="dialog" aria-modal="true" aria-label="매일미사">
@@ -479,7 +510,7 @@ window.APP_CONFIG = {
   </div>
 </div>
 <div id="cover">
-<div id="oai-build-marker" aria-label="현재 버전" role="status" hidden aria-hidden="true">V1-40</div>
+<div id="oai-build-marker" aria-label="현재 버전" role="status" hidden aria-hidden="true">V1-41</div>
   <div id="cv-pull-modern" aria-hidden="true">
   <div class="cv-pull-ring">
     <svg viewBox="0 0 24 24" class="cv-pull-icon">
@@ -545,8 +576,8 @@ window.APP_CONFIG = {
       <div id="cover-action-row" class="cover-action-single">
         <div id="cover-update-box">
           <button id="cover-update-btn" class="cover-refresh-main-btn" type="button"
-                  data-target-version="V1-40"
-                  aria-label="V1-40 앱 새로고침"><span class="refresh-version-main">V1</span><span class="refresh-version-sub">-39</span> 새로고침</button>
+                  data-target-version="V1-41"
+                  aria-label="V1-41 앱 새로고침"><span class="refresh-version-main">V1</span><span class="refresh-version-sub">-41</span> 새로고침</button>
           <div id="cover-update-hint" role="status" aria-live="polite"></div>
         </div>
       </div>
@@ -644,7 +675,7 @@ window.APP_CONFIG = {
         <span class="cover-menu-icon">📘</span>
         <span class="cover-menu-text">주요기능</span>
       </button>
-      <a id="cover-menu-privacy-link" class="cover-menu-item" href="privacy.html?v=V1-40">
+      <a id="cover-menu-privacy-link" class="cover-menu-item" href="privacy.html?v=V1-41">
         <span class="cover-menu-icon">🛡</span>
         <span class="cover-menu-text">개인정보처리방침</span>
       </a>
@@ -656,9 +687,9 @@ window.APP_CONFIG = {
   </div>
 </div>
 
-<script src="constants.js?v=V1-40"></script>
-<script src="core.js?v=V1-40"></script>
-<script src="app.js?v=V1-40"></script>
+<script src="constants.js?v=V1-41"></script>
+<script src="core.js?v=V1-41"></script>
+<script src="app.js?v=V1-41"></script>
 <div id="oai-category-entry-veil" aria-hidden="true"></div>
 <div id="app"><div id="tabbar"><button id="tab-btn-nearby" class="tab-btn" data-tab="nearby"><span class="tab-icon">📍</span><span id="tab-nearby-lbl">내주변</span></button><button id="tab-btn-list" class="tab-btn" data-tab="list"><span class="tab-icon">📋</span><span id="tab-list-lbl">목록</span></button><button id="tab-btn-region" class="tab-btn" data-tab="region"><span class="tab-icon">🔍</span>지역검색
     </button><button id="tab-btn-route" class="tab-btn" data-tab="route"><span class="tab-icon">🧭</span>길찾기
@@ -734,13 +765,13 @@ window.APP_CONFIG = {
     </div>
   </div>
 </div>
-<script src="web.js?v=V1-40"></script>
+<script src="web.js?v=V1-41"></script>
 
 <div id="qna-view" role="dialog" aria-modal="true" aria-label="문의·건의" class="module-view"><div class="module-bar qna"><div class="module-bar-main"><div class="module-bar-ico">✝</div><div class="module-bar-txt"><div class="module-bar-title">문의·건의</div><div class="module-bar-sub">질문, 오류, 수정요청을 남겨주세요</div></div></div><button id="qna-close-btn" class="module-close" aria-label="문의·건의 닫기">×</button></div><div class="qna-body"><div class="qna-tabs"><button id="qna-tab-write" class="qna-tab on" type="button">작성</button></div><div class="qna-list" id="qna-list"></div></div></div>
 
-<script src="patches.js?v=V1-40"></script>
+<script src="patches.js?v=V1-41"></script>
 
-<script src="sw-update.js?v=V1-40"></script>
+<script src="sw-update.js?v=V1-41"></script>
 
 </body>
 </html>
