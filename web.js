@@ -583,6 +583,9 @@
         try{
           const lv = trailState.map.getLevel();
           if(Number.isFinite(lv) && lv < 12) trailState.map.setLevel(12);
+          // 백령도·울릉도 같은 극단 외곽 섬을 기준으로 보지 않는 우리나라 중심감에 맞춰
+          // 순례길 지도 초기 시야를 약간 서쪽으로 보정한다. 마커 데이터와 기능은 변경하지 않는다.
+          trailState.map.setCenter(new kakao.maps.LatLng(36.05, 127.45));
         }catch(e){ console.warn("[가톨릭길동무]", e); }
       }, 60);
     }catch(e){ console.warn("[가톨릭길동무]", e); }
