@@ -5296,7 +5296,7 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
   }
 }
 
-/* V1-24: cover footer down-tune, trail sheet background fill, info-card action text size final tuning */
+/* V1-25: cover footer visibility and category block position retune */
 #cover {
   --cover-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + clamp(18px, calc(var(--cover-vh, 1vh) * 2.2), 28px)) !important;
   padding-bottom: var(--cover-bottom-safe) !important;
@@ -5304,13 +5304,13 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
 }
 #cover-main-block {
   padding-bottom: clamp(0px, calc(var(--cover-vh, 1vh) * 0.45), 5px) !important;
-  transform: translateY(clamp(8px, calc(var(--cover-vh, 1vh) * 1.45), 14px)) !important;
+  transform: translateY(clamp(-2px, calc(var(--cover-vh, 1vh) * -0.2), 0px)) !important;
 }
 #cover-bottom-note {
   position: fixed !important;
   left: 0 !important;
   right: 0 !important;
-  bottom: calc(env(safe-area-inset-bottom, 0px) - clamp(58px, calc(var(--cover-vh, 1vh) * 7.2), 82px)) !important;
+  bottom: calc(env(safe-area-inset-bottom, 0px) - clamp(22px, calc(var(--cover-vh, 1vh) * 2.6), 36px)) !important;
   transform: none !important;
   width: 100% !important;
   max-width: none !important;
@@ -5349,9 +5349,9 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
   }
   #cover-main-block {
     padding-bottom: 0 !important;
-    transform: translateY(clamp(6px, calc(var(--cover-vh, 1vh) * 1.2), 11px)) !important;
+    transform: translateY(clamp(-1px, calc(var(--cover-vh, 1vh) * -0.15), 0px)) !important;
   }
   #cover-bottom-note {
-    bottom: calc(env(safe-area-inset-bottom, 0px) - clamp(52px, calc(var(--cover-vh, 1vh) * 6.4), 74px)) !important;
+    bottom: calc(env(safe-area-inset-bottom, 0px) - clamp(18px, calc(var(--cover-vh, 1vh) * 2.3), 30px)) !important;
   }
 }
