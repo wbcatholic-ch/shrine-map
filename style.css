@@ -247,7 +247,7 @@ html, body {
   color: var(--text-main);
   font-family: 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
   padding-top: var(--cover-top-safe);
-  padding-bottom: var(--cover-bottom-safe);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 44px);
   box-sizing: border-box;
   height: var(--cover-h);
   min-height: var(--cover-h);
@@ -1147,14 +1147,14 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active {
   border: 1.5px solid #c5d9f5;
   border-radius: 10px;
   padding: 0 8px;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 800;
   color: #1565c0;
   height: 46px;
   white-space: nowrap;
   overflow: hidden;
 }
-.ic-tel-icon { font-size: 18px; }
+.ic-tel-icon { font-size: 16px; }
 .ic-route-btn {
   flex: 1;
   background: var(--pilgrim, #1f2a44);
@@ -1162,7 +1162,7 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active {
   border: none;
   border-radius: 10px;
   padding: 0 8px;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 800;
   cursor: pointer;
   font-family: inherit;
@@ -1179,7 +1179,7 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active {
   height: 46px;
   padding: 0 4px;
   border-radius: 10px;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 800;
   text-align: center;
   cursor: pointer;
@@ -1204,7 +1204,7 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active {
   border-radius: 10px;
   border: none;
   cursor: pointer;
-  font-size: 16px;
+  font-size: 14px;
   font-weight: 800;
   font-family: inherit;
   background: #fee500;
@@ -1705,7 +1705,8 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, #3F6F5A, #4F846C
 .trail-url { font-size: 11px; color: #2563eb; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
 .trail-arr { font-size: 14px; color: #94a3b8; flex-shrink: 0; margin-left: 6px; }
 .trail-loc-btn { position: absolute; right: 14px; bottom: calc(18px + env(safe-area-inset-bottom, 0)); z-index: 5; background: rgba(255,255,255,.94); border: 1.5px solid #dde3ee; border-radius: 24px; box-shadow: 0 2px 10px rgba(0,0,0,.12); padding: 12px 16px; display: flex; align-items: center; gap: 6px; font-family: inherit; font-size: 13px; font-weight: 700; color: #2563eb; cursor: pointer; }
-.trail-sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 6; background: linear-gradient(180deg, #fffdf9, #f6efe4); border-radius: 26px; border-top: 1px solid #eadfce; box-shadow: 0 -16px 32px rgba(0,0,0,.18); padding: 0 0 0; transform: translateY(110%); transition: transform .25s cubic-bezier(.4,0,.2,1); pointer-events: none; overflow: visible; height: auto; }
+.trail-sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 6; background: linear-gradient(180deg, #fffdf9, #f6efe4); border-radius: 26px 26px 0 0; border-top: 1px solid #eadfce; box-shadow: 0 -16px 32px rgba(0,0,0,.18); padding: 0 0 0; transform: translateY(110%); transition: transform .25s cubic-bezier(.4,0,.2,1); pointer-events: none; overflow: visible; height: auto; }
+.trail-sheet::after { content: ""; position: absolute; left: 0; right: 0; bottom: calc(-1 * (env(safe-area-inset-bottom, 0px) + 18px)); height: calc(env(safe-area-inset-bottom, 0px) + 20px); background: #f6efe4; pointer-events: none; }
 .trail-sheet.open { transform: none; pointer-events: all; }
 .trail-sh-handle { width: 36px; height: 4px; border-radius: 2px; background: #e8ecf3; margin: 10px auto 0; }
 .trail-sh-close { position: absolute; top: 12px; right: 14px; width: 30px; height: 30px; border-radius: 50%; background: #f1f5f9; border: 1px solid #e2e8f0; cursor: pointer; font-size: 20px; font-weight: 900; line-height: 1; color: #64748b; display: flex; align-items: center; justify-content: center; }
@@ -2145,6 +2146,7 @@ html.oai-cover-booting #cover > * {
   justify-content: center;
   gap: clamp(5px, calc(var(--cover-vh, 1vh) * 0.8), 10px);
   box-sizing: border-box;
+  transform: translateY(clamp(8px, calc(var(--cover-vh, 1vh) * 1.6), 16px));
 }
 
 .cover-grid {
@@ -2356,15 +2358,15 @@ html.app-active #cover-action-row { display: none; }
 }
 
 #cover-bottom-note {
-  position: relative;
-  left: auto;
-  right: auto;
-  bottom: auto;
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 10px);
   flex: 0 0 auto;
   width: 100%;
-  max-width: 720px;
-  margin: clamp(8px, calc(var(--cover-vh, 1vh) * 1.2), 14px) auto 0;
-  padding: 0 22px 0 60px;
+  max-width: none;
+  margin: 0 auto;
+  padding: 0 18px;
   text-align: center;
   font-size: clamp(7.8px, calc(var(--cover-vh, 1vh) * 1.1), 9px);
   font-weight: 500;
@@ -2374,6 +2376,7 @@ html.app-active #cover-action-row { display: none; }
   pointer-events: none;
   z-index: 130;
   box-sizing: border-box;
+  transform: none;
 }
 #cover #oai-build-marker {
   position: fixed;
@@ -5252,7 +5255,7 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
    - 문의/개인정보 상단 여백은 V1-19의 약 50%로 줄인다.
    - 커버 내용은 V1-19보다 조금 더 아래로 둔다. */
 
-/* V1-22: Android 209 cover/trail/qna final retune
+/* V1-23: Android 209 cover/trail/qna final retune
    - Cover notice stays centered above the Android navigation area without left shift.
    - Refresh remains with the category block, but the lower gap is reduced.
    - Pilgrimage route sheet is lifted slightly from the very bottom. */
@@ -5290,5 +5293,64 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
   }
   #cover-bottom-note {
     bottom: calc(env(safe-area-inset-bottom, 0px) + 8px) !important;
+  }
+}
+
+/* V1-23: cover bottom/footer, trail sheet background fill, info-card action text size final tuning */
+#cover {
+  --cover-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + clamp(34px, calc(var(--cover-vh, 1vh) * 4.2), 44px)) !important;
+  padding-bottom: var(--cover-bottom-safe) !important;
+}
+#cover-main-block {
+  padding-bottom: clamp(0px, calc(var(--cover-vh, 1vh) * 0.45), 5px) !important;
+  transform: translateY(clamp(8px, calc(var(--cover-vh, 1vh) * 1.45), 14px)) !important;
+}
+#cover-bottom-note {
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 6px) !important;
+  transform: none !important;
+  width: 100% !important;
+  max-width: none !important;
+  margin: 0 !important;
+  padding: 0 16px !important;
+  text-align: center !important;
+  box-sizing: border-box !important;
+}
+.trail-sheet {
+  border-radius: 26px 26px 0 0 !important;
+  background: linear-gradient(180deg, #fffdf9, #f6efe4) !important;
+}
+.trail-sheet::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: calc(-1 * (env(safe-area-inset-bottom, 0px) + 26px));
+  height: calc(env(safe-area-inset-bottom, 0px) + 30px);
+  background: #f6efe4;
+  pointer-events: none;
+}
+#app #info-card .ic-tel-btn,
+#app #info-card .ic-route-btn,
+#app #info-card .ic-link-btn,
+#app #info-card .btn-kakao-nav {
+  font-size: 14px !important;
+  letter-spacing: -.035em !important;
+}
+#app #info-card .ic-tel-icon {
+  font-size: 16px !important;
+}
+@media (max-height: 740px) {
+  #cover {
+    --cover-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + clamp(32px, calc(var(--cover-vh, 1vh) * 4.0), 40px)) !important;
+  }
+  #cover-main-block {
+    padding-bottom: 0 !important;
+    transform: translateY(clamp(6px, calc(var(--cover-vh, 1vh) * 1.2), 11px)) !important;
+  }
+  #cover-bottom-note {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 5px) !important;
   }
 }
