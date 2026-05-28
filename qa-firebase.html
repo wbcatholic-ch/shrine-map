@@ -40,7 +40,7 @@
     --fs-header:22px;
     --fs-tab:15px;
     --fs-sub:10px;
-    --qa-top-gap: calc(24px + env(safe-area-inset-top, 0px));
+    --qa-top-gap: env(safe-area-inset-top, 0px);
   }
   html, body { height: 100%; overflow: hidden; }
   body {
@@ -100,9 +100,9 @@
     min-height: 36px;
     padding: 0 12px;
     border-radius: 18px;
-    background: #fff;
+    background: var(--blue);
     border: none;
-    color: #1565c0;
+    color: #fff;
     font-family: 'Noto Sans KR', sans-serif;
     font-size: 13px;
     font-weight: 700;
@@ -346,9 +346,9 @@
 
 
 
-  /* V1-41: Android WebView에서 문의·글쓰기 화면 상단이 상태바에 붙지 않도록 여백 확보 */
+  /* V1-42: 문의/글쓰기 상단은 헤더의 상태바 여백만 사용하고 본문은 기본 여백으로 복귀 */
   #write-view{
-    padding-top:22px!important;
+    padding-top:16px!important;
   }
 
 </style>
@@ -866,10 +866,10 @@ showView('list-view', { historyMode:'replace' });
 subscribeList();
 </script>
 
-<script id="oai-cache-lifecycle-V1-41">
+<script id="oai-cache-lifecycle-V1-42">
 (function(){
   'use strict';
-  var APP_VERSION = 'V1-41';
+  var APP_VERSION = 'V1-42';
   if('serviceWorker' in navigator){
     try{ navigator.serviceWorker.register('./sw.js?v=' + encodeURIComponent(APP_VERSION)).then(function(reg){try{reg.update();}catch(e){}}).catch(function(){}); }catch(e){}
   }
