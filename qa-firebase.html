@@ -346,9 +346,57 @@
 
 
 
-  /* V1-46: 문의/글쓰기 상단은 헤더의 상태바 여백만 사용하고 본문은 기본 여백으로 복귀 */
+  /* V1-47: 문의/글쓰기 상단은 헤더의 상태바 여백만 사용하고 본문은 기본 여백으로 복귀 */
   #write-view{
     padding-top:16px!important;
+  }
+
+
+  /* V1-47: 문의·건의 UI 미세 조정 */
+  #write-btn {
+    height: 40px !important;
+    min-height: 40px !important;
+    padding: 0 16px !important;
+    border-radius: 20px !important;
+    font-size: 14px !important;
+    font-weight: 800 !important;
+    background: var(--blue) !important;
+    color: #fff !important;
+    box-shadow: 0 4px 12px rgba(0,0,0,.24) !important;
+  }
+  #filter-bar {
+    gap: 4px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+  #filter-bar .filter-btn,
+  .filter-btn {
+    min-width: 56px !important;
+    padding-left: 6px !important;
+    padding-right: 6px !important;
+    letter-spacing: -.04em !important;
+  }
+  .cat-row {
+    gap: 5px !important;
+  }
+  .cat-opt {
+    padding: 6px 11px !important;
+    font-size: 15px !important;
+    letter-spacing: -.04em !important;
+  }
+  #f-title::placeholder,
+  #f-content::placeholder {
+    font-size: 14px !important;
+    color: var(--gray-400) !important;
+    opacity: 1 !important;
+  }
+  .notice-txt {
+    font-size: 13px !important;
+    line-height: 1.55 !important;
+    color: var(--gray-400) !important;
+  }
+  .char-count {
+    font-size: 13px !important;
   }
 
 </style>
@@ -866,10 +914,10 @@ showView('list-view', { historyMode:'replace' });
 subscribeList();
 </script>
 
-<script id="oai-cache-lifecycle-V1-46">
+<script id="oai-cache-lifecycle-V1-47">
 (function(){
   'use strict';
-  var APP_VERSION = 'V1-46';
+  var APP_VERSION = 'V1-47';
   if('serviceWorker' in navigator){
     try{ navigator.serviceWorker.register('./sw.js?v=' + encodeURIComponent(APP_VERSION)).then(function(reg){try{reg.update();}catch(e){}}).catch(function(){}); }catch(e){}
   }
