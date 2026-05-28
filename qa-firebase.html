@@ -40,7 +40,7 @@
     --fs-header:22px;
     --fs-tab:15px;
     --fs-sub:10px;
-    --qa-top-gap: calc(10px + env(safe-area-inset-top, 0px));
+    --qa-top-gap: calc(24px + env(safe-area-inset-top, 0px));
   }
   html, body { height: 100%; overflow: hidden; }
   body {
@@ -342,6 +342,13 @@
   body.returning-to-cover * {
     transition: none !important;
     animation: none !important;
+  }
+
+
+
+  /* V1-40: Android WebView에서 문의·글쓰기 화면 상단이 상태바에 붙지 않도록 여백 확보 */
+  #write-view{
+    padding-top:22px!important;
   }
 
 </style>
@@ -859,10 +866,10 @@ showView('list-view', { historyMode:'replace' });
 subscribeList();
 </script>
 
-<script id="oai-cache-lifecycle-V1-39">
+<script id="oai-cache-lifecycle-V1-40">
 (function(){
   'use strict';
-  var APP_VERSION = 'V1-39';
+  var APP_VERSION = 'V1-40';
   if('serviceWorker' in navigator){
     try{ navigator.serviceWorker.register('./sw.js?v=' + encodeURIComponent(APP_VERSION)).then(function(reg){try{reg.update();}catch(e){}}).catch(function(){}); }catch(e){}
   }

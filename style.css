@@ -4968,7 +4968,7 @@ body.gp-info-page #privacy-back-app-link {
 }
 
 
-/* V1-39: Android 209 위치 안정화 1단계 CSS 정리
+/* V1-40: Android 209 위치 안정화 1단계 CSS 정리
    - 커버 하단/새로고침/인포카드/순례길 카드의 누적 보정 블록을 한곳으로 통합한다.
    - 기능, 지도, 위치, 뒤로가기 로직은 건드리지 않는다. */
 
@@ -5240,7 +5240,7 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
 }
 
 
-/* V1-39: 웹사이트 기준 UI 통일 및 하단 위치 미세 조정
+/* V1-40: 웹사이트 기준 UI 통일 및 하단 위치 미세 조정
    - Android/위치/지도/뒤로가기/종료 로직은 건드리지 않고 웹앱 CSS만 정리한다.
    - 웹사이트 화면을 기준으로 주요기도문·문의·순례길·관구교구의 헤더/탭/카드 글자 크기를 맞춘다. */
 :root {
@@ -5405,7 +5405,7 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
   }
 }
 
-/* V1-39: 주요기도문 카드 높이 및 순례길/관구교구 목록 카드 간격 안정화 */
+/* V1-40: 주요기도문 카드 높이 및 순례길/관구교구 목록 카드 간격 안정화 */
 .pr-item{
   min-height:76px!important;
   padding-top:16px!important;
@@ -5424,7 +5424,7 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
 }
 
 
-/* V1-39: 검색 입력창 글자 기준 통일 및 기도문 검색창 높이 보정
+/* V1-40: 검색 입력창 글자 기준 통일 및 기도문 검색창 높이 보정
    - 1 주요기도문, 2 찾기 목록, 4 장소검색 모달 입력창의 실제 입력 글자는 진한 검정으로 통일
    - placeholder 안내문구는 연한 회색으로 통일
    - 기도문 글자 크기를 키워도 검색창이 답답하지 않도록 성당찾기 검색창 높이 기준에 맞춘다
@@ -5478,4 +5478,79 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
   color: #9ca3af !important;
   font-weight: 600 !important;
   letter-spacing: -.03em !important;
+}
+
+/* V1-40: 검색창 기준 통일 + 장소검색 모달 상단 잘림 보정
+   - 성당/성지/피정 찾기 검색창을 기준으로 입력 글자색/크기/높이를 맞춘다.
+   - 출발지/도착지 검색 모달은 Android 상태바에 헤더가 가려지지 않도록 상단 여백을 둔다. */
+:root{
+  --oai-search-std-h:42px;
+  --oai-search-std-fs:15px;
+  --oai-search-std-text:#374151;
+  --oai-search-std-placeholder:#9ca3af;
+  --oai-modal-status-gap:24px;
+}
+.srch-inner,
+#srch-modal .sm-si{
+  height:var(--oai-search-std-h)!important;
+  min-height:var(--oai-search-std-h)!important;
+  border-radius:22px!important;
+  box-sizing:border-box!important;
+}
+#prayer-search-bar{
+  min-height:56px!important;
+  padding:7px 12px!important;
+  align-items:center!important;
+}
+#prayer-search-wrap,
+#prayer-search-bar #prayer-search-wrap{
+  height:var(--oai-search-std-h)!important;
+  min-height:var(--oai-search-std-h)!important;
+  display:flex!important;
+  align-items:center!important;
+}
+#prayer-search-inp,
+#prayer-search-bar #prayer-search-inp{
+  height:var(--oai-search-std-h)!important;
+  min-height:var(--oai-search-std-h)!important;
+  line-height:normal!important;
+  border-radius:22px!important;
+}
+#prayer-search-inp,
+#list-srch-inp,
+#region-inp,
+#srch-modal #sm-inp{
+  font-size:calc(var(--oai-search-std-fs) * var(--app-inner-font-scale,1))!important;
+  color:var(--oai-search-std-text)!important;
+  font-weight:600!important;
+  -webkit-text-fill-color:var(--oai-search-std-text)!important;
+}
+#prayer-search-inp::placeholder,
+#list-srch-inp::placeholder,
+#region-inp::placeholder,
+#srch-modal #sm-inp::placeholder{
+  color:var(--oai-search-std-placeholder)!important;
+  -webkit-text-fill-color:var(--oai-search-std-placeholder)!important;
+  font-size:calc(var(--oai-search-std-fs) * var(--app-inner-font-scale,1))!important;
+  font-weight:500!important;
+  opacity:1!important;
+}
+#prayer-search-ico{
+  color:var(--oai-search-std-placeholder)!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+}
+#prayer-search-bar .pr-font-ctrl{
+  height:var(--oai-search-std-h)!important;
+  min-height:var(--oai-search-std-h)!important;
+  align-self:center!important;
+}
+#srch-modal .sm-hd{
+  padding-top:calc(14px + var(--oai-modal-status-gap))!important;
+}
+#srch-modal .sm-title{
+  line-height:1.25!important;
+}
+#sheet-route .rs-lbl.empty{
+  font-size:12px!important;
 }
