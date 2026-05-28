@@ -40,6 +40,7 @@
     --fs-header:22px;
     --fs-tab:15px;
     --fs-sub:10px;
+    --qa-top-gap: calc(22px + env(safe-area-inset-top, 0px));
   }
   html, body { height: 100%; overflow: hidden; }
   body {
@@ -60,7 +61,7 @@
   #header {
     width: 100%; max-width: none; box-sizing: border-box;
     background: var(--d); color: #fff;
-    height: var(--header-h,70px); min-height: var(--header-h,70px); padding: 0 16px;
+    height: calc(var(--header-h,70px) + var(--qa-top-gap)); min-height: calc(var(--header-h,70px) + var(--qa-top-gap)); padding: var(--qa-top-gap) 16px 0;
     display: flex; align-items: center; gap: 10px; flex: 0 0 auto;
     position: relative; top: auto; z-index: 100;
     border-radius: 0; border-bottom: none; box-shadow: none;
@@ -839,10 +840,10 @@ showView('list-view', { historyMode:'replace' });
 subscribeList();
 </script>
 
-<script id="oai-cache-lifecycle-V1-18">
+<script id="oai-cache-lifecycle-V1-19">
 (function(){
   'use strict';
-  var APP_VERSION = 'V1-18';
+  var APP_VERSION = 'V1-19';
   if('serviceWorker' in navigator){
     try{ navigator.serviceWorker.register('./sw.js?v=' + encodeURIComponent(APP_VERSION)).then(function(reg){try{reg.update();}catch(e){}}).catch(function(){}); }catch(e){}
   }
