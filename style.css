@@ -1084,7 +1084,7 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active {
 #info-card {
   display: none;
   position: fixed;
-  bottom: calc(4px + env(safe-area-inset-bottom, 0px));
+  bottom: 0;
   left: 0;
   right: 0;
   background: linear-gradient(180deg, #fffdf9, #f6efe6);
@@ -1095,7 +1095,7 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   box-shadow: 0 -12px 36px rgba(0,0,0,.16);
-  padding-bottom: calc(4px + env(safe-area-inset-bottom, 0px));
+  padding-bottom: 0;
   will-change: transform;
 }
 #info-card.open { display: block; }
@@ -1705,7 +1705,7 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, #3F6F5A, #4F846C
 .trail-url { font-size: 11px; color: #2563eb; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
 .trail-arr { font-size: 14px; color: #94a3b8; flex-shrink: 0; margin-left: 6px; }
 .trail-loc-btn { position: absolute; right: 14px; bottom: calc(18px + env(safe-area-inset-bottom, 0)); z-index: 5; background: rgba(255,255,255,.94); border: 1.5px solid #dde3ee; border-radius: 24px; box-shadow: 0 2px 10px rgba(0,0,0,.12); padding: 12px 16px; display: flex; align-items: center; gap: 6px; font-family: inherit; font-size: 13px; font-weight: 700; color: #2563eb; cursor: pointer; }
-.trail-sheet { position: absolute; left: 0; right: 0; bottom: calc(4px + env(safe-area-inset-bottom, 0px)); z-index: 6; background: linear-gradient(180deg, #fffdf9, #f6efe4); border-radius: 26px; border-top: 1px solid #eadfce; box-shadow: 0 -16px 32px rgba(0,0,0,.18); padding: 0 0 calc(28px + 4px + env(safe-area-inset-bottom, 0px)); transform: translateY(110%); transition: transform .25s cubic-bezier(.4,0,.2,1); pointer-events: none; overflow: visible; height: auto; }
+.trail-sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 6; background: linear-gradient(180deg, #fffdf9, #f6efe4); border-radius: 26px; border-top: 1px solid #eadfce; box-shadow: 0 -16px 32px rgba(0,0,0,.18); padding: 0 0 0; transform: translateY(110%); transition: transform .25s cubic-bezier(.4,0,.2,1); pointer-events: none; overflow: visible; height: auto; }
 .trail-sheet.open { transform: none; pointer-events: all; }
 .trail-sh-handle { width: 36px; height: 4px; border-radius: 2px; background: #e8ecf3; margin: 10px auto 0; }
 .trail-sh-close { position: absolute; top: 12px; right: 14px; width: 30px; height: 30px; border-radius: 50%; background: #f1f5f9; border: 1px solid #e2e8f0; cursor: pointer; font-size: 20px; font-weight: 900; line-height: 1; color: #64748b; display: flex; align-items: center; justify-content: center; }
@@ -5251,3 +5251,38 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
    - 지도 하단 정보카드는 V1-19보다 낮게 배치한다.
    - 문의/개인정보 상단 여백은 V1-19의 약 50%로 줄인다.
    - 커버 내용은 V1-19보다 조금 더 아래로 둔다. */
+
+/* V1-21: Android 209 final lower-position tuning
+   - Map bottom info cards sit close to the Android navigation-bar edge.
+   - Pilgrimage route bottom sheet places its last line close to the lower edge.
+   - Cover notice is fixed near the lower navigation-bar edge. */
+#info-card {
+  bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+.trail-sheet {
+  bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+#cover-main-block {
+  padding-bottom: clamp(42px, calc(var(--cover-vh, 1vh) * 6.2), 58px) !important;
+}
+#cover-bottom-note {
+  position: fixed !important;
+  left: 0 !important;
+  right: 0 !important;
+  bottom: calc(env(safe-area-inset-bottom, 0px) + 10px) !important;
+  width: 100% !important;
+  max-width: 720px !important;
+  margin: 0 auto !important;
+  padding: 0 22px 0 60px !important;
+  z-index: 130 !important;
+}
+@media (max-height: 740px) {
+  #cover-main-block {
+    padding-bottom: clamp(36px, calc(var(--cover-vh, 1vh) * 5.4), 50px) !important;
+  }
+  #cover-bottom-note {
+    bottom: calc(env(safe-area-inset-bottom, 0px) + 8px) !important;
+  }
+}
