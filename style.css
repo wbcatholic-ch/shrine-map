@@ -2243,8 +2243,6 @@ html.oai-cover-booting #cover > * {
   word-break: keep-all;
   color: var(--text-main);
 }
-#cc-5 .cover-name { font-size: 13px; letter-spacing: -.04em; }
-
 #cover-action-row {
   width: 100%;
   margin: 0;
@@ -5536,7 +5534,7 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
 }
 
 
-/* V1-61: 일반 인포카드 하단 기준 정리
+/* V1-62: 일반 인포카드 하단 기준 정리
    - 카카오내비 아래 여백 기준과 하단 마감 규칙을 한 곳으로 모은다.
    - 카드 내부 정보 구조, 거리 표시, 버튼 기능은 변경하지 않는다. */
 #app #info-card {
@@ -5594,7 +5592,7 @@ html.ios-device #app #info-card.open {
   font-weight: 800 !important;
 }
 
-/* V1-61: 요청 6항목 UI 미세 조정
+/* V1-62: 요청 6항목 UI 미세 조정
    1) 성당·성지·피정의집 일반 인포카드 장소명 확대
    2) 첫 진입 십자가는 index.html의 intro CSS에서 60% 확대
    3) 피정의집 지도 로딩 아이콘은 app.js에서 십자가로 통일
@@ -5610,9 +5608,10 @@ html.ios-device #app #info-card.open {
   margin-left: 6px !important;
 }
 
-/* V1-61: 구조 UI 글자 크기 고정
-   - A 글자 크기 조절은 본문/목록 내용에만 적용한다.
-   - 커버 핵심 문구, 헤더, 탭, 구조 버튼은 글자 크기 조절과 분리한다. */
+/* V1-62: 글자 크기 연동 범위 정리
+   - 커버 핵심 4문구는 줄바꿈 방지를 위해 A 글자 크기와 분리한다.
+   - 헤더/탭/구조 버튼은 고정한다.
+   - 커버 카테고리 박스는 A 글자 크기와 연결하되 박스 안에서만 커지도록 제한한다. */
 #cover .cover-subtitle,
 html.oai-font-global #cover .cover-subtitle {
   font-size: 16px !important;
@@ -5633,16 +5632,23 @@ html.oai-font-global #cover #cover-bottom-note {
   white-space: nowrap !important;
 }
 #cover .cover-name,
-html.oai-font-global #cover .cover-name {
-  font-size: 16px !important;
-}
+html.oai-font-global #cover .cover-name,
 #cc-5 .cover-name,
 html.oai-font-global #cc-5 .cover-name {
-  font-size: 13px !important;
+  font-size: clamp(13.6px, calc(16px * var(--app-inner-font-scale, 1)), 16.8px) !important;
+  line-height: 1.18 !important;
+  letter-spacing: -.025em !important;
+  max-width: 100%;
+  overflow: hidden;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
 }
 #cover .cover-emoji,
-html.oai-font-global #cover .cover-emoji {
-  font-size: var(--cover-emoji-size, 40px) !important;
+html.oai-font-global #cover .cover-emoji,
+#cc-5 .cover-emoji,
+html.oai-font-global #cc-5 .cover-emoji {
+  font-size: clamp(30px, calc(40px * var(--app-inner-font-scale, 1)), 40px) !important;
 }
 #cover #cover-menu-btn .cover-menu-label {
   font-size: 11.5px !important;
