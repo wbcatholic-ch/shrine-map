@@ -5415,9 +5415,9 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
   box-sizing: border-box !important;
 }
 
-/* 성당/성지/피정의집 길찾기 시트: 카카오내비 버튼이 하단부에 더 가깝게 오도록 시트 전체를 아래로 조정 */
+/* 성당/성지/피정의집 길찾기 시트: 일반 인포카드와 같은 하단 외곽 기준으로 통일 */
 #sheet-route {
-  bottom: calc(-1 * var(--oai-android-nav-nudge) - 8px) !important;
+  bottom: 0 !important;
 }
 
 
@@ -5534,8 +5534,9 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
 }
 
 
-/* V1-69: 일반 인포카드 하단 기준 정리
-   - 카카오내비 아래 여백 기준과 하단 마감 규칙을 한 곳으로 모은다.
+/* V1-70: 일반 인포카드·경로 정보카드 하단 여백 기준 통일
+   - 두 카드의 외곽 하단은 bottom:0으로 맞춘다.
+   - 실제 버튼 아래 여백은 카드 내부 padding-bottom 기준으로 통일한다.
    - 카드 내부 정보 구조, 거리 표시, 버튼 기능은 변경하지 않는다. */
 #app #info-card {
   background: linear-gradient(180deg, #fffdf9 0%, #f9f2e9 78%, #f6efe6 100%) !important;
@@ -5548,6 +5549,19 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
   pointer-events: none !important;
 }
 #app #info-card .ic-body {
+  padding-bottom: 22px !important;
+}
+#app #sheet-route {
+  bottom: 0 !important;
+  padding-bottom: 0 !important;
+}
+#app #sheet-route.open {
+  bottom: 0 !important;
+}
+#app #rs-bottom {
+  padding-bottom: 22px !important;
+}
+#app #rs-hint {
   padding-bottom: 22px !important;
 }
 #app #info-card .ic-body > div:last-child {
@@ -5592,7 +5606,7 @@ html.ios-device #app #info-card.open {
   font-weight: 800 !important;
 }
 
-/* V1-69: 요청 6항목 UI 미세 조정
+/* V1-70: 요청 6항목 UI 미세 조정
    1) 성당·성지·피정의집 일반 인포카드 장소명 확대
    2) 첫 진입 십자가는 index.html의 intro CSS에서 60% 확대
    3) 피정의집 지도 로딩 아이콘은 app.js에서 십자가로 통일
@@ -5608,11 +5622,11 @@ html.ios-device #app #info-card.open {
   margin-left: 6px !important;
 }
 
-/* V1-69: 커버 세부 균형 조정
+/* V1-70: 커버 세부 균형 조정
    - 커버 메뉴는 1단계 추가 확대하고 var(--app-font-scale)에 계속 연결한다.
    - 커버 제목과 하단 안내문은 1단계 추가 확대한다.
    - 성당·성지·피정의집 일반 인포카드 주소 상세 글자는 1단계 줄인다. */
-/* V1-69: 정식 출시 기준 글자 크기 2단계 정리
+/* V1-70: 정식 출시 기준 글자 크기 2단계 정리
    - 커버 제목/부제목·메뉴·새로고침·카테고리·표준 헤더/탭은 요청 범위만 2단계 확대한다.
    - 커버 카테고리 글자는 font-size 최대 제한과 줄수 제한을 제거해 앱 글자 크기 기준을 그대로 따른다.
    - 커버 메뉴·새로고침은 고정 px가 아니라 var(--app-font-scale)에 연결한다.
