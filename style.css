@@ -5534,7 +5534,7 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
 }
 
 
-/* V1-62: 일반 인포카드 하단 기준 정리
+/* V1-63: 일반 인포카드 하단 기준 정리
    - 카카오내비 아래 여백 기준과 하단 마감 규칙을 한 곳으로 모은다.
    - 카드 내부 정보 구조, 거리 표시, 버튼 기능은 변경하지 않는다. */
 #app #info-card {
@@ -5592,7 +5592,7 @@ html.ios-device #app #info-card.open {
   font-weight: 800 !important;
 }
 
-/* V1-62: 요청 6항목 UI 미세 조정
+/* V1-63: 요청 6항목 UI 미세 조정
    1) 성당·성지·피정의집 일반 인포카드 장소명 확대
    2) 첫 진입 십자가는 index.html의 intro CSS에서 60% 확대
    3) 피정의집 지도 로딩 아이콘은 app.js에서 십자가로 통일
@@ -5608,7 +5608,7 @@ html.ios-device #app #info-card.open {
   margin-left: 6px !important;
 }
 
-/* V1-62: 글자 크기 연동 범위 정리
+/* V1-63: 글자 크기 연동 범위 정리
    - 커버 핵심 4문구는 줄바꿈 방지를 위해 A 글자 크기와 분리한다.
    - 헤더/탭/구조 버튼은 고정한다.
    - 커버 카테고리 박스는 A 글자 크기와 연결하되 박스 안에서만 커지도록 제한한다. */
@@ -5635,20 +5635,24 @@ html.oai-font-global #cover #cover-bottom-note {
 html.oai-font-global #cover .cover-name,
 #cc-5 .cover-name,
 html.oai-font-global #cc-5 .cover-name {
-  font-size: clamp(13.6px, calc(16px * var(--app-inner-font-scale, 1)), 16.8px) !important;
-  line-height: 1.18 !important;
-  letter-spacing: -.025em !important;
+  font-size: clamp(14px, calc(15.6px * var(--app-font-scale, 1)), 18.4px) !important;
+  line-height: 1.15 !important;
+  letter-spacing: -.03em !important;
   max-width: 100%;
   overflow: hidden;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
+  word-break: keep-all;
 }
 #cover .cover-emoji,
 html.oai-font-global #cover .cover-emoji,
 #cc-5 .cover-emoji,
 html.oai-font-global #cc-5 .cover-emoji {
-  font-size: clamp(30px, calc(40px * var(--app-inner-font-scale, 1)), 40px) !important;
+  font-size: clamp(32px, calc(34px * var(--app-font-scale, 1)), 46px) !important;
+}
+#cover .cover-card {
+  gap: clamp(4px, calc(5px * var(--app-font-scale, 1)), 7px) !important;
 }
 #cover #cover-menu-btn .cover-menu-label {
   font-size: 11.5px !important;
