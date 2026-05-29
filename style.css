@@ -5012,7 +5012,7 @@ html.retreat-mode #tab-btn-list {
   padding-right: 1px !important;
 }
 html.retreat-mode #tab-list-lbl {
-  font-size: 11.5px !important;
+  font-size: 13.5px !important;
   letter-spacing: -0.095em !important;
   line-height: 1.02 !important;
   max-width: 100% !important;
@@ -5281,9 +5281,9 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
   --oai-website-header-h: 70px;
   --oai-website-tabbar-h: 52px;
   --oai-website-tab-btn-h: 40px;
-  --oai-website-title-fs: 18px;
-  --oai-website-sub-fs: 12px;
-  --oai-website-tab-fs: 15px;
+  --oai-website-title-fs: 20px;
+  --oai-website-sub-fs: 14px;
+  --oai-website-tab-fs: 17px;
   --oai-website-card-title-fs: 17px;
   --oai-website-card-body-fs: 13px;
   --oai-website-card-meta-fs: 12px;
@@ -5534,7 +5534,7 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
 }
 
 
-/* V1-65: 일반 인포카드 하단 기준 정리
+/* V1-67: 일반 인포카드 하단 기준 정리
    - 카카오내비 아래 여백 기준과 하단 마감 규칙을 한 곳으로 모은다.
    - 카드 내부 정보 구조, 거리 표시, 버튼 기능은 변경하지 않는다. */
 #app #info-card {
@@ -5562,7 +5562,7 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
 #app #info-card .ic-route-btn,
 #app #info-card .ic-link-btn,
 #app #info-card .btn-kakao-nav {
-  font-size: 14px !important;
+  font-size: 16px !important;
   letter-spacing: -.03em !important;
 }
 #app #info-card .btn-kakao-nav {
@@ -5592,7 +5592,7 @@ html.ios-device #app #info-card.open {
   font-weight: 800 !important;
 }
 
-/* V1-65: 요청 6항목 UI 미세 조정
+/* V1-67: 요청 6항목 UI 미세 조정
    1) 성당·성지·피정의집 일반 인포카드 장소명 확대
    2) 첫 진입 십자가는 index.html의 intro CSS에서 60% 확대
    3) 피정의집 지도 로딩 아이콘은 app.js에서 십자가로 통일
@@ -5608,42 +5608,47 @@ html.ios-device #app #info-card.open {
   margin-left: 6px !important;
 }
 
-/* V1-65: 글자 크기 연동 범위 정리
-   - 커버 핵심 4문구는 줄바꿈 방지를 위해 A 글자 크기와 분리한다.
-   - 헤더/탭/구조 버튼은 고정한다.
-   - 커버 카테고리 박스는 A 글자 크기와 연결하되 박스 안에서만 커지도록 제한한다. */
+/* V1-67: 정식 출시 기준 글자 크기 2단계 정리
+   - 커버 제목/부제목·메뉴·새로고침·카테고리·표준 헤더/탭은 요청 범위만 2단계 확대한다.
+   - 커버 카테고리 글자는 font-size 최대 제한과 줄수 제한을 제거해 앱 글자 크기 기준을 그대로 따른다.
+   - 커버 메뉴·새로고침은 고정 px가 아니라 var(--app-font-scale)에 연결한다.
+   - 커버 하단 안내문은 1단계만 확대한다.
+   - Android textZoom과 기능 흐름은 건드리지 않는다. */
 #cover .cover-subtitle,
 html.oai-font-global #cover .cover-subtitle {
-  font-size: 16px !important;
+  font-size: 18px !important;
   white-space: nowrap !important;
   overflow: visible !important;
   text-overflow: clip !important;
 }
 #cover .cover-title,
 html.oai-font-global #cover .cover-title {
-  font-size: clamp(28px, 8.2vw, 38px) !important;
+  font-size: clamp(30px, 8.7vw, 40px) !important;
   white-space: nowrap !important;
   overflow: visible !important;
   text-overflow: clip !important;
 }
 #cover #cover-bottom-note,
 html.oai-font-global #cover #cover-bottom-note {
-  font-size: clamp(7.8px, calc(var(--cover-vh, 1vh) * 1.1), 9px) !important;
+  font-size: clamp(8.8px, calc(var(--cover-vh, 1vh) * 1.2), 10px) !important;
   white-space: nowrap !important;
 }
 #cover .cover-name,
 html.oai-font-global #cover .cover-name,
 #cc-5 .cover-name,
 html.oai-font-global #cc-5 .cover-name {
-  font-size: clamp(14px, calc(15.6px * var(--app-font-scale, 1)), 18.4px) !important;
-  line-height: 1.15 !important;
+  font-size: calc(18px * var(--app-font-scale, 1)) !important;
+  line-height: 1.14 !important;
   letter-spacing: -.03em !important;
-  max-width: 100%;
-  overflow: hidden;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  word-break: keep-all;
+  max-width: none !important;
+  max-height: none !important;
+  overflow: visible !important;
+  display: block !important;
+  -webkit-line-clamp: unset !important;
+  -webkit-box-orient: initial !important;
+  white-space: normal !important;
+  text-overflow: clip !important;
+  word-break: keep-all !important;
 }
 #cover .cover-emoji,
 html.oai-font-global #cover .cover-emoji,
@@ -5655,11 +5660,11 @@ html.oai-font-global #cc-5 .cover-emoji {
   gap: clamp(4px, calc(5px * var(--app-font-scale, 1)), 7px) !important;
 }
 #cover #cover-menu-btn .cover-menu-label {
-  font-size: 11.5px !important;
+  font-size: calc(13.5px * var(--app-font-scale, 1)) !important;
 }
 #cover #cover-update-btn,
 #cover .cover-refresh-main-btn {
-  font-size: 12.5px !important;
+  font-size: calc(14.5px * var(--app-font-scale, 1)) !important;
 }
 #cover #qna-cover-btn,
 #cover #cover-guide-btn {
@@ -5677,7 +5682,7 @@ html.oai-font-global #cc-5 .cover-emoji {
 #diocese-module-bar .module-bar-title,
 html.oai-font-global .module-bar-title,
 html.oai-font-global #prayer-bar-ttl {
-  font-size: var(--oai-website-title-fs, 18px) !important;
+  font-size: var(--oai-website-title-fs, 20px) !important;
   line-height: 1.2 !important;
 }
 .module-bar-sub,
@@ -5688,7 +5693,7 @@ html.oai-font-global #prayer-bar-ttl {
 #diocese-view .module-bar-sub,
 #diocese-module-bar .module-bar-sub,
 html.oai-font-global .module-bar-sub {
-  font-size: var(--oai-website-sub-fs, 12px) !important;
+  font-size: var(--oai-website-sub-fs, 14px) !important;
   line-height: 1.2 !important;
 }
 #prayer-tabs .pr-tab,
@@ -5711,14 +5716,14 @@ html.oai-font-global .filter-btn,
 html.oai-font-global .region-search-btn,
 html.oai-font-global .sm-fb,
 html.oai-font-global .tab-btn {
-  font-size: var(--oai-website-tab-fs, 15px) !important;
+  font-size: var(--oai-website-tab-fs, 17px) !important;
 }
 #tabbar .tab-btn {
-  font-size: 13px !important;
+  font-size: 15px !important;
 }
 .sheet-title,
 html.oai-font-global .sheet-title {
-  font-size: 18px !important;
+  font-size: 20px !important;
 }
 #prayer-search-inp,
 #list-srch-inp,
@@ -5733,15 +5738,15 @@ html.oai-font-global .sheet-title {
 @media (max-width: 370px) {
   #cover .cover-title,
   html.oai-font-global #cover .cover-title {
-    font-size: clamp(25px, 7.4vw, 34px) !important;
+    font-size: clamp(27px, 7.9vw, 36px) !important;
   }
   #cover .cover-subtitle,
   html.oai-font-global #cover .cover-subtitle {
-    font-size: 14px !important;
+    font-size: 16px !important;
   }
   #cover #cover-bottom-note,
   html.oai-font-global #cover #cover-bottom-note {
-    font-size: 7.4px !important;
+    font-size: 8.4px !important;
   }
 }
 
