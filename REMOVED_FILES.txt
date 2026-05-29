@@ -1,0 +1,2 @@
+--- removed list ---
+shrines.js.bak
