@@ -136,34 +136,64 @@ html.oai-first-entry-intro::after {
   height:min(78vh, 660px);
   transform:translate(-50%,-50%) scale(.985);
   background-image:
-    radial-gradient(ellipse 82% 86% at 50% 46%, rgba(245,240,232,0) 56%, rgba(245,240,232,.08) 64%, rgba(245,240,232,.30) 76%, rgba(245,240,232,.72) 88%, rgba(245,240,232,.98) 100%),
-    linear-gradient(to bottom, rgba(245,240,232,.10), rgba(245,240,232,.04)),
+    linear-gradient(to right, #f5f0e8 0%, rgba(245,240,232,.96) 5%, rgba(245,240,232,.60) 13%, rgba(245,240,232,.16) 24%, rgba(245,240,232,0) 36%, rgba(245,240,232,0) 64%, rgba(245,240,232,.16) 76%, rgba(245,240,232,.60) 87%, rgba(245,240,232,.96) 95%, #f5f0e8 100%),
+    linear-gradient(to bottom, #f5f0e8 0%, rgba(245,240,232,.90) 6%, rgba(245,240,232,.36) 17%, rgba(245,240,232,0) 30%, rgba(245,240,232,0) 70%, rgba(245,240,232,.36) 83%, rgba(245,240,232,.90) 94%, #f5f0e8 100%),
+    radial-gradient(ellipse 96% 88% at 50% 48%, rgba(245,240,232,0) 50%, rgba(245,240,232,.08) 62%, rgba(245,240,232,.34) 76%, rgba(245,240,232,.76) 90%, rgba(245,240,232,1) 100%),
     url("intro-cross-jesus.jpg?v=V1-1");
-  background-position:center center, center center, center center;
-  background-size:100% 100%, 100% 100%, auto 96%;
-  background-repeat:no-repeat, no-repeat, no-repeat;
+  background-position:center center, center center, center center, center center;
+  background-size:100% 100%, 100% 100%, 100% 100%, auto 96%;
+  background-repeat:no-repeat, no-repeat, no-repeat, no-repeat;
   pointer-events:none;
   opacity:0;
-  border-radius:36px;
+  border-radius:38px;
   background-color:#f5f0e8;
   box-shadow:
     0 0 0 999px #f5f0e8,
     0 8px 18px rgba(80,54,18,.05),
-    inset 0 0 54px rgba(245,240,232,.20),
-    inset 0 0 110px rgba(245,240,232,.12);
-  -webkit-mask-image:radial-gradient(ellipse 84% 88% at 50% 46%, #000 58%, rgba(0,0,0,.96) 67%, rgba(0,0,0,.78) 78%, rgba(0,0,0,.42) 89%, rgba(0,0,0,.12) 96%, transparent 100%);
-  mask-image:radial-gradient(ellipse 84% 88% at 50% 46%, #000 58%, rgba(0,0,0,.96) 67%, rgba(0,0,0,.78) 78%, rgba(0,0,0,.42) 89%, rgba(0,0,0,.12) 96%, transparent 100%);
+    inset 0 0 72px rgba(245,240,232,.28),
+    inset 0 0 150px rgba(245,240,232,.18);
+  -webkit-mask-image:
+    linear-gradient(to right, transparent 0%, rgba(0,0,0,.35) 6%, rgba(0,0,0,.82) 15%, #000 28%, #000 72%, rgba(0,0,0,.82) 85%, rgba(0,0,0,.35) 94%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, rgba(0,0,0,.50) 5%, rgba(0,0,0,.90) 13%, #000 24%, #000 76%, rgba(0,0,0,.90) 87%, rgba(0,0,0,.50) 95%, transparent 100%);
+  -webkit-mask-composite: source-in;
+  mask-image:
+    linear-gradient(to right, transparent 0%, rgba(0,0,0,.35) 6%, rgba(0,0,0,.82) 15%, #000 28%, #000 72%, rgba(0,0,0,.82) 85%, rgba(0,0,0,.35) 94%, transparent 100%),
+    linear-gradient(to bottom, transparent 0%, rgba(0,0,0,.50) 5%, rgba(0,0,0,.90) 13%, #000 24%, #000 76%, rgba(0,0,0,.90) 87%, rgba(0,0,0,.50) 95%, transparent 100%);
+  mask-composite: intersect;
   filter:contrast(1.015) saturate(1.02) drop-shadow(0 6px 16px rgba(80,54,18,.05));
-  animation:oaiJesusIntroPhoto 2.85s cubic-bezier(.18,.76,.22,1) both;
+  animation:oaiJesusIntroPhoto 2.70s cubic-bezier(.18,.76,.22,1) both;
 }
 html.oai-cover-first-reveal #cover > * {
   animation:oaiCoverFirstReveal .72s ease-out both !important;
 }
+
+@media (max-width: 540px) and (max-aspect-ratio: 3/4) {
+  html.oai-first-entry-intro::after {
+    left:0;
+    top:0;
+    width:100vw;
+    height:100vh;
+    transform:none;
+    border-radius:0;
+    background-size:100% 100%, 100% 100%, 100% 100%, cover;
+    -webkit-mask-image:none;
+    mask-image:none;
+    box-shadow:0 0 0 999px #f5f0e8;
+    animation:oaiJesusIntroPhotoMobile 2.70s cubic-bezier(.18,.76,.22,1) both;
+  }
+}
+@keyframes oaiJesusIntroPhotoMobile {
+  0%{opacity:0; transform:scale(.985);}
+  18%{opacity:1; transform:scale(1);}
+  58%{opacity:1; transform:scale(1);}
+  100%{opacity:0; transform:scale(1.012);}
+}
+
 @keyframes oaiJesusIntroPhoto {
-  0%{opacity:0; transform:translate(-50%,-49%) scale(.97);}
-  34%{opacity:1; transform:translate(-50%,-50%) scale(1);}
-  62%{opacity:1; transform:translate(-50%,-50%) scale(1);}
-  100%{opacity:0; transform:translate(-50%,-51%) scale(1.006);}
+  0%{opacity:0; transform:translate(-50%,-49%) scale(.965);}
+  18%{opacity:1; transform:translate(-50%,-50%) scale(1);}
+  58%{opacity:1; transform:translate(-50%,-50%) scale(1);}
+  100%{opacity:0; transform:translate(-50%,-51%) scale(1.012);}
 }
 @keyframes oaiCoverFirstReveal {
   0%{opacity:0; transform:translateY(6px) scale(.99);}
@@ -393,9 +423,9 @@ html.oai-cover-first-reveal #cover > * {
           root.classList.add('oai-cover-first-reveal');
           setTimeout(function(){
             try{ root.classList.remove('oai-cover-first-reveal'); }catch(__e){}
-          }, 860);
+          }, 820);
         }catch(_e){}
-      }, 2850);
+      }, 2700);
     }
   }else{
     root.classList.remove('oai-cover-booting','oai-first-entry-intro');
