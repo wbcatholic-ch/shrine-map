@@ -192,11 +192,12 @@ html.oai-cover-first-reveal #cover {
   will-change:opacity, transform;
 }
 html.oai-cover-first-reveal #cover > * {
-  animation:none !important;
+  transform-origin:center center !important;
+  animation:oaiCoverScaleReveal .46s cubic-bezier(.18,.76,.22,1) both !important;
 }
 @keyframes oaiCoverScaleReveal {
-  0%{opacity:.62; transform:scale(.965);}
-  100%{opacity:1; transform:scale(1);}
+  0%{transform:scale(.92);}
+  100%{transform:scale(1);}
 }
 
 
@@ -455,7 +456,7 @@ html.oai-cover-first-reveal #cover > * {
         try{
           root.classList.add('oai-cover-under-intro-reveal');
         }catch(_e){}
-      }, 1840);
+      }, 1720);
       setTimeout(function(){
         try{
           root.classList.remove('oai-first-entry-intro','oai-cover-under-intro-reveal','oai-ivory-wipe-transition');
@@ -464,7 +465,7 @@ html.oai-cover-first-reveal #cover > * {
             try{ root.classList.remove('oai-cover-first-reveal'); }catch(__e){}
           }, 520);
         }catch(_e){}
-      }, 2100);
+      }, 1980);
     }
   }else{
     root.classList.remove('oai-cover-booting','oai-first-entry-intro','oai-cover-under-intro-reveal','oai-ivory-wipe-transition');
