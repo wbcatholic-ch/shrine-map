@@ -5777,3 +5777,41 @@ html.oai-font-global .sheet-title {
   }
 }
 
+
+/* V1 cover button font unification: category buttons + six cover action labels */
+#cover .category-btn,
+#cover .category-button,
+#cover .cover-category-btn,
+#cover .cover-category-button,
+#cover .quick-btn,
+#cover .quick-button,
+#cover .cover-quick-btn,
+#cover .cover-quick-button,
+#cover .action-btn,
+#cover .action-button,
+#cover .cover-action-btn,
+#cover .cover-action-button,
+#cover .feature-btn,
+#cover .feature-button,
+#cover button,
+#cover a[role="button"],
+#cover .mass-btn,
+#cover .prayer-btn,
+#cover .hymn-btn,
+#cover .privacy-btn,
+#cover .main-feature-btn,
+#cover .inquiry-btn {
+  font-family: "Noto Sans KR", "Apple SD Gothic Neo", sans-serif !important;
+  font-size: clamp(15px, 4vw, 17px) !important;
+  font-weight: 700 !important;
+  line-height: 1.2 !important;
+  letter-spacing: -0.02em !important;
+}
+
+/* Keep cover title independent from button unification */
+#cover .cover-title {
+  font-family: "Noto Serif KR", "Noto Sans KR", serif !important;
+  font-size: clamp(32px, 8.9vw, 43px) !important;
+  font-weight: 700 !important;
+}
+
