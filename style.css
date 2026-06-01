@@ -2128,35 +2128,27 @@ html.oai-cover-booting #cover > * {
   overflow: hidden;
   border-radius: 22px;
   background:
-    linear-gradient(180deg, #3e4a57 0%, #2d3845 18%, #182431 62%, #0f1823 100%);
-  border: 1px solid rgba(13,22,32,.36);
+    linear-gradient(180deg, rgba(255,253,247,.92) 0%, rgba(249,242,231,.82) 54%, rgba(241,231,216,.78) 100%);
+  border: 1px solid rgba(126,104,74,.18);
   box-shadow:
-    0 10px 20px rgba(31,42,68,.18),
-    inset 0 1px 0 rgba(190,204,216,.22),
-    inset 0 -18px 26px rgba(0,0,0,.34);
+    0 9px 18px rgba(31,42,68,.105),
+    0 2px 5px rgba(31,42,68,.055),
+    inset 0 1px 0 rgba(255,255,255,.86),
+    inset 0 -8px 14px rgba(136,112,78,.075);
 }
 .cover-header::before {
-  content: "";
-  position: absolute;
-  left: 4%;
-  right: 4%;
-  top: 3px;
-  height: 16%;
-  border-radius: 20px 20px 42% 42% / 20px 20px 26% 26%;
-  background: linear-gradient(180deg, rgba(124,142,158,.22) 0%, rgba(124,142,158,.06) 70%, rgba(124,142,158,0) 100%);
-  opacity: .55;
-  pointer-events: none;
-  z-index: 0;
+  content: none;
+  display: none;
 }
 .cover-header::after {
   content: "";
   position: absolute;
-  left: 7%;
-  right: 7%;
+  left: 8%;
+  right: 8%;
   top: 1px;
   height: 1px;
   border-radius: 999px;
-  background: rgba(212,170,106,.26);
+  background: rgba(126,104,74,.12);
   pointer-events: none;
   z-index: 0;
 }
@@ -2170,10 +2162,10 @@ html.oai-cover-booting #cover > * {
   font-family: "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
   font-weight: 800;
   letter-spacing: -.03em;
-  color: #fffaf0;
+  color: #2f2925;
   margin: 0;
   line-height: 1.14;
-  text-shadow: 0 1px 2px rgba(0,0,0,.32);
+  text-shadow: 0 1px 0 rgba(255,255,255,.75);
 }
 
 .cover-title::after {
@@ -2189,7 +2181,7 @@ html.oai-cover-booting #cover > * {
 .cover-subtitle {
   font-size: 16px;
   font-weight: 650;
-  color: rgba(255,250,240,.74);
+  color: rgba(96,86,76,.78);
   margin: 0 0 7px;
   line-height: 1.45;
 }
@@ -2481,7 +2473,7 @@ html.app-active #cover-action-row { display: none; }
   position: absolute;
   left: 0;
   right: 0;
-  bottom: calc(env(safe-area-inset-bottom, 0px) - 32px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) - 18px);
   flex: 0 0 auto;
   width: 100%;
   max-width: none;
