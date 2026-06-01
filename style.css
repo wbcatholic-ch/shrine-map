@@ -2731,22 +2731,18 @@ html.oai-category-entering #sheet-nearby.oai-preopen-nearby { z-index: 820; }
 #oai-swipe-overlay.active { animation: oaiSwipeShow .38s ease forwards; }
 
 #cv-pull-modern {
-  position: fixed;
-  top: calc(50px + env(safe-area-inset-top, 0px));
-  left: 50%;
-  width: 44px; height: 44px;
-  display: flex; align-items: center; justify-content: center;
-  padding: 0; border-radius: 999px;
-  background: #fff; border: 1px solid #d0d7de;
-  box-shadow: 0 8px 18px rgba(27,31,36,.14);
-  color: #57606a; z-index: 10060;
-  opacity: 0; pointer-events: none;
-  transform: translate(-50%, 0) scale(1);
-  transform-origin: center;
-  transition: opacity .10s, transform .08s;
-  will-change: opacity, transform;
+  /* 커버에서는 당겨서 새로고침 동그라미를 보여 주지 않는다.
+     새로고침은 커버 하단 버튼으로만 보이게 유지한다. */
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+  pointer-events: none !important;
 }
-#cv-pull-modern.show, #cv-pull-modern.ready, #cv-pull-modern.refreshing { opacity: 1; }
+#cv-pull-modern.show, #cv-pull-modern.ready, #cv-pull-modern.refreshing {
+  display: none !important;
+  opacity: 0 !important;
+  visibility: hidden !important;
+}
 #cv-pull-modern .cv-pull-ring { width: 44px; height: 44px; display: flex; align-items: center; justify-content: center; background: transparent; }
 #cv-pull-modern .cv-pull-icon { width: 25px; height: 25px; display: block; color: #57606a; stroke: currentColor; transition: transform .16s, color .16s; }
 #cv-pull-modern.ready .cv-pull-icon { color: #0969da; transform: rotate(180deg); }

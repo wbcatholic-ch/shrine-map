@@ -1166,49 +1166,11 @@
 
   function installPullRefresh(){
     var cover=$('cover'), ind=$('cv-pull-modern');
-    if(!cover || !ind || cover.__oaiPullRefreshCleanV20_8) return;
-    cover.__oaiPullRefreshCleanV20_8 = true;
-
-    var sx=0, sy=0, active=false, ready=false, refreshing=false;
-    var THRESHOLD=74;
-    var MAX=112;
-
-    cover.addEventListener('touchstart', function(e){
-      if(refreshing || isGuideModalOpen() || !isCoverVisible() || isTypingTarget(document.activeElement) || cover.scrollTop > 0 || !e.touches || !e.touches[0]) return;
-      sx=e.touches[0].clientX;
-      sy=e.touches[0].clientY;
-      active=true;
-      ready=false;
-      hideIndicator(ind);
-    }, {passive:true, capture:true});
-
-    cover.addEventListener('touchmove', function(e){
-      if(!active || refreshing || isGuideModalOpen() || !e.touches || !e.touches[0]){ active=false; ready=false; hideIndicator(ind); return; }
-      var dx=e.touches[0].clientX - sx;
-      var dy=e.touches[0].clientY - sy;
-      if(Math.abs(dx) > Math.abs(dy) * 1.15){ active=false; hideIndicator(ind); return; }
-      if(dy <= 3){ ready=false; hideIndicator(ind); return; }
-      if(e.cancelable) e.preventDefault();
-      ready = dy >= THRESHOLD;
-      setIndicator(ind, ready ? 'ready' : 'pulling', Math.min(dy, MAX));
-    }, {passive:false, capture:true});
-
-    function finish(){
-      if(!active) return;
-      active=false;
-      if(!ready){ ready=false; hideIndicator(ind); return; }
-      ready=false;
-      refreshing=true;
-      setIndicator(ind, 'refreshing', MAX);
-      try{ navigator.vibrate && navigator.vibrate(10); }catch(e){ console.warn('[가톨릭길동무]', e); }
-      setTimeout(function(){
-        try{ window.__oaiSoftCoverRefresh(); }catch(e){ console.warn('[가톨릭길동무]', e); }
-        refreshing=false;
-        hideIndicator(ind);
-      }, 420);
-    }
-    cover.addEventListener('touchend', finish, {passive:true, capture:true});
-    cover.addEventListener('touchcancel', function(){ active=false; ready=false; refreshing=false; hideIndicator(ind); }, {passive:true, capture:true});
+    if(!cover || cover.__oaiPullRefreshDisabledV1_74) return;
+    cover.__oaiPullRefreshDisabledV1_74 = true;
+    /* 커버에서 손으로 당길 때 보이던 원형 새로고침 표시와 제스처를 끈다.
+       기존 하단 새로고침 버튼은 app.js의 전용 핸들러가 계속 담당한다. */
+    hideIndicator(ind);
   }
 
   window.addEventListener('pageshow', function(){
