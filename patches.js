@@ -852,9 +852,10 @@
     document.documentElement.style.setProperty('--app-font-scale',String(scale));
     var pv=el('prayer-view');
     if(pv){
-      pv.style.setProperty('--pr-item-fs',px+'px');
-      pv.style.setProperty('--pr-body-fs',px+'px');
-      pv.style.setProperty('--pr-detail-fs',(px+1)+'px');
+      var coverPx=Math.round((px*18/16)*100)/100;
+      pv.style.setProperty('--pr-item-fs',coverPx+'px');
+      pv.style.setProperty('--pr-body-fs',coverPx+'px');
+      pv.style.setProperty('--pr-detail-fs',coverPx+'px');
       pv.style.setProperty('--pr-icon-sz',Math.max(34,Math.round(px*2.2))+'px');
       pv.style.setProperty('--pr-icon-fs',Math.max(17,Math.round(px*1.2))+'px');
     }

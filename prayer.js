@@ -195,9 +195,10 @@ function prApplyFont(){
   const px = PR_FONT_SIZES[prFontIdx];
   const r = document.getElementById('prayer-view');
   if(r){
-    r.style.setProperty('--pr-item-fs',   px+'px');
-    r.style.setProperty('--pr-body-fs',   px+'px');
-    r.style.setProperty('--pr-detail-fs', (px+1)+'px');
+    const coverPx = Math.round((px * 18 / 16) * 100) / 100;
+    r.style.setProperty('--pr-item-fs',   coverPx+'px');
+    r.style.setProperty('--pr-body-fs',   coverPx+'px');
+    r.style.setProperty('--pr-detail-fs', coverPx+'px');
     r.style.setProperty('--pr-icon-sz',   Math.max(34,Math.round(px*2.2))+'px');
     r.style.setProperty('--pr-icon-fs',   Math.max(17,Math.round(px*1.2))+'px');
   }
