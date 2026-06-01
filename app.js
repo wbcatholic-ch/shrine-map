@@ -6113,20 +6113,109 @@ function _fmtTime(s){
 
 (function(){
   const IDLE_MS = 10 * 60 * 1000; // 10분
+  const BG_KEY = 'oai_home_backgrounded_at';
   let _idleTimer = null;
+  let _idleIntroRunning = false;
+
+  function _now(){ return Date.now ? Date.now() : new Date().getTime(); }
+
+  function _isAppScreenActive(){
+    try{ return document.documentElement.classList.contains('app-active'); }
+    catch(_e){ return false; }
+  }
+
+  function _isExternalReturnContext(){
+    try{
+      const now = _now();
+      const extTs = parseInt(sessionStorage.getItem('oai_external_nav_started_at') || '0', 10) || 0;
+      return sessionStorage.getItem('oai_external_nav_pending') === '1' ||
+             sessionStorage.getItem('oai_external_nav_pagehide') === '1' ||
+             (extTs && (now - extTs) < IDLE_MS);
+    }catch(_e){ return false; }
+  }
+
+  function _clearBgStamp(){
+    try{ sessionStorage.removeItem(BG_KEY); }catch(_e){}
+  }
+
+  function _markBackgrounded(){
+    try{
+      if(_isAppScreenActive() && !_isExternalReturnContext()){
+        sessionStorage.setItem(BG_KEY, String(_now()));
+      }
+    }catch(_e){}
+  }
+
+  function _showCoverWithSameIntro(reason){
+    if(_idleIntroRunning) return;
+    if(!_isAppScreenActive()) return;
+    if(_isExternalReturnContext()) return;
+    _idleIntroRunning = true;
+    _clearBgStamp();
+
+    const root = document.documentElement;
+    try{
+      root.classList.remove('oai-cover-first-reveal','oai-cover-under-intro-reveal','oai-ivory-wipe-transition','oai-internal-no-return-effect');
+      root.classList.add('oai-cover-booting','oai-first-entry-intro');
+    }catch(_e){}
+
+    try{ _resetMapState(); }catch(e){ console.warn('[가톨릭길동무]', e); }
+    try{ goToCover(); }catch(e){ console.warn('[가톨릭길동무]', e); }
+
+    // 첫 진입 인트로와 같은 타이밍을 그대로 사용한다.
+    setTimeout(function(){
+      try{ root.classList.add('oai-cover-under-intro-reveal'); }catch(_e){}
+    }, 1360);
+
+    setTimeout(function(){
+      try{
+        root.classList.remove('oai-first-entry-intro','oai-cover-under-intro-reveal','oai-ivory-wipe-transition');
+        root.classList.add('oai-cover-first-reveal');
+        setTimeout(function(){
+          try{ root.classList.remove('oai-cover-first-reveal','oai-cover-booting'); }catch(__e){}
+          _idleIntroRunning = false;
+        }, 360);
+      }catch(_e){
+        _idleIntroRunning = false;
+      }
+    }, 1720);
+  }
+
   function _resetIdle(){
     clearTimeout(_idleTimer);
-    _idleTimer = setTimeout(()=>{
-      // 앱이 활성 상태일 때만
-      if(document.documentElement.classList.contains('app-active')){
-        _resetMapState();
-        goToCover();
-      }
+    _idleTimer = setTimeout(function(){
+      _showCoverWithSameIntro('idle-active');
     }, IDLE_MS);
   }
-  ['touchstart','touchend','click','keydown','scroll'].forEach(ev=>{
+
+  function _checkBackgroundReturn(){
+    try{
+      if(!_isAppScreenActive() || _isExternalReturnContext()){
+        _clearBgStamp();
+        return;
+      }
+      const started = parseInt(sessionStorage.getItem(BG_KEY) || '0', 10) || 0;
+      if(started && (_now() - started) >= IDLE_MS){
+        _showCoverWithSameIntro('idle-background-return');
+      }else{
+        _clearBgStamp();
+      }
+    }catch(_e){ _clearBgStamp(); }
+  }
+
+  ['touchstart','touchend','click','keydown','scroll'].forEach(function(ev){
     document.addEventListener(ev, _resetIdle, {passive:true});
   });
+  document.addEventListener('visibilitychange', function(){
+    if(document.visibilityState === 'hidden') _markBackgrounded();
+    else _checkBackgroundReturn();
+  }, {passive:true});
+  window.addEventListener('pagehide', _markBackgrounded, {passive:true});
+  window.addEventListener('pageshow', function(){
+    _checkBackgroundReturn();
+    _resetIdle();
+  }, {passive:true});
+
   _resetIdle();
 })();
 
