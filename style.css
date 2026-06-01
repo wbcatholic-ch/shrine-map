@@ -2128,13 +2128,12 @@ html.oai-cover-booting #cover > * {
   overflow: hidden;
   border-radius: 22px;
   background:
-    radial-gradient(120% 55% at 50% -10%, rgba(255,255,255,.30) 0%, rgba(255,255,255,.13) 33%, rgba(255,255,255,0) 58%),
-    linear-gradient(180deg, #434f5b 0%, #2a3541 48%, #17212c 100%);
-  border: 1px solid rgba(255,255,255,.20);
+    linear-gradient(180deg, #3e4a57 0%, #2d3845 18%, #182431 62%, #0f1823 100%);
+  border: 1px solid rgba(13,22,32,.36);
   box-shadow:
-    0 10px 20px rgba(31,42,68,.16),
-    inset 0 1px 0 rgba(255,255,255,.45),
-    inset 0 -16px 24px rgba(0,0,0,.28);
+    0 10px 20px rgba(31,42,68,.18),
+    inset 0 1px 0 rgba(190,204,216,.22),
+    inset 0 -18px 26px rgba(0,0,0,.34);
 }
 .cover-header::before {
   content: "";
@@ -2142,10 +2141,10 @@ html.oai-cover-booting #cover > * {
   left: 4%;
   right: 4%;
   top: 3px;
-  height: 42%;
-  border-radius: 20px 20px 48% 48% / 20px 20px 34% 34%;
-  background: linear-gradient(180deg, rgba(255,255,255,.34) 0%, rgba(255,255,255,.13) 54%, rgba(255,255,255,0) 100%);
-  opacity: .72;
+  height: 16%;
+  border-radius: 20px 20px 42% 42% / 20px 20px 26% 26%;
+  background: linear-gradient(180deg, rgba(124,142,158,.22) 0%, rgba(124,142,158,.06) 70%, rgba(124,142,158,0) 100%);
+  opacity: .55;
   pointer-events: none;
   z-index: 0;
 }
@@ -2157,7 +2156,7 @@ html.oai-cover-booting #cover > * {
   top: 1px;
   height: 1px;
   border-radius: 999px;
-  background: rgba(255,255,255,.55);
+  background: rgba(212,170,106,.26);
   pointer-events: none;
   z-index: 0;
 }
@@ -2482,7 +2481,7 @@ html.app-active #cover-action-row { display: none; }
   position: absolute;
   left: 0;
   right: 0;
-  bottom: calc(env(safe-area-inset-bottom, 0px) - 14px);
+  bottom: calc(env(safe-area-inset-bottom, 0px) - 32px);
   flex: 0 0 auto;
   width: 100%;
   max-width: none;
@@ -4672,7 +4671,7 @@ html.app-active #cover-menu-btn { display: none !important; }
   position: fixed !important;
   left: 50% !important;
   right: auto !important;
-  bottom: calc(env(safe-area-inset-bottom, 0px) - 14px) !important;
+  bottom: calc(env(safe-area-inset-bottom, 0px) - 32px) !important;
   transform: translateX(-50%) !important;
   width: min(100vw, 720px) !important;
   max-width: min(100vw, 720px) !important;
@@ -5216,7 +5215,7 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
   position: fixed !important;
   left: 50% !important;
   right: auto !important;
-  bottom: calc(env(safe-area-inset-bottom, 0px) - 14px) !important;
+  bottom: calc(env(safe-area-inset-bottom, 0px) - 32px) !important;
   transform: translateX(-50%) !important;
   flex: none !important;
   width: min(100vw, 720px) !important;
@@ -5383,7 +5382,7 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
     padding: 0 10px !important;
   }
   #cover-bottom-note {
-    bottom: calc(env(safe-area-inset-bottom, 0px) - 14px) !important;
+    bottom: calc(env(safe-area-inset-bottom, 0px) - 32px) !important;
     font-size: clamp(7.8px, calc(var(--cover-vh, 1vh) * 1.1), 9px) !important;
     line-height: 1.28 !important;
   }
@@ -5550,11 +5549,11 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
 
 /* 커버 하단 문구: V3-54 기준으로 하단 고정, 잘림 방지 */
 #cover-bottom-note {
-  bottom: calc(env(safe-area-inset-bottom, 0px) - 14px) !important;
+  bottom: calc(env(safe-area-inset-bottom, 0px) - 32px) !important;
 }
 @media (max-height: 740px) {
   #cover-bottom-note {
-    bottom: calc(env(safe-area-inset-bottom, 0px) - 14px) !important;
+    bottom: calc(env(safe-area-inset-bottom, 0px) - 32px) !important;
   }
 }
 
@@ -5771,7 +5770,7 @@ html.oai-font-global #cover #cover-bottom-note {
   position: fixed !important;
   left: 50% !important;
   right: auto !important;
-  bottom: calc(env(safe-area-inset-bottom, 0px) - 14px) !important;
+  bottom: calc(env(safe-area-inset-bottom, 0px) - 32px) !important;
   transform: translateX(-50%) !important;
   width: min(100vw, 720px) !important;
   max-width: min(100vw, 720px) !important;
@@ -5907,7 +5906,7 @@ html.oai-font-global .sheet-title {
   }
   #cover #cover-bottom-note,
   html.oai-font-global #cover #cover-bottom-note {
-    bottom: calc(env(safe-area-inset-bottom, 0px) - 10px) !important;
+    bottom: calc(env(safe-area-inset-bottom, 0px) - 28px) !important;
     font-size: 9px !important;
   }
 }
