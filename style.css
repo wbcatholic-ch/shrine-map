@@ -2127,9 +2127,14 @@ html.oai-cover-booting #cover > * {
   position: relative;
   overflow: hidden;
   border-radius: 22px;
-  background: linear-gradient(135deg, #2f3742 0%, #3f4752 100%);
-  border: 1px solid rgba(212,170,106,.22);
-  box-shadow: 0 8px 18px rgba(31,42,68,.10), inset 0 1px 0 rgba(255,255,255,.10);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.24) 0%, rgba(255,255,255,.10) 36%, rgba(255,255,255,0) 56%),
+    linear-gradient(135deg, #343d49 0%, #47505b 52%, #303844 100%);
+  border: 1px solid rgba(212,170,106,.28);
+  box-shadow:
+    0 8px 18px rgba(31,42,68,.10),
+    inset 0 1px 0 rgba(255,255,255,.22),
+    inset 0 -10px 18px rgba(0,0,0,.08);
 }
 .cover-title {
   display: inline-block;
@@ -5105,13 +5110,13 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
 
 /* 커버 하단/새로고침 최종 위치 */
 #cover {
-  --cover-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + clamp(18px, calc(var(--cover-vh, 1vh) * 2.2), 28px)) !important;
+  --cover-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + clamp(48px, calc(var(--cover-vh, 1vh) * 6.2), 62px)) !important;
   padding-bottom: var(--cover-bottom-safe) !important;
   overflow: visible !important;
 }
 #cover-main-block {
   gap: clamp(5px, calc(var(--cover-vh, 1vh) * 0.8), 10px) !important;
-  padding-bottom: 0 !important;
+  padding-bottom: clamp(6px, calc(var(--cover-vh, 1vh) * 1.0), 12px) !important;
   transform: none !important;
   justify-content: center !important;
 }
@@ -5179,15 +5184,15 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
 }
 #cover-bottom-note {
   position: fixed !important;
-  left: 0 !important;
-  right: 0 !important;
+  left: 50% !important;
+  right: auto !important;
   bottom: 0 !important;
-  transform: none !important;
+  transform: translateX(-50%) !important;
   flex: none !important;
-  width: 100% !important;
-  max-width: 720px !important;
+  width: min(100vw, 720px) !important;
+  max-width: min(100vw, 720px) !important;
   margin: 0 auto !important;
-  padding: 3px 22px calc(7px + env(safe-area-inset-bottom, 0px)) 60px !important;
+  padding: 3px max(18px, env(safe-area-inset-left, 0px)) calc(8px + env(safe-area-inset-bottom, 0px)) max(18px, env(safe-area-inset-right, 0px)) !important;
   text-align: center !important;
   font-size: clamp(7.8px, calc(var(--cover-vh, 1vh) * 1.1), 9px) !important;
   font-weight: 500 !important;
@@ -5319,11 +5324,11 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
 
 @media (max-height: 740px) {
   #cover {
-    --cover-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + clamp(16px, calc(var(--cover-vh, 1vh) * 2.0), 24px)) !important;
+    --cover-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + clamp(42px, calc(var(--cover-vh, 1vh) * 5.8), 56px)) !important;
   }
   #cover-main-block {
     gap: clamp(4px, calc(var(--cover-vh, 1vh) * .55), 7px) !important;
-    padding-bottom: 0 !important;
+    padding-bottom: clamp(4px, calc(var(--cover-vh, 1vh) * .7), 8px) !important;
     transform: none !important;
   }
   #cover #cover-action-row.cover-action-single {
