@@ -247,8 +247,12 @@
     return items.slice().sort(function(a,b){
       var aa = isMyDioceseWebItem(a, myName) ? 0 : 1;
       var bb = isMyDioceseWebItem(b, myName) ? 0 : 1;
-      return aa - bb;
+      if(aa !== bb) return aa - bb;
+      return 0;
     });
+  }
+  function myDioceseBadgeHtml(){
+    return '<span class="web-my-diocese-badge">나의 교구</span>';
   }
   function hideIntegratedViews(){
     ig$('web-view')?.classList.remove('open');
@@ -547,7 +551,8 @@
       // 교구/사제찾기: 배지=관구명, 교구 카드 op 숨김
       const badgeText = ((s.cat==='교구' || s.cat==='사제찾기') && s.prov) ? esc(s.prov) : esc(s.cat);
       const topRight = s.cat==='교구' ? '' : esc(s.op);
-      const cardName = esc(s.name);
+      const isMyWebCard = isMyDioceseWebItem(s, getMyDioceseName());
+      const cardName = esc(s.name) + (isMyWebCard ? myDioceseBadgeHtml() : '');
       const cardDesc = s.cat==='교구' ? '교구 공식 홈페이지' : esc(s.desc);
       const icoBg = '#F5F0E8';
       const icoStyle = 'background:' + icoBg + (s.cat==='사제찾기' ? ';color:' + color + ';font-weight:900;font-family:Georgia,serif' : '');
