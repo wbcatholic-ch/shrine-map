@@ -1345,22 +1345,9 @@ function buildListView(){
   wrap.innerHTML='';
   const myName=getMyDioceseName();
   if(myName && DIOCESE_META[myName]){
-    const myGw=GW_OF[myName] || (DIOCESE_META[myName]&&DIOCESE_META[myName].gwangu) || '';
-    const myGroup=gws.find(function(g){return g.key===myGw;});
-    const mySec=document.createElement('div');mySec.className='lv-sec lv-my-diocese-sec';
-    const myBdg=document.createElement('span');myBdg.className='lv-sec-bdg';
-    myBdg.style.background=(myGroup&&myGroup.col)||'#B7791F';myBdg.textContent='나의 교구';
-    mySec.appendChild(myBdg);
-    wrap.appendChild(mySec);
     wrap.appendChild(makeRow((DIOCESE_META[myName]&&DIOCESE_META[myName].region)||'', myName));
   }
   gws.forEach(function(g){
-    // ── 관구 섹션 헤더 ──
-    const sec=document.createElement('div');sec.className='lv-sec';
-    const secBdg=document.createElement('span');secBdg.className='lv-sec-bdg';
-    secBdg.style.background=g.col;secBdg.textContent=g.key;
-    sec.appendChild(secBdg);
-    wrap.appendChild(sec);
     // ── 교구 카드 ──
     g.dioceses.forEach(function(dName){
       if(myName && dName === myName) return;
