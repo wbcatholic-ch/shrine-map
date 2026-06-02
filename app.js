@@ -2298,6 +2298,40 @@ function _kakaoKeywordDocs(query, limit){
 const KAKAO_PLACE_SEARCH_DISPLAY_LIMIT = 30;
 const TC    = {'성지':'#c0392b','순례지':'#1565c0','순교 사적지':'#1b7a3e'};
 const _DIOS=[['all','전체'],['서울대교구','서울'],['인천교구','인천'],['수원교구','수원'],['의정부교구','의정부'],['춘천교구','춘천'],['원주교구','원주'],['대전교구','대전'],['청주교구','청주'],['대구대교구','대구'],['안동교구','안동'],['부산교구','부산'],['마산교구','마산'],['광주대교구','광주'],['전주교구','전주'],['제주교구','제주'],['군종교구','군종']];
+const MY_DIOCESE_STORAGE_KEY='oai_my_diocese_name';
+function _getMyDioceseName(){
+  try{
+    const name=(localStorage.getItem(MY_DIOCESE_STORAGE_KEY)||'').trim();
+    if(!name || name==='군종교구') return '';
+    return _DIOS.some(function(x){ return x[0]===name; }) ? name : '';
+  }catch(e){ return ''; }
+}
+function _orderedDiosForMode(mode){
+  const base=_DIOS.slice();
+  if(mode!=='parish') return base;
+  const mine=_getMyDioceseName();
+  if(!mine) return base;
+  const mineRow=base.find(function(x){ return x[0]===mine; });
+  if(!mineRow) return base;
+  const rest=base.slice(1).filter(function(x){ return x[0]!==mine; });
+  return [base[0], mineRow].concat(rest);
+}
+function _renderDioFilterBars(mode){
+  const fb=$('list-filter-bar'), sm=$('sm-filter-bar');
+  if(!fb || !sm) return;
+  const rows=_orderedDiosForMode(mode);
+  const sig=String(mode||'')+'|'+rows.map(function(x){ return x[0]; }).join(',');
+  if(fb.dataset.dioSig===sig && sm.dataset.dioSig===sig && fb.children.length && sm.children.length) return;
+  fb.innerHTML='';
+  sm.innerHTML='';
+  rows.forEach(function(row,i){
+    const v=row[0], l=row[1];
+    fb.innerHTML+=`<button class="filter-btn${i?'':' active'}" onclick="setDioFilter('${v}',this)">${l}</button>`;
+    sm.innerHTML+=`<button class="sm-fb${i?'':' on'}" onclick="setSmDio('${v}',this)">${l}</button>`;
+  });
+  fb.dataset.dioSig=sig;
+  sm.dataset.dioSig=sig;
+}
 
 const _SU='https://www.cbck.or.kr/Catholic/Shrine/Read?seq=';
 /* ── Mobility API 동시 호출 제한 + 결과 캐시 ──────────────────────
@@ -2849,16 +2883,11 @@ function startApp(mode){
   resetRoute();
   const _ls=$('list-srch-inp'); if(_ls) _ls.value='';
   const _lsx=$('list-srch-x'); if(_lsx) _lsx.style.display='none';
+  _renderDioFilterBars(mode);
   $$('.filter-btn').forEach((b,i)=>b.classList.toggle('active',i===0));
   $$('.sm-fb').forEach((b,i)=>b.classList.toggle('on',i===0));
 
- if(!$('list-filter-bar').children.length){
-  const fb=$('list-filter-bar'),sm=$('sm-filter-bar');
-  _DIOS.forEach(([v,l],i)=>{
-   fb.innerHTML+=`<button class="filter-btn${i?'':' active'}" onclick="setDioFilter('${v}',this)">${l}</button>`;
-   sm.innerHTML+=`<button class="sm-fb${i?'':' on'}" onclick="setSmDio('${v}',this)">${l}</button>`;
-  });
- }  _screen='map';
+  _screen='map';
   try{ if(window._historyEnterMap) window._historyEnterMap(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   $('cover').style.display='none';
   if(typeof oaiSetMainMapLayerHidden==='function') oaiSetMainMapLayerHidden(false);
@@ -6328,6 +6357,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           if(e && e.preventDefault) e.preventDefault();
           setSelectedName(name);
           updateButton();
+          try{ if(typeof _renderDioFilterBars==='function') _renderDioFilterBars(_mode); }catch(_e){}
           closeModal();
         });
         list.appendChild(item);
