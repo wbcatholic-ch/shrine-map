@@ -6337,9 +6337,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     function updateButton(){
       var name = selectedName();
       if(name){
-        btn.innerHTML = '<span class="diocese-btn-label">나의 교구</span><span class="diocese-btn-name">' + safeText(name) + '</span>';
+        btn.innerHTML = '<span class="diocese-btn-label">나의 신앙생활</span><span class="diocese-btn-name">' + safeText(name) + '</span>';
       } else {
-        btn.textContent = '나의 교구는?';
+        btn.innerHTML = '<span class="diocese-btn-label">나의 신앙생활</span><span class="diocese-btn-name">나의 교구는?</span>';
       }
       btn.setAttribute('aria-label', name ? ('나의 교구 ' + name + ' 변경') : '나의 교구 선택');
       btn.classList.toggle('has-diocese', !!name);
