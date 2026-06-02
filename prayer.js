@@ -667,16 +667,10 @@ prBindDetailSwipeArrow();
 function prUpdateGoodNewsPrayerButton(){
   var btn = document.getElementById('goodnews-prayer-btn');
   if(!btn) return;
-  var dio = '';
-  try{ dio = String(localStorage.getItem('oai_my_diocese_name') || '').trim(); }catch(_e){}
-  var show = (dio !== '대구대교구');
-  btn.hidden = !show;
-  btn.setAttribute('aria-hidden', show ? 'false' : 'true');
-  if(show){
-    btn.style.removeProperty('display');
-  }else{
-    btn.style.display = 'none';
-  }
+  // 굿뉴스 버튼은 숨기거나 새로 표시하지 않고 기존 위치에 그대로 둔다.
+  btn.hidden = false;
+  btn.setAttribute('aria-hidden', 'false');
+  btn.style.removeProperty('display');
 }
 window.prUpdateGoodNewsPrayerButton = prUpdateGoodNewsPrayerButton;
 

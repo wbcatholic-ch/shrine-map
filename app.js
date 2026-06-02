@@ -1496,7 +1496,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V2-35';
+    frame.src='diocese.html?v=V2-36';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -6582,6 +6582,37 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       });
       body.appendChild(noneItem);
     }
+    function renderPrayerSetupGuide(){
+      setHeader('나의 교구 설정', '주요기도문 이동 안내');
+      setBodyMode('my-faith-body');
+      var sec = document.createElement('section');
+      sec.className = 'my-faith-section my-faith-prayer-guide-section';
+      sec.innerHTML = '<h3>나의 교구를 설정해 주세요</h3>' +
+        '<p>나의 교구를 설정하면 교구에 맞는 주요기도문 안내를 받을 수 있습니다.<br>지금은 굿뉴스 주요기도문으로 이동할 수 있습니다.</p>';
+      var actions = document.createElement('div');
+      actions.className = 'my-faith-actions';
+      var setupBtn = actionButton('나의 교구 설정하기', '');
+      setupBtn.disabled = false;
+      setupBtn.addEventListener('click', function(e){
+        if(e && e.preventDefault) e.preventDefault();
+        renderDioceseList();
+      });
+      var goodBtn = actionButton('굿뉴스로 이동', '');
+      goodBtn.disabled = false;
+      goodBtn.addEventListener('click', function(e){
+        if(e && e.preventDefault) e.preventDefault();
+        goExternal('https://maria.catholic.or.kr/mobile/prayer/');
+      });
+      actions.appendChild(setupBtn);
+      actions.appendChild(goodBtn);
+      sec.appendChild(actions);
+      body.appendChild(sec);
+      setTimeout(updateMyFaithViewport, 80);
+    }
+    window.openMyFaithPrayerSetupGuide = function(){
+      renderPrayerSetupGuide();
+      openModal({keepContent:true});
+    };
     function getParishItems(){
       try{ if(Array.isArray(PARISHES) && PARISHES.length) return PARISHES; }catch(e){}
       return [];
@@ -6783,11 +6814,39 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if (typeof openMissa === 'function') openMissa();
   });
   on('mass-quick-prayer', 'click', function() {
+    var myDiocese = '';
+    try{ myDiocese = String(localStorage.getItem('oai_my_diocese_name') || '').trim(); }catch(_e){}
+    var goodNewsUrl = 'https://maria.catholic.or.kr/mobile/prayer/';
+    try{
+      document.querySelectorAll('#mass-quick-modal .app-pressing').forEach(function(el){ el.classList.remove('app-pressing'); });
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+
+    if(myDiocese && myDiocese !== '대구대교구'){
+      // 대구대교구가 아닌 교구는 주요기도문 버튼 자체는 유지하되, 바로 굿뉴스 주요기도문으로 이동한다.
+      try{ if(typeof _setMassQuickReturn === 'function') _setMassQuickReturn(true); }catch(e){ console.warn('[가톨릭길동무]', e); }
+      if(typeof oaiSmoothNavigate === 'function') oaiSmoothNavigate(goodNewsUrl, 'prayer-goodnews');
+      else location.href = goodNewsUrl;
+      return;
+    }
+
+    if(!myDiocese){
+      // 나의 교구가 없을 때만 교구 설정 안내와 굿뉴스 이동 선택지를 보여준다.
+      try{
+        var mq = document.getElementById('mass-quick-modal');
+        if(mq){ mq.classList.remove('show'); mq.setAttribute('aria-hidden','true'); }
+      }catch(e){ console.warn('[가톨릭길동무]', e); }
+      if(typeof window.openMyFaithPrayerSetupGuide === 'function'){
+        window.openMyFaithPrayerSetupGuide();
+      }else if(typeof oaiSmoothNavigate === 'function'){
+        oaiSmoothNavigate(goodNewsUrl, 'prayer-goodnews');
+      }else{
+        location.href = goodNewsUrl;
+      }
+      return;
+    }
+
     _setPrayerQuickReturn(true);
     var openPrayerFromQuick = function(){
-      try{
-        document.querySelectorAll('#mass-quick-modal .app-pressing').forEach(function(el){ el.classList.remove('app-pressing'); });
-      }catch(e){ console.warn('[가톨릭길동무]', e); }
       if (typeof openPrayerBook === 'function') openPrayerBook({fromMassQuick:true, instant:true});
       else alert('기도문 기능이 연결되지 않았습니다.');
     };
