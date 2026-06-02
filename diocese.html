@@ -1418,7 +1418,7 @@ function buildListView(){
         const priestBtn=document.createElement('button');
         priestBtn.type='button';
         priestBtn.className='lv-priest-link';
-        priestBtn.textContent='✝ 사제찾기';
+        priestBtn.textContent='사제찾기';
         priestBtn.dataset.dioUrl=m.priestUrl;
         priestBtn.dataset.dioSource='priest';
         priestBtn.dataset.dioKey=dName;
@@ -1752,10 +1752,10 @@ function showCard(el){
   const meta=DIOCESE_META[el.dataset.d||'']||{};
   const priestUrl=meta.priestUrl||'';
   const homeBtn=url
-    ?`<button type="button" class="c-btn" data-dio-url="${url}" data-dio-source="map" style="background:${c}">↗ 홈페이지 방문</button>`
+    ?`<button type="button" class="c-btn" data-dio-url="${url}" data-dio-source="map" style="background:${c}">교구 홈페이지</button>`
     :'<div class="c-nurl">홈페이지 없음</div>';
   const priestBtn=priestUrl
-    ?`<button type="button" class="c-btn c-priest-btn" data-dio-url="${priestUrl}" data-dio-source="priest">✝ 사제찾기</button>`
+    ?`<button type="button" class="c-btn c-priest-btn" data-dio-url="${priestUrl}" data-dio-source="priest">사제찾기</button>`
     :'';
   document.getElementById('c-act').innerHTML=`<div class="c-action-group">${homeBtn}${priestBtn}</div>`;
   const card=document.getElementById('card');
@@ -1864,7 +1864,7 @@ function makeRow(disp,diocese,overlapDongs){
     const priestBtn=document.createElement('button');
     priestBtn.type='button';
     priestBtn.className='lv-priest-link';
-    priestBtn.textContent='✝ 사제찾기';
+    priestBtn.textContent='사제찾기';
     priestBtn.dataset.dioUrl=priestUrl;
     priestBtn.dataset.dioSource='priest';
     priestBtn.dataset.dioKey=diocese;
