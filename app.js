@@ -1893,7 +1893,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V2-11';
+const _PARISH_ASSET_VERSION='V2-12';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -6269,6 +6269,79 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     return true;
   }
   ['list-srch-inp', 'region-inp', 'sm-inp', 'prayer-search-inp'].forEach(prepareSearchKeyboardInput);
+
+  // ── 나의 교구 선택 ──
+  (function bindMyDioceseSelector(){
+    var KEY = 'oai_my_diocese_name';
+    var dioceses = [
+      '서울대교구','대구대교구','광주대교구','수원교구','인천교구',
+      '의정부교구','춘천교구','원주교구','대전교구','청주교구',
+      '부산교구','마산교구','안동교구','전주교구','제주교구'
+    ];
+    var btn = document.getElementById('cover-diocese-btn');
+    var modal = document.getElementById('my-diocese-modal');
+    var list = document.getElementById('my-diocese-list');
+    if(!btn || !modal || !list) return;
+
+    function selectedName(){
+      try{ return (localStorage.getItem(KEY) || '').trim(); }catch(e){ return ''; }
+    }
+    function setSelectedName(name){
+      try{ localStorage.setItem(KEY, String(name || '').trim()); }catch(e){ console.warn('[가톨릭길동무]', e); }
+    }
+    function updateButton(){
+      var name = selectedName();
+      btn.textContent = name || '나의 교구는?';
+      btn.setAttribute('aria-label', name ? ('나의 교구 ' + name + ' 변경') : '나의 교구 선택');
+      btn.classList.toggle('has-diocese', !!name);
+    }
+    function closeModal(){
+      modal.classList.remove('show');
+      modal.setAttribute('aria-hidden', 'true');
+      try{ document.body.classList.remove('modal-open'); }catch(e){}
+    }
+    function openModal(){
+      renderList();
+      modal.classList.add('show');
+      modal.setAttribute('aria-hidden', 'false');
+      try{ document.body.classList.add('modal-open'); }catch(e){}
+    }
+    function renderList(){
+      var current = selectedName();
+      list.innerHTML = '';
+      dioceses.forEach(function(name){
+        var item = document.createElement('button');
+        item.type = 'button';
+        item.className = 'my-diocese-option' + (current === name ? ' selected' : '');
+        item.textContent = name;
+        item.setAttribute('aria-pressed', current === name ? 'true' : 'false');
+        item.addEventListener('click', function(e){
+          if(e && e.preventDefault) e.preventDefault();
+          setSelectedName(name);
+          updateButton();
+          closeModal();
+        });
+        list.appendChild(item);
+      });
+    }
+
+    updateButton();
+    on(btn, 'click', function(e){
+      if(e && e.preventDefault) e.preventDefault();
+      if(e && e.stopPropagation) e.stopPropagation();
+      openModal();
+    });
+    on('my-diocese-close', 'click', function(e){
+      if(e && e.preventDefault) e.preventDefault();
+      closeModal();
+    });
+    modal.addEventListener('click', function(e){
+      if(e && e.target && e.target.getAttribute && e.target.getAttribute('data-my-diocese-close') === 'true') closeModal();
+    });
+    document.addEventListener('keydown', function(e){
+      if(e && e.key === 'Escape' && modal.classList.contains('show')) closeModal();
+    });
+  })();
 
   // ── 매일미사 ──
   on('missa-close', 'click', function() { closeMissa(); });

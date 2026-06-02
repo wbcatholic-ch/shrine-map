@@ -4094,7 +4094,8 @@ html.app-active #cover-menu-btn { display: none !important; }
 }
 
 #cover #cover-action-row.cover-action-single {
-  justify-content: flex-end;
+  justify-content: space-between;
+  gap: 10px;
   height: 38px;
   min-height: 38px;
   max-height: 38px;
@@ -4142,6 +4143,106 @@ html.app-active #cover-menu-btn { display: none !important; }
   box-sizing: border-box;
 }
 .cover-menu-modal.show { display: flex; }
+
+.my-diocese-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10025;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: max(18px, env(safe-area-inset-top, 0px)) 18px max(18px, env(safe-area-inset-bottom, 0px));
+  box-sizing: border-box;
+}
+.my-diocese-modal.show { display: flex; }
+.my-diocese-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, .25);
+  backdrop-filter: blur(3px);
+  -webkit-backdrop-filter: blur(3px);
+}
+.my-diocese-panel {
+  position: relative;
+  width: min(360px, calc(100vw - 36px));
+  max-height: min(620px, calc(100vh - 54px - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px)));
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  background: rgba(255, 253, 247, .98);
+  border: 1px solid rgba(183, 121, 31, .25);
+  border-radius: 22px;
+  box-shadow: 0 20px 42px rgba(15, 23, 42, .24);
+  padding: 15px 14px 14px;
+  box-sizing: border-box;
+  animation: coverMenuIn .16s ease-out;
+}
+.my-diocese-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 2px 2px 12px;
+  flex: 0 0 auto;
+}
+.my-diocese-title {
+  font-size: calc(18px * var(--app-font-scale, 1));
+  font-weight: 900;
+  color: #1f2a44;
+  letter-spacing: -.03em;
+}
+.my-diocese-subtitle {
+  margin-top: 4px;
+  font-size: calc(11.5px * var(--app-font-scale, 1));
+  font-weight: 700;
+  color: #6b5d4c;
+  letter-spacing: -.03em;
+  line-height: 1.35;
+}
+.my-diocese-close {
+  width: 34px;
+  height: 34px;
+  border: 0;
+  border-radius: 12px;
+  background: rgba(31,42,68,.08);
+  color: #1f2a44;
+  font-size: 24px;
+  font-weight: 800;
+  line-height: 1;
+  cursor: pointer;
+  flex: 0 0 34px;
+}
+.my-diocese-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 2px 2px 4px;
+}
+.my-diocese-option {
+  min-height: 42px;
+  border: 1px solid rgba(183,121,31,.22);
+  border-radius: 14px;
+  background: #fffaf2;
+  color: #1f2a44;
+  font-family: inherit;
+  font-size: calc(13.2px * var(--app-font-scale, 1));
+  font-weight: 850;
+  letter-spacing: -.035em;
+  line-height: 1.1;
+  box-shadow: 0 4px 10px rgba(31,42,68,.05);
+  cursor: pointer;
+  box-sizing: border-box;
+}
+.my-diocese-option.selected {
+  background: #f6ead5;
+  border-color: rgba(183,121,31,.48);
+  box-shadow: inset 0 0 0 1px rgba(183,121,31,.18), 0 6px 12px rgba(31,42,68,.07);
+}
+@media (max-width: 340px) {
+  .my-diocese-list { grid-template-columns: 1fr; }
+}
 .cover-menu-backdrop {
   position: absolute;
   inset: 0;
@@ -5147,7 +5248,8 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
   padding: 0 !important;
   display: flex !important;
   align-items: center !important;
-  justify-content: flex-end !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
   flex: 0 0 36px !important;
   z-index: 12 !important;
   pointer-events: auto !important;
@@ -5911,4 +6013,77 @@ html.oai-font-global #cover .cover-subname {
 #cover #cc-6 .cover-name,
 html.oai-font-global #cover #cc-6 .cover-name {
   font-size: calc(16px * var(--app-font-scale, 1)) !important;
+}
+
+/* V2-15: 커버 하단 나의 교구 선택 버튼 */
+#cover #cover-action-row.cover-action-single {
+  justify-content: space-between !important;
+  gap: 10px !important;
+}
+#cover #cover-action-row.cover-action-single #cover-diocese-box {
+  display: flex !important;
+  flex: 0 1 auto !important;
+  width: clamp(118px, 35vw, 158px) !important;
+  min-width: 118px !important;
+  max-width: 158px !important;
+  height: 34px !important;
+  min-height: 34px !important;
+  max-height: 34px !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+#cover #cover-action-row.cover-action-single #cover-update-box {
+  margin-left: auto !important;
+}
+#cover .cover-diocese-btn {
+  width: 100% !important;
+  min-height: 34px !important;
+  height: 34px !important;
+  max-height: 34px !important;
+  padding: 0 10px !important;
+  border-radius: 13px !important;
+  background: rgba(255,251,242,.92) !important;
+  color: #4b3f32 !important;
+  border: 1.5px solid rgba(183,121,31,.25) !important;
+  font-family: inherit !important;
+  font-size: calc(11.2px * var(--app-font-scale, 1)) !important;
+  font-weight: 850 !important;
+  line-height: 1 !important;
+  letter-spacing: -.03em !important;
+  box-shadow: 0 4px 10px rgba(31,42,68,.06) !important;
+  cursor: pointer !important;
+  white-space: nowrap !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  box-sizing: border-box !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+#cover .cover-diocese-btn.has-diocese {
+  background: #fff7e8 !important;
+  color: #1f2a44 !important;
+  border-color: rgba(183,121,31,.34) !important;
+  font-weight: 900 !important;
+}
+#cover .cover-diocese-btn:active { transform: translateY(1px); }
+@media (max-height: 740px) {
+  #cover #cover-action-row.cover-action-single #cover-diocese-box,
+  #cover .cover-diocese-btn {
+    height: 34px !important;
+    min-height: 34px !important;
+    max-height: 34px !important;
+  }
+}
+@media (max-width: 390px) {
+  #cover #cover-action-row.cover-action-single {
+    gap: 8px !important;
+  }
+  #cover #cover-action-row.cover-action-single #cover-diocese-box {
+    width: clamp(108px, 36vw, 136px) !important;
+    min-width: 108px !important;
+    max-width: 136px !important;
+  }
+  #cover .cover-diocese-btn {
+    font-size: calc(10.4px * var(--app-font-scale, 1)) !important;
+    padding: 0 8px !important;
+  }
 }
