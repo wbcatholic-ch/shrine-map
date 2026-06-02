@@ -208,6 +208,7 @@
   const trailState = {inited:false, map:null, markers:[], selected:-1, myOverlay:null, view:'map', pendingOpenIndex:null, restoreCenter:null, restoreLevel:null, needsHardReset:false, pendingFitBounds:false};
   const webState = {built:false, curCat:'⭐ 즐겨찾기'};
   const WEB_FAV_KEY = 'web_favorites_v1';
+  const MY_DIOCESE_KEY = 'oai_my_diocese_name';
   let webFavs = [];
   function wfLoad(){ try{ webFavs=JSON.parse(localStorage.getItem(WEB_FAV_KEY)||'[]'); }catch(e){ webFavs=[]; } }
   function wfSave(){ try{ localStorage.setItem(WEB_FAV_KEY, JSON.stringify(webFavs)); }catch(e){ console.warn("[가톨릭길동무]", e); } }
@@ -225,6 +226,30 @@
   function ig$(id){ return document.getElementById(id); }
   function esc(s){ return String(s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m])); }
   function shortUrl(url){ return String(url||'').replace(/^https?:\/\//,'').replace(/\/$/,''); }
+  function getMyDioceseName(){
+    try{ return (localStorage.getItem(MY_DIOCESE_KEY) || '').trim(); }catch(e){ return ''; }
+  }
+  function isMyDioceseWebItem(item, myName){
+    if(!item || !myName) return false;
+    var itemName = String(item.name || '').trim();
+    if(item.cat === '사제찾기'){
+      return itemName === myName + ' 사제찾기' || itemName.indexOf(myName) === 0;
+    }
+    if(item.cat === '교구'){
+      return itemName === myName;
+    }
+    return false;
+  }
+  function sortWebItemsForMyDiocese(items){
+    var myName = getMyDioceseName();
+    if(!myName || !Array.isArray(items) || items.length < 2) return items;
+    if(webState.curCat !== '사제찾기' && webState.curCat !== '교구') return items;
+    return items.slice().sort(function(a,b){
+      var aa = isMyDioceseWebItem(a, myName) ? 0 : 1;
+      var bb = isMyDioceseWebItem(b, myName) ? 0 : 1;
+      return aa - bb;
+    });
+  }
   function hideIntegratedViews(){
     ig$('web-view')?.classList.remove('open');
     ig$('trail-view')?.classList.remove('open');
@@ -495,7 +520,7 @@
     if(!wrap || !empty) return;
     applyWebCatState(webState.curCat || '⭐ 즐겨찾기');
     Array.from(wrap.querySelectorAll('.web-card')).forEach(el => el.remove());
-    const filtered = webState.curCat==='⭐ 즐겨찾기' ? WEB_SITES.filter(s => wfHas(s.url)) : WEB_SITES.filter(s => s.cat===webState.curCat);
+    const filtered = sortWebItemsForMyDiocese(webState.curCat==='⭐ 즐겨찾기' ? WEB_SITES.filter(s => wfHas(s.url)) : WEB_SITES.filter(s => s.cat===webState.curCat));
     const countEl = ig$('web-count');
     if(countEl) countEl.textContent = filtered.length + '개';
     empty.classList.toggle('show', filtered.length===0);

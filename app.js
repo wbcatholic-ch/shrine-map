@@ -6289,9 +6289,18 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     function setSelectedName(name){
       try{ localStorage.setItem(KEY, String(name || '').trim()); }catch(e){ console.warn('[가톨릭길동무]', e); }
     }
+    function safeText(x){
+      return String(x || '').replace(/[&<>"']/g, function(c){
+        return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] || c);
+      });
+    }
     function updateButton(){
       var name = selectedName();
-      btn.textContent = name ? ('나의 교구: ' + name) : '나의 교구는?';
+      if(name){
+        btn.innerHTML = '<span class="diocese-btn-label">나의 교구</span><span class="diocese-btn-name">' + safeText(name) + '</span>';
+      } else {
+        btn.textContent = '나의 교구는?';
+      }
       btn.setAttribute('aria-label', name ? ('나의 교구 ' + name + ' 변경') : '나의 교구 선택');
       btn.classList.toggle('has-diocese', !!name);
     }
