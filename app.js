@@ -6359,20 +6359,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       var current = selectedName();
       list.innerHTML = '';
 
-      var noneItem = document.createElement('button');
-      noneItem.type = 'button';
-      noneItem.className = 'my-diocese-option my-diocese-none' + (!current ? ' selected' : '');
-      noneItem.textContent = '선택 안함';
-      noneItem.setAttribute('aria-pressed', !current ? 'true' : 'false');
-      noneItem.addEventListener('click', function(e){
-        if(e && e.preventDefault) e.preventDefault();
-        setSelectedName('');
-        updateButton();
-        try{ if(typeof _renderDioFilterBars==='function') _renderDioFilterBars(_mode); }catch(_e){}
-        closeModal();
-      });
-      list.appendChild(noneItem);
-
       dioceses.forEach(function(name){
         var item = document.createElement('button');
         item.type = 'button';
@@ -6388,6 +6374,20 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         });
         list.appendChild(item);
       });
+
+      var noneItem = document.createElement('button');
+      noneItem.type = 'button';
+      noneItem.className = 'my-diocese-option my-diocese-none' + (!current ? ' selected' : '');
+      noneItem.textContent = '선택 안함';
+      noneItem.setAttribute('aria-pressed', !current ? 'true' : 'false');
+      noneItem.addEventListener('click', function(e){
+        if(e && e.preventDefault) e.preventDefault();
+        setSelectedName('');
+        updateButton();
+        try{ if(typeof _renderDioFilterBars==='function') _renderDioFilterBars(_mode); }catch(_e){}
+        closeModal();
+      });
+      list.appendChild(noneItem);
     }
 
     updateButton();

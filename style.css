@@ -6015,7 +6015,7 @@ html.oai-font-global #cover #cc-6 .cover-name {
   font-size: calc(16px * var(--app-font-scale, 1)) !important;
 }
 
-/* V2-17: 커버 하단 나의 교구 버튼 폭 축소 및 2줄 표기 */
+/* V2-20: 나의 교구 버튼 글자 크기 및 선택 해제 위치 정리 */
 #cover #cover-action-row.cover-action-single {
   justify-content: space-between !important;
   gap: 8px !important;
@@ -6046,9 +6046,9 @@ html.oai-font-global #cover #cc-6 .cover-name {
   color: #4b3f32 !important;
   border: 1.5px solid rgba(183,121,31,.25) !important;
   font-family: inherit !important;
-  font-size: calc(10.6px * var(--app-font-scale, 1)) !important;
-  font-weight: 850 !important;
-  line-height: 1.05 !important;
+  font-size: calc(12.6px * var(--app-font-scale, 1)) !important;
+  font-weight: 900 !important;
+  line-height: 1.04 !important;
   letter-spacing: -.03em !important;
   box-shadow: 0 4px 10px rgba(31,42,68,.06) !important;
   cursor: pointer !important;
@@ -6083,7 +6083,7 @@ html.oai-font-global #cover #cc-6 .cover-name {
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
-  font-size: calc(11.4px * var(--app-font-scale, 1)) !important;
+  font-size: calc(12.8px * var(--app-font-scale, 1)) !important;
   font-weight: 950 !important;
   line-height: 1.05 !important;
   color: #1f2a44 !important;
@@ -6108,18 +6108,18 @@ html.oai-font-global #cover #cc-6 .cover-name {
     max-width: 124px !important;
   }
   #cover .cover-diocese-btn {
-    font-size: calc(9.6px * var(--app-font-scale, 1)) !important;
+    font-size: calc(11.5px * var(--app-font-scale, 1)) !important;
     padding: 0 6px !important;
   }
   #cover .cover-diocese-btn .diocese-btn-label {
     font-size: calc(8px * var(--app-font-scale, 1)) !important;
   }
   #cover .cover-diocese-btn .diocese-btn-name {
-    font-size: calc(10.3px * var(--app-font-scale, 1)) !important;
+    font-size: calc(12px * var(--app-font-scale, 1)) !important;
   }
 }
 
-/* V2-19: 나의 교구 선택 해제 옵션 */
+/* V2-20: 선택 안함은 교구 목록 마지막에 표시 */
 .my-diocese-option.my-diocese-none {
   color: #6b7280 !important;
   background: #f8fafc !important;
