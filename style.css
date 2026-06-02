@@ -1559,6 +1559,7 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, #3F6F5A, #4F846C
 #prayer-tabs .pr-tab.on[data-cat="novena"]    { background: #1565c0; }
 
 #web-view .web-cat-btn.on[data-cat-color="전체"]    { background: #1a2d5a; }
+#web-view .web-cat-btn.on[data-cat-color="사제찾기"] { background: #0F766E; }
 #web-view .web-cat-btn.on[data-cat-color="중앙기구"] { background: #8b1c2a; }
 #web-view .web-cat-btn.on[data-cat-color="신앙 포털"] { background: #1a6b3c; }
 #web-view .web-cat-btn.on[data-cat-color="미디어"]  { background: #1a4f8b; }
@@ -2269,7 +2270,8 @@ html.oai-cover-booting #cover > * {
 #cc-6 { --cover-card-point: #2563EB; }
 #cc-7 { --cover-card-point: #1a3560; }
 .cover-card .cover-icon-wrap,
-.cover-card .cover-name {
+.cover-card .cover-name,
+.cover-card .cover-subname {
   position: relative;
   z-index: 1;
 }
@@ -5891,3 +5893,19 @@ html.oai-font-global .sheet-title {
   }
 }
 
+
+/* V2-12: 가톨릭 정보 카드 보조 문구 */
+#cover .cover-subname,
+html.oai-font-global #cover .cover-subname {
+  font-size: calc(10.2px * var(--app-font-scale, 1)) !important;
+  line-height: 1.18 !important;
+  font-weight: 750 !important;
+  letter-spacing: -.04em !important;
+  color: #6B7280 !important;
+  position: relative !important;
+  z-index: 1 !important;
+}
+#cover #cc-6 .cover-name,
+html.oai-font-global #cover #cc-6 .cover-name {
+  font-size: calc(16px * var(--app-font-scale, 1)) !important;
+}

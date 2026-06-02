@@ -4,6 +4,57 @@
 
 (function(){
   const WEB_SITES = [
+
+  /* 교구별 사제찾기 */
+  {cat:"사제찾기", ico:"🧑‍💼", name:"서울대교구 사제찾기",
+   op:"서울대교구", url:"https://aos.catholic.or.kr/pro10315",
+   desc:"교구 사제 검색 바로가기"},
+  {cat:"사제찾기", ico:"🧑‍💼", name:"의정부교구 사제찾기",
+   op:"의정부교구", url:"http://ucatholic.or.kr/bbs/board.php?bo_table=priest",
+   desc:"교구 사제 검색 바로가기"},
+  {cat:"사제찾기", ico:"🧑‍💼", name:"인천교구 사제찾기",
+   op:"인천교구", url:"http://www.caincheon.or.kr/father/father_list.do",
+   desc:"교구 사제 검색 바로가기"},
+  {cat:"사제찾기", ico:"🧑‍💼", name:"수원교구 사제찾기",
+   op:"수원교구", url:"https://www.casuwon.or.kr/priest/priest",
+   desc:"교구 사제 검색 바로가기"},
+  {cat:"사제찾기", ico:"🧑‍💼", name:"춘천교구 사제찾기",
+   op:"춘천교구", url:"https://www.cccatholic.or.kr/diocese/priest/priest",
+   desc:"교구 사제 검색 바로가기"},
+  {cat:"사제찾기", ico:"🧑‍💼", name:"원주교구 사제찾기",
+   op:"원주교구", url:"http://www.wjcatholic.or.kr/company/sajedan",
+   desc:"교구 사제 검색 바로가기"},
+  {cat:"사제찾기", ico:"🧑‍💼", name:"대전교구 사제찾기",
+   op:"대전교구", url:"https://www.djcatholic.or.kr/home/pages/priest_list.php",
+   desc:"교구 사제 검색 바로가기"},
+  {cat:"사제찾기", ico:"🧑‍💼", name:"대구대교구 사제찾기",
+   op:"대구대교구", url:"https://www.daegu-archdiocese.or.kr/page/priest.html?srl=priest",
+   desc:"교구 사제 검색 바로가기"},
+  {cat:"사제찾기", ico:"🧑‍💼", name:"청주교구 사제찾기",
+   op:"청주교구", url:"https://www.cdcj.or.kr/diocese/priest/priest",
+   desc:"교구 사제 검색 바로가기"},
+  {cat:"사제찾기", ico:"🧑‍💼", name:"안동교구 사제찾기",
+   op:"안동교구", url:"https://www.acatholic.or.kr/sub2/sub1.asp",
+   desc:"교구 사제 검색 바로가기"},
+  {cat:"사제찾기", ico:"🧑‍💼", name:"마산교구 사제찾기",
+   op:"마산교구", url:"https://cathms.kr/saje",
+   desc:"교구 사제 검색 바로가기"},
+  {cat:"사제찾기", ico:"🧑‍💼", name:"부산교구 사제찾기",
+   op:"부산교구", url:"https://www.catholicbusan.or.kr/clergy/priest",
+   desc:"교구 사제 검색 바로가기"},
+  {cat:"사제찾기", ico:"🧑‍💼", name:"광주대교구 사제찾기",
+   op:"광주대교구", url:"https://www.gjcatholic.or.kr/priest/priests",
+   desc:"교구 사제 검색 바로가기"},
+  {cat:"사제찾기", ico:"🧑‍💼", name:"전주교구 사제찾기",
+   op:"전주교구", url:"https://www.jcatholic.or.kr/theme/main/pages/priest.php?st=diocese",
+   desc:"교구 사제 검색 바로가기"},
+  {cat:"사제찾기", ico:"🧑‍💼", name:"제주교구 사제찾기",
+   op:"제주교구", url:"https://www.diocesejeju.or.kr/diocese_father",
+   desc:"교구 사제 검색 바로가기"},
+  {cat:"사제찾기", ico:"🧑‍💼", name:"군종교구 사제찾기",
+   op:"군종교구", url:"https://www.gunjong.or.kr/organization/index.asp?SearchArmyCd=",
+   desc:"교구 사제 검색 바로가기"},
+
   /* 공식 중앙기구 */
   {cat:"중앙기구", ico:"🏛️", name:"한국천주교주교회의 (CBCK)",
    op:"한국천주교주교회의", url:"https://cbck.or.kr",
@@ -128,6 +179,7 @@
   {n:"버그내순례길",             op:"당진시청",              t:"l", r:"충남 당진",                 lat:36.8199,lng:126.7848, ico:"🏞️", url:"https://beogeunae.dangjin.go.kr/pil1.html"}
 ];
   const WEB_CAT_COLORS = {
+    "사제찾기":"#0F766E",
     "중앙기구":"#8B1C2A",
     "신앙 포털":"#1A6B3C",
     "미디어":"#1A4F8B",
@@ -142,6 +194,7 @@
     "광주관구":"#1A6B3C"
   };
   const WEB_CAT_BG = {
+    "사제찾기":"#eef7f5",
     "중앙기구":"#fdf0f0",
     "신앙 포털":"#eef7f2",
     "미디어":"#eef3fd",
@@ -152,7 +205,7 @@
   const TRAIL_COLORS = {d:'#1D4ED8', l:'#2A8040'};
   const RETURN_KEY = 'catholic_integrated_return_v2';
   const trailState = {inited:false, map:null, markers:[], selected:-1, myOverlay:null, view:'map', pendingOpenIndex:null, restoreCenter:null, restoreLevel:null, needsHardReset:false, pendingFitBounds:false};
-  const webState = {built:false, curCat:'⭐ 즐겨찾기'};
+  const webState = {built:false, curCat:'사제찾기'};
   const WEB_FAV_KEY = 'web_favorites_v1';
   let webFavs = [];
   function wfLoad(){ try{ webFavs=JSON.parse(localStorage.getItem(WEB_FAV_KEY)||'[]'); }catch(e){ webFavs=[]; } }
@@ -240,7 +293,7 @@
     if(!restore){
       // 가톨릭 웹사이트는 진입할 때 항상 즐겨찾기 탭의 맨 위에서 시작
       resetWebTransientState();
-      webState.curCat = (webFavs && webFavs.length) ? '⭐ 즐겨찾기' : '중앙기구';
+      webState.curCat = '사제찾기';
       const list = ig$('web-list');
       if(list){
         list.style.scrollBehavior = 'auto';
@@ -455,10 +508,14 @@
       const bg = WEB_CAT_BG[s.cat] || '#f8f8f8';
       // 관구 헤더 제거됨(v13: CSS .web-prov-hd{display:none} + JS 생성 중단)
       const isDioceseCard = (s.cat === '교구');
+      const isPriestCard = (s.cat === '사제찾기');
       const card = document.createElement('div');
       card.className = 'web-card';
       if(isDioceseCard){
         card.setAttribute('aria-label', s.name + ' 홈페이지 새창 열기');
+      }
+      if(isPriestCard){
+        card.setAttribute('aria-label', s.name + ' 새창 열기');
       }
       // 교구: 배지=관구명, desc="교구 공식 홈페이지", op 숨김
       const badgeText = (s.cat==='교구' && s.prov) ? esc(s.prov) : esc(s.cat);
