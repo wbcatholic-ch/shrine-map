@@ -206,7 +206,7 @@
   const TRAIL_COLORS = {d:'#1D4ED8', l:'#2A8040'};
   const RETURN_KEY = 'catholic_integrated_return_v2';
   const trailState = {inited:false, map:null, markers:[], selected:-1, myOverlay:null, view:'map', pendingOpenIndex:null, restoreCenter:null, restoreLevel:null, needsHardReset:false, pendingFitBounds:false};
-  const webState = {built:false, curCat:'사제찾기'};
+  const webState = {built:false, curCat:'⭐ 즐겨찾기'};
   const WEB_FAV_KEY = 'web_favorites_v1';
   let webFavs = [];
   function wfLoad(){ try{ webFavs=JSON.parse(localStorage.getItem(WEB_FAV_KEY)||'[]'); }catch(e){ webFavs=[]; } }
@@ -292,9 +292,9 @@
   window.openWebView = function(opts){
     const restore = !!(opts && opts.restore);
     if(!restore){
-      // 가톨릭 웹사이트는 진입할 때 항상 즐겨찾기 탭의 맨 위에서 시작
+      // 가톨릭 정보는 진입할 때 항상 즐겨찾기 탭의 맨 위에서 시작
       resetWebTransientState();
-      webState.curCat = '사제찾기';
+      webState.curCat = '⭐ 즐겨찾기';
       const list = ig$('web-list');
       if(list){
         list.style.scrollBehavior = 'auto';
