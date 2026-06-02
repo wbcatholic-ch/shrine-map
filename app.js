@@ -1496,7 +1496,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V2-36';
+    frame.src='diocese.html?v=V2-38';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -6577,6 +6577,19 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         });
         body.appendChild(item);
       });
+      var noneItem = document.createElement('button');
+      noneItem.type = 'button';
+      noneItem.className = 'my-diocese-option my-diocese-none' + (!current ? ' selected' : '');
+      noneItem.textContent = '선택 안함';
+      noneItem.setAttribute('aria-pressed', !current ? 'true' : 'false');
+      noneItem.addEventListener('click', function(e){
+        if(e && e.preventDefault) e.preventDefault();
+        try{ localStorage.removeItem(DIO_KEY); }catch(_e){ setSelectedName(''); }
+        updateButton();
+        refreshDependentViews();
+        renderHome();
+      });
+      body.appendChild(noneItem);
     }
     function getParishItems(){
       try{ if(Array.isArray(PARISHES) && PARISHES.length) return PARISHES; }catch(e){}
