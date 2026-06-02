@@ -1496,7 +1496,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V2-28';
+    frame.src='diocese.html?v=V2-31';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -6396,16 +6396,29 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       try{ if(typeof window.webRenderCats === 'function') window.webRenderCats(); }catch(_e){}
       try{ if(typeof window.webRenderList === 'function') window.webRenderList(); }catch(_e){}
     }
+    function updateMyFaithViewport(){
+      try{
+        var vv = window.visualViewport || null;
+        var h = Math.round((vv && vv.height) || window.innerHeight || document.documentElement.clientHeight || 0);
+        if(h > 0) modal.style.setProperty('--my-faith-vh', h + 'px');
+        var kb = !!(vv && window.innerHeight && vv.height < window.innerHeight * 0.78);
+        modal.classList.toggle('keyboard-open', kb);
+      }catch(e){ console.warn('[가톨릭길동무]', e); }
+    }
     function closeModal(){
-      modal.classList.remove('show');
+      modal.classList.remove('show','keyboard-open');
       modal.setAttribute('aria-hidden', 'true');
       try{ document.body.classList.remove('modal-open'); }catch(e){}
+      try{ modal.style.removeProperty('--my-faith-vh'); }catch(e){}
+      try{ sessionStorage.removeItem('oai_my_faith_external_open'); sessionStorage.removeItem('oai_my_faith_external_ts'); }catch(e){}
     }
     function openModal(){
       renderHome();
+      updateMyFaithViewport();
       modal.classList.add('show');
       modal.setAttribute('aria-hidden', 'false');
       try{ document.body.classList.add('modal-open'); }catch(e){}
+      setTimeout(updateMyFaithViewport, 80);
     }
     window.isMyFaithLifeModalOpen = function(){
       try{ return !!(modal && modal.classList.contains('show')); }catch(_e){ return false; }
@@ -6416,9 +6429,19 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     function goExternal(url){
       url = String(url || '').trim();
       if(!url) return;
-      try{ sessionStorage.setItem('oai_my_faith_external_open', '1'); }catch(_e){}
-      try{ if(typeof openCoreExternalUrl === 'function'){ openCoreExternalUrl(url, {source:'my-faith-life'}); return; } }catch(e){ console.warn('[가톨릭길동무]', e); }
-      try{ if(typeof oaiSmoothNavigate === 'function') oaiSmoothNavigate(url, 'my-faith-life'); else location.href = url; }catch(e){ try{ location.assign(url); }catch(_e){} }
+      try{
+        if(typeof prepareExternalUrl === 'function') url = prepareExternalUrl(url);
+        else if(typeof normalizeCatholicExternalUrl === 'function') url = normalizeCatholicExternalUrl(url);
+      }catch(_e){}
+      if(!url) return;
+      try{ document.activeElement && document.activeElement.blur && document.activeElement.blur(); }catch(_e){}
+      try{
+        sessionStorage.setItem('oai_my_faith_external_open', '1');
+        sessionStorage.setItem('oai_my_faith_external_ts', String(Date.now ? Date.now() : new Date().getTime()));
+        if(typeof CORE_RETURN_KEY !== 'undefined') sessionStorage.removeItem(CORE_RETURN_KEY);
+      }catch(_e){}
+      try{ if(typeof markExternalReturnStabilize === 'function') markExternalReturnStabilize('my-faith-life'); }catch(e){ console.warn('[가톨릭길동무]', e); }
+      try{ location.assign(url); }catch(e){ try{ location.href = url; }catch(_e){} }
     }
     function actionButton(label, url, extraClass){
       var b = document.createElement('button');
@@ -6605,8 +6628,35 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       }else{
         draw();
       }
-      setTimeout(function(){ try{ input.focus({preventScroll:true}); }catch(e){} }, 80);
+      setTimeout(updateMyFaithViewport, 80);
     }
+
+    function resumeMyFaithAfterExternal(){
+      try{
+        if(sessionStorage.getItem('oai_my_faith_external_open') !== '1') return false;
+        var ts = parseInt(sessionStorage.getItem('oai_my_faith_external_ts') || '0', 10) || 0;
+        if(ts && Date.now && Date.now() - ts > 10 * 60 * 1000){
+          sessionStorage.removeItem('oai_my_faith_external_open');
+          sessionStorage.removeItem('oai_my_faith_external_ts');
+          return false;
+        }
+        try{ if(typeof CORE_RETURN_KEY !== 'undefined') sessionStorage.removeItem(CORE_RETURN_KEY); }catch(_e){}
+        try{ sessionStorage.removeItem('oai_my_faith_external_open'); sessionStorage.removeItem('oai_my_faith_external_ts'); }catch(_e){}
+        if(!modal.classList.contains('show')) openModal();
+        else { renderHome(); updateMyFaithViewport(); }
+        try{ if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady(); }catch(_e){}
+        try{ if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed(); }catch(_e){}
+        return true;
+      }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
+    }
+    if(window.visualViewport){
+      window.visualViewport.addEventListener('resize', function(){ if(modal.classList.contains('show')) updateMyFaithViewport(); }, {passive:true});
+      window.visualViewport.addEventListener('scroll', function(){ if(modal.classList.contains('show')) updateMyFaithViewport(); }, {passive:true});
+    }
+    window.addEventListener('resize', function(){ if(modal.classList.contains('show')) updateMyFaithViewport(); }, {passive:true});
+    window.addEventListener('pageshow', function(){ setTimeout(resumeMyFaithAfterExternal, 60); }, true);
+    document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible') setTimeout(resumeMyFaithAfterExternal, 80); }, true);
+    window.addEventListener('focus', function(){ setTimeout(resumeMyFaithAfterExternal, 100); }, true);
 
     updateButton();
     on(btn, 'click', function(e){
