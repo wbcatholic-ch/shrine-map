@@ -6343,6 +6343,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     var subtitle = modal ? modal.querySelector('.my-diocese-subtitle') : null;
     if(!btn || !modal || !body) return;
     var myFaithResumeBusy = false;
+    var myFaithStableHeight = 0;
+    var myFaithReturnSettling = false;
 
     function selectedName(){
       try{ return (localStorage.getItem(DIO_KEY) || '').trim(); }catch(e){ return ''; }
@@ -6400,19 +6402,27 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     function updateMyFaithViewport(){
       try{
         var vv = window.visualViewport || null;
-        var baseH = Math.round(window.innerHeight || document.documentElement.clientHeight || 0);
-        var visibleH = Math.round((vv && vv.height) || baseH || 0);
-        if(baseH > 0) modal.style.setProperty('--my-faith-vh', baseH + 'px');
+        var layoutH = Math.round(document.documentElement.clientHeight || window.innerHeight || 0);
+        var innerH = Math.round(window.innerHeight || 0);
+        var visibleH = Math.round((vv && vv.height) || innerH || layoutH || 0);
+        var candidateH = Math.max(layoutH || 0, innerH || 0, visibleH || 0);
+        if(candidateH && candidateH > myFaithStableHeight) myFaithStableHeight = candidateH;
+        if(!myFaithStableHeight) myFaithStableHeight = candidateH || visibleH || 0;
+        var active = document.activeElement || null;
+        var focusedInput = !!(active && modal.contains(active) && /^(INPUT|TEXTAREA|SELECT)$/i.test(active.tagName || ''));
+        var keyboardLikely = focusedInput || !!(myFaithStableHeight && visibleH && visibleH < myFaithStableHeight - 120) || !!(vv && Math.round(vv.offsetTop || 0) > 0);
+        if(myFaithStableHeight > 0) modal.style.setProperty('--my-faith-vh', myFaithStableHeight + 'px');
         if(visibleH > 0) modal.style.setProperty('--my-faith-visible-vh', visibleH + 'px');
-        var kb = !!(vv && baseH && visibleH < baseH * 0.78);
-        modal.classList.toggle('keyboard-open', kb);
+        modal.classList.toggle('keyboard-open', keyboardLikely);
       }catch(e){ console.warn('[가톨릭길동무]', e); }
     }
     function closeModal(){
-      modal.classList.remove('show','keyboard-open');
+      modal.classList.remove('show','keyboard-open','return-settling');
       modal.setAttribute('aria-hidden', 'true');
       try{ document.body.classList.remove('modal-open'); }catch(e){}
       try{ modal.style.removeProperty('--my-faith-vh'); modal.style.removeProperty('--my-faith-visible-vh'); }catch(e){}
+      myFaithStableHeight = 0;
+      myFaithReturnSettling = false;
       try{ sessionStorage.removeItem('oai_my_faith_external_open'); sessionStorage.removeItem('oai_my_faith_external_ts'); }catch(e){}
       try{
         if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady();
@@ -6421,13 +6431,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         else if(typeof window._ensureCoverBackTrap === 'function') window._ensureCoverBackTrap('my-faith-close');
       }catch(e){ console.warn('[가톨릭길동무]', e); }
     }
-    function openModal(){
-      renderHome();
+    function openModal(opts){
+      opts = opts || {};
+      if(!opts.keepContent) renderHome();
       updateMyFaithViewport();
       modal.classList.add('show');
       modal.setAttribute('aria-hidden', 'false');
       try{ document.body.classList.add('modal-open'); }catch(e){}
-      setTimeout(updateMyFaithViewport, 80);
+      setTimeout(updateMyFaithViewport, opts.fromExternal ? 180 : 80);
     }
     window.isMyFaithLifeModalOpen = function(){
       try{ return !!(modal && modal.classList.contains('show')); }catch(_e){ return false; }
@@ -6447,6 +6458,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       try{
         sessionStorage.setItem('oai_my_faith_external_open', '1');
         sessionStorage.setItem('oai_my_faith_external_ts', String(Date.now ? Date.now() : new Date().getTime()));
+        modal.classList.add('return-settling');
         if(typeof CORE_RETURN_KEY !== 'undefined') sessionStorage.removeItem(CORE_RETURN_KEY);
       }catch(_e){}
       try{
@@ -6636,6 +6648,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         });
       }
       input.addEventListener('input', draw);
+      input.addEventListener('focus', function(){
+        try{ modal.classList.add('keyboard-open'); updateMyFaithViewport(); }catch(_e){}
+      });
+      input.addEventListener('blur', function(){
+        setTimeout(function(){ try{ updateMyFaithViewport(); }catch(_e){} }, 180);
+      });
       if(!_parishRawLoaded && typeof _ensureParishDataLoaded === 'function'){
         results.innerHTML = '<div class="my-faith-empty">성당 정보를 불러오는 중입니다...</div>';
         _ensureParishDataLoaded().then(function(){ draw(); }).catch(function(){ draw(); });
@@ -6650,22 +6668,43 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(myFaithResumeBusy) return false;
         if(sessionStorage.getItem('oai_my_faith_external_open') !== '1') return false;
         myFaithResumeBusy = true;
+        myFaithReturnSettling = true;
         var ts = parseInt(sessionStorage.getItem('oai_my_faith_external_ts') || '0', 10) || 0;
         if(ts && Date.now && Date.now() - ts > 10 * 60 * 1000){
           sessionStorage.removeItem('oai_my_faith_external_open');
           sessionStorage.removeItem('oai_my_faith_external_ts');
+          modal.classList.remove('return-settling');
+          myFaithReturnSettling = false;
           myFaithResumeBusy = false;
           return false;
         }
         try{ if(typeof CORE_RETURN_KEY !== 'undefined') sessionStorage.removeItem(CORE_RETURN_KEY); }catch(_e){}
         try{ sessionStorage.removeItem('oai_my_faith_external_open'); sessionStorage.removeItem('oai_my_faith_external_ts'); }catch(_e){}
-        if(!modal.classList.contains('show')) openModal();
-        else { renderHome(); updateMyFaithViewport(); }
+        modal.classList.add('return-settling');
+        if(!modal.classList.contains('show')){
+          setTimeout(function(){
+            try{ openModal({fromExternal:true}); }catch(_e){}
+          }, 120);
+        }else{
+          modal.setAttribute('aria-hidden', 'false');
+          try{ document.body.classList.add('modal-open'); }catch(_e){}
+          setTimeout(updateMyFaithViewport, 160);
+        }
         try{ if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady(); }catch(_e){}
         try{ if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed(); }catch(_e){}
-        setTimeout(function(){ myFaithResumeBusy = false; }, 600);
+        setTimeout(function(){
+          try{ modal.classList.remove('return-settling'); updateMyFaithViewport(); }catch(_e){}
+          myFaithReturnSettling = false;
+          myFaithResumeBusy = false;
+        }, 650);
         return true;
-      }catch(e){ myFaithResumeBusy = false; console.warn('[가톨릭길동무]', e); return false; }
+      }catch(e){
+        myFaithReturnSettling = false;
+        myFaithResumeBusy = false;
+        try{ modal.classList.remove('return-settling'); }catch(_e){}
+        console.warn('[가톨릭길동무]', e);
+        return false;
+      }
     }
     if(window.visualViewport){
       window.visualViewport.addEventListener('resize', function(){ if(modal.classList.contains('show')) updateMyFaithViewport(); }, {passive:true});
