@@ -4952,7 +4952,7 @@ function _loadNearbyWithDist(lat,lng,items,getIdx,getColor,getLabel,opts){
   }
 
   if(body && isCurrent() && !(opts.silent && opts.keepCurrentList === true)){
-    body.innerHTML='<div class="empty-msg nearby-distance-loading">🚗 자동차 거리 계산 중입니다...<br>계산이 끝난 뒤 가까운 순서로 보여드립니다.</div>';
+    body.innerHTML='<div class="empty-msg nearby-distance-loading">정확한 거리를 계산중입니다.</div>';
   }
 
   // 성당·성지·피정의집 내주변 목록은 정확한 자동차 거리 계산이 끝난 뒤에 표시한다.
@@ -5261,7 +5261,7 @@ function doRegionSearch(){
       const caddr=cand.dataset.addr||'', ccat=cand.dataset.cat||'', curl=cand.dataset.url||'';
       _regionLat=clat;_regionLng=clng;_regionName=cname;_regionPlaceName=cname;
       _routeRegionStart={lat:clat,lng:clng,name:'📍 '+cname,placeName:cname};
-      body.innerHTML='<div class="empty-msg">🚗 자동차 거리 계산 중...</div>';
+      body.innerHTML='<div class="empty-msg">정확한 거리를 계산중입니다.</div>';
       _showRegionResults(cname,clat,clng,{place_name:cname,road_address_name:caddr,address_name:caddr,category_name:ccat,place_url:curl});
       if(_map) _showRegionItemsOnMap([],clat,clng,{center:true});
     };
@@ -5284,7 +5284,7 @@ function _showRegionResults(q,lat,lng,doc){
   const safePlaceCat=_regionHtmlEsc(placeCat);
   const infoCard=`<div class="region-info-card"><div class="ric-hd"><div class="ric-icon">📍</div><div class="ric-name-wrap"><div class="ric-name">${safePlaceName}</div>${placeAddr?`<div class="ric-addr">${safePlaceAddr}</div>`:''}${placeCat?`<div class="ric-cat">${safePlaceCat}</div>`:''}</div><button type="button" class="ric-map-link" onclick="showRegionPlaceOnMap()">지도 보기</button></div></div>`;
   const listHd=`<div class="region-list-hd">${isParish?'⛪ 근처 성당':(isRetreat?'🏔 근처 피정의 집':'✝ 근처 성지')} <span style="font-size:13px;font-weight:500;color:#aaa">· 자동차 거리순 10곳</span></div>`;
-  $('region-body').innerHTML=infoCard+listHd+'<div id="rg-loading" style="text-align:center;padding:10px;font-size:12px;color:#888;">🚗 정확한 거리 계산 중입니다…</div><div id="rg-list" style="background:#fff"></div>';
+  $('region-body').innerHTML=infoCard+listHd+'<div id="rg-loading" style="text-align:center;padding:10px;font-size:12px;color:#888;">정확한 거리를 계산중입니다.</div><div id="rg-list" style="background:#fff"></div>';
   if(!prelim.length){
     _regionCache=[];
     if(_map) _showRegionItemsOnMap([],lat,lng,{center:true});
@@ -6613,12 +6613,21 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       try{ if(Array.isArray(PARISHES) && PARISHES.length) return PARISHES; }catch(e){}
       return [];
     }
-    function sortParishItems(items){
+    function getSelectedDioceseCode(){
       var myDio = selectedName();
+      if(!myDio) return null;
+      try{
+        if(typeof _PARISH_DIO_CODE_MAP !== 'undefined' && _PARISH_DIO_CODE_MAP && _PARISH_DIO_CODE_MAP[myDio]) return _PARISH_DIO_CODE_MAP[myDio];
+      }catch(_e){}
+      try{
+        for(var code in _DIO){
+          if(Object.prototype.hasOwnProperty.call(_DIO, code) && _DIO[code] === myDio) return code;
+        }
+      }catch(_e){}
+      return null;
+    }
+    function sortParishItems(items){
       return items.slice().sort(function(a,b){
-        var aa = (myDio && a && a.diocese === myDio) ? 0 : 1;
-        var bb = (myDio && b && b.diocese === myDio) ? 0 : 1;
-        if(aa !== bb) return aa - bb;
         return String(a && a.name || '').localeCompare(String(b && b.name || ''), 'ko');
       });
     }
@@ -6649,14 +6658,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         var q = String(input.value || '').trim().toLowerCase();
         var items = getParishItems();
         var myDio = selectedName();
+        if(myDio){
+          items = items.filter(function(p){ return p && p.diocese === myDio; });
+        }
         if(q){
           items = items.filter(function(p){
             return String((p.name||'') + ' ' + (p.addr||'') + ' ' + (p.diocese||'')).toLowerCase().indexOf(q) >= 0;
           });
-        }else if(myDio){
-          items = items.filter(function(p){ return p && p.diocese === myDio; });
         }
-        items = sortParishItems(items).slice(0, 80);
+        items = sortParishItems(items);
         results.innerHTML = '';
         if(!items.length){
           results.innerHTML = '<div class="my-faith-empty">검색 결과가 없습니다.</div>';
@@ -6682,7 +6692,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       input.addEventListener('blur', function(){
         setTimeout(function(){ try{ updateMyFaithViewport(); }catch(_e){} }, 180);
       });
-      if(!_parishRawLoaded && typeof _ensureParishDataLoaded === 'function'){
+      var selectedDioCode = getSelectedDioceseCode();
+      if(selectedDioCode && typeof _ensureParishDioceseDataLoaded === 'function'){
+        results.innerHTML = '<div class="my-faith-empty">' + safeText(selectedName()) + ' 본당 정보를 불러오는 중입니다...</div>';
+        _ensureParishDioceseDataLoaded(selectedDioCode).then(function(){ draw(); }).catch(function(){ draw(); });
+      }else if(!_parishRawLoaded && typeof _ensureParishDataLoaded === 'function'){
         results.innerHTML = '<div class="my-faith-empty">성당 정보를 불러오는 중입니다...</div>';
         _ensureParishDataLoaded().then(function(){ draw(); }).catch(function(){ draw(); });
       }else{

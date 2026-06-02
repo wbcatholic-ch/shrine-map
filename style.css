@@ -5,7 +5,7 @@
   --navy3:   #243070;
   --gold:    #d4aa6a;
   --gold2:   #b8965a;
-  --cream:   #f5f0e8;
+  --cream:   #fbf8f1;
   --ink:     #1f2937;
   --border:  #dde3f2;
 
@@ -117,7 +117,7 @@
   --color-7: #1a3560;
   --color-8: #374151;
 
-  --bg-color:   #f7f0e5;
+  --bg-color:   #fbf8f1;
 
   --cover-top-safe: calc(env(safe-area-inset-top, 0px) + clamp(72px, calc(var(--cover-vh, 1vh) * 10.6), 94px));
   --cover-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + clamp(14px, calc(var(--cover-vh, 1vh) * 2.0), 24px));
@@ -3200,7 +3200,7 @@ html:not(.app-active), html:not(.app-active) body { scroll-behavior: auto; }
 .cv-extra-btn.cv-btn-diocese{background:linear-gradient(135deg,#dce7f1,#c5d6e6);color:#26384d}
 .cv-extra-btn.cv-btn-web .cv-btn-icon{background:rgba(255,255,255,.34);color:#5a4026}
 .cv-extra-btn.cv-btn-diocese .cv-btn-icon{background:rgba(255,255,255,.34);color:#334c6a}
-@media (max-width:420px){#cover{position:fixed;top:0;left:0;right:0;bottom:auto;z-index:9999;background:#f4efe4;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0);overflow:hidden;overflow-y:hidden;background-color:var(--bg-color);color:var(--text-main);font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;transition:none;padding-top:var(--cover-top-safe);padding-bottom:var(--cover-bottom-safe)}.cv-shell-stage{position:relative;z-index:2;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;gap:10px;width:min(100%,560px);height:var(--cover-h);min-height:var(--cover-h);padding:calc(env(safe-area-inset-top,0) + 9vh) 0 calc(9vh + env(safe-area-inset-bottom,0));margin:0 auto;box-sizing:border-box}.cv-stage,.cv-extra-row{width:min(100%,calc((var(--cover-h) - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 112px) * .5625))}.cv-extra-row{gap:8px}.cv-extra-btn{min-height:78px;border-radius:18px;padding:8px 7px;gap:5px}.cv-extra-btn::before{inset:3px;border-radius:14px}.cv-extra-btn .cv-btn-icon{width:32px;height:32px;font-size:16px;border-radius:11px}.cv-extra-btn .cv-btn-label{font-size:10.4px}}
+@media (max-width:420px){#cover{position:fixed;top:0;left:0;right:0;bottom:auto;z-index:9999;background:#fbf8f1;display:flex;flex-direction:column;align-items:center;justify-content:flex-start;padding:env(safe-area-inset-top,0) 0 env(safe-area-inset-bottom,0);overflow:hidden;overflow-y:hidden;background-color:var(--bg-color);color:var(--text-main);font-family:'Apple SD Gothic Neo','Malgun Gothic',sans-serif;transition:none;padding-top:var(--cover-top-safe);padding-bottom:var(--cover-bottom-safe)}.cv-shell-stage{position:relative;z-index:2;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;gap:10px;width:min(100%,560px);height:var(--cover-h);min-height:var(--cover-h);padding:calc(env(safe-area-inset-top,0) + 9vh) 0 calc(9vh + env(safe-area-inset-bottom,0));margin:0 auto;box-sizing:border-box}.cv-stage,.cv-extra-row{width:min(100%,calc((var(--cover-h) - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 112px) * .5625))}.cv-extra-row{gap:8px}.cv-extra-btn{min-height:78px;border-radius:18px;padding:8px 7px;gap:5px}.cv-extra-btn::before{inset:3px;border-radius:14px}.cv-extra-btn .cv-btn-icon{width:32px;height:32px;font-size:16px;border-radius:11px}.cv-extra-btn .cv-btn-label{font-size:10.4px}}
 @media (max-height:760px){.cv-shell-stage{position:relative;z-index:2;display:flex;flex-direction:column;justify-content:flex-start;align-items:center;gap:10px;width:min(100%,560px);height:var(--cover-h);min-height:var(--cover-h);padding:calc(env(safe-area-inset-top,0) + 9vh) 0 calc(9vh + env(safe-area-inset-bottom,0));margin:0 auto;box-sizing:border-box}.cv-stage,.cv-extra-row{width:min(100%,calc((var(--cover-h) - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 98px) * .5625))}.cv-extra-row{gap:7px}.cv-extra-btn{min-height:70px;border-radius:16px;padding:7px 6px;gap:4px}.cv-extra-btn::before{inset:3px;border-radius:13px}.cv-extra-btn .cv-btn-icon{width:28px;height:28px;font-size:14px;border-radius:10px}.cv-extra-btn .cv-btn-label{font-size:9.6px;line-height:1.06}}
 html.parish-mode .srch-bar,html.parish-mode .filter-bar,html.parish-mode .sheet-hd{background:#374151!important}
 html.parish-mode .ric-lbl,html.parish-mode .region-list-hd{color:#4B5563!important}
@@ -6084,7 +6084,7 @@ html.oai-font-global .sheet-title {
 }
 
 
-/* V2-50: 나의 신앙생활 개인정보 안내문을 화면 배경 안쪽에 자연스럽게 배치 */
+/* V2-54: 나의 신앙생활 개인정보 안내문을 화면 배경 안쪽에 자연스럽게 배치 */
 .my-diocese-panel > .my-faith-privacy-note {
   display: none !important;
 }
@@ -6142,7 +6142,7 @@ html.oai-font-global #cover #cc-6 .cover-name {
 }
 
 
-/* V2-50: 교구 미설정 배너 중앙 정렬 + 나의 신앙생활 버튼 색상 안정화 */
+/* V2-54: 교구 미설정 배너 중앙 정렬 + 나의 신앙생활 버튼 색상 안정화 */
 #cover #cover-action-row.cover-action-single {
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -6196,14 +6196,13 @@ html.oai-font-global #cover #cc-6 .cover-name {
   border: 1px solid rgba(126,104,74,.26) !important;
   background: linear-gradient(180deg, #fffdf8 0%, #f1e5d3 100%) !important;
   box-shadow:
-    0 8px 16px rgba(31,42,68,.12),
     inset 0 1px 0 rgba(255,255,255,.92),
     inset 0 -5px 10px rgba(136,112,78,.10) !important;
 }
 #cover .cover-refresh-main-btn {
   border: 1.5px solid rgba(31,42,68,.16) !important;
   background: linear-gradient(180deg, #ece7de 0%, #ddd6c9 100%) !important;
-  box-shadow: 0 6px 12px rgba(31,42,68,.08) !important;
+  box-shadow: none !important;
 }
 #cover .cover-diocese-btn {
   padding: 0 10px !important;
@@ -6230,7 +6229,6 @@ html.oai-font-global #cover #cc-6 .cover-name {
 #cover .cover-refresh-main-btn:active {
   transform: translateY(3px) scale(.982) !important;
   box-shadow:
-    0 3px 7px rgba(31,42,68,.13),
     inset 0 3px 8px rgba(31,42,68,.10),
     inset 0 1px 0 rgba(255,255,255,.70) !important;
   filter: brightness(.975) !important;
@@ -6517,7 +6515,7 @@ html.oai-font-global #cover #cc-6 .cover-name {
   word-break: keep-all !important;
 }
 
-/* V2-50: 나의 신앙생활 선택값 제목 강조 - 카드보다 조금 진한 배경과 분리선 */
+/* V2-54: 나의 신앙생활 선택값 제목 강조 - 카드보다 조금 진한 배경과 분리선 */
 .my-faith-section h3 {
   margin: 0 !important;
   padding: 15px 15px 13px !important;
@@ -6644,7 +6642,7 @@ html.oai-font-global #cover #cc-6 .cover-name {
 }
 
 
-/* V2-50: 나의 본당 찾기 화면은 전체 본문이 아니라 결과 리스트만 안정적으로 끝까지 스크롤되도록 정리 */
+/* V2-54: 나의 본당 찾기 화면은 전체 본문이 아니라 결과 리스트만 안정적으로 끝까지 스크롤되도록 정리 */
 .my-faith-body.my-faith-search-body {
   overflow: hidden !important;
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 14px) !important;
@@ -6754,4 +6752,16 @@ html.oai-font-global #cover #cc-6 .cover-name {
   #cover .my-diocese-setup-banner strong { font-size: calc(20px * var(--app-font-scale, 1)) !important; }
   #cover .my-diocese-setup-banner span { font-size: calc(15.2px * var(--app-font-scale, 1)) !important; }
   .my-diocese-list { grid-template-columns: 1fr !important; }
+}
+
+/* V2-54: 나의 본당 찾기 검색창 높이 보강 */
+.my-faith-search-input {
+  height: 56px !important;
+  min-height: 56px !important;
+  border-radius: 15px !important;
+  font-size: calc(16.2px * var(--app-font-scale, 1)) !important;
+  padding: 0 15px !important;
+}
+.my-faith-body.my-faith-search-body .my-faith-search-results {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 22px) !important;
 }
