@@ -6389,8 +6389,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     function updateSetupBanner(){
       try{
-        if(!setupBanner) return;
         var needsSetup = !selectedName();
+        var coverEl = document.getElementById('cover');
+        if(coverEl) coverEl.classList.toggle('my-diocese-setup-active', needsSetup);
+        if(!setupBanner) return;
         setupBanner.hidden = !needsSetup;
         setupBanner.classList.toggle('show', needsSetup);
         setupBanner.setAttribute('aria-hidden', needsSetup ? 'false' : 'true');
