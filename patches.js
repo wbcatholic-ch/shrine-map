@@ -533,6 +533,18 @@
         window.__OAI_AFTER_RESTORE_COVER_MENU_CB__ = null;
         window.__OAI_AFTER_RESTORE_COVER_MENU_UNTIL__ = 0;
       }catch(e){ console.warn('[가톨릭길동무]', e); }
+      try{
+        var _mfCb = window.__OAI_AFTER_RESTORE_MY_FAITH_CB__;
+        var _mfUntil = Number(window.__OAI_AFTER_RESTORE_MY_FAITH_UNTIL__ || 0);
+        if(typeof _mfCb === 'function' && (!_mfUntil || Date.now() < _mfUntil)){
+          window.__OAI_AFTER_RESTORE_MY_FAITH_CB__ = null;
+          window.__OAI_AFTER_RESTORE_MY_FAITH_UNTIL__ = 0;
+          setTimeout(function(){ try{ _mfCb(); }catch(e){ console.warn('[가톨릭길동무]', e); } }, 0);
+          return;
+        }
+        window.__OAI_AFTER_RESTORE_MY_FAITH_CB__ = null;
+        window.__OAI_AFTER_RESTORE_MY_FAITH_UNTIL__ = 0;
+      }catch(e){ console.warn('[가톨릭길동무]', e); }
       if(runPendingPrayerCoverReset()) return;
       runPendingPrayerQuickPopup();
       return;
@@ -585,12 +597,36 @@
       return;
     }
 
-    /* 나의 신앙생활 전체창이 열려 있으면 종료 흐름보다 먼저 닫고 커버로 돌아간다. */
+    /* 나의 신앙생활 전체창이 열려 있으면 종료 흐름보다 먼저 닫고 커버로 돌아간다.
+       popstate로 root까지 내려온 뒤 바로 닫으면 다음 Back이 앱 종료로 빠질 수 있으므로
+       커버 메뉴와 같은 방식으로 trap 위치를 먼저 복원한 뒤 닫는다. */
     if(window.isMyFaithLifeModalOpen && window.isMyFaithLifeModalOpen()){
-      try{ if(typeof window.closeMyFaithLifeModal === 'function') window.closeMyFaithLifeModal(); }catch(e){ console.warn('[가톨릭길동무]', e); }
-      try{ if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady(); }catch(e){ console.warn('[가톨릭길동무]', e); }
-      try{ if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed(); }catch(e){ console.warn('[가톨릭길동무]', e); }
-      try{ if(typeof window._ensureCoverBackTrap === 'function') window._ensureCoverBackTrap('my-faith-life-close'); else armCoverBackTrap('my-faith-life-close'); }catch(e){ console.warn('[가톨릭길동무]', e); }
+      var myFaithCb = function(){
+        try{ if(typeof window.closeMyFaithLifeModal === 'function') window.closeMyFaithLifeModal(); }catch(e){ console.warn('[가톨릭길동무]', e); }
+        try{ if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady(); }catch(e){ console.warn('[가톨릭길동무]', e); }
+        try{ if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed(); }catch(e){ console.warn('[가톨릭길동무]', e); }
+        try{ if(typeof window._resetCoverBackTrap === 'function') window._resetCoverBackTrap('my-faith-life-close'); else armCoverBackTrap('my-faith-life-close', {force:true}); }catch(e){ console.warn('[가톨릭길동무]', e); }
+      };
+      try{
+        window.__OAI_AFTER_RESTORE_MY_FAITH_CB__ = myFaithCb;
+        window.__OAI_AFTER_RESTORE_MY_FAITH_UNTIL__ = Date.now() + 1800;
+        _restoring = true;
+        history.go(1);
+        setTimeout(function(){
+          try{
+            if(window.__OAI_AFTER_RESTORE_MY_FAITH_CB__ === myFaithCb){
+              _restoring = false;
+              window.__OAI_AFTER_RESTORE_MY_FAITH_CB__ = null;
+              window.__OAI_AFTER_RESTORE_MY_FAITH_UNTIL__ = 0;
+              myFaithCb();
+            }
+          }catch(e){ console.warn('[가톨릭길동무]', e); }
+        }, 160);
+      }catch(e){
+        _restoring = false;
+        console.warn('[가톨릭길동무]', e);
+        myFaithCb();
+      }
       return;
     }
 
@@ -665,7 +701,7 @@
       try{ if(typeof window.closeMyFaithLifeModal === 'function') window.closeMyFaithLifeModal(); }catch(e){ console.warn('[가톨릭길동무]', e); }
       try{ if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady(); }catch(e){}
       try{ if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed(); }catch(e){}
-      try{ if(typeof window._ensureCoverBackTrap === 'function') window._ensureCoverBackTrap('my-faith-life-hardware-close'); else armCoverBackTrap('my-faith-life-hardware-close'); }catch(e){}
+      try{ if(typeof window._resetCoverBackTrap === 'function') window._resetCoverBackTrap('my-faith-life-hardware-close'); else armCoverBackTrap('my-faith-life-hardware-close', {force:true}); }catch(e){}
       return;
     }
     if(isGuideModalOpen()){

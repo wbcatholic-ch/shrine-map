@@ -1496,7 +1496,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V2-31';
+    frame.src='diocese.html?v=V2-32';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -6342,6 +6342,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     var title = document.getElementById('my-diocese-title');
     var subtitle = modal ? modal.querySelector('.my-diocese-subtitle') : null;
     if(!btn || !modal || !body) return;
+    var myFaithResumeBusy = false;
 
     function selectedName(){
       try{ return (localStorage.getItem(DIO_KEY) || '').trim(); }catch(e){ return ''; }
@@ -6399,9 +6400,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     function updateMyFaithViewport(){
       try{
         var vv = window.visualViewport || null;
-        var h = Math.round((vv && vv.height) || window.innerHeight || document.documentElement.clientHeight || 0);
-        if(h > 0) modal.style.setProperty('--my-faith-vh', h + 'px');
-        var kb = !!(vv && window.innerHeight && vv.height < window.innerHeight * 0.78);
+        var baseH = Math.round(window.innerHeight || document.documentElement.clientHeight || 0);
+        var visibleH = Math.round((vv && vv.height) || baseH || 0);
+        if(baseH > 0) modal.style.setProperty('--my-faith-vh', baseH + 'px');
+        if(visibleH > 0) modal.style.setProperty('--my-faith-visible-vh', visibleH + 'px');
+        var kb = !!(vv && baseH && visibleH < baseH * 0.78);
         modal.classList.toggle('keyboard-open', kb);
       }catch(e){ console.warn('[가톨릭길동무]', e); }
     }
@@ -6409,8 +6412,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       modal.classList.remove('show','keyboard-open');
       modal.setAttribute('aria-hidden', 'true');
       try{ document.body.classList.remove('modal-open'); }catch(e){}
-      try{ modal.style.removeProperty('--my-faith-vh'); }catch(e){}
+      try{ modal.style.removeProperty('--my-faith-vh'); modal.style.removeProperty('--my-faith-visible-vh'); }catch(e){}
       try{ sessionStorage.removeItem('oai_my_faith_external_open'); sessionStorage.removeItem('oai_my_faith_external_ts'); }catch(e){}
+      try{
+        if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady();
+        if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed();
+        if(typeof window._resetCoverBackTrap === 'function') window._resetCoverBackTrap('my-faith-close');
+        else if(typeof window._ensureCoverBackTrap === 'function') window._ensureCoverBackTrap('my-faith-close');
+      }catch(e){ console.warn('[가톨릭길동무]', e); }
     }
     function openModal(){
       renderHome();
@@ -6440,8 +6449,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         sessionStorage.setItem('oai_my_faith_external_ts', String(Date.now ? Date.now() : new Date().getTime()));
         if(typeof CORE_RETURN_KEY !== 'undefined') sessionStorage.removeItem(CORE_RETURN_KEY);
       }catch(_e){}
-      try{ if(typeof markExternalReturnStabilize === 'function') markExternalReturnStabilize('my-faith-life'); }catch(e){ console.warn('[가톨릭길동무]', e); }
-      try{ location.assign(url); }catch(e){ try{ location.href = url; }catch(_e){} }
+      try{
+        if(typeof oaiSmoothNavigate === 'function') oaiSmoothNavigate(url, 'my-faith-life');
+        else {
+          if(typeof markExternalReturnStabilize === 'function') markExternalReturnStabilize('my-faith-life');
+          setTimeout(function(){ try{ location.assign(url); }catch(e){ try{ location.href = url; }catch(_e){} } }, 70);
+        }
+      }catch(e){ console.warn('[가톨릭길동무]', e); }
     }
     function actionButton(label, url, extraClass){
       var b = document.createElement('button');
@@ -6633,11 +6647,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 
     function resumeMyFaithAfterExternal(){
       try{
+        if(myFaithResumeBusy) return false;
         if(sessionStorage.getItem('oai_my_faith_external_open') !== '1') return false;
+        myFaithResumeBusy = true;
         var ts = parseInt(sessionStorage.getItem('oai_my_faith_external_ts') || '0', 10) || 0;
         if(ts && Date.now && Date.now() - ts > 10 * 60 * 1000){
           sessionStorage.removeItem('oai_my_faith_external_open');
           sessionStorage.removeItem('oai_my_faith_external_ts');
+          myFaithResumeBusy = false;
           return false;
         }
         try{ if(typeof CORE_RETURN_KEY !== 'undefined') sessionStorage.removeItem(CORE_RETURN_KEY); }catch(_e){}
@@ -6646,12 +6663,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         else { renderHome(); updateMyFaithViewport(); }
         try{ if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady(); }catch(_e){}
         try{ if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed(); }catch(_e){}
+        setTimeout(function(){ myFaithResumeBusy = false; }, 600);
         return true;
-      }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
+      }catch(e){ myFaithResumeBusy = false; console.warn('[가톨릭길동무]', e); return false; }
     }
     if(window.visualViewport){
       window.visualViewport.addEventListener('resize', function(){ if(modal.classList.contains('show')) updateMyFaithViewport(); }, {passive:true});
-      window.visualViewport.addEventListener('scroll', function(){ if(modal.classList.contains('show')) updateMyFaithViewport(); }, {passive:true});
     }
     window.addEventListener('resize', function(){ if(modal.classList.contains('show')) updateMyFaithViewport(); }, {passive:true});
     window.addEventListener('pageshow', function(){ setTimeout(resumeMyFaithAfterExternal, 60); }, true);
