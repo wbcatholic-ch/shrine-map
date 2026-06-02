@@ -1496,7 +1496,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V2-38';
+    frame.src='diocese.html?v=V2-39';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -6545,6 +6545,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         var parishTools = document.createElement('div');
         parishTools.className = 'my-faith-tools';
         parishTools.appendChild(smallButton('본당 변경', function(){ renderParishSearch(''); }));
+        parishTools.appendChild(smallButton('선택 안함', function(){ setSelectedParish(null); renderHome(); }));
         parishSec.appendChild(parishTools);
       }else{
         parishSec.innerHTML = '<h3>나의 본당 선택</h3><p>본당을 선택하면 성당 홈페이지와 상세페이지를 바로 열 수 있습니다.</p>';
@@ -6570,6 +6571,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         item.setAttribute('aria-pressed', current === name ? 'true' : 'false');
         item.addEventListener('click', function(e){
           if(e && e.preventDefault) e.preventDefault();
+          if(current !== name) setSelectedParish(null);
           setSelectedName(name);
           updateButton();
           refreshDependentViews();
@@ -6585,6 +6587,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       noneItem.addEventListener('click', function(e){
         if(e && e.preventDefault) e.preventDefault();
         try{ localStorage.removeItem(DIO_KEY); }catch(_e){ setSelectedName(''); }
+        setSelectedParish(null);
         updateButton();
         refreshDependentViews();
         renderHome();
@@ -6623,6 +6626,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       var tools = document.createElement('div');
       tools.className = 'my-faith-tools';
       tools.appendChild(smallButton('뒤로', renderHome));
+      if(selectedParish()) tools.appendChild(smallButton('선택 안함', function(){ setSelectedParish(null); renderHome(); }));
       wrap.appendChild(tools);
       body.appendChild(wrap);
 
