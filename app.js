@@ -6549,7 +6549,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       var parishSec = document.createElement('section');
       parishSec.className = 'my-faith-section my-faith-parish-section';
       if(parish){
-        parishSec.innerHTML = '<h3>나의 본당 : ' + safeText(parish.name) + '</h3>' + (parish.diocese ? '<p>' + safeText(parish.diocese) + '</p>' : '');
+        parishSec.innerHTML = '<h3>나의 본당 : ' + safeText(parish.name) + '</h3>';
         var parishActions = document.createElement('div');
         parishActions.className = 'my-faith-actions';
         if(parish.hp) parishActions.appendChild(actionButton('성당 홈페이지', parish.hp));

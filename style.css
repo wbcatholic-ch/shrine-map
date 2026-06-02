@@ -6084,7 +6084,7 @@ html.oai-font-global .sheet-title {
 }
 
 
-/* V2-47: 나의 신앙생활 개인정보 안내문을 화면 배경 안쪽에 자연스럽게 배치 */
+/* V2-48: 나의 신앙생활 개인정보 안내문을 화면 배경 안쪽에 자연스럽게 배치 */
 .my-diocese-panel > .my-faith-privacy-note {
   display: none !important;
 }
@@ -6142,7 +6142,7 @@ html.oai-font-global #cover #cc-6 .cover-name {
 }
 
 
-/* V2-47: 교구 미설정 배너 중앙 정렬 + 나의 신앙생활 버튼 색상 안정화 */
+/* V2-48: 교구 미설정 배너 중앙 정렬 + 나의 신앙생활 버튼 색상 안정화 */
 #cover #cover-action-row.cover-action-single {
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -6516,6 +6516,28 @@ html.oai-font-global #cover #cc-6 .cover-name {
   letter-spacing: -.02em !important;
   word-break: keep-all !important;
 }
+
+/* V2-48: 나의 신앙생활 선택값 제목 강조 - 카드보다 조금 진한 배경과 분리선 */
+.my-faith-section h3 {
+  margin: 0 !important;
+  padding: 15px 15px 13px !important;
+  border-bottom: 1px solid rgba(126,104,74,.20) !important;
+  background: rgba(241,232,218,.72) !important;
+  color: #17172A !important;
+}
+.my-faith-section.my-faith-diocese-section h3 {
+  background: #F1E5D2 !important;
+  border-bottom-color: rgba(183,121,31,.22) !important;
+}
+.my-faith-section.my-faith-parish-section h3 {
+  background: #E8F0E7 !important;
+  border-bottom-color: rgba(47,133,90,.20) !important;
+}
+.my-faith-section.my-faith-search-section h3 {
+  background: #E8EEF6 !important;
+  border-bottom-color: rgba(37,99,235,.16) !important;
+}
+
 .my-faith-actions {
   display: flex !important;
   flex-direction: column !important;
