@@ -1496,7 +1496,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V2-39';
+    frame.src='diocese.html?v=V2-40';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -6518,6 +6518,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         dioSec.appendChild(dioActions);
         var dioTools = document.createElement('div');
         dioTools.className = 'my-faith-tools';
+        dioTools.appendChild(smallButton('선택 안함', function(){
+          try{ localStorage.removeItem(DIO_KEY); }catch(_e){ setSelectedName(''); }
+          setSelectedParish(null);
+          updateButton();
+          refreshDependentViews();
+          renderHome();
+        }));
         dioTools.appendChild(smallButton('교구 변경', renderDioceseList));
         dioSec.appendChild(dioTools);
       }else{
