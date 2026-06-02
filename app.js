@@ -4951,14 +4951,11 @@ function _loadNearbyWithDist(lat,lng,items,getIdx,getColor,getLabel,opts){
     return;
   }
 
-  if(body && isCurrent()){
-    const hasStableList = !!body.querySelector('.nearby-item');
-    if(!(opts.silent && hasStableList)){
-      body.innerHTML='<div class="empty-msg nearby-distance-loading">📍 정확한 거리를 계산 중입니다...</div>';
-    }
+  if(body && isCurrent() && !(opts.silent && opts.keepCurrentList === true)){
+    body.innerHTML='<div class="empty-msg nearby-distance-loading">🚗 자동차 거리 계산 중입니다...<br>계산이 끝난 뒤 가까운 순서로 보여드립니다.</div>';
   }
 
-  // 성당 첫 진입/내주변 목록은 정확한 도로거리 계산이 끝난 뒤에 표시한다.
+  // 성당·성지·피정의집 내주변 목록은 정확한 자동차 거리 계산이 끝난 뒤에 표시한다.
   // 계산 전 직선거리 목록을 먼저 띄우지 않아 목록 순서가 바뀌는 느낌을 없앤다.
   // V1: 비동기 결과가 늦게 도착해 다른 카테고리 목록을 덮지 않도록 요청 식별자를 확인한다.
 
@@ -6518,6 +6515,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         dioSec.appendChild(dioActions);
         var dioTools = document.createElement('div');
         dioTools.className = 'my-faith-tools';
+        dioTools.appendChild(smallButton('교구 변경', renderDioceseList));
         dioTools.appendChild(smallButton('선택 안함', function(){
           try{ localStorage.removeItem(DIO_KEY); }catch(_e){ setSelectedName(''); }
           setSelectedParish(null);
@@ -6525,7 +6523,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           refreshDependentViews();
           renderHome();
         }));
-        dioTools.appendChild(smallButton('교구 변경', renderDioceseList));
         dioSec.appendChild(dioTools);
       }else{
         dioSec.innerHTML = '<h3>나의 교구 선택</h3><p>교구를 선택하면 사제찾기와 주요 홈페이지를 빠르게 열 수 있습니다.</p>';
