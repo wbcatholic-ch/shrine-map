@@ -189,10 +189,10 @@
   };
   // 관구별 배지 색상
   const WEB_PROV_COLORS = {
-    "서울관구":"#6B5B43",
-    "대구관구":"#6B5B43",
-    "광주관구":"#6B5B43",
-    "군종교구":"#6B5B43"
+    "서울관구":"#2563EB",
+    "대구관구":"#B7791F",
+    "광주관구":"#7C3AED",
+    "군종교구":"#64748B"
   };
   const WEB_CAT_BG = {
     "사제찾기":"#eef7f5",
@@ -259,16 +259,13 @@
     return '<span class="web-province-inline">' + esc(prov) + '</span>';
   }
   function webCardNameHtml(item){
-    var myName = getMyDioceseName();
     if(item && (item.cat === '사제찾기' || item.cat === '교구')){
       var dioName = item.cat === '사제찾기' ? String(item.op || item.name || '').replace(/\s*사제찾기\s*$/, '') : String(item.name || '');
-      var tail = item.cat === '사제찾기' ? '사제찾기' : '';
+      var tail = item.cat === '사제찾기' ? '사제찾기' : '홈페이지';
       return '<span class="web-diocese-name-main">' + esc(dioName) + '</span>'
-        + (isMyDioceseWebItem(item, myName) ? myDioceseBadgeHtml() : '')
-        + webProvinceBadgeHtml(item.prov)
-        + (tail ? '<span class="web-card-name-tail">' + esc(tail) + '</span>' : '');
+        + '<span class="web-card-name-tail">' + esc(tail) + '</span>';
     }
-    return esc(item && item.name || '') + (isMyDioceseWebItem(item, myName) ? myDioceseBadgeHtml() : '');
+    return esc(item && item.name || '');
   }
   function hideIntegratedViews(){
     ig$('web-view')?.classList.remove('open');
@@ -565,9 +562,9 @@
       if(isPriestCard){
         card.setAttribute('aria-label', s.name + ' 새창 열기');
       }
-      // 교구/사제찾기: 관구와 나의 교구 표시는 교구명 옆에 함께 둔다.
-      const badgeText = ((s.cat==='교구' || s.cat==='사제찾기') && s.prov) ? esc(s.cat) : esc(s.cat);
-      const topRight = (s.cat==='교구' || s.cat==='사제찾기') ? '' : esc(s.op);
+      // 교구/사제찾기: 상단에는 관구와 나의 교구 표시, 본문에는 교구명+기능명을 둔다.
+      const badgeText = ((s.cat==='교구' || s.cat==='사제찾기') && s.prov) ? esc(s.prov) : esc(s.cat);
+      const topRight = (s.cat==='교구' || s.cat==='사제찾기') ? (isMyWebCard ? myDioceseBadgeHtml() : '') : esc(s.op);
       const cardName = webCardNameHtml(s);
       const cardDesc = s.cat==='교구' ? '교구 공식 홈페이지' : esc(s.desc);
       const icoBg = '#F5F0E8';
