@@ -663,10 +663,28 @@ function prBindDetailSwipeArrow(){
 window.prBindDetailSwipeArrow = prBindDetailSwipeArrow;
 prBindDetailSwipeArrow();
 
+
+function prUpdateGoodNewsPrayerButton(){
+  var btn = document.getElementById('goodnews-prayer-btn');
+  if(!btn) return;
+  var dio = '';
+  try{ dio = String(localStorage.getItem('oai_my_diocese_name') || '').trim(); }catch(_e){}
+  var show = (dio !== '대구대교구');
+  btn.hidden = !show;
+  btn.setAttribute('aria-hidden', show ? 'false' : 'true');
+  if(show){
+    btn.style.removeProperty('display');
+  }else{
+    btn.style.display = 'none';
+  }
+}
+window.prUpdateGoodNewsPrayerButton = prUpdateGoodNewsPrayerButton;
+
 /* lyTabColors: 미선언 전역 변수 - 참조하는 코드 없음, 제거 */
 
 window.initPrayerView = function(){
   prLoadPrefs();
+  prUpdateGoodNewsPrayerButton();
   prCurCat = (prFavorites && prFavorites.length) ? 'favorites' : 'aim';
   prBuildTabs();
   prApplyFont();
@@ -692,6 +710,7 @@ window.initPrayerView = function(){
 (function(){
   try{
     var btn = document.getElementById('goodnews-prayer-btn');
+    prUpdateGoodNewsPrayerButton();
     if(!btn || btn.__oaiHandled) return;
     btn.__oaiHandled = true;
     btn.removeAttribute('target');

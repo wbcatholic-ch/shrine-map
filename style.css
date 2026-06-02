@@ -6029,7 +6029,7 @@ html.oai-font-global #cover #cc-6 .cover-name {
 }
 
 
-/* V2-34: 나의 신앙생활 구조 정리 — 중복 보정 제거 후 최종 값 통합 */
+/* V2-35: 나의 신앙생활 구조 정리 + 새로고침 중립색 복귀 */
 #cover #cover-action-row.cover-action-single {
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -6063,8 +6063,6 @@ html.oai-font-global #cover #cc-6 .cover-name {
   min-height: 60px !important;
   max-height: 60px !important;
   border-radius: 17px !important;
-  border: 1px solid rgba(126,104,74,.26) !important;
-  background: linear-gradient(180deg, #fffdf8 0%, #f1e5d3 100%) !important;
   color: #1f2a44 !important;
   font-family: inherit !important;
   font-size: calc(15.4px * var(--app-font-scale, 1)) !important;
@@ -6072,10 +6070,6 @@ html.oai-font-global #cover #cc-6 .cover-name {
   line-height: 1.18 !important;
   letter-spacing: -.03em !important;
   text-align: center !important;
-  box-shadow:
-    0 8px 16px rgba(31,42,68,.12),
-    inset 0 1px 0 rgba(255,255,255,.92),
-    inset 0 -5px 10px rgba(136,112,78,.10) !important;
   cursor: pointer !important;
   touch-action: manipulation !important;
   -webkit-tap-highlight-color: transparent !important;
@@ -6084,6 +6078,19 @@ html.oai-font-global #cover #cc-6 .cover-name {
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
+}
+#cover .cover-diocese-btn {
+  border: 1px solid rgba(126,104,74,.26) !important;
+  background: linear-gradient(180deg, #fffdf8 0%, #f1e5d3 100%) !important;
+  box-shadow:
+    0 8px 16px rgba(31,42,68,.12),
+    inset 0 1px 0 rgba(255,255,255,.92),
+    inset 0 -5px 10px rgba(136,112,78,.10) !important;
+}
+#cover .cover-refresh-main-btn {
+  border: 1.5px solid rgba(31,42,68,.16) !important;
+  background: linear-gradient(180deg, #ece7de 0%, #ddd6c9 100%) !important;
+  box-shadow: 0 6px 12px rgba(31,42,68,.08) !important;
 }
 #cover .cover-diocese-btn {
   padding: 0 10px !important;
