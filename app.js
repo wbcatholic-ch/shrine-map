@@ -6625,7 +6625,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     function renderParishSearch(query){
       query = String(query || '');
       setHeader('나의 본당 찾기', '성당명 또는 주소로 검색');
-      setBodyMode('my-faith-body');
+      setBodyMode('my-faith-body my-faith-search-body');
       var wrap = document.createElement('section');
       wrap.className = 'my-faith-section my-faith-search-section';
       wrap.innerHTML = '<h3>성당 검색</h3>';
