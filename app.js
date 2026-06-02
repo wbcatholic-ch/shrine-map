@@ -6291,7 +6291,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     function updateButton(){
       var name = selectedName();
-      btn.textContent = name || '나의 교구는?';
+      btn.textContent = name ? ('나의 교구: ' + name) : '나의 교구는?';
       btn.setAttribute('aria-label', name ? ('나의 교구 ' + name + ' 변경') : '나의 교구 선택');
       btn.classList.toggle('has-diocese', !!name);
     }

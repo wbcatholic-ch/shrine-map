@@ -6015,7 +6015,7 @@ html.oai-font-global #cover #cc-6 .cover-name {
   font-size: calc(16px * var(--app-font-scale, 1)) !important;
 }
 
-/* V2-15: 커버 하단 나의 교구 선택 버튼 */
+/* V2-16: 커버 하단 나의 교구 선택 버튼 문구 보정 */
 #cover #cover-action-row.cover-action-single {
   justify-content: space-between !important;
   gap: 10px !important;
@@ -6023,9 +6023,9 @@ html.oai-font-global #cover #cc-6 .cover-name {
 #cover #cover-action-row.cover-action-single #cover-diocese-box {
   display: flex !important;
   flex: 0 1 auto !important;
-  width: clamp(118px, 35vw, 158px) !important;
-  min-width: 118px !important;
-  max-width: 158px !important;
+  width: clamp(150px, 45vw, 184px) !important;
+  min-width: 150px !important;
+  max-width: 184px !important;
   height: 34px !important;
   min-height: 34px !important;
   max-height: 34px !important;
@@ -6046,7 +6046,7 @@ html.oai-font-global #cover #cc-6 .cover-name {
   color: #4b3f32 !important;
   border: 1.5px solid rgba(183,121,31,.25) !important;
   font-family: inherit !important;
-  font-size: calc(11.2px * var(--app-font-scale, 1)) !important;
+  font-size: calc(10.8px * var(--app-font-scale, 1)) !important;
   font-weight: 850 !important;
   line-height: 1 !important;
   letter-spacing: -.03em !important;
@@ -6078,12 +6078,12 @@ html.oai-font-global #cover #cc-6 .cover-name {
     gap: 8px !important;
   }
   #cover #cover-action-row.cover-action-single #cover-diocese-box {
-    width: clamp(108px, 36vw, 136px) !important;
-    min-width: 108px !important;
-    max-width: 136px !important;
+    width: clamp(142px, 44vw, 166px) !important;
+    min-width: 142px !important;
+    max-width: 166px !important;
   }
   #cover .cover-diocese-btn {
-    font-size: calc(10.4px * var(--app-font-scale, 1)) !important;
-    padding: 0 8px !important;
+    font-size: calc(9.8px * var(--app-font-scale, 1)) !important;
+    padding: 0 7px !important;
   }
 }
