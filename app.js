@@ -6499,6 +6499,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       b.addEventListener('click', function(e){ if(e && e.preventDefault) e.preventDefault(); fn && fn(); });
       return b;
     }
+    function appendMyFaithPrivacyNote(){
+      try{
+        var note = document.createElement('div');
+        note.className = 'my-faith-inline-privacy-note';
+        note.textContent = '선택한 교구와 본당 정보는 이 기기 안에만 저장되며, 외부로 수집되거나 전송되지 않습니다.';
+        body.appendChild(note);
+      }catch(e){ console.warn('[가톨릭길동무]', e); }
+    }
     function renderHome(){
       var name = selectedName();
       var info = name ? DIO_INFO[name] : null;
@@ -6564,6 +6572,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         parishSec.appendChild(chooseParish);
       }
       body.appendChild(parishSec);
+      appendMyFaithPrivacyNote();
     }
     function renderDioceseList(){
       var current = selectedName();

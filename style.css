@@ -6082,6 +6082,31 @@ html.oai-font-global .sheet-title {
 #srch-modal #sm-inp::placeholder {
   font-size: var(--oai-search-std-fs, 15px) !important;
 }
+
+
+/* V2-47: 나의 신앙생활 개인정보 안내문을 화면 배경 안쪽에 자연스럽게 배치 */
+.my-diocese-panel > .my-faith-privacy-note {
+  display: none !important;
+}
+.my-faith-inline-privacy-note {
+  margin: 2px 4px 0 !important;
+  padding: 12px 14px calc(env(safe-area-inset-bottom, 0px) + 8px) !important;
+  border-radius: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: rgba(95,85,73,.62) !important;
+  text-align: center !important;
+  font-size: calc(10.8px * var(--app-font-scale, 1)) !important;
+  line-height: 1.45 !important;
+  font-weight: 650 !important;
+  letter-spacing: -.025em !important;
+  word-break: keep-all !important;
+  box-shadow: none !important;
+}
+.my-diocese-modal.keyboard-open .my-faith-inline-privacy-note {
+  display: none !important;
+}
+
 @media (max-width: 370px) {
   #cover .cover-title,
   html.oai-font-global #cover .cover-title {
@@ -6117,7 +6142,7 @@ html.oai-font-global #cover #cc-6 .cover-name {
 }
 
 
-/* V2-46: 교구 미설정 배너 중앙 정렬 + 나의 신앙생활 버튼 색상 안정화 */
+/* V2-47: 교구 미설정 배너 중앙 정렬 + 나의 신앙생활 버튼 색상 안정화 */
 #cover #cover-action-row.cover-action-single {
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
