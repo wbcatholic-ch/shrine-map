@@ -1496,7 +1496,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V2-27';
+    frame.src='diocese.html?v=V2-28';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -6383,8 +6383,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       body.innerHTML = '';
     }
     function updateButton(){
-      btn.innerHTML = '<span class="diocese-btn-label">My Faith Life</span><span class="diocese-btn-name">나의 교구는?</span>';
-      btn.setAttribute('aria-label', 'My Faith Life 열기');
+      btn.innerHTML = '<span class="diocese-btn-label">나의 신앙생활</span>';
+      btn.setAttribute('aria-label', '나의 신앙생활 열기');
       btn.classList.remove('has-diocese');
     }
     function refreshDependentViews(){
@@ -6434,11 +6434,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       var name = selectedName();
       var info = name ? DIO_INFO[name] : null;
       var parish = selectedParish();
-      setHeader('My Faith Life', '내 교구와 내 본당의 자주 쓰는 바로가기를 한곳에서 확인합니다.');
+      setHeader('나의 신앙생활', '교구·본당 바로가기');
       setBodyMode('my-faith-body');
 
       var dioSec = document.createElement('section');
-      dioSec.className = 'my-faith-section';
+      dioSec.className = 'my-faith-section my-faith-diocese-section';
       if(name){
         dioSec.innerHTML = '<h3>나의 교구 : ' + safeText(name) + '</h3>';
         var dioActions = document.createElement('div');
@@ -6452,7 +6452,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         dioTools.appendChild(smallButton('선택 안함', function(){ setSelectedName(''); refreshDependentViews(); renderHome(); }));
         dioSec.appendChild(dioTools);
       }else{
-        dioSec.innerHTML = '<h3>나의 교구는?</h3><p>교구를 선택하면 가톨릭 정보와 성당·성지·피정의집에서 내 교구를 더 쉽게 찾을 수 있습니다.</p>';
+        dioSec.innerHTML = '<h3>나의 교구 선택</h3><p>교구를 선택하면 사제찾기와 주요 홈페이지를 빠르게 열 수 있습니다.</p>';
         var chooseDio = document.createElement('div');
         chooseDio.className = 'my-faith-actions';
         var chooseDioBtn = actionButton('나의 교구 선택', '');
@@ -6464,7 +6464,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       body.appendChild(dioSec);
 
       var parishSec = document.createElement('section');
-      parishSec.className = 'my-faith-section';
+      parishSec.className = 'my-faith-section my-faith-parish-section';
       if(parish){
         parishSec.innerHTML = '<h3>나의 본당 : ' + safeText(parish.name) + '</h3>' + (parish.diocese ? '<p>' + safeText(parish.diocese) + '</p>' : '');
         var parishActions = document.createElement('div');
@@ -6479,7 +6479,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         parishTools.appendChild(smallButton('선택 안함', function(){ setSelectedParish(null); renderHome(); }));
         parishSec.appendChild(parishTools);
       }else{
-        parishSec.innerHTML = '<h3>나의 본당은?</h3><p>본당을 선택하면 성당 홈페이지와 상세페이지를 바로 열 수 있습니다.</p>';
+        parishSec.innerHTML = '<h3>나의 본당 선택</h3><p>본당을 선택하면 성당 홈페이지와 상세페이지를 바로 열 수 있습니다.</p>';
         var chooseParish = document.createElement('div');
         chooseParish.className = 'my-faith-actions';
         var chooseParishBtn = actionButton('나의 본당 찾기', '');
@@ -6492,7 +6492,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     function renderDioceseList(){
       var current = selectedName();
-      setHeader('나의 교구 선택', '선택한 교구는 가톨릭 정보와 성당·성지·피정의집 교구 목록에서 먼저 보입니다.');
+      setHeader('나의 교구 선택', '선택한 교구를 먼저 보여줍니다.');
       setBodyMode('my-diocese-list');
       dioceses.forEach(function(name){
         var item = document.createElement('button');
@@ -6538,7 +6538,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     function renderParishSearch(query){
       query = String(query || '');
-      setHeader('나의 본당 찾기', '성당 이름이나 주소를 검색한 뒤 내 본당으로 선택합니다.');
+      setHeader('나의 본당 찾기', '성당명 또는 주소로 검색');
       setBodyMode('my-faith-body');
       var wrap = document.createElement('section');
       wrap.className = 'my-faith-section my-faith-search-section';
