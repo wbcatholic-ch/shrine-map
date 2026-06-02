@@ -6192,33 +6192,58 @@ html.oai-font-global #cover #cc-6 .cover-name {
   background: #eef2f7 !important;
 }
 
-/* V2-26: 나의 신앙생활 전체 화면 구성 */
+/* V2-27: 나의 신앙생활 커버 버튼/전체화면 헤더/카드 배경 정리 */
 #cover #cover-action-row.cover-action-single {
   height: 52px !important;
   min-height: 52px !important;
   max-height: 52px !important;
   flex-basis: 52px !important;
-  gap: 9px !important;
+  gap: clamp(4px, 1.2vw, 8px) !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  align-items: stretch !important;
+  justify-content: stretch !important;
 }
 #cover #cover-action-row.cover-action-single #cover-diocese-box,
-#cover .cover-diocese-btn {
-  height: 52px !important;
-  min-height: 52px !important;
-  max-height: 52px !important;
-}
 #cover #cover-action-row.cover-action-single #cover-update-box {
-  flex: 0 0 clamp(118px, 30vw, 140px) !important;
-  width: clamp(118px, 30vw, 140px) !important;
-  min-width: 118px !important;
-  max-width: 140px !important;
+  display: flex !important;
+  width: 100% !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  flex: 1 1 0 !important;
   height: 52px !important;
   min-height: 52px !important;
   max-height: 52px !important;
+  margin: 0 !important;
+  box-sizing: border-box !important;
+}
+#cover .cover-diocese-btn,
+#cover .cover-refresh-main-btn {
+  width: 100% !important;
+  min-height: 52px !important;
+  height: 52px !important;
+  max-height: 52px !important;
+  border-radius: 17px !important;
+  box-sizing: border-box !important;
+}
+#cover .cover-diocese-btn {
+  justify-content: center !important;
+  align-items: center !important;
+  text-align: center !important;
+  gap: 3px !important;
+  padding: 5px 10px 6px !important;
+}
+#cover .cover-diocese-btn .diocese-btn-label {
+  font-size: calc(13.2px * var(--app-font-scale, 1)) !important;
+  line-height: 1.05 !important;
+  letter-spacing: -.02em !important;
+}
+#cover .cover-diocese-btn .diocese-btn-name {
+  font-size: calc(13.2px * var(--app-font-scale, 1)) !important;
+  line-height: 1.08 !important;
+  letter-spacing: -.04em !important;
 }
 #cover .cover-refresh-main-btn {
-  min-height: 52px !important;
-  height: 52px !important;
-  border-radius: 17px !important;
   font-size: calc(13.2px * var(--app-font-scale, 1)) !important;
   box-shadow:
     0 6px 13px rgba(31,42,68,.09),
@@ -6231,7 +6256,7 @@ html.oai-font-global #cover #cc-6 .cover-name {
 }
 .my-diocese-modal.show { display: flex !important; }
 .my-diocese-backdrop {
-  background: rgba(248, 246, 242, .96) !important;
+  background: rgba(250, 247, 240, .98) !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
@@ -6243,24 +6268,53 @@ html.oai-font-global #cover #cc-6 .cover-name {
   border-radius: 0 !important;
   border: 0 !important;
   box-shadow: none !important;
-  padding: calc(env(safe-area-inset-top, 0px) + 14px) 16px calc(env(safe-area-inset-bottom, 0px) + 16px) !important;
-  background: #F8F6F2 !important;
+  padding: 0 !important;
+  background: #FFF9EF !important;
+  display: flex !important;
+  flex-direction: column !important;
 }
 .my-diocese-head {
-  padding: 4px 2px 14px !important;
-  border-bottom: 1px solid rgba(183,121,31,.18) !important;
+  margin: 0 !important;
+  padding: calc(10px + env(safe-area-inset-top, 0px)) 16px 10px !important;
+  min-height: calc(70px + env(safe-area-inset-top, 0px)) !important;
+  background: #1f2a44 !important;
+  color: #fff !important;
+  border-bottom: 2px solid #B7791F !important;
+  box-shadow: 0 4px 14px rgba(31,42,68,.20) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 12px !important;
+  flex: 0 0 auto !important;
+  box-sizing: border-box !important;
 }
 .my-diocese-title {
-  font-size: calc(22px * var(--app-font-scale, 1)) !important;
+  font-size: calc(20px * var(--app-font-scale, 1)) !important;
   line-height: 1.18 !important;
+  color: #fff !important;
+  font-weight: 900 !important;
+  letter-spacing: -.03em !important;
 }
 .my-diocese-subtitle {
-  max-width: 92vw !important;
-  font-size: calc(12.5px * var(--app-font-scale, 1)) !important;
-  line-height: 1.45 !important;
+  max-width: 86vw !important;
+  margin-top: 3px !important;
+  font-size: calc(12.2px * var(--app-font-scale, 1)) !important;
+  line-height: 1.35 !important;
+  color: rgba(255,255,255,.82) !important;
+  font-weight: 700 !important;
 }
 .my-diocese-close {
-  background: rgba(31,42,68,.08) !important;
+  width: 38px !important;
+  height: 38px !important;
+  flex: 0 0 38px !important;
+  border-radius: 14px !important;
+  background: rgba(255,255,255,.13) !important;
+  color: #fff !important;
+  border: 1px solid rgba(255,255,255,.18) !important;
+}
+#my-diocese-list {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
 }
 .my-faith-body {
   display: flex !important;
@@ -6268,15 +6322,16 @@ html.oai-font-global #cover #cc-6 .cover-name {
   gap: 14px !important;
   overflow-y: auto !important;
   -webkit-overflow-scrolling: touch !important;
-  padding: 14px 2px 4px !important;
+  padding: 16px 16px 8px !important;
+  background: #FFF9EF !important;
 }
 .my-faith-section {
-  background: linear-gradient(180deg, #fffdf8 0%, #f3eadc 100%) !important;
-  border: 1px solid rgba(183,121,31,.22) !important;
+  background: linear-gradient(180deg, #FFFFFF 0%, #FFF9EE 100%) !important;
+  border: 1px solid rgba(183,121,31,.18) !important;
   border-radius: 20px !important;
   box-shadow:
-    0 8px 18px rgba(31,42,68,.08),
-    inset 0 1px 0 rgba(255,255,255,.92) !important;
+    0 8px 18px rgba(31,42,68,.065),
+    inset 0 1px 0 rgba(255,255,255,1) !important;
   padding: 16px 14px !important;
   box-sizing: border-box !important;
 }
@@ -6285,14 +6340,14 @@ html.oai-font-global #cover #cc-6 .cover-name {
   font-size: calc(18px * var(--app-font-scale, 1)) !important;
   line-height: 1.25 !important;
   font-weight: 900 !important;
-  color: #1f2a44 !important;
+  color: #111827 !important;
   letter-spacing: -.04em !important;
 }
 .my-faith-section p {
   margin: -4px 0 12px !important;
   font-size: calc(13px * var(--app-font-scale, 1)) !important;
   line-height: 1.45 !important;
-  color: #6b5d4c !important;
+  color: #5f5549 !important;
   font-weight: 700 !important;
   letter-spacing: -.03em !important;
 }
@@ -6305,14 +6360,14 @@ html.oai-font-global #cover #cc-6 .cover-name {
   width: 100% !important;
   min-height: 52px !important;
   border-radius: 13px !important;
-  border: 1.5px solid rgba(31,42,68,.24) !important;
+  border: 1.5px solid rgba(31,42,68,.18) !important;
   background: #fff !important;
   color: #111827 !important;
   font-family: inherit !important;
   font-size: calc(16px * var(--app-font-scale, 1)) !important;
   font-weight: 850 !important;
   letter-spacing: -.035em !important;
-  box-shadow: 0 4px 10px rgba(31,42,68,.06) !important;
+  box-shadow: 0 4px 10px rgba(31,42,68,.05) !important;
   cursor: pointer !important;
 }
 .my-faith-action:disabled {
@@ -6331,8 +6386,8 @@ html.oai-font-global #cover #cc-6 .cover-name {
   min-height: 34px !important;
   padding: 0 13px !important;
   border-radius: 999px !important;
-  border: 1px solid rgba(183,121,31,.24) !important;
-  background: rgba(255,255,255,.72) !important;
+  border: 1px solid rgba(183,121,31,.22) !important;
+  background: rgba(255,255,255,.86) !important;
   color: #6b4e2e !important;
   font-family: inherit !important;
   font-size: calc(12.5px * var(--app-font-scale, 1)) !important;
@@ -6346,7 +6401,7 @@ html.oai-font-global #cover #cc-6 .cover-name {
   width: 100% !important;
   height: 44px !important;
   border-radius: 13px !important;
-  border: 1.5px solid rgba(183,121,31,.25) !important;
+  border: 1.5px solid rgba(183,121,31,.22) !important;
   background: #fff !important;
   color: #111827 !important;
   font-family: inherit !important;
@@ -6369,8 +6424,8 @@ html.oai-font-global #cover #cc-6 .cover-name {
   width: 100% !important;
   text-align: left !important;
   border-radius: 13px !important;
-  border: 1px solid rgba(183,121,31,.20) !important;
-  background: #fffaf2 !important;
+  border: 1px solid rgba(183,121,31,.18) !important;
+  background: #fff !important;
   padding: 11px 12px !important;
   font-family: inherit !important;
   color: #1f2a44 !important;
@@ -6388,7 +6443,7 @@ html.oai-font-global #cover #cc-6 .cover-name {
   margin-top: 4px !important;
   font-size: calc(11.5px * var(--app-font-scale, 1)) !important;
   line-height: 1.35 !important;
-  color: #6b5d4c !important;
+  color: #5f5549 !important;
   font-weight: 700 !important;
 }
 .my-faith-empty {
@@ -6398,23 +6453,27 @@ html.oai-font-global #cover #cc-6 .cover-name {
   font-size: calc(13px * var(--app-font-scale, 1)) !important;
   font-weight: 750 !important;
 }
-@media (min-width: 520px) {
-  .my-diocese-panel {
-    max-width: 520px !important;
-    margin: 0 auto !important;
-    border-left: 1px solid rgba(183,121,31,.18) !important;
-    border-right: 1px solid rgba(183,121,31,.18) !important;
-  }
+.my-faith-privacy-note {
+  flex: 0 0 auto !important;
+  padding: 9px 16px calc(env(safe-area-inset-bottom, 0px) + 10px) !important;
+  text-align: center !important;
+  font-size: calc(11.2px * var(--app-font-scale, 1)) !important;
+  line-height: 1.35 !important;
+  color: rgba(95,85,73,.82) !important;
+  font-weight: 700 !important;
+  background: #FFF9EF !important;
+  border-top: 1px solid rgba(183,121,31,.12) !important;
 }
 @media (max-width: 370px) {
   #cover #cover-action-row.cover-action-single { gap: 7px !important; }
+  #cover #cover-action-row.cover-action-single #cover-diocese-box,
   #cover #cover-action-row.cover-action-single #cover-update-box {
-    flex-basis: 112px !important;
-    width: 112px !important;
-    min-width: 112px !important;
-    max-width: 112px !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: none !important;
+    flex: 1 1 0 !important;
   }
   #cover .cover-refresh-main-btn { font-size: calc(12.4px * var(--app-font-scale, 1)) !important; padding: 0 10px !important; }
-  #cover .cover-diocese-btn .diocese-btn-label { font-size: calc(11.4px * var(--app-font-scale, 1)) !important; }
-  #cover .cover-diocese-btn .diocese-btn-name { font-size: calc(13.5px * var(--app-font-scale, 1)) !important; }
+  #cover .cover-diocese-btn .diocese-btn-label,
+  #cover .cover-diocese-btn .diocese-btn-name { font-size: calc(12.4px * var(--app-font-scale, 1)) !important; }
 }

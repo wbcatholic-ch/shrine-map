@@ -1496,7 +1496,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V2-26';
+    frame.src='diocese.html?v=V2-27';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -6383,8 +6383,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       body.innerHTML = '';
     }
     function updateButton(){
-      btn.innerHTML = '<span class="diocese-btn-label">나의 신앙생활</span><span class="diocese-btn-name">나의 교구는?</span>';
-      btn.setAttribute('aria-label', '나의 신앙생활 열기');
+      btn.innerHTML = '<span class="diocese-btn-label">My Faith Life</span><span class="diocese-btn-name">나의 교구는?</span>';
+      btn.setAttribute('aria-label', 'My Faith Life 열기');
       btn.classList.remove('has-diocese');
     }
     function refreshDependentViews(){
@@ -6434,7 +6434,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       var name = selectedName();
       var info = name ? DIO_INFO[name] : null;
       var parish = selectedParish();
-      setHeader('나의 신앙생활', '내 교구와 내 본당의 자주 쓰는 바로가기를 한곳에서 확인합니다.');
+      setHeader('My Faith Life', '내 교구와 내 본당의 자주 쓰는 바로가기를 한곳에서 확인합니다.');
       setBodyMode('my-faith-body');
 
       var dioSec = document.createElement('section');
