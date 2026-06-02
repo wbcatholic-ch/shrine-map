@@ -2308,13 +2308,24 @@ function _getMyDioceseName(){
 }
 function _orderedDiosForMode(mode){
   const base=_DIOS.slice();
-  if(mode!=='parish') return base;
+  const reorderModes={shrine:true, parish:true, retreat:true};
+  if(!reorderModes[mode]) return base;
   const mine=_getMyDioceseName();
   if(!mine) return base;
   const mineRow=base.find(function(x){ return x[0]===mine; });
   if(!mineRow) return base;
   const rest=base.slice(1).filter(function(x){ return x[0]!==mine; });
   return [base[0], mineRow].concat(rest);
+}
+function _orderedGroupEntriesForMyDiocese(groups){
+  const entries=Object.entries(groups||{});
+  const mine=_getMyDioceseName();
+  if(!mine || entries.length<2) return entries;
+  return entries.slice().sort(function(a,b){
+    const aa=a[0]===mine ? 0 : 1;
+    const bb=b[0]===mine ? 0 : 1;
+    return aa-bb;
+  });
 }
 function _renderDioFilterBars(mode){
   const fb=$('list-filter-bar'), sm=$('sm-filter-bar');
@@ -5096,7 +5107,7 @@ function renderList(){
   // 기존 renderList 내부에서 빠져 있던 기본 렌더링 흐름을 복원해,
   // 탭을 처음 열었을 때 빈 화면처럼 보이지 않게 한다.
   body.innerHTML='';
-  Object.entries(groups).forEach(([dio,items])=>{
+  _orderedGroupEntriesForMyDiocese(groups).forEach(([dio,items])=>{
     const hd=document.createElement('div');
     hd.className='dio-hd'; hd.textContent=dio;
     body.appendChild(hd);
@@ -5990,7 +6001,7 @@ function filterModal(q){
   groups[s.diocese].push({s,i});
   });
   let html='';
-  Object.entries(groups).forEach(([dio,items])=>{
+  _orderedGroupEntriesForMyDiocese(groups).forEach(([dio,items])=>{
   const c=_smRole==='start'?'#E53935':'#2E7D32';
   html+=`<div class="sm-grp" style="color:${c}">${dio}</div>`;
   items.forEach(({s,i})=>{
@@ -6203,7 +6214,7 @@ function _fmtTime(s){
         setTimeout(function(){
           try{ root.classList.remove('oai-cover-first-reveal','oai-cover-booting'); }catch(__e){}
           _idleIntroRunning = false;
-        }, 360);
+        }, 660);
       }catch(_e){
         _idleIntroRunning = false;
       }
@@ -6347,6 +6358,21 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     function renderList(){
       var current = selectedName();
       list.innerHTML = '';
+
+      var noneItem = document.createElement('button');
+      noneItem.type = 'button';
+      noneItem.className = 'my-diocese-option my-diocese-none' + (!current ? ' selected' : '');
+      noneItem.textContent = '선택 안함';
+      noneItem.setAttribute('aria-pressed', !current ? 'true' : 'false');
+      noneItem.addEventListener('click', function(e){
+        if(e && e.preventDefault) e.preventDefault();
+        setSelectedName('');
+        updateButton();
+        try{ if(typeof _renderDioFilterBars==='function') _renderDioFilterBars(_mode); }catch(_e){}
+        closeModal();
+      });
+      list.appendChild(noneItem);
+
       dioceses.forEach(function(name){
         var item = document.createElement('button');
         item.type = 'button';

@@ -6118,3 +6118,14 @@ html.oai-font-global #cover #cc-6 .cover-name {
     font-size: calc(10.3px * var(--app-font-scale, 1)) !important;
   }
 }
+
+/* V2-19: 나의 교구 선택 해제 옵션 */
+.my-diocese-option.my-diocese-none {
+  color: #6b7280 !important;
+  background: #f8fafc !important;
+  border-style: dashed !important;
+}
+.my-diocese-option.my-diocese-none.selected {
+  color: #4b5563 !important;
+  background: #eef2f7 !important;
+}
