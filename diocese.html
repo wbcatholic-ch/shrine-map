@@ -113,6 +113,8 @@ header{flex-shrink:0;background:var(--d);border-bottom:none;z-index:30;
 .dd{font-size:11px;color:#555;padding:2px 0;border-bottom:.5px solid #f5f5f5;line-height:1.5;}
 .c-btn{display:flex;align-items:center;justify-content:center;gap:5px;font-size:12px;
   font-weight:500;color:white;border-radius:7px;padding:7px;border:none;width:100%;text-decoration:none;cursor:pointer;}
+.c-action-group{display:flex;flex-direction:column;gap:6px;}
+.c-btn.c-priest-btn{background:#0F766E!important;}
 .c-nurl{font-size:11px;color:#ccc;text-align:center;padding:3px 0;}
 
 /* ── 관구 버튼 ── */
@@ -195,6 +197,7 @@ header{flex-shrink:0;background:var(--d);border-bottom:none;z-index:30;
 .lv-foot{border-top:1px solid #EDE8E2;padding:9px 14px;display:flex;align-items:center;justify-content:space-between;background:#FAF8F4;}
 .lv-url{font-size:12px;color:var(--d);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;}
 .lv-arr{font-size:15px;color:var(--dim);flex-shrink:0;margin-left:6px;}
+.lv-priest-link{flex-shrink:0;margin-left:8px;border:0;border-radius:7px;background:#0F766E;color:#fff;font-size:11px;font-weight:800;padding:5px 8px;font-family:inherit;}
 
 
 @media(display-mode:standalone){
@@ -535,6 +538,7 @@ const DIOCESE_META =
     "gwangu": "서울관구",
     "parishes": 233,
     "url": "https://aos.catholic.or.kr/index",
+    "priestUrl": "https://aos.catholic.or.kr/pro10315",
     "region": "서울 전지역",
     "detail": ["서울 전지역"]
   },
@@ -543,6 +547,7 @@ const DIOCESE_META =
     "gwangu": "서울관구",
     "parishes": 135,
     "url": "http://www.caincheon.or.kr/",
+    "priestUrl": "http://www.caincheon.or.kr/father/father_list.do",
     "region": "인천 전지역, 경기 서부",
     "detail": [
       "인천 전지역",
@@ -554,6 +559,7 @@ const DIOCESE_META =
     "gwangu": "서울관구",
     "parishes": 222,
     "url": "https://www.casuwon.or.kr/",
+    "priestUrl": "https://www.casuwon.or.kr/priest/priest",
     "region": "경기 남부",
     "detail": [
       "경기 남부 (수원·광주·과천·광명·군포·성남·시흥일부·안산일부·안성·안양·양평·여주·오산·용인·의왕·이천·평택·하남·화성)"
@@ -564,6 +570,7 @@ const DIOCESE_META =
     "gwangu": "서울관구",
     "parishes": 88,
     "url": "http://ucatholic.or.kr/",
+    "priestUrl": "http://ucatholic.or.kr/bbs/board.php?bo_table=priest",
     "region": "경기 북부",
     "detail": [
       "경기 북부 (의정부·고양·구리·남양주·동두천·양주·연천·파주)"
@@ -574,6 +581,7 @@ const DIOCESE_META =
     "gwangu": "서울관구",
     "parishes": 54,
     "url": "http://www.wjcatholic.or.kr/",
+    "priestUrl": "http://www.wjcatholic.or.kr/company/sajedan",
     "region": "강원 남부, 충북 북부, 경북 봉화(석포면)",
     "detail": [
       "강원 남부 (원주·삼척·영월·정선·태백·횡성·동해일부·평창일부)",
@@ -586,6 +594,7 @@ const DIOCESE_META =
     "gwangu": "서울관구",
     "parishes": 62,
     "url": "https://www.cccatholic.or.kr/",
+    "priestUrl": "https://www.cccatholic.or.kr/diocese/priest/priest",
     "region": "강원 북부, 경기 동북부",
     "detail": [
       "강원 북부 (춘천·강릉·고성·속초·양구·양양·인제·철원·홍천·화천·동해일부·평창일부)",
@@ -597,6 +606,7 @@ const DIOCESE_META =
     "gwangu": "서울관구",
     "parishes": 145,
     "url": "https://www.djcatholic.or.kr/home/",
+    "priestUrl": "https://www.djcatholic.or.kr/home/pages/priest_list.php",
     "region": "대전 전지역, 세종 일부, 충남 전지역",
     "detail": [
       "대전 전지역",
@@ -609,6 +619,7 @@ const DIOCESE_META =
     "gwangu": "대구관구",
     "parishes": 164,
     "url": "https://www.daegu-archdiocese.or.kr/",
+    "priestUrl": "https://www.daegu-archdiocese.or.kr/page/priest.html?srl=priest",
     "region": "대구, 경북 남부",
     "detail": [
       "대구 전지역",
@@ -620,6 +631,7 @@ const DIOCESE_META =
     "gwangu": "대구관구",
     "parishes": 82,
     "url": "https://www.cdcj.or.kr/",
+    "priestUrl": "https://www.cdcj.or.kr/diocese/priest/priest",
     "region": "충북 중남부, 세종 일부",
     "detail": [
       "충북 중남부 (청주·충주·진천·증평·음성·옥천·영동·괴산·보은)",
@@ -631,6 +643,7 @@ const DIOCESE_META =
     "gwangu": "대구관구",
     "parishes": 41,
     "url": "https://www.acatholic.or.kr/",
+    "priestUrl": "https://www.acatholic.or.kr/sub2/sub1.asp",
     "region": "경북 북부",
     "detail": [
       "경북 북부 (안동·영덕·울진·영양·청송·문경·상주·영주·봉화(석포면 제외한 전지역)·예천·의성)"
@@ -641,6 +654,7 @@ const DIOCESE_META =
     "gwangu": "대구관구",
     "parishes": 75,
     "url": "https://cathms.kr/",
+    "priestUrl": "https://cathms.kr/saje",
     "region": "경남 서부",
     "detail": [
       "경남 서부 (창원·창녕·함안·의령·진주·거창·산청·함양·합천·남해·사천·하동·고성·통영·거제, 김해일부, 밀양일부)"
@@ -651,6 +665,7 @@ const DIOCESE_META =
     "gwangu": "대구관구",
     "parishes": 125,
     "url": "https://www.catholicbusan.or.kr/",
+    "priestUrl": "https://www.catholicbusan.or.kr/clergy/priest",
     "region": "부산, 울산, 경남 동부",
     "detail": [
       "부산 전지역",
@@ -663,6 +678,7 @@ const DIOCESE_META =
     "gwangu": "광주관구",
     "parishes": 143,
     "url": "https://www.gjcatholic.or.kr/",
+    "priestUrl": "https://www.gjcatholic.or.kr/priest/priests",
     "region": "광주, 전남 전지역",
     "detail": [
       "광주 전지역",
@@ -674,6 +690,7 @@ const DIOCESE_META =
     "gwangu": "광주관구",
     "parishes": 96,
     "url": "https://jcatholic.or.kr/index.php",
+    "priestUrl": "https://www.jcatholic.or.kr/theme/main/pages/priest.php?st=diocese",
     "region": "전북 전지역, 충남 논산(연무읍)",
     "detail": [
       "전북 전지역",
@@ -685,6 +702,7 @@ const DIOCESE_META =
     "gwangu": "광주관구",
     "parishes": 31,
     "url": "https://www.diocesejeju.or.kr/",
+    "priestUrl": "https://www.diocesejeju.or.kr/diocese_father",
     "region": "제주도 전지역",
     "detail": [
       "제주도 전지역 (제주·서귀포)"
@@ -695,6 +713,7 @@ const DIOCESE_META =
     "gwangu": "군종교구",
     "parishes": 0,
     "url": "https://www.gunjong.or.kr/",
+    "priestUrl": "https://www.gunjong.or.kr/organization/index.asp?SearchArmyCd=",
     "region": "육·해·공군 전체",
     "detail": [
       "육·해·공군 전체"
@@ -1358,7 +1377,18 @@ function buildListView(){
       const url=document.createElement('span');url.className='lv-url';
       url.textContent=m.url?m.url.replace(/^https?:\/\//,'').replace(/\/$/,''):'홈페이지 없음';
       const arr=document.createElement('span');arr.className='lv-arr';arr.textContent='›';
-      foot.appendChild(url);foot.appendChild(arr);
+      foot.appendChild(url);
+      if(m.priestUrl){
+        const priestBtn=document.createElement('button');
+        priestBtn.type='button';
+        priestBtn.className='lv-priest-link';
+        priestBtn.textContent='✝ 사제찾기';
+        priestBtn.dataset.dioUrl=m.priestUrl;
+        priestBtn.dataset.dioSource='priest';
+        priestBtn.dataset.dioKey=dName;
+        foot.appendChild(priestBtn);
+      }
+      foot.appendChild(arr);
 
       card.appendChild(top);card.appendChild(body);card.appendChild(foot);
       if(m.url){
@@ -1672,9 +1702,15 @@ function showCard(el){
   dl.classList.remove('on');detOpen=false;
   document.getElementById('c-dtbtn').textContent='▶ 상세 지역 보기';
   const url=el.dataset.url;
-  document.getElementById('c-act').innerHTML=url
+  const meta=DIOCESE_META[el.dataset.d||'']||{};
+  const priestUrl=meta.priestUrl||'';
+  const homeBtn=url
     ?`<button type="button" class="c-btn" data-dio-url="${url}" data-dio-source="map" style="background:${c}">↗ 홈페이지 방문</button>`
     :'<div class="c-nurl">홈페이지 없음</div>';
+  const priestBtn=priestUrl
+    ?`<button type="button" class="c-btn c-priest-btn" data-dio-url="${priestUrl}" data-dio-source="priest">✝ 사제찾기</button>`
+    :'';
+  document.getElementById('c-act').innerHTML=`<div class="c-action-group">${homeBtn}${priestBtn}</div>`;
   const card=document.getElementById('card');
   const diocese=el.dataset.d||'';
   const topDioceses=['서울대교구','인천교구','수원교구','의정부교구','원주교구','춘천교구','대전교구','청주교구','안동교구'];
@@ -1744,6 +1780,7 @@ document.addEventListener('touchstart',closeCardIfOutside,{capture:true,passive:
 function makeRow(disp,diocese,overlapDongs){
   const m=DIOCESE_META[diocese];if(!m)return document.createElement('div');
   const url=m.url||'';
+  const priestUrl=m.priestUrl||'';
   const isArch=diocese.includes('대교구');
   const gwKey=GW_OF[diocese]||m.gwangu||'';
   const gwCol={'서울관구':'#1a6bb5','대구관구':'#c05a00','광주관구':'#7a1fa2','군종교구':'#4A5568'}[gwKey]||'#888';
@@ -1773,7 +1810,18 @@ function makeRow(disp,diocese,overlapDongs){
   const urlEl=document.createElement('span');urlEl.className='lv-url';
   urlEl.textContent=url?url.replace(/^https?:\/\//,'').replace(/\/$/,''):'홈페이지 없음';
   const arr=document.createElement('span');arr.className='lv-arr';arr.textContent='›';
-  foot.appendChild(urlEl);foot.appendChild(arr);
+  foot.appendChild(urlEl);
+  if(priestUrl){
+    const priestBtn=document.createElement('button');
+    priestBtn.type='button';
+    priestBtn.className='lv-priest-link';
+    priestBtn.textContent='✝ 사제찾기';
+    priestBtn.dataset.dioUrl=priestUrl;
+    priestBtn.dataset.dioSource='priest';
+    priestBtn.dataset.dioKey=diocese;
+    foot.appendChild(priestBtn);
+  }
+  foot.appendChild(arr);
   card.appendChild(top);card.appendChild(body);card.appendChild(foot);
   if(url){
     card.dataset.dioUrl = url;

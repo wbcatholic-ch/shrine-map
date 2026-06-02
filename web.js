@@ -6,53 +6,53 @@
   const WEB_SITES = [
 
   /* 교구별 사제찾기 */
-  {cat:"사제찾기", ico:"🧑‍💼", name:"서울대교구 사제찾기",
-   op:"서울대교구", url:"https://aos.catholic.or.kr/pro10315",
+  {cat:"사제찾기", ico:"✝", name:"서울대교구 사제찾기",
+   op:"서울대교구", prov:"서울관구", url:"https://aos.catholic.or.kr/pro10315",
    desc:"교구 사제 검색 바로가기"},
-  {cat:"사제찾기", ico:"🧑‍💼", name:"의정부교구 사제찾기",
-   op:"의정부교구", url:"http://ucatholic.or.kr/bbs/board.php?bo_table=priest",
+  {cat:"사제찾기", ico:"✝", name:"의정부교구 사제찾기",
+   op:"의정부교구", prov:"서울관구", url:"http://ucatholic.or.kr/bbs/board.php?bo_table=priest",
    desc:"교구 사제 검색 바로가기"},
-  {cat:"사제찾기", ico:"🧑‍💼", name:"인천교구 사제찾기",
-   op:"인천교구", url:"http://www.caincheon.or.kr/father/father_list.do",
+  {cat:"사제찾기", ico:"✝", name:"인천교구 사제찾기",
+   op:"인천교구", prov:"서울관구", url:"http://www.caincheon.or.kr/father/father_list.do",
    desc:"교구 사제 검색 바로가기"},
-  {cat:"사제찾기", ico:"🧑‍💼", name:"수원교구 사제찾기",
-   op:"수원교구", url:"https://www.casuwon.or.kr/priest/priest",
+  {cat:"사제찾기", ico:"✝", name:"수원교구 사제찾기",
+   op:"수원교구", prov:"서울관구", url:"https://www.casuwon.or.kr/priest/priest",
    desc:"교구 사제 검색 바로가기"},
-  {cat:"사제찾기", ico:"🧑‍💼", name:"춘천교구 사제찾기",
-   op:"춘천교구", url:"https://www.cccatholic.or.kr/diocese/priest/priest",
+  {cat:"사제찾기", ico:"✝", name:"춘천교구 사제찾기",
+   op:"춘천교구", prov:"서울관구", url:"https://www.cccatholic.or.kr/diocese/priest/priest",
    desc:"교구 사제 검색 바로가기"},
-  {cat:"사제찾기", ico:"🧑‍💼", name:"원주교구 사제찾기",
-   op:"원주교구", url:"http://www.wjcatholic.or.kr/company/sajedan",
+  {cat:"사제찾기", ico:"✝", name:"원주교구 사제찾기",
+   op:"원주교구", prov:"서울관구", url:"http://www.wjcatholic.or.kr/company/sajedan",
    desc:"교구 사제 검색 바로가기"},
-  {cat:"사제찾기", ico:"🧑‍💼", name:"대전교구 사제찾기",
-   op:"대전교구", url:"https://www.djcatholic.or.kr/home/pages/priest_list.php",
+  {cat:"사제찾기", ico:"✝", name:"대전교구 사제찾기",
+   op:"대전교구", prov:"서울관구", url:"https://www.djcatholic.or.kr/home/pages/priest_list.php",
    desc:"교구 사제 검색 바로가기"},
-  {cat:"사제찾기", ico:"🧑‍💼", name:"대구대교구 사제찾기",
-   op:"대구대교구", url:"https://www.daegu-archdiocese.or.kr/page/priest.html?srl=priest",
+  {cat:"사제찾기", ico:"✝", name:"대구대교구 사제찾기",
+   op:"대구대교구", prov:"대구관구", url:"https://www.daegu-archdiocese.or.kr/page/priest.html?srl=priest",
    desc:"교구 사제 검색 바로가기"},
-  {cat:"사제찾기", ico:"🧑‍💼", name:"청주교구 사제찾기",
-   op:"청주교구", url:"https://www.cdcj.or.kr/diocese/priest/priest",
+  {cat:"사제찾기", ico:"✝", name:"청주교구 사제찾기",
+   op:"청주교구", prov:"대구관구", url:"https://www.cdcj.or.kr/diocese/priest/priest",
    desc:"교구 사제 검색 바로가기"},
-  {cat:"사제찾기", ico:"🧑‍💼", name:"안동교구 사제찾기",
-   op:"안동교구", url:"https://www.acatholic.or.kr/sub2/sub1.asp",
+  {cat:"사제찾기", ico:"✝", name:"안동교구 사제찾기",
+   op:"안동교구", prov:"대구관구", url:"https://www.acatholic.or.kr/sub2/sub1.asp",
    desc:"교구 사제 검색 바로가기"},
-  {cat:"사제찾기", ico:"🧑‍💼", name:"마산교구 사제찾기",
-   op:"마산교구", url:"https://cathms.kr/saje",
+  {cat:"사제찾기", ico:"✝", name:"마산교구 사제찾기",
+   op:"마산교구", prov:"대구관구", url:"https://cathms.kr/saje",
    desc:"교구 사제 검색 바로가기"},
-  {cat:"사제찾기", ico:"🧑‍💼", name:"부산교구 사제찾기",
-   op:"부산교구", url:"https://www.catholicbusan.or.kr/clergy/priest",
+  {cat:"사제찾기", ico:"✝", name:"부산교구 사제찾기",
+   op:"부산교구", prov:"대구관구", url:"https://www.catholicbusan.or.kr/clergy/priest",
    desc:"교구 사제 검색 바로가기"},
-  {cat:"사제찾기", ico:"🧑‍💼", name:"광주대교구 사제찾기",
-   op:"광주대교구", url:"https://www.gjcatholic.or.kr/priest/priests",
+  {cat:"사제찾기", ico:"✝", name:"광주대교구 사제찾기",
+   op:"광주대교구", prov:"광주관구", url:"https://www.gjcatholic.or.kr/priest/priests",
    desc:"교구 사제 검색 바로가기"},
-  {cat:"사제찾기", ico:"🧑‍💼", name:"전주교구 사제찾기",
-   op:"전주교구", url:"https://www.jcatholic.or.kr/theme/main/pages/priest.php?st=diocese",
+  {cat:"사제찾기", ico:"✝", name:"전주교구 사제찾기",
+   op:"전주교구", prov:"광주관구", url:"https://www.jcatholic.or.kr/theme/main/pages/priest.php?st=diocese",
    desc:"교구 사제 검색 바로가기"},
-  {cat:"사제찾기", ico:"🧑‍💼", name:"제주교구 사제찾기",
-   op:"제주교구", url:"https://www.diocesejeju.or.kr/diocese_father",
+  {cat:"사제찾기", ico:"✝", name:"제주교구 사제찾기",
+   op:"제주교구", prov:"광주관구", url:"https://www.diocesejeju.or.kr/diocese_father",
    desc:"교구 사제 검색 바로가기"},
-  {cat:"사제찾기", ico:"🧑‍💼", name:"군종교구 사제찾기",
-   op:"군종교구", url:"https://www.gunjong.or.kr/organization/index.asp?SearchArmyCd=",
+  {cat:"사제찾기", ico:"✝", name:"군종교구 사제찾기",
+   op:"군종교구", prov:"군종교구", url:"https://www.gunjong.or.kr/organization/index.asp?SearchArmyCd=",
    desc:"교구 사제 검색 바로가기"},
 
   /* 공식 중앙기구 */
@@ -191,7 +191,8 @@
   const WEB_PROV_COLORS = {
     "서울관구":"#C0392B",
     "대구관구":"#1A4F8B",
-    "광주관구":"#1A6B3C"
+    "광주관구":"#1A6B3C",
+    "군종교구":"#4A5568"
   };
   const WEB_CAT_BG = {
     "사제찾기":"#eef7f5",
@@ -502,34 +503,36 @@
     const showProvHd = (webState.curCat === '교구');
     let lastProv = null;
     filtered.forEach(s => {
-      const color = (s.cat==='교구' && s.prov)
-        ? (WEB_PROV_COLORS[s.prov] || WEB_CAT_COLORS['교구'])
+      const color = ((s.cat==='교구' || s.cat==='사제찾기') && s.prov)
+        ? (WEB_PROV_COLORS[s.prov] || WEB_CAT_COLORS[s.cat] || '#555')
         : (WEB_CAT_COLORS[s.cat] || '#555');
       const bg = WEB_CAT_BG[s.cat] || '#f8f8f8';
       // 관구 헤더 제거됨(v13: CSS .web-prov-hd{display:none} + JS 생성 중단)
       const isDioceseCard = (s.cat === '교구');
       const isPriestCard = (s.cat === '사제찾기');
+      const cardClass = 'web-card' + (s.cat==='사제찾기' ? ' web-priest-card' : '');
       const card = document.createElement('div');
-      card.className = 'web-card';
+      card.className = cardClass;
       if(isDioceseCard){
         card.setAttribute('aria-label', s.name + ' 홈페이지 새창 열기');
       }
       if(isPriestCard){
         card.setAttribute('aria-label', s.name + ' 새창 열기');
       }
-      // 교구: 배지=관구명, desc="교구 공식 홈페이지", op 숨김
-      const badgeText = (s.cat==='교구' && s.prov) ? esc(s.prov) : esc(s.cat);
+      // 교구/사제찾기: 배지=관구명, 교구 카드 op 숨김
+      const badgeText = ((s.cat==='교구' || s.cat==='사제찾기') && s.prov) ? esc(s.prov) : esc(s.cat);
       const topRight = s.cat==='교구' ? '' : esc(s.op);
       const cardName = esc(s.name);
       const cardDesc = s.cat==='교구' ? '교구 공식 홈페이지' : esc(s.desc);
       const icoBg = '#F5F0E8';
+      const icoStyle = 'background:' + icoBg + (s.cat==='사제찾기' ? ';color:' + color + ';font-weight:900;font-family:Georgia,serif' : '');
       card.innerHTML = `
         <div class="web-card-top">
           <span class="web-card-badge" style="background:${color}">${badgeText}</span>
           <span class="web-card-op">${topRight}</span>
         </div>
         <div class="web-card-body">
-          <div class="web-card-ico" style="background:${icoBg}">${esc(s.ico)}</div>
+          <div class="web-card-ico" style="${icoStyle}">${esc(s.ico)}</div>
           <div class="web-card-info">
             <div class="web-card-name">${cardName}</div>
             <div class="web-card-desc">${cardDesc}</div>
