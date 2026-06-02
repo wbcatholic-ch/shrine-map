@@ -199,6 +199,11 @@ header{flex-shrink:0;background:var(--d);border-bottom:none;z-index:30;
 .lv-arr{font-size:15px;color:var(--dim);flex-shrink:0;margin-left:6px;}
 .lv-priest-link{flex-shrink:0;margin-left:8px;border:0;border-radius:7px;background:#0F766E;color:#fff;font-size:11px;font-weight:800;padding:5px 8px;font-family:inherit;}
 
+/* V2-21: 관구·교구지도 나의 교구 표시 */
+.lv-card.my-diocese-card{border-color:#B7791F;box-shadow:0 2px 12px rgba(183,121,31,.16);}
+.lv-my-diocese-badge{display:inline-flex;align-items:center;justify-content:center;margin-left:6px;padding:2px 7px;border-radius:999px;background:#FFF4D6;border:1px solid rgba(183,121,31,.36);color:#8A5A12;font-size:10px;font-weight:900;line-height:1.2;letter-spacing:-.03em;vertical-align:2px;white-space:nowrap;}
+.c-my-diocese-badge{display:none;margin-top:6px;padding:3px 8px;border-radius:999px;background:rgba(255,255,255,.94);border:1px solid rgba(183,121,31,.38);color:#1F2A44;font-size:10px;font-weight:900;line-height:1.2;letter-spacing:-.03em;box-shadow:0 2px 6px rgba(0,0,0,.08);}
+
 
 @media(display-mode:standalone){
   header{padding-top:env(safe-area-inset-top);height:calc(var(--header-h) + env(safe-area-inset-top));}
@@ -1315,6 +1320,23 @@ const DIOCESE_ICO={
   '광주대교구':'💜','전주교구':'🌿','제주교구':'🌸',
   '군종교구':'🎖️'
 };
+const MY_DIOCESE_STORAGE_KEY='oai_my_diocese_name';
+function getMyDioceseName(){
+  try{return (localStorage.getItem(MY_DIOCESE_STORAGE_KEY)||'').trim();}
+  catch(e){return '';}
+}
+function isMyDioceseName(name){
+  const mine=getMyDioceseName();
+  return !!(mine&&name&&mine===name);
+}
+function appendMyDioceseBadge(target){
+  if(!target)return null;
+  const badge=document.createElement('span');
+  badge.className='lv-my-diocese-badge';
+  badge.textContent='나의 교구';
+  target.appendChild(badge);
+  return badge;
+}
 function buildListView(){
   const gws=[
     {key:'서울관구',col:'#1a6bb5',dioceses:['서울대교구','인천교구','수원교구','의정부교구','원주교구','춘천교구','대전교구']},
@@ -1338,7 +1360,8 @@ function buildListView(){
       const dets=(m.detail||[]).filter(function(x){return x.trim()!==m.region.trim();});
       const regionFull=m.region+(dets.length?'·'+dets.join('·'):'');
 
-      const card=document.createElement('div');card.className='lv-card';
+      const isMine=isMyDioceseName(dName);
+      const card=document.createElement('div');card.className='lv-card'+(isMine?' my-diocese-card':'');
 
       // top: 뱃지(대교구/교구) + 오른쪽 "천주교 XX교구"
       const top=document.createElement('div');top.className='lv-top';
@@ -1360,6 +1383,7 @@ function buildListView(){
       }else{
         nm.textContent=(dName==='군종교구')?dName:(dName+' · '+(m.parishes||0)+'개 본당');
       }
+      if(isMine) appendMyDioceseBadge(nm);
       const rg=document.createElement('div');rg.className='lv-rg';
       rg.innerHTML='📍 '+m.region;
       info.appendChild(nm);info.appendChild(rg);
@@ -1694,6 +1718,17 @@ function showCard(el){
   document.getElementById('c-gw').textContent=el.dataset.gw||'';
   document.getElementById('c-nm').textContent=el.dataset.d||'';
   document.getElementById('c-rg').textContent=el.dataset.region||'';
+  const cardDioceseName=el.dataset.d||'';
+  let myCardBadge=document.getElementById('c-my-diocese-badge');
+  if(!myCardBadge){
+    myCardBadge=document.createElement('div');
+    myCardBadge.id='c-my-diocese-badge';
+    myCardBadge.className='c-my-diocese-badge';
+    myCardBadge.textContent='나의 교구';
+    const closeBtn=document.querySelector('#c-hd .c-x');
+    if(closeBtn&&closeBtn.parentNode) closeBtn.parentNode.insertBefore(myCardBadge,closeBtn);
+  }
+  if(myCardBadge) myCardBadge.style.display=isMyDioceseName(cardDioceseName)?'inline-flex':'none';
   const cn=document.getElementById('c-n');cn.style.color=c;cn.textContent=el.dataset.parishes||'';
   const parishRow=document.getElementById('c-parish-row');
   if(parishRow){ parishRow.style.display=(el.dataset.d==='군종교구')?'none':'flex'; }
@@ -1784,7 +1819,8 @@ function makeRow(disp,diocese,overlapDongs){
   const isArch=diocese.includes('대교구');
   const gwKey=GW_OF[diocese]||m.gwangu||'';
   const gwCol={'서울관구':'#1a6bb5','대구관구':'#c05a00','광주관구':'#7a1fa2','군종교구':'#4A5568'}[gwKey]||'#888';
-  const card=document.createElement('div');card.className='lv-card';
+  const isMine=isMyDioceseName(diocese);
+  const card=document.createElement('div');card.className='lv-card'+(isMine?' my-diocese-card':'');
   // top
   const top=document.createElement('div');top.className='lv-top';
   const bdg=document.createElement('span');bdg.className='lv-bdg';
@@ -1797,6 +1833,7 @@ function makeRow(disp,diocese,overlapDongs){
   ico.textContent='⛪';
   const info=document.createElement('div');info.className='lv-info';
   const nm=document.createElement('div');nm.className='lv-name';nm.textContent=diocese;
+  if(isMine) appendMyDioceseBadge(nm);
   const rg=document.createElement('div');rg.className='lv-rg';rg.innerHTML='📍 '+(disp||m.region);
   info.appendChild(nm);info.appendChild(rg);
   // 세부지역: 중복지역일 때만 표시
