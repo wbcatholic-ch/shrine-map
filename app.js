@@ -6337,6 +6337,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       '제주교구': {home:'https://www.diocesejeju.or.kr/', priest:'https://www.diocesejeju.or.kr/diocese_father'}
     };
     var btn = document.getElementById('cover-diocese-btn');
+    var setupBanner = document.getElementById('my-diocese-setup-banner');
     var modal = document.getElementById('my-diocese-modal');
     var body = document.getElementById('my-diocese-list');
     var title = document.getElementById('my-diocese-title');
@@ -6389,10 +6390,20 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       body.className = name || 'my-faith-body';
       body.innerHTML = '';
     }
+    function updateSetupBanner(){
+      try{
+        if(!setupBanner) return;
+        var needsSetup = !selectedName();
+        setupBanner.hidden = !needsSetup;
+        setupBanner.classList.toggle('show', needsSetup);
+        setupBanner.setAttribute('aria-hidden', needsSetup ? 'false' : 'true');
+      }catch(e){ console.warn('[가톨릭길동무]', e); }
+    }
     function updateButton(){
       btn.innerHTML = '<span class="diocese-btn-label">나의 신앙생활</span>';
       btn.setAttribute('aria-label', '나의 신앙생활 열기');
       btn.classList.remove('has-diocese');
+      updateSetupBanner();
     }
     function refreshDependentViews(){
       try{ if(typeof _renderDioFilterBars === 'function') _renderDioFilterBars(_mode); }catch(_e){}
@@ -6508,7 +6519,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         var dioTools = document.createElement('div');
         dioTools.className = 'my-faith-tools';
         dioTools.appendChild(smallButton('교구 변경', renderDioceseList));
-        dioTools.appendChild(smallButton('선택 안함', function(){ setSelectedName(''); refreshDependentViews(); renderHome(); }));
         dioSec.appendChild(dioTools);
       }else{
         dioSec.innerHTML = '<h3>나의 교구 선택</h3><p>교구를 선택하면 사제찾기와 주요 홈페이지를 빠르게 열 수 있습니다.</p>';
@@ -6535,7 +6545,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         var parishTools = document.createElement('div');
         parishTools.className = 'my-faith-tools';
         parishTools.appendChild(smallButton('본당 변경', function(){ renderParishSearch(''); }));
-        parishTools.appendChild(smallButton('선택 안함', function(){ setSelectedParish(null); renderHome(); }));
         parishSec.appendChild(parishTools);
       }else{
         parishSec.innerHTML = '<h3>나의 본당 선택</h3><p>본당을 선택하면 성당 홈페이지와 상세페이지를 바로 열 수 있습니다.</p>';
@@ -6568,51 +6577,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         });
         body.appendChild(item);
       });
-      var noneItem = document.createElement('button');
-      noneItem.type = 'button';
-      noneItem.className = 'my-diocese-option my-diocese-none' + (!current ? ' selected' : '');
-      noneItem.textContent = '선택 안함';
-      noneItem.setAttribute('aria-pressed', !current ? 'true' : 'false');
-      noneItem.addEventListener('click', function(e){
-        if(e && e.preventDefault) e.preventDefault();
-        setSelectedName('');
-        updateButton();
-        refreshDependentViews();
-        renderHome();
-      });
-      body.appendChild(noneItem);
     }
-    function renderPrayerSetupGuide(){
-      setHeader('나의 교구 설정', '주요기도문 이동 안내');
-      setBodyMode('my-faith-body');
-      var sec = document.createElement('section');
-      sec.className = 'my-faith-section my-faith-prayer-guide-section';
-      sec.innerHTML = '<h3>나의 교구를 설정해 주세요</h3>' +
-        '<p>나의 교구를 설정하면 교구에 맞는 주요기도문 안내를 받을 수 있습니다.<br>지금은 굿뉴스 주요기도문으로 이동할 수 있습니다.</p>';
-      var actions = document.createElement('div');
-      actions.className = 'my-faith-actions';
-      var setupBtn = actionButton('나의 교구 설정하기', '');
-      setupBtn.disabled = false;
-      setupBtn.addEventListener('click', function(e){
-        if(e && e.preventDefault) e.preventDefault();
-        renderDioceseList();
-      });
-      var goodBtn = actionButton('굿뉴스로 이동', '');
-      goodBtn.disabled = false;
-      goodBtn.addEventListener('click', function(e){
-        if(e && e.preventDefault) e.preventDefault();
-        goExternal('https://maria.catholic.or.kr/mobile/prayer/');
-      });
-      actions.appendChild(setupBtn);
-      actions.appendChild(goodBtn);
-      sec.appendChild(actions);
-      body.appendChild(sec);
-      setTimeout(updateMyFaithViewport, 80);
-    }
-    window.openMyFaithPrayerSetupGuide = function(){
-      renderPrayerSetupGuide();
-      openModal({keepContent:true});
-    };
     function getParishItems(){
       try{ if(Array.isArray(PARISHES) && PARISHES.length) return PARISHES; }catch(e){}
       return [];
@@ -6751,6 +6716,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(e && e.stopPropagation) e.stopPropagation();
       openModal();
     });
+    if(setupBanner){
+      on(setupBanner, 'click', function(e){
+        if(e && e.preventDefault) e.preventDefault();
+        if(e && e.stopPropagation) e.stopPropagation();
+        renderDioceseList();
+        openModal({keepContent:true});
+      });
+    }
     on('my-diocese-close', 'click', function(e){
       if(e && e.preventDefault) e.preventDefault();
       closeModal();
@@ -6830,18 +6803,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
 
     if(!myDiocese){
-      // 나의 교구가 없을 때만 교구 설정 안내와 굿뉴스 이동 선택지를 보여준다.
-      try{
-        var mq = document.getElementById('mass-quick-modal');
-        if(mq){ mq.classList.remove('show'); mq.setAttribute('aria-hidden','true'); }
-      }catch(e){ console.warn('[가톨릭길동무]', e); }
-      if(typeof window.openMyFaithPrayerSetupGuide === 'function'){
-        window.openMyFaithPrayerSetupGuide();
-      }else if(typeof oaiSmoothNavigate === 'function'){
-        oaiSmoothNavigate(goodNewsUrl, 'prayer-goodnews');
-      }else{
-        location.href = goodNewsUrl;
-      }
+      // 나의 교구가 아직 없으면 커버 배너가 교구 설정을 안내하고, 주요기도문은 굿뉴스로 바로 연결한다.
+      try{ if(typeof _setMassQuickReturn === 'function') _setMassQuickReturn(true); }catch(e){ console.warn('[가톨릭길동무]', e); }
+      if(typeof oaiSmoothNavigate === 'function') oaiSmoothNavigate(goodNewsUrl, 'prayer-goodnews');
+      else location.href = goodNewsUrl;
       return;
     }
 
