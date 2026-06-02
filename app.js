@@ -6375,7 +6375,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       });
     }
     function setHeader(main, sub){
-      if(title) title.textContent = main || '나의 신앙생활';
+      var heading = main || '나의 신앙생활';
+      if(title){
+        title.textContent = heading;
+        try{ title.setAttribute('data-myfaith-title', heading); }catch(_e){}
+      }
       if(subtitle) subtitle.textContent = sub || '';
     }
     function setBodyMode(name){
@@ -6403,10 +6407,16 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       modal.setAttribute('aria-hidden', 'false');
       try{ document.body.classList.add('modal-open'); }catch(e){}
     }
+    window.isMyFaithLifeModalOpen = function(){
+      try{ return !!(modal && modal.classList.contains('show')); }catch(_e){ return false; }
+    };
+    window.closeMyFaithLifeModal = function(){
+      closeModal();
+    };
     function goExternal(url){
       url = String(url || '').trim();
       if(!url) return;
-      closeModal();
+      try{ sessionStorage.setItem('oai_my_faith_external_open', '1'); }catch(_e){}
       try{ if(typeof openCoreExternalUrl === 'function'){ openCoreExternalUrl(url, {source:'my-faith-life'}); return; } }catch(e){ console.warn('[가톨릭길동무]', e); }
       try{ if(typeof oaiSmoothNavigate === 'function') oaiSmoothNavigate(url, 'my-faith-life'); else location.href = url; }catch(e){ try{ location.assign(url); }catch(_e){} }
     }

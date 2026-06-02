@@ -6487,3 +6487,26 @@ html.oai-font-global #cover #cc-6 .cover-name {
   #cover .cover-diocese-btn .diocese-btn-label { font-size: calc(13.4px * var(--app-font-scale, 1)) !important; }
   #cover .cover-diocese-btn .diocese-btn-name { display: none !important; }
 }
+
+/* V2-29: 나의 신앙생활 헤더 아이콘 및 외부 복귀 뒤로가기 정리 보조 */
+.my-diocese-title[data-myfaith-title="나의 신앙생활"] {
+  display: flex !important;
+  align-items: center !important;
+  gap: 8px !important;
+}
+.my-diocese-title[data-myfaith-title="나의 신앙생활"]::before {
+  content: "✝";
+  width: 30px;
+  height: 30px;
+  flex: 0 0 30px;
+  border-radius: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(255,255,255,.14);
+  border: 1px solid rgba(255,255,255,.22);
+  color: #F7D58A;
+  font-size: 18px;
+  line-height: 1;
+  box-sizing: border-box;
+}

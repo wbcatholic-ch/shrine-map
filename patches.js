@@ -585,6 +585,15 @@
       return;
     }
 
+    /* 나의 신앙생활 전체창이 열려 있으면 종료 흐름보다 먼저 닫고 커버로 돌아간다. */
+    if(window.isMyFaithLifeModalOpen && window.isMyFaithLifeModalOpen()){
+      try{ if(typeof window.closeMyFaithLifeModal === 'function') window.closeMyFaithLifeModal(); }catch(e){ console.warn('[가톨릭길동무]', e); }
+      try{ if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady(); }catch(e){ console.warn('[가톨릭길동무]', e); }
+      try{ if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed(); }catch(e){ console.warn('[가톨릭길동무]', e); }
+      try{ if(typeof window._ensureCoverBackTrap === 'function') window._ensureCoverBackTrap('my-faith-life-close'); else armCoverBackTrap('my-faith-life-close'); }catch(e){ console.warn('[가톨릭길동무]', e); }
+      return;
+    }
+
     /* 빠른메뉴/안내 팝업이 열려 있으면 먼저 닫는다. */
     if(isGuideModalOpen()){
       closeGuideModals();  /* 내부에서 _resetCoverExitReady() 호출 */
@@ -652,6 +661,13 @@
   document.addEventListener('backbutton', function(){
     if(handlePrayerBack('prayer-hardware-back')) return;
     if(closeRefreshDialog()){ try{ armCoverBackTrap('refresh-dialog-hardware', {force:true}); }catch(e){} return; }
+    if(window.isMyFaithLifeModalOpen && window.isMyFaithLifeModalOpen()){
+      try{ if(typeof window.closeMyFaithLifeModal === 'function') window.closeMyFaithLifeModal(); }catch(e){ console.warn('[가톨릭길동무]', e); }
+      try{ if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady(); }catch(e){}
+      try{ if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed(); }catch(e){}
+      try{ if(typeof window._ensureCoverBackTrap === 'function') window._ensureCoverBackTrap('my-faith-life-hardware-close'); else armCoverBackTrap('my-faith-life-hardware-close'); }catch(e){}
+      return;
+    }
     if(isGuideModalOpen()){
       closeGuideModals();
       try{ if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed(); }catch(e){}
