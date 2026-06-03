@@ -2527,6 +2527,7 @@ const AppState = {
   rS:               null,  // 출발지 {lat, lng, name, idx}
   rE:               null,  // 도착지
   routeRegionStart: null,  // 지역검색에서 길찾기 시작 시 출발지 보존
+  routeInfoRestoreBlockedUntil: 0, // 탭 전환 중 길찾기 도착 인포카드 복원 차단 시각
 
   // ── 검색 모달 ──
   smRole: 'start',
@@ -2593,6 +2594,7 @@ const AppState = {
     ['_rS',               'rS'],
     ['_rE',               'rE'],
     ['_routeRegionStart', 'routeRegionStart'],
+    ['_routeInfoRestoreBlockedUntil', 'routeInfoRestoreBlockedUntil'],
     ['_smRole',           'smRole'],
     ['_smDio',            'smDio'],
     ['_curInfoItem',      'curInfoItem'],
@@ -3097,6 +3099,48 @@ function closeCategoryToCoverFromMap(){
   if(typeof goToCover === 'function') goToCover();
 }
 
+function _blockRouteInfoRestore(reason, ms){
+  try{
+    const now = Date.now ? Date.now() : new Date().getTime();
+    _routeInfoRestoreBlockedUntil = now + (ms || 1400);
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+}
+function _isRouteInfoRestoreBlocked(){
+  try{
+    const now = Date.now ? Date.now() : new Date().getTime();
+    return !!(_routeInfoRestoreBlockedUntil && now < _routeInfoRestoreBlockedUntil);
+  }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
+}
+function _clearRouteSwitchInfoCard(reason){
+  // 길찾기 결과에서 성당/성지/피정의집 검색 탭으로 넘어갈 때는
+  // 일반 장소 선택 화면이 아니므로 이전 도착지 인포카드가 다시 열리면 안 된다.
+  // route reset/지연 복원 흐름보다 먼저 복원 차단 플래그를 세우고,
+  // 같은 전환 프레임 및 지연 타이머에서 한 번 더 닫아 잔상을 제거한다.
+  try{ _blockRouteInfoRestore(reason || 'tab-switch', 1600); }catch(e){ console.warn('[가톨릭길동무]', e); }
+  try{ if(typeof _hideInfoRouteRoleChoice === 'function') _hideInfoRouteRoleChoice(); }catch(e){ console.warn('[가톨릭길동무]', e); }
+  try{ closeInfoCard({keepMap:true}); }catch(e){ console.warn('[가톨릭길동무]', e); }
+  try{ _curFromRegion=false; }catch(e){ console.warn('[가톨릭길동무]', e); }
+  try{
+    const card=$('info-card');
+    if(card){
+      card.classList.remove('open','no-anim');
+      card.style.removeProperty('display');
+    }
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+  [0, 80, 220, 520].forEach(function(delay){
+    setTimeout(function(){
+      try{
+        if(!_isRouteInfoRestoreBlocked()) return;
+        if(typeof _hideInfoRouteRoleChoice === 'function') _hideInfoRouteRoleChoice();
+        closeInfoCard({keepMap:true});
+        const card=$('info-card');
+        if(card) card.classList.remove('open','no-anim');
+        _curFromRegion=false;
+      }catch(e){ console.warn('[가톨릭길동무]', e); }
+    }, delay);
+  });
+}
+
 function zoomCategoryMap(delta){
   if(!_map || typeof _map.getLevel !== 'function' || typeof _map.setLevel !== 'function') return;
   try{
@@ -3116,8 +3160,8 @@ function openTab(name, opts){
   if(_activeTab===name){
     // 같은 탭을 다시 열도록 호출되는 경로에서도 일반 인포카드는 남기지 않는다.
     // 탭/모드 전환이 아닌 단순 재호출이므로 지도 중심은 그대로 유지한다.
-    try{ closeInfoCard({keepMap:true}); }catch(e){ console.warn('[가톨릭길동무]', e); }
-    _curFromRegion=false;
+    if(name!=='route') _clearRouteSwitchInfoCard('same-tab-'+name);
+    else { try{ closeInfoCard({keepMap:true}); }catch(e){ console.warn('[가톨릭길동무]', e); } _curFromRegion=false; }
     return;
   }
   _updateSheetPanelTitles();
@@ -3144,16 +3188,15 @@ function openTab(name, opts){
   }
 
   // 새 시트(내주변/찾기/지역검색/길찾기)를 열 때는 기존 인포카드를 먼저 정리한다.
-  // 단순 z-index 보정이 아니라 상태 전환 순서에서 겹침을 없애며, 지도 중심은 흔들리지 않게 유지한다.
-  closeInfoCard({keepMap:true});
-  _curFromRegion=false;
+  // 특히 길찾기 결과에서 검색 탭으로 이동할 때는 resetRoute/closeTab의 지연 복원 흐름이
+  // 이전 도착지 인포카드를 다시 열 수 있으므로, 비-길찾기 탭 전환 동안 복원을 차단한다.
   if(name!=='route') {
-    // V2-74: 길찾기 결과 상태에서 성당/성지/피정의집 검색 탭으로 전환할 때
-    // resetRoute()의 기본 도착지 복원 흐름이 이전 인포카드를 다시 열 수 있다.
-    // 탭 전환은 길찾기 재선택이 아니므로 출발/도착·경로만 조용히 비우고
-    // 도착지 노란 선택 마커와 인포카드는 복원하지 않는다.
+    _clearRouteSwitchInfoCard('open-tab-'+name);
     resetRoute({fresh:true});
-    closeInfoCard({keepMap:true});
+    _clearRouteSwitchInfoCard('after-reset-'+name);
+  } else {
+    try{ closeInfoCard({keepMap:true}); }catch(e){ console.warn('[가톨릭길동무]', e); }
+    _curFromRegion=false;
   }
   _exitRouteMode();
   if(name==='route' && _routeRegionStart && _routeRegionStart.lat && _regionCache && _regionCache.length){
@@ -3205,6 +3248,10 @@ function closeTab(name){
     setTimeout(function(){
       try{ resetRoute(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       _routeMode=false;
+      if(_isRouteInfoRestoreBlocked && _isRouteInfoRestoreBlocked()){
+        _routeDest=null;
+        try{ closeInfoCard({keepMap:true}); }catch(e){ console.warn('[가톨릭길동무]', e); }
+      }
       if(_routeDest){
         const items = _getCurrentItems();
         const idx = (typeof _routeDest.idx==='number' && _routeDest.idx>=0)
@@ -3277,7 +3324,8 @@ function _resetTabWork(name){
 function toggleTab(name){
   if(_activeTab===name){
     // 같은 탭을 다시 눌러 목록을 다시 올릴 때도 인포카드는 남기지 않는다.
-    closeInfoCard({keepMap:true});
+    if(name!=='route') _clearRouteSwitchInfoCard('toggle-same-'+name);
+    else closeInfoCard({keepMap:true});
     _resetTabWork(name);
     if(name==='nearby') _loadNearby();
     else if(name==='list') { renderList(); oaiFocusSearchKeyboardInput('list-srch-inp'); }
@@ -3295,8 +3343,8 @@ function toggleTab(name){
   }
   // 탭 전환 전 열린 일반 인포카드는 항상 먼저 닫아,
   // 길찾기/지역검색/목록/내주변 시트 위에 잔상으로 남지 않게 한다.
-  try{ closeInfoCard({keepMap:true}); }catch(e){ console.warn('[가톨릭길동무]', e); }
-  _curFromRegion=false;
+  if(name!=='route') _clearRouteSwitchInfoCard('toggle-open-'+name);
+  else { try{ closeInfoCard({keepMap:true}); }catch(e){ console.warn('[가톨릭길동무]', e); } _curFromRegion=false; }
   if(name==='route') resetRoute({fresh:true});
   openTab(name, {keyboard:true});
 }
@@ -3494,7 +3542,7 @@ function _focusMarkerAboveInfoCard(item){
   if(!_map || !item || !item.lat || !item.lng) return;
   try{
     if(_mode==='parish' && !_routeMode){
-      // V2-74: 마커 클릭 후 인포카드를 열 때는 중심 이동만 하고,
+      // V2-75: 마커 클릭 후 인포카드를 열 때는 중심 이동만 하고,
       // 사용자가 보고 있던 확대/축소 수준은 유지한다.
       if(typeof _focusParishPointAround==='function' && _focusParishPointAround(item.lat,item.lng,{level:6,aboveInfoCard:true,noZoom:true})) return;
     }
@@ -5698,7 +5746,7 @@ function resetRoute(opts){
       _regionName=regionStart.placeName || regionStart.name || _regionName;
     }
     _ensureCurrentLocationStart();
-    // V2-74: 경로검색 결과의 '다시 선택'은 길찾기 재선택 카드로 돌아가는 동작이다.
+    // V2-75: 경로검색 결과의 '다시 선택'은 길찾기 재선택 카드로 돌아가는 동작이다.
     // 이때 도착지 위치로 지도를 돌리더라도 일반 선택 상태가 아니므로 노란 선택 마커와 인포카드는 띄우지 않는다.
     try{
       if(_mode==='shrine') _clearShrineMarkerSel();
@@ -6434,7 +6482,7 @@ function _fmtTime(s){
 
     const root = document.documentElement;
     try{
-      // V2-74: 장시간 백그라운드 복귀 시 이전 카테고리 화면이 한 프레임 보이지 않게
+      // V2-75: 장시간 백그라운드 복귀 시 이전 카테고리 화면이 한 프레임 보이지 않게
       // 먼저 앱 화면을 숨기는 전용 상태를 걸고, 그 상태 안에서 기존 goToCover 정리 흐름을 탄다.
       root.classList.remove('oai-cover-first-reveal','oai-cover-under-intro-reveal','oai-ivory-wipe-transition','oai-internal-no-return-effect');
       root.classList.add('oai-cover-resetting-to-intro');
@@ -6444,7 +6492,7 @@ function _fmtTime(s){
     try{ _resetMapState(); }catch(e){ console.warn('[가톨릭길동무]', e); }
     try{ root.classList.add('oai-cover-booting','oai-first-entry-intro'); }catch(_e){}
 
-    // 첫 진입 인트로와 같은 타이밍을 그대로 사용한다. (V2-74: 십자가 안정 유지 시간 소폭 연장)
+    // 첫 진입 인트로와 같은 타이밍을 그대로 사용한다. (V2-75: 십자가 안정 유지 시간 소폭 연장)
     setTimeout(function(){
       try{ root.classList.add('oai-cover-under-intro-reveal'); }catch(_e){}
     }, 1520);

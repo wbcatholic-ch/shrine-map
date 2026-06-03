@@ -2125,7 +2125,7 @@ html.oai-cover-booting #cover > * {
   transition: none;
 }
 
-/* V2-74: 첫 인트로/장시간 재진입 인트로 중에는 이전 카테고리 화면을 먼저 노출하지 않는다. */
+/* V2-75: 첫 인트로/장시간 재진입 인트로 중에는 이전 카테고리 화면을 먼저 노출하지 않는다. */
 html.oai-cover-resetting-to-intro,
 html.oai-cover-resetting-to-intro body {
   background: #fbf8f1 !important;
@@ -5521,7 +5521,7 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
   min-width: 0 !important;
   padding-top: 1px !important;
 }
-/* V2-74: 성당·성지·피정의집 인포카드 주소 상세 글자 크기를 교구명 기준과 맞춤 */
+/* V2-75: 성당·성지·피정의집 인포카드 주소 상세 글자 크기를 교구명 기준과 맞춤 */
 #app #info-card .ic-addr-val {
   font-size: calc(14px * var(--app-inner-font-scale, 1)) !important;
   line-height: 1.38 !important;
@@ -6115,7 +6115,7 @@ html.oai-font-global .sheet-title {
 }
 
 
-/* V2-74: 나의 신앙생활 개인정보 안내문을 화면 배경 안쪽에 자연스럽게 배치 */
+/* V2-75: 나의 신앙생활 개인정보 안내문을 화면 배경 안쪽에 자연스럽게 배치 */
 .my-diocese-panel > .my-faith-privacy-note {
   display: none !important;
 }
@@ -6173,7 +6173,7 @@ html.oai-font-global #cover #cc-6 .cover-name {
 }
 
 
-/* V2-74: 교구 미설정 배너 중앙 정렬 + 나의 신앙생활 버튼 색상 안정화 */
+/* V2-75: 교구 미설정 배너 중앙 정렬 + 나의 신앙생활 버튼 색상 안정화 */
 #cover #cover-action-row.cover-action-single {
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -6546,7 +6546,7 @@ html.oai-font-global #cover #cc-6 .cover-name {
   word-break: keep-all !important;
 }
 
-/* V2-74: 나의 신앙생활 선택값 제목 강조 - 카드보다 조금 진한 배경과 분리선 */
+/* V2-75: 나의 신앙생활 선택값 제목 강조 - 카드보다 조금 진한 배경과 분리선 */
 .my-faith-section h3 {
   margin: 0 !important;
   padding: 15px 15px 13px !important;
@@ -6673,7 +6673,7 @@ html.oai-font-global #cover #cc-6 .cover-name {
 }
 
 
-/* V2-74: 나의 본당 찾기 화면은 전체 본문이 아니라 결과 리스트만 안정적으로 끝까지 스크롤되도록 정리 */
+/* V2-75: 나의 본당 찾기 화면은 전체 본문이 아니라 결과 리스트만 안정적으로 끝까지 스크롤되도록 정리 */
 .my-faith-body.my-faith-search-body {
   overflow: hidden !important;
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 14px) !important;
@@ -6785,7 +6785,7 @@ html.oai-font-global #cover #cc-6 .cover-name {
   .my-diocese-list { grid-template-columns: 1fr !important; }
 }
 
-/* V2-74: 나의 본당 찾기 검색창 높이 보강 */
+/* V2-75: 나의 본당 찾기 검색창 높이 보강 */
 .my-faith-search-input {
   height: 56px !important;
   min-height: 56px !important;
@@ -6797,7 +6797,7 @@ html.oai-font-global #cover #cc-6 .cover-name {
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 22px) !important;
 }
 
-/* V2-74: 나의 신앙생활 선택값 제목 배경 강화 + 성당 검색창 가시성 보강 */
+/* V2-75: 나의 신앙생활 선택값 제목 배경 강화 + 성당 검색창 가시성 보강 */
 .my-faith-section.my-faith-diocese-section h3 {
   background: #E8D7BB !important;
   border-bottom-color: rgba(158,105,31,.32) !important;
@@ -6835,7 +6835,7 @@ html.oai-font-global #cover #cc-6 .cover-name {
   box-shadow: 0 0 0 4px rgba(183,121,31,.14), 0 10px 20px rgba(31,42,68,.10), inset 0 1px 0 rgba(255,255,255,.98) !important;
 }
 
-/* V2-74: 커버 카테고리 · 매일미사/기도문/성가 배너 · 기도문 본문 글자 크기 통일 */
+/* V2-75: 커버 카테고리 · 매일미사/기도문/성가 배너 · 기도문 본문 글자 크기 통일 */
 :root {
   --oai-unified-reading-fs: calc(16px * var(--app-font-scale, 1));
 }
@@ -6872,7 +6872,7 @@ html.oai-font-global #prayer-view .pr-body-title {
 
 
 
-/* V2-74: 기도문 리스트 항목 글자크기를 기도문 본문 기준과 통일 */
+/* V2-75: 기도문 리스트 항목 글자크기를 기도문 본문 기준과 통일 */
 #prayer-list-view .pr-title,
 #pr-list-ul .pr-title,
 html.oai-font-global #prayer-list-view .pr-title,
@@ -6881,7 +6881,7 @@ html.oai-font-global #pr-list-ul .pr-title {
   line-height: 1.36 !important;
 }
 
-/* V2-74: 나의 신앙생활 기능 버튼은 배경을 차분하게 유지하고 글자색만 역할별로 은은하게 구분 */
+/* V2-75: 나의 신앙생활 기능 버튼은 배경을 차분하게 유지하고 글자색만 역할별로 은은하게 구분 */
 .my-faith-diocese-section .my-faith-actions .my-faith-action:nth-child(1) {
   color: #6B4A24 !important;
 }
@@ -6913,7 +6913,7 @@ html.oai-font-global #pr-list-ul .pr-title {
   color: rgba(75,85,99,.52) !important;
 }
 
-/* V2-74: 인포카드 경로검색 시 선택한 마커를 출발지/도착지로 지정하는 선택창 */
+/* V2-75: 인포카드 경로검색 시 선택한 마커를 출발지/도착지로 지정하는 선택창 */
 #route-role-choice.route-role-choice{
   position:fixed;
   inset:0;
@@ -6983,7 +6983,7 @@ html.oai-font-global #pr-list-ul .pr-title {
   color:#6B7280;
 }
 
-/* V2-74: 길찾기 검색 모달에서 리스트를 닫고 지도 마커를 직접 고르는 안내 버튼 */
+/* V2-75: 길찾기 검색 모달에서 리스트를 닫고 지도 마커를 직접 고르는 안내 버튼 */
 #srch-modal .sm-srch-row{
   display:flex;
   align-items:center;
@@ -7018,7 +7018,7 @@ html.oai-font-global #pr-list-ul .pr-title {
   #srch-modal .sm-map-select-btn{padding:0 10px;font-size:13px;}
 }
 
-/* V2-74: 1분 이상 10분 미만 백그라운드 복귀 때 화면 흔들림을 짧게 가리는 안정화 레이어 */
+/* V2-75: 1분 이상 10분 미만 백그라운드 복귀 때 화면 흔들림을 짧게 가리는 안정화 레이어 */
 html.oai-background-return-stabilizing::before {
   content: '';
   position: fixed;
@@ -7034,7 +7034,7 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
 }
 
 
-/* V2-74: Fold 대화면 나의 신앙생활 하단 버튼 잘림 방지 + 커버톤 배너/버튼 정리 */
+/* V2-75: Fold 대화면 나의 신앙생활 하단 버튼 잘림 방지 + 커버톤 배너/버튼 정리 */
 .my-faith-body:not(.my-faith-search-body) .my-faith-section {
   flex: 0 0 auto !important;
   min-height: max-content !important;
@@ -7056,7 +7056,7 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
   }
 }
 
-/* V2-74: 메뉴 배너를 커버와 가까운 아이보리/골드 톤으로 정리 */
+/* V2-75: 메뉴 배너를 커버와 가까운 아이보리/골드 톤으로 정리 */
 .cover-menu-panel {
   background: #FFFCF6 !important;
   border-color: rgba(183,121,31,.24) !important;
@@ -7085,7 +7085,7 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
   color: #7A4D14 !important;
 }
 
-/* V2-74: 매일미사 배너를 커버톤으로 조정 */
+/* V2-75: 매일미사 배너를 커버톤으로 조정 */
 #missa-bar {
   background: linear-gradient(180deg, #FFF8EA 0%, #F1E5D2 100%) !important;
   color: #1F2A44 !important;
@@ -7106,7 +7106,7 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
   border: 1px solid rgba(183,121,31,.34) !important;
 }
 
-/* V2-74: 주요기도문 배너와 기도문 주요 버튼을 커버톤으로 조정 */
+/* V2-75: 주요기도문 배너와 기도문 주요 버튼을 커버톤으로 조정 */
 #prayer-bar {
   background: linear-gradient(180deg, #FFF8EA 0%, #F1E5D2 100%) !important;
   color: #1F2A44 !important;
@@ -7130,7 +7130,7 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
   border-color: rgba(183,121,31,.34) !important;
 }
 
-/* V2-74: 커버 빠른 메뉴 버튼도 커버 카드와 같은 톤으로 낮춤 */
+/* V2-75: 커버 빠른 메뉴 버튼도 커버 카드와 같은 톤으로 낮춤 */
 #cover #mass-quick-modal .mass-quick-btn {
   background: linear-gradient(180deg, #FFFFFF 0%, #F7F1E8 100%) !important;
   border-color: rgba(126,104,74,.22) !important;
