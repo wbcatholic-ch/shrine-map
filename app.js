@@ -29,9 +29,9 @@ function hideCoverAndRun(callback) {
    ═══════════════════════════════════════════════ */
 var OAI_EXTERNAL_LEAVE_HOLD_MS = 6000;
 var OAI_EXTERNAL_LEAVE_HARD_MS = 6500;
-var OAI_EXTERNAL_RETURN_MIN_MS = 1200;
-var OAI_EXTERNAL_RETURN_MAX_MS = 4000;
-var OAI_EXTERNAL_RETURN_STABLE_TICKS = 3;
+var OAI_EXTERNAL_RETURN_MIN_MS = 1500;
+var OAI_EXTERNAL_RETURN_MAX_MS = 4500;
+var OAI_EXTERNAL_RETURN_STABLE_TICKS = 4;
 var OAI_REFRESH_VEIL_MS = 1000; // refresh veil must remain visible for at least 1s
 var OAI_REFRESH_CARRY_MS = 3000;
 var OAI_REFRESH_PROGRESS_HOLD_MS = 10000;
@@ -1496,7 +1496,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V2-88';
+    frame.src='diocese.html?v=V2-89';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1777,6 +1777,11 @@ function restoreCoreReturnState(){
     _loadMap();
   }
   const restoreDelay = needMapLoad ? 650 : 30;
+  try{
+    if(typeof oaiHoldStabilityVeil === 'function'){
+      oaiHoldStabilityVeil('core-external-return', Math.max(900, restoreDelay + 700));
+    }
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
   // V37: 외부사이트 복귀 시 지도 중심을 두 단계로 움직이지 않는다.
   // 인포카드가 있었던 경우에는 처음부터 인포카드 기준 중심으로 복원한다.
   setTimeout(()=>{
@@ -1904,7 +1909,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V2-88';
+const _PARISH_ASSET_VERSION='V2-89';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -2067,7 +2072,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V2-88';
+const _PRAYER_ASSET_VERSION='V2-89';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2966,7 +2971,13 @@ function _resetMapState(){
 }
 function goToCover(){
   try{
-    if(document.querySelector('#web-view.open,#trail-view.open,#diocese-view.open,#missa-view.open') && typeof oaiHoldStabilityVeil === 'function') oaiHoldStabilityVeil('view-close', 260);
+    if(typeof oaiHoldStabilityVeil === 'function'){
+      var hasDioceseView = !!document.querySelector('#diocese-view.open');
+      var hasClosableView = !!document.querySelector('#web-view.open,#trail-view.open,#diocese-view.open,#missa-view.open');
+      if(hasClosableView){
+        oaiHoldStabilityVeil(hasDioceseView ? 'diocese-cover-return' : 'view-close', hasDioceseView ? 720 : 360);
+      }
+    }
   }catch(e){ console.warn('[가톨릭길동무]', e); }
   closeTab(_activeTab);
   closeInfoCard();
@@ -7009,6 +7020,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(sessionStorage.getItem('oai_my_faith_external_open') !== '1') return false;
         myFaithResumeBusy = true;
         myFaithReturnSettling = true;
+        try{ if(typeof oaiHoldStabilityVeil === 'function') oaiHoldStabilityVeil('my-faith-external-return', 900); }catch(_e){}
         var ts = parseInt(sessionStorage.getItem('oai_my_faith_external_ts') || '0', 10) || 0;
         if(ts && Date.now && Date.now() - ts > 10 * 60 * 1000){
           sessionStorage.removeItem('oai_my_faith_external_open');
