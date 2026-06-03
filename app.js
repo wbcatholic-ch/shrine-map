@@ -3487,7 +3487,7 @@ function _focusMarkerAboveInfoCard(item){
   if(!_map || !item || !item.lat || !item.lng) return;
   try{
     if(_mode==='parish' && !_routeMode){
-      // V2-67: 마커 클릭 후 인포카드를 열 때는 중심 이동만 하고,
+      // V2-68: 마커 클릭 후 인포카드를 열 때는 중심 이동만 하고,
       // 사용자가 보고 있던 확대/축소 수준은 유지한다.
       if(typeof _focusParishPointAround==='function' && _focusParishPointAround(item.lat,item.lng,{level:6,aboveInfoCard:true,noZoom:true})) return;
     }
@@ -4104,6 +4104,37 @@ function _restoreAllCategoryMarkersForSelection(){
     });
     if(_paSelMkr){try{_paSelMkr.setMap(null);}catch(e){ console.warn("[가톨릭길동무]", e); } _paSelMkr=null;}
   }
+}
+
+
+function _restoreMarkersWhenRouteNotDisplayed(){
+  // 경로선이 실제로 표시되는 동안에는 출발지·도착지·경로 중심으로 단순화한다.
+  // 경로선이 없을 때는 지도에서 직접 선택할 수 있도록 성지/피정의집은 전체 마커를 복원하고,
+  // 성당은 기존 교구/뷰포트 표시 규칙을 유지한다.
+  if(!_map) return;
+  try{
+    if(_polyline) return;
+    if(_mode==='shrine' || _mode==='retreat'){
+      _restoreAllCategoryMarkersForSelection();
+    }else{
+      _restoreMapMarkers();
+    }
+
+    // 길찾기 탭에서 이미 출발/도착을 고른 상태라면 전체 마커 복원 뒤에도
+    // 선택된 출발/도착 표시가 사라지지 않도록 기존 route 마커 표시만 다시 적용한다.
+    if(_mode==='shrine'){
+      if(_rS && typeof _rS.idx==='number' && _rS.idx>=0 && _markers[_rS.idx]){
+        _markers[_rS.idx].marker.setImage(_mkrImgRoute('#ff0000','출'));
+        _setRouteMarkerZ(_rS.idx,'start');
+      }
+      if(_rE && typeof _rE.idx==='number' && _rE.idx>=0 && _markers[_rE.idx]){
+        const base=_markers[_rE.idx].shrine ? _typeColor(_markers[_rE.idx].shrine.type) : '#005BFF';
+        _markers[_rE.idx].marker.setImage(_mkrImgRoute(base,'도'));
+        _setRouteMarkerZ(_rE.idx,'end');
+      }
+    }
+    _refreshRouteTmpMarkers();
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 
 function _selectShrineMarker(idx){
@@ -5519,6 +5550,7 @@ function _enterRouteMode(){
   const rs=$('sheet-route');
   if(rs){ rs.style.display=''; rs.classList.add('open'); }
   _ensureCurrentLocationStart();
+  _restoreMarkersWhenRouteNotDisplayed();
   _showRouteGuideText(_rS?`도착 ${_getRouteGuideTarget()}를 탭하세요`:`출발지를 탭하거나 지도에서 ${_getRouteGuideTarget()}를 선택하세요`);
 }
 
@@ -5591,7 +5623,7 @@ function clearRoute(role){
   _hide($('rs-result'));
   if(_polyline){_polyline.setMap(null);_polyline=null;}
   _refreshRouteTmpMarkers();
-  _restoreMapMarkers();
+  _restoreMarkersWhenRouteNotDisplayed();
   }
 }
 
@@ -5618,8 +5650,7 @@ function resetRoute(opts){
   _clearRouteTmpMarkers();
   _showJukrimgulParkingMkr(false);
   _hideRouteGuide();
-  if(_mode==='shrine'||_mode==='retreat') _restoreAllCategoryMarkersForSelection();
-  else _restoreMapMarkers();
+  _restoreMarkersWhenRouteNotDisplayed();
 
   // 다시선택 버튼: 뒤로가기처럼 지도를 도착지로 돌리되,
   // 일반 장소 인포카드는 열지 않고 길찾기 선택 카드(출발/도착 입력 화면)를 유지한다.
@@ -5693,6 +5724,7 @@ function _selectRouteItem(idx){
   _setRouteLabel('start',s.name);
   _setRouteLabel('end','');
   _refreshRouteTmpMarkers();
+  _restoreMarkersWhenRouteNotDisplayed();
   _showRouteGuideText(`도착 ${_getRouteGuideTarget()}를 탭하세요`);
   if(!_activeTab) openTab('route');
   } else {
@@ -5700,6 +5732,7 @@ function _selectRouteItem(idx){
   if(_mode==='shrine'){ _markers[idx]?.marker.setImage(_mkrImgRoute(_typeColor(s.type),'도')); _setRouteMarkerZ(idx,'end'); }
   _setRouteLabel('end',s.name);
   _refreshRouteTmpMarkers();
+  _restoreMarkersWhenRouteNotDisplayed();
   _hideRouteGuide();
   _updateSearchBtn();
   }
@@ -6059,6 +6092,7 @@ function routeSearchModalMapSelect(){
   const rs=$('sheet-route');
   if(rs){ rs.style.display=''; rs.classList.add('open'); }
   if(_routeMode){
+    _restoreMarkersWhenRouteNotDisplayed();
     _showRouteGuideText(_rS && !_isRouteImplicitCurrentStartHidden()
       ? `도착 ${_getRouteGuideTarget()}를 탭하세요`
       : `출발 ${_getRouteGuideTarget()}를 탭하거나 지도에서 선택하세요`);
@@ -6368,7 +6402,7 @@ function _fmtTime(s){
 
     const root = document.documentElement;
     try{
-      // V2-67: 장시간 백그라운드 복귀 시 이전 카테고리 화면이 한 프레임 보이지 않게
+      // V2-68: 장시간 백그라운드 복귀 시 이전 카테고리 화면이 한 프레임 보이지 않게
       // 먼저 앱 화면을 숨기는 전용 상태를 걸고, 그 상태 안에서 기존 goToCover 정리 흐름을 탄다.
       root.classList.remove('oai-cover-first-reveal','oai-cover-under-intro-reveal','oai-ivory-wipe-transition','oai-internal-no-return-effect');
       root.classList.add('oai-cover-resetting-to-intro');
@@ -6378,7 +6412,7 @@ function _fmtTime(s){
     try{ _resetMapState(); }catch(e){ console.warn('[가톨릭길동무]', e); }
     try{ root.classList.add('oai-cover-booting','oai-first-entry-intro'); }catch(_e){}
 
-    // 첫 진입 인트로와 같은 타이밍을 그대로 사용한다. (V2-67: 십자가 안정 유지 시간 소폭 연장)
+    // 첫 진입 인트로와 같은 타이밍을 그대로 사용한다. (V2-68: 십자가 안정 유지 시간 소폭 연장)
     setTimeout(function(){
       try{ root.classList.add('oai-cover-under-intro-reveal'); }catch(_e){}
     }, 1520);
