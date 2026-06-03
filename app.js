@@ -1602,6 +1602,15 @@ function openDioceseExternal(url, state){
   return true;
 }
 window.openDioceseExternal = openDioceseExternal;
+function oaiIsCoverIntroResetActive(){
+  try{
+    var root=document.documentElement;
+    return root.classList.contains('oai-first-entry-intro') ||
+           root.classList.contains('oai-cover-resetting-to-intro') ||
+           root.classList.contains('oai-cover-booting');
+  }catch(_e){ return false; }
+}
+
 function _finishDioceseExternalReturn(frame){
   try{
     var w = frame && frame.contentWindow;
@@ -1687,6 +1696,7 @@ function restoreDioceseExternalState(opts){
 }
 window.addEventListener('pageshow', function(ev){
   try{
+    if(oaiIsCoverIntroResetActive()) return;
     var hasReturn=sessionStorage.getItem(DIOCESE_RETURN_KEY) || localStorage.getItem(DIOCESE_RETURN_KEY);
     if(hasReturn){
       document.documentElement.classList.remove('oai-diocese-returning');
@@ -1804,6 +1814,7 @@ function restoreCoreReturnState(){
 }
 window.addEventListener('pageshow', function(e){
   setTimeout(()=>{
+    if(oaiIsCoverIntroResetActive()) return;
     if(restoreCoreReturnState()) return;
     if(_screen==='map' && (!_map || !$('map')?.children.length)){
       const reopenTab=_activeTab||'';
@@ -6171,6 +6182,15 @@ function _fmtTime(s){
     }catch(_e){ return false; }
   }
 
+  function _isCoverIntroResetActive(){
+    try{
+      const root = document.documentElement;
+      return root.classList.contains('oai-first-entry-intro') ||
+             root.classList.contains('oai-cover-resetting-to-intro') ||
+             root.classList.contains('oai-cover-booting');
+    }catch(_e){ return false; }
+  }
+
   function _clearBgStamp(){
     try{ sessionStorage.removeItem(BG_KEY); }catch(_e){}
   }
@@ -6189,24 +6209,32 @@ function _fmtTime(s){
     if(_isExternalReturnContext()) return;
     _idleIntroRunning = true;
     _clearBgStamp();
+    try{
+      sessionStorage.removeItem('catholic_core_return_v1');
+      sessionStorage.removeItem('catholic_diocese_external_return_v1');
+      localStorage.removeItem('catholic_diocese_external_return_v1');
+    }catch(_e){}
 
     const root = document.documentElement;
     try{
+      // V2-62: 장시간 백그라운드 복귀 시 이전 카테고리 화면이 한 프레임 보이지 않게
+      // 먼저 앱 화면을 숨기는 전용 상태를 걸고, 그 상태 안에서 기존 goToCover 정리 흐름을 탄다.
       root.classList.remove('oai-cover-first-reveal','oai-cover-under-intro-reveal','oai-ivory-wipe-transition','oai-internal-no-return-effect');
-      root.classList.add('oai-cover-booting','oai-first-entry-intro');
+      root.classList.add('oai-cover-resetting-to-intro');
     }catch(_e){}
 
-    try{ _resetMapState(); }catch(e){ console.warn('[가톨릭길동무]', e); }
     try{ goToCover(); }catch(e){ console.warn('[가톨릭길동무]', e); }
+    try{ _resetMapState(); }catch(e){ console.warn('[가톨릭길동무]', e); }
+    try{ root.classList.add('oai-cover-booting','oai-first-entry-intro'); }catch(_e){}
 
-    // 첫 진입 인트로와 같은 타이밍을 그대로 사용한다. (V2-60: 십자가 안정 유지 시간 소폭 연장)
+    // 첫 진입 인트로와 같은 타이밍을 그대로 사용한다. (V2-62: 십자가 안정 유지 시간 소폭 연장)
     setTimeout(function(){
       try{ root.classList.add('oai-cover-under-intro-reveal'); }catch(_e){}
     }, 1520);
 
     setTimeout(function(){
       try{
-        root.classList.remove('oai-first-entry-intro','oai-cover-under-intro-reveal','oai-ivory-wipe-transition');
+        root.classList.remove('oai-cover-resetting-to-intro','oai-first-entry-intro','oai-cover-under-intro-reveal','oai-ivory-wipe-transition');
         root.classList.add('oai-cover-first-reveal');
         setTimeout(function(){
           try{ root.classList.remove('oai-cover-first-reveal','oai-cover-booting'); }catch(__e){}
@@ -6227,6 +6255,7 @@ function _fmtTime(s){
 
   function _checkBackgroundReturn(){
     try{
+      if(_isCoverIntroResetActive()) return;
       if(!_isAppScreenActive() || _isExternalReturnContext()){
         _clearBgStamp();
         return;
