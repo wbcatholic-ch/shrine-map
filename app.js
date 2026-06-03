@@ -3487,7 +3487,7 @@ function _focusMarkerAboveInfoCard(item){
   if(!_map || !item || !item.lat || !item.lng) return;
   try{
     if(_mode==='parish' && !_routeMode){
-      // V2-69: 마커 클릭 후 인포카드를 열 때는 중심 이동만 하고,
+      // V2-70: 마커 클릭 후 인포카드를 열 때는 중심 이동만 하고,
       // 사용자가 보고 있던 확대/축소 수준은 유지한다.
       if(typeof _focusParishPointAround==='function' && _focusParishPointAround(item.lat,item.lng,{level:6,aboveInfoCard:true,noZoom:true})) return;
     }
@@ -3854,7 +3854,11 @@ function _routeEndMarkerColor(){
 function _refreshRouteTmpMarkers(){
   if(!_map) return;
   _clearRouteTmpMarkers();
-  const needStart = !!(_rS && (_mode!=='shrine' || _rS.idx<0 || !_markers[_rS.idx]));
+  // 길찾기 탭 진입 시 내부적으로만 준비한 현재 위치 출발지는
+  // 출발창에서 '현재 위치'를 직접 누르기 전까지 지도에 출발 마커를 표시하지 않는다.
+  // 단, 실제 경로검색을 실행해 라벨이 보이게 된 경우에는 경로 출발점으로 표시한다.
+  const hideImplicitStartMarker = _isRouteImplicitCurrentStartHidden();
+  const needStart = !!(_rS && !hideImplicitStartMarker && (_mode!=='shrine' || _rS.idx<0 || !_markers[_rS.idx]));
   const needEnd = !!(_rE && (_mode!=='shrine' || _rE.idx<0 || !_markers[_rE.idx]));
   if(needStart){
     _startTmpMkr = new _MM({
@@ -6422,7 +6426,7 @@ function _fmtTime(s){
 
     const root = document.documentElement;
     try{
-      // V2-69: 장시간 백그라운드 복귀 시 이전 카테고리 화면이 한 프레임 보이지 않게
+      // V2-70: 장시간 백그라운드 복귀 시 이전 카테고리 화면이 한 프레임 보이지 않게
       // 먼저 앱 화면을 숨기는 전용 상태를 걸고, 그 상태 안에서 기존 goToCover 정리 흐름을 탄다.
       root.classList.remove('oai-cover-first-reveal','oai-cover-under-intro-reveal','oai-ivory-wipe-transition','oai-internal-no-return-effect');
       root.classList.add('oai-cover-resetting-to-intro');
@@ -6432,7 +6436,7 @@ function _fmtTime(s){
     try{ _resetMapState(); }catch(e){ console.warn('[가톨릭길동무]', e); }
     try{ root.classList.add('oai-cover-booting','oai-first-entry-intro'); }catch(_e){}
 
-    // 첫 진입 인트로와 같은 타이밍을 그대로 사용한다. (V2-69: 십자가 안정 유지 시간 소폭 연장)
+    // 첫 진입 인트로와 같은 타이밍을 그대로 사용한다. (V2-70: 십자가 안정 유지 시간 소폭 연장)
     setTimeout(function(){
       try{ root.classList.add('oai-cover-under-intro-reveal'); }catch(_e){}
     }, 1520);
