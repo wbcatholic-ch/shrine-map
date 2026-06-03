@@ -1282,11 +1282,43 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, #3F6F5A, #4F846C
 @keyframes spin { to { transform: rotate(360deg); } }
 
 .empty-msg { padding: 40px 20px; text-align: center; color: #aaa; font-size: 13px; line-height: 1.8; }
-#nearby-body .nearby-distance-loading {
+#nearby-body .nearby-distance-loading,
+#region-body .nearby-distance-loading,
+#region-body .region-distance-loading {
   color: #111827;
   font-size: calc(16px * var(--app-inner-font-scale));
   font-weight: 800;
   line-height: 1.6;
+}
+#nearby-body .nearby-distance-loading,
+#region-body .nearby-distance-loading {
+  min-height: min(58vh, 430px);
+  padding-top: 34px;
+  box-sizing: border-box;
+}
+#region-body .region-distance-loading {
+  min-height: min(48vh, 360px);
+  padding: 24px 20px 0;
+  text-align: center;
+  box-sizing: border-box;
+  background: #fff;
+}
+.distance-loading-cross {
+  width: 50px;
+  height: 50px;
+  margin: clamp(82px, 19vh, 148px) auto 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold, #d4aa6a);
+  font-size: 42px;
+  font-weight: 900;
+  line-height: 1;
+  text-shadow: 0 2px 8px rgba(120,80,20,.16);
+  animation: spin 2s linear infinite;
+}
+#region-body .region-distance-loading .distance-loading-cross {
+  margin-top: clamp(64px, 15vh, 124px);
 }
 #region-body .empty-msg.region-guide-empty {
   color: #111827;
@@ -6258,6 +6290,7 @@ html.oai-font-global #cover #cc-6 .cover-name {
   font-size: calc(18px * var(--app-font-scale, 1)) !important;
   font-weight: 900 !important;
   line-height: 1 !important;
+  transform: translateY(-1.5px) !important;
 }
 
 #cover .cover-diocese-btn .diocese-btn-label {

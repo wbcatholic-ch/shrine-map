@@ -1496,7 +1496,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V2-89';
+    frame.src='diocese.html?v=V2-90';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1909,7 +1909,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V2-89';
+const _PARISH_ASSET_VERSION='V2-90';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -2072,7 +2072,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V2-89';
+const _PRAYER_ASSET_VERSION='V2-90';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -5164,7 +5164,7 @@ function _loadNearbyWithDist(lat,lng,items,getIdx,getColor,getLabel,opts){
   }
 
   if(body && isCurrent() && !(opts.silent && opts.keepCurrentList === true)){
-    body.innerHTML='<div class="empty-msg nearby-distance-loading">정확한 거리를 계산중입니다.</div>';
+    body.innerHTML='<div class="empty-msg nearby-distance-loading">정확한 거리를 계산중입니다.<div class="distance-loading-cross" aria-hidden="true">✝</div></div>';
   }
 
   // 성당·성지·피정의집 내주변 목록은 정확한 자동차 거리 계산이 끝난 뒤에 표시한다.
@@ -5473,7 +5473,7 @@ function doRegionSearch(){
       const caddr=cand.dataset.addr||'', ccat=cand.dataset.cat||'', curl=cand.dataset.url||'';
       _regionLat=clat;_regionLng=clng;_regionName=cname;_regionPlaceName=cname;
       _routeRegionStart={lat:clat,lng:clng,name:'📍 '+cname,placeName:cname};
-      body.innerHTML='<div class="empty-msg">정확한 거리를 계산중입니다.</div>';
+      body.innerHTML='<div class="empty-msg nearby-distance-loading">정확한 거리를 계산중입니다.<div class="distance-loading-cross" aria-hidden="true">✝</div></div>';
       _showRegionResults(cname,clat,clng,{place_name:cname,road_address_name:caddr,address_name:caddr,category_name:ccat,place_url:curl});
       if(_map) _showRegionItemsOnMap([],clat,clng,{center:true});
     };
@@ -5496,7 +5496,7 @@ function _showRegionResults(q,lat,lng,doc){
   const safePlaceCat=_regionHtmlEsc(placeCat);
   const infoCard=`<div class="region-info-card"><div class="ric-hd"><div class="ric-icon">📍</div><div class="ric-name-wrap"><div class="ric-name">${safePlaceName}</div>${placeAddr?`<div class="ric-addr">${safePlaceAddr}</div>`:''}${placeCat?`<div class="ric-cat">${safePlaceCat}</div>`:''}</div><button type="button" class="ric-map-link" onclick="showRegionPlaceOnMap()">지도 보기</button></div></div>`;
   const listHd=`<div class="region-list-hd">${isParish?'⛪ 근처 성당':(isRetreat?'🏔 근처 피정의 집':'✝ 근처 성지')} <span style="font-size:13px;font-weight:500;color:#aaa">· 자동차 거리순 10곳</span></div>`;
-  $('region-body').innerHTML=infoCard+listHd+'<div id="rg-loading" style="text-align:center;padding:10px;font-size:12px;color:#888;">정확한 거리를 계산중입니다.</div><div id="rg-list" style="background:#fff"></div>';
+  $('region-body').innerHTML=infoCard+listHd+'<div id="rg-loading" class="region-distance-loading">정확한 거리를 계산중입니다.<div class="distance-loading-cross" aria-hidden="true">✝</div></div><div id="rg-list" style="background:#fff"></div>';
   if(!prelim.length){
     _regionCache=[];
     if(_map) _showRegionItemsOnMap([],lat,lng,{center:true});
