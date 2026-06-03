@@ -3147,7 +3147,14 @@ function openTab(name, opts){
   // 단순 z-index 보정이 아니라 상태 전환 순서에서 겹침을 없애며, 지도 중심은 흔들리지 않게 유지한다.
   closeInfoCard({keepMap:true});
   _curFromRegion=false;
-  if(name!=='route') resetRoute();
+  if(name!=='route') {
+    // V2-73: 길찾기 결과 상태에서 성당/성지/피정의집 검색 탭으로 전환할 때
+    // resetRoute()의 기본 도착지 복원 흐름이 이전 인포카드를 다시 열 수 있다.
+    // 탭 전환은 길찾기 재선택이 아니므로 출발/도착·경로만 조용히 비우고
+    // 도착지 노란 선택 마커와 인포카드는 복원하지 않는다.
+    resetRoute({fresh:true});
+    closeInfoCard({keepMap:true});
+  }
   _exitRouteMode();
   if(name==='route' && _routeRegionStart && _routeRegionStart.lat && _regionCache && _regionCache.length){
     try{ _showRegionItemsOnMap(_regionCache, _routeRegionStart.lat, _routeRegionStart.lng, {center:false}); }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -3487,7 +3494,7 @@ function _focusMarkerAboveInfoCard(item){
   if(!_map || !item || !item.lat || !item.lng) return;
   try{
     if(_mode==='parish' && !_routeMode){
-      // V2-72: 마커 클릭 후 인포카드를 열 때는 중심 이동만 하고,
+      // V2-73: 마커 클릭 후 인포카드를 열 때는 중심 이동만 하고,
       // 사용자가 보고 있던 확대/축소 수준은 유지한다.
       if(typeof _focusParishPointAround==='function' && _focusParishPointAround(item.lat,item.lng,{level:6,aboveInfoCard:true,noZoom:true})) return;
     }
@@ -5691,7 +5698,7 @@ function resetRoute(opts){
       _regionName=regionStart.placeName || regionStart.name || _regionName;
     }
     _ensureCurrentLocationStart();
-    // V2-72: 경로검색 결과의 '다시 선택'은 길찾기 재선택 카드로 돌아가는 동작이다.
+    // V2-73: 경로검색 결과의 '다시 선택'은 길찾기 재선택 카드로 돌아가는 동작이다.
     // 이때 도착지 위치로 지도를 돌리더라도 일반 선택 상태가 아니므로 노란 선택 마커와 인포카드는 띄우지 않는다.
     try{
       if(_mode==='shrine') _clearShrineMarkerSel();
@@ -6427,7 +6434,7 @@ function _fmtTime(s){
 
     const root = document.documentElement;
     try{
-      // V2-72: 장시간 백그라운드 복귀 시 이전 카테고리 화면이 한 프레임 보이지 않게
+      // V2-73: 장시간 백그라운드 복귀 시 이전 카테고리 화면이 한 프레임 보이지 않게
       // 먼저 앱 화면을 숨기는 전용 상태를 걸고, 그 상태 안에서 기존 goToCover 정리 흐름을 탄다.
       root.classList.remove('oai-cover-first-reveal','oai-cover-under-intro-reveal','oai-ivory-wipe-transition','oai-internal-no-return-effect');
       root.classList.add('oai-cover-resetting-to-intro');
@@ -6437,7 +6444,7 @@ function _fmtTime(s){
     try{ _resetMapState(); }catch(e){ console.warn('[가톨릭길동무]', e); }
     try{ root.classList.add('oai-cover-booting','oai-first-entry-intro'); }catch(_e){}
 
-    // 첫 진입 인트로와 같은 타이밍을 그대로 사용한다. (V2-72: 십자가 안정 유지 시간 소폭 연장)
+    // 첫 진입 인트로와 같은 타이밍을 그대로 사용한다. (V2-73: 십자가 안정 유지 시간 소폭 연장)
     setTimeout(function(){
       try{ root.classList.add('oai-cover-under-intro-reveal'); }catch(_e){}
     }, 1520);
