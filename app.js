@@ -3487,7 +3487,9 @@ function _focusMarkerAboveInfoCard(item){
   if(!_map || !item || !item.lat || !item.lng) return;
   try{
     if(_mode==='parish' && !_routeMode){
-      if(typeof _focusParishPointAround==='function' && _focusParishPointAround(item.lat,item.lng,{level:6,aboveInfoCard:true})) return;
+      // V2-67: 마커 클릭 후 인포카드를 열 때는 중심 이동만 하고,
+      // 사용자가 보고 있던 확대/축소 수준은 유지한다.
+      if(typeof _focusParishPointAround==='function' && _focusParishPointAround(item.lat,item.lng,{level:6,aboveInfoCard:true,noZoom:true})) return;
     }
     _setMapCenterByInfoCardStandard(new _LL(item.lat,item.lng));
   }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -4367,7 +4369,7 @@ function _focusParishPointAround(lat, lng, opts){
   const targetLevel = opts.level || 6;
   const pos = new _LL(lat,lng);
   try{
-    if(typeof _map.getLevel==='function' && typeof _map.setLevel==='function'){
+    if(!opts.noZoom && typeof _map.getLevel==='function' && typeof _map.setLevel==='function'){
       const lvl = _map.getLevel();
       // 현재 위치/노란 마커 기준 이동은 교구 전체 bounds로 축소하지 않는다.
       // 화면이 멀리 빠져 있을 때만 주변이 보이도록 확대하고, 이미 더 확대된 상태는 유지한다.
@@ -6049,6 +6051,20 @@ function closeSearchModal(){
   $('srch-modal').classList.remove('open');
 }
 
+function routeSearchModalMapSelect(){
+  // 길찾기 검색 결과 창을 닫고, 현재 지도에 표시된 마커를 직접 선택할 수 있게 한다.
+  // 출발/도착 자동 입력 규칙과 인포카드 경로검색 선택창은 기존 흐름을 그대로 사용한다.
+  closeSearchModal();
+  if(!_activeTab || _activeTab !== 'route') openTab('route');
+  const rs=$('sheet-route');
+  if(rs){ rs.style.display=''; rs.classList.add('open'); }
+  if(_routeMode){
+    _showRouteGuideText(_rS && !_isRouteImplicitCurrentStartHidden()
+      ? `도착 ${_getRouteGuideTarget()}를 탭하세요`
+      : `출발 ${_getRouteGuideTarget()}를 탭하거나 지도에서 선택하세요`);
+  }
+}
+
 function setSmDio(v,btn){
   if(_mode==='parish'){
     const code = v==='all' ? null : (_PARISH_DIO_CODE_MAP[v]||null);
@@ -6255,9 +6271,11 @@ function _fmtTime(s){
 
 (function(){
   const IDLE_MS = 10 * 60 * 1000; // 10분
+  const MEDIUM_BG_RETURN_MS = 60 * 1000; // 1분 이상~10분 미만 복귀 안정화
   const BG_KEY = 'oai_home_backgrounded_at';
   let _idleTimer = null;
   let _idleIntroRunning = false;
+  let _bgReturnStabilizing = false;
 
   function _now(){ return Date.now ? Date.now() : new Date().getTime(); }
 
@@ -6297,6 +6315,45 @@ function _fmtTime(s){
     }catch(_e){}
   }
 
+  function _stabilizeMediumBackgroundReturn(reason){
+    if(_bgReturnStabilizing || _idleIntroRunning) return;
+    if(!_isAppScreenActive()) return;
+    if(_isExternalReturnContext()) return;
+    _bgReturnStabilizing = true;
+    const root = document.documentElement;
+    try{
+      root.classList.remove('oai-background-return-stabilizing-release');
+      root.classList.add('oai-background-return-stabilizing');
+      root.setAttribute('data-oai-background-return-reason', reason || 'medium-background-return');
+    }catch(_e){}
+
+    const settleMap = function(){
+      try{
+        if(_map && typeof _map.relayout === 'function') _map.relayout();
+      }catch(e){ console.warn('[가톨릭길동무]', e); }
+    };
+    try{
+      requestAnimationFrame(function(){
+        settleMap();
+        requestAnimationFrame(settleMap);
+      });
+    }catch(_e){
+      setTimeout(settleMap, 40);
+    }
+    setTimeout(settleMap, 180);
+
+    setTimeout(function(){
+      try{ root.classList.add('oai-background-return-stabilizing-release'); }catch(_e){}
+    }, 260);
+    setTimeout(function(){
+      try{
+        root.classList.remove('oai-background-return-stabilizing','oai-background-return-stabilizing-release');
+        root.removeAttribute('data-oai-background-return-reason');
+      }catch(_e){}
+      _bgReturnStabilizing = false;
+    }, 520);
+  }
+
   function _showCoverWithSameIntro(reason){
     if(_idleIntroRunning) return;
     if(!_isAppScreenActive()) return;
@@ -6311,7 +6368,7 @@ function _fmtTime(s){
 
     const root = document.documentElement;
     try{
-      // V2-64: 장시간 백그라운드 복귀 시 이전 카테고리 화면이 한 프레임 보이지 않게
+      // V2-67: 장시간 백그라운드 복귀 시 이전 카테고리 화면이 한 프레임 보이지 않게
       // 먼저 앱 화면을 숨기는 전용 상태를 걸고, 그 상태 안에서 기존 goToCover 정리 흐름을 탄다.
       root.classList.remove('oai-cover-first-reveal','oai-cover-under-intro-reveal','oai-ivory-wipe-transition','oai-internal-no-return-effect');
       root.classList.add('oai-cover-resetting-to-intro');
@@ -6321,7 +6378,7 @@ function _fmtTime(s){
     try{ _resetMapState(); }catch(e){ console.warn('[가톨릭길동무]', e); }
     try{ root.classList.add('oai-cover-booting','oai-first-entry-intro'); }catch(_e){}
 
-    // 첫 진입 인트로와 같은 타이밍을 그대로 사용한다. (V2-64: 십자가 안정 유지 시간 소폭 연장)
+    // 첫 진입 인트로와 같은 타이밍을 그대로 사용한다. (V2-67: 십자가 안정 유지 시간 소폭 연장)
     setTimeout(function(){
       try{ root.classList.add('oai-cover-under-intro-reveal'); }catch(_e){}
     }, 1520);
@@ -6355,8 +6412,12 @@ function _fmtTime(s){
         return;
       }
       const started = parseInt(sessionStorage.getItem(BG_KEY) || '0', 10) || 0;
-      if(started && (_now() - started) >= IDLE_MS){
+      const elapsed = started ? (_now() - started) : 0;
+      if(started && elapsed >= IDLE_MS){
         _showCoverWithSameIntro('idle-background-return');
+      }else if(started && elapsed >= MEDIUM_BG_RETURN_MS){
+        _stabilizeMediumBackgroundReturn('medium-background-return');
+        _clearBgStamp();
       }else{
         _clearBgStamp();
       }
@@ -7198,6 +7259,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 
   // ── 검색 모달 ──
   on('sm-close-btn', 'click', function() { closeSearchModal(); });
+  on('sm-map-select-btn', 'click', function() { routeSearchModalMapSelect(); });
   on('sm-inp', 'input', function() { onSmInp(this.value); });
   on('sm-inp', 'keydown', function(e) {
     blurSearchKeyboardOnDone(e, function(inp) {
