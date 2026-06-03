@@ -6199,7 +6199,7 @@ function _fmtTime(s){
     try{ _resetMapState(); }catch(e){ console.warn('[가톨릭길동무]', e); }
     try{ goToCover(); }catch(e){ console.warn('[가톨릭길동무]', e); }
 
-    // 첫 진입 인트로와 같은 타이밍을 그대로 사용한다. (V2-59: 십자가 안정 유지 시간 소폭 연장)
+    // 첫 진입 인트로와 같은 타이밍을 그대로 사용한다. (V2-60: 십자가 안정 유지 시간 소폭 연장)
     setTimeout(function(){
       try{ root.classList.add('oai-cover-under-intro-reveal'); }catch(_e){}
     }, 1520);
