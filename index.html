@@ -2,7 +2,7 @@
 <html lang="ko" class="oai-font-global" style="background:#fbf8f1;">
 <head>
 <style id="oai-first-entry-bg">html,body{margin:0;width:100%;min-height:100%;background:#fbf8f1;color-scheme:light;}body{background:#fbf8f1;}</style>
-<link rel="preload" href="intro-cross-jesus.jpg?v=V2-57" as="image" fetchpriority="high">
+<link rel="preload" href="intro-cross-jesus.jpg?v=V2-58" as="image" fetchpriority="high">
 
 <style id="oai-android-update-gate-style">
 html.oai-android-update-required,
@@ -148,7 +148,7 @@ html.oai-first-entry-intro::before {
   background:#fbf8f1;
   pointer-events:none;
   opacity:1;
-  animation:oaiIvoryIntroVeil 1.72s cubic-bezier(.18,.76,.22,1) both;
+  animation:oaiIvoryIntroVeil 1.90s cubic-bezier(.18,.76,.22,1) both;
 }
 html.oai-first-entry-intro::after {
   content:"";
@@ -163,7 +163,7 @@ html.oai-first-entry-intro::after {
     linear-gradient(to right, #fbf8f1 0%, rgba(251,248,241,.96) 5%, rgba(251,248,241,.60) 13%, rgba(251,248,241,.16) 24%, rgba(251,248,241,0) 36%, rgba(251,248,241,0) 64%, rgba(251,248,241,.16) 76%, rgba(251,248,241,.60) 87%, rgba(251,248,241,.96) 95%, #fbf8f1 100%),
     linear-gradient(to bottom, #fbf8f1 0%, rgba(251,248,241,.90) 6%, rgba(251,248,241,.36) 17%, rgba(251,248,241,0) 30%, rgba(251,248,241,0) 70%, rgba(251,248,241,.36) 83%, rgba(251,248,241,.90) 94%, #fbf8f1 100%),
     radial-gradient(ellipse 96% 88% at 50% 48%, rgba(251,248,241,0) 50%, rgba(251,248,241,.08) 62%, rgba(251,248,241,.34) 76%, rgba(251,248,241,.76) 90%, rgba(251,248,241,1) 100%),
-    url("intro-cross-jesus.jpg?v=V2-57");
+    url("intro-cross-jesus.jpg?v=V2-58");
   background-position:center center, center center, center center, center center;
   background-size:100% 100%, 100% 100%, 100% 100%, auto 96%;
   background-repeat:no-repeat, no-repeat, no-repeat, no-repeat;
@@ -184,7 +184,7 @@ html.oai-first-entry-intro::after {
     linear-gradient(to right, transparent 0%, rgba(0,0,0,.35) 6%, rgba(0,0,0,.82) 15%, #000 28%, #000 72%, rgba(0,0,0,.82) 85%, rgba(0,0,0,.35) 94%, transparent 100%),
     linear-gradient(to bottom, transparent 0%, rgba(0,0,0,.50) 5%, rgba(0,0,0,.90) 13%, #000 24%, #000 76%, rgba(0,0,0,.90) 87%, rgba(0,0,0,.50) 95%, transparent 100%);
   mask-composite: intersect;
-  animation:oaiJesusIntroPhoto 1.72s cubic-bezier(.18,.76,.22,1) both;
+  animation:oaiJesusIntroPhoto 1.90s cubic-bezier(.18,.76,.22,1) both;
 }
 
 html.oai-cover-first-reveal #cover {
@@ -210,7 +210,7 @@ html.oai-cover-first-reveal #cover > * {
 }
 
 @keyframes oaiIvoryIntroVeil {
-  0%, 78%{opacity:1;}
+  0%, 84%{opacity:1;}
   100%{opacity:0;}
 }
 
@@ -228,20 +228,20 @@ html.oai-cover-first-reveal #cover > * {
     -webkit-mask-image:none;
     mask-image:none;
     box-shadow:0 0 0 999px #fbf8f1;
-    animation:oaiJesusIntroPhotoMobile 1.72s cubic-bezier(.18,.76,.22,1) both;
+    animation:oaiJesusIntroPhotoMobile 1.90s cubic-bezier(.18,.76,.22,1) both;
   }
 }
 @keyframes oaiJesusIntroPhotoMobile {
   0%{opacity:.04; transform:scale(.90); filter:contrast(1.005) saturate(1.01);}
   50%{opacity:1; transform:scale(1); filter:contrast(1.015) saturate(1.02);}
-  78%{opacity:1; transform:scale(1); filter:contrast(1.015) saturate(1.02);}
+  84%{opacity:1; transform:scale(1); filter:contrast(1.015) saturate(1.02);}
   100%{opacity:0; transform:scale(1); filter:contrast(1) saturate(1);}
 }
 
 @keyframes oaiJesusIntroPhoto {
   0%{opacity:.04; transform:translate(-50%,-49%) scale(.90); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
   50%{opacity:1; transform:translate(-50%,-50%) scale(1); filter:contrast(1.015) saturate(1.02) drop-shadow(0 6px 16px rgba(80,54,18,.05));}
-  78%{opacity:1; transform:translate(-50%,-50%) scale(1); filter:contrast(1.015) saturate(1.02) drop-shadow(0 6px 16px rgba(80,54,18,.05));}
+  84%{opacity:1; transform:translate(-50%,-50%) scale(1); filter:contrast(1.015) saturate(1.02) drop-shadow(0 6px 16px rgba(80,54,18,.05));}
   100%{opacity:0; transform:translate(-50%,-50%) scale(1); filter:contrast(1) saturate(1) drop-shadow(0 0 0 rgba(80,54,18,0));}
 }
 @keyframes oaiCoverFirstReveal {
@@ -504,7 +504,7 @@ html.oai-cover-first-reveal #cover > * {
         try{
           root.classList.add('oai-cover-under-intro-reveal');
         }catch(_e){}
-      }, 1360);
+      }, 1520);
       setTimeout(function(){
         try{
           finishFirstIntroAtCover();
@@ -514,7 +514,7 @@ html.oai-cover-first-reveal #cover > * {
             try{ root.classList.remove('oai-cover-first-reveal'); }catch(__e){}
           }, 660);
         }catch(_e){}
-      }, 1720);
+      }, 1900);
     }
   }else{
     root.classList.remove('oai-cover-booting','oai-first-entry-intro','oai-cover-under-intro-reveal','oai-ivory-wipe-transition');
@@ -692,28 +692,28 @@ window.APP_CONFIG = {
   window.addEventListener('focus', lockStatusTheme, {passive:true});
 })();
 </script>
-<link rel="manifest" href="manifest.json?v=V2-57">
-<link rel="apple-touch-icon" href="icon-192x192.png?v=V2-57">
+<link rel="manifest" href="manifest.json?v=V2-58">
+<link rel="apple-touch-icon" href="icon-192x192.png?v=V2-58">
 <meta name="format-detection" content="telephone=no">
 <meta name="description" content="가톨릭길동무 - 가톨릭 신앙생활 종합 앱">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="가톨릭길동무">
 <meta property="og:title" content="가톨릭길동무">
 <meta property="og:description" content="성지 · 성당 · 기도문 · 순례길 · 가톨릭 정보 안내">
-<meta property="og:image" content="icon-512x512.png?v=V2-57">
+<meta property="og:image" content="icon-512x512.png?v=V2-58">
 <meta property="og:image:width" content="512">
 <meta property="og:image:height" content="512">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="가톨릭길동무">
 <meta name="twitter:description" content="성지 · 성당 · 기도문 · 순례길 · 가톨릭 정보 안내">
-<meta name="twitter:image" content="icon-512x512.png?v=V2-57">
+<meta name="twitter:image" content="icon-512x512.png?v=V2-58">
 <title>가톨릭길동무</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 32 32%22%3E%3Crect width=%2232%22 height=%2232%22 fill=%22%230e1535%22/%3E%3Ctext x=%226%22 y=%2226%22 font-size=%2224%22 fill=%22%23d4aa6a%22%3E%E2%9C%9D%3C/text%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style id="oai-initial-bg">html,body{margin:0;width:100%;height:100%;min-height:100%;background:#fbf8f1;overflow:hidden;color-scheme:light;}#cover{background:#fbf8f1;min-height:100%;}#app{background:#f8f6f2;display:none;}</style>
-<link rel="stylesheet" href="style.css?v=V2-57">
+<link rel="stylesheet" href="style.css?v=V2-58">
 
 <script id="oai-android-update-gate-script">
 (function(){
@@ -1062,7 +1062,7 @@ window.APP_CONFIG = {
         <span class="cover-menu-icon">📘</span>
         <span class="cover-menu-text">주요기능</span>
       </button>
-      <a id="cover-menu-privacy-link" class="cover-menu-item" href="privacy.html?v=V2-57">
+      <a id="cover-menu-privacy-link" class="cover-menu-item" href="privacy.html?v=V2-58">
         <span class="cover-menu-icon">🛡</span>
         <span class="cover-menu-text">개인정보처리방침</span>
       </a>
@@ -1074,9 +1074,9 @@ window.APP_CONFIG = {
   </div>
 </div>
 
-<script src="constants.js?v=V2-57"></script>
-<script src="core.js?v=V2-57"></script>
-<script src="app.js?v=V2-57"></script>
+<script src="constants.js?v=V2-58"></script>
+<script src="core.js?v=V2-58"></script>
+<script src="app.js?v=V2-58"></script>
 <div id="oai-category-entry-veil" aria-hidden="true"></div>
 <div id="app"><div id="tabbar"><button id="tab-btn-nearby" class="tab-btn" data-tab="nearby"><span class="tab-icon">📍</span><span id="tab-nearby-lbl">내주변</span></button><button id="tab-btn-list" class="tab-btn" data-tab="list"><span class="tab-icon">📋</span><span id="tab-list-lbl">목록</span></button><button id="tab-btn-region" class="tab-btn" data-tab="region"><span class="tab-icon">🔍</span>지역검색
     </button><button id="tab-btn-route" class="tab-btn" data-tab="route"><span class="tab-icon">🧭</span>길찾기
@@ -1152,13 +1152,13 @@ window.APP_CONFIG = {
     </div>
   </div>
 </div>
-<script src="web.js?v=V2-57"></script>
+<script src="web.js?v=V2-58"></script>
 
 <div id="qna-view" role="dialog" aria-modal="true" aria-label="문의·건의" class="module-view"><div class="module-bar qna"><div class="module-bar-main"><div class="module-bar-ico">✝</div><div class="module-bar-txt"><div class="module-bar-title">문의·건의</div><div class="module-bar-sub">질문, 오류, 수정요청을 남겨주세요</div></div></div><button id="qna-close-btn" class="module-close" aria-label="문의·건의 닫기">×</button></div><div class="qna-body"><div class="qna-tabs"><button id="qna-tab-write" class="qna-tab on" type="button">작성</button></div><div class="qna-list" id="qna-list"></div></div></div>
 
-<script src="patches.js?v=V2-57"></script>
+<script src="patches.js?v=V2-58"></script>
 
-<script src="sw-update.js?v=V2-57"></script>
+<script src="sw-update.js?v=V2-58"></script>
 
 </body>
 </html>
