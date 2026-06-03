@@ -195,7 +195,7 @@ function prApplyFont(){
   const px = PR_FONT_SIZES[prFontIdx];
   const r = document.getElementById('prayer-view');
   if(r){
-    const coverPx = Math.round((px * 18 / 16) * 100) / 100;
+    const coverPx = px;
     r.style.setProperty('--pr-item-fs',   coverPx+'px');
     r.style.setProperty('--pr-body-fs',   coverPx+'px');
     r.style.setProperty('--pr-detail-fs', coverPx+'px');

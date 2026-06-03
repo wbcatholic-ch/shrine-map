@@ -904,7 +904,7 @@
     document.documentElement.style.setProperty('--app-font-scale',String(scale));
     var pv=el('prayer-view');
     if(pv){
-      var coverPx=Math.round((px*18/16)*100)/100;
+      var coverPx=px;
       pv.style.setProperty('--pr-item-fs',coverPx+'px');
       pv.style.setProperty('--pr-body-fs',coverPx+'px');
       pv.style.setProperty('--pr-detail-fs',coverPx+'px');

@@ -39,9 +39,9 @@
   --app-font-scale:      1;
   --ios-inner-font-scale: 1;
   --app-inner-font-scale: calc(var(--app-font-scale) * var(--ios-inner-font-scale));
-  --pr-item-fs:  18px;
-  --pr-body-fs:  18px;
-  --pr-detail-fs: 18px;
+  --pr-item-fs:  16px;
+  --pr-body-fs:  16px;
+  --pr-detail-fs: 16px;
   --pr-icon-fs:  17px;
   --pr-icon-sz:  36px;
   --app-fs-title: calc(16px * var(--app-inner-font-scale));
@@ -1885,7 +1885,7 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, #3F6F5A, #4F846C
 #prayer-bar { background: #0e1535; border-bottom: 2px solid var(--gold); gap: 12px; }
 #prayer-bar-brand { display: flex; align-items: center; gap: 10px; }
 #prayer-bar-ico { width: 44px; height: 44px; border-radius: 14px; background: rgba(255,255,255,.14); border: 1px solid rgba(255,255,255,.22); display: flex; align-items: center; justify-content: center; font-size: 22px; flex-shrink: 0; }
-#prayer-bar-ttl { font-size: 20px; font-weight: 800; color: #fff; letter-spacing: -.02em; }
+#prayer-bar-ttl { font-size: 16px; font-weight: 800; color: #fff; letter-spacing: -.02em; }
 #prayer-bar-sub { font-size: 11px; color: rgba(255,255,255,.6); margin-top: 1px; }
 #prayer-tabs {
   display: flex;
@@ -2330,7 +2330,7 @@ html.oai-cover-booting #cover > * {
   width: 100%;
   min-width: 0;
   margin: 0;
-  font-size: calc(15.4px * var(--app-font-scale));
+  font-size: calc(16px * var(--app-font-scale));
   line-height: 1.22;
   font-weight: 850;
   letter-spacing: -.02em;
@@ -2338,7 +2338,7 @@ html.oai-cover-booting #cover > * {
   word-break: keep-all;
   color: var(--text-main);
 }
-#cc-5 .cover-name { font-size: 13px; letter-spacing: -.04em; }
+#cc-5 .cover-name { font-size: calc(16px * var(--app-font-scale)); letter-spacing: -.04em; }
 
 /* 커버 액션 줄 */
 #cover-action-row {
@@ -3009,8 +3009,8 @@ html.oai-font-global #region-body .nearby-name,
 html.oai-font-global .sm-name,
 html.oai-font-global .sm-place-name { font-size: var(--app-fs-title); line-height: 1.34; }
 
-html.oai-font-global .pr-content-card { font-size: calc(18px * var(--app-font-scale, 1)); line-height: 2.05; }
-html.oai-font-global .pr-body-title { font-size: calc(18px * var(--app-font-scale, 1)); line-height: 1.45; }
+html.oai-font-global .pr-content-card { font-size: calc(16px * var(--app-font-scale, 1)); line-height: 2.05; }
+html.oai-font-global .pr-body-title { font-size: calc(16px * var(--app-font-scale, 1)); line-height: 1.45; }
 html.oai-font-global .web-card-desc { font-size: var(--app-fs-body); line-height: 1.6; }
 
 html.oai-font-global .li-sub,
@@ -5972,7 +5972,7 @@ html.oai-font-global #cover #cover-bottom-note {
 html.oai-font-global #cover .cover-name,
 #cc-5 .cover-name,
 html.oai-font-global #cc-5 .cover-name {
-  font-size: calc(15.4px * var(--app-font-scale, 1)) !important;
+  font-size: calc(16px * var(--app-font-scale, 1)) !important;
   line-height: 1.2 !important;
   letter-spacing: -.03em !important;
   max-width: none !important;
@@ -6084,7 +6084,7 @@ html.oai-font-global .sheet-title {
 }
 
 
-/* V2-54: 나의 신앙생활 개인정보 안내문을 화면 배경 안쪽에 자연스럽게 배치 */
+/* V2-56: 나의 신앙생활 개인정보 안내문을 화면 배경 안쪽에 자연스럽게 배치 */
 .my-diocese-panel > .my-faith-privacy-note {
   display: none !important;
 }
@@ -6142,7 +6142,7 @@ html.oai-font-global #cover #cc-6 .cover-name {
 }
 
 
-/* V2-54: 교구 미설정 배너 중앙 정렬 + 나의 신앙생활 버튼 색상 안정화 */
+/* V2-56: 교구 미설정 배너 중앙 정렬 + 나의 신앙생활 버튼 색상 안정화 */
 #cover #cover-action-row.cover-action-single {
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -6178,7 +6178,7 @@ html.oai-font-global #cover #cc-6 .cover-name {
   border-radius: 17px !important;
   color: #1f2a44 !important;
   font-family: inherit !important;
-  font-size: calc(15.4px * var(--app-font-scale, 1)) !important;
+  font-size: calc(16px * var(--app-font-scale, 1)) !important;
   font-weight: 900 !important;
   line-height: 1.18 !important;
   letter-spacing: -.03em !important;
@@ -6218,7 +6218,7 @@ html.oai-font-global #cover #cc-6 .cover-name {
   overflow: hidden !important;
   text-overflow: ellipsis !important;
   white-space: nowrap !important;
-  font-size: calc(15.4px * var(--app-font-scale, 1)) !important;
+  font-size: calc(16px * var(--app-font-scale, 1)) !important;
   font-weight: 900 !important;
   line-height: 1.18 !important;
   color: #1f2a44 !important;
@@ -6515,7 +6515,7 @@ html.oai-font-global #cover #cc-6 .cover-name {
   word-break: keep-all !important;
 }
 
-/* V2-54: 나의 신앙생활 선택값 제목 강조 - 카드보다 조금 진한 배경과 분리선 */
+/* V2-56: 나의 신앙생활 선택값 제목 강조 - 카드보다 조금 진한 배경과 분리선 */
 .my-faith-section h3 {
   margin: 0 !important;
   padding: 15px 15px 13px !important;
@@ -6642,7 +6642,7 @@ html.oai-font-global #cover #cc-6 .cover-name {
 }
 
 
-/* V2-54: 나의 본당 찾기 화면은 전체 본문이 아니라 결과 리스트만 안정적으로 끝까지 스크롤되도록 정리 */
+/* V2-56: 나의 본당 찾기 화면은 전체 본문이 아니라 결과 리스트만 안정적으로 끝까지 스크롤되도록 정리 */
 .my-faith-body.my-faith-search-body {
   overflow: hidden !important;
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 14px) !important;
@@ -6754,7 +6754,7 @@ html.oai-font-global #cover #cc-6 .cover-name {
   .my-diocese-list { grid-template-columns: 1fr !important; }
 }
 
-/* V2-54: 나의 본당 찾기 검색창 높이 보강 */
+/* V2-56: 나의 본당 찾기 검색창 높이 보강 */
 .my-faith-search-input {
   height: 56px !important;
   min-height: 56px !important;
@@ -6765,3 +6765,75 @@ html.oai-font-global #cover #cc-6 .cover-name {
 .my-faith-body.my-faith-search-body .my-faith-search-results {
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 22px) !important;
 }
+
+/* V2-56: 나의 신앙생활 선택값 제목 배경 강화 + 성당 검색창 가시성 보강 */
+.my-faith-section.my-faith-diocese-section h3 {
+  background: #E8D7BB !important;
+  border-bottom-color: rgba(158,105,31,.32) !important;
+  color: #17172A !important;
+}
+.my-faith-section.my-faith-parish-section h3 {
+  background: #DCE8D9 !important;
+  border-bottom-color: rgba(47,133,90,.30) !important;
+  color: #17172A !important;
+}
+.my-faith-section.my-faith-search-section h3 {
+  background: #DCE6F1 !important;
+  border-bottom-color: rgba(37,99,235,.22) !important;
+  color: #172033 !important;
+}
+.my-faith-search-input {
+  height: 62px !important;
+  min-height: 62px !important;
+  border-radius: 17px !important;
+  border: 2px solid rgba(126,104,74,.42) !important;
+  background: #FFFCF6 !important;
+  color: #111827 !important;
+  font-size: calc(17px * var(--app-font-scale, 1)) !important;
+  font-weight: 850 !important;
+  padding: 0 17px !important;
+  box-shadow: 0 0 0 3px rgba(183,121,31,.08), 0 8px 18px rgba(31,42,68,.08), inset 0 1px 0 rgba(255,255,255,.96) !important;
+}
+.my-faith-search-input::placeholder {
+  color: rgba(79,63,43,.70) !important;
+  font-weight: 800 !important;
+}
+.my-faith-search-input:focus {
+  border-color: rgba(183,121,31,.72) !important;
+  background: #FFFFFF !important;
+  box-shadow: 0 0 0 4px rgba(183,121,31,.14), 0 10px 20px rgba(31,42,68,.10), inset 0 1px 0 rgba(255,255,255,.98) !important;
+}
+
+/* V2-56: 커버 카테고리 · 매일미사/기도문/성가 배너 · 기도문 본문 글자 크기 통일 */
+:root {
+  --oai-unified-reading-fs: calc(16px * var(--app-font-scale, 1));
+}
+#cover .cover-name,
+html.oai-font-global #cover .cover-name,
+#cover #cc-1 .cover-name,
+html.oai-font-global #cover #cc-1 .cover-name,
+#cover #cc-5 .cover-name,
+html.oai-font-global #cover #cc-5 .cover-name,
+#cover #cc-6 .cover-name,
+html.oai-font-global #cover #cc-6 .cover-name,
+#cover #cc-7 .cover-name,
+html.oai-font-global #cover #cc-7 .cover-name {
+  font-size: var(--oai-unified-reading-fs) !important;
+  line-height: 1.22 !important;
+  font-weight: 850 !important;
+}
+#missa-bar-title,
+#prayer-bar-ttl,
+#cover #mass-quick-modal .mass-quick-btn strong,
+html.oai-font-global #cover #mass-quick-modal .mass-quick-btn strong {
+  font-size: var(--oai-unified-reading-fs) !important;
+  line-height: 1.22 !important;
+  font-weight: 850 !important;
+}
+#prayer-view .pr-content-card,
+html.oai-font-global #prayer-view .pr-content-card,
+#prayer-view .pr-body-title,
+html.oai-font-global #prayer-view .pr-body-title {
+  font-size: var(--oai-unified-reading-fs) !important;
+}
+
