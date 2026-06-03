@@ -503,7 +503,7 @@ firebase.initializeApp(FIREBASE_CONFIG);
 const db = firebase.firestore();
 const COL = db.collection("qa_posts");
 
-/* V2-63: 문의·건의는 비공개 접수 방식으로 운영한다. */
+/* V2-64: 문의·건의는 비공개 접수 방식으로 운영한다. */
 const QA_PRIVATE_MODE = true;
 const QA_COOLDOWN_MS = 60 * 1000;
 const QA_DAILY_LIMIT = 3;

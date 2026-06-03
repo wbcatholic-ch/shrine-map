@@ -5666,6 +5666,15 @@ function resetRoute(opts){
   }
 }
 
+function _isRouteImplicitCurrentStartHidden(){
+  try{
+    if(!_rS || !_rS.isImplicitCurrentLocation) return false;
+    const lbl=$('rs-start-lbl');
+    if(!lbl) return true;
+    return lbl.classList.contains('empty') || !String(lbl.textContent||'').trim() || String(lbl.textContent||'').indexOf('선택하세요')>=0;
+  }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
+}
+
 function _selectRouteItem(idx){
   const items=_getCurrentItems();
   const s=items[idx];
@@ -5673,11 +5682,14 @@ function _selectRouteItem(idx){
   if(_rS&&_rE){
   resetRoute();
   }
-  if(!_rS){
+  const shouldSetStart = !_rS || _isRouteImplicitCurrentStartHidden();
+  if(shouldSetStart){
   _routeRegionStart=null;
   _rS={idx,name:s.name,lat:s.lat,lng:s.lng};
+  _rE=null;
   if(_mode==='shrine'){ _markers[idx]?.marker.setImage(_mkrImgRoute('#ff0000','출')); _setRouteMarkerZ(idx,'start'); }
   _setRouteLabel('start',s.name);
+  _setRouteLabel('end','');
   _refreshRouteTmpMarkers();
   _showRouteGuideText(`도착 ${_getRouteGuideTarget()}를 탭하세요`);
   if(!_activeTab) openTab('route');
@@ -6299,7 +6311,7 @@ function _fmtTime(s){
 
     const root = document.documentElement;
     try{
-      // V2-63: 장시간 백그라운드 복귀 시 이전 카테고리 화면이 한 프레임 보이지 않게
+      // V2-64: 장시간 백그라운드 복귀 시 이전 카테고리 화면이 한 프레임 보이지 않게
       // 먼저 앱 화면을 숨기는 전용 상태를 걸고, 그 상태 안에서 기존 goToCover 정리 흐름을 탄다.
       root.classList.remove('oai-cover-first-reveal','oai-cover-under-intro-reveal','oai-ivory-wipe-transition','oai-internal-no-return-effect');
       root.classList.add('oai-cover-resetting-to-intro');
@@ -6309,7 +6321,7 @@ function _fmtTime(s){
     try{ _resetMapState(); }catch(e){ console.warn('[가톨릭길동무]', e); }
     try{ root.classList.add('oai-cover-booting','oai-first-entry-intro'); }catch(_e){}
 
-    // 첫 진입 인트로와 같은 타이밍을 그대로 사용한다. (V2-63: 십자가 안정 유지 시간 소폭 연장)
+    // 첫 진입 인트로와 같은 타이밍을 그대로 사용한다. (V2-64: 십자가 안정 유지 시간 소폭 연장)
     setTimeout(function(){
       try{ root.classList.add('oai-cover-under-intro-reveal'); }catch(_e){}
     }, 1520);
