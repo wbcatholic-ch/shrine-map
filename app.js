@@ -2067,7 +2067,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V2-79';
+const _PRAYER_ASSET_VERSION='V2-81';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -3542,7 +3542,7 @@ function _focusMarkerAboveInfoCard(item){
   if(!_map || !item || !item.lat || !item.lng) return;
   try{
     if(_mode==='parish' && !_routeMode){
-      // V2-79: 마커 클릭 후 인포카드를 열 때는 중심 이동만 하고,
+      // V2-81: 마커 클릭 후 인포카드를 열 때는 중심 이동만 하고,
       // 사용자가 보고 있던 확대/축소 수준은 유지한다.
       if(typeof _focusParishPointAround==='function' && _focusParishPointAround(item.lat,item.lng,{level:6,aboveInfoCard:true,noZoom:true})) return;
     }
@@ -5746,7 +5746,7 @@ function resetRoute(opts){
       _regionName=regionStart.placeName || regionStart.name || _regionName;
     }
     _ensureCurrentLocationStart();
-    // V2-79: 경로검색 결과의 '다시 선택'은 길찾기 재선택 카드로 돌아가는 동작이다.
+    // V2-81: 경로검색 결과의 '다시 선택'은 길찾기 재선택 카드로 돌아가는 동작이다.
     // 이때 도착지 위치로 지도를 돌리더라도 일반 선택 상태가 아니므로 노란 선택 마커와 인포카드는 띄우지 않는다.
     try{
       if(_mode==='shrine') _clearShrineMarkerSel();
@@ -6482,7 +6482,7 @@ function _fmtTime(s){
 
     const root = document.documentElement;
     try{
-      // V2-79: 장시간 백그라운드 복귀 시 이전 카테고리 화면이 한 프레임 보이지 않게
+      // V2-81: 장시간 백그라운드 복귀 시 이전 카테고리 화면이 한 프레임 보이지 않게
       // 먼저 앱 화면을 숨기는 전용 상태를 걸고, 그 상태 안에서 기존 goToCover 정리 흐름을 탄다.
       root.classList.remove('oai-cover-first-reveal','oai-cover-under-intro-reveal','oai-ivory-wipe-transition','oai-internal-no-return-effect');
       root.classList.add('oai-cover-resetting-to-intro');
@@ -6492,7 +6492,7 @@ function _fmtTime(s){
     try{ _resetMapState(); }catch(e){ console.warn('[가톨릭길동무]', e); }
     try{ root.classList.add('oai-cover-booting','oai-first-entry-intro'); }catch(_e){}
 
-    // 첫 진입 인트로와 같은 타이밍을 그대로 사용한다. (V2-79: 십자가 안정 유지 시간 소폭 연장)
+    // 첫 진입 인트로와 같은 타이밍을 그대로 사용한다. (V2-81: 십자가 안정 유지 시간 소폭 연장)
     setTimeout(function(){
       try{ root.classList.add('oai-cover-under-intro-reveal'); }catch(_e){}
     }, 1520);
