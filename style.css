@@ -6084,7 +6084,7 @@ html.oai-font-global .sheet-title {
 }
 
 
-/* V2-56: 나의 신앙생활 개인정보 안내문을 화면 배경 안쪽에 자연스럽게 배치 */
+/* V2-57: 나의 신앙생활 개인정보 안내문을 화면 배경 안쪽에 자연스럽게 배치 */
 .my-diocese-panel > .my-faith-privacy-note {
   display: none !important;
 }
@@ -6142,7 +6142,7 @@ html.oai-font-global #cover #cc-6 .cover-name {
 }
 
 
-/* V2-56: 교구 미설정 배너 중앙 정렬 + 나의 신앙생활 버튼 색상 안정화 */
+/* V2-57: 교구 미설정 배너 중앙 정렬 + 나의 신앙생활 버튼 색상 안정화 */
 #cover #cover-action-row.cover-action-single {
   display: grid !important;
   grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
@@ -6515,7 +6515,7 @@ html.oai-font-global #cover #cc-6 .cover-name {
   word-break: keep-all !important;
 }
 
-/* V2-56: 나의 신앙생활 선택값 제목 강조 - 카드보다 조금 진한 배경과 분리선 */
+/* V2-57: 나의 신앙생활 선택값 제목 강조 - 카드보다 조금 진한 배경과 분리선 */
 .my-faith-section h3 {
   margin: 0 !important;
   padding: 15px 15px 13px !important;
@@ -6642,7 +6642,7 @@ html.oai-font-global #cover #cc-6 .cover-name {
 }
 
 
-/* V2-56: 나의 본당 찾기 화면은 전체 본문이 아니라 결과 리스트만 안정적으로 끝까지 스크롤되도록 정리 */
+/* V2-57: 나의 본당 찾기 화면은 전체 본문이 아니라 결과 리스트만 안정적으로 끝까지 스크롤되도록 정리 */
 .my-faith-body.my-faith-search-body {
   overflow: hidden !important;
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 14px) !important;
@@ -6754,7 +6754,7 @@ html.oai-font-global #cover #cc-6 .cover-name {
   .my-diocese-list { grid-template-columns: 1fr !important; }
 }
 
-/* V2-56: 나의 본당 찾기 검색창 높이 보강 */
+/* V2-57: 나의 본당 찾기 검색창 높이 보강 */
 .my-faith-search-input {
   height: 56px !important;
   min-height: 56px !important;
@@ -6766,7 +6766,7 @@ html.oai-font-global #cover #cc-6 .cover-name {
   padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 22px) !important;
 }
 
-/* V2-56: 나의 신앙생활 선택값 제목 배경 강화 + 성당 검색창 가시성 보강 */
+/* V2-57: 나의 신앙생활 선택값 제목 배경 강화 + 성당 검색창 가시성 보강 */
 .my-faith-section.my-faith-diocese-section h3 {
   background: #E8D7BB !important;
   border-bottom-color: rgba(158,105,31,.32) !important;
@@ -6804,7 +6804,7 @@ html.oai-font-global #cover #cc-6 .cover-name {
   box-shadow: 0 0 0 4px rgba(183,121,31,.14), 0 10px 20px rgba(31,42,68,.10), inset 0 1px 0 rgba(255,255,255,.98) !important;
 }
 
-/* V2-56: 커버 카테고리 · 매일미사/기도문/성가 배너 · 기도문 본문 글자 크기 통일 */
+/* V2-57: 커버 카테고리 · 매일미사/기도문/성가 배너 · 기도문 본문 글자 크기 통일 */
 :root {
   --oai-unified-reading-fs: calc(16px * var(--app-font-scale, 1));
 }
@@ -6837,3 +6837,36 @@ html.oai-font-global #prayer-view .pr-body-title {
   font-size: var(--oai-unified-reading-fs) !important;
 }
 
+
+
+/* V2-57: 나의 신앙생활 기능 버튼은 배경을 차분하게 유지하고 글자색만 역할별로 은은하게 구분 */
+.my-faith-diocese-section .my-faith-actions .my-faith-action:nth-child(1) {
+  color: #6B4A24 !important;
+}
+.my-faith-diocese-section .my-faith-actions .my-faith-action:nth-child(2) {
+  color: #243B63 !important;
+}
+.my-faith-parish-section .my-faith-actions .my-faith-action:nth-child(1) {
+  color: #2F6045 !important;
+}
+.my-faith-parish-section .my-faith-actions .my-faith-action:nth-child(2) {
+  color: #40556D !important;
+}
+.my-faith-search-section .my-faith-actions .my-faith-action {
+  color: #4B5563 !important;
+}
+.my-faith-diocese-section .my-faith-actions .my-faith-action:nth-child(1)::after {
+  color: rgba(107,74,36,.58) !important;
+}
+.my-faith-diocese-section .my-faith-actions .my-faith-action:nth-child(2)::after {
+  color: rgba(36,59,99,.55) !important;
+}
+.my-faith-parish-section .my-faith-actions .my-faith-action:nth-child(1)::after {
+  color: rgba(47,96,69,.55) !important;
+}
+.my-faith-parish-section .my-faith-actions .my-faith-action:nth-child(2)::after {
+  color: rgba(64,85,109,.55) !important;
+}
+.my-faith-search-section .my-faith-actions .my-faith-action::after {
+  color: rgba(75,85,99,.52) !important;
+}
