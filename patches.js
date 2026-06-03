@@ -753,10 +753,11 @@
 
   /* 통합 뒤로가기 컨트롤러가 기도문을 처리하므로, 여기서는 목록 초기화만 담당한다.
      기도문 전용 history.pushState / 별도 popstate / 별도 backbutton은 사용하지 않는다. */
-  function showPrayerListOnly(){
+  function showPrayerListOnly(opts){
     blurActive();
     var d=el('prayer-detail');
     if(d) d.classList.remove('show');
+    if(opts && opts.skipRestore) return;
     if(typeof window.prRestoreListPosition === 'function'){
       try{ window.prRestoreListPosition(); }catch(_){ console.warn("[가톨릭길동무] silent catch"); }
     }
@@ -870,7 +871,7 @@
   window.__APP_FONT_SCALE_GUARD__=true;
   // V3-S: 커버 글자 크기 조절은 prayer.js에 의존하지 않는 공통 함수가 담당한다.
   // prayer.js는 기도문 화면이 열렸을 때 같은 localStorage 값을 읽어 자체 UI를 맞춘다.
-  var QA_URL="qa-firebase.html?v=V2-87";
+  var QA_URL="qa-firebase.html?v=V2-88";
   var FONT_KEY='prayer_font_size';
   var BASE=16;
   var FONT_SIZES=[13,14,15,16,17,18,19,20,21,22,24,26,28,30];
