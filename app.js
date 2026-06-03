@@ -3638,7 +3638,85 @@ function closeInfoCard(opts){
   }
 }
 
-function openInAppRoute(){
+function _hideInfoRouteRoleChoice(){
+  try{
+    const el=document.getElementById('route-role-choice');
+    if(el) el.classList.remove('open');
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+}
+
+function _ensureInfoRouteRoleChoice(){
+  let modal=document.getElementById('route-role-choice');
+  if(modal) return modal;
+  modal=document.createElement('div');
+  modal.id='route-role-choice';
+  modal.className='route-role-choice';
+  modal.innerHTML=`<div class="route-role-choice-panel" role="dialog" aria-modal="true" aria-label="경로검색 위치 선택">
+    <div class="rrc-title">경로검색 위치 선택</div>
+    <div class="rrc-desc" id="rrc-desc">선택한 장소를 출발지 또는 도착지로 설정하세요.</div>
+    <div class="rrc-actions">
+      <button type="button" class="rrc-btn rrc-start" data-role="start">출발지로 설정</button>
+      <button type="button" class="rrc-btn rrc-end" data-role="end">도착지로 설정</button>
+    </div>
+    <button type="button" class="rrc-cancel" data-role="cancel">취소</button>
+  </div>`;
+  modal.addEventListener('click',function(e){
+    if(e.target===modal || (e.target && e.target.dataset && e.target.dataset.role==='cancel')){
+      _hideInfoRouteRoleChoice();
+      return;
+    }
+    const btn=e.target && e.target.closest ? e.target.closest('[data-role]') : null;
+    if(!btn) return;
+    const role=btn.dataset.role;
+    if(role==='start'){
+      _hideInfoRouteRoleChoice();
+      _openInfoCardRouteAsStart();
+    }else if(role==='end'){
+      _hideInfoRouteRoleChoice();
+      _openInfoCardRouteAsDestination();
+    }
+  });
+  document.body.appendChild(modal);
+  return modal;
+}
+
+function _showInfoRouteRoleChoice(){
+  if(!_curInfoItem) return;
+  const item=_curInfoItem.item;
+  if(!item || !item.lat || !item.lng) return;
+  const modal=_ensureInfoRouteRoleChoice();
+  const desc=document.getElementById('rrc-desc');
+  if(desc) desc.textContent=`${item.name}을(를) 출발지 또는 도착지로 설정하세요.`;
+  modal.classList.add('open');
+}
+
+function _openInfoCardRouteAsStart(){
+  if(!_curInfoItem) return;
+  const {item, idx}=_curInfoItem;
+  if(!item.lat||!item.lng) return;
+  closeInfoCard({keepMap:true});
+  _routeRegionStart=null;
+  openTab('route');
+  _hide($('rs-result'));
+  const hint=$('rs-hint');
+  if(hint) hint.style.display='block';
+  if(_polyline){ _polyline.setMap(null); _polyline=null; }
+  _clearRouteTmpMarkers();
+  _rS={idx, name:item.name, lat:item.lat, lng:item.lng};
+  _rE=null;
+  _setRouteLabel('start', item.name);
+  _setRouteLabel('end', '');
+  if(_mode==='shrine' && idx>=0 && _markers[idx]){
+    _markers[idx].marker.setImage(_mkrImgRoute('#ff0000','출'));
+    _setRouteMarkerZ(idx,'start');
+  }
+  _refreshRouteTmpMarkers();
+  _enterRouteMode();
+  _showRouteGuideText(`도착 ${_getRouteGuideTarget()}를 탭하세요`);
+  _updateSearchBtn();
+}
+
+function _openInfoCardRouteAsDestination(){
   if(!_curInfoItem) return;
   const {item, idx}=_curInfoItem;
   if(!item.lat||!item.lng) return;
@@ -3678,6 +3756,10 @@ function openInAppRoute(){
    function(err){ alert(_geoErrorMessage(err)); }
   );
   }
+}
+
+function openInAppRoute(){
+  _showInfoRouteRoleChoice();
 }
 
 function openKakaoNav(){
@@ -6217,7 +6299,7 @@ function _fmtTime(s){
 
     const root = document.documentElement;
     try{
-      // V2-62: 장시간 백그라운드 복귀 시 이전 카테고리 화면이 한 프레임 보이지 않게
+      // V2-63: 장시간 백그라운드 복귀 시 이전 카테고리 화면이 한 프레임 보이지 않게
       // 먼저 앱 화면을 숨기는 전용 상태를 걸고, 그 상태 안에서 기존 goToCover 정리 흐름을 탄다.
       root.classList.remove('oai-cover-first-reveal','oai-cover-under-intro-reveal','oai-ivory-wipe-transition','oai-internal-no-return-effect');
       root.classList.add('oai-cover-resetting-to-intro');
@@ -6227,7 +6309,7 @@ function _fmtTime(s){
     try{ _resetMapState(); }catch(e){ console.warn('[가톨릭길동무]', e); }
     try{ root.classList.add('oai-cover-booting','oai-first-entry-intro'); }catch(_e){}
 
-    // 첫 진입 인트로와 같은 타이밍을 그대로 사용한다. (V2-62: 십자가 안정 유지 시간 소폭 연장)
+    // 첫 진입 인트로와 같은 타이밍을 그대로 사용한다. (V2-63: 십자가 안정 유지 시간 소폭 연장)
     setTimeout(function(){
       try{ root.classList.add('oai-cover-under-intro-reveal'); }catch(_e){}
     }, 1520);
