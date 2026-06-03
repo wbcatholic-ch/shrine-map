@@ -5411,7 +5411,7 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
   background: linear-gradient(180deg, #ece7de 0%, #ddd6c9 100%) !important;
   color: #1f2a44 !important;
   border: 1.5px solid rgba(31,42,68,.16) !important;
-  font-size: calc(13.2px * var(--app-font-scale)) !important;
+  font-size: calc(15px * var(--app-font-scale)) !important;
   font-weight: 900 !important;
   line-height: 1 !important;
   letter-spacing: -.02em !important;
@@ -6247,6 +6247,19 @@ html.oai-font-global #cover #cc-6 .cover-name {
 }
 #cover .cover-diocese-btn::before,
 #cover .cover-diocese-btn::after { content: none !important; display: none !important; }
+
+#cover .cover-diocese-btn .cover-faith-cross {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  flex: 0 0 auto !important;
+  margin-right: 6px !important;
+  color: #C62828 !important;
+  font-size: calc(18px * var(--app-font-scale, 1)) !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+}
+
 #cover .cover-diocese-btn .diocese-btn-label {
   display: block !important;
   max-width: 100% !important;
@@ -6776,6 +6789,11 @@ html.oai-font-global #cover #cc-6 .cover-name {
   #cover .cover-refresh-main-btn {
     font-size: calc(14.8px * var(--app-font-scale, 1)) !important;
   }
+  #cover .cover-diocese-btn .cover-faith-cross {
+    font-size: calc(16.8px * var(--app-font-scale, 1)) !important;
+    margin-right: 5px !important;
+  }
+
   #cover .my-diocese-setup-banner {
     left: 14px !important;
     right: 14px !important;
