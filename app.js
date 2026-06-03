@@ -3290,7 +3290,7 @@ function toggleTab(name){
   // 길찾기/지역검색/목록/내주변 시트 위에 잔상으로 남지 않게 한다.
   try{ closeInfoCard({keepMap:true}); }catch(e){ console.warn('[가톨릭길동무]', e); }
   _curFromRegion=false;
-  if(name==='route') resetRoute({fresh:!(_routeRegionStart&&_routeRegionStart.lat)});
+  if(name==='route') resetRoute({fresh:true});
   openTab(name, {keyboard:true});
 }
 
@@ -3487,7 +3487,7 @@ function _focusMarkerAboveInfoCard(item){
   if(!_map || !item || !item.lat || !item.lng) return;
   try{
     if(_mode==='parish' && !_routeMode){
-      // V2-68: 마커 클릭 후 인포카드를 열 때는 중심 이동만 하고,
+      // V2-69: 마커 클릭 후 인포카드를 열 때는 중심 이동만 하고,
       // 사용자가 보고 있던 확대/축소 수준은 유지한다.
       if(typeof _focusParishPointAround==='function' && _focusParishPointAround(item.lat,item.lng,{level:6,aboveInfoCard:true,noZoom:true})) return;
     }
@@ -3760,8 +3760,24 @@ function _openInfoCardRouteAsDestination(){
   }
 }
 
+function _hasExplicitRouteStartForInfoCard(){
+  try{
+    if(_curFromRegion && _regionLat && _regionLng) return true;
+    if(_routeRegionStart && _routeRegionStart.lat && _routeRegionStart.lng) return true;
+    if(!_rS || !_rS.lat || !_rS.lng) return false;
+    // 길찾기 탭이 내부적으로만 잡아 둔 '숨은 현재 위치'는
+    // 일반 인포카드에서는 출발지를 직접 지정한 상태로 보지 않는다.
+    if(_isRouteImplicitCurrentStartHidden && _isRouteImplicitCurrentStartHidden()) return false;
+    return true;
+  }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
+}
+
 function openInAppRoute(){
-  _showInfoRouteRoleChoice();
+  // 일반 인포카드 경로검색은 출발지가 없을 때만 출발/도착 선택창을 띄운다.
+  // 지역검색 출발지나 이미 지정된 출발지가 있으면 사용자를 다시 묻지 않고
+  // 선택한 성당·성지·피정의집을 도착지로 설정해 바로 경로검색한다.
+  if(_hasExplicitRouteStartForInfoCard && _hasExplicitRouteStartForInfoCard()) _openInfoCardRouteAsDestination();
+  else _showInfoRouteRoleChoice();
 }
 
 function openKakaoNav(){
@@ -5594,6 +5610,10 @@ function _updateSearchBtn(){
 }
 
 function doSearchRoute(){ document.activeElement&&document.activeElement.blur();
+  // 길찾기 탭에서 검색 버튼을 다시 누른 뒤에는 지역검색·인포카드 진입 경로보다
+  // 길찾기 탭의 출발지→도착지 자동 입력 규칙이 우선한다.
+  _routeRegionStart=null;
+  _curFromRegion=false;
   // 출발지가 자동 현재 위치로 잡혀 있는데 라벨만 숨겨져 있던 경우,
   // 실제 경로 표시 단계에서는 사용자에게 '현재 위치'를 명확히 보여 준다.
   if(_rS && (_rS.name === '현재 위치' || _rS.name === '현위치')) _setImplicitCurrentLocationStartLabelVisible(true);
@@ -6402,7 +6422,7 @@ function _fmtTime(s){
 
     const root = document.documentElement;
     try{
-      // V2-68: 장시간 백그라운드 복귀 시 이전 카테고리 화면이 한 프레임 보이지 않게
+      // V2-69: 장시간 백그라운드 복귀 시 이전 카테고리 화면이 한 프레임 보이지 않게
       // 먼저 앱 화면을 숨기는 전용 상태를 걸고, 그 상태 안에서 기존 goToCover 정리 흐름을 탄다.
       root.classList.remove('oai-cover-first-reveal','oai-cover-under-intro-reveal','oai-ivory-wipe-transition','oai-internal-no-return-effect');
       root.classList.add('oai-cover-resetting-to-intro');
@@ -6412,7 +6432,7 @@ function _fmtTime(s){
     try{ _resetMapState(); }catch(e){ console.warn('[가톨릭길동무]', e); }
     try{ root.classList.add('oai-cover-booting','oai-first-entry-intro'); }catch(_e){}
 
-    // 첫 진입 인트로와 같은 타이밍을 그대로 사용한다. (V2-68: 십자가 안정 유지 시간 소폭 연장)
+    // 첫 진입 인트로와 같은 타이밍을 그대로 사용한다. (V2-69: 십자가 안정 유지 시간 소폭 연장)
     setTimeout(function(){
       try{ root.classList.add('oai-cover-under-intro-reveal'); }catch(_e){}
     }, 1520);
