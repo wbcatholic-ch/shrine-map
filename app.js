@@ -1496,7 +1496,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V2-92';
+    frame.src='diocese.html?v=V2-93';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1909,7 +1909,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V2-92';
+const _PARISH_ASSET_VERSION='V2-93';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -2072,7 +2072,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V2-92';
+const _PRAYER_ASSET_VERSION='V2-93';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2411,7 +2411,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V2-92';
+const _SHRINE_ASSET_VERSION='V2-93';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -5063,7 +5063,7 @@ function _loadNearby(opts){
     extra = extra || {};
     _myLat=lat;_myLng=lng;
     _saveLastGeo(lat,lng);
-    const distOpts={token:req, silent:extra.silent===true};
+    const distOpts={token:req, silent:extra.silent===true, keepCurrentList:extra.keepCurrentList===true};
     if(_mode==='shrine') _loadNearbyShrines(lat,lng,distOpts);
     else if(_mode==='retreat') _loadNearbyRetreats(lat,lng,distOpts);
     else _loadNearbyParishes(lat,lng,distOpts);
@@ -5086,7 +5086,7 @@ function _loadNearby(opts){
           go(cached.lat,cached.lng);
           setTimeout(function(){
             try{
-              if(isCurrent()) _warmRefreshNearbyLocation(function(lat,lng){ go(lat,lng,{silent:true}); });
+              if(isCurrent()) _warmRefreshNearbyLocation(function(lat,lng){ go(lat,lng,{silent:true,keepCurrentList:true}); });
             }catch(e){ console.warn('[가톨릭길동무] 저장 위치 갱신 실패', e); }
           }, 500);
           return;
@@ -5142,7 +5142,7 @@ function _loadNearby(opts){
       go(cached.lat,cached.lng);
       setTimeout(function(){
         try{
-          if(isCurrent()) _warmRefreshNearbyLocation(function(lat,lng){ go(lat,lng,{silent:true}); });
+          if(isCurrent()) _warmRefreshNearbyLocation(function(lat,lng){ go(lat,lng,{silent:true,keepCurrentList:true}); });
         }catch(e){ console.warn('[가톨릭길동무] 저장 위치 갱신 실패', e); }
       }, 800);
       return;
@@ -5200,12 +5200,13 @@ function _loadNearbyWithDist(lat,lng,items,getIdx,getColor,getLabel,opts){
       if(!isCurrent()) return;
       done++;
       if(done===prelim.length){
-        _renderNearbyDone(prelim,results,getIdx,getColor,getLabel,'final',token);
+        _renderNearbyDone(prelim,results,getIdx,getColor,getLabel,'final',token,opts);
       }
     });
   });
 }
-function _renderNearbyDone(prelim,results,getIdx,getColor,getLabel,phase,token){
+function _renderNearbyDone(prelim,results,getIdx,getColor,getLabel,phase,token,opts){
+  opts = opts || {};
   if(token && !_isNearbyRequestCurrent(token)) return;
   const sorted=prelim.map((x,i)=>({x,r:results[i]||{km:x.d*1.35,dur:null}})).sort((a,b)=>a.r.km-b.r.km).slice(0,10);
   _nearbyCache=sorted.map(o=>o.x.p);
@@ -5214,6 +5215,11 @@ function _renderNearbyDone(prelim,results,getIdx,getColor,getLabel,phase,token){
   const body=$('nearby-body');
   if(!body) return;
   if(token && !_isNearbyRequestCurrent(token)) return;
+  // 저장된 위치 목록이 이미 표시된 뒤 실제 위치를 조용히 갱신할 때는
+  // 목록 DOM을 다시 그리지 않는다. 성지 재진입 시 내주변 목록이 두 번 뜨는 느낌을 막는다.
+  if(opts.silent === true && opts.keepCurrentList === true){
+    return;
+  }
   const scrollTop=body.scrollTop||0;
   body.innerHTML=sorted.map((o,i)=>{
     const idx=getIdx(o.x.p);
