@@ -7445,7 +7445,7 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
   box-shadow:none !important;
 }
 
-/* V2-96: Galaxy 일반 모델(작은 Android viewport) 전용 전체 UI compact 조정
+/* V2-97: Galaxy 일반 모델(작은 Android viewport) 전용 전체 UI compact 조정
    - Plus/Ultra급 넓은 화면은 건드리지 않음.
    - zoom/transform 축소를 쓰지 않고, 실제 글자/패딩/높이만 작게 조정한다.
    - 지도 중심, 마커, 길찾기, 뒤로가기 로직은 CSS에서 변경하지 않는다. */
@@ -8002,3 +8002,225 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
   }
 }
 
+
+/* V2-97: 나의 신앙생활 홈을 목록형 카드 + 오른쪽 버튼 구조로 정리 */
+.my-faith-body.my-faith-home-list-body {
+  gap: 12px !important;
+  padding-top: 14px !important;
+}
+.my-faith-intro-card {
+  border-radius: 16px !important;
+  border: 1px solid rgba(183,121,31,.22) !important;
+  background: linear-gradient(180deg,#FFFDF8 0%,#F8EEDC 100%) !important;
+  box-shadow: 0 7px 16px rgba(31,42,68,.08), inset 0 1px 0 rgba(255,255,255,.95) !important;
+  padding: 14px 15px !important;
+  color: #263244 !important;
+  box-sizing: border-box !important;
+}
+.my-faith-intro-card strong {
+  display: block !important;
+  font-size: calc(15.8px * var(--app-font-scale, 1)) !important;
+  line-height: 1.28 !important;
+  font-weight: 900 !important;
+  letter-spacing: -.04em !important;
+  margin-bottom: 4px !important;
+}
+.my-faith-intro-card span {
+  display: block !important;
+  font-size: calc(12.8px * var(--app-font-scale, 1)) !important;
+  line-height: 1.45 !important;
+  font-weight: 700 !important;
+  color: #6B5B45 !important;
+  letter-spacing: -.025em !important;
+  word-break: keep-all !important;
+}
+.my-faith-section.my-faith-list-section {
+  padding: 0 !important;
+  overflow: hidden !important;
+  background: #FFFFFF !important;
+  border-color: rgba(126,104,74,.18) !important;
+}
+.my-faith-section.my-faith-list-section h3 {
+  padding: 12px 14px 11px !important;
+  margin: 0 !important;
+  font-size: calc(15.6px * var(--app-font-scale, 1)) !important;
+  line-height: 1.25 !important;
+  font-weight: 900 !important;
+  letter-spacing: -.04em !important;
+  color: #172033 !important;
+  background: #F5EBDD !important;
+  border-bottom: 1px solid rgba(126,104,74,.18) !important;
+}
+.my-faith-section.my-faith-settings-section h3 {
+  background: #F1E5D2 !important;
+  border-bottom-color: rgba(183,121,31,.22) !important;
+}
+.my-faith-section.my-faith-quick-section h3 {
+  background: #EAF1EA !important;
+  border-bottom-color: rgba(47,133,90,.20) !important;
+}
+.my-faith-list-row {
+  display: grid !important;
+  grid-template-columns: minmax(0,1fr) auto !important;
+  align-items: center !important;
+  gap: 10px !important;
+  min-height: 64px !important;
+  padding: 10px 12px 10px 14px !important;
+  border-bottom: 1px solid rgba(126,104,74,.12) !important;
+  background: #FFFFFF !important;
+  box-sizing: border-box !important;
+}
+.my-faith-list-row:last-child {
+  border-bottom: 0 !important;
+}
+.my-faith-list-row.is-disabled {
+  background: #FAFAF8 !important;
+}
+.my-faith-row-main {
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 4px !important;
+}
+.my-faith-row-top {
+  display: flex !important;
+  align-items: center !important;
+  gap: 7px !important;
+  min-width: 0 !important;
+}
+.my-faith-row-top strong {
+  min-width: 0 !important;
+  color: #1F2937 !important;
+  font-size: calc(14.8px * var(--app-font-scale, 1)) !important;
+  line-height: 1.2 !important;
+  font-weight: 900 !important;
+  letter-spacing: -.04em !important;
+  white-space: nowrap !important;
+}
+.my-faith-row-status {
+  flex: 0 0 auto !important;
+  border-radius: 999px !important;
+  padding: 3px 7px 2px !important;
+  font-size: calc(10.7px * var(--app-font-scale, 1)) !important;
+  line-height: 1.1 !important;
+  font-weight: 900 !important;
+  letter-spacing: -.035em !important;
+}
+.my-faith-row-status.done {
+  background: #EAF5EC !important;
+  color: #2F855A !important;
+  border: 1px solid rgba(47,133,90,.20) !important;
+}
+.my-faith-row-status.needed {
+  background: #FFF4E5 !important;
+  color: #9A5E16 !important;
+  border: 1px solid rgba(183,121,31,.24) !important;
+}
+.my-faith-row-sub {
+  display: block !important;
+  min-width: 0 !important;
+  color: #6B7280 !important;
+  font-size: calc(12.4px * var(--app-font-scale, 1)) !important;
+  line-height: 1.32 !important;
+  font-weight: 700 !important;
+  letter-spacing: -.025em !important;
+  overflow: hidden !important;
+  text-overflow: ellipsis !important;
+  white-space: nowrap !important;
+}
+.my-faith-list-row.has-status-done .my-faith-row-sub {
+  color: #374151 !important;
+}
+.my-faith-row-btn {
+  min-width: 58px !important;
+  height: 36px !important;
+  padding: 0 12px !important;
+  border-radius: 999px !important;
+  border: 1.3px solid rgba(126,104,74,.24) !important;
+  background: #FFFDF8 !important;
+  color: #4B3A25 !important;
+  font-family: inherit !important;
+  font-size: calc(12.4px * var(--app-font-scale, 1)) !important;
+  font-weight: 900 !important;
+  letter-spacing: -.04em !important;
+  box-shadow: 0 4px 10px rgba(31,42,68,.08), inset 0 1px 0 rgba(255,255,255,.92) !important;
+  cursor: pointer !important;
+  touch-action: manipulation !important;
+  -webkit-tap-highlight-color: transparent !important;
+}
+.my-faith-row-btn-open {
+  border-color: rgba(47,133,90,.22) !important;
+  background: #F5FBF6 !important;
+  color: #2F6045 !important;
+}
+.my-faith-row-btn-set {
+  border-color: rgba(183,121,31,.28) !important;
+  background: #FFF8EA !important;
+  color: #7A4E14 !important;
+}
+.my-faith-row-btn:active {
+  transform: translateY(2px) scale(.98) !important;
+  box-shadow: 0 2px 6px rgba(31,42,68,.10), inset 0 2px 5px rgba(31,42,68,.08) !important;
+}
+.my-faith-row-btn:disabled {
+  color: #A0A7B2 !important;
+  border-color: rgba(156,163,175,.30) !important;
+  background: #F3F4F6 !important;
+  box-shadow: none !important;
+  cursor: default !important;
+}
+.my-faith-body.my-faith-home-list-body .my-faith-inline-privacy-note {
+  margin-top: 0 !important;
+}
+@media (max-width: 370px) and (max-height: 820px) {
+  html:not(.ios-device) .my-faith-body.my-faith-home-list-body {
+    gap: 9px !important;
+    padding: 10px 11px calc(18px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  html:not(.ios-device) .my-faith-intro-card {
+    border-radius: 14px !important;
+    padding: 11px 12px !important;
+  }
+  html:not(.ios-device) .my-faith-intro-card strong {
+    font-size: 13.9px !important;
+    line-height: 1.24 !important;
+  }
+  html:not(.ios-device) .my-faith-intro-card span {
+    font-size: 11.2px !important;
+    line-height: 1.38 !important;
+  }
+  html:not(.ios-device) .my-faith-section.my-faith-list-section {
+    padding: 0 !important;
+    border-radius: 14px !important;
+  }
+  html:not(.ios-device) .my-faith-section.my-faith-list-section h3 {
+    padding: 10px 12px 9px !important;
+    font-size: 13.8px !important;
+    line-height: 1.22 !important;
+  }
+  html:not(.ios-device) .my-faith-list-row {
+    min-height: 56px !important;
+    padding: 8px 10px 8px 12px !important;
+    gap: 7px !important;
+  }
+  html:not(.ios-device) .my-faith-row-top {
+    gap: 5px !important;
+  }
+  html:not(.ios-device) .my-faith-row-top strong {
+    font-size: 13px !important;
+  }
+  html:not(.ios-device) .my-faith-row-status {
+    font-size: 9.7px !important;
+    padding: 2px 5px !important;
+  }
+  html:not(.ios-device) .my-faith-row-sub {
+    font-size: 10.8px !important;
+    line-height: 1.26 !important;
+  }
+  html:not(.ios-device) .my-faith-row-btn {
+    min-width: 52px !important;
+    height: 32px !important;
+    padding: 0 9px !important;
+    font-size: 11.2px !important;
+  }
+}
