@@ -197,6 +197,34 @@
     return closeGeneralModuleToCover('back-general-module');
   }
 
+  function isNearbySheetVisiblyOpen(){
+    try{
+      var sheet = $b('sheet-nearby');
+      if(!sheet) return false;
+      if(sheet.classList.contains('open') || sheet.classList.contains('oai-preopen-nearby')) return true;
+      var st = window.getComputedStyle ? window.getComputedStyle(sheet) : null;
+      if(st && st.display !== 'none' && st.visibility !== 'hidden'){
+        var r = sheet.getBoundingClientRect ? sheet.getBoundingClientRect() : null;
+        if(r && r.height > 40 && r.bottom > 0 && r.top < window.innerHeight) return true;
+      }
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+    return false;
+  }
+
+  function closeNearbySheetBeforeCover(reason){
+    try{
+      if(!isNearbySheetVisiblyOpen()) return false;
+      if(typeof window.closeSheetPanelOnly === 'function') window.closeSheetPanelOnly('nearby');
+      else {
+        var sheet = $b('sheet-nearby');
+        if(sheet) sheet.classList.remove('open','oai-preopen-nearby','from-left','from-right','exit-left','exit-right');
+        try{ if(typeof _activeTab !== 'undefined' && _activeTab === 'nearby') _activeTab = null; }catch(_e){}
+        try{ if(typeof _updateTabBtns === 'function') _updateTabBtns(null); }catch(_e){}
+      }
+      return true;
+    }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
+  }
+
   /* ── 카테고리 레이어 닫기 (하나씩) ── */
   function closeLayer(){
     var el;
@@ -239,6 +267,8 @@
         return true;
       }
     }catch(e){ console.warn("[가톨릭길동무]", e); }
+
+    if(closeNearbySheetBeforeCover('nearby-sheet-back-first')) return true;
 
     el = $b('info-card');
     if(el && el.classList.contains('open')){
@@ -871,7 +901,7 @@
   window.__APP_FONT_SCALE_GUARD__=true;
   // V3-S: 커버 글자 크기 조절은 prayer.js에 의존하지 않는 공통 함수가 담당한다.
   // prayer.js는 기도문 화면이 열렸을 때 같은 localStorage 값을 읽어 자체 UI를 맞춘다.
-  var QA_URL="qa-firebase.html?v=V2-94";
+  var QA_URL="qa-firebase.html?v=V2-96";
   var FONT_KEY='prayer_font_size';
   var BASE=16;
   var FONT_SIZES=[13,14,15,16,17,18,19,20,21,22,24,26,28,30];

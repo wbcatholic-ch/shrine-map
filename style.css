@@ -7444,3 +7444,561 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
   border:0 !important;
   box-shadow:none !important;
 }
+
+/* V2-96: Galaxy 일반 모델(작은 Android viewport) 전용 전체 UI compact 조정
+   - Plus/Ultra급 넓은 화면은 건드리지 않음.
+   - zoom/transform 축소를 쓰지 않고, 실제 글자/패딩/높이만 작게 조정한다.
+   - 지도 중심, 마커, 길찾기, 뒤로가기 로직은 CSS에서 변경하지 않는다. */
+@media (max-width: 370px) and (max-height: 820px) {
+  html:not(.ios-device) {
+    --app-font-scale: .94;
+    --tab-h: 70px;
+    --oai-std-header-h: 64px;
+    --oai-std-tabbar-h: 46px;
+    --oai-std-tab-btn-h: 34px;
+    --oai-std-btn-h: 34px;
+    --oai-std-title-fs: 18px;
+    --oai-std-sub-fs: 10.4px;
+    --oai-std-btn-fs: 13px;
+    --oai-std-icon-sz: 24px;
+    --oai-std-close-sz: 36px;
+    --oai-std-hdr-pad: calc(8px + env(safe-area-inset-top, 0px));
+    --oai-website-header-h: 64px;
+    --oai-website-tabbar-h: 46px;
+    --oai-website-tab-btn-h: 34px;
+    --oai-website-title-fs: 18px;
+    --oai-website-sub-fs: 10.8px;
+    --oai-website-tab-fs: 14px;
+    --oai-website-card-title-fs: 16px;
+    --oai-website-card-body-fs: 12.4px;
+    --oai-website-card-meta-fs: 11px;
+    --pr-item-fs: 15px;
+    --pr-body-fs: 15px;
+    --pr-detail-fs: 15px;
+    --pr-icon-fs: 15px;
+    --pr-icon-sz: 32px;
+    --cover-emoji-size: 34px;
+    --oai-search-std-h: 38px;
+    --oai-search-std-fs: 13.8px;
+  }
+
+  html:not(.ios-device) #cover {
+    --cover-top-safe: calc(env(safe-area-inset-top, 0px) + clamp(58px, calc(var(--cover-vh, 1vh) * 8.4), 74px));
+    --cover-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + clamp(10px, calc(var(--cover-vh, 1vh) * 1.5), 18px));
+    padding-top: var(--cover-top-safe) !important;
+    padding-bottom: var(--cover-bottom-safe) !important;
+  }
+  html:not(.ios-device) #cover .cover-header {
+    padding: 2px 8px 5px !important;
+  }
+  html:not(.ios-device) #cover .cover-title {
+    font-size: clamp(29px, 8.05vw, 36px) !important;
+    line-height: 1.10 !important;
+    letter-spacing: -.035em !important;
+  }
+  html:not(.ios-device) #cover .cover-title::after {
+    margin-top: 6px !important;
+  }
+  html:not(.ios-device) #cover .cover-subtitle {
+    font-size: 13.5px !important;
+    line-height: 1.28 !important;
+    margin-bottom: 4px !important;
+  }
+  html:not(.ios-device) #cover-main-block {
+    max-width: calc(100vw - 16px) !important;
+    gap: 5px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+    padding-bottom: 0 !important;
+    transform: none !important;
+  }
+  html:not(.ios-device) #cover .cover-grid {
+    row-gap: 4px !important;
+    column-gap: 5px !important;
+  }
+  html:not(.ios-device) #cover .cover-card {
+    padding: 5px 5px 4px !important;
+    gap: 3px !important;
+    border-radius: 15px !important;
+  }
+  html:not(.ios-device) #cover .cover-card::after {
+    left: 3px !important;
+    right: 3px !important;
+    top: 3px !important;
+    bottom: 3px !important;
+    border-radius: 12px !important;
+  }
+  html:not(.ios-device) #cover .cover-icon-wrap {
+    width: clamp(34px, 9.7vw, 42px) !important;
+    min-width: clamp(34px, 9.7vw, 42px) !important;
+    height: clamp(34px, 9.7vw, 42px) !important;
+    margin-bottom: 2px !important;
+  }
+  html:not(.ios-device) #cover .cover-emoji {
+    font-size: 34px !important;
+    line-height: 1.08 !important;
+  }
+  html:not(.ios-device) #cover .cover-name,
+  html:not(.ios-device) #cover #cc-6 .cover-name,
+  html:not(.ios-device).oai-font-global #cover #cc-6 .cover-name {
+    font-size: 14px !important;
+    line-height: 1.12 !important;
+    letter-spacing: -.04em !important;
+  }
+  html:not(.ios-device) #cover #cover-action-row.cover-action-single {
+    height: 50px !important;
+    min-height: 50px !important;
+    max-height: 50px !important;
+    flex-basis: 50px !important;
+    gap: 5px !important;
+  }
+  html:not(.ios-device) #cover #cover-action-row.cover-action-single #cover-diocese-box,
+  html:not(.ios-device) #cover #cover-action-row.cover-action-single #cover-update-box,
+  html:not(.ios-device) #cover .cover-diocese-btn,
+  html:not(.ios-device) #cover .cover-refresh-main-btn {
+    height: 50px !important;
+    min-height: 50px !important;
+    max-height: 50px !important;
+  }
+  html:not(.ios-device) #cover .cover-diocese-btn,
+  html:not(.ios-device) #cover .cover-refresh-main-btn {
+    border-radius: 15px !important;
+    font-size: 13.8px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+  html:not(.ios-device) #cover .cover-diocese-btn .cover-faith-cross {
+    font-size: 16.5px !important;
+    margin-right: 5px !important;
+    transform: translateY(-1px) !important;
+  }
+  html:not(.ios-device) #cover .cover-diocese-btn .diocese-btn-label {
+    font-size: 13.8px !important;
+  }
+  html:not(.ios-device) #cover-bottom-note {
+    bottom: calc(env(safe-area-inset-bottom, 0px) - 18px) !important;
+    padding: 0 12px !important;
+    font-size: 7.8px !important;
+    line-height: 1.24 !important;
+    letter-spacing: -.045em !important;
+  }
+
+  html:not(.ios-device) #tabbar {
+    height: calc(var(--tab-h) + env(safe-area-inset-top, 0px)) !important;
+    min-height: calc(var(--tab-h) + env(safe-area-inset-top, 0px)) !important;
+    padding: calc(env(safe-area-inset-top, 0px) + 5px) 5px 6px !important;
+    gap: 4px !important;
+  }
+  html:not(.ios-device) #tabbar .tab-btn,
+  html:not(.ios-device) .tab-btn {
+    height: 58px !important;
+    min-height: 58px !important;
+    padding: 5px 1px 5px !important;
+    gap: 3px !important;
+    border-radius: 11px !important;
+    font-size: 11.6px !important;
+    line-height: 1.08 !important;
+  }
+  html:not(.ios-device) #tabbar .tab-icon,
+  html:not(.ios-device) .tab-icon {
+    font-size: 17px !important;
+  }
+  html:not(.ios-device) #tabbar .tab-btn.active .tab-icon,
+  html:not(.ios-device) .tab-btn.active .tab-icon {
+    font-size: 18px !important;
+  }
+
+  html:not(.ios-device) .sheet-hd {
+    padding: 9px 10px !important;
+    min-height: 52px !important;
+  }
+  html:not(.ios-device) .sheet-title,
+  html:not(.ios-device).oai-font-global .sheet-title,
+  html:not(.ios-device).oai-font-global .module-bar-title {
+    font-size: 16px !important;
+    line-height: 1.18 !important;
+  }
+  html:not(.ios-device) .sheet-x,
+  html:not(.ios-device) .module-close,
+  html:not(.ios-device) #prayer-close {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    flex-basis: 36px !important;
+    font-size: 24px !important;
+  }
+  html:not(.ios-device) .srch-bar,
+  html:not(.ios-device) .filter-bar,
+  html:not(.ios-device) .region-wrap {
+    padding-top: 5px !important;
+    padding-bottom: 5px !important;
+  }
+  html:not(.ios-device) .filter-bar {
+    gap: 5px !important;
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+  }
+  html:not(.ios-device) .srch-inner,
+  html:not(.ios-device) #srch-modal .sm-si {
+    height: 36px !important;
+    min-height: 36px !important;
+    padding-left: 11px !important;
+    padding-right: 11px !important;
+  }
+  html:not(.ios-device) .srch-inner input,
+  html:not(.ios-device) #srch-modal .sm-si input {
+    font-size: 13.8px !important;
+  }
+  html:not(.ios-device) .filter-btn,
+  html:not(.ios-device) .region-search-btn,
+  html:not(.ios-device) .sm-fb,
+  html:not(.ios-device) .sm-tab {
+    min-height: 28px !important;
+    height: 28px !important;
+    padding: 0 8px !important;
+    border-radius: 10px !important;
+    font-size: 11.6px !important;
+  }
+  html:not(.ios-device) .list-item,
+  html:not(.ios-device) .nearby-item,
+  html:not(.ios-device) .region-item,
+  html:not(.ios-device).oai-font-global .region-item {
+    margin: 0 8px 5px !important;
+    padding: 9px 11px !important;
+    gap: 9px !important;
+    min-height: 62px !important;
+    border-radius: 12px !important;
+    align-items: center !important;
+  }
+  html:not(.ios-device) .nearby-num {
+    width: 30px !important;
+    height: 30px !important;
+    min-width: 30px !important;
+    font-size: 13px !important;
+  }
+  html:not(.ios-device) .li-name,
+  html:not(.ios-device) .nearby-name,
+  html:not(.ios-device) .sm-name,
+  html:not(.ios-device) .sm-place-name,
+  html:not(.ios-device).oai-font-global .nearby-name,
+  html:not(.ios-device).oai-font-global #region-body .nearby-name,
+  html:not(.ios-device).oai-font-global .region-item .nearby-name,
+  html:not(.ios-device).oai-font-global .li-name,
+  html:not(.ios-device).oai-font-global .sm-name,
+  html:not(.ios-device).oai-font-global .sm-place-name {
+    font-size: 14.8px !important;
+    line-height: 1.26 !important;
+  }
+  html:not(.ios-device) .li-sub,
+  html:not(.ios-device) .nearby-addr,
+  html:not(.ios-device) .sm-sub,
+  html:not(.ios-device) .sm-place-addr,
+  html:not(.ios-device).oai-font-global .nearby-addr,
+  html:not(.ios-device).oai-font-global #region-body .nearby-addr,
+  html:not(.ios-device).oai-font-global .region-item .nearby-addr,
+  html:not(.ios-device).oai-font-global .li-sub,
+  html:not(.ios-device).oai-font-global .sm-sub,
+  html:not(.ios-device).oai-font-global .sm-place-addr {
+    font-size: 11.7px !important;
+    line-height: 1.28 !important;
+    margin-top: 2px !important;
+  }
+  html:not(.ios-device) .li-badge,
+  html:not(.ios-device) .nearby-type {
+    font-size: 10.8px !important;
+    padding: 4px 8px !important;
+  }
+  html:not(.ios-device) .nearby-meta {
+    min-width: 58px !important;
+    line-height: 1.35 !important;
+  }
+  html:not(.ios-device) .nearby-dist {
+    font-size: 13.8px !important;
+    margin-top: 2px !important;
+  }
+
+  html:not(.ios-device) #info-card {
+    max-height: 46vh !important;
+    border-radius: 18px 18px 0 0 !important;
+  }
+  html:not(.ios-device) #info-card .ic-header {
+    padding: 10px 12px 5px !important;
+  }
+  html:not(.ios-device) #info-card .ic-name,
+  html:not(.ios-device) #app #info-card .ic-name {
+    font-size: 15px !important;
+    line-height: 1.24 !important;
+  }
+  html:not(.ios-device) #info-card .ic-close-btn {
+    width: 30px !important;
+    height: 30px !important;
+    font-size: 20px !important;
+  }
+  html:not(.ios-device) #info-card .ic-meta {
+    padding: 0 12px 5px !important;
+  }
+  html:not(.ios-device) #info-card .ic-addr-row {
+    gap: 7px !important;
+    padding: 0 12px 8px !important;
+  }
+  html:not(.ios-device) #app #info-card .ic-addr-val {
+    font-size: 13.8px !important;
+    line-height: 1.34 !important;
+  }
+  html:not(.ios-device) #app #info-card .ic-sub,
+  html:not(.ios-device) #app #info-card .ic-addr-lbl,
+  html:not(.ios-device) #app #info-card .ic-dist-lbl,
+  html:not(.ios-device) #app #info-card .ic-type-badge {
+    font-size: 11.2px !important;
+  }
+  html:not(.ios-device) #app #info-card .ic-dist-box {
+    font-size: 13px !important;
+    padding: 5px 8px !important;
+  }
+  html:not(.ios-device) #info-card .ic-btn-row,
+  html:not(.ios-device) #info-card .ic-links {
+    gap: 5px !important;
+    padding: 8px 12px 0 !important;
+  }
+  html:not(.ios-device) #info-card .ic-tel-btn,
+  html:not(.ios-device) #info-card .ic-route-btn,
+  html:not(.ios-device) #info-card .ic-link-btn,
+  html:not(.ios-device) #info-card .btn-kakao-nav,
+  html:not(.ios-device) #info-card .btn-kakao-route,
+  html:not(.ios-device) #info-card .btn-route-reset {
+    height: 38px !important;
+    min-height: 38px !important;
+    border-radius: 9px !important;
+    font-size: 12.5px !important;
+  }
+
+  html:not(.ios-device) #prayer-tabs,
+  html:not(.ios-device) #web-view .web-cats,
+  html:not(.ios-device) #trail-view .trail-tabs,
+  html:not(.ios-device) #qna-view .qna-tabs {
+    height: 46px !important;
+    min-height: 46px !important;
+    max-height: 46px !important;
+    padding: 6px 9px !important;
+    gap: 5px !important;
+  }
+  html:not(.ios-device) #prayer-tabs .pr-tab,
+  html:not(.ios-device) #web-view .web-cat-btn,
+  html:not(.ios-device) #trail-view .trail-tab,
+  html:not(.ios-device) #qna-view .qna-tab {
+    height: 34px !important;
+    min-height: 34px !important;
+    max-height: 34px !important;
+    padding: 0 9px !important;
+    border-radius: 11px !important;
+    font-size: 13.2px !important;
+  }
+  html:not(.ios-device) #prayer-search-bar {
+    min-height: 45px !important;
+    padding: 6px 9px 5px !important;
+    gap: 6px !important;
+  }
+  html:not(.ios-device) #prayer-search-bar #prayer-search-inp,
+  html:not(.ios-device) #prayer-search-inp {
+    height: 34px !important;
+    min-height: 34px !important;
+    font-size: 13.2px !important;
+  }
+  html:not(.ios-device) #prayer-search-bar .pr-font-ctrl {
+    height: 34px !important;
+    min-height: 34px !important;
+    min-width: 70px !important;
+  }
+  html:not(.ios-device) #prayer-list-view {
+    padding: 8px 9px calc(20px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+  html:not(.ios-device) #prayer-list-view .pr-item,
+  html:not(.ios-device) #pr-list-ul .pr-item,
+  html:not(.ios-device) .pr-item {
+    min-height: 62px !important;
+    padding: 11px 10px !important;
+    gap: 7px !important;
+    border-radius: 10px !important;
+  }
+  html:not(.ios-device) .pr-item-left {
+    gap: 8px !important;
+  }
+  html:not(.ios-device) .pr-title,
+  html:not(.ios-device).oai-font-global .pr-title {
+    font-size: 15px !important;
+    line-height: 1.28 !important;
+  }
+  html:not(.ios-device) .pr-star {
+    font-size: 18px !important;
+  }
+  html:not(.ios-device) #prayer-detail-body {
+    padding: 12px 11px 28px !important;
+  }
+  html:not(.ios-device) .pr-content-card {
+    padding: 16px 14px !important;
+    font-size: 15px !important;
+    line-height: 1.92 !important;
+  }
+  html:not(.ios-device) .pr-body-title {
+    font-size: 15px !important;
+    line-height: 1.36 !important;
+    margin-bottom: 14px !important;
+    padding-bottom: 10px !important;
+  }
+
+  html:not(.ios-device) .module-bar,
+  html:not(.ios-device) #prayer-bar,
+  html:not(.ios-device) #diocese-bar,
+  html:not(.ios-device) #web-view .module-bar,
+  html:not(.ios-device) #trail-view .module-bar,
+  html:not(.ios-device) #qna-view .module-bar,
+  html:not(.ios-device) #diocese-module-bar {
+    height: calc(64px + env(safe-area-inset-top, 0px)) !important;
+    min-height: calc(64px + env(safe-area-inset-top, 0px)) !important;
+    max-height: calc(64px + env(safe-area-inset-top, 0px)) !important;
+    padding: calc(8px + env(safe-area-inset-top, 0px)) 11px 8px !important;
+  }
+  html:not(.ios-device) .module-bar-main,
+  html:not(.ios-device) #web-view .module-bar-main,
+  html:not(.ios-device) #trail-view .module-bar-main,
+  html:not(.ios-device) #qna-view .module-bar-main,
+  html:not(.ios-device) #diocese-view .module-bar-main {
+    gap: 9px !important;
+  }
+  html:not(.ios-device) .module-bar-ico,
+  html:not(.ios-device) #web-view .module-bar-ico,
+  html:not(.ios-device) #trail-view .module-bar-ico,
+  html:not(.ios-device) #qna-view .module-bar-ico,
+  html:not(.ios-device) #diocese-view .module-bar-ico {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    flex-basis: 36px !important;
+    font-size: 20px !important;
+  }
+  html:not(.ios-device) #prayer-bar-ttl,
+  html:not(.ios-device) #prayer-bar .module-bar-title,
+  html:not(.ios-device) #web-view .module-bar-title,
+  html:not(.ios-device) #trail-view .module-bar-title,
+  html:not(.ios-device) #qna-view .module-bar-title,
+  html:not(.ios-device) #diocese-view .module-bar-title,
+  html:not(.ios-device) #diocese-bar-title {
+    font-size: 17.2px !important;
+    line-height: 1.16 !important;
+  }
+  html:not(.ios-device) #prayer-bar-sub,
+  html:not(.ios-device) #prayer-bar .module-bar-sub,
+  html:not(.ios-device) #web-view .module-bar-sub,
+  html:not(.ios-device) #trail-view .module-bar-sub,
+  html:not(.ios-device) #qna-view .module-bar-sub,
+  html:not(.ios-device) #diocese-view .module-bar-sub {
+    font-size: 9.8px !important;
+    line-height: 1.14 !important;
+  }
+
+  html:not(.ios-device) .web-card {
+    border-radius: 13px !important;
+    margin-bottom: 8px !important;
+  }
+  html:not(.ios-device) .web-card-top {
+    padding: 9px 11px 0 !important;
+  }
+  html:not(.ios-device) .web-card-body {
+    padding: 7px 11px 8px !important;
+    gap: 9px !important;
+  }
+  html:not(.ios-device) .web-card-foot {
+    padding: 7px 11px !important;
+  }
+  html:not(.ios-device) .web-card-ico {
+    width: 44px !important;
+    height: 44px !important;
+    border-radius: 10px !important;
+    font-size: 23px !important;
+  }
+  html:not(.ios-device) .web-card-name,
+  html:not(.ios-device).oai-font-global .web-card-name {
+    font-size: 15.5px !important;
+    line-height: 1.30 !important;
+  }
+  html:not(.ios-device) .web-card-desc,
+  html:not(.ios-device).oai-font-global .web-card-desc {
+    font-size: 12.2px !important;
+    line-height: 1.42 !important;
+  }
+  html:not(.ios-device) .web-card-badge,
+  html:not(.ios-device) .web-card-url,
+  html:not(.ios-device) .web-card-op {
+    font-size: 10.8px !important;
+  }
+
+  html:not(.ios-device) #trail-list {
+    gap: 3px !important;
+    padding-left: 10px !important;
+    padding-right: 10px !important;
+  }
+  html:not(.ios-device) #trail-list > .trail-card,
+  html:not(.ios-device) .trail-card {
+    min-height: 104px !important;
+    margin-bottom: 4px !important;
+    border-radius: 16px !important;
+  }
+  html:not(.ios-device) #trail-list .trail-nm,
+  html:not(.ios-device) #trail-sheet .trail-sh-name {
+    font-size: 15.5px !important;
+    line-height: 1.30 !important;
+  }
+  html:not(.ios-device) #trail-list .trail-reg,
+  html:not(.ios-device) #trail-sheet .trail-sh-region,
+  html:not(.ios-device) #trail-sheet .trail-sh-sub {
+    font-size: 12px !important;
+  }
+
+  html:not(.ios-device) #qna-view .qna-list {
+    padding: 10px !important;
+  }
+  html:not(.ios-device) #qna-view .qna-card {
+    padding: 12px !important;
+    margin-bottom: 9px !important;
+    border-radius: 14px !important;
+  }
+  html:not(.ios-device) #qna-view .qna-title {
+    font-size: 15px !important;
+    line-height: 1.30 !important;
+  }
+  html:not(.ios-device) #qna-view .qna-text {
+    font-size: 12.5px !important;
+    line-height: 1.50 !important;
+  }
+  html:not(.ios-device) #qna-view .qna-actions button {
+    height: 38px !important;
+    border-radius: 10px !important;
+    font-size: 12.5px !important;
+  }
+
+  html:not(.ios-device) .my-faith-body {
+    padding: 10px 12px calc(18px + env(safe-area-inset-bottom, 0px)) !important;
+    gap: 10px !important;
+  }
+  html:not(.ios-device) .my-faith-section {
+    padding: 12px !important;
+    border-radius: 15px !important;
+  }
+  html:not(.ios-device) .my-faith-section h3 {
+    font-size: 14.5px !important;
+    line-height: 1.28 !important;
+  }
+  html:not(.ios-device) .my-faith-section p {
+    font-size: 11.5px !important;
+    line-height: 1.40 !important;
+  }
+  html:not(.ios-device) .my-faith-action,
+  html:not(.ios-device) .my-faith-small-btn,
+  html:not(.ios-device) .my-faith-parish-result {
+    min-height: 38px !important;
+    border-radius: 11px !important;
+    font-size: 12.8px !important;
+    padding: 8px 10px !important;
+  }
+}
+
