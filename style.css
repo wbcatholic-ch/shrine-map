@@ -8224,3 +8224,80 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
     font-size: 11.2px !important;
   }
 }
+
+
+/* V2-98: 나의 신앙생활 색 대비 강화 + 설정 완료 후 정보 영역 노출 */
+.my-faith-body.my-faith-home-list-body {
+  background: #F6EBD8 !important;
+}
+.my-faith-body.my-faith-home-list-body .my-faith-intro-card {
+  border-color: #D6BE85 !important;
+  background: linear-gradient(180deg,#FFFFFF 0%,#FFFCF5 100%) !important;
+  box-shadow: 0 10px 20px rgba(31,42,68,.12), 0 2px 7px rgba(183,121,31,.10), inset 0 1px 0 rgba(255,255,255,.98) !important;
+}
+.my-faith-body.my-faith-home-list-body .my-faith-intro-card strong {
+  color: #7F1D1D !important;
+}
+.my-faith-body.my-faith-home-list-body .my-faith-section.my-faith-list-section {
+  background: #FFFFFF !important;
+  border: 1.4px solid #D6BE85 !important;
+  box-shadow: 0 10px 22px rgba(31,42,68,.13), 0 2px 8px rgba(183,121,31,.10) !important;
+}
+.my-faith-body.my-faith-home-list-body .my-faith-section.my-faith-list-section h3 {
+  color: #FFF8EA !important;
+  background: #7F1D1D !important;
+  border-bottom-color: rgba(127,29,29,.24) !important;
+}
+.my-faith-body.my-faith-home-list-body .my-faith-section.my-faith-quick-section h3 {
+  background: #1F2937 !important;
+  color: #FFF8EA !important;
+  border-bottom-color: rgba(31,41,55,.24) !important;
+}
+.my-faith-body.my-faith-home-list-body .my-faith-list-row {
+  background: #FFFFFF !important;
+  border-bottom-color: rgba(183,121,31,.18) !important;
+}
+.my-faith-body.my-faith-home-list-body .my-faith-list-row.is-disabled {
+  background: #F8FAFC !important;
+}
+.my-faith-body.my-faith-home-list-body .my-faith-row-btn-open {
+  border-color: #1F2937 !important;
+  background: #1F2937 !important;
+  color: #FFFFFF !important;
+}
+.my-faith-body.my-faith-home-list-body .my-faith-row-btn-set {
+  border-color: #B7791F !important;
+  background: #FFF8EA !important;
+  color: #7A3E12 !important;
+}
+.my-faith-body.my-faith-home-list-body .my-faith-row-status.done {
+  background: #E6F4EA !important;
+  color: #166534 !important;
+  border-color: rgba(22,101,52,.24) !important;
+}
+.my-faith-body.my-faith-home-list-body .my-faith-row-status.needed {
+  background: #FCE7E7 !important;
+  color: #9F1239 !important;
+  border-color: rgba(159,18,57,.20) !important;
+}
+.my-faith-next-step-note {
+  border: 1.4px dashed #B7791F !important;
+  border-radius: 15px !important;
+  background: rgba(255,252,245,.78) !important;
+  color: #7A4E14 !important;
+  font-size: calc(12.8px * var(--app-font-scale, 1)) !important;
+  line-height: 1.42 !important;
+  font-weight: 800 !important;
+  letter-spacing: -.03em !important;
+  padding: 11px 13px !important;
+  box-shadow: 0 6px 13px rgba(31,42,68,.07) !important;
+  box-sizing: border-box !important;
+}
+@media (max-width: 370px) and (max-height: 820px) {
+  html:not(.ios-device) .my-faith-next-step-note {
+    border-radius: 13px !important;
+    font-size: 11.2px !important;
+    line-height: 1.34 !important;
+    padding: 9px 11px !important;
+  }
+}
