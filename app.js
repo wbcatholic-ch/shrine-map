@@ -1496,7 +1496,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V2-91';
+    frame.src='diocese.html?v=V2-92';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1909,7 +1909,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V2-91';
+const _PARISH_ASSET_VERSION='V2-92';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -2072,7 +2072,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V2-91';
+const _PRAYER_ASSET_VERSION='V2-92';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2411,7 +2411,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V2-91';
+const _SHRINE_ASSET_VERSION='V2-92';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -3065,7 +3065,25 @@ function _onMapReady(){
   if(!window._noAutoNearby){
     // V3-S: 성당 첫 진입도 기존 기준대로 내주변 탭을 먼저 연다.
     // 교구별 분리 구조는 유지하되, 성당찾기 탭으로 자동 전환하지 않는다.
-    openTab('nearby');
+    var preopenedNearbySheet = $('sheet-nearby');
+    var usePreopenedNearby = (_mode==='shrine' || _mode==='retreat') && preopenedNearbySheet && preopenedNearbySheet.classList.contains('oai-preopen-nearby');
+    if(usePreopenedNearby){
+      try{ _clearRouteSwitchInfoCard('preopened-nearby'); }catch(e){ console.warn('[가톨릭길동무]', e); }
+      try{ resetRoute({fresh:true}); }catch(e){ console.warn('[가톨릭길동무]', e); }
+      try{ _clearRouteSwitchInfoCard('preopened-nearby-after-reset'); }catch(e){ console.warn('[가톨릭길동무]', e); }
+      try{ _exitRouteMode(); }catch(e){ console.warn('[가톨릭길동무]', e); }
+      try{ _restoreMapMarkers(); }catch(e){ console.warn('[가톨릭길동무]', e); }
+      _resetTabWork('nearby');
+      _activeTab='nearby';
+      preopenedNearbySheet.style.display='';
+      preopenedNearbySheet.classList.remove('from-left','from-right','exit-left','exit-right','oai-preopen-nearby');
+      preopenedNearbySheet.classList.add('open');
+      _updateTabBtns('nearby');
+      _loadNearby();
+      setTimeout(function(){ _scrollSheetTop('nearby'); }, 30);
+    }else{
+      openTab('nearby');
+    }
   }
   window._noAutoNearby = false;
   if(typeof oaiHideCategoryEntryVeil==='function') setTimeout(oaiHideCategoryEntryVeil, 260);
