@@ -8303,7 +8303,7 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
 }
 
 
-/* V2-101: 미사 중 빠른 사용 / 가톨릭길동무 메뉴 모달 헤더 색상 순례길 헤더 기준 통일 */
+/* V2-102: 미사 중 빠른 사용 / 가톨릭길동무 메뉴 모달 헤더 색상 순례길 헤더 기준 통일 */
 .cover-menu-panel,
 #cover #mass-quick-modal .mass-quick-panel {
   background: #FFFDF8 !important;
@@ -8408,32 +8408,33 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
 }
 
 
-/* V2-101: 빠른 사용/메뉴 모달 브라운 조합 재정리 + 빠른 메뉴 박스 높이 보정
-   - 헤더는 진한 브라운, 패널/버튼은 밝은 브라운 크림 계열로 통일
-   - 매일미사·주요기도문·가톨릭성가 박스는 색으로 강조하고 높이는 낮춰 비율을 안정화
+/* V2-102: 빠른 사용/메뉴 모달 브라운 색상 대비 재정리 + 두 모달 버튼 높이 통일
+   - 헤더는 네이비 기운을 줄인 진한 브라운으로 정리
+   - 패널 배경과 버튼 배경 대비를 키워 두 모달 모두 박스가 더 또렷하게 보이도록 조정
+   - 가톨릭길동무 메뉴 버튼 높이를 미사 빠른 사용 버튼과 같은 기준으로 복구
    - 기능/구조/이벤트 로직 변경 없음 */
 :root{
-  --oai-modal-brown-head:#3A3328;
+  --oai-modal-brown-head:#4A2F22;
   --oai-modal-brown-head-text:#FFF8EA;
-  --oai-modal-brown-sub:#E7D8B8;
-  --oai-modal-brown-panel:#F7EDDE;
-  --oai-modal-brown-box:#F4E8D4;
-  --oai-modal-brown-box-press:#ECDABE;
-  --oai-modal-brown-line:#D6BE85;
-  --oai-modal-brown-ink:#2B241F;
-  --oai-modal-brown-muted:#725E49;
+  --oai-modal-brown-sub:#F0DFC2;
+  --oai-modal-brown-panel:#EEDCC0;
+  --oai-modal-brown-box:#FFFDF8;
+  --oai-modal-brown-box-press:#F5E6CF;
+  --oai-modal-brown-line:#C49555;
+  --oai-modal-brown-ink:#2B211B;
+  --oai-modal-brown-muted:#6B513D;
 }
 .cover-menu-panel,
 #cover #mass-quick-modal .mass-quick-panel{
   background:var(--oai-modal-brown-panel) !important;
   border-color:rgba(214,190,133,.90) !important;
-  box-shadow:0 22px 48px rgba(43,36,31,.20), inset 0 1px 0 rgba(255,255,255,.86) !important;
+  box-shadow:0 22px 48px rgba(58,47,34,.18), inset 0 1px 0 rgba(255,255,255,.72) !important;
 }
 .cover-menu-head,
 #cover #mass-quick-modal .mass-quick-head{
   background:var(--oai-modal-brown-head) !important;
   border-color:var(--oai-modal-brown-line) !important;
-  box-shadow:0 8px 18px rgba(58,51,40,.22), inset 0 1px 0 rgba(255,255,255,.08) !important;
+  box-shadow:0 8px 18px rgba(74,47,34,.24), inset 0 1px 0 rgba(255,255,255,.08) !important;
 }
 .cover-menu-title,
 #cover #mass-quick-modal .mass-quick-title{
@@ -8452,22 +8453,29 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
   box-shadow:0 5px 12px rgba(0,0,0,.13) !important;
 }
 .cover-menu-list{
-  gap:8px !important;
+  gap:10px !important;
 }
 .cover-menu-item{
-  min-height:50px !important;
-  padding:0 14px !important;
-  border-radius:16px !important;
+  min-height:92px !important;
+  padding:15px 18px !important;
+  border-radius:20px !important;
   background:var(--oai-modal-brown-box) !important;
   border-color:var(--oai-modal-brown-line) !important;
   color:var(--oai-modal-brown-ink) !important;
-  box-shadow:0 5px 12px rgba(58,51,40,.08), inset 0 1px 0 rgba(255,255,255,.78) !important;
+  box-shadow:0 6px 14px rgba(74,47,34,.10), inset 0 1px 0 rgba(255,255,255,.88) !important;
 }
 .cover-menu-item:active{
   background:var(--oai-modal-brown-box-press) !important;
 }
 .cover-menu-icon{
+  width:48px !important;
+  height:48px !important;
+  min-width:48px !important;
+  display:flex !important;
+  align-items:center !important;
+  justify-content:center !important;
   color:#7A4E16 !important;
+  font-size:calc(29px * var(--app-font-scale, 1)) !important;
 }
 #cover #mass-quick-modal .mass-quick-actions{
   gap:10px !important;
@@ -8481,7 +8489,7 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
   background:var(--oai-modal-brown-box) !important;
   border-color:var(--oai-modal-brown-line) !important;
   color:var(--oai-modal-brown-ink) !important;
-  box-shadow:0 6px 14px rgba(58,51,40,.08), inset 0 1px 0 rgba(255,255,255,.78) !important;
+  box-shadow:0 6px 14px rgba(74,47,34,.10), inset 0 1px 0 rgba(255,255,255,.88) !important;
 }
 #cover #mass-quick-modal .mass-quick-btn:active,
 #cover #mass-quick-modal .mass-quick-primary:active{
@@ -8503,13 +8511,19 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
 }
 @media (max-width:370px) and (max-height:820px){
   html:not(.ios-device) .cover-menu-list{
-    gap:7px !important;
+    gap:8px !important;
   }
   html:not(.ios-device) .cover-menu-item{
-    min-height:45px !important;
-    padding:0 12px !important;
-    border-radius:14px !important;
-    font-size:13.2px !important;
+    min-height:78px !important;
+    padding:12px 14px !important;
+    border-radius:17px !important;
+    font-size:13.8px !important;
+  }
+  html:not(.ios-device) .cover-menu-icon{
+    width:40px !important;
+    height:40px !important;
+    min-width:40px !important;
+    font-size:24px !important;
   }
   html:not(.ios-device) #cover #mass-quick-modal .mass-quick-actions{
     gap:8px !important;
