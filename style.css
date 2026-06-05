@@ -8303,7 +8303,7 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
 }
 
 
-/* V2-99: 미사 중 빠른 사용 / 가톨릭길동무 메뉴 모달 헤더 통일 */
+/* V2-100: 미사 중 빠른 사용 / 가톨릭길동무 메뉴 모달 헤더 색상 순례길 헤더 기준 통일 */
 .cover-menu-panel,
 #cover #mass-quick-modal .mass-quick-panel {
   background: #FFFDF8 !important;
@@ -8320,10 +8320,10 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
   margin: 0 0 18px !important;
   padding: 15px 16px !important;
   box-sizing: border-box !important;
-  border: 1.4px solid #D6BE85 !important;
+  border: 1.4px solid var(--oai-gold-border, #c49a57) !important;
   border-radius: 22px !important;
-  background: linear-gradient(180deg, #FFF8EA 0%, #F3E7D4 100%) !important;
-  box-shadow: 0 8px 18px rgba(31,42,68,.09), inset 0 1px 0 rgba(255,255,255,.98) !important;
+  background: #0e1535 !important;
+  box-shadow: 0 8px 18px rgba(14,21,53,.22), inset 0 1px 0 rgba(255,255,255,.08) !important;
   text-align: left !important;
 }
 .cover-menu-head > div,
@@ -8335,7 +8335,7 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
 }
 .cover-menu-title,
 #cover #mass-quick-modal .mass-quick-title {
-  color: #1F2937 !important;
+  color: #FFFFFF !important;
   font-size: calc(20px * var(--app-font-scale, 1)) !important;
   line-height: 1.18 !important;
   font-weight: 900 !important;
@@ -8345,7 +8345,7 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
 .cover-menu-subtitle,
 #cover #mass-quick-modal .mass-quick-subtitle {
   margin-top: 6px !important;
-  color: #6B5C48 !important;
+  color: rgba(255,255,255,.68) !important;
   font-size: calc(13px * var(--app-font-scale, 1)) !important;
   line-height: 1.25 !important;
   font-weight: 800 !important;
@@ -8360,10 +8360,10 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
   width: 42px !important;
   height: 42px !important;
   border-radius: 50% !important;
-  border: 1.4px solid #7A6A55 !important;
-  background: rgba(255,252,246,.74) !important;
-  color: #1F2937 !important;
-  box-shadow: 0 5px 12px rgba(31,42,68,.08) !important;
+  border: 1.4px solid var(--oai-close-gold, #c49b56) !important;
+  background: rgba(255,255,255,.06) !important;
+  color: var(--oai-close-gold, #c49b56) !important;
+  box-shadow: 0 5px 12px rgba(0,0,0,.12) !important;
   transform: none !important;
   font-size: 27px !important;
   font-weight: 900 !important;
