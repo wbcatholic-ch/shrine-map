@@ -1496,7 +1496,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V2-103';
+    frame.src='diocese.html?v=V2-104';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1909,7 +1909,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V2-103';
+const _PARISH_ASSET_VERSION='V2-104';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -2072,7 +2072,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V2-103';
+const _PRAYER_ASSET_VERSION='V2-104';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2411,7 +2411,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V2-103';
+const _SHRINE_ASSET_VERSION='V2-104';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -6927,11 +6927,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           badge.textContent = status === 'done' ? '설정됨' : '설정 필요';
           top.appendChild(badge);
         }
-        var sub = document.createElement('span');
-        sub.className = 'my-faith-row-sub';
-        sub.textContent = value || '';
         main.appendChild(top);
-        main.appendChild(sub);
+        if(value){
+          var sub = document.createElement('span');
+          sub.className = 'my-faith-row-sub';
+          sub.textContent = value;
+          main.appendChild(sub);
+        }
         row.appendChild(main);
         row.appendChild(rowButton(buttonLabel, fn, disabled, cls));
         sec.appendChild(row);
@@ -6958,8 +6960,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       );
       appendRow(
         settings,
-        '내 본당',
-        parish ? parish.name : (name ? '본당을 선택해 주세요.' : '교구를 먼저 설정해 주세요.'),
+        parish ? parish.name : '내 본당',
+        parish ? '' : (name ? '본당을 선택해 주세요.' : '교구를 먼저 설정해 주세요.'),
         parish ? 'done' : 'needed',
         parish ? '변경' : (name ? '설정' : '교구설정'),
         name ? function(){ renderParishSearch(''); } : renderDioceseList,
@@ -6992,8 +6994,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         );
         appendRow(
           quick,
-          '본당 홈페이지',
-          parish ? (parish.name + (parish.hp ? ' 홈페이지' : ' 홈페이지 정보 없음')) : '내 본당 설정 후 이용할 수 있습니다.',
+          parish ? (parish.name + (parish.hp ? ' 홈페이지' : ' 홈페이지 정보 없음')) : '본당 홈페이지',
+          '',
           '',
           '열기',
           function(){ openIfUrl(parish && parish.hp); },
@@ -7002,8 +7004,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         );
         appendRow(
           quick,
-          '본당 상세정보',
-          parish ? (parish.name + (parish.url ? ' 상세페이지' : ' 상세페이지 정보 없음')) : '내 본당 설정 후 이용할 수 있습니다.',
+          parish ? (parish.name + (parish.url ? ' 상세정보' : ' 상세정보 없음')) : '본당 상세정보',
+          '',
           '',
           '열기',
           function(){ openIfUrl(parish && parish.url); },
