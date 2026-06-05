@@ -1510,7 +1510,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V2-131';
+    frame.src='diocese.html?v=V2-132';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1923,7 +1923,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V2-131';
+const _PARISH_ASSET_VERSION='V2-132';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -2086,7 +2086,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V2-131';
+const _PRAYER_ASSET_VERSION='V2-132';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2425,7 +2425,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V2-131';
+const _SHRINE_ASSET_VERSION='V2-132';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -2646,19 +2646,59 @@ const AppState = {
 // ─── 상수: 죽림굴 ────────────────────────────────────────────────────────────
 const JUKRIMGUL_PARKING = {lat:35.550726, lng:129.014589, name:'죽림굴주차장', kw:'죽림굴주차장'};
 (function(){
-  if(!window.visualViewport) return;
-  let _kbOpen=false;
-  window.visualViewport.addEventListener('resize',()=>{
-  const ratio = window.visualViewport.height / window.innerHeight;
-  const isKb = ratio < 0.75;
-  if(isKb===_kbOpen) return;
-  _kbOpen=isKb;
-  if(isKb){
-   document.documentElement.classList.add('kb-open');
-  } else {
-   document.documentElement.classList.remove('kb-open');
+  // V2-132: Android/WebView에서 키보드가 올라올 때 viewport 높이 축소를
+  // 실제 작은 화면으로 오인해 전체 글자와 탭이 compact 모드로 줄어드는 문제를 막는다.
+  // 기존 kb-open 클래스를 더 안정적으로 유지하되, 화면/탭/지도/뒤로가기 로직은 변경하지 않는다.
+  var root = document.documentElement;
+  var vv = window.visualViewport || null;
+  var stableH = 0;
+  var _kbOpen = false;
+  function _num(v){ v = Math.round(v || 0); return isFinite(v) ? v : 0; }
+  function _activeEditable(){
+    try{
+      var el = document.activeElement;
+      if(!el) return false;
+      var tag = (el.tagName || '').toUpperCase();
+      if(tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
+      return !!el.isContentEditable;
+    }catch(_e){ return false; }
   }
-  });
+  function _measure(){
+    var layoutH = _num(root && root.clientHeight);
+    var innerH = _num(window.innerHeight);
+    var visibleH = _num(vv && vv.height);
+    var h = Math.max(layoutH, innerH, visibleH);
+    return {layoutH:layoutH, innerH:innerH, visibleH:visibleH || innerH || layoutH, maxH:h};
+  }
+  function _set(open){
+    open = !!open;
+    if(open === _kbOpen) return;
+    _kbOpen = open;
+    root.classList.toggle('kb-open', open);
+  }
+  function updateKeyboardState(){
+    try{
+      var m = _measure();
+      var focused = _activeEditable();
+      if(!focused && m.maxH && m.maxH > stableH) stableH = m.maxH;
+      if(!stableH) stableH = m.maxH || m.visibleH || 0;
+      var ratioBase = Math.max(stableH || 0, m.innerH || 0, m.layoutH || 0);
+      var byHeight = !!(ratioBase && m.visibleH && m.visibleH < ratioBase - 120);
+      var byOffset = !!(vv && _num(vv.offsetTop) > 0);
+      var byFocusShrink = !!(focused && ratioBase && m.visibleH && m.visibleH < ratioBase - 80);
+      _set(byHeight || byOffset || byFocusShrink);
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }
+  window.__oaiUpdateKeyboardState = updateKeyboardState;
+  if(vv){
+    vv.addEventListener('resize', updateKeyboardState, {passive:true});
+    vv.addEventListener('scroll', updateKeyboardState, {passive:true});
+  }
+  window.addEventListener('resize', updateKeyboardState, {passive:true});
+  document.addEventListener('focusin', function(){ setTimeout(updateKeyboardState, 40); setTimeout(updateKeyboardState, 220); }, true);
+  document.addEventListener('focusout', function(){ setTimeout(updateKeyboardState, 120); setTimeout(updateKeyboardState, 360); }, true);
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', updateKeyboardState);
+  else updateKeyboardState();
 })();
 (function(){
   function measureSA(){
@@ -6709,7 +6749,7 @@ function _fmtTime(s){
     const root = document.documentElement;
     try{ sessionStorage.setItem('oai_background_intro_return_until', String(_now() + 4200)); }catch(_e){}
     try{
-      // V2-131: 10분 이상 백그라운드 복귀 최종 규칙.
+      // V2-132: 10분 이상 백그라운드 복귀 최종 규칙.
       // 십자가/커버 인트로를 1회 실행한 뒤 최종 목적지는 커버다.
       // goToCover()와 _resetMapState()는 인트로 종료 직전에만 실행해
       // 복귀 순간 화면이 두 번 로딩되는 느낌을 줄인다.

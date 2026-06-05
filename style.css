@@ -67,7 +67,7 @@
   --oai-list-card-soft: #FFF9F1;
   --oai-list-card-foot: #FFF9F1;
   --oai-list-card-line: #E9DDCB;
-  /* V2-131: 순례길/웹사이트/관구교구 목록 카드 배경색 통일 기준 */
+  /* V2-132: 순례길/웹사이트/관구교구 목록 카드 배경색 통일 기준 */
 
   --mode-header-bg:    linear-gradient(135deg, #1f2a44, #2d3a5f);
   --mode-header-solid: #1f2a44;
@@ -4984,7 +4984,7 @@ html.app-active #cover-menu-btn { display: none !important; }
   }
 }
 
-/* V2-131: 이전 메뉴 모달 크기 보정 블록은 아래 최종 통합 모달 규칙으로 합침. */
+/* V2-132: 이전 메뉴 모달 크기 보정 블록은 아래 최종 통합 모달 규칙으로 합침. */
 
 #cover #cover-menu-btn.cover-menu-btn {
   min-width: 94px !important;
@@ -6891,7 +6891,7 @@ html.oai-font-global #pr-list-ul .pr-title {
   color: rgba(75,85,99,.52) !important;
 }
 
-/* V2-131: 인포카드 경로검색 출발지/도착지/취소 선택창 색상 기준 유지 */
+/* V2-132: 인포카드 경로검색 출발지/도착지/취소 선택창 색상 기준 유지 */
 #route-role-choice.route-role-choice{
   position:fixed;
   inset:0;
@@ -7187,7 +7187,7 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
    - zoom/transform 축소를 쓰지 않고, 실제 글자/패딩/높이만 작게 조정한다.
    - 지도 중심, 마커, 길찾기, 뒤로가기 로직은 CSS에서 변경하지 않는다. */
 @media (max-width: 370px) and (max-height: 820px) {
-  html:not(.ios-device) {
+  html:not(.kb-open):not(.ios-device) {
     --app-font-scale: .90;
     --tab-h: 62px;
     --oai-std-header-h: 60px;
@@ -7219,29 +7219,29 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
     --oai-search-std-fs: 12.8px;
   }
 
-  html:not(.ios-device) #cover {
+  html:not(.kb-open):not(.ios-device) #cover {
     --cover-top-safe: calc(env(safe-area-inset-top, 0px) + clamp(50px, calc(var(--cover-vh, 1vh) * 7.6), 68px));
     --cover-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + clamp(8px, calc(var(--cover-vh, 1vh) * 1.2), 14px));
     padding-top: var(--cover-top-safe) !important;
     padding-bottom: var(--cover-bottom-safe) !important;
   }
-  html:not(.ios-device) #cover .cover-header {
+  html:not(.kb-open):not(.ios-device) #cover .cover-header {
     padding: 2px 8px 5px !important;
   }
-  html:not(.ios-device) #cover .cover-title {
+  html:not(.kb-open):not(.ios-device) #cover .cover-title {
     font-size: clamp(27px, 7.55vw, 34px) !important;
     line-height: 1.10 !important;
     letter-spacing: -.035em !important;
   }
-  html:not(.ios-device) #cover .cover-title::after {
+  html:not(.kb-open):not(.ios-device) #cover .cover-title::after {
     margin-top: 6px !important;
   }
-  html:not(.ios-device) #cover .cover-subtitle {
+  html:not(.kb-open):not(.ios-device) #cover .cover-subtitle {
     font-size: 12.8px !important;
     line-height: 1.24 !important;
     margin-bottom: 3px !important;
   }
-  html:not(.ios-device) #cover-main-block {
+  html:not(.kb-open):not(.ios-device) #cover-main-block {
     max-width: calc(100vw - 14px) !important;
     gap: 4px !important;
     padding-left: 8px !important;
@@ -7249,70 +7249,70 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
     padding-bottom: 0 !important;
     transform: none !important;
   }
-  html:not(.ios-device) #cover .cover-grid {
+  html:not(.kb-open):not(.ios-device) #cover .cover-grid {
     row-gap: 3px !important;
     column-gap: 4px !important;
   }
-  html:not(.ios-device) #cover .cover-card {
+  html:not(.kb-open):not(.ios-device) #cover .cover-card {
     padding: 4px 4px 3px !important;
     gap: 3px !important;
     border-radius: 15px !important;
   }
-  html:not(.ios-device) #cover .cover-card::after {
+  html:not(.kb-open):not(.ios-device) #cover .cover-card::after {
     left: 3px !important;
     right: 3px !important;
     top: 3px !important;
     bottom: 3px !important;
     border-radius: 12px !important;
   }
-  html:not(.ios-device) #cover .cover-icon-wrap {
+  html:not(.kb-open):not(.ios-device) #cover .cover-icon-wrap {
     width: clamp(31px, 8.9vw, 39px) !important;
     min-width: clamp(31px, 8.9vw, 39px) !important;
     height: clamp(31px, 8.9vw, 39px) !important;
     margin-bottom: 2px !important;
   }
-  html:not(.ios-device) #cover .cover-emoji {
+  html:not(.kb-open):not(.ios-device) #cover .cover-emoji {
     font-size: 31px !important;
     line-height: 1.05 !important;
   }
-  html:not(.ios-device) #cover .cover-name,
-  html:not(.ios-device) #cover #cc-6 .cover-name,
-  html:not(.ios-device).oai-font-global #cover #cc-6 .cover-name {
+  html:not(.kb-open):not(.ios-device) #cover .cover-name,
+  html:not(.kb-open):not(.ios-device) #cover #cc-6 .cover-name,
+  html:not(.kb-open):not(.ios-device).oai-font-global #cover #cc-6 .cover-name {
     font-size: 12.5px !important;
     line-height: 1.10 !important;
     letter-spacing: -.04em !important;
   }
-  html:not(.ios-device) #cover #cover-action-row.cover-action-single {
+  html:not(.kb-open):not(.ios-device) #cover #cover-action-row.cover-action-single {
     height: 47px !important;
     min-height: 47px !important;
     max-height: 47px !important;
     flex-basis: 47px !important;
     gap: 5px !important;
   }
-  html:not(.ios-device) #cover #cover-action-row.cover-action-single #cover-diocese-box,
-  html:not(.ios-device) #cover #cover-action-row.cover-action-single #cover-update-box,
-  html:not(.ios-device) #cover .cover-diocese-btn,
-  html:not(.ios-device) #cover .cover-refresh-main-btn {
+  html:not(.kb-open):not(.ios-device) #cover #cover-action-row.cover-action-single #cover-diocese-box,
+  html:not(.kb-open):not(.ios-device) #cover #cover-action-row.cover-action-single #cover-update-box,
+  html:not(.kb-open):not(.ios-device) #cover .cover-diocese-btn,
+  html:not(.kb-open):not(.ios-device) #cover .cover-refresh-main-btn {
     height: 47px !important;
     min-height: 47px !important;
     max-height: 47px !important;
   }
-  html:not(.ios-device) #cover .cover-diocese-btn,
-  html:not(.ios-device) #cover .cover-refresh-main-btn {
+  html:not(.kb-open):not(.ios-device) #cover .cover-diocese-btn,
+  html:not(.kb-open):not(.ios-device) #cover .cover-refresh-main-btn {
     border-radius: 15px !important;
     font-size: 13px !important;
     padding-left: 7px !important;
     padding-right: 8px !important;
   }
-  html:not(.ios-device) #cover .cover-diocese-btn .cover-faith-cross {
+  html:not(.kb-open):not(.ios-device) #cover .cover-diocese-btn .cover-faith-cross {
     font-size: 14.7px !important;
     margin-right: 5px !important;
     transform: translateY(-1px) !important;
   }
-  html:not(.ios-device) #cover .cover-diocese-btn .diocese-btn-label {
+  html:not(.kb-open):not(.ios-device) #cover .cover-diocese-btn .diocese-btn-label {
     font-size: 13px !important;
   }
-  html:not(.ios-device) #cover-bottom-note {
+  html:not(.kb-open):not(.ios-device) #cover-bottom-note {
     bottom: calc(env(safe-area-inset-bottom, 0px) - 18px) !important;
     padding: 0 12px !important;
     font-size: 7.5px !important;
@@ -7320,14 +7320,14 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
     letter-spacing: -.045em !important;
   }
 
-  html:not(.ios-device) #tabbar {
+  html:not(.kb-open):not(.ios-device) #tabbar {
     height: calc(var(--tab-h) + env(safe-area-inset-top, 0px)) !important;
     min-height: calc(var(--tab-h) + env(safe-area-inset-top, 0px)) !important;
     padding: calc(env(safe-area-inset-top, 0px) + 4px) 4px 5px !important;
     gap: 4px !important;
   }
-  html:not(.ios-device) #tabbar .tab-btn,
-  html:not(.ios-device) .tab-btn {
+  html:not(.kb-open):not(.ios-device) #tabbar .tab-btn,
+  html:not(.kb-open):not(.ios-device) .tab-btn {
     height: 50px !important;
     min-height: 50px !important;
     padding: 5px 1px 5px !important;
@@ -7336,37 +7336,37 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
     font-size: 10.9px !important;
     line-height: 1.06 !important;
   }
-  html:not(.ios-device) #tabbar .tab-icon,
-  html:not(.ios-device) .tab-icon {
+  html:not(.kb-open):not(.ios-device) #tabbar .tab-icon,
+  html:not(.kb-open):not(.ios-device) .tab-icon {
     font-size: 14.7px !important;
   }
-  html:not(.ios-device) #tabbar .tab-btn.active .tab-icon,
-  html:not(.ios-device) .tab-btn.active .tab-icon {
+  html:not(.kb-open):not(.ios-device) #tabbar .tab-btn.active .tab-icon,
+  html:not(.kb-open):not(.ios-device) .tab-btn.active .tab-icon {
     font-size: 16.5px !important;
   }
 
-  html:not(.ios-device) .sheet-hd {
+  html:not(.kb-open):not(.ios-device) .sheet-hd {
     padding: 9px 10px !important;
     min-height: 48px !important;
   }
-  html:not(.ios-device) .sheet-title,
-  html:not(.ios-device).oai-font-global .sheet-title,
-  html:not(.ios-device).oai-font-global .module-bar-title {
+  html:not(.kb-open):not(.ios-device) .sheet-title,
+  html:not(.kb-open):not(.ios-device).oai-font-global .sheet-title,
+  html:not(.kb-open):not(.ios-device).oai-font-global .module-bar-title {
     font-size: 15.2px !important;
     line-height: 1.16 !important;
   }
-  html:not(.ios-device) .sheet-x,
-  html:not(.ios-device) .module-close,
-  html:not(.ios-device) #prayer-close {
+  html:not(.kb-open):not(.ios-device) .sheet-x,
+  html:not(.kb-open):not(.ios-device) .module-close,
+  html:not(.kb-open):not(.ios-device) #prayer-close {
     width: 33px !important;
     height: 33px !important;
     min-width: 33px !important;
     flex-basis: 33px !important;
     font-size: 22px !important;
   }
-  /* V2-131: 갤럭시 일반 모델에서 지도 상단 X도 다른 닫기 버튼과 크기감을 맞춘다.
+  /* V2-132: 갤럭시 일반 모델에서 지도 상단 X도 다른 닫기 버튼과 크기감을 맞춘다.
      - 지도/마커/길찾기 로직은 변경하지 않고, 작은 Android 화면의 버튼 크기만 조정한다. */
-  html:not(.ios-device) .map-category-close {
+  html:not(.kb-open):not(.ios-device) .map-category-close {
     width: 33px !important;
     height: 33px !important;
     min-width: 33px !important;
@@ -7375,42 +7375,42 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
     right: 10px !important;
     border-width: 1.2px !important;
   }
-  html:not(.ios-device) .srch-bar,
-  html:not(.ios-device) .filter-bar,
-  html:not(.ios-device) .region-wrap {
+  html:not(.kb-open):not(.ios-device) .srch-bar,
+  html:not(.kb-open):not(.ios-device) .filter-bar,
+  html:not(.kb-open):not(.ios-device) .region-wrap {
     padding-top: 5px !important;
     padding-bottom: 5px !important;
   }
-  html:not(.ios-device) .filter-bar {
+  html:not(.kb-open):not(.ios-device) .filter-bar {
     gap: 5px !important;
     padding-left: 8px !important;
     padding-right: 8px !important;
   }
-  html:not(.ios-device) .srch-inner,
-  html:not(.ios-device) #srch-modal .sm-si {
+  html:not(.kb-open):not(.ios-device) .srch-inner,
+  html:not(.kb-open):not(.ios-device) #srch-modal .sm-si {
     height: 33px !important;
     min-height: 33px !important;
     padding-left: 11px !important;
     padding-right: 11px !important;
   }
-  html:not(.ios-device) .srch-inner input,
-  html:not(.ios-device) #srch-modal .sm-si input {
+  html:not(.kb-open):not(.ios-device) .srch-inner input,
+  html:not(.kb-open):not(.ios-device) #srch-modal .sm-si input {
     font-size: 12.9px !important;
   }
-  html:not(.ios-device) .filter-btn,
-  html:not(.ios-device) .region-search-btn,
-  html:not(.ios-device) .sm-fb,
-  html:not(.ios-device) .sm-tab {
+  html:not(.kb-open):not(.ios-device) .filter-btn,
+  html:not(.kb-open):not(.ios-device) .region-search-btn,
+  html:not(.kb-open):not(.ios-device) .sm-fb,
+  html:not(.kb-open):not(.ios-device) .sm-tab {
     min-height: 26px !important;
     height: 26px !important;
     padding: 0 8px !important;
     border-radius: 10px !important;
     font-size: 10.9px !important;
   }
-  html:not(.ios-device) .list-item,
-  html:not(.ios-device) .nearby-item,
-  html:not(.ios-device) .region-item,
-  html:not(.ios-device).oai-font-global .region-item {
+  html:not(.kb-open):not(.ios-device) .list-item,
+  html:not(.kb-open):not(.ios-device) .nearby-item,
+  html:not(.kb-open):not(.ios-device) .region-item,
+  html:not(.kb-open):not(.ios-device).oai-font-global .region-item {
     margin: 0 7px 4px !important;
     padding: 8px 9px !important;
     gap: 8px !important;
@@ -7418,122 +7418,122 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
     border-radius: 12px !important;
     align-items: center !important;
   }
-  html:not(.ios-device) .nearby-num {
+  html:not(.kb-open):not(.ios-device) .nearby-num {
     width: 28px !important;
     height: 28px !important;
     min-width: 28px !important;
     font-size: 12px !important;
   }
-  html:not(.ios-device) .li-name,
-  html:not(.ios-device) .nearby-name,
-  html:not(.ios-device) .sm-name,
-  html:not(.ios-device) .sm-place-name,
-  html:not(.ios-device).oai-font-global .nearby-name,
-  html:not(.ios-device).oai-font-global #region-body .nearby-name,
-  html:not(.ios-device).oai-font-global .region-item .nearby-name,
-  html:not(.ios-device).oai-font-global .li-name,
-  html:not(.ios-device).oai-font-global .sm-name,
-  html:not(.ios-device).oai-font-global .sm-place-name {
+  html:not(.kb-open):not(.ios-device) .li-name,
+  html:not(.kb-open):not(.ios-device) .nearby-name,
+  html:not(.kb-open):not(.ios-device) .sm-name,
+  html:not(.kb-open):not(.ios-device) .sm-place-name,
+  html:not(.kb-open):not(.ios-device).oai-font-global .nearby-name,
+  html:not(.kb-open):not(.ios-device).oai-font-global #region-body .nearby-name,
+  html:not(.kb-open):not(.ios-device).oai-font-global .region-item .nearby-name,
+  html:not(.kb-open):not(.ios-device).oai-font-global .li-name,
+  html:not(.kb-open):not(.ios-device).oai-font-global .sm-name,
+  html:not(.kb-open):not(.ios-device).oai-font-global .sm-place-name {
     font-size: 14px !important;
     line-height: 1.22 !important;
   }
-  html:not(.ios-device) .li-sub,
-  html:not(.ios-device) .nearby-addr,
-  html:not(.ios-device) .sm-sub,
-  html:not(.ios-device) .sm-place-addr,
-  html:not(.ios-device).oai-font-global .nearby-addr,
-  html:not(.ios-device).oai-font-global #region-body .nearby-addr,
-  html:not(.ios-device).oai-font-global .region-item .nearby-addr,
-  html:not(.ios-device).oai-font-global .li-sub,
-  html:not(.ios-device).oai-font-global .sm-sub,
-  html:not(.ios-device).oai-font-global .sm-place-addr {
+  html:not(.kb-open):not(.ios-device) .li-sub,
+  html:not(.kb-open):not(.ios-device) .nearby-addr,
+  html:not(.kb-open):not(.ios-device) .sm-sub,
+  html:not(.kb-open):not(.ios-device) .sm-place-addr,
+  html:not(.kb-open):not(.ios-device).oai-font-global .nearby-addr,
+  html:not(.kb-open):not(.ios-device).oai-font-global #region-body .nearby-addr,
+  html:not(.kb-open):not(.ios-device).oai-font-global .region-item .nearby-addr,
+  html:not(.kb-open):not(.ios-device).oai-font-global .li-sub,
+  html:not(.kb-open):not(.ios-device).oai-font-global .sm-sub,
+  html:not(.kb-open):not(.ios-device).oai-font-global .sm-place-addr {
     font-size: 11.2px !important;
     line-height: 1.24 !important;
     margin-top: 2px !important;
   }
-  html:not(.ios-device) .li-badge,
-  html:not(.ios-device) .nearby-type {
+  html:not(.kb-open):not(.ios-device) .li-badge,
+  html:not(.kb-open):not(.ios-device) .nearby-type {
     font-size: 10.2px !important;
     padding: 3px 7px !important;
   }
-  html:not(.ios-device) .nearby-meta {
+  html:not(.kb-open):not(.ios-device) .nearby-meta {
     min-width: 54px !important;
     line-height: 1.35 !important;
   }
-  html:not(.ios-device) .nearby-dist {
+  html:not(.kb-open):not(.ios-device) .nearby-dist {
     font-size: 12.9px !important;
     margin-top: 2px !important;
   }
 
-  html:not(.ios-device) #info-card {
+  html:not(.kb-open):not(.ios-device) #info-card {
     max-height: 43vh !important;
     border-radius: 18px 18px 0 0 !important;
   }
-  html:not(.ios-device) #info-card .ic-header {
+  html:not(.kb-open):not(.ios-device) #info-card .ic-header {
     padding: 10px 12px 5px !important;
   }
-  html:not(.ios-device) #info-card .ic-name,
-  html:not(.ios-device) #app #info-card .ic-name {
+  html:not(.kb-open):not(.ios-device) #info-card .ic-name,
+  html:not(.kb-open):not(.ios-device) #app #info-card .ic-name {
     font-size: 15px !important;
     line-height: 1.24 !important;
   }
-  html:not(.ios-device) #info-card .ic-close-btn {
+  html:not(.kb-open):not(.ios-device) #info-card .ic-close-btn {
     width: 30px !important;
     height: 30px !important;
     font-size: 20px !important;
   }
-  html:not(.ios-device) #info-card .ic-meta {
+  html:not(.kb-open):not(.ios-device) #info-card .ic-meta {
     padding: 0 12px 5px !important;
   }
-  html:not(.ios-device) #info-card .ic-addr-row {
+  html:not(.kb-open):not(.ios-device) #info-card .ic-addr-row {
     gap: 7px !important;
     padding: 0 12px 8px !important;
   }
-  html:not(.ios-device) #app #info-card .ic-addr-val {
+  html:not(.kb-open):not(.ios-device) #app #info-card .ic-addr-val {
     font-size: 12.9px !important;
     line-height: 1.34 !important;
   }
-  html:not(.ios-device) #app #info-card .ic-sub,
-  html:not(.ios-device) #app #info-card .ic-addr-lbl,
-  html:not(.ios-device) #app #info-card .ic-dist-lbl,
-  html:not(.ios-device) #app #info-card .ic-type-badge {
+  html:not(.kb-open):not(.ios-device) #app #info-card .ic-sub,
+  html:not(.kb-open):not(.ios-device) #app #info-card .ic-addr-lbl,
+  html:not(.kb-open):not(.ios-device) #app #info-card .ic-dist-lbl,
+  html:not(.kb-open):not(.ios-device) #app #info-card .ic-type-badge {
     font-size: 11.2px !important;
   }
-  html:not(.ios-device) #app #info-card .ic-dist-box {
+  html:not(.kb-open):not(.ios-device) #app #info-card .ic-dist-box {
     font-size: 13px !important;
     padding: 5px 8px !important;
   }
-  html:not(.ios-device) #info-card .ic-btn-row,
-  html:not(.ios-device) #info-card .ic-links {
+  html:not(.kb-open):not(.ios-device) #info-card .ic-btn-row,
+  html:not(.kb-open):not(.ios-device) #info-card .ic-links {
     gap: 5px !important;
     padding: 8px 12px 0 !important;
   }
-  html:not(.ios-device) #info-card .ic-tel-btn,
-  html:not(.ios-device) #info-card .ic-route-btn,
-  html:not(.ios-device) #info-card .ic-link-btn,
-  html:not(.ios-device) #info-card .btn-kakao-nav,
-  html:not(.ios-device) #info-card .btn-kakao-route,
-  html:not(.ios-device) #info-card .btn-route-reset {
+  html:not(.kb-open):not(.ios-device) #info-card .ic-tel-btn,
+  html:not(.kb-open):not(.ios-device) #info-card .ic-route-btn,
+  html:not(.kb-open):not(.ios-device) #info-card .ic-link-btn,
+  html:not(.kb-open):not(.ios-device) #info-card .btn-kakao-nav,
+  html:not(.kb-open):not(.ios-device) #info-card .btn-kakao-route,
+  html:not(.kb-open):not(.ios-device) #info-card .btn-route-reset {
     height: 38px !important;
     min-height: 38px !important;
     border-radius: 9px !important;
     font-size: 12.5px !important;
   }
 
-  html:not(.ios-device) #prayer-tabs,
-  html:not(.ios-device) #web-view .web-cats,
-  html:not(.ios-device) #trail-view .trail-tabs,
-  html:not(.ios-device) #qna-view .qna-tabs {
+  html:not(.kb-open):not(.ios-device) #prayer-tabs,
+  html:not(.kb-open):not(.ios-device) #web-view .web-cats,
+  html:not(.kb-open):not(.ios-device) #trail-view .trail-tabs,
+  html:not(.kb-open):not(.ios-device) #qna-view .qna-tabs {
     height: 42px !important;
     min-height: 42px !important;
     max-height: 42px !important;
     padding: 6px 9px !important;
     gap: 5px !important;
   }
-  html:not(.ios-device) #prayer-tabs .pr-tab,
-  html:not(.ios-device) #web-view .web-cat-btn,
-  html:not(.ios-device) #trail-view .trail-tab,
-  html:not(.ios-device) #qna-view .qna-tab {
+  html:not(.kb-open):not(.ios-device) #prayer-tabs .pr-tab,
+  html:not(.kb-open):not(.ios-device) #web-view .web-cat-btn,
+  html:not(.kb-open):not(.ios-device) #trail-view .trail-tab,
+  html:not(.kb-open):not(.ios-device) #qna-view .qna-tab {
     height: 31px !important;
     min-height: 31px !important;
     max-height: 31px !important;
@@ -7541,252 +7541,252 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
     border-radius: 11px !important;
     font-size: 12.5px !important;
   }
-  html:not(.ios-device) #prayer-search-bar {
+  html:not(.kb-open):not(.ios-device) #prayer-search-bar {
     min-height: 41px !important;
     padding: 6px 9px 5px !important;
     gap: 6px !important;
   }
-  html:not(.ios-device) #prayer-search-bar #prayer-search-inp,
-  html:not(.ios-device) #prayer-search-inp {
+  html:not(.kb-open):not(.ios-device) #prayer-search-bar #prayer-search-inp,
+  html:not(.kb-open):not(.ios-device) #prayer-search-inp {
     height: 34px !important;
     min-height: 34px !important;
     font-size: 12.5px !important;
   }
-  html:not(.ios-device) #prayer-search-bar .pr-font-ctrl {
+  html:not(.kb-open):not(.ios-device) #prayer-search-bar .pr-font-ctrl {
     height: 34px !important;
     min-height: 34px !important;
     min-width: 70px !important;
   }
-  html:not(.ios-device) #prayer-list-view {
+  html:not(.kb-open):not(.ios-device) #prayer-list-view {
     padding: 8px 9px calc(20px + env(safe-area-inset-bottom, 0px)) !important;
   }
-  html:not(.ios-device) #prayer-list-view .pr-item,
-  html:not(.ios-device) #pr-list-ul .pr-item,
-  html:not(.ios-device) .pr-item {
+  html:not(.kb-open):not(.ios-device) #prayer-list-view .pr-item,
+  html:not(.kb-open):not(.ios-device) #pr-list-ul .pr-item,
+  html:not(.kb-open):not(.ios-device) .pr-item {
     min-height: 57px !important;
     padding: 9px 9px !important;
     gap: 7px !important;
     border-radius: 10px !important;
   }
-  html:not(.ios-device) .pr-item-left {
+  html:not(.kb-open):not(.ios-device) .pr-item-left {
     gap: 8px !important;
   }
-  html:not(.ios-device) .pr-title,
-  html:not(.ios-device).oai-font-global .pr-title {
+  html:not(.kb-open):not(.ios-device) .pr-title,
+  html:not(.kb-open):not(.ios-device).oai-font-global .pr-title {
     font-size: 14.2px !important;
     line-height: 1.24 !important;
   }
-  html:not(.ios-device) .pr-star {
+  html:not(.kb-open):not(.ios-device) .pr-star {
     font-size: 16.5px !important;
   }
-  html:not(.ios-device) #prayer-detail-body {
+  html:not(.kb-open):not(.ios-device) #prayer-detail-body {
     padding: 12px 11px 28px !important;
   }
-  html:not(.ios-device) .pr-content-card {
+  html:not(.kb-open):not(.ios-device) .pr-content-card {
     padding: 16px 14px !important;
     font-size: 14.2px !important;
     line-height: 1.82 !important;
   }
-  html:not(.ios-device) .pr-body-title {
+  html:not(.kb-open):not(.ios-device) .pr-body-title {
     font-size: 15px !important;
     line-height: 1.36 !important;
     margin-bottom: 14px !important;
     padding-bottom: 10px !important;
   }
 
-  html:not(.ios-device) .module-bar,
-  html:not(.ios-device) #prayer-bar,
-  html:not(.ios-device) #diocese-bar,
-  html:not(.ios-device) #web-view .module-bar,
-  html:not(.ios-device) #trail-view .module-bar,
-  html:not(.ios-device) #qna-view .module-bar,
-  html:not(.ios-device) #diocese-module-bar {
+  html:not(.kb-open):not(.ios-device) .module-bar,
+  html:not(.kb-open):not(.ios-device) #prayer-bar,
+  html:not(.kb-open):not(.ios-device) #diocese-bar,
+  html:not(.kb-open):not(.ios-device) #web-view .module-bar,
+  html:not(.kb-open):not(.ios-device) #trail-view .module-bar,
+  html:not(.kb-open):not(.ios-device) #qna-view .module-bar,
+  html:not(.kb-open):not(.ios-device) #diocese-module-bar {
     height: calc(60px + env(safe-area-inset-top, 0px)) !important;
     min-height: calc(60px + env(safe-area-inset-top, 0px)) !important;
     max-height: calc(60px + env(safe-area-inset-top, 0px)) !important;
     padding: calc(7px + env(safe-area-inset-top, 0px)) 10px 7px !important;
   }
-  html:not(.ios-device) .module-bar-main,
-  html:not(.ios-device) #web-view .module-bar-main,
-  html:not(.ios-device) #trail-view .module-bar-main,
-  html:not(.ios-device) #qna-view .module-bar-main,
-  html:not(.ios-device) #diocese-view .module-bar-main {
+  html:not(.kb-open):not(.ios-device) .module-bar-main,
+  html:not(.kb-open):not(.ios-device) #web-view .module-bar-main,
+  html:not(.kb-open):not(.ios-device) #trail-view .module-bar-main,
+  html:not(.kb-open):not(.ios-device) #qna-view .module-bar-main,
+  html:not(.kb-open):not(.ios-device) #diocese-view .module-bar-main {
     gap: 9px !important;
   }
-  html:not(.ios-device) .module-bar-ico,
-  html:not(.ios-device) #web-view .module-bar-ico,
-  html:not(.ios-device) #trail-view .module-bar-ico,
-  html:not(.ios-device) #qna-view .module-bar-ico,
-  html:not(.ios-device) #diocese-view .module-bar-ico {
+  html:not(.kb-open):not(.ios-device) .module-bar-ico,
+  html:not(.kb-open):not(.ios-device) #web-view .module-bar-ico,
+  html:not(.kb-open):not(.ios-device) #trail-view .module-bar-ico,
+  html:not(.kb-open):not(.ios-device) #qna-view .module-bar-ico,
+  html:not(.kb-open):not(.ios-device) #diocese-view .module-bar-ico {
     width: 33px !important;
     height: 33px !important;
     min-width: 33px !important;
     flex-basis: 33px !important;
     font-size: 18px !important;
   }
-  html:not(.ios-device) #prayer-bar-ttl,
-  html:not(.ios-device) #prayer-bar .module-bar-title,
-  html:not(.ios-device) #web-view .module-bar-title,
-  html:not(.ios-device) #trail-view .module-bar-title,
-  html:not(.ios-device) #qna-view .module-bar-title,
-  html:not(.ios-device) #diocese-view .module-bar-title,
-  html:not(.ios-device) #diocese-bar-title {
+  html:not(.kb-open):not(.ios-device) #prayer-bar-ttl,
+  html:not(.kb-open):not(.ios-device) #prayer-bar .module-bar-title,
+  html:not(.kb-open):not(.ios-device) #web-view .module-bar-title,
+  html:not(.kb-open):not(.ios-device) #trail-view .module-bar-title,
+  html:not(.kb-open):not(.ios-device) #qna-view .module-bar-title,
+  html:not(.kb-open):not(.ios-device) #diocese-view .module-bar-title,
+  html:not(.kb-open):not(.ios-device) #diocese-bar-title {
     font-size: 16px !important;
     line-height: 1.16 !important;
   }
-  html:not(.ios-device) #prayer-bar-sub,
-  html:not(.ios-device) #prayer-bar .module-bar-sub,
-  html:not(.ios-device) #web-view .module-bar-sub,
-  html:not(.ios-device) #trail-view .module-bar-sub,
-  html:not(.ios-device) #qna-view .module-bar-sub,
-  html:not(.ios-device) #diocese-view .module-bar-sub {
+  html:not(.kb-open):not(.ios-device) #prayer-bar-sub,
+  html:not(.kb-open):not(.ios-device) #prayer-bar .module-bar-sub,
+  html:not(.kb-open):not(.ios-device) #web-view .module-bar-sub,
+  html:not(.kb-open):not(.ios-device) #trail-view .module-bar-sub,
+  html:not(.kb-open):not(.ios-device) #qna-view .module-bar-sub,
+  html:not(.kb-open):not(.ios-device) #diocese-view .module-bar-sub {
     font-size: 9.3px !important;
     line-height: 1.14 !important;
   }
 
-  html:not(.ios-device) .web-card {
+  html:not(.kb-open):not(.ios-device) .web-card {
     border-radius: 13px !important;
     margin-bottom: 8px !important;
   }
-  html:not(.ios-device) .web-card-top {
+  html:not(.kb-open):not(.ios-device) .web-card-top {
     padding: 9px 11px 0 !important;
   }
-  html:not(.ios-device) .web-card-body {
+  html:not(.kb-open):not(.ios-device) .web-card-body {
     padding: 7px 11px 8px !important;
     gap: 9px !important;
   }
-  html:not(.ios-device) .web-card-foot {
+  html:not(.kb-open):not(.ios-device) .web-card-foot {
     padding: 7px 11px !important;
   }
-  html:not(.ios-device) .web-card-ico {
+  html:not(.kb-open):not(.ios-device) .web-card-ico {
     width: 40px !important;
     height: 40px !important;
     border-radius: 10px !important;
     font-size: 23px !important;
   }
-  html:not(.ios-device) .web-card-name,
-  html:not(.ios-device).oai-font-global .web-card-name {
+  html:not(.kb-open):not(.ios-device) .web-card-name,
+  html:not(.kb-open):not(.ios-device).oai-font-global .web-card-name {
     font-size: 14.7px !important;
     line-height: 1.30 !important;
   }
-  html:not(.ios-device) .web-card-desc,
-  html:not(.ios-device).oai-font-global .web-card-desc {
+  html:not(.kb-open):not(.ios-device) .web-card-desc,
+  html:not(.kb-open):not(.ios-device).oai-font-global .web-card-desc {
     font-size: 11.6px !important;
     line-height: 1.42 !important;
   }
-  html:not(.ios-device) .web-card-badge,
-  html:not(.ios-device) .web-card-url,
-  html:not(.ios-device) .web-card-op {
+  html:not(.kb-open):not(.ios-device) .web-card-badge,
+  html:not(.kb-open):not(.ios-device) .web-card-url,
+  html:not(.kb-open):not(.ios-device) .web-card-op {
     font-size: 10.8px !important;
   }
 
-  html:not(.ios-device) #trail-list {
+  html:not(.kb-open):not(.ios-device) #trail-list {
     gap: 3px !important;
     padding-left: 10px !important;
     padding-right: 10px !important;
   }
-  html:not(.ios-device) #trail-list > .trail-card,
-  html:not(.ios-device) .trail-card {
+  html:not(.kb-open):not(.ios-device) #trail-list > .trail-card,
+  html:not(.kb-open):not(.ios-device) .trail-card {
     min-height: 96px !important;
     margin-bottom: 4px !important;
     border-radius: 16px !important;
   }
-  html:not(.ios-device) #trail-list .trail-nm,
-  html:not(.ios-device) #trail-sheet .trail-sh-name {
+  html:not(.kb-open):not(.ios-device) #trail-list .trail-nm,
+  html:not(.kb-open):not(.ios-device) #trail-sheet .trail-sh-name {
     font-size: 14.7px !important;
     line-height: 1.30 !important;
   }
-  html:not(.ios-device) #trail-list .trail-reg,
-  html:not(.ios-device) #trail-sheet .trail-sh-region,
-  html:not(.ios-device) #trail-sheet .trail-sh-sub {
+  html:not(.kb-open):not(.ios-device) #trail-list .trail-reg,
+  html:not(.kb-open):not(.ios-device) #trail-sheet .trail-sh-region,
+  html:not(.kb-open):not(.ios-device) #trail-sheet .trail-sh-sub {
     font-size: 12px !important;
   }
 
-  html:not(.ios-device) #qna-view .qna-list {
+  html:not(.kb-open):not(.ios-device) #qna-view .qna-list {
     padding: 10px !important;
   }
-  html:not(.ios-device) #qna-view .qna-card {
+  html:not(.kb-open):not(.ios-device) #qna-view .qna-card {
     padding: 12px !important;
     margin-bottom: 9px !important;
     border-radius: 14px !important;
   }
-  html:not(.ios-device) #qna-view .qna-title {
+  html:not(.kb-open):not(.ios-device) #qna-view .qna-title {
     font-size: 15px !important;
     line-height: 1.30 !important;
   }
-  html:not(.ios-device) #qna-view .qna-text {
+  html:not(.kb-open):not(.ios-device) #qna-view .qna-text {
     font-size: 12.5px !important;
     line-height: 1.50 !important;
   }
-  html:not(.ios-device) #qna-view .qna-actions button {
+  html:not(.kb-open):not(.ios-device) #qna-view .qna-actions button {
     height: 38px !important;
     border-radius: 10px !important;
     font-size: 12.5px !important;
   }
 
-  html:not(.ios-device) .my-faith-body {
+  html:not(.kb-open):not(.ios-device) .my-faith-body {
     padding: 10px 12px calc(18px + env(safe-area-inset-bottom, 0px)) !important;
     gap: 10px !important;
   }
-  html:not(.ios-device) .my-faith-section {
+  html:not(.kb-open):not(.ios-device) .my-faith-section {
     padding: 12px !important;
     border-radius: 15px !important;
   }
-  html:not(.ios-device) .my-faith-section h3 {
+  html:not(.kb-open):not(.ios-device) .my-faith-section h3 {
     font-size: 14.5px !important;
     line-height: 1.28 !important;
   }
-  html:not(.ios-device) .my-faith-section p {
+  html:not(.kb-open):not(.ios-device) .my-faith-section p {
     font-size: 11.5px !important;
     line-height: 1.40 !important;
   }
-  html:not(.ios-device) .my-faith-action,
-  html:not(.ios-device) .my-faith-small-btn,
-  html:not(.ios-device) .my-faith-parish-result {
+  html:not(.kb-open):not(.ios-device) .my-faith-action,
+  html:not(.kb-open):not(.ios-device) .my-faith-small-btn,
+  html:not(.kb-open):not(.ios-device) .my-faith-parish-result {
     min-height: 38px !important;
     border-radius: 11px !important;
     font-size: 12.8px !important;
     padding: 8px 10px !important;
   }
-  html:not(.ios-device) #sheet-route {
+  html:not(.kb-open):not(.ios-device) #sheet-route {
     max-height: 46vh !important;
   }
-  html:not(.ios-device) #sheet-route #rs-top {
+  html:not(.kb-open):not(.ios-device) #sheet-route #rs-top {
     padding: 9px 42px 0 11px !important;
   }
-  html:not(.ios-device) #sheet-route #rs-bottom {
+  html:not(.kb-open):not(.ios-device) #sheet-route #rs-bottom {
     padding: 8px 11px 12px !important;
   }
-  html:not(.ios-device) .rs-start-box,
-  html:not(.ios-device) .rs-end-box {
+  html:not(.kb-open):not(.ios-device) .rs-start-box,
+  html:not(.kb-open):not(.ios-device) .rs-end-box {
     height: 39px !important;
     min-height: 39px !important;
     padding: 0 9px !important;
     border-radius: 9px !important;
     gap: 6px !important;
   }
-  html:not(.ios-device) .rs-lbl {
+  html:not(.kb-open):not(.ios-device) .rs-lbl {
     font-size: 12.2px !important;
     line-height: 1.25 !important;
   }
-  html:not(.ios-device) .rs-myloc {
+  html:not(.kb-open):not(.ios-device) .rs-myloc {
     padding: 5px 8px !important;
     font-size: 11px !important;
   }
-  html:not(.ios-device) .rs-swap-btn {
+  html:not(.kb-open):not(.ios-device) .rs-swap-btn {
     width: 32px !important;
     height: 32px !important;
     font-size: 15px !important;
   }
-  html:not(.ios-device) .route-sheet-x {
+  html:not(.kb-open):not(.ios-device) .route-sheet-x {
     width: 27px !important;
     height: 27px !important;
     font-size: 18px !important;
     top: 8px !important;
     right: 10px !important;
   }
-  html:not(.ios-device) .rs-hint,
-  html:not(.ios-device) #app #rs-hint {
+  html:not(.kb-open):not(.ios-device) .rs-hint,
+  html:not(.kb-open):not(.ios-device) #app #rs-hint {
     font-size: 12.4px !important;
     line-height: 1.65 !important;
     padding: 11px 0 12px !important;
@@ -7794,7 +7794,7 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
 
 }
 
-/* V2-131: 나의 신앙생활 목록형 화면 CSS 정리
+/* V2-132: 나의 신앙생활 목록형 화면 CSS 정리
    - V2-97 구조와 V2-98 색 대비를 하나로 통합
    - 화면 모양은 V2-98 기준 유지, 중복 선언만 정리 */
 .my-faith-body.my-faith-home-list-body { gap: 12px !important; padding-top: 14px !important; background: #F6EBD8 !important; overscroll-behavior-y: contain !important; }
@@ -7823,22 +7823,22 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
 .my-faith-body.my-faith-home-list-body .my-faith-inline-privacy-note { margin-top: 0 !important; }
 .my-faith-next-step-note { border: 1.4px dashed #B7791F !important; border-radius: 15px !important; background: rgba(255,252,245,.78) !important; color: #7A4E14 !important; font-size: calc(12.8px * var(--app-font-scale, 1)) !important; line-height: 1.42 !important; font-weight: 800 !important; letter-spacing: -.03em !important; padding: 11px 13px !important; box-shadow: 0 6px 13px rgba(31,42,68,.07) !important; box-sizing: border-box !important; }
 @media (max-width: 370px) and (max-height: 820px) {
-  html:not(.ios-device) .my-faith-body.my-faith-home-list-body { gap: 9px !important; padding: 10px 11px calc(10px + env(safe-area-inset-bottom, 0px)) !important; }
-  html:not(.ios-device) .my-faith-intro-card { border-radius: 14px !important; padding: 11px 12px !important; }
-  html:not(.ios-device) .my-faith-intro-card strong { font-size: 13.9px !important; line-height: 1.24 !important; }
-  html:not(.ios-device) .my-faith-intro-card span { font-size: 11.2px !important; line-height: 1.38 !important; }
-  html:not(.ios-device) .my-faith-section.my-faith-list-section { padding: 0 !important; border-radius: 14px !important; }
-  html:not(.ios-device) .my-faith-section.my-faith-list-section h3 { padding: 10px 12px 9px !important; font-size: 13.8px !important; line-height: 1.22 !important; }
-  html:not(.ios-device) .my-faith-list-row { min-height: 56px !important; padding: 8px 10px 8px 12px !important; gap: 7px !important; }
-  html:not(.ios-device) .my-faith-row-top { gap: 5px !important; }
-  html:not(.ios-device) .my-faith-row-top strong { font-size: 13px !important; }
-  html:not(.ios-device) .my-faith-row-status { font-size: 9.7px !important; padding: 2px 5px !important; }
-  html:not(.ios-device) .my-faith-row-sub { font-size: 10.8px !important; line-height: 1.26 !important; }
-  html:not(.ios-device) .my-faith-row-btn { min-width: 52px !important; height: 32px !important; padding: 0 9px !important; font-size: 11.2px !important; }
-  html:not(.ios-device) .my-faith-next-step-note { border-radius: 13px !important; font-size: 11.2px !important; line-height: 1.34 !important; padding: 9px 11px !important; }
+  html:not(.kb-open):not(.ios-device) .my-faith-body.my-faith-home-list-body { gap: 9px !important; padding: 10px 11px calc(10px + env(safe-area-inset-bottom, 0px)) !important; }
+  html:not(.kb-open):not(.ios-device) .my-faith-intro-card { border-radius: 14px !important; padding: 11px 12px !important; }
+  html:not(.kb-open):not(.ios-device) .my-faith-intro-card strong { font-size: 13.9px !important; line-height: 1.24 !important; }
+  html:not(.kb-open):not(.ios-device) .my-faith-intro-card span { font-size: 11.2px !important; line-height: 1.38 !important; }
+  html:not(.kb-open):not(.ios-device) .my-faith-section.my-faith-list-section { padding: 0 !important; border-radius: 14px !important; }
+  html:not(.kb-open):not(.ios-device) .my-faith-section.my-faith-list-section h3 { padding: 10px 12px 9px !important; font-size: 13.8px !important; line-height: 1.22 !important; }
+  html:not(.kb-open):not(.ios-device) .my-faith-list-row { min-height: 56px !important; padding: 8px 10px 8px 12px !important; gap: 7px !important; }
+  html:not(.kb-open):not(.ios-device) .my-faith-row-top { gap: 5px !important; }
+  html:not(.kb-open):not(.ios-device) .my-faith-row-top strong { font-size: 13px !important; }
+  html:not(.kb-open):not(.ios-device) .my-faith-row-status { font-size: 9.7px !important; padding: 2px 5px !important; }
+  html:not(.kb-open):not(.ios-device) .my-faith-row-sub { font-size: 10.8px !important; line-height: 1.26 !important; }
+  html:not(.kb-open):not(.ios-device) .my-faith-row-btn { min-width: 52px !important; height: 32px !important; padding: 0 9px !important; font-size: 11.2px !important; }
+  html:not(.kb-open):not(.ios-device) .my-faith-next-step-note { border-radius: 13px !important; font-size: 11.2px !important; line-height: 1.34 !important; padding: 9px 11px !important; }
 }
 
-/* V2-131: 미사 중 빠른 사용 / 가톨릭길동무 메뉴 최종 통합 CSS
+/* V2-132: 미사 중 빠른 사용 / 가톨릭길동무 메뉴 최종 통합 CSS
    - V2-99~V2-113의 순례길색/브라운/유리톤/단색 헤더 중복을 정리
    - 현재 화면 기준은 V2-113 단색 다크톤 유지
    - 버튼 높이와 기능은 변경하지 않음 */
@@ -7907,8 +7907,8 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
   html:not(.ios-device) #cover #mass-quick-modal .mass-quick-btn strong{ font-size:13.8px !important; line-height:1.14 !important; }
 }
 
-/* V2-131 Step 2: 커버/모달/나의 신앙생활 CSS 중복 정리 후 현재 시각 기준 유지 */
-/* V2-131: 커버 배경은 살짝 어두운 아이보리, 빠른 메뉴/메뉴 배너는 더 밝은 아이보리 기준 유지 */
+/* V2-132 Step 2: 커버/모달/나의 신앙생활 CSS 중복 정리 후 현재 시각 기준 유지 */
+/* V2-132: 커버 배경은 살짝 어두운 아이보리, 빠른 메뉴/메뉴 배너는 더 밝은 아이보리 기준 유지 */
 #cover { background-color: #F4EDE2 !important; }
 html.oai-cover-booting #cover,
 html.oai-cover-resetting-to-intro #cover { background: #F4EDE2 !important; background-color: #F4EDE2 !important; }
@@ -7916,7 +7916,7 @@ html.oai-cover-resetting-to-intro #cover { background: #F4EDE2 !important; backg
 #cover .cover-grid > #cc-1.cover-card-wide { background: linear-gradient(180deg,#FFFEFA 0%,#FAF2E6 100%) !important; border-color: rgba(198,166,90,.42) !important; }
 
 
-/* V2-131: 나의 신앙생활 홈 화면 스크롤 보정 유지 / 커버 카테고리 박스 내부 테두리 제거 */
+/* V2-132: 나의 신앙생활 홈 화면 스크롤 보정 유지 / 커버 카테고리 박스 내부 테두리 제거 */
 .my-faith-body.my-faith-home-list-body.my-faith-no-scroll {
   overflow-y: hidden !important;
   touch-action: manipulation !important;
