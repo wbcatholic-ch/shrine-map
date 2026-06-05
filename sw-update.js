@@ -10,7 +10,7 @@
   // SW_BUILD_VERSION:  SW 등록·캐시 키용 전체 버전 (sw.js BUILD_VERSION과 일치해야 함)
   // ★ 버전 업그레이드 시 두 값 모두 수정, sw.js BUILD_VERSION과 SW_BUILD_VERSION을 동일하게 맞출 것
   var APP_VERSION = 'V-2';
-  var SW_BUILD_VERSION = 'V2-107';
+  var SW_BUILD_VERSION = 'V2-108';
   window.APP_VERSION = APP_VERSION;
 
   function now(){ return Date.now ? Date.now() : new Date().getTime(); }
@@ -29,8 +29,15 @@
     }catch(e){ console.warn("[가톨릭길동무]", e); }
     return false;
   }
+  function hasExternalReturnPending(){
+    try{
+      return sessionStorage.getItem('oai_external_nav_pending') === '1' ||
+             sessionStorage.getItem('oai_external_nav_pagehide') === '1' ||
+             sessionStorage.getItem('oai_external_nav_kind') === 'my-faith-life';
+    }catch(e){ return false; }
+  }
   function canBackgroundRefresh(){
-    try{ if(isTypingTarget(document.activeElement) || isTransientOpen()) return false; }catch(e){ console.warn("[가톨릭길동무]", e); }
+    try{ if(isTypingTarget(document.activeElement) || isTransientOpen() || hasExternalReturnPending()) return false; }catch(e){ console.warn("[가톨릭길동무]", e); }
     return true;
   }
   function stableReload(reason){
@@ -40,6 +47,17 @@
     try{ if(typeof window.oaiMarkRefreshHistoryCompact === 'function') window.oaiMarkRefreshHistoryCompact(reason || 'background-reload'); }catch(e){ console.warn("[가톨릭길동무]", e); }
     setTimeout(function(){ try{ location.reload(); }catch(e){ location.href = location.href; } }, 120);
     return true;
+  }
+  function softBackgroundReturn(reason){
+    if(!canBackgroundRefresh()) return false;
+    try{ sessionStorage.removeItem(SS.STABLE_AUTO_RELOAD_REASON); }catch(e){ console.warn("[가톨릭길동무]", e); }
+    try{
+      if(typeof window.oaiSoftBackgroundReturn === 'function'){
+        window.oaiSoftBackgroundReturn(reason || 'background-return');
+        return true;
+      }
+    }catch(e){ console.warn("[가톨릭길동무]", e); }
+    return false;
   }
   function clearReturnFlagsForBackground(){
     try{
@@ -60,22 +78,17 @@
     }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
   function resetToCoverForBackground(){
+    // V2-108: 장시간 백그라운드 복귀에서도 커버 이동/자동 새로고침을 하지 않는다.
+    // 현재 화면을 유지하고 필요한 화면 높이·지도 resize만 조용히 한 번 정리한다.
     if(!canBackgroundRefresh()) return false;
-    try{ if(typeof window.oaiHoldStabilityVeil === 'function') window.oaiHoldStabilityVeil('background-cover-reset', 520); }catch(e){ console.warn("[가톨릭길동무]", e); }
     clearReturnFlagsForBackground();
-    try{ if(typeof window.closeMassQuickMenu === 'function') window.closeMassQuickMenu(); }catch(e){ console.warn("[가톨릭길동무]", e); }
-    try{ if(typeof window.goToCover === 'function') window.goToCover(); }catch(e){ console.warn("[가톨릭길동무]", e); }
-    try{ if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady(); }catch(e){ console.warn("[가톨릭길동무]", e); }
-    try{ if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed(); }catch(e){ console.warn("[가톨릭길동무]", e); }
-    try{ if(typeof window._resetCoverBackTrap === 'function') window._resetCoverBackTrap('background-cover-reset'); }catch(e){ console.warn("[가톨릭길동무]", e); }
     try{ sessionStorage.setItem(SS.BACKGROUND_COVER_RESET, String(now())); }catch(e){ console.warn("[가톨릭길동무]", e); }
-    setTimeout(function(){ stableReload('background-cover-reset'); }, 220);
-    return true;
+    return softBackgroundReturn('background-long-return');
   }
 
   /* 백그라운드 복귀 정책
-     - 15분 이상: 조용한 새로고침
-     - 30분 이상: 임시 상태를 커버로 정리한 뒤 조용한 새로고침
+     - 15분 이상: 현재 화면 유지 + 조용한 화면 안정화
+     - 30분 이상: 커버 이동/자동 새로고침 없이 현재 화면 유지
      - 입력/길찾기/팝업 등 사용 중 화면에서는 보류 */
   var hiddenAt = 0;
   var BACKGROUND_SOFT_RELOAD_AFTER = 15 * 60 * 1000;
@@ -94,7 +107,7 @@
       if(elapsed >= BACKGROUND_COVER_RESET_AFTER){
         setTimeout(function(){ resetToCoverForBackground(); }, 350);
       }else if(elapsed >= BACKGROUND_SOFT_RELOAD_AFTER){
-        setTimeout(function(){ stableReload('background-soft-return'); }, 350);
+        setTimeout(function(){ softBackgroundReturn('background-soft-return'); }, 350);
       }
     }
   }, true);

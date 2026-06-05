@@ -389,6 +389,12 @@ function oaiHasExternalReturnPending(){
     return !!(info.ts && info.pageHidden && info.now && info.now - info.ts < 10 * 60 * 1000);
   }catch(_e){ return false; }
 }
+function oaiExternalReturnKind(){
+  try{ return String(sessionStorage.getItem('oai_external_nav_kind') || ''); }catch(_e){ return ''; }
+}
+function oaiIsMyFaithExternalReturn(){
+  return oaiExternalReturnKind() === 'my-faith-life';
+}
 function oaiIsExternalLeaveStillOpening(){
   try{
     var info = oaiGetExternalNavInfo();
@@ -442,6 +448,13 @@ function applyExternalReturnStabilize(){
   try{
     if(oaiConsumeInternalReturnNoEffect('apply-internal-return')) return;
     if(oaiHasExternalReturnPending()){
+      if(oaiIsMyFaithExternalReturn()){
+        // 나의 신앙생활 외부 바로가기는 지도/커버 복귀가 아니므로
+        // 공통 십자가 안정막을 다시 띄우지 않고, 나의 신앙생활 전용 복귀 처리만 실행한다.
+        oaiClearExternalNavigationState();
+        try{ if(typeof window.oaiResumeMyFaithAfterExternal === 'function') window.oaiResumeMyFaithAfterExternal(); }catch(_e){}
+        return;
+      }
       oaiStartExternalReturnStabilize();
       return;
     }
@@ -453,6 +466,30 @@ function applyExternalReturnStabilize(){
     oaiClearExternalNavigationState();
   }catch(e){ console.warn("[가톨릭길동무]", e); }
 }
+
+function oaiSoftBackgroundReturn(reason){
+  // 장시간 백그라운드 복귀는 새로고침/커버 이동 없이 현재 화면을 조용히 안정화한다.
+  try{
+    if(oaiHasExternalReturnPending && oaiHasExternalReturnPending()) return false;
+  }catch(_e){}
+  try{
+    var root = document.documentElement;
+    root.classList.remove('oai-stability-veil','oai-stability-veil-releasing','oai-external-return-freeze','oai-external-leaving');
+    root.removeAttribute('data-oai-stability-reason');
+    root.removeAttribute('data-oai-external-return-early');
+  }catch(_e){}
+  try{ if(typeof window.oaiSettleMyFaithLifeReturn === 'function') window.oaiSettleMyFaithLifeReturn(reason || 'background-return'); }catch(_e){}
+  try{
+    if(typeof _map !== 'undefined' && _map && typeof _map.relayout === 'function'){
+      _map.relayout();
+      setTimeout(function(){ try{ _map.relayout(); }catch(_e){} }, 180);
+    }
+  }catch(_e){}
+  try{ if(typeof _ensureCoverBackTrap === 'function') _ensureCoverBackTrap('background-soft-return'); }catch(_e){}
+  return true;
+}
+window.oaiSoftBackgroundReturn = oaiSoftBackgroundReturn;
+
 window.addEventListener('pageshow', applyExternalReturnStabilize, true);
 window.addEventListener('pageshow', function(){ setTimeout(oaiReleasePassiveVeil, 2600); }, true);
 window.addEventListener('focus', function(){ setTimeout(applyExternalReturnStabilize, 40); setTimeout(oaiReleasePassiveVeil, 2600); }, true);
@@ -1496,7 +1533,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V2-107';
+    frame.src='diocese.html?v=V2-108';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1909,7 +1946,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V2-107';
+const _PARISH_ASSET_VERSION='V2-108';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -2072,7 +2109,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V2-107';
+const _PRAYER_ASSET_VERSION='V2-108';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2411,7 +2448,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V2-107';
+const _SHRINE_ASSET_VERSION='V2-108';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -7268,7 +7305,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(sessionStorage.getItem('oai_my_faith_external_open') !== '1') return false;
         myFaithResumeBusy = true;
         myFaithReturnSettling = true;
-        try{ if(typeof oaiHoldStabilityVeil === 'function') oaiHoldStabilityVeil('my-faith-external-return', 900); }catch(_e){}
+        // 나의 신앙생활 복귀는 전체 화면 십자가 안정막을 띄우지 않고 현재 카드 화면을 그대로 유지한다.
         var ts = parseInt(sessionStorage.getItem('oai_my_faith_external_ts') || '0', 10) || 0;
         if(ts && Date.now && Date.now() - ts > 10 * 60 * 1000){
           sessionStorage.removeItem('oai_my_faith_external_open');
@@ -7308,6 +7345,20 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         return false;
       }
     }
+    window.oaiResumeMyFaithAfterExternal = resumeMyFaithAfterExternal;
+    window.oaiSettleMyFaithLifeReturn = function(reason){
+      try{
+        if(!modal || !modal.classList.contains('show')) return false;
+        var saved = body && typeof body.scrollTop === 'number' ? body.scrollTop : 0;
+        modal.classList.add('return-settling');
+        updateMyFaithViewport();
+        if(body) body.scrollTop = saved;
+        setTimeout(function(){
+          try{ updateMyFaithViewport(); if(body) body.scrollTop = saved; modal.classList.remove('return-settling'); }catch(_e){}
+        }, 260);
+        return true;
+      }catch(_e){ return false; }
+    };
     if(window.visualViewport){
       window.visualViewport.addEventListener('resize', function(){ if(modal.classList.contains('show')) updateMyFaithViewport(); }, {passive:true});
     }
