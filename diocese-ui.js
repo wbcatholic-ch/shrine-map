@@ -1,4 +1,4 @@
-/* V2-137: 교구 기본 데이터와 검색 데이터를 기능별 파일로 분리 */
+/* V2-138: 교구 기본 데이터와 검색 데이터를 기능별 파일로 분리 */
 const MY_DIOCESE_STORAGE_KEY='oai_my_diocese_name';
 function getMyDioceseName(){
   try{return (localStorage.getItem(MY_DIOCESE_STORAGE_KEY)||'').trim();}

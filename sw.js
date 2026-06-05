@@ -1,25 +1,25 @@
 /* 가톨릭길동무 Service Worker - V3-S
    캐시를 매번 삭제하지 않고, 버전 변경 시 오래된 캐시만 정리합니다.
    localStorage/사용자 설정은 건드리지 않습니다. */
-const CACHE_VERSION = 'catholic-way-V2-137';
+const CACHE_VERSION = 'catholic-way-V2-138';
 /* 다이어트 1: 첫 실행에 꼭 필요한 앱 셸만 선캐시합니다.
    성당/성지/피정의집/기도문/관구교구/문의 페이지는 versioned fetch 시 cacheFirst로 저장됩니다. */
 const APP_SHELL = [
   './',
   './index.html',
-  './constants.js?v=V2-137',
-  './core.js?v=V2-137',
-  './style.css?v=V2-137',
-  './app.js?v=V2-137',
-  './diocese-meta.js?v=V2-137',
-  './diocese-search.js?v=V2-137',
-  './diocese-data.js?v=V2-137',
-  './diocese-ui.js?v=V2-137',
-  './web.js?v=V2-137',
-  './patches.js?v=V2-137',
-  './sw-update.js?v=V2-137',
-  './manifest.json?v=V2-137',
-  './intro-cross-jesus.jpg?v=V2-137',
+  './constants.js?v=V2-138',
+  './core.js?v=V2-138',
+  './style.css?v=V2-138',
+  './app.js?v=V2-138',
+  './diocese-meta.js?v=V2-138',
+  './diocese-search.js?v=V2-138',
+  './diocese-data.js?v=V2-138',
+  './diocese-ui.js?v=V2-138',
+  './web.js?v=V2-138',
+  './patches.js?v=V2-138',
+  './sw-update.js?v=V2-138',
+  './manifest.json?v=V2-138',
+  './intro-cross-jesus.jpg?v=V2-138',
 './icon-192x192.png',
   './icon-512x512.png',
   './icon-512x512-maskable.png',
