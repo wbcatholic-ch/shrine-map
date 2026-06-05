@@ -1510,7 +1510,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V2-133';
+    frame.src='diocese.html?v=V2-134';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1923,7 +1923,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V2-133';
+const _PARISH_ASSET_VERSION='V2-134';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -2086,7 +2086,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V2-133';
+const _PRAYER_ASSET_VERSION='V2-134';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2425,7 +2425,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V2-133';
+const _SHRINE_ASSET_VERSION='V2-134';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -2646,7 +2646,7 @@ const AppState = {
 // ─── 상수: 죽림굴 ────────────────────────────────────────────────────────────
 const JUKRIMGUL_PARKING = {lat:35.550726, lng:129.014589, name:'죽림굴주차장', kw:'죽림굴주차장'};
 (function(){
-  // V2-133: Android/WebView에서 키보드가 올라올 때 viewport 높이 축소를
+  // V2-134: Android/WebView에서 키보드가 올라올 때 viewport 높이 축소를
   // 실제 작은 화면으로 오인해 전체 글자와 탭이 compact 모드로 줄어드는 문제를 막는다.
   // 기존 kb-open 클래스를 더 안정적으로 유지하되, 화면/탭/지도/뒤로가기 로직은 변경하지 않는다.
   var root = document.documentElement;
@@ -3269,6 +3269,10 @@ function openTab(name, opts){
     // 탭/모드 전환이 아닌 단순 재호출이므로 지도 중심은 그대로 유지한다.
     if(name!=='route') _clearRouteSwitchInfoCard('same-tab-'+name);
     else { try{ closeInfoCard({keepMap:true}); }catch(e){ console.warn('[가톨릭길동무]', e); } _curFromRegion=false; }
+    if(shouldAutoFocusKeyboard){
+      if(name==='list') oaiFocusSearchKeyboardInput('list-srch-inp');
+      else if(name==='region') oaiFocusSearchKeyboardInput('region-inp');
+    }
     return;
   }
   _updateSheetPanelTitles();
@@ -3331,8 +3335,19 @@ function openTab(name, opts){
 
   _updateTabBtns(name);
   if(name==='nearby')     _loadNearby();
-  else if(name==='list')  { renderList(); if(shouldAutoFocusKeyboard) oaiFocusSearchKeyboardInput('list-srch-inp'); }
-  else if(name==='region'){ if(shouldAutoFocusKeyboard) oaiFocusSearchKeyboardInput('region-inp'); }
+  else if(name==='list')  {
+    renderList();
+    if(shouldAutoFocusKeyboard){
+      oaiFocusSearchKeyboardInput('list-srch-inp');
+      if(dir) oaiFocusSearchKeyboardInput('list-srch-inp', 120);
+    }
+  }
+  else if(name==='region'){
+    if(shouldAutoFocusKeyboard){
+      oaiFocusSearchKeyboardInput('region-inp');
+      if(dir) oaiFocusSearchKeyboardInput('region-inp', 120);
+    }
+  }
   else if(name==='route') _enterRouteMode();
   setTimeout(()=>_scrollSheetTop(name), 30);
 }
@@ -6577,7 +6592,7 @@ function _fmtTime(s){
       : (idx > 0 ? TABS[idx - 1] : TABS[TABS.length - 1]);
     // 스와이프 방향 저장: 왼쪽 밀기=다음탭(오른쪽에서 들어옴), 오른쪽 밀기=이전탭(왼쪽에서 들어옴)
     window._swipeDir = dx < 0 ? 'right' : 'left';
-    if(typeof openTab === 'function') openTab(next);
+    if(typeof openTab === 'function') openTab(next, {keyboard: (next === 'list' || next === 'region')});
     window._swipeDir = null;
   }
 
@@ -6770,7 +6785,7 @@ function _fmtTime(s){
     const root = document.documentElement;
     try{ sessionStorage.setItem('oai_background_intro_return_until', String(_now() + 4200)); }catch(_e){}
     try{
-      // V2-133: 10분 이상 백그라운드 복귀 최종 규칙.
+      // V2-134: 10분 이상 백그라운드 복귀 최종 규칙.
       // 십자가/커버 인트로를 1회 실행한 뒤 최종 목적지는 커버다.
       // goToCover()와 _resetMapState()는 인트로 종료 직전에만 실행해
       // 복귀 순간 화면이 두 번 로딩되는 느낌을 줄인다.
