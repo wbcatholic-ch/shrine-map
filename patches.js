@@ -288,6 +288,26 @@
     return false;
   }
 
+  /* ── 앱 내부 Back 직접 처리 ──
+     지도 가장자리 제스처처럼 popstate를 거치면 native back과 겹칠 수 있는 경우에도
+     기존 뒤로가기 순서(closeModuleInnerLayer → closeExtOrModule → closeLayer → goToCover)를 그대로 쓴다. */
+  function handleAppBackDirect(reason){
+    try{
+      if(!appActive()){
+        var exiting = false;
+        if(typeof window._showBackToast === 'function') exiting = window._showBackToast() === true;
+        if(!exiting) armCoverBackTrap(reason || 'cover-direct-toast');
+        return true;
+      }
+      if(closeModuleInnerLayer()) return true;
+      if(closeExtOrModule()) return true;
+      if(closeLayer()) return true;
+      callGTC();
+      return true;
+    }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
+  }
+  try{ window._oaiHandleAppBackDirect = handleAppBackDirect; }catch(_e){}
+
   /* ── popstate 핸들러 ── */
   var _restoring = false;
 
@@ -755,14 +775,7 @@
       try{ if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed(); }catch(e){}
       return;
     }
-    if(!appActive()){
-      if(typeof window._showBackToast==='function') window._showBackToast();
-      return;
-    }
-    if(closeModuleInnerLayer()) return;
-    if(closeExtOrModule()) return;
-    if(closeLayer()) return;
-    callGTC();
+    if(handleAppBackDirect('hardware-back')) return;
   }, false);
 
   // 외부 사이트 방문 후 복귀 시 history 트랩 강제 재확립.
