@@ -1510,7 +1510,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V2-130';
+    frame.src='diocese.html?v=V2-131';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1923,7 +1923,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V2-130';
+const _PARISH_ASSET_VERSION='V2-131';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -2086,7 +2086,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V2-130';
+const _PRAYER_ASSET_VERSION='V2-131';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2425,7 +2425,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V2-130';
+const _SHRINE_ASSET_VERSION='V2-131';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -4101,6 +4101,7 @@ function _refreshRouteTmpMarkers(){
     });
     _endTmpMkr.setMap(_map);
   }
+  _raiseMyLocationMarker();
 }
 
 function _typeColor(t){return t==='성지'?'#c0392b':t==='순례지'?'#1565c0':'#1b7a3e';}
@@ -4129,6 +4130,7 @@ function _showRegionMarker(lat,lng,name){
       zIndex:500
     });
     _regionMarker.setMap(_map);
+    _raiseMyLocationMarker();
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 function _regionMapLevelFor(items, lat, lng){
@@ -4392,6 +4394,7 @@ function _selectShrineMarker(idx){
   _markers[idx].marker.setZIndex(10);
   }
   _selIdx=idx;
+  _raiseMyLocationMarker();
 }
 
 function _clearShrineMarkerSel(){
@@ -4540,6 +4543,7 @@ function _selectParishMarker(p){
   }
   _paSelMkr=new _MM({position:new _LL(p.lat,p.lng),image:_mkrImg('#FFE500',true),zIndex:200});
   _paSelMkr.setMap(_map);
+  _raiseMyLocationMarker();
   return dioCode;
 }
 
@@ -4949,6 +4953,7 @@ function _selectRetreatMarker(p){
   if(!_map||!p.lat||!p.lng) return;
   _paSelMkr=new _MM({position:new _LL(p.lat,p.lng),image:_mkrImgRetreat('#FFE500',true),zIndex:180});
   _paSelMkr.setMap(_map);
+  _raiseMyLocationMarker();
 }
 // ──────────────────────────────────────────────────────────────────
 
@@ -5153,18 +5158,25 @@ function _showCurrentParishDioIfIdle(){
     if(clickedEl){clickedEl.style.display='none';}
   }catch(e){ console.warn("[가톨릭길동무]", e); }
 }
+function _raiseMyLocationMarker(){
+  try{
+    if(_myMkr && typeof _myMkr.setZIndex === 'function') _myMkr.setZIndex(260);
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+}
 function _setMyLoc(lat,lng){
   _myLat=lat;_myLng=lng;
   _saveLastGeo(lat,lng);
   if(typeof kakao==='undefined'||!_map) return;  // 지도 미로드 시 무시
   if(_myMkr) _myMkr.setMap(null);
-  const svg=`<svg ${_NS} width='28' height='28' viewBox='0 0 28 28'><circle cx='14' cy='14' r='12' fill='#1a73e8' opacity='.18'/><circle cx='14' cy='14' r='7' fill='#1a73e8'/><circle cx='14' cy='14' r='3.5' fill='white'/></svg>`;
+  const svg=`<svg ${_NS} width='34' height='34' viewBox='0 0 34 34'><circle cx='17' cy='17' r='15' fill='#1a73e8' opacity='.18'/><circle cx='17' cy='17' r='9' fill='#1a73e8' stroke='white' stroke-width='2'/><circle cx='17' cy='17' r='3.8' fill='white'/></svg>`;
   _myMkr=new _MM({
   position:new _LL(lat,lng),
   image:new _MI(_svgUrl(svg),
-   new _SZ(28,28),{offset:new _PT(14,14)})
+   new _SZ(34,34),{offset:new _PT(17,17)}),
+  zIndex:260
   });
   _myMkr.setMap(_map);
+  _raiseMyLocationMarker();
   setTimeout(_showCurrentParishDioIfIdle, 80);
 }
 
@@ -6520,14 +6532,16 @@ function _fmtTime(s){
       const vw = Math.round(window.innerWidth || document.documentElement.clientWidth || 0);
       if(vw < 600) return false;
       const startTarget = start.t || target;
-      if(!startTarget || !startTarget.closest || !startTarget.closest('#map')) return false;
+      if(!startTarget || !startTarget.closest) return false;
+      if(!startTarget.closest('#map') && !startTarget.closest('#map-wrap')) return false;
       if(document.getElementById('srch-modal')?.classList.contains('open')) return false;
-      const edge = Math.min(24, Math.max(16, Math.round(vw * 0.028)));
+      if(document.getElementById('route-role-choice')?.classList.contains('open')) return false;
+      const edge = Math.min(64, Math.max(34, Math.round(vw * 0.055)));
       const fromLeft = start.x <= edge && dx > 0;
       const fromRight = start.x >= (vw - edge) && dx < 0;
       if(!fromLeft && !fromRight) return false;
-      if(Math.abs(dx) < 48 || dy > 78) return false;
-      if(Math.abs(dx) < dy * 1.12) return false;
+      if(Math.abs(dx) < 36 || dy > 96) return false;
+      if(Math.abs(dx) < dy * 1.04) return false;
       const now = Date.now ? Date.now() : new Date().getTime();
       if(window.__OAI_MAP_EDGE_BACK_UNTIL__ && now < window.__OAI_MAP_EDGE_BACK_UNTIL__) return false;
       window.__OAI_MAP_EDGE_BACK_UNTIL__ = now + 900;
@@ -6695,7 +6709,7 @@ function _fmtTime(s){
     const root = document.documentElement;
     try{ sessionStorage.setItem('oai_background_intro_return_until', String(_now() + 4200)); }catch(_e){}
     try{
-      // V2-130: 10분 이상 백그라운드 복귀 최종 규칙.
+      // V2-131: 10분 이상 백그라운드 복귀 최종 규칙.
       // 십자가/커버 인트로를 1회 실행한 뒤 최종 목적지는 커버다.
       // goToCover()와 _resetMapState()는 인트로 종료 직전에만 실행해
       // 복귀 순간 화면이 두 번 로딩되는 느낌을 줄인다.
