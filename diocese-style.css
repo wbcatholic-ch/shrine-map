@@ -1,4 +1,4 @@
-/* V2-135: diocese.html 안의 관구·교구 전용 스타일을 외부 CSS로 분리했습니다.
+/* V2-136: diocese.html 안의 관구·교구 전용 스타일을 외부 CSS로 분리했습니다.
    - 기존 선택자와 선언 순서를 유지해 화면 모양 변화 위험을 줄였습니다.
    - 폴드/작은 화면에서 인포카드가 위아래로 늘어나는 문제를 기존 카드 위치 제어 기준 안에서 정리했습니다. */
 
@@ -379,7 +379,7 @@ header{height:var(--header-h)!important;min-height:var(--header-h)!important;max
 #si{font-size:15px!important;}
 
 
-/* ===== moved from <style id="oai-diocese-main-app-style-sync-V2-135"> ===== */
+/* ===== moved from <style id="oai-diocese-main-app-style-sync-V2-136"> ===== */
 :root{
   --dio-main-header: #3F4752;
   --dio-main-header-dark: #2F3742;
@@ -410,7 +410,7 @@ header{height:var(--header-h)!important;min-height:var(--header-h)!important;max
   --tab-h: 52px !important;
   --tab-btn-h: 40px !important;
   --fs-tab: 15px !important;
-  /* V2-135: 관구·교구 스타일 수치 기준을 한 곳에서 관리한다.
+  /* V2-136: 관구·교구 스타일 수치 기준을 한 곳에서 관리한다.
      화면 모양은 V2-125와 동일하게 유지하고, 이후 크기/간격 수정은 아래 변수에서만 조정한다. */
   --dio-tab-bar-pad: 9px 14px;
   --dio-tab-gap: 8px;
@@ -509,7 +509,7 @@ html,body{background:var(--dio-app-bg)!important;color:var(--dio-text)!important
 }
 
 
-/* V2-135: 모바일 compact 폭에서 상단 교구(서울관구 북부 등) 인포카드가
+/* V2-136: 모바일 compact 폭에서 상단 교구(서울관구 북부 등) 인포카드가
    top/bottom 동시 지정으로 세로 전체가 늘어나는 문제 방지. */
 #card.dio-card-top,
 #card.dio-card-bottom{

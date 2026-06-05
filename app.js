@@ -1510,7 +1510,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V2-135';
+    frame.src='diocese.html?v=V2-136';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1923,7 +1923,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V2-135';
+const _PARISH_ASSET_VERSION='V2-136';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -2086,7 +2086,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V2-135';
+const _PRAYER_ASSET_VERSION='V2-136';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2425,7 +2425,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V2-135';
+const _SHRINE_ASSET_VERSION='V2-136';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -2640,13 +2640,13 @@ const AppState = {
       configurable: true,
       enumerable: false,
     });
-  });
+  }, {passive: false, capture: true});
 })();
 
 // ─── 상수: 죽림굴 ────────────────────────────────────────────────────────────
 const JUKRIMGUL_PARKING = {lat:35.550726, lng:129.014589, name:'죽림굴주차장', kw:'죽림굴주차장'};
 (function(){
-  // V2-135: Android/WebView에서 키보드가 올라올 때 viewport 높이 축소를
+  // V2-136: Android/WebView에서 키보드가 올라올 때 viewport 높이 축소를
   // 실제 작은 화면으로 오인해 전체 글자와 탭이 compact 모드로 줄어드는 문제를 막는다.
   // 기존 kb-open 클래스를 더 안정적으로 유지하되, 화면/탭/지도/뒤로가기 로직은 변경하지 않는다.
   var root = document.documentElement;
@@ -6612,9 +6612,19 @@ function _fmtTime(s){
       if(typeof _screen !== 'undefined' && _screen !== 'map') return false;
       const vw = Math.round(window.innerWidth || document.documentElement.clientWidth || 0);
       if(vw < 600) return false;
-      const startTarget = start.t || target;
-      if(!startTarget || !startTarget.closest) return false;
-      if(!startTarget.closest('#map') && !startTarget.closest('#map-wrap')) return false;
+      let startTarget = start.t || target;
+      if(startTarget && startTarget.nodeType && startTarget.nodeType !== 1) startTarget = startTarget.parentElement;
+      let inMapArea = false;
+      try{
+        if(startTarget && startTarget.closest){
+          inMapArea = !!(startTarget.closest('#map') || startTarget.closest('#map-wrap'));
+        }
+        if(!inMapArea && document.elementFromPoint){
+          const probe = document.elementFromPoint(start.x, start.y);
+          if(probe && probe.closest) inMapArea = !!(probe.closest('#map') || probe.closest('#map-wrap'));
+        }
+      }catch(_e){}
+      if(!inMapArea) return false;
       if(document.getElementById('srch-modal')?.classList.contains('open')) return false;
       if(document.getElementById('route-role-choice')?.classList.contains('open')) return false;
       const edge = Math.min(64, Math.max(34, Math.round(vw * 0.055)));
@@ -6636,7 +6646,7 @@ function _fmtTime(s){
   document.addEventListener('touchstart', function(e){
     if(!e.touches || !e.touches[0]) return;
     _swSt = {x: e.touches[0].clientX, y: e.touches[0].clientY, t: e.target};
-  }, {passive: true});
+  }, {passive: true, capture: true});
 
   document.addEventListener('touchend', function(e){
     if(!_swSt) return;
@@ -6698,7 +6708,7 @@ function _fmtTime(s){
       tgt.closest('#info-card');
     if(inApp) _doMainSwipe(dx);
 
-  }, {passive: false});
+  }, {passive: false, capture: true});
 })();
 
 // ── 관구교구: 커버 버튼에서 직접 새탭 열기 ──
@@ -6799,7 +6809,7 @@ function _fmtTime(s){
     const root = document.documentElement;
     try{ sessionStorage.setItem('oai_background_intro_return_until', String(_now() + 4200)); }catch(_e){}
     try{
-      // V2-135: 10분 이상 백그라운드 복귀 최종 규칙.
+      // V2-136: 10분 이상 백그라운드 복귀 최종 규칙.
       // 십자가/커버 인트로를 1회 실행한 뒤 최종 목적지는 커버다.
       // goToCover()와 _resetMapState()는 인트로 종료 직전에만 실행해
       // 복귀 순간 화면이 두 번 로딩되는 느낌을 줄인다.

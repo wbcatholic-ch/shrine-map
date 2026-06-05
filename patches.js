@@ -595,6 +595,18 @@
         window.__OAI_AFTER_RESTORE_MY_FAITH_CB__ = null;
         window.__OAI_AFTER_RESTORE_MY_FAITH_UNTIL__ = 0;
       }catch(e){ console.warn('[가톨릭길동무]', e); }
+      try{
+        var _appCb = window.__OAI_AFTER_RESTORE_APP_BACK_CB__;
+        var _appUntil = Number(window.__OAI_AFTER_RESTORE_APP_BACK_UNTIL__ || 0);
+        if(typeof _appCb === 'function' && (!_appUntil || Date.now() < _appUntil)){
+          window.__OAI_AFTER_RESTORE_APP_BACK_CB__ = null;
+          window.__OAI_AFTER_RESTORE_APP_BACK_UNTIL__ = 0;
+          setTimeout(function(){ try{ _appCb(); }catch(e){ console.warn('[가톨릭길동무]', e); } }, 0);
+          return;
+        }
+        window.__OAI_AFTER_RESTORE_APP_BACK_CB__ = null;
+        window.__OAI_AFTER_RESTORE_APP_BACK_UNTIL__ = 0;
+      }catch(e){ console.warn('[가톨릭길동무]', e); }
       if(runPendingPrayerCoverReset()) return;
       runPendingPrayerQuickPopup();
       return;
@@ -740,16 +752,37 @@
       return;
     }
 
-    /* 앱 활성 상태에서는 다른 정상 카테고리와 동일하게 먼저 trap을 복원하고,
-       그 다음 DOM 상태를 직접 정리한다. 기도문도 여기서만 처리한다. */
-    _restoring = true;
-    try{ history.go(1); }catch(e){ _restoring = false; console.warn("[가톨릭길동무]", e); }
-
-    if(handlePrayerBack('prayer-popstate')) return;
-    if(closeModuleInnerLayer()) return;
-    if(closeExtOrModule()) return;
-    if(closeLayer()) return;
-    callGTC();
+    /* 앱 활성 상태에서는 먼저 history.go(1)로 app trap을 복원한 뒤,
+       복원 popstate가 돌아온 다음 실제 화면만 정리한다.
+       이전처럼 go(1)을 호출하자마자 goToCover()를 실행하면 Android/WebView에서
+       trap 복원과 커버 trap 재설정이 겹쳐 커버 첫 Back이 앱 종료로 빠질 수 있다. */
+    var appBackCb = function(){
+      if(handlePrayerBack('prayer-popstate')) return;
+      if(closeModuleInnerLayer()) return;
+      if(closeExtOrModule()) return;
+      if(closeLayer()) return;
+      callGTC();
+    };
+    try{
+      window.__OAI_AFTER_RESTORE_APP_BACK_CB__ = appBackCb;
+      window.__OAI_AFTER_RESTORE_APP_BACK_UNTIL__ = Date.now() + 1800;
+      _restoring = true;
+      history.go(1);
+      setTimeout(function(){
+        try{
+          if(window.__OAI_AFTER_RESTORE_APP_BACK_CB__ === appBackCb){
+            _restoring = false;
+            window.__OAI_AFTER_RESTORE_APP_BACK_CB__ = null;
+            window.__OAI_AFTER_RESTORE_APP_BACK_UNTIL__ = 0;
+            appBackCb();
+          }
+        }catch(e){ console.warn('[가톨릭길동무]', e); }
+      }, 180);
+    }catch(e){
+      _restoring = false;
+      console.warn("[가톨릭길동무]", e);
+      appBackCb();
+    }
   }, false);
 
 

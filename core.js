@@ -82,13 +82,16 @@ function _oaiNormalizeTrapState(kind, reason, forceReset){
 
     if(st && st._p === 1 && st[trapKey] && !forceReset) return;
 
-    if(st && st._p === 1){
+    if(st && st._p === 1 && !forceReset){
       // 현재 위치가 이미 trap이면 새 항목을 만들지 않고 역할만 교체한다.
       history.replaceState(_oaiTrapPayload(kind, reason, false), '', href);
       return;
     }
 
-    // root 또는 빈 상태에서만 trap 한 칸을 만든다.
+    // forceReset일 때는 현재 위치가 trap이어도 반드시 root → trap 한 쌍을 다시 만든다.
+    // 성당·성지·피정의집에서 커버로 돌아온 뒤 현재 trap만 cover로 바꾸면
+    // 일부 Android/WebView에서 다음 Back을 앱 종료로 처리할 수 있으므로,
+    // 현재 항목을 root로 바꾼 뒤 새 trap을 한 칸 올린다.
     history.replaceState(_oaiTrapPayload(kind, reason, true), '', href);
     history.pushState(_oaiTrapPayload(kind, reason, false), '', href);
   }catch(e){ console.warn('[가톨릭길동무]', e); }
