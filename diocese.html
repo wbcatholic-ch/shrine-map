@@ -257,7 +257,7 @@ html.oai-dio-external-return *{transition:none!important;animation:none!importan
 /* 관구교구 헤더 아래 탭 버튼 표준화 + 글자 크기 조절(지도 제외) */
 :root{
   --diocese-font-scale:1;--dio-font-scale:1;--dio-effective-font-scale:calc(var(--dio-font-scale,1) * var(--ios-dio-font-scale,1));--diocese-effective-font-scale:calc(var(--diocese-font-scale,1) * var(--ios-dio-font-scale,1));}
-.tab-bar{height:52px!important;padding:9px 14px!important;gap:8px!important;background:#FFFBF2!important;border-top:0!important;border-bottom:1px solid #DDD5C8!important;align-items:center!important;}
+.tab-bar{height:52px!important;padding:var(--dio-tab-bar-pad)!important;gap:var(--dio-tab-gap)!important;background:#FFFBF2!important;border-top:0!important;border-bottom:1px solid #DDD5C8!important;align-items:center!important;}
 .tab{height:40px!important;min-height:40px!important;max-height:40px!important;border-radius:14px!important;font-size:15px!important;font-weight:800!important;background:#F8FAFC!important;color:#475569!important;border:1.5px solid #dde3ee!important;display:flex!important;align-items:center!important;justify-content:center!important;}
 .tab.on{background:#1F2A44!important;color:#fff!important;border-color:#1F2A44!important;box-shadow:0 3px 10px rgba(31,42,68,.22)!important;}
 
@@ -401,14 +401,14 @@ header{height:var(--header-h)!important;min-height:var(--header-h)!important;max
 </style>
 
 
-<!-- V2-125: 관구·교구 스타일 동기화 규칙
+<!-- V2-126: 관구·교구 스타일 동기화/수치 변수 정리 규칙
   - 관구·교구는 별도 diocese.html 파일로 유지한다.
   - 단, 색상/글자/탭/카드/검색창/compact 기준은 메인 앱 style.css 기준을 따라간다.
   - 큰 화면·폴드 작은화면·플러스/울트라 기본 크기는 기존 관구·교구 표준(탭 52/40/15)을 유지하고, 작은 일반 모델 compact도 과도하게 줄이지 않는다.
-  - 이후 관구·교구만 별도 크기나 색을 덧씌우지 말고, 이 동기화 블록 안에서만 조정한다. 탭 색은 카드 목록 색상과 분리해 유지한다.
+  - 이후 관구·교구만 별도 크기나 색을 덧씌우지 말고, 이 동기화 블록의 변수에서만 조정한다. 탭 색은 카드 목록 색상과 분리해 유지한다.
   - 기능 로직, 지도 데이터, 외부 링크, 탭 전환 로직은 변경하지 않는다.
 -->
-<style id="oai-diocese-main-app-style-sync-V2-125">
+<style id="oai-diocese-main-app-style-sync-V2-126">
 :root{
   --dio-main-header: #3F4752;
   --dio-main-header-dark: #2F3742;
@@ -439,31 +439,58 @@ header{height:var(--header-h)!important;min-height:var(--header-h)!important;max
   --tab-h: 52px !important;
   --tab-btn-h: 40px !important;
   --fs-tab: 15px !important;
+  /* V2-126: 관구·교구 스타일 수치 기준을 한 곳에서 관리한다.
+     화면 모양은 V2-125와 동일하게 유지하고, 이후 크기/간격 수정은 아래 변수에서만 조정한다. */
+  --dio-tab-bar-pad: 9px 14px;
+  --dio-tab-gap: 8px;
+  --dio-tab-radius: 14px;
+  --dio-tab-pad-x: 8px;
+  --dio-gw-top: 10px;
+  --dio-gw-left: 10px;
+  --dio-gw-gap: 5px;
+  --dio-gw-btn-h: 32px;
+  --dio-gw-btn-pad: 0 14px;
+  --dio-info-card-radius: 14px;
+  --dio-info-x-size: 24px;
+  --dio-info-x-font: 17px;
+  --dio-info-btn-h: 36px;
+  --dio-screen-pad: 16px;
+  --dio-list-pad: 14px 14px 60px;
+  --dio-input-h: 44px;
+  --dio-input-radius: 10px;
+  --dio-result-radius: 13px;
+  --dio-search-result-gap: 10px;
+  --dio-list-card-gap: 12px;
+  --dio-list-icon-size: 52px;
+  --dio-list-icon-radius: 13px;
+  --dio-list-icon-font: 28px;
+  --dio-section-gap-top: 18px;
+  --dio-section-gap-bottom: 10px;
 }
 html,body{background:var(--dio-app-bg)!important;color:var(--dio-text)!important;font-family:'Apple SD Gothic Neo','Noto Sans KR','Malgun Gothic',sans-serif!important;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
 #main,#map-view,#search-view,#list-view{background:var(--dio-app-bg)!important;}
-.tab-bar{height:var(--tab-h)!important;min-height:var(--tab-h)!important;max-height:var(--tab-h)!important;padding:9px 14px!important;gap:8px!important;background:var(--dio-card-bg)!important;border-top:0!important;border-bottom:1px solid var(--dio-line)!important;box-shadow:0 2px 8px rgba(31,41,55,.04)!important;}
-.tab{height:var(--tab-btn-h)!important;min-height:var(--tab-btn-h)!important;max-height:var(--tab-btn-h)!important;border-radius:14px!important;padding:0 8px!important;background:var(--dio-card-soft)!important;color:var(--dio-main-header)!important;border:1.3px solid var(--dio-line)!important;font-size:calc(var(--fs-tab) * var(--dio-effective-font-scale,1))!important;font-weight:850!important;letter-spacing:-.035em!important;line-height:1.1!important;box-shadow:none!important;}
+.tab-bar{height:var(--tab-h)!important;min-height:var(--tab-h)!important;max-height:var(--tab-h)!important;padding:var(--dio-tab-bar-pad)!important;gap:var(--dio-tab-gap)!important;background:var(--dio-card-bg)!important;border-top:0!important;border-bottom:1px solid var(--dio-line)!important;box-shadow:0 2px 8px rgba(31,41,55,.04)!important;}
+.tab{height:var(--tab-btn-h)!important;min-height:var(--tab-btn-h)!important;max-height:var(--tab-btn-h)!important;border-radius:var(--dio-tab-radius)!important;padding:0 var(--dio-tab-pad-x)!important;background:var(--dio-card-soft)!important;color:var(--dio-main-header)!important;border:1.3px solid var(--dio-line)!important;font-size:calc(var(--fs-tab) * var(--dio-effective-font-scale,1))!important;font-weight:850!important;letter-spacing:-.035em!important;line-height:1.1!important;box-shadow:none!important;}
 .tab.on{background:var(--dio-main-header)!important;color:#fff!important;border-color:var(--dio-main-header)!important;box-shadow:0 3px 10px rgba(63,71,82,.20)!important;}
-#gw-bar{top:10px!important;left:10px!important;gap:5px!important;}
-.gb{min-height:32px!important;padding:0 14px!important;border-radius:999px!important;border-width:1.5px!important;font-size:calc(12px * var(--dio-effective-font-scale,1))!important;font-weight:850!important;background:rgba(255,255,255,.96)!important;box-shadow:0 2px 8px rgba(31,41,55,.08)!important;}
+#gw-bar{top:var(--dio-gw-top)!important;left:var(--dio-gw-left)!important;gap:var(--dio-gw-gap)!important;}
+.gb{min-height:var(--dio-gw-btn-h)!important;padding:var(--dio-gw-btn-pad)!important;border-radius:999px!important;border-width:1.5px!important;font-size:calc(12px * var(--dio-effective-font-scale,1))!important;font-weight:850!important;background:rgba(255,255,255,.96)!important;box-shadow:0 2px 8px rgba(31,41,55,.08)!important;}
 .gb.on{color:#fff!important;box-shadow:0 3px 10px rgba(31,41,55,.16)!important;}
 .gb-all{color:var(--dio-main-header)!important;border-color:rgba(63,71,82,.32)!important;}
 .gb-all.on{background:var(--dio-main-header)!important;border-color:var(--dio-main-header)!important;color:#fff!important;}
-#card{border-radius:14px!important;border:1px solid rgba(31,41,55,.12)!important;box-shadow:0 10px 24px rgba(31,41,55,.18)!important;}
-.c-x{width:24px!important;height:24px!important;font-size:17px!important;line-height:1!important;}
+#card{border-radius:var(--dio-info-card-radius)!important;border:1px solid rgba(31,41,55,.12)!important;box-shadow:0 10px 24px rgba(31,41,55,.18)!important;}
+.c-x{width:var(--dio-info-x-size)!important;height:var(--dio-info-x-size)!important;font-size:var(--dio-info-x-font)!important;line-height:1!important;}
 .c-n{font-size:calc(24px * var(--dio-effective-font-scale,1))!important;}
 .c-gw,.c-rg,.c-lbl,.c-nurl{font-size:calc(10.5px * var(--dio-effective-font-scale,1))!important;}
-.c-btn{min-height:36px!important;border-radius:10px!important;font-size:calc(11.5px * var(--dio-effective-font-scale,1))!important;}
-#search-view{padding:16px!important;}
-#list-view{padding:14px 14px 60px!important;}
+.c-btn{min-height:var(--dio-info-btn-h)!important;border-radius:var(--dio-input-radius)!important;font-size:calc(11.5px * var(--dio-effective-font-scale,1))!important;}
+#search-view{padding:var(--dio-screen-pad)!important;}
+#list-view{padding:var(--dio-list-pad)!important;}
 #search-view .ss{padding-bottom:12px!important;margin-bottom:0!important;}
-#search-view #si,#search-view #sb{height:44px!important;border-radius:10px!important;font-size:calc(15px * var(--dio-effective-font-scale,1))!important;}
+#search-view #si,#search-view #sb{height:var(--dio-input-h)!important;border-radius:var(--dio-input-radius)!important;font-size:calc(15px * var(--dio-effective-font-scale,1))!important;}
 #search-view #si{background:var(--dio-card-bg)!important;border-color:var(--dio-line)!important;color:var(--dio-text)!important;}
 #search-view #sb{background:var(--dio-main-header)!important;color:#fff!important;}
-.si-r,.lv-card{background:var(--dio-list-card-bg)!important;border:1px solid var(--dio-line)!important;border-radius:13px!important;box-shadow:0 3px 10px rgba(31,41,55,.05)!important;}
-.si-r{margin-bottom:10px!important;}
-.lv-card{margin-bottom:12px!important;padding:0!important;}
+.si-r,.lv-card{background:var(--dio-list-card-bg)!important;border:1px solid var(--dio-line)!important;border-radius:var(--dio-result-radius)!important;box-shadow:0 3px 10px rgba(31,41,55,.05)!important;}
+.si-r{margin-bottom:var(--dio-search-result-gap)!important;}
+.lv-card{margin-bottom:var(--dio-list-card-gap)!important;padding:0!important;}
 .si-r-foot,.lv-foot{background:var(--dio-list-card-foot)!important;border-top:1px solid var(--dio-list-card-line)!important;}
 #search-view .sl,#list-view .lv-bdg{font-size:calc(12px * var(--dio-effective-font-scale,1))!important;font-weight:850!important;}
 #search-view .si-r-op,#list-view .lv-op{font-size:calc(11.5px * var(--dio-effective-font-scale,1))!important;}
@@ -471,40 +498,40 @@ html,body{background:var(--dio-app-bg)!important;color:var(--dio-text)!important
 #search-view .sg,#list-view .lv-rg,#list-view .lv-det{font-size:calc(13px * var(--dio-effective-font-scale,1))!important;line-height:1.5!important;color:var(--dio-muted)!important;}
 #search-view .si-r-url,#list-view .lv-url{font-size:calc(12px * var(--dio-effective-font-scale,1))!important;color:var(--dio-main-header)!important;}
 #search-view .si-r-arr,#list-view .lv-arr{font-size:14px!important;color:#9CA3AF!important;}
-#list-view .lv-sec{margin:18px 0 10px!important;padding:0!important;border-radius:0!important;background:transparent!important;border:0!important;}
+#list-view .lv-sec{margin:var(--dio-section-gap-top) 0 var(--dio-section-gap-bottom)!important;padding:0!important;border-radius:0!important;background:transparent!important;border:0!important;}
 #list-view .lv-sec-bdg{min-width:100px!important;padding:7px 20px!important;font-size:calc(15px * var(--dio-effective-font-scale,1))!important;border-radius:999px!important;}
 #list-view .lv-sec-cnt{font-size:calc(14px * var(--dio-effective-font-scale,1))!important;}
-.lv-ico{width:52px!important;height:52px!important;border-radius:13px!important;font-size:28px!important;background:var(--dio-card-soft)!important;}
+.lv-ico{width:var(--dio-list-icon-size)!important;height:var(--dio-list-icon-size)!important;border-radius:var(--dio-list-icon-radius)!important;font-size:var(--dio-list-icon-font)!important;background:var(--dio-card-soft)!important;}
 .lv-priest-link{background:#0F766E!important;border-radius:8px!important;font-size:calc(11px * var(--dio-effective-font-scale,1))!important;padding:5px 8px!important;}
 .lv-parish-count{background:rgba(63,71,82,.06)!important;border:1px solid rgba(63,71,82,.12)!important;color:var(--dio-main-header)!important;}
 .lv-card.my-diocese-card{border-color:var(--dio-gold)!important;box-shadow:0 4px 14px rgba(183,121,31,.12)!important;}
 @media(max-width:370px) and (max-height:820px){
-  :root{--diocese-font-scale:.96;--tab-h:48px!important;--tab-btn-h:36px!important;--fs-tab:14px!important;}
-  .tab-bar{padding:6px 8px!important;gap:5px!important;}
-  .tab{border-radius:10px!important;padding:0 6px!important;}
-  #gw-bar{top:8px!important;left:8px!important;gap:4px!important;}
-  .gb{min-height:30px!important;padding:0 10px!important;font-size:calc(11.2px * var(--dio-effective-font-scale,1))!important;}
-  #card{width:166px!important;top:6px!important;right:6px!important;border-radius:12px!important;}
+  :root{--diocese-font-scale:.96;--tab-h:48px!important;--tab-btn-h:36px!important;--fs-tab:14px!important;--dio-tab-bar-pad:6px 8px;--dio-tab-gap:5px;--dio-tab-radius:10px;--dio-tab-pad-x:6px;--dio-gw-top:8px;--dio-gw-left:8px;--dio-gw-gap:4px;--dio-gw-btn-h:30px;--dio-gw-btn-pad:0 10px;--dio-info-card-radius:12px;--dio-info-x-size:22px;--dio-info-x-font:16px;--dio-info-btn-h:34px;--dio-screen-pad:12px;--dio-list-pad:12px 12px 50px;--dio-input-h:38px;--dio-input-radius:10px;--dio-result-radius:12px;--dio-search-result-gap:7px;--dio-list-card-gap:7px;--dio-list-icon-size:44px;--dio-list-icon-radius:11px;--dio-list-icon-font:24px;--dio-section-gap-top:14px;--dio-section-gap-bottom:8px;}
+  .tab-bar{padding:var(--dio-tab-bar-pad)!important;gap:var(--dio-tab-gap)!important;}
+  .tab{border-radius:var(--dio-tab-radius)!important;padding:0 var(--dio-tab-pad-x)!important;}
+  #gw-bar{top:var(--dio-gw-top)!important;left:var(--dio-gw-left)!important;gap:var(--dio-gw-gap)!important;}
+  .gb{min-height:var(--dio-gw-btn-h)!important;padding:var(--dio-gw-btn-pad)!important;font-size:calc(11.2px * var(--dio-effective-font-scale,1))!important;}
+  #card{width:166px!important;top:6px!important;right:6px!important;border-radius:var(--dio-info-card-radius)!important;}
   .c-hd{padding:10px 11px!important;}
   .c-bd{padding:9px 11px 11px!important;}
-  .c-x{width:22px!important;height:22px!important;font-size:16px!important;top:7px!important;right:7px!important;}
+  .c-x{width:var(--dio-info-x-size)!important;height:var(--dio-info-x-size)!important;font-size:var(--dio-info-x-font)!important;top:7px!important;right:7px!important;}
   .c-n{font-size:calc(21px * var(--dio-effective-font-scale,1))!important;}
-  .c-btn{min-height:34px!important;}
-  #search-view{padding:12px!important;}
-  #list-view{padding:12px 12px 50px!important;}
-  #search-view #si,#search-view #sb{height:38px!important;border-radius:10px!important;}
-  .si-r{margin-bottom:7px!important;}
+  .c-btn{min-height:var(--dio-info-btn-h)!important;}
+  #search-view{padding:var(--dio-screen-pad)!important;}
+  #list-view{padding:var(--dio-list-pad)!important;}
+  #search-view #si,#search-view #sb{height:var(--dio-input-h)!important;border-radius:var(--dio-input-radius)!important;}
+  .si-r{margin-bottom:var(--dio-search-result-gap)!important;}
   .si-r-top{padding:10px 11px 0!important;}
   .si-r-foot{padding:7px 11px!important;}
-  .lv-card{padding:0!important;border-radius:12px!important;margin-bottom:7px!important;}
-  .lv-ico{width:44px!important;height:44px!important;border-radius:11px!important;font-size:24px!important;}
+  .lv-card{padding:0!important;border-radius:var(--dio-result-radius)!important;margin-bottom:var(--dio-list-card-gap)!important;}
+  .lv-ico{width:var(--dio-list-icon-size)!important;height:var(--dio-list-icon-size)!important;border-radius:var(--dio-list-icon-radius)!important;font-size:var(--dio-list-icon-font)!important;}
   #search-view .sd,#list-view .lv-name{font-size:calc(15.2px * var(--dio-effective-font-scale,1))!important;}
   #search-view .sg,#list-view .lv-rg,#list-view .lv-det{font-size:calc(12.2px * var(--dio-effective-font-scale,1))!important;}
-  #list-view .lv-sec{padding:0!important;margin:14px 0 8px!important;}
+  #list-view .lv-sec{padding:0!important;margin:var(--dio-section-gap-top) 0 var(--dio-section-gap-bottom)!important;}
   #list-view .lv-sec-bdg{min-width:82px!important;padding:5px 12px!important;font-size:calc(12.6px * var(--dio-effective-font-scale,1))!important;}
 }
 </style>
-<script id="oai-diocese-parent-style-sync-V2-125">
+<script id="oai-diocese-parent-style-sync-V2-126">
 (function(){
   function clean(v){ return String(v || '').trim(); }
   function parentVar(cs, names, fallback){
@@ -661,9 +688,9 @@ html,body{background:var(--dio-app-bg)!important;color:var(--dio-text)!important
   </div>
 </div>
 
-<script src="diocese-data.js?v=V2-125"></script>
+<script src="diocese-data.js?v=V2-126"></script>
 <script>
-/* V2-125: GW_OF / DIOCESE_ICO 데이터는 diocese-data.js로 분리 */
+/* V2-126: GW_OF / DIOCESE_ICO 데이터는 diocese-data.js로 분리 */
 const MY_DIOCESE_STORAGE_KEY='oai_my_diocese_name';
 function getMyDioceseName(){
   try{return (localStorage.getItem(MY_DIOCESE_STORAGE_KEY)||'').trim();}
