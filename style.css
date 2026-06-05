@@ -2305,10 +2305,7 @@ html.oai-cover-resetting-to-intro #cover {
   cursor: pointer;
   background: linear-gradient(180deg, #fffdf8 0%, #f1e5d3 100%);
   border: 1px solid rgba(126,104,74,.24);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.96),
-    inset 0 -7px 13px rgba(136,112,78,.13),
-    inset 0 0 0 1px rgba(255,255,255,.34);
+  box-shadow: 0 3px 9px rgba(47,41,33,.10);
   outline: none;
   box-sizing: border-box;
 }
@@ -2324,15 +2321,9 @@ html.oai-cover-resetting-to-intro #cover {
   border-radius: 0;
 }
 .cover-card::after {
-  content: "";
-  position: absolute;
-  left: 4px;
-  right: 4px;
-  top: 4px;
-  bottom: 4px;
-  border-radius: 13px;
-  border: 1px solid rgba(255,255,255,.42);
-  pointer-events: none;
+  content: none;
+  display: none;
+  border: none;
 }
 
 #cc-1 { --cover-card-point: #c49a57; }
@@ -2351,10 +2342,7 @@ html.oai-cover-resetting-to-intro #cover {
 
 .cover-card.app-pressing {
   transform: translateY(7px) scale(.978);
-  box-shadow:
-    inset 0 1px 0 rgba(255,255,255,.96),
-    inset 0 -7px 13px rgba(136,112,78,.16),
-    inset 0 0 0 1px rgba(255,255,255,.36);
+  box-shadow: 0 2px 7px rgba(47,41,33,.10);
   filter: brightness(.97);
   transition: transform .16s, filter .16s, box-shadow .16s;
 }
@@ -6968,7 +6956,7 @@ html.oai-font-global #pr-list-ul .pr-title {
   color: rgba(75,85,99,.52) !important;
 }
 
-/* V2-109: 인포카드 경로검색 출발지/도착지/취소 선택창 색상 선명도 보강 */
+/* V2-110: 인포카드 경로검색 출발지/도착지/취소 선택창 색상 선명도 보강 */
 #route-role-choice.route-role-choice{
   position:fixed;
   inset:0;
@@ -7259,7 +7247,7 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
   box-shadow:none !important;
 }
 
-/* V2-109: Galaxy 일반 모델(작은 Android viewport) 전용 전체 UI compact 재조정
+/* V2-110: Galaxy 일반 모델(작은 Android viewport) 전용 전체 UI compact 재조정
    - Plus/Ultra급 넓은 화면은 건드리지 않음.
    - zoom/transform 축소를 쓰지 않고, 실제 글자/패딩/높이만 작게 조정한다.
    - 지도 중심, 마커, 길찾기, 뒤로가기 로직은 CSS에서 변경하지 않는다. */
@@ -7860,7 +7848,7 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
 
 }
 
-/* V2-109: 나의 신앙생활 목록형 화면 CSS 정리
+/* V2-110: 나의 신앙생활 목록형 화면 CSS 정리
    - V2-97 구조와 V2-98 색 대비를 하나로 통합
    - 화면 모양은 V2-98 기준 유지, 중복 선언만 정리 */
 .my-faith-body.my-faith-home-list-body { gap: 12px !important; padding-top: 14px !important; background: #F6EBD8 !important; overscroll-behavior-y: contain !important; }
@@ -7905,8 +7893,8 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
   html:not(.ios-device) .my-faith-next-step-note { border-radius: 13px !important; font-size: 11.2px !important; line-height: 1.34 !important; padding: 9px 11px !important; }
 }
 
-/* V2-109: 미사 중 빠른 사용 / 가톨릭길동무 메뉴 모달 CSS 정리
-   - V2-99~V2-109 중복 색상 선언을 하나로 통합
+/* V2-110: 미사 중 빠른 사용 / 가톨릭길동무 메뉴 모달 CSS 정리
+   - V2-99~V2-110 중복 색상 선언을 하나로 통합
    - 헤더는 브라운 유지, 패널과 버튼 배경은 더 밝은 아이보리로 조정
    - 두 모달의 버튼 높이는 같은 기준으로 유지 */
 :root{
@@ -7972,7 +7960,7 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
   html:not(.ios-device) #cover #mass-quick-modal .mass-quick-btn strong{ font-size:13.8px !important; line-height:1.14 !important; }
 }
 
-/* V2-109: 커버 배경은 살짝 어두운 아이보리, 빠른 메뉴/메뉴 배너는 더 밝은 아이보리 */
+/* V2-110: 커버 배경은 살짝 어두운 아이보리, 빠른 메뉴/메뉴 배너는 더 밝은 아이보리 */
 #cover { background-color: #F4EDE2 !important; }
 html.oai-cover-booting #cover,
 html.oai-cover-resetting-to-intro #cover { background: #F4EDE2 !important; background-color: #F4EDE2 !important; }
@@ -7980,7 +7968,7 @@ html.oai-cover-resetting-to-intro #cover { background: #F4EDE2 !important; backg
 #cover .cover-grid > #cc-1.cover-card-wide { background: linear-gradient(180deg,#FFFEFA 0%,#FAF2E6 100%) !important; border-color: rgba(198,166,90,.42) !important; }
 
 
-/* V2-109: 나의 신앙생활 홈 화면은 내용이 보이는 경우 불필요한 스크롤바를 숨기고, 커버 카테고리 테두리는 살짝 더 선명하게 */
+/* V2-110: 나의 신앙생활 홈 화면 스크롤 보정 유지 / 커버 카테고리 박스 내부 테두리 제거 */
 .my-faith-body.my-faith-home-list-body.my-faith-no-scroll {
   overflow-y: hidden !important;
   scrollbar-width: none !important;
@@ -7998,10 +7986,15 @@ html.oai-cover-resetting-to-intro #cover { background: #F4EDE2 !important; backg
 #cover .cover-card {
   border-width: 1.6px !important;
   border-color: rgba(126,104,74,.38) !important;
+  box-shadow: 0 3px 9px rgba(47,41,33,.10) !important;
 }
 #cover .cover-card::after {
-  border-width: 1.2px !important;
-  border-color: rgba(126,104,74,.16) !important;
+  content: none !important;
+  display: none !important;
+  border: none !important;
+}
+#cover .cover-card.app-pressing {
+  box-shadow: 0 2px 7px rgba(47,41,33,.10) !important;
 }
 #cover .cover-card::before {
   height: 4px !important;
@@ -8012,7 +8005,9 @@ html.oai-cover-resetting-to-intro #cover { background: #F4EDE2 !important; backg
     border-width: 1.5px !important;
   }
   html:not(.ios-device) #cover .cover-card::after {
-    border-width: 1.1px !important;
+    content: none !important;
+    display: none !important;
+    border: none !important;
   }
   html:not(.ios-device) #cover .cover-card::before {
     height: 3px !important;

@@ -10,7 +10,7 @@
   // SW_BUILD_VERSION:  SW 등록·캐시 키용 전체 버전 (sw.js BUILD_VERSION과 일치해야 함)
   // ★ 버전 업그레이드 시 두 값 모두 수정, sw.js BUILD_VERSION과 SW_BUILD_VERSION을 동일하게 맞출 것
   var APP_VERSION = 'V-2';
-  var SW_BUILD_VERSION = 'V2-109';
+  var SW_BUILD_VERSION = 'V2-110';
   window.APP_VERSION = APP_VERSION;
 
   function now(){ return Date.now ? Date.now() : new Date().getTime(); }
@@ -78,7 +78,7 @@
     }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
   function resetToCoverForBackground(){
-    // V2-109: 장시간 백그라운드 복귀에서도 커버 이동/자동 새로고침을 하지 않는다.
+    // V2-110: 장시간 백그라운드 복귀에서도 커버 이동/자동 새로고침을 하지 않는다.
     // 현재 화면을 유지하고 필요한 화면 높이·지도 resize만 조용히 한 번 정리한다.
     if(!canBackgroundRefresh()) return false;
     clearReturnFlagsForBackground();
