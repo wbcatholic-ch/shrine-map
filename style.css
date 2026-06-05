@@ -7111,35 +7111,6 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
   }
 }
 
-/* V2-82: 메뉴 배너를 커버와 가까운 아이보리/골드 톤으로 정리 */
-.cover-menu-panel {
-  background: #FFFCF6 !important;
-  border-color: rgba(183,121,31,.24) !important;
-  box-shadow: 0 20px 46px rgba(31,42,68,.18), inset 0 1px 0 rgba(255,255,255,.92) !important;
-}
-.cover-menu-head {
-  background: linear-gradient(180deg, #FFF8EA 0%, #F2E5D0 100%) !important;
-  border-bottom: 1px solid rgba(183,121,31,.24) !important;
-}
-.cover-menu-title { color: #1F2A44 !important; }
-.cover-menu-subtitle { color: #7A6A55 !important; }
-.cover-menu-close {
-  background: transparent !important;
-  color: var(--oai-close-brown) !important;
-  border: 1px solid currentColor !important;
-  box-shadow: none !important;
-}
-.cover-menu-item {
-  background: linear-gradient(180deg, #FFFFFF 0%, #F7F1E8 100%) !important;
-  border-color: rgba(126,104,74,.22) !important;
-  color: #1F2A44 !important;
-  box-shadow: 0 7px 14px rgba(31,42,68,.08), inset 0 1px 0 rgba(255,255,255,.92) !important;
-}
-.cover-menu-icon {
-  background: #F5E9D6 !important;
-  color: #7A4D14 !important;
-}
-
 /* V2-82: 매일미사 배너를 커버톤으로 조정 */
 #missa-bar {
   background: linear-gradient(180deg, #FFF8EA 0%, #F1E5D2 100%) !important;
@@ -7184,25 +7155,6 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
   color: #1F2A44 !important;
   border-color: rgba(183,121,31,.34) !important;
 }
-
-/* V2-82: 커버 빠른 메뉴 버튼도 커버 카드와 같은 톤으로 낮춤 */
-#cover #mass-quick-modal .mass-quick-btn {
-  background: linear-gradient(180deg, #FFFFFF 0%, #F7F1E8 100%) !important;
-  border-color: rgba(126,104,74,.22) !important;
-  color: #1F2A44 !important;
-  box-shadow: 0 8px 17px rgba(31,42,68,.09), inset 0 1px 0 rgba(255,255,255,.92) !important;
-}
-#cover #mass-quick-modal .mass-quick-btn span {
-  background: #F5E9D6 !important;
-}
-#cover #mass-quick-modal .mass-quick-btn strong {
-  color: #1F2A44 !important;
-}
-#cover #mass-quick-modal .mass-quick-primary {
-  background: linear-gradient(180deg, #FFF8EA 0%, #EBD7B8 100%) !important;
-  border-color: rgba(183,121,31,.34) !important;
-}
-
 
 /* V2-82: 성당·성지·피정의집 지역검색 검색창 화면 밖 밀림 방지 */
 #app #sheet-region .region-wrap{
@@ -7279,63 +7231,6 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
   box-shadow:none !important;
 }
 
-/* V2-82: 메뉴 배너와 미사·기도문·성가 빠른 배너를 커버와 어울리는 차분한 아이보리 톤으로 재정리 */
-.cover-menu-panel{
-  background:#FFFDF8 !important;
-  border-color:rgba(214,196,166,.72) !important;
-  box-shadow:0 18px 38px rgba(31,42,68,.14), inset 0 1px 0 rgba(255,255,255,.95) !important;
-}
-.cover-menu-head{
-  background:#F8F2E8 !important;
-  border-bottom:1px solid rgba(214,196,166,.82) !important;
-}
-.cover-menu-title{color:#1F2937 !important;}
-.cover-menu-subtitle{color:#6B7280 !important;}
-.cover-menu-close{
-  background:transparent !important;
-  color:var(--oai-close-brown) !important;
-  border:1px solid currentColor !important;
-  box-shadow:none !important;
-}
-.cover-menu-item{
-  background:#FFFFFF !important;
-  border-color:rgba(229,219,202,.95) !important;
-  color:#1F2937 !important;
-  box-shadow:none !important;
-}
-.cover-menu-icon{
-  background:#F4EBDD !important;
-  color:#8A5A1E !important;
-}
-#cover #mass-quick-modal .guide-panel,
-#cover #mass-quick-modal .mass-quick-panel{
-  background:#FFFDF8 !important;
-  border-color:rgba(214,196,166,.72) !important;
-}
-#cover #mass-quick-modal .guide-badge,
-#cover #mass-quick-modal .mass-quick-panel .guide-badge{
-  background:#F8F2E8 !important;
-  color:#7A5A2A !important;
-  border:1px solid rgba(214,196,166,.72) !important;
-  box-shadow:none !important;
-}
-#cover #mass-quick-modal .mass-quick-btn{
-  background:#FFFFFF !important;
-  border-color:rgba(229,219,202,.95) !important;
-  color:#1F2937 !important;
-  box-shadow:none !important;
-}
-#cover #mass-quick-modal .mass-quick-primary{
-  background:#FFFCF6 !important;
-  border-color:rgba(214,196,166,.95) !important;
-}
-#cover #mass-quick-modal .mass-quick-btn span{
-  background:#F4EBDD !important;
-}
-#cover #mass-quick-modal .mass-quick-btn strong{
-  color:#1F2937 !important;
-}
-
 /* V2-82: 매일미사 상단 배너는 주요기도문 헤더와 달리 커버톤으로 유지하되 노란 기운을 낮춤 */
 #missa-bar{
   background:#F8F2E8 !important;
@@ -7354,94 +7249,6 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
   background:#FFFFFF !important;
   color:#1F2937 !important;
   border:1px solid rgba(214,196,166,.82) !important;
-  box-shadow:none !important;
-}
-
-/* V2-82: 메뉴·매일미사·주요기도문·성가 배너 버튼을 밝은 크림 아이보리 + 은은한 골드 테두리로 조정 */
-:root{
-  --cover-action-ivory-v282:#FAF6EC;
-  --cover-action-ivory-border-v282:#D6BE85;
-  --cover-action-ivory-text-v282:#263244;
-  --cover-action-ivory-soft-v282:#F3E8D3;
-}
-
-/* 가톨릭 길동무 메뉴 배너: 아이콘 사각 배경 제거 */
-.cover-menu-icon{
-  background:transparent !important;
-  border:0 !important;
-  box-shadow:none !important;
-  width:34px !important;
-  height:34px !important;
-  min-width:34px !important;
-  border-radius:0 !important;
-  color:#7A5A2A !important;
-}
-.cover-menu-icon::before,
-.cover-menu-icon::after{
-  content:none !important;
-  display:none !important;
-}
-
-/* 메뉴 배너 버튼: 밝은 크림 아이보리 + 은은한 골드 테두리 */
-.cover-menu-item{
-  background:var(--cover-action-ivory-v282) !important;
-  border-color:var(--cover-action-ivory-border-v282) !important;
-  color:var(--cover-action-ivory-text-v282) !important;
-  box-shadow:none !important;
-}
-.cover-menu-item:active{
-  background:#F3E8D3 !important;
-}
-
-/* 매일미사·주요기도문·성가 빠른 메뉴 버튼: 동일한 크림 아이보리 적용 */
-#cover #mass-quick-modal .mass-quick-btn,
-#cover #mass-quick-modal .mass-quick-primary{
-  background:var(--cover-action-ivory-v282) !important;
-  border-color:var(--cover-action-ivory-border-v282) !important;
-  color:var(--cover-action-ivory-text-v282) !important;
-  box-shadow:none !important;
-}
-#cover #mass-quick-modal .mass-quick-btn:active,
-#cover #mass-quick-modal .mass-quick-primary:active{
-  background:#F3E8D3 !important;
-}
-#cover #mass-quick-modal .mass-quick-btn span{
-  background:transparent !important;
-  border:0 !important;
-  box-shadow:none !important;
-  color:#7A5A2A !important;
-}
-#cover #mass-quick-modal .mass-quick-btn strong{
-  color:var(--cover-action-ivory-text-v282) !important;
-}
-
-/* 매일미사 상단 배너 안의 실행 버튼도 같은 톤으로 맞춤 */
-.missa-open-link{
-  background:var(--cover-action-ivory-v282) !important;
-  color:var(--cover-action-ivory-text-v282) !important;
-  border-color:var(--cover-action-ivory-border-v282) !important;
-  box-shadow:none !important;
-}
-
-/* 주요기도문 본문/검색 영역의 보조 버튼만 버튼 톤 적용, 헤더 자체는 기존 네이비 유지 */
-#goodnews-prayer-btn,
-#prayer-search-bar .pr-font-ctrl{
-  background:var(--cover-action-ivory-v282) !important;
-  color:#7A5A2A !important;
-  border-color:var(--cover-action-ivory-border-v282) !important;
-  box-shadow:none !important;
-}
-
-/* V2-82: 가톨릭길동무 메뉴 제목 아래 연한 사각 배경 제거 */
-.cover-menu-head{
-  background:transparent !important;
-  border-bottom:0 !important;
-  box-shadow:none !important;
-  padding:0 6px 14px !important;
-}
-.cover-menu-head > div{
-  background:transparent !important;
-  border:0 !important;
   box-shadow:none !important;
 }
 
@@ -8002,548 +7809,113 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
   }
 }
 
-
-/* V2-97: 나의 신앙생활 홈을 목록형 카드 + 오른쪽 버튼 구조로 정리 */
-.my-faith-body.my-faith-home-list-body {
-  gap: 12px !important;
-  padding-top: 14px !important;
-}
-.my-faith-intro-card {
-  border-radius: 16px !important;
-  border: 1px solid rgba(183,121,31,.22) !important;
-  background: linear-gradient(180deg,#FFFDF8 0%,#F8EEDC 100%) !important;
-  box-shadow: 0 7px 16px rgba(31,42,68,.08), inset 0 1px 0 rgba(255,255,255,.95) !important;
-  padding: 14px 15px !important;
-  color: #263244 !important;
-  box-sizing: border-box !important;
-}
-.my-faith-intro-card strong {
-  display: block !important;
-  font-size: calc(15.8px * var(--app-font-scale, 1)) !important;
-  line-height: 1.28 !important;
-  font-weight: 900 !important;
-  letter-spacing: -.04em !important;
-  margin-bottom: 4px !important;
-}
-.my-faith-intro-card span {
-  display: block !important;
-  font-size: calc(12.8px * var(--app-font-scale, 1)) !important;
-  line-height: 1.45 !important;
-  font-weight: 700 !important;
-  color: #6B5B45 !important;
-  letter-spacing: -.025em !important;
-  word-break: keep-all !important;
-}
-.my-faith-section.my-faith-list-section {
-  padding: 0 !important;
-  overflow: hidden !important;
-  background: #FFFFFF !important;
-  border-color: rgba(126,104,74,.18) !important;
-}
-.my-faith-section.my-faith-list-section h3 {
-  padding: 12px 14px 11px !important;
-  margin: 0 !important;
-  font-size: calc(15.6px * var(--app-font-scale, 1)) !important;
-  line-height: 1.25 !important;
-  font-weight: 900 !important;
-  letter-spacing: -.04em !important;
-  color: #172033 !important;
-  background: #F5EBDD !important;
-  border-bottom: 1px solid rgba(126,104,74,.18) !important;
-}
-.my-faith-section.my-faith-settings-section h3 {
-  background: #F1E5D2 !important;
-  border-bottom-color: rgba(183,121,31,.22) !important;
-}
-.my-faith-section.my-faith-quick-section h3 {
-  background: #EAF1EA !important;
-  border-bottom-color: rgba(47,133,90,.20) !important;
-}
-.my-faith-list-row {
-  display: grid !important;
-  grid-template-columns: minmax(0,1fr) auto !important;
-  align-items: center !important;
-  gap: 10px !important;
-  min-height: 64px !important;
-  padding: 10px 12px 10px 14px !important;
-  border-bottom: 1px solid rgba(126,104,74,.12) !important;
-  background: #FFFFFF !important;
-  box-sizing: border-box !important;
-}
-.my-faith-list-row:last-child {
-  border-bottom: 0 !important;
-}
-.my-faith-list-row.is-disabled {
-  background: #FAFAF8 !important;
-}
-.my-faith-row-main {
-  min-width: 0 !important;
-  display: flex !important;
-  flex-direction: column !important;
-  gap: 4px !important;
-}
-.my-faith-row-top {
-  display: flex !important;
-  align-items: center !important;
-  gap: 7px !important;
-  min-width: 0 !important;
-}
-.my-faith-row-top strong {
-  min-width: 0 !important;
-  color: #1F2937 !important;
-  font-size: calc(14.8px * var(--app-font-scale, 1)) !important;
-  line-height: 1.2 !important;
-  font-weight: 900 !important;
-  letter-spacing: -.04em !important;
-  white-space: nowrap !important;
-}
-.my-faith-row-status {
-  flex: 0 0 auto !important;
-  border-radius: 999px !important;
-  padding: 3px 7px 2px !important;
-  font-size: calc(10.7px * var(--app-font-scale, 1)) !important;
-  line-height: 1.1 !important;
-  font-weight: 900 !important;
-  letter-spacing: -.035em !important;
-}
-.my-faith-row-status.done {
-  background: #EAF5EC !important;
-  color: #2F855A !important;
-  border: 1px solid rgba(47,133,90,.20) !important;
-}
-.my-faith-row-status.needed {
-  background: #FFF4E5 !important;
-  color: #9A5E16 !important;
-  border: 1px solid rgba(183,121,31,.24) !important;
-}
-.my-faith-row-sub {
-  display: block !important;
-  min-width: 0 !important;
-  color: #6B7280 !important;
-  font-size: calc(12.4px * var(--app-font-scale, 1)) !important;
-  line-height: 1.32 !important;
-  font-weight: 700 !important;
-  letter-spacing: -.025em !important;
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
-  white-space: nowrap !important;
-}
-.my-faith-list-row.has-status-done .my-faith-row-sub {
-  color: #374151 !important;
-}
-.my-faith-row-btn {
-  min-width: 58px !important;
-  height: 36px !important;
-  padding: 0 12px !important;
-  border-radius: 999px !important;
-  border: 1.3px solid rgba(126,104,74,.24) !important;
-  background: #FFFDF8 !important;
-  color: #4B3A25 !important;
-  font-family: inherit !important;
-  font-size: calc(12.4px * var(--app-font-scale, 1)) !important;
-  font-weight: 900 !important;
-  letter-spacing: -.04em !important;
-  box-shadow: 0 4px 10px rgba(31,42,68,.08), inset 0 1px 0 rgba(255,255,255,.92) !important;
-  cursor: pointer !important;
-  touch-action: manipulation !important;
-  -webkit-tap-highlight-color: transparent !important;
-}
-.my-faith-row-btn-open {
-  border-color: rgba(47,133,90,.22) !important;
-  background: #F5FBF6 !important;
-  color: #2F6045 !important;
-}
-.my-faith-row-btn-set {
-  border-color: rgba(183,121,31,.28) !important;
-  background: #FFF8EA !important;
-  color: #7A4E14 !important;
-}
-.my-faith-row-btn:active {
-  transform: translateY(2px) scale(.98) !important;
-  box-shadow: 0 2px 6px rgba(31,42,68,.10), inset 0 2px 5px rgba(31,42,68,.08) !important;
-}
-.my-faith-row-btn:disabled {
-  color: #A0A7B2 !important;
-  border-color: rgba(156,163,175,.30) !important;
-  background: #F3F4F6 !important;
-  box-shadow: none !important;
-  cursor: default !important;
-}
-.my-faith-body.my-faith-home-list-body .my-faith-inline-privacy-note {
-  margin-top: 0 !important;
-}
+/* V2-103: 나의 신앙생활 목록형 화면 CSS 정리
+   - V2-97 구조와 V2-98 색 대비를 하나로 통합
+   - 화면 모양은 V2-98 기준 유지, 중복 선언만 정리 */
+.my-faith-body.my-faith-home-list-body { gap: 12px !important; padding-top: 14px !important; background: #F6EBD8 !important; }
+.my-faith-body.my-faith-home-list-body .my-faith-intro-card { border-radius: 16px !important; border: 1.4px solid #D6BE85 !important; background: linear-gradient(180deg,#FFFFFF 0%,#FFFCF5 100%) !important; box-shadow: 0 10px 20px rgba(31,42,68,.12), 0 2px 7px rgba(183,121,31,.10), inset 0 1px 0 rgba(255,255,255,.98) !important; padding: 14px 15px !important; color: #263244 !important; box-sizing: border-box !important; }
+.my-faith-body.my-faith-home-list-body .my-faith-intro-card strong { display: block !important; color: #7F1D1D !important; font-size: calc(15.8px * var(--app-font-scale, 1)) !important; line-height: 1.28 !important; font-weight: 900 !important; letter-spacing: -.04em !important; margin-bottom: 4px !important; }
+.my-faith-body.my-faith-home-list-body .my-faith-intro-card span { display: block !important; font-size: calc(12.8px * var(--app-font-scale, 1)) !important; line-height: 1.45 !important; font-weight: 700 !important; color: #6B5B45 !important; letter-spacing: -.025em !important; word-break: keep-all !important; }
+.my-faith-body.my-faith-home-list-body .my-faith-section.my-faith-list-section { padding: 0 !important; overflow: hidden !important; background: #FFFFFF !important; border: 1.4px solid #D6BE85 !important; box-shadow: 0 10px 22px rgba(31,42,68,.13), 0 2px 8px rgba(183,121,31,.10) !important; }
+.my-faith-body.my-faith-home-list-body .my-faith-section.my-faith-list-section h3 { padding: 12px 14px 11px !important; margin: 0 !important; color: #FFF8EA !important; background: #7F1D1D !important; border-bottom: 1px solid rgba(127,29,29,.24) !important; font-size: calc(15.6px * var(--app-font-scale, 1)) !important; line-height: 1.25 !important; font-weight: 900 !important; letter-spacing: -.04em !important; }
+.my-faith-body.my-faith-home-list-body .my-faith-section.my-faith-quick-section h3 { background: #1F2937 !important; color: #FFF8EA !important; border-bottom-color: rgba(31,41,55,.24) !important; }
+.my-faith-list-row { display: grid !important; grid-template-columns: minmax(0,1fr) auto !important; align-items: center !important; gap: 10px !important; min-height: 64px !important; padding: 10px 12px 10px 14px !important; border-bottom: 1px solid rgba(183,121,31,.18) !important; background: #FFFFFF !important; box-sizing: border-box !important; }
+.my-faith-list-row:last-child { border-bottom: 0 !important; }
+.my-faith-list-row.is-disabled { background: #F8FAFC !important; }
+.my-faith-row-main { min-width: 0 !important; display: flex !important; flex-direction: column !important; gap: 4px !important; }
+.my-faith-row-top { display: flex !important; align-items: center !important; gap: 7px !important; min-width: 0 !important; }
+.my-faith-row-top strong { min-width: 0 !important; color: #1F2937 !important; font-size: calc(14.8px * var(--app-font-scale, 1)) !important; line-height: 1.2 !important; font-weight: 900 !important; letter-spacing: -.04em !important; white-space: nowrap !important; }
+.my-faith-row-status { flex: 0 0 auto !important; border-radius: 999px !important; padding: 3px 7px 2px !important; font-size: calc(10.7px * var(--app-font-scale, 1)) !important; line-height: 1.1 !important; font-weight: 900 !important; letter-spacing: -.035em !important; }
+.my-faith-row-status.done { background: #E6F4EA !important; color: #166534 !important; border: 1px solid rgba(22,101,52,.24) !important; }
+.my-faith-row-status.needed { background: #FCE7E7 !important; color: #9F1239 !important; border: 1px solid rgba(159,18,57,.20) !important; }
+.my-faith-row-sub { display: block !important; min-width: 0 !important; color: #6B7280 !important; font-size: calc(12.4px * var(--app-font-scale, 1)) !important; line-height: 1.32 !important; font-weight: 700 !important; letter-spacing: -.025em !important; overflow: hidden !important; text-overflow: ellipsis !important; white-space: nowrap !important; }
+.my-faith-list-row.has-status-done .my-faith-row-sub { color: #374151 !important; }
+.my-faith-row-btn { min-width: 58px !important; height: 36px !important; padding: 0 12px !important; border-radius: 999px !important; border: 1.3px solid rgba(126,104,74,.24) !important; background: #FFFDF8 !important; color: #4B3A25 !important; font-family: inherit !important; font-size: calc(12.4px * var(--app-font-scale, 1)) !important; font-weight: 900 !important; letter-spacing: -.04em !important; box-shadow: 0 4px 10px rgba(31,42,68,.08), inset 0 1px 0 rgba(255,255,255,.92) !important; cursor: pointer !important; touch-action: manipulation !important; -webkit-tap-highlight-color: transparent !important; }
+.my-faith-body.my-faith-home-list-body .my-faith-row-btn-open { border-color: #1F2937 !important; background: #1F2937 !important; color: #FFFFFF !important; }
+.my-faith-body.my-faith-home-list-body .my-faith-row-btn-set { border-color: #B7791F !important; background: #FFF8EA !important; color: #7A3E12 !important; }
+.my-faith-row-btn:active { transform: translateY(2px) scale(.98) !important; box-shadow: 0 2px 6px rgba(31,42,68,.10), inset 0 2px 5px rgba(31,42,68,.08) !important; }
+.my-faith-row-btn:disabled { color: #A0A7B2 !important; border-color: rgba(156,163,175,.30) !important; background: #F3F4F6 !important; box-shadow: none !important; cursor: default !important; }
+.my-faith-body.my-faith-home-list-body .my-faith-inline-privacy-note { margin-top: 0 !important; }
+.my-faith-next-step-note { border: 1.4px dashed #B7791F !important; border-radius: 15px !important; background: rgba(255,252,245,.78) !important; color: #7A4E14 !important; font-size: calc(12.8px * var(--app-font-scale, 1)) !important; line-height: 1.42 !important; font-weight: 800 !important; letter-spacing: -.03em !important; padding: 11px 13px !important; box-shadow: 0 6px 13px rgba(31,42,68,.07) !important; box-sizing: border-box !important; }
 @media (max-width: 370px) and (max-height: 820px) {
-  html:not(.ios-device) .my-faith-body.my-faith-home-list-body {
-    gap: 9px !important;
-    padding: 10px 11px calc(18px + env(safe-area-inset-bottom, 0px)) !important;
-  }
-  html:not(.ios-device) .my-faith-intro-card {
-    border-radius: 14px !important;
-    padding: 11px 12px !important;
-  }
-  html:not(.ios-device) .my-faith-intro-card strong {
-    font-size: 13.9px !important;
-    line-height: 1.24 !important;
-  }
-  html:not(.ios-device) .my-faith-intro-card span {
-    font-size: 11.2px !important;
-    line-height: 1.38 !important;
-  }
-  html:not(.ios-device) .my-faith-section.my-faith-list-section {
-    padding: 0 !important;
-    border-radius: 14px !important;
-  }
-  html:not(.ios-device) .my-faith-section.my-faith-list-section h3 {
-    padding: 10px 12px 9px !important;
-    font-size: 13.8px !important;
-    line-height: 1.22 !important;
-  }
-  html:not(.ios-device) .my-faith-list-row {
-    min-height: 56px !important;
-    padding: 8px 10px 8px 12px !important;
-    gap: 7px !important;
-  }
-  html:not(.ios-device) .my-faith-row-top {
-    gap: 5px !important;
-  }
-  html:not(.ios-device) .my-faith-row-top strong {
-    font-size: 13px !important;
-  }
-  html:not(.ios-device) .my-faith-row-status {
-    font-size: 9.7px !important;
-    padding: 2px 5px !important;
-  }
-  html:not(.ios-device) .my-faith-row-sub {
-    font-size: 10.8px !important;
-    line-height: 1.26 !important;
-  }
-  html:not(.ios-device) .my-faith-row-btn {
-    min-width: 52px !important;
-    height: 32px !important;
-    padding: 0 9px !important;
-    font-size: 11.2px !important;
-  }
+  html:not(.ios-device) .my-faith-body.my-faith-home-list-body { gap: 9px !important; padding: 10px 11px calc(18px + env(safe-area-inset-bottom, 0px)) !important; }
+  html:not(.ios-device) .my-faith-intro-card { border-radius: 14px !important; padding: 11px 12px !important; }
+  html:not(.ios-device) .my-faith-intro-card strong { font-size: 13.9px !important; line-height: 1.24 !important; }
+  html:not(.ios-device) .my-faith-intro-card span { font-size: 11.2px !important; line-height: 1.38 !important; }
+  html:not(.ios-device) .my-faith-section.my-faith-list-section { padding: 0 !important; border-radius: 14px !important; }
+  html:not(.ios-device) .my-faith-section.my-faith-list-section h3 { padding: 10px 12px 9px !important; font-size: 13.8px !important; line-height: 1.22 !important; }
+  html:not(.ios-device) .my-faith-list-row { min-height: 56px !important; padding: 8px 10px 8px 12px !important; gap: 7px !important; }
+  html:not(.ios-device) .my-faith-row-top { gap: 5px !important; }
+  html:not(.ios-device) .my-faith-row-top strong { font-size: 13px !important; }
+  html:not(.ios-device) .my-faith-row-status { font-size: 9.7px !important; padding: 2px 5px !important; }
+  html:not(.ios-device) .my-faith-row-sub { font-size: 10.8px !important; line-height: 1.26 !important; }
+  html:not(.ios-device) .my-faith-row-btn { min-width: 52px !important; height: 32px !important; padding: 0 9px !important; font-size: 11.2px !important; }
+  html:not(.ios-device) .my-faith-next-step-note { border-radius: 13px !important; font-size: 11.2px !important; line-height: 1.34 !important; padding: 9px 11px !important; }
 }
 
-
-/* V2-98: 나의 신앙생활 색 대비 강화 + 설정 완료 후 정보 영역 노출 */
-.my-faith-body.my-faith-home-list-body {
-  background: #F6EBD8 !important;
-}
-.my-faith-body.my-faith-home-list-body .my-faith-intro-card {
-  border-color: #D6BE85 !important;
-  background: linear-gradient(180deg,#FFFFFF 0%,#FFFCF5 100%) !important;
-  box-shadow: 0 10px 20px rgba(31,42,68,.12), 0 2px 7px rgba(183,121,31,.10), inset 0 1px 0 rgba(255,255,255,.98) !important;
-}
-.my-faith-body.my-faith-home-list-body .my-faith-intro-card strong {
-  color: #7F1D1D !important;
-}
-.my-faith-body.my-faith-home-list-body .my-faith-section.my-faith-list-section {
-  background: #FFFFFF !important;
-  border: 1.4px solid #D6BE85 !important;
-  box-shadow: 0 10px 22px rgba(31,42,68,.13), 0 2px 8px rgba(183,121,31,.10) !important;
-}
-.my-faith-body.my-faith-home-list-body .my-faith-section.my-faith-list-section h3 {
-  color: #FFF8EA !important;
-  background: #7F1D1D !important;
-  border-bottom-color: rgba(127,29,29,.24) !important;
-}
-.my-faith-body.my-faith-home-list-body .my-faith-section.my-faith-quick-section h3 {
-  background: #1F2937 !important;
-  color: #FFF8EA !important;
-  border-bottom-color: rgba(31,41,55,.24) !important;
-}
-.my-faith-body.my-faith-home-list-body .my-faith-list-row {
-  background: #FFFFFF !important;
-  border-bottom-color: rgba(183,121,31,.18) !important;
-}
-.my-faith-body.my-faith-home-list-body .my-faith-list-row.is-disabled {
-  background: #F8FAFC !important;
-}
-.my-faith-body.my-faith-home-list-body .my-faith-row-btn-open {
-  border-color: #1F2937 !important;
-  background: #1F2937 !important;
-  color: #FFFFFF !important;
-}
-.my-faith-body.my-faith-home-list-body .my-faith-row-btn-set {
-  border-color: #B7791F !important;
-  background: #FFF8EA !important;
-  color: #7A3E12 !important;
-}
-.my-faith-body.my-faith-home-list-body .my-faith-row-status.done {
-  background: #E6F4EA !important;
-  color: #166534 !important;
-  border-color: rgba(22,101,52,.24) !important;
-}
-.my-faith-body.my-faith-home-list-body .my-faith-row-status.needed {
-  background: #FCE7E7 !important;
-  color: #9F1239 !important;
-  border-color: rgba(159,18,57,.20) !important;
-}
-.my-faith-next-step-note {
-  border: 1.4px dashed #B7791F !important;
-  border-radius: 15px !important;
-  background: rgba(255,252,245,.78) !important;
-  color: #7A4E14 !important;
-  font-size: calc(12.8px * var(--app-font-scale, 1)) !important;
-  line-height: 1.42 !important;
-  font-weight: 800 !important;
-  letter-spacing: -.03em !important;
-  padding: 11px 13px !important;
-  box-shadow: 0 6px 13px rgba(31,42,68,.07) !important;
-  box-sizing: border-box !important;
-}
-@media (max-width: 370px) and (max-height: 820px) {
-  html:not(.ios-device) .my-faith-next-step-note {
-    border-radius: 13px !important;
-    font-size: 11.2px !important;
-    line-height: 1.34 !important;
-    padding: 9px 11px !important;
-  }
-}
-
-
-/* V2-102: 미사 중 빠른 사용 / 가톨릭길동무 메뉴 모달 헤더 색상 순례길 헤더 기준 통일 */
-.cover-menu-panel,
-#cover #mass-quick-modal .mass-quick-panel {
-  background: #FFFDF8 !important;
-  border: 1.4px solid rgba(214,190,133,.82) !important;
-  box-shadow: 0 22px 48px rgba(31,42,68,.18), inset 0 1px 0 rgba(255,255,255,.96) !important;
-}
-.cover-menu-head,
-#cover #mass-quick-modal .mass-quick-head {
-  display: flex !important;
-  align-items: center !important;
-  justify-content: space-between !important;
-  gap: 14px !important;
-  width: 100% !important;
-  margin: 0 0 18px !important;
-  padding: 15px 16px !important;
-  box-sizing: border-box !important;
-  border: 1.4px solid var(--oai-gold-border, #c49a57) !important;
-  border-radius: 22px !important;
-  background: #0e1535 !important;
-  box-shadow: 0 8px 18px rgba(14,21,53,.22), inset 0 1px 0 rgba(255,255,255,.08) !important;
-  text-align: left !important;
-}
-.cover-menu-head > div,
-#cover #mass-quick-modal .mass-quick-head-text {
-  min-width: 0 !important;
-  background: transparent !important;
-  border: 0 !important;
-  box-shadow: none !important;
-}
-.cover-menu-title,
-#cover #mass-quick-modal .mass-quick-title {
-  color: #FFFFFF !important;
-  font-size: calc(20px * var(--app-font-scale, 1)) !important;
-  line-height: 1.18 !important;
-  font-weight: 900 !important;
-  letter-spacing: -.045em !important;
-  word-break: keep-all !important;
-}
-.cover-menu-subtitle,
-#cover #mass-quick-modal .mass-quick-subtitle {
-  margin-top: 6px !important;
-  color: rgba(255,255,255,.68) !important;
-  font-size: calc(13px * var(--app-font-scale, 1)) !important;
-  line-height: 1.25 !important;
-  font-weight: 800 !important;
-  letter-spacing: -.035em !important;
-  word-break: keep-all !important;
-}
-.cover-menu-close,
-#cover #mass-quick-modal .mass-quick-head .guide-x,
-#cover #mass-quick-modal .mass-quick-close {
-  position: static !important;
-  flex: 0 0 auto !important;
-  width: 42px !important;
-  height: 42px !important;
-  border-radius: 50% !important;
-  border: 1.4px solid var(--oai-close-gold, #c49b56) !important;
-  background: rgba(255,255,255,.06) !important;
-  color: var(--oai-close-gold, #c49b56) !important;
-  box-shadow: 0 5px 12px rgba(0,0,0,.12) !important;
-  transform: none !important;
-  font-size: 27px !important;
-  font-weight: 900 !important;
-  line-height: 1 !important;
-  display: flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-}
-#cover #mass-quick-modal .mass-quick-actions {
-  margin-top: 0 !important;
-}
-@media (max-width: 370px) and (max-height: 820px) {
-  html:not(.ios-device) .cover-menu-panel,
-  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-panel {
-    padding: 16px 13px 15px !important;
-  }
-  html:not(.ios-device) .cover-menu-head,
-  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-head {
-    border-radius: 18px !important;
-    margin-bottom: 12px !important;
-    padding: 12px 12px !important;
-    gap: 10px !important;
-  }
-  html:not(.ios-device) .cover-menu-title,
-  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-title {
-    font-size: 17px !important;
-    line-height: 1.16 !important;
-  }
-  html:not(.ios-device) .cover-menu-subtitle,
-  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-subtitle {
-    margin-top: 4px !important;
-    font-size: 11.5px !important;
-    line-height: 1.2 !important;
-  }
-  html:not(.ios-device) .cover-menu-close,
-  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-head .guide-x,
-  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-close {
-    width: 36px !important;
-    height: 36px !important;
-    font-size: 24px !important;
-  }
-}
-
-
-/* V2-102: 빠른 사용/메뉴 모달 브라운 색상 대비 재정리 + 두 모달 버튼 높이 통일
-   - 헤더는 네이비 기운을 줄인 진한 브라운으로 정리
-   - 패널 배경과 버튼 배경 대비를 키워 두 모달 모두 박스가 더 또렷하게 보이도록 조정
-   - 가톨릭길동무 메뉴 버튼 높이를 미사 빠른 사용 버튼과 같은 기준으로 복구
-   - 기능/구조/이벤트 로직 변경 없음 */
+/* V2-103: 미사 중 빠른 사용 / 가톨릭길동무 메뉴 모달 CSS 정리
+   - V2-99~V2-103 중복 색상 선언을 하나로 통합
+   - 헤더는 브라운 유지, 패널과 버튼 배경은 V2-103보다 밝게 조정
+   - 두 모달의 버튼 높이는 같은 기준으로 유지 */
 :root{
   --oai-modal-brown-head:#4A2F22;
   --oai-modal-brown-head-text:#FFF8EA;
   --oai-modal-brown-sub:#F0DFC2;
-  --oai-modal-brown-panel:#EEDCC0;
-  --oai-modal-brown-box:#FFFDF8;
-  --oai-modal-brown-box-press:#F5E6CF;
+  --oai-modal-brown-panel:#F4E7D2;
+  --oai-modal-brown-box:#FFFFFF;
+  --oai-modal-brown-box-press:#FBF1E2;
   --oai-modal-brown-line:#C49555;
   --oai-modal-brown-ink:#2B211B;
   --oai-modal-brown-muted:#6B513D;
 }
 .cover-menu-panel,
-#cover #mass-quick-modal .mass-quick-panel{
-  background:var(--oai-modal-brown-panel) !important;
-  border-color:rgba(214,190,133,.90) !important;
-  box-shadow:0 22px 48px rgba(58,47,34,.18), inset 0 1px 0 rgba(255,255,255,.72) !important;
-}
+#cover #mass-quick-modal .mass-quick-panel{ background:var(--oai-modal-brown-panel) !important; border:1.4px solid rgba(214,190,133,.90) !important; box-shadow:0 22px 48px rgba(58,47,34,.16), inset 0 1px 0 rgba(255,255,255,.78) !important; }
 .cover-menu-head,
-#cover #mass-quick-modal .mass-quick-head{
-  background:var(--oai-modal-brown-head) !important;
-  border-color:var(--oai-modal-brown-line) !important;
-  box-shadow:0 8px 18px rgba(74,47,34,.24), inset 0 1px 0 rgba(255,255,255,.08) !important;
-}
+#cover #mass-quick-modal .mass-quick-head{ display:flex !important; align-items:center !important; justify-content:space-between !important; gap:14px !important; width:100% !important; margin:0 0 18px !important; padding:15px 16px !important; box-sizing:border-box !important; border:1.4px solid var(--oai-modal-brown-line) !important; border-radius:22px !important; background:var(--oai-modal-brown-head) !important; box-shadow:0 8px 18px rgba(74,47,34,.24), inset 0 1px 0 rgba(255,255,255,.08) !important; text-align:left !important; }
+.cover-menu-head > div,
+#cover #mass-quick-modal .mass-quick-head-text{ min-width:0 !important; background:transparent !important; border:0 !important; box-shadow:none !important; }
 .cover-menu-title,
-#cover #mass-quick-modal .mass-quick-title{
-  color:var(--oai-modal-brown-head-text) !important;
-}
+#cover #mass-quick-modal .mass-quick-title{ color:var(--oai-modal-brown-head-text) !important; font-size:calc(20px * var(--app-font-scale, 1)) !important; line-height:1.18 !important; font-weight:900 !important; letter-spacing:-.045em !important; word-break:keep-all !important; }
 .cover-menu-subtitle,
-#cover #mass-quick-modal .mass-quick-subtitle{
-  color:var(--oai-modal-brown-sub) !important;
-}
+#cover #mass-quick-modal .mass-quick-subtitle{ margin-top:6px !important; color:var(--oai-modal-brown-sub) !important; font-size:calc(13px * var(--app-font-scale, 1)) !important; line-height:1.25 !important; font-weight:800 !important; letter-spacing:-.035em !important; word-break:keep-all !important; }
 .cover-menu-close,
 #cover #mass-quick-modal .mass-quick-head .guide-x,
-#cover #mass-quick-modal .mass-quick-close{
-  color:var(--oai-modal-brown-sub) !important;
-  border-color:rgba(231,216,184,.78) !important;
-  background:rgba(255,248,234,.08) !important;
-  box-shadow:0 5px 12px rgba(0,0,0,.13) !important;
-}
-.cover-menu-list{
-  gap:10px !important;
-}
-.cover-menu-item{
-  min-height:92px !important;
-  padding:15px 18px !important;
-  border-radius:20px !important;
-  background:var(--oai-modal-brown-box) !important;
-  border-color:var(--oai-modal-brown-line) !important;
-  color:var(--oai-modal-brown-ink) !important;
-  box-shadow:0 6px 14px rgba(74,47,34,.10), inset 0 1px 0 rgba(255,255,255,.88) !important;
-}
-.cover-menu-item:active{
-  background:var(--oai-modal-brown-box-press) !important;
-}
-.cover-menu-icon{
-  width:48px !important;
-  height:48px !important;
-  min-width:48px !important;
-  display:flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  color:#7A4E16 !important;
-  font-size:calc(29px * var(--app-font-scale, 1)) !important;
-}
-#cover #mass-quick-modal .mass-quick-actions{
-  gap:10px !important;
-}
+#cover #mass-quick-modal .mass-quick-close{ position:static !important; flex:0 0 auto !important; width:42px !important; height:42px !important; border-radius:50% !important; border:1.4px solid rgba(231,216,184,.78) !important; background:rgba(255,248,234,.08) !important; color:var(--oai-modal-brown-sub) !important; box-shadow:0 5px 12px rgba(0,0,0,.13) !important; transform:none !important; font-size:27px !important; font-weight:900 !important; line-height:1 !important; display:flex !important; align-items:center !important; justify-content:center !important; }
+.cover-menu-list,
+#cover #mass-quick-modal .mass-quick-actions{ gap:10px !important; margin-top:0 !important; }
+.cover-menu-item,
 #cover #mass-quick-modal .mass-quick-btn,
-#cover #mass-quick-modal .mass-quick-primary{
-  min-height:92px !important;
-  padding:15px 18px !important;
-  border-radius:20px !important;
-  grid-template-columns:58px 1fr !important;
-  background:var(--oai-modal-brown-box) !important;
-  border-color:var(--oai-modal-brown-line) !important;
-  color:var(--oai-modal-brown-ink) !important;
-  box-shadow:0 6px 14px rgba(74,47,34,.10), inset 0 1px 0 rgba(255,255,255,.88) !important;
-}
+#cover #mass-quick-modal .mass-quick-primary{ min-height:92px !important; padding:15px 18px !important; border-radius:20px !important; background:var(--oai-modal-brown-box) !important; border-color:var(--oai-modal-brown-line) !important; color:var(--oai-modal-brown-ink) !important; box-shadow:0 6px 14px rgba(74,47,34,.09), inset 0 1px 0 rgba(255,255,255,.92) !important; }
+.cover-menu-item:active,
 #cover #mass-quick-modal .mass-quick-btn:active,
-#cover #mass-quick-modal .mass-quick-primary:active{
-  background:var(--oai-modal-brown-box-press) !important;
-}
-#cover #mass-quick-modal .mass-quick-btn span{
-  width:48px !important;
-  height:48px !important;
-  min-width:48px !important;
-  border-radius:16px !important;
-  background:transparent !important;
-  color:#7A4E16 !important;
-  font-size:calc(29px * var(--app-font-scale, 1)) !important;
-}
-#cover #mass-quick-modal .mass-quick-btn strong{
-  color:var(--oai-modal-brown-ink) !important;
-  font-size:calc(15.5px * var(--app-font-scale, 1)) !important;
-  line-height:1.18 !important;
-}
+#cover #mass-quick-modal .mass-quick-primary:active{ background:var(--oai-modal-brown-box-press) !important; }
+.cover-menu-icon,
+#cover #mass-quick-modal .mass-quick-btn span{ width:48px !important; height:48px !important; min-width:48px !important; display:flex !important; align-items:center !important; justify-content:center !important; background:transparent !important; border:0 !important; box-shadow:none !important; color:#7A4E16 !important; font-size:calc(29px * var(--app-font-scale, 1)) !important; }
+.cover-menu-icon{ border-radius:0 !important; }
+#cover #mass-quick-modal .mass-quick-btn{ grid-template-columns:58px 1fr !important; }
+#cover #mass-quick-modal .mass-quick-btn span{ border-radius:16px !important; }
+#cover #mass-quick-modal .mass-quick-btn strong{ color:var(--oai-modal-brown-ink) !important; font-size:calc(15.5px * var(--app-font-scale, 1)) !important; line-height:1.18 !important; }
 @media (max-width:370px) and (max-height:820px){
-  html:not(.ios-device) .cover-menu-list{
-    gap:8px !important;
-  }
-  html:not(.ios-device) .cover-menu-item{
-    min-height:78px !important;
-    padding:12px 14px !important;
-    border-radius:17px !important;
-    font-size:13.8px !important;
-  }
-  html:not(.ios-device) .cover-menu-icon{
-    width:40px !important;
-    height:40px !important;
-    min-width:40px !important;
-    font-size:24px !important;
-  }
-  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-actions{
-    gap:8px !important;
-  }
+  html:not(.ios-device) .cover-menu-panel,
+  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-panel{ padding:16px 13px 15px !important; }
+  html:not(.ios-device) .cover-menu-head,
+  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-head{ border-radius:18px !important; margin-bottom:12px !important; padding:12px !important; gap:10px !important; }
+  html:not(.ios-device) .cover-menu-title,
+  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-title{ font-size:17px !important; line-height:1.16 !important; }
+  html:not(.ios-device) .cover-menu-subtitle,
+  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-subtitle{ margin-top:4px !important; font-size:11.5px !important; line-height:1.2 !important; }
+  html:not(.ios-device) .cover-menu-close,
+  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-head .guide-x,
+  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-close{ width:36px !important; height:36px !important; font-size:24px !important; }
+  html:not(.ios-device) .cover-menu-list,
+  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-actions{ gap:8px !important; }
+  html:not(.ios-device) .cover-menu-item,
   html:not(.ios-device) #cover #mass-quick-modal .mass-quick-btn,
-  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-primary{
-    min-height:78px !important;
-    padding:12px 14px !important;
-    grid-template-columns:50px 1fr !important;
-    border-radius:17px !important;
-  }
-  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-btn span{
-    width:40px !important;
-    height:40px !important;
-    min-width:40px !important;
-    border-radius:13px !important;
-    font-size:24px !important;
-  }
-  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-btn strong{
-    font-size:13.8px !important;
-    line-height:1.14 !important;
-  }
+  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-primary{ min-height:78px !important; padding:12px 14px !important; border-radius:17px !important; }
+  html:not(.ios-device) .cover-menu-item{ font-size:13.8px !important; }
+  html:not(.ios-device) .cover-menu-icon,
+  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-btn span{ width:40px !important; height:40px !important; min-width:40px !important; font-size:24px !important; }
+  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-btn{ grid-template-columns:50px 1fr !important; }
+  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-btn span{ border-radius:13px !important; }
+  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-btn strong{ font-size:13.8px !important; line-height:1.14 !important; }
 }
