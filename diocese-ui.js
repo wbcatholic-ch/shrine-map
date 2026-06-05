@@ -1,4 +1,4 @@
-/* V2-128: 교구 기본 데이터와 검색 데이터를 기능별 파일로 분리 */
+/* V2-129: 교구 기본 데이터와 검색 데이터를 기능별 파일로 분리 */
 const MY_DIOCESE_STORAGE_KEY='oai_my_diocese_name';
 function getMyDioceseName(){
   try{return (localStorage.getItem(MY_DIOCESE_STORAGE_KEY)||'').trim();}
@@ -428,20 +428,29 @@ function showCard(el){
   const diocese=el.dataset.d||'';
   const topDioceses=['서울대교구','인천교구','수원교구','의정부교구','원주교구','춘천교구','대전교구','청주교구','안동교구'];
   const isMobile=window.innerWidth<=560;
+  card.classList.remove('dio-card-top','dio-card-bottom');
   if(isMobile){
     if(topDioceses.includes(diocese)){
-      card.style.top='auto';card.style.bottom='10px';card.style.right='10px';card.style.left='auto';
+      card.classList.add('dio-card-bottom');
+      card.style.setProperty('top','auto','important');
+      card.style.setProperty('bottom','10px','important');
+      card.style.setProperty('right','10px','important');
+      card.style.setProperty('left','auto','important');
     } else {
-      card.style.top='6px';card.style.bottom='auto';card.style.right='6px';card.style.left='auto';
+      card.classList.add('dio-card-top');
+      card.style.setProperty('top','6px','important');
+      card.style.setProperty('bottom','auto','important');
+      card.style.setProperty('right','6px','important');
+      card.style.setProperty('left','auto','important');
     }
   } else {
     let cx=0.5,cy=0.5;
     try{const bb=el.getBBox();cx=(bb.x+bb.width/2-vx)/vw;cy=(bb.y+bb.height/2-vy)/vh;}catch(e){}
     const onRight=(cx>0.5),onBottom=(cy>0.5);
-    card.style.right=onRight?'auto':'10px';
-    card.style.left=onRight?'10px':'auto';
-    card.style.top=onBottom?'10px':'auto';
-    card.style.bottom=onBottom?'auto':'50px';
+    card.style.setProperty('right',onRight?'auto':'10px');
+    card.style.setProperty('left',onRight?'10px':'auto');
+    card.style.setProperty('top',onBottom?'10px':'auto');
+    card.style.setProperty('bottom',onBottom?'auto':'50px');
   }
   card.classList.add('on');
   try{
@@ -457,7 +466,7 @@ function toggleDetail(){
 function hideCard(){
   const card=document.getElementById('card');
   if(!card)return;
-  card.classList.remove('on');
+  card.classList.remove('on','dio-card-top','dio-card-bottom');
   try{ delete card.dataset.diocese; }catch(e){}
 }
 function isCardOpen(){
