@@ -1533,7 +1533,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V2-108';
+    frame.src='diocese.html?v=V2-109';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1946,7 +1946,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V2-108';
+const _PARISH_ASSET_VERSION='V2-109';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -2109,7 +2109,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V2-108';
+const _PRAYER_ASSET_VERSION='V2-109';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2448,7 +2448,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V2-108';
+const _SHRINE_ASSET_VERSION='V2-109';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -6700,7 +6700,7 @@ function _fmtTime(s){
     // 첫 진입 인트로와 같은 타이밍을 그대로 사용한다. (V2-82: 십자가 안정 유지 시간 소폭 연장)
     setTimeout(function(){
       try{ root.classList.add('oai-cover-under-intro-reveal'); }catch(_e){}
-    }, 1520);
+    }, 1720);
 
     setTimeout(function(){
       try{
@@ -6709,11 +6709,11 @@ function _fmtTime(s){
         setTimeout(function(){
           try{ root.classList.remove('oai-cover-first-reveal','oai-cover-booting'); }catch(__e){}
           _idleIntroRunning = false;
-        }, 660);
+        }, 820);
       }catch(_e){
         _idleIntroRunning = false;
       }
-    }, 1900);
+    }, 2150);
   }
 
   function _resetIdle(){
@@ -7016,15 +7016,54 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(!body || !body.classList.contains('my-faith-home-list-body')) return;
         body.classList.remove('my-faith-no-scroll');
         body.scrollTop = 0;
-        requestAnimationFrame(function(){
+
+        function contentFitsWithoutScroll(){
           try{
+            var bodyRect = body.getBoundingClientRect ? body.getBoundingClientRect() : null;
+            if(!bodyRect || !bodyRect.height) return false;
+            var children = Array.prototype.slice.call(body.children || []);
+            var top = Infinity;
+            var bottom = -Infinity;
+            children.forEach(function(el){
+              try{
+                if(!el || el.hidden) return;
+                var st = window.getComputedStyle ? window.getComputedStyle(el) : null;
+                if(st && st.display === 'none') return;
+                var r = el.getBoundingClientRect ? el.getBoundingClientRect() : null;
+                if(!r || (!r.height && !r.width)) return;
+                top = Math.min(top, r.top);
+                bottom = Math.max(bottom, r.bottom);
+              }catch(_e){}
+            });
+            if(!isFinite(top) || !isFinite(bottom)) return false;
+            var visualHeight = bottom - top;
+            // 실제 내용이 화면 안에 들어오는데 padding/safe-area 때문에 scrollHeight만 조금 커지는 경우는
+            // 스크롤이 생기지 않도록 현재 홈 화면에서만 잠근다.
+            return visualHeight <= (bodyRect.height + 6);
+          }catch(_e){
+            return false;
+          }
+        }
+
+        function apply(){
+          try{
+            body.scrollTop = 0;
             var extra = (body.scrollHeight || 0) - (body.clientHeight || 0);
-            if(extra <= 28){
+            if(contentFitsWithoutScroll() || extra <= 42){
               body.scrollTop = 0;
               body.classList.add('my-faith-no-scroll');
+            }else{
+              body.classList.remove('my-faith-no-scroll');
             }
           }catch(_e){}
+        }
+
+        requestAnimationFrame(function(){
+          apply();
+          requestAnimationFrame(apply);
         });
+        setTimeout(apply, 160);
+        setTimeout(apply, 360);
       }catch(e){ console.warn('[가톨릭길동무]', e); }
     }
     function renderHome(){
