@@ -401,14 +401,14 @@ header{height:var(--header-h)!important;min-height:var(--header-h)!important;max
 </style>
 
 
-<!-- V2-126: 관구·교구 스타일 동기화/수치 변수 정리 규칙
+<!-- V2-127: 관구·교구 스타일 동기화/수치 변수 정리 규칙
   - 관구·교구는 별도 diocese.html 파일로 유지한다.
   - 단, 색상/글자/탭/카드/검색창/compact 기준은 메인 앱 style.css 기준을 따라간다.
   - 큰 화면·폴드 작은화면·플러스/울트라 기본 크기는 기존 관구·교구 표준(탭 52/40/15)을 유지하고, 작은 일반 모델 compact도 과도하게 줄이지 않는다.
   - 이후 관구·교구만 별도 크기나 색을 덧씌우지 말고, 이 동기화 블록의 변수에서만 조정한다. 탭 색은 카드 목록 색상과 분리해 유지한다.
   - 기능 로직, 지도 데이터, 외부 링크, 탭 전환 로직은 변경하지 않는다.
 -->
-<style id="oai-diocese-main-app-style-sync-V2-126">
+<style id="oai-diocese-main-app-style-sync-V2-127">
 :root{
   --dio-main-header: #3F4752;
   --dio-main-header-dark: #2F3742;
@@ -439,7 +439,7 @@ header{height:var(--header-h)!important;min-height:var(--header-h)!important;max
   --tab-h: 52px !important;
   --tab-btn-h: 40px !important;
   --fs-tab: 15px !important;
-  /* V2-126: 관구·교구 스타일 수치 기준을 한 곳에서 관리한다.
+  /* V2-127: 관구·교구 스타일 수치 기준을 한 곳에서 관리한다.
      화면 모양은 V2-125와 동일하게 유지하고, 이후 크기/간격 수정은 아래 변수에서만 조정한다. */
   --dio-tab-bar-pad: 9px 14px;
   --dio-tab-gap: 8px;
@@ -531,7 +531,7 @@ html,body{background:var(--dio-app-bg)!important;color:var(--dio-text)!important
   #list-view .lv-sec-bdg{min-width:82px!important;padding:5px 12px!important;font-size:calc(12.6px * var(--dio-effective-font-scale,1))!important;}
 }
 </style>
-<script id="oai-diocese-parent-style-sync-V2-126">
+<script id="oai-diocese-parent-style-sync-V2-127">
 (function(){
   function clean(v){ return String(v || '').trim(); }
   function parentVar(cs, names, fallback){
@@ -688,9 +688,11 @@ html,body{background:var(--dio-app-bg)!important;color:var(--dio-text)!important
   </div>
 </div>
 
-<script src="diocese-data.js?v=V2-126"></script>
+<script src="diocese-meta.js?v=V2-127"></script>
+<script src="diocese-search.js?v=V2-127"></script>
+<script src="diocese-data.js?v=V2-127"></script>
 <script>
-/* V2-126: GW_OF / DIOCESE_ICO 데이터는 diocese-data.js로 분리 */
+/* V2-127: 교구 기본 데이터와 검색 데이터를 기능별 파일로 분리 */
 const MY_DIOCESE_STORAGE_KEY='oai_my_diocese_name';
 function getMyDioceseName(){
   try{return (localStorage.getItem(MY_DIOCESE_STORAGE_KEY)||'').trim();}
