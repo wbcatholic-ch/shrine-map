@@ -1510,7 +1510,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V2-132';
+    frame.src='diocese.html?v=V2-133';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1923,7 +1923,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V2-132';
+const _PARISH_ASSET_VERSION='V2-133';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -2086,7 +2086,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V2-132';
+const _PRAYER_ASSET_VERSION='V2-133';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2425,7 +2425,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V2-132';
+const _SHRINE_ASSET_VERSION='V2-133';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -2646,7 +2646,7 @@ const AppState = {
 // ─── 상수: 죽림굴 ────────────────────────────────────────────────────────────
 const JUKRIMGUL_PARKING = {lat:35.550726, lng:129.014589, name:'죽림굴주차장', kw:'죽림굴주차장'};
 (function(){
-  // V2-132: Android/WebView에서 키보드가 올라올 때 viewport 높이 축소를
+  // V2-133: Android/WebView에서 키보드가 올라올 때 viewport 높이 축소를
   // 실제 작은 화면으로 오인해 전체 글자와 탭이 compact 모드로 줄어드는 문제를 막는다.
   // 기존 kb-open 클래스를 더 안정적으로 유지하되, 화면/탭/지도/뒤로가기 로직은 변경하지 않는다.
   var root = document.documentElement;
@@ -3056,8 +3056,26 @@ function goToCover(){
   }
   // 커버로 돌아오는 모든 경로는 새 종료 대기 상태로 시작해야 한다.
   // 정상 카테고리뿐 아니라 팝업/기도문/외부복귀 경로에서도
-  // 이전 _exitReady=true가 남아 커버 첫 뒤로가기에서 바로 종료되는 것을 막는다.
+  // 이전 _exitReady / COVER_EXIT_ARMED 상태가 남아 커버 첫 뒤로가기에서 바로 종료되는 것을 막는다.
   try{ if(typeof _resetCoverExitReady === 'function') _resetCoverExitReady(); }catch(e){ console.warn('[가톨릭길동무]', e); }
+  try{ if(typeof _clearCoverExitArmed === 'function') _clearCoverExitArmed(); }catch(e){ console.warn('[가톨릭길동무]', e); }
+  // popstate 복원(history.go(1)) 직후 커버로 돌아오는 경우에도 커버용 trap이 살아 있게 한다.
+  // 즉시 push를 새로 쌓지 않고, 기존 trap이 있으면 역할만 유지/교체하는 공통 함수만 사용한다.
+  try{
+    var _coverTrapSettle = function(tag){
+      try{
+        var cv = document.getElementById('cover');
+        var visible = !!(cv && !document.documentElement.classList.contains('app-active') && (!window.getComputedStyle || getComputedStyle(cv).display !== 'none'));
+        if(!visible) return;
+        if(typeof _resetCoverExitReady === 'function') _resetCoverExitReady();
+        if(typeof _clearCoverExitArmed === 'function') _clearCoverExitArmed();
+        if(typeof _ensureCoverBackTrap === 'function') _ensureCoverBackTrap('cover-return-' + tag);
+      }catch(_e){ console.warn('[가톨릭길동무]', _e); }
+    };
+    if(window.requestAnimationFrame) requestAnimationFrame(function(){ _coverTrapSettle('raf'); });
+    setTimeout(function(){ _coverTrapSettle('settle-120'); }, 120);
+    setTimeout(function(){ _coverTrapSettle('settle-360'); }, 360);
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
   // 갤럭시 폴드처럼 화면 크기가 바뀐 뒤 커버로 돌아오는 경우, 현재 화면 기준으로 한 번 더 고정한다.
   try{
     if(typeof window.oaiSettleCoverSize === 'function'){
@@ -6585,6 +6603,9 @@ function _fmtTime(s){
       const now = Date.now ? Date.now() : new Date().getTime();
       if(window.__OAI_MAP_EDGE_BACK_UNTIL__ && now < window.__OAI_MAP_EDGE_BACK_UNTIL__) return false;
       window.__OAI_MAP_EDGE_BACK_UNTIL__ = now + 900;
+      // WebView/Android가 같은 가장자리 제스처를 native back으로 한 번 더 전달하는 경우가 있어
+      // 커버로 돌아온 직후의 중복 Back 1회는 patches.js 공통 컨트롤러에서 종료로 처리하지 않는다.
+      window.__OAI_MAP_EDGE_BACK_GUARD_UNTIL__ = now + 1200;
       return true;
     }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
   }
@@ -6749,7 +6770,7 @@ function _fmtTime(s){
     const root = document.documentElement;
     try{ sessionStorage.setItem('oai_background_intro_return_until', String(_now() + 4200)); }catch(_e){}
     try{
-      // V2-132: 10분 이상 백그라운드 복귀 최종 규칙.
+      // V2-133: 10분 이상 백그라운드 복귀 최종 규칙.
       // 십자가/커버 인트로를 1회 실행한 뒤 최종 목적지는 커버다.
       // goToCover()와 _resetMapState()는 인트로 종료 직전에만 실행해
       // 복귀 순간 화면이 두 번 로딩되는 느낌을 줄인다.

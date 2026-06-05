@@ -704,6 +704,16 @@
 
     /* 커버: 토스트 → 두 번째에 종료. */
     if(!appActive()){
+      try{
+        var edgeGuardUntil = Number(window.__OAI_MAP_EDGE_BACK_GUARD_UNTIL__ || 0);
+        if(edgeGuardUntil && Date.now && Date.now() < edgeGuardUntil){
+          window.__OAI_MAP_EDGE_BACK_GUARD_UNTIL__ = 0;
+          if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady();
+          if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed();
+          armCoverBackTrap('map-edge-duplicate-back');
+          return;
+        }
+      }catch(e){ console.warn('[가톨릭길동무]', e); }
       var exiting = false;
       if(typeof window._showBackToast==='function') exiting = window._showBackToast() === true;
       if(!exiting){ armCoverBackTrap('cover-toast'); }
