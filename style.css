@@ -6956,7 +6956,7 @@ html.oai-font-global #pr-list-ul .pr-title {
   color: rgba(75,85,99,.52) !important;
 }
 
-/* V2-111: 인포카드 경로검색 출발지/도착지/취소 선택창 색상 선명도 보강 */
+/* V2-112: 인포카드 경로검색 출발지/도착지/취소 선택창 색상 선명도 보강 */
 #route-role-choice.route-role-choice{
   position:fixed;
   inset:0;
@@ -7247,7 +7247,7 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
   box-shadow:none !important;
 }
 
-/* V2-111: Galaxy 일반 모델(작은 Android viewport) 전용 전체 UI compact 재조정
+/* V2-112: Galaxy 일반 모델(작은 Android viewport) 전용 전체 UI compact 재조정
    - Plus/Ultra급 넓은 화면은 건드리지 않음.
    - zoom/transform 축소를 쓰지 않고, 실제 글자/패딩/높이만 작게 조정한다.
    - 지도 중심, 마커, 길찾기, 뒤로가기 로직은 CSS에서 변경하지 않는다. */
@@ -7848,7 +7848,7 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
 
 }
 
-/* V2-111: 나의 신앙생활 목록형 화면 CSS 정리
+/* V2-112: 나의 신앙생활 목록형 화면 CSS 정리
    - V2-97 구조와 V2-98 색 대비를 하나로 통합
    - 화면 모양은 V2-98 기준 유지, 중복 선언만 정리 */
 .my-faith-body.my-faith-home-list-body { gap: 12px !important; padding-top: 14px !important; background: #F6EBD8 !important; overscroll-behavior-y: contain !important; }
@@ -7893,25 +7893,24 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
   html:not(.ios-device) .my-faith-next-step-note { border-radius: 13px !important; font-size: 11.2px !important; line-height: 1.34 !important; padding: 9px 11px !important; }
 }
 
-/* V2-111: 미사 중 빠른 사용 / 가톨릭길동무 메뉴 모달 CSS 정리
-   - V2-99~V2-111 중복 색상 선언을 하나로 통합
-   - 헤더는 브라운 유지, 패널과 버튼 배경은 더 밝은 아이보리로 조정
-   - 두 모달의 버튼 높이는 같은 기준으로 유지 */
+/* V2-112: 미사 중 빠른 사용 / 가톨릭길동무 메뉴 헤더를 성당 카테고리 색 계열의 은은한 유리톤으로 조정
+   - 본문 버튼/높이/기능은 유지
+   - 헤더만 브라운에서 성당 카테고리 슬레이트 계열로 변경 */
 :root{
-  --oai-modal-brown-head:#4A2F22;
-  --oai-modal-brown-head-text:#FFF8EA;
-  --oai-modal-brown-sub:#F0DFC2;
+  --oai-modal-brown-head:linear-gradient(135deg, rgba(55,65,81,.94) 0%, rgba(71,85,105,.86) 100%);
+  --oai-modal-brown-head-text:#FFFDF7;
+  --oai-modal-brown-sub:#E5E7EB;
   --oai-modal-brown-panel:#F7EFE3;
   --oai-modal-brown-box:#FFFDF7;
   --oai-modal-brown-box-press:#FAF1E3;
-  --oai-modal-brown-line:#C49555;
+  --oai-modal-brown-line:#94A3B8;
   --oai-modal-brown-ink:#2B211B;
   --oai-modal-brown-muted:#6B513D;
 }
 .cover-menu-panel,
 #cover #mass-quick-modal .mass-quick-panel{ background:var(--oai-modal-brown-panel) !important; border:1.4px solid rgba(214,190,133,.90) !important; box-shadow:0 22px 48px rgba(58,47,34,.16), inset 0 1px 0 rgba(255,255,255,.78) !important; }
 .cover-menu-head,
-#cover #mass-quick-modal .mass-quick-head{ display:flex !important; align-items:center !important; justify-content:space-between !important; gap:14px !important; width:100% !important; margin:0 0 18px !important; padding:15px 16px !important; box-sizing:border-box !important; border:1.4px solid var(--oai-modal-brown-line) !important; border-radius:22px !important; background:var(--oai-modal-brown-head) !important; box-shadow:0 8px 18px rgba(74,47,34,.24), inset 0 1px 0 rgba(255,255,255,.08) !important; text-align:left !important; }
+#cover #mass-quick-modal .mass-quick-head{ display:flex !important; align-items:center !important; justify-content:space-between !important; gap:14px !important; width:100% !important; margin:0 0 18px !important; padding:15px 16px !important; box-sizing:border-box !important; border:1.4px solid rgba(226,232,240,.58) !important; border-radius:22px !important; background:var(--oai-modal-brown-head) !important; box-shadow:0 10px 22px rgba(55,65,81,.22), inset 0 1px 0 rgba(255,255,255,.36), inset 0 -1px 0 rgba(15,23,42,.12) !important; text-align:left !important; backdrop-filter:blur(6px) saturate(1.08); -webkit-backdrop-filter:blur(6px) saturate(1.08); }
 .cover-menu-head > div,
 #cover #mass-quick-modal .mass-quick-head-text{ min-width:0 !important; background:transparent !important; border:0 !important; box-shadow:none !important; }
 .cover-menu-title,
@@ -7920,7 +7919,7 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
 #cover #mass-quick-modal .mass-quick-subtitle{ margin-top:6px !important; color:var(--oai-modal-brown-sub) !important; font-size:calc(13px * var(--app-font-scale, 1)) !important; line-height:1.25 !important; font-weight:800 !important; letter-spacing:-.035em !important; word-break:keep-all !important; }
 .cover-menu-close,
 #cover #mass-quick-modal .mass-quick-head .guide-x,
-#cover #mass-quick-modal .mass-quick-close{ position:static !important; flex:0 0 auto !important; width:42px !important; height:42px !important; border-radius:50% !important; border:1.4px solid rgba(231,216,184,.78) !important; background:rgba(255,248,234,.08) !important; color:var(--oai-modal-brown-sub) !important; box-shadow:0 5px 12px rgba(0,0,0,.13) !important; transform:none !important; font-size:27px !important; font-weight:900 !important; line-height:1 !important; display:flex !important; align-items:center !important; justify-content:center !important; }
+#cover #mass-quick-modal .mass-quick-close{ position:static !important; flex:0 0 auto !important; width:42px !important; height:42px !important; border-radius:50% !important; border:1.4px solid rgba(255,255,255,.56) !important; background:rgba(255,255,255,.13) !important; color:#F8FAFC !important; box-shadow:0 5px 12px rgba(15,23,42,.18), inset 0 1px 0 rgba(255,255,255,.24) !important; transform:none !important; font-size:27px !important; font-weight:900 !important; line-height:1 !important; display:flex !important; align-items:center !important; justify-content:center !important; }
 .cover-menu-list,
 #cover #mass-quick-modal .mass-quick-actions{ gap:10px !important; margin-top:0 !important; }
 .cover-menu-item,
@@ -7960,7 +7959,7 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
   html:not(.ios-device) #cover #mass-quick-modal .mass-quick-btn strong{ font-size:13.8px !important; line-height:1.14 !important; }
 }
 
-/* V2-111: 커버 배경은 살짝 어두운 아이보리, 빠른 메뉴/메뉴 배너는 더 밝은 아이보리 */
+/* V2-112: 커버 배경은 살짝 어두운 아이보리, 빠른 메뉴/메뉴 배너는 더 밝은 아이보리 */
 #cover { background-color: #F4EDE2 !important; }
 html.oai-cover-booting #cover,
 html.oai-cover-resetting-to-intro #cover { background: #F4EDE2 !important; background-color: #F4EDE2 !important; }
@@ -7968,7 +7967,7 @@ html.oai-cover-resetting-to-intro #cover { background: #F4EDE2 !important; backg
 #cover .cover-grid > #cc-1.cover-card-wide { background: linear-gradient(180deg,#FFFEFA 0%,#FAF2E6 100%) !important; border-color: rgba(198,166,90,.42) !important; }
 
 
-/* V2-111: 나의 신앙생활 홈 화면 스크롤 보정 유지 / 커버 카테고리 박스 내부 테두리 제거 */
+/* V2-112: 나의 신앙생활 홈 화면 스크롤 보정 유지 / 커버 카테고리 박스 내부 테두리 제거 */
 .my-faith-body.my-faith-home-list-body.my-faith-no-scroll {
   overflow-y: hidden !important;
   scrollbar-width: none !important;

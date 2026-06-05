@@ -1533,7 +1533,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V2-111';
+    frame.src='diocese.html?v=V2-112';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1946,7 +1946,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V2-111';
+const _PARISH_ASSET_VERSION='V2-112';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -2109,7 +2109,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V2-111';
+const _PRAYER_ASSET_VERSION='V2-112';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2448,7 +2448,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V2-111';
+const _SHRINE_ASSET_VERSION='V2-112';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -6694,7 +6694,7 @@ function _fmtTime(s){
     const root = document.documentElement;
     try{ sessionStorage.setItem('oai_background_intro_return_until', String(_now() + 4200)); }catch(_e){}
     try{
-      // V2-111: 장시간 백그라운드 복귀 최종 규칙.
+      // V2-112: 장시간 백그라운드 복귀 최종 규칙.
       // 십자가/커버 인트로는 보여 주되 goToCover()와 _resetMapState()는 호출하지 않는다.
       // 따라서 사용자가 나가기 전에 보던 화면은 그대로 보존되고, 인트로가 끝나면 그 화면으로 돌아간다.
       root.classList.remove('oai-cover-first-reveal','oai-cover-under-intro-reveal','oai-ivory-wipe-transition','oai-internal-no-return-effect','oai-cover-resetting-to-intro');
