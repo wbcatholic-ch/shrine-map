@@ -401,24 +401,24 @@ header{height:var(--header-h)!important;min-height:var(--header-h)!important;max
 </style>
 
 
-<!-- V2-121: 관구·교구 스타일 동기화 규칙
+<!-- V2-122: 관구·교구 스타일 동기화 규칙
   - 관구·교구는 별도 diocese.html 파일로 유지한다.
   - 단, 색상/글자/탭/카드/검색창/compact 기준은 메인 앱 style.css 기준을 따라간다.
   - 큰 화면 기본 크기는 기존 관구·교구 표준(탭 52/40/15)을 유지하고, 축소는 갤럭시 일반 모델 compact 조건 안에서만 적용한다.
   - 이후 관구·교구만 별도 크기나 색을 덧씌우지 말고, 이 동기화 블록 안에서만 조정한다. 탭 색은 카드 목록 색상과 분리해 유지한다.
   - 기능 로직, 지도 데이터, 외부 링크, 탭 전환 로직은 변경하지 않는다.
 -->
-<style id="oai-diocese-main-app-style-sync-V2-121">
+<style id="oai-diocese-main-app-style-sync-V2-122">
 :root{
   --dio-main-header: #3F4752;
   --dio-main-header-dark: #2F3742;
   --dio-app-bg: #fbf8f1;
   --dio-card-bg: #ffffff;
   --dio-card-soft: #F8FAFC;
-  --dio-list-card-bg: #FFFFFC;
-  --dio-list-card-soft: #FFFDF8;
-  --dio-list-card-foot: #FFFDF8;
-  --dio-list-card-line: #EEE6D9;
+  --dio-list-card-bg: #FFF9F1;
+  --dio-list-card-soft: #FFF9F1;
+  --dio-list-card-foot: #FFF9F1;
+  --dio-list-card-line: #E9DDCB;
   --dio-line: #D8DEE8;
   --dio-line-soft: #E6EAF0;
   --dio-text: #1F2937;
@@ -504,7 +504,7 @@ html,body{background:var(--dio-app-bg)!important;color:var(--dio-text)!important
   #list-view .lv-sec-bdg{min-width:76px!important;padding:5px 11px!important;font-size:calc(12px * var(--dio-effective-font-scale,1))!important;}
 }
 </style>
-<script id="oai-diocese-parent-style-sync-V2-121">
+<script id="oai-diocese-parent-style-sync-V2-122">
 (function(){
   function clean(v){ return String(v || '').trim(); }
   function parentVar(cs, names, fallback){
@@ -525,10 +525,10 @@ html,body{background:var(--dio-app-bg)!important;color:var(--dio-text)!important
       root.style.setProperty('--dio-app-bg', parentVar(cs, ['--bg-color','--ui-bg'], '#fbf8f1'));
       root.style.setProperty('--dio-card-bg', parentVar(cs, ['--ui-card','--card-bg'], '#ffffff'));
       root.style.setProperty('--dio-card-soft', parentVar(cs, ['--ui-surface','--church-soft-2'], '#F8FAFC'));
-      root.style.setProperty('--dio-list-card-bg', parentVar(cs, ['--oai-list-card-bg'], '#FFFFFC'));
-      root.style.setProperty('--dio-list-card-soft', parentVar(cs, ['--oai-list-card-soft'], '#FFFDF8'));
-      root.style.setProperty('--dio-list-card-foot', parentVar(cs, ['--oai-list-card-foot'], '#FFFDF8'));
-      root.style.setProperty('--dio-list-card-line', parentVar(cs, ['--oai-list-card-line'], '#EEE6D9'));
+      root.style.setProperty('--dio-list-card-bg', parentVar(cs, ['--oai-list-card-bg'], '#FFF9F1'));
+      root.style.setProperty('--dio-list-card-soft', parentVar(cs, ['--oai-list-card-soft'], '#FFF9F1'));
+      root.style.setProperty('--dio-list-card-foot', parentVar(cs, ['--oai-list-card-foot'], '#FFF9F1'));
+      root.style.setProperty('--dio-list-card-line', parentVar(cs, ['--oai-list-card-line'], '#E9DDCB'));
       root.style.setProperty('--dio-line', parentVar(cs, ['--ui-line-strong','--oai-btn-border','--border'], '#D8DEE8'));
       root.style.setProperty('--dio-line-soft', parentVar(cs, ['--ui-line','--line-soft'], '#E6EAF0'));
       root.style.setProperty('--dio-text', parentVar(cs, ['--ink','--text-main'], '#1F2937'));
