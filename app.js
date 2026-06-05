@@ -1533,7 +1533,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V2-110';
+    frame.src='diocese.html?v=V2-111';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1946,7 +1946,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V2-110';
+const _PARISH_ASSET_VERSION='V2-111';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -2109,7 +2109,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V2-110';
+const _PRAYER_ASSET_VERSION='V2-111';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2448,7 +2448,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V2-110';
+const _SHRINE_ASSET_VERSION='V2-111';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -6673,7 +6673,60 @@ function _fmtTime(s){
     }, 520);
   }
 
+  function _settleAfterLongBackgroundIntro(reason){
+    try{ _stabilizeMediumBackgroundReturn(reason || 'long-background-return-after-intro'); }catch(_e){}
+    try{ if(typeof window.oaiSettleMyFaithLifeReturn === 'function') window.oaiSettleMyFaithLifeReturn(reason || 'long-background-return-after-intro'); }catch(_e){}
+    try{
+      if(_map && typeof _map.relayout === 'function'){
+        _map.relayout();
+        setTimeout(function(){ try{ _map && _map.relayout && _map.relayout(); }catch(__e){} }, 180);
+      }
+    }catch(_e){}
+  }
+
+  function _showBackgroundReturnIntroToPreviousScreen(reason){
+    if(_idleIntroRunning) return;
+    if(!_isAppScreenActive()) return;
+    if(_isExternalReturnContext()) return;
+    _idleIntroRunning = true;
+    _clearBgStamp();
+
+    const root = document.documentElement;
+    try{ sessionStorage.setItem('oai_background_intro_return_until', String(_now() + 4200)); }catch(_e){}
+    try{
+      // V2-111: 장시간 백그라운드 복귀 최종 규칙.
+      // 십자가/커버 인트로는 보여 주되 goToCover()와 _resetMapState()는 호출하지 않는다.
+      // 따라서 사용자가 나가기 전에 보던 화면은 그대로 보존되고, 인트로가 끝나면 그 화면으로 돌아간다.
+      root.classList.remove('oai-cover-first-reveal','oai-cover-under-intro-reveal','oai-ivory-wipe-transition','oai-internal-no-return-effect','oai-cover-resetting-to-intro');
+      root.classList.add('oai-cover-booting','oai-first-entry-intro','oai-background-return-intro');
+    }catch(_e){}
+
+    setTimeout(function(){
+      try{ root.classList.add('oai-cover-under-intro-reveal'); }catch(_e){}
+    }, 1720);
+
+    setTimeout(function(){
+      try{
+        root.classList.remove('oai-first-entry-intro','oai-cover-under-intro-reveal','oai-ivory-wipe-transition','oai-background-return-intro');
+        setTimeout(function(){
+          try{ root.classList.remove('oai-cover-booting'); }catch(__e){}
+          try{ sessionStorage.removeItem('oai_background_intro_return_until'); }catch(__e){}
+          _idleIntroRunning = false;
+          _settleAfterLongBackgroundIntro('long-background-return-after-intro');
+        }, 180);
+      }catch(_e){
+        try{ sessionStorage.removeItem('oai_background_intro_return_until'); }catch(__e){}
+        _idleIntroRunning = false;
+        _settleAfterLongBackgroundIntro('long-background-return-after-intro');
+      }
+    }, 2150);
+  }
+
   function _showCoverWithSameIntro(reason){
+    if(String(reason || '') === 'idle-background-return'){
+      _showBackgroundReturnIntroToPreviousScreen(reason);
+      return;
+    }
     if(_idleIntroRunning) return;
     if(!_isAppScreenActive()) return;
     if(_isExternalReturnContext()) return;
@@ -6687,8 +6740,6 @@ function _fmtTime(s){
 
     const root = document.documentElement;
     try{
-      // V2-82: 장시간 백그라운드 복귀 시 이전 카테고리 화면이 한 프레임 보이지 않게
-      // 먼저 앱 화면을 숨기는 전용 상태를 걸고, 그 상태 안에서 기존 goToCover 정리 흐름을 탄다.
       root.classList.remove('oai-cover-first-reveal','oai-cover-under-intro-reveal','oai-ivory-wipe-transition','oai-internal-no-return-effect');
       root.classList.add('oai-cover-resetting-to-intro');
     }catch(_e){}
@@ -6697,7 +6748,6 @@ function _fmtTime(s){
     try{ _resetMapState(); }catch(e){ console.warn('[가톨릭길동무]', e); }
     try{ root.classList.add('oai-cover-booting','oai-first-entry-intro'); }catch(_e){}
 
-    // 첫 진입 인트로와 같은 타이밍을 그대로 사용한다. (V2-82: 십자가 안정 유지 시간 소폭 연장)
     setTimeout(function(){
       try{ root.classList.add('oai-cover-under-intro-reveal'); }catch(_e){}
     }, 1720);
