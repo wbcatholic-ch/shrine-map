@@ -1,0 +1,3 @@
+V2-137에서 diocese-style.css는 더 이상 사용하지 않습니다.
+diocese.html은 style.css?v=V2-137을 직접 로딩하며, 관구·교구 스타일은 style.css 하단의 html.diocese-doc 범위에서 통제합니다.
+기존 저장소에 diocese-style.css가 남아 있어도 앱은 참조하지 않지만, 정리하려면 삭제해도 됩니다.
