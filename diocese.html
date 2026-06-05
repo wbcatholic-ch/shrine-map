@@ -401,13 +401,13 @@ header{height:var(--header-h)!important;min-height:var(--header-h)!important;max
 </style>
 
 
-<!-- V2-116: 관구·교구 스타일 동기화 규칙
+<!-- V2-117: 관구·교구 스타일 동기화 규칙
   - 관구·교구는 별도 diocese.html 파일로 유지한다.
   - 단, 색상/글자/탭/카드/검색창/compact 기준은 메인 앱 style.css 기준을 따라간다.
   - 이후 관구·교구만 별도 크기나 색을 덧씌우지 말고, 이 동기화 블록 안에서만 조정한다.
   - 기능 로직, 지도 데이터, 외부 링크, 탭 전환 로직은 변경하지 않는다.
 -->
-<style id="oai-diocese-main-app-style-sync-V2-116">
+<style id="oai-diocese-main-app-style-sync-V2-117">
 :root{
   --dio-main-header: #3F4752;
   --dio-main-header-dark: #2F3742;
@@ -499,7 +499,7 @@ html,body{background:var(--dio-app-bg)!important;color:var(--dio-text)!important
   #list-view .lv-sec-bdg{min-width:76px!important;padding:5px 11px!important;font-size:calc(12px * var(--dio-effective-font-scale,1))!important;}
 }
 </style>
-<script id="oai-diocese-parent-style-sync-V2-116">
+<script id="oai-diocese-parent-style-sync-V2-117">
 (function(){
   function clean(v){ return String(v || '').trim(); }
   function parentVar(cs, names, fallback){
