@@ -297,7 +297,7 @@
       return true;
     }
 
-    /* V2-146: 길찾기 후 일반 인포카드가 보이는 상태에서는 Back이
+    /* V2-147: 길찾기 후 일반 인포카드가 보이는 상태에서는 Back이
        숨은 route 상태(_routeMode/_rS/_rE)를 먼저 소비하면 resetRoute()가
        같은 인포카드를 다시 복원해 화면 변화가 없어 보인다.
        화면에 실제로 보이는 인포카드를 X 버튼과 같은 우선순위로 먼저 닫고,
@@ -321,6 +321,37 @@
       }catch(e){ console.warn("[가톨릭길동무]", e); }
       return true;
     }
+
+    /* V2-147: 지역검색/성지찾기/내주변 시트가 실제로 열린 상태에서는
+       보이지 않는 길찾기 잔여값(_routeMode/_rS/_rE/_polyline)이 Back 1회를
+       먼저 소비하면 화면 변화가 없어 보인다.
+       따라서 실제로 보이는 일반 탭 시트를 route 잔여 상태보다 먼저 닫는다. */
+    try{
+      var visibleMainSheetName = null;
+      ['nearby','list','region'].some(function(n){
+        var sh = $b('sheet-' + n);
+        if(isVisiblyOpen(sh)){ visibleMainSheetName = n; return true; }
+        return false;
+      });
+      if(visibleMainSheetName && !routeSheetOpen){
+        try{
+          if(_routeMode || _rS || _rE || _polyline){
+            if(typeof window.resetRoute === 'function') window.resetRoute({fresh:true});
+            try{ _routeMode = false; }catch(_e){}
+            if(routeSheetEl) routeSheetEl.classList.remove('open');
+          }
+        }catch(e){ console.warn('[가톨릭길동무]', e); }
+        if(typeof window.closeSheetPanelOnly === 'function') window.closeSheetPanelOnly(visibleMainSheetName);
+        else if(typeof closeTab === 'function') closeTab(visibleMainSheetName);
+        else {
+          var mainSheet = $b('sheet-' + visibleMainSheetName);
+          if(mainSheet) mainSheet.classList.remove('open');
+          try{ if(_activeTab === visibleMainSheetName) _activeTab = null; }catch(_e){}
+          try{ if(typeof _updateTabBtns === 'function') _updateTabBtns(null); }catch(_e){}
+        }
+        return true;
+      }
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
 
     // 길찾기 시트가 실제로 보이거나 경로 결과만 남아 있으면 route 상태를 정리한다.
     // 단, 위의 보이는 인포카드는 이미 X 버튼과 동일하게 먼저 처리했다.
@@ -805,7 +836,7 @@
     }
 
     /* 앱 활성 상태에서는 먼저 trap을 복원한 뒤 화면을 정리한다.
-       V2-146: Fold 큰 화면의 성지·성당·피정 지도 루트 상태에서는
+       V2-147: Fold 큰 화면의 성지·성당·피정 지도 루트 상태에서는
        숨은 sheet/카카오맵 복원 popstate가 Back을 소비하지 않도록 커버 복귀를 우선한다. */
     _restoring = true;
     try{ history.go(1); }catch(e){ _restoring = false; console.warn("[가톨릭길동무]", e); }
