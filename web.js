@@ -217,10 +217,16 @@
     return webFavs && webFavs.length ? '⭐ 즐겨찾기' : '사제찾기';
   }
   function wfToggle(url){
+    const hadFavs = !!(webFavs && webFavs.length);
     if(wfHas(url)) webFavs=webFavs.filter(u=>u!==url);
     else webFavs.push(url);
     wfSave();
-    // ⭐ 탭 카운트 업데이트
+    const hasFavs = !!(webFavs && webFavs.length);
+    if(hadFavs !== hasFavs){
+      rebuildWebCats();
+      return;
+    }
+    // ⭐ 탭 상태 업데이트
     var favBtn = document.getElementById('web-cat_⭐ 즐겨찾기');
     if(favBtn){ favBtn.innerHTML = '⭐ 즐겨찾기'; }
   }
@@ -450,6 +456,32 @@
     if(empty) empty.classList.remove('show');
   }
 
+  function webCatLabel(cat){
+    if(cat === '교구') return '교구 홈페이지';
+    if(cat === '중앙기구') return '중앙기관';
+    return cat;
+  }
+
+  function webOrderedCats(){
+    const cats = [];
+    const priority = ['사제찾기', '교구', '중앙기구'];
+    if(webFavs && webFavs.length) cats.push('⭐ 즐겨찾기');
+    priority.forEach(function(cat){
+      if(!cats.includes(cat) && WEB_SITES.some(function(s){ return s.cat === cat; })) cats.push(cat);
+    });
+    WEB_SITES.forEach(function(s){ if(!cats.includes(s.cat)) cats.push(s.cat); });
+    return cats;
+  }
+
+  function rebuildWebCats(){
+    const wrap = ig$('web-cats');
+    if(!wrap) return;
+    if(!(webFavs && webFavs.length) && webState.curCat === '⭐ 즐겨찾기') webState.curCat = '사제찾기';
+    webState.built = false;
+    wrap.innerHTML = '';
+    initWebModule();
+  }
+
   function initWebModule(){
     if(webState.built){
       scheduleWebCatSync(webState.curCat||webDefaultCat());
@@ -459,8 +491,7 @@
     webState.built = true;
     const wrap = ig$('web-cats');
     if(!wrap) return;
-    const cats = ['⭐ 즐겨찾기'];
-    WEB_SITES.forEach(s => { if(!cats.includes(s.cat)) cats.push(s.cat); });
+    const cats = webOrderedCats();
     cats.forEach(c => {
       const btn = document.createElement('button');
       btn.className = 'web-cat-btn' + (c===webState.curCat ? ' on' : '');
@@ -469,7 +500,7 @@
       btn.dataset.catColor = c; // CSS 선택자용
       btn.setAttribute('aria-pressed', c===webState.curCat ? 'true' : 'false');
       const count = c==='⭐ 즐겨찾기' ? WEB_SITES.filter(s => wfHas(s.url)).length : WEB_SITES.filter(s => s.cat===c).length;
-      btn.innerHTML = esc(c) + (c==='⭐ 즐겨찾기' ? '' : '<span class="cnt">' + count + '</span>');
+      btn.innerHTML = esc(webCatLabel(c)) + (c==='⭐ 즐겨찾기' ? '' : '<span class="cnt">' + count + '</span>');
       btn.addEventListener('click', function(){ setWebCat(c); });
       wrap.appendChild(btn);
     });
