@@ -1,4 +1,4 @@
-/* V2-158: 교구 기본 데이터와 검색 데이터를 기능별 파일로 분리 */
+/* V2-159: 교구 기본 데이터와 검색 데이터를 기능별 파일로 분리 */
 const MY_DIOCESE_STORAGE_KEY='oai_my_diocese_name';
 function getMyDioceseName(){
   try{return (localStorage.getItem(MY_DIOCESE_STORAGE_KEY)||'').trim();}
@@ -521,11 +521,8 @@ function makeRow(disp,diocese,overlapDongs){
   ico.textContent='⛪';
   const info=document.createElement('div');info.className='lv-info';
   const nm=document.createElement('div');nm.className='lv-name';
-  if(diocese==='춘천교구' || diocese==='부산교구'){
-    nm.textContent=diocese+' · '+(m.parishes||0)+'개 본당(해외본당 제외)';
-  }else{
-    nm.textContent=(diocese==='군종교구')?diocese:(diocese+' · '+(m.parishes||0)+'개 본당');
-  }
+  // 지역검색 결과 카드에서는 본당 수를 표시하지 않고 교구명만 간결하게 보여준다.
+  nm.textContent=diocese;
   const rg=document.createElement('div');rg.className='lv-rg';rg.innerHTML='📍 '+(disp||m.region);
   info.appendChild(nm);info.appendChild(rg);
   // 세부지역: 중복지역일 때만 표시
