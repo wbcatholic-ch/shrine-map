@@ -1510,7 +1510,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V2-139';
+    frame.src='diocese.html?v=V2-140';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1923,7 +1923,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V2-139';
+const _PARISH_ASSET_VERSION='V2-140';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -2086,7 +2086,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V2-139';
+const _PRAYER_ASSET_VERSION='V2-140';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2425,7 +2425,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V2-139';
+const _SHRINE_ASSET_VERSION='V2-140';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -2646,7 +2646,7 @@ const AppState = {
 // ─── 상수: 죽림굴 ────────────────────────────────────────────────────────────
 const JUKRIMGUL_PARKING = {lat:35.550726, lng:129.014589, name:'죽림굴주차장', kw:'죽림굴주차장'};
 (function(){
-  // V2-139: Android/WebView에서 키보드가 올라올 때 viewport 높이 축소를
+  // V2-140: Android/WebView에서 키보드가 올라올 때 viewport 높이 축소를
   // 실제 작은 화면으로 오인해 전체 글자와 탭이 compact 모드로 줄어드는 문제를 막는다.
   // 기존 kb-open 클래스를 더 안정적으로 유지하되, 화면/탭/지도/뒤로가기 로직은 변경하지 않는다.
   var root = document.documentElement;
@@ -6582,58 +6582,98 @@ function _fmtTime(s){
     window._swipeDir = null;
   }
 
-  function _isWideAndroidMapEdgeBack(start, dx, dy, target){
+  function _isWideMapBackEdgeContext(){
     try{
-      if(!start) return false;
       const root = document.documentElement;
       if(root.classList.contains('ios-device')) return false;
       if(typeof _screen !== 'undefined' && _screen !== 'map') return false;
       const vw = Math.round(window.innerWidth || document.documentElement.clientWidth || 0);
-      // 작은 화면/compact 화면의 정상 Android 뒤로가기는 그대로 두고, 지도 터치 영역이 넓은 Fold 큰 화면 계열만 처리한다.
       if(vw < 600) return false;
-      const startTarget = start.t || target;
-      const mapWrap = document.getElementById('map-wrap');
-      const mapEl = document.getElementById('map');
-      let inMap = false;
-      if(startTarget && startTarget.closest){
-        inMap = !!(startTarget.closest('#map') || startTarget.closest('#map-wrap'));
-      }
-      if(!inMap && mapWrap && mapWrap.getBoundingClientRect){
-        const r = mapWrap.getBoundingClientRect();
-        inMap = start.x >= r.left && start.x <= r.right && start.y >= r.top && start.y <= r.bottom;
-      }
-      if(!inMap && mapEl && mapEl.getBoundingClientRect){
-        const r = mapEl.getBoundingClientRect();
-        inMap = start.x >= r.left && start.x <= r.right && start.y >= r.top && start.y <= r.bottom;
-      }
-      if(!inMap) return false;
       if(document.getElementById('srch-modal')?.classList.contains('open')) return false;
       if(document.getElementById('route-role-choice')?.classList.contains('open')) return false;
-      const edge = Math.min(96, Math.max(48, Math.round(vw * 0.075)));
-      const fromLeft = start.x <= edge && dx > 0;
-      const fromRight = start.x >= (vw - edge) && dx < 0;
-      if(!fromLeft && !fromRight) return false;
-      if(Math.abs(dx) < 36 || dy > 110) return false;
-      if(Math.abs(dx) < dy * 1.04) return false;
-      const now = Date.now ? Date.now() : new Date().getTime();
-      if(window.__OAI_MAP_EDGE_BACK_UNTIL__ && now < window.__OAI_MAP_EDGE_BACK_UNTIL__) return false;
-      window.__OAI_MAP_EDGE_BACK_UNTIL__ = now + 900;
       return true;
     }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
   }
 
-  function _runWideAndroidMapEdgeBack(){
+  function _runWideMapBackEdge(reason){
     try{
-      if(typeof window._oaiRunAppBackFlow === 'function') return window._oaiRunAppBackFlow('wide-map-edge-back');
-      if(typeof goToCover === 'function'){ goToCover(); return true; }
-    }catch(e){ console.warn('[가톨릭길동무]', e); }
-    return false;
+      if(!_isWideMapBackEdgeContext()) return false;
+      const now = Date.now ? Date.now() : new Date().getTime();
+      if(window.__OAI_MAP_EDGE_BACK_UNTIL__ && now < window.__OAI_MAP_EDGE_BACK_UNTIL__) return true;
+      window.__OAI_MAP_EDGE_BACK_UNTIL__ = now + 900;
+      // 일반 Android Back과 동일하게 history popstate 흐름을 타게 한다.
+      // goToCover()를 직접 호출하지 않아야 커버 종료 안내 trap이 유지된다.
+      history.back();
+      return true;
+    }catch(e){
+      console.warn('[가톨릭길동무]', e);
+      try{ if(typeof goToCover === 'function') goToCover(); }catch(_e){}
+      return true;
+    }
   }
+
+  function _bindMapBackEdge(el, side){
+    if(!el || el.__oaiMapBackEdgeBound) return;
+    el.__oaiMapBackEdgeBound = true;
+    let st = null;
+    el.addEventListener('touchstart', function(e){
+      if(!_isWideMapBackEdgeContext()) return;
+      if(!e.touches || !e.touches[0]) return;
+      const t = e.touches[0];
+      st = {x:t.clientX, y:t.clientY, side:side};
+    }, {passive:true});
+    el.addEventListener('touchmove', function(e){
+      if(!st) return;
+      // 지도 팬/드래그로 넘기지 않고 뒤로가기 전용 가장자리 영역으로 유지한다.
+      try{ e.preventDefault(); }catch(_e){}
+    }, {passive:false});
+    el.addEventListener('touchcancel', function(){ st = null; }, {passive:true});
+    el.addEventListener('touchend', function(e){
+      if(!st) return;
+      if(!e.changedTouches || !e.changedTouches[0]){ st = null; return; }
+      const t = e.changedTouches[0];
+      const dx = t.clientX - st.x;
+      const dy = Math.abs(t.clientY - st.y);
+      const inward = st.side === 'left' ? dx > 0 : dx < 0;
+      st = null;
+      if(!inward || Math.abs(dx) < 32 || dy > 110 || Math.abs(dx) < dy * 1.04) return;
+      try{ e.preventDefault(); e.stopPropagation(); }catch(_e){}
+      _runWideMapBackEdge('wide-map-edge-zone');
+    }, {passive:false});
+  }
+
+  function _ensureMapBackEdges(){
+    try{
+      const wrap = document.getElementById('map-wrap');
+      if(!wrap) return;
+      let left = document.getElementById('map-back-edge-left');
+      let right = document.getElementById('map-back-edge-right');
+      if(!left){
+        left = document.createElement('div');
+        left.id = 'map-back-edge-left';
+        left.className = 'map-back-edge map-back-edge-left';
+        left.setAttribute('aria-hidden','true');
+        wrap.appendChild(left);
+      }
+      if(!right){
+        right = document.createElement('div');
+        right.id = 'map-back-edge-right';
+        right.className = 'map-back-edge map-back-edge-right';
+        right.setAttribute('aria-hidden','true');
+        wrap.appendChild(right);
+      }
+      _bindMapBackEdge(left, 'left');
+      _bindMapBackEdge(right, 'right');
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', _ensureMapBackEdges, {once:true});
+  else _ensureMapBackEdges();
+  setTimeout(_ensureMapBackEdges, 250);
 
   document.addEventListener('touchstart', function(e){
     if(!e.touches || !e.touches[0]) return;
-    _swSt = {x: e.touches[0].clientX, y: e.touches[0].clientY, t: e.target};
-  }, {passive: true, capture: true});
+    _swSt = {x: e.touches[0].clientX, y: e.touches[0].clientY};
+  }, {passive: true});
 
   document.addEventListener('touchend', function(e){
     if(!_swSt) return;
@@ -6642,14 +6682,7 @@ function _fmtTime(s){
     const ey = e.changedTouches[0].clientY;
     const dx = ex - _swSt.x;
     const dy = Math.abs(ey - _swSt.y);
-    const swStart = _swSt;
     _swSt = null;
-
-    if(_isWideAndroidMapEdgeBack(swStart, dx, dy, e.target)){
-      _runWideAndroidMapEdgeBack();
-      return;
-    }
-
     if(Math.abs(dx) < MIN_DX || dy > MAX_DY) return;
 
     const tgt = e.target;
@@ -6674,8 +6707,7 @@ function _fmtTime(s){
 
     /* ── 메인 앱 (성지·성당·피정) ──
        적용: 내주변 리스트, 찾기 리스트, 지역검색, 길찾기, 인포카드
-       제외: 검색창(srch-bar), 교구필터탭(filter-bar), 지도(#map), 검색모달
-       단, 폴드 큰화면의 지도 가장자리 뒤로가기 제스처는 위에서 먼저 한 번만 처리한다. */
+       제외: 검색창(srch-bar), 교구필터탭(filter-bar), 지도(#map), 검색모달 */
     if(tgt.closest('.srch-bar'))   return;
     if(tgt.closest('.filter-bar')) return;
     if(tgt.closest('#map'))        return;
@@ -6689,7 +6721,7 @@ function _fmtTime(s){
       tgt.closest('#info-card');
     if(inApp) _doMainSwipe(dx);
 
-  }, {passive: false, capture: true});
+  }, {passive: true});
 })();
 
 // ── 관구교구: 커버 버튼에서 직접 새탭 열기 ──
@@ -6790,7 +6822,7 @@ function _fmtTime(s){
     const root = document.documentElement;
     try{ sessionStorage.setItem('oai_background_intro_return_until', String(_now() + 4200)); }catch(_e){}
     try{
-      // V2-139: 10분 이상 백그라운드 복귀 최종 규칙.
+      // V2-140: 10분 이상 백그라운드 복귀 최종 규칙.
       // 십자가/커버 인트로를 1회 실행한 뒤 최종 목적지는 커버다.
       // goToCover()와 _resetMapState()는 인트로 종료 직전에만 실행해
       // 복귀 순간 화면이 두 번 로딩되는 느낌을 줄인다.

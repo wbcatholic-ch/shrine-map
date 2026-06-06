@@ -505,30 +505,6 @@
     window._oaiPrayerResetToCover = resetPrayerToCover;
   }catch(_e){}
 
-  function runAppBackFlow(reason){
-    try{
-      if(window._appExiting) return true;
-      if(!appActive()){
-        var exiting = false;
-        if(typeof window._showBackToast === 'function') exiting = window._showBackToast() === true;
-        if(!exiting) armCoverBackTrap(reason || 'cover-back-flow');
-        return true;
-      }
-      if(handlePrayerBack(reason || 'app-back-flow-prayer')) return true;
-      if(closeRefreshDialog()){ try{ armCoverBackTrap('refresh-dialog-app-flow', {force:true}); }catch(_e){} return true; }
-      if(closeModuleInnerLayer()) return true;
-      if(closeExtOrModule()) return true;
-      if(closeLayer()) return true;
-      callGTC();
-      return true;
-    }catch(e){
-      console.warn('[가톨릭길동무]', e);
-      try{ callGTC(); }catch(_e){}
-      return true;
-    }
-  }
-  try{ window._oaiRunAppBackFlow = runAppBackFlow; }catch(_e){}
-
   function runPendingPrayerQuickPopup(){
     try{
       var cb = window.__OAI_AFTER_RESTORE_PRAYER_QUICK_POPUP__;
