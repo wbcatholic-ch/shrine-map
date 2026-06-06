@@ -1,4 +1,4 @@
-/* V2-159: 교구 기본 데이터와 검색 데이터를 기능별 파일로 분리 */
+/* V2-160: 구 단위 지역검색 alias 확장 및 중복 구 단독 검색 안내 */
 const MY_DIOCESE_STORAGE_KEY='oai_my_diocese_name';
 function getMyDioceseName(){
   try{return (localStorage.getItem(MY_DIOCESE_STORAGE_KEY)||'').trim();}
@@ -562,9 +562,14 @@ function doSearch(){
   try{ document.activeElement && document.activeElement.blur && document.activeElement.blur(); }catch(e){}
   const raw=document.getElementById('si').value.trim();
   const res=document.getElementById('sres');
-  if(!raw){res.innerHTML='<div class="se">검색어를 입력하세요</div>';return;}
+  if(!raw){res.innerHTML='<div class="se">시·군·구 이름을 입력하세요</div>';return;}
 
   const q=raw.replace(/\s+/g,'');
+
+  if(Array.isArray(window.AMBIGUOUS_DISTRICT_PLAIN) && AMBIGUOUS_DISTRICT_PLAIN.map(a=>a.replace(/\s+/g,'')).includes(q)){
+    res.innerHTML='<div class="se">중구·동구·서구·남구·북구처럼 여러 도시에 있는 구는<br>도시명을 함께 입력하세요.<br><span style="font-size:11px;color:#6B7280">예: 대구 중구, 서울 중구, 부산 남구</span></div>';
+    return;
+  }
 
   for(const [city,aliases] of Object.entries(REGION_OVERLAP_PLAIN)){
     if(aliases.map(a=>a.replace(/\s+/g,'')).includes(q)){
