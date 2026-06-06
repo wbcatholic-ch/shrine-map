@@ -249,15 +249,36 @@
     }
     return false;
   }
+  function webCategoryRank(cat){
+    var order = {
+      '사제찾기': 0,
+      '교구': 1,
+      '중앙기구': 2,
+      '신앙 포털': 3,
+      '미디어': 4,
+      '뉴스': 5,
+      '출판·교육': 6
+    };
+    return Object.prototype.hasOwnProperty.call(order, cat) ? order[cat] : 99;
+  }
+
   function sortWebItemsForMyDiocese(items){
+    if(!Array.isArray(items) || items.length < 2) return items;
     var myName = getMyDioceseName();
-    if(!myName || !Array.isArray(items) || items.length < 2) return items;
-    if(webState.curCat !== '사제찾기' && webState.curCat !== '교구') return items;
+    var isFavTab = webState.curCat === '⭐ 즐겨찾기';
+    var shouldPreferMyDiocese = !!(myName && (isFavTab || webState.curCat === '사제찾기' || webState.curCat === '교구'));
     return items.slice().sort(function(a,b){
-      var aa = isMyDioceseWebItem(a, myName) ? 0 : 1;
-      var bb = isMyDioceseWebItem(b, myName) ? 0 : 1;
-      if(aa !== bb) return aa - bb;
-      return 0;
+      if(isFavTab){
+        var ca = webCategoryRank(a && a.cat);
+        var cb = webCategoryRank(b && b.cat);
+        if(ca !== cb) return ca - cb;
+      }
+      if(shouldPreferMyDiocese){
+        var aa = isMyDioceseWebItem(a, myName) ? 0 : 1;
+        var bb = isMyDioceseWebItem(b, myName) ? 0 : 1;
+        if(aa !== bb) return aa - bb;
+      }
+      return WEB_SITES.indexOf(a) - WEB_SITES.indexOf(b);
     });
   }
   function myDioceseBadgeHtml(){
