@@ -288,6 +288,26 @@
     return false;
   }
 
+  /* ── 앱 내부 Back 직접 처리 ──
+     지도 가장자리 제스처처럼 popstate를 거치면 native back과 겹칠 수 있는 경우에도
+     기존 뒤로가기 순서(closeModuleInnerLayer → closeExtOrModule → closeLayer → goToCover)를 그대로 쓴다. */
+  function handleAppBackDirect(reason){
+    try{
+      if(!appActive()){
+        var exiting = false;
+        if(typeof window._showBackToast === 'function') exiting = window._showBackToast() === true;
+        if(!exiting) armCoverBackTrap(reason || 'cover-direct-toast');
+        return true;
+      }
+      if(closeModuleInnerLayer()) return true;
+      if(closeExtOrModule()) return true;
+      if(closeLayer()) return true;
+      callGTC();
+      return true;
+    }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
+  }
+  try{ window._oaiHandleAppBackDirect = handleAppBackDirect; }catch(_e){}
+
   /* ── popstate 핸들러 ── */
   var _restoring = false;
 
@@ -575,6 +595,18 @@
         window.__OAI_AFTER_RESTORE_MY_FAITH_CB__ = null;
         window.__OAI_AFTER_RESTORE_MY_FAITH_UNTIL__ = 0;
       }catch(e){ console.warn('[가톨릭길동무]', e); }
+      try{
+        var _appCb = window.__OAI_AFTER_RESTORE_APP_BACK_CB__;
+        var _appUntil = Number(window.__OAI_AFTER_RESTORE_APP_BACK_UNTIL__ || 0);
+        if(typeof _appCb === 'function' && (!_appUntil || Date.now() < _appUntil)){
+          window.__OAI_AFTER_RESTORE_APP_BACK_CB__ = null;
+          window.__OAI_AFTER_RESTORE_APP_BACK_UNTIL__ = 0;
+          setTimeout(function(){ try{ _appCb(); }catch(e){ console.warn('[가톨릭길동무]', e); } }, 0);
+          return;
+        }
+        window.__OAI_AFTER_RESTORE_APP_BACK_CB__ = null;
+        window.__OAI_AFTER_RESTORE_APP_BACK_UNTIL__ = 0;
+      }catch(e){ console.warn('[가톨릭길동무]', e); }
       if(runPendingPrayerCoverReset()) return;
       runPendingPrayerQuickPopup();
       return;
@@ -704,22 +736,65 @@
 
     /* 커버: 토스트 → 두 번째에 종료. */
     if(!appActive()){
+      try{
+        var edgeGuardUntil = Number(window.__OAI_MAP_EDGE_BACK_GUARD_UNTIL__ || 0);
+        if(edgeGuardUntil && Date.now && Date.now() < edgeGuardUntil){
+          window.__OAI_MAP_EDGE_BACK_GUARD_UNTIL__ = 0;
+          if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady();
+          if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed();
+          armCoverBackTrap('map-edge-duplicate-back');
+          return;
+        }
+      }catch(e){ console.warn('[가톨릭길동무]', e); }
       var exiting = false;
       if(typeof window._showBackToast==='function') exiting = window._showBackToast() === true;
       if(!exiting){ armCoverBackTrap('cover-toast'); }
       return;
     }
 
-    /* 앱 활성 상태에서는 다른 정상 카테고리와 동일하게 먼저 trap을 복원하고,
-       그 다음 DOM 상태를 직접 정리한다. 기도문도 여기서만 처리한다. */
-    _restoring = true;
-    try{ history.go(1); }catch(e){ _restoring = false; console.warn("[가톨릭길동무]", e); }
+    /* 폴드 큰화면 엣지 제스처: _runWideAndroidMapEdgeBackGesture가 이미 goToCover를 호출했는데
+       Predictive Back popstate가 뒤따라 오는 경우, __OAI_MAP_EDGE_BACK_GUARD_UNTIL__ guard로 흡수한다.
+       app active 상태에서도 중복 처리되면 closeLayer가 재소비되어 커버 이동이 취소될 수 있다. */
+    try{
+      var _edgeGuardApp = Number(window.__OAI_MAP_EDGE_BACK_GUARD_UNTIL__ || 0);
+      if(_edgeGuardApp && Date.now && Date.now() < _edgeGuardApp){
+        window.__OAI_MAP_EDGE_BACK_GUARD_UNTIL__ = 0;
+        try{ if(typeof window._resetAppBackTrap === 'function') window._resetAppBackTrap('map-edge-popstate-absorbed'); }catch(_e){}
+        return;
+      }
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
 
-    if(handlePrayerBack('prayer-popstate')) return;
-    if(closeModuleInnerLayer()) return;
-    if(closeExtOrModule()) return;
-    if(closeLayer()) return;
-    callGTC();
+    /* 앱 활성 상태에서는 먼저 history.go(1)로 app trap을 복원한 뒤,
+       복원 popstate가 돌아온 다음 실제 화면만 정리한다.
+       이전처럼 go(1)을 호출하자마자 goToCover()를 실행하면 Android/WebView에서
+       trap 복원과 커버 trap 재설정이 겹쳐 커버 첫 Back이 앱 종료로 빠질 수 있다. */
+    var appBackCb = function(){
+      if(handlePrayerBack('prayer-popstate')) return;
+      if(closeModuleInnerLayer()) return;
+      if(closeExtOrModule()) return;
+      if(closeLayer()) return;
+      callGTC();
+    };
+    try{
+      window.__OAI_AFTER_RESTORE_APP_BACK_CB__ = appBackCb;
+      window.__OAI_AFTER_RESTORE_APP_BACK_UNTIL__ = Date.now() + 1800;
+      _restoring = true;
+      history.go(1);
+      setTimeout(function(){
+        try{
+          if(window.__OAI_AFTER_RESTORE_APP_BACK_CB__ === appBackCb){
+            _restoring = false;
+            window.__OAI_AFTER_RESTORE_APP_BACK_CB__ = null;
+            window.__OAI_AFTER_RESTORE_APP_BACK_UNTIL__ = 0;
+            appBackCb();
+          }
+        }catch(e){ console.warn('[가톨릭길동무]', e); }
+      }, 180);
+    }catch(e){
+      _restoring = false;
+      console.warn("[가톨릭길동무]", e);
+      appBackCb();
+    }
   }, false);
 
 
@@ -745,14 +820,7 @@
       try{ if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed(); }catch(e){}
       return;
     }
-    if(!appActive()){
-      if(typeof window._showBackToast==='function') window._showBackToast();
-      return;
-    }
-    if(closeModuleInnerLayer()) return;
-    if(closeExtOrModule()) return;
-    if(closeLayer()) return;
-    callGTC();
+    if(handleAppBackDirect('hardware-back')) return;
   }, false);
 
   // 외부 사이트 방문 후 복귀 시 history 트랩 강제 재확립.
