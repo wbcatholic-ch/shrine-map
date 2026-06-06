@@ -297,13 +297,38 @@
       return true;
     }
 
-    // 길찾기 시트가 열려 있거나 경로 상태가 남아 있으면 인포카드보다 먼저 정리한다.
-    // 순서: 경로삭제 → 출발/도착 초기화 → 도착 노랑마커 + 인포카드 복귀.
-    el = $b('sheet-route');
+    /* V2-146: 길찾기 후 일반 인포카드가 보이는 상태에서는 Back이
+       숨은 route 상태(_routeMode/_rS/_rE)를 먼저 소비하면 resetRoute()가
+       같은 인포카드를 다시 복원해 화면 변화가 없어 보인다.
+       화면에 실제로 보이는 인포카드를 X 버튼과 같은 우선순위로 먼저 닫고,
+       화면에 보이지 않는 route 잔여 상태만 복원 없이 정리한다. */
+    var infoCardEl = $b('info-card');
+    var routeSheetEl = $b('sheet-route');
+    var infoCardOpen = isVisiblyOpen(infoCardEl);
+    var routeSheetOpen = isVisiblyOpen(routeSheetEl);
+    if(infoCardOpen && !routeSheetOpen){
+      try{
+        if(typeof window.closeInfoCard==='function') window.closeInfoCard();
+        else{ infoCardEl.classList.remove('open'); infoCardEl.style.display='none'; }
+      }catch(e){ console.warn("[가톨릭길동무]", e); }
+      try{
+        if(_routeMode || _rS || _rE || _polyline){
+          if(typeof window.resetRoute==='function') window.resetRoute({fresh:true});
+          try{ _routeMode = false; }catch(e){ console.warn("[가톨릭길동무]", e); }
+          if(routeSheetEl) routeSheetEl.classList.remove('open');
+          try{ if(_activeTab==='route') _activeTab=null; if(typeof _updateTabBtns==='function') _updateTabBtns(null); }catch(e){ console.warn("[가톨릭길동무]", e); }
+        }
+      }catch(e){ console.warn("[가톨릭길동무]", e); }
+      return true;
+    }
+
+    // 길찾기 시트가 실제로 보이거나 경로 결과만 남아 있으면 route 상태를 정리한다.
+    // 단, 위의 보이는 인포카드는 이미 X 버튼과 동일하게 먼저 처리했다.
+    el = routeSheetEl;
     try{
-      if((el && el.classList.contains('open')) || _routeMode || _rS || _rE){
-        var dest = (_rE && _rE.lat) ? Object.assign({}, _rE) : null;
-        try{ if(typeof window.resetRoute==='function') window.resetRoute(); }catch(e){ console.warn("[가톨릭길동무]", e); }
+      if(routeSheetOpen || _routeMode || _rS || _rE){
+        var dest = (!infoCardOpen && _rE && _rE.lat) ? Object.assign({}, _rE) : null;
+        try{ if(typeof window.resetRoute==='function') window.resetRoute(dest ? {} : {fresh:true}); }catch(e){ console.warn("[가톨릭길동무]", e); }
         try{ _routeMode = false; }catch(e){ console.warn("[가톨릭길동무]", e); }
         if(el) el.classList.remove('open');
         try{ if(_activeTab==='route') _activeTab=null; if(typeof _updateTabBtns==='function') _updateTabBtns(null); }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -329,7 +354,7 @@
 
     if(closeNearbySheetBeforeCover('nearby-sheet-back-first')) return true;
 
-    el = $b('info-card');
+    el = infoCardEl;
     if(el && el.classList.contains('open')){
       if(typeof window.closeInfoCard==='function') window.closeInfoCard();
       else{ el.classList.remove('open'); el.style.display='none'; }
@@ -780,7 +805,7 @@
     }
 
     /* 앱 활성 상태에서는 먼저 trap을 복원한 뒤 화면을 정리한다.
-       V2-145: Fold 큰 화면의 성지·성당·피정 지도 루트 상태에서는
+       V2-146: Fold 큰 화면의 성지·성당·피정 지도 루트 상태에서는
        숨은 sheet/카카오맵 복원 popstate가 Back을 소비하지 않도록 커버 복귀를 우선한다. */
     _restoring = true;
     try{ history.go(1); }catch(e){ _restoring = false; console.warn("[가톨릭길동무]", e); }
