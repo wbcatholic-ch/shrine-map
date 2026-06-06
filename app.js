@@ -1510,7 +1510,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V2-152';
+    frame.src='diocese.html?v=V2-153';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1923,7 +1923,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V2-152';
+const _PARISH_ASSET_VERSION='V2-153';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -2086,7 +2086,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V2-152';
+const _PRAYER_ASSET_VERSION='V2-153';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2425,7 +2425,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V2-152';
+const _SHRINE_ASSET_VERSION='V2-153';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -2646,7 +2646,7 @@ const AppState = {
 // ─── 상수: 죽림굴 ────────────────────────────────────────────────────────────
 const JUKRIMGUL_PARKING = {lat:35.550726, lng:129.014589, name:'죽림굴주차장', kw:'죽림굴주차장'};
 (function(){
-  // V2-152: Android/WebView에서 키보드가 올라올 때 viewport 높이 축소를
+  // V2-153: Android/WebView에서 키보드가 올라올 때 viewport 높이 축소를
   // 실제 작은 화면으로 오인해 전체 글자와 탭이 compact 모드로 줄어드는 문제를 막는다.
   // 기존 kb-open 클래스를 더 안정적으로 유지하되, 화면/탭/지도/뒤로가기 로직은 변경하지 않는다.
   var root = document.documentElement;
@@ -5394,7 +5394,7 @@ function _loadNearbyWithDist(lat,lng,items,getIdx,getColor,getLabel,opts){
   }
 
   if(body && isCurrent() && !(opts.silent && opts.keepCurrentList === true)){
-    body.innerHTML='<div class="empty-msg nearby-distance-loading">정확한 거리를 계산중입니다.<div class="distance-loading-cross" aria-hidden="true">✝</div></div>';
+    body.innerHTML='<div class="empty-msg nearby-distance-loading">📍 정확한 거리를 계산중입니다.<div class="distance-loading-cross" aria-hidden="true">✝</div></div>';
   }
 
   // 성당·성지·피정의집 내주변 목록은 정확한 자동차 거리 계산이 끝난 뒤에 표시한다.
@@ -5712,7 +5712,7 @@ function doRegionSearch(){
       const caddr=cand.dataset.addr||'', ccat=cand.dataset.cat||'', curl=cand.dataset.url||'';
       _regionLat=clat;_regionLng=clng;_regionName=cname;_regionPlaceName=cname;
       _routeRegionStart={lat:clat,lng:clng,name:'📍 '+cname,placeName:cname};
-      body.innerHTML='<div class="empty-msg nearby-distance-loading">정확한 거리를 계산중입니다.<div class="distance-loading-cross" aria-hidden="true">✝</div></div>';
+      body.innerHTML='<div class="empty-msg nearby-distance-loading">📍 정확한 거리를 계산중입니다.<div class="distance-loading-cross" aria-hidden="true">✝</div></div>';
       _showRegionResults(cname,clat,clng,{place_name:cname,road_address_name:caddr,address_name:caddr,category_name:ccat,place_url:curl});
       if(_map) _showRegionItemsOnMap([],clat,clng,{center:true});
     };
@@ -5735,7 +5735,7 @@ function _showRegionResults(q,lat,lng,doc){
   const safePlaceCat=_regionHtmlEsc(placeCat);
   const infoCard=`<div class="region-info-card"><div class="ric-hd"><div class="ric-icon">📍</div><div class="ric-name-wrap"><div class="ric-name">${safePlaceName}</div>${placeAddr?`<div class="ric-addr">${safePlaceAddr}</div>`:''}${placeCat?`<div class="ric-cat">${safePlaceCat}</div>`:''}</div><button type="button" class="ric-map-link" onclick="showRegionPlaceOnMap()">지도 보기</button></div></div>`;
   const listHd=`<div class="region-list-hd">${isParish?'⛪ 근처 성당':(isRetreat?'🏔 근처 피정의 집':'✝ 근처 성지')} <span style="font-size:13px;font-weight:500;color:#aaa">· 자동차 거리순 10곳</span></div>`;
-  $('region-body').innerHTML=infoCard+listHd+'<div id="rg-loading" class="region-distance-loading">정확한 거리를 계산중입니다.<div class="distance-loading-cross" aria-hidden="true">✝</div></div><div id="rg-list" style="background:#fff"></div>';
+  $('region-body').innerHTML=infoCard+listHd+'<div id="rg-loading" class="region-distance-loading">📍 정확한 거리를 계산중입니다.<div class="distance-loading-cross" aria-hidden="true">✝</div></div><div id="rg-list" style="background:#fff"></div>';
   if(!prelim.length){
     _regionCache=[];
     if(_map) _showRegionItemsOnMap([],lat,lng,{center:true});
@@ -6583,7 +6583,7 @@ function _fmtTime(s){
   }
 
   function _isFoldWideMapEdgeBack(start, dx, dy, target){
-    // V2-152: Fold 큰 화면 지도에서 시스템 back(popstate)와 JS edge swipe가
+    // V2-153: Fold 큰 화면 지도에서 시스템 back(popstate)와 JS edge swipe가
     // 겹치며 내부 레이어만 소비하던 문제를 막기 위해, 큰 지도 가장자리에서
     // 들어온 명확한 back 제스처는 '카테고리 → 커버' 전용 흐름으로 보낸다.
     // 지도 위에 투명 레이어를 덮지 않고, 기존 스와이프 감지 안에서만 판정한다.
@@ -6799,7 +6799,7 @@ function _fmtTime(s){
     const root = document.documentElement;
     try{ sessionStorage.setItem('oai_background_intro_return_until', String(_now() + 4200)); }catch(_e){}
     try{
-      // V2-152: 10분 이상 백그라운드 복귀 최종 규칙.
+      // V2-153: 10분 이상 백그라운드 복귀 최종 규칙.
       // 십자가/커버 인트로를 1회 실행한 뒤 최종 목적지는 커버다.
       // goToCover()와 _resetMapState()는 인트로 종료 직전에만 실행해
       // 복귀 순간 화면이 두 번 로딩되는 느낌을 줄인다.
