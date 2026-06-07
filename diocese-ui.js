@@ -1,4 +1,4 @@
-/* V2-166: 구 단위 지역검색 alias 확장 및 중복 구 단독 검색 안내 */
+/* V2-167: 구 단위 지역검색 alias 확장 및 중복 구 단독 검색 안내 */
 const MY_DIOCESE_STORAGE_KEY='oai_my_diocese_name';
 function getMyDioceseName(){
   try{return (localStorage.getItem(MY_DIOCESE_STORAGE_KEY)||'').trim();}
