@@ -1510,7 +1510,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V2-161';
+    frame.src='diocese.html?v=V2-162';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1923,7 +1923,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V2-161';
+const _PARISH_ASSET_VERSION='V2-162';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -2086,7 +2086,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V2-161';
+const _PRAYER_ASSET_VERSION='V2-162';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2425,7 +2425,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V2-161';
+const _SHRINE_ASSET_VERSION='V2-162';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -2646,7 +2646,7 @@ const AppState = {
 // ─── 상수: 죽림굴 ────────────────────────────────────────────────────────────
 const JUKRIMGUL_PARKING = {lat:35.550726, lng:129.014589, name:'죽림굴주차장', kw:'죽림굴주차장'};
 (function(){
-  // V2-161: Android/WebView에서 키보드가 올라올 때 viewport 높이 축소를
+  // V2-162: Android/WebView에서 키보드가 올라올 때 viewport 높이 축소를
   // 실제 작은 화면으로 오인해 전체 글자와 탭이 compact 모드로 줄어드는 문제를 막는다.
   // 기존 kb-open 클래스를 더 안정적으로 유지하되, 화면/탭/지도/뒤로가기 로직은 변경하지 않는다.
   var root = document.documentElement;
@@ -4013,7 +4013,7 @@ function _openInfoCardRouteAsDestination(){
   // 길찾기 흐름에서는 지도를 움직이지 않고 카드만 닫는다.
   closeInfoCard({keepMap:true});
   openTab('route');
-  _rS={idx:-1, name:spName, lat:spLat, lng:spLng};
+  _rS={idx:-1, name:spName, lat:spLat, lng:spLng, isRegionStart:!!(_routeRegionStart && Number(_routeRegionStart.lat)===Number(spLat) && Number(_routeRegionStart.lng)===Number(spLng))};
   _rE={idx, name:item.name, lat:item.lat, lng:item.lng};
   _setRouteLabel('start', spName);
   _setRouteLabel('end', item.name);
@@ -4142,7 +4142,10 @@ function _refreshRouteTmpMarkers(){
   // 출발창에서 '현재 위치'를 직접 누르기 전까지 지도에 출발 마커를 표시하지 않는다.
   // 단, 실제 경로검색을 실행해 라벨이 보이게 된 경우에는 경로 출발점으로 표시한다.
   const hideImplicitStartMarker = _isRouteImplicitCurrentStartHidden();
-  const needStart = !!(_rS && !hideImplicitStartMarker && (_mode!=='shrine' || _rS.idx<0 || !_markers[_rS.idx]));
+  // 지역검색 보라색 마커가 출발지인 경우에는 빨간 '출' 임시 마커를 겹쳐 그리지 않는다.
+  // 보라색 마커 자체가 출발지 기준점이며, 지도 마커를 누르면 도착지로 선택된다.
+  const hideRegionStartMarker = !!(_rS && _rS.isRegionStart && _regionLat && _regionLng);
+  const needStart = !!(_rS && !hideImplicitStartMarker && !hideRegionStartMarker && (_mode!=='shrine' || _rS.idx<0 || !_markers[_rS.idx]));
   const needEnd = !!(_rE && (_mode!=='shrine' || _rE.idx<0 || !_markers[_rE.idx]));
   if(needStart){
     _startTmpMkr = new _MM({
@@ -5922,9 +5925,11 @@ function _updateSearchBtn(){
 }
 
 function doSearchRoute(){ document.activeElement&&document.activeElement.blur();
-  // 길찾기 탭에서 검색 버튼을 다시 누른 뒤에는 지역검색·인포카드 진입 경로보다
-  // 길찾기 탭의 출발지→도착지 자동 입력 규칙이 우선한다.
-  _routeRegionStart=null;
+  // 길찾기 탭에서 검색 버튼을 다시 누른 뒤에는 길찾기 탭의 출발지→도착지 자동 입력 규칙이 우선한다.
+  // 단, 지역검색 보라색 마커가 출발지인 경우에는 다시선택 후에도 같은 검색지를 출발지로 유지해야 하므로
+  // _routeRegionStart를 지우지 않는다.
+  const keepRegionRouteStart = !!(_rS && _rS.isRegionStart && _routeRegionStart && _routeRegionStart.lat && _routeRegionStart.lng);
+  if(!keepRegionRouteStart) _routeRegionStart=null;
   _curFromRegion=false;
   // 출발지가 자동 현재 위치로 잡혀 있는데 라벨만 숨겨져 있던 경우,
   // 실제 경로 표시 단계에서는 사용자에게 '현재 위치'를 명확히 보여 준다.
@@ -5959,6 +5964,23 @@ function clearRoute(role){
   }
 }
 
+function _restoreRegionRouteStartAfterReset(regionStart){
+  if(!regionStart || !regionStart.lat || !regionStart.lng) return false;
+  try{
+    _routeRegionStart=Object.assign({}, regionStart);
+    _regionLat=regionStart.lat;
+    _regionLng=regionStart.lng;
+    _regionPlaceName=regionStart.placeName || regionStart.name || _regionPlaceName;
+    _regionName=regionStart.placeName || regionStart.name || _regionName;
+    _rS={idx:-1,name:regionStart.name || ('📍 ' + (_regionPlaceName || _regionName || '검색지')),lat:regionStart.lat,lng:regionStart.lng,isRegionStart:true};
+    _setRouteLabel('start',_rS.name);
+    if(_regionCache && _regionCache.length) _showRegionItemsOnMap(_regionCache, regionStart.lat, regionStart.lng, {center:false});
+    else _showRegionMarker(regionStart.lat, regionStart.lng, _regionPlaceName || _regionName || '검색 위치');
+    return true;
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+  return false;
+}
+
 function resetRoute(opts){
   opts = opts || {};
   const fromButton = !!opts.fromButton;
@@ -5991,14 +6013,8 @@ function resetRoute(opts){
     const rs=$('sheet-route');
     if(rs){ rs.style.display=''; rs.classList.add('open'); }
     closeInfoCard();
-    if(regionStart){
-      _routeRegionStart=Object.assign({}, regionStart);
-      _regionLat=regionStart.lat;
-      _regionLng=regionStart.lng;
-      _regionPlaceName=regionStart.placeName || regionStart.name || _regionPlaceName;
-      _regionName=regionStart.placeName || regionStart.name || _regionName;
-    }
-    _ensureCurrentLocationStart();
+    const restoredRegionStart = regionStart ? _restoreRegionRouteStartAfterReset(regionStart) : false;
+    if(!restoredRegionStart) _ensureCurrentLocationStart();
     // V2-82: 경로검색 결과의 '다시 선택'은 길찾기 재선택 카드로 돌아가는 동작이다.
     // 이때 도착지 위치로 지도를 돌리더라도 일반 선택 상태가 아니므로 노란 선택 마커와 인포카드는 띄우지 않는다.
     try{
@@ -6583,7 +6599,7 @@ function _fmtTime(s){
   }
 
   function _isFoldWideMapEdgeBack(start, dx, dy, target){
-    // V2-161: Fold 큰 화면 지도에서 시스템 back(popstate)와 JS edge swipe가
+    // V2-162: Fold 큰 화면 지도에서 시스템 back(popstate)와 JS edge swipe가
     // 겹치며 내부 레이어만 소비하던 문제를 막기 위해, 큰 지도 가장자리에서
     // 들어온 명확한 back 제스처는 '카테고리 → 커버' 전용 흐름으로 보낸다.
     // 지도 위에 투명 레이어를 덮지 않고, 기존 스와이프 감지 안에서만 판정한다.
@@ -6799,7 +6815,7 @@ function _fmtTime(s){
     const root = document.documentElement;
     try{ sessionStorage.setItem('oai_background_intro_return_until', String(_now() + 4200)); }catch(_e){}
     try{
-      // V2-161: 10분 이상 백그라운드 복귀 최종 규칙.
+      // V2-162: 10분 이상 백그라운드 복귀 최종 규칙.
       // 십자가/커버 인트로를 1회 실행한 뒤 최종 목적지는 커버다.
       // goToCover()와 _resetMapState()는 인트로 종료 직전에만 실행해
       // 복귀 순간 화면이 두 번 로딩되는 느낌을 줄인다.
