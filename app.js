@@ -1510,7 +1510,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V2-162';
+    frame.src='diocese.html?v=V2-163';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1923,7 +1923,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V2-162';
+const _PARISH_ASSET_VERSION='V2-163';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -2086,7 +2086,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V2-162';
+const _PRAYER_ASSET_VERSION='V2-163';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2425,7 +2425,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V2-162';
+const _SHRINE_ASSET_VERSION='V2-163';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -2646,7 +2646,7 @@ const AppState = {
 // ─── 상수: 죽림굴 ────────────────────────────────────────────────────────────
 const JUKRIMGUL_PARKING = {lat:35.550726, lng:129.014589, name:'죽림굴주차장', kw:'죽림굴주차장'};
 (function(){
-  // V2-162: Android/WebView에서 키보드가 올라올 때 viewport 높이 축소를
+  // V2-163: Android/WebView에서 키보드가 올라올 때 viewport 높이 축소를
   // 실제 작은 화면으로 오인해 전체 글자와 탭이 compact 모드로 줄어드는 문제를 막는다.
   // 기존 kb-open 클래스를 더 안정적으로 유지하되, 화면/탭/지도/뒤로가기 로직은 변경하지 않는다.
   var root = document.documentElement;
@@ -6006,8 +6006,8 @@ function resetRoute(opts){
   _hideRouteGuide();
   _restoreMarkersWhenRouteNotDisplayed();
 
-  // 다시선택 버튼: 뒤로가기처럼 지도를 도착지로 돌리되,
-  // 일반 장소 인포카드는 열지 않고 길찾기 선택 카드(출발/도착 입력 화면)를 유지한다.
+  // 다시선택 버튼: 현재 지도 위치와 줌은 그대로 유지하고,
+  // 경로 표시만 해제한 뒤 길찾기 재선택 카드(출발/도착 입력 화면)를 유지한다.
   if(fromButton){
     if(_activeTab!=='route') openTab('route');
     const rs=$('sheet-route');
@@ -6015,19 +6015,14 @@ function resetRoute(opts){
     closeInfoCard();
     const restoredRegionStart = regionStart ? _restoreRegionRouteStartAfterReset(regionStart) : false;
     if(!restoredRegionStart) _ensureCurrentLocationStart();
-    // V2-82: 경로검색 결과의 '다시 선택'은 길찾기 재선택 카드로 돌아가는 동작이다.
-    // 이때 도착지 위치로 지도를 돌리더라도 일반 선택 상태가 아니므로 노란 선택 마커와 인포카드는 띄우지 않는다.
+    // V2-163: 경로검색 결과의 '다시선택'은 현재 지도 위치·줌을 움직이지 않는다.
+    // 경로선과 출발/도착 임시표시만 지우고, 지도 위 성지/피정의집/성당 마커를 다시 선택 가능한 상태로 복원한다.
     try{
       if(_mode==='shrine') _clearShrineMarkerSel();
       if(_paSelMkr){ try{ _paSelMkr.setMap(null); }catch(_e){} _paSelMkr=null; }
+      if(_polyline){ try{ _polyline.setMap(null); }catch(_e){} _polyline=null; }
+      _restoreMarkersWhenRouteNotDisplayed();
     }catch(e){ console.warn("[가톨릭길동무]", e); }
-    if(destItem && destItem.lat && destItem.lng && _map){
-      try{
-        const pos=new _LL(destItem.lat,destItem.lng);
-        if(typeof _map.panTo==='function') _map.panTo(pos);
-        else _map.setCenter(pos);
-      }catch(e){ console.warn("[가톨릭길동무]", e); }
-    }
     return;
   }
 
@@ -6599,7 +6594,7 @@ function _fmtTime(s){
   }
 
   function _isFoldWideMapEdgeBack(start, dx, dy, target){
-    // V2-162: Fold 큰 화면 지도에서 시스템 back(popstate)와 JS edge swipe가
+    // V2-163: Fold 큰 화면 지도에서 시스템 back(popstate)와 JS edge swipe가
     // 겹치며 내부 레이어만 소비하던 문제를 막기 위해, 큰 지도 가장자리에서
     // 들어온 명확한 back 제스처는 '카테고리 → 커버' 전용 흐름으로 보낸다.
     // 지도 위에 투명 레이어를 덮지 않고, 기존 스와이프 감지 안에서만 판정한다.
@@ -6815,7 +6810,7 @@ function _fmtTime(s){
     const root = document.documentElement;
     try{ sessionStorage.setItem('oai_background_intro_return_until', String(_now() + 4200)); }catch(_e){}
     try{
-      // V2-162: 10분 이상 백그라운드 복귀 최종 규칙.
+      // V2-163: 10분 이상 백그라운드 복귀 최종 규칙.
       // 십자가/커버 인트로를 1회 실행한 뒤 최종 목적지는 커버다.
       // goToCover()와 _resetMapState()는 인트로 종료 직전에만 실행해
       // 복귀 순간 화면이 두 번 로딩되는 느낌을 줄인다.
