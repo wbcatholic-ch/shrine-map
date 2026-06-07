@@ -1510,7 +1510,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V2-163';
+    frame.src='diocese.html?v=V2-164';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1923,7 +1923,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V2-163';
+const _PARISH_ASSET_VERSION='V2-164';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -2086,7 +2086,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V2-163';
+const _PRAYER_ASSET_VERSION='V2-164';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2425,7 +2425,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V2-163';
+const _SHRINE_ASSET_VERSION='V2-164';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -2646,7 +2646,7 @@ const AppState = {
 // ─── 상수: 죽림굴 ────────────────────────────────────────────────────────────
 const JUKRIMGUL_PARKING = {lat:35.550726, lng:129.014589, name:'죽림굴주차장', kw:'죽림굴주차장'};
 (function(){
-  // V2-163: Android/WebView에서 키보드가 올라올 때 viewport 높이 축소를
+  // V2-164: Android/WebView에서 키보드가 올라올 때 viewport 높이 축소를
   // 실제 작은 화면으로 오인해 전체 글자와 탭이 compact 모드로 줄어드는 문제를 막는다.
   // 기존 kb-open 클래스를 더 안정적으로 유지하되, 화면/탭/지도/뒤로가기 로직은 변경하지 않는다.
   var root = document.documentElement;
@@ -4154,6 +4154,7 @@ function _refreshRouteTmpMarkers(){
       zIndex:340
     });
     _startTmpMkr.setMap(_map);
+    try{ kakao.maps.event.addListener(_startTmpMkr,'click',function(){ _showRouteCancelConfirm('start'); }); }catch(_e){}
   }
   if(needEnd){
     _endTmpMkr = new _MM({
@@ -4162,6 +4163,7 @@ function _refreshRouteTmpMarkers(){
       zIndex:320
     });
     _endTmpMkr.setMap(_map);
+    try{ kakao.maps.event.addListener(_endTmpMkr,'click',function(){ _showRouteCancelConfirm('end'); }); }catch(_e){}
   }
   _raiseMyLocationMarker();
 }
@@ -4192,6 +4194,13 @@ function _showRegionMarker(lat,lng,name){
       zIndex:500
     });
     _regionMarker.setMap(_map);
+    try{
+      kakao.maps.event.addListener(_regionMarker,'click',function(){
+        if(_routeMode && _rS && _rS.isRegionStart && Number(_rS.lat)===Number(lat) && Number(_rS.lng)===Number(lng)){
+          _showRouteCancelConfirm('start');
+        }
+      });
+    }catch(_e){}
     _raiseMyLocationMarker();
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
@@ -6015,7 +6024,7 @@ function resetRoute(opts){
     closeInfoCard();
     const restoredRegionStart = regionStart ? _restoreRegionRouteStartAfterReset(regionStart) : false;
     if(!restoredRegionStart) _ensureCurrentLocationStart();
-    // V2-163: 경로검색 결과의 '다시선택'은 현재 지도 위치·줌을 움직이지 않는다.
+    // V2-164: 경로검색 결과의 '다시선택'은 현재 지도 위치·줌을 움직이지 않는다.
     // 경로선과 출발/도착 임시표시만 지우고, 지도 위 성지/피정의집/성당 마커를 다시 선택 가능한 상태로 복원한다.
     try{
       if(_mode==='shrine') _clearShrineMarkerSel();
@@ -6052,10 +6061,152 @@ function _isRouteImplicitCurrentStartHidden(){
   }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
 }
 
+
+function _routePointMatchesIndex(point, idx){
+  try{
+    return !!(point && typeof point.idx==='number' && point.idx>=0 && point.idx===idx);
+  }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
+}
+
+function _hideRouteCancelConfirm(){
+  try{
+    const el=document.getElementById('route-cancel-confirm');
+    if(el) el.classList.remove('open');
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+}
+
+function _ensureRouteCancelConfirm(){
+  let modal=document.getElementById('route-cancel-confirm');
+  if(modal) return modal;
+  modal=document.createElement('div');
+  modal.id='route-cancel-confirm';
+  modal.className='route-cancel-confirm';
+  modal.innerHTML=`<div class="route-cancel-confirm-panel" role="dialog" aria-modal="true" aria-label="길찾기 선택 취소 확인">
+    <div class="rcc-title" id="rcc-title">선택을 취소하시겠습니까?</div>
+    <div class="rcc-desc" id="rcc-desc">실수로 누르셨다면 유지를 누르세요.</div>
+    <div class="rcc-actions">
+      <button type="button" class="rcc-btn rcc-keep" data-role="keep">유지</button>
+      <button type="button" class="rcc-btn rcc-cancel-point" data-role="cancel-point">선택 취소</button>
+    </div>
+  </div>`;
+  modal.addEventListener('click',function(e){
+    if(e.target===modal || (e.target && e.target.dataset && e.target.dataset.role==='keep')){
+      _hideRouteCancelConfirm();
+      return;
+    }
+    const btn=e.target && e.target.closest ? e.target.closest('[data-role="cancel-point"]') : null;
+    if(!btn) return;
+    const role=modal.dataset.cancelRole;
+    _hideRouteCancelConfirm();
+    _cancelRoutePoint(role);
+  });
+  document.body.appendChild(modal);
+  return modal;
+}
+
+function _showRouteCancelConfirm(role){
+  if(role!=='start' && role!=='end') return false;
+  const modal=_ensureRouteCancelConfirm();
+  modal.dataset.cancelRole=role;
+  const isStart=role==='start';
+  const title=document.getElementById('rcc-title');
+  const desc=document.getElementById('rcc-desc');
+  const cancelBtn=modal.querySelector('[data-role="cancel-point"]');
+  if(title) title.textContent=isStart?'출발지를 취소하시겠습니까?':'도착지를 취소하시겠습니까?';
+  if(desc) desc.textContent='실수로 누르셨다면 유지를 누르세요.';
+  if(cancelBtn) cancelBtn.textContent=isStart?'출발지 취소':'도착지 취소';
+  modal.classList.add('open');
+  return true;
+}
+
+function _restoreRoutePointMarker(point){
+  if(!point || typeof point.idx!=='number' || point.idx<0) return;
+  try{
+    if(_mode==='shrine' && _markers && _markers[point.idx] && _markers[point.idx].marker){
+      const item=_markers[point.idx].shrine;
+      _markers[point.idx].marker.setImage(_mkrImg(_typeColor(item.type),false));
+      _markers[point.idx].marker.setZIndex(1);
+    }else if(_mode==='retreat' && _retreatMarkers){
+      const r=_retreatMarkers.find(function(o){ return o && o.index===point.idx; });
+      if(r && r.marker){
+        r.marker.setImage(_mkrImgRetreat('#2e7d32',false));
+        r.marker.setZIndex(45);
+      }
+    }
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+}
+
+function _reapplyShrineRouteMarkerImages(){
+  try{
+    if(_mode!=='shrine') return;
+    if(_rS && typeof _rS.idx==='number' && _rS.idx>=0 && _markers && _markers[_rS.idx] && _markers[_rS.idx].marker){
+      _markers[_rS.idx].marker.setImage(_mkrImgRoute('#ff0000','출'));
+      _setRouteMarkerZ(_rS.idx,'start');
+    }
+    if(_rE && typeof _rE.idx==='number' && _rE.idx>=0 && _markers && _markers[_rE.idx] && _markers[_rE.idx].marker){
+      const item=_markers[_rE.idx].shrine;
+      _markers[_rE.idx].marker.setImage(_mkrImgRoute(item ? _typeColor(item.type) : '#005BFF','도'));
+      _setRouteMarkerZ(_rE.idx,'end');
+    }
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+}
+
+function _clearVisibleRouteResultOnly(){
+  try{
+    const result=$('rs-result');
+    if(result) result.style.display='none';
+    const hint=$('rs-hint');
+    if(hint) hint.style.display='block';
+    const note=$('rs-note');
+    if(note){ note.textContent=''; note.style.display='none'; }
+    if(_polyline){ _polyline.setMap(null); _polyline=null; }
+    _showJukrimgulParkingMkr(false);
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+}
+
+function _cancelRoutePoint(role){
+  if(role!=='start' && role!=='end') return;
+  try{
+    const target=role==='start' ? _rS : _rE;
+    _restoreRoutePointMarker(target);
+    _clearVisibleRouteResultOnly();
+    if(role==='start'){
+      if(target && target.isRegionStart){ _routeRegionStart=null; }
+      _rS=null;
+      _setRouteLabel('start','');
+    }else{
+      _rE=null;
+      _setRouteLabel('end','');
+    }
+    _clearRouteTmpMarkers();
+    if(_regionLat && _regionLng && _regionCache && _regionCache.length){
+      try{ _showRegionItemsOnMap(_regionCache,_regionLat,_regionLng,{center:false}); }catch(_e){}
+      _reapplyShrineRouteMarkerImages();
+    }else{
+      _restoreMarkersWhenRouteNotDisplayed();
+    }
+    _refreshRouteTmpMarkers();
+    if(_rS && !_rE) _showRouteGuideText(`도착 ${_getRouteGuideTarget()}를 탭하세요`);
+    else if(!_rS && _rE) _showRouteGuideText(`출발 ${_getRouteGuideTarget()}를 탭하세요`);
+    else if(!_rS && !_rE) _showRouteGuideText(`출발지를 탭하거나 지도에서 ${_getRouteGuideTarget()}를 선택하세요`);
+    _updateSearchBtn();
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+}
+
 function _selectRouteItem(idx){
   const items=_getCurrentItems();
   const s=items[idx];
   if(!s) return;
+  if(_routeMode){
+    if(_routePointMatchesIndex(_rS, idx)){
+      _showRouteCancelConfirm('start');
+      return;
+    }
+    if(_routePointMatchesIndex(_rE, idx)){
+      _showRouteCancelConfirm('end');
+      return;
+    }
+  }
   if(_rS&&_rE){
   resetRoute();
   }
@@ -6594,7 +6745,7 @@ function _fmtTime(s){
   }
 
   function _isFoldWideMapEdgeBack(start, dx, dy, target){
-    // V2-163: Fold 큰 화면 지도에서 시스템 back(popstate)와 JS edge swipe가
+    // V2-164: Fold 큰 화면 지도에서 시스템 back(popstate)와 JS edge swipe가
     // 겹치며 내부 레이어만 소비하던 문제를 막기 위해, 큰 지도 가장자리에서
     // 들어온 명확한 back 제스처는 '카테고리 → 커버' 전용 흐름으로 보낸다.
     // 지도 위에 투명 레이어를 덮지 않고, 기존 스와이프 감지 안에서만 판정한다.
@@ -6810,7 +6961,7 @@ function _fmtTime(s){
     const root = document.documentElement;
     try{ sessionStorage.setItem('oai_background_intro_return_until', String(_now() + 4200)); }catch(_e){}
     try{
-      // V2-163: 10분 이상 백그라운드 복귀 최종 규칙.
+      // V2-164: 10분 이상 백그라운드 복귀 최종 규칙.
       // 십자가/커버 인트로를 1회 실행한 뒤 최종 목적지는 커버다.
       // goToCover()와 _resetMapState()는 인트로 종료 직전에만 실행해
       // 복귀 순간 화면이 두 번 로딩되는 느낌을 줄인다.

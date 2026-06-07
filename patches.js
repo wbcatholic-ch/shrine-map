@@ -156,6 +156,7 @@
       el = $b('exit-dlg'); if(isVisiblyOpen(el)) return true;
       el = $b('srch-modal'); if(isVisiblyOpen(el)) return true;
       el = $b('route-role-choice'); if(isVisiblyOpen(el)) return true;
+      el = $b('route-cancel-confirm'); if(isVisiblyOpen(el)) return true;
       el = $b('sheet-route'); if(isVisiblyOpen(el)) return true;
       el = $b('info-card'); if(isVisiblyOpen(el)) return true;
       var routeBusy = false;
@@ -297,7 +298,13 @@
       return true;
     }
 
-    /* V2-163: 길찾기 후 일반 인포카드가 보이는 상태에서는 Back이
+    el = $b('route-cancel-confirm');
+    if(el && el.classList.contains('open')){
+      el.classList.remove('open');
+      return true;
+    }
+
+    /* V2-164: 길찾기 후 일반 인포카드가 보이는 상태에서는 Back이
        숨은 route 상태(_routeMode/_rS/_rE)를 먼저 소비하면 resetRoute()가
        같은 인포카드를 다시 복원해 화면 변화가 없어 보인다.
        화면에 실제로 보이는 인포카드를 X 버튼과 같은 우선순위로 먼저 닫고,
@@ -322,7 +329,7 @@
       return true;
     }
 
-    /* V2-163: 지역검색/성지찾기/내주변 시트가 실제로 열린 상태에서는
+    /* V2-164: 지역검색/성지찾기/내주변 시트가 실제로 열린 상태에서는
        보이지 않는 길찾기 잔여값(_routeMode/_rS/_rE/_polyline)이 Back 1회를
        먼저 소비하면 화면 변화가 없어 보인다.
        따라서 실제로 보이는 일반 탭 시트를 route 잔여 상태보다 먼저 닫는다. */
@@ -836,7 +843,7 @@
     }
 
     /* 앱 활성 상태에서는 먼저 trap을 복원한 뒤 화면을 정리한다.
-       V2-163: Fold 큰 화면의 성지·성당·피정 지도 루트 상태에서는
+       V2-164: Fold 큰 화면의 성지·성당·피정 지도 루트 상태에서는
        숨은 sheet/카카오맵 복원 popstate가 Back을 소비하지 않도록 커버 복귀를 우선한다. */
     _restoring = true;
     try{ history.go(1); }catch(e){ _restoring = false; console.warn("[가톨릭길동무]", e); }
