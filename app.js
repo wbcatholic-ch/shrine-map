@@ -1506,7 +1506,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V2-174';
+    frame.src='diocese.html?v=V2-176';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1919,7 +1919,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V2-174';
+const _PARISH_ASSET_VERSION='V2-176';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -2082,7 +2082,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V2-174';
+const _PRAYER_ASSET_VERSION='V2-176';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2353,18 +2353,40 @@ function _orderedGroupEntriesForMyDiocese(groups){
     return aa-bb;
   });
 }
+function _isMyDioceseName(dio){
+  const mine=_getMyDioceseName();
+  return !!(mine && dio && dio===mine);
+}
+function _myDioceseFilterLabel(label, dio){
+  return _isMyDioceseName(dio) ? `${label}<span class="my-dio-filter-badge">나의 교구</span>` : label;
+}
+function _setDioHeading(el, dio){
+  if(!el) return;
+  const mine=_isMyDioceseName(dio);
+  el.className='dio-hd'+(mine?' my-diocese-dio-hd':'');
+  el.textContent='';
+  el.appendChild(document.createTextNode(dio || ''));
+  if(mine){
+    const badge=document.createElement('span');
+    badge.className='my-dio-heading-badge';
+    badge.textContent='나의 교구';
+    el.appendChild(badge);
+  }
+}
 function _renderDioFilterBars(mode){
   const fb=$('list-filter-bar'), sm=$('sm-filter-bar');
   if(!fb || !sm) return;
   const rows=_orderedDiosForMode(mode);
-  const sig=String(mode||'')+'|'+rows.map(function(x){ return x[0]; }).join(',');
+  const mine=_getMyDioceseName();
+  const sig=String(mode||'')+'|'+mine+'|'+rows.map(function(x){ return x[0]; }).join(',');
   if(fb.dataset.dioSig===sig && sm.dataset.dioSig===sig && fb.children.length && sm.children.length) return;
   fb.innerHTML='';
   sm.innerHTML='';
   rows.forEach(function(row,i){
-    const v=row[0], l=row[1];
-    fb.innerHTML+=`<button class="filter-btn${i?'':' active'}" onclick="setDioFilter('${v}',this)">${l}</button>`;
-    sm.innerHTML+=`<button class="sm-fb${i?'':' on'}" onclick="setSmDio('${v}',this)">${l}</button>`;
+    const v=row[0], l=row[1], isMine=_isMyDioceseName(v);
+    const extra=isMine?' my-diocese-filter-btn':'';
+    fb.innerHTML+=`<button class="filter-btn${i?'':' active'}${extra}" onclick="setDioFilter('${v}',this)">${_myDioceseFilterLabel(l,v)}</button>`;
+    sm.innerHTML+=`<button class="sm-fb${i?'':' on'}${extra}" onclick="setSmDio('${v}',this)">${_myDioceseFilterLabel(l,v)}</button>`;
   });
   fb.dataset.dioSig=sig;
   sm.dataset.dioSig=sig;
@@ -2421,7 +2443,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V2-174';
+const _SHRINE_ASSET_VERSION='V2-176';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -2642,7 +2664,7 @@ const AppState = {
 // ─── 상수: 죽림굴 ────────────────────────────────────────────────────────────
 const JUKRIMGUL_PARKING = {lat:35.550726, lng:129.014589, name:'죽림굴주차장', kw:'죽림굴주차장'};
 (function(){
-  // V2-174: Android/WebView에서 키보드가 올라올 때 viewport 높이 축소를
+  // V2-176: Android/WebView에서 키보드가 올라올 때 viewport 높이 축소를
   // 실제 작은 화면으로 오인해 전체 글자와 탭이 compact 모드로 줄어드는 문제를 막는다.
   // 기존 kb-open 클래스를 더 안정적으로 유지하되, 화면/탭/지도/뒤로가기 로직은 변경하지 않는다.
   var root = document.documentElement;
@@ -5542,7 +5564,7 @@ function renderList(){
     body.innerHTML='';
     dioOrder.forEach(dio=>{
       const hd=document.createElement('div');
-      hd.className='dio-hd'; hd.textContent=dio;
+      _setDioHeading(hd,dio);
       body.appendChild(hd);
       groups[dio].forEach(({s,i})=>{
         const c=_getModeMarkerColor(s);
@@ -5565,7 +5587,7 @@ function renderList(){
   body.innerHTML='';
   _orderedGroupEntriesForMyDiocese(groups).forEach(([dio,items])=>{
     const hd=document.createElement('div');
-    hd.className='dio-hd'; hd.textContent=dio;
+    _setDioHeading(hd,dio);
     body.appendChild(hd);
     items.forEach(({s,i})=>{
       const c=_getModeMarkerColor(s);
@@ -6020,7 +6042,7 @@ function resetRoute(opts){
     closeInfoCard();
     const restoredRegionStart = regionStart ? _restoreRegionRouteStartAfterReset(regionStart) : false;
     if(!restoredRegionStart) _ensureCurrentLocationStart();
-    // V2-174: 경로검색 결과의 '다시선택'은 현재 지도 위치·줌을 움직이지 않는다.
+    // V2-176: 경로검색 결과의 '다시선택'은 현재 지도 위치·줌을 움직이지 않는다.
     // 경로선과 출발/도착 임시표시만 지우고, 지도 위 성지/피정의집/성당 마커를 다시 선택 가능한 상태로 복원한다.
     try{
       if(_mode==='shrine') _clearShrineMarkerSel();
@@ -6207,7 +6229,7 @@ function _selectRouteItem(idx){
   const hasStart = !!(_rS && _rS.lat && _rS.lng && !_isRouteImplicitCurrentStartHidden());
   const hasEnd = !!(_rE && _rE.lat && _rE.lng);
 
-  // V2-174: 출발지 또는 도착지 중 하나만 남아 있을 때는
+  // V2-176: 출발지 또는 도착지 중 하나만 남아 있을 때는
   // 남은 한쪽을 유지하고 비어 있는 한쪽만 새 선택으로 채운다.
   // 둘 다 이미 지정된 상태에서 새 마커를 누르는 기존 흐름은 초기화 후 새 출발지 선택으로 유지한다.
   if(hasStart && hasEnd){
@@ -6755,7 +6777,7 @@ function _fmtTime(s){
   }
 
   function _isFoldWideMapEdgeBack(start, dx, dy, target){
-    // V2-174: Fold 큰 화면 지도에서 시스템 back(popstate)와 JS edge swipe가
+    // V2-176: Fold 큰 화면 지도에서 시스템 back(popstate)와 JS edge swipe가
     // 겹치며 내부 레이어만 소비하던 문제를 막기 위해, 큰 지도 가장자리에서
     // 들어온 명확한 back 제스처는 '카테고리 → 커버' 전용 흐름으로 보낸다.
     // 지도 위에 투명 레이어를 덮지 않고, 기존 스와이프 감지 안에서만 판정한다.
@@ -6971,7 +6993,7 @@ function _fmtTime(s){
     const root = document.documentElement;
     try{ sessionStorage.setItem('oai_background_intro_return_until', String(_now() + 4200)); }catch(_e){}
     try{
-      // V2-174: 10분 이상 백그라운드 복귀 최종 규칙.
+      // V2-176: 10분 이상 백그라운드 복귀 최종 규칙.
       // 십자가/커버 인트로를 1회 실행한 뒤 최종 목적지는 커버다.
       // goToCover()와 _resetMapState()는 인트로 종료 직전에만 실행해
       // 복귀 순간 화면이 두 번 로딩되는 느낌을 줄인다.
