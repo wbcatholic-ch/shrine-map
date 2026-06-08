@@ -562,7 +562,7 @@ function doSearch(){
   try{ document.activeElement && document.activeElement.blur && document.activeElement.blur(); }catch(e){}
   const raw=document.getElementById('si').value.trim();
   const res=document.getElementById('sres');
-  if(!raw){res.innerHTML='<div class="se">시·군·구 이름을 입력하세요</div>';return;}
+  if(!raw){res.innerHTML='';return;}
 
   const q=raw.replace(/\s+/g,'');
 
@@ -576,7 +576,7 @@ function doSearch(){
       const sm=OVERLAP_SUMMARY[city]||{};
       res.innerHTML='';
       const warn=document.createElement('div');warn.className='sob';
-      warn.innerHTML=`<div class="sot">⚠️ <strong>"${city}"</strong>는 중복 지역입니다 — 해당 교구를 확인하세요</div>`;
+      warn.innerHTML=`<div class="sot">⚠️ <strong>"${city}"</strong> 중복 지역입니다 — 해당 교구를 확인하세요</div>`;
       res.appendChild(warn);
       Object.keys(sm).forEach(function(d){
         if(DIOCESE_META[d]) res.appendChild(makeRow(city,d,sm[d]));

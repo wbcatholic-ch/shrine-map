@@ -17,8 +17,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>교구지도</title>
-<link rel="stylesheet" href="style.css?v=V2-176">
-<script id="oai-diocese-parent-style-sync-V2-176">
+<link rel="stylesheet" href="style.css?v=V2-178">
+<script id="oai-diocese-parent-style-sync-V2-178">
 (function(){
   function clean(v){ return String(v || '').trim(); }
   function parentVar(cs, names, fallback){
@@ -166,22 +166,22 @@
   <div id="search-view">
     <div class="ss">
       <div class="sr">
-        <input id="si" type="text" placeholder="도·시·군·구 이름 검색 (예: 달서, 대구달서구, 마산, 진해)" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="search" enterkeyhint="done">
+        <input id="si" type="text" placeholder="도·시·군·구 검색" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" inputmode="search" enterkeyhint="done">
         <button id="sb" onclick="doSearch()">검색</button>
       </div>
       <div class="sh">도·시·군·구 이름으로 검색</div>
     </div>
-    <div id="sres"><div class="se">시·군·구 이름을 입력하세요</div></div>
+    <div id="sres"></div>
   </div>
   <div id="list-view">
     <div id="list-content"></div>
   </div>
 </div>
 
-<script src="diocese-meta.js?v=V2-176"></script>
-<script src="diocese-search.js?v=V2-176"></script>
-<script src="diocese-data.js?v=V2-176"></script>
-<script src="diocese-ui.js?v=V2-176"></script>
+<script src="diocese-meta.js?v=V2-178"></script>
+<script src="diocese-search.js?v=V2-178"></script>
+<script src="diocese-data.js?v=V2-178"></script>
+<script src="diocese-ui.js?v=V2-178"></script>
 
 <script id="oai-diocese-return-state-20260501">
 (function(){
@@ -314,7 +314,7 @@
   window.resetDioceseFirstPage = function(){
     try{ sessionStorage.removeItem('listScroll'); }catch(e){}
     var si=document.getElementById('si'); if(si) si.value='';
-    var sres=document.getElementById('sres'); if(sres) sres.innerHTML='<div class="se">시·군·구 이름을 입력하세요</div>';
+    var sres=document.getElementById('sres'); if(sres) sres.innerHTML='';
     var lv=document.getElementById('list-view'); if(lv) lv.scrollTop=0;
     var sv=document.getElementById('search-view'); if(sv) sv.scrollTop=0;
     var btn=document.querySelector('.tab[data-tab="gwangu"]'); if(btn) btn.click();
