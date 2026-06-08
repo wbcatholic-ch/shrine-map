@@ -7,9 +7,11 @@
 ════════════════════════════════════════════════════════ */
 (function(){
 
-const PR_CATS = ['favorites','aim','basic','special','etc','bong1','bong2','bong3','bong4'];
+const PR_ALL_CATS = ['favorites','wyd','aim','basic','special','etc','bong1','bong2','bong3','bong4'];
+let PR_CATS = PR_ALL_CATS.slice();
 const PR_CAT_STYLE = {
   favorites:{ label:'⭐ 즐겨찾기', bg:'#FFF0DC', color:'#E8780C', icon:'⭐', accent:'#E8780C' },
+  wyd:      { label:'2027 WYD', bg:'#EEF2FF', color:'#4338CA', icon:'🌍', accent:'#4338CA' },
   aim:      { label:'대구대교구 인준', bg:'#E3F0FF', color:'#1565C0', icon:'✝️', accent:'#1565C0' },
   basic:    { label:'주요 기도', bg:'#EFF4FF', color:'#1E40AF', icon:'🏰', accent:'#1E40AF' },
   special:  { label:'특수 기도', bg:'#FFF0F5', color:'#BE185D', icon:'🙏', accent:'#BE185D' },
@@ -28,8 +30,11 @@ let prTabsFirstAlign = true;
 // 기도문 데이터 (항목 추가 시 여기에 추가)
 const PR_DATA = { 
 
+ 'wyd': [
+{id:"aim_029",title:"2027 서울 세계청년대회 공식 기도문",content:"<p>젊은이를 사랑하시는 주님,<br />저희를 주님의 무한한 사랑과 자비로 초대해 주심에 감사드립니다.<br />&nbsp;<br />하느님 아버지,<br />저희 자신을 당신께 맡겨 드리오니,<br />온 세상 젊은이들이 교회의 품 안에서 위로받고<br />친교와 일치의 기쁨을 누리게 하소서.<br />&nbsp;<br />&lsquo;이미 그리고 영원히&rsquo; 세상을 이기신 그리스도님,<br />&ldquo;용기를 내어라.&rdquo; 하신 당신의 말씀 안에서<br />온 세상 모든 이가 희망을 발견하고,<br />사랑과 용서의 십자가가 세상에 대한 승리임을 깨닫게 하소서.<br />&nbsp;<br />사랑의 불꽃이신 성령님,<br />당신의 놀라운 손길로 이 땅에 복음의 씨앗을 심으셨으니,<br />한국 순교 성인들의 믿음이 저희 가슴에도 타올라<br />평화와 사랑과 진리의 복음을 살아가는 제자가 되게 하소서.<br />&nbsp;<br />주님, 이 세계청년대회의 순례 여정을 통해<br />저희 모두가 서로의 목소리를 경청하고<br />그 안에서 당신의 뜻을 찾으며,<br />모든 하느님 백성이 함께 걷는 시노드 교회가 되게 하소서. 아멘<br />&nbsp;<br />○ 자비와 평화의 모후이시여,<br />◎ 저희를 위하여 빌어 주소서.<br />○ 서울 세계청년대회의 주보성인들이여,<br />◎ 모든 젊은이들을 위하여 빌어 주소서.<br />&nbsp;<br />2027 서울 WYD 지역조직위원회(공식기도문): <u><a href=\"https://wydseoul.org/introduction/prayer\" target=\"_blank\">https://wydseoul.org/introduction/prayer</a></u></p>"}
+ ],
+
  'aim': [
-{id:"aim_029",title:"2027 서울 세계청년대회 공식 기도문",content:"<p>젊은이를 사랑하시는 주님,<br />저희를 주님의 무한한 사랑과 자비로 초대해 주심에 감사드립니다.<br />&nbsp;<br />하느님 아버지,<br />저희 자신을 당신께 맡겨 드리오니,<br />온 세상 젊은이들이 교회의 품 안에서 위로받고<br />친교와 일치의 기쁨을 누리게 하소서.<br />&nbsp;<br />&lsquo;이미 그리고 영원히&rsquo; 세상을 이기신 그리스도님,<br />&ldquo;용기를 내어라.&rdquo; 하신 당신의 말씀 안에서<br />온 세상 모든 이가 희망을 발견하고,<br />사랑과 용서의 십자가가 세상에 대한 승리임을 깨닫게 하소서.<br />&nbsp;<br />사랑의 불꽃이신 성령님,<br />당신의 놀라운 손길로 이 땅에 복음의 씨앗을 심으셨으니,<br />한국 순교 성인들의 믿음이 저희 가슴에도 타올라<br />평화와 사랑과 진리의 복음을 살아가는 제자가 되게 하소서.<br />&nbsp;<br />주님, 이 세계청년대회의 순례 여정을 통해<br />저희 모두가 서로의 목소리를 경청하고<br />그 안에서 당신의 뜻을 찾으며,<br />모든 하느님 백성이 함께 걷는 시노드 교회가 되게 하소서. 아멘<br />&nbsp;<br />○ 자비와 평화의 모후이시여,<br />◎ 저희를 위하여 빌어 주소서.<br />○ 서울 세계청년대회의 주보성인들이여,<br />◎ 모든 젊은이들을 위하여 빌어 주소서.<br />&nbsp;<br />2027 서울 WYD 지역조직위원회(공식기도문): <u><a href=\"https://wydseoul.org/introduction/prayer\" target=\"_blank\">https://wydseoul.org/introduction/prayer</a></u></p>"},
 {id:"aim_028",title:"교황 선출을 위한 기도",content:"<p>○ 오소서 창조주님 성령께서 찾아오사</p><p>창조하신 마음속에 천상은총 채우소서.</p><p class='new_line'>&nbsp;</p><p>● 보호자신 성령님은 지존하신 주님선물</p><p>사랑의샘 불과사랑 우리영혼 축성기름</p><p class='new_line'>&nbsp;</p><p>○ 약속되신 성령님은 하느님의 손가락</p><p>일곱은혜 베푸시고 말씀능력 채우시네.</p><p class='new_line'>&nbsp;</p><p>● 느낌생각 비추시고 마음속에 사랑부어</p><p>나약하온 저희육신 튼튼하게 고치소서.</p><p class='new_line'>&nbsp;</p><p>○ 원수들을 멀리쫓아 참된평화 주옵소서.</p><p>성령님의 인도받아 모든해악 피하리다.</p><p class='new_line'>&nbsp;</p><p>◎ 성령님은 아버지와 아드님을 알리시니</p><p>아버지와 아드님의 성령님을 믿나이다.</p><p class='new_line'>&nbsp;</p><p>+ 기도합시다.</p><p>주님,</p><p>교회를 다스리고 지켜 주시니</p><p>주님의 종들에게 지혜와 진리와 평화의 성령을 보내시어</p><p>주님의 뜻을 온전히 깨닫고</p><p>그 뜻을 온 힘을 다하여 실천하게 하소서.</p><p>우리 주 그리스도를 통하여 비나이다.</p><p>◎ 아멘.</p>"},
 {id:"aim_027",title:"프란치스코 교황의 영원한 안식을 위한 기도",content:"<p>영원한 목자이신 하느님 아버지,&nbsp;</p><p>사랑으로 교회를 다스린 주님의 종 프란치스코를 위하여 바치는&nbsp;</p><p>하느님 백성의 기도를 들어주소서.&nbsp;</p><p class='new_line'>&nbsp;</p><p>주님, 자비를 베푸시어,&nbsp;</p><p>주님의 양 떼를 돌보게 하신 프란치스코 교황에게 영원한 상급을 베풀어 주소서.</p><p class='new_line'>&nbsp;</p><p>프란치스코 교황은 이 세상에서 사랑의 신비를 충실히 거행하였으니,</p><p>천상에서 주님과 함께 영원한 기쁨을 누리게 하소서.&nbsp;</p><p class='new_line'>&nbsp;</p><p>주님께서는 주님의 종 프란치스코를 사랑으로 돌보시어</p><p>온 교회를 가르치는 슬기로운 교사로 삼으시고</p><p>이 세상에서 그리스도의 일을 훌륭히 수행하게 하셨으니,</p><p>저희의 간구를 들으시어&nbsp;</p><p>프란치스코 교황이 하늘에서 영원한 영광을 누리게 하소서.&nbsp;</p><p class='new_line'>&nbsp;</p><p>주님의 양 떼를 돌보는 대사제로 뽑으신 주님의 종 프란치스코가</p><p>이제 하느님 나라의 사제단에 들어 영원한 생명을 누리게 하소서.</p><p class='new_line'>&nbsp;</p><p>프란치스코 교황은 인류 가족에게 사랑을 베풀며 주님의 평화를 이루는 도구였으니,</p><p>이제 주님의 종 프란치스코가 하늘의 성인들과 함께 평화를 누리게 하소서.</p><p class='new_line'>&nbsp;</p><p>우리 주 그리스도를 통하여 비나이다.&nbsp;</p><p>아멘.</p><p class='new_line'>&nbsp;</p><p style=\"text-align: right;\">- 한국천주교주교회의 인준</p>"},
 {id:"aim_024",title:"전례의 해 기도",content:"<p>하느님 아버지</p><p>성자의 강생과 파스카 신비로&nbsp;</p><p>구원의 문을 열어 주시고&nbsp;</p><p>성령을 보내시어 저희를 이끄시고 보호하시니&nbsp;</p><p>감사하나이다. &nbsp;</p><p class='new_line'>&nbsp;</p><p>저희는 교구 설정 120주년과</p><p>조선교구 설정 200주년을 바라보면서</p><p>&lsquo;복음의 기쁨을 함께 살아가는 공동체&rsquo;를 이루기 위해</p><p>말씀, 친교, 전례, 이웃사랑, 그리고 선교라는 핵심가치를</p><p>매 2년씩 중점적으로 실천하고자 하나이다.</p><p class='new_line'>&nbsp;</p><p>전례의 해를 지내는 두 해 동안</p><p>아름답고 거룩한 전례로&nbsp;</p><p>하느님을 찬미하고&nbsp;</p><p>성사 안에 계시는 하느님과 더불어&nbsp;</p><p>일치의 기쁨을 누리려 하오니&nbsp;</p><p>저희가 주님 안에서 하나되어&nbsp;</p><p>영원한 생명의 길을 함께 걸어가게 하소서.&nbsp;</p><p class='new_line'>&nbsp;</p><p>루르드의 복되신 동정 마리아님&nbsp;</p><p>저희와 저희 교구를 위하여 빌어주소서.&nbsp;</p><p>성 이윤일 요한과 한국의 모든 성인과 복자들이여</p><p>저희와 저희 교구를 위하여 빌어주소서.&nbsp;</p><p>아멘.</p><p class='new_line'>&nbsp;</p><p data-font=\"20\" style=\"text-align: right;\">천주교 대구대교구장 조환길 타대오 대주교 인준(2024.11.5)</p>"},
@@ -233,7 +238,50 @@ window.prAdjustFont = function(delta){
 };
 window.prApplyFont = prApplyFont;
 
+
+function prIsDaeguBeliever(){
+  try{
+    return String(localStorage.getItem('oai_my_diocese_name') || '').trim() === '대구대교구';
+  }catch(_e){
+    return false;
+  }
+}
+
+function prVisibleDataCats(){
+  const cats = ['wyd'];
+  if(prIsDaeguBeliever()) cats.push('aim');
+  return cats.concat(['basic','special','etc','bong1','bong2','bong3','bong4']);
+}
+
+function prVisibleFavoriteCount(){
+  if(!Array.isArray(prFavorites) || !prFavorites.length) return 0;
+  const visibleIds = new Set();
+  prVisibleDataCats().forEach(function(k){
+    (PR_DATA[k] || []).forEach(function(p){ if(p && p.id) visibleIds.add(p.id); });
+  });
+  return prFavorites.filter(function(id){ return visibleIds.has(id); }).length;
+}
+
+function prUpdateVisibleCats(){
+  const cats = [];
+  if(prVisibleFavoriteCount() > 0) cats.push('favorites');
+  prVisibleDataCats().forEach(function(k){ cats.push(k); });
+  PR_CATS = cats;
+}
+
+function prDefaultCat(){
+  prUpdateVisibleCats();
+  if(PR_CATS.includes('favorites') && prVisibleFavoriteCount() > 0) return 'favorites';
+  return PR_CATS.includes('wyd') ? 'wyd' : (PR_CATS[0] || 'basic');
+}
+
+function prEnsureCurrentCat(){
+  prUpdateVisibleCats();
+  if(!PR_CATS.includes(prCurCat)) prCurCat = prDefaultCat();
+}
+
 function prBuildTabs(){
+  prUpdateVisibleCats();
   const wrap = prG('prayer-tabs');
   if(!wrap) return;
   wrap.innerHTML='';
@@ -266,9 +314,11 @@ function prApplyTabColors(){
 // V3-S: 주요기도문 탭 표시 안전장치.
 // 일부 화면 전환/캐시 조합에서 목록은 렌더링되지만 탭 컨테이너가 비어 보이는 경우를 막는다.
 function prEnsureTabsVisible(){
+  prUpdateVisibleCats();
   const wrap = prG('prayer-tabs');
   if(!wrap) return;
-  if(wrap.children.length < PR_CATS.length) prBuildTabs();
+  var currentCats = Array.from(wrap.children).map(function(btn){ return btn.dataset.cat || ''; }).join('|');
+  if(currentCats !== PR_CATS.join('|')) prBuildTabs();
   wrap.style.display = 'flex';
   wrap.style.visibility = 'visible';
   wrap.style.opacity = '1';
@@ -281,6 +331,8 @@ function prEnsureTabsVisible(){
 }
 window.prEnsureTabsVisible = prEnsureTabsVisible;
 function prSwitchCat(cat){
+  prUpdateVisibleCats();
+  if(!PR_CATS.includes(cat)) cat = prDefaultCat();
   prCurCat = cat;
   const inp = prG('prayer-search-inp');
   const listView = prG('prayer-list-view');
@@ -297,6 +349,7 @@ function prSwitchCat(cat){
 }
 
 window.prRenderList = function(){
+  prEnsureCurrentCat();
   const ul = prG('pr-list-ul');
   if(!ul) return;
   ul.innerHTML = '';
@@ -438,7 +491,7 @@ window.prRenderList = function(){
 
 function prGetCat(id){
   for(const k in PR_DATA){ if((PR_DATA[k]||[]).find(p=>p.id===id)) return k; }
-  return 'aim';
+  return 'wyd';
 }
 
 window.prToggleFav = function(id, e){
@@ -450,6 +503,9 @@ window.prToggleFav = function(id, e){
   const keepScroll = lv ? (lv.scrollTop || 0) : 0;
   prFavorites = prFavorites.includes(id) ? prFavorites.filter(f=>f!==id) : [...prFavorites,id];
   prSaveFavorites();
+  prUpdateVisibleCats();
+  prBuildTabs();
+  prEnsureCurrentCat();
   prRenderList();
   if(lv){
     const restoreScroll = function(){
@@ -474,6 +530,9 @@ window.prToggleDetailFav = function(e){
   if(!id) return;
   prFavorites = prFavorites.includes(id) ? prFavorites.filter(f=>f!==id) : [...prFavorites,id];
   prSaveFavorites();
+  prUpdateVisibleCats();
+  prBuildTabs();
+  prEnsureCurrentCat();
   var isFav = prFavorites.includes(id);
   btn.classList.toggle('on', isFav);
   /* 목록 동기화 */
@@ -589,7 +648,7 @@ function prBindSwipeTabs(){
   var SWIPE_BLOCK_MS = 700;
   var horizontalLocked = false;
 
-  function getIdx(cat) { return PR_CATS.indexOf(cat); }
+  function getIdx(cat) { prEnsureCurrentCat(); return PR_CATS.indexOf(cat); }
   function blockFavAfterSwipe(){ prSwipeBlockUntil = Date.now() + SWIPE_BLOCK_MS; }
   function isHorizontalSwipe(dx, dy){
     return Math.abs(dx) >= THRESHOLD && Math.abs(dx) >= Math.abs(dy) * HORIZONTAL_RATIO;
@@ -686,7 +745,7 @@ window.prUpdateGoodNewsPrayerButton = prUpdateGoodNewsPrayerButton;
 window.initPrayerView = function(){
   prLoadPrefs();
   prUpdateGoodNewsPrayerButton();
-  prCurCat = (prFavorites && prFavorites.length) ? 'favorites' : 'aim';
+  prCurCat = prDefaultCat();
   prBuildTabs();
   prApplyFont();
   prEnsureTabsVisible();
