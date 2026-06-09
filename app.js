@@ -1506,7 +1506,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V2-182';
+    frame.src='diocese.html?v=V2-183';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1919,7 +1919,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V2-182';
+const _PARISH_ASSET_VERSION='V2-183';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -2082,7 +2082,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V2-182';
+const _PRAYER_ASSET_VERSION='V2-183';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2443,7 +2443,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V2-182';
+const _SHRINE_ASSET_VERSION='V2-183';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -2664,7 +2664,7 @@ const AppState = {
 // ─── 상수: 죽림굴 ────────────────────────────────────────────────────────────
 const JUKRIMGUL_PARKING = {lat:35.550726, lng:129.014589, name:'죽림굴주차장', kw:'죽림굴주차장'};
 (function(){
-  // V2-182: Android/WebView에서 키보드가 올라올 때 viewport 높이 축소를
+  // V2-183: Android/WebView에서 키보드가 올라올 때 viewport 높이 축소를
   // 실제 작은 화면으로 오인해 전체 글자와 탭이 compact 모드로 줄어드는 문제를 막는다.
   // 기존 kb-open 클래스를 더 안정적으로 유지하되, 화면/탭/지도/뒤로가기 로직은 변경하지 않는다.
   var root = document.documentElement;
@@ -6042,7 +6042,7 @@ function resetRoute(opts){
     closeInfoCard();
     const restoredRegionStart = regionStart ? _restoreRegionRouteStartAfterReset(regionStart) : false;
     if(!restoredRegionStart) _ensureCurrentLocationStart();
-    // V2-182: 경로검색 결과의 '다시선택'은 현재 지도 위치·줌을 움직이지 않는다.
+    // V2-183: 경로검색 결과의 '다시선택'은 현재 지도 위치·줌을 움직이지 않는다.
     // 경로선과 출발/도착 임시표시만 지우고, 지도 위 성지/피정의집/성당 마커를 다시 선택 가능한 상태로 복원한다.
     try{
       if(_mode==='shrine') _clearShrineMarkerSel();
@@ -6229,7 +6229,7 @@ function _selectRouteItem(idx){
   const hasStart = !!(_rS && _rS.lat && _rS.lng && !_isRouteImplicitCurrentStartHidden());
   const hasEnd = !!(_rE && _rE.lat && _rE.lng);
 
-  // V2-182: 출발지 또는 도착지 중 하나만 남아 있을 때는
+  // V2-183: 출발지 또는 도착지 중 하나만 남아 있을 때는
   // 남은 한쪽을 유지하고 비어 있는 한쪽만 새 선택으로 채운다.
   // 둘 다 이미 지정된 상태에서 새 마커를 누르는 기존 흐름은 초기화 후 새 출발지 선택으로 유지한다.
   if(hasStart && hasEnd){
@@ -6777,7 +6777,7 @@ function _fmtTime(s){
   }
 
   function _isFoldWideMapEdgeBack(start, dx, dy, target){
-    // V2-182: Fold 큰 화면 지도에서 시스템 back(popstate)와 JS edge swipe가
+    // V2-183: Fold 큰 화면 지도에서 시스템 back(popstate)와 JS edge swipe가
     // 겹치며 내부 레이어만 소비하던 문제를 막기 위해, 큰 지도 가장자리에서
     // 들어온 명확한 back 제스처는 '카테고리 → 커버' 전용 흐름으로 보낸다.
     // 지도 위에 투명 레이어를 덮지 않고, 기존 스와이프 감지 안에서만 판정한다.
@@ -6993,7 +6993,7 @@ function _fmtTime(s){
     const root = document.documentElement;
     try{ sessionStorage.setItem('oai_background_intro_return_until', String(_now() + 4200)); }catch(_e){}
     try{
-      // V2-182: 10분 이상 백그라운드 복귀 최종 규칙.
+      // V2-183: 10분 이상 백그라운드 복귀 최종 규칙.
       // 십자가/커버 인트로를 1회 실행한 뒤 최종 목적지는 커버다.
       // goToCover()와 _resetMapState()는 인트로 종료 직전에만 실행해
       // 복귀 순간 화면이 두 번 로딩되는 느낌을 줄인다.
@@ -7346,7 +7346,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         parish: null,
         query: '',
         error: '',
-        fromChange: !!fromChange
+        fromChange: !!fromChange,
+        dioceseFolded: false,
+        parishFolded: false
       };
       renderMyFaithSettings();
     }
@@ -7555,8 +7557,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     function renderMyFaithSettings(){
       if(!myFaithDraft){
-        myFaithDraft = {diocese:'', parish:null, query:'', error:'', fromChange:false};
+        myFaithDraft = {diocese:'', parish:null, query:'', error:'', fromChange:false, dioceseFolded:false, parishFolded:false};
       }
+      if(typeof myFaithDraft.dioceseFolded !== 'boolean') myFaithDraft.dioceseFolded = false;
+      if(typeof myFaithDraft.parishFolded !== 'boolean') myFaithDraft.parishFolded = false;
       setHeader('나의 설정', '교구와 본당을 모두 선택해 주세요');
       setBodyMode('my-faith-body my-faith-home-list-body my-faith-settings-edit-body');
 
@@ -7568,34 +7572,76 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         sec.appendChild(h);
         return sec;
       }
+      function appendFoldedPick(sec, label, value, buttonLabel, fn){
+        var wrap = document.createElement('div');
+        wrap.className = 'my-faith-folded-pick';
+        var main = document.createElement('div');
+        main.className = 'my-faith-folded-pick-main';
+        var small = document.createElement('span');
+        small.className = 'my-faith-folded-pick-label';
+        small.textContent = label;
+        var strong = document.createElement('strong');
+        strong.textContent = value || '선택됨';
+        main.appendChild(small);
+        main.appendChild(strong);
+        var change = document.createElement('button');
+        change.type = 'button';
+        change.className = 'my-faith-folded-pick-change';
+        change.textContent = buttonLabel || '변경';
+        change.addEventListener('click', function(e){
+          if(e && e.preventDefault) e.preventDefault();
+          fn && fn();
+        });
+        wrap.appendChild(main);
+        wrap.appendChild(change);
+        sec.appendChild(wrap);
+      }
 
       var settings = makeSection('나의 설정', 'my-faith-settings-section my-faith-settings-edit-section');
-      var dioBox = document.createElement('div');
-      dioBox.className = 'my-faith-pick-options my-faith-diocese-pick-options';
-      dioceses.forEach(function(dioName){
-        var item = document.createElement('button');
-        item.type = 'button';
-        item.className = 'my-diocese-option' + (myFaithDraft.diocese === dioName ? ' selected' : '');
-        item.textContent = dioName;
-        item.setAttribute('aria-pressed', myFaithDraft.diocese === dioName ? 'true' : 'false');
-        item.addEventListener('click', function(e){
-          if(e && e.preventDefault) e.preventDefault();
-          if(myFaithDraft.diocese !== dioName){
-            myFaithDraft.diocese = dioName;
-            myFaithDraft.parish = null;
-            myFaithDraft.query = '';
-          }
+      if(myFaithDraft.diocese && myFaithDraft.dioceseFolded){
+        appendFoldedPick(settings, '선택한 교구', myFaithDraft.diocese, '교구 변경', function(){
+          myFaithDraft.dioceseFolded = false;
           myFaithDraft.error = '';
           renderMyFaithSettings();
         });
-        dioBox.appendChild(item);
-      });
-      settings.appendChild(dioBox);
+      }else{
+        var dioBox = document.createElement('div');
+        dioBox.className = 'my-faith-pick-options my-faith-diocese-pick-options';
+        dioceses.forEach(function(dioName){
+          var item = document.createElement('button');
+          item.type = 'button';
+          item.className = 'my-diocese-option' + (myFaithDraft.diocese === dioName ? ' selected' : '');
+          item.textContent = dioName;
+          item.setAttribute('aria-pressed', myFaithDraft.diocese === dioName ? 'true' : 'false');
+          item.addEventListener('click', function(e){
+            if(e && e.preventDefault) e.preventDefault();
+            if(myFaithDraft.diocese !== dioName){
+              myFaithDraft.diocese = dioName;
+              myFaithDraft.parish = null;
+              myFaithDraft.query = '';
+            }
+            myFaithDraft.dioceseFolded = true;
+            myFaithDraft.parishFolded = false;
+            myFaithDraft.error = '';
+            renderMyFaithSettings();
+          });
+          dioBox.appendChild(item);
+        });
+        settings.appendChild(dioBox);
+      }
 
       var parishTitle = document.createElement('div');
       parishTitle.className = 'my-faith-pick-subtitle';
-      parishTitle.textContent = myFaithDraft.diocese ? '본당 선택' : '본당 선택은 교구를 먼저 선택한 뒤 가능합니다.';
+      parishTitle.textContent = myFaithDraft.diocese ? (myFaithDraft.parish && myFaithDraft.parishFolded ? '본당 선택 완료' : '본당 선택') : '본당 선택은 교구를 먼저 선택한 뒤 가능합니다.';
       settings.appendChild(parishTitle);
+
+      if(myFaithDraft.parish && myFaithDraft.parishFolded){
+        appendFoldedPick(settings, '선택한 본당', myFaithDraft.parish.name || '', '본당 변경', function(){
+          myFaithDraft.parishFolded = false;
+          myFaithDraft.error = '';
+          renderMyFaithSettings();
+        });
+      }
 
       var searchInput = document.createElement('input');
       searchInput.type = 'search';
@@ -7603,10 +7649,18 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       searchInput.placeholder = '본당명 또는 주소 검색';
       searchInput.value = myFaithDraft.query || '';
       searchInput.disabled = !myFaithDraft.diocese;
+      if(myFaithDraft.parish && myFaithDraft.parishFolded){
+        searchInput.hidden = true;
+        searchInput.setAttribute('aria-hidden', 'true');
+      }
       settings.appendChild(searchInput);
 
       var results = document.createElement('div');
       results.className = 'my-faith-search-results my-faith-settings-results';
+      if(myFaithDraft.parish && myFaithDraft.parishFolded){
+        results.hidden = true;
+        results.setAttribute('aria-hidden', 'true');
+      }
       settings.appendChild(results);
       body.appendChild(settings);
 
@@ -7651,6 +7705,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 
       function drawParishes(){
         try{
+          if(myFaithDraft.parish && myFaithDraft.parishFolded){
+            results.innerHTML = '';
+            return;
+          }
           var q = String(searchInput.value || '').trim().toLowerCase();
           myFaithDraft.query = searchInput.value || '';
           var items = getParishItems();
@@ -7683,6 +7741,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
             card.addEventListener('click', function(e){
               if(e && e.preventDefault) e.preventDefault();
               myFaithDraft.parish = p;
+              myFaithDraft.parishFolded = true;
               myFaithDraft.error = '';
               renderMyFaithSettings();
             });
