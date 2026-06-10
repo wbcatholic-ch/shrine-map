@@ -1,12 +1,6 @@
-/* 가톨릭길동무 core.js — 뒤로가기/종료 상태 관리
-   patches.js와 app.js 양쪽에서 참조하는 순수 유틸리티 함수들.
-   브라우저 전역(window, history, sessionStorage, document)만 사용하며
-   app.js의 다른 함수에 의존하지 않습니다.
-   로드 순서: constants.js → core.js → app.js → patches.js */
 
 'use strict';
 
-/* ── 커버 종료 상태 ──────────────────────────────────── */
 
 function _resetCoverExitReady(){
   try{
@@ -38,7 +32,6 @@ function _isCoverExitArmed(){
   }catch(e){ return false; }
 }
 
-/* ── 화면 상태 판단 ─────────────────────────────────── */
 
 function _isCoverScreenVisible(){
   try{
@@ -57,13 +50,6 @@ function _isAppScreenActive(){
   try{ return document.documentElement.classList.contains('app-active'); }catch(e){ return false; }
 }
 
-/* ── Back Trap 공통 관리 ───────────────────────────────
-   Google Play/WebView 안정화용 정리:
-   - 이미 _p:1 trap 위치에 있을 때는 pushState를 새로 쌓지 않는다.
-   - 다른 trap 상태에서 커버/앱 trap으로 바꿔야 할 때는 replaceState만 사용한다.
-   - _p:0 root 상태일 때만 root → trap 한 쌍을 만든다.
-   이렇게 해서 커버 복귀·기도문 복귀·빠른메뉴 복귀가 반복되어도 history 스택이
-   root/trap/root/trap으로 계속 누적되지 않게 한다. */
 function _oaiBaseHref(){
   try{ return location.href.split('#')[0]; }catch(_e){ return location.href; }
 }
@@ -83,18 +69,15 @@ function _oaiNormalizeTrapState(kind, reason, forceReset){
     if(st && st._p === 1 && st[trapKey] && !forceReset) return;
 
     if(st && st._p === 1){
-      // 현재 위치가 이미 trap이면 새 항목을 만들지 않고 역할만 교체한다.
       history.replaceState(_oaiTrapPayload(kind, reason, false), '', href);
       return;
     }
 
-    // root 또는 빈 상태에서만 trap 한 칸을 만든다.
     history.replaceState(_oaiTrapPayload(kind, reason, true), '', href);
     history.pushState(_oaiTrapPayload(kind, reason, false), '', href);
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 
-/* ── 커버 Back Trap 관리 ─────────────────────────────── */
 
 function _ensureCoverBackTrap(reason){
   try{
@@ -113,7 +96,6 @@ function _resetCoverBackTrap(reason){
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 
-/* ── 앱 내부 Back Trap 관리 ──────────────────────────── */
 
 function _ensureAppBackTrap(reason){
   try{
@@ -128,7 +110,6 @@ function _resetAppBackTrap(reason){
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 
-/* ── 종료 토스트 / 앱 종료 ───────────────────────────── */
 
 function _showBackToast(){
   try{
@@ -185,7 +166,6 @@ function doExit(){
   attemptAppExit();
 }
 
-/* ── window 전역 노출 (patches.js 등 외부에서 window.* 로 접근) ── */
 window._resetCoverExitReady   = _resetCoverExitReady;
 window._clearCoverExitArmed   = _clearCoverExitArmed;
 window._armCoverExitWindow    = _armCoverExitWindow;
@@ -202,7 +182,6 @@ window.attemptAppExit         = attemptAppExit;
 window.closeExitDlg           = closeExitDlg;
 window.doExit                 = doExit;
 
-/* ── 초기화: 앱 로드 시 종료 상태 리셋 ── */
 window._exitReady = false;
 window.__oaiCoverExitUntil = 0;
 try{ sessionStorage.removeItem(SS.COVER_EXIT_ARMED_UNTIL); }catch(_e){}

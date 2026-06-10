@@ -1,27 +1,4 @@
-/* patches.js — 뒤로가기·스와이프·터치 UX 보조 모듈
-   history 기반 뒤로가기 컨트롤러, 스와이프 액션,
-   터치 피드백과 키보드 입력 보정을 담당합니다. */
 
-/*
- * ═══════════════════════════════════════════════════════════
- *  뒤로가기 원칙
- *  [대전제] 커버에서만 앱 탈출.
- *
- *  핵심 설계:
- *  - go(1) 방식: [루트(0), 트랩(1)] 유지 → back → go(1) → UI처리
- *  - 외부뷰(미사/기도/교구지도)/모듈뷰(웹/순례길) 닫힐 때 → goToCover()
- *  - 카테고리 레이어(시트/카드/모달) → 하나씩 닫기
- *  - 아무것도 없고 앱 활성 → goToCover()
- *  - 커버 상태 → 토스트 → 두 번째 → 앱 종료
- *
- *  Step 9-1~9-5 기준:
- *  - 이 파일의 popstate 순서가 현재 정상 흐름의 기준입니다.
- *  - goToCover/startApp/history 통합은 아직 하지 않습니다.
- *  - Step 9-2에서는 커버/앱 활성 판별만 실제 DOM 표시 상태 기준으로 보강합니다.
- *  - Step 9-5에서는 기도문 본문→목록 복귀를 기존 prayer.js 담당 함수로 정리합니다.
- *  - Step 9-6에서는 매일미사·성가 빠른메뉴 팝업 닫힘 흐름을 기존 정상 구조로 유지합니다.
- * ═══════════════════════════════════════════════════════════
- */
 (function(){
   'use strict';
   if(window.__BACK_CTRL__) return;
@@ -31,15 +8,11 @@
   var _href = location.href.split('#')[0];
 
   function armCoverBackTrap(reason, opts){
-    /* V3-S: patches.js를 커버 뒤로가기 trap 생성의 최종 기준으로 둔다.
-       index.html의 조기 guard는 patches.js가 로드되기 전 첫 화면 안전망으로만 사용하고,
-       patches.js 로드 이후에는 여기서 직접 root/trap 한 쌍을 관리한다. */
     try{
       opts = opts || {};
       var href = location.href.split('#')[0];
       _href = href;
       var st = history.state;
-      // 이미 커버 trap이 살아 있으면 force 호출이어도 중복으로 쌓지 않는다.
       if(st && st._p === 1 && st.oai_cover_trap) return;
       history.replaceState({_p:0, oai_cover_root:reason||'cover-root'}, '', href);
       history.pushState({_p:1, oai_cover_trap:reason||'cover-trap'}, '', href);
@@ -49,9 +22,6 @@
   }
   try{ window._oaiArmCoverBackTrap = armCoverBackTrap; }catch(_e){}
 
-  /* history 초기화
-     V3-S: 첫 커버 뒤로가기 실패를 만들던 hash/query trap 흔적을 제거하고,
-     최종 뒤로가기 판단은 이 patches.js popstate 컨트롤러로 단일화한다. */
   try{
     var refreshReason = '';
     try{
@@ -110,9 +80,6 @@
         var fromPrayer = false;
         try{ fromPrayer = !!(mq.dataset && mq.dataset.returnSource === 'prayer'); }catch(e){}
         try{ if(typeof window._isPrayerPopupReturnSource === 'function' && window._isPrayerPopupReturnSource()) fromPrayer = true; }catch(e){}
-        // closeMassQuickMenu() 안에서 기도문 복귀 팝업 여부를 직접 판정해 커버를 확정한다.
-        // 여기서 한 번 더 _forceCoverAfterPrayerQuickPopup()를 호출하면 커버/히스토리 재설정이 중복되어
-        // 팝업 복귀 또는 팝업 닫힘 순간 화면이 흔들릴 수 있다.
         window.closeMassQuickMenu();
       } else {
         document.querySelectorAll('.guide-modal.show').forEach(function(el){
@@ -177,7 +144,6 @@
       if(window.__OAI_MAP_BACK_TO_COVER_UNTIL__ && now < window.__OAI_MAP_BACK_TO_COVER_UNTIL__) return true;
       var w = Math.round(window.innerWidth || document.documentElement.clientWidth || 0);
       var h = Math.round(window.innerHeight || document.documentElement.clientHeight || 0);
-      // Fold/태블릿형 큰 화면의 지도 루트 상태에서는 숨은 sheet 상태가 Back을 소비하지 않게 한다.
       if(w >= 600 && Math.min(w, h) >= 520 && !hasVisibleCategoryLayerForBack()) return true;
     }catch(e){ console.warn('[가톨릭길동무]', e); }
     return false;
@@ -193,9 +159,6 @@
   }
   try{ window._oaiMapBackToCover = mapBackToCover; }catch(_e){}
 
-  /* ── 일반 모듈 뷰 닫기: Step 9-3 범위
-     웹사이트·순례길·문의·관구교구 기본 화면은 모두 커버로 복귀한다.
-     기도문/매일미사/성가는 각각 전용 흐름이 있으므로 여기서 처리하지 않는다. */
   function closeGeneralModuleToCover(reason){
     var diocese = $b('diocese-view');
     if(diocese && diocese.classList.contains('open')){
@@ -218,9 +181,6 @@
 
   try{ window._oaiCloseGeneralModuleToCover = closeGeneralModuleToCover; }catch(_e){}
 
-  /* ── 외부·모듈 뷰 닫기 */
-  /* ── 모듈 내부 레이어 닫기: Step 9-4 범위
-     순례길 상세 시트가 열려 있으면 모듈 전체를 닫기 전에 상세 시트만 먼저 닫는다. */
   function closeModuleInnerLayer(){
     var trailSheet = null;
     try{ trailSheet = document.querySelector('.trail-sheet.open'); }catch(_e){}
@@ -238,14 +198,12 @@
   }
 
   function closeExtOrModule(){
-    /* 매일미사 */
     var missa = $b('missa-view');
     if(missa && missa.classList.contains('open')){
       if(typeof window.closeMissa === 'function') window.closeMissa();
       else missa.classList.remove('open');
       return true;
     }
-    /* 기도문은 전용 컨트롤러 한 곳에서만 처리한다. */
     var prayer = $b('prayer-view');
     if(prayer && prayer.classList.contains('open')){
       if(typeof handlePrayerBack === 'function') return handlePrayerBack('closeExtOrModule-prayer');
@@ -285,7 +243,6 @@
     }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
   }
 
-  /* ── 카테고리 레이어 닫기 (하나씩) ── */
   function closeLayer(){
     var el;
     el = $b('exit-dlg');
@@ -304,11 +261,6 @@
       return true;
     }
 
-    /* V2-175: 길찾기 후 일반 인포카드가 보이는 상태에서는 Back이
-       숨은 route 상태(_routeMode/_rS/_rE)를 먼저 소비하면 resetRoute()가
-       같은 인포카드를 다시 복원해 화면 변화가 없어 보인다.
-       화면에 실제로 보이는 인포카드를 X 버튼과 같은 우선순위로 먼저 닫고,
-       화면에 보이지 않는 route 잔여 상태만 복원 없이 정리한다. */
     var infoCardEl = $b('info-card');
     var routeSheetEl = $b('sheet-route');
     var infoCardOpen = isVisiblyOpen(infoCardEl);
@@ -329,10 +281,6 @@
       return true;
     }
 
-    /* V2-175: 지역검색/성지찾기/내주변 시트가 실제로 열린 상태에서는
-       보이지 않는 길찾기 잔여값(_routeMode/_rS/_rE/_polyline)이 Back 1회를
-       먼저 소비하면 화면 변화가 없어 보인다.
-       따라서 실제로 보이는 일반 탭 시트를 route 잔여 상태보다 먼저 닫는다. */
     try{
       var visibleMainSheetName = null;
       ['nearby','list','region'].some(function(n){
@@ -360,8 +308,6 @@
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
 
-    // 길찾기 시트가 실제로 보이거나 경로 결과만 남아 있으면 route 상태를 정리한다.
-    // 단, 위의 보이는 인포카드는 이미 X 버튼과 동일하게 먼저 처리했다.
     el = routeSheetEl;
     try{
       if(routeSheetOpen || _routeMode || _rS || _rE){
@@ -410,22 +356,9 @@
     return false;
   }
 
-  /* ── popstate 핸들러 ── */
   var _restoring = false;
 
 
-  /* ─────────────────────────────────────────────
-     V3-S 기도문 전용 뒤로가기 컨트롤러 — history 단계 분리 제거
-
-     원칙:
-     1) 다른 정상 카테고리처럼 실제 history는 공통 root/trap 한 쌍만 사용한다.
-     2) 기도문 detail/list/popup은 별도 history state를 만들지 않고 DOM 상태로만 판단한다.
-     3) popstate가 오면 먼저 history.go(1)로 공통 trap을 복원한 뒤 화면만 바꾼다.
-        - 본문   → 목록
-        - 목록   → 빠른메뉴 팝업 또는 커버
-        - 팝업   → 커버
-     4) 매일미사·성가는 외부 사이트, 기도문은 내부 카테고리이므로 복귀 플래그는 분리한다.
-     ───────────────────────────────────────────── */
   function prayerView(){ return $b('prayer-view'); }
   function prayerDetail(){ return $b('prayer-detail'); }
   function prayerPopup(){ return $b('mass-quick-modal'); }
@@ -467,8 +400,6 @@
     return !!yes;
   }
   function armPrayerBackTrap(reason){
-    /* 호환용 함수. V3-S부터 기도문 detail/list용 별도 pushState는 만들지 않는다.
-       공통 컨트롤러가 이미 갖고 있는 root/trap을 유지하는 것만 필요하다. */
     try{
       if(isPrayerOpen() && typeof window._ensureAppBackTrap === 'function'){
         window._ensureAppBackTrap(reason || 'prayer-ui-state');
@@ -522,9 +453,6 @@
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
   function settleCoverTrapAfterPrayer(reason){
-    // V3-S: 기도문 팝업 → 커버 후에는 이미 공통 컨트롤러가 history.go(1)로 trap을 복원한 상태다.
-    // 여기서 replaceState/pushState를 강제로 반복하면 Android/PWA에서 다음 Back이 앱 종료로 오판될 수 있다.
-    // 따라서 현재 trap이 살아 있으면 그대로 두고, 없을 때만 최소한으로 보강한다.
     function run(tag){
       try{
         if(document.documentElement.classList.contains('app-active')) return;
@@ -564,8 +492,6 @@
   function prayerDetailToList(reason){
     try{
       var fromQuick = isPrayerQuickSource();
-      /* Step 9-5: 본문 → 목록 복귀는 prayer.js의 기존 상세 닫기 함수를 우선 사용한다.
-         history는 건드리지 않고, 목록 스크롤 복원과 탭 표시만 원래 담당 함수에 맡긴다. */
       if(typeof window.prCloseDetail === 'function') window.prCloseDetail({skipTrap:true});
       else {
         var d = prayerDetail();
@@ -582,12 +508,6 @@
       var fromQuick = isPrayerQuickSource();
       if(!fromQuick) return resetPrayerToCover(reason || 'prayer-list-cover');
 
-      /* V3-S: 기도문 목록 → 빠른메뉴 팝업 복귀는 직접 팝업을 띄우지 않는다.
-         사용자의 Back으로 공통 trap이 일단 소비된 직후라, 이 자리에서 openMassQuickMenu()를
-         바로 호출하면 Android/PWA에서 history.go(1) 복원 타이밍과 겹쳐 팝업 Back이 앱 종료로
-         먹힐 수 있다. 기존 안정 함수 _returnToMassQuickMenu('prayer')에게 맡기면,
-         공통 trap 복원이 끝난 뒤
-         '기도문 닫기 → 커버 복원 → 커버 위 빠른메뉴 팝업 표시'를 한 번에 실행한다. */
       try{ keepPrayerQuickSource(true); }catch(_e){}
       try{ if(typeof window._setPrayerPopupReturnSource === 'function') window._setPrayerPopupReturnSource(true); }catch(_e){}
       try{ if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady(); }catch(_e){}
@@ -597,7 +517,6 @@
         return true;
       }
 
-      /* fallback: _returnToMassQuickMenu가 없을 때만 예전 방식으로 복구 */
       hidePrayerOnly();
       showCoverOnlyForPrayer();
       var mq = prayerPopup();
@@ -678,11 +597,8 @@
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
 
-    /* history.go(1)로 공통 trap을 복원하면서 발생한 popstate는
-       어떤 화면 처리도 하지 않고 여기서 끝낸다. 이 순서가 중요하다. */
     if(_restoring){
       _restoring = false;
-      /* 커버 메뉴 팝업 go(1) 복원 후 콜백 */
       try{
         var _cmCb = window.__OAI_AFTER_RESTORE_COVER_MENU_CB__;
         var _cmUntil = Number(window.__OAI_AFTER_RESTORE_COVER_MENU_UNTIL__ || 0);
@@ -712,8 +628,6 @@
       return;
     }
 
-    /* 빠른메뉴에서 주요기도문으로 진입하기 위해 팝업용 mq history state를
-       직접 pop하는 중이면, 이것은 사용자의 뒤로가기 명령이 아니다. */
     try{
       var mqPopUntil = Number(window.__OAI_MQ_STATE_POPPING__ || 0);
       if(mqPopUntil && Date.now() < mqPopUntil){
@@ -725,9 +639,6 @@
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
 
-    /* 커버 위에 떠 있는 기도문 복귀 팝업은 일반 종료 흐름보다 먼저 닫고 커버를 확정한다.
-       단, 먼저 history.go(1)로 방금 소비된 공통 trap을 복원한 뒤 닫아야
-       커버 첫 Back이 앱 종료로 빠지지 않는다. */
     if(isPrayerReturnPopupOpen()){
       var coverCb = function(){ resetPrayerToCover('prayer-popup-cover-after-restore'); };
       try{
@@ -753,15 +664,11 @@
       return;
     }
 
-    /* 새로고침 확인창이 열려 있으면 종료 안내로 넘기지 말고 확인창만 닫는다. */
     if(closeRefreshDialog()){
       try{ armCoverBackTrap('refresh-dialog-close', {force:true}); }catch(e){ console.warn('[가톨릭길동무]', e); }
       return;
     }
 
-    /* 나의 신앙생활 전체창이 열려 있으면 종료 흐름보다 먼저 닫고 커버로 돌아간다.
-       popstate로 root까지 내려온 뒤 바로 닫으면 다음 Back이 앱 종료로 빠질 수 있으므로
-       커버 메뉴와 같은 방식으로 trap 위치를 먼저 복원한 뒤 닫는다. */
     if(window.isMyFaithLifeModalOpen && window.isMyFaithLifeModalOpen()){
       var myFaithCb = function(){
         try{ if(typeof window.closeMyFaithLifeModal === 'function') window.closeMyFaithLifeModal(); }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -792,7 +699,6 @@
       return;
     }
 
-    /* 빠른메뉴/안내 팝업이 열려 있으면 먼저 닫는다. */
     if(isGuideModalOpen()){
       closeGuideModals();  /* 내부에서 _resetCoverExitReady() 호출 */
       try{ if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady(); }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -801,9 +707,6 @@
       return;
     }
 
-    /* 커버 메뉴 팝업 — guide-modal 클래스가 없어 isGuideModalOpen에 안 잡힘.
-       기도문 복귀팝업과 동일하게: go(1)로 소비된 trap을 먼저 복원한 뒤 팝업을 닫아야
-       커버 첫 Back이 앱 종료로 빠지지 않는다. */
     if(window.isCoverMenuPopupOpen && window.isCoverMenuPopupOpen()){
       var menuCb = function(){
         try{ if(typeof window.closeCoverMenuPopup === 'function') window.closeCoverMenuPopup(); }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -834,7 +737,6 @@
       return;
     }
 
-    /* 커버: 토스트 → 두 번째에 종료. */
     if(!appActive()){
       var exiting = false;
       if(typeof window._showBackToast==='function') exiting = window._showBackToast() === true;
@@ -842,9 +744,6 @@
       return;
     }
 
-    /* 앱 활성 상태에서는 먼저 trap을 복원한 뒤 화면을 정리한다.
-       V2-175: Fold 큰 화면의 성지·성당·피정 지도 루트 상태에서는
-       숨은 sheet/카카오맵 복원 popstate가 Back을 소비하지 않도록 커버 복귀를 우선한다. */
     _restoring = true;
     try{ history.go(1); }catch(e){ _restoring = false; console.warn("[가톨릭길동무]", e); }
 
@@ -857,7 +756,6 @@
   }, false);
 
 
-  /* Cordova 물리 백버튼 */
   document.addEventListener('backbutton', function(){
     if(handlePrayerBack('prayer-hardware-back')) return;
     if(closeRefreshDialog()){ try{ armCoverBackTrap('refresh-dialog-hardware', {force:true}); }catch(e){} return; }
@@ -890,8 +788,6 @@
     callGTC();
   }, false);
 
-  // 외부 사이트 방문 후 복귀 시 history 트랩 강제 재확립.
-  // 트랩이 소실되면 다음 뒤로가기에서 앱이 탈출된다.
   window.addEventListener('pageshow', function(){
     try{
       var st = history.state;
@@ -904,9 +800,7 @@
 
 })();
 
-/* 자동 ?v=Date.now 리디렉션은 사용하지 않음: 버전 문자열과 서비스워커로 캐시를 관리 */
 
-/* 시작 시 강제 상태 초기화는 사용하지 않음: 뒤로가기와 외부사이트 복귀 상태 보존 */
 
 (function(){
   'use strict';
@@ -916,8 +810,6 @@
   function el(id){ return document.getElementById(id); }
   function blurActive(){ try{ var a=document.activeElement; if(a && /INPUT|TEXTAREA|SELECT/.test(a.tagName)) a.blur(); }catch(_){ console.warn("[가톨릭길동무] silent catch"); } }
 
-  /* 통합 뒤로가기 컨트롤러가 기도문을 처리하므로, 여기서는 목록 초기화만 담당한다.
-     기도문 전용 history.pushState / 별도 popstate / 별도 backbutton은 사용하지 않는다. */
   function showPrayerListOnly(opts){
     blurActive();
     var d=el('prayer-detail');
@@ -962,12 +854,9 @@
   }, true);
   document.addEventListener('DOMContentLoaded', function(){ setTimeout(syncPrayerTabOn, 300); });
   window.addEventListener('load', function(){ setTimeout(syncPrayerTabOn, 300); });
-  // setInterval → MutationObserver: prayer-view의 class 변화(open/close)시에만 실행
-  // 기존 500ms 폴링은 앱 수명 동안 영구 실행되어 불필요한 CPU 낭비였음
   (function(){
     var pv = document.getElementById('prayer-view');
     if(!pv){
-      // DOM 준비 전이면 DOMContentLoaded 후 재시도
       document.addEventListener('DOMContentLoaded', function(){
         var el = document.getElementById('prayer-view');
         if(el) new MutationObserver(function(){
@@ -1034,8 +923,6 @@
 (function(){
   if(window.__APP_FONT_SCALE_GUARD__) return;
   window.__APP_FONT_SCALE_GUARD__=true;
-  // V3-S: 커버 글자 크기 조절은 prayer.js에 의존하지 않는 공통 함수가 담당한다.
-  // prayer.js는 기도문 화면이 열렸을 때 같은 localStorage 값을 읽어 자체 UI를 맞춘다.
   var QA_URL="qa-firebase.html?v=V2-116";
   var FONT_KEY='prayer_font_size';
   var BASE=16;
@@ -1107,7 +994,6 @@
   }
   function setEmojiIcons(){var icons={'cc-1':'✝️','cc-2':'⛪','cc-3':'🙏','cc-4':'🌿','cc-5':'🥾','cc-6':'🌐','cc-7':'🧭'};Object.keys(icons).forEach(function(id){var btn=el(id);if(!btn)return;var wrap=btn.querySelector('.cover-icon-wrap');if(wrap)wrap.innerHTML='<span class="cover-emoji" aria-hidden="true">'+icons[id]+'</span>';});}
   function configureQna(){
-    // V3-S: 문의·건의 버튼은 중간 안내 카드를 만들지 않고 실제 문의 페이지로 바로 이동한다.
     window.QNA_FORM_URL=QA_URL;
     var q=el('qna-list');
     if(q) q.innerHTML='';
@@ -1124,18 +1010,12 @@
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();window.addEventListener('load',function(){boot();setTimeout(boot,250);setTimeout(boot,900);},{once:true});window.addEventListener('pageshow',boot);
 })();
 
-// user-cache mode: keep app cache stable; refresh changed files through versioned URLs.
 
-// Google Play 정리본: 별도 설치 버튼/설치 유도 로직 제거.
 
-/* ====== 성능 최적화 보정 ====== */
 (function(){
-  // 화면 전환 중 불필요한 레이아웃 부담을 줄인다.
-  // cover의 pull-to-refresh: 불필요한 transform 제거
   var coverEl = document.getElementById('cover');
   if(coverEl) coverEl.style.willChange = 'auto';
   
-  // 모듈뷰 열릴 때 contain 해제, 닫힐 때 재적용
   var observer = new MutationObserver(function(mutations){
     mutations.forEach(function(m){
       if(m.attributeName === 'class'){
@@ -1143,7 +1023,6 @@
         if(el.classList.contains('open')){
           el.style.contain = 'none';
         } else {
-          // 닫힌 후 짧은 딜레이로 contain 복구
           setTimeout(function(){ el.style.contain = ''; }, 300);
         }
       }
@@ -1170,11 +1049,7 @@
     el.classList.add(dir==='right'?'oai-swipe-right':'oai-swipe-left');
     setTimeout(function(){try{el.classList.remove('oai-swipe-left','oai-swipe-right');}catch(e){ console.warn("[가톨릭길동무]", e); }},240);
   }
-  /* 가로 스와이프 보호는 각 기능의 실제 스와이프 리스너가 담당한다.
-     부모 뷰에서 touchmove를 가로채면 기도문/웹사이트 탭의 손가락 스크롤까지 막힐 수 있으므로
-     전역 preventDefault 가드는 사용하지 않는다. */
 
-  /* 웹사이트 좌우 스와이프 탭 이동 — 기도문과 동일 감도 */
   function bindWebSwipe(){
     var el=$('web-list');
     if(!el || el.__oaiFinalWebSwipe) return;
@@ -1189,8 +1064,6 @@
       if(!e.touches || !e.touches[0]) return;
       sx=e.touches[0].clientX; sy=e.touches[0].clientY;
     }, {passive:true});
-    /* 세로 스크롤을 막지 않기 위해 touchmove에서는 preventDefault를 하지 않는다.
-       좌우 탭 전환은 touchend에서만 거리와 비율을 판단한다. */
     el.addEventListener('touchend', function(e){
       if(!e.changedTouches || !e.changedTouches[0]) return;
       var dx=e.changedTouches[0].clientX-sx, dy=e.changedTouches[0].clientY-sy;
@@ -1203,13 +1076,11 @@
       var nextCat = tabs[next].dataset.webCat || tabs[next].id.replace('web-cat_','');
       if(typeof window.setWebCat==='function') window.setWebCat(nextCat);
       else tabs[next].click();
-      /* 기도문과 동일하게 overlay 방식 시각 피드백 사용 */
       if(typeof window.oaiSwipeAction==='function') window.oaiSwipeAction($('web-list'), dx<0?'left':'right');
       else flash($('web-list'), dx<0?'left':'right');
     }, {passive:true});
   }
 
-  /* 뒤로가기/경로삭제 뒤 노란 마커 복귀 보강 */
   function restoreYellowMarkerFromRoute(dest){
     if(!dest || !dest.lat) return;
     setTimeout(function(){
@@ -1247,7 +1118,6 @@
     try{ window.resetRoute = resetRoute; }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
 
-  /* 경로 시트 뒤로 닫힘도 경로삭제와 동일하게 노란 마커 복귀 */
   function watchRouteSheet(){
     var rs=$('sheet-route');
     if(!rs || rs.__oaiFinalRouteWatch) return;
@@ -1268,7 +1138,6 @@
   }
 
   function init(){
-    // 웹사이트는 세로 스크롤을 CSS flex 컨테이너로 보장하고, 탭 전환은 touchend에서만 처리한다.
     bindWebSwipe();
     wrapRouteReset();
     watchRouteSheet();
@@ -1277,12 +1146,9 @@
   window.addEventListener('load', init);
   window.addEventListener('pageshow', init);
 })();
-/* V13: 사용처가 없는 정밀 보정 잔여 블록(__APP_PRECISE_GUARD__) 제거.
-   경로 복귀 안정화는 위의 __APP_BACK_ROUTE_GUARD__에서 계속 담당한다. */
 (function(){
   'use strict';
   window.oaiSwipeAction = function(el, dir){
-    /* overlay div 방식: position:fixed로 화면 정중앙 고정, 항상 선명하게 */
     var ov=document.getElementById('oai-swipe-overlay');
     if(!ov){
       ov=document.createElement('div');
@@ -1377,8 +1243,6 @@
         cover.classList.remove('pulling','refreshing');
         cover.scrollTop=0;
       }
-      // 커버는 fixed 레이어이므로 window scroll을 강제로 움직이지 않는다.
-      // 짧은 새로고침 때 화면이 위/아래로 튀는 원인이 될 수 있다.
       hideIndicator(ind);
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   };
@@ -1387,8 +1251,6 @@
     var cover=$('cover'), ind=$('cv-pull-modern');
     if(!cover || cover.__oaiPullRefreshDisabledV1_74) return;
     cover.__oaiPullRefreshDisabledV1_74 = true;
-    /* 커버에서 손으로 당길 때 보이던 원형 새로고침 표시와 제스처를 끈다.
-       기존 하단 새로고침 버튼은 app.js의 전용 핸들러가 계속 담당한다. */
     hideIndicator(ind);
   }
 
@@ -1396,9 +1258,6 @@
     try{
       var ind=$('cv-pull-modern');
       hideIndicator(ind);
-      // 외부 사이트에서 돌아올 때 강제 window.scrollTo(0,0)를 실행하면
-      // 화면이 아래로 내려갔다가 돌아오는 흔들림이 생긴다.
-      // pull-to-refresh 표시만 정리하고 스크롤 위치는 브라우저 복원에 맡긴다.
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }, true);
 
@@ -1442,9 +1301,6 @@
   if(typeof oldGTC==='function'){
     window.goToCover=function(){
       var r=oldGTC.apply(this,arguments);
-      // goToCover가 호출되었다면 lastCover 상태와 무관하게 종료 대기값을 지운다.
-      // 팝업/기도문 흐름은 이미 커버 위에서 움직여 lastCover가 true인 경우가 있으므로
-      // '커버가 아니었다가 커버가 됨' 조건에만 의존하면 첫 뒤로가기에서 바로 종료될 수 있다.
       clearNativeExitToast();
       try{ if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       fixRetreatTabLabel();
@@ -1452,12 +1308,9 @@
       return r;
     };
   }
-  // startApp은 app.js에서 피정의집 탭 이름을 직접 설정하고,
-  // class 변화 감지에서도 fixRetreatTabLabel()을 실행하므로 별도 wrapper를 두지 않는다.
   function boot(){fixRetreatTabLabel();resetNativeExitToastOnCoverEntry();}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();
   window.addEventListener('load',function(){boot();setTimeout(boot,200);},{once:true});
-  // pageshow에서 종료 대기값을 지우지 않는다. 커버 진입/복귀 시에는 goToCover와 class 변화 감지에서만 초기화한다.
   try{new MutationObserver(function(){fixRetreatTabLabel();resetNativeExitToastOnCoverEntry();}).observe(document.documentElement,{attributes:true,attributeFilter:['class']});}catch(e){ console.warn("[가톨릭길동무]", e); }
 })();
 
@@ -1470,7 +1323,6 @@
   var PRESS_DELAY_MS = 85;
   var MOVE_CANCEL_PX = 7;
 
-  /* 스크롤/당겨서 새로고침 중 눌림 방지 적용 대상: 목록형 요소만 */
   var delayedSelectors = [
     '#cover .cover-card','#cover .cv-hotspot','#cover .cv-btn',
     '#prayer-list-view .pr-item','#prayer-list-view .prayer-item','#prayer-list-view .prayer-card','#prayer-list-view .prayer-list-item','#prayer-list-view .pr-list-item',

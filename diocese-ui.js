@@ -1,4 +1,3 @@
-/* V2-175: 구 단위 지역검색 alias 확장 및 중복 구 단독 검색 안내 */
 const MY_DIOCESE_STORAGE_KEY='oai_my_diocese_name';
 function getMyDioceseName(){
   try{return (localStorage.getItem(MY_DIOCESE_STORAGE_KEY)||'').trim();}
@@ -30,7 +29,6 @@ function buildListView(){
     wrap.appendChild(makeRow((DIOCESE_META[myName]&&DIOCESE_META[myName].region)||'', myName));
   }
   gws.forEach(function(g){
-    // ── 교구 카드 ──
     g.dioceses.forEach(function(dName){
       if(myName && dName === myName) return;
       const m=DIOCESE_META[dName];if(!m)return;
@@ -41,7 +39,6 @@ function buildListView(){
       const isMine=isMyDioceseName(dName);
       const card=document.createElement('div');card.className='lv-card'+(isMine?' my-diocese-card':'');
 
-      // top: 뱃지(대교구/교구) + 오른쪽 "천주교 XX교구"
       const top=document.createElement('div');top.className='lv-top';
       const bdg=document.createElement('span');bdg.className='lv-bdg';
       bdg.style.background=g.col;
@@ -50,7 +47,6 @@ function buildListView(){
       if(isMine) appendMyDioceseBadge(op);
       top.appendChild(bdg);top.appendChild(op);
 
-      // body: 아이콘 + (교구명 + 지역)
       const body=document.createElement('div');body.className='lv-body';
       const ico=document.createElement('div');ico.className='lv-ico';
       ico.textContent='⛪';
@@ -74,7 +70,6 @@ function buildListView(){
       }
       body.appendChild(ico);body.appendChild(info);
 
-      // foot: URL
       const foot=document.createElement('div');foot.className='lv-foot';
       const url=document.createElement('span');url.className='lv-url';
       url.textContent=m.url?m.url.replace(/^https?:\/\//,'').replace(/\/$/,''):'홈페이지 없음';
@@ -97,8 +92,6 @@ function buildListView(){
         card.dataset.dioUrl = m.url;
         card.dataset.dioSource = 'list';
         card.dataset.dioKey = dName;
-        /* 관구교구 목록 홈페이지 이동은 아래 전역 [data-dio-url] 캡처 핸들러 한 곳에서만 처리한다.
-           개별 카드 click 핸들러까지 함께 두면 외부 이동 직전/복귀 직후 중복 실행되어 화면이 흔들릴 수 있다. */
       }
       wrap.appendChild(card);
     });
@@ -143,8 +136,6 @@ document.querySelectorAll('.tab').forEach(function(t){
       }
     }
     if(tab!=='list'){
-      // 사용자가 목록 탭을 떠날 때만 저장한다. 목록 탭으로 돌아올 때 자동 복원하면
-      // 외부 홈페이지 복귀 직후 브라우저가 보존한 위치를 한 번 더 밀어 흔들림이 생긴다.
       try{ sessionStorage.setItem('listScroll',document.getElementById('list-view').scrollTop); }catch(e){}
     }
     document.getElementById('gw-bar').style.display=tab==='gwangu'?'flex':'none';
@@ -185,7 +176,6 @@ window.addEventListener('mousemove',e=>{
   vx-=(e.clientX-px)*sx;vy-=(e.clientY-py)*sy;px=e.clientX;py=e.clientY;setVB();
 });
 window.addEventListener('mouseup',()=>{dragging=false;});
-// 카카오내비 스타일 휠 줌 (마우스 위치 기준, 부드럽게)
 let _zoomTarget=null, _zoomRAF=null;
 function _applyZoom(nw,nh,mx,my,rx,ry){
   vw=Math.max(80,Math.min(1800,nw));
@@ -199,7 +189,6 @@ svg.addEventListener('wheel',e=>{
   const rx=(e.clientX-rect.left)/rect.width;
   const ry=(e.clientY-rect.top)/rect.height;
   const mx=rx*vw+vx, my=ry*vh+vy;
-  // deltaY 누적해서 부드럽게
   const delta=e.deltaY<0?-1:1; // -1=확대, 1=축소
   const f=delta<0?0.82:1.22;   // 카카오내비 수준 배율
   const nw=vw*f, nh=vh*f;
@@ -248,12 +237,10 @@ svg.addEventListener('touchstart',e=>{
     t1=null;
   }
   if(e.touches.length===2){
-    // 두 손가락 중심점 + 거리 저장
     const cx=(e.touches[0].clientX+e.touches[1].clientX)/2;
     const cy=(e.touches[0].clientY+e.touches[1].clientY)/2;
     const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
     const rect=svg.getBoundingClientRect();
-    // 현재 중심점의 SVG 좌표
     const rx=(cx-rect.left)/rect.width;
     const ry=(cy-rect.top)/rect.height;
     t1={d,vw,vh,vx,vy,cx,cy,rx,ry,mx:rx*vw+vx,my:ry*vh+vy};
@@ -284,7 +271,6 @@ svg.addEventListener('touchmove',e=>{
     const f=t1.d/d; // d 작아지면 f>1 → 축소
     const nw=Math.max(80,Math.min(1800,t1.vw*f));
     const nh=Math.max(100,Math.min(2250,t1.vh*f));
-    // 중심점 SVG 좌표가 같은 화면 위치에 오도록 vx/vy 보정
     vx=t1.mx-t1.rx*nw;
     vy=t1.my-t1.ry*nh;
     vw=nw; vh=nh;
@@ -382,7 +368,6 @@ function filterGw(btn){
         t.setAttribute('stroke','rgba(255,255,255,0.3)');
       }
     });
-    // 위치 이동 없이 색상 강조만
   }
 
   hideCard();
@@ -496,7 +481,6 @@ document.getElementById('map-svg').addEventListener('click',e=>{
 });
 document.addEventListener('pointerdown',closeCardIfOutside,true);
 document.addEventListener('touchstart',closeCardIfOutside,{capture:true,passive:true});
-/* diocese card click handled inside iframe */
 
 
 function makeRow(disp,diocese,overlapDongs){
@@ -508,30 +492,25 @@ function makeRow(disp,diocese,overlapDongs){
   const gwCol={'서울관구':'#2563EB','대구관구':'#B7791F','광주관구':'#7C3AED','군종교구':'#64748B'}[gwKey]||'#888';
   const isMine=isMyDioceseName(diocese);
   const card=document.createElement('div');card.className='lv-card'+(isMine?' my-diocese-card':'');
-  // top
   const top=document.createElement('div');top.className='lv-top';
   const bdg=document.createElement('span');bdg.className='lv-bdg';
   bdg.style.background=gwCol;bdg.textContent=gwKey;
   const op=document.createElement('span');op.className='lv-op';
   if(isMine) appendMyDioceseBadge(op);
   top.appendChild(bdg);top.appendChild(op);
-  // body
   const body=document.createElement('div');body.className='lv-body';
   const ico=document.createElement('div');ico.className='lv-ico';
   ico.textContent='⛪';
   const info=document.createElement('div');info.className='lv-info';
   const nm=document.createElement('div');nm.className='lv-name';
-  // 지역검색 결과 카드에서는 본당 수를 표시하지 않고 교구명만 간결하게 보여준다.
   nm.textContent=diocese;
   const rg=document.createElement('div');rg.className='lv-rg';rg.innerHTML='📍 '+(disp||m.region);
   info.appendChild(nm);info.appendChild(rg);
-  // 세부지역: 중복지역일 때만 표시
   if(overlapDongs&&overlapDongs.length){
     const dt=document.createElement('div');dt.className='lv-det';
     dt.textContent='◾ '+overlapDongs.join(' · ');info.appendChild(dt);
   }
   body.appendChild(ico);body.appendChild(info);
-  // foot
   const foot=document.createElement('div');foot.className='lv-foot';
   const urlEl=document.createElement('span');urlEl.className='lv-url';
   urlEl.textContent=url?url.replace(/^https?:\/\//,'').replace(/\/$/,''):'홈페이지 없음';
@@ -553,7 +532,6 @@ function makeRow(disp,diocese,overlapDongs){
     card.dataset.dioUrl = url;
     card.dataset.dioSource = 'list';
     card.dataset.dioKey = diocese;
-    /* 목록 홈페이지 이동은 아래 전역 [data-dio-url] 핸들러 한 곳에서만 처리한다. */
   }
   return card;
 }
@@ -653,10 +631,7 @@ document.addEventListener('click',function(e){
 },true);
 
 window.addEventListener('pageshow',function(){
-  // 부모 앱 안에서 외부 교구 홈페이지를 다녀온 경우에는 브라우저가 보존한 목록 위치를 그대로 둔다.
-  // 여기서 sessionStorage의 예전 listScroll을 다시 적용하면 원래 보던 위치가 틀어진다.
 });
-/* ── 스와이프 탭 전환: 목록에서 관구별 지도로 복귀 가능, 지도 화면 자체에는 스와이프 없음 ── */
 (function(){
   var SWIPE_TABS=['gwangu','list','search'];
   var sx=0,sy=0,sMoving=false,sLocked=false;
