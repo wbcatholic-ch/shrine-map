@@ -7905,7 +7905,7 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
   --oai-modal-brown-head:rgba(31,42,68,.96);
   --oai-modal-brown-head-text:#FFFDF7;
   --oai-modal-brown-sub:rgba(255,255,255,.82);
-  --oai-modal-brown-panel:linear-gradient(135deg, rgba(250,241,224,.97) 0%, rgba(255,252,245,.94) 48%, rgba(232,210,176,.94) 100%);
+  --oai-modal-brown-panel:linear-gradient(135deg, rgba(226,202,163,.97) 0%, rgba(255,252,245,.96) 50%, rgba(222,195,150,.97) 100%);
   --oai-modal-brown-box:rgba(255,255,255,.96);
   --oai-modal-brown-box-press:rgba(255,255,255,.90);
   --oai-modal-brown-line:rgba(255,255,255,.72);
