@@ -8931,3 +8931,40 @@ html.diocese-doc .si-r:last-child {
     font-size: 11px !important;
   }
 }
+
+
+/* V6-20 WebView waypoint route UI */
+#sheet-route.route-waypoint-scroll #rs-top{ max-height: 252px; overflow-y:auto; overscroll-behavior:contain; padding-bottom:4px; }
+#sheet-route.route-result-showing #rs-top{ max-height: 220px; overflow-y:auto; }
+.rs-route-stack { display:grid; grid-template-columns:minmax(0,1fr) 52px; grid-template-rows:46px 6px 46px; align-items:stretch; column-gap:8px; row-gap:0; }
+.rs-route-stack.has-waypoint { grid-template-rows:46px 6px 46px 6px 46px; }
+.rs-route-stack.has-waypoint2 { grid-template-rows:46px 6px 46px 6px 46px 6px 46px; }
+.rs-route-stack.has-waypoint3 { grid-template-rows:46px 6px 46px 6px 46px 6px 46px 6px 46px; }
+.rs-start-box, .rs-waypoint-box, .rs-waypoints-summary-box, .rs-end-box { min-width:0; min-height:46px; display:flex; align-items:center; gap:8px; border:1.4px solid var(--border); border-radius:14px; background:#fff; padding:0 10px; box-sizing:border-box; }
+.rs-start-box{ grid-column:1; grid-row:1; }
+.rs-end-box{ grid-column:1; grid-row:3; }
+.rs-waypoint-box{ grid-column:1; grid-row:3; background:#fff8e9; border-color:#f39c12; }
+.rs-waypoint2-box{ grid-column:1; grid-row:5; background:#fff4df; border-color:#d97706; }
+.rs-waypoint3-box{ grid-column:1; grid-row:7; background:#fff1dc; border-color:#b45309; }
+.rs-waypoints-summary-box{ grid-column:1; grid-row:3; background:#fff7ea; border-color:#d97706; cursor:default; }
+.rs-waypoints-summary-dot{ background:#d97706; }
+.rs-route-stack.has-waypoint-summary{ grid-template-rows:46px 6px 46px 6px 46px; }
+.rs-route-stack.has-waypoint-summary .rs-end-box{ grid-row:5!important; }
+.rs-route-stack.has-waypoint-summary #rs-start-waypoint-tools, .rs-route-stack.has-waypoint-summary .rs-waypoint-end-tools, .rs-route-stack.has-waypoint-summary .rs-waypoint2-end-tools, .rs-route-stack.has-waypoint-summary .rs-waypoint3-end-tools{ display:none!important; }
+.rs-route-stack.has-waypoint .rs-end-box{ grid-row:5; }
+.rs-route-stack.has-waypoint2 .rs-end-box{ grid-row:7; }
+.rs-route-stack.has-waypoint3 .rs-end-box{ grid-row:9; }
+.rs-between-tools{ grid-column:2; position:relative; display:block; align-self:stretch; }
+#rs-start-waypoint-tools{ grid-row:1 / 4; }
+.rs-route-stack.has-waypoint #rs-start-waypoint-tools{ grid-row:1 / 4; }
+.rs-waypoint-end-tools{ grid-column:2; grid-row:3 / 6; align-self:stretch; }
+.rs-waypoint2-end-tools{ grid-column:2; grid-row:5 / 8; align-self:stretch; }
+.rs-waypoint3-end-tools{ grid-column:2; grid-row:7 / 10; align-self:stretch; }
+.rs-swap-btn{ position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); width:36px; height:36px; border-radius:50%; border:1.5px solid #8b6b36; background:#fffdf7; color:#5f4520; font-size:0; line-height:1; cursor:pointer; display:flex; align-items:center; justify-content:center; box-shadow:0 2px 7px rgba(77,53,18,.16); z-index:2; padding:0; }
+.rs-swap-btn::before{ content:'⇅'; display:block; font-size:18px; line-height:1; font-weight:900; transform:translateY(-.5px); }
+.rs-swap-btn:active{ opacity:.82; transform:translate(-50%,-50%) translateY(1px); }
+.rs-add-waypoint-btn{ position:absolute; left:50%; bottom:2px; transform:translateX(-50%); min-width:48px; height:25px; padding:0 8px; border-radius:999px; border:1.5px solid #8b5e13; background:linear-gradient(180deg,#fff3a6 0%,#ffd34d 100%); color:#4b3200; font-size:11px; font-weight:900; white-space:nowrap; box-shadow:0 2px 6px rgba(139,94,19,.22); display:inline-flex; align-items:center; justify-content:center; z-index:3; }
+.rs-add-waypoint-btn:active{ opacity:.78; transform:translateX(-50%) translateY(1px); }
+.rs-lbl{ flex:1; min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+.rs-x{ border:0; background:#f1f1f1; color:#555; border-radius:50%; width:24px; height:24px; display:inline-flex; align-items:center; justify-content:center; font-size:17px; line-height:1; padding:0; cursor:pointer; touch-action:manipulation; pointer-events:auto; }
+.route-sheet-x{ z-index:9999!important; pointer-events:auto!important; touch-action:manipulation; }
