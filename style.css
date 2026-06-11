@@ -9004,3 +9004,49 @@ html.diocese-doc .si-r:last-child {
   #sheet-route.route-waypoint-scroll #rs-top{ max-height:min(168px, 25vh)!important; }
   #sheet-route.route-waypoint-scroll #rs-search-btn{ min-height:42px!important; padding-top:10px!important; padding-bottom:10px!important; }
 }
+
+
+/* V6-22 WebView waypoint marker + bottom-cover final fix */
+#sheet-route.route-waypoint-scroll{
+  max-height:46vh!important;
+  overflow:hidden!important;
+  display:flex!important;
+  flex-direction:column!important;
+}
+#sheet-route.route-waypoint-scroll #rs-top{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow:hidden!important;
+  display:flex!important;
+  flex-direction:column!important;
+  padding-bottom:8px!important;
+}
+#sheet-route.route-waypoint-scroll #rs-top .rs-route-stack{
+  flex:1 1 auto!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+  -webkit-overflow-scrolling:touch!important;
+  overscroll-behavior:contain!important;
+  padding-bottom:6px!important;
+}
+#sheet-route.route-waypoint-scroll #rs-search-btn{
+  flex:0 0 auto!important;
+  width:100%!important;
+  margin-top:8px!important;
+  margin-bottom:0!important;
+  min-height:48px!important;
+  display:flex;
+}
+#sheet-route.route-waypoint-scroll #rs-bottom{
+  flex:0 0 auto!important;
+  padding:0 14px calc(8px + env(safe-area-inset-bottom, 0px))!important;
+  background:var(--ui-bg)!important;
+}
+#sheet-route.route-waypoint-scroll #rs-hint{
+  display:none!important;
+}
+@media (max-height:740px){
+  #sheet-route.route-waypoint-scroll{ max-height:44vh!important; }
+  #sheet-route.route-waypoint-scroll #rs-search-btn{ min-height:44px!important; }
+}
