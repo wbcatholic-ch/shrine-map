@@ -1378,7 +1378,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=WebView-Clean-24';
+    frame.src='diocese.html?v=WebView-Clean-25';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1724,7 +1724,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='WebView-Clean-24';
+const _PARISH_ASSET_VERSION='WebView-Clean-25';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -1887,7 +1887,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='WebView-Clean-24';
+const _PRAYER_ASSET_VERSION='WebView-Clean-25';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2232,7 +2232,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='WebView-Clean-24';
+const _SHRINE_ASSET_VERSION='WebView-Clean-25';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -3933,7 +3933,7 @@ function _syncRouteWaypointBoxes(){
   if(wx1) wx1.style.display=(!summaryVisible && w1Visible)?'inline-flex':'none'; if(wx2) wx2.style.display=(!summaryVisible && w2Visible)?'inline-flex':'none'; if(wx3) wx3.style.display=(!summaryVisible && w3Visible)?'inline-flex':'none';
 }
 function _ensureRouteWaypointBox(role){ role=role||_nextAvailableWaypointRole()||'waypoint'; _setRouteWaypointEnabledByRole(role,true); _setRouteLabel(role,_routePointName(_getRoutePointByRole(role))); _refreshRouteTmpMarkers(); if(!_getRoutePointByRole(role)) _showRouteGuideText('지도에서 경유지'+_routeWaypointIndex(role)+' 마커를 선택하거나 경유지 박스를 눌러 검색하세요'); }
-function _beginWaypointAddMode(role){ role=role||_nextAvailableWaypointRole(); if(!role){ _showRouteGuideText('경유지는 현재 3곳까지 추가할 수 있습니다.'); return; } _ensureRouteWaypointBox(role); if(_polyline) _clearVisibleRouteResultOnly(); else _restoreMarkersWhenRouteNotDisplayed(); _refreshRouteTmpMarkers(); _showRouteGuideText('지도에서 경유지'+_routeWaypointIndex(role)+'를 선택하거나 경유지 박스를 눌러 검색하세요'); }
+function _beginWaypointAddMode(role){ role=role||_nextAvailableWaypointRole(); if(!role){ _showRouteGuideText('경유지는 현재 3곳까지 추가할 수 있습니다.'); return; } _ensureRouteWaypointBox(role); if(_polyline) _clearVisibleRouteResultOnly(); _scheduleRouteSelectionMarkerRestore(); _refreshRouteTmpMarkers(); _showRouteGuideText('지도에서 경유지'+_routeWaypointIndex(role)+'를 선택하거나 경유지 박스를 눌러 검색하세요'); }
 function _syncRouteWaypointBox(){ _routeWaypointEnabled=!!(_routeWaypointEnabled || (_rW&&_rW.lat&&_rW.lng)); _routeWaypoint2Enabled=!!(_routeWaypoint2Enabled || (_rW2&&_rW2.lat&&_rW2.lng)); _routeWaypoint3Enabled=!!(_routeWaypoint3Enabled || (_rW3&&_rW3.lat&&_rW3.lng)); _syncRouteWaypointBoxes(); }
 function _routePointMatchesItem(point,item,idx){ if(!point||!item) return false; if(typeof point.idx==='number' && point.idx>=0 && point.idx===idx) return true; return Number(point.lat)===Number(item.lat) && Number(point.lng)===Number(item.lng) && String(point.name||'')===String(item.name||''); }
 function _restoreRoutePointMarker(point){
@@ -4270,6 +4270,40 @@ function _restoreAllCategoryMarkersForSelection(){
     });
     if(_paSelMkr){try{_paSelMkr.setMap(null);}catch(e){ console.warn("[가톨릭길동무]", e); } _paSelMkr=null;}
   }
+}
+
+
+function _restoreRouteSelectionMarkersAfterReset(){
+  try{
+    if(!_map) return;
+    if(_mode==='parish'){
+      try{ _clearRegionResultMarkers && _clearRegionResultMarkers(); }catch(_e){}
+      _restoreMapMarkers();
+    }else if(_mode==='shrine'){
+      if(!_markers || !_markers.some(function(m){ return !!(m&&m.marker); })){
+        try{ _buildShrineMarkers(); }catch(_e){}
+      }
+      _restoreAllCategoryMarkersForSelection();
+    }else if(_mode==='retreat'){
+      if(!_retreatMarkers || !_retreatMarkers.length){
+        try{ _buildRetreatMarkers(); }catch(_e){}
+      }
+      _restoreAllCategoryMarkersForSelection();
+    }else{
+      _restoreMapMarkers();
+    }
+    if(_routeRegionStart && _routeRegionStart.lat && _routeRegionStart.lng){
+      try{ _showRegionPlaceMarker(_routeRegionStart.lat,_routeRegionStart.lng,_routeRegionStart.placeName || _routeRegionStart.name || _regionPlaceName || _regionName || '검색지'); }catch(_e){}
+    }else if(_regionLat && _regionLng && _regionMarker){
+      try{ _showRegionPlaceMarker(_regionLat,_regionLng,_regionPlaceName||_regionName||'검색지'); }catch(_e){}
+    }
+    try{ _reapplyShrineRouteMarkerImages(); }catch(_e){}
+    try{ _refreshRouteTmpMarkers(); }catch(_e){}
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+}
+function _scheduleRouteSelectionMarkerRestore(){
+  try{ _restoreRouteSelectionMarkersAfterReset(); }catch(e){ console.warn('[가톨릭길동무]', e); }
+  [80,240,520].forEach(function(ms){ setTimeout(function(){ try{ _restoreRouteSelectionMarkersAfterReset(); }catch(e){ console.warn('[가톨릭길동무]', e); } }, ms); });
 }
 
 
@@ -5908,6 +5942,7 @@ function _clearVisibleRouteResultOnly(){
     if(note){ note.textContent=''; note.style.display='none'; }
     if(_polyline){ _polyline.setMap(null); _polyline=null; }
     _showJukrimgulParkingMkr(false);
+    _scheduleRouteSelectionMarkerRestore();
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 
