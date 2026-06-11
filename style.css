@@ -9200,3 +9200,130 @@ html.ios-device #sheet-route .route-sheet-x{
 #sheet-route .route-sheet-x:active{
   transform:scale(.96)!important;
 }
+
+/* V6-26 WebView: route sheet layer cleanup + right-aligned route tools */
+#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-bottom{
+  display:none!important;
+  height:0!important;
+  min-height:0!important;
+  padding:0!important;
+  margin:0!important;
+  border:0!important;
+  overflow:hidden!important;
+  background:transparent!important;
+}
+#sheet-route.route-waypoint-scroll:not(.route-result-showing){
+  max-height:50vh!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  display:block!important;
+  -webkit-overflow-scrolling:touch!important;
+  background:var(--ui-bg)!important;
+}
+#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-top{
+  max-height:none!important;
+  min-height:0!important;
+  overflow:visible!important;
+  display:block!important;
+  padding:12px 38px 12px 14px!important;
+}
+#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-top .rs-route-stack{
+  max-height:none!important;
+  min-height:0!important;
+  overflow:visible!important;
+  display:grid!important;
+  padding-bottom:0!important;
+}
+#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-search-btn{
+  margin-top:12px!important;
+  margin-bottom:0!important;
+  min-height:52px!important;
+  border-radius:14px!important;
+  flex:0 0 auto!important;
+  display:flex!important;
+}
+#sheet-route .rs-route-stack{
+  grid-template-columns:minmax(0,1fr) 64px!important;
+  column-gap:8px!important;
+}
+#sheet-route .rs-between-tools{
+  grid-column:2!important;
+  position:relative!important;
+  overflow:visible!important;
+  z-index:8!important;
+  pointer-events:none!important;
+}
+#sheet-route .rs-swap-btn{
+  left:auto!important;
+  right:0!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+  width:38px!important;
+  height:38px!important;
+  min-width:38px!important;
+  min-height:38px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:0!important;
+  line-height:1!important;
+  font-size:0!important;
+  border-radius:50%!important;
+  z-index:9!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+}
+#sheet-route .rs-swap-btn::before{
+  content:'⇅'!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:100%!important;
+  height:100%!important;
+  font-size:20px!important;
+  line-height:1!important;
+  font-weight:900!important;
+  text-align:center!important;
+  transform:none!important;
+}
+#sheet-route .rs-swap-btn:active{
+  transform:translateY(calc(-50% + 1px))!important;
+}
+#sheet-route .rs-add-waypoint-btn{
+  left:auto!important;
+  right:0!important;
+  bottom:0!important;
+  transform:none!important;
+  min-width:60px!important;
+  height:28px!important;
+  padding:0 10px!important;
+  z-index:10!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+}
+#sheet-route .rs-add-waypoint-btn:active{
+  transform:translateY(1px)!important;
+}
+#sheet-route .route-sheet-x,
+html:not(.kb-open):not(.ios-device) #sheet-route .route-sheet-x,
+html.ios-device #sheet-route .route-sheet-x{
+  top:11px!important;
+  right:14px!important;
+  width:30px!important;
+  height:30px!important;
+  min-width:30px!important;
+  min-height:30px!important;
+  z-index:10090!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+}
+@media (max-height:740px){
+  #sheet-route.route-waypoint-scroll:not(.route-result-showing){ max-height:52vh!important; }
+  #sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-search-btn{ min-height:48px!important; }
+}
+@media (max-width:370px){
+  #sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-top{ padding-right:34px!important; }
+  #sheet-route .rs-route-stack{ grid-template-columns:minmax(0,1fr) 58px!important; }
+  #sheet-route .rs-swap-btn{ width:36px!important; height:36px!important; min-width:36px!important; min-height:36px!important; }
+  #sheet-route .rs-add-waypoint-btn{ min-width:56px!important; height:27px!important; padding:0 8px!important; }
+}
