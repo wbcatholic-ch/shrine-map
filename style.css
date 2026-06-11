@@ -7901,7 +7901,7 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
 }
 
 :root{
-  --oai-modal-brown-head:linear-gradient(135deg, rgba(31,42,68,.96) 0%, rgba(45,58,95,.92) 58%, rgba(81,98,145,.88) 100%);
+  --oai-modal-brown-head:rgba(31,42,68,.96);
   --oai-modal-brown-head-text:#FFFDF7;
   --oai-modal-brown-sub:rgba(255,255,255,.82);
   --oai-modal-brown-panel:linear-gradient(145deg, rgba(250,242,226,.97) 0%, rgba(238,220,188,.94) 54%, rgba(214,181,128,.90) 100%);
