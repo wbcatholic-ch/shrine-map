@@ -700,7 +700,7 @@
     }
 
     if(isGuideModalOpen()){
-      closeGuideModals();  /* 내부에서 _resetCoverExitReady() 호출 */
+      closeGuideModals();
       try{ if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady(); }catch(e){ console.warn('[가톨릭길동무]', e); }
       try{ if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed(); }catch(e){ console.warn('[가톨릭길동무]', e); }
       try{ if(typeof window._ensureCoverBackTrap === 'function') window._ensureCoverBackTrap('guide-modal'); else armCoverBackTrap('guide-modal'); }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -791,7 +791,7 @@
   window.addEventListener('pageshow', function(){
     try{
       var st = history.state;
-      if(st && st._p === 1) return;  // 트랩 유지 중이면 스킵
+      if(st && st._p === 1) return;
       if(!appActive()) armCoverBackTrap('pageshow-cover');
       else { history.replaceState({_p:0}, '', _href); history.pushState({_p:1}, '', _href); }
     }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -923,7 +923,7 @@
 (function(){
   if(window.__APP_FONT_SCALE_GUARD__) return;
   window.__APP_FONT_SCALE_GUARD__=true;
-  var QA_URL="qa-firebase.html?v=V2-116";
+  var QA_URL="qa-firebase.html?v=WebView-Clean-9";
   var FONT_KEY='prayer_font_size';
   var BASE=16;
   var FONT_SIZES=[13,14,15,16,17,18,19,20,21,22,24,26,28,30];
@@ -1159,7 +1159,7 @@
     ov.style.left  = dir==='left' ? 'auto' : '20px';
     ov.style.right = dir==='left' ? '20px' : 'auto';
     ov.classList.remove('active');
-    void ov.offsetWidth; /* reflow for animation restart */
+    void ov.offsetWidth;
     ov.classList.add('active');
     clearTimeout(ov._t);
     ov._t=setTimeout(function(){ try{ov.classList.remove('active');}catch(e){ console.warn("[가톨릭길동무]", e); } }, 420);

@@ -492,7 +492,7 @@
       btn.className = 'web-cat-btn' + (c===webState.curCat ? ' on' : '');
       btn.id = 'web-cat_' + c;
       btn.dataset.webCat = c;
-      btn.dataset.catColor = c; // CSS 선택자용
+      btn.dataset.catColor = c;
       btn.setAttribute('aria-pressed', c===webState.curCat ? 'true' : 'false');
       const count = c==='⭐ 즐겨찾기' ? WEB_SITES.filter(s => wfHas(s.url)).length : WEB_SITES.filter(s => s.cat===c).length;
       btn.innerHTML = esc(webCatLabel(c)) + (c==='⭐ 즐겨찾기' ? '' : '<span class="cnt">' + count + '</span>');

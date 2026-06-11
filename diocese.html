@@ -17,8 +17,8 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>교구지도</title>
-<link rel="stylesheet" href="style.css?v=WebView-Clean-2">
-<script id="oai-diocese-parent-style-sync-WebView-Clean-2">
+<link rel="stylesheet" href="style.css?v=WebView-Clean-9">
+<script id="oai-diocese-parent-style-sync-WebView-Clean-9">
 (function(){
   function clean(v){ return String(v || '').trim(); }
   function parentVar(cs, names, fallback){
@@ -50,7 +50,7 @@
       root.style.setProperty('--dio-gold', parentVar(cs, ['--oai-gold-border','--gold2','--gold'], '#C9A96A'));
       root.style.setProperty('--diocese-font-scale', parentVar(cs, ['--app-font-scale'], '1'));
       document.documentElement.classList.add('oai-diocese-main-style-synced');
-    }catch(e){ /* same-origin이 아닐 때는 diocese.html 내부 기본값을 사용한다. */ }
+    }catch(e){}
   }
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', syncDioceseStyleFromParent);
   else syncDioceseStyleFromParent();
@@ -171,10 +171,10 @@
   </div>
 </div>
 
-<script src="diocese-meta.js?v=WebView-Clean-2"></script>
-<script src="diocese-search.js?v=WebView-Clean-2"></script>
-<script src="diocese-data.js?v=WebView-Clean-2"></script>
-<script src="diocese-ui.js?v=WebView-Clean-2"></script>
+<script src="diocese-meta.js?v=WebView-Clean-9"></script>
+<script src="diocese-search.js?v=WebView-Clean-9"></script>
+<script src="diocese-data.js?v=WebView-Clean-9"></script>
+<script src="diocese-ui.js?v=WebView-Clean-9"></script>
 
 <script id="oai-diocese-return-state-20260501">
 (function(){
@@ -206,9 +206,6 @@
   };
 
   window.isDioceseReturnPreserved = function(state){
-    // 부모 app.js가 "iframe이 진짜 살아 있는지" 확인할 때 호출한다.
-    // contentWindow 존재만으로 판단하면, WebView가 iframe을 새로 초기화한 경우에도 복원을 건너뛰어
-    // 목록 위치가 원래대로 돌아오지 않는 문제가 생긴다.
     state = state || {};
     try{
       var tab = state.tab || 'gwangu';
@@ -261,9 +258,6 @@
 
   window.restoreDioceseReturnState = function(state){
     state=state||{};
-    // 부모 앱에서 외부 교구 홈페이지로 나갔다가 돌아온 경우에는
-    // 탭 click 이벤트를 다시 실행하지 않는다. click 이벤트는 지도 초기화, 카드 닫기,
-    // 목록 스크롤 재적용을 동반해 복귀 순간에 흔들림처럼 보일 수 있다.
     try{ window.__OAI_DIO_PARENT_RETURNING__ = true; window.__OAI_DIO_EXTERNAL_LEAVING__ = false; }catch(e){}
     try{ document.documentElement.classList.remove('oai-dio-external-stabilize','oai-dio-external-return'); document.documentElement.classList.add('oai-dio-returning'); }catch(e){}
     var tab=state.tab||'gwangu';
@@ -285,8 +279,6 @@
       try{
         var lv=document.getElementById('list-view');
         if(lv && state.tab==='list'){
-          // 외부 홈페이지로 나가기 직전의 정확한 scrollTop만 복원한다.
-          // 이전처럼 클릭한 교구 카드를 화면 위로 맞추면, 사용자가 보던 원래 위치보다 카드가 위로 튀어 올라간다.
           var saved=Number(state.listScroll||0);
           if(!isNaN(saved)){
             var oldBehavior=lv.style.scrollBehavior;
@@ -316,7 +308,6 @@
     try{
       sessionStorage.setItem('oai_diocese_external_pending','1');
       sessionStorage.setItem('oai_diocese_external_ts', String(Date.now ? Date.now() : new Date().getTime()));
-      /* 부모 앱 안에서는 진입 순간 안정막을 쓰지 않는다. */
     }catch(e){}
   }
   function clearDioceseStandaloneExternal(){
@@ -340,8 +331,6 @@
   function inParentApp(){ try{ return !!(window.parent && window.parent!==window); }catch(e){ return false; } }
   window.addEventListener('pageshow', function(){
     try{
-      // 부모 앱 안에서는 pageshow/focus/visibility 복원 타이머를 쓰지 않는다.
-      // 웹사이트/순례길처럼 기존 iframe 화면을 그대로 두어야 흔들림이 사라진다.
       if(inParentApp()){
         document.documentElement.classList.remove('oai-dio-external-stabilize','oai-dio-external-return','oai-dio-returning');
         return;
@@ -372,8 +361,6 @@
     var state=window.getDioceseReturnState(source||'link', extra || {});
     try{ sessionStorage.setItem('oai_diocese_last_return_state', JSON.stringify(state)); localStorage.setItem('oai_diocese_last_return_state', JSON.stringify(state)); }catch(e){}
     if(window.parent && window.parent!==window){
-      // V3-S: iframe 내부 클릭은 부모의 지연 이동에 맡기지 않고, 클릭 흐름 안에서 top을 즉시 이동한다.
-      // 이렇게 해야 웹페이지 카테고리처럼 Android/PWA에서도 외부 교구 홈페이지가 바로 열린다.
       try{
         if(typeof window.parent.prepareExternalUrl === 'function') url = window.parent.prepareExternalUrl(url) || url;
       }catch(e){}

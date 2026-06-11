@@ -23,7 +23,7 @@ var OAI_EXTERNAL_LEAVE_HARD_MS = 6500;
 var OAI_EXTERNAL_RETURN_MIN_MS = 1500;
 var OAI_EXTERNAL_RETURN_MAX_MS = 4500;
 var OAI_EXTERNAL_RETURN_STABLE_TICKS = 4;
-var OAI_REFRESH_VEIL_MS = 1000; // refresh veil must remain visible for at least 1s
+var OAI_REFRESH_VEIL_MS = 1000;
 var OAI_REFRESH_CARRY_MS = 3000;
 var OAI_REFRESH_PROGRESS_HOLD_MS = 10000;
 var OAI_REFRESH_PRE_NAV_HOLD_MS = 2500;
@@ -1378,7 +1378,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=WebView-Clean-2';
+    frame.src='diocese.html?v=WebView-Clean-9';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1724,7 +1724,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='WebView-Clean-2';
+const _PARISH_ASSET_VERSION='WebView-Clean-9';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -1887,7 +1887,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='WebView-Clean-2';
+const _PRAYER_ASSET_VERSION='WebView-Clean-9';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2232,7 +2232,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='WebView-Clean-2';
+const _SHRINE_ASSET_VERSION='WebView-Clean-9';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -2301,70 +2301,70 @@ function _ensureShrineDataLoaded(){
 try{ window._setShrineRawData = _setShrineRawData; }catch(e){ console.warn('[가톨릭길동무]', e); }
 _initShrineDataFromGlobal();
 const AppState = {
-  map:              null,   // Kakao 지도 인스턴스
-  markers:          [],     // 성지/성당 마커 배열
-  retreatMarkers:   [],     // 피정의 집 마커 배열
-  myMkr:            null,   // 내 위치 마커
-  myLat:            null,   // 내 위치 위도
-  myLng:            null,   // 내 위치 경도
-  jukrimgulParkMkr: null,   // 죽림굴 주차장 마커
-  startTmpMkr:      null,   // 출발지 임시 마커
-  endTmpMkr:        null,   // 도착지 임시 마커
-  paSelMkr:         null,   // parish/retreat 선택 마커
-  selIdx:           -1,     // 현재 선택된 shrine 마커 인덱스
-  polyline:         null,   // 경로 폴리라인
+  map:              null,
+  markers:          [],
+  retreatMarkers:   [],
+  myMkr:            null,
+  myLat:            null,
+  myLng:            null,
+  jukrimgulParkMkr: null,
+  startTmpMkr:      null,
+  endTmpMkr:        null,
+  paSelMkr:         null,
+  selIdx:           -1,
+  polyline:         null,
 
-  mode:       'shrine',  // 'shrine' | 'parish' | 'retreat'
-  screen:     'cover',   // 'cover' | 'map'
-  activeTab:  null,      // 현재 열린 탭 이름
+  mode:       'shrine',
+  screen:     'cover',
+  activeTab:  null,
 
-  filterDio:  'all',     // 교구 필터
-  listSrch:   '',        // 목록 검색어
+  filterDio:  'all',
+  listSrch:   '',
 
   regionLat:       null,
   regionLng:       null,
   regionName:      '',
   regionPlaceName: '',
-  regionCache:     [],   // 지역검색 결과 캐시
-  regionMarker:    null, // 지역검색 기준점 보라색 마커
+  regionCache:     [],
+  regionMarker:    null,
 
-  nearbyCache: [],       // 내주변 결과 캐시
-  nearbyParishMarkers: [], // 성당 첫 진입/내주변 10곳 전용 마커
-  nearbyRequestSeq: 0,   // 내주변 비동기 요청 식별자
-  nearbyRequestMode: null, // 내주변 요청 시작 시점의 카테고리
-  categoryEntryCenteredAt: 0, // 카테고리 진입 시 현재 위치 중심 적용 시각
+  nearbyCache: [],
+  nearbyParishMarkers: [],
+  nearbyRequestSeq: 0,
+  nearbyRequestMode: null,
+  categoryEntryCenteredAt: 0,
   categoryEntryCenteredMode: null,
   categoryEntryCenteredSource: '',
 
   routeMode:        false,
-  rS:               null,  // 출발지 {lat, lng, name, idx}
-  rE:               null,  // 도착지
-  routeRegionStart: null,  // 지역검색에서 길찾기 시작 시 출발지 보존
-  routeInfoRestoreBlockedUntil: 0, // 탭 전환 중 길찾기 도착 인포카드 복원 차단 시각
+  rS:               null,
+  rE:               null,
+  routeRegionStart: null,
+  routeInfoRestoreBlockedUntil: 0,
 
   smRole: 'start',
   smDio:  'all',
 
-  curInfoItem:   null,   // 현재 열린 인포카드 아이템
-  curFromRegion: false,  // 인포카드가 지역검색에서 열렸는지
+  curInfoItem:   null,
+  curFromRegion: false,
 
   kakaoLaunching: false,
   mapInited:      false,
-  dp:             null,  // PWA install prompt (BeforeInstallPromptEvent)
+  dp:             null,
 
   exitReady: false,
   exitTimer: null,
 
-  dioMkrs:            {},   // code → [Marker, ...]
-  dioOverlays:        {},   // code → CustomOverlay
-  activeDio:          null, // 현재 마커 펼쳐진 교구 코드
+  dioMkrs:            {},
+  dioOverlays:        {},
+  activeDio:          null,
   parishSysInited:    false,
-  parishIdleListener: null, // 뷰포트 필터링용 idle 이벤트 리스너
-  parishDioUserZoomTouched: false, // 사용자가 성당 교구 지도에서 직접 확대/축소했는지
-  parishDioProgrammaticMoveUntil: 0, // 앱이 조정한 줌 변경을 사용자 조작으로 오인하지 않기 위한 보호 시간
+  parishIdleListener: null,
+  parishDioUserZoomTouched: false,
+  parishDioProgrammaticMoveUntil: 0,
 
   smPlaceDebounce: null,
-  smTab: 'cat',  // 'cat' | 'place'
+  smTab: 'cat',
 };
 
 (function installStateProxy() {
@@ -2719,7 +2719,7 @@ function startApp(mode){
   try{ _cancelNearbyRequests(); }catch(e){ console.warn('[가톨릭길동무]', e); }
   _filterDio='all';
   _listSrch='';
-  window._noAutoNearby = false;  // 직접 진입 시 nearby 열기 허용
+  window._noAutoNearby = false;
   try{ _clearRegionMarker(); }catch(e){ console.warn('[가톨릭길동무]', e); }
   _regionLat=null; _regionLng=null; _regionCache=[];
   _regionName=''; _regionPlaceName='';
@@ -3004,9 +3004,9 @@ function openTab(name, opts){
     if(prevSheet && prevSheet.classList.contains('open')){
       prevSheet.classList.add(dir === 'right' ? 'exit-left' : 'exit-right');
       setTimeout(()=>{
-        prevSheet.style.transition = 'none'; // 아래로 내려가는 버그 방지
+        prevSheet.style.transition = 'none';
         prevSheet.classList.remove('open','exit-left','exit-right');
-        void prevSheet.offsetHeight; // reflow
+        void prevSheet.offsetHeight;
         prevSheet.style.transition = '';
       }, 280);
     } else {
@@ -3563,7 +3563,7 @@ function _showInfoCard(item, idx){
   const distCol=$('ic-dist-col');
   const distEl=$('ic-dist');
   distCol.classList.remove('ready');
-  distEl.textContent='—';           // 미리 공간 확보(레이아웃 고정)
+  distEl.textContent='—';
   if(_myLat && item.lat){
   const _snap=item;
   (async()=>{
@@ -3614,7 +3614,7 @@ function _showInfoCard(item, idx){
 
 function closeInfoCard(opts){
   opts = opts || {};
-  const wasItem = _curInfoItem; // 닫기 전에 저장
+  const wasItem = _curInfoItem;
   const card = $('info-card');
   if(card) card.classList.remove('open');
   _curInfoItem=null;
@@ -4856,7 +4856,7 @@ function _raiseMyLocationMarker(){
 function _setMyLoc(lat,lng){
   _myLat=lat;_myLng=lng;
   _saveLastGeo(lat,lng);
-  if(typeof kakao==='undefined'||!_map) return;  // 지도 미로드 시 무시
+  if(typeof kakao==='undefined'||!_map) return;
   if(_myMkr) _myMkr.setMap(null);
   const svg=`<svg ${_NS} width='34' height='34' viewBox='0 0 34 34'><circle cx='17' cy='17' r='15' fill='#1a73e8' opacity='.18'/><circle cx='17' cy='17' r='9' fill='#1a73e8' stroke='white' stroke-width='2'/><circle cx='17' cy='17' r='3.8' fill='white'/></svg>`;
   _myMkr=new _MM({
@@ -5135,9 +5135,9 @@ function renderList(){
     const nq=q.replace(/\s+/g,'');
     function _score(name){
       const n=name.replace(/\s+/g,'');
-      if(n===nq)           return 0; // 정확 일치
-      if(n.startsWith(nq)) return 1; // 이름 시작
-      return 3;                       // 주소만 일치
+      if(n===nq)           return 0;
+      if(n.startsWith(nq)) return 1;
+      return 3;
     }
     Object.keys(groups).forEach(dio=>{
       groups[dio].sort((a,b)=>_score(a.s.name)-_score(b.s.name));
@@ -6421,8 +6421,8 @@ function _fmtTime(s){
 
 
 (function(){
-  const LONG_BG_RETURN_MS = 10 * 60 * 1000; // 10분 이상: 인트로 후 커버 복귀
-  const MEDIUM_BG_RETURN_MS = 60 * 1000; // 1분 이상~10분 미만: 현재 화면 유지 안정화
+  const LONG_BG_RETURN_MS = 10 * 60 * 1000;
+  const MEDIUM_BG_RETURN_MS = 60 * 1000;
   const BG_KEY = 'oai_home_backgrounded_at';
   let _bgIntroRunning = false;
   let _bgReturnStabilizing = false;

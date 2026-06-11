@@ -189,8 +189,8 @@ svg.addEventListener('wheel',e=>{
   const rx=(e.clientX-rect.left)/rect.width;
   const ry=(e.clientY-rect.top)/rect.height;
   const mx=rx*vw+vx, my=ry*vh+vy;
-  const delta=e.deltaY<0?-1:1; // -1=확대, 1=축소
-  const f=delta<0?0.82:1.22;   // 카카오내비 수준 배율
+  const delta=e.deltaY<0?-1:1;
+  const f=delta<0?0.82:1.22;
   const nw=vw*f, nh=vh*f;
   if(_zoomRAF)cancelAnimationFrame(_zoomRAF);
   _zoomRAF=requestAnimationFrame(()=>{ _applyZoom(nw,nh,mx,my,rx,ry); _zoomRAF=null; });
@@ -268,7 +268,7 @@ svg.addEventListener('touchmove',e=>{
   if(e.touches.length===2&&t1){
     dioSuppressClickUntil=Date.now()+450;
     const d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);
-    const f=t1.d/d; // d 작아지면 f>1 → 축소
+    const f=t1.d/d;
     const nw=Math.max(80,Math.min(1800,t1.vw*f));
     const nh=Math.max(100,Math.min(2250,t1.vh*f));
     vx=t1.mx-t1.rx*nw;
@@ -315,7 +315,7 @@ const GW_BOUNDS={
 const PADDING=18;
 
 function filterGw(btn){
-  vx=55;vy=130;vw=380;vh=600;setVB(); // 항상 초기 위치
+  vx=55;vy=130;vw=380;vh=600;setVB();
   const gw=btn.dataset.gw;
   document.querySelectorAll('.gb').forEach(b=>{
     const on=b.dataset.gw===gw;b.classList.toggle('on',on);
