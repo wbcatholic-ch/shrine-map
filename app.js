@@ -1378,7 +1378,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=WebView-Clean-26';
+    frame.src='diocese.html?v=WebView-Clean-27';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1724,7 +1724,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='WebView-Clean-26';
+const _PARISH_ASSET_VERSION='WebView-Clean-27';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -1887,7 +1887,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='WebView-Clean-26';
+const _PRAYER_ASSET_VERSION='WebView-Clean-27';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2232,7 +2232,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='WebView-Clean-26';
+const _SHRINE_ASSET_VERSION='WebView-Clean-27';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -2347,6 +2347,7 @@ const AppState = {
   routeWaypoint2Enabled: false,
   rW3:              null,
   routeWaypoint3Enabled: false,
+  routeWaypointSummaryExpanded: false,
   rE:               null,
   routeRegionStart: null,
   routeInfoRestoreBlockedUntil: 0,
@@ -2413,6 +2414,7 @@ const AppState = {
     ['_routeWaypoint2Enabled','routeWaypoint2Enabled'],
     ['_rW3',              'rW3'],
     ['_routeWaypoint3Enabled','routeWaypoint3Enabled'],
+    ['_routeWaypointSummaryExpanded','routeWaypointSummaryExpanded'],
     ['_rE',               'rE'],
     ['_routeRegionStart', 'routeRegionStart'],
     ['_routeInfoRestoreBlockedUntil', 'routeInfoRestoreBlockedUntil'],
@@ -3906,6 +3908,17 @@ function _routePointReady(point){ return !!(point && point.lat && point.lng); }
 function _pendingRouteWaypointRole(){ if(_routeWaypointEnabled && !_routePointReady(_rW)) return 'waypoint'; if(_routeWaypoint2Enabled && !_routePointReady(_rW2)) return 'waypoint2'; if(_routeWaypoint3Enabled && !_routePointReady(_rW3)) return 'waypoint3'; return null; }
 function _routePointName(point){ return point && point.name ? point.name : ''; }
 function _syncRoutePointLabels(){ _setRouteLabel('start',_routePointName(_rS)); _setRouteLabel('waypoint',_routePointName(_rW)); _setRouteLabel('waypoint2',_routePointName(_rW2)); _setRouteLabel('waypoint3',_routePointName(_rW3)); _setRouteLabel('end',_routePointName(_rE)); _syncRouteWaypointBox(); }
+function _expandRouteWaypointSummary(){
+  const routeWaypoints=_getRouteWaypoints();
+  if(!routeWaypoints.length) return;
+  _routeWaypointSummaryExpanded=true;
+  _routeWaypointEnabled=!!(_routeWaypointEnabled || (_rW&&_rW.lat&&_rW.lng));
+  _routeWaypoint2Enabled=!!(_routeWaypoint2Enabled || (_rW2&&_rW2.lat&&_rW2.lng));
+  _routeWaypoint3Enabled=!!(_routeWaypoint3Enabled || (_rW3&&_rW3.lat&&_rW3.lng));
+  _syncRoutePointLabels();
+  _syncRouteWaypointBox();
+}
+function _collapseRouteWaypointSummary(){ _routeWaypointSummaryExpanded=false; _syncRouteWaypointBox(); }
 function _setRouteWaypointEnabled(enabled){ _routeWaypointEnabled=!!enabled; _syncRouteWaypointBoxes(); }
 function _setRouteWaypoint2Enabled(enabled){ _routeWaypoint2Enabled=!!enabled; _syncRouteWaypointBoxes(); }
 function _setRouteWaypoint3Enabled(enabled){ _routeWaypoint3Enabled=!!enabled; _syncRouteWaypointBoxes(); }
@@ -3917,7 +3930,8 @@ function _syncRouteWaypointBoxes(){
   const w2Visible=!!(_routeWaypoint2Enabled || (_rW2&&_rW2.lat&&_rW2.lng));
   const w3Visible=!!(_routeWaypoint3Enabled || (_rW3&&_rW3.lat&&_rW3.lng));
   const resultShowing=!!(_polyline || ($('rs-result') && $('rs-result').style.display !== 'none'));
-  const summaryVisible=!!(resultShowing && routeWaypoints.length);
+  const summaryExpanded=!!_routeWaypointSummaryExpanded;
+  const summaryVisible=!!(resultShowing && routeWaypoints.length && !summaryExpanded);
   const shouldScrollForMultiWaypoint=!!(!summaryVisible && (w2Visible || w3Visible || routeWaypoints.length >= 2));
   const summaryBox=$('rs-waypoints-summary-box'), summaryLbl=$('rs-waypoints-summary-lbl');
   const box1=$('rs-waypoint-box'), box2=$('rs-waypoint2-box'), box3=$('rs-waypoint3-box');
@@ -3926,7 +3940,7 @@ function _syncRouteWaypointBoxes(){
   const wx1=$('rs-waypoint-x'), wx2=$('rs-waypoint2-x'), wx3=$('rs-waypoint3-x');
   if(stack){ stack.classList.toggle('has-waypoint', !summaryVisible && w1Visible); stack.classList.toggle('has-waypoint2', !summaryVisible && w2Visible); stack.classList.toggle('has-waypoint3', !summaryVisible && w3Visible); stack.classList.toggle('has-waypoint-summary', summaryVisible); stack.classList.toggle('route-result-showing', resultShowing); }
   if(sheet){ sheet.classList.toggle('route-waypoint-scroll', shouldScrollForMultiWaypoint); sheet.classList.toggle('route-result-showing', resultShowing); }
-  if(summaryBox){ summaryBox.style.display=summaryVisible?'flex':'none'; if(summaryVisible){ const summaryText='경유지 '+routeWaypoints.length+'곳 · '+routeWaypoints.map(function(p,idx){ return (idx+1)+'. '+((p&&p.name)||('경유지'+(idx+1))); }).join(' → '); if(summaryLbl) summaryLbl.textContent=summaryText; summaryBox.setAttribute('title', summaryText); }else{ if(summaryLbl) summaryLbl.textContent='경유지 없음'; summaryBox.removeAttribute('title'); } }
+  if(summaryBox){ summaryBox.style.display=summaryVisible?'flex':'none'; if(summaryVisible){ const summaryText='경유지 '+routeWaypoints.length+'곳 · '+routeWaypoints.map(function(p,idx){ return (idx+1)+'. '+((p&&p.name)||('경유지'+(idx+1))); }).join(' → '); if(summaryLbl) summaryLbl.textContent=summaryText; summaryBox.setAttribute('title', '눌러서 경유지 박스 펼치기 · '+summaryText); summaryBox.setAttribute('role','button'); summaryBox.setAttribute('tabindex','0'); summaryBox.setAttribute('aria-label','경유지 요약 박스 펼치기'); }else{ if(summaryLbl) summaryLbl.textContent='경유지 없음'; summaryBox.removeAttribute('title'); summaryBox.removeAttribute('role'); summaryBox.removeAttribute('tabindex'); summaryBox.removeAttribute('aria-label'); } }
   if(box1) box1.style.display=(!summaryVisible && w1Visible)?'flex':'none'; if(box2) box2.style.display=(!summaryVisible && w2Visible)?'flex':'none'; if(box3) box3.style.display=(!summaryVisible && w3Visible)?'flex':'none';
   if(add1) add1.style.display=(!summaryVisible && !w1Visible)?'inline-flex':'none'; if(add2) add2.style.display=(!summaryVisible && w1Visible && !w2Visible)?'inline-flex':'none'; if(add3) add3.style.display=(!summaryVisible && w2Visible && !w3Visible)?'inline-flex':'none';
   if(tools0) tools0.style.display=summaryVisible?'none':'block'; if(tools1) tools1.style.display=(!summaryVisible && w1Visible)?'flex':'none'; if(tools2) tools2.style.display=(!summaryVisible && w2Visible)?'flex':'none'; if(tools3) tools3.style.display=(!summaryVisible && w3Visible)?'flex':'none';
@@ -5721,6 +5735,7 @@ function _updateSearchBtn(){
 }
 
 function doSearchRoute(){ document.activeElement&&document.activeElement.blur();
+  _routeWaypointSummaryExpanded=false;
   _syncRouteWaypointBox();
   const keepRegionRouteStart = !!(_rS && _rS.isRegionStart && _routeRegionStart && _routeRegionStart.lat && _routeRegionStart.lng);
   if(!keepRegionRouteStart) _routeRegionStart=null;
@@ -5795,6 +5810,7 @@ function resetRoute(opts){
     [_rS,_rW,_rW2,_rW3,_rE].forEach(function(p){ if(p&&p.idx>=0&&_markers[p.idx]) _markers[p.idx].marker.setImage(_mkrImg(_typeColor(_markers[p.idx].shrine.type),false)); });
   }
   _rS=_rW=_rW2=_rW3=_rE=null;
+  _routeWaypointSummaryExpanded=false;
   _routeWaypointEnabled=_routeWaypoint2Enabled=_routeWaypoint3Enabled=false;
   _setRouteLabel('start','');_setRouteLabel('waypoint','');_setRouteLabel('waypoint2','');_setRouteLabel('waypoint3','');_setRouteLabel('end','');
   _syncRouteWaypointBox();
@@ -5934,6 +5950,7 @@ function _reapplyShrineRouteMarkerImages(){
 
 function _clearVisibleRouteResultOnly(){
   try{
+    _routeWaypointSummaryExpanded=false;
     const result=$('rs-result');
     if(result) result.style.display='none';
     const hint=$('rs-hint');
@@ -6006,6 +6023,7 @@ function _hideCategoryMarkersForRouteDisplay(){
 
 async function _calcRoute(){
   if(!_rS||!_rE) return;
+  _routeWaypointSummaryExpanded=false;
   _hideRouteGuide();
   $('rs-km').textContent='…';
   $('rs-time').textContent='…';
@@ -7917,6 +7935,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   on('rs-waypoint-box', 'click', function() { openSearchModal('waypoint'); });
   on('rs-waypoint2-box', 'click', function() { openSearchModal('waypoint2'); });
   on('rs-waypoint3-box', 'click', function() { openSearchModal('waypoint3'); });
+  on('rs-waypoints-summary-box', 'click', function(e) { e.stopPropagation(); _expandRouteWaypointSummary(); });
+  on('rs-waypoints-summary-box', 'keydown', function(e) { if(e.key==='Enter' || e.key===' '){ e.preventDefault(); _expandRouteWaypointSummary(); } });
   on('rs-add-waypoint-btn', 'click', function(e) { e.stopPropagation(); _beginWaypointAddMode('waypoint'); });
   on('rs-add-waypoint2-btn', 'click', function(e) { e.stopPropagation(); _beginWaypointAddMode('waypoint2'); });
   on('rs-add-waypoint3-btn', 'click', function(e) { e.stopPropagation(); _beginWaypointAddMode('waypoint3'); });

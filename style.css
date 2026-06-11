@@ -8946,7 +8946,7 @@ html.diocese-doc .si-r:last-child {
 .rs-waypoint-box{ grid-column:1; grid-row:3; background:#fff8e9; border-color:#f39c12; }
 .rs-waypoint2-box{ grid-column:1; grid-row:5; background:#fff4df; border-color:#d97706; }
 .rs-waypoint3-box{ grid-column:1; grid-row:7; background:#fff1dc; border-color:#b45309; }
-.rs-waypoints-summary-box{ grid-column:1; grid-row:3; background:#fff7ea; border-color:#d97706; cursor:default; }
+.rs-waypoints-summary-box{ grid-column:1; grid-row:3; background:#fff7ea; border-color:#d97706; cursor:pointer; }
 .rs-waypoints-summary-dot{ background:#d97706; }
 .rs-route-stack.has-waypoint-summary{ grid-template-rows:46px 6px 46px 6px 46px; }
 .rs-route-stack.has-waypoint-summary .rs-end-box{ grid-row:5!important; }
@@ -9326,4 +9326,16 @@ html.ios-device #sheet-route .route-sheet-x{
   #sheet-route .rs-route-stack{ grid-template-columns:minmax(0,1fr) 58px!important; }
   #sheet-route .rs-swap-btn{ width:36px!important; height:36px!important; min-width:36px!important; min-height:36px!important; }
   #sheet-route .rs-add-waypoint-btn{ min-width:56px!important; height:27px!important; padding:0 8px!important; }
+}
+
+
+/* V6-27 WebView: tap route waypoint summary to expand back to editable boxes */
+#sheet-route .rs-waypoints-summary-box{
+  cursor:pointer!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  -webkit-tap-highlight-color:transparent!important;
+}
+#sheet-route .rs-waypoints-summary-box:active{
+  transform:translateY(1px);
 }
