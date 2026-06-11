@@ -2736,14 +2736,14 @@ html.app-active #cover-guide-btn { display: none; }
   min-width: 96px;
   min-height: 42px;
   padding: 0 18px;
-  border: 0;
+  border: 1.2px solid rgba(31,42,68,.14);
   border-radius: 12px;
-  background: #1f2a44;
-  color: #fff;
+  background: #FFFFFF;
+  color: #1f2a44;
   font-family: inherit;
   font-size: calc(14px * var(--app-font-scale));
   font-weight: 900;
-  box-shadow: 0 7px 16px rgba(31,42,68,.20);
+  box-shadow: 0 7px 16px rgba(31,42,68,.14), inset 0 1px 0 rgba(255,255,255,.94);
 }
 #cover #favorites-reset-notice-ok:active { transform: scale(.985); }
 
@@ -7904,9 +7904,9 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
   --oai-modal-brown-head:linear-gradient(135deg, rgba(31,42,68,.96) 0%, rgba(45,58,95,.92) 58%, rgba(81,98,145,.88) 100%);
   --oai-modal-brown-head-text:#FFFDF7;
   --oai-modal-brown-sub:rgba(255,255,255,.82);
-  --oai-modal-brown-panel:linear-gradient(145deg, rgba(31,42,68,.88) 0%, rgba(45,58,95,.78) 52%, rgba(255,255,255,.28) 100%);
-  --oai-modal-brown-box:rgba(255,255,255,.94);
-  --oai-modal-brown-box-press:rgba(245,248,255,.96);
+  --oai-modal-brown-panel:linear-gradient(145deg, rgba(250,242,226,.97) 0%, rgba(238,220,188,.94) 54%, rgba(214,181,128,.90) 100%);
+  --oai-modal-brown-box:rgba(255,255,255,.96);
+  --oai-modal-brown-box-press:rgba(255,255,255,.90);
   --oai-modal-brown-line:rgba(255,255,255,.72);
   --oai-modal-brown-ink:#1F2A44;
   --oai-modal-brown-muted:#475569;
