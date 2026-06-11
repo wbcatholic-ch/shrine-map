@@ -10160,3 +10160,256 @@ html.ios-device #sheet-route .route-sheet-x{
     padding:0 5px!important;
   }
 }
+
+/* V6-35 WebView: route row/tool alignment rebuilt on waypoint-2 reference + start/end colors */
+#sheet-route,
+#sheet-route.open{
+  overflow-x:hidden!important;
+}
+#sheet-route #rs-top,
+#sheet-route.route-waypoint-scroll #rs-top,
+#sheet-route.route-result-showing #rs-top,
+#sheet-route.route-waypoint-scroll.route-result-showing #rs-top,
+#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-top{
+  padding:12px 12px 8px 14px!important;
+  box-sizing:border-box!important;
+  overflow-x:hidden!important;
+  border:0!important;
+  box-shadow:none!important;
+  outline:0!important;
+  scrollbar-width:none!important;
+  -ms-overflow-style:none!important;
+}
+#sheet-route #rs-top::-webkit-scrollbar,
+#sheet-route .rs-route-stack::-webkit-scrollbar{
+  width:0!important;
+  height:0!important;
+  display:none!important;
+}
+#sheet-route #rs-top::before,
+#sheet-route #rs-top::after,
+#sheet-route #rs-bottom::before,
+#sheet-route #rs-bottom::after,
+#sheet-route .rs-route-stack::before,
+#sheet-route .rs-route-stack::after{
+  display:none!important;
+  content:none!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+#sheet-route #rs-bottom,
+#sheet-route.route-result-showing #rs-bottom,
+#sheet-route.route-waypoint-scroll #rs-bottom{
+  padding-left:14px!important;
+  padding-right:14px!important;
+  margin-top:0!important;
+  border:0!important;
+  box-shadow:none!important;
+  outline:0!important;
+  box-sizing:border-box!important;
+  overflow-x:hidden!important;
+}
+#sheet-route .rs-route-stack,
+#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-top .rs-route-stack,
+#sheet-route.route-waypoint-scroll.route-result-showing #rs-top .rs-route-stack,
+#sheet-route.route-result-showing #rs-top .rs-route-stack{
+  display:grid!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  grid-template-columns:minmax(0,1fr) 62px!important;
+  column-gap:7px!important;
+  row-gap:0!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+}
+#sheet-route .rs-route-stack{ grid-template-rows:48px 6px 48px!important; }
+#sheet-route .rs-route-stack.has-waypoint{ grid-template-rows:48px 6px 48px 6px 48px!important; }
+#sheet-route .rs-route-stack.has-waypoint2{ grid-template-rows:48px 6px 48px 6px 48px 6px 48px!important; }
+#sheet-route .rs-route-stack.has-waypoint3{ grid-template-rows:48px 6px 48px 6px 48px 6px 48px 6px 48px!important; }
+#sheet-route .rs-route-stack.has-waypoint-summary{ grid-template-rows:48px 6px 48px 6px 48px!important; }
+#sheet-route .rs-start-box,
+#sheet-route .rs-waypoint-box,
+#sheet-route .rs-waypoints-summary-box,
+#sheet-route .rs-end-box{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  height:48px!important;
+  min-height:48px!important;
+  max-height:48px!important;
+  box-sizing:border-box!important;
+  padding:0 8px 0 11px!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:8px!important;
+}
+#sheet-route .rs-start-box{
+  background:#f1f7ff!important;
+  border-color:#2b7fd3!important;
+  box-shadow:0 1px 0 rgba(43,127,211,.08)!important;
+}
+#sheet-route .rs-end-box{
+  background:#fff4f4!important;
+  border-color:#e53935!important;
+  box-shadow:0 1px 0 rgba(229,57,53,.08)!important;
+}
+#sheet-route .rs-waypoint-box{
+  background:#fff8e9!important;
+  border-color:#f2a51a!important;
+}
+#sheet-route .rs-waypoint2-box{
+  background:#fff4df!important;
+  border-color:#d97706!important;
+}
+#sheet-route .rs-waypoint3-box{
+  background:#fff1dc!important;
+  border-color:#b45309!important;
+}
+#sheet-route .rs-lbl{
+  min-width:0!important;
+  overflow:hidden!important;
+  text-overflow:ellipsis!important;
+  white-space:nowrap!important;
+}
+#sheet-route .rs-between-tools{
+  grid-column:2!important;
+  width:62px!important;
+  min-width:62px!important;
+  max-width:62px!important;
+  position:relative!important;
+  overflow:hidden!important;
+  pointer-events:none!important;
+  z-index:50!important;
+  margin:0!important;
+  padding:0!important;
+  box-sizing:border-box!important;
+}
+#sheet-route #rs-start-waypoint-tools,
+#sheet-route .rs-route-stack.has-waypoint #rs-start-waypoint-tools,
+#sheet-route .rs-route-stack.has-waypoint2 #rs-start-waypoint-tools,
+#sheet-route .rs-route-stack.has-waypoint3 #rs-start-waypoint-tools{
+  grid-row:1 / 4!important;
+}
+#sheet-route .rs-waypoint-end-tools{ grid-row:3 / 6!important; }
+#sheet-route .rs-waypoint2-end-tools{ grid-row:5 / 8!important; }
+#sheet-route .rs-waypoint3-end-tools{ grid-row:7 / 10!important; }
+#sheet-route .rs-swap-btn{
+  position:absolute!important;
+  left:6px!important;
+  right:auto!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+  width:40px!important;
+  height:40px!important;
+  min-width:40px!important;
+  min-height:40px!important;
+  max-width:40px!important;
+  max-height:40px!important;
+  margin:0!important;
+  padding:0!important;
+  box-sizing:border-box!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  z-index:51!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+}
+#sheet-route .rs-swap-btn::before{
+  content:'⇅'!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:100%!important;
+  height:100%!important;
+  line-height:1!important;
+  font-size:20px!important;
+  text-align:center!important;
+  transform:none!important;
+}
+#sheet-route .rs-swap-btn:active{
+  transform:translateY(calc(-50% + 1px))!important;
+}
+#sheet-route .rs-add-waypoint-btn{
+  position:absolute!important;
+  left:6px!important;
+  right:auto!important;
+  top:calc(50% + 28px)!important;
+  bottom:auto!important;
+  transform:translateY(-50%)!important;
+  width:56px!important;
+  min-width:56px!important;
+  max-width:56px!important;
+  height:28px!important;
+  min-height:28px!important;
+  max-height:28px!important;
+  margin:0!important;
+  padding:0 5px!important;
+  box-sizing:border-box!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  white-space:nowrap!important;
+  line-height:1!important;
+  font-size:10.8px!important;
+  z-index:52!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+}
+#sheet-route .rs-add-waypoint-btn:active{
+  transform:translateY(calc(-50% + 1px))!important;
+}
+#sheet-route.route-result-showing #rs-search-btn{
+  margin-bottom:0!important;
+}
+#sheet-route.route-result-showing .rs-result{
+  margin-top:0!important;
+  border-top:0!important;
+}
+#sheet-route .route-sheet-x,
+html:not(.kb-open):not(.ios-device) #sheet-route .route-sheet-x,
+html.ios-device #sheet-route .route-sheet-x{
+  z-index:10300!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+}
+@media (max-width:370px){
+  #sheet-route #rs-top,
+  #sheet-route.route-waypoint-scroll #rs-top,
+  #sheet-route.route-result-showing #rs-top,
+  #sheet-route.route-waypoint-scroll.route-result-showing #rs-top,
+  #sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-top{
+    padding-left:12px!important;
+    padding-right:10px!important;
+  }
+  #sheet-route .rs-route-stack,
+  #sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-top .rs-route-stack,
+  #sheet-route.route-waypoint-scroll.route-result-showing #rs-top .rs-route-stack,
+  #sheet-route.route-result-showing #rs-top .rs-route-stack{
+    grid-template-columns:minmax(0,1fr) 60px!important;
+    column-gap:6px!important;
+  }
+  #sheet-route .rs-between-tools{
+    width:60px!important;
+    min-width:60px!important;
+    max-width:60px!important;
+  }
+  #sheet-route .rs-swap-btn{
+    left:5px!important;
+    width:38px!important;
+    height:38px!important;
+    min-width:38px!important;
+    min-height:38px!important;
+  }
+  #sheet-route .rs-add-waypoint-btn{
+    left:5px!important;
+    width:54px!important;
+    min-width:54px!important;
+    max-width:54px!important;
+    height:27px!important;
+    font-size:10.2px!important;
+    padding:0 4px!important;
+    top:calc(50% + 27px)!important;
+  }
+}
