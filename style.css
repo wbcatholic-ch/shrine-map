@@ -6149,6 +6149,8 @@ html.oai-font-global #cover #cc-6 .cover-name {
 }
 #cover .cover-diocese-btn,
 #cover .cover-refresh-main-btn {
+  position: relative !important;
+  overflow: hidden !important;
   width: 100% !important;
   height: 54px !important;
   min-height: 54px !important;
@@ -6189,7 +6191,23 @@ html.oai-font-global #cover #cc-6 .cover-name {
   justify-content: center !important;
 }
 #cover .cover-diocese-btn::before,
-#cover .cover-diocese-btn::after { content: none !important; display: none !important; }
+#cover .cover-refresh-main-btn::before {
+  content: "" !important;
+  display: block !important;
+  position: absolute !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  height: 3px !important;
+  background: var(--cover-action-point, #d4aa6a) !important;
+  opacity: .34 !important;
+  border-radius: 0 !important;
+  pointer-events: none !important;
+}
+#cover .cover-diocese-btn::after,
+#cover .cover-refresh-main-btn::after { content: none !important; display: none !important; }
+#cover .cover-diocese-btn { --cover-action-point: #FCA5A5; }
+#cover .cover-refresh-main-btn { --cover-action-point: #93C5FD; }
 
 #cover .cover-diocese-btn .cover-faith-cross {
   display: inline-flex !important;
