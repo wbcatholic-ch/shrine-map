@@ -1378,7 +1378,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=WebView-Clean-22';
+    frame.src='diocese.html?v=WebView-Clean-23';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1724,7 +1724,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='WebView-Clean-22';
+const _PARISH_ASSET_VERSION='WebView-Clean-23';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -1887,7 +1887,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='WebView-Clean-22';
+const _PRAYER_ASSET_VERSION='WebView-Clean-23';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2232,7 +2232,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='WebView-Clean-22';
+const _SHRINE_ASSET_VERSION='WebView-Clean-23';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -2867,7 +2867,7 @@ function _mapError(msg){
 }
 
 function _onMapReady(){
- const KM=kakao.maps;window._LL=KM.LatLng;window._MM=KM.Marker;window._MI=KM.MarkerImage;window._SZ=KM.Size;window._PT=KM.Point;window._LB=KM.LatLngBounds;window._PL=KM.Polyline;window._EL=KM.event.addListener;
+ const KM=kakao.maps;window._LL=KM.LatLng;window._MM=KM.Marker;window._MI=KM.MarkerImage;window._SZ=KM.Size;window._PT=KM.Point;window._LB=KM.LatLngBounds;window._PL=KM.Polyline;window._CO=KM.CustomOverlay;window._EL=KM.event.addListener;
   _map=new kakao.maps.Map($('map'),{
   center:new _LL(36.2,127.9),level:8
   });
@@ -3824,6 +3824,56 @@ function _mkrImgRoute(color,label){
 }
 
 
+
+
+function _routeOverlayFontSize(label){
+  return String(label||'').length>1 ? '12px' : '15px';
+}
+function _routePointOverlayHtml(color,label){
+  const c=color||'#f39c12';
+  const fs=_routeOverlayFontSize(label);
+  return '<div class="oai-route-point-overlay" style="width:42px;height:54px;position:relative;pointer-events:none;filter:drop-shadow(0 2px 4px rgba(0,0,0,.28));">'
+    + '<svg xmlns="http://www.w3.org/2000/svg" width="42" height="54" viewBox="0 0 42 54" aria-hidden="true">'
+    + '<ellipse cx="21" cy="51" rx="9" ry="3" fill="rgba(0,0,0,.24)"/>'
+    + '<path d="M21 2C10.5 2 2 10.5 2 21c0 12.2 19 30 19 30s19-17.8 19-30C40 10.5 31.5 2 21 2z" fill="'+c+'" stroke="#fff" stroke-width="3"/>'
+    + '<circle cx="21" cy="21" r="11" fill="#fff" opacity=".94"/>'
+    + '<text x="21" y="25.5" font-size="'+fs+'" font-weight="900" fill="'+c+'" text-anchor="middle" font-family="Arial,sans-serif">'+String(label||'')+'</text>'
+    + '</svg></div>';
+}
+function _clearRoutePointOverlays(){
+  try{
+    const list=window._oaiRoutePointOverlays||[];
+    list.forEach(function(ov){ try{ ov.setMap(null); }catch(_e){} });
+    window._oaiRoutePointOverlays=[];
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+}
+function _addRoutePointOverlay(point,role){
+  try{
+    if(!point || !point.lat || !point.lng || !window._CO || !_map) return;
+    const label=_routeRoleShort(role);
+    const color=_routeRoleColor(role);
+    const ov=new _CO({
+      position:new _LL(point.lat,point.lng),
+      content:_routePointOverlayHtml(color,label),
+      xAnchor:0.5,
+      yAnchor:1,
+      zIndex:100000 + (role==='start'?40:(role==='end'?20:_routeWaypointIndex(role)*10))
+    });
+    ov.setMap(_map);
+    if(!window._oaiRoutePointOverlays) window._oaiRoutePointOverlays=[];
+    window._oaiRoutePointOverlays.push(ov);
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+}
+function _refreshRoutePointOverlays(){
+  _clearRoutePointOverlays();
+  if(!_routeMode && !_polyline) return;
+  if(_rS && _rS.lat && _rS.lng && !_isRouteImplicitCurrentStartHidden()) _addRoutePointOverlay(_rS,'start');
+  if(_rW && _rW.lat && _rW.lng) _addRoutePointOverlay(_rW,'waypoint');
+  if(_rW2 && _rW2.lat && _rW2.lng) _addRoutePointOverlay(_rW2,'waypoint2');
+  if(_rW3 && _rW3.lat && _rW3.lng) _addRoutePointOverlay(_rW3,'waypoint3');
+  if(_rE && _rE.lat && _rE.lng) _addRoutePointOverlay(_rE,'end');
+}
+
 function _setRouteMarkerZ(idx, role){
   try{
     if(idx>=0 && _markers && _markers[idx] && _markers[idx].marker){
@@ -3918,6 +3968,7 @@ function _repaintRoutePointMarkers(){ try{ _clearVisibleRouteResultOnly(); _clea
 
 
 function _clearRouteTmpMarkers(){
+  _clearRoutePointOverlays();
   if(_startTmpMkr){ _startTmpMkr.setMap(null); _startTmpMkr=null; }
   if(_wayTmpMkr){ _wayTmpMkr.setMap(null); _wayTmpMkr=null; }
   if(_way2TmpMkr){ _way2TmpMkr.setMap(null); _way2TmpMkr=null; }
@@ -3950,6 +4001,7 @@ function _refreshRouteTmpMarkers(){
   if(needWaypoint2){ _way2TmpMkr = new _MM({position:new _LL(_rW2.lat,_rW2.lng), image:_mkrImgRoute(_routeWaypointColor('waypoint2'),_routeWaypointMarkerText('waypoint2')), zIndex:10020}); _way2TmpMkr.setMap(_map); try{ kakao.maps.event.addListener(_way2TmpMkr,'click',function(){ _showRouteCancelConfirm('waypoint2'); }); }catch(_e){} }
   if(needWaypoint3){ _way3TmpMkr = new _MM({position:new _LL(_rW3.lat,_rW3.lng), image:_mkrImgRoute(_routeWaypointColor('waypoint3'),_routeWaypointMarkerText('waypoint3')), zIndex:10010}); _way3TmpMkr.setMap(_map); try{ kakao.maps.event.addListener(_way3TmpMkr,'click',function(){ _showRouteCancelConfirm('waypoint3'); }); }catch(_e){} }
   if(needEnd){ _endTmpMkr = new _MM({position:new _LL(_rE.lat,_rE.lng), image:_mkrImgRoute(_routeEndMarkerColor(),'도'), zIndex:320}); _endTmpMkr.setMap(_map); try{ kakao.maps.event.addListener(_endTmpMkr,'click',function(){ _showRouteCancelConfirm('end'); }); }catch(_e){} }
+  _refreshRoutePointOverlays();
   _syncRouteWaypointBox();
   _raiseMyLocationMarker();
 }
