@@ -9651,3 +9651,512 @@ html.ios-device #sheet-route .route-sheet-x{
   #sheet-route .rs-swap-btn{ right:10px!important; width:36px!important; height:36px!important; min-width:36px!important; min-height:36px!important; }
   #sheet-route .rs-add-waypoint-btn{ right:1px!important; width:56px!important; min-width:56px!important; max-width:56px!important; font-size:10.5px!important; }
 }
+
+/* V6-32 WebView: remove unnecessary route-sheet line and align swap/+waypoint tools to visible waypoint rows */
+#sheet-route,
+#sheet-route #rs-top,
+#sheet-route #rs-bottom{
+  overflow-x:hidden!important;
+}
+#sheet-route #rs-top{
+  scrollbar-width:none!important;
+  -ms-overflow-style:none!important;
+}
+#sheet-route #rs-top::-webkit-scrollbar{
+  width:0!important;
+  height:0!important;
+  display:none!important;
+}
+#sheet-route .rs-route-stack,
+#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-top .rs-route-stack,
+#sheet-route.route-waypoint-scroll.route-result-showing #rs-top .rs-route-stack,
+#sheet-route.route-result-showing #rs-top .rs-route-stack{
+  grid-template-columns:minmax(0,1fr) 64px!important;
+  column-gap:10px!important;
+}
+#sheet-route .rs-between-tools{
+  width:64px!important;
+  min-width:64px!important;
+  max-width:64px!important;
+  position:relative!important;
+  overflow:visible!important;
+}
+#sheet-route .rs-swap-btn{
+  right:10px!important;
+  left:auto!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+}
+#sheet-route .rs-swap-btn:active{
+  transform:translateY(calc(-50% + 1px))!important;
+}
+#sheet-route .rs-add-waypoint-btn{
+  left:auto!important;
+  right:2px!important;
+  top:calc(50% + 24px)!important;
+  bottom:auto!important;
+  transform:translateY(-50%)!important;
+  width:60px!important;
+  min-width:60px!important;
+  max-width:60px!important;
+  height:28px!important;
+  padding:0 8px!important;
+}
+#sheet-route .rs-add-waypoint-btn:active{
+  transform:translateY(calc(-50% + 1px))!important;
+}
+@media (max-width:370px){
+  #sheet-route .rs-route-stack,
+  #sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-top .rs-route-stack,
+  #sheet-route.route-waypoint-scroll.route-result-showing #rs-top .rs-route-stack,
+  #sheet-route.route-result-showing #rs-top .rs-route-stack{
+    grid-template-columns:minmax(0,1fr) 60px!important;
+    column-gap:8px!important;
+  }
+  #sheet-route .rs-between-tools{
+    width:60px!important;
+    min-width:60px!important;
+    max-width:60px!important;
+  }
+  #sheet-route .rs-swap-btn{
+    right:8px!important;
+    width:36px!important;
+    height:36px!important;
+    min-width:36px!important;
+    min-height:36px!important;
+  }
+  #sheet-route .rs-add-waypoint-btn{
+    right:0!important;
+    width:58px!important;
+    min-width:58px!important;
+    max-width:58px!important;
+    top:calc(50% + 23px)!important;
+    font-size:10.5px!important;
+  }
+}
+
+/* V6-33 WebView: final route card cleanup - no extra layer/line, safe route tool alignment */
+#sheet-route,
+#sheet-route.open{
+  overflow-x:hidden!important;
+}
+#sheet-route #rs-top,
+#sheet-route #rs-bottom,
+#sheet-route.route-result-showing #rs-top,
+#sheet-route.route-result-showing #rs-bottom,
+#sheet-route.route-waypoint-scroll #rs-top,
+#sheet-route.route-waypoint-scroll #rs-bottom{
+  border:0!important;
+  border-top:0!important;
+  border-bottom:0!important;
+  box-shadow:none!important;
+  outline:0!important;
+}
+#sheet-route #rs-top{
+  padding-left:14px!important;
+  padding-right:12px!important;
+  padding-bottom:8px!important;
+  box-sizing:border-box!important;
+  overflow-x:hidden!important;
+  scrollbar-width:none!important;
+  -ms-overflow-style:none!important;
+}
+#sheet-route #rs-top::-webkit-scrollbar{
+  width:0!important;
+  height:0!important;
+  display:none!important;
+  background:transparent!important;
+}
+#sheet-route #rs-bottom{
+  padding-left:14px!important;
+  padding-right:14px!important;
+  margin-top:0!important;
+  box-sizing:border-box!important;
+  background:var(--ui-bg)!important;
+  overflow-x:hidden!important;
+}
+#sheet-route #rs-bottom::before,
+#sheet-route #rs-top::after,
+#sheet-route .rs-route-stack::after{
+  display:none!important;
+  content:none!important;
+}
+#sheet-route.route-result-showing #rs-top,
+#sheet-route.route-waypoint-scroll.route-result-showing #rs-top,
+#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-top{
+  padding-left:14px!important;
+  padding-right:12px!important;
+  overflow-x:hidden!important;
+}
+#sheet-route .rs-route-stack,
+#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-top .rs-route-stack,
+#sheet-route.route-waypoint-scroll.route-result-showing #rs-top .rs-route-stack,
+#sheet-route.route-result-showing #rs-top .rs-route-stack{
+  width:100%!important;
+  max-width:100%!important;
+  box-sizing:border-box!important;
+  grid-template-columns:minmax(0,1fr) 58px!important;
+  column-gap:8px!important;
+  overflow:visible!important;
+  scrollbar-width:none!important;
+  -ms-overflow-style:none!important;
+}
+#sheet-route .rs-route-stack::-webkit-scrollbar{
+  width:0!important;
+  height:0!important;
+  display:none!important;
+}
+#sheet-route .rs-start-box,
+#sheet-route .rs-waypoint-box,
+#sheet-route .rs-waypoints-summary-box,
+#sheet-route .rs-end-box{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  box-sizing:border-box!important;
+  padding-left:11px!important;
+  padding-right:8px!important;
+}
+#sheet-route .rs-between-tools{
+  grid-column:2!important;
+  width:58px!important;
+  min-width:58px!important;
+  max-width:58px!important;
+  position:relative!important;
+  overflow:visible!important;
+  pointer-events:none!important;
+  z-index:30!important;
+}
+#sheet-route .rs-swap-btn{
+  left:auto!important;
+  right:9px!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+  width:40px!important;
+  height:40px!important;
+  min-width:40px!important;
+  min-height:40px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:0!important;
+  margin:0!important;
+  box-sizing:border-box!important;
+  z-index:31!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+}
+#sheet-route .rs-swap-btn::before{
+  content:'⇅'!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:100%!important;
+  height:100%!important;
+  font-size:20px!important;
+  line-height:1!important;
+  transform:none!important;
+}
+#sheet-route .rs-swap-btn:active{
+  transform:translateY(calc(-50% + 1px))!important;
+}
+#sheet-route .rs-add-waypoint-btn{
+  left:auto!important;
+  right:0!important;
+  top:calc(50% + 25px)!important;
+  bottom:auto!important;
+  transform:translateY(-50%)!important;
+  width:58px!important;
+  min-width:58px!important;
+  max-width:58px!important;
+  height:28px!important;
+  padding:0 6px!important;
+  box-sizing:border-box!important;
+  margin:0!important;
+  font-size:11px!important;
+  line-height:1!important;
+  z-index:32!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+}
+#sheet-route .rs-add-waypoint-btn:active{
+  transform:translateY(calc(-50% + 1px))!important;
+}
+#sheet-route.route-result-showing #rs-search-btn{
+  margin-bottom:0!important;
+}
+#sheet-route.route-result-showing .rs-result{
+  margin-top:0!important;
+}
+#sheet-route .route-sheet-x,
+html:not(.kb-open):not(.ios-device) #sheet-route .route-sheet-x,
+html.ios-device #sheet-route .route-sheet-x{
+  z-index:10150!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+}
+@media (max-width:370px){
+  #sheet-route #rs-top,
+  #sheet-route.route-result-showing #rs-top,
+  #sheet-route.route-waypoint-scroll.route-result-showing #rs-top,
+  #sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-top{
+    padding-left:12px!important;
+    padding-right:10px!important;
+  }
+  #sheet-route .rs-route-stack,
+  #sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-top .rs-route-stack,
+  #sheet-route.route-waypoint-scroll.route-result-showing #rs-top .rs-route-stack,
+  #sheet-route.route-result-showing #rs-top .rs-route-stack{
+    grid-template-columns:minmax(0,1fr) 56px!important;
+    column-gap:7px!important;
+  }
+  #sheet-route .rs-between-tools{
+    width:56px!important;
+    min-width:56px!important;
+    max-width:56px!important;
+  }
+  #sheet-route .rs-swap-btn{
+    right:8px!important;
+    width:38px!important;
+    height:38px!important;
+    min-width:38px!important;
+    min-height:38px!important;
+  }
+  #sheet-route .rs-add-waypoint-btn{
+    right:0!important;
+    width:56px!important;
+    min-width:56px!important;
+    max-width:56px!important;
+    height:27px!important;
+    font-size:10.5px!important;
+    padding:0 5px!important;
+    top:calc(50% + 24px)!important;
+  }
+}
+
+/* V6-34 WebView: fix route tool column to waypoint-2 reference position, no extra layer, no clipping */
+#sheet-route,
+#sheet-route.open,
+#sheet-route #rs-top,
+#sheet-route #rs-bottom{
+  overflow-x:hidden!important;
+}
+#sheet-route #rs-top,
+#sheet-route.route-result-showing #rs-top,
+#sheet-route.route-waypoint-scroll.route-result-showing #rs-top,
+#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-top{
+  padding-left:14px!important;
+  padding-right:10px!important;
+  padding-bottom:8px!important;
+  box-sizing:border-box!important;
+  border:0!important;
+  box-shadow:none!important;
+  outline:0!important;
+}
+#sheet-route #rs-bottom,
+#sheet-route.route-result-showing #rs-bottom,
+#sheet-route.route-waypoint-scroll #rs-bottom{
+  border:0!important;
+  box-shadow:none!important;
+  outline:0!important;
+  margin-top:0!important;
+  padding-left:14px!important;
+  padding-right:14px!important;
+  box-sizing:border-box!important;
+}
+#sheet-route #rs-top::before,
+#sheet-route #rs-top::after,
+#sheet-route #rs-bottom::before,
+#sheet-route #rs-bottom::after,
+#sheet-route .rs-route-stack::before,
+#sheet-route .rs-route-stack::after{
+  display:none!important;
+  content:none!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+#sheet-route .rs-route-stack,
+#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-top .rs-route-stack,
+#sheet-route.route-waypoint-scroll.route-result-showing #rs-top .rs-route-stack,
+#sheet-route.route-result-showing #rs-top .rs-route-stack{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  box-sizing:border-box!important;
+  grid-template-columns:minmax(0,1fr) 70px!important;
+  column-gap:7px!important;
+  overflow:hidden!important;
+}
+#sheet-route .rs-route-stack{
+  grid-template-rows:46px 6px 46px!important;
+}
+#sheet-route .rs-route-stack.has-waypoint{
+  grid-template-rows:46px 6px 46px 6px 46px!important;
+}
+#sheet-route .rs-route-stack.has-waypoint2{
+  grid-template-rows:46px 6px 46px 6px 46px 6px 46px!important;
+}
+#sheet-route .rs-route-stack.has-waypoint3{
+  grid-template-rows:46px 6px 46px 6px 46px 6px 46px 6px 46px!important;
+}
+#sheet-route .rs-route-stack.has-waypoint-summary{
+  grid-template-rows:46px 6px 46px 6px 46px!important;
+}
+#sheet-route .rs-start-box,
+#sheet-route .rs-waypoint-box,
+#sheet-route .rs-waypoints-summary-box,
+#sheet-route .rs-end-box{
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  height:46px!important;
+  min-height:46px!important;
+  box-sizing:border-box!important;
+  padding-left:11px!important;
+  padding-right:8px!important;
+}
+#sheet-route .rs-between-tools{
+  grid-column:2!important;
+  width:70px!important;
+  min-width:70px!important;
+  max-width:70px!important;
+  position:relative!important;
+  overflow:hidden!important;
+  pointer-events:none!important;
+  z-index:40!important;
+  margin:0!important;
+  padding:0!important;
+}
+#sheet-route #rs-start-waypoint-tools{
+  grid-row:1 / 4!important;
+}
+#sheet-route .rs-route-stack.has-waypoint #rs-start-waypoint-tools,
+#sheet-route .rs-route-stack.has-waypoint2 #rs-start-waypoint-tools,
+#sheet-route .rs-route-stack.has-waypoint3 #rs-start-waypoint-tools{
+  grid-row:1 / 4!important;
+}
+#sheet-route .rs-waypoint-end-tools{
+  grid-row:3 / 6!important;
+}
+#sheet-route .rs-waypoint2-end-tools{
+  grid-row:5 / 8!important;
+}
+#sheet-route .rs-waypoint3-end-tools{
+  grid-row:7 / 10!important;
+}
+#sheet-route .rs-swap-btn{
+  left:auto!important;
+  right:15px!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+  width:40px!important;
+  height:40px!important;
+  min-width:40px!important;
+  min-height:40px!important;
+  max-width:40px!important;
+  max-height:40px!important;
+  margin:0!important;
+  padding:0!important;
+  box-sizing:border-box!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  z-index:41!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+}
+#sheet-route .rs-swap-btn::before{
+  content:'⇅'!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:100%!important;
+  height:100%!important;
+  font-size:20px!important;
+  line-height:1!important;
+  transform:none!important;
+  text-align:center!important;
+}
+#sheet-route .rs-swap-btn:active{
+  transform:translateY(calc(-50% + 1px))!important;
+}
+#sheet-route .rs-add-waypoint-btn{
+  left:auto!important;
+  right:6px!important;
+  top:calc(50% + 25px)!important;
+  bottom:auto!important;
+  transform:translateY(-50%)!important;
+  width:58px!important;
+  min-width:58px!important;
+  max-width:58px!important;
+  height:28px!important;
+  min-height:28px!important;
+  max-height:28px!important;
+  margin:0!important;
+  padding:0 6px!important;
+  box-sizing:border-box!important;
+  font-size:11px!important;
+  line-height:1!important;
+  display:inline-flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  z-index:42!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  white-space:nowrap!important;
+}
+#sheet-route .rs-add-waypoint-btn:active{
+  transform:translateY(calc(-50% + 1px))!important;
+}
+#sheet-route.route-result-showing #rs-search-btn{
+  margin-bottom:0!important;
+}
+#sheet-route.route-result-showing .rs-result{
+  margin-top:0!important;
+  border-top:0!important;
+}
+#sheet-route .route-sheet-x,
+html:not(.kb-open):not(.ios-device) #sheet-route .route-sheet-x,
+html.ios-device #sheet-route .route-sheet-x{
+  z-index:10200!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+}
+@media (max-width:370px){
+  #sheet-route #rs-top,
+  #sheet-route.route-result-showing #rs-top,
+  #sheet-route.route-waypoint-scroll.route-result-showing #rs-top,
+  #sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-top{
+    padding-left:12px!important;
+    padding-right:8px!important;
+  }
+  #sheet-route .rs-route-stack,
+  #sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-top .rs-route-stack,
+  #sheet-route.route-waypoint-scroll.route-result-showing #rs-top .rs-route-stack,
+  #sheet-route.route-result-showing #rs-top .rs-route-stack{
+    grid-template-columns:minmax(0,1fr) 66px!important;
+    column-gap:6px!important;
+  }
+  #sheet-route .rs-between-tools{
+    width:66px!important;
+    min-width:66px!important;
+    max-width:66px!important;
+  }
+  #sheet-route .rs-swap-btn{
+    right:14px!important;
+    width:38px!important;
+    height:38px!important;
+    min-width:38px!important;
+    min-height:38px!important;
+  }
+  #sheet-route .rs-add-waypoint-btn{
+    right:5px!important;
+    width:56px!important;
+    min-width:56px!important;
+    max-width:56px!important;
+    height:27px!important;
+    font-size:10.5px!important;
+    top:calc(50% + 24px)!important;
+    padding:0 5px!important;
+  }
+}
