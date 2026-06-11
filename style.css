@@ -6945,21 +6945,21 @@ html.oai-font-global #pr-list-ul .pr-title {
   box-shadow:0 3px 8px rgba(31,41,55,.08);
 }
 #route-role-choice .rrc-start{
-  background:#FDE7E2;
-  color:#A61B14;
-  border-color:#D94A3A;
+  background:#FFF4F2;
+  color:#A32622;
+  border-color:#D84D48;
 }
 #route-role-choice .rrc-end{
-  background:#E4F0FF;
-  color:#1557C0;
-  border-color:#2F7DE1;
+  background:#EEF6FF;
+  color:#1565C0;
+  border-color:#2F83E6;
 }
 #route-role-choice .rrc-cancel{
   width:100%;
   margin-top:10px;
-  background:#EAF7EF;
-  color:#1F7A46;
-  border-color:#4CAF72;
+  background:#EFFAF3;
+  color:#238653;
+  border-color:#4FB374;
 }
 #route-role-choice .rrc-btn:active,
 #route-role-choice .rrc-cancel:active{
@@ -9407,4 +9407,25 @@ html.ios-device #sheet-route .route-sheet-x{
   #sheet-route .rs-route-stack{ grid-template-columns:minmax(0,1fr) 70px!important; }
   #sheet-route .rs-swap-btn{ right:-22px!important; }
   #sheet-route .rs-add-waypoint-btn{ right:-44px!important; min-width:58px!important; width:58px!important; }
+}
+
+/* V6-29: route role choice button colors matched to reference modal */
+#route-role-choice .rrc-btn,
+#route-role-choice .rrc-cancel{
+  box-shadow:none;
+}
+#route-role-choice .rrc-start{
+  background:#FFF4F2 !important;
+  border-color:#D84D48 !important;
+  color:#A32622 !important;
+}
+#route-role-choice .rrc-end{
+  background:#EEF6FF !important;
+  border-color:#2F83E6 !important;
+  color:#1565C0 !important;
+}
+#route-role-choice .rrc-cancel{
+  background:#EFFAF3 !important;
+  border-color:#4FB374 !important;
+  color:#238653 !important;
 }
