@@ -1378,7 +1378,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=WebView-Clean-23';
+    frame.src='diocese.html?v=WebView-Clean-24';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1724,7 +1724,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='WebView-Clean-23';
+const _PARISH_ASSET_VERSION='WebView-Clean-24';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -1887,7 +1887,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='WebView-Clean-23';
+const _PRAYER_ASSET_VERSION='WebView-Clean-24';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2232,7 +2232,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='WebView-Clean-23';
+const _SHRINE_ASSET_VERSION='WebView-Clean-24';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -7849,8 +7849,19 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   on('nearby-close-btn', 'click', function(e) { e.stopPropagation(); closeSheetPanelOnly('nearby'); });
   on('list-close-btn',   'click', function(e) { e.stopPropagation(); closeSheetPanelOnly('list'); });
   on('region-close-btn', 'click', function(e) { e.stopPropagation(); closeSheetPanelOnly('region'); });
-  on('route-close-btn',  'click', function(e) { e.stopPropagation(); closeRouteSheetByX(); });
-  ['pointerup','touchend'].forEach(function(ev){ on('route-close-btn', ev, function(e){ if(e){ e.preventDefault(); e.stopPropagation(); } closeRouteSheetByX(); }, {passive:false}); });
+  on('route-close-btn',  'pointerdown', function(e) { if(e){ e.preventDefault(); e.stopPropagation(); } }, {passive:false});
+  ['click','pointerup','touchend'].forEach(function(ev){ on('route-close-btn', ev, function(e){ if(e){ e.preventDefault(); e.stopPropagation(); } closeRouteSheetByX(); }, {passive:false}); });
+  (function(){
+    var routeCloseBtn=document.getElementById('route-close-btn');
+    if(!routeCloseBtn || routeCloseBtn.__oaiRouteCloseSafeV624) return;
+    routeCloseBtn.__oaiRouteCloseSafeV624=true;
+    function stopOnly(e){ if(e){ e.preventDefault(); e.stopPropagation(); } }
+    function closeSafe(e){ stopOnly(e); closeRouteSheetByX(); }
+    routeCloseBtn.addEventListener('pointerdown', stopOnly, {capture:true, passive:false});
+    routeCloseBtn.addEventListener('click', closeSafe, {capture:true, passive:false});
+    routeCloseBtn.addEventListener('pointerup', closeSafe, {capture:true, passive:false});
+    routeCloseBtn.addEventListener('touchend', closeSafe, {capture:true, passive:false});
+  })();
   on('map-category-close-btn', 'click', function(e) { e.stopPropagation(); closeCategoryToCoverFromMap(); });
 
   on('loc-btn', 'click', function() { goMyLoc(); });

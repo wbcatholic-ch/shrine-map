@@ -9101,3 +9101,72 @@ html.diocese-doc .si-r:last-child {
   #sheet-route.route-waypoint-scroll #rs-top{ max-height:calc(38vh - 90px)!important; }
   #sheet-route.route-waypoint-scroll #rs-search-btn{ min-height:42px!important; padding-top:9px!important; padding-bottom:9px!important; }
 }
+
+
+/* V6-24 WebView route tools right-align + X touch-safe fix */
+#sheet-route .route-sheet-x{
+  z-index:10050!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  -webkit-tap-highlight-color:transparent!important;
+}
+#sheet-route #rs-top{
+  padding-right:54px!important;
+}
+#sheet-route .rs-route-stack{
+  grid-template-columns:minmax(0,1fr) 72px!important;
+  column-gap:8px!important;
+}
+#sheet-route .rs-between-tools{
+  grid-column:2!important;
+  overflow:visible!important;
+  z-index:5!important;
+  pointer-events:none!important;
+}
+#sheet-route .rs-swap-btn{
+  left:66%!important;
+  top:50%!important;
+  width:38px!important;
+  height:38px!important;
+  min-width:38px!important;
+  min-height:38px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  padding:0!important;
+  line-height:1!important;
+  font-size:0!important;
+  z-index:6!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+}
+#sheet-route .rs-swap-btn::before{
+  display:block!important;
+  width:100%!important;
+  text-align:center!important;
+  font-size:19px!important;
+  line-height:38px!important;
+  transform:none!important;
+}
+#sheet-route .rs-swap-btn:active{
+  transform:translate(-50%,-50%) translateY(1px)!important;
+}
+#sheet-route .rs-add-waypoint-btn{
+  left:66%!important;
+  bottom:0!important;
+  min-width:58px!important;
+  height:27px!important;
+  padding:0 9px!important;
+  z-index:7!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+}
+#sheet-route .rs-add-waypoint-btn:active{
+  transform:translateX(-50%) translateY(1px)!important;
+}
+@media (max-width:370px){
+  #sheet-route #rs-top{ padding-right:50px!important; }
+  #sheet-route .rs-route-stack{ grid-template-columns:minmax(0,1fr) 66px!important; }
+  #sheet-route .rs-swap-btn,
+  #sheet-route .rs-add-waypoint-btn{ left:64%!important; }
+}
