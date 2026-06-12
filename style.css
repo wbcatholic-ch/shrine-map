@@ -9165,172 +9165,33 @@ html.ios-device #app #sheet-route .route-sheet-x{
 }
 
 
-/* V6-73: 길찾기 인포카드 하단 실제 여백 축소 - 모든 경유지 개수 공통 */
+/* V6-82: route arrow layout cleanup.
+   Remove accumulated V6-73~V6-81 arrow/tool overrides.
+   Arrow x-position stays unchanged. Each arrow is centered between route boxes by one common row rule.
+   The + waypoint button is separated downward from the last visible arrow. */
 #app #sheet-route,
 #sheet-route{
+  padding-bottom:10px!important;
   height:auto!important;
   min-height:0!important;
-  padding-bottom:0!important;
 }
-#sheet-route #rs-bottom{
-  padding-bottom:0!important;
-}
+#sheet-route #rs-bottom,
 #sheet-route.route-result-showing #rs-bottom{
-  padding-bottom:0!important;
+  padding-bottom:8px!important;
 }
 #sheet-route .rs-result{
-  padding-bottom:6px!important;
+  padding-bottom:10px!important;
 }
-#sheet-route #rs-search-btn{
-  margin-bottom:0!important;
-}
+#sheet-route #rs-search-btn,
 #sheet-route.route-multi-waypoint-input:not(.route-result-showing) #rs-search-btn{
-  margin-bottom:0!important;
+  margin-bottom:10px!important;
 }
-#sheet-route .rs-between-tools{
+#app #sheet-route .rs-route-stack > .rs-between-tools,
+#sheet-route .rs-route-stack > .rs-between-tools{
+  transform:translate(4px,34px)!important;
   gap:12px!important;
-}
-#sheet-route .rs-add-waypoint-btn{
-  height:26px!important;
-  min-height:26px!important;
-}
-
-
-/* V6-74: route card bottom spacing rebalance and waypoint tool alignment.
-   Keep all route/waypoint logic unchanged; only visual spacing. */
-#app #sheet-route,
-#sheet-route{
-  padding-bottom:10px!important;
-}
-#sheet-route #rs-bottom{
-  padding-bottom:8px!important;
-}
-#sheet-route.route-result-showing #rs-bottom{
-  padding-bottom:8px!important;
-}
-#sheet-route .rs-result{
-  padding-bottom:10px!important;
-}
-#sheet-route #rs-search-btn{
-  margin-bottom:10px!important;
-}
-#sheet-route.route-multi-waypoint-input:not(.route-result-showing) #rs-search-btn{
-  margin-bottom:10px!important;
-}
-#sheet-route .rs-between-tools{
-  gap:15px!important;
-  transform:translate(4px,24px)!important;
-}
-#sheet-route .rs-add-waypoint-btn{
-  height:28px!important;
-  min-height:28px!important;
-  max-height:28px!important;
-}
-@media (max-width:370px){
-  #sheet-route .rs-between-tools{
-    gap:14px!important;
-    transform:translate(3px,23px)!important;
-  }
-}
-
-
-/* V6-75: route tool vertical target adjustment.
-   5-row / 경유지3 화면을 정상 기준으로 두고,
-   아직 다음 경유지를 추가할 수 있는 마지막 도구줄만 아래로 내려 맞춘다. */
-#sheet-route .rs-route-stack:not(.has-waypoint):not(.has-waypoint-summary) #rs-start-waypoint-tools{
-  transform:translate(4px,34px)!important;
-}
-#sheet-route .rs-route-stack.has-waypoint:not(.has-waypoint2):not(.has-waypoint-summary) .rs-waypoint-end-tools{
-  transform:translate(4px,34px)!important;
-}
-#sheet-route .rs-route-stack.has-waypoint2:not(.has-waypoint3):not(.has-waypoint-summary) .rs-waypoint2-end-tools{
-  transform:translate(4px,34px)!important;
-}
-#sheet-route .rs-route-stack.has-waypoint3:not(.has-waypoint-summary) .rs-between-tools{
-  transform:translate(4px,24px)!important;
-}
-#sheet-route .rs-route-stack:not(.has-waypoint):not(.has-waypoint-summary) #rs-start-waypoint-tools,
-#sheet-route .rs-route-stack.has-waypoint:not(.has-waypoint2):not(.has-waypoint-summary) .rs-waypoint-end-tools,
-#sheet-route .rs-route-stack.has-waypoint2:not(.has-waypoint3):not(.has-waypoint-summary) .rs-waypoint2-end-tools{
-  gap:16px!important;
-}
-@media (max-width:370px){
-  #sheet-route .rs-route-stack:not(.has-waypoint):not(.has-waypoint-summary) #rs-start-waypoint-tools{
-    transform:translate(3px,33px)!important;
-  }
-  #sheet-route .rs-route-stack.has-waypoint:not(.has-waypoint2):not(.has-waypoint-summary) .rs-waypoint-end-tools{
-    transform:translate(3px,33px)!important;
-  }
-  #sheet-route .rs-route-stack.has-waypoint2:not(.has-waypoint3):not(.has-waypoint-summary) .rs-waypoint2-end-tools{
-    transform:translate(3px,33px)!important;
-  }
-  #sheet-route .rs-route-stack.has-waypoint3:not(.has-waypoint-summary) .rs-between-tools{
-    transform:translate(3px,23px)!important;
-  }
-}
-
-/* V6-80: route tool vertical alignment final.
-   Keep the arrow column x-position fixed. Place every arrow at the same box-between center,
-   and lower only the visible + waypoint button so it never overlaps the arrow. */
-#app #sheet-route .rs-route-stack > .rs-between-tools,
-#sheet-route .rs-route-stack > .rs-between-tools{
   top:auto!important;
   margin-top:0!important;
-  transform:translate(4px,24px)!important;
-}
-#app #sheet-route .rs-route-stack:not(.has-waypoint-summary) > #rs-start-waypoint-tools.rs-between-tools,
-#sheet-route .rs-route-stack:not(.has-waypoint-summary) > #rs-start-waypoint-tools.rs-between-tools,
-#app #sheet-route .rs-route-stack:not(.has-waypoint-summary) > #rs-waypoint-end-tools.rs-between-tools,
-#sheet-route .rs-route-stack:not(.has-waypoint-summary) > #rs-waypoint-end-tools.rs-between-tools,
-#app #sheet-route .rs-route-stack:not(.has-waypoint-summary) > #rs-waypoint2-end-tools.rs-between-tools,
-#sheet-route .rs-route-stack:not(.has-waypoint-summary) > #rs-waypoint2-end-tools.rs-between-tools,
-#app #sheet-route .rs-route-stack:not(.has-waypoint-summary) > #rs-waypoint3-end-tools.rs-between-tools,
-#sheet-route .rs-route-stack:not(.has-waypoint-summary) > #rs-waypoint3-end-tools.rs-between-tools{
-  gap:18px!important;
-}
-#app #sheet-route .rs-route-stack:not(.has-waypoint):not(.has-waypoint-summary) > #rs-start-waypoint-tools.rs-between-tools > .rs-add-waypoint-btn,
-#sheet-route .rs-route-stack:not(.has-waypoint):not(.has-waypoint-summary) > #rs-start-waypoint-tools.rs-between-tools > .rs-add-waypoint-btn,
-#app #sheet-route .rs-route-stack.has-waypoint:not(.has-waypoint2):not(.has-waypoint-summary) > #rs-waypoint-end-tools.rs-between-tools > .rs-add-waypoint-btn,
-#sheet-route .rs-route-stack.has-waypoint:not(.has-waypoint2):not(.has-waypoint-summary) > #rs-waypoint-end-tools.rs-between-tools > .rs-add-waypoint-btn,
-#app #sheet-route .rs-route-stack.has-waypoint2:not(.has-waypoint3):not(.has-waypoint-summary) > #rs-waypoint2-end-tools.rs-between-tools > .rs-add-waypoint-btn,
-#sheet-route .rs-route-stack.has-waypoint2:not(.has-waypoint3):not(.has-waypoint-summary) > #rs-waypoint2-end-tools.rs-between-tools > .rs-add-waypoint-btn{
-  margin-top:12px!important;
-}
-@media (max-width:370px){
-  #app #sheet-route .rs-route-stack > .rs-between-tools,
-  #sheet-route .rs-route-stack > .rs-between-tools{
-    transform:translate(3px,23px)!important;
-  }
-  #app #sheet-route .rs-route-stack:not(.has-waypoint-summary) > #rs-start-waypoint-tools.rs-between-tools,
-  #sheet-route .rs-route-stack:not(.has-waypoint-summary) > #rs-start-waypoint-tools.rs-between-tools,
-  #app #sheet-route .rs-route-stack:not(.has-waypoint-summary) > #rs-waypoint-end-tools.rs-between-tools,
-  #sheet-route .rs-route-stack:not(.has-waypoint-summary) > #rs-waypoint-end-tools.rs-between-tools,
-  #app #sheet-route .rs-route-stack:not(.has-waypoint-summary) > #rs-waypoint2-end-tools.rs-between-tools,
-  #sheet-route .rs-route-stack:not(.has-waypoint-summary) > #rs-waypoint2-end-tools.rs-between-tools,
-  #app #sheet-route .rs-route-stack:not(.has-waypoint-summary) > #rs-waypoint3-end-tools.rs-between-tools,
-  #sheet-route .rs-route-stack:not(.has-waypoint-summary) > #rs-waypoint3-end-tools.rs-between-tools{
-    gap:17px!important;
-  }
-  #app #sheet-route .rs-route-stack:not(.has-waypoint):not(.has-waypoint-summary) > #rs-start-waypoint-tools.rs-between-tools > .rs-add-waypoint-btn,
-  #sheet-route .rs-route-stack:not(.has-waypoint):not(.has-waypoint-summary) > #rs-start-waypoint-tools.rs-between-tools > .rs-add-waypoint-btn,
-  #app #sheet-route .rs-route-stack.has-waypoint:not(.has-waypoint2):not(.has-waypoint-summary) > #rs-waypoint-end-tools.rs-between-tools > .rs-add-waypoint-btn,
-  #sheet-route .rs-route-stack.has-waypoint:not(.has-waypoint2):not(.has-waypoint-summary) > #rs-waypoint-end-tools.rs-between-tools > .rs-add-waypoint-btn,
-  #app #sheet-route .rs-route-stack.has-waypoint2:not(.has-waypoint3):not(.has-waypoint-summary) > #rs-waypoint2-end-tools.rs-between-tools > .rs-add-waypoint-btn,
-  #sheet-route .rs-route-stack.has-waypoint2:not(.has-waypoint3):not(.has-waypoint-summary) > #rs-waypoint2-end-tools.rs-between-tools > .rs-add-waypoint-btn{
-    margin-top:11px!important;
-  }
-}
-
-
-/* V6-81: final route arrow center + add button separation.
-   Do not move horizontal position. One common vertical rule for every visible arrow.
-   Add waypoint button is separated downward by margin so it never overlaps the arrow. */
-#app #sheet-route .rs-route-stack > .rs-between-tools,
-#sheet-route .rs-route-stack > .rs-between-tools{
-  top:auto!important;
-  margin-top:0!important;
-  transform:translate(4px,34px)!important;
-  gap:18px!important;
 }
 #app #sheet-route .rs-route-stack > .rs-between-tools > .rs-swap-btn,
 #sheet-route .rs-route-stack > .rs-between-tools > .rs-swap-btn{
@@ -9338,7 +9199,10 @@ html.ios-device #app #sheet-route .route-sheet-x{
 }
 #app #sheet-route .rs-route-stack > .rs-between-tools > .rs-add-waypoint-btn,
 #sheet-route .rs-route-stack > .rs-between-tools > .rs-add-waypoint-btn{
-  margin-top:8px!important;
+  margin-top:14px!important;
+  height:28px!important;
+  min-height:28px!important;
+  max-height:28px!important;
 }
 #app #sheet-route .rs-route-stack.has-waypoint-summary > .rs-between-tools,
 #sheet-route .rs-route-stack.has-waypoint-summary > .rs-between-tools{
@@ -9348,10 +9212,10 @@ html.ios-device #app #sheet-route .route-sheet-x{
   #app #sheet-route .rs-route-stack > .rs-between-tools,
   #sheet-route .rs-route-stack > .rs-between-tools{
     transform:translate(3px,33px)!important;
-    gap:17px!important;
+    gap:11px!important;
   }
   #app #sheet-route .rs-route-stack > .rs-between-tools > .rs-add-waypoint-btn,
   #sheet-route .rs-route-stack > .rs-between-tools > .rs-add-waypoint-btn{
-    margin-top:7px!important;
+    margin-top:13px!important;
   }
 }
