@@ -9312,3 +9312,21 @@ html.ios-device #app #sheet-route .route-sheet-x{
   visibility:hidden!important;
   pointer-events:none!important;
 }
+
+
+/* WebView V6-59: 경유지가 없는 기본 입력 상태도 결과 카드와 같은 높이 기준을 유지한다.
+   - 다시선택 직후(출발/도착 비어 있음)
+   - 출발/도착 선택 완료 후(경로검색 버튼 표시)
+   두 상태 모두 첫 번째 결과 카드 높이를 기준으로 고정한다.
+   경유지1/2/3이 열린 상태와 경로 결과 화면은 건드리지 않는다. */
+#sheet-route.route-basic-input:not(.route-result-showing),
+#sheet-route.route-reset-input:not(.route-result-showing){
+  min-height:316px!important;
+}
+#sheet-route.route-basic-input:not(.route-result-showing) #rs-top,
+#sheet-route.route-reset-input:not(.route-result-showing) #rs-top{
+  flex-shrink:0!important;
+}
+#sheet-route.route-basic-input:not(.route-result-showing) #rs-search-btn{
+  margin-top:14px!important;
+}

@@ -1378,7 +1378,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=WebView-Clean-58';
+    frame.src='diocese.html?v=WebView-Clean-59';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1724,7 +1724,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='WebView-Clean-58';
+const _PARISH_ASSET_VERSION='WebView-Clean-59';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -1887,7 +1887,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='WebView-Clean-58';
+const _PRAYER_ASSET_VERSION='WebView-Clean-59';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2232,7 +2232,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='WebView-Clean-58';
+const _SHRINE_ASSET_VERSION='WebView-Clean-59';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -3958,6 +3958,10 @@ function _syncRouteWaypointBoxes(){
     // 경유지가 없고 도착지가 아직 없을 때만 적용해서 일반 경유지/결과 흐름은 건드리지 않는다.
     const tallResetInput=!!(!resultShowing && !w1Visible && !w2Visible && !w3Visible && !(_rE&&_rE.lat&&_rE.lng));
     sheet.classList.toggle('route-reset-input', tallResetInput);
+    // WebView V6-59: 경유지가 없는 기본 입력 카드(출발/도착 선택 전후)는
+    // 결과 카드 기준 높이를 유지한다. 경유지 기능/결과 로직은 건드리지 않는다.
+    const basicRouteInput=!!(!resultShowing && !w1Visible && !w2Visible && !w3Visible);
+    sheet.classList.toggle('route-basic-input', basicRouteInput);
   }
   // WebView V6-55: 경유지2/3 입력 상태에서는 경로검색 버튼 아래 안내 영역을 실제로 접는다.
   // CSS 클래스 적용이 늦거나 이전 inline style이 남아도 하단 빈 공간이 생기지 않도록 여기서 직접 동기화한다.
