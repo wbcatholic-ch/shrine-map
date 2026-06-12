@@ -1812,6 +1812,37 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, #3F6F5A, #4F846C
   cursor: pointer;
   flex-shrink: 0;
 }
+
+#missa-frame{
+  flex:1;
+  min-height:0;
+  width:100%;
+  border:0;
+  background:#fff;
+}
+#missa-quick-nav{
+  position:absolute;
+  right:12px;
+  bottom:calc(16px + env(safe-area-inset-bottom, 0px));
+  z-index:3;
+  display:flex;
+  flex-direction:column;
+  gap:7px;
+  pointer-events:auto;
+}
+#missa-quick-nav button{
+  min-width:68px;
+  height:34px;
+  border-radius:12px;
+  border:1px solid rgba(14,21,53,.22);
+  background:rgba(14,21,53,.9);
+  color:#f7e5bd;
+  font-size:12px;
+  font-weight:800;
+  box-shadow:0 4px 14px rgba(0,0,0,.18);
+}
+#missa-quick-nav button:active{transform:translateY(1px);}
+
 #missa-external-panel { flex: 1; display: flex; align-items: flex-start; justify-content: center; background: #f8f6f2; padding: 42px 18px 18px; overflow-y: auto; }
 .missa-external-card { width: min(420px,100%); background: #fff; border: 1px solid #e5ded3; border-radius: 18px; padding: 28px 20px; text-align: center; box-shadow: 0 8px 26px rgba(14,21,53,.08); }
 .missa-external-icon { width: 54px; height: 54px; margin: 0 auto 14px; border-radius: 16px; background: #f5efe4; color: #b7791f; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 900; }
@@ -9177,4 +9208,4 @@ body.route-search-modal-open #sheet-route{
   display:none!important;
 }
 
-/* V6-92: align route arrow tool origin to row top; keep JS visibility restore. */
+/* V6-93: align route arrow tool origin to row top; keep JS visibility restore. */
