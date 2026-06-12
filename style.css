@@ -8933,7 +8933,7 @@ html.diocese-doc .si-r:last-child {
 }
 
 
-/* V6-50 route sheet tool alignment.
+/* V6-51 route sheet tool alignment.
    Keep waypoint function and previous WebView route-card design.
    Tools use one fixed right column: arrow between boxes, +waypoint directly below it.
    The same alignment applies from 내주변/성당찾기/성지찾기/피정의집찾기 entry paths. */
@@ -9130,7 +9130,7 @@ html.diocese-doc .si-r:last-child {
   align-self:flex-start!important;
 }
 
-/* V6-50: 결과 화면에서도 출발/도착만 있는 경우 +경유지 버튼을 표시한다.
+/* V6-51: 결과 화면에서도 출발/도착만 있는 경우 +경유지 버튼을 표시한다.
    겹침은 숨김이 아니라 오른쪽 도구 칸 위치로 해결한다. */
 #sheet-route.route-result-showing .rs-between-tools .rs-add-waypoint-btn{display:flex;}
 
@@ -9160,6 +9160,40 @@ html.diocese-doc .si-r:last-child {
   box-sizing:border-box!important;
 }
 #sheet-route .rs-hint{font-size:14px!important;color:#aaa!important;text-align:center!important;padding:16px 0!important;line-height:1.8!important;margin:0!important;}
+
+/* V6-51: from waypoint2 input mode, keep the route card top from rising further.
+   Only the route input stack scrolls; the search button keeps its position.
+   Do not affect completed result-card screens. */
+#sheet-route.route-waypoint-scroll:not(.route-result-showing){
+  max-height:372px!important;
+  overflow:hidden!important;
+}
+#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-top{
+  display:flex!important;
+  flex-direction:column!important;
+  overflow:hidden!important;
+  max-height:100%!important;
+}
+#sheet-route.route-waypoint-scroll:not(.route-result-showing) .rs-route-stack{
+  max-height:226px!important;
+  overflow-y:auto!important;
+  overflow-x:visible!important;
+  -webkit-overflow-scrolling:touch!important;
+  overscroll-behavior:contain!important;
+  padding-right:2px!important;
+}
+#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-search-btn{
+  margin-top:12px!important;
+  flex-shrink:0!important;
+}
+#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-bottom{
+  padding-top:6px!important;
+  padding-bottom:10px!important;
+  flex-shrink:0!important;
+}
+#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-hint{
+  display:none!important;
+}
 #sheet-route .rs-result{background:#fff!important;border-radius:12px!important;padding:12px!important;border:1.5px solid var(--border)!important;box-shadow:0 2px 10px rgba(14,21,53,.08)!important;box-sizing:border-box!important;width:100%!important;max-width:100%!important;margin:0!important;}
 #sheet-route .rs-stats{display:flex!important;gap:8px!important;margin-bottom:10px!important;}
 #sheet-route .rs-stat{flex:1!important;background:var(--navy)!important;border-radius:10px!important;padding:13px 8px!important;text-align:center!important;}
