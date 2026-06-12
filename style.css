@@ -9194,3 +9194,41 @@ html.ios-device #app #sheet-route .route-sheet-x{
   height:26px!important;
   min-height:26px!important;
 }
+
+
+/* V6-74: route card bottom spacing rebalance and waypoint tool alignment.
+   Keep all route/waypoint logic unchanged; only visual spacing. */
+#app #sheet-route,
+#sheet-route{
+  padding-bottom:10px!important;
+}
+#sheet-route #rs-bottom{
+  padding-bottom:8px!important;
+}
+#sheet-route.route-result-showing #rs-bottom{
+  padding-bottom:8px!important;
+}
+#sheet-route .rs-result{
+  padding-bottom:10px!important;
+}
+#sheet-route #rs-search-btn{
+  margin-bottom:10px!important;
+}
+#sheet-route.route-multi-waypoint-input:not(.route-result-showing) #rs-search-btn{
+  margin-bottom:10px!important;
+}
+#sheet-route .rs-between-tools{
+  gap:15px!important;
+  transform:translate(4px,24px)!important;
+}
+#sheet-route .rs-add-waypoint-btn{
+  height:28px!important;
+  min-height:28px!important;
+  max-height:28px!important;
+}
+@media (max-width:370px){
+  #sheet-route .rs-between-tools{
+    gap:14px!important;
+    transform:translate(3px,23px)!important;
+  }
+}
