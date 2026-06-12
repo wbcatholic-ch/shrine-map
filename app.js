@@ -1378,7 +1378,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=WebView-Clean-59';
+    frame.src='diocese.html?v=WebView-Clean-60';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1724,7 +1724,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='WebView-Clean-59';
+const _PARISH_ASSET_VERSION='WebView-Clean-60';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -1887,7 +1887,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='WebView-Clean-59';
+const _PRAYER_ASSET_VERSION='WebView-Clean-60';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2232,7 +2232,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='WebView-Clean-59';
+const _SHRINE_ASSET_VERSION='WebView-Clean-60';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -3943,7 +3943,7 @@ function _syncRouteWaypointBoxes(){
   const w1Visible=!!(resultShowing ? p1Ready : rawW1Visible);
   const w2Visible=!!(resultShowing ? (p1Ready && p2Ready) : rawW2Visible);
   const w3Visible=!!(resultShowing ? (p1Ready && p2Ready && p3Ready) : rawW3Visible);
-  const shouldScrollForMultiWaypoint=!!(!summaryVisible && (w2Visible || w3Visible || routeWaypoints.length >= 2));
+  const multiWaypointInput=!!(!resultShowing && !summaryVisible && (w2Visible || w3Visible || routeWaypoints.length >= 2));
   const summaryBox=$('rs-waypoints-summary-box'), summaryLbl=$('rs-waypoints-summary-lbl');
   const box1=$('rs-waypoint-box'), box2=$('rs-waypoint2-box'), box3=$('rs-waypoint3-box');
   const add1=$('rs-add-waypoint-btn'), add2=$('rs-add-waypoint2-btn'), add3=$('rs-add-waypoint3-btn');
@@ -3951,30 +3951,13 @@ function _syncRouteWaypointBoxes(){
   const wx1=$('rs-waypoint-x'), wx2=$('rs-waypoint2-x'), wx3=$('rs-waypoint3-x');
   if(stack){ stack.classList.toggle('has-waypoint', !summaryVisible && w1Visible); stack.classList.toggle('has-waypoint2', !summaryVisible && w2Visible); stack.classList.toggle('has-waypoint3', !summaryVisible && w3Visible); stack.classList.toggle('has-waypoint-summary', summaryVisible); stack.classList.toggle('route-result-showing', resultShowing); }
   if(sheet){
-    sheet.classList.toggle('route-waypoint-scroll', shouldScrollForMultiWaypoint);
+    // V6-60 cleanup: JS only assigns route state classes.
+    // Height, gap, and bottom-area layout are handled in style.css.
     sheet.classList.toggle('route-result-showing', resultShowing);
-    sheet.classList.toggle('route-multi-waypoint-input', shouldScrollForMultiWaypoint && !resultShowing);
-    // WebView V6-56: 다시선택 후 출발/도착 선택 화면은 결과 카드 높이와 비슷하게 유지한다.
-    // 경유지가 없고 도착지가 아직 없을 때만 적용해서 일반 경유지/결과 흐름은 건드리지 않는다.
-    const tallResetInput=!!(!resultShowing && !w1Visible && !w2Visible && !w3Visible && !(_rE&&_rE.lat&&_rE.lng));
-    sheet.classList.toggle('route-reset-input', tallResetInput);
-    // WebView V6-59: 경유지가 없는 기본 입력 카드(출발/도착 선택 전후)는
-    // 결과 카드 기준 높이를 유지한다. 경유지 기능/결과 로직은 건드리지 않는다.
+    sheet.classList.toggle('route-multi-waypoint-input', multiWaypointInput);
     const basicRouteInput=!!(!resultShowing && !w1Visible && !w2Visible && !w3Visible);
     sheet.classList.toggle('route-basic-input', basicRouteInput);
   }
-  // WebView V6-55: 경유지2/3 입력 상태에서는 경로검색 버튼 아래 안내 영역을 실제로 접는다.
-  // CSS 클래스 적용이 늦거나 이전 inline style이 남아도 하단 빈 공간이 생기지 않도록 여기서 직접 동기화한다.
-  try{
-    const rsBottom=$('rs-bottom'), rsHint=$('rs-hint');
-    if(shouldScrollForMultiWaypoint && !resultShowing){
-      if(rsBottom){ rsBottom.style.display='none'; rsBottom.style.padding='0'; rsBottom.style.margin='0'; rsBottom.style.height='0'; rsBottom.style.minHeight='0'; }
-      if(rsHint){ rsHint.style.display='none'; }
-    }else{
-      if(rsBottom){ rsBottom.style.display=''; rsBottom.style.padding=''; rsBottom.style.margin=''; rsBottom.style.height=''; rsBottom.style.minHeight=''; }
-      if(rsHint){ rsHint.style.display=''; }
-    }
-  }catch(e){ console.warn('[가톨릭길동무]', e); }
   if(summaryBox){ summaryBox.style.display=summaryVisible?'flex':'none'; if(summaryVisible){ const summaryText='경유지 '+routeWaypoints.length+'곳 · '+routeWaypoints.map(function(p,idx){ return (idx+1)+'. '+((p&&p.name)||('경유지'+(idx+1))); }).join(' → '); if(summaryLbl) summaryLbl.textContent=summaryText; summaryBox.setAttribute('title', '눌러서 경유지 박스 펼치기 · '+summaryText); summaryBox.setAttribute('role','button'); summaryBox.setAttribute('tabindex','0'); summaryBox.setAttribute('aria-label','경유지 요약 박스 펼치기'); }else{ if(summaryLbl) summaryLbl.textContent='경유지 없음'; summaryBox.removeAttribute('title'); summaryBox.removeAttribute('role'); summaryBox.removeAttribute('tabindex'); summaryBox.removeAttribute('aria-label'); } }
   if(box1) box1.style.display=(!summaryVisible && w1Visible)?'flex':'none'; if(box2) box2.style.display=(!summaryVisible && w2Visible)?'flex':'none'; if(box3) box3.style.display=(!summaryVisible && w3Visible)?'flex':'none';
   // V6-50: 결과 화면에서도 출발/도착만 있는 경우 +경유지 버튼은 보여야 한다.

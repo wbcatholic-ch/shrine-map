@@ -8933,13 +8933,11 @@ html.diocese-doc .si-r:last-child {
 }
 
 
-/* V6-51 route sheet tool alignment.
-   Keep waypoint function and previous WebView route-card design.
-   Tools use one fixed right column: arrow between boxes, +waypoint directly below it.
-   The same alignment applies from 내주변/성당찾기/성지찾기/피정의집찾기 entry paths. */
+/* WebView V6-60 route cleanup: one final route-card layout block.
+   PWA is reference only; this is WebView route-card cleanup.
+   Keep waypoint logic. Remove accumulated patch-style layout overrides. */
 .oai-route-point-overlay{pointer-events:none!important;transform:translateZ(0);}
 
-/* route sheet: use the old WebView card behavior */
 #app #sheet-route,
 #sheet-route{
   position:absolute!important;
@@ -8966,8 +8964,30 @@ html.diocese-doc .si-r:last-child {
   overflow:visible!important;
   max-height:none!important;
 }
+#sheet-route #rs-hint,
+#app #sheet-route #rs-hint{
+  display:none!important;
+  padding:0!important;
+  margin:0!important;
+  height:0!important;
+  min-height:0!important;
+  max-height:0!important;
+  overflow:hidden!important;
+}
 
-/* one stable grid: left boxes + right tool column */
+#sheet-route #rs-top::before,
+#sheet-route #rs-top::after,
+#sheet-route #rs-bottom::before,
+#sheet-route #rs-bottom::after,
+#sheet-route .rs-route-stack::before,
+#sheet-route .rs-route-stack::after{
+  content:none!important;
+  display:none!important;
+  border:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+}
+
 #sheet-route .rs-route-stack{
   display:grid!important;
   grid-template-columns:minmax(0,1fr) 74px!important;
@@ -8983,17 +9003,6 @@ html.diocese-doc .si-r:last-child {
   background:transparent!important;
 }
 
-/* hide any pseudo lines from previous styles */
-#sheet-route #rs-top::before,
-#sheet-route #rs-top::after,
-#sheet-route #rs-bottom::before,
-#sheet-route #rs-bottom::after,
-#sheet-route .rs-route-stack::before,
-#sheet-route .rs-route-stack::after{
-  content:none!important;display:none!important;border:0!important;box-shadow:none!important;background:transparent!important;
-}
-
-/* boxes: old WebView dimensions and colors */
 #sheet-route .rs-start-box,
 #sheet-route .rs-end-box,
 #sheet-route .rs-waypoint-box,
@@ -9021,7 +9030,6 @@ html.diocese-doc .si-r:last-child {
 #sheet-route .rs-waypoints-summary-box{grid-column:1!important;background:#fff7ea!important;border-color:#d97706!important;touch-action:manipulation!important;}
 #sheet-route .rs-waypoints-summary-dot{background:#d97706!important;}
 
-/* fixed row positions. The grid gap supplies all vertical spacing. */
 #sheet-route .rs-waypoint-box{grid-row:2!important;}
 #sheet-route .rs-waypoint2-box{grid-row:3!important;}
 #sheet-route .rs-waypoint3-box{grid-row:4!important;}
@@ -9032,7 +9040,6 @@ html.diocese-doc .si-r:last-child {
 #sheet-route .rs-route-stack.has-waypoint3 .rs-end-box{grid-row:5!important;}
 #sheet-route .rs-route-stack.has-waypoint-summary .rs-end-box{grid-row:3!important;}
 
-/* right-side tools: old style, one narrow column, no overlap with result card */
 #sheet-route .rs-between-tools{
   grid-column:2!important;
   width:74px!important;
@@ -9057,8 +9064,6 @@ html.diocese-doc .si-r:last-child {
   padding:0!important;
 }
 #sheet-route #rs-start-waypoint-tools{grid-row:1!important;}
-#sheet-route .rs-between-tools[style*="block"],
-#sheet-route .rs-between-tools[style*="flex"]{display:flex!important;}
 #sheet-route .rs-waypoint-end-tools{grid-row:2!important;}
 #sheet-route .rs-waypoint2-end-tools{grid-row:3!important;}
 #sheet-route .rs-waypoint3-end-tools{grid-row:4!important;}
@@ -9125,13 +9130,8 @@ html.diocese-doc .si-r:last-child {
   margin-left:0!important;
   margin-right:0!important;
   flex-shrink:0!important;
-}
-#sheet-route .rs-between-tools .rs-add-waypoint-btn{
   align-self:flex-start!important;
 }
-
-/* V6-51: 결과 화면에서도 출발/도착만 있는 경우 +경유지 버튼을 표시한다.
-   겹침은 숨김이 아니라 오른쪽 도구 칸 위치로 해결한다. */
 #sheet-route.route-result-showing .rs-between-tools .rs-add-waypoint-btn{display:flex;}
 
 #sheet-route .rs-dot{width:10px!important;height:10px!important;border-radius:50%!important;flex-shrink:0!important;}
@@ -9159,41 +9159,20 @@ html.diocese-doc .si-r:last-child {
   gap:8px!important;
   box-sizing:border-box!important;
 }
-#sheet-route .rs-hint{font-size:14px!important;color:#aaa!important;text-align:center!important;padding:16px 0!important;line-height:1.8!important;margin:0!important;}
+#sheet-route #rs-search-btn.rs-search-placeholder{
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
 
-/* V6-55: from waypoint2/3 input mode, keep the bottom/search area fixed and grow the sheet upward.
-   Do not create an inner scroll: all route boxes must be visible in the same card. */
-#sheet-route.route-waypoint-scroll:not(.route-result-showing){
-  max-height:none!important;
-  overflow:visible!important;
-}
-#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-top{
-  display:flex!important;
-  flex-direction:column!important;
-  overflow:visible!important;
-  max-height:none!important;
-}
-#sheet-route.route-waypoint-scroll:not(.route-result-showing) .rs-route-stack{
-  max-height:none!important;
-  overflow:visible!important;
-  overflow-y:visible!important;
-  overflow-x:visible!important;
-  -webkit-overflow-scrolling:auto!important;
-  overscroll-behavior:auto!important;
-  padding-right:0!important;
-}
-#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-search-btn{
-  margin-top:12px!important;
-  flex-shrink:0!important;
-}
-#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-bottom{
-  padding-top:0!important;
-  padding-bottom:0!important;
-  flex-shrink:0!important;
-}
-#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-hint{
-  display:none!important;
-}
+#sheet-route.route-basic-input:not(.route-result-showing){min-height:316px!important;}
+#sheet-route.route-basic-input:not(.route-result-showing) #rs-top{flex-shrink:0!important;}
+#sheet-route.route-basic-input:not(.route-result-showing) #rs-search-btn{margin-top:14px!important;}
+#sheet-route.route-multi-waypoint-input:not(.route-result-showing){max-height:none!important;overflow:visible!important;}
+#sheet-route.route-multi-waypoint-input:not(.route-result-showing) #rs-top,
+#sheet-route.route-multi-waypoint-input:not(.route-result-showing) .rs-route-stack{max-height:none!important;overflow:visible!important;}
+#sheet-route.route-multi-waypoint-input:not(.route-result-showing) #rs-bottom{padding-top:0!important;padding-bottom:0!important;}
+#sheet-route.route-multi-waypoint-input:not(.route-result-showing) #rs-search-btn{margin-bottom:8px!important;}
+
 #sheet-route .rs-result{background:#fff!important;border-radius:12px!important;padding:12px!important;border:1.5px solid var(--border)!important;box-shadow:0 2px 10px rgba(14,21,53,.08)!important;box-sizing:border-box!important;width:100%!important;max-width:100%!important;margin:0!important;}
 #sheet-route .rs-stats{display:flex!important;gap:8px!important;margin-bottom:10px!important;}
 #sheet-route .rs-stat{flex:1!important;background:var(--navy)!important;border-radius:10px!important;padding:13px 8px!important;text-align:center!important;}
@@ -9246,87 +9225,4 @@ html.ios-device #app #sheet-route .route-sheet-x{
   #sheet-route .rs-waypoint-box,
   #sheet-route .rs-waypoints-summary-box,
   #sheet-route .rs-end-box{padding-left:10px!important;padding-right:9px!important;}
-}
-
-/* WebView V6-55: 경유지2/3 입력 상태에서 경로검색 버튼 아래 빈 안내 영역 제거.
-   기능/마커/결과카드는 건드리지 않고 입력 중 하단 공간만 줄인다. */
-#sheet-route.route-multi-waypoint-input:not(.route-result-showing) #rs-bottom,
-#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-bottom{
-  display:none!important;
-  padding:0!important;
-  margin:0!important;
-  height:0!important;
-  min-height:0!important;
-  max-height:0!important;
-  overflow:hidden!important;
-}
-#sheet-route.route-multi-waypoint-input:not(.route-result-showing) #rs-hint,
-#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-hint{
-  display:none!important;
-  padding:0!important;
-  margin:0!important;
-  height:0!important;
-  min-height:0!important;
-  max-height:0!important;
-  overflow:hidden!important;
-}
-#sheet-route.route-multi-waypoint-input:not(.route-result-showing) #rs-search-btn,
-#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-search-btn{
-  margin-bottom:8px!important;
-}
-
-
-/* WebView V6-55: delete bottom route instruction text and its reserved space. */
-#sheet-route #rs-hint,
-#app #sheet-route #rs-hint{
-  display:none!important;
-  padding:0!important;
-  margin:0!important;
-  height:0!important;
-  min-height:0!important;
-  max-height:0!important;
-  overflow:hidden!important;
-}
-
-/* WebView V6-56: result view hides empty waypoint placeholders; reselect input keeps result-card-height. */
-#sheet-route.route-reset-input:not(.route-result-showing){
-  min-height:316px!important;
-}
-#sheet-route.route-reset-input:not(.route-result-showing) #rs-top{
-  flex-shrink:0!important;
-}
-#sheet-route.route-reset-input:not(.route-result-showing) #rs-bottom{
-  display:none!important;
-  height:0!important;
-  min-height:0!important;
-  max-height:0!important;
-  padding:0!important;
-  margin:0!important;
-  overflow:hidden!important;
-}
-
-
-/* WebView V6-58: 목적지를 취소해도 길찾기 카드 높이는 유지한다.
-   경로검색 버튼은 보이지 않지만 같은 자리를 예약했다가, 출발/도착이 다시 채워지면 같은 위치에 복귀한다. */
-#sheet-route #rs-search-btn.rs-search-placeholder{
-  visibility:hidden!important;
-  pointer-events:none!important;
-}
-
-
-/* WebView V6-59: 경유지가 없는 기본 입력 상태도 결과 카드와 같은 높이 기준을 유지한다.
-   - 다시선택 직후(출발/도착 비어 있음)
-   - 출발/도착 선택 완료 후(경로검색 버튼 표시)
-   두 상태 모두 첫 번째 결과 카드 높이를 기준으로 고정한다.
-   경유지1/2/3이 열린 상태와 경로 결과 화면은 건드리지 않는다. */
-#sheet-route.route-basic-input:not(.route-result-showing),
-#sheet-route.route-reset-input:not(.route-result-showing){
-  min-height:316px!important;
-}
-#sheet-route.route-basic-input:not(.route-result-showing) #rs-top,
-#sheet-route.route-reset-input:not(.route-result-showing) #rs-top{
-  flex-shrink:0!important;
-}
-#sheet-route.route-basic-input:not(.route-result-showing) #rs-search-btn{
-  margin-top:14px!important;
 }
