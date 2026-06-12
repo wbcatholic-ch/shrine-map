@@ -9248,22 +9248,29 @@ html.ios-device #app #sheet-route .route-sheet-x{
   #sheet-route .rs-end-box{padding-left:10px!important;padding-right:9px!important;}
 }
 
-
-/* V6-52: 경유지2/3 입력 상태도 인포카드 안에서 억지 스크롤을 만들지 않는다.
-   기존 카드 높이 흐름 안에서 보이는 높이까지 자연스럽게 표시한다. */
-#sheet-route.route-waypoint-scroll:not(.route-result-showing){
-  max-height:none!important;
-  overflow:visible!important;
-}
-#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-top{
-  overflow:visible!important;
-  max-height:none!important;
-}
-#sheet-route.route-waypoint-scroll:not(.route-result-showing) .rs-route-stack{
-  max-height:none!important;
-  overflow:visible!important;
-  padding-right:0!important;
-}
+/* WebView V6-53: 경유지2/3 입력 상태에서 경로검색 버튼 아래 빈 안내 영역 제거.
+   기능/마커/결과카드는 건드리지 않고 입력 중 하단 공간만 줄인다. */
+#sheet-route.route-multi-waypoint-input:not(.route-result-showing) #rs-bottom,
 #sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-bottom{
-  padding-bottom:14px!important;
+  display:none!important;
+  padding:0!important;
+  margin:0!important;
+  height:0!important;
+  min-height:0!important;
+  max-height:0!important;
+  overflow:hidden!important;
+}
+#sheet-route.route-multi-waypoint-input:not(.route-result-showing) #rs-hint,
+#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-hint{
+  display:none!important;
+  padding:0!important;
+  margin:0!important;
+  height:0!important;
+  min-height:0!important;
+  max-height:0!important;
+  overflow:hidden!important;
+}
+#sheet-route.route-multi-waypoint-input:not(.route-result-showing) #rs-search-btn,
+#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-search-btn{
+  margin-bottom:8px!important;
 }
