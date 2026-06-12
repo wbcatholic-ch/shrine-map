@@ -1378,7 +1378,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=WebView-Clean-55';
+    frame.src='diocese.html?v=WebView-Clean-56';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1724,7 +1724,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='WebView-Clean-55';
+const _PARISH_ASSET_VERSION='WebView-Clean-56';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -1887,7 +1887,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='WebView-Clean-55';
+const _PRAYER_ASSET_VERSION='WebView-Clean-56';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2232,7 +2232,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='WebView-Clean-55';
+const _SHRINE_ASSET_VERSION='WebView-Clean-56';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -3932,12 +3932,17 @@ function _syncRouteWaypointBoxes(){
   // 경유지2·경유지3 빈 박스와 화살표가 뜨는 일을 막는다.
   if(!(_routeWaypointEnabled || p1Ready)){ _routeWaypoint2Enabled=false; _routeWaypoint3Enabled=false; }
   if(!(_routeWaypoint2Enabled || p2Ready)){ _routeWaypoint3Enabled=false; }
-  const w1Visible=!!(_routeWaypointEnabled || p1Ready);
-  const w2Visible=!!((_routeWaypoint2Enabled || p2Ready) && w1Visible);
-  const w3Visible=!!((_routeWaypoint3Enabled || p3Ready) && w2Visible);
+  const rawW1Visible=!!(_routeWaypointEnabled || p1Ready);
+  const rawW2Visible=!!((_routeWaypoint2Enabled || p2Ready) && rawW1Visible);
+  const rawW3Visible=!!((_routeWaypoint3Enabled || p3Ready) && rawW2Visible);
   const resultShowing=!!(_polyline || ($('rs-result') && $('rs-result').style.display !== 'none'));
   const summaryExpanded=!!_routeWaypointSummaryExpanded;
   const summaryVisible=!!(resultShowing && routeWaypoints.length && !summaryExpanded);
+  // WebView V6-56: 경로 결과 화면에서는 값이 없는 빈 경유지 박스를 표시하지 않는다.
+  // +경유지를 눌러 열어 두었더라도 실제 경유지 좌표가 없으면 결과는 출발→도착으로만 보인다.
+  const w1Visible=!!(resultShowing ? p1Ready : rawW1Visible);
+  const w2Visible=!!(resultShowing ? (p1Ready && p2Ready) : rawW2Visible);
+  const w3Visible=!!(resultShowing ? (p1Ready && p2Ready && p3Ready) : rawW3Visible);
   const shouldScrollForMultiWaypoint=!!(!summaryVisible && (w2Visible || w3Visible || routeWaypoints.length >= 2));
   const summaryBox=$('rs-waypoints-summary-box'), summaryLbl=$('rs-waypoints-summary-lbl');
   const box1=$('rs-waypoint-box'), box2=$('rs-waypoint2-box'), box3=$('rs-waypoint3-box');
@@ -3945,7 +3950,15 @@ function _syncRouteWaypointBoxes(){
   const tools0=$('rs-start-waypoint-tools'), tools1=$('rs-waypoint-end-tools'), tools2=$('rs-waypoint2-end-tools'), tools3=$('rs-waypoint3-end-tools');
   const wx1=$('rs-waypoint-x'), wx2=$('rs-waypoint2-x'), wx3=$('rs-waypoint3-x');
   if(stack){ stack.classList.toggle('has-waypoint', !summaryVisible && w1Visible); stack.classList.toggle('has-waypoint2', !summaryVisible && w2Visible); stack.classList.toggle('has-waypoint3', !summaryVisible && w3Visible); stack.classList.toggle('has-waypoint-summary', summaryVisible); stack.classList.toggle('route-result-showing', resultShowing); }
-  if(sheet){ sheet.classList.toggle('route-waypoint-scroll', shouldScrollForMultiWaypoint); sheet.classList.toggle('route-result-showing', resultShowing); sheet.classList.toggle('route-multi-waypoint-input', shouldScrollForMultiWaypoint && !resultShowing); }
+  if(sheet){
+    sheet.classList.toggle('route-waypoint-scroll', shouldScrollForMultiWaypoint);
+    sheet.classList.toggle('route-result-showing', resultShowing);
+    sheet.classList.toggle('route-multi-waypoint-input', shouldScrollForMultiWaypoint && !resultShowing);
+    // WebView V6-56: 다시선택 후 출발/도착 선택 화면은 결과 카드 높이와 비슷하게 유지한다.
+    // 경유지가 없고 도착지가 아직 없을 때만 적용해서 일반 경유지/결과 흐름은 건드리지 않는다.
+    const tallResetInput=!!(!resultShowing && !w1Visible && !w2Visible && !w3Visible && !(_rE&&_rE.lat&&_rE.lng));
+    sheet.classList.toggle('route-reset-input', tallResetInput);
+  }
   // WebView V6-55: 경유지2/3 입력 상태에서는 경로검색 버튼 아래 안내 영역을 실제로 접는다.
   // CSS 클래스 적용이 늦거나 이전 inline style이 남아도 하단 빈 공간이 생기지 않도록 여기서 직접 동기화한다.
   try{

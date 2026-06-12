@@ -9287,3 +9287,20 @@ html.ios-device #app #sheet-route .route-sheet-x{
   max-height:0!important;
   overflow:hidden!important;
 }
+
+/* WebView V6-56: result view hides empty waypoint placeholders; reselect input keeps result-card-height. */
+#sheet-route.route-reset-input:not(.route-result-showing){
+  min-height:316px!important;
+}
+#sheet-route.route-reset-input:not(.route-result-showing) #rs-top{
+  flex-shrink:0!important;
+}
+#sheet-route.route-reset-input:not(.route-result-showing) #rs-bottom{
+  display:none!important;
+  height:0!important;
+  min-height:0!important;
+  max-height:0!important;
+  padding:0!important;
+  margin:0!important;
+  overflow:hidden!important;
+}
