@@ -9268,3 +9268,45 @@ html.ios-device #app #sheet-route .route-sheet-x{
     transform:translate(3px,23px)!important;
   }
 }
+
+
+/* V6-76: route tool real vertical override.
+   Do not touch route logic. Move only the active last tool line down for 0/1/2 waypoint states.
+   The 3-waypoint state remains at the V6-75 normal reference. */
+#app #sheet-route .rs-route-stack:not(.has-waypoint):not(.has-waypoint-summary) > #rs-start-waypoint-tools.rs-between-tools,
+#sheet-route .rs-route-stack:not(.has-waypoint):not(.has-waypoint-summary) > #rs-start-waypoint-tools.rs-between-tools{
+  transform:translateX(4px)!important;
+  top:12px!important;
+  margin-top:0!important;
+  gap:18px!important;
+}
+#app #sheet-route .rs-route-stack.has-waypoint:not(.has-waypoint2):not(.has-waypoint-summary) > #rs-waypoint-end-tools.rs-between-tools,
+#sheet-route .rs-route-stack.has-waypoint:not(.has-waypoint2):not(.has-waypoint-summary) > #rs-waypoint-end-tools.rs-between-tools{
+  transform:translateX(4px)!important;
+  top:12px!important;
+  margin-top:0!important;
+  gap:18px!important;
+}
+#app #sheet-route .rs-route-stack.has-waypoint2:not(.has-waypoint3):not(.has-waypoint-summary) > #rs-waypoint2-end-tools.rs-between-tools,
+#sheet-route .rs-route-stack.has-waypoint2:not(.has-waypoint3):not(.has-waypoint-summary) > #rs-waypoint2-end-tools.rs-between-tools{
+  transform:translateX(4px)!important;
+  top:12px!important;
+  margin-top:0!important;
+  gap:18px!important;
+}
+#app #sheet-route .rs-route-stack.has-waypoint3:not(.has-waypoint-summary) > .rs-between-tools,
+#sheet-route .rs-route-stack.has-waypoint3:not(.has-waypoint-summary) > .rs-between-tools{
+  top:auto!important;
+}
+@media (max-width:370px){
+  #app #sheet-route .rs-route-stack:not(.has-waypoint):not(.has-waypoint-summary) > #rs-start-waypoint-tools.rs-between-tools,
+  #sheet-route .rs-route-stack:not(.has-waypoint):not(.has-waypoint-summary) > #rs-start-waypoint-tools.rs-between-tools,
+  #app #sheet-route .rs-route-stack.has-waypoint:not(.has-waypoint2):not(.has-waypoint-summary) > #rs-waypoint-end-tools.rs-between-tools,
+  #sheet-route .rs-route-stack.has-waypoint:not(.has-waypoint2):not(.has-waypoint-summary) > #rs-waypoint-end-tools.rs-between-tools,
+  #app #sheet-route .rs-route-stack.has-waypoint2:not(.has-waypoint3):not(.has-waypoint-summary) > #rs-waypoint2-end-tools.rs-between-tools,
+  #sheet-route .rs-route-stack.has-waypoint2:not(.has-waypoint3):not(.has-waypoint-summary) > #rs-waypoint2-end-tools.rs-between-tools{
+    transform:translateX(3px)!important;
+    top:12px!important;
+    gap:17px!important;
+  }
+}
