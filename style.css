@@ -8933,7 +8933,7 @@ html.diocese-doc .si-r:last-child {
 }
 
 
-/* V6-49 route sheet tool alignment.
+/* V6-50 route sheet tool alignment.
    Keep waypoint function and previous WebView route-card design.
    Tools use one fixed right column: arrow between boxes, +waypoint directly below it.
    The same alignment applies from 내주변/성당찾기/성지찾기/피정의집찾기 entry paths. */
@@ -9130,9 +9130,9 @@ html.diocese-doc .si-r:last-child {
   align-self:flex-start!important;
 }
 
-/* In result mode, restore the old clean result-card design: no +waypoint overlap. */
-#sheet-route.route-result-showing .rs-add-waypoint-btn{display:none!important;}
-#sheet-route.route-result-showing .rs-between-tools:has(.rs-add-waypoint-btn[style*="inline-flex"]){display:none!important;}
+/* V6-50: 결과 화면에서도 출발/도착만 있는 경우 +경유지 버튼을 표시한다.
+   겹침은 숨김이 아니라 오른쪽 도구 칸 위치로 해결한다. */
+#sheet-route.route-result-showing .rs-between-tools .rs-add-waypoint-btn{display:flex;}
 
 #sheet-route .rs-dot{width:10px!important;height:10px!important;border-radius:50%!important;flex-shrink:0!important;}
 #sheet-route .rs-lbl{flex:1!important;min-width:0!important;font-size:14px!important;color:#555!important;font-weight:500!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}

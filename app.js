@@ -1378,7 +1378,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=WebView-Clean-49';
+    frame.src='diocese.html?v=WebView-Clean-50';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1724,7 +1724,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='WebView-Clean-49';
+const _PARISH_ASSET_VERSION='WebView-Clean-50';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -1887,7 +1887,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='WebView-Clean-49';
+const _PRAYER_ASSET_VERSION='WebView-Clean-50';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2232,7 +2232,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='WebView-Clean-49';
+const _SHRINE_ASSET_VERSION='WebView-Clean-50';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -3948,7 +3948,9 @@ function _syncRouteWaypointBoxes(){
   if(sheet){ sheet.classList.toggle('route-waypoint-scroll', shouldScrollForMultiWaypoint); sheet.classList.toggle('route-result-showing', resultShowing); }
   if(summaryBox){ summaryBox.style.display=summaryVisible?'flex':'none'; if(summaryVisible){ const summaryText='경유지 '+routeWaypoints.length+'곳 · '+routeWaypoints.map(function(p,idx){ return (idx+1)+'. '+((p&&p.name)||('경유지'+(idx+1))); }).join(' → '); if(summaryLbl) summaryLbl.textContent=summaryText; summaryBox.setAttribute('title', '눌러서 경유지 박스 펼치기 · '+summaryText); summaryBox.setAttribute('role','button'); summaryBox.setAttribute('tabindex','0'); summaryBox.setAttribute('aria-label','경유지 요약 박스 펼치기'); }else{ if(summaryLbl) summaryLbl.textContent='경유지 없음'; summaryBox.removeAttribute('title'); summaryBox.removeAttribute('role'); summaryBox.removeAttribute('tabindex'); summaryBox.removeAttribute('aria-label'); } }
   if(box1) box1.style.display=(!summaryVisible && w1Visible)?'flex':'none'; if(box2) box2.style.display=(!summaryVisible && w2Visible)?'flex':'none'; if(box3) box3.style.display=(!summaryVisible && w3Visible)?'flex':'none';
-  if(add1) add1.style.display=(!resultShowing && !summaryVisible && !w1Visible)?'inline-flex':'none'; if(add2) add2.style.display=(!resultShowing && !summaryVisible && w1Visible && !w2Visible)?'inline-flex':'none'; if(add3) add3.style.display=(!resultShowing && !summaryVisible && w2Visible && !w3Visible)?'inline-flex':'none';
+  // V6-50: 결과 화면에서도 출발/도착만 있는 경우 +경유지 버튼은 보여야 한다.
+  // 경유지 요약 상태(summaryVisible)에서는 요약 박스를 눌러 펼치는 흐름을 유지한다.
+  if(add1) add1.style.display=(!summaryVisible && !w1Visible)?'inline-flex':'none'; if(add2) add2.style.display=(!summaryVisible && w1Visible && !w2Visible)?'inline-flex':'none'; if(add3) add3.style.display=(!summaryVisible && w2Visible && !w3Visible)?'inline-flex':'none';
   if(tools0) tools0.style.display=summaryVisible?'none':'block'; if(tools1) tools1.style.display=(!summaryVisible && w1Visible)?'flex':'none'; if(tools2) tools2.style.display=(!summaryVisible && w2Visible)?'flex':'none'; if(tools3) tools3.style.display=(!summaryVisible && w3Visible)?'flex':'none';
   if(wx1) wx1.style.display=(!summaryVisible && w1Visible)?'inline-flex':'none'; if(wx2) wx2.style.display=(!summaryVisible && w2Visible)?'inline-flex':'none'; if(wx3) wx3.style.display=(!summaryVisible && w3Visible)?'inline-flex':'none';
 }
