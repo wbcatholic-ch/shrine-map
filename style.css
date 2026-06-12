@@ -9237,31 +9237,197 @@ html.ios-device #sheet-route .route-sheet-x{
   #sheet-route .rs-myloc{ padding-left:8px!important; padding-right:8px!important; }
 }
 
-/* V6-39 WebView route sheet spacing balance only.
-   PWA file is reference only. This block does not add layers or change route logic. */
-#sheet-route:not(.route-result-showing) #rs-top{
-  padding-bottom:12px!important;
+
+/* V6-43 WebView route card final normalization from PWA V6-20 screenshots.
+   PWA is reference only. This block replaces V6-39~V6-42 spacing patches with one clean rule set. */
+#sheet-route{
+  max-height:52vh!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
 }
-#sheet-route:not(.route-result-showing) #rs-search-btn{
-  margin-top:10px!important;
-  margin-bottom:2px!important;
+#sheet-route.route-waypoint-scroll{
+  max-height:min(42vh,330px)!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+  overscroll-behavior:contain!important;
+}
+html.ios-device #app #sheet-route.route-waypoint-scroll{
+  max-height:min(40vh,310px)!important;
+}
+
+#sheet-route #rs-top,
+#sheet-route.route-waypoint-scroll #rs-top,
+#sheet-route.route-result-showing #rs-top,
+#sheet-route.route-waypoint-scroll.route-result-showing #rs-top,
+#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-top{
+  padding:12px 14px 8px 14px!important;
+  margin:0!important;
+  border:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+  overflow:visible!important;
+  box-sizing:border-box!important;
+}
+#sheet-route #rs-bottom,
+#sheet-route.route-result-showing #rs-bottom,
+#sheet-route.route-waypoint-scroll #rs-bottom{
+  padding:10px 14px calc(14px + env(safe-area-inset-bottom,0px)) 14px!important;
+  margin:0!important;
+  border:0!important;
+  box-shadow:none!important;
+  background:transparent!important;
+  overflow:visible!important;
+  box-sizing:border-box!important;
+}
+#sheet-route:not(.route-result-showing) #rs-bottom{
+  display:none!important;
+  height:0!important;
+  min-height:0!important;
+  padding:0!important;
+  margin:0!important;
+  border:0!important;
+  overflow:hidden!important;
+}
+
+#sheet-route #rs-top::before,
+#sheet-route #rs-top::after,
+#sheet-route #rs-bottom::before,
+#sheet-route #rs-bottom::after,
+#sheet-route .rs-route-stack::before,
+#sheet-route .rs-route-stack::after{
+  display:none!important;
+  content:none!important;
+  border:0!important;
+  box-shadow:none!important;
+}
+
+#sheet-route .rs-route-stack,
+#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-top .rs-route-stack,
+#sheet-route.route-waypoint-scroll.route-result-showing #rs-top .rs-route-stack,
+#sheet-route.route-result-showing #rs-top .rs-route-stack{
+  display:grid!important;
+  width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  grid-template-columns:minmax(0,1fr) 64px!important;
+  grid-template-rows:46px 6px 46px!important;
+  column-gap:4px!important;
+  row-gap:0!important;
+  align-items:stretch!important;
+  overflow:visible!important;
+  box-sizing:border-box!important;
+  padding:0!important;
+  margin:0!important;
+}
+#sheet-route .rs-route-stack.has-waypoint{ grid-template-rows:46px 6px 46px 6px 46px!important; }
+#sheet-route .rs-route-stack.has-waypoint2{ grid-template-rows:46px 6px 46px 6px 46px 6px 46px!important; }
+#sheet-route .rs-route-stack.has-waypoint3{ grid-template-rows:46px 6px 46px 6px 46px 6px 46px 6px 46px!important; }
+#sheet-route .rs-route-stack.has-waypoint-summary{ grid-template-rows:46px 6px 46px 6px 46px!important; }
+
+#sheet-route .rs-start-box,
+#sheet-route .rs-waypoint-box,
+#sheet-route .rs-waypoints-summary-box,
+#sheet-route .rs-end-box{
+  height:46px!important;
+  min-height:46px!important;
+  max-height:46px!important;
+  padding:0 12px!important;
+  border-radius:10px!important;
+  margin:0!important;
+  box-sizing:border-box!important;
+}
+#sheet-route .rs-start-box{ background:#f0f5ff!important; border-color:#1565c0!important; }
+#sheet-route .rs-end-box{ background:#fff5f5!important; border-color:#c0392b!important; }
+#sheet-route .rs-waypoint-box{ background:#fff8e9!important; border-color:#f39c12!important; }
+#sheet-route .rs-waypoint2-box{ background:#fff4df!important; border-color:#d97706!important; }
+#sheet-route .rs-waypoint3-box{ background:#fff1dc!important; border-color:#b45309!important; }
+#sheet-route .rs-waypoints-summary-box{ background:#fff7ea!important; border-color:#d97706!important; }
+
+#sheet-route .rs-between-tools{
+  width:64px!important;
+  min-width:64px!important;
+  max-width:64px!important;
+  pointer-events:none!important;
+  overflow:visible!important;
+}
+#sheet-route .rs-swap-btn{
+  width:36px!important;
+  height:36px!important;
+  min-width:36px!important;
+  min-height:36px!important;
+  max-width:36px!important;
+  max-height:36px!important;
+  left:calc(50% + 9px)!important;
+  top:50%!important;
+  transform:translate(-50%,-50%)!important;
+  border-radius:50%!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  pointer-events:auto!important;
+}
+#sheet-route .rs-swap-btn::before{
+  content:'⇅'!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  width:100%!important;
+  height:100%!important;
+  font-size:17px!important;
+  font-weight:900!important;
+  line-height:1!important;
+  transform:translateY(-0.5px)!important;
+}
+#sheet-route .rs-swap-btn:active{ transform:translate(-50%,-50%) translateY(1px)!important; }
+
+#sheet-route .rs-add-waypoint-btn{
+  width:70px!important;
+  min-width:70px!important;
+  max-width:70px!important;
+  height:30px!important;
+  min-height:30px!important;
+  max-height:30px!important;
+  left:calc(50% + 9px)!important;
+  top:calc(50% + 25px)!important;
+  transform:translateX(-50%)!important;
+  border-radius:8px!important;
+  font-size:11.5px!important;
+  display:flex;
+  align-items:center!important;
+  justify-content:center!important;
+  pointer-events:auto!important;
+  box-sizing:border-box!important;
+}
+#sheet-route .rs-add-waypoint-btn:active{ transform:translateX(-50%) translateY(1px)!important; }
+
+#sheet-route #rs-search-btn{
+  width:100%!important;
+  margin:10px 0 16px 0!important;
+  padding:13px!important;
+  border-radius:12px!important;
+  box-sizing:border-box!important;
+}
+#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-search-btn{
+  margin:10px 0 16px 0!important;
+}
+#sheet-route .rs-hint{
+  padding:14px 0 18px 0!important;
+  margin:0!important;
 }
 #sheet-route.route-result-showing #rs-top,
 #sheet-route.route-result-showing.route-waypoint-scroll #rs-top{
-  padding-bottom:4px!important;
+  padding-bottom:6px!important;
 }
 #sheet-route.route-result-showing #rs-bottom,
 #sheet-route.route-result-showing.route-waypoint-scroll #rs-bottom{
-  padding-top:4px!important;
-  padding-bottom:8px!important;
+  padding-top:6px!important;
+  padding-bottom:calc(14px + env(safe-area-inset-bottom,0px))!important;
 }
-#sheet-route.route-result-showing #rs-result,
-#sheet-route.route-result-showing .rs-result{
-  margin-top:0!important;
-  margin-bottom:0!important;
-}
-#sheet-route.route-result-showing .rs-result{
-  padding:11px 12px!important;
+#sheet-route .rs-result{
+  margin:0!important;
+  padding:12px!important;
+  box-sizing:border-box!important;
 }
 #sheet-route.route-result-showing .rs-note{
   margin-top:8px!important;
@@ -9270,117 +9436,7 @@ html.ios-device #sheet-route .route-sheet-x{
 #sheet-route.route-result-showing .route-btns{
   margin-top:8px!important;
 }
-@media (max-width:370px){
-  #sheet-route:not(.route-result-showing) #rs-top{ padding-bottom:10px!important; }
-  #sheet-route.route-result-showing #rs-bottom,
-  #sheet-route.route-result-showing.route-waypoint-scroll #rs-bottom{ padding-top:3px!important; padding-bottom:7px!important; }
-}
 
-
-/* V6-40 WebView route box spacing normalization.
-   기준: 1번/4번 상태는 유지하고, 2개 경유지 입력/요약 상태만 박스 간격을 같은 기준으로 보정한다.
-   PWA 파일은 참고용이며, WebView 레이아웃만 수정한다. */
-#sheet-route .rs-route-stack.has-waypoint2{
-  grid-template-rows:46px 8px 46px 8px 46px 8px 46px!important;
-}
-#sheet-route .rs-route-stack.has-waypoint3{
-  grid-template-rows:46px 8px 46px 8px 46px 8px 46px 8px 46px!important;
-}
-#sheet-route .rs-route-stack.has-waypoint-summary{
-  grid-template-rows:46px 8px 46px 8px 46px!important;
-}
-#sheet-route .rs-route-stack.has-waypoint2 .rs-end-box{ grid-row:7!important; }
-#sheet-route .rs-route-stack.has-waypoint3 .rs-end-box{ grid-row:9!important; }
-#sheet-route .rs-route-stack.has-waypoint-summary .rs-end-box{ grid-row:5!important; }
-#sheet-route.route-result-showing .rs-route-stack.has-waypoint-summary{
-  margin-bottom:0!important;
-}
-#sheet-route.route-result-showing #rs-top,
-#sheet-route.route-result-showing.route-waypoint-scroll #rs-top{
-  padding-bottom:3px!important;
-}
-#sheet-route.route-result-showing #rs-bottom,
-#sheet-route.route-result-showing.route-waypoint-scroll #rs-bottom{
-  padding-top:3px!important;
-  padding-bottom:8px!important;
-}
-@media (max-width:370px){
-  #sheet-route .rs-route-stack.has-waypoint2{
-    grid-template-rows:46px 7px 46px 7px 46px 7px 46px!important;
-  }
-  #sheet-route .rs-route-stack.has-waypoint3{
-    grid-template-rows:46px 7px 46px 7px 46px 7px 46px 7px 46px!important;
-  }
-  #sheet-route .rs-route-stack.has-waypoint-summary{
-    grid-template-rows:46px 7px 46px 7px 46px!important;
-  }
-}
-
-
-/* V6-41 WebView route input spacing correction only.
-   PWA file remains reference only. No route logic, marker, result card, or layer structure is changed.
-   Goal: match box spacing across 1/2/3 waypoint input states and add safe bottom breathing room. */
-#sheet-route .rs-route-stack{
-  row-gap:0!important;
-}
-#sheet-route .rs-route-stack.has-waypoint{
-  grid-template-rows:46px 10px 46px 10px 46px!important;
-}
-#sheet-route .rs-route-stack.has-waypoint2{
-  grid-template-rows:46px 10px 46px 10px 46px 10px 46px!important;
-}
-#sheet-route .rs-route-stack.has-waypoint3{
-  grid-template-rows:46px 10px 46px 10px 46px 10px 46px 10px 46px!important;
-}
-#sheet-route .rs-route-stack.has-waypoint-summary{
-  grid-template-rows:46px 10px 46px 10px 46px!important;
-}
-#sheet-route:not(.route-result-showing) #rs-top{
-  padding-bottom:18px!important;
-}
-#sheet-route:not(.route-result-showing) #rs-search-btn{
-  margin-top:14px!important;
-  margin-bottom:12px!important;
-}
-#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-top{
-  padding-bottom:18px!important;
-}
-#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-search-btn{
-  margin-top:14px!important;
-  margin-bottom:12px!important;
-}
-#sheet-route .rs-waypoint-box,
-#sheet-route .rs-start-box,
-#sheet-route .rs-end-box,
-#sheet-route .rs-waypoints-summary-box{
-  margin:0!important;
-}
-@media (max-width:370px){
-  #sheet-route .rs-route-stack.has-waypoint{
-    grid-template-rows:46px 9px 46px 9px 46px!important;
-  }
-  #sheet-route .rs-route-stack.has-waypoint2{
-    grid-template-rows:46px 9px 46px 9px 46px 9px 46px!important;
-  }
-  #sheet-route .rs-route-stack.has-waypoint3{
-    grid-template-rows:46px 9px 46px 9px 46px 9px 46px 9px 46px!important;
-  }
-  #sheet-route .rs-route-stack.has-waypoint-summary{
-    grid-template-rows:46px 9px 46px 9px 46px!important;
-  }
-  #sheet-route:not(.route-result-showing) #rs-top,
-  #sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-top{
-    padding-bottom:16px!important;
-  }
-  #sheet-route:not(.route-result-showing) #rs-search-btn,
-  #sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-search-btn{
-    margin-top:13px!important;
-    margin-bottom:10px!important;
-  }
-}
-
-/* V6-42 WebView route sheet close button size sync.
-   Match the directions info-card X to the nearby/detail info-card X button. */
 #sheet-route .route-sheet-x,
 #app #sheet-route .route-sheet-x,
 html:not(.kb-open):not(.ios-device) #app #sheet-route .route-sheet-x,
@@ -9403,16 +9459,37 @@ html.ios-device #app #sheet-route .route-sheet-x{
   display:flex!important;
   align-items:center!important;
   justify-content:center!important;
-  font-family:inherit!important;
   box-shadow:none!important;
-  appearance:none!important;
-  -webkit-appearance:none!important;
   z-index:10370!important;
   pointer-events:auto!important;
   touch-action:manipulation!important;
   -webkit-tap-highlight-color:transparent!important;
 }
-#sheet-route .route-sheet-x:active,
-#app #sheet-route .route-sheet-x:active{
-  transform:scale(.96)!important;
+
+@media (max-width:370px){
+  #sheet-route #rs-top,
+  #sheet-route.route-waypoint-scroll #rs-top,
+  #sheet-route.route-result-showing #rs-top,
+  #sheet-route.route-waypoint-scroll.route-result-showing #rs-top,
+  #sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-top{
+    padding-left:12px!important;
+    padding-right:12px!important;
+  }
+  #sheet-route .rs-route-stack,
+  #sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-top .rs-route-stack,
+  #sheet-route.route-waypoint-scroll.route-result-showing #rs-top .rs-route-stack,
+  #sheet-route.route-result-showing #rs-top .rs-route-stack{
+    grid-template-columns:minmax(0,1fr) 64px!important;
+    column-gap:4px!important;
+  }
+  #sheet-route .rs-between-tools{ width:64px!important; min-width:64px!important; max-width:64px!important; }
+  #sheet-route .rs-swap-btn{ width:36px!important; height:36px!important; left:calc(50% + 9px)!important; }
+  #sheet-route .rs-add-waypoint-btn{ width:70px!important; min-width:70px!important; max-width:70px!important; left:calc(50% + 9px)!important; }
+  #sheet-route .rs-start-box,
+  #sheet-route .rs-waypoint-box,
+  #sheet-route .rs-waypoints-summary-box,
+  #sheet-route .rs-end-box{
+    padding-left:10px!important;
+    padding-right:9px!important;
+  }
 }
