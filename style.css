@@ -8929,12 +8929,12 @@ html.diocese-doc .si-r:last-child {
 
 #sheet-route .rs-route-stack{
   --rs-row-h:46px;
-  --rs-row-gap:12px;
+  --rs-row-gap:10px;
   --rs-tool-col-w:74px;
   --rs-arrow-size:36px;
   --rs-arrow-x:4px;
-  --rs-arrow-top:34px;
-  --rs-add-top:84px;
+  --rs-arrow-top:33px;
+  --rs-add-top:76px;
   display:grid!important;
   grid-template-columns:minmax(0,1fr) var(--rs-tool-col-w)!important;
   grid-auto-rows:var(--rs-row-h)!important;
@@ -9047,7 +9047,7 @@ html.diocese-doc .si-r:last-child {
   height:28px!important;
   min-height:28px!important;
   max-height:28px!important;
-  border-radius:14px!important;
+  border-radius:9px!important;
   border:1.5px solid #8a5a12!important;
   background:#ffe07a!important;
   color:#3a2500!important;
@@ -9172,4 +9172,4 @@ html.ios-device #app #sheet-route .route-sheet-x{
   #sheet-route .rs-end-box{padding-left:10px!important;padding-right:9px!important;}
 }
 
-/* V6-89: align route arrow tool origin to row top; keep JS visibility restore. */
+/* V6-91: align route arrow tool origin to row top; keep JS visibility restore. */

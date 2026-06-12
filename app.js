@@ -1382,7 +1382,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=WebView-Clean-89';
+    frame.src='diocese.html?v=WebView-Clean-91';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1727,7 +1727,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='WebView-Clean-89';
+const _PARISH_ASSET_VERSION='WebView-Clean-91';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -1890,7 +1890,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='WebView-Clean-89';
+const _PRAYER_ASSET_VERSION='WebView-Clean-91';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2235,7 +2235,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='WebView-Clean-89';
+const _SHRINE_ASSET_VERSION='WebView-Clean-91';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -5825,17 +5825,26 @@ function doSearchRoute(){ document.activeElement&&document.activeElement.blur();
   if(_rS&&_rE) setTimeout(function(){ try{ _calcRoute(); }catch(e){ console.warn('[가톨릭길동무]', e); } }, OAI_ROUTE_VISUAL_DELAY_MS);
 }
 
-function swapRoute(){
+function _swapRouteAdjacentPair(a,b){
+  if(!a || !b) return;
   _clearRouteTmpMarkers();
-  const tmp=_rS; _rS=_rE; _rE=tmp;
+  _swapRouteObjects(a,b);
   if(_rS && _rS.isImplicitCurrentLocation) _rS.isImplicitCurrentLocation=false;
-  _syncRoutePointLabels();
-  _repaintRoutePointMarkers();
-  if(_rS&&_rE) _updateSearchBtn();
+  _updateSearchBtn();
 }
-function swapRouteWaypointEnd(){ _swapRouteObjects('waypoint','end'); }
-function swapRouteWaypoint2End(){ _swapRouteObjects('waypoint2','end'); }
-function swapRouteWaypoint3End(){ _swapRouteObjects('waypoint3','end'); }
+function swapRoute(){
+  // 첫 번째 화살표: 바로 위/아래 항목만 교환한다.
+  _swapRouteAdjacentPair('start', (_routeWaypointEnabled || _routePointReady(_rW)) ? 'waypoint' : 'end');
+}
+function swapRouteWaypointEnd(){
+  // 경유지1 아래 화살표: 경유지2가 있으면 경유지1↔경유지2, 없으면 경유지1↔도착지.
+  _swapRouteAdjacentPair('waypoint', (_routeWaypoint2Enabled || _routePointReady(_rW2)) ? 'waypoint2' : 'end');
+}
+function swapRouteWaypoint2End(){
+  // 경유지2 아래 화살표: 경유지3이 있으면 경유지2↔경유지3, 없으면 경유지2↔도착지.
+  _swapRouteAdjacentPair('waypoint2', (_routeWaypoint3Enabled || _routePointReady(_rW3)) ? 'waypoint3' : 'end');
+}
+function swapRouteWaypoint3End(){ _swapRouteAdjacentPair('waypoint3','end'); }
 
 function clearRoute(role){
   if(role==='start' && _rS){ _restoreRoutePointMarker(_rS); if(_rS.isRegionStart) _routeRegionStart=null; _rS=null; _setRouteLabel('start',''); }
