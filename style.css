@@ -9320,3 +9320,38 @@ html.ios-device #app #sheet-route .route-sheet-x{
     margin-top:11px!important;
   }
 }
+
+
+/* V6-81: final route arrow center + add button separation.
+   Do not move horizontal position. One common vertical rule for every visible arrow.
+   Add waypoint button is separated downward by margin so it never overlaps the arrow. */
+#app #sheet-route .rs-route-stack > .rs-between-tools,
+#sheet-route .rs-route-stack > .rs-between-tools{
+  top:auto!important;
+  margin-top:0!important;
+  transform:translate(4px,34px)!important;
+  gap:18px!important;
+}
+#app #sheet-route .rs-route-stack > .rs-between-tools > .rs-swap-btn,
+#sheet-route .rs-route-stack > .rs-between-tools > .rs-swap-btn{
+  margin:0!important;
+}
+#app #sheet-route .rs-route-stack > .rs-between-tools > .rs-add-waypoint-btn,
+#sheet-route .rs-route-stack > .rs-between-tools > .rs-add-waypoint-btn{
+  margin-top:8px!important;
+}
+#app #sheet-route .rs-route-stack.has-waypoint-summary > .rs-between-tools,
+#sheet-route .rs-route-stack.has-waypoint-summary > .rs-between-tools{
+  display:none!important;
+}
+@media (max-width:370px){
+  #app #sheet-route .rs-route-stack > .rs-between-tools,
+  #sheet-route .rs-route-stack > .rs-between-tools{
+    transform:translate(3px,33px)!important;
+    gap:17px!important;
+  }
+  #app #sheet-route .rs-route-stack > .rs-between-tools > .rs-add-waypoint-btn,
+  #sheet-route .rs-route-stack > .rs-between-tools > .rs-add-waypoint-btn{
+    margin-top:7px!important;
+  }
+}
