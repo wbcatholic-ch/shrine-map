@@ -9247,3 +9247,23 @@ html.ios-device #app #sheet-route .route-sheet-x{
   #sheet-route .rs-waypoints-summary-box,
   #sheet-route .rs-end-box{padding-left:10px!important;padding-right:9px!important;}
 }
+
+
+/* V6-52: 경유지2/3 입력 상태도 인포카드 안에서 억지 스크롤을 만들지 않는다.
+   기존 카드 높이 흐름 안에서 보이는 높이까지 자연스럽게 표시한다. */
+#sheet-route.route-waypoint-scroll:not(.route-result-showing){
+  max-height:none!important;
+  overflow:visible!important;
+}
+#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-top{
+  overflow:visible!important;
+  max-height:none!important;
+}
+#sheet-route.route-waypoint-scroll:not(.route-result-showing) .rs-route-stack{
+  max-height:none!important;
+  overflow:visible!important;
+  padding-right:0!important;
+}
+#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-bottom{
+  padding-bottom:14px!important;
+}
