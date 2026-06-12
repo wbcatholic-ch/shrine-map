@@ -9232,3 +9232,39 @@ html.ios-device #app #sheet-route .route-sheet-x{
     transform:translate(3px,23px)!important;
   }
 }
+
+
+/* V6-75: route tool vertical target adjustment.
+   5-row / 경유지3 화면을 정상 기준으로 두고,
+   아직 다음 경유지를 추가할 수 있는 마지막 도구줄만 아래로 내려 맞춘다. */
+#sheet-route .rs-route-stack:not(.has-waypoint):not(.has-waypoint-summary) #rs-start-waypoint-tools{
+  transform:translate(4px,34px)!important;
+}
+#sheet-route .rs-route-stack.has-waypoint:not(.has-waypoint2):not(.has-waypoint-summary) .rs-waypoint-end-tools{
+  transform:translate(4px,34px)!important;
+}
+#sheet-route .rs-route-stack.has-waypoint2:not(.has-waypoint3):not(.has-waypoint-summary) .rs-waypoint2-end-tools{
+  transform:translate(4px,34px)!important;
+}
+#sheet-route .rs-route-stack.has-waypoint3:not(.has-waypoint-summary) .rs-between-tools{
+  transform:translate(4px,24px)!important;
+}
+#sheet-route .rs-route-stack:not(.has-waypoint):not(.has-waypoint-summary) #rs-start-waypoint-tools,
+#sheet-route .rs-route-stack.has-waypoint:not(.has-waypoint2):not(.has-waypoint-summary) .rs-waypoint-end-tools,
+#sheet-route .rs-route-stack.has-waypoint2:not(.has-waypoint3):not(.has-waypoint-summary) .rs-waypoint2-end-tools{
+  gap:16px!important;
+}
+@media (max-width:370px){
+  #sheet-route .rs-route-stack:not(.has-waypoint):not(.has-waypoint-summary) #rs-start-waypoint-tools{
+    transform:translate(3px,33px)!important;
+  }
+  #sheet-route .rs-route-stack.has-waypoint:not(.has-waypoint2):not(.has-waypoint-summary) .rs-waypoint-end-tools{
+    transform:translate(3px,33px)!important;
+  }
+  #sheet-route .rs-route-stack.has-waypoint2:not(.has-waypoint3):not(.has-waypoint-summary) .rs-waypoint2-end-tools{
+    transform:translate(3px,33px)!important;
+  }
+  #sheet-route .rs-route-stack.has-waypoint3:not(.has-waypoint-summary) .rs-between-tools{
+    transform:translate(3px,23px)!important;
+  }
+}
