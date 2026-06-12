@@ -1378,7 +1378,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=WebView-Clean-37';
+    frame.src='diocese.html?v=WebView-Clean-38';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1724,7 +1724,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='WebView-Clean-37';
+const _PARISH_ASSET_VERSION='WebView-Clean-38';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -1887,7 +1887,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='WebView-Clean-37';
+const _PRAYER_ASSET_VERSION='WebView-Clean-38';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2232,7 +2232,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='WebView-Clean-37';
+const _SHRINE_ASSET_VERSION='WebView-Clean-38';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -3926,9 +3926,15 @@ function _syncRouteWaypointBoxes(){
   const stack=$('rs-top') ? $('rs-top').querySelector('.rs-route-stack') : document.querySelector('.rs-route-stack');
   const sheet=$('sheet-route');
   const routeWaypoints=_getRouteWaypoints();
-  const w1Visible=!!(_routeWaypointEnabled || (_rW&&_rW.lat&&_rW.lng));
-  const w2Visible=!!(_routeWaypoint2Enabled || (_rW2&&_rW2.lat&&_rW2.lng));
-  const w3Visible=!!(_routeWaypoint3Enabled || (_rW3&&_rW3.lat&&_rW3.lng));
+  const p1Ready=_routePointReady(_rW), p2Ready=_routePointReady(_rW2), p3Ready=_routePointReady(_rW3);
+  // WebView V6-38: 경유지 UI는 반드시 순서대로만 보인다.
+  // 이전 보정에서 남은 enabled 값 때문에 출발/도착만 있는 상태에
+  // 경유지2·경유지3 빈 박스와 화살표가 뜨는 일을 막는다.
+  if(!(_routeWaypointEnabled || p1Ready)){ _routeWaypoint2Enabled=false; _routeWaypoint3Enabled=false; }
+  if(!(_routeWaypoint2Enabled || p2Ready)){ _routeWaypoint3Enabled=false; }
+  const w1Visible=!!(_routeWaypointEnabled || p1Ready);
+  const w2Visible=!!((_routeWaypoint2Enabled || p2Ready) && w1Visible);
+  const w3Visible=!!((_routeWaypoint3Enabled || p3Ready) && w2Visible);
   const resultShowing=!!(_polyline || ($('rs-result') && $('rs-result').style.display !== 'none'));
   const summaryExpanded=!!_routeWaypointSummaryExpanded;
   const summaryVisible=!!(resultShowing && routeWaypoints.length && !summaryExpanded);

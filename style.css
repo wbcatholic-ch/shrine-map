@@ -8933,7 +8933,7 @@ html.diocese-doc .si-r:last-child {
 }
 
 
-/* V6-37 WebView route card rebuild: one clean layout, no extra layer */
+/* V6-38 WebView route card cleanup: inline display controls visibility, no forced waypoint/tool layers */
 /* PWA V6-20 is reference only; this block only normalizes the WebView route card UI. */
 .oai-route-point-overlay{pointer-events:none!important;transform:translateZ(0);}
 
@@ -9042,7 +9042,7 @@ html.diocese-doc .si-r:last-child {
 #sheet-route .rs-waypoint-box,
 #sheet-route .rs-waypoints-summary-box,
 #sheet-route .rs-end-box{
-  display:flex!important;
+  display:flex;
   align-items:center!important;
   gap:8px!important;
   height:46px!important;
@@ -9088,7 +9088,7 @@ html.diocese-doc .si-r:last-child {
 #sheet-route .rs-between-tools{
   grid-column:2!important;
   position:relative!important;
-  display:block!important;
+  display:block;
   align-self:stretch!important;
   width:72px!important;
   min-width:72px!important;
@@ -9107,11 +9107,6 @@ html.diocese-doc .si-r:last-child {
 #sheet-route .rs-waypoint-end-tools{ grid-row:3 / 6!important; }
 #sheet-route .rs-waypoint2-end-tools{ grid-row:5 / 8!important; }
 #sheet-route .rs-waypoint3-end-tools{ grid-row:7 / 10!important; }
-#sheet-route .rs-route-stack.has-waypoint:not(.has-waypoint2) .rs-add-waypoint2-btn{ display:flex!important; }
-#sheet-route .rs-route-stack.has-waypoint2 .rs-add-waypoint2-btn{ display:none!important; }
-#sheet-route .rs-route-stack.has-waypoint2:not(.has-waypoint3) .rs-add-waypoint3-btn{ display:flex!important; }
-#sheet-route .rs-route-stack.has-waypoint3 .rs-add-waypoint3-btn{ display:none!important; }
-
 #sheet-route .rs-swap-btn{
   position:absolute!important;
   left:calc(50% + 7px)!important;
@@ -9168,7 +9163,7 @@ html.diocese-doc .si-r:last-child {
   letter-spacing:-0.045em!important;
   font-family:inherit!important;
   white-space:nowrap!important;
-  display:flex!important;
+  display:flex;
   align-items:center!important;
   justify-content:center!important;
   text-align:center!important;
