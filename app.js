@@ -1378,7 +1378,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=WebView-Clean-53';
+    frame.src='diocese.html?v=WebView-Clean-54';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1724,7 +1724,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='WebView-Clean-53';
+const _PARISH_ASSET_VERSION='WebView-Clean-54';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -1887,7 +1887,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='WebView-Clean-53';
+const _PRAYER_ASSET_VERSION='WebView-Clean-54';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2232,7 +2232,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='WebView-Clean-53';
+const _SHRINE_ASSET_VERSION='WebView-Clean-54';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -3946,7 +3946,7 @@ function _syncRouteWaypointBoxes(){
   const wx1=$('rs-waypoint-x'), wx2=$('rs-waypoint2-x'), wx3=$('rs-waypoint3-x');
   if(stack){ stack.classList.toggle('has-waypoint', !summaryVisible && w1Visible); stack.classList.toggle('has-waypoint2', !summaryVisible && w2Visible); stack.classList.toggle('has-waypoint3', !summaryVisible && w3Visible); stack.classList.toggle('has-waypoint-summary', summaryVisible); stack.classList.toggle('route-result-showing', resultShowing); }
   if(sheet){ sheet.classList.toggle('route-waypoint-scroll', shouldScrollForMultiWaypoint); sheet.classList.toggle('route-result-showing', resultShowing); sheet.classList.toggle('route-multi-waypoint-input', shouldScrollForMultiWaypoint && !resultShowing); }
-  // WebView V6-53: 경유지2/3 입력 상태에서는 경로검색 버튼 아래 안내 영역을 실제로 접는다.
+  // WebView V6-54: 경유지2/3 입력 상태에서는 경로검색 버튼 아래 안내 영역을 실제로 접는다.
   // CSS 클래스 적용이 늦거나 이전 inline style이 남아도 하단 빈 공간이 생기지 않도록 여기서 직접 동기화한다.
   try{
     const rsBottom=$('rs-bottom'), rsHint=$('rs-hint');
