@@ -8933,7 +8933,7 @@ html.diocese-doc .si-r:last-child {
 }
 
 
-/* V6-47 route sheet tool alignment.
+/* V6-48 route sheet tool far-right alignment.
    Keep waypoint function, restore clean route design.
    Tools are fixed in one right column: arrow between boxes, +waypoint below it. */
 .oai-route-point-overlay{pointer-events:none!important;transform:translateZ(0);}
@@ -8955,7 +8955,7 @@ html.diocese-doc .si-r:last-child {
 }
 
 #sheet-route #rs-top{
-  padding:12px 48px 0 14px!important;
+  padding:12px 14px 0 14px!important;
   flex-shrink:0!important;
   overflow:visible!important;
   max-height:none!important;
@@ -8969,7 +8969,7 @@ html.diocese-doc .si-r:last-child {
 /* one stable grid: left boxes + right tool column */
 #sheet-route .rs-route-stack{
   display:grid!important;
-  grid-template-columns:minmax(0,1fr) 78px!important;
+  grid-template-columns:minmax(0,1fr) 74px!important;
   grid-auto-rows:46px!important;
   row-gap:14px!important;
   column-gap:8px!important;
@@ -9034,9 +9034,9 @@ html.diocese-doc .si-r:last-child {
 /* right-side tools: old style, one narrow column, no overlap with result card */
 #sheet-route .rs-between-tools{
   grid-column:2!important;
-  width:78px!important;
-  min-width:78px!important;
-  max-width:78px!important;
+  width:74px!important;
+  min-width:74px!important;
+  max-width:74px!important;
   height:auto!important;
   min-height:0!important;
   max-height:none!important;
@@ -9052,7 +9052,7 @@ html.diocese-doc .si-r:last-child {
   background:transparent!important;
   border:0!important;
   box-shadow:none!important;
-  transform:translateY(35px)!important;
+  transform:translate(4px,35px)!important;
 }
 #sheet-route #rs-start-waypoint-tools{grid-row:1!important;}
 #sheet-route .rs-between-tools[style*="block"],
@@ -9132,8 +9132,8 @@ html.diocese-doc .si-r:last-child {
 
 #sheet-route #rs-search-btn{
   display:none;
-  width:calc(100% - 86px)!important;
-  max-width:calc(100% - 86px)!important;
+  width:calc(100% - 82px)!important;
+  max-width:calc(100% - 82px)!important;
   margin:14px 0 0!important;
   padding:13px!important;
   background:#1565c0!important;
@@ -9192,11 +9192,11 @@ html.ios-device #app #sheet-route .route-sheet-x{
 #route-role-choice .rrc-cancel{background:#effaf4!important;color:#238653!important;border-color:#4fb374!important;box-shadow:none!important;}
 
 @media (max-width:370px){
-  #sheet-route #rs-top{padding-left:12px!important;padding-right:46px!important;}
-  #sheet-route .rs-route-stack{grid-template-columns:minmax(0,1fr) 72px!important;column-gap:7px!important;row-gap:12px!important;}
-  #sheet-route .rs-between-tools{width:72px!important;min-width:72px!important;max-width:72px!important;transform:translateY(34px)!important;}
+  #sheet-route #rs-top{padding-left:12px!important;padding-right:12px!important;}
+  #sheet-route .rs-route-stack{grid-template-columns:minmax(0,1fr) 70px!important;column-gap:7px!important;row-gap:12px!important;}
+  #sheet-route .rs-between-tools{width:70px!important;min-width:70px!important;max-width:70px!important;transform:translate(3px,34px)!important;}
   #sheet-route .rs-add-waypoint-btn{width:68px!important;min-width:68px!important;max-width:68px!important;font-size:11.5px!important;}
-  #sheet-route #rs-search-btn{width:calc(100% - 79px)!important;max-width:calc(100% - 79px)!important;}
+  #sheet-route #rs-search-btn{width:calc(100% - 77px)!important;max-width:calc(100% - 77px)!important;}
   #sheet-route .rs-start-box,
   #sheet-route .rs-waypoint-box,
   #sheet-route .rs-waypoints-summary-box,
