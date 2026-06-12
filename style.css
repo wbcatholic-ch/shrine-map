@@ -8933,9 +8933,10 @@ html.diocese-doc .si-r:last-child {
 }
 
 
-/* V6-48 route sheet tool far-right alignment.
-   Keep waypoint function, restore clean route design.
-   Tools are fixed in one right column: arrow between boxes, +waypoint below it. */
+/* V6-49 route sheet tool alignment.
+   Keep waypoint function and previous WebView route-card design.
+   Tools use one fixed right column: arrow between boxes, +waypoint directly below it.
+   The same alignment applies from 내주변/성당찾기/성지찾기/피정의집찾기 entry paths. */
 .oai-route-point-overlay{pointer-events:none!important;transform:translateZ(0);}
 
 /* route sheet: use the old WebView card behavior */
@@ -9053,6 +9054,7 @@ html.diocese-doc .si-r:last-child {
   border:0!important;
   box-shadow:none!important;
   transform:translate(4px,35px)!important;
+  padding:0!important;
 }
 #sheet-route #rs-start-waypoint-tools{grid-row:1!important;}
 #sheet-route .rs-between-tools[style*="block"],
@@ -9118,6 +9120,15 @@ html.diocese-doc .si-r:last-child {
   touch-action:manipulation!important;
 }
 #sheet-route .rs-add-waypoint-btn:active{transform:translateY(1px)!important;}
+#sheet-route .rs-between-tools .rs-swap-btn,
+#sheet-route .rs-between-tools .rs-add-waypoint-btn{
+  margin-left:0!important;
+  margin-right:0!important;
+  flex-shrink:0!important;
+}
+#sheet-route .rs-between-tools .rs-add-waypoint-btn{
+  align-self:flex-start!important;
+}
 
 /* In result mode, restore the old clean result-card design: no +waypoint overlap. */
 #sheet-route.route-result-showing .rs-add-waypoint-btn{display:none!important;}
