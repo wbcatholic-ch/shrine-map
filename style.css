@@ -9315,3 +9315,66 @@ html.ios-device #sheet-route .route-sheet-x{
     grid-template-rows:46px 7px 46px 7px 46px!important;
   }
 }
+
+
+/* V6-41 WebView route input spacing correction only.
+   PWA file remains reference only. No route logic, marker, result card, or layer structure is changed.
+   Goal: match box spacing across 1/2/3 waypoint input states and add safe bottom breathing room. */
+#sheet-route .rs-route-stack{
+  row-gap:0!important;
+}
+#sheet-route .rs-route-stack.has-waypoint{
+  grid-template-rows:46px 10px 46px 10px 46px!important;
+}
+#sheet-route .rs-route-stack.has-waypoint2{
+  grid-template-rows:46px 10px 46px 10px 46px 10px 46px!important;
+}
+#sheet-route .rs-route-stack.has-waypoint3{
+  grid-template-rows:46px 10px 46px 10px 46px 10px 46px 10px 46px!important;
+}
+#sheet-route .rs-route-stack.has-waypoint-summary{
+  grid-template-rows:46px 10px 46px 10px 46px!important;
+}
+#sheet-route:not(.route-result-showing) #rs-top{
+  padding-bottom:18px!important;
+}
+#sheet-route:not(.route-result-showing) #rs-search-btn{
+  margin-top:14px!important;
+  margin-bottom:12px!important;
+}
+#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-top{
+  padding-bottom:18px!important;
+}
+#sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-search-btn{
+  margin-top:14px!important;
+  margin-bottom:12px!important;
+}
+#sheet-route .rs-waypoint-box,
+#sheet-route .rs-start-box,
+#sheet-route .rs-end-box,
+#sheet-route .rs-waypoints-summary-box{
+  margin:0!important;
+}
+@media (max-width:370px){
+  #sheet-route .rs-route-stack.has-waypoint{
+    grid-template-rows:46px 9px 46px 9px 46px!important;
+  }
+  #sheet-route .rs-route-stack.has-waypoint2{
+    grid-template-rows:46px 9px 46px 9px 46px 9px 46px!important;
+  }
+  #sheet-route .rs-route-stack.has-waypoint3{
+    grid-template-rows:46px 9px 46px 9px 46px 9px 46px 9px 46px!important;
+  }
+  #sheet-route .rs-route-stack.has-waypoint-summary{
+    grid-template-rows:46px 9px 46px 9px 46px!important;
+  }
+  #sheet-route:not(.route-result-showing) #rs-top,
+  #sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-top{
+    padding-bottom:16px!important;
+  }
+  #sheet-route:not(.route-result-showing) #rs-search-btn,
+  #sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-search-btn{
+    margin-top:13px!important;
+    margin-bottom:10px!important;
+  }
+}
