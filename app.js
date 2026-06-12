@@ -899,12 +899,16 @@ try{ window._shouldMassQuickReturn=_shouldMassQuickReturn; window._shouldPrayerQ
 
 function oaiFormatCoverVersionHtml(version, suffixText){
   function esc(x){ return String(x).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c] || c); }); }
-  return esc(suffixText || '새로고침');
+  var main = esc(suffixText || '새로고침');
+  var ver = esc(version || '');
+  if(!ver) return main;
+  return '<span class="refresh-version-main">' + main + '</span><span class="refresh-version-sub">' + ver + '</span>';
 }
 function oaiSetCoverRefreshButtonLabel(btn, version, suffixText){
   if(!btn) return;
-  try{ btn.innerHTML = oaiFormatCoverVersionHtml(version, suffixText); }
-  catch(_e){ btn.textContent = (suffixText || '새로고침'); }
+  var displayVersion = btn.getAttribute('data-display-version') || version || '';
+  try{ btn.innerHTML = oaiFormatCoverVersionHtml(displayVersion, suffixText); }
+  catch(_e){ btn.textContent = (suffixText || '새로고침') + (displayVersion ? ' ' + displayVersion : ''); }
 }
 function _runRefreshAppFilesOnly(){
   var btn = document.getElementById('cover-update-btn');
@@ -1378,7 +1382,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=WebView-Clean-60';
+    frame.src='diocese.html?v=WebView-Clean-63';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1595,7 +1599,7 @@ function clearRouteNoFocus(){
     _rS=null; _rE=null; _routeMode=false;
     if(typeof _setRouteLabel==='function'){ _setRouteLabel('start',''); _setRouteLabel('end',''); }
     var rs=document.getElementById('rs-result'); if(rs) rs.style.display='none';
-    var hint=document.getElementById('rs-hint'); if(hint){ hint.textContent=''; hint.style.display='none'; }
+    if(typeof _hideRouteHint==='function') _hideRouteHint();
     var sBtn=document.getElementById('rs-search-btn'); if(sBtn) sBtn.style.display='none';
     if(_polyline){ _polyline.setMap(null); _polyline=null; }
     if(typeof _clearRouteTmpMarkers==='function') _clearRouteTmpMarkers();
@@ -1724,7 +1728,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='WebView-Clean-60';
+const _PARISH_ASSET_VERSION='WebView-Clean-63';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -1887,7 +1891,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='WebView-Clean-60';
+const _PRAYER_ASSET_VERSION='WebView-Clean-63';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2232,7 +2236,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='WebView-Clean-60';
+const _SHRINE_ASSET_VERSION='WebView-Clean-63';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -3690,6 +3694,14 @@ function _ensureInfoRouteRoleChoice(){
   return modal;
 }
 
+function _hideRouteHint(){
+  const hint=$('rs-hint');
+  if(hint){
+    hint.textContent='';
+    hint.style.display='none';
+  }
+}
+
 function _showInfoRouteRoleChoice(){
   if(!_curInfoItem) return;
   const item=_curInfoItem.item;
@@ -3708,8 +3720,7 @@ function _openInfoCardRouteAsStart(){
   _routeRegionStart=null;
   openTab('route');
   _hide($('rs-result'));
-  const hint=$('rs-hint');
-  if(hint){ hint.textContent=''; hint.style.display='none'; }
+  _hideRouteHint();
   if(_polyline){ _polyline.setMap(null); _polyline=null; }
   _clearRouteTmpMarkers();
   _rS={idx, name:item.name, lat:item.lat, lng:item.lng};
@@ -3927,9 +3938,7 @@ function _syncRouteWaypointBoxes(){
   const sheet=$('sheet-route');
   const routeWaypoints=_getRouteWaypoints();
   const p1Ready=_routePointReady(_rW), p2Ready=_routePointReady(_rW2), p3Ready=_routePointReady(_rW3);
-  // WebView V6-38: 경유지 UI는 반드시 순서대로만 보인다.
-  // 이전 보정에서 남은 enabled 값 때문에 출발/도착만 있는 상태에
-  // 경유지2·경유지3 빈 박스와 화살표가 뜨는 일을 막는다.
+  // 경유지는 반드시 1 → 2 → 3 순서로만 표시한다.
   if(!(_routeWaypointEnabled || p1Ready)){ _routeWaypoint2Enabled=false; _routeWaypoint3Enabled=false; }
   if(!(_routeWaypoint2Enabled || p2Ready)){ _routeWaypoint3Enabled=false; }
   const rawW1Visible=!!(_routeWaypointEnabled || p1Ready);
@@ -3938,8 +3947,7 @@ function _syncRouteWaypointBoxes(){
   const resultShowing=!!(_polyline || ($('rs-result') && $('rs-result').style.display !== 'none'));
   const summaryExpanded=!!_routeWaypointSummaryExpanded;
   const summaryVisible=!!(resultShowing && routeWaypoints.length && !summaryExpanded);
-  // WebView V6-56: 경로 결과 화면에서는 값이 없는 빈 경유지 박스를 표시하지 않는다.
-  // +경유지를 눌러 열어 두었더라도 실제 경유지 좌표가 없으면 결과는 출발→도착으로만 보인다.
+  // 경로 결과 화면에서는 실제 좌표가 있는 경유지만 표시한다.
   const w1Visible=!!(resultShowing ? p1Ready : rawW1Visible);
   const w2Visible=!!(resultShowing ? (p1Ready && p2Ready) : rawW2Visible);
   const w3Visible=!!(resultShowing ? (p1Ready && p2Ready && p3Ready) : rawW3Visible);
@@ -3951,8 +3959,7 @@ function _syncRouteWaypointBoxes(){
   const wx1=$('rs-waypoint-x'), wx2=$('rs-waypoint2-x'), wx3=$('rs-waypoint3-x');
   if(stack){ stack.classList.toggle('has-waypoint', !summaryVisible && w1Visible); stack.classList.toggle('has-waypoint2', !summaryVisible && w2Visible); stack.classList.toggle('has-waypoint3', !summaryVisible && w3Visible); stack.classList.toggle('has-waypoint-summary', summaryVisible); stack.classList.toggle('route-result-showing', resultShowing); }
   if(sheet){
-    // V6-60 cleanup: JS only assigns route state classes.
-    // Height, gap, and bottom-area layout are handled in style.css.
+    // JS는 상태 클래스만 부여하고, 높이/간격은 style.css에서 처리한다.
     sheet.classList.toggle('route-result-showing', resultShowing);
     sheet.classList.toggle('route-multi-waypoint-input', multiWaypointInput);
     const basicRouteInput=!!(!resultShowing && !w1Visible && !w2Visible && !w3Visible);
@@ -3960,8 +3967,7 @@ function _syncRouteWaypointBoxes(){
   }
   if(summaryBox){ summaryBox.style.display=summaryVisible?'flex':'none'; if(summaryVisible){ const summaryText='경유지 '+routeWaypoints.length+'곳 · '+routeWaypoints.map(function(p,idx){ return (idx+1)+'. '+((p&&p.name)||('경유지'+(idx+1))); }).join(' → '); if(summaryLbl) summaryLbl.textContent=summaryText; summaryBox.setAttribute('title', '눌러서 경유지 박스 펼치기 · '+summaryText); summaryBox.setAttribute('role','button'); summaryBox.setAttribute('tabindex','0'); summaryBox.setAttribute('aria-label','경유지 요약 박스 펼치기'); }else{ if(summaryLbl) summaryLbl.textContent='경유지 없음'; summaryBox.removeAttribute('title'); summaryBox.removeAttribute('role'); summaryBox.removeAttribute('tabindex'); summaryBox.removeAttribute('aria-label'); } }
   if(box1) box1.style.display=(!summaryVisible && w1Visible)?'flex':'none'; if(box2) box2.style.display=(!summaryVisible && w2Visible)?'flex':'none'; if(box3) box3.style.display=(!summaryVisible && w3Visible)?'flex':'none';
-  // V6-50: 결과 화면에서도 출발/도착만 있는 경우 +경유지 버튼은 보여야 한다.
-  // 경유지 요약 상태(summaryVisible)에서는 요약 박스를 눌러 펼치는 흐름을 유지한다.
+  // 결과 화면에서도 경유지 요약 상태가 아니면 +경유지 버튼 흐름을 유지한다.
   if(add1) add1.style.display=(!summaryVisible && !w1Visible)?'inline-flex':'none'; if(add2) add2.style.display=(!summaryVisible && w1Visible && !w2Visible)?'inline-flex':'none'; if(add3) add3.style.display=(!summaryVisible && w2Visible && !w3Visible)?'inline-flex':'none';
   if(tools0) tools0.style.display=summaryVisible?'none':'block'; if(tools1) tools1.style.display=(!summaryVisible && w1Visible)?'flex':'none'; if(tools2) tools2.style.display=(!summaryVisible && w2Visible)?'flex':'none'; if(tools3) tools3.style.display=(!summaryVisible && w3Visible)?'flex':'none';
   if(wx1) wx1.style.display=(!summaryVisible && w1Visible)?'inline-flex':'none'; if(wx2) wx2.style.display=(!summaryVisible && w2Visible)?'inline-flex':'none'; if(wx3) wx3.style.display=(!summaryVisible && w3Visible)?'inline-flex':'none';
@@ -3970,10 +3976,6 @@ function _ensureRouteWaypointBox(role){ role=role||_nextAvailableWaypointRole()|
 function _beginWaypointAddMode(role){ role=role||_nextAvailableWaypointRole(); if(!role){ _showRouteGuideText('경유지는 현재 3곳까지 추가할 수 있습니다.'); return; } _ensureRouteWaypointBox(role); if(_polyline) _clearVisibleRouteResultOnly(); _scheduleRouteSelectionMarkerRestore(); _refreshRouteTmpMarkers(); _showRouteGuideText('지도에서 경유지'+_routeWaypointIndex(role)+'를 선택하거나 경유지 박스를 눌러 검색하세요'); }
 function _syncRouteWaypointBox(){ _routeWaypointEnabled=!!(_routeWaypointEnabled || (_rW&&_rW.lat&&_rW.lng)); _routeWaypoint2Enabled=!!(_routeWaypoint2Enabled || (_rW2&&_rW2.lat&&_rW2.lng)); _routeWaypoint3Enabled=!!(_routeWaypoint3Enabled || (_rW3&&_rW3.lat&&_rW3.lng)); _syncRouteWaypointBoxes(); }
 function _routePointMatchesItem(point,item,idx){ if(!point||!item) return false; if(typeof point.idx==='number' && point.idx>=0 && point.idx===idx) return true; return Number(point.lat)===Number(item.lat) && Number(point.lng)===Number(item.lng) && String(point.name||'')===String(item.name||''); }
-function _restoreRoutePointMarker(point){
-  if(!point || typeof point.idx!=='number' || point.idx<0) return;
-  try{ if(_mode==='shrine' && _markers && _markers[point.idx] && _markers[point.idx].marker){ const item=_markers[point.idx].shrine; _markers[point.idx].marker.setImage(_mkrImg(_typeColor(item.type),false)); _markers[point.idx].marker.setZIndex(1); } else if(_mode==='retreat' && _retreatMarkers){ const r=_retreatMarkers.find(function(o){ return o && o.index===point.idx; }); if(r&&r.marker){ r.marker.setImage(_mkrImgRetreat('#2e7d32',false)); r.marker.setZIndex(45); } } }catch(e){ console.warn('[가톨릭길동무]', e); }
-}
 function _setRoutePointFromItem(role,item,idx){
   const oldPoint=_getRoutePointByRole(role);
   _restoreRoutePointMarker(oldPoint);
@@ -5880,7 +5882,7 @@ function resetRoute(opts){
   _setRouteLabel('start','');_setRouteLabel('waypoint','');_setRouteLabel('waypoint2','');_setRouteLabel('waypoint3','');_setRouteLabel('end','');
   _syncRouteWaypointBox();
   _hide($('rs-result'));
-  $('rs-hint').textContent=''; $('rs-hint').style.display='none';
+  _hideRouteHint();
   const sBtn=$('rs-search-btn');
   if(sBtn) _setRouteSearchButtonState(sBtn,'hidden');
   if(_polyline){_polyline.setMap(null);_polyline=null;}
@@ -6018,8 +6020,7 @@ function _clearVisibleRouteResultOnly(){
     _routeWaypointSummaryExpanded=false;
     const result=$('rs-result');
     if(result) result.style.display='none';
-    const hint=$('rs-hint');
-    if(hint){ hint.textContent=''; hint.style.display='none'; }
+    _hideRouteHint();
     const note=$('rs-note');
     if(note){ note.textContent=''; note.style.display='none'; }
     if(_polyline){ _polyline.setMap(null); _polyline=null; }
@@ -6093,7 +6094,7 @@ async function _calcRoute(){
   $('rs-km').textContent='…';
   $('rs-time').textContent='…';
   $('rs-result').style.display='block';
-  $('rs-hint').style.display='none';
+  _hideRouteHint();
   _syncRouteWaypointBox();
   const sBtn=$('rs-search-btn');
   if(sBtn) _setRouteSearchButtonState(sBtn,'hidden');

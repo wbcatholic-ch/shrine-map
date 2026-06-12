@@ -8933,7 +8933,7 @@ html.diocese-doc .si-r:last-child {
 }
 
 
-/* WebView V6-60 route cleanup: one final route-card layout block.
+/* WebView V6-63 route cleanup: one final route-card layout block.
    PWA is reference only; this is WebView route-card cleanup.
    Keep waypoint logic. Remove accumulated patch-style layout overrides. */
 .oai-route-point-overlay{pointer-events:none!important;transform:translateZ(0);}
