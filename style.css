@@ -8895,19 +8895,19 @@ html.diocese-doc .si-r:last-child {
 }
 
 #sheet-route #rs-top{
-  padding:12px 14px 0 14px!important;
+  padding:10px 14px 0 14px!important;
   flex-shrink:0!important;
   overflow:visible!important;
   max-height:none!important;
 }
 #sheet-route #rs-bottom{
-  padding:8px 14px 10px!important;
+  padding:4px 14px 4px!important;
   overflow:visible!important;
   max-height:none!important;
 }
 #sheet-route.route-result-showing #rs-bottom{
-  padding-top:6px!important;
-  padding-bottom:8px!important;
+  padding-top:4px!important;
+  padding-bottom:4px!important;
 }
 #sheet-route #rs-top::before,
 #sheet-route #rs-top::after,
@@ -8926,7 +8926,7 @@ html.diocese-doc .si-r:last-child {
   display:grid!important;
   grid-template-columns:minmax(0,1fr) 74px!important;
   grid-auto-rows:46px!important;
-  row-gap:14px!important;
+  row-gap:12px!important;
   column-gap:8px!important;
   align-items:center!important;
   width:100%!important;
@@ -8986,7 +8986,7 @@ html.diocese-doc .si-r:last-child {
   flex-direction:column!important;
   align-items:flex-start!important;
   justify-content:flex-start!important;
-  gap:8px!important;
+  gap:10px!important;
   box-sizing:border-box!important;
   overflow:visible!important;
   position:relative!important;
@@ -8994,7 +8994,7 @@ html.diocese-doc .si-r:last-child {
   background:transparent!important;
   border:0!important;
   box-shadow:none!important;
-  transform:translate(4px,30px)!important;
+  transform:translate(4px,24px)!important;
   padding:0!important;
 }
 #sheet-route #rs-start-waypoint-tools{grid-row:1!important;}
@@ -9077,7 +9077,7 @@ html.diocese-doc .si-r:last-child {
   display:none;
   width:calc(100% - 82px)!important;
   max-width:calc(100% - 82px)!important;
-  margin:14px 0 0!important;
+  margin:10px 0 0!important;
   padding:13px!important;
   background:#1565c0!important;
   color:#fff!important;
@@ -9088,7 +9088,7 @@ html.diocese-doc .si-r:last-child {
   font-family:inherit!important;
   align-items:center!important;
   justify-content:center!important;
-  gap:8px!important;
+  gap:10px!important;
   box-sizing:border-box!important;
 }
 #sheet-route #rs-search-btn.rs-search-placeholder{
@@ -9096,19 +9096,19 @@ html.diocese-doc .si-r:last-child {
   pointer-events:none!important;
 }
 
-#sheet-route.route-basic-input:not(.route-result-showing){min-height:316px!important;}
+#sheet-route.route-basic-input:not(.route-result-showing){min-height:0!important;}
 #sheet-route.route-basic-input:not(.route-result-showing) #rs-top{flex-shrink:0!important;}
-#sheet-route.route-basic-input:not(.route-result-showing) #rs-search-btn{margin-top:14px!important;}
+#sheet-route.route-basic-input:not(.route-result-showing) #rs-search-btn{margin-top:10px!important;}
 #sheet-route.route-multi-waypoint-input:not(.route-result-showing){max-height:none!important;overflow:visible!important;}
 #sheet-route.route-multi-waypoint-input:not(.route-result-showing) #rs-top,
 #sheet-route.route-multi-waypoint-input:not(.route-result-showing) .rs-route-stack{max-height:none!important;overflow:visible!important;}
 #sheet-route.route-multi-waypoint-input:not(.route-result-showing) #rs-bottom{padding-top:0!important;padding-bottom:0!important;}
-#sheet-route.route-multi-waypoint-input:not(.route-result-showing) #rs-search-btn{margin-bottom:8px!important;}
+#sheet-route.route-multi-waypoint-input:not(.route-result-showing) #rs-search-btn{margin-bottom:0!important;}
 
-#sheet-route .rs-result{background:#fff!important;border-radius:12px!important;padding:10px 12px!important;border:1.5px solid var(--border)!important;box-shadow:0 2px 10px rgba(14,21,53,.08)!important;box-sizing:border-box!important;width:100%!important;max-width:100%!important;margin:0!important;}
-#sheet-route .rs-stats{display:flex!important;gap:8px!important;margin-bottom:10px!important;}
+#sheet-route .rs-result{background:#fff!important;border-radius:12px!important;padding:8px 12px!important;border:1.5px solid var(--border)!important;box-shadow:0 2px 10px rgba(14,21,53,.08)!important;box-sizing:border-box!important;width:100%!important;max-width:100%!important;margin:0!important;}
+#sheet-route .rs-stats{display:flex!important;gap:8px!important;margin-bottom:8px!important;}
 #sheet-route .rs-stat{flex:1!important;background:var(--navy)!important;border-radius:10px!important;padding:13px 8px!important;text-align:center!important;}
-#sheet-route .route-btns{display:flex!important;gap:8px!important;margin-top:6px!important;}
+#sheet-route .route-btns{display:flex!important;gap:8px!important;margin-top:4px!important;}
 #sheet-route .btn-kakao-route,
 #sheet-route .btn-route-reset{flex:1!important;padding:12px 6px!important;border-radius:10px!important;font-size:14px!important;font-weight:700!important;font-family:inherit!important;}
 
@@ -9150,7 +9150,7 @@ html.ios-device #app #sheet-route .route-sheet-x{
 @media (max-width:370px){
   #sheet-route #rs-top{padding-left:12px!important;padding-right:12px!important;}
   #sheet-route .rs-route-stack{grid-template-columns:minmax(0,1fr) 70px!important;column-gap:7px!important;row-gap:12px!important;}
-  #sheet-route .rs-between-tools{width:70px!important;min-width:70px!important;max-width:70px!important;gap:7px!important;transform:translate(3px,29px)!important;}
+  #sheet-route .rs-between-tools{width:70px!important;min-width:70px!important;max-width:70px!important;gap:9px!important;transform:translate(3px,23px)!important;}
   #sheet-route .rs-add-waypoint-btn{width:68px!important;min-width:68px!important;max-width:68px!important;font-size:11.5px!important;}
   #sheet-route #rs-search-btn{width:calc(100% - 77px)!important;max-width:calc(100% - 77px)!important;}
   #sheet-route .rs-start-box,
