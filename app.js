@@ -1382,7 +1382,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=WebView-Clean-86';
+    frame.src='diocese.html?v=WebView-Clean-88';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1727,7 +1727,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='WebView-Clean-86';
+const _PARISH_ASSET_VERSION='WebView-Clean-88';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -1890,7 +1890,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='WebView-Clean-86';
+const _PRAYER_ASSET_VERSION='WebView-Clean-88';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2235,7 +2235,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='WebView-Clean-86';
+const _SHRINE_ASSET_VERSION='WebView-Clean-88';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -3923,7 +3923,7 @@ function _collapseRouteWaypointSummary(){ _routeWaypointSummaryExpanded=false; _
 function _setRouteWaypointEnabled(enabled){ _routeWaypointEnabled=!!enabled; _syncRouteWaypointBoxes(); }
 function _setRouteWaypoint2Enabled(enabled){ _routeWaypoint2Enabled=!!enabled; _syncRouteWaypointBoxes(); }
 function _setRouteWaypoint3Enabled(enabled){ _routeWaypoint3Enabled=!!enabled; _syncRouteWaypointBoxes(); }
-function _routeSetDisplay(el,displayValue){ if(el) el.style.display=displayValue; }
+function _routeSetDisplay(el,displayValue){ if(el) el.style.setProperty('display',displayValue,'important'); }
 function _syncRouteWaypointSummaryBox(summaryBox,summaryLbl,summaryVisible,routeWaypoints){
   if(!summaryBox) return;
   summaryBox.style.display=summaryVisible?'flex':'none';

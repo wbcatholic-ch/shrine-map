@@ -8933,8 +8933,8 @@ html.diocese-doc .si-r:last-child {
   --rs-tool-col-w:74px;
   --rs-arrow-size:36px;
   --rs-arrow-x:4px;
-  --rs-arrow-top:24px;
-  --rs-add-top:74px;
+  --rs-arrow-top:34px;
+  --rs-add-top:84px;
   display:grid!important;
   grid-template-columns:minmax(0,1fr) var(--rs-tool-col-w)!important;
   grid-auto-rows:var(--rs-row-h)!important;
@@ -8998,6 +8998,8 @@ html.diocese-doc .si-r:last-child {
   box-sizing:border-box!important;
   overflow:visible!important;
   position:relative!important;
+  align-self:start!important;
+  justify-self:start!important;
   z-index:5!important;
   background:transparent!important;
   border:0!important;
@@ -9170,4 +9172,4 @@ html.ios-device #app #sheet-route .route-sheet-x{
   #sheet-route .rs-end-box{padding-left:10px!important;padding-right:9px!important;}
 }
 
-/* V6-86: keep equal arrow gaps, raise the whole arrow/add-waypoint vertical group by 10px. */
+/* V6-88: align route arrow tool origin to row top; keep JS visibility restore. */
