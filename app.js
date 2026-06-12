@@ -1382,7 +1382,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=WebView-Clean-63';
+    frame.src='diocese.html?v=WebView-Clean-70';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1599,7 +1599,6 @@ function clearRouteNoFocus(){
     _rS=null; _rE=null; _routeMode=false;
     if(typeof _setRouteLabel==='function'){ _setRouteLabel('start',''); _setRouteLabel('end',''); }
     var rs=document.getElementById('rs-result'); if(rs) rs.style.display='none';
-    if(typeof _hideRouteHint==='function') _hideRouteHint();
     var sBtn=document.getElementById('rs-search-btn'); if(sBtn) sBtn.style.display='none';
     if(_polyline){ _polyline.setMap(null); _polyline=null; }
     if(typeof _clearRouteTmpMarkers==='function') _clearRouteTmpMarkers();
@@ -1728,7 +1727,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='WebView-Clean-63';
+const _PARISH_ASSET_VERSION='WebView-Clean-70';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -1891,7 +1890,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='WebView-Clean-63';
+const _PRAYER_ASSET_VERSION='WebView-Clean-70';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2236,7 +2235,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='WebView-Clean-63';
+const _SHRINE_ASSET_VERSION='WebView-Clean-70';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -3694,14 +3693,6 @@ function _ensureInfoRouteRoleChoice(){
   return modal;
 }
 
-function _hideRouteHint(){
-  const hint=$('rs-hint');
-  if(hint){
-    hint.textContent='';
-    hint.style.display='none';
-  }
-}
-
 function _showInfoRouteRoleChoice(){
   if(!_curInfoItem) return;
   const item=_curInfoItem.item;
@@ -3720,7 +3711,6 @@ function _openInfoCardRouteAsStart(){
   _routeRegionStart=null;
   openTab('route');
   _hide($('rs-result'));
-  _hideRouteHint();
   if(_polyline){ _polyline.setMap(null); _polyline=null; }
   _clearRouteTmpMarkers();
   _rS={idx, name:item.name, lat:item.lat, lng:item.lng};
@@ -3933,6 +3923,38 @@ function _collapseRouteWaypointSummary(){ _routeWaypointSummaryExpanded=false; _
 function _setRouteWaypointEnabled(enabled){ _routeWaypointEnabled=!!enabled; _syncRouteWaypointBoxes(); }
 function _setRouteWaypoint2Enabled(enabled){ _routeWaypoint2Enabled=!!enabled; _syncRouteWaypointBoxes(); }
 function _setRouteWaypoint3Enabled(enabled){ _routeWaypoint3Enabled=!!enabled; _syncRouteWaypointBoxes(); }
+function _routeSetDisplay(el,displayValue){ if(el) el.style.display=displayValue; }
+function _syncRouteWaypointSummaryBox(summaryBox,summaryLbl,summaryVisible,routeWaypoints){
+  if(!summaryBox) return;
+  summaryBox.style.display=summaryVisible?'flex':'none';
+  if(summaryVisible){
+    const summaryText='경유지 '+routeWaypoints.length+'곳 · '+routeWaypoints.map(function(p,idx){ return (idx+1)+'. '+((p&&p.name)||('경유지'+(idx+1))); }).join(' → ');
+    if(summaryLbl) summaryLbl.textContent=summaryText;
+    summaryBox.setAttribute('title', '눌러서 경유지 박스 펼치기 · '+summaryText);
+    summaryBox.setAttribute('role','button');
+    summaryBox.setAttribute('tabindex','0');
+    summaryBox.setAttribute('aria-label','경유지 요약 박스 펼치기');
+  }else{
+    if(summaryLbl) summaryLbl.textContent='경유지 없음';
+    summaryBox.removeAttribute('title');
+    summaryBox.removeAttribute('role');
+    summaryBox.removeAttribute('tabindex');
+    summaryBox.removeAttribute('aria-label');
+  }
+}
+function _syncRouteWaypointStateClasses(stack,sheet,state){
+  if(stack){
+    stack.classList.toggle('has-waypoint', !state.summaryVisible && state.w1Visible);
+    stack.classList.toggle('has-waypoint2', !state.summaryVisible && state.w2Visible);
+    stack.classList.toggle('has-waypoint3', !state.summaryVisible && state.w3Visible);
+    stack.classList.toggle('has-waypoint-summary', state.summaryVisible);
+  }
+  if(sheet){
+    sheet.classList.toggle('route-result-showing', state.resultShowing);
+    sheet.classList.toggle('route-multi-waypoint-input', state.multiWaypointInput);
+    sheet.classList.toggle('route-basic-input', state.basicRouteInput);
+  }
+}
 function _syncRouteWaypointBoxes(){
   const stack=$('rs-top') ? $('rs-top').querySelector('.rs-route-stack') : document.querySelector('.rs-route-stack');
   const sheet=$('sheet-route');
@@ -3944,7 +3966,7 @@ function _syncRouteWaypointBoxes(){
   const rawW1Visible=!!(_routeWaypointEnabled || p1Ready);
   const rawW2Visible=!!((_routeWaypoint2Enabled || p2Ready) && rawW1Visible);
   const rawW3Visible=!!((_routeWaypoint3Enabled || p3Ready) && rawW2Visible);
-  const resultShowing=!!(_polyline || ($('rs-result') && $('rs-result').style.display !== 'none'));
+  const resultShowing=_isRouteResultShowing();
   const summaryExpanded=!!_routeWaypointSummaryExpanded;
   const summaryVisible=!!(resultShowing && routeWaypoints.length && !summaryExpanded);
   // 경로 결과 화면에서는 실제 좌표가 있는 경유지만 표시한다.
@@ -3957,20 +3979,14 @@ function _syncRouteWaypointBoxes(){
   const add1=$('rs-add-waypoint-btn'), add2=$('rs-add-waypoint2-btn'), add3=$('rs-add-waypoint3-btn');
   const tools0=$('rs-start-waypoint-tools'), tools1=$('rs-waypoint-end-tools'), tools2=$('rs-waypoint2-end-tools'), tools3=$('rs-waypoint3-end-tools');
   const wx1=$('rs-waypoint-x'), wx2=$('rs-waypoint2-x'), wx3=$('rs-waypoint3-x');
-  if(stack){ stack.classList.toggle('has-waypoint', !summaryVisible && w1Visible); stack.classList.toggle('has-waypoint2', !summaryVisible && w2Visible); stack.classList.toggle('has-waypoint3', !summaryVisible && w3Visible); stack.classList.toggle('has-waypoint-summary', summaryVisible); stack.classList.toggle('route-result-showing', resultShowing); }
-  if(sheet){
-    // JS는 상태 클래스만 부여하고, 높이/간격은 style.css에서 처리한다.
-    sheet.classList.toggle('route-result-showing', resultShowing);
-    sheet.classList.toggle('route-multi-waypoint-input', multiWaypointInput);
-    const basicRouteInput=!!(!resultShowing && !w1Visible && !w2Visible && !w3Visible);
-    sheet.classList.toggle('route-basic-input', basicRouteInput);
-  }
-  if(summaryBox){ summaryBox.style.display=summaryVisible?'flex':'none'; if(summaryVisible){ const summaryText='경유지 '+routeWaypoints.length+'곳 · '+routeWaypoints.map(function(p,idx){ return (idx+1)+'. '+((p&&p.name)||('경유지'+(idx+1))); }).join(' → '); if(summaryLbl) summaryLbl.textContent=summaryText; summaryBox.setAttribute('title', '눌러서 경유지 박스 펼치기 · '+summaryText); summaryBox.setAttribute('role','button'); summaryBox.setAttribute('tabindex','0'); summaryBox.setAttribute('aria-label','경유지 요약 박스 펼치기'); }else{ if(summaryLbl) summaryLbl.textContent='경유지 없음'; summaryBox.removeAttribute('title'); summaryBox.removeAttribute('role'); summaryBox.removeAttribute('tabindex'); summaryBox.removeAttribute('aria-label'); } }
-  if(box1) box1.style.display=(!summaryVisible && w1Visible)?'flex':'none'; if(box2) box2.style.display=(!summaryVisible && w2Visible)?'flex':'none'; if(box3) box3.style.display=(!summaryVisible && w3Visible)?'flex':'none';
+  const basicRouteInput=!!(!resultShowing && !w1Visible && !w2Visible && !w3Visible);
+  _syncRouteWaypointStateClasses(stack,sheet,{summaryVisible,w1Visible,w2Visible,w3Visible,resultShowing,multiWaypointInput,basicRouteInput});
+  _syncRouteWaypointSummaryBox(summaryBox,summaryLbl,summaryVisible,routeWaypoints);
+  _routeSetDisplay(box1,(!summaryVisible && w1Visible)?'flex':'none'); _routeSetDisplay(box2,(!summaryVisible && w2Visible)?'flex':'none'); _routeSetDisplay(box3,(!summaryVisible && w3Visible)?'flex':'none');
   // 결과 화면에서도 경유지 요약 상태가 아니면 +경유지 버튼 흐름을 유지한다.
-  if(add1) add1.style.display=(!summaryVisible && !w1Visible)?'inline-flex':'none'; if(add2) add2.style.display=(!summaryVisible && w1Visible && !w2Visible)?'inline-flex':'none'; if(add3) add3.style.display=(!summaryVisible && w2Visible && !w3Visible)?'inline-flex':'none';
-  if(tools0) tools0.style.display=summaryVisible?'none':'block'; if(tools1) tools1.style.display=(!summaryVisible && w1Visible)?'flex':'none'; if(tools2) tools2.style.display=(!summaryVisible && w2Visible)?'flex':'none'; if(tools3) tools3.style.display=(!summaryVisible && w3Visible)?'flex':'none';
-  if(wx1) wx1.style.display=(!summaryVisible && w1Visible)?'inline-flex':'none'; if(wx2) wx2.style.display=(!summaryVisible && w2Visible)?'inline-flex':'none'; if(wx3) wx3.style.display=(!summaryVisible && w3Visible)?'inline-flex':'none';
+  _routeSetDisplay(add1,(!summaryVisible && !w1Visible)?'inline-flex':'none'); _routeSetDisplay(add2,(!summaryVisible && w1Visible && !w2Visible)?'inline-flex':'none'); _routeSetDisplay(add3,(!summaryVisible && w2Visible && !w3Visible)?'inline-flex':'none');
+  _routeSetDisplay(tools0,summaryVisible?'none':'block'); _routeSetDisplay(tools1,(!summaryVisible && w1Visible)?'flex':'none'); _routeSetDisplay(tools2,(!summaryVisible && w2Visible)?'flex':'none'); _routeSetDisplay(tools3,(!summaryVisible && w3Visible)?'flex':'none');
+  _routeSetDisplay(wx1,(!summaryVisible && w1Visible)?'inline-flex':'none'); _routeSetDisplay(wx2,(!summaryVisible && w2Visible)?'inline-flex':'none'); _routeSetDisplay(wx3,(!summaryVisible && w3Visible)?'inline-flex':'none');
 }
 function _ensureRouteWaypointBox(role){ role=role||_nextAvailableWaypointRole()||'waypoint'; _setRouteWaypointEnabledByRole(role,true); _setRouteLabel(role,_routePointName(_getRoutePointByRole(role))); _refreshRouteTmpMarkers(); if(!_getRoutePointByRole(role)) _showRouteGuideText('지도에서 경유지'+_routeWaypointIndex(role)+' 마커를 선택하거나 경유지 박스를 눌러 검색하세요'); }
 function _beginWaypointAddMode(role){ role=role||_nextAvailableWaypointRole(); if(!role){ _showRouteGuideText('경유지는 현재 3곳까지 추가할 수 있습니다.'); return; } _ensureRouteWaypointBox(role); if(_polyline) _clearVisibleRouteResultOnly(); _scheduleRouteSelectionMarkerRestore(); _refreshRouteTmpMarkers(); _showRouteGuideText('지도에서 경유지'+_routeWaypointIndex(role)+'를 선택하거나 경유지 박스를 눌러 검색하세요'); }
@@ -5751,9 +5767,7 @@ function _setRouteLabel(role,name){
 
 function _routeShouldReserveSearchButtonSpace(){
   try{
-    const resultShowing = (typeof _isRouteResultShowing === 'function')
-      ? _isRouteResultShowing()
-      : !!(_polyline || ($('rs-result') && $('rs-result').style.display !== 'none'));
+    const resultShowing = _isRouteResultShowing();
     if(resultShowing) return false;
     return !!(
       (_rS && _rS.lat && _rS.lng) ||
@@ -5882,7 +5896,6 @@ function resetRoute(opts){
   _setRouteLabel('start','');_setRouteLabel('waypoint','');_setRouteLabel('waypoint2','');_setRouteLabel('waypoint3','');_setRouteLabel('end','');
   _syncRouteWaypointBox();
   _hide($('rs-result'));
-  _hideRouteHint();
   const sBtn=$('rs-search-btn');
   if(sBtn) _setRouteSearchButtonState(sBtn,'hidden');
   if(_polyline){_polyline.setMap(null);_polyline=null;}
@@ -6020,8 +6033,7 @@ function _clearVisibleRouteResultOnly(){
     _routeWaypointSummaryExpanded=false;
     const result=$('rs-result');
     if(result) result.style.display='none';
-    _hideRouteHint();
-    const note=$('rs-note');
+      const note=$('rs-note');
     if(note){ note.textContent=''; note.style.display='none'; }
     if(_polyline){ _polyline.setMap(null); _polyline=null; }
     _showJukrimgulParkingMkr(false);
@@ -6094,7 +6106,6 @@ async function _calcRoute(){
   $('rs-km').textContent='…';
   $('rs-time').textContent='…';
   $('rs-result').style.display='block';
-  _hideRouteHint();
   _syncRouteWaypointBox();
   const sBtn=$('rs-search-btn');
   if(sBtn) _setRouteSearchButtonState(sBtn,'hidden');
@@ -6145,7 +6156,6 @@ async function _calcRoute(){
       $('rs-km').textContent=(distance/1000).toFixed(1);
       $('rs-time').textContent=_fmtTime(duration);
       _drawLine(_rS, navDest, path.length>1?path:null, {waypoints:waypoints});
-      /* V6-55: 경유지 포함 안내 문구 제거 */
       return;
     }
     const leg=await fetchLeg(_rS, navDest);
@@ -6162,7 +6172,6 @@ async function _calcRoute(){
     d *= 1.4;
     $('rs-km').textContent=d.toFixed(1);
     $('rs-time').textContent=_fmtTime(d/70*3600);
-    /* V6-55: 직선거리/경유지 포함 안내 문구 제거 */
     _drawLine(_rS, navDest, null, {fit:true, waypoints:waypoints});
   }
 }

@@ -1251,7 +1251,6 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active {
 .rs-stat-val { font-size: 24px; font-weight: 900; color: #fff; line-height: 1; }
 .rs-stat-unit { font-size: 14px; color: rgba(255,255,255,.75); font-weight: 600; }
 .rs-note { font-size: 12px; color: #7a4f00; margin-bottom: 6px; display: none; background: #fff8e1; border-left: 3px solid #f39c12; border-radius: 6px; padding: 7px 10px; line-height: 1.6; }
-.rs-hint { font-size: 14px; color: #aaa; text-align: center; padding: 16px 0; line-height: 1.8; }
 .route-btns { display: flex; gap: 8px; margin-top: 8px; }
 .btn-kakao-route { flex: 1; padding: 12px 6px; border-radius: 10px; border: none; background: #fee500; color: #111; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
 .btn-route-reset { flex: 1; padding: 12px 6px; border-radius: 10px; border: 1.5px solid var(--border); background: #fff; font-size: 14px; color: var(--ink); cursor: pointer; font-family: inherit; font-weight: 600; }
@@ -5814,19 +5813,6 @@ html.retreat-mode #tab-btn-list.active #tab-list-lbl {
 #app #info-card .ic-body {
   padding-bottom: 22px !important;
 }
-#app #sheet-route {
-  bottom: 0 !important;
-  padding-bottom: 0 !important;
-}
-#app #sheet-route.open {
-  bottom: 0 !important;
-}
-#app #rs-bottom {
-  padding-bottom: 22px !important;
-}
-#app #rs-hint {
-  padding-bottom: 22px !important;
-}
 #app #info-card .ic-body > div:last-child {
   padding-top: 7px !important;
   padding-bottom: 0 !important;
@@ -7814,50 +7800,6 @@ html.oai-background-return-stabilizing.oai-background-return-stabilizing-release
     font-size: 12.8px !important;
     padding: 8px 10px !important;
   }
-  html:not(.kb-open):not(.ios-device) #sheet-route {
-    max-height: 46vh !important;
-  }
-  html:not(.kb-open):not(.ios-device) #sheet-route #rs-top {
-    padding: 9px 42px 0 11px !important;
-  }
-  html:not(.kb-open):not(.ios-device) #sheet-route #rs-bottom {
-    padding: 8px 11px 12px !important;
-  }
-  html:not(.kb-open):not(.ios-device) .rs-start-box,
-  html:not(.kb-open):not(.ios-device) .rs-end-box {
-    height: 39px !important;
-    min-height: 39px !important;
-    padding: 0 9px !important;
-    border-radius: 9px !important;
-    gap: 6px !important;
-  }
-  html:not(.kb-open):not(.ios-device) .rs-lbl {
-    font-size: 12.2px !important;
-    line-height: 1.25 !important;
-  }
-  html:not(.kb-open):not(.ios-device) .rs-myloc {
-    padding: 5px 8px !important;
-    font-size: 11px !important;
-  }
-  html:not(.kb-open):not(.ios-device) .rs-swap-btn {
-    width: 32px !important;
-    height: 32px !important;
-    font-size: 15px !important;
-  }
-  html:not(.kb-open):not(.ios-device) .route-sheet-x {
-    width: 27px !important;
-    height: 27px !important;
-    font-size: 18px !important;
-    top: 8px !important;
-    right: 10px !important;
-  }
-  html:not(.kb-open):not(.ios-device) .rs-hint,
-  html:not(.kb-open):not(.ios-device) #app #rs-hint {
-    font-size: 12.4px !important;
-    line-height: 1.65 !important;
-    padding: 11px 0 12px !important;
-  }
-
 }
 
 .my-faith-body.my-faith-home-list-body { gap: 10px !important; padding: 12px 15px calc(6px + env(safe-area-inset-bottom, 0px)) !important; background: #F5F1E8 !important; overscroll-behavior-y: contain !important; }
@@ -8933,9 +8875,8 @@ html.diocese-doc .si-r:last-child {
 }
 
 
-/* WebView V6-63 route cleanup: one final route-card layout block.
-   PWA is reference only; this is WebView route-card cleanup.
-   Keep waypoint logic. Remove accumulated patch-style layout overrides. */
+/* WebView route-card final layout block.
+   Keep waypoint logic; centralize route-card spacing/height/tool positioning here. */
 .oai-route-point-overlay{pointer-events:none!important;transform:translateZ(0);}
 
 #app #sheet-route,
@@ -8964,17 +8905,6 @@ html.diocese-doc .si-r:last-child {
   overflow:visible!important;
   max-height:none!important;
 }
-#sheet-route #rs-hint,
-#app #sheet-route #rs-hint{
-  display:none!important;
-  padding:0!important;
-  margin:0!important;
-  height:0!important;
-  min-height:0!important;
-  max-height:0!important;
-  overflow:hidden!important;
-}
-
 #sheet-route #rs-top::before,
 #sheet-route #rs-top::after,
 #sheet-route #rs-bottom::before,
@@ -9132,8 +9062,6 @@ html.diocese-doc .si-r:last-child {
   flex-shrink:0!important;
   align-self:flex-start!important;
 }
-#sheet-route.route-result-showing .rs-between-tools .rs-add-waypoint-btn{display:flex;}
-
 #sheet-route .rs-dot{width:10px!important;height:10px!important;border-radius:50%!important;flex-shrink:0!important;}
 #sheet-route .rs-lbl{flex:1!important;min-width:0!important;font-size:14px!important;color:#555!important;font-weight:500!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;}
 #sheet-route .rs-lbl.filled{color:var(--ink)!important;font-weight:700!important;}
