@@ -1382,7 +1382,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=WebView-Clean-91';
+    frame.src='diocese.html?v=WebView-Clean-92';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1727,7 +1727,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='WebView-Clean-91';
+const _PARISH_ASSET_VERSION='WebView-Clean-92';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -1890,7 +1890,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='WebView-Clean-91';
+const _PRAYER_ASSET_VERSION='WebView-Clean-92';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2235,7 +2235,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='WebView-Clean-91';
+const _SHRINE_ASSET_VERSION='WebView-Clean-92';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -6396,10 +6396,12 @@ function _hideRouteSheetWhileSearchModalOpen(){
     const rs=$('sheet-route');
     const modal=$('srch-modal');
     if(!rs || !modal) return;
-    if(_activeTab==='route' && (rs.style.display !== 'none')){
+    const visible = rs.style.display !== 'none' && getComputedStyle(rs).display !== 'none';
+    if(visible){
       modal.dataset.routeSheetHidden='1';
       rs.dataset.hiddenBySearchModal='1';
-      rs.style.display='none';
+      document.body && document.body.classList.add('route-search-modal-open');
+      rs.style.setProperty('display','none','important');
     }
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
@@ -6409,8 +6411,9 @@ function _restoreRouteSheetAfterSearchModal(){
     const rs=$('sheet-route');
     const modal=$('srch-modal');
     if(!rs || !modal) return;
+    document.body && document.body.classList.remove('route-search-modal-open');
     if(modal.dataset.routeSheetHidden==='1' || rs.dataset.hiddenBySearchModal==='1'){
-      rs.style.display='';
+      rs.style.removeProperty('display');
       rs.classList.add('open');
       delete modal.dataset.routeSheetHidden;
       delete rs.dataset.hiddenBySearchModal;

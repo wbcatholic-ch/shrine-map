@@ -9172,4 +9172,9 @@ html.ios-device #app #sheet-route .route-sheet-x{
   #sheet-route .rs-end-box{padding-left:10px!important;padding-right:9px!important;}
 }
 
-/* V6-91: align route arrow tool origin to row top; keep JS visibility restore. */
+
+body.route-search-modal-open #sheet-route{
+  display:none!important;
+}
+
+/* V6-92: align route arrow tool origin to row top; keep JS visibility restore. */
