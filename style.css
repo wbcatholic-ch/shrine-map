@@ -9378,3 +9378,41 @@ html.ios-device #sheet-route .route-sheet-x{
     margin-bottom:10px!important;
   }
 }
+
+/* V6-42 WebView route sheet close button size sync.
+   Match the directions info-card X to the nearby/detail info-card X button. */
+#sheet-route .route-sheet-x,
+#app #sheet-route .route-sheet-x,
+html:not(.kb-open):not(.ios-device) #app #sheet-route .route-sheet-x,
+html.ios-device #app #sheet-route .route-sheet-x{
+  width:30px!important;
+  height:30px!important;
+  min-width:30px!important;
+  min-height:30px!important;
+  max-width:30px!important;
+  max-height:30px!important;
+  box-sizing:border-box!important;
+  padding:0!important;
+  border:1px solid var(--oai-map-close)!important;
+  border-radius:50%!important;
+  background:transparent!important;
+  color:var(--oai-map-close)!important;
+  font-size:20px!important;
+  font-weight:900!important;
+  line-height:1!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  font-family:inherit!important;
+  box-shadow:none!important;
+  appearance:none!important;
+  -webkit-appearance:none!important;
+  z-index:10370!important;
+  pointer-events:auto!important;
+  touch-action:manipulation!important;
+  -webkit-tap-highlight-color:transparent!important;
+}
+#sheet-route .route-sheet-x:active,
+#app #sheet-route .route-sheet-x:active{
+  transform:scale(.96)!important;
+}
