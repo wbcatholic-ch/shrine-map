@@ -1382,7 +1382,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=WebView-Clean-82';
+    frame.src='diocese.html?v=WebView-Clean-84';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1727,7 +1727,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='WebView-Clean-82';
+const _PARISH_ASSET_VERSION='WebView-Clean-84';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -1890,7 +1890,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='WebView-Clean-82';
+const _PRAYER_ASSET_VERSION='WebView-Clean-84';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2235,7 +2235,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='WebView-Clean-82';
+const _SHRINE_ASSET_VERSION='WebView-Clean-84';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -3985,7 +3985,7 @@ function _syncRouteWaypointBoxes(){
   _routeSetDisplay(box1,(!summaryVisible && w1Visible)?'flex':'none'); _routeSetDisplay(box2,(!summaryVisible && w2Visible)?'flex':'none'); _routeSetDisplay(box3,(!summaryVisible && w3Visible)?'flex':'none');
   // 결과 화면에서도 경유지 요약 상태가 아니면 +경유지 버튼 흐름을 유지한다.
   _routeSetDisplay(add1,(!summaryVisible && !w1Visible)?'inline-flex':'none'); _routeSetDisplay(add2,(!summaryVisible && w1Visible && !w2Visible)?'inline-flex':'none'); _routeSetDisplay(add3,(!summaryVisible && w2Visible && !w3Visible)?'inline-flex':'none');
-  _routeSetDisplay(tools0,summaryVisible?'none':'block'); _routeSetDisplay(tools1,(!summaryVisible && w1Visible)?'flex':'none'); _routeSetDisplay(tools2,(!summaryVisible && w2Visible)?'flex':'none'); _routeSetDisplay(tools3,(!summaryVisible && w3Visible)?'flex':'none');
+  _routeSetDisplay(tools0,summaryVisible?'none':'block'); _routeSetDisplay(tools1,(!summaryVisible && w1Visible)?'block':'none'); _routeSetDisplay(tools2,(!summaryVisible && w2Visible)?'block':'none'); _routeSetDisplay(tools3,(!summaryVisible && w3Visible)?'block':'none');
   _routeSetDisplay(wx1,(!summaryVisible && w1Visible)?'inline-flex':'none'); _routeSetDisplay(wx2,(!summaryVisible && w2Visible)?'inline-flex':'none'); _routeSetDisplay(wx3,(!summaryVisible && w3Visible)?'inline-flex':'none');
 }
 function _ensureRouteWaypointBox(role){ role=role||_nextAvailableWaypointRole()||'waypoint'; _setRouteWaypointEnabledByRole(role,true); _setRouteLabel(role,_routePointName(_getRoutePointByRole(role))); _refreshRouteTmpMarkers(); if(!_getRoutePointByRole(role)) _showRouteGuideText('지도에서 경유지'+_routeWaypointIndex(role)+' 마커를 선택하거나 경유지 박스를 눌러 검색하세요'); }
