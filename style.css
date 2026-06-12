@@ -8896,7 +8896,7 @@ html.diocese-doc .si-r:last-child {
   box-shadow:0 -4px 16px rgba(0,0,0,.12)!important;
   overflow:visible!important;
   max-height:none!important;
-  padding-bottom:0!important;
+  padding-bottom:14px!important;
 }
 
 #sheet-route #rs-top{
@@ -8912,7 +8912,7 @@ html.diocese-doc .si-r:last-child {
 }
 #sheet-route.route-result-showing #rs-bottom{
   padding-top:2px!important;
-  padding-bottom:0!important;
+  padding-bottom:8px!important;
 }
 #sheet-route #rs-top::before,
 #sheet-route #rs-top::after,
@@ -9090,7 +9090,7 @@ html.diocese-doc .si-r:last-child {
   display:none;
   width:calc(100% - 82px)!important;
   max-width:calc(100% - 82px)!important;
-  margin:8px 0 0!important;
+  margin:8px 0 8px!important;
   padding:13px!important;
   background:#1565c0!important;
   color:#fff!important;
@@ -9111,12 +9111,12 @@ html.diocese-doc .si-r:last-child {
 
 #sheet-route.route-basic-input:not(.route-result-showing){min-height:0!important;}
 #sheet-route.route-basic-input:not(.route-result-showing) #rs-top{flex-shrink:0!important;}
-#sheet-route.route-basic-input:not(.route-result-showing) #rs-search-btn{margin-top:8px!important;margin-bottom:0!important;}
+#sheet-route.route-basic-input:not(.route-result-showing) #rs-search-btn{margin-top:8px!important;margin-bottom:8px!important;}
 #sheet-route.route-multi-waypoint-input:not(.route-result-showing){max-height:none!important;overflow:visible!important;}
 #sheet-route.route-multi-waypoint-input:not(.route-result-showing) #rs-top,
 #sheet-route.route-multi-waypoint-input:not(.route-result-showing) .rs-route-stack{max-height:none!important;overflow:visible!important;}
-#sheet-route.route-multi-waypoint-input:not(.route-result-showing) #rs-bottom{padding-top:0!important;padding-bottom:0!important;}
-#sheet-route.route-multi-waypoint-input:not(.route-result-showing) #rs-search-btn{margin-bottom:0!important;}
+#sheet-route.route-multi-waypoint-input:not(.route-result-showing) #rs-bottom{padding-top:0!important;padding-bottom:8px!important;}
+#sheet-route.route-multi-waypoint-input:not(.route-result-showing) #rs-search-btn{margin-bottom:8px!important;}
 
 #sheet-route .rs-result{background:#fff!important;border-radius:12px!important;padding:8px 12px 6px!important;border:1.5px solid var(--border)!important;box-shadow:0 2px 10px rgba(14,21,53,.08)!important;box-sizing:border-box!important;width:100%!important;max-width:100%!important;margin:0!important;}
 #sheet-route .rs-stats{display:flex!important;gap:8px!important;margin-bottom:6px!important;}
@@ -9172,4 +9172,4 @@ html.ios-device #app #sheet-route .route-sheet-x{
   #sheet-route .rs-end-box{padding-left:10px!important;padding-right:9px!important;}
 }
 
-/* V6-88: align route arrow tool origin to row top; keep JS visibility restore. */
+/* V6-89: align route arrow tool origin to row top; keep JS visibility restore. */
