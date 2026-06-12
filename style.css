@@ -9275,3 +9275,43 @@ html.ios-device #sheet-route .route-sheet-x{
   #sheet-route.route-result-showing #rs-bottom,
   #sheet-route.route-result-showing.route-waypoint-scroll #rs-bottom{ padding-top:3px!important; padding-bottom:7px!important; }
 }
+
+
+/* V6-40 WebView route box spacing normalization.
+   기준: 1번/4번 상태는 유지하고, 2개 경유지 입력/요약 상태만 박스 간격을 같은 기준으로 보정한다.
+   PWA 파일은 참고용이며, WebView 레이아웃만 수정한다. */
+#sheet-route .rs-route-stack.has-waypoint2{
+  grid-template-rows:46px 8px 46px 8px 46px 8px 46px!important;
+}
+#sheet-route .rs-route-stack.has-waypoint3{
+  grid-template-rows:46px 8px 46px 8px 46px 8px 46px 8px 46px!important;
+}
+#sheet-route .rs-route-stack.has-waypoint-summary{
+  grid-template-rows:46px 8px 46px 8px 46px!important;
+}
+#sheet-route .rs-route-stack.has-waypoint2 .rs-end-box{ grid-row:7!important; }
+#sheet-route .rs-route-stack.has-waypoint3 .rs-end-box{ grid-row:9!important; }
+#sheet-route .rs-route-stack.has-waypoint-summary .rs-end-box{ grid-row:5!important; }
+#sheet-route.route-result-showing .rs-route-stack.has-waypoint-summary{
+  margin-bottom:0!important;
+}
+#sheet-route.route-result-showing #rs-top,
+#sheet-route.route-result-showing.route-waypoint-scroll #rs-top{
+  padding-bottom:3px!important;
+}
+#sheet-route.route-result-showing #rs-bottom,
+#sheet-route.route-result-showing.route-waypoint-scroll #rs-bottom{
+  padding-top:3px!important;
+  padding-bottom:8px!important;
+}
+@media (max-width:370px){
+  #sheet-route .rs-route-stack.has-waypoint2{
+    grid-template-rows:46px 7px 46px 7px 46px 7px 46px!important;
+  }
+  #sheet-route .rs-route-stack.has-waypoint3{
+    grid-template-rows:46px 7px 46px 7px 46px 7px 46px 7px 46px!important;
+  }
+  #sheet-route .rs-route-stack.has-waypoint-summary{
+    grid-template-rows:46px 7px 46px 7px 46px!important;
+  }
+}
