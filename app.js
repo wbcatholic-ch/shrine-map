@@ -1378,7 +1378,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=WebView-Clean-57';
+    frame.src='diocese.html?v=WebView-Clean-58';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1724,7 +1724,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='WebView-Clean-57';
+const _PARISH_ASSET_VERSION='WebView-Clean-58';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -1887,7 +1887,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='WebView-Clean-57';
+const _PRAYER_ASSET_VERSION='WebView-Clean-58';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2232,7 +2232,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='WebView-Clean-57';
+const _SHRINE_ASSET_VERSION='WebView-Clean-58';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -5760,11 +5760,56 @@ function _setRouteLabel(role,name){
   _updateSearchBtn();
 }
 
+function _routeShouldReserveSearchButtonSpace(){
+  try{
+    const resultShowing = (typeof _isRouteResultShowing === 'function')
+      ? _isRouteResultShowing()
+      : !!(_polyline || ($('rs-result') && $('rs-result').style.display !== 'none'));
+    if(resultShowing) return false;
+    return !!(
+      (_rS && _rS.lat && _rS.lng) ||
+      (_rE && _rE.lat && _rE.lng) ||
+      (_routeWaypointEnabled || _routeWaypoint2Enabled || _routeWaypoint3Enabled) ||
+      (_rW && _rW.lat && _rW.lng) ||
+      (_rW2 && _rW2.lat && _rW2.lng) ||
+      (_rW3 && _rW3.lat && _rW3.lng)
+    );
+  }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
+}
+
+function _setRouteSearchButtonState(btn, mode){
+  if(!btn) return;
+  if(mode === 'visible'){
+    btn.style.display='flex';
+    btn.style.visibility='visible';
+    btn.style.pointerEvents='auto';
+    btn.disabled=false;
+    btn.removeAttribute('aria-hidden');
+    btn.classList.remove('rs-search-placeholder');
+  }else if(mode === 'placeholder'){
+    btn.style.display='flex';
+    btn.style.visibility='hidden';
+    btn.style.pointerEvents='none';
+    btn.disabled=true;
+    btn.setAttribute('aria-hidden','true');
+    btn.classList.add('rs-search-placeholder');
+  }else{
+    btn.style.display='none';
+    btn.style.visibility='';
+    btn.style.pointerEvents='';
+    btn.disabled=false;
+    btn.removeAttribute('aria-hidden');
+    btn.classList.remove('rs-search-placeholder');
+  }
+}
+
 function _updateSearchBtn(){
   const btn=$('rs-search-btn');
   if(!btn) return;
   const filled=!!(_rS&&_rS.lat&&_rS.lng&&_rE&&_rE.lat&&_rE.lng);
-  btn.style.display=filled?'flex':'none';
+  if(filled) _setRouteSearchButtonState(btn,'visible');
+  else if(_routeShouldReserveSearchButtonSpace()) _setRouteSearchButtonState(btn,'placeholder');
+  else _setRouteSearchButtonState(btn,'hidden');
 }
 
 function doSearchRoute(){ document.activeElement&&document.activeElement.blur();
@@ -5850,7 +5895,7 @@ function resetRoute(opts){
   _hide($('rs-result'));
   $('rs-hint').textContent=''; $('rs-hint').style.display='none';
   const sBtn=$('rs-search-btn');
-  if(sBtn) sBtn.style.display='none';
+  if(sBtn) _setRouteSearchButtonState(sBtn,'hidden');
   if(_polyline){_polyline.setMap(null);_polyline=null;}
   _clearRouteTmpMarkers();
   _showJukrimgulParkingMkr(false);
@@ -6064,7 +6109,7 @@ async function _calcRoute(){
   $('rs-hint').style.display='none';
   _syncRouteWaypointBox();
   const sBtn=$('rs-search-btn');
-  if(sBtn) sBtn.style.display='none';
+  if(sBtn) _setRouteSearchButtonState(sBtn,'hidden');
   if(_polyline){_polyline.setMap(null);_polyline=null;}
   const isJuk = _mode==='shrine' && _rE.idx === JUKRIMGUL_IDX && JUKRIMGUL_IDX >= 0;
   const navDest = isJuk ? JUKRIMGUL_PARKING : _rE;

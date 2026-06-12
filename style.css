@@ -9304,3 +9304,11 @@ html.ios-device #app #sheet-route .route-sheet-x{
   margin:0!important;
   overflow:hidden!important;
 }
+
+
+/* WebView V6-58: 목적지를 취소해도 길찾기 카드 높이는 유지한다.
+   경로검색 버튼은 보이지 않지만 같은 자리를 예약했다가, 출발/도착이 다시 채워지면 같은 위치에 복귀한다. */
+#sheet-route #rs-search-btn.rs-search-placeholder{
+  visibility:hidden!important;
+  pointer-events:none!important;
+}
