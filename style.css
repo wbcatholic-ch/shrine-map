@@ -9161,7 +9161,7 @@ html.diocese-doc .si-r:last-child {
 }
 #sheet-route .rs-hint{font-size:14px!important;color:#aaa!important;text-align:center!important;padding:16px 0!important;line-height:1.8!important;margin:0!important;}
 
-/* V6-54: from waypoint2/3 input mode, keep the bottom/search area fixed and grow the sheet upward.
+/* V6-55: from waypoint2/3 input mode, keep the bottom/search area fixed and grow the sheet upward.
    Do not create an inner scroll: all route boxes must be visible in the same card. */
 #sheet-route.route-waypoint-scroll:not(.route-result-showing){
   max-height:none!important;
@@ -9248,7 +9248,7 @@ html.ios-device #app #sheet-route .route-sheet-x{
   #sheet-route .rs-end-box{padding-left:10px!important;padding-right:9px!important;}
 }
 
-/* WebView V6-54: 경유지2/3 입력 상태에서 경로검색 버튼 아래 빈 안내 영역 제거.
+/* WebView V6-55: 경유지2/3 입력 상태에서 경로검색 버튼 아래 빈 안내 영역 제거.
    기능/마커/결과카드는 건드리지 않고 입력 중 하단 공간만 줄인다. */
 #sheet-route.route-multi-waypoint-input:not(.route-result-showing) #rs-bottom,
 #sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-bottom{
@@ -9273,4 +9273,17 @@ html.ios-device #app #sheet-route .route-sheet-x{
 #sheet-route.route-multi-waypoint-input:not(.route-result-showing) #rs-search-btn,
 #sheet-route.route-waypoint-scroll:not(.route-result-showing) #rs-search-btn{
   margin-bottom:8px!important;
+}
+
+
+/* WebView V6-55: delete bottom route instruction text and its reserved space. */
+#sheet-route #rs-hint,
+#app #sheet-route #rs-hint{
+  display:none!important;
+  padding:0!important;
+  margin:0!important;
+  height:0!important;
+  min-height:0!important;
+  max-height:0!important;
+  overflow:hidden!important;
 }
