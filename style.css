@@ -1833,7 +1833,7 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, #3F6F5A, #4F846C
   gap:12px;
   pointer-events:auto;
   box-sizing:border-box;
-  padding:8px 22px 0;
+  padding:8px 22px 4px;
   background:rgba(255,252,244,.96);
   border-top:1.5px solid rgba(31,42,68,.12);
   box-shadow:0 -8px 22px rgba(15,23,42,.10);
@@ -9232,4 +9232,17 @@ body.route-search-modal-open #sheet-route{
   display:none!important;
 }
 
-/* V6-102: align route arrow tool origin to row top; keep JS visibility restore. */
+/* V6-103: align route arrow tool origin to row top; keep JS visibility restore. */
+
+
+/* V6-103: add visible borders to the two cover bottom banner boxes */
+#cover-diocese-box,
+#cover-update-box{
+  border:1.5px solid rgba(31,42,68,.18) !important;
+  border-radius:18px !important;
+  box-shadow:0 4px 12px rgba(31,42,68,.06), inset 0 1px 0 rgba(255,255,255,.72) !important;
+}
+#cover-diocese-box .cover-diocese-btn,
+#cover-update-box .cover-refresh-main-btn{
+  border:1.2px solid rgba(31,42,68,.18) !important;
+}
