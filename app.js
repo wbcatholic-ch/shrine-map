@@ -1501,7 +1501,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=WebView-Clean-108';
+    frame.src='diocese.html?v=WebView-Clean-109';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1846,7 +1846,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='WebView-Clean-108';
+const _PARISH_ASSET_VERSION='WebView-Clean-109';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -2009,7 +2009,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='WebView-Clean-108';
+const _PRAYER_ASSET_VERSION='WebView-Clean-109';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2354,7 +2354,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='WebView-Clean-108';
+const _SHRINE_ASSET_VERSION='WebView-Clean-109';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -2937,6 +2937,11 @@ function _oaiStabilizeCoverBackTrapAfterReturn(reason){
       if(modal && modal.classList.contains('show')) return;
       if(typeof _resetCoverExitReady === 'function') _resetCoverExitReady();
       if(typeof _clearCoverExitArmed === 'function') _clearCoverExitArmed();
+      try{
+        var forceUntil = Date.now() + 5000;
+        window.__OAI_FORCE_COVER_FIRST_EXIT_NOTICE_UNTIL__ = forceUntil;
+        sessionStorage.setItem('oai_force_cover_first_exit_notice_until', String(forceUntil));
+      }catch(_e){}
       if(typeof _resetCoverBackTrap === 'function') _resetCoverBackTrap((reason || 'cover-return') + '-' + tag);
       else if(typeof _ensureCoverBackTrap === 'function') _ensureCoverBackTrap((reason || 'cover-return') + '-' + tag);
       else if(window._oaiArmCoverBackTrap) window._oaiArmCoverBackTrap((reason || 'cover-return') + '-' + tag, {force:true});
