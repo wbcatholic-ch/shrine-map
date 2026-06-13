@@ -484,6 +484,26 @@ function _syncFaithQuickNav(current){
     });
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
+function _loadFaithFrameFresh(frame,url){
+  try{
+    if(!frame) return;
+    frame.onload=function(){
+      try{ if(typeof missaLoaded==='function') missaLoaded(); }catch(e){ console.warn('[가톨릭길동무]', e); }
+    };
+    frame.src='about:blank';
+    setTimeout(function(){
+      try{
+        if(frame.contentWindow && frame.contentWindow.location){
+          frame.contentWindow.location.replace(url);
+        }else{
+          frame.src=url;
+        }
+      }catch(e){
+        try{ frame.src=url; }catch(_e){ console.warn('[가톨릭길동무]', _e); }
+      }
+    },30);
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+}
 function _openFaithFrameView(kind,url,title){
   try{ localStorage.setItem('oai_last_'+kind+'_url', url); }catch(e){ console.warn('[가톨릭길동무]', e); }
   try{ if(typeof _resetCoverExitReady==='function') _resetCoverExitReady(); }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -502,8 +522,9 @@ function _openFaithFrameView(kind,url,title){
     view.dataset.faithCurrent=kind;
     view.classList.add('open');
     _syncFaithQuickNav(kind);
-    // 외부 신앙 화면은 iframe 로딩과 전환 효과가 겹치면 화면이 흔들릴 수 있어 진입 애니메이션을 생략한다.
-    frame.src=url;
+    // 성가/성경 등 외부 신앙 화면 이동 시 기존 iframe 히스토리를 남기지 않는다.
+    // 이렇게 해야 성가/성경에서 뒤로가기를 눌렀을 때 이전 매일미사 iframe 페이지로 돌아가지 않는다.
+    _loadFaithFrameFresh(frame,url);
   }
 
   function run(){
@@ -1447,7 +1468,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=WebView-Clean-104';
+    frame.src='diocese.html?v=WebView-Clean-105';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1792,7 +1813,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='WebView-Clean-104';
+const _PARISH_ASSET_VERSION='WebView-Clean-105';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -1955,7 +1976,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='WebView-Clean-104';
+const _PRAYER_ASSET_VERSION='WebView-Clean-105';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2300,7 +2321,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='WebView-Clean-104';
+const _SHRINE_ASSET_VERSION='WebView-Clean-105';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
