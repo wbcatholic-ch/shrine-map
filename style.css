@@ -9232,10 +9232,10 @@ body.route-search-modal-open #sheet-route{
   display:none!important;
 }
 
-/* V6-107: align route arrow tool origin to row top; keep JS visibility restore. */
+/* V6-108: align route arrow tool origin to row top; keep JS visibility restore. */
 
 
-/* V6-107: add visible borders to the two cover bottom banner boxes */
+/* V6-108: add visible borders to the two cover bottom banner boxes */
 #cover-diocese-box,
 #cover-update-box{
   border:1.5px solid rgba(31,42,68,.18) !important;
@@ -9248,7 +9248,7 @@ body.route-search-modal-open #sheet-route{
 }
 
 
-/* V6-107: visible border lines for the two menu/banner button groups */
+/* V6-108: visible border lines for the two menu/banner button groups */
 .cover-menu-item,
 #cover #mass-quick-modal .mass-quick-btn,
 #cover #mass-quick-modal .mass-quick-primary{

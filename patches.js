@@ -756,7 +756,9 @@
   }, false);
 
 
-  document.addEventListener('backbutton', function(){
+  document.addEventListener('backbutton', function(e){
+    try{ if(e && e.preventDefault) e.preventDefault(); }catch(_e){}
+    try{ if(e && e.stopPropagation) e.stopPropagation(); }catch(_e){}
     if(handlePrayerBack('prayer-hardware-back')) return;
     if(closeRefreshDialog()){ try{ armCoverBackTrap('refresh-dialog-hardware', {force:true}); }catch(e){} return; }
     if(window.isMyFaithLifeModalOpen && window.isMyFaithLifeModalOpen()){
@@ -778,7 +780,11 @@
       return;
     }
     if(!appActive()){
-      if(typeof window._showBackToast==='function') window._showBackToast();
+      var exitingNow = false;
+      if(typeof window._showBackToast==='function') exitingNow = window._showBackToast() === true;
+      if(!exitingNow){
+        try{ armCoverBackTrap('cover-hardware-toast', {force:true}); }catch(e){ console.warn('[가톨릭길동무]', e); }
+      }
       return;
     }
     if(shouldMapBackGoStraightToCover('map-hardware-back')){ mapBackToCover('map-hardware-back'); return; }
@@ -923,7 +929,7 @@
 (function(){
   if(window.__APP_FONT_SCALE_GUARD__) return;
   window.__APP_FONT_SCALE_GUARD__=true;
-  var QA_URL="qa-firebase.html?v=WebView-Clean-107";
+  var QA_URL="qa-firebase.html?v=WebView-Clean-108";
   var FONT_KEY='prayer_font_size';
   var BASE=16;
   var FONT_SIZES=[13,14,15,16,17,18,19,20,21,22,24,26,28,30];
