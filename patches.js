@@ -927,7 +927,7 @@
 (function(){
   if(window.__APP_FONT_SCALE_GUARD__) return;
   window.__APP_FONT_SCALE_GUARD__=true;
-  var QA_URL="qa-firebase.html?v=WebView-Clean-110";
+  var QA_URL="qa-firebase.html?v=WebView-Clean-111";
   var FONT_KEY='prayer_font_size';
   var BASE=16;
   var FONT_SIZES=[13,14,15,16,17,18,19,20,21,22,24,26,28,30];
@@ -1461,3 +1461,102 @@
     mo.observe(document.documentElement,{childList:true,subtree:true});
   }catch(e){ console.warn("[가톨릭길동무]", e); }
 })();
+
+
+(function(){
+  'use strict';
+  if(window.__OAI_FAITH_PRAYER_BACK_TO_BANNER_GUARD__) return;
+  window.__OAI_FAITH_PRAYER_BACK_TO_BANNER_GUARD__ = true;
+
+  function el(id){ return document.getElementById(id); }
+  function isOpen(id){
+    try{
+      var v = el(id);
+      return !!(v && v.classList && v.classList.contains('open'));
+    }catch(e){ return false; }
+  }
+  function stopEvent(e){
+    try{ if(e && e.preventDefault) e.preventDefault(); }catch(_e){}
+    try{ if(e && e.stopPropagation) e.stopPropagation(); }catch(_e){}
+    try{ if(e && e.stopImmediatePropagation) e.stopImmediatePropagation(); }catch(_e){}
+  }
+  function blankMissaFrame(){
+    try{
+      var f = el('missa-frame');
+      if(!f) return;
+      try{ f.contentWindow && f.contentWindow.location && f.contentWindow.location.replace('about:blank'); }
+      catch(_e){ f.src = 'about:blank'; }
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }
+  function returnBanner(source){
+    try{
+      if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady();
+      if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed();
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+
+    try{
+      if(source === 'faith'){
+        blankMissaFrame();
+        var mv = el('missa-view');
+        if(mv) mv.classList.remove('open');
+      }
+      if(source === 'prayer'){
+        var pd = el('prayer-detail');
+        if(pd) pd.classList.remove('show');
+        var pv = el('prayer-view');
+        if(pv){
+          pv.classList.remove('open');
+          try{ pv.dataset.quickSource = 'mass'; }catch(_e){}
+        }
+        try{ if(typeof window._setPrayerPopupReturnSource === 'function') window._setPrayerPopupReturnSource(true); }catch(_e){}
+      }
+      if(typeof window._returnToMassQuickMenu === 'function'){
+        window._returnToMassQuickMenu(source || 'faith');
+        return true;
+      }
+      if(typeof window.goToCover === 'function') window.goToCover();
+      if(typeof window.openMassQuickMenu === 'function') window.openMassQuickMenu({keepReturn:true});
+      return true;
+    }catch(e){ console.warn('[가톨릭길동무]', e); return true; }
+  }
+  function handle(reason, e){
+    try{
+      if(isOpen('missa-view')){
+        stopEvent(e);
+        if(typeof window.closeMissa === 'function') window.closeMissa({reason:reason || 'faith-back'});
+        else returnBanner('faith');
+        return true;
+      }
+
+      if(isOpen('prayer-view')){
+        stopEvent(e);
+        var detail = el('prayer-detail');
+        if(detail && detail.classList && detail.classList.contains('show')){
+          if(typeof window.prCloseDetail === 'function'){
+            try{ window.prCloseDetail({skipTrap:true}); }catch(_e){ detail.classList.remove('show'); }
+          }else{
+            detail.classList.remove('show');
+          }
+          return true;
+        }
+        return returnBanner('prayer');
+      }
+    }catch(err){ console.warn('[가톨릭길동무]', err); }
+    return false;
+  }
+
+  try{
+    document.addEventListener('backbutton', function(e){
+      handle('hardware-back', e);
+    }, true);
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+
+  try{
+    window.addEventListener('popstate', function(e){
+      handle('popstate-back', e);
+    }, true);
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+
+  try{ window._oaiFaithPrayerBackToBanner = handle; }catch(_e){}
+})();
+
