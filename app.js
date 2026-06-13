@@ -506,6 +506,8 @@ function _loadFaithFrameFresh(frame,url){
 }
 function _openFaithFrameView(kind,url,title){
   try{ localStorage.setItem('oai_last_'+kind+'_url', url); }catch(e){ console.warn('[가톨릭길동무]', e); }
+  // 매일미사/성가/성경은 닫기/뒤로가기 시 커버로 복귀해야 하므로 기존 배너 복귀 플래그를 남기지 않는다.
+  try{ _setMassQuickReturn(false); }catch(e){ console.warn('[가톨릭길동무]', e); }
   try{ if(typeof _resetCoverExitReady==='function') _resetCoverExitReady(); }catch(e){ console.warn('[가톨릭길동무]', e); }
   try{ if(typeof _clearCoverExitArmed==='function') _clearCoverExitArmed(); }catch(e){ console.warn('[가톨릭길동무]', e); }
 
@@ -520,8 +522,11 @@ function _openFaithFrameView(kind,url,title){
     try{ if(typeof oaiSetMainMapLayerHidden==='function') oaiSetMainMapLayerHidden(true); }catch(e){ console.warn('[가톨릭길동무]', e); }
     if(titleEl) titleEl.textContent=title;
     view.dataset.faithCurrent=kind;
+    document.documentElement.classList.add('app-active');
     view.classList.add('open');
-    try{ if(typeof _ensureAppBackTrap==='function') _ensureAppBackTrap('faith-frame-open'); }catch(e){ console.warn('[가톨릭길동무]', e); }
+    try{ if(typeof _resetAppBackTrap==='function') _resetAppBackTrap('faith-frame-open-reset'); else if(typeof _ensureAppBackTrap==='function') _ensureAppBackTrap('faith-frame-open'); }catch(e){ console.warn('[가톨릭길동무]', e); }
+    setTimeout(function(){ try{ if(typeof _ensureAppBackTrap==='function') _ensureAppBackTrap('faith-frame-open-settle-120'); }catch(e){ console.warn('[가톨릭길동무]', e); } }, 120);
+    setTimeout(function(){ try{ if(typeof _ensureAppBackTrap==='function') _ensureAppBackTrap('faith-frame-open-settle-420'); }catch(e){ console.warn('[가톨릭길동무]', e); } }, 420);
     _syncFaithQuickNav(kind);
     // 성가/성경 등 외부 신앙 화면 이동 시 기존 iframe 히스토리를 남기지 않는다.
     // 이렇게 해야 성가/성경에서 뒤로가기를 눌렀을 때 이전 매일미사 iframe 페이지로 돌아가지 않는다.
@@ -1496,7 +1501,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=WebView-Clean-106';
+    frame.src='diocese.html?v=WebView-Clean-107';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1841,7 +1846,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='WebView-Clean-106';
+const _PARISH_ASSET_VERSION='WebView-Clean-107';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -2004,7 +2009,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='WebView-Clean-106';
+const _PRAYER_ASSET_VERSION='WebView-Clean-107';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2349,7 +2354,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='WebView-Clean-106';
+const _SHRINE_ASSET_VERSION='WebView-Clean-107';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -7991,7 +7996,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 
   onQ('[data-mass-quick-close]', 'click', function() { closeMassQuickMenu(); });
   on('mass-quick-missa', 'click', function() {
-    _setMassQuickReturn(true);
+    _setMassQuickReturn(false);
     if (typeof openMissa === 'function') openMissa();
   });
   on('mass-quick-prayer', 'click', function() {
@@ -8008,11 +8013,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     else openPrayerFromQuick();
   });
   on('mass-quick-hymn', 'click', function() {
-    _setMassQuickReturn(true);
+    _setMassQuickReturn(false);
     if (typeof openCatholicHymn === 'function') openCatholicHymn();
   });
   on('mass-quick-bible', 'click', function() {
-    _setMassQuickReturn(true);
+    _setMassQuickReturn(false);
     if (typeof openCatholicBible === 'function') openCatholicBible();
   });
 
