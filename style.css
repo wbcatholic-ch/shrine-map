@@ -1823,22 +1823,22 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, #3F6F5A, #4F846C
 #missa-quick-nav{
   position:absolute;
   right:12px;
-  bottom:calc(16px + env(safe-area-inset-bottom, 0px));
+  bottom:calc(8px + env(safe-area-inset-bottom, 0px));
   z-index:3;
   display:flex;
   flex-direction:column;
-  gap:7px;
+  gap:8px;
   pointer-events:auto;
 }
 #missa-quick-nav button{
-  min-width:68px;
-  height:34px;
-  border-radius:12px;
+  min-width:82px;
+  height:40px;
+  border-radius:13px;
   border:1px solid rgba(14,21,53,.22);
   background:rgba(14,21,53,.9);
   color:#f7e5bd;
-  font-size:12px;
-  font-weight:800;
+  font-size:13.5px;
+  font-weight:850;
   box-shadow:0 4px 14px rgba(0,0,0,.18);
 }
 #missa-quick-nav button:active{transform:translateY(1px);}
@@ -9208,4 +9208,4 @@ body.route-search-modal-open #sheet-route{
   display:none!important;
 }
 
-/* V6-93: align route arrow tool origin to row top; keep JS visibility restore. */
+/* V6-94: align route arrow tool origin to row top; keep JS visibility restore. */
