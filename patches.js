@@ -505,9 +505,7 @@
   }
   function prayerListToPopupOrCover(reason){
     try{
-      var fromQuick = isPrayerQuickSource();
-      if(!fromQuick) return resetPrayerToCover(reason || 'prayer-list-cover');
-
+      // 기도문 리스트에서는 진입 출처와 관계없이 반드시 '미사 중 빠른 사용' 배너로 복귀한다.
       try{ keepPrayerQuickSource(true); }catch(_e){}
       try{ if(typeof window._setPrayerPopupReturnSource === 'function') window._setPrayerPopupReturnSource(true); }catch(_e){}
       try{ if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady(); }catch(_e){}
@@ -929,7 +927,7 @@
 (function(){
   if(window.__APP_FONT_SCALE_GUARD__) return;
   window.__APP_FONT_SCALE_GUARD__=true;
-  var QA_URL="qa-firebase.html?v=WebView-Clean-109";
+  var QA_URL="qa-firebase.html?v=WebView-Clean-110";
   var FONT_KEY='prayer_font_size';
   var BASE=16;
   var FONT_SIZES=[13,14,15,16,17,18,19,20,21,22,24,26,28,30];
