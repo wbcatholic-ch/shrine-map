@@ -505,13 +505,11 @@
   }
   function prayerListToPopupOrCover(reason){
     try{
-      if(typeof window._isFaithSmallButtonUsed === 'function' && window._isFaithSmallButtonUsed()){
-        if(typeof window._returnFaithSmallButtonFlowToCover === 'function'){
-          window._returnFaithSmallButtonFlowToCover(reason || 'prayer-small-list-cover');
-          return true;
-        }
+      // 주요기도문 리스트에서는 진입 출처와 관계없이 반드시 '미사 중 빠른 사용' 배너로 복귀한다.
+      if(typeof window.returnFaithCategoryToBanner === 'function'){
+        window.returnFaithCategoryToBanner(reason || 'prayer-list-back');
+        return true;
       }
-      // 작은 버튼을 누르지 않은 기도문 리스트에서는 기존 정상 흐름대로 '미사 중 빠른 사용' 배너로 복귀한다.
       try{ keepPrayerQuickSource(true); }catch(_e){}
       try{ if(typeof window._setPrayerPopupReturnSource === 'function') window._setPrayerPopupReturnSource(true); }catch(_e){}
       try{ if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady(); }catch(_e){}
@@ -933,7 +931,7 @@
 (function(){
   if(window.__APP_FONT_SCALE_GUARD__) return;
   window.__APP_FONT_SCALE_GUARD__=true;
-  var QA_URL="qa-firebase.html?v=WebView-Clean-112";
+  var QA_URL="qa-firebase.html?v=WebView-Clean-113";
   var FONT_KEY='prayer_font_size';
   var BASE=16;
   var FONT_SIZES=[13,14,15,16,17,18,19,20,21,22,24,26,28,30];
@@ -1529,12 +1527,8 @@
     try{
       if(isOpen('missa-view')){
         stopEvent(e);
-        if(typeof window._isFaithSmallButtonUsed === 'function' && window._isFaithSmallButtonUsed()){
-          if(typeof window._returnFaithSmallButtonFlowToCover === 'function') window._returnFaithSmallButtonFlowToCover('faith-small-back');
-          else returnBanner('faith');
-          return true;
-        }
-        if(typeof window.closeMissa === 'function') window.closeMissa({reason:reason || 'faith-back'});
+        if(typeof window.returnFaithCategoryToBanner === 'function') window.returnFaithCategoryToBanner(reason || 'faith-back');
+        else if(typeof window.closeMissa === 'function') window.closeMissa({reason:reason || 'faith-back'});
         else returnBanner('faith');
         return true;
       }
@@ -1550,12 +1544,9 @@
           }
           return true;
         }
-        if(typeof window._isFaithSmallButtonUsed === 'function' && window._isFaithSmallButtonUsed()){
-          if(typeof window._returnFaithSmallButtonFlowToCover === 'function') window._returnFaithSmallButtonFlowToCover('prayer-small-back');
-          else returnBanner('prayer');
-          return true;
-        }
-        return returnBanner('prayer');
+        if(typeof window.returnFaithCategoryToBanner === 'function') window.returnFaithCategoryToBanner(reason || 'prayer-list-back');
+        else returnBanner('prayer');
+        return true;
       }
     }catch(err){ console.warn('[가톨릭길동무]', err); }
     return false;
