@@ -1824,7 +1824,7 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, #3F6F5A, #4F846C
   position:absolute;
   left:12px;
   right:12px;
-  bottom:calc(8px + env(safe-area-inset-bottom, 0px));
+  bottom:calc(4px + env(safe-area-inset-bottom, 0px));
   z-index:5;
   display:flex;
   flex-direction:row;
@@ -1838,7 +1838,7 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, #3F6F5A, #4F846C
   max-width:116px;
   height:42px;
   border-radius:14px;
-  border:1px solid rgba(255,255,255,.65);
+  border:2px solid rgba(255,255,255,.65);
   color:#1f2937;
   font-size:14px;
   font-weight:900;
@@ -1848,10 +1848,10 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, #3F6F5A, #4F846C
   justify-content:center;
 }
 .faith-quick-btn:active{transform:translateY(1px);}
-.faith-quick-missa{background:#FFE9A8;}
-.faith-quick-prayer{background:#BFEFDB;}
-.faith-quick-hymn{background:#FFD0E6;}
-.faith-quick-bible{background:#CFE5FF;}
+.faith-quick-missa{background:#FFE9A8;border-color:#D99A00;}
+.faith-quick-prayer{background:#BFEFDB;border-color:#1E9B6C;}
+.faith-quick-hymn{background:#FFD0E6;border-color:#CC4F87;position:relative;top:-6px;}
+.faith-quick-bible{background:#CFE5FF;border-color:#3D7FC4;}
 
 #missa-external-panel { flex: 1; display: flex; align-items: flex-start; justify-content: center; background: #f8f6f2; padding: 42px 18px 18px; overflow-y: auto; }
 .missa-external-card { width: min(420px,100%); background: #fff; border: 1px solid #e5ded3; border-radius: 18px; padding: 28px 20px; text-align: center; box-shadow: 0 8px 26px rgba(14,21,53,.08); }
@@ -9218,4 +9218,4 @@ body.route-search-modal-open #sheet-route{
   display:none!important;
 }
 
-/* V6-95: align route arrow tool origin to row top; keep JS visibility restore. */
+/* V6-96: align route arrow tool origin to row top; keep JS visibility restore. */
