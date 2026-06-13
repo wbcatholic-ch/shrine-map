@@ -3,8 +3,8 @@
   'use strict';
   if(window.__APP_CACHE_LIFECYCLE_GUARD__) return;
   window.__APP_CACHE_LIFECYCLE_GUARD__ = true;
-  var APP_VERSION = 'WebView-Clean-103';
-  var SW_BUILD_VERSION = 'WebView-Clean-103';
+  var APP_VERSION = 'WebView-Clean-104';
+  var SW_BUILD_VERSION = 'WebView-Clean-104';
   window.APP_VERSION = APP_VERSION;
 
 
