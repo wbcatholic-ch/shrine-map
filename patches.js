@@ -505,11 +505,8 @@
   }
   function prayerListToPopupOrCover(reason){
     try{
-      // 주요기도문 리스트에서는 진입 출처와 관계없이 반드시 '미사 중 빠른 사용' 배너로 복귀한다.
-      if(typeof window.returnFaithCategoryToBanner === 'function'){
-        window.returnFaithCategoryToBanner(reason || 'prayer-list-back');
-        return true;
-      }
+      try{ if(typeof window._markFaithSmallButtonUsed === 'function') window._markFaithSmallButtonUsed(false); }catch(_e){}
+      // 기도문 리스트에서는 작은 버튼/배너 진입 여부와 관계없이 '미사 중 빠른 사용' 배너로 복귀한다.
       try{ keepPrayerQuickSource(true); }catch(_e){}
       try{ if(typeof window._setPrayerPopupReturnSource === 'function') window._setPrayerPopupReturnSource(true); }catch(_e){}
       try{ if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady(); }catch(_e){}
@@ -931,7 +928,7 @@
 (function(){
   if(window.__APP_FONT_SCALE_GUARD__) return;
   window.__APP_FONT_SCALE_GUARD__=true;
-  var QA_URL="qa-firebase.html?v=WebView-Clean-113";
+  var QA_URL="qa-firebase.html?v=WebView-Clean-115";
   var FONT_KEY='prayer_font_size';
   var BASE=16;
   var FONT_SIZES=[13,14,15,16,17,18,19,20,21,22,24,26,28,30];
@@ -1527,8 +1524,8 @@
     try{
       if(isOpen('missa-view')){
         stopEvent(e);
-        if(typeof window.returnFaithCategoryToBanner === 'function') window.returnFaithCategoryToBanner(reason || 'faith-back');
-        else if(typeof window.closeMissa === 'function') window.closeMissa({reason:reason || 'faith-back'});
+        try{ if(typeof window._markFaithSmallButtonUsed === 'function') window._markFaithSmallButtonUsed(false); }catch(_e){}
+        if(typeof window.closeMissa === 'function') window.closeMissa({reason:reason || 'faith-back'});
         else returnBanner('faith');
         return true;
       }
@@ -1544,9 +1541,8 @@
           }
           return true;
         }
-        if(typeof window.returnFaithCategoryToBanner === 'function') window.returnFaithCategoryToBanner(reason || 'prayer-list-back');
-        else returnBanner('prayer');
-        return true;
+        try{ if(typeof window._markFaithSmallButtonUsed === 'function') window._markFaithSmallButtonUsed(false); }catch(_e){}
+        return returnBanner('prayer');
       }
     }catch(err){ console.warn('[가톨릭길동무]', err); }
     return false;

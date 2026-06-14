@@ -9232,10 +9232,10 @@ body.route-search-modal-open #sheet-route{
   display:none!important;
 }
 
-/* V6-113: align route arrow tool origin to row top; keep JS visibility restore. */
+/* V6-115: align route arrow tool origin to row top; keep JS visibility restore. */
 
 
-/* V6-113: add visible borders to the two cover bottom banner boxes */
+/* V6-115: add visible borders to the two cover bottom banner boxes */
 #cover-diocese-box,
 #cover-update-box{
   border:1.5px solid rgba(31,42,68,.18) !important;
@@ -9248,9 +9248,21 @@ body.route-search-modal-open #sheet-route{
 }
 
 
-/* V6-113: visible border lines for the two menu/banner button groups */
+/* V6-115: visible border lines for the two menu/banner button groups */
 .cover-menu-item,
 #cover #mass-quick-modal .mass-quick-btn,
 #cover #mass-quick-modal .mass-quick-primary{
   border:1.8px solid rgba(154,111,47,.42) !important;
+}
+
+
+/* V6-115: hymn external site scale + bottom player safe area */
+#missa-view[data-faith-current="hymn"] #missa-frame{
+  transform:scale(.92);
+  transform-origin:top left;
+  width:108.7%;
+  height:calc((100% - 96px) / .92);
+}
+#missa-view[data-faith-current="hymn"] .faith-quick-nav{
+  bottom:0;
 }
