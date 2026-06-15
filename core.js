@@ -123,7 +123,7 @@ function _showBackToast(){
   var old = document.getElementById('_bt');
 
   /*
-    V6-116:
+    V6-117:
     실제 종료 안내 문구가 화면에 떠 있을 때만 두 번째 뒤로가기로 종료한다.
     _exitReady / sessionStorage 값이 남아 있어도 안내 문구가 없으면 바로 종료하지 않는다.
   */
