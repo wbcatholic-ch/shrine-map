@@ -66,7 +66,15 @@ function _oaiNormalizeTrapState(kind, reason, forceReset){
     var st = history.state || null;
     var trapKey = kind === 'cover' ? 'oai_cover_trap' : 'oai_app_trap';
 
-    if(st && st._p === 1 && st[trapKey] && !forceReset) return;
+    // V6-118 cleanup: forceReset은 현재 state가 _p=1이어도 반드시 root + trap 두 단계를 다시 만든다.
+    // 그래야 Android WebView가 커버에서 바로 종료로 빠지지 않고 popstate를 먼저 발생시킨다.
+    if(forceReset){
+      history.replaceState(_oaiTrapPayload(kind, reason, true), '', href);
+      history.pushState(_oaiTrapPayload(kind, reason, false), '', href);
+      return;
+    }
+
+    if(st && st._p === 1 && st[trapKey]) return;
 
     if(st && st._p === 1){
       history.replaceState(_oaiTrapPayload(kind, reason, false), '', href);
@@ -123,7 +131,7 @@ function _showBackToast(){
   var old = document.getElementById('_bt');
 
   /*
-    V6-117:
+    V6-118:
     실제 종료 안내 문구가 화면에 떠 있을 때만 두 번째 뒤로가기로 종료한다.
     _exitReady / sessionStorage 값이 남아 있어도 안내 문구가 없으면 바로 종료하지 않는다.
   */

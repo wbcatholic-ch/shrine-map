@@ -1440,20 +1440,7 @@ function _closeFaithFrameToCover(reason){
   }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
 }
 try{ window._closeFaithFrameToCover=_closeFaithFrameToCover; }catch(e){ console.warn('[가톨릭길동무]', e); }
-(function bindFaithFrameBackGuard(){
-  try{
-    document.addEventListener('backbutton', function(e){
-      if(_closeFaithFrameToCover('faith-hardware-back')){
-        try{ e.preventDefault(); e.stopImmediatePropagation(); }catch(_e){}
-      }
-    }, true);
-    window.addEventListener('popstate', function(e){
-      if(_closeFaithFrameToCover('faith-popstate-back')){
-        try{ e.stopImmediatePropagation(); }catch(_e){}
-      }
-    }, true);
-  }catch(e){ console.warn('[가톨릭길동무]', e); }
-})();
+/* V6-118 cleanup: faith iframe back is handled by the single controller in patches.js. */
 function missaLoaded(){
 }
 
@@ -1521,10 +1508,6 @@ function closePrayerView(){
 }
 function _closePrayerAndReturn(){
   try{
-    history.go(-1);
-    return;
-  }catch(e){ console.warn('[가톨릭길동무]', e); }
-  try{
     if(typeof window._oaiPrayerListToPopupOrCover === 'function'){
       window._oaiPrayerListToPopupOrCover('prayer-close-button');
       return;
@@ -1559,7 +1542,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=WebView-Clean-117';
+    frame.src='diocese.html?v=WebView-Clean-118';
   }else if(!restore){
     try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -1904,7 +1887,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='WebView-Clean-117';
+const _PARISH_ASSET_VERSION='WebView-Clean-118';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -2067,7 +2050,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='WebView-Clean-117';
+const _PRAYER_ASSET_VERSION='WebView-Clean-118';
 let _prayerModuleLoadPromise=null;
 function _isPrayerModuleReady(){
   return typeof window.initPrayerView === 'function' &&
@@ -2412,7 +2395,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='WebView-Clean-117';
+const _SHRINE_ASSET_VERSION='WebView-Clean-118';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
