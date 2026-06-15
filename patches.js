@@ -13,7 +13,7 @@
       var href = location.href.split('#')[0];
       _href = href;
       var st = history.state;
-      if(!opts.force && st && st._p === 1 && st.oai_cover_trap) return;
+      if(st && st._p === 1 && st.oai_cover_trap) return;
       history.replaceState({_p:0, oai_cover_root:reason||'cover-root'}, '', href);
       history.pushState({_p:1, oai_cover_trap:reason||'cover-trap'}, '', href);
     }catch(e){
@@ -505,8 +505,7 @@
   }
   function prayerListToPopupOrCover(reason){
     try{
-      try{ if(typeof window._markFaithSmallButtonUsed === 'function') window._markFaithSmallButtonUsed(false); }catch(_e){}
-      // 기도문 리스트에서는 작은 버튼/배너 진입 여부와 관계없이 '미사 중 빠른 사용' 배너로 복귀한다.
+      // V6-119: 주요기도문 리스트에서는 진입 경로와 관계없이 '미사 중 빠른 사용' 배너로 복귀한다.
       try{ keepPrayerQuickSource(true); }catch(_e){}
       try{ if(typeof window._setPrayerPopupReturnSource === 'function') window._setPrayerPopupReturnSource(true); }catch(_e){}
       try{ if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady(); }catch(_e){}
@@ -585,14 +584,6 @@
 
   window.addEventListener('popstate', function(){
     if(window._appExiting) return;
-
-    try{
-      var coverPopHandledUntil = Number(window.__OAI_COVER_POP_HANDLED_UNTIL__ || 0);
-      if(coverPopHandledUntil && Date.now && Date.now() < coverPopHandledUntil && !appActive()){
-        armCoverBackTrap('cover-pop-already-handled', {force:true});
-        return;
-      }
-    }catch(e){ console.warn('[가톨릭길동무]', e); }
 
     try{
       var mapCoverUntil = Number(window.__OAI_MAP_BACK_TO_COVER_UNTIL__ || 0);
@@ -763,9 +754,7 @@
   }, false);
 
 
-  document.addEventListener('backbutton', function(e){
-    try{ if(e && e.preventDefault) e.preventDefault(); }catch(_e){}
-    try{ if(e && e.stopPropagation) e.stopPropagation(); }catch(_e){}
+  document.addEventListener('backbutton', function(){
     if(handlePrayerBack('prayer-hardware-back')) return;
     if(closeRefreshDialog()){ try{ armCoverBackTrap('refresh-dialog-hardware', {force:true}); }catch(e){} return; }
     if(window.isMyFaithLifeModalOpen && window.isMyFaithLifeModalOpen()){
@@ -787,11 +776,7 @@
       return;
     }
     if(!appActive()){
-      var exitingNow = false;
-      if(typeof window._showBackToast==='function') exitingNow = window._showBackToast() === true;
-      if(!exitingNow){
-        try{ armCoverBackTrap('cover-hardware-toast', {force:true}); }catch(e){ console.warn('[가톨릭길동무]', e); }
-      }
+      if(typeof window._showBackToast==='function') window._showBackToast();
       return;
     }
     if(shouldMapBackGoStraightToCover('map-hardware-back')){ mapBackToCover('map-hardware-back'); return; }
@@ -936,7 +921,7 @@
 (function(){
   if(window.__APP_FONT_SCALE_GUARD__) return;
   window.__APP_FONT_SCALE_GUARD__=true;
-  var QA_URL="qa-firebase.html?v=WebView-Clean-118";
+  var QA_URL="qa-firebase.html?v=WebView-Clean-119";
   var FONT_KEY='prayer_font_size';
   var BASE=16;
   var FONT_SIZES=[13,14,15,16,17,18,19,20,21,22,24,26,28,30];
@@ -1470,11 +1455,3 @@
     mo.observe(document.documentElement,{childList:true,subtree:true});
   }catch(e){ console.warn("[가톨릭길동무]", e); }
 })();
-
-
-/* V6-118 cleanup: removed duplicate faith/prayer back guard; main controller handles these flows. */
-
-
-/* V6-118 cleanup: removed duplicate cover exit direct guard; cover exit is handled by core + main back controller. */
-
-
