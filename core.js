@@ -119,42 +119,50 @@ function _showBackToast(){
       clearTimeout(window._exitTimer);
     }
   }catch(e){ console.warn('[가톨릭길동무]', e); }
-  var forceFirstNotice = false;
-  try{
-    var forceUntil = Number(window.__OAI_FORCE_COVER_FIRST_EXIT_NOTICE_UNTIL__ || sessionStorage.getItem('oai_force_cover_first_exit_notice_until') || 0);
-    forceFirstNotice = !!(forceUntil && Date.now() < forceUntil);
-    if(forceFirstNotice){
-      window.__OAI_FORCE_COVER_FIRST_EXIT_NOTICE_UNTIL__ = 0;
-      sessionStorage.removeItem('oai_force_cover_first_exit_notice_until');
-      window._exitReady = false;
-      _clearCoverExitArmed();
-      clearTimeout(window._exitTimer);
-    }
-  }catch(e){ console.warn('[가톨릭길동무]', e); }
 
-  if(!forceFirstNotice && (window._exitReady || _isCoverExitArmed())){
+  var old = document.getElementById('_bt');
+
+  /*
+    V6-116:
+    실제 종료 안내 문구가 화면에 떠 있을 때만 두 번째 뒤로가기로 종료한다.
+    _exitReady / sessionStorage 값이 남아 있어도 안내 문구가 없으면 바로 종료하지 않는다.
+  */
+  if(old && window._exitReady && _isCoverExitArmed()){
     window._exitReady = false;
     _clearCoverExitArmed();
     clearTimeout(window._exitTimer);
     doExit();
     return true;
   }
+
+  try{
+    window.__OAI_FORCE_COVER_FIRST_EXIT_NOTICE_UNTIL__ = 0;
+    sessionStorage.removeItem('oai_force_cover_first_exit_notice_until');
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+
+  window._exitReady = false;
+  _clearCoverExitArmed();
+  clearTimeout(window._exitTimer);
+  if(old) old.remove();
+
   window._exitReady = true;
   _armCoverExitWindow();
-  var old = document.getElementById('_bt');
-  if(old) old.remove();
+
   var t = document.createElement('div');
   t.id = '_bt';
   t.textContent = '한 번 더 누르면 앱이 종료됩니다';
-  t.style.cssText = 'position:fixed;top:50%;left:50%;bottom:auto;transform:translate(-50%,-50%);background:rgba(14,21,53,.94);color:#fff;padding:12px 24px;border-radius:24px;font-size:14px;font-weight:800;z-index:99999;white-space:nowrap;pointer-events:none;box-shadow:0 14px 36px rgba(0,0,0,.32);';
+  t.style.cssText = 'position:fixed;top:50%;left:50%;bottom:auto;transform:translate(-50%,-50%);background:rgba(14,21,53,.96);color:#fff;padding:13px 25px;border-radius:24px;font-size:14px;font-weight:900;z-index:2147483647;white-space:nowrap;pointer-events:none;box-shadow:0 14px 36px rgba(0,0,0,.36);';
   document.body.appendChild(t);
+
   window._exitTimer = setTimeout(function(){
     window._exitReady = false;
     _clearCoverExitArmed();
     if(t.parentNode) t.remove();
   }, 2500);
+
   return false;
 }
+
 function attemptAppExit(){
   window._appExiting = true;
   var bt = document.getElementById('_bt');
