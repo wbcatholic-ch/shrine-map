@@ -224,12 +224,6 @@
   function getMyDioceseName(){
     try{ return (localStorage.getItem(MY_DIOCESE_KEY) || '').trim(); }catch(e){ return ''; }
   }
-  function normalizeDioceseName(name){
-    return String(name || '')
-      .replace(/^천주교\s*/, '')
-      .replace(/\s+/g, '')
-      .trim();
-  }
   function isMyDioceseWebItem(item, myName){
     if(!item || !myName) return false;
     var itemName = String(item.name || '').trim();
@@ -240,12 +234,6 @@
       return itemName === myName;
     }
     return false;
-  }
-  function isMyDioceseTrailItem(item, myName){
-    if(!item || !myName) return false;
-    var my = normalizeDioceseName(myName);
-    var op = normalizeDioceseName(item.op);
-    return !!(my && op && op === my);
   }
   function webCategoryRank(cat){
     var order = {
@@ -281,9 +269,6 @@
   }
   function myDioceseBadgeHtml(){
     return '<span class="web-my-diocese-badge">나의 교구</span>';
-  }
-  function trailMyDioceseBadgeHtml(){
-    return '<span class="trail-my-diocese-badge">나의 교구</span>';
   }
   function webProvinceBadgeHtml(prov){
     if(!prov) return '';
@@ -344,7 +329,6 @@
   };
 
   function enterIntegratedView(id){
-    try{ if(typeof window.oaiClearMapInfoSelection === 'function') window.oaiClearMapInfoSelection('integrated-view:'+id); }catch(e){ console.warn('[가톨릭길동무]', e); }
     hideIntegratedViews();
     _screen = 'map';
     if(typeof window.oaiSetMainMapLayerHidden === 'function') window.oaiSetMainMapLayerHidden(true);
@@ -508,7 +492,7 @@
       btn.className = 'web-cat-btn' + (c===webState.curCat ? ' on' : '');
       btn.id = 'web-cat_' + c;
       btn.dataset.webCat = c;
-      btn.dataset.catColor = c; // CSS 선택자용
+      btn.dataset.catColor = c;
       btn.setAttribute('aria-pressed', c===webState.curCat ? 'true' : 'false');
       const count = c==='⭐ 즐겨찾기' ? WEB_SITES.filter(s => wfHas(s.url)).length : WEB_SITES.filter(s => s.cat===c).length;
       btn.innerHTML = esc(webCatLabel(c)) + (c==='⭐ 즐겨찾기' ? '' : '<span class="cnt">' + count + '</span>');
@@ -801,34 +785,19 @@
     });
   }
 
-  function getTrailItemsForList(){
-    if(!Array.isArray(TRAIL_ITEMS) || TRAIL_ITEMS.length < 2) return TRAIL_ITEMS;
-    var myName = getMyDioceseName();
-    if(!myName) return TRAIL_ITEMS;
-    return TRAIL_ITEMS.slice().sort(function(a,b){
-      var aa = isMyDioceseTrailItem(a, myName) ? 0 : 1;
-      var bb = isMyDioceseTrailItem(b, myName) ? 0 : 1;
-      if(aa !== bb) return aa - bb;
-      return TRAIL_ITEMS.indexOf(a) - TRAIL_ITEMS.indexOf(b);
-    });
-  }
-
   function buildTrailList(){
     const wrap = ig$('trail-list');
     if(!wrap) return;
     wrap.innerHTML = '';
     const countEl = ig$('trail-count');
     if(countEl) countEl.textContent = TRAIL_ITEMS.length + '개';
-    const myName = getMyDioceseName();
-    getTrailItemsForList().forEach(function(d){
+    TRAIL_ITEMS.forEach(function(d,i){
       const card = document.createElement('div');
-      const isMyTrailCard = isMyDioceseTrailItem(d, myName);
-      card.className = 'trail-card' + (isMyTrailCard ? ' trail-my-diocese-card' : '');
+      card.className = 'trail-card';
       card.innerHTML = `
         <div class="trail-r1">
           <span class="trail-bdg ${d.t}">${esc(d.op)}</span>
           <span class="trail-reg">📍 ${esc(d.r)}</span>
-          ${isMyTrailCard ? trailMyDioceseBadgeHtml() : ''}
         </div>
         <div class="trail-r2">
           <div class="trail-ico ${d.t}">${esc(d.ico)}</div>
