@@ -505,7 +505,7 @@
   }
   function prayerListToPopupOrCover(reason){
     try{
-      // V6-122: 주요기도문 리스트에서는 진입 경로와 관계없이 '미사 중 빠른 사용' 배너로 복귀한다.
+      // V6-124: 주요기도문 리스트에서는 진입 경로와 관계없이 '미사 중 빠른 사용' 배너로 복귀한다.
       try{ keepPrayerQuickSource(true); }catch(_e){}
       try{ if(typeof window._setPrayerPopupReturnSource === 'function') window._setPrayerPopupReturnSource(true); }catch(_e){}
       try{ if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady(); }catch(_e){}
@@ -921,7 +921,7 @@
 (function(){
   if(window.__APP_FONT_SCALE_GUARD__) return;
   window.__APP_FONT_SCALE_GUARD__=true;
-  var QA_URL="qa-firebase.html?v=WebView-Clean-122";
+  var QA_URL="qa-firebase.html?v=WebView-Clean-124";
   var FONT_KEY='prayer_font_size';
   var BASE=16;
   var FONT_SIZES=[13,14,15,16,17,18,19,20,21,22,24,26,28,30];
