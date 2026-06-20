@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko" class="oai-font-global" style="background:#f5f0e8;">
 <head>
-<link rel="preload" href="intro-cross-jesus.jpg?v=V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE" as="image" fetchpriority="high">
+<link rel="preload" href="intro-cross-jesus.jpg?v=V8-1-14-69-NO-RELOAD-INTRO-CROSS" as="image" fetchpriority="high">
 <style id="oai-first-entry-bg">html,body{margin:0;width:100%;min-height:100%;background:#f5f0e8;color-scheme:light;}body{background:#f5f0e8;}</style>
 <style id="oai-refresh-veil-early-style">
 /* 새로고침 직후 style.css가 아직 도착하지 않은 첫 페인트도 아이보리 보호막으로 덮는다. */
@@ -11,6 +11,9 @@ html.oai-stability-veil::before { content:""; position:fixed; inset:0; z-index:2
 html.oai-stability-veil.oai-stability-veil-releasing::before { animation:oaiStabilityVeilOut .18s ease-in both; }
 html.oai-stability-veil::after { content:"✝"; position:fixed; left:50%; top:50%; width:34px; height:34px; margin:-17px 0 0 -17px; display:flex; align-items:center; justify-content:center; border:0; border-radius:0; background:transparent; color:#d4aa6a; font-size:30px; font-weight:900; line-height:1; z-index:2147483001; pointer-events:none; animation:oaiStabilitySpin 2.8s linear infinite; }
 html.oai-stability-veil[data-oai-stability-reason*="external"]::after,
+html.oai-stability-veil[data-oai-stability-reason*="refresh"]::after,
+html.oai-stability-veil[data-oai-stability-reason*="reload"]::after,
+html.oai-stability-veil[data-oai-refresh-early-veil="1"]::after,
 html.oai-external-return-freeze::after { content:"" !important; display:none !important; opacity:0 !important; animation:none !important; }
 @keyframes oaiStabilityVeilIn { from { opacity:0; } to { opacity:1; } }
 @keyframes oaiStabilityVeilOut { from { opacity:1; } to { opacity:0; } }
@@ -52,7 +55,7 @@ html.oai-cover-first-reveal #cover > * {
     document.documentElement.classList.add('ios-device');
   }
   // iPhone/iPad에서만 iOS 전용 화면 보정을 적용한다.
-  // V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE: 키보드가 올라온 동안에는 화면 등급을 다시 바꾸지 않는다.
+  // V8-1-14-69-NO-RELOAD-INTRO-CROSS: 키보드가 올라온 동안에는 화면 등급을 다시 바꾸지 않는다.
   function applyAndroidScreenClass(){
     var root = document.documentElement;
     if(!root || !root.classList) return;
@@ -287,12 +290,25 @@ html.oai-cover-first-reveal #cover > * {
     isExternalReturnNoIntro = !!(extPending && extTs && (internalNow - extTs) < 10 * 60 * 1000);
   }catch(_e){}
   function now(){ return Date.now ? Date.now() : new Date().getTime(); }
-  if(!isInternalNoEffectReturn && !isExternalReturnNoIntro){
+  var isRefreshBootNoIntro = false;
+  try{
+    var navEntry = (performance && performance.getEntriesByType) ? performance.getEntriesByType('navigation')[0] : null;
+    var navType = navEntry && navEntry.type || '';
+    var n = now();
+    var softRefresh = parseInt(sessionStorage.getItem('oai_soft_refresh_requested') || '0', 10) || 0;
+    var refreshVeilUntil = parseInt(sessionStorage.getItem('oai_refresh_veil_until') || '0', 10) || 0;
+    var stableReloadReason = sessionStorage.getItem('oai_stable_auto_reload_reason') || '';
+    isRefreshBootNoIntro = navType === 'reload' || !!stableReloadReason || !!(softRefresh && (n - softRefresh) < 120000) || !!(refreshVeilUntil && refreshVeilUntil > n);
+  }catch(_e){}
+  var shouldRunCoverBoot = false;
+  if(!isInternalNoEffectReturn && !isExternalReturnNoIntro && !isRefreshBootNoIntro){
+    shouldRunCoverBoot = true;
     root.classList.add('oai-cover-booting');
   }else{
     root.classList.remove('oai-cover-booting','oai-cover-revealing','oai-first-entry-intro','oai-cover-under-intro-reveal','oai-cover-first-reveal');
+    if(isRefreshBootNoIntro) root.classList.add('oai-refresh-no-intro');
     root.classList.add('oai-internal-no-return-effect');
-    setTimeout(function(){ try{ root.classList.remove('oai-internal-no-return-effect'); }catch(_e){} }, isExternalReturnNoIntro ? 900 : 420);
+    setTimeout(function(){ try{ root.classList.remove('oai-internal-no-return-effect','oai-refresh-no-intro'); }catch(_e){} }, isExternalReturnNoIntro ? 900 : 420);
   }
   function readStored(){
     try{
@@ -375,6 +391,7 @@ html.oai-cover-first-reveal #cover > * {
   var BOOT_MIN_MS = 720;
   function releaseBooting(){
     if(bootReleaseDone) return;
+    if(!shouldRunCoverBoot || !root.classList.contains('oai-cover-booting')) return;
     var wait = Math.max(0, BOOT_MIN_MS - (now() - bootStartedAt));
     setTimeout(function(){
       if(bootReleaseDone) return;
@@ -613,38 +630,38 @@ window.APP_CONFIG = {
 <meta name="application-name" content="가톨릭길동무">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="theme-color" content="#f5f0e8">
-<link rel="manifest" href="manifest.json?v=V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE">
-<link rel="apple-touch-icon" sizes="180x180" href="icon-512x512.png?v=V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE">
-<link rel="apple-touch-icon-precomposed" sizes="180x180" href="icon-512x512.png?v=V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE">
+<link rel="manifest" href="manifest.json?v=V8-1-14-69-NO-RELOAD-INTRO-CROSS">
+<link rel="apple-touch-icon" sizes="180x180" href="icon-512x512.png?v=V8-1-14-69-NO-RELOAD-INTRO-CROSS">
+<link rel="apple-touch-icon-precomposed" sizes="180x180" href="icon-512x512.png?v=V8-1-14-69-NO-RELOAD-INTRO-CROSS">
 <meta name="format-detection" content="telephone=no">
 <meta name="description" content="가톨릭길동무 - 가톨릭 신앙생활 종합 앱">
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="가톨릭길동무">
 <meta property="og:title" content="가톨릭길동무">
 <meta property="og:description" content="성지 · 성당 · 기도문 · 순례길 · 가톨릭 웹사이트 안내">
-<meta property="og:image" content="icon-512x512.png?v=V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE">
+<meta property="og:image" content="icon-512x512.png?v=V8-1-14-69-NO-RELOAD-INTRO-CROSS">
 <meta property="og:image:width" content="512">
 <meta property="og:image:height" content="512">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="가톨릭길동무">
 <meta name="twitter:description" content="성지 · 성당 · 기도문 · 순례길 · 가톨릭 웹사이트 안내">
-<meta name="twitter:image" content="icon-512x512.png?v=V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE">
+<meta name="twitter:image" content="icon-512x512.png?v=V8-1-14-69-NO-RELOAD-INTRO-CROSS">
 <title>가톨릭길동무</title>
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192x192.png?v=V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192x192.png?v=V8-1-14-69-NO-RELOAD-INTRO-CROSS">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style id="oai-initial-bg">html,body{margin:0;width:100%;height:100%;min-height:100%;background:#f5f0e8;overflow:hidden;color-scheme:light;}#cover{background:#f5f0e8;min-height:100%;}#app{background:#f8f6f2;display:none;}</style>
-<link rel="stylesheet" href="style.css?v=V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE">
-<link rel="stylesheet" href="css/module-common.css?v=V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE">
-<link rel="stylesheet" href="css/prayer.css?v=V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE">
-<link rel="stylesheet" href="css/web.css?v=V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE">
-<link rel="stylesheet" href="css/pilgrimage.css?v=V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE">
-<link rel="stylesheet" href="css/overlays.css?v=V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE">
-<link rel="stylesheet" href="css/cover-modals.css?v=V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE">
-<link rel="stylesheet" href="css/myfaith.css?v=V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE">
-<link rel="stylesheet" href="css/my-diocese.css?v=V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE">
+<link rel="stylesheet" href="style.css?v=V8-1-14-69-NO-RELOAD-INTRO-CROSS">
+<link rel="stylesheet" href="css/module-common.css?v=V8-1-14-69-NO-RELOAD-INTRO-CROSS">
+<link rel="stylesheet" href="css/prayer.css?v=V8-1-14-69-NO-RELOAD-INTRO-CROSS">
+<link rel="stylesheet" href="css/web.css?v=V8-1-14-69-NO-RELOAD-INTRO-CROSS">
+<link rel="stylesheet" href="css/pilgrimage.css?v=V8-1-14-69-NO-RELOAD-INTRO-CROSS">
+<link rel="stylesheet" href="css/overlays.css?v=V8-1-14-69-NO-RELOAD-INTRO-CROSS">
+<link rel="stylesheet" href="css/cover-modals.css?v=V8-1-14-69-NO-RELOAD-INTRO-CROSS">
+<link rel="stylesheet" href="css/myfaith.css?v=V8-1-14-69-NO-RELOAD-INTRO-CROSS">
+<link rel="stylesheet" href="css/my-diocese.css?v=V8-1-14-69-NO-RELOAD-INTRO-CROSS">
 </head>
 <body>
 <div id="missa-view" role="dialog" aria-modal="true" aria-label="매일미사">
@@ -807,7 +824,7 @@ window.APP_CONFIG = {
 <div id="cover-bottom-note" aria-label="앱 안내문구">
   본 앱은 가톨릭 신자들의 신앙생활을 돕기 위해 만든 비공식 개인 앱입니다.<br>
   정보는 CBCK, 굿뉴스 및 각 교구 홈페이지를 참고했습니다.<br>
-  <span id="cover-version-label">V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE</span>
+  <span id="cover-version-label">V8-1-14-69-NO-RELOAD-INTRO-CROSS</span>
 </div>
 
 <!-- Google Play 배포용: iPhone Safari 설치 안내 모달 제거 -->
@@ -891,7 +908,7 @@ window.APP_CONFIG = {
       <div class="guide-badge">가톨릭길동무</div>
       <h2 id="privacy-policy-modal-title">개인정보처리방침</h2>
     </div>
-    <iframe id="privacy-policy-frame" class="privacy-policy-frame" src="about:blank" data-src="privacy.html?embedded=1&v=V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE" title="개인정보처리방침" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+    <iframe id="privacy-policy-frame" class="privacy-policy-frame" src="about:blank" data-src="privacy.html?embedded=1&v=V8-1-14-69-NO-RELOAD-INTRO-CROSS" title="개인정보처리방침" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
     <button id="privacy-policy-ok-btn" type="button" class="guide-primary guide-ok">확인</button>
   </div>
 </div>
@@ -928,9 +945,9 @@ window.APP_CONFIG = {
   </div>
 </div>
 
-<script src="js/myfaith.js?v=V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE"></script>
-<script src="app.js?v=V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE"></script>
-<script src="js/cover-common.js?v=V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE"></script>
+<script src="js/myfaith.js?v=V8-1-14-69-NO-RELOAD-INTRO-CROSS"></script>
+<script src="app.js?v=V8-1-14-69-NO-RELOAD-INTRO-CROSS"></script>
+<script src="js/cover-common.js?v=V8-1-14-69-NO-RELOAD-INTRO-CROSS"></script>
 <div id="oai-category-entry-veil" aria-hidden="true"></div>
 <div id="app"><div id="tabbar"><button id="tab-btn-nearby" class="tab-btn" data-tab="nearby"><span class="tab-icon">📍</span><span id="tab-nearby-lbl">내주변</span></button><button id="tab-btn-list" class="tab-btn" data-tab="list"><span class="tab-icon">📋</span><span id="tab-list-lbl">목록</span></button><button id="tab-btn-region" class="tab-btn" data-tab="region"><span class="tab-icon">🔍</span>지역검색
     </button><button id="tab-btn-route" class="tab-btn" data-tab="route"><span class="tab-icon">🧭</span>길찾기
@@ -1023,7 +1040,7 @@ window.APP_CONFIG = {
     </div>
   </div>
 </div>
-<script src="web.js?v=V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE"></script>
+<script src="web.js?v=V8-1-14-69-NO-RELOAD-INTRO-CROSS"></script>
 
 <div id="qna-view" role="dialog" aria-modal="true" aria-label="문의·건의" class="module-view">
   <div class="module-bar qna">
@@ -1036,18 +1053,18 @@ window.APP_CONFIG = {
     </div>
     <button id="qna-close-btn" class="module-close" aria-label="문의·건의 닫기">×</button>
   </div>
-  <iframe id="qna-frame" class="qna-frame" src="about:blank" data-src="qa-firebase.html?embedded=1&v=V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE" title="문의·건의" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+  <iframe id="qna-frame" class="qna-frame" src="about:blank" data-src="qa-firebase.html?embedded=1&v=V8-1-14-69-NO-RELOAD-INTRO-CROSS" title="문의·건의" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
 </div>
 
-<script src="js/touch-ux.js?v=V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE"></script>
-<script src="js/prayer-ui.js?v=V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE"></script>
-<script src="js/cover-refresh.js?v=V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE"></script>
-<script src="js/app-state-guards.js?v=V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE"></script>
+<script src="js/touch-ux.js?v=V8-1-14-69-NO-RELOAD-INTRO-CROSS"></script>
+<script src="js/prayer-ui.js?v=V8-1-14-69-NO-RELOAD-INTRO-CROSS"></script>
+<script src="js/cover-refresh.js?v=V8-1-14-69-NO-RELOAD-INTRO-CROSS"></script>
+<script src="js/app-state-guards.js?v=V8-1-14-69-NO-RELOAD-INTRO-CROSS"></script>
 
-<script src="js/route-web-guards.js?v=V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE"></script>
+<script src="js/route-web-guards.js?v=V8-1-14-69-NO-RELOAD-INTRO-CROSS"></script>
 
 
-<script src="js/back-controller.js?v=V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE"></script>
+<script src="js/back-controller.js?v=V8-1-14-69-NO-RELOAD-INTRO-CROSS"></script>
 <script>
 /* V8-1-12: 문의·건의에서 커버로 복귀한 직후, back-controller가 로드된 뒤 커버 뒤로가기 상태를 한 번 더 재등록한다. */
 (function(){
@@ -1075,7 +1092,7 @@ window.APP_CONFIG = {
   setTimeout(function(){ rearmQnaCoverReturn('700'); },700);
 })();
 </script>
-<script src="sw-update.js?v=V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE"></script>
+<script src="sw-update.js?v=V8-1-14-69-NO-RELOAD-INTRO-CROSS"></script>
 
 </body>
 </html>

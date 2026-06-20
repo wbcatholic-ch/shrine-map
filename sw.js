@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE';
-const ASSET_VERSION = 'V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE';
+const CACHE_VERSION = 'catholic-way-V8-1-14-69-NO-RELOAD-INTRO-CROSS';
+const ASSET_VERSION = 'V8-1-14-69-NO-RELOAD-INTRO-CROSS';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }

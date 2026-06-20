@@ -1103,7 +1103,7 @@ function _updateShrineVisitFloatingListButtonUI(){
   const route=document.getElementById('sheet-route');
   const routeOpen=(_activeTab==='route') || !!(route&&route.classList.contains('open'));
   const ae=document.activeElement;
-  const inputFocused=!!(ae && (ae.tagName==='INPUT'||ae.tagName==='TEXTAREA') && (ae.id==='list-srch-inp'||ae.id==='sm-inp'));
+  const inputFocused=!!(ae && (ae.tagName==='INPUT'||ae.tagName==='TEXTAREA') && (ae.id==='list-srch-inp'||ae.id==='sm-inp'||ae.id==='region-inp'));
   const keyboardOpen=inputFocused && (document.documentElement.classList.contains('kb-open') || document.documentElement.classList.contains('oai-map-search-keyboard-lock'));
   const visitOpen=(typeof _isAnyVisitModalOpen==='function'&&_isAnyVisitModalOpen()) || (typeof _isShrineVisitDetailOpen==='function'&&_isShrineVisitDetailOpen()) || (typeof _isShrineVisitCardsModalOpen==='function'&&_isShrineVisitCardsModalOpen());
   const allowedTabs=['nearby','list','region'];
@@ -2662,7 +2662,7 @@ window.addEventListener('load', syncCoverUpdateVersionState, true);
     try{
       var frame=document.getElementById('privacy-policy-frame');
       if(frame){
-        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE'));
+        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-69-NO-RELOAD-INTRO-CROSS'));
         if(frame.getAttribute('src') === 'about:blank' || !frame.getAttribute('src')) frame.setAttribute('src', src);
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -2916,7 +2916,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE';
+    frame.src='diocese.html?v=V8-1-14-69-NO-RELOAD-INTRO-CROSS';
     setTimeout(armDioceseOverlayBack, 0);
   }else{
     if(!restore){
@@ -3486,7 +3486,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE';
+const _PRAYER_ASSET_VERSION='V8-1-14-69-NO-RELOAD-INTRO-CROSS';
 let _prayerModuleLoadPromise=null;
 function _isPrayerDataReady(){
   return !!(window.PRAYER_DATA && typeof window.PRAYER_DATA === 'object');
@@ -8512,19 +8512,19 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function scheduleScrollBlur(){
     try{
       if(scrollBlurTimer) clearTimeout(scrollBlurTimer);
-      scrollBlurTimer=setTimeout(function(){ if(hasActiveEditable()) blurActive(); }, 220);
+      scrollBlurTimer=setTimeout(function(){ if(hasActiveEditable()) blurActive(); }, 60);
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
-  document.addEventListener('touchstart', function(e){
-    if(!hasActiveEditable() || isEditable(e.target)) return;
-    if(isResultScrollSurface(e.target)) return;
-    blurActive();
-  }, {capture:true, passive:true});
-  document.addEventListener('mousedown', function(e){
-    if(!hasActiveEditable() || isEditable(e.target)) return;
-    if(isResultScrollSurface(e.target)) return;
-    blurActive();
-  }, true);
+  function blurOnOutsidePointer(e){
+    try{
+      if(!hasActiveEditable() || isEditable(e.target)) return;
+      blurActive();
+      setTimeout(function(){ if(hasActiveEditable()) blurActive(); }, 40);
+    }catch(err){ console.warn('[가톨릭길동무]', err); }
+  }
+  document.addEventListener('pointerdown', blurOnOutsidePointer, {capture:true, passive:true});
+  document.addEventListener('touchstart', blurOnOutsidePointer, {capture:true, passive:true});
+  document.addEventListener('mousedown', blurOnOutsidePointer, true);
   document.addEventListener('scroll', function(e){
     if(!hasActiveEditable()) return;
     try{
