@@ -1,0 +1,6 @@
+V8-1-14-64-GOOGLE-BOTTOM-TUNE
+- Based on V8-1-14-63-GOOGLE-CLEAN.
+- Only common Android/non-iOS bottom spacing was slightly lowered.
+- No back-navigation, protective-window, inactivity, external-return, map, prayer, myfaith, or category logic was modified.
+- iPhone/Safari install files remain removed.
+- Photo intro and Google clean structure remain intact.

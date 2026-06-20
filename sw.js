@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-63-GOOGLE-CLEAN';
-const ASSET_VERSION = 'V8-1-14-63-GOOGLE-CLEAN';
+const CACHE_VERSION = 'catholic-way-V8-1-14-64-GOOGLE-BOTTOM-TUNE';
+const ASSET_VERSION = 'V8-1-14-64-GOOGLE-BOTTOM-TUNE';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }
