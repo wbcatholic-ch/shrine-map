@@ -6285,7 +6285,7 @@ html.oai-font-global #map-wrap #shrine-visit-map-filter > button[data-shrine-vis
 }
 
 
-/* V8-1-14-66-ANDROID-BOTTOM-SAFE: Google 배포용 첫 커버 인트로는 금색 십자가 대신 업로드된 십자가 사진을 사용한다. */
+/* V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE: Google 배포용 첫 커버 인트로는 금색 십자가 대신 업로드된 십자가 사진을 사용한다. */
 @keyframes oaiGoogleIntroPhotoDesktop{
   0%{opacity:.04; transform:translate(-50%,-49%) scale(.90); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
   50%{opacity:1; transform:translate(-50%,-50%) scale(1); filter:contrast(1.015) saturate(1.02) drop-shadow(0 6px 16px rgba(80,54,18,.05));}
@@ -6330,7 +6330,7 @@ html.oai-cover-revealing::after{
     linear-gradient(to right, #fbf8f1 0%, rgba(251,248,241,.96) 5%, rgba(251,248,241,.60) 13%, rgba(251,248,241,.16) 24%, rgba(251,248,241,0) 36%, rgba(251,248,241,0) 64%, rgba(251,248,241,.16) 76%, rgba(251,248,241,.60) 87%, rgba(251,248,241,.96) 95%, #fbf8f1 100%),
     linear-gradient(to bottom, #fbf8f1 0%, rgba(251,248,241,.90) 6%, rgba(251,248,241,.36) 17%, rgba(251,248,241,0) 30%, rgba(251,248,241,0) 70%, rgba(251,248,241,.36) 83%, rgba(251,248,241,.90) 94%, #fbf8f1 100%),
     radial-gradient(ellipse 96% 88% at 50% 48%, rgba(251,248,241,0) 50%, rgba(251,248,241,.08) 62%, rgba(251,248,241,.34) 76%, rgba(251,248,241,.76) 90%, rgba(251,248,241,1) 100%),
-    url("intro-cross-jesus.jpg?v=V8-1-14-66-ANDROID-BOTTOM-SAFE") !important;
+    url("intro-cross-jesus.jpg?v=V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE") !important;
   background-position:center center, center center, center center, center center !important;
   background-size:100% 100%, 100% 100%, 100% 100%, auto 106% !important;
   background-repeat:no-repeat, no-repeat, no-repeat, no-repeat !important;
@@ -6375,4 +6375,113 @@ html.oai-cover-revealing::after{
     box-shadow:0 0 0 999px #fbf8f1 !important;
     animation:oaiGoogleIntroPhotoMobile .72s cubic-bezier(.18,.76,.22,1) both !important;
   }
+}
+
+
+/* OAI-V67-STAMPBOOK-HEADER-BOTTOM-SAFE-FINAL
+   V8-1-14-67-STAMPBOOK-HEADER-BOTTOM-SAFE: 스탬프북 헤더의 status-bar 중복 보정 제거 + Android WebView 하단 안전영역 표준화. */
+html:not(.ios-device){
+  --oai-android-bottom-gap:clamp(10px, env(safe-area-inset-bottom,0px), 18px);
+  --oai-android-bottom-gap-tight:clamp(8px, env(safe-area-inset-bottom,0px), 14px);
+  --oai-android-bottom-gap-roomy:clamp(12px, env(safe-area-inset-bottom,0px), 20px);
+  --v4-list-pad-bottom:calc(72px + var(--oai-android-bottom-gap));
+}
+/* 스탬프북은 body 안 전체 모달이라 module-bar의 safe-area top을 한 번 더 더하면
+   관구·교구/다른 헤더보다 status bar 높이만큼 아래로 밀린다. */
+html:not(.ios-device) #shrine-visit-cards-modal .shrine-visit-cards-panel,
+html:not(.ios-device) .shrine-visit-cards-modal .shrine-visit-cards-panel{
+  padding-top:0!important;
+  padding-bottom:var(--oai-android-bottom-gap)!important;
+}
+html:not(.ios-device) #shrine-visit-cards-modal .shrine-visit-cards-head.module-bar,
+html:not(.ios-device) #shrine-visit-cards-modal .shrine-visit-cards-head,
+html:not(.ios-device) .shrine-visit-cards-modal .shrine-visit-cards-head.module-bar,
+html:not(.ios-device) .shrine-visit-cards-modal .shrine-visit-cards-head,
+html:not(.ios-device).oai-screen-compact-short #shrine-visit-cards-modal .shrine-visit-cards-head.module-bar,
+html:not(.ios-device).oai-screen-compact-short #shrine-visit-cards-modal .shrine-visit-cards-head,
+html:not(.ios-device).oai-screen-tall-phone #shrine-visit-cards-modal .shrine-visit-cards-head.module-bar,
+html:not(.ios-device).oai-screen-tall-phone #shrine-visit-cards-modal .shrine-visit-cards-head,
+html:not(.ios-device).oai-screen-fold-wide #shrine-visit-cards-modal .shrine-visit-cards-head.module-bar,
+html:not(.ios-device).oai-screen-fold-wide #shrine-visit-cards-modal .shrine-visit-cards-head{
+  height:var(--oai-std-header-h)!important;
+  min-height:var(--oai-std-header-h)!important;
+  max-height:var(--oai-std-header-h)!important;
+  padding:10px 16px 10px!important;
+  margin:0!important;
+  margin-left:0!important;
+  margin-right:0!important;
+  width:100%!important;
+  box-sizing:border-box!important;
+  flex-shrink:0!important;
+  align-items:center!important;
+  background:#0e1535!important;
+  border-bottom:2px solid var(--gold)!important;
+  border-radius:0!important;
+}
+html:not(.ios-device).oai-screen-compact-short #shrine-visit-cards-modal .shrine-visit-cards-head.module-bar,
+html:not(.ios-device).oai-screen-compact-short #shrine-visit-cards-modal .shrine-visit-cards-head{
+  padding:8px 14px 8px!important;
+}
+html:not(.ios-device) #cover{
+  --cover-bottom-safe:var(--oai-android-bottom-gap)!important;
+  padding-bottom:calc(var(--cover-note-reserve) + var(--oai-android-bottom-gap))!important;
+}
+html:not(.ios-device) #cover-bottom-note{
+  bottom:var(--oai-android-bottom-gap)!important;
+}
+html:not(.ios-device) #list-body,
+html:not(.ios-device) #nearby-body,
+html:not(.ios-device) #region-body{
+  padding-bottom:calc(18px + var(--oai-android-bottom-gap))!important;
+}
+html:not(.ios-device) .web-list,
+html:not(.ios-device) #trail-list{
+  padding-bottom:calc(72px + var(--oai-android-bottom-gap))!important;
+}
+html:not(.ios-device) #missa-view .faith-bottom-nav,
+html:not(.ios-device) #prayer-view .faith-bottom-nav,
+html:not(.ios-device) .faith-bottom-nav{
+  padding-bottom:calc(5px + var(--oai-android-bottom-gap))!important;
+}
+html:not(.ios-device) #prayer-list-view{
+  padding-bottom:calc(78px + var(--oai-android-bottom-gap))!important;
+}
+html:not(.ios-device) #prayer-detail-body{
+  padding-bottom:calc(86px + var(--oai-android-bottom-gap))!important;
+}
+html:not(.ios-device) #app #info-card,
+html:not(.ios-device) #app #sheet-route{
+  padding-bottom:var(--oai-android-bottom-gap)!important;
+}
+html:not(.ios-device) #app #info-card .ic-body{
+  padding-bottom:calc(8px + var(--oai-android-bottom-gap-tight))!important;
+}
+html:not(.ios-device) #app .guide-modal{
+  padding-bottom:calc(14px + var(--oai-android-bottom-gap))!important;
+}
+html:not(.ios-device) #app .shrine-visit-floating-list-btn{
+  bottom:calc(var(--oai-android-bottom-gap) + 24px)!important;
+}
+html:not(.ios-device) #app #loc-btn{
+  bottom:calc(var(--oai-android-bottom-gap) + 76px)!important;
+}
+@media (max-width:390px){
+  html:not(.ios-device) #app .shrine-visit-floating-list-btn{bottom:calc(var(--oai-android-bottom-gap) + 22px)!important;}
+  html:not(.ios-device) #app #loc-btn{bottom:calc(var(--oai-android-bottom-gap) + 70px)!important;}
+}
+html:not(.ios-device) .shrine-visit-panel,
+html:not(.ios-device) .shrine-auto-visit-panel{
+  padding-bottom:var(--oai-android-bottom-gap-roomy)!important;
+}
+html:not(.ios-device) .shrine-visit-cards-body{
+  padding-bottom:max(46px, calc(34px + var(--oai-android-bottom-gap)))!important;
+}
+html:not(.ios-device) .shrine-visit-cards-body.stats{
+  padding-bottom:max(48px, calc(36px + var(--oai-android-bottom-gap)))!important;
+}
+html:not(.ios-device) .shrine-visit-detail-view{
+  padding-bottom:var(--oai-android-bottom-gap)!important;
+}
+html:not(.ios-device) .shrine-visit-detail-body{
+  padding-bottom:max(44px, calc(32px + var(--oai-android-bottom-gap)))!important;
 }
