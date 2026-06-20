@@ -1104,7 +1104,7 @@ function _updateShrineVisitFloatingListButtonUI(){
   const routeOpen=(_activeTab==='route') || !!(route&&route.classList.contains('open'));
   const ae=document.activeElement;
   const inputFocused=!!(ae && (ae.tagName==='INPUT'||ae.tagName==='TEXTAREA') && (ae.id==='list-srch-inp'||ae.id==='sm-inp'));
-  const keyboardOpen=inputFocused && document.documentElement.classList.contains('kb-open');
+  const keyboardOpen=inputFocused && (document.documentElement.classList.contains('kb-open') || document.documentElement.classList.contains('oai-map-search-keyboard-lock'));
   const visitOpen=(typeof _isAnyVisitModalOpen==='function'&&_isAnyVisitModalOpen()) || (typeof _isShrineVisitDetailOpen==='function'&&_isShrineVisitDetailOpen()) || (typeof _isShrineVisitCardsModalOpen==='function'&&_isShrineVisitCardsModalOpen());
   const allowedTabs=['nearby','list','region'];
   const sheetOpen=_isShrineVisitFloatingListSurfaceOpen();
@@ -2662,7 +2662,7 @@ window.addEventListener('load', syncCoverUpdateVersionState, true);
     try{
       var frame=document.getElementById('privacy-policy-frame');
       if(frame){
-        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-64-GOOGLE-BOTTOM-TUNE'));
+        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-65-STAMPBOOK-HEADER-KEYBOARD'));
         if(frame.getAttribute('src') === 'about:blank' || !frame.getAttribute('src')) frame.setAttribute('src', src);
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -2916,7 +2916,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V8-1-14-64-GOOGLE-BOTTOM-TUNE';
+    frame.src='diocese.html?v=V8-1-14-65-STAMPBOOK-HEADER-KEYBOARD';
     setTimeout(armDioceseOverlayBack, 0);
   }else{
     if(!restore){
@@ -3486,7 +3486,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V8-1-14-64-GOOGLE-BOTTOM-TUNE';
+const _PRAYER_ASSET_VERSION='V8-1-14-65-STAMPBOOK-HEADER-KEYBOARD';
 let _prayerModuleLoadPromise=null;
 function _isPrayerDataReady(){
   return !!(window.PRAYER_DATA && typeof window.PRAYER_DATA === 'object');
