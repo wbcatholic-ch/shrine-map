@@ -168,3 +168,9 @@ html.pr-external-guide-active.oai-stability-veil::after {
 @media(max-width:520px){
   .route-choice-btn{min-height:60px!important;font-size:15.5px!important;border-width:2.5px!important;}
 }
+
+
+/* V8-1-14-66-ANDROID-BOTTOM-SAFE: Android WebView 하단 여백 상한/최소값 표준화 */
+html:not(.ios-device) .guide-modal{padding-bottom:calc(14px + var(--oai-android-bottom-gap, 10px))!important;}
+html:not(.ios-device) .modal-panel,
+html:not(.ios-device) .guide-panel{max-height:calc(100vh - 96px - var(--oai-android-bottom-gap, 10px))!important;}

@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-65-STAMPBOOK-HEADER-KEYBOARD';
-const ASSET_VERSION = 'V8-1-14-65-STAMPBOOK-HEADER-KEYBOARD';
+const CACHE_VERSION = 'catholic-way-V8-1-14-66-ANDROID-BOTTOM-SAFE';
+const ASSET_VERSION = 'V8-1-14-66-ANDROID-BOTTOM-SAFE';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }

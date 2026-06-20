@@ -308,3 +308,10 @@
   animation: none !important;
   scroll-behavior: auto !important;
 }
+
+
+/* V8-1-14-66-ANDROID-BOTTOM-SAFE: Android WebView 하단 여백 상한/최소값 표준화 */
+html:not(.ios-device) .my-faith-body{padding-bottom:calc(14px + var(--oai-android-bottom-gap, 10px))!important;}
+html:not(.ios-device) .my-faith-body.my-faith-search-body{padding-bottom:calc(10px + var(--oai-android-bottom-gap, 10px))!important;}
+html:not(.ios-device) .my-faith-search-results{padding-bottom:calc(14px + var(--oai-android-bottom-gap, 10px))!important;}
+html:not(.ios-device) .my-faith-inline-privacy-note{padding-bottom:calc(6px + var(--oai-android-bottom-gap-tight, 8px))!important;}
