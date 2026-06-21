@@ -328,12 +328,14 @@
         saveReturnState(state);
       }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof oaiSmoothNavigate === 'function') oaiSmoothNavigate(url, 'trail-external');
-      else { try{ if(typeof markExternalReturnStabilize === 'function') markExternalReturnStabilize('trail-external'); }catch(e){ console.warn("[가톨릭길동무]", e); } try{ location.href = url; }catch(e){ try{ location.assign(url); }catch(_){ } } }
+      else if(typeof oaiOpenExternalSite === 'function') oaiOpenExternalSite(url, {kind:'trail-external'});
+      else { try{ if(typeof markExternalReturnStabilize === 'function') markExternalReturnStabilize('trail-external'); }catch(e){ console.warn("[가톨릭길동무]", e); } setTimeout(function(){ try{ location.href = url; }catch(e){ try{ location.assign(url); }catch(_){ } } }, 220); }
       return;
     }
     try{ sessionStorage.removeItem(RETURN_KEY); }catch(e){ console.warn("[가톨릭길동무]", e); }
     if(typeof oaiSmoothNavigate === 'function') oaiSmoothNavigate(url, 'integrated-external');
-    else { try{ if(typeof markExternalReturnStabilize === 'function') markExternalReturnStabilize('integrated-external'); }catch(e){ console.warn("[가톨릭길동무]", e); } location.href = url; }
+    else if(typeof oaiOpenExternalSite === 'function') oaiOpenExternalSite(url, {kind:'integrated-external'});
+    else { try{ if(typeof markExternalReturnStabilize === 'function') markExternalReturnStabilize('integrated-external'); }catch(e){ console.warn("[가톨릭길동무]", e); } setTimeout(function(){ location.href = url; }, 220); }
     return;
   }
 

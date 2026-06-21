@@ -387,15 +387,22 @@ function oaiOpenExternalSite(url, options){
     if(/^(tel:|mailto:|sms:|javascript:)/i.test(url)) return false;
   }catch(_e){}
   var kind = options.kind || options.source || 'external-site';
-  var delay = typeof options.delay === 'number' ? options.delay : 70;
+  // V8-1-14-77-EXTERNAL-ENTRY-VEIL: 외부사이트 진입 직전 보호창이 실제로 한 번 그려진 뒤 이동하도록 최소 지연을 둔다.
+  var requestedDelay = typeof options.delay === 'number' ? options.delay : 0;
+  var delay = Math.max(220, requestedDelay || 0);
   try{ document.activeElement && document.activeElement.blur && document.activeElement.blur(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   try{ if(typeof _resetCoverExitReady === 'function') _resetCoverExitReady(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   try{ if(typeof _clearCoverExitArmed === 'function') _clearCoverExitArmed(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   try{ markExternalReturnStabilize(kind); }catch(e){ console.warn("[가톨릭길동무]", e); }
-  setTimeout(function(){
+  function goExternalNow(){
     try{ location.assign(url); }
     catch(e){ try{ location.href = url; }catch(_e){ console.warn('[가톨릭길동무]', _e); } }
-  }, Math.max(0, delay));
+  }
+  try{
+    requestAnimationFrame(function(){
+      requestAnimationFrame(function(){ setTimeout(goExternalNow, delay); });
+    });
+  }catch(_e){ setTimeout(goExternalNow, delay); }
   return true;
 }
 
@@ -2662,7 +2669,7 @@ window.addEventListener('load', syncCoverUpdateVersionState, true);
     try{
       var frame=document.getElementById('privacy-policy-frame');
       if(frame){
-        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-76-INTRO-EARLY-SCALE'));
+        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-77-EXTERNAL-ENTRY-VEIL'));
         if(frame.getAttribute('src') === 'about:blank' || !frame.getAttribute('src')) frame.setAttribute('src', src);
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -2916,7 +2923,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V8-1-14-76-INTRO-EARLY-SCALE';
+    frame.src='diocese.html?v=V8-1-14-77-EXTERNAL-ENTRY-VEIL';
     setTimeout(armDioceseOverlayBack, 0);
   }else{
     if(!restore){
@@ -3486,7 +3493,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V8-1-14-76-INTRO-EARLY-SCALE';
+const _PRAYER_ASSET_VERSION='V8-1-14-77-EXTERNAL-ENTRY-VEIL';
 let _prayerModuleLoadPromise=null;
 function _isPrayerDataReady(){
   return !!(window.PRAYER_DATA && typeof window.PRAYER_DATA === 'object');
