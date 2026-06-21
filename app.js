@@ -337,6 +337,7 @@ function oaiClearExternalNavigationState(opts){
      1분 이상: 현재 화면 안정화 / 10분 이상: 커버 인트로 후 커버 이동 / 외부페이지 복귀는 제외 */
   var LONG_BG_RETURN_MS = 10 * 60 * 1000;
   var MEDIUM_BG_RETURN_MS = 60 * 1000;
+  var SHORT_BG_RETURN_MS = 900;
   var BG_KEY = 'oai_home_backgrounded_at';
   var OLD_HIDDEN_AT_KEY = 'oai_pwa_backgrounded_at_v356';
   var OLD_RESTART_LOCK_KEY = 'oai_pwa_idle_restart_lock_v356';
@@ -392,6 +393,18 @@ function oaiClearExternalNavigationState(opts){
     }catch(e){ console.warn('[가톨릭길동무]', e); }
     try{ if(typeof window.oaiSettleMyFaithLifeReturn === 'function') window.oaiSettleMyFaithLifeReturn(reason || 'background-return'); }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
+  function stabilizeShortBackgroundReturn(reason){
+    if(_bgReturnStabilizing || _bgIntroRunning) return;
+    if(!isAppScreenActive()) return;
+    if(isExternalReturnContext()) return;
+    _bgReturnStabilizing = true;
+    try{ document.documentElement.classList.add('oai-short-background-return'); }catch(_e){}
+    setTimeout(function(){ settleCurrentScreen(reason || 'short-background-return'); }, 90);
+    setTimeout(function(){
+      try{ document.documentElement.classList.remove('oai-short-background-return'); }catch(_e){}
+      _bgReturnStabilizing = false;
+    }, 360);
+  }
   function stabilizeMediumBackgroundReturn(reason){
     if(_bgReturnStabilizing || _bgIntroRunning) return;
     if(!isAppScreenActive()) return;
@@ -443,6 +456,9 @@ function oaiClearExternalNavigationState(opts){
       }else if(started && elapsed >= MEDIUM_BG_RETURN_MS){
         stabilizeMediumBackgroundReturn('medium-background-return');
         clearBgStamp();
+      }else if(started && elapsed >= SHORT_BG_RETURN_MS){
+        stabilizeShortBackgroundReturn('short-background-return');
+        clearBgStamp();
       }else{
         clearBgStamp();
       }
@@ -476,7 +492,7 @@ function oaiOpenExternalSite(url, options){
     if(/^(tel:|mailto:|sms:|javascript:)/i.test(url)) return false;
   }catch(_e){}
   var kind = options.kind || options.source || 'external-site';
-  // V8-1-14-92-SHRINE-188-BANNER: 십자가 보호창이 실제로 보인 뒤 Chrome 전환이 시작되도록 표시 시간을 조금 더 확보한다.
+  // V8-1-14-93-SHORT-RESUME-SMOOTH: 십자가 보호창이 실제로 보인 뒤 Chrome 전환이 시작되도록 표시 시간을 조금 더 확보한다.
   var requestedDelay = typeof options.delay === 'number' ? options.delay : 0;
   var delay = Math.max(900, requestedDelay || 0);
   try{ document.activeElement && document.activeElement.blur && document.activeElement.blur(); }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -2758,7 +2774,7 @@ window.addEventListener('load', syncCoverUpdateVersionState, true);
     try{
       var frame=document.getElementById('privacy-policy-frame');
       if(frame){
-        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-92-SHRINE-188-BANNER'));
+        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-93-SHORT-RESUME-SMOOTH'));
         if(frame.getAttribute('src') === 'about:blank' || !frame.getAttribute('src')) frame.setAttribute('src', src);
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -3012,7 +3028,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V8-1-14-92-SHRINE-188-BANNER';
+    frame.src='diocese.html?v=V8-1-14-93-SHORT-RESUME-SMOOTH';
     setTimeout(armDioceseOverlayBack, 0);
   }else{
     if(!restore){
@@ -3582,7 +3598,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V8-1-14-92-SHRINE-188-BANNER';
+const _PRAYER_ASSET_VERSION='V8-1-14-93-SHORT-RESUME-SMOOTH';
 let _prayerModuleLoadPromise=null;
 function _isPrayerDataReady(){
   return !!(window.PRAYER_DATA && typeof window.PRAYER_DATA === 'object');
@@ -3927,7 +3943,7 @@ function _navFetch(origin, dest) {
 const $=id=>document.getElementById(id);
 const $$=s=>document.querySelectorAll(s);
 const _GEO=navigator.geolocation;
-// V8-1-14-92-SHRINE-188-BANNER: 이동 후 이전 위치가 남지 않도록 위치 캐시는 사용하지 않고, 빠른 신선 위치를 우선 요청한다.
+// V8-1-14-93-SHORT-RESUME-SMOOTH: 이동 후 이전 위치가 남지 않도록 위치 캐시는 사용하지 않고, 빠른 신선 위치를 우선 요청한다.
 const _GO1={enableHighAccuracy:true,timeout:7000,maximumAge:0};
 const _GO2={enableHighAccuracy:false,timeout:2500,maximumAge:15000};
 const _GO_FAST_FRESH={enableHighAccuracy:false,timeout:2500,maximumAge:20000};
