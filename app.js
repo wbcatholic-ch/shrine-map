@@ -378,6 +378,18 @@ function oaiClearExternalNavigationState(opts){
     try{ sessionStorage.removeItem(BG_KEY); }catch(e){ console.warn('[가톨릭길동무]', e); }
     clearOldRestartKeys();
   }
+  function markShortResumeFreeze(reason){
+    try{
+      if(typeof window.__oaiMarkResumeFreeze === 'function') window.__oaiMarkResumeFreeze(980);
+      else {
+        window.__oaiResumeFreezeUntil = now() + 980;
+        document.documentElement.classList.add('oai-resume-freeze');
+        clearTimeout(window.__oaiResumeFreezeTimer);
+        window.__oaiResumeFreezeTimer = setTimeout(function(){ try{ document.documentElement.classList.remove('oai-resume-freeze'); }catch(_e){} }, 1080);
+      }
+      window.__oaiShortResumeFreezeReason = reason || 'short-background-return';
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }
   function markBackgrounded(){
     try{
       clearOldRestartKeys();
@@ -444,7 +456,8 @@ function oaiClearExternalNavigationState(opts){
         stabilizeMediumBackgroundReturn('medium-background-return');
         clearBgStamp();
       }else{
-        // 짧은 앱 전환 복귀는 원래 화면을 그대로 두고 강제 relayout을 하지 않는다.
+        // V8-1-14-98-RESUME-FREEZE-STABLE: 짧은 앱 전환 복귀는 relayout을 하지 않고, 화면만 잠깐 고정해 흔들림을 줄인다.
+        if(started) markShortResumeFreeze(reason || 'short-background-return');
         clearBgStamp();
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); clearBgStamp(); }
@@ -477,7 +490,7 @@ function oaiOpenExternalSite(url, options){
     if(/^(tel:|mailto:|sms:|javascript:)/i.test(url)) return false;
   }catch(_e){}
   var kind = options.kind || options.source || 'external-site';
-  // V8-1-14-97-LOCATION-CACHE-12H: 십자가 보호창이 실제로 보인 뒤 Chrome 전환이 시작되도록 표시 시간을 조금 더 확보한다.
+  // V8-1-14-98-RESUME-FREEZE-STABLE: 십자가 보호창이 실제로 보인 뒤 Chrome 전환이 시작되도록 표시 시간을 조금 더 확보한다.
   var requestedDelay = typeof options.delay === 'number' ? options.delay : 0;
   var delay = Math.max(900, requestedDelay || 0);
   try{ document.activeElement && document.activeElement.blur && document.activeElement.blur(); }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -2759,7 +2772,7 @@ window.addEventListener('load', syncCoverUpdateVersionState, true);
     try{
       var frame=document.getElementById('privacy-policy-frame');
       if(frame){
-        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-97-LOCATION-CACHE-12H'));
+        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-98-RESUME-FREEZE-STABLE'));
         if(frame.getAttribute('src') === 'about:blank' || !frame.getAttribute('src')) frame.setAttribute('src', src);
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -3013,7 +3026,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V8-1-14-97-LOCATION-CACHE-12H';
+    frame.src='diocese.html?v=V8-1-14-98-RESUME-FREEZE-STABLE';
     setTimeout(armDioceseOverlayBack, 0);
   }else{
     if(!restore){
@@ -3583,7 +3596,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V8-1-14-97-LOCATION-CACHE-12H';
+const _PRAYER_ASSET_VERSION='V8-1-14-98-RESUME-FREEZE-STABLE';
 let _prayerModuleLoadPromise=null;
 function _isPrayerDataReady(){
   return !!(window.PRAYER_DATA && typeof window.PRAYER_DATA === 'object');
@@ -3928,7 +3941,7 @@ function _navFetch(origin, dest) {
 const $=id=>document.getElementById(id);
 const $$=s=>document.querySelectorAll(s);
 const _GEO=navigator.geolocation;
-// V8-1-14-97-LOCATION-CACHE-12H: 오래 미사용 후 복귀 시 마지막 위치를 먼저 보여주고, 새 GPS가 잡히면 최신 위치로 교체한다.
+// V8-1-14-98-RESUME-FREEZE-STABLE: 오래 미사용 후 복귀 시 마지막 위치를 먼저 보여주고, 새 GPS가 잡히면 최신 위치로 교체한다.
 const _GO1={enableHighAccuracy:true,timeout:6500,maximumAge:0};
 const _GO2={enableHighAccuracy:false,timeout:1200,maximumAge:60000};
 const _GO_FAST_FRESH={enableHighAccuracy:false,timeout:1100,maximumAge:60000};
@@ -3965,6 +3978,13 @@ function _useStoredLocationIfAny(apply,maxAgeMs){
 }
 function _refreshFreshLocationThen(apply,fail){
   if(!_GEO){ if(fail) fail({code:0}); return; }
+  try{
+    if(typeof window.__oaiIsResumeFreeze === 'function' && window.__oaiIsResumeFreeze() && !window.__oaiLocationRefreshResumeBypass){
+      const wait=Math.max(180, Math.min(1100, (window.__oaiResumeFreezeRemain ? window.__oaiResumeFreezeRemain() : 780) + 80));
+      setTimeout(function(){ _refreshFreshLocationThen(apply,fail); }, wait);
+      return;
+    }
+  }catch(_e){}
   _getFreshGeoPosition(function(p){
     const lat=p.coords.latitude, lng=p.coords.longitude;
     _setMyLoc(lat,lng);
@@ -4209,6 +4229,7 @@ const JUKRIMGUL_PARKING = {lat:35.550726, lng:129.014589, name:'죽림굴주차�
   if(!window.visualViewport) return;
   let _kbOpen=false;
   window.visualViewport.addEventListener('resize',()=>{
+  try{ if(typeof window.__oaiIsResumeFreeze === 'function' && window.__oaiIsResumeFreeze()) return; }catch(_e){}
   const ratio = window.visualViewport.height / window.innerHeight;
   const isKb = ratio < 0.75;
   if(isKb===_kbOpen) return;
