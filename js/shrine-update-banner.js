@@ -1,4 +1,4 @@
-/* V8-1-14-92: 성지순례 기능 업데이트 안내 배너
+/* V8-1-14-94: 성지순례 188곳 업데이트 안내 배너
    Google Play 테스트 단계에서만 표시하고, 승인 후 제거 예정. */
 (function(){
   'use strict';
@@ -65,16 +65,16 @@
     if(el) return el;
     el=document.createElement('section');
     el.id='shrine-update-banner';
-    el.setAttribute('aria-label','성지순례 기능 업데이트 안내');
+    el.setAttribute('aria-label','성지순례 188곳 업데이트 안내');
     el.innerHTML=''+
       '<div class="shrine-update-card" role="dialog" aria-modal="false">'+
         '<div class="shrine-update-head">'+
           '<div class="shrine-update-icon" aria-hidden="true">🙏</div>'+
-          '<div class="shrine-update-title">성지순례 기능 업데이트 안내</div>'+
+          '<div class="shrine-update-title">성지순례 188곳 업데이트 안내</div>'+
           '<button type="button" class="shrine-update-x" data-shrine-update-close aria-label="닫기">×</button>'+
         '</div>'+
         '<div class="shrine-update-body">'+
-          '<b>전국 188곳 성지순례 기록 기능과 경로검색 기능이 추가되었습니다.</b>'+
+          '<b>전국 성지 정보가 167곳에서 188곳으로 업데이트되었습니다.</b>'+
           '<div class="shrine-update-list">'+
             '<div>• 성지찾기 카드 및 정보카드에서 <b>순례등록</b> 버튼으로 수동 순례등록</div>'+
             '<div>• 성지 근처에서는 <b>GPS 자동 감지</b>로 오늘 순례등록</div>'+
