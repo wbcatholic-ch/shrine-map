@@ -6282,7 +6282,7 @@ html.oai-font-global #map-wrap #shrine-visit-map-filter > button[data-shrine-vis
 }
 
 
-/* V8-1-14-98-RESUME-FREEZE-STABLE: Google 배포용 첫 커버 인트로는 금색 십자가 대신 업로드된 십자가 사진을 사용한다. */
+/* V8-1-14-99-RESUME-VEIL-FIRST: Google 배포용 첫 커버 인트로는 금색 십자가 대신 업로드된 십자가 사진을 사용한다. */
 @keyframes oaiGoogleIntroPhotoDesktop{
   0%{opacity:.02; transform:translate(-50%,-49%) scale(.94); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
   42%{opacity:1; transform:translate(-50%,-50%) scale(1); filter:contrast(1.015) saturate(1.02) drop-shadow(0 6px 16px rgba(80,54,18,.05));}
@@ -6329,7 +6329,7 @@ html.oai-cover-revealing::after{
     linear-gradient(to right, #fbf8f1 0%, rgba(251,248,241,.96) 5%, rgba(251,248,241,.60) 13%, rgba(251,248,241,.16) 24%, rgba(251,248,241,0) 36%, rgba(251,248,241,0) 64%, rgba(251,248,241,.16) 76%, rgba(251,248,241,.60) 87%, rgba(251,248,241,.96) 95%, #fbf8f1 100%),
     linear-gradient(to bottom, #fbf8f1 0%, rgba(251,248,241,.90) 6%, rgba(251,248,241,.36) 17%, rgba(251,248,241,0) 30%, rgba(251,248,241,0) 70%, rgba(251,248,241,.36) 83%, rgba(251,248,241,.90) 94%, #fbf8f1 100%),
     radial-gradient(ellipse 96% 88% at 50% 48%, rgba(251,248,241,0) 50%, rgba(251,248,241,.08) 62%, rgba(251,248,241,.34) 76%, rgba(251,248,241,.76) 90%, rgba(251,248,241,1) 100%),
-    url("intro-cross-jesus.jpg?v=V8-1-14-98-RESUME-FREEZE-STABLE") !important;
+    url("intro-cross-jesus.jpg?v=V8-1-14-99-RESUME-VEIL-FIRST") !important;
   background-position:center center, center center, center center, center center !important;
   background-size:100% 100%, 100% 100%, 100% 100%, auto 106% !important;
   background-repeat:no-repeat, no-repeat, no-repeat, no-repeat !important;
@@ -6378,7 +6378,7 @@ html.oai-cover-revealing::after{
 
 
 /* OAI-V67-STAMPBOOK-HEADER-BOTTOM-SAFE-FINAL
-   V8-1-14-98-RESUME-FREEZE-STABLE: 스탬프북 헤더의 status-bar 중복 보정 제거 + Android WebView 하단 안전영역 표준화. */
+   V8-1-14-99-RESUME-VEIL-FIRST: 스탬프북 헤더의 status-bar 중복 보정 제거 + Android WebView 하단 안전영역 표준화. */
 html:not(.ios-device){
   --oai-android-bottom-gap:clamp(10px, env(safe-area-inset-bottom,0px), 18px);
   --oai-android-bottom-gap-tight:clamp(8px, env(safe-area-inset-bottom,0px), 14px);
@@ -6487,7 +6487,7 @@ html:not(.ios-device) .shrine-visit-detail-body{
 
 
 /* OAI-V68-KEYBOARD-BUTTON-POSITION-FINAL
-   V8-1-14-98-RESUME-FREEZE-STABLE: 지도/지역검색 키보드 중 나의순례현황 버튼 숨김, 내위치/나의순례현황 버튼 위치 중간 상향. */
+   V8-1-14-99-RESUME-VEIL-FIRST: 지도/지역검색 키보드 중 나의순례현황 버튼 숨김, 내위치/나의순례현황 버튼 위치 중간 상향. */
 html.oai-map-search-keyboard-lock #app #shrine-visit-floating-list-btn,
 html.oai-map-search-keyboard-lock #app #shrine-visit-floating-list-btn.show,
 html.kb-open #app #shrine-visit-floating-list-btn,
@@ -6515,7 +6515,7 @@ html:not(.ios-device) #app #loc-btn{
 
 
 /* OAI-V69-NO-RELOAD-INTRO-CROSS-FINAL
-   V8-1-14-98-RESUME-FREEZE-STABLE: 새로고침/리로드 끝부분에 다시 나타나는 인트로 십자가를 제거한다. */
+   V8-1-14-99-RESUME-VEIL-FIRST: 새로고침/리로드 끝부분에 다시 나타나는 인트로 십자가를 제거한다. */
 html.oai-refresh-no-intro.oai-cover-booting::after,
 html.oai-refresh-no-intro.oai-cover-revealing::after,
 html.oai-stability-veil[data-oai-stability-reason*="refresh"]::after,
@@ -6531,7 +6531,7 @@ html.oai-stability-veil[data-oai-refresh-early-veil="1"]::after{
 
 
 /* OAI-V71-SMOOTH-TIMING-FINAL
-   V8-1-14-98-RESUME-FREEZE-STABLE: 인트로는 유지하고, 외부페이지 보호막/성지·성당·피정 전환 체감만 부드럽게 정리한다. */
+   V8-1-14-99-RESUME-VEIL-FIRST: 인트로는 유지하고, 외부페이지 보호막/성지·성당·피정 전환 체감만 부드럽게 정리한다. */
 html:not(.ios-device){
   --oai-category-enter-ms:360ms!important;
   --oai-popup-enter-ms:320ms!important;
@@ -6572,7 +6572,7 @@ html.oai-stability-veil[data-oai-stability-reason*="external"] *{
 
 
 /* OAI-V73-INTRO-LONGER-FINAL
-   V8-1-14-98-RESUME-FREEZE-STABLE: 인트로 십자가 사진의 유지 시간과 나타남/사라짐 시간을 늘린다. 새로고침 인트로 제거 규칙은 유지. */
+   V8-1-14-99-RESUME-VEIL-FIRST: 인트로 십자가 사진의 유지 시간과 나타남/사라짐 시간을 늘린다. 새로고침 인트로 제거 규칙은 유지. */
 html.oai-cover-booting::after,
 html.oai-cover-revealing::after{
   animation-duration:2.45s!important;
@@ -6584,7 +6584,7 @@ html.oai-cover-revealing::after{
 
 
 /* OAI-V74-STAMPBOOK-HEADER-TOP-FIX-FINAL
-   V8-1-14-98-RESUME-FREEZE-STABLE: V67에서 스탬프북 헤더의 상단 safe-area를 완전히 빼면서 일부 Android WebView에서 헤더가 위로 잘리는 문제를 보정한다.
+   V8-1-14-99-RESUME-VEIL-FIRST: V67에서 스탬프북 헤더의 상단 safe-area를 완전히 빼면서 일부 Android WebView에서 헤더가 위로 잘리는 문제를 보정한다.
    다른 카테고리 헤더/뒤로가기/보호창/인트로는 건드리지 않고 스탬프북 헤더에만 최소 상단 여유를 준다. */
 html:not(.ios-device){
   --oai-stampbook-header-top-gap:clamp(16px, env(safe-area-inset-top, 0px), 24px);
@@ -6618,7 +6618,7 @@ html:not(.ios-device).oai-screen-compact-short #shrine-visit-cards-modal .shrine
 
 
 /* OAI-V75-INTRO-SCALE-VISIBLE-FINAL
-   V8-1-14-98-RESUME-FREEZE-STABLE: 인트로 십자가 사진이 작은 상태에서 커지는 효과가 더 분명하게 보이도록 확대 시작값을 낮추고 중간 확대 단계를 추가한다. */
+   V8-1-14-99-RESUME-VEIL-FIRST: 인트로 십자가 사진이 작은 상태에서 커지는 효과가 더 분명하게 보이도록 확대 시작값을 낮추고 중간 확대 단계를 추가한다. */
 @keyframes oaiGoogleIntroPhotoDesktop{
   0%{opacity:.02; transform:translate(-50%,-49%) scale(.78); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
   28%{opacity:.78; transform:translate(-50%,-50%) scale(.91); filter:contrast(1.012) saturate(1.018) drop-shadow(0 5px 14px rgba(80,54,18,.045));}
@@ -6638,7 +6638,7 @@ html.oai-cover-revealing::after{
 
 
 /* OAI-V76-INTRO-EARLY-SCALE-FINAL
-   V8-1-14-98-RESUME-FREEZE-STABLE: 인트로 시작 시점을 style.css 로딩 이후가 아니라 head 초반으로 앞당겼다. 실제 확대 keyframes는 V75의 더 잘 보이는 scale 효과를 유지한다. */
+   V8-1-14-99-RESUME-VEIL-FIRST: 인트로 시작 시점을 style.css 로딩 이후가 아니라 head 초반으로 앞당겼다. 실제 확대 keyframes는 V75의 더 잘 보이는 scale 효과를 유지한다. */
 html.oai-cover-booting::after,
 html.oai-cover-revealing::after{
   animation-duration:2.45s!important;
@@ -6646,7 +6646,7 @@ html.oai-cover-revealing::after{
 
 
 /* OAI-V77-EXTERNAL-ENTRY-VEIL-FINAL
-   V8-1-14-98-RESUME-FREEZE-STABLE: 모든 외부사이트 진입 직전 보호창이 보이도록 external-leave 보호막을 즉시 표시하고 최소 표시 시간을 확보한다. */
+   V8-1-14-99-RESUME-VEIL-FIRST: 모든 외부사이트 진입 직전 보호창이 보이도록 external-leave 보호막을 즉시 표시하고 최소 표시 시간을 확보한다. */
 html.oai-stability-veil[data-oai-stability-reason="external-leave"]::before,
 html.oai-stability-veil.oai-external-leaving::before{
   content:""!important;
@@ -6667,7 +6667,7 @@ html.oai-stability-veil.oai-external-leaving::after{
 
 
 /* OAI-V78-INTRO-SLOW-GROWTH-FINAL
-   V8-1-14-98-RESUME-FREEZE-STABLE: 인트로 전체 시간은 그대로 두고, 작은 상태에서 최종 크기까지 커지는 속도만 더 천천히 조정한다. */
+   V8-1-14-99-RESUME-VEIL-FIRST: 인트로 전체 시간은 그대로 두고, 작은 상태에서 최종 크기까지 커지는 속도만 더 천천히 조정한다. */
 @keyframes oaiGoogleIntroPhotoDesktop{
   0%{opacity:.02; transform:translate(-50%,-49%) scale(.78); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
   32%{opacity:.72; transform:translate(-50%,-50%) scale(.86); filter:contrast(1.010) saturate(1.014) drop-shadow(0 5px 14px rgba(80,54,18,.040));}
@@ -6689,7 +6689,7 @@ html.oai-cover-revealing::after{
 
 
 /* OAI-V79-STAMPBOOK-HEADER-REPAIR-FINAL
-   V8-1-14-98-RESUME-FREEZE-STABLE: V74의 16~24px 상단 여유가 일부 Android WebView에서 부족해 스탬프북 헤더가 계속 잘리는 문제를 재보정한다.
+   V8-1-14-99-RESUME-VEIL-FIRST: V74의 16~24px 상단 여유가 일부 Android WebView에서 부족해 스탬프북 헤더가 계속 잘리는 문제를 재보정한다.
    관구·교구/다른 헤더는 건드리지 않고, 스탬프북 헤더 내부 여백만 충분히 확보한다. */
 html:not(.ios-device){
   --oai-stampbook-header-top-gap:clamp(38px, calc(env(safe-area-inset-top, 0px) + 18px), 46px);
@@ -6735,7 +6735,7 @@ html:not(.ios-device) .shrine-visit-cards-modal .shrine-visit-cards-head .module
 
 
 /* OAI-V80-INTRO-GROWTH-CLEAR-FINAL
-   V8-1-14-98-RESUME-FREEZE-STABLE: 인트로 전체 시간은 그대로 두고, 작게 시작해 거의 끝까지 천천히 커지는 동작이 눈에 보이도록 확대 폭을 더 크게 조정한다. */
+   V8-1-14-99-RESUME-VEIL-FIRST: 인트로 전체 시간은 그대로 두고, 작게 시작해 거의 끝까지 천천히 커지는 동작이 눈에 보이도록 확대 폭을 더 크게 조정한다. */
 @keyframes oaiGoogleIntroPhotoDesktop{
   0%{opacity:.02; transform:translate(-50%,-49%) scale(.60); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
   28%{opacity:.62; transform:translate(-50%,-50%) scale(.74); filter:contrast(1.010) saturate(1.014) drop-shadow(0 5px 14px rgba(80,54,18,.040));}
@@ -6759,7 +6759,7 @@ html.oai-cover-revealing::after{
 
 
 /* OAI-V81-INTRO-SLOWER-GROWTH-FINAL
-   V8-1-14-98-RESUME-FREEZE-STABLE: 인트로 전체 시간은 그대로 두고, 십자가 확대가 거의 끝까지 계속되도록 더 천천히 조정한다. */
+   V8-1-14-99-RESUME-VEIL-FIRST: 인트로 전체 시간은 그대로 두고, 십자가 확대가 거의 끝까지 계속되도록 더 천천히 조정한다. */
 @keyframes oaiGoogleIntroPhotoDesktop{
   0%{opacity:.02; transform:translate(-50%,-49%) scale(.54); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
   42%{opacity:.60; transform:translate(-50%,-50%) scale(.66); filter:contrast(1.010) saturate(1.014) drop-shadow(0 5px 14px rgba(80,54,18,.040));}
@@ -6782,7 +6782,7 @@ html.oai-cover-revealing::after{
 
 
 /* OAI-V82-LOCATION-EXTERNAL-STABLE-FINAL
-   V8-1-14-98-RESUME-FREEZE-STABLE: 이동 후 이전 위치가 남는 문제를 줄이기 위해 위치 캐시 의존을 낮추고, 외부사이트가 늦게 열릴 때 보호창이 먼저 사라지지 않도록 보강했다. */
+   V8-1-14-99-RESUME-VEIL-FIRST: 이동 후 이전 위치가 남는 문제를 줄이기 위해 위치 캐시 의존을 낮추고, 외부사이트가 늦게 열릴 때 보호창이 먼저 사라지지 않도록 보강했다. */
 html.oai-stability-veil[data-oai-stability-reason="external-leave"]::before,
 html.oai-stability-veil.oai-external-leaving::before{
   opacity:1!important;
@@ -6794,7 +6794,7 @@ html.oai-stability-veil.oai-external-leaving::after{
 
 
 /* OAI-V83-INTRO-TRANSFORM-APPLY-FINAL
-   V8-1-14-98-RESUME-FREEZE-STABLE: 기존 intro pseudo-element에 transform:scale(1)!important가 있어 keyframes의 scale 변화가 실제로 적용되지 않던 문제를 제거했다. */
+   V8-1-14-99-RESUME-VEIL-FIRST: 기존 intro pseudo-element에 transform:scale(1)!important가 있어 keyframes의 scale 변화가 실제로 적용되지 않던 문제를 제거했다. */
 html.oai-cover-booting::after,
 html.oai-cover-revealing::after{
   animation-duration:2.45s!important;
@@ -6803,7 +6803,7 @@ html.oai-cover-revealing::after{
 
 
 /* OAI-V84-INTRO-LOCATION-FAST-FINAL
-   V8-1-14-98-RESUME-FREEZE-STABLE: 인트로는 전체 길이와 확대 폭을 줄이고, 위치는 짧은 최신 캐시/빠른 위치 우선으로 다시 빠르게 조정한다. */
+   V8-1-14-99-RESUME-VEIL-FIRST: 인트로는 전체 길이와 확대 폭을 줄이고, 위치는 짧은 최신 캐시/빠른 위치 우선으로 다시 빠르게 조정한다. */
 @keyframes oaiGoogleIntroPhotoDesktop{
   0%{opacity:.10; transform:translate(-50%,-49%) scale(.78); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
   18%{opacity:.76; transform:translate(-50%,-50%) scale(.84); filter:contrast(1.010) saturate(1.014) drop-shadow(0 5px 14px rgba(80,54,18,.040));}
@@ -6830,7 +6830,7 @@ html.oai-cover-revealing::after{
 
 
 /* OAI-V85-INTRO-SMOOTH-NO-STUTTER-FINAL
-   V8-1-14-98-RESUME-FREEZE-STABLE: 인트로 속도는 유지하고, 중간 끊김처럼 보이던 다단계 확대를 전용 keyframes의 단일 연속 곡선으로 정리한다. */
+   V8-1-14-99-RESUME-VEIL-FIRST: 인트로 속도는 유지하고, 중간 끊김처럼 보이던 다단계 확대를 전용 keyframes의 단일 연속 곡선으로 정리한다. */
 @keyframes oaiIntroSmoothPhotoDesktopV85{
   0%{opacity:.12; transform:translate(-50%,-49%) scale(.84); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
   100%{opacity:1; transform:translate(-50%,-50%) scale(1); filter:contrast(1.015) saturate(1.02) drop-shadow(0 6px 16px rgba(80,54,18,.05));}
@@ -6862,7 +6862,7 @@ html.oai-cover-revealing::after{
 
 
 /* OAI-V86-EXTERNAL-VEIL-STABLE-FINAL
-   V8-1-14-98-RESUME-FREEZE-STABLE: 외부사이트 진입 때 CSS pseudo 보호막이 WebView 로딩과 겹치며 사라져 보이는 현상을 줄이기 위해 실제 DOM 보호창을 최상단에 유지한다. */
+   V8-1-14-99-RESUME-VEIL-FIRST: 외부사이트 진입 때 CSS pseudo 보호막이 WebView 로딩과 겹치며 사라져 보이는 현상을 줄이기 위해 실제 DOM 보호창을 최상단에 유지한다. */
 #oai-external-entry-guard{
   position:fixed!important;
   inset:0!important;
@@ -6918,7 +6918,7 @@ html.oai-stability-veil.oai-external-leaving::after{
 
 
 /* OAI-V87-NO-PULL-EXTERNAL-PLAIN-FINAL
-   V8-1-14-98-RESUME-FREEZE-STABLE: 커버 당김 새로고침 원형 화살표를 완전히 숨기고, 외부사이트 진입 보호창은 단색 화면만 사용해 검은 화면/원형 표시처럼 보이는 중간 단계를 줄인다. */
+   V8-1-14-99-RESUME-VEIL-FIRST: 커버 당김 새로고침 원형 화살표를 완전히 숨기고, 외부사이트 진입 보호창은 단색 화면만 사용해 검은 화면/원형 표시처럼 보이는 중간 단계를 줄인다. */
 #cv-pull-modern,
 #cv-pull-modern.show,
 #cv-pull-modern.ready,
@@ -6974,7 +6974,7 @@ html.oai-stability-veil.oai-external-leaving::after{
 
 
 /* OAI-V88-EXTERNAL-VEIL-HOLD-FINAL
-   V8-1-14-98-RESUME-FREEZE-STABLE: 외부사이트 진입 보호창이 너무 짧게 느껴지지 않도록, 보호창은 단색 아이보리 상태를 유지하고 이동 전 최소 표시 시간을 app.js에서 늘렸다. */
+   V8-1-14-99-RESUME-VEIL-FIRST: 외부사이트 진입 보호창이 너무 짧게 느껴지지 않도록, 보호창은 단색 아이보리 상태를 유지하고 이동 전 최소 표시 시간을 app.js에서 늘렸다. */
 #oai-external-entry-guard.show{
   display:flex!important;
   opacity:1!important;
@@ -6984,7 +6984,7 @@ html.oai-stability-veil.oai-external-leaving::after{
 
 
 /* OAI-V89-EXTERNAL-CROSS-RESTORE-FINAL
-   V8-1-14-98-RESUME-FREEZE-STABLE: V87에서 제거했던 외부사이트 진입 로딩 십자가를 복구한다. 원형 당김 새로고침 표시는 계속 제거한다. */
+   V8-1-14-99-RESUME-VEIL-FIRST: V87에서 제거했던 외부사이트 진입 로딩 십자가를 복구한다. 원형 당김 새로고침 표시는 계속 제거한다. */
 #oai-external-entry-guard.show{
   display:flex!important;
   opacity:1!important;
@@ -7041,7 +7041,7 @@ html.oai-stability-veil.oai-external-leaving::after{
 
 
 /* OAI-V90-EXTERNAL-CROSS-CHROME-SMOOTH-FINAL
-   V8-1-14-98-RESUME-FREEZE-STABLE: Chrome 전환 전에 로딩 십자가가 확실히 보이도록 보호창을 더 선명하게 표시한다. */
+   V8-1-14-99-RESUME-VEIL-FIRST: Chrome 전환 전에 로딩 십자가가 확실히 보이도록 보호창을 더 선명하게 표시한다. */
 #oai-external-entry-guard.show{
   display:flex!important;
   opacity:1!important;
@@ -7082,9 +7082,9 @@ html.oai-stability-veil.oai-external-leaving::after{
 }
 
 
-/* V8-1-14-98-RESUME-FREEZE-STABLE: V95의 짧은 복귀 강제 relayout/전환 억제는 화면 흔들림을 키울 수 있어 제거했다. */
+/* V8-1-14-99-RESUME-VEIL-FIRST: V95의 짧은 복귀 강제 relayout/전환 억제는 화면 흔들림을 키울 수 있어 제거했다. */
 
-/* V8-1-14-98-RESUME-FREEZE-STABLE: 짧은 앱 복귀 직후 Android/WebView 높이 재계산 흔들림 완화 */
+/* V8-1-14-99-RESUME-VEIL-FIRST: 짧은 앱 복귀 직후 Android/WebView 높이 재계산 흔들림 완화 */
 html.oai-resume-freeze,
 html.oai-resume-freeze body {
   scroll-behavior: auto !important;
@@ -7110,4 +7110,39 @@ html.oai-resume-freeze #info-card,
 html.oai-resume-freeze .sheet {
   transition: none !important;
   animation-play-state: paused !important;
+}
+
+/* V8-1-14-99-RESUME-VEIL-FIRST: 앱 복귀 첫 화면 보호창 */
+html.oai-resume-return-veil,
+html.oai-resume-return-veil body {
+  background: #f5f0e8 !important;
+  color-scheme: light !important;
+}
+html.oai-resume-return-veil::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  z-index: 2147483400;
+  background: #f5f0e8;
+  pointer-events: auto;
+  opacity: 1;
+}
+html.oai-resume-return-veil::after {
+  content: "✝";
+  position: fixed;
+  left: 50%;
+  top: 50%;
+  z-index: 2147483401;
+  transform: translate(-50%, -50%);
+  color: #b98a3a;
+  font-size: 42px;
+  line-height: 1;
+  font-weight: 900;
+  text-shadow: 0 8px 24px rgba(120, 80, 20, .18);
+  pointer-events: none;
+  animation: oaiResumeCrossPulse 1.15s ease-in-out infinite;
+}
+@keyframes oaiResumeCrossPulse {
+  0%, 100% { opacity: .55; transform: translate(-50%, -50%) scale(.94); }
+  50% { opacity: 1; transform: translate(-50%, -50%) scale(1.06); }
 }
