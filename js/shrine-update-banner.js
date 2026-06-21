@@ -1,4 +1,4 @@
-/* V8-1-14-94: 성지순례 188곳 업데이트 안내 배너
+/* V8-1-14-95: 성지순례 업데이트안내 배너
    Google Play 테스트 단계에서만 표시하고, 승인 후 제거 예정. */
 (function(){
   'use strict';
@@ -65,12 +65,12 @@
     if(el) return el;
     el=document.createElement('section');
     el.id='shrine-update-banner';
-    el.setAttribute('aria-label','성지순례 188곳 업데이트 안내');
+    el.setAttribute('aria-label','성지순례 업데이트안내');
     el.innerHTML=''+
       '<div class="shrine-update-card" role="dialog" aria-modal="false">'+
         '<div class="shrine-update-head">'+
           '<div class="shrine-update-icon" aria-hidden="true">🙏</div>'+
-          '<div class="shrine-update-title">성지순례 188곳 업데이트 안내</div>'+
+          '<div class="shrine-update-title">성지순례 업데이트안내</div>'+
           '<button type="button" class="shrine-update-x" data-shrine-update-close aria-label="닫기">×</button>'+
         '</div>'+
         '<div class="shrine-update-body">'+
