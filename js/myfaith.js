@@ -339,7 +339,7 @@
           return;
         }
       }catch(_e){}
-      setTimeout(function(){ try{ location.assign(url); }catch(e){ try{ location.href = url; }catch(_e){} } }, 70);
+      setTimeout(function(){ try{ location.assign(url); }catch(e){ try{ location.href = url; }catch(_e){} } }, 220);
     }
     function bindMyFaithClick(el, fn){
       if(!el || typeof fn !== 'function') return;
