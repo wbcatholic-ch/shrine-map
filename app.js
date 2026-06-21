@@ -17,8 +17,9 @@ function hideCoverAndRun(callback) {
   if (callback) requestAnimationFrame(function(){ setTimeout(callback, 0); });
 }
 
-var OAI_EXTERNAL_LEAVE_HOLD_MS = 6000;
-var OAI_EXTERNAL_LEAVE_HARD_MS = 8500;
+var OAI_EXTERNAL_LEAVE_HOLD_MS = 8000;
+var OAI_EXTERNAL_LEAVE_HARD_MS = 14000;
+var OAI_EXTERNAL_ENTRY_GUARD_HARD_MS = 16000;
 var OAI_EXTERNAL_RETURN_MIN_MS = 520;
 var OAI_EXTERNAL_RETURN_MAX_MS = 1350;
 var OAI_EXTERNAL_RETURN_STABLE_TICKS = 1;
@@ -26,6 +27,51 @@ var OAI_REFRESH_VEIL_MS = 2200; // refresh veil must remain visible for at least
 var OAI_REFRESH_CARRY_MS = 15000;
 var OAI_REFRESH_PROGRESS_HOLD_MS = 15000;
 var OAI_REFRESH_PRE_NAV_HOLD_MS = 8000;
+
+
+function oaiShowExternalEntryGuard(kind){
+  try{
+    var body = document.body;
+    if(!body) return;
+    var guard = document.getElementById('oai-external-entry-guard');
+    if(!guard){
+      guard = document.createElement('div');
+      guard.id = 'oai-external-entry-guard';
+      guard.setAttribute('aria-hidden','true');
+      guard.innerHTML = ''; // V87: 외부 진입 중 검은 화면/원형 표시처럼 보이는 중간 단계를 줄이기 위해 보호창은 단색 화면만 사용
+      body.appendChild(guard);
+    }
+    guard.innerHTML = '';
+    guard.setAttribute('data-oai-kind', String(kind || 'external-site'));
+    guard.classList.remove('hide');
+    guard.classList.add('show');
+    guard.style.display = 'flex';
+    try{ document.documentElement.style.backgroundColor = '#f5f0e8'; if(document.body) document.body.style.backgroundColor = '#f5f0e8'; document.documentElement.style.colorScheme = 'light'; }catch(_e){}
+    clearTimeout(window.__oaiExternalEntryGuardTimer);
+    window.__oaiExternalEntryGuardTimer = setTimeout(function(){
+      try{ oaiHideExternalEntryGuard('hard-timeout'); }catch(_e){}
+    }, OAI_EXTERNAL_ENTRY_GUARD_HARD_MS || 18000);
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+}
+function oaiHideExternalEntryGuard(reason){
+  try{
+    clearTimeout(window.__oaiExternalEntryGuardTimer);
+    var guard = document.getElementById('oai-external-entry-guard');
+    if(!guard) return;
+    guard.classList.remove('show');
+    guard.classList.add('hide');
+    setTimeout(function(){
+      try{
+        var g = document.getElementById('oai-external-entry-guard');
+        if(g && !g.classList.contains('show')){
+          g.style.display = 'none';
+          if(g.parentNode) g.parentNode.removeChild(g);
+        }
+      }catch(_e){}
+    }, 180);
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+}
+try{ window.oaiShowExternalEntryGuard = oaiShowExternalEntryGuard; window.oaiHideExternalEntryGuard = oaiHideExternalEntryGuard; }catch(e){ console.warn('[가톨릭길동무]', e); }
 
 function markExternalReturnStabilize(kind){
   try{
@@ -37,6 +83,7 @@ function markExternalReturnStabilize(kind){
     sessionStorage.setItem('oai_external_nav_hold_until', String(now + OAI_EXTERNAL_LEAVE_HOLD_MS));
     sessionStorage.setItem('oai_external_nav_force_release_at', String(now + OAI_EXTERNAL_LEAVE_HARD_MS));
     document.documentElement.classList.add('oai-external-leaving');
+    try{ if(typeof oaiShowExternalEntryGuard === 'function') oaiShowExternalEntryGuard(kind); }catch(_e){}
     if(typeof oaiHoldStabilityVeil === 'function') oaiHoldStabilityVeil('external-leave', OAI_EXTERNAL_LEAVE_HOLD_MS);
   }catch(e){ console.warn("[가톨릭길동무]", e); }
 }
@@ -233,6 +280,7 @@ function oaiClearExternalNavigationState(opts){
     sessionStorage.removeItem('oai_external_nav_hold_until');
     sessionStorage.removeItem('oai_external_nav_force_release_at');
   }catch(e){ console.warn("[가톨릭길동무]", e); }
+  try{ if(typeof oaiHideExternalEntryGuard === 'function') oaiHideExternalEntryGuard('clear-state'); }catch(_e){}
   try{
     var v = document.getElementById('oai-nav-veil');
     if(v && v.parentNode) v.parentNode.removeChild(v);
@@ -387,9 +435,9 @@ function oaiOpenExternalSite(url, options){
     if(/^(tel:|mailto:|sms:|javascript:)/i.test(url)) return false;
   }catch(_e){}
   var kind = options.kind || options.source || 'external-site';
-  // V8-1-14-85-INTRO-SMOOTH-NO-STUTTER: 외부사이트 진입 직전 보호창이 실제로 한 번 그려진 뒤 이동하도록 최소 지연을 둔다.
+  // V8-1-14-87-NO-PULL-EXTERNAL-PLAIN: 보호창은 한 번 페인트하되 지연을 줄여 보호창→검은 전환→외부사이트 단계가 길어지지 않게 한다.
   var requestedDelay = typeof options.delay === 'number' ? options.delay : 0;
-  var delay = Math.max(220, requestedDelay || 0);
+  var delay = Math.max(140, requestedDelay || 0);
   try{ document.activeElement && document.activeElement.blur && document.activeElement.blur(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   try{ if(typeof _resetCoverExitReady === 'function') _resetCoverExitReady(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   try{ if(typeof _clearCoverExitArmed === 'function') _clearCoverExitArmed(); }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -399,9 +447,7 @@ function oaiOpenExternalSite(url, options){
     catch(e){ try{ location.href = url; }catch(_e){ console.warn('[가톨릭길동무]', _e); } }
   }
   try{
-    requestAnimationFrame(function(){
-      requestAnimationFrame(function(){ setTimeout(goExternalNow, delay); });
-    });
+    requestAnimationFrame(function(){ setTimeout(goExternalNow, delay); });
   }catch(_e){ setTimeout(goExternalNow, delay); }
   return true;
 }
@@ -458,6 +504,7 @@ function oaiIsExternalLeaveStillOpening(){
 }
 function oaiStartExternalReturnStabilize(){
   try{
+    try{ if(typeof oaiHideExternalEntryGuard === 'function') oaiHideExternalEntryGuard('external-return'); }catch(_e){}
     var root = document.documentElement;
     if(window.__oaiExternalReturnStabilizing) return true;
     window.__oaiExternalReturnStabilizing = true;
@@ -2669,7 +2716,7 @@ window.addEventListener('load', syncCoverUpdateVersionState, true);
     try{
       var frame=document.getElementById('privacy-policy-frame');
       if(frame){
-        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-85-INTRO-SMOOTH-NO-STUTTER'));
+        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-87-NO-PULL-EXTERNAL-PLAIN'));
         if(frame.getAttribute('src') === 'about:blank' || !frame.getAttribute('src')) frame.setAttribute('src', src);
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -2923,7 +2970,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V8-1-14-85-INTRO-SMOOTH-NO-STUTTER';
+    frame.src='diocese.html?v=V8-1-14-87-NO-PULL-EXTERNAL-PLAIN';
     setTimeout(armDioceseOverlayBack, 0);
   }else{
     if(!restore){
@@ -3493,7 +3540,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V8-1-14-85-INTRO-SMOOTH-NO-STUTTER';
+const _PRAYER_ASSET_VERSION='V8-1-14-87-NO-PULL-EXTERNAL-PLAIN';
 let _prayerModuleLoadPromise=null;
 function _isPrayerDataReady(){
   return !!(window.PRAYER_DATA && typeof window.PRAYER_DATA === 'object');
@@ -3838,7 +3885,7 @@ function _navFetch(origin, dest) {
 const $=id=>document.getElementById(id);
 const $$=s=>document.querySelectorAll(s);
 const _GEO=navigator.geolocation;
-// V8-1-14-85-INTRO-SMOOTH-NO-STUTTER: 이동 후 이전 위치가 남지 않도록 위치 캐시는 사용하지 않고, 빠른 신선 위치를 우선 요청한다.
+// V8-1-14-87-NO-PULL-EXTERNAL-PLAIN: 이동 후 이전 위치가 남지 않도록 위치 캐시는 사용하지 않고, 빠른 신선 위치를 우선 요청한다.
 const _GO1={enableHighAccuracy:true,timeout:7000,maximumAge:0};
 const _GO2={enableHighAccuracy:false,timeout:2500,maximumAge:15000};
 const _GO_FAST_FRESH={enableHighAccuracy:false,timeout:2500,maximumAge:20000};
