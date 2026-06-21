@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-82-LOCATION-EXTERNAL-STABLE';
-const ASSET_VERSION = 'V8-1-14-82-LOCATION-EXTERNAL-STABLE';
+const CACHE_VERSION = 'catholic-way-V8-1-14-83-INTRO-TRANSFORM-APPLY';
+const ASSET_VERSION = 'V8-1-14-83-INTRO-TRANSFORM-APPLY';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }

@@ -1,0 +1,5 @@
+V8-1-14-83-INTRO-TRANSFORM-APPLY
+- 인트로 확대가 안 보이던 실제 원인 수정
+- intro pseudo-element의 transform: scale(1) !important가 keyframes scale 애니메이션을 막고 있었음
+- static transform !important를 제거해 작은 크기에서 커지는 keyframes가 실제 적용되도록 수정
+- V82 위치/외부사이트 보호창 안정화, V81 인트로 느린 확대 설정 유지
