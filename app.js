@@ -17,10 +17,10 @@ function hideCoverAndRun(callback) {
   if (callback) requestAnimationFrame(function(){ setTimeout(callback, 0); });
 }
 
-var OAI_EXTERNAL_LEAVE_HOLD_MS = 3200;
-var OAI_EXTERNAL_LEAVE_HARD_MS = 3600;
-var OAI_EXTERNAL_RETURN_MIN_MS = 420;
-var OAI_EXTERNAL_RETURN_MAX_MS = 1100;
+var OAI_EXTERNAL_LEAVE_HOLD_MS = 6000;
+var OAI_EXTERNAL_LEAVE_HARD_MS = 8500;
+var OAI_EXTERNAL_RETURN_MIN_MS = 520;
+var OAI_EXTERNAL_RETURN_MAX_MS = 1350;
 var OAI_EXTERNAL_RETURN_STABLE_TICKS = 1;
 var OAI_REFRESH_VEIL_MS = 2200; // refresh veil must remain visible for at least 2.2s
 var OAI_REFRESH_CARRY_MS = 15000;
@@ -387,7 +387,7 @@ function oaiOpenExternalSite(url, options){
     if(/^(tel:|mailto:|sms:|javascript:)/i.test(url)) return false;
   }catch(_e){}
   var kind = options.kind || options.source || 'external-site';
-  // V8-1-14-81-INTRO-SLOWER-GROWTH: 외부사이트 진입 직전 보호창이 실제로 한 번 그려진 뒤 이동하도록 최소 지연을 둔다.
+  // V8-1-14-82-LOCATION-EXTERNAL-STABLE: 외부사이트 진입 직전 보호창이 실제로 한 번 그려진 뒤 이동하도록 최소 지연을 둔다.
   var requestedDelay = typeof options.delay === 'number' ? options.delay : 0;
   var delay = Math.max(220, requestedDelay || 0);
   try{ document.activeElement && document.activeElement.blur && document.activeElement.blur(); }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -2669,7 +2669,7 @@ window.addEventListener('load', syncCoverUpdateVersionState, true);
     try{
       var frame=document.getElementById('privacy-policy-frame');
       if(frame){
-        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-81-INTRO-SLOWER-GROWTH'));
+        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-82-LOCATION-EXTERNAL-STABLE'));
         if(frame.getAttribute('src') === 'about:blank' || !frame.getAttribute('src')) frame.setAttribute('src', src);
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -2923,7 +2923,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V8-1-14-81-INTRO-SLOWER-GROWTH';
+    frame.src='diocese.html?v=V8-1-14-82-LOCATION-EXTERNAL-STABLE';
     setTimeout(armDioceseOverlayBack, 0);
   }else{
     if(!restore){
@@ -3493,7 +3493,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V8-1-14-81-INTRO-SLOWER-GROWTH';
+const _PRAYER_ASSET_VERSION='V8-1-14-82-LOCATION-EXTERNAL-STABLE';
 let _prayerModuleLoadPromise=null;
 function _isPrayerDataReady(){
   return !!(window.PRAYER_DATA && typeof window.PRAYER_DATA === 'object');
@@ -3838,8 +3838,11 @@ function _navFetch(origin, dest) {
 const $=id=>document.getElementById(id);
 const $$=s=>document.querySelectorAll(s);
 const _GEO=navigator.geolocation;
-const _GO1={enableHighAccuracy:true,timeout:10000};
-const _GO2={enableHighAccuracy:false,timeout:3000,maximumAge:300000};
+// V8-1-14-82-LOCATION-EXTERNAL-STABLE: 이동 후 이전 위치가 남지 않도록 위치 캐시는 사용하지 않고, 빠른 신선 위치를 우선 요청한다.
+const _GO1={enableHighAccuracy:true,timeout:9000,maximumAge:0};
+const _GO2={enableHighAccuracy:false,timeout:4500,maximumAge:0};
+const _GO_FAST_FRESH={enableHighAccuracy:false,timeout:4500,maximumAge:0};
+const _GO_ACCURATE_FRESH={enableHighAccuracy:true,timeout:9000,maximumAge:0};
 const _EC=encodeURIComponent;
 const _NS='xmlns="http://www.w3.org/2000/svg"';
 const _svgUrl=s=>'data:image/svg+xml;charset=utf-8,'+_EC(s);
@@ -3847,6 +3850,7 @@ const _isMob=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
 const _isIOS=/iPhone|iPad|iPod/i.test(navigator.userAgent) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
 const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 
+let _myLocAt = 0;
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
 const _SHRINE_ASSET_VERSION='V6-147-QNA-MYFAITH-COVER-TOAST-CHECK';
@@ -3936,6 +3940,7 @@ const AppState = {
   myMkr:            null,   // 내 위치 마커
   myLat:            null,   // 내 위치 위도
   myLng:            null,   // 내 위치 경도
+  myLocAt:          0,      // 내 위치를 마지막으로 새로 받은 시각
   jukrimgulParkMkr: null,   // 죽림굴 주차장 마커
   startTmpMkr:      null,   // 출발지 임시 마커
   endTmpMkr:        null,   // 도착지 임시 마커
@@ -5480,7 +5485,7 @@ function openKakaoNav(){
   else if(_myLat) launch(_myLat,_myLng,'현위치');
   else if(_GEO){
     _GEO.getCurrentPosition(p=>launch(p.coords.latitude,p.coords.longitude),
-     ()=>launch(null,null),{enableHighAccuracy:true,timeout:8000,maximumAge:60000});
+     ()=>launch(null,null),{enableHighAccuracy:true,timeout:9000,maximumAge:0});
   } else launch(null,null);
 }
 
@@ -6234,6 +6239,27 @@ function _clearParishMarkers(){
   _hideDioOverlays();
 }
 
+
+function _isMyLocFresh(maxAgeMs){
+  try{
+    const t=Number(_myLocAt || (AppState && AppState.myLocAt) || 0);
+    return !!(_myLat && _myLng && t && ((Date.now ? Date.now() : new Date().getTime()) - t) <= (maxAgeMs || 15000));
+  }catch(e){ return false; }
+}
+function _getFreshGeoPosition(success, fail){
+  if(!_GEO){ if(fail) fail({code:0}); return; }
+  let done=false;
+  function ok(p){ if(done) return; done=true; success && success(p); }
+  function bad1(e1){
+    if(done) return;
+    try{
+      _GEO.getCurrentPosition(ok,function(e2){ if(done) return; done=true; fail && fail(e2 || e1); },_GO_ACCURATE_FRESH);
+    }catch(e){ if(!done){ done=true; fail && fail(e1 || e); } }
+  }
+  try{ _GEO.getCurrentPosition(ok,bad1,_GO_FAST_FRESH); }
+  catch(e){ bad1(e); }
+}
+
 function _autoLocate(){
   if(!_GEO) return;
   _GEO.getCurrentPosition(p=>{
@@ -6256,7 +6282,7 @@ function _autoLocate(){
   setTimeout(()=>{
   _GEO.getCurrentPosition(p=>{
    _setMyLoc(p.coords.latitude,p.coords.longitude);
-  },()=>{},{enableHighAccuracy:true,timeout:10000,maximumAge:0});
+  },()=>{},_GO1);
   },500);
 }
 
@@ -6300,6 +6326,8 @@ function _raiseMyLocationMarker(){
 }
 function _setMyLoc(lat,lng){
   _myLat=lat;_myLng=lng;
+  _myLocAt=Date.now ? Date.now() : new Date().getTime();
+  try{ if(AppState){ AppState.myLocAt=_myLocAt; } }catch(_e){}
   if(typeof kakao==='undefined'||!_map) return;  // 지도 미로드 시 무시
   if(_myMkr) _myMkr.setMap(null);
   const svg=`<svg ${_NS} width='28' height='28' viewBox='0 0 28 28'><circle cx='14' cy='14' r='12' fill='#1a73e8' opacity='.18'/><circle cx='14' cy='14' r='7' fill='#1a73e8'/><circle cx='14' cy='14' r='3.5' fill='white'/></svg>`;
@@ -6317,7 +6345,7 @@ function _setMyLoc(lat,lng){
 
 function goMyLoc(){
   if(!_GEO) return alert('위치 정보를 지원하지 않습니다.');
-  _GEO.getCurrentPosition(p=>{
+  _getFreshGeoPosition(p=>{
   _setMyLoc(p.coords.latitude,p.coords.longitude);
   _map.setLevel(7);
   if(typeof _setMapCenterByInfoCardStandard==='function') _setMapCenterByInfoCardStandard(new _LL(p.coords.latitude,p.coords.longitude));
@@ -6325,8 +6353,8 @@ function goMyLoc(){
   },err=>{
   if(_mode==='shrine') window.__OAI_SHRINE_NEARBY_LOADING__=false;
   try{ _updateShrineVisitCardsButtonUI(); }catch(_e){}
-  alert(err.code===1?'위치 권한을 허용해 주세요.':'위치를 가져올 수 없습니다.');
-  },_GO1);
+  alert(err&&err.code===1?'위치 권한을 허용해 주세요.':'위치를 가져올 수 없습니다.');
+  });
 }
 
 function _beginNearbyLoad(){
@@ -6376,9 +6404,9 @@ function _loadNearby(){
   else _loadNearbyParishes(lat,lng);
   };
 
-  if(_myLat) { go(_myLat,_myLng); return; }
+  if(_isMyLocFresh(15000)) { go(_myLat,_myLng); return; }
 
-  _GEO.getCurrentPosition(p=>{
+  _getFreshGeoPosition(p=>{
   _setMyLoc(p.coords.latitude,p.coords.longitude);
   go(p.coords.latitude,p.coords.longitude);
   },err=>{
@@ -6400,7 +6428,7 @@ function _loadNearby(){
       <button onclick="_loadNearby()" style="background:#0e1535;color:#d4aa6a;border:none;border-radius:20px;padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">↺ 다시 시도</button>
     </div>`;
   }
-  },{enableHighAccuracy:true,timeout:12000,maximumAge:60000});
+  });
 }
 
 function _loadNearbyWithDist(lat,lng,items,getIdx,getColor,getLabel){
@@ -6897,7 +6925,7 @@ function _ensureCurrentLocationStart(){
     _updateSearchBtn();
     return;
   }
-  if(_myLat&&_myLng){
+  if(_isMyLocFresh(20000)){
     _routeStartMarkerExplicitCurrent=false;
     _rS={idx:-1,name:'현재 위치',lat:_myLat,lng:_myLng,isImplicitCurrentLocation:true};
     _setRouteLabel('start','');
@@ -6906,7 +6934,7 @@ function _ensureCurrentLocationStart(){
     return;
   }
   if(!_GEO) return;
-  _GEO.getCurrentPosition(p=>{
+  _getFreshGeoPosition(p=>{
     _setMyLoc(p.coords.latitude,p.coords.longitude);
     if(!_rS){
       _routeStartMarkerExplicitCurrent=false;
@@ -6918,7 +6946,7 @@ function _ensureCurrentLocationStart(){
         _showRouteGuideText(`도착 ${_getRouteGuideTarget()}를 탭하세요`);
       }
     }
-  },()=>{},_GO1);
+  },function(){});
 }
 
 function _enterRouteMode(){
@@ -6959,14 +6987,14 @@ function setMyLocAsStart(){
       _showRouteGuideText(`도착 ${_getRouteGuideTarget()}를 탭하세요`);
     }
   }
-  if(_myLat&&_myLng){
+  if(_isMyLocFresh(15000)){
     applyCurrentStart(_myLat,_myLng);
     return;
   }
   if(!_GEO) return alert('위치 정보를 지원하지 않습니다.');
-  _GEO.getCurrentPosition(p=>{
+  _getFreshGeoPosition(p=>{
     applyCurrentStart(p.coords.latitude,p.coords.longitude);
-  },()=>alert('위치를 가져올 수 없습니다.'),_GO1);
+  },()=>alert('위치를 가져올 수 없습니다.'));
 }
 
 function _setRouteWaypointEnabled(enabled){
