@@ -492,7 +492,7 @@ function oaiOpenExternalSite(url, options){
     if(/^(tel:|mailto:|sms:|javascript:)/i.test(url)) return false;
   }catch(_e){}
   var kind = options.kind || options.source || 'external-site';
-  // V8-1-14-93-SHORT-RESUME-SMOOTH: 십자가 보호창이 실제로 보인 뒤 Chrome 전환이 시작되도록 표시 시간을 조금 더 확보한다.
+  // V8-1-14-94-BANNER-167-TO-188: 십자가 보호창이 실제로 보인 뒤 Chrome 전환이 시작되도록 표시 시간을 조금 더 확보한다.
   var requestedDelay = typeof options.delay === 'number' ? options.delay : 0;
   var delay = Math.max(900, requestedDelay || 0);
   try{ document.activeElement && document.activeElement.blur && document.activeElement.blur(); }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -2774,7 +2774,7 @@ window.addEventListener('load', syncCoverUpdateVersionState, true);
     try{
       var frame=document.getElementById('privacy-policy-frame');
       if(frame){
-        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-93-SHORT-RESUME-SMOOTH'));
+        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-94-BANNER-167-TO-188'));
         if(frame.getAttribute('src') === 'about:blank' || !frame.getAttribute('src')) frame.setAttribute('src', src);
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -3028,7 +3028,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V8-1-14-93-SHORT-RESUME-SMOOTH';
+    frame.src='diocese.html?v=V8-1-14-94-BANNER-167-TO-188';
     setTimeout(armDioceseOverlayBack, 0);
   }else{
     if(!restore){
@@ -3598,7 +3598,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V8-1-14-93-SHORT-RESUME-SMOOTH';
+const _PRAYER_ASSET_VERSION='V8-1-14-94-BANNER-167-TO-188';
 let _prayerModuleLoadPromise=null;
 function _isPrayerDataReady(){
   return !!(window.PRAYER_DATA && typeof window.PRAYER_DATA === 'object');
@@ -3943,7 +3943,7 @@ function _navFetch(origin, dest) {
 const $=id=>document.getElementById(id);
 const $$=s=>document.querySelectorAll(s);
 const _GEO=navigator.geolocation;
-// V8-1-14-93-SHORT-RESUME-SMOOTH: 이동 후 이전 위치가 남지 않도록 위치 캐시는 사용하지 않고, 빠른 신선 위치를 우선 요청한다.
+// V8-1-14-94-BANNER-167-TO-188: 이동 후 이전 위치가 남지 않도록 위치 캐시는 사용하지 않고, 빠른 신선 위치를 우선 요청한다.
 const _GO1={enableHighAccuracy:true,timeout:7000,maximumAge:0};
 const _GO2={enableHighAccuracy:false,timeout:2500,maximumAge:15000};
 const _GO_FAST_FRESH={enableHighAccuracy:false,timeout:2500,maximumAge:20000};
