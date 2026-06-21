@@ -387,7 +387,7 @@ function oaiOpenExternalSite(url, options){
     if(/^(tel:|mailto:|sms:|javascript:)/i.test(url)) return false;
   }catch(_e){}
   var kind = options.kind || options.source || 'external-site';
-  // V8-1-14-83-INTRO-TRANSFORM-APPLY: 외부사이트 진입 직전 보호창이 실제로 한 번 그려진 뒤 이동하도록 최소 지연을 둔다.
+  // V8-1-14-84-INTRO-LOCATION-FAST: 외부사이트 진입 직전 보호창이 실제로 한 번 그려진 뒤 이동하도록 최소 지연을 둔다.
   var requestedDelay = typeof options.delay === 'number' ? options.delay : 0;
   var delay = Math.max(220, requestedDelay || 0);
   try{ document.activeElement && document.activeElement.blur && document.activeElement.blur(); }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -2669,7 +2669,7 @@ window.addEventListener('load', syncCoverUpdateVersionState, true);
     try{
       var frame=document.getElementById('privacy-policy-frame');
       if(frame){
-        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-83-INTRO-TRANSFORM-APPLY'));
+        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-84-INTRO-LOCATION-FAST'));
         if(frame.getAttribute('src') === 'about:blank' || !frame.getAttribute('src')) frame.setAttribute('src', src);
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -2923,7 +2923,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V8-1-14-83-INTRO-TRANSFORM-APPLY';
+    frame.src='diocese.html?v=V8-1-14-84-INTRO-LOCATION-FAST';
     setTimeout(armDioceseOverlayBack, 0);
   }else{
     if(!restore){
@@ -3493,7 +3493,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V8-1-14-83-INTRO-TRANSFORM-APPLY';
+const _PRAYER_ASSET_VERSION='V8-1-14-84-INTRO-LOCATION-FAST';
 let _prayerModuleLoadPromise=null;
 function _isPrayerDataReady(){
   return !!(window.PRAYER_DATA && typeof window.PRAYER_DATA === 'object');
@@ -3838,11 +3838,11 @@ function _navFetch(origin, dest) {
 const $=id=>document.getElementById(id);
 const $$=s=>document.querySelectorAll(s);
 const _GEO=navigator.geolocation;
-// V8-1-14-83-INTRO-TRANSFORM-APPLY: 이동 후 이전 위치가 남지 않도록 위치 캐시는 사용하지 않고, 빠른 신선 위치를 우선 요청한다.
-const _GO1={enableHighAccuracy:true,timeout:9000,maximumAge:0};
-const _GO2={enableHighAccuracy:false,timeout:4500,maximumAge:0};
-const _GO_FAST_FRESH={enableHighAccuracy:false,timeout:4500,maximumAge:0};
-const _GO_ACCURATE_FRESH={enableHighAccuracy:true,timeout:9000,maximumAge:0};
+// V8-1-14-84-INTRO-LOCATION-FAST: 이동 후 이전 위치가 남지 않도록 위치 캐시는 사용하지 않고, 빠른 신선 위치를 우선 요청한다.
+const _GO1={enableHighAccuracy:true,timeout:7000,maximumAge:0};
+const _GO2={enableHighAccuracy:false,timeout:2500,maximumAge:15000};
+const _GO_FAST_FRESH={enableHighAccuracy:false,timeout:2500,maximumAge:20000};
+const _GO_ACCURATE_FRESH={enableHighAccuracy:true,timeout:6500,maximumAge:0};
 const _EC=encodeURIComponent;
 const _NS='xmlns="http://www.w3.org/2000/svg"';
 const _svgUrl=s=>'data:image/svg+xml;charset=utf-8,'+_EC(s);
@@ -6249,15 +6249,31 @@ function _isMyLocFresh(maxAgeMs){
 function _getFreshGeoPosition(success, fail){
   if(!_GEO){ if(fail) fail({code:0}); return; }
   let done=false;
-  function ok(p){ if(done) return; done=true; success && success(p); }
-  function bad1(e1){
+  let fastStarted=Date.now ? Date.now() : new Date().getTime();
+  function ok(p){
+    if(done) return;
+    done=true;
+    success && success(p);
+    // 빠른 위치가 도착한 뒤에도 정확 위치를 조용히 한 번 더 받아 다음 동작을 빠르게 준비한다.
+    try{
+      _GEO.getCurrentPosition(function(pp){
+        try{ _setMyLoc(pp.coords.latitude, pp.coords.longitude); }catch(_e){}
+      },function(){},_GO_ACCURATE_FRESH);
+    }catch(_e){}
+  }
+  function fallback(e1){
     if(done) return;
     try{
       _GEO.getCurrentPosition(ok,function(e2){ if(done) return; done=true; fail && fail(e2 || e1); },_GO_ACCURATE_FRESH);
     }catch(e){ if(!done){ done=true; fail && fail(e1 || e); } }
   }
-  try{ _GEO.getCurrentPosition(ok,bad1,_GO_FAST_FRESH); }
-  catch(e){ bad1(e); }
+  try{
+    _GEO.getCurrentPosition(ok,function(e){
+      var elapsed=(Date.now ? Date.now() : new Date().getTime())-fastStarted;
+      if(elapsed < 300) setTimeout(function(){ fallback(e); }, 150);
+      else fallback(e);
+    },_GO_FAST_FRESH);
+  }catch(e){ fallback(e); }
 }
 
 function _autoLocate(){
@@ -6404,7 +6420,7 @@ function _loadNearby(){
   else _loadNearbyParishes(lat,lng);
   };
 
-  if(_isMyLocFresh(15000)) { go(_myLat,_myLng); return; }
+  if(_isMyLocFresh(45000)) { go(_myLat,_myLng); return; }
 
   _getFreshGeoPosition(p=>{
   _setMyLoc(p.coords.latitude,p.coords.longitude);
@@ -6925,7 +6941,7 @@ function _ensureCurrentLocationStart(){
     _updateSearchBtn();
     return;
   }
-  if(_isMyLocFresh(20000)){
+  if(_isMyLocFresh(45000)){
     _routeStartMarkerExplicitCurrent=false;
     _rS={idx:-1,name:'현재 위치',lat:_myLat,lng:_myLng,isImplicitCurrentLocation:true};
     _setRouteLabel('start','');
