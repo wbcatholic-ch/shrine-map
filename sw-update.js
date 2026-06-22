@@ -4,7 +4,7 @@
   if(window.__APP_CACHE_LIFECYCLE_GUARD__) return;
   window.__APP_CACHE_LIFECYCLE_GUARD__ = true;
   var APP_VERSION = 'V2';
-  var SW_BUILD_VERSION = 'V8-1-14-113-BUTTON-GRADATION-COLUMNS';
+  var SW_BUILD_VERSION = 'V8-1-14-114-BUTTON-GRADATION-APPLY';
   window.APP_VERSION = APP_VERSION;
 
   function now(){ return Date.now ? Date.now() : new Date().getTime(); }
