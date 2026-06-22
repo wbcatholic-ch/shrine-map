@@ -453,7 +453,14 @@
         return;
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
-    setTimeout(restoreIntegratedState, 0);
+    setTimeout(function(){
+      try{
+        if(window.oaiReturnConductorBusy && window.oaiReturnConductorBusy(['category-return','passive'])){ setTimeout(restoreIntegratedState, 380); return; }
+        if(window.oaiReturnConductorRequest) window.oaiReturnConductorRequest('category-return', {ms:900});
+        restoreIntegratedState();
+        setTimeout(function(){ try{ if(window.oaiReturnConductorFinish) window.oaiReturnConductorFinish('category-return'); }catch(_e){} }, 520);
+      }catch(e){ console.warn('[가톨릭길동무]', e); restoreIntegratedState(); }
+    }, 0);
   });
 
   function resetWebTransientState(){

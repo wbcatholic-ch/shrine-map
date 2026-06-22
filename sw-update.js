@@ -4,7 +4,7 @@
   if(window.__APP_CACHE_LIFECYCLE_GUARD__) return;
   window.__APP_CACHE_LIFECYCLE_GUARD__ = true;
   var APP_VERSION = 'V2';
-  var SW_BUILD_VERSION = 'V8-1-14-141-COMMON-RETURN-LEADER';
+  var SW_BUILD_VERSION = 'V8-1-14-142-RETURN-DUPLICATE-CLEANUP';
   window.APP_VERSION = APP_VERSION;
 
   function now(){ return Date.now ? Date.now() : new Date().getTime(); }
@@ -68,8 +68,11 @@
   }
 
   var hiddenAt = 0;
-  var BACKGROUND_SOFT_RELOAD_AFTER = 15 * 60 * 1000;
-  var BACKGROUND_COVER_RESET_AFTER = 30 * 60 * 1000;
+  /* V8-1-14-142-RETURN-DUPLICATE-CLEANUP:
+     10분 이상 미사용 복귀는 app.js의 공통 복귀 지휘자가 담당한다.
+     예전 sw-update의 15분 자동 reload / 30분 cover reset은 같은 복귀 순간에
+     인트로·로딩·리로드를 다시 일으켜 품질이 낮아 보였으므로 자동 실행하지 않는다.
+     앱 파일 갱신은 사용자의 새로고침 흐름과 service worker update 확인으로만 처리한다. */
   document.addEventListener('visibilitychange', function(){
     if(document.visibilityState === 'hidden'){
       hiddenAt = now();
@@ -77,15 +80,8 @@
       return;
     }
     if(document.visibilityState === 'visible'){
-      var last = hiddenAt;
-      try{ last = Math.max(last, parseInt(sessionStorage.getItem('oai_hidden_at') || '0', 10) || 0); }catch(e){ console.warn("[가톨릭길동무]", e); }
-      if(!last) return;
-      var elapsed = now() - last;
-      if(elapsed >= BACKGROUND_COVER_RESET_AFTER){
-        setTimeout(function(){ resetToCoverForBackground(); }, 350);
-      }else if(elapsed >= BACKGROUND_SOFT_RELOAD_AFTER){
-        setTimeout(function(){ stableReload('background-soft-return'); }, 350);
-      }
+      try{ sessionStorage.removeItem('oai_hidden_at'); }catch(e){ console.warn("[가톨릭길동무]", e); }
+      hiddenAt = 0;
     }
   }, true);
 
