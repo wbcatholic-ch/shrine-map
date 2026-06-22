@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-129-SHRINE-VISIT-BTN-SURFACES';
-const ASSET_VERSION = 'V8-1-14-129-SHRINE-VISIT-BTN-SURFACES';
+const CACHE_VERSION = 'catholic-way-V8-1-14-131-VIEWPORT-PROFILE-CACHE';
+const ASSET_VERSION = 'V8-1-14-131-VIEWPORT-PROFILE-CACHE';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }
