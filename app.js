@@ -334,7 +334,7 @@ function oaiClearExternalNavigationState(opts){
   if(window.__OAI_IDLE_RESTART_GUARD__) return;
   window.__OAI_IDLE_RESTART_GUARD__ = true;
 
-  /* V8-1-14-123-GOODNEWS-DIRECT-BLUE: 미사용 후 복귀는 예전 WebView 방식으로 단순화한다.
+  /* V8-1-14-120-CLEAN-BUTTONS-CROSS-SPEED: 미사용 후 복귀는 예전 WebView 방식으로 단순화한다.
      짧은 복귀: 원래 화면 유지 / 1분 이상: 아이보리 안정막 1회 / 10분 이상: 커버 인트로 복귀 */
   var LONG_BG_RETURN_MS = 10 * 60 * 1000;
   var MEDIUM_BG_RETURN_MS = 60 * 1000;
@@ -514,7 +514,7 @@ function oaiOpenExternalSite(url, options){
     if(/^(tel:|mailto:|sms:|javascript:)/i.test(url)) return false;
   }catch(_e){}
   var kind = options.kind || options.source || 'external-site';
-  // V8-1-14-123-GOODNEWS-DIRECT-BLUE: 십자가 보호창이 실제로 보인 뒤 Chrome 전환이 시작되도록 표시 시간을 조금 더 확보한다.
+  // V8-1-14-120-CLEAN-BUTTONS-CROSS-SPEED: 십자가 보호창이 실제로 보인 뒤 Chrome 전환이 시작되도록 표시 시간을 조금 더 확보한다.
   var requestedDelay = typeof options.delay === 'number' ? options.delay : 0;
   var delay = Math.max(900, requestedDelay || 0);
   try{ document.activeElement && document.activeElement.blur && document.activeElement.blur(); }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -1551,7 +1551,7 @@ function _renderShrineVisitDetail(idx){
   const telHref=item.tel?'tel:'+String(item.tel).replace(/[^0-9+]/g,''):'';
   const hpBtn=hpUrl?'<button type="button" class="shrine-visit-detail-action detail-home" data-shrine-detail-hp="'+_visitHtmlEsc(hpUrl)+'">홈페이지</button>':'';
   const guideBtn=guideUrl?'<button type="button" class="shrine-visit-detail-action detail-guide" data-shrine-detail-guide="'+_visitHtmlEsc(guideUrl)+'">성지 상세페이지</button>':'';
-  const goodnewsBtn=goodnewsUrl?'<button type="button" class="shrine-visit-detail-action detail-goodnews" style="background:#0d6efd!important;color:#ffffff!important;border:1.8px solid #084db3!important;box-shadow:0 2px 8px rgba(13,110,253,.24)!important;text-shadow:0 1px 1px rgba(0,0,0,.18)!important;font-weight:950!important;" data-shrine-detail-goodnews="'+_visitHtmlEsc(goodnewsUrl)+'">굿뉴스 성지안내</button>':'';
+  const goodnewsBtn=goodnewsUrl?'<button type="button" class="shrine-visit-detail-action detail-goodnews" data-shrine-detail-goodnews="'+_visitHtmlEsc(goodnewsUrl)+'">굿뉴스 성지안내</button>':'';
   const telBtn=telHref?'<a class="shrine-visit-detail-action detail-tel" href="'+_visitHtmlEsc(telHref)+'"><span class="detail-tel-icon">📞</span><span>'+telText+'</span></a>':'';
   const routeBtn='<button type="button" class="shrine-visit-detail-action detail-route" data-shrine-detail-route="'+idx+'">경로검색</button>';
   const kakaoBtn='<button type="button" class="shrine-visit-detail-action detail-kakao" data-shrine-detail-kakao="'+idx+'">카카오내비</button>';
@@ -2804,7 +2804,7 @@ window.addEventListener('load', syncCoverUpdateVersionState, true);
     try{
       var frame=document.getElementById('privacy-policy-frame');
       if(frame){
-        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-123-GOODNEWS-DIRECT-BLUE'));
+        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-120-CLEAN-BUTTONS-CROSS-SPEED'));
         if(frame.getAttribute('src') === 'about:blank' || !frame.getAttribute('src')) frame.setAttribute('src', src);
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -3058,7 +3058,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V8-1-14-123-GOODNEWS-DIRECT-BLUE';
+    frame.src='diocese.html?v=V8-1-14-120-CLEAN-BUTTONS-CROSS-SPEED';
     setTimeout(armDioceseOverlayBack, 0);
   }else{
     if(!restore){
@@ -3633,7 +3633,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V8-1-14-123-GOODNEWS-DIRECT-BLUE';
+const _PRAYER_ASSET_VERSION='V8-1-14-120-CLEAN-BUTTONS-CROSS-SPEED';
 let _prayerModuleLoadPromise=null;
 function _isPrayerDataReady(){
   return !!(window.PRAYER_DATA && typeof window.PRAYER_DATA === 'object');
@@ -3978,7 +3978,7 @@ function _navFetch(origin, dest) {
 const $=id=>document.getElementById(id);
 const $$=s=>document.querySelectorAll(s);
 const _GEO=navigator.geolocation;
-// V8-1-14-123-GOODNEWS-DIRECT-BLUE: 오래 미사용 후 복귀 시 마지막 위치를 먼저 보여주고, 새 GPS가 잡히면 최신 위치로 교체한다.
+// V8-1-14-120-CLEAN-BUTTONS-CROSS-SPEED: 오래 미사용 후 복귀 시 마지막 위치를 먼저 보여주고, 새 GPS가 잡히면 최신 위치로 교체한다.
 const _GO1={enableHighAccuracy:true,timeout:6500,maximumAge:0};
 const _GO2={enableHighAccuracy:false,timeout:1200,maximumAge:60000};
 const _GO_FAST_FRESH={enableHighAccuracy:false,timeout:1100,maximumAge:60000};
