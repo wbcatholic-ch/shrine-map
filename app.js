@@ -334,7 +334,7 @@ function oaiClearExternalNavigationState(opts){
   if(window.__OAI_IDLE_RESTART_GUARD__) return;
   window.__OAI_IDLE_RESTART_GUARD__ = true;
 
-  /* V8-1-14-133-LIGHT-SHEET-SWITCH: 미사용 후 복귀는 예전 WebView 방식으로 단순화한다.
+  /* V8-1-14-134-PILGRIMAGE-BTN-SWIPE-CLEAN: 미사용 후 복귀는 예전 WebView 방식으로 단순화한다.
      짧은 복귀: 원래 화면 유지 / 1분 이상: 아이보리 안정막 1회 / 10분 이상: 커버 인트로 복귀 */
   var LONG_BG_RETURN_MS = 10 * 60 * 1000;
   var MEDIUM_BG_RETURN_MS = 60 * 1000;
@@ -514,7 +514,7 @@ function oaiOpenExternalSite(url, options){
     if(/^(tel:|mailto:|sms:|javascript:)/i.test(url)) return false;
   }catch(_e){}
   var kind = options.kind || options.source || 'external-site';
-  // V8-1-14-133-LIGHT-SHEET-SWITCH: 십자가 보호창이 실제로 보인 뒤 Chrome 전환이 시작되도록 표시 시간을 조금 더 확보한다.
+  // V8-1-14-134-PILGRIMAGE-BTN-SWIPE-CLEAN: 십자가 보호창이 실제로 보인 뒤 Chrome 전환이 시작되도록 표시 시간을 조금 더 확보한다.
   var requestedDelay = typeof options.delay === 'number' ? options.delay : 0;
   var delay = Math.max(900, requestedDelay || 0);
   try{ document.activeElement && document.activeElement.blur && document.activeElement.blur(); }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -1261,9 +1261,9 @@ function _updateShrineVisitFloatingListButtonUI(){
   const regionOpen=(_activeTab==='region') || !!(regionSheet&&regionSheet.classList.contains('open'));
   const sheetOpen=nearbyOpen || listOpen || regionOpen;
   const mapOpen=(_screen==='map' && !sheetOpen);
-  const nearbyLoading=nearbyOpen && _mode==='shrine' && window.__OAI_SHRINE_NEARBY_LOADING__ === true;
-  /* V8-1-14-129: 나의순례현황은 성지 내주변/찾기목록/지역검색/성지지도에서만 명확하게 표시한다. 단, 내주변에서는 거리 계산 완료 후 목록과 함께 표시한다. */
-  const nearbyReady=(!nearbyOpen) || (!!window.__OAI_SHRINE_NEARBY_DISTANCE_DONE__ && !nearbyLoading);
+  const shrineNearbyWaiting=(_mode==='shrine' && (window.__OAI_SHRINE_NEARBY_LOADING__ === true || window.__OAI_SHRINE_NEARBY_AWAITING_FRESH__ === true));
+  /* V8-1-14-134: 성지 내주변은 캐시 위치/새 GPS 재계산 사이에도 완료 전 상태로 보고, 나의순례현황 버튼이 먼저 보였다가 사라지는 깜빡임을 막는다. */
+  const nearbyReady=!shrineNearbyWaiting && ((!nearbyOpen) || !!window.__OAI_SHRINE_NEARBY_DISTANCE_DONE__);
   const shrineSurfaceOpen=nearbyOpen || listOpen || regionOpen || mapOpen;
   const show=(_mode==='shrine' && shrineSurfaceOpen && nearbyReady && !searchOpen && !keyboardOpen && !infoOpen && !routeOpen && !visitOpen);
   delete btn.dataset.oaiShowAfter;
@@ -1567,7 +1567,7 @@ function _renderShrineVisitDetail(idx){
   const goodnewsUrl=_getShrineGoodnewsUrl(item);
   const telText=item.tel?_visitHtmlEsc(item.tel):'—';
   const telHref=item.tel?'tel:'+String(item.tel).replace(/[^0-9+]/g,''):'';
-  // V8-1-14-133-LIGHT-SHEET-SWITCH: V117 기준에서 V118 성지정보 카드 색상과 V123 굿뉴스 파란색을 실제 생성 버튼에 직접 적용한다.
+  // V8-1-14-134-PILGRIMAGE-BTN-SWIPE-CLEAN: V117 기준에서 V118 성지정보 카드 색상과 V123 굿뉴스 파란색을 실제 생성 버튼에 직접 적용한다.
   const detailInfoStyle='background:linear-gradient(180deg,#fbfdff 0%,#fffaf0 100%)!important;border:2px solid #9db7cc!important;box-shadow:0 8px 22px rgba(17,35,60,.08)!important;';
   const detailMapBtnStyle='background:#fff8e6!important;color:#5f4515!important;border:1.5px solid #d5b86d!important;box-shadow:0 2px 6px rgba(95,69,21,.08)!important;';
   const detailTelStyle='background:linear-gradient(180deg,#f4fbf5 0%,#dff2e5 100%)!important;color:#244f38!important;border:1.5px solid #a8d5b5!important;box-shadow:0 3px 8px rgba(35,78,56,.10), inset 0 1px 0 rgba(255,255,255,.90)!important;text-shadow:none!important;';
@@ -2831,7 +2831,7 @@ window.addEventListener('load', syncCoverUpdateVersionState, true);
     try{
       var frame=document.getElementById('privacy-policy-frame');
       if(frame){
-        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-133-LIGHT-SHEET-SWITCH'));
+        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-134-PILGRIMAGE-BTN-SWIPE-CLEAN'));
         if(frame.getAttribute('src') === 'about:blank' || !frame.getAttribute('src')) frame.setAttribute('src', src);
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -3085,7 +3085,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V8-1-14-133-LIGHT-SHEET-SWITCH';
+    frame.src='diocese.html?v=V8-1-14-134-PILGRIMAGE-BTN-SWIPE-CLEAN';
     setTimeout(armDioceseOverlayBack, 0);
   }else{
     if(!restore){
@@ -3660,7 +3660,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V8-1-14-133-LIGHT-SHEET-SWITCH';
+const _PRAYER_ASSET_VERSION='V8-1-14-134-PILGRIMAGE-BTN-SWIPE-CLEAN';
 let _prayerModuleLoadPromise=null;
 function _isPrayerDataReady(){
   return !!(window.PRAYER_DATA && typeof window.PRAYER_DATA === 'object');
@@ -4005,7 +4005,7 @@ function _navFetch(origin, dest) {
 const $=id=>document.getElementById(id);
 const $$=s=>document.querySelectorAll(s);
 const _GEO=navigator.geolocation;
-// V8-1-14-133-LIGHT-SHEET-SWITCH: 오래 미사용 후 복귀 시 마지막 위치를 먼저 보여주고, 새 GPS가 잡히면 최신 위치로 교체한다.
+// V8-1-14-134-PILGRIMAGE-BTN-SWIPE-CLEAN: 오래 미사용 후 복귀 시 마지막 위치를 먼저 보여주고, 새 GPS가 잡히면 최신 위치로 교체한다.
 const _GO1={enableHighAccuracy:true,timeout:6500,maximumAge:0};
 const _GO2={enableHighAccuracy:false,timeout:1200,maximumAge:60000};
 const _GO_FAST_FRESH={enableHighAccuracy:false,timeout:1100,maximumAge:60000};
@@ -4622,6 +4622,11 @@ function startApp(mode){
   document.documentElement.classList.add('app-active');
   document.documentElement.classList.toggle('parish-mode',mode==='parish');
   document.documentElement.classList.toggle('retreat-mode',mode==='retreat');
+  if(mode==='shrine'){
+    window.__OAI_SHRINE_NEARBY_DISTANCE_DONE__=false;
+    window.__OAI_SHRINE_NEARBY_LOADING__=true;
+    window.__OAI_SHRINE_NEARBY_AWAITING_FRESH__=false;
+  }
   try{ _ensureShrineVisitMapFilter(); _updateShrineVisitMapFilterUI(); _ensureShrineVisitCardsButton(); _updateShrineVisitCardsButtonUI(); }catch(e){ console.warn('[가톨릭길동무]', e); }
   const _setTxt=(id,v)=>{const el=$(id);if(el)el.textContent=v;};
   const listLbl = mode==='parish' ? '성당찾기' : (mode==='retreat' ? '피정의집 찾기' : '성지찾기');
@@ -4803,7 +4808,7 @@ function openTab(name, opts){
   try{ if(typeof oaiClearMapInfoSelection === 'function') oaiClearMapInfoSelection('tab-switch:'+name); }catch(e){ console.warn('[가톨릭길동무]', e); }
   _updateSheetPanelTitles();
   const prevName = _activeTab;
-  // V8-1-14-133: 성지/성당/피정의집 시트 전환은 무거운 가로 swiper 애니메이션 없이 즉시 전환한다.
+  // V8-1-14-134: 성지/성당/피정의집 시트 전환은 무거운 가로 swiper 애니메이션 없이 즉시 전환하고, 내부 좌우 스와이프 전환은 비활성화한다.
   if(prevName) _closeSheetOnly(prevName);
 
   closeInfoCard({keepMap:true});
@@ -4816,6 +4821,7 @@ function openTab(name, opts){
   if(_mode==='shrine' && name==='nearby'){
     window.__OAI_SHRINE_NEARBY_DISTANCE_DONE__=false;
     window.__OAI_SHRINE_NEARBY_LOADING__=true;
+    window.__OAI_SHRINE_NEARBY_AWAITING_FRESH__=false;
     try{ _updateShrineVisitCardsButtonUI(); }catch(_e){}
     try{ _updateShrineNearbyLocationButtonUI(); }catch(_e){}
   }
@@ -6637,6 +6643,7 @@ function _loadNearby(){
   if(_mode==='shrine'){
     window.__OAI_SHRINE_NEARBY_DISTANCE_DONE__=false;
     window.__OAI_SHRINE_NEARBY_LOADING__=true;
+    window.__OAI_SHRINE_NEARBY_AWAITING_FRESH__=false;
   }
   try{ _updateShrineVisitCardsButtonUI(); }catch(_e){}
   try{ _updateShrineNearbyLocationButtonUI(); }catch(_e){}
@@ -6644,6 +6651,17 @@ function _loadNearby(){
 
   const go=(lat,lng,fromCache)=>{
     _myLat=lat;_myLng=lng;
+    if(_mode==='shrine'){
+      if(fromCache && _GEO){
+        window.__OAI_SHRINE_NEARBY_AWAITING_FRESH__=true;
+      } else {
+        window.__OAI_SHRINE_NEARBY_AWAITING_FRESH__=false;
+        window.__OAI_SHRINE_NEARBY_DISTANCE_DONE__=false;
+        window.__OAI_SHRINE_NEARBY_LOADING__=true;
+      }
+      try{ _updateShrineVisitCardsButtonUI(); }catch(_e){}
+      try{ _updateShrineNearbyLocationButtonUI(); }catch(_e){}
+    }
     if(_mode==='shrine') _loadNearbyShrines(lat,lng);
     else if(_mode==='retreat') _loadNearbyRetreats(lat,lng);
     else _loadNearbyParishes(lat,lng);
@@ -6658,9 +6676,30 @@ function _loadNearby(){
     return;
   }
 
-  _refreshFreshLocationThen(function(lat,lng){ go(lat,lng,false); },function(err){
-    if(usedCache) return;
-    if(_mode==='shrine') window.__OAI_SHRINE_NEARBY_LOADING__=false;
+  _refreshFreshLocationThen(function(lat,lng){
+    if(_mode==='shrine'){
+      window.__OAI_SHRINE_NEARBY_AWAITING_FRESH__=false;
+      window.__OAI_SHRINE_NEARBY_DISTANCE_DONE__=false;
+      window.__OAI_SHRINE_NEARBY_LOADING__=true;
+      try{ _updateShrineVisitCardsButtonUI(); }catch(_e){}
+      try{ _updateShrineNearbyLocationButtonUI(); }catch(_e){}
+    }
+    go(lat,lng,false);
+  },function(err){
+    if(usedCache){
+      if(_mode==='shrine'){
+        window.__OAI_SHRINE_NEARBY_AWAITING_FRESH__=false;
+        window.__OAI_SHRINE_NEARBY_LOADING__=false;
+        window.__OAI_SHRINE_NEARBY_DISTANCE_DONE__=true;
+        try{ _updateShrineVisitCardsButtonUI(); }catch(_e){}
+        try{ _updateShrineNearbyLocationButtonUI(); }catch(_e){}
+      }
+      return;
+    }
+    if(_mode==='shrine'){
+      window.__OAI_SHRINE_NEARBY_AWAITING_FRESH__=false;
+      window.__OAI_SHRINE_NEARBY_LOADING__=false;
+    }
     try{ _updateShrineVisitCardsButtonUI(); }catch(_e){}
     try{ _updateShrineNearbyLocationButtonUI(); }catch(_e){}
     if(err.code===1){
@@ -6688,14 +6727,25 @@ function _loadNearbyWithDist(lat,lng,items,getIdx,getColor,getLabel){
   const body=$('nearby-body');
   const requestMode=_mode;
   const requestToken=_beginNearbyLoad();
+  if(requestMode==='shrine'){
+    window.__OAI_SHRINE_NEARBY_LOADING__=true;
+    window.__OAI_SHRINE_NEARBY_DISTANCE_DONE__=false;
+    try{ _updateShrineVisitCardsButtonUI(); }catch(_e){}
+    try{ _updateShrineNearbyLocationButtonUI(); }catch(_e){}
+  }
   const POOL=items.filter(p=>p.lat&&p.lng);
   const prelim=POOL.map(p=>({p,d:calcDist(lat,lng,p.lat,p.lng)})).sort((a,b)=>a.d-b.d).slice(0,OAI_NEARBY_ROUTE_CANDIDATE_LIMIT);
 
   if(!prelim.length){
     if(body && _isNearbyLoadCurrent(requestMode,requestToken,body)) body.innerHTML='<div class="empty-msg">표시할 장소가 없습니다.</div>';
     if(requestMode==='shrine'){
-      window.__OAI_SHRINE_NEARBY_LOADING__=false;
-      window.__OAI_SHRINE_NEARBY_DISTANCE_DONE__=true;
+      if(window.__OAI_SHRINE_NEARBY_AWAITING_FRESH__===true){
+        window.__OAI_SHRINE_NEARBY_LOADING__=true;
+        window.__OAI_SHRINE_NEARBY_DISTANCE_DONE__=false;
+      } else {
+        window.__OAI_SHRINE_NEARBY_LOADING__=false;
+        window.__OAI_SHRINE_NEARBY_DISTANCE_DONE__=true;
+      }
       try{ _updateShrineVisitCardsButtonUI(); }catch(_e){}
       try{ _updateShrineNearbyLocationButtonUI(); }catch(_e){}
     }
@@ -6744,8 +6794,13 @@ function _renderNearbyDone(prelim,results,getIdx,getColor,getLabel,phase,request
   if(phase==='final'){
     body.scrollTop=scrollTop;
     if(_mode==='shrine'){
-      window.__OAI_SHRINE_NEARBY_LOADING__=false;
-      window.__OAI_SHRINE_NEARBY_DISTANCE_DONE__=true;
+      if(window.__OAI_SHRINE_NEARBY_AWAITING_FRESH__===true){
+        window.__OAI_SHRINE_NEARBY_LOADING__=true;
+        window.__OAI_SHRINE_NEARBY_DISTANCE_DONE__=false;
+      } else {
+        window.__OAI_SHRINE_NEARBY_LOADING__=false;
+        window.__OAI_SHRINE_NEARBY_DISTANCE_DONE__=true;
+      }
     }
     try{ _updateShrineVisitCardsButtonUI(); }catch(_e){}
     try{ _updateShrineNearbyLocationButtonUI(); }catch(_e){}
@@ -8233,6 +8288,8 @@ function _fmtTime(s){
 
   function _doMainSwipe(dx){
     if(typeof _screen === 'undefined' || _screen !== 'map') return;
+    /* V8-1-14-134: 성지·성당·피정의집 시트 내부 좌우 스와이프 전환은 그림자/무거운 반응을 만들 수 있어 탭 버튼 전환만 사용한다. */
+    if(_mode==='shrine' || _mode==='parish' || _mode==='retreat') return;
     if(document.getElementById('srch-modal')?.classList.contains('open')) return;
     const idx = (typeof _activeTab !== 'undefined' && _activeTab)
       ? TABS.indexOf(_activeTab) : -1;

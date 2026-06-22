@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-133-LIGHT-SHEET-SWITCH';
-const ASSET_VERSION = 'V8-1-14-133-LIGHT-SHEET-SWITCH';
+const CACHE_VERSION = 'catholic-way-V8-1-14-134-PILGRIMAGE-BTN-SWIPE-CLEAN';
+const ASSET_VERSION = 'V8-1-14-134-PILGRIMAGE-BTN-SWIPE-CLEAN';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }
