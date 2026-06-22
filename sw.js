@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-103-XLSX-INFO-SYNC';
-const ASSET_VERSION = 'V8-1-14-103-XLSX-INFO-SYNC';
+const CACHE_VERSION = 'catholic-way-V8-1-14-104-XLSX-SHRINE-DATA-SYNC';
+const ASSET_VERSION = 'V8-1-14-104-XLSX-SHRINE-DATA-SYNC';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }
