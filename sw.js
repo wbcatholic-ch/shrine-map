@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-137-HYMN-GOODNEWS-URL';
-const ASSET_VERSION = 'V8-1-14-137-HYMN-GOODNEWS-URL';
+const CACHE_VERSION = 'catholic-way-V8-1-14-138-NO-INTENT-HYMN-FIX';
+const ASSET_VERSION = 'V8-1-14-138-NO-INTENT-HYMN-FIX';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }
