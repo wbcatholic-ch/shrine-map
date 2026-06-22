@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-136-NEARBY-SINGLE-CALC';
-const ASSET_VERSION = 'V8-1-14-136-NEARBY-SINGLE-CALC';
+const CACHE_VERSION = 'catholic-way-V8-1-14-137-HYMN-GOODNEWS-URL';
+const ASSET_VERSION = 'V8-1-14-137-HYMN-GOODNEWS-URL';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }

@@ -74,7 +74,7 @@
    op:"서울대교구 굿뉴스", url:"https://maria.catholic.or.kr/mobile/bible/read/bible_list.asp",
    desc:"가톨릭 성경과 신앙 자료를 모바일에서 확인"},
   {cat:"신앙 포털", ico:"🎼", name:"가톨릭 성가",
-   op:"서울대교구 굿뉴스", url:"https://maria.catholic.or.kr/mobile/sungga/sungga.asp",
+   op:"서울대교구 굿뉴스", url:"https://maria.catholic.or.kr/mobile/sungga/",
    desc:"가톨릭 성가 검색과 악보 자료 제공"},
   {cat:"신앙 포털", ico:"🎵", name:"가톨릭 생활성가",
    op:"서울대교구 굿뉴스", url:"https://maria.catholic.or.kr/mobile/ccm/main.asp",
