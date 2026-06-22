@@ -6099,23 +6099,6 @@ html.oai-font-global .shrine-visit-floating-list-btn{
   line-height: 1 !important;
 }
 
-/* V6-161 확인용: 외부사이트에서 앱으로 복귀할 때는 첫 진입 십자가/로딩 십자가를 보이지 않게 한다. */
-html.oai-stability-veil[data-oai-stability-reason*="external"]::after,
-html.oai-stability-veil.oai-external-return-freeze::after,
-html.oai-external-return-freeze::after {
-  content:"" !important;
-  display:none !important;
-  opacity:0 !important;
-  animation:none !important;
-  background:transparent !important;
-  border:0 !important;
-}
-html.oai-external-return-freeze #cover > *,
-html.oai-stability-veil[data-oai-stability-reason*="external"] #cover > * {
-  transition:none !important;
-  animation:none !important;
-}
-
 /* V6-162 확인용: 앱 첫 진입에서 큰 십자가 다음에 보이던 작은 십자가는 표시하지 않는다. */
 html.oai-cover-booting::after,
 html.oai-cover-revealing::after {
@@ -6180,13 +6163,7 @@ html.oai-external-return-freeze::after {
 #qna-view.open { display: flex; flex-direction: column; }
 
 /* V8-1-14-10-QNA-NOTICE-IN-TEXTAREA: 외부복귀/새로고침 안정막의 금색 로딩 십자가 복원 */
-html.oai-stability-veil::after,
-html.oai-stability-veil[data-oai-stability-reason*="external"]::after,
-html.oai-stability-veil[data-oai-stability-reason*="refresh"]::after,
-html.oai-stability-veil[data-oai-stability-reason*="reload"]::after,
-html.oai-stability-veil[data-oai-stability-reason*="background"]::after,
-html.oai-stability-veil.oai-external-return-freeze::after,
-html.oai-external-return-freeze::after {
+html.oai-stability-veil::after {
   content:"✝" !important;
   position:fixed !important;
   left:50% !important;
@@ -6298,7 +6275,7 @@ html.oai-font-global #map-wrap #shrine-visit-map-filter > button[data-shrine-vis
 }
 
 
-/* V8-1-14-143-RETURN-CLEANUP-SW: Google 배포용 첫 커버 인트로는 금색 십자가 대신 업로드된 십자가 사진을 사용한다. */
+/* V8-1-14-144-RETURN-CSS-CLEANUP: Google 배포용 첫 커버 인트로는 금색 십자가 대신 업로드된 십자가 사진을 사용한다. */
 @keyframes oaiGoogleIntroPhotoDesktop{
   0%{opacity:.02; transform:translate(-50%,-49%) scale(.94); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
   42%{opacity:1; transform:translate(-50%,-50%) scale(1); filter:contrast(1.015) saturate(1.02) drop-shadow(0 6px 16px rgba(80,54,18,.05));}
@@ -6345,7 +6322,7 @@ html.oai-cover-revealing::after{
     linear-gradient(to right, #fbf8f1 0%, rgba(251,248,241,.96) 5%, rgba(251,248,241,.60) 13%, rgba(251,248,241,.16) 24%, rgba(251,248,241,0) 36%, rgba(251,248,241,0) 64%, rgba(251,248,241,.16) 76%, rgba(251,248,241,.60) 87%, rgba(251,248,241,.96) 95%, #fbf8f1 100%),
     linear-gradient(to bottom, #fbf8f1 0%, rgba(251,248,241,.90) 6%, rgba(251,248,241,.36) 17%, rgba(251,248,241,0) 30%, rgba(251,248,241,0) 70%, rgba(251,248,241,.36) 83%, rgba(251,248,241,.90) 94%, #fbf8f1 100%),
     radial-gradient(ellipse 96% 88% at 50% 48%, rgba(251,248,241,0) 50%, rgba(251,248,241,.08) 62%, rgba(251,248,241,.34) 76%, rgba(251,248,241,.76) 90%, rgba(251,248,241,1) 100%),
-    url("intro-cross-jesus.jpg?v=V8-1-14-143-RETURN-CLEANUP-SW") !important;
+    url("intro-cross-jesus.jpg?v=V8-1-14-144-RETURN-CSS-CLEANUP") !important;
   background-position:center center, center center, center center, center center !important;
   background-size:100% 100%, 100% 100%, 100% 100%, auto 106% !important;
   background-repeat:no-repeat, no-repeat, no-repeat, no-repeat !important;
@@ -6394,7 +6371,7 @@ html.oai-cover-revealing::after{
 
 
 /* OAI-V67-STAMPBOOK-HEADER-BOTTOM-SAFE-FINAL
-   V8-1-14-143-RETURN-CLEANUP-SW: 스탬프북 헤더의 status-bar 중복 보정 제거 + Android WebView 하단 안전영역 표준화. */
+   V8-1-14-144-RETURN-CSS-CLEANUP: 스탬프북 헤더의 status-bar 중복 보정 제거 + Android WebView 하단 안전영역 표준화. */
 html:not(.ios-device){
   --oai-android-bottom-gap:clamp(10px, env(safe-area-inset-bottom,0px), 18px);
   --oai-android-bottom-gap-tight:clamp(8px, env(safe-area-inset-bottom,0px), 14px);
@@ -6503,7 +6480,7 @@ html:not(.ios-device) .shrine-visit-detail-body{
 
 
 /* OAI-V68-KEYBOARD-BUTTON-POSITION-FINAL
-   V8-1-14-143-RETURN-CLEANUP-SW: 지도/지역검색 키보드 중 나의순례현황 버튼 숨김, 내위치/나의순례현황 버튼 위치 중간 상향. */
+   V8-1-14-144-RETURN-CSS-CLEANUP: 지도/지역검색 키보드 중 나의순례현황 버튼 숨김, 내위치/나의순례현황 버튼 위치 중간 상향. */
 html.oai-map-search-keyboard-lock #app #shrine-visit-floating-list-btn,
 html.oai-map-search-keyboard-lock #app #shrine-visit-floating-list-btn.show,
 html.kb-open #app #shrine-visit-floating-list-btn,
@@ -6531,7 +6508,7 @@ html:not(.ios-device) #app #loc-btn{
 
 
 /* OAI-V69-NO-RELOAD-INTRO-CROSS-FINAL
-   V8-1-14-143-RETURN-CLEANUP-SW: 새로고침/리로드 끝부분에 다시 나타나는 인트로 십자가를 제거한다. */
+   V8-1-14-144-RETURN-CSS-CLEANUP: 새로고침/리로드 끝부분에 다시 나타나는 인트로 십자가를 제거한다. */
 html.oai-refresh-no-intro.oai-cover-booting::after,
 html.oai-refresh-no-intro.oai-cover-revealing::after,
 html.oai-stability-veil[data-oai-stability-reason*="refresh"]::after,
@@ -6547,7 +6524,7 @@ html.oai-stability-veil[data-oai-refresh-early-veil="1"]::after{
 
 
 /* OAI-V71-SMOOTH-TIMING-FINAL
-   V8-1-14-143-RETURN-CLEANUP-SW: 인트로는 유지하고, 외부페이지 보호막/성지·성당·피정 전환 체감만 부드럽게 정리한다. */
+   V8-1-14-144-RETURN-CSS-CLEANUP: 인트로는 유지하고, 외부페이지 보호막/성지·성당·피정 전환 체감만 부드럽게 정리한다. */
 html:not(.ios-device){
   --oai-category-enter-ms:360ms!important;
   --oai-popup-enter-ms:320ms!important;
@@ -6568,11 +6545,6 @@ html.oai-stability-veil::before{
 html.oai-stability-veil.oai-stability-veil-releasing::before{
   animation-duration:.12s!important;
 }
-html.oai-stability-veil[data-oai-stability-reason*="external"]::after,
-html.oai-external-return-freeze::after{
-  opacity:.72!important;
-  animation-duration:1.1s!important;
-}
 html.oai-external-return-freeze *,
 html.oai-stability-veil[data-oai-stability-reason*="external"] *{
   scroll-behavior:auto!important;
@@ -6588,7 +6560,7 @@ html.oai-stability-veil[data-oai-stability-reason*="external"] *{
 
 
 /* OAI-V73-INTRO-LONGER-FINAL
-   V8-1-14-143-RETURN-CLEANUP-SW: 인트로 십자가 사진의 유지 시간과 나타남/사라짐 시간을 늘린다. 새로고침 인트로 제거 규칙은 유지. */
+   V8-1-14-144-RETURN-CSS-CLEANUP: 인트로 십자가 사진의 유지 시간과 나타남/사라짐 시간을 늘린다. 새로고침 인트로 제거 규칙은 유지. */
 html.oai-cover-booting::after,
 html.oai-cover-revealing::after{
   animation-duration:2.45s!important;
@@ -6600,7 +6572,7 @@ html.oai-cover-revealing::after{
 
 
 /* OAI-V74-STAMPBOOK-HEADER-TOP-FIX-FINAL
-   V8-1-14-143-RETURN-CLEANUP-SW: V67에서 스탬프북 헤더의 상단 safe-area를 완전히 빼면서 일부 Android WebView에서 헤더가 위로 잘리는 문제를 보정한다.
+   V8-1-14-144-RETURN-CSS-CLEANUP: V67에서 스탬프북 헤더의 상단 safe-area를 완전히 빼면서 일부 Android WebView에서 헤더가 위로 잘리는 문제를 보정한다.
    다른 카테고리 헤더/뒤로가기/보호창/인트로는 건드리지 않고 스탬프북 헤더에만 최소 상단 여유를 준다. */
 html:not(.ios-device){
   --oai-stampbook-header-top-gap:clamp(16px, env(safe-area-inset-top, 0px), 24px);
@@ -6634,7 +6606,7 @@ html:not(.ios-device).oai-screen-compact-short #shrine-visit-cards-modal .shrine
 
 
 /* OAI-V75-INTRO-SCALE-VISIBLE-FINAL
-   V8-1-14-143-RETURN-CLEANUP-SW: 인트로 십자가 사진이 작은 상태에서 커지는 효과가 더 분명하게 보이도록 확대 시작값을 낮추고 중간 확대 단계를 추가한다. */
+   V8-1-14-144-RETURN-CSS-CLEANUP: 인트로 십자가 사진이 작은 상태에서 커지는 효과가 더 분명하게 보이도록 확대 시작값을 낮추고 중간 확대 단계를 추가한다. */
 @keyframes oaiGoogleIntroPhotoDesktop{
   0%{opacity:.02; transform:translate(-50%,-49%) scale(.78); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
   28%{opacity:.78; transform:translate(-50%,-50%) scale(.91); filter:contrast(1.012) saturate(1.018) drop-shadow(0 5px 14px rgba(80,54,18,.045));}
@@ -6654,7 +6626,7 @@ html.oai-cover-revealing::after{
 
 
 /* OAI-V76-INTRO-EARLY-SCALE-FINAL
-   V8-1-14-143-RETURN-CLEANUP-SW: 인트로 시작 시점을 style.css 로딩 이후가 아니라 head 초반으로 앞당겼다. 실제 확대 keyframes는 V75의 더 잘 보이는 scale 효과를 유지한다. */
+   V8-1-14-144-RETURN-CSS-CLEANUP: 인트로 시작 시점을 style.css 로딩 이후가 아니라 head 초반으로 앞당겼다. 실제 확대 keyframes는 V75의 더 잘 보이는 scale 효과를 유지한다. */
 html.oai-cover-booting::after,
 html.oai-cover-revealing::after{
   animation-duration:2.45s!important;
@@ -6662,7 +6634,7 @@ html.oai-cover-revealing::after{
 
 
 /* OAI-V77-EXTERNAL-ENTRY-VEIL-FINAL
-   V8-1-14-143-RETURN-CLEANUP-SW: 모든 외부사이트 진입 직전 보호창이 보이도록 external-leave 보호막을 즉시 표시하고 최소 표시 시간을 확보한다. */
+   V8-1-14-144-RETURN-CSS-CLEANUP: 모든 외부사이트 진입 직전 보호창이 보이도록 external-leave 보호막을 즉시 표시하고 최소 표시 시간을 확보한다. */
 html.oai-stability-veil[data-oai-stability-reason="external-leave"]::before,
 html.oai-stability-veil.oai-external-leaving::before{
   content:""!important;
@@ -6683,7 +6655,7 @@ html.oai-stability-veil.oai-external-leaving::after{
 
 
 /* OAI-V78-INTRO-SLOW-GROWTH-FINAL
-   V8-1-14-143-RETURN-CLEANUP-SW: 인트로 전체 시간은 그대로 두고, 작은 상태에서 최종 크기까지 커지는 속도만 더 천천히 조정한다. */
+   V8-1-14-144-RETURN-CSS-CLEANUP: 인트로 전체 시간은 그대로 두고, 작은 상태에서 최종 크기까지 커지는 속도만 더 천천히 조정한다. */
 @keyframes oaiGoogleIntroPhotoDesktop{
   0%{opacity:.02; transform:translate(-50%,-49%) scale(.78); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
   32%{opacity:.72; transform:translate(-50%,-50%) scale(.86); filter:contrast(1.010) saturate(1.014) drop-shadow(0 5px 14px rgba(80,54,18,.040));}
@@ -6705,7 +6677,7 @@ html.oai-cover-revealing::after{
 
 
 /* OAI-V79-STAMPBOOK-HEADER-REPAIR-FINAL
-   V8-1-14-143-RETURN-CLEANUP-SW: V74의 16~24px 상단 여유가 일부 Android WebView에서 부족해 스탬프북 헤더가 계속 잘리는 문제를 재보정한다.
+   V8-1-14-144-RETURN-CSS-CLEANUP: V74의 16~24px 상단 여유가 일부 Android WebView에서 부족해 스탬프북 헤더가 계속 잘리는 문제를 재보정한다.
    관구·교구/다른 헤더는 건드리지 않고, 스탬프북 헤더 내부 여백만 충분히 확보한다. */
 html:not(.ios-device){
   --oai-stampbook-header-top-gap:clamp(38px, calc(env(safe-area-inset-top, 0px) + 18px), 46px);
@@ -6751,7 +6723,7 @@ html:not(.ios-device) .shrine-visit-cards-modal .shrine-visit-cards-head .module
 
 
 /* OAI-V80-INTRO-GROWTH-CLEAR-FINAL
-   V8-1-14-143-RETURN-CLEANUP-SW: 인트로 전체 시간은 그대로 두고, 작게 시작해 거의 끝까지 천천히 커지는 동작이 눈에 보이도록 확대 폭을 더 크게 조정한다. */
+   V8-1-14-144-RETURN-CSS-CLEANUP: 인트로 전체 시간은 그대로 두고, 작게 시작해 거의 끝까지 천천히 커지는 동작이 눈에 보이도록 확대 폭을 더 크게 조정한다. */
 @keyframes oaiGoogleIntroPhotoDesktop{
   0%{opacity:.02; transform:translate(-50%,-49%) scale(.60); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
   28%{opacity:.62; transform:translate(-50%,-50%) scale(.74); filter:contrast(1.010) saturate(1.014) drop-shadow(0 5px 14px rgba(80,54,18,.040));}
@@ -6775,7 +6747,7 @@ html.oai-cover-revealing::after{
 
 
 /* OAI-V81-INTRO-SLOWER-GROWTH-FINAL
-   V8-1-14-143-RETURN-CLEANUP-SW: 인트로 전체 시간은 그대로 두고, 십자가 확대가 거의 끝까지 계속되도록 더 천천히 조정한다. */
+   V8-1-14-144-RETURN-CSS-CLEANUP: 인트로 전체 시간은 그대로 두고, 십자가 확대가 거의 끝까지 계속되도록 더 천천히 조정한다. */
 @keyframes oaiGoogleIntroPhotoDesktop{
   0%{opacity:.02; transform:translate(-50%,-49%) scale(.54); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
   42%{opacity:.60; transform:translate(-50%,-50%) scale(.66); filter:contrast(1.010) saturate(1.014) drop-shadow(0 5px 14px rgba(80,54,18,.040));}
@@ -6798,7 +6770,7 @@ html.oai-cover-revealing::after{
 
 
 /* OAI-V82-LOCATION-EXTERNAL-STABLE-FINAL
-   V8-1-14-143-RETURN-CLEANUP-SW: 이동 후 이전 위치가 남는 문제를 줄이기 위해 위치 캐시 의존을 낮추고, 외부사이트가 늦게 열릴 때 보호창이 먼저 사라지지 않도록 보강했다. */
+   V8-1-14-144-RETURN-CSS-CLEANUP: 이동 후 이전 위치가 남는 문제를 줄이기 위해 위치 캐시 의존을 낮추고, 외부사이트가 늦게 열릴 때 보호창이 먼저 사라지지 않도록 보강했다. */
 html.oai-stability-veil[data-oai-stability-reason="external-leave"]::before,
 html.oai-stability-veil.oai-external-leaving::before{
   opacity:1!important;
@@ -6810,7 +6782,7 @@ html.oai-stability-veil.oai-external-leaving::after{
 
 
 /* OAI-V83-INTRO-TRANSFORM-APPLY-FINAL
-   V8-1-14-143-RETURN-CLEANUP-SW: 기존 intro pseudo-element에 transform:scale(1)!important가 있어 keyframes의 scale 변화가 실제로 적용되지 않던 문제를 제거했다. */
+   V8-1-14-144-RETURN-CSS-CLEANUP: 기존 intro pseudo-element에 transform:scale(1)!important가 있어 keyframes의 scale 변화가 실제로 적용되지 않던 문제를 제거했다. */
 html.oai-cover-booting::after,
 html.oai-cover-revealing::after{
   animation-duration:2.45s!important;
@@ -6819,7 +6791,7 @@ html.oai-cover-revealing::after{
 
 
 /* OAI-V84-INTRO-LOCATION-FAST-FINAL
-   V8-1-14-143-RETURN-CLEANUP-SW: 인트로는 전체 길이와 확대 폭을 줄이고, 위치는 짧은 최신 캐시/빠른 위치 우선으로 다시 빠르게 조정한다. */
+   V8-1-14-144-RETURN-CSS-CLEANUP: 인트로는 전체 길이와 확대 폭을 줄이고, 위치는 짧은 최신 캐시/빠른 위치 우선으로 다시 빠르게 조정한다. */
 @keyframes oaiGoogleIntroPhotoDesktop{
   0%{opacity:.10; transform:translate(-50%,-49%) scale(.78); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
   18%{opacity:.76; transform:translate(-50%,-50%) scale(.84); filter:contrast(1.010) saturate(1.014) drop-shadow(0 5px 14px rgba(80,54,18,.040));}
@@ -6846,7 +6818,7 @@ html.oai-cover-revealing::after{
 
 
 /* OAI-V85-INTRO-SMOOTH-NO-STUTTER-FINAL
-   V8-1-14-143-RETURN-CLEANUP-SW: 인트로 속도는 유지하고, 중간 끊김처럼 보이던 다단계 확대를 전용 keyframes의 단일 연속 곡선으로 정리한다. */
+   V8-1-14-144-RETURN-CSS-CLEANUP: 인트로 속도는 유지하고, 중간 끊김처럼 보이던 다단계 확대를 전용 keyframes의 단일 연속 곡선으로 정리한다. */
 @keyframes oaiIntroSmoothPhotoDesktopV85{
   0%{opacity:.12; transform:translate(-50%,-49%) scale(.84); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
   100%{opacity:1; transform:translate(-50%,-50%) scale(1); filter:contrast(1.015) saturate(1.02) drop-shadow(0 6px 16px rgba(80,54,18,.05));}
@@ -6878,7 +6850,7 @@ html.oai-cover-revealing::after{
 
 
 /* OAI-V86-EXTERNAL-VEIL-STABLE-FINAL
-   V8-1-14-143-RETURN-CLEANUP-SW: 외부사이트 진입 때 CSS pseudo 보호막이 WebView 로딩과 겹치며 사라져 보이는 현상을 줄이기 위해 실제 DOM 보호창을 최상단에 유지한다. */
+   V8-1-14-144-RETURN-CSS-CLEANUP: 외부사이트 진입 때 CSS pseudo 보호막이 WebView 로딩과 겹치며 사라져 보이는 현상을 줄이기 위해 실제 DOM 보호창을 최상단에 유지한다. */
 #oai-external-entry-guard{
   position:fixed!important;
   inset:0!important;
@@ -6934,7 +6906,7 @@ html.oai-stability-veil.oai-external-leaving::after{
 
 
 /* OAI-V87-NO-PULL-EXTERNAL-PLAIN-FINAL
-   V8-1-14-143-RETURN-CLEANUP-SW: 커버 당김 새로고침 원형 화살표를 완전히 숨기고, 외부사이트 진입 보호창은 단색 화면만 사용해 검은 화면/원형 표시처럼 보이는 중간 단계를 줄인다. */
+   V8-1-14-144-RETURN-CSS-CLEANUP: 커버 당김 새로고침 원형 화살표를 완전히 숨기고, 외부사이트 진입 보호창은 단색 화면만 사용해 검은 화면/원형 표시처럼 보이는 중간 단계를 줄인다. */
 #cv-pull-modern,
 #cv-pull-modern.show,
 #cv-pull-modern.ready,
@@ -6990,7 +6962,7 @@ html.oai-stability-veil.oai-external-leaving::after{
 
 
 /* OAI-V88-EXTERNAL-VEIL-HOLD-FINAL
-   V8-1-14-143-RETURN-CLEANUP-SW: 외부사이트 진입 보호창이 너무 짧게 느껴지지 않도록, 보호창은 단색 아이보리 상태를 유지하고 이동 전 최소 표시 시간을 app.js에서 늘렸다. */
+   V8-1-14-144-RETURN-CSS-CLEANUP: 외부사이트 진입 보호창이 너무 짧게 느껴지지 않도록, 보호창은 단색 아이보리 상태를 유지하고 이동 전 최소 표시 시간을 app.js에서 늘렸다. */
 #oai-external-entry-guard.show{
   display:flex!important;
   opacity:1!important;
@@ -7000,7 +6972,7 @@ html.oai-stability-veil.oai-external-leaving::after{
 
 
 /* OAI-V89-EXTERNAL-CROSS-RESTORE-FINAL
-   V8-1-14-143-RETURN-CLEANUP-SW: V87에서 제거했던 외부사이트 진입 로딩 십자가를 복구한다. 원형 당김 새로고침 표시는 계속 제거한다. */
+   V8-1-14-144-RETURN-CSS-CLEANUP: V87에서 제거했던 외부사이트 진입 로딩 십자가를 복구한다. 원형 당김 새로고침 표시는 계속 제거한다. */
 #oai-external-entry-guard.show{
   display:flex!important;
   opacity:1!important;
@@ -7057,7 +7029,7 @@ html.oai-stability-veil.oai-external-leaving::after{
 
 
 /* OAI-V90-EXTERNAL-CROSS-CHROME-SMOOTH-FINAL
-   V8-1-14-143-RETURN-CLEANUP-SW: Chrome 전환 전에 로딩 십자가가 확실히 보이도록 보호창을 더 선명하게 표시한다. */
+   V8-1-14-144-RETURN-CSS-CLEANUP: Chrome 전환 전에 로딩 십자가가 확실히 보이도록 보호창을 더 선명하게 표시한다. */
 #oai-external-entry-guard.show{
   display:flex!important;
   opacity:1!important;
@@ -7098,7 +7070,7 @@ html.oai-stability-veil.oai-external-leaving::after{
 }
 
 
-/* V8-1-14-143-RETURN-CLEANUP-SW: 예전 WebView 방식의 미사용 복귀 안정막 */
+/* V8-1-14-144-RETURN-CSS-CLEANUP: 예전 WebView 방식의 미사용 복귀 안정막 */
 html.oai-background-return-stabilizing::before {
   content: '';
   position: fixed;
@@ -7117,7 +7089,7 @@ html.oai-background-return-intro * {
   scroll-behavior: auto !important;
 }
 
-/* V8-1-14-143-RETURN-CLEANUP-SW: 성지/성당/피정의집 카테고리별 정보 출처 표기 */
+/* V8-1-14-144-RETURN-CSS-CLEANUP: 성지/성당/피정의집 카테고리별 정보 출처 표기 */
 .category-source-note {
   display: block;
   flex-shrink: 0;
@@ -7152,29 +7124,7 @@ html.oai-font-global .category-source-note { font-size: calc(11px * var(--app-in
 #app .shrine-visit-detail-action.detail-goodnews{background:#e8f7ff!important;color:#075985!important;border:1px solid #66bdf2!important;}
 #app .shrine-visit-detail-action.detail-kakao{width:auto!important;}
 
-/* V8-1-14-106: 외부사이트 복귀 깜빡임 완화 + 정보카드/스탬프북 버튼 폭 통일 */
-html.oai-stability-veil[data-oai-stability-reason="external-return"]::before,
-html.oai-external-return-freeze::before{
-  background:#fbf8f1!important;
-  opacity:1!important;
-  animation:none!important;
-  transition:none!important;
-}
-html.oai-stability-veil[data-oai-stability-reason="external-return"]::after,
-html.oai-external-return-freeze::after{
-  content:""!important;
-  display:none!important;
-  opacity:0!important;
-  animation:none!important;
-  visibility:hidden!important;
-}
-html.oai-stability-veil[data-oai-stability-reason="external-return"] #oai-external-entry-guard,
-html.oai-external-return-freeze #oai-external-entry-guard{
-  display:none!important;
-  opacity:0!important;
-  visibility:hidden!important;
-  animation:none!important;
-}
+/* V8-1-14-106: 정보카드/스탬프북 버튼 폭 통일 */
 #app #info-card .ic-btn-row,
 #app #info-card .ic-links,
 #app #info-card .ic-kakao-row{
@@ -7240,56 +7190,6 @@ html.oai-external-return-freeze #oai-external-entry-guard{
   #app .shrine-visit-detail-action{height:43px!important;min-height:43px!important;font-size:13px!important;padding:0 6px!important;}
 }
 
-/* V8-1-14-107: 외부사이트 복귀 시 십자가는 제거하지 않고 하나만 고정 표시한다 */
-html.oai-stability-veil[data-oai-stability-reason="external-return"]::before,
-html.oai-external-return-freeze::before{
-  content:""!important;
-  position:fixed!important;
-  inset:0!important;
-  z-index:2147483000!important;
-  background:#fbf8f1!important;
-  opacity:1!important;
-  animation:none!important;
-  transition:none!important;
-  pointer-events:none!important;
-}
-html.oai-stability-veil[data-oai-stability-reason="external-return"]::after,
-html.oai-external-return-freeze::after{
-  content:"✝"!important;
-  position:fixed!important;
-  left:50%!important;
-  top:50%!important;
-  width:42px!important;
-  height:42px!important;
-  margin:-21px 0 0 -21px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  background:transparent!important;
-  border:0!important;
-  border-radius:0!important;
-  color:#c9a15e!important;
-  font-size:38px!important;
-  font-weight:900!important;
-  line-height:1!important;
-  z-index:2147483001!important;
-  opacity:1!important;
-  visibility:visible!important;
-  animation:oaiExternalReturnCrossRotate 2.8s linear infinite!important;
-  transition:none!important;
-  transform-origin:center center!important;
-  pointer-events:none!important;
-}
-html.oai-stability-veil[data-oai-stability-reason="external-return"] #oai-external-entry-guard,
-html.oai-external-return-freeze #oai-external-entry-guard{
-  display:none!important;
-  opacity:0!important;
-  visibility:hidden!important;
-  animation:none!important;
-}
-
-@keyframes oaiExternalReturnCrossRotate{from{transform:rotate(0deg)}to{transform:rotate(360deg)}}
-
 /* V8-1-14-109: 정보카드/나의 성지순례 현황 6버튼 색상 통일 */
 #app #info-card .ic-tel-btn,
 #app #info-card .ic-route-btn,
@@ -7339,7 +7239,7 @@ html.oai-external-return-freeze #oai-external-entry-guard{
 }
 
 
-/* V8-1-14-143-RETURN-CLEANUP-SW: 성지 정보카드 6개 버튼 색상을 부드러운 아이보리/골드 계열로 정리한다. */
+/* V8-1-14-144-RETURN-CSS-CLEANUP: 성지 정보카드 6개 버튼 색상을 부드러운 아이보리/골드 계열로 정리한다. */
 #app #info-card .ic-btn-row > *,
 #app #info-card .ic-links > *,
 #app #info-card .ic-kakao-row > *,
@@ -7392,7 +7292,7 @@ html.oai-external-return-freeze #oai-external-entry-guard{
 }
 
 
-/* V8-1-14-143-RETURN-CLEANUP-SW-FINAL: 1안 적용 - 남색 배경 + 금색 테두리 + 아이보리 글자. */
+/* V8-1-14-144-RETURN-CSS-CLEANUP-FINAL: 1안 적용 - 남색 배경 + 금색 테두리 + 아이보리 글자. */
 #app #info-card .ic-btn-row > *,
 #app #info-card .ic-links > *,
 #app #info-card .ic-kakao-row > *,
@@ -7445,7 +7345,7 @@ html.oai-external-return-freeze #oai-external-entry-guard{
 }
 
 
-/* V8-1-14-143-RETURN-CLEANUP-SW-FINAL: 실제 버튼 ID/행 클래스에 직접 적용해 이전 색상 최종 오버라이드를 덮는다. */
+/* V8-1-14-144-RETURN-CSS-CLEANUP-FINAL: 실제 버튼 ID/행 클래스에 직접 적용해 이전 색상 최종 오버라이드를 덮는다. */
 #app #info-card #ic-tel-link,
 #app .shrine-visit-detail-action-row.detail-primary-row > .detail-tel{
   background:linear-gradient(180deg,#f5fbff 0%,#e4f3ff 100%)!important;
@@ -7506,7 +7406,7 @@ html.oai-external-return-freeze #oai-external-entry-guard{
 }
 
 
-/* V8-1-14-143-RETURN-CLEANUP-SW-FINAL: 좌우 모두 파스텔 톤으로 맞춘다. 왼쪽은 파스텔 그린, 오른쪽은 파스텔 네이비. */
+/* V8-1-14-144-RETURN-CSS-CLEANUP-FINAL: 좌우 모두 파스텔 톤으로 맞춘다. 왼쪽은 파스텔 그린, 오른쪽은 파스텔 네이비. */
 #app #info-card #ic-tel-link,
 #app .shrine-visit-detail-action-row.detail-primary-row > .detail-tel{
   background:linear-gradient(180deg,#f4fbf5 0%,#dff2e5 100%)!important;
@@ -7567,7 +7467,7 @@ html.oai-external-return-freeze #oai-external-entry-guard{
 }
 
 
-/* V8-1-14-143-RETURN-CLEANUP-SW-FINAL: 카카오내비 버튼은 원래 카카오 노란색으로 복원한다. */
+/* V8-1-14-144-RETURN-CSS-CLEANUP-FINAL: 카카오내비 버튼은 원래 카카오 노란색으로 복원한다. */
 #app #info-card #ic-kakao-nav,
 #app .shrine-visit-detail-action-row.detail-kakao-row > .detail-kakao{
   background:linear-gradient(180deg,#ffe812 0%,#fee500 100%)!important;
@@ -7585,7 +7485,7 @@ html.oai-external-return-freeze #oai-external-entry-guard{
 }
 
 
-/* V8-1-14-143-RETURN-CLEANUP-SW-FINAL: 홈페이지/성지 상세페이지는 한 톤 더 진하게, 굿뉴스는 더 굵고 선명하게 조정. */
+/* V8-1-14-144-RETURN-CSS-CLEANUP-FINAL: 홈페이지/성지 상세페이지는 한 톤 더 진하게, 굿뉴스는 더 굵고 선명하게 조정. */
 #app #info-card #ic-hp,
 #app .shrine-visit-detail-action-row.detail-link-row > .detail-home{
   background:linear-gradient(180deg,#d9f0e1 0%,#b8dec6 100%)!important;
@@ -7611,7 +7511,7 @@ html.oai-external-return-freeze #oai-external-entry-guard{
 }
 
 
-/* V8-1-14-143-RETURN-CLEANUP-SW: V117 기준 유지. V118의 나의 성지순례 현황 성지정보 카드 색상만 적용하고, 흔들림을 만들었던 홈복귀 보호막은 넣지 않는다. */
+/* V8-1-14-144-RETURN-CSS-CLEANUP: V117 기준 유지. V118의 나의 성지순례 현황 성지정보 카드 색상만 적용하고, 흔들림을 만들었던 홈복귀 보호막은 넣지 않는다. */
 #app .shrine-visit-detail-info{
   background:linear-gradient(180deg,#fbfdff 0%,#fffaf0 100%)!important;
   border:2px solid #9db7cc!important;
@@ -7634,7 +7534,7 @@ html.oai-external-return-freeze #oai-external-entry-guard{
 }
 
 
-/* V8-1-14-143-RETURN-CLEANUP-SW: 버튼 색상은 굿뉴스/홈페이지만 한 톤 진하게 하고, 로딩 십자가는 하나의 규격으로 통일한다. */
+/* V8-1-14-144-RETURN-CSS-CLEANUP: 버튼 색상은 굿뉴스/홈페이지만 한 톤 진하게 하고, 로딩 십자가는 하나의 규격으로 통일한다. */
 @keyframes oaiUnifiedLoadingCrossSpin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
 #app #info-card #ic-hp,
 #app .shrine-visit-detail-action.detail-home{
@@ -7735,7 +7635,7 @@ html.oai-stability-veil.oai-external-leaving::after{
 }
 
 
-/* V8-1-14-143-RETURN-CLEANUP-SW: 홈페이지는 V117 색상으로 되돌리고, 굿뉴스만 더 진한 청록색으로 강조한다. 십자가는 겹치는 구간을 하나로 통일한다. */
+/* V8-1-14-144-RETURN-CSS-CLEANUP: 홈페이지는 V117 색상으로 되돌리고, 굿뉴스만 더 진한 청록색으로 강조한다. 십자가는 겹치는 구간을 하나로 통일한다. */
 #app #info-card #ic-hp,
 #app .shrine-visit-detail-action.detail-home{
   background:linear-gradient(180deg,#d9f0e1 0%,#b8dec6 100%)!important;
@@ -7843,7 +7743,7 @@ html.oai-external-return-freeze::after{
   animation:oaiUnifiedLoadingCrossSpin 2.8s linear infinite!important;
 }
 
-/* V8-1-14-143-RETURN-CLEANUP-SW: 성지 내주변 거리 계산 중에는 내위치 버튼을 숨기고, 내주변 목록이 준비될 때 함께 표시한다. */
+/* V8-1-14-144-RETURN-CSS-CLEANUP: 성지 내주변 거리 계산 중에는 내위치 버튼을 숨기고, 내주변 목록이 준비될 때 함께 표시한다. */
 #app #loc-btn.oai-wait-nearby-list{
   opacity:0!important;
   visibility:hidden!important;
@@ -7851,7 +7751,7 @@ html.oai-external-return-freeze::after{
   transform:translateY(6px)!important;
 }
 
-/* V8-1-14-143-RETURN-CLEANUP-SW: 목적별 보호창은 하나만 사용하고, 로딩 십자가 규격을 하나로 통일한다. */
+/* V8-1-14-144-RETURN-CSS-CLEANUP: 목적별 보호창은 하나만 사용하고, 로딩 십자가 규격을 하나로 통일한다. */
 @keyframes oaiUnifiedLoadingCrossSpin{to{transform:rotate(360deg)}}
 :root{
   --oai-loading-cross-size:36px;
@@ -7994,7 +7894,7 @@ html.oai-external-return-freeze::after{
 #oai-external-entry-guard .oai-external-entry-cross{font-size:var(--oai-loading-cross-font)!important;}
 html.oai-external-return-freeze #oai-external-entry-guard{display:none!important;opacity:0!important;visibility:hidden!important;animation:none!important;}
 
-/* V8-1-14-143-RETURN-CLEANUP-SW: 성지·성당·피정의집 내주변/찾기/지역검색 시트 열림·전환 애니메이션을 제거하고, 시트 내부 좌우 스와이프 전환의 그림자/잔상을 없앤다. */
+/* V8-1-14-144-RETURN-CSS-CLEANUP: 성지·성당·피정의집 내주변/찾기/지역검색 시트 열림·전환 애니메이션을 제거하고, 시트 내부 좌우 스와이프 전환의 그림자/잔상을 없앤다. */
 #app .sheet{
   will-change:auto!important;
 }
