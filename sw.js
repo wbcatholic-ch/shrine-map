@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-128-LOCBTN-GOODNEWS-CROSS-FIX';
-const ASSET_VERSION = 'V8-1-14-128-LOCBTN-GOODNEWS-CROSS-FIX';
+const CACHE_VERSION = 'catholic-way-V8-1-14-129-SHRINE-VISIT-BTN-SURFACES';
+const ASSET_VERSION = 'V8-1-14-129-SHRINE-VISIT-BTN-SURFACES';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }
