@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-100-SOURCE-NOTICE';
-const ASSET_VERSION = 'V8-1-14-100-SOURCE-NOTICE';
+const CACHE_VERSION = 'catholic-way-V8-1-14-101-RESUME-WEBVIEW-RULE';
+const ASSET_VERSION = 'V8-1-14-101-RESUME-WEBVIEW-RULE';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }
