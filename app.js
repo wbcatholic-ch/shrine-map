@@ -334,7 +334,7 @@ function oaiClearExternalNavigationState(opts){
   if(window.__OAI_IDLE_RESTART_GUARD__) return;
   window.__OAI_IDLE_RESTART_GUARD__ = true;
 
-  /* V8-1-14-125-BASED117-V118-V123-FIX: 미사용 후 복귀는 예전 WebView 방식으로 단순화한다.
+  /* V8-1-14-126-DARK-BUTTONS-CROSS-STANDARD: 미사용 후 복귀는 예전 WebView 방식으로 단순화한다.
      짧은 복귀: 원래 화면 유지 / 1분 이상: 아이보리 안정막 1회 / 10분 이상: 커버 인트로 복귀 */
   var LONG_BG_RETURN_MS = 10 * 60 * 1000;
   var MEDIUM_BG_RETURN_MS = 60 * 1000;
@@ -514,7 +514,7 @@ function oaiOpenExternalSite(url, options){
     if(/^(tel:|mailto:|sms:|javascript:)/i.test(url)) return false;
   }catch(_e){}
   var kind = options.kind || options.source || 'external-site';
-  // V8-1-14-125-BASED117-V118-V123-FIX: 십자가 보호창이 실제로 보인 뒤 Chrome 전환이 시작되도록 표시 시간을 조금 더 확보한다.
+  // V8-1-14-126-DARK-BUTTONS-CROSS-STANDARD: 십자가 보호창이 실제로 보인 뒤 Chrome 전환이 시작되도록 표시 시간을 조금 더 확보한다.
   var requestedDelay = typeof options.delay === 'number' ? options.delay : 0;
   var delay = Math.max(900, requestedDelay || 0);
   try{ document.activeElement && document.activeElement.blur && document.activeElement.blur(); }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -1549,14 +1549,14 @@ function _renderShrineVisitDetail(idx){
   const goodnewsUrl=_getShrineGoodnewsUrl(item);
   const telText=item.tel?_visitHtmlEsc(item.tel):'—';
   const telHref=item.tel?'tel:'+String(item.tel).replace(/[^0-9+]/g,''):'';
-  // V8-1-14-125-BASED117-V118-V123-FIX: V117 기준에서 V118 성지정보 카드 색상과 V123 굿뉴스 파란색을 실제 생성 버튼에 직접 적용한다.
+  // V8-1-14-126-DARK-BUTTONS-CROSS-STANDARD: V117 기준에서 V118 성지정보 카드 색상과 V123 굿뉴스 파란색을 실제 생성 버튼에 직접 적용한다.
   const detailInfoStyle='background:linear-gradient(180deg,#fbfdff 0%,#fffaf0 100%)!important;border:2px solid #9db7cc!important;box-shadow:0 8px 22px rgba(17,35,60,.08)!important;';
   const detailMapBtnStyle='background:#fff8e6!important;color:#5f4515!important;border:1.5px solid #d5b86d!important;box-shadow:0 2px 6px rgba(95,69,21,.08)!important;';
   const detailTelStyle='background:linear-gradient(180deg,#f4fbf5 0%,#dff2e5 100%)!important;color:#244f38!important;border:1.5px solid #a8d5b5!important;box-shadow:0 3px 8px rgba(35,78,56,.10), inset 0 1px 0 rgba(255,255,255,.90)!important;text-shadow:none!important;';
   const detailRouteStyle='background:linear-gradient(180deg,#f4f7fc 0%,#e2eaf6 100%)!important;color:#2e466b!important;border:1.5px solid #a8bbd8!important;box-shadow:0 3px 8px rgba(46,70,107,.10), inset 0 1px 0 rgba(255,255,255,.90)!important;text-shadow:none!important;';
-  const detailHomeStyle='background:linear-gradient(180deg,#d9f0e1 0%,#b8dec6 100%)!important;color:#1b432e!important;border:1.5px solid #75b688!important;font-weight:900!important;';
+  const detailHomeStyle='background:linear-gradient(180deg,#b9dfc4 0%,#7fb993 100%)!important;color:#083d24!important;border:1.5px solid #3f8f5b!important;font-weight:950!important;box-shadow:0 3px 9px rgba(28,94,55,.17), inset 0 1px 0 rgba(255,255,255,.42)!important;';
   const detailGuideStyle='background:linear-gradient(180deg,#d5e2f2 0%,#b8cae4 100%)!important;color:#203858!important;border:1.5px solid #6f8fba!important;font-weight:900!important;';
-  const detailGoodnewsStyle='background:#0d6efd!important;color:#ffffff!important;border:1.8px solid #084db3!important;box-shadow:0 2px 8px rgba(13,110,253,.24)!important;text-shadow:0 1px 1px rgba(0,0,0,.18)!important;font-weight:950!important;';
+  const detailGoodnewsStyle='background:#0056d6!important;color:#ffffff!important;border:1.8px solid #003f9e!important;box-shadow:0 2px 9px rgba(0,86,214,.28)!important;text-shadow:0 1px 1px rgba(0,0,0,.20)!important;font-weight:950!important;';
   const detailKakaoStyle='background:linear-gradient(180deg,#ffe812 0%,#fee500 100%)!important;color:#3c1e1e!important;border:1.5px solid #e2c900!important;box-shadow:0 3px 8px rgba(60,30,30,.13), inset 0 1px 0 rgba(255,255,255,.45)!important;text-shadow:none!important;';
   const hpBtn=hpUrl?'<button type="button" class="shrine-visit-detail-action detail-home" style="'+detailHomeStyle+'" data-shrine-detail-hp="'+_visitHtmlEsc(hpUrl)+'">홈페이지</button>':'';
   const guideBtn=guideUrl?'<button type="button" class="shrine-visit-detail-action detail-guide" style="'+detailGuideStyle+'" data-shrine-detail-guide="'+_visitHtmlEsc(guideUrl)+'">성지 상세페이지</button>':'';
@@ -2813,7 +2813,7 @@ window.addEventListener('load', syncCoverUpdateVersionState, true);
     try{
       var frame=document.getElementById('privacy-policy-frame');
       if(frame){
-        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-125-BASED117-V118-V123-FIX'));
+        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-126-DARK-BUTTONS-CROSS-STANDARD'));
         if(frame.getAttribute('src') === 'about:blank' || !frame.getAttribute('src')) frame.setAttribute('src', src);
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -3067,7 +3067,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V8-1-14-125-BASED117-V118-V123-FIX';
+    frame.src='diocese.html?v=V8-1-14-126-DARK-BUTTONS-CROSS-STANDARD';
     setTimeout(armDioceseOverlayBack, 0);
   }else{
     if(!restore){
@@ -3642,7 +3642,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V8-1-14-125-BASED117-V118-V123-FIX';
+const _PRAYER_ASSET_VERSION='V8-1-14-126-DARK-BUTTONS-CROSS-STANDARD';
 let _prayerModuleLoadPromise=null;
 function _isPrayerDataReady(){
   return !!(window.PRAYER_DATA && typeof window.PRAYER_DATA === 'object');
@@ -3987,7 +3987,7 @@ function _navFetch(origin, dest) {
 const $=id=>document.getElementById(id);
 const $$=s=>document.querySelectorAll(s);
 const _GEO=navigator.geolocation;
-// V8-1-14-125-BASED117-V118-V123-FIX: 오래 미사용 후 복귀 시 마지막 위치를 먼저 보여주고, 새 GPS가 잡히면 최신 위치로 교체한다.
+// V8-1-14-126-DARK-BUTTONS-CROSS-STANDARD: 오래 미사용 후 복귀 시 마지막 위치를 먼저 보여주고, 새 GPS가 잡히면 최신 위치로 교체한다.
 const _GO1={enableHighAccuracy:true,timeout:6500,maximumAge:0};
 const _GO2={enableHighAccuracy:false,timeout:1200,maximumAge:60000};
 const _GO_FAST_FRESH={enableHighAccuracy:false,timeout:1100,maximumAge:60000};
