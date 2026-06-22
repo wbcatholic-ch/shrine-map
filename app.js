@@ -144,6 +144,9 @@ function oaiRefreshVeilVisibleUntil(){
 function oaiReleaseStabilityVeil(){
   try{
     var root = document.documentElement;
+    if(window.__oaiExternalReturnStabilizing && root.classList.contains('oai-external-return-freeze') && !root.classList.contains('oai-stability-veil')){
+      return;
+    }
     var reason = root.getAttribute('data-oai-stability-reason') || '';
     if(oaiIsRefreshVeilReason(reason)){
       var minUntil = oaiRefreshVeilVisibleUntil();
@@ -334,7 +337,7 @@ function oaiClearExternalNavigationState(opts){
   if(window.__OAI_IDLE_RESTART_GUARD__) return;
   window.__OAI_IDLE_RESTART_GUARD__ = true;
 
-  /* V8-1-14-134-PILGRIMAGE-BTN-SWIPE-CLEAN: 미사용 후 복귀는 예전 WebView 방식으로 단순화한다.
+  /* V8-1-14-135-EXTERNAL-GUARD-DIOCESE-CLEAN: 미사용 후 복귀는 예전 WebView 방식으로 단순화한다.
      짧은 복귀: 원래 화면 유지 / 1분 이상: 아이보리 안정막 1회 / 10분 이상: 커버 인트로 복귀 */
   var LONG_BG_RETURN_MS = 10 * 60 * 1000;
   var MEDIUM_BG_RETURN_MS = 60 * 1000;
@@ -505,6 +508,34 @@ function oaiNormalizeExternalSiteUrl(url){
   return String(url || '').trim();
 }
 
+function oaiBuildAndroidExternalIntent(url){
+  try{
+    if(!/Android/i.test(navigator.userAgent || '')) return '';
+    var u = new URL(String(url || ''), location.href);
+    if(!/^https?:$/.test(u.protocol)) return '';
+    var scheme = u.protocol.replace(':','');
+    var path = (u.pathname || '/') + (u.search || '');
+    return 'intent://' + u.host + path + '#Intent;scheme=' + scheme + ';package=com.android.chrome;S.browser_fallback_url=' + encodeURIComponent(u.toString()) + ';end';
+  }catch(_e){ return ''; }
+}
+function oaiNavigateExternalNow(url){
+  url = String(url || '').trim();
+  if(!url) return;
+  var navUrl = oaiBuildAndroidExternalIntent(url) || url;
+  var usedIntent = navUrl !== url;
+  try{ location.assign(navUrl); }
+  catch(e){ try{ location.href = navUrl; }catch(_e){ console.warn('[가톨릭길동무]', _e); } }
+  if(usedIntent){
+    setTimeout(function(){
+      try{
+        if(document.visibilityState === 'hidden') return;
+        if(sessionStorage.getItem('oai_external_nav_pending') !== '1') return;
+        location.assign(url);
+      }catch(e){ try{ location.href = url; }catch(_e){} }
+    }, 1200);
+  }
+}
+
 function oaiOpenExternalSite(url, options){
   options = options || {};
   if(typeof options === 'string') options = {kind:options};
@@ -514,7 +545,7 @@ function oaiOpenExternalSite(url, options){
     if(/^(tel:|mailto:|sms:|javascript:)/i.test(url)) return false;
   }catch(_e){}
   var kind = options.kind || options.source || 'external-site';
-  // V8-1-14-134-PILGRIMAGE-BTN-SWIPE-CLEAN: 십자가 보호창이 실제로 보인 뒤 Chrome 전환이 시작되도록 표시 시간을 조금 더 확보한다.
+  // V8-1-14-135-EXTERNAL-GUARD-DIOCESE-CLEAN: 십자가 보호창이 실제로 보인 뒤 Chrome 전환이 시작되도록 표시 시간을 조금 더 확보한다.
   var requestedDelay = typeof options.delay === 'number' ? options.delay : 0;
   var delay = Math.max(900, requestedDelay || 0);
   try{ document.activeElement && document.activeElement.blur && document.activeElement.blur(); }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -523,8 +554,8 @@ function oaiOpenExternalSite(url, options){
   try{ if(typeof _clearCoverExitArmed === 'function') _clearCoverExitArmed(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   try{ markExternalReturnStabilize(kind); }catch(e){ console.warn("[가톨릭길동무]", e); }
   function goExternalNow(){
-    try{ location.assign(url); }
-    catch(e){ try{ location.href = url; }catch(_e){ console.warn('[가톨릭길동무]', _e); } }
+    try{ oaiNavigateExternalNow(url); }
+    catch(e){ try{ location.assign(url); }catch(_e){ try{ location.href = url; }catch(__e){ console.warn('[가톨릭길동무]', __e); } } }
   }
   try{
     requestAnimationFrame(function(){ setTimeout(goExternalNow, delay); });
@@ -536,7 +567,7 @@ function oaiSmoothNavigate(url, kind){
   return oaiOpenExternalSite(url, {kind: kind || 'external'});
 }
 
-try{ window.oaiOpenExternalSite = oaiOpenExternalSite; window.oaiSmoothNavigate = oaiSmoothNavigate; }catch(e){ console.warn("[가톨릭길동무]", e); }
+try{ window.oaiOpenExternalSite = oaiOpenExternalSite; window.oaiSmoothNavigate = oaiSmoothNavigate; window.oaiNavigateExternalNow = oaiNavigateExternalNow; }catch(e){ console.warn("[가톨릭길동무]", e); }
 
 function oaiMeasureExternalViewport(){
   try{
@@ -552,7 +583,12 @@ function oaiMeasureExternalViewport(){
 }
 function oaiReleasePassiveVeil(){
   try{
-    var reason = document.documentElement.getAttribute('data-oai-stability-reason') || '';
+    var root = document.documentElement;
+    // V8-1-14-135-EXTERNAL-GUARD-DIOCESE-CLEAN:
+    // 외부사이트 복귀 보호창은 oaiStartExternalReturnStabilize/finish 흐름만 해제한다.
+    // 일반 passive veil 정리 타이머가 중간에 external-return-freeze를 지우면 십자가가 끊겨 보인다.
+    if(window.__oaiExternalReturnStabilizing || root.classList.contains('oai-external-return-freeze')) return;
+    var reason = root.getAttribute('data-oai-stability-reason') || '';
     if(/external-leave|external-return/i.test(reason)) return;
     oaiReleaseStabilityVeil();
   }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -1567,7 +1603,7 @@ function _renderShrineVisitDetail(idx){
   const goodnewsUrl=_getShrineGoodnewsUrl(item);
   const telText=item.tel?_visitHtmlEsc(item.tel):'—';
   const telHref=item.tel?'tel:'+String(item.tel).replace(/[^0-9+]/g,''):'';
-  // V8-1-14-134-PILGRIMAGE-BTN-SWIPE-CLEAN: V117 기준에서 V118 성지정보 카드 색상과 V123 굿뉴스 파란색을 실제 생성 버튼에 직접 적용한다.
+  // V8-1-14-135-EXTERNAL-GUARD-DIOCESE-CLEAN: V117 기준에서 V118 성지정보 카드 색상과 V123 굿뉴스 파란색을 실제 생성 버튼에 직접 적용한다.
   const detailInfoStyle='background:linear-gradient(180deg,#fbfdff 0%,#fffaf0 100%)!important;border:2px solid #9db7cc!important;box-shadow:0 8px 22px rgba(17,35,60,.08)!important;';
   const detailMapBtnStyle='background:#fff8e6!important;color:#5f4515!important;border:1.5px solid #d5b86d!important;box-shadow:0 2px 6px rgba(95,69,21,.08)!important;';
   const detailTelStyle='background:linear-gradient(180deg,#f4fbf5 0%,#dff2e5 100%)!important;color:#244f38!important;border:1.5px solid #a8d5b5!important;box-shadow:0 3px 8px rgba(35,78,56,.10), inset 0 1px 0 rgba(255,255,255,.90)!important;text-shadow:none!important;';
@@ -2831,7 +2867,7 @@ window.addEventListener('load', syncCoverUpdateVersionState, true);
     try{
       var frame=document.getElementById('privacy-policy-frame');
       if(frame){
-        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-134-PILGRIMAGE-BTN-SWIPE-CLEAN'));
+        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-135-EXTERNAL-GUARD-DIOCESE-CLEAN'));
         if(frame.getAttribute('src') === 'about:blank' || !frame.getAttribute('src')) frame.setAttribute('src', src);
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -3085,7 +3121,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V8-1-14-134-PILGRIMAGE-BTN-SWIPE-CLEAN';
+    frame.src='diocese.html?v=V8-1-14-135-EXTERNAL-GUARD-DIOCESE-CLEAN';
     setTimeout(armDioceseOverlayBack, 0);
   }else{
     if(!restore){
@@ -3235,7 +3271,7 @@ function openCatholicExternalPreserveApp(url, kind){
   }catch(e){ console.warn("[가톨릭길동무]", e); }
   try{ if(typeof markExternalReturnStabilize === 'function') markExternalReturnStabilize(kind || 'external-site'); }catch(e){ console.warn("[가톨릭길동무]", e); }
   setTimeout(function(){
-    try{ location.assign(url); }catch(e){ try{ location.href = url; }catch(_e){ console.warn('[가톨릭길동무]', _e); } }
+    try{ oaiNavigateExternalNow(url); }catch(e){ try{ location.assign(url); }catch(_e){ try{ location.href = url; }catch(__e){ console.warn('[가톨릭길동무]', __e); } } }
   }, 70);
   return true;
 }
@@ -3275,8 +3311,7 @@ function openDioceseExternal(url, state){
   }
   try{ if(typeof markExternalReturnStabilize === 'function') markExternalReturnStabilize('diocese-external'); }catch(e){ console.warn('[가톨릭길동무]', e); }
   setTimeout(function(){
-    try{ location.assign(url); }
-    catch(e){ try{ location.href = url; }catch(_e){ console.warn('[가톨릭길동무]', _e); } }
+    try{ oaiNavigateExternalNow(url); }catch(e){ try{ location.assign(url); }catch(_e){ try{ location.href = url; }catch(__e){ console.warn('[가톨릭길동무]', __e); } } }
   }, 70);
   return true;
 }
@@ -3660,7 +3695,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V8-1-14-134-PILGRIMAGE-BTN-SWIPE-CLEAN';
+const _PRAYER_ASSET_VERSION='V8-1-14-135-EXTERNAL-GUARD-DIOCESE-CLEAN';
 let _prayerModuleLoadPromise=null;
 function _isPrayerDataReady(){
   return !!(window.PRAYER_DATA && typeof window.PRAYER_DATA === 'object');
@@ -4005,7 +4040,7 @@ function _navFetch(origin, dest) {
 const $=id=>document.getElementById(id);
 const $$=s=>document.querySelectorAll(s);
 const _GEO=navigator.geolocation;
-// V8-1-14-134-PILGRIMAGE-BTN-SWIPE-CLEAN: 오래 미사용 후 복귀 시 마지막 위치를 먼저 보여주고, 새 GPS가 잡히면 최신 위치로 교체한다.
+// V8-1-14-135-EXTERNAL-GUARD-DIOCESE-CLEAN: 오래 미사용 후 복귀 시 마지막 위치를 먼저 보여주고, 새 GPS가 잡히면 최신 위치로 교체한다.
 const _GO1={enableHighAccuracy:true,timeout:6500,maximumAge:0};
 const _GO2={enableHighAccuracy:false,timeout:1200,maximumAge:60000};
 const _GO_FAST_FRESH={enableHighAccuracy:false,timeout:1100,maximumAge:60000};
