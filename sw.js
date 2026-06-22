@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-114-BUTTON-GRADATION-APPLY';
-const ASSET_VERSION = 'V8-1-14-114-BUTTON-GRADATION-APPLY';
+const CACHE_VERSION = 'catholic-way-V8-1-14-115-BUTTON-PASTEL-NAVY-GREEN';
+const ASSET_VERSION = 'V8-1-14-115-BUTTON-PASTEL-NAVY-GREEN';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }
