@@ -337,7 +337,7 @@ function oaiClearExternalNavigationState(opts){
   if(window.__OAI_IDLE_RESTART_GUARD__) return;
   window.__OAI_IDLE_RESTART_GUARD__ = true;
 
-  /* V8-1-14-135-EXTERNAL-GUARD-DIOCESE-CLEAN: 미사용 후 복귀는 예전 WebView 방식으로 단순화한다.
+  /* V8-1-14-136-NEARBY-SINGLE-CALC: 미사용 후 복귀는 예전 WebView 방식으로 단순화한다.
      짧은 복귀: 원래 화면 유지 / 1분 이상: 아이보리 안정막 1회 / 10분 이상: 커버 인트로 복귀 */
   var LONG_BG_RETURN_MS = 10 * 60 * 1000;
   var MEDIUM_BG_RETURN_MS = 60 * 1000;
@@ -545,7 +545,7 @@ function oaiOpenExternalSite(url, options){
     if(/^(tel:|mailto:|sms:|javascript:)/i.test(url)) return false;
   }catch(_e){}
   var kind = options.kind || options.source || 'external-site';
-  // V8-1-14-135-EXTERNAL-GUARD-DIOCESE-CLEAN: 십자가 보호창이 실제로 보인 뒤 Chrome 전환이 시작되도록 표시 시간을 조금 더 확보한다.
+  // V8-1-14-136-NEARBY-SINGLE-CALC: 십자가 보호창이 실제로 보인 뒤 Chrome 전환이 시작되도록 표시 시간을 조금 더 확보한다.
   var requestedDelay = typeof options.delay === 'number' ? options.delay : 0;
   var delay = Math.max(900, requestedDelay || 0);
   try{ document.activeElement && document.activeElement.blur && document.activeElement.blur(); }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -584,7 +584,7 @@ function oaiMeasureExternalViewport(){
 function oaiReleasePassiveVeil(){
   try{
     var root = document.documentElement;
-    // V8-1-14-135-EXTERNAL-GUARD-DIOCESE-CLEAN:
+    // V8-1-14-136-NEARBY-SINGLE-CALC:
     // 외부사이트 복귀 보호창은 oaiStartExternalReturnStabilize/finish 흐름만 해제한다.
     // 일반 passive veil 정리 타이머가 중간에 external-return-freeze를 지우면 십자가가 끊겨 보인다.
     if(window.__oaiExternalReturnStabilizing || root.classList.contains('oai-external-return-freeze')) return;
@@ -1603,7 +1603,7 @@ function _renderShrineVisitDetail(idx){
   const goodnewsUrl=_getShrineGoodnewsUrl(item);
   const telText=item.tel?_visitHtmlEsc(item.tel):'—';
   const telHref=item.tel?'tel:'+String(item.tel).replace(/[^0-9+]/g,''):'';
-  // V8-1-14-135-EXTERNAL-GUARD-DIOCESE-CLEAN: V117 기준에서 V118 성지정보 카드 색상과 V123 굿뉴스 파란색을 실제 생성 버튼에 직접 적용한다.
+  // V8-1-14-136-NEARBY-SINGLE-CALC: V117 기준에서 V118 성지정보 카드 색상과 V123 굿뉴스 파란색을 실제 생성 버튼에 직접 적용한다.
   const detailInfoStyle='background:linear-gradient(180deg,#fbfdff 0%,#fffaf0 100%)!important;border:2px solid #9db7cc!important;box-shadow:0 8px 22px rgba(17,35,60,.08)!important;';
   const detailMapBtnStyle='background:#fff8e6!important;color:#5f4515!important;border:1.5px solid #d5b86d!important;box-shadow:0 2px 6px rgba(95,69,21,.08)!important;';
   const detailTelStyle='background:linear-gradient(180deg,#f4fbf5 0%,#dff2e5 100%)!important;color:#244f38!important;border:1.5px solid #a8d5b5!important;box-shadow:0 3px 8px rgba(35,78,56,.10), inset 0 1px 0 rgba(255,255,255,.90)!important;text-shadow:none!important;';
@@ -2867,7 +2867,7 @@ window.addEventListener('load', syncCoverUpdateVersionState, true);
     try{
       var frame=document.getElementById('privacy-policy-frame');
       if(frame){
-        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-135-EXTERNAL-GUARD-DIOCESE-CLEAN'));
+        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-136-NEARBY-SINGLE-CALC'));
         if(frame.getAttribute('src') === 'about:blank' || !frame.getAttribute('src')) frame.setAttribute('src', src);
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -3121,7 +3121,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V8-1-14-135-EXTERNAL-GUARD-DIOCESE-CLEAN';
+    frame.src='diocese.html?v=V8-1-14-136-NEARBY-SINGLE-CALC';
     setTimeout(armDioceseOverlayBack, 0);
   }else{
     if(!restore){
@@ -3695,7 +3695,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V8-1-14-135-EXTERNAL-GUARD-DIOCESE-CLEAN';
+const _PRAYER_ASSET_VERSION='V8-1-14-136-NEARBY-SINGLE-CALC';
 let _prayerModuleLoadPromise=null;
 function _isPrayerDataReady(){
   return !!(window.PRAYER_DATA && typeof window.PRAYER_DATA === 'object');
@@ -4040,7 +4040,7 @@ function _navFetch(origin, dest) {
 const $=id=>document.getElementById(id);
 const $$=s=>document.querySelectorAll(s);
 const _GEO=navigator.geolocation;
-// V8-1-14-135-EXTERNAL-GUARD-DIOCESE-CLEAN: 오래 미사용 후 복귀 시 마지막 위치를 먼저 보여주고, 새 GPS가 잡히면 최신 위치로 교체한다.
+// V8-1-14-136-NEARBY-SINGLE-CALC: 오래 미사용 후 복귀 시 마지막 위치를 먼저 보여주고, 새 GPS가 잡히면 최신 위치로 교체한다.
 const _GO1={enableHighAccuracy:true,timeout:6500,maximumAge:0};
 const _GO2={enableHighAccuracy:false,timeout:1200,maximumAge:60000};
 const _GO_FAST_FRESH={enableHighAccuracy:false,timeout:1100,maximumAge:60000};
@@ -6674,8 +6674,13 @@ function _isNearbyLoadCurrent(mode, token, body){
 
 function _loadNearby(){
   const body=$('nearby-body');
+  if(!body) return;
   _cancelNearbyLoad();
-  if(_mode==='shrine'){
+  const requestMode=_mode;
+  let settled=false;
+  let cacheTimer=null;
+
+  if(requestMode==='shrine'){
     window.__OAI_SHRINE_NEARBY_DISTANCE_DONE__=false;
     window.__OAI_SHRINE_NEARBY_LOADING__=true;
     window.__OAI_SHRINE_NEARBY_AWAITING_FRESH__=false;
@@ -6684,60 +6689,39 @@ function _loadNearby(){
   try{ _updateShrineNearbyLocationButtonUI(); }catch(_e){}
   body.innerHTML='<div class="empty-msg">📍 위치를 확인하는 중...</div>';
 
-  const go=(lat,lng,fromCache)=>{
-    _myLat=lat;_myLng=lng;
-    if(_mode==='shrine'){
-      if(fromCache && _GEO){
-        window.__OAI_SHRINE_NEARBY_AWAITING_FRESH__=true;
-      } else {
-        window.__OAI_SHRINE_NEARBY_AWAITING_FRESH__=false;
-        window.__OAI_SHRINE_NEARBY_DISTANCE_DONE__=false;
-        window.__OAI_SHRINE_NEARBY_LOADING__=true;
-      }
-      try{ _updateShrineVisitCardsButtonUI(); }catch(_e){}
-      try{ _updateShrineNearbyLocationButtonUI(); }catch(_e){}
-    }
-    if(_mode==='shrine') _loadNearbyShrines(lat,lng);
-    else if(_mode==='retreat') _loadNearbyRetreats(lat,lng);
-    else _loadNearbyParishes(lat,lng);
-  };
-
-  const usedCache=_useStoredLocationIfAny(go,OAI_LOCATION_CACHE_MAX_MS);
-  if(!_GEO){
-    if(usedCache) return;
-    if(_mode==='shrine') window.__OAI_SHRINE_NEARBY_LOADING__=false;
-    try{ _updateShrineNearbyLocationButtonUI(); }catch(_e){}
-    body.innerHTML='<div style="padding:30px;text-align:center;color:#c0392b;font-size:13px">⚠️ 위치 기능을 지원하지 않습니다</div>';
-    return;
-  }
-
-  _refreshFreshLocationThen(function(lat,lng){
-    if(_mode==='shrine'){
+  function markReadyForDistance(){
+    if(requestMode==='shrine'){
       window.__OAI_SHRINE_NEARBY_AWAITING_FRESH__=false;
       window.__OAI_SHRINE_NEARBY_DISTANCE_DONE__=false;
       window.__OAI_SHRINE_NEARBY_LOADING__=true;
       try{ _updateShrineVisitCardsButtonUI(); }catch(_e){}
       try{ _updateShrineNearbyLocationButtonUI(); }catch(_e){}
     }
-    go(lat,lng,false);
-  },function(err){
-    if(usedCache){
-      if(_mode==='shrine'){
-        window.__OAI_SHRINE_NEARBY_AWAITING_FRESH__=false;
-        window.__OAI_SHRINE_NEARBY_LOADING__=false;
-        window.__OAI_SHRINE_NEARBY_DISTANCE_DONE__=true;
-        try{ _updateShrineVisitCardsButtonUI(); }catch(_e){}
-        try{ _updateShrineNearbyLocationButtonUI(); }catch(_e){}
-      }
-      return;
+  }
+  function runOnce(lat,lng,fromCache){
+    if(settled) return;
+    settled=true;
+    if(cacheTimer){ clearTimeout(cacheTimer); cacheTimer=null; }
+    _myLat=lat; _myLng=lng;
+    if(fromCache){
+      try{
+        const saved=_readRecentStoredLocation(OAI_LOCATION_CACHE_MAX_MS);
+        if(saved && saved.lat===lat && saved.lng===lng){ _myLocAt=saved.ts; if(AppState) AppState.myLocAt=_myLocAt; }
+      }catch(_e){}
     }
-    if(_mode==='shrine'){
+    markReadyForDistance();
+    if(requestMode==='shrine') _loadNearbyShrines(lat,lng);
+    else if(requestMode==='retreat') _loadNearbyRetreats(lat,lng);
+    else _loadNearbyParishes(lat,lng);
+  }
+  function showLocationError(err){
+    if(requestMode==='shrine'){
       window.__OAI_SHRINE_NEARBY_AWAITING_FRESH__=false;
       window.__OAI_SHRINE_NEARBY_LOADING__=false;
     }
     try{ _updateShrineVisitCardsButtonUI(); }catch(_e){}
     try{ _updateShrineNearbyLocationButtonUI(); }catch(_e){}
-    if(err.code===1){
+    if(err && err.code===1){
       body.innerHTML=`<div style="padding:28px 20px;text-align:center;">
         <div style="font-size:36px;margin-bottom:12px">📍</div>
         <div style="font-size:14px;font-weight:700;color:#c0392b;margin-bottom:8px">위치 권한이 거부되어 있습니다</div>
@@ -6755,6 +6739,35 @@ function _loadNearby(){
         <button onclick="_loadNearby()" style="background:#0e1535;color:#d4aa6a;border:none;border-radius:20px;padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">↺ 다시 시도</button>
       </div>`;
     }
+  }
+
+  const cached=_readRecentStoredLocation(OAI_LOCATION_CACHE_MAX_MS);
+  if(cached){
+    _myLat=cached.lat; _myLng=cached.lng; _myLocAt=cached.ts;
+    try{ if(AppState) AppState.myLocAt=_myLocAt; }catch(_e){}
+  }
+
+  if(!_GEO){
+    if(cached){ runOnce(cached.lat,cached.lng,true); return; }
+    showLocationError({code:0});
+    return;
+  }
+
+  // V8-1-14-136-NEARBY-SINGLE-CALC:
+  // 저장 위치와 새 GPS를 모두 즉시 화면에 그리면 내주변 로딩/목록이 두 번 보인다.
+  // 캐시는 대기용 예비값으로만 잡아 두고, 새 GPS가 빠르게 오면 새 GPS로 한 번만 계산한다.
+  // 새 GPS가 늦거나 실패할 때만 캐시 기준으로 한 번 계산한다.
+  if(cached){
+    cacheTimer=setTimeout(function(){ runOnce(cached.lat,cached.lng,true); }, 1800);
+    _refreshFreshLocationThen(function(lat,lng){ runOnce(lat,lng,false); },function(err){
+      if(!settled) runOnce(cached.lat,cached.lng,true);
+    });
+    return;
+  }
+
+  _refreshFreshLocationThen(function(lat,lng){ runOnce(lat,lng,false); },function(err){
+    if(settled) return;
+    showLocationError(err || {code:0});
   });
 }
 
