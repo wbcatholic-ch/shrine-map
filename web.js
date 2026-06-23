@@ -9,7 +9,7 @@
    op:"의정부교구", prov:"서울관구", url:"http://ucatholic.or.kr/bbs/board.php?bo_table=priest",
    desc:"교구 사제 검색 바로가기"},
   {cat:"사제찾기", ico:"✝", name:"인천교구 사제찾기",
-   op:"인천교구", prov:"서울관구", url:"http://www.caincheon.or.kr/father/father_list.do",
+   op:"인천교구", prov:"서울관구", url:"https://www.caincheon.or.kr/father/father_list.do",
    desc:"교구 사제 검색 바로가기"},
   {cat:"사제찾기", ico:"✝", name:"수원교구 사제찾기",
    op:"수원교구", prov:"서울관구", url:"https://www.casuwon.or.kr/priest/priest",
@@ -111,7 +111,7 @@
    op:"천주교 서울대교구", url:"https://aos.catholic.or.kr",
    desc:"교구 공지·교육·사목 자료·기관 정보 제공"},
   {cat:"교구", ico:"⛪", prov:"서울관구", name:"인천교구",
-   op:"천주교 인천교구", url:"http://www.caincheon.or.kr/",
+   op:"천주교 인천교구", url:"https://www.caincheon.or.kr/home.do",
    desc:"교구 공지·사목 자료·기관 정보 제공"},
   {cat:"교구", ico:"⛪", prov:"서울관구", name:"수원교구",
    op:"천주교 수원교구", url:"https://www.casuwon.or.kr/",
@@ -333,7 +333,16 @@
       else { try{ if(typeof markExternalReturnStabilize === 'function') markExternalReturnStabilize('trail-external'); }catch(e){ console.warn("[가톨릭길동무]", e); } setTimeout(function(){ try{ location.href = url; }catch(e){ try{ location.assign(url); }catch(_){ } } }, 220); }
       return;
     }
-    try{ sessionStorage.removeItem(RETURN_KEY); }catch(e){ console.warn("[가톨릭길동무]", e); }
+    if(state && state.module === 'web'){
+      try{
+        state.cat = state.cat || webState.curCat || webDefaultCat();
+        state.scroll = ig$('web-list') ? (ig$('web-list').scrollTop || 0) : (state.scroll || 0);
+        state.catScroll = ig$('web-cats') ? (ig$('web-cats').scrollLeft || 0) : (state.catScroll || 0);
+        saveReturnState(state);
+      }catch(e){ console.warn("[가톨릭길동무]", e); }
+    }else{
+      try{ sessionStorage.removeItem(RETURN_KEY); }catch(e){ console.warn("[가톨릭길동무]", e); }
+    }
     if(typeof oaiSmoothNavigate === 'function') oaiSmoothNavigate(url, 'integrated-external');
     else if(typeof oaiOpenExternalSite === 'function') oaiOpenExternalSite(url, {kind:'integrated-external'});
     else { try{ if(typeof markExternalReturnStabilize === 'function') markExternalReturnStabilize('integrated-external'); }catch(e){ console.warn("[가톨릭길동무]", e); } setTimeout(function(){ location.href = url; }, 220); }
@@ -419,6 +428,26 @@
     if(!state || !state.module) return;
 
     if(state.module === 'web'){
+      try{
+        if(!ig$('web-view')?.classList.contains('open')) enterIntegratedView('web-view');
+        webState.curCat = state.cat || webState.curCat || webDefaultCat();
+        initWebModule();
+        applyWebCatState(webState.curCat || webDefaultCat());
+        renderWebList();
+        scheduleWebCatSync(webState.curCat || webDefaultCat());
+        var list = ig$('web-list');
+        var cats = ig$('web-cats');
+        var y = Number(state.scroll || 0);
+        var cx = Number(state.catScroll || 0);
+        function restoreWebScrolls(){
+          try{ if(list && !isNaN(y)){ var old=list.style.scrollBehavior; list.style.scrollBehavior='auto'; list.scrollTop=y; list.style.scrollBehavior=old||''; } }catch(_e){}
+          try{ if(cats && !isNaN(cx)) cats.scrollLeft=cx; }catch(_e){}
+        }
+        restoreWebScrolls();
+        requestAnimationFrame(restoreWebScrolls);
+        setTimeout(restoreWebScrolls, 90);
+        setTimeout(restoreWebScrolls, 240);
+      }catch(e){ console.warn("[가톨릭길동무]", e); }
       return;
     }
 
@@ -445,6 +474,8 @@
       return;
     }
   }
+
+  try{ window.restoreIntegratedStateNow = restoreIntegratedState; }catch(_e){}
 
   window.addEventListener('pageshow', function(ev){
     try{

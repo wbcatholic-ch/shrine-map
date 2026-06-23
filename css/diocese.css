@@ -297,7 +297,7 @@ html.ios-device .cb{width:34px!important;height:34px!important;border-radius:10p
 
 
 
-/* V8-1-14-150-SWIPE-MAP-STABILIZE: 관구·교구 swipe 중 상단 헤더/탭이 아래로 밀리는 현상 방지 */
+/* V8-1-14-151-EXTERNAL-RETURN-CLEANUP: 관구·교구 swipe 중 상단 헤더/탭이 아래로 밀리는 현상 방지 */
 html.oai-dio-swiping body > header,
 html.oai-dio-swiping .tab-bar,
 html.oai-dio-swiping .tab,
