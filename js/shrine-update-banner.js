@@ -116,6 +116,7 @@
     }catch(_e){}
   }
   function show(){
+    try{ if(window.oaiReturnConductorBusy && window.oaiReturnConductorBusy(['passive'])) return; }catch(_e){}
     if(!ENABLED || hiddenForever() || hiddenToday() || shownThisSession() || !isInstalledRun()) return;
     if(!coverReady()){ setTimeout(show,350); return; }
     markFirstShownDate();
