@@ -58,7 +58,7 @@ function oaiPrimeExternalDestination(url){
 try{ window.oaiPrimeExternalDestination = oaiPrimeExternalDestination; }catch(e){ console.warn('[가톨릭길동무]', e); }
 
 function oaiShowExternalEntryGuard(kind){
-  // V8-1-14-157-REF-EXTERNAL-RETURN-RESTORE:
+  // V8-1-14-158-HTTP-DIRECT-EXTERNAL-UNIFY:
   // Android 233/239 외부 브라우저 위임 전후에 쓰는 단일 보호창. entry/return 모두 같은 DOM 하나만 사용한다.
   try{
     var body = document.body;
@@ -365,7 +365,7 @@ function oaiClearExternalNavigationState(opts){
   if(window.__OAI_IDLE_RESTART_GUARD__) return;
   window.__OAI_IDLE_RESTART_GUARD__ = true;
 
-  /* V8-1-14-157-REF-EXTERNAL-RETURN-RESTORE: 미사용 후 복귀는 예전 WebView 방식으로 단순화한다.
+  /* V8-1-14-158-HTTP-DIRECT-EXTERNAL-UNIFY: 미사용 후 복귀는 예전 WebView 방식으로 단순화한다.
      짧은 복귀: 원래 화면 유지 / 1분 이상: 아이보리 안정막 1회 / 10분 이상: 커버 인트로 복귀 */
   var LONG_BG_RETURN_MS = 10 * 60 * 1000;
   var MEDIUM_BG_RETURN_MS = 60 * 1000;
@@ -638,8 +638,7 @@ function oaiOpenExternalSite(url, options){
   if(typeof options === 'string') options = {kind:options};
   if(!url) return false;
   try{
-    if(typeof normalizeCatholicExternalUrl === 'function') url = normalizeCatholicExternalUrl(url);
-    else url = String(url || '').trim();
+    url = (typeof oaiNormalizeExternalSiteUrl === 'function') ? oaiNormalizeExternalSiteUrl(url) : String(url || '').trim();
   }catch(_e){ url = String(url || '').trim(); }
   if(!url) return false;
   try{ document.activeElement && document.activeElement.blur && document.activeElement.blur(); }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -1681,7 +1680,7 @@ function _renderShrineVisitDetail(idx){
   const goodnewsUrl=_getShrineGoodnewsUrl(item);
   const telText=item.tel?_visitHtmlEsc(item.tel):'—';
   const telHref=item.tel?'tel:'+String(item.tel).replace(/[^0-9+]/g,''):'';
-  // V8-1-14-157-REF-EXTERNAL-RETURN-RESTORE: V117 기준에서 V118 성지정보 카드 색상과 V123 굿뉴스 파란색을 실제 생성 버튼에 직접 적용한다.
+  // V8-1-14-158-HTTP-DIRECT-EXTERNAL-UNIFY: V117 기준에서 V118 성지정보 카드 색상과 V123 굿뉴스 파란색을 실제 생성 버튼에 직접 적용한다.
   const detailInfoStyle='background:linear-gradient(180deg,#fbfdff 0%,#fffaf0 100%)!important;border:2px solid #9db7cc!important;box-shadow:0 8px 22px rgba(17,35,60,.08)!important;';
   const detailMapBtnStyle='background:#fff8e6!important;color:#5f4515!important;border:1.5px solid #d5b86d!important;box-shadow:0 2px 6px rgba(95,69,21,.08)!important;';
   const detailTelStyle='background:linear-gradient(180deg,#f4fbf5 0%,#dff2e5 100%)!important;color:#244f38!important;border:1.5px solid #a8d5b5!important;box-shadow:0 3px 8px rgba(35,78,56,.10), inset 0 1px 0 rgba(255,255,255,.90)!important;text-shadow:none!important;';
@@ -2947,7 +2946,7 @@ window.addEventListener('load', syncCoverUpdateVersionState, true);
     try{
       var frame=document.getElementById('privacy-policy-frame');
       if(frame){
-        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-157-REF-EXTERNAL-RETURN-RESTORE'));
+        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-158-HTTP-DIRECT-EXTERNAL-UNIFY'));
         if(frame.getAttribute('src') === 'about:blank' || !frame.getAttribute('src')) frame.setAttribute('src', src);
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -3201,7 +3200,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V8-1-14-157-REF-EXTERNAL-RETURN-RESTORE';
+    frame.src='diocese.html?v=V8-1-14-158-HTTP-DIRECT-EXTERNAL-UNIFY';
     setTimeout(armDioceseOverlayBack, 0);
   }else{
     if(!restore){
@@ -3269,6 +3268,13 @@ function dioceseLoaded(){
   if(loading) loading.style.display='none';
 }
 /* V6-147-QNA-MYFAITH-COVER-TOAST-CHECK: 성지 외부 링크는 웹사이트 카테고리와 같은 보호창 이동 흐름으로 통일하고 옛 core return 저장 함수는 제거 */
+function oaiPreserveExplicitHttpUrl(url){
+  url = String(url || '').trim();
+  if(!url) return '';
+  url = url.replace(/^hthttp:\/\//i, 'http://').replace(/^http\/\//i, 'http://');
+  if(/^http:\/\//i.test(url)) return url;
+  return '';
+}
 function normalizeCatholicExternalUrl(url){
   url = String(url || '').trim();
   if(!url) return '';
@@ -3276,6 +3282,9 @@ function normalizeCatholicExternalUrl(url){
   try{
     if(typeof _decUrl === 'function') url = _decUrl(url);
   }catch(e){ console.warn("[가톨릭길동무]", e); }
+
+  var explicitHttp = oaiPreserveExplicitHttpUrl(url);
+  if(explicitHttp) return explicitHttp;
 
   url = url.replace(/^hthttp:\/\//i, 'http://').replace(/^hthttps:\/\//i, 'https://').replace(/^http\/\//i, 'http://').replace(/^https\/\//i, 'https://');
   if(url.indexOf('//') === 0) url = 'https:' + url;
@@ -3285,7 +3294,7 @@ function normalizeCatholicExternalUrl(url){
     var u = new URL(url);
     u.pathname = u.pathname.replace(/\/\/+/g, '/');
     var host = u.hostname.toLowerCase();
-    // V8-1-14-157-REF-EXTERNAL-RETURN-RESTORE:
+    // V8-1-14-158-HTTP-DIRECT-EXTERNAL-UNIFY:
     // 원래 HTTP로 쓰던 교구는 HTTPS로 끌어올리지 않고 HTTP를 명시 유지한다.
     if(host === 'caincheon.or.kr' || host === 'www.caincheon.or.kr'){
       u.protocol = 'http:';
@@ -3781,7 +3790,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V8-1-14-157-REF-EXTERNAL-RETURN-RESTORE';
+const _PRAYER_ASSET_VERSION='V8-1-14-158-HTTP-DIRECT-EXTERNAL-UNIFY';
 let _prayerModuleLoadPromise=null;
 function _isPrayerDataReady(){
   return !!(window.PRAYER_DATA && typeof window.PRAYER_DATA === 'object');
@@ -4126,7 +4135,7 @@ function _navFetch(origin, dest) {
 const $=id=>document.getElementById(id);
 const $$=s=>document.querySelectorAll(s);
 const _GEO=navigator.geolocation;
-// V8-1-14-157-REF-EXTERNAL-RETURN-RESTORE: 오래 미사용 후 복귀 시 마지막 위치를 먼저 보여주고, 새 GPS가 잡히면 최신 위치로 교체한다.
+// V8-1-14-158-HTTP-DIRECT-EXTERNAL-UNIFY: 오래 미사용 후 복귀 시 마지막 위치를 먼저 보여주고, 새 GPS가 잡히면 최신 위치로 교체한다.
 const _GO1={enableHighAccuracy:true,timeout:6500,maximumAge:0};
 const _GO2={enableHighAccuracy:false,timeout:1200,maximumAge:60000};
 const _GO_FAST_FRESH={enableHighAccuracy:false,timeout:1100,maximumAge:60000};
@@ -6839,7 +6848,7 @@ function _loadNearby(){
     return;
   }
 
-  // V8-1-14-157-REF-EXTERNAL-RETURN-RESTORE:
+  // V8-1-14-158-HTTP-DIRECT-EXTERNAL-UNIFY:
   // 저장 위치와 새 GPS를 모두 즉시 화면에 그리면 내주변 로딩/목록이 두 번 보인다.
   // 캐시는 대기용 예비값으로만 잡아 두고, 새 GPS가 빠르게 오면 새 GPS로 한 번만 계산한다.
   // 새 GPS가 늦거나 실패할 때만 캐시 기준으로 한 번 계산한다.

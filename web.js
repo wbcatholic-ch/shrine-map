@@ -307,6 +307,8 @@
     try{ sessionStorage.setItem(RETURN_KEY, JSON.stringify(state)); }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
   function prepareExternalUrl(url){
+    var raw = String(url || '').trim().replace(/^hthttp:\/\//i,'http://').replace(/^http\/\//i,'http://');
+    if(/^http:\/\//i.test(raw)) return raw;
     url = (typeof normalizeCatholicExternalUrl === 'function')
           ? normalizeCatholicExternalUrl(url)
           : String(url || '').trim();
