@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-166-NEARBY-LOADING-TEXT-FIXED';
-const ASSET_VERSION = 'V8-1-14-166-NEARBY-LOADING-TEXT-FIXED';
+const CACHE_VERSION = 'catholic-way-V8-1-14-167-SHRINE-BANNER-ON-COVER';
+const ASSET_VERSION = 'V8-1-14-167-SHRINE-BANNER-ON-COVER';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }

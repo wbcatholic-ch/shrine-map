@@ -1,5 +1,5 @@
-/* V8-1-14-97: 성지순례 업데이트안내 배너
-   Google Play 테스트 단계에서만 표시하고, 승인 후 제거 예정. */
+/* V8-1-14-167: 성지순례 업데이트안내를 전체화면 팝업이 아니라 커버 안쪽 배너로 표시한다.
+   나의 신앙생활 설정 배너가 떠 있는 동안에는 먼저 가리지 않는다. */
 (function(){
   'use strict';
   var ENABLED = window.OAI_SHRINE_UPDATE_BANNER_ENABLED !== false;
@@ -7,6 +7,9 @@
   var HIDE_UNTIL_KEY = 'oai_shrine_update_banner_v91_hide_until';
   var FIRST_DATE_KEY = 'oai_shrine_update_banner_v91_first_date';
   var SESSION_KEY = 'oai_shrine_update_banner_v91_session_shown';
+  var retryTimer = null;
+  var watchBound = false;
+
   function todayKey(){
     var d = new Date();
     var m = String(d.getMonth()+1).padStart(2,'0');
@@ -35,19 +38,17 @@
       return until && Date.now && Date.now() < until;
     }catch(_e){ return false; }
   }
-  function markFirstShownDate(){
-    try{ if(!localStorage.getItem(FIRST_DATE_KEY)) localStorage.setItem(FIRST_DATE_KEY, todayKey()); }catch(_e){}
-  }
+  function markFirstShownDate(){ try{ if(!localStorage.getItem(FIRST_DATE_KEY)) localStorage.setItem(FIRST_DATE_KEY, todayKey()); }catch(_e){} }
   function shouldShowNeverButton(){
     try{
       var first = localStorage.getItem(FIRST_DATE_KEY) || '';
       return !!(first && first !== todayKey());
     }catch(_e){ return false; }
   }
-  function hideForever(){ try{ localStorage.setItem(HIDE_FOREVER_KEY,'1'); }catch(_e){} hide(); }
-  function hideForToday(){ try{ localStorage.setItem(HIDE_UNTIL_KEY, String(nextLocalMidnight())); }catch(_e){} hide(); }
   function markSession(){ try{ sessionStorage.setItem(SESSION_KEY,'1'); }catch(_e){} }
   function shownThisSession(){ try{ return sessionStorage.getItem(SESSION_KEY)==='1'; }catch(_e){ return false; } }
+  function hideForever(){ try{ localStorage.setItem(HIDE_FOREVER_KEY,'1'); }catch(_e){} hide(); }
+  function hideForToday(){ try{ localStorage.setItem(HIDE_UNTIL_KEY, String(nextLocalMidnight())); }catch(_e){} hide(); }
   function coverReady(){
     var cover=document.getElementById('cover');
     if(!cover) return false;
@@ -59,7 +60,38 @@
     try{ if(document.documentElement.classList.contains('oai-cover-booting') || document.documentElement.classList.contains('oai-cover-revealing')) return false; }catch(_e){}
     return true;
   }
-  function hide(){ var el=document.getElementById('shrine-update-banner'); if(el) el.classList.remove('show'); }
+  function myFaithSetupActive(){
+    try{
+      var cover = document.getElementById('cover');
+      var setup = document.getElementById('my-diocese-setup-banner');
+      if(cover && cover.classList && cover.classList.contains('my-diocese-setup-active')) return true;
+      if(setup){
+        if(setup.hidden) return false;
+        if(setup.getAttribute('aria-hidden') === 'true') return false;
+        if(setup.classList && setup.classList.contains('show')) return true;
+        var cs = window.getComputedStyle ? window.getComputedStyle(setup) : null;
+        if(cs && cs.display !== 'none' && cs.visibility !== 'hidden' && cs.opacity !== '0') return true;
+      }
+    }catch(_e){}
+    return false;
+  }
+  function scheduleRetry(ms){
+    try{
+      if(retryTimer) clearTimeout(retryTimer);
+      retryTimer = setTimeout(function(){ retryTimer=null; show(); }, ms || 900);
+    }catch(_e){}
+  }
+  function setCoverActive(active){
+    try{
+      var cover=document.getElementById('cover');
+      if(cover && cover.classList) cover.classList.toggle('shrine-update-cover-active', !!active);
+    }catch(_e){}
+  }
+  function hide(){
+    var el=document.getElementById('shrine-update-banner');
+    if(el) el.classList.remove('show');
+    setCoverActive(false);
+  }
   function create(){
     var el=document.getElementById('shrine-update-banner');
     if(el) return el;
@@ -67,7 +99,7 @@
     el.id='shrine-update-banner';
     el.setAttribute('aria-label','성지순례 업데이트안내');
     el.innerHTML=''+
-      '<div class="shrine-update-card" role="dialog" aria-modal="false">'+
+      '<div class="shrine-update-card" role="region" aria-modal="false">'+
         '<div class="shrine-update-head">'+
           '<div class="shrine-update-icon" aria-hidden="true">🙏</div>'+
           '<div class="shrine-update-title">성지순례 업데이트안내</div>'+
@@ -88,7 +120,8 @@
           '<button type="button" class="shrine-update-close" data-shrine-update-close>닫기</button>'+
         '</div>'+
       '</div>';
-    document.body.appendChild(el);
+    var host = document.getElementById('cover-main-block') || document.getElementById('cover') || document.body;
+    host.appendChild(el);
     el.addEventListener('click',function(e){
       var t=e.target;
       if(!t || !t.closest) return;
@@ -115,19 +148,38 @@
       if(btn) btn.textContent = shouldShowNeverButton() ? '다시 보지 않기' : '하루 동안 안 보기';
     }catch(_e){}
   }
+  function bindVisibilityWatch(){
+    if(watchBound) return;
+    watchBound = true;
+    try{
+      var cover = document.getElementById('cover');
+      var setup = document.getElementById('my-diocese-setup-banner');
+      var opt = {attributes:true, attributeFilter:['class','hidden','aria-hidden','style']};
+      var cb = function(){ scheduleRetry(350); };
+      if(cover) new MutationObserver(cb).observe(cover, opt);
+      if(setup) new MutationObserver(cb).observe(setup, opt);
+      if(document.documentElement) new MutationObserver(cb).observe(document.documentElement, {attributes:true, attributeFilter:['class']});
+    }catch(_e){}
+  }
   function show(){
     try{ if(window.oaiReturnConductorBusy && window.oaiReturnConductorBusy(['passive'])) return; }catch(_e){}
     if(!ENABLED || hiddenForever() || hiddenToday() || shownThisSession() || !isInstalledRun()) return;
-    if(!coverReady()){ setTimeout(show,350); return; }
+    bindVisibilityWatch();
+    if(!coverReady()){ scheduleRetry(700); return; }
+    if(myFaithSetupActive()){ hide(); scheduleRetry(1000); return; }
     markFirstShownDate();
     var el=create();
     updateActionLabel(el);
     markSession();
-    setTimeout(function(){ el.classList.add('show'); },60);
+    setCoverActive(true);
+    setTimeout(function(){
+      if(myFaithSetupActive()){ hide(); scheduleRetry(1000); return; }
+      el.classList.add('show');
+    },40);
   }
-  function boot(){ [900,1800,3200,6200].forEach(function(ms){ setTimeout(show,ms); }); }
+  function boot(){ [1100,2200,3800,7000].forEach(function(ms){ setTimeout(show,ms); }); bindVisibilityWatch(); }
   if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', boot, {once:true});
   else boot();
-  window.addEventListener('pageshow', function(){ setTimeout(show,900); });
-  window.addEventListener('focus', function(){ setTimeout(show,900); });
+  window.addEventListener('pageshow', function(){ scheduleRetry(900); });
+  window.addEventListener('focus', function(){ scheduleRetry(900); });
 })();
