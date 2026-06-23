@@ -127,7 +127,7 @@
 #trail-view .trail-tab{height:40px!important;min-height:40px!important;padding:0 12px!important;border-radius:10px!important;font-size:15px!important;line-height:1!important;align-items:center!important;box-sizing:border-box!important;}
 
 
-/* V8-1-14-158-HTTP-DIRECT-EXTERNAL-UNIFY: Android WebView 하단 여백 상한/최소값 표준화 */
+/* V8-1-14-159-EXTERNAL-STATE-RETURN: Android WebView 하단 여백 상한/최소값 표준화 */
 html:not(.ios-device) .trail-loc-btn{bottom:calc(10px + var(--oai-android-bottom-gap, 10px))!important;}
 html:not(.ios-device) .trail-sheet{padding-bottom:calc(18px + var(--oai-android-bottom-gap, 10px))!important;}
 
