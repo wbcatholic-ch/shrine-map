@@ -15,7 +15,7 @@
       '대구대교구': {home:'https://www.daegu-archdiocese.or.kr/', priest:'https://www.daegu-archdiocese.or.kr/page/priest.html?srl=priest'},
       '광주대교구': {home:'https://www.gjcatholic.or.kr/', priest:'https://www.gjcatholic.or.kr/priest/priests'},
       '수원교구': {home:'https://www.casuwon.or.kr/', priest:'https://www.casuwon.or.kr/priest/priest'},
-      '인천교구': {home:'https://www.caincheon.or.kr/home.do', priest:'https://www.caincheon.or.kr/father/father_list.do'},
+      '인천교구': {home:'http://www.caincheon.or.kr/', priest:'http://www.caincheon.or.kr/father/father_list.do'},
       '의정부교구': {home:'http://ucatholic.or.kr/', priest:'http://ucatholic.or.kr/bbs/board.php?bo_table=priest'},
       '춘천교구': {home:'https://www.cccatholic.or.kr/', priest:'https://www.cccatholic.or.kr/diocese/priest/priest'},
       '원주교구': {home:'http://www.wjcatholic.or.kr/', priest:'http://www.wjcatholic.or.kr/company/sajedan'},
@@ -166,7 +166,6 @@
         setupBanner.hidden = !showBanner;
         setupBanner.classList.toggle('show', showBanner);
         setupBanner.setAttribute('aria-hidden', showBanner ? 'false' : 'true');
-        try{ window.dispatchEvent(new CustomEvent('oai-myfaith-setup-banner-state', {detail:{active:!!showBanner}})); }catch(_e){}
       }catch(e){ console.warn('[가톨릭길동무]', e); }
     }
     window.refreshMyDioceseSetupBanner = scheduleSetupBannerUpdate;
@@ -253,7 +252,6 @@
           if(typeof window.oaiSetMainMapLayerHidden === 'function') window.oaiSetMainMapLayerHidden(false);
         }
       }catch(e){ console.warn('[가톨릭길동무]', e); }
-      try{ setTimeout(function(){ window.dispatchEvent(new CustomEvent('oai-myfaith-cover-returned')); }, 160); }catch(_e){}
     }
     function openModal(opts){
       try{ clearLegacyMyFaithBackFlags('open'); }catch(_e){}

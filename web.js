@@ -9,7 +9,7 @@
    op:"의정부교구", prov:"서울관구", url:"http://ucatholic.or.kr/bbs/board.php?bo_table=priest",
    desc:"교구 사제 검색 바로가기"},
   {cat:"사제찾기", ico:"✝", name:"인천교구 사제찾기",
-   op:"인천교구", prov:"서울관구", url:"https://www.caincheon.or.kr/father/father_list.do",
+   op:"인천교구", prov:"서울관구", url:"http://www.caincheon.or.kr/father/father_list.do",
    desc:"교구 사제 검색 바로가기"},
   {cat:"사제찾기", ico:"✝", name:"수원교구 사제찾기",
    op:"수원교구", prov:"서울관구", url:"https://www.casuwon.or.kr/priest/priest",
@@ -111,7 +111,7 @@
    op:"천주교 서울대교구", url:"https://aos.catholic.or.kr",
    desc:"교구 공지·교육·사목 자료·기관 정보 제공"},
   {cat:"교구", ico:"⛪", prov:"서울관구", name:"인천교구",
-   op:"천주교 인천교구", url:"https://www.caincheon.or.kr/home.do",
+   op:"천주교 인천교구", url:"http://www.caincheon.or.kr/",
    desc:"교구 공지·사목 자료·기관 정보 제공"},
   {cat:"교구", ico:"⛪", prov:"서울관구", name:"수원교구",
    op:"천주교 수원교구", url:"https://www.casuwon.or.kr/",
@@ -192,8 +192,7 @@
   };
   const TRAIL_COLORS = {d:'#1D4ED8', l:'#2A8040'};
   const RETURN_KEY = 'catholic_integrated_return_v2';
-  const TRAIL_INITIAL_CENTER = {lat:36.10, lng:127.85, level:12};
-  const trailState = {inited:false, map:null, markers:[], selected:-1, myOverlay:null, view:'map', pendingOpenIndex:null, restoreCenter:null, restoreLevel:null, needsHardReset:false, pendingFitBounds:false, pendingInitialCenterOnce:false};
+  const trailState = {inited:false, map:null, markers:[], selected:-1, myOverlay:null, view:'map', pendingOpenIndex:null, restoreCenter:null, restoreLevel:null, needsHardReset:false, pendingFitBounds:false};
   const webState = {built:false, curCat:'⭐ 즐겨찾기'};
   const WEB_FAV_KEY = 'web_favorites_v1';
   const MY_DIOCESE_KEY = 'oai_my_diocese_name';
@@ -333,16 +332,7 @@
       else { try{ if(typeof markExternalReturnStabilize === 'function') markExternalReturnStabilize('trail-external'); }catch(e){ console.warn("[가톨릭길동무]", e); } setTimeout(function(){ try{ location.href = url; }catch(e){ try{ location.assign(url); }catch(_){ } } }, 220); }
       return;
     }
-    if(state && state.module === 'web'){
-      try{
-        state.cat = state.cat || webState.curCat || webDefaultCat();
-        state.scroll = ig$('web-list') ? (ig$('web-list').scrollTop || 0) : (state.scroll || 0);
-        state.catScroll = ig$('web-cats') ? (ig$('web-cats').scrollLeft || 0) : (state.catScroll || 0);
-        saveReturnState(state);
-      }catch(e){ console.warn("[가톨릭길동무]", e); }
-    }else{
-      try{ sessionStorage.removeItem(RETURN_KEY); }catch(e){ console.warn("[가톨릭길동무]", e); }
-    }
+    try{ sessionStorage.removeItem(RETURN_KEY); }catch(e){ console.warn("[가톨릭길동무]", e); }
     if(typeof oaiSmoothNavigate === 'function') oaiSmoothNavigate(url, 'integrated-external');
     else if(typeof oaiOpenExternalSite === 'function') oaiOpenExternalSite(url, {kind:'integrated-external'});
     else { try{ if(typeof markExternalReturnStabilize === 'function') markExternalReturnStabilize('integrated-external'); }catch(e){ console.warn("[가톨릭길동무]", e); } setTimeout(function(){ location.href = url; }, 220); }
@@ -402,8 +392,7 @@
       trailState.pendingOpenIndex=null;
       trailState.restoreCenter=null;
       trailState.restoreLevel=null;
-      trailState.pendingFitBounds=false;
-      trailState.pendingInitialCenterOnce=true;
+      trailState.pendingFitBounds=true;
       trailCloseSheet();
       const list=ig$('trail-list');
       if(list) list.scrollTop=0;
@@ -414,7 +403,9 @@
     initTrailModule();
     trailSetView(trailState.view || 'map');
     if(!restore){
-      relayoutTrailMap(220);
+      relayoutTrailMap(80);
+      relayoutTrailMap(260);
+      relayoutTrailMap(520);
     }
   };
 
@@ -428,26 +419,6 @@
     if(!state || !state.module) return;
 
     if(state.module === 'web'){
-      try{
-        if(!ig$('web-view')?.classList.contains('open')) enterIntegratedView('web-view');
-        webState.curCat = state.cat || webState.curCat || webDefaultCat();
-        initWebModule();
-        applyWebCatState(webState.curCat || webDefaultCat());
-        renderWebList();
-        scheduleWebCatSync(webState.curCat || webDefaultCat());
-        var list = ig$('web-list');
-        var cats = ig$('web-cats');
-        var y = Number(state.scroll || 0);
-        var cx = Number(state.catScroll || 0);
-        function restoreWebScrolls(){
-          try{ if(list && !isNaN(y)){ var old=list.style.scrollBehavior; list.style.scrollBehavior='auto'; list.scrollTop=y; list.style.scrollBehavior=old||''; } }catch(_e){}
-          try{ if(cats && !isNaN(cx)) cats.scrollLeft=cx; }catch(_e){}
-        }
-        restoreWebScrolls();
-        requestAnimationFrame(restoreWebScrolls);
-        setTimeout(restoreWebScrolls, 90);
-        setTimeout(restoreWebScrolls, 240);
-      }catch(e){ console.warn("[가톨릭길동무]", e); }
       return;
     }
 
@@ -474,8 +445,6 @@
       return;
     }
   }
-
-  try{ window.restoreIntegratedStateNow = restoreIntegratedState; }catch(_e){}
 
   window.addEventListener('pageshow', function(ev){
     try{
@@ -738,17 +707,6 @@
     }, wait);
   }
 
-  function applyTrailInitialCenterOnce(){
-    if(!(trailState.map && window.kakao && window.kakao.maps)) return;
-    if(!trailState.pendingInitialCenterOnce) return;
-    try{
-      if(typeof trailState.map.relayout === 'function') trailState.map.relayout();
-      if(typeof trailState.map.setLevel === 'function') trailState.map.setLevel(TRAIL_INITIAL_CENTER.level);
-      trailState.map.setCenter(new kakao.maps.LatLng(TRAIL_INITIAL_CENTER.lat, TRAIL_INITIAL_CENTER.lng));
-    }catch(e){ console.warn("[가톨릭길동무]", e); }
-    trailState.pendingInitialCenterOnce = false;
-  }
-
   function hardResetTrailModule(){
     try{ if(trailState.myOverlay) trailState.myOverlay.setMap(null); }catch(e){ console.warn("[가톨릭길동무]", e); }
     trailState.myOverlay = null;
@@ -810,9 +768,7 @@
       syncTrailMarkers();
       if(trailState.map){
         relayoutTrailMap(30); relayoutTrailMap(180);
-        if(trailState.pendingInitialCenterOnce){
-          setTimeout(applyTrailInitialCenterOnce, 90);
-        }else if(trailState.pendingFitBounds){
+        if(trailState.pendingFitBounds){
           setTimeout(function(){ fitTrailMapToBounds(); trailState.pendingFitBounds = false; }, 90);
         }
       }
@@ -825,7 +781,7 @@
       }
       const container = ig$('trail-map');
       if(!container || !(window.kakao && window.kakao.maps)) return;
-      trailState.map = new kakao.maps.Map(container, { center:new kakao.maps.LatLng(TRAIL_INITIAL_CENTER.lat, TRAIL_INITIAL_CENTER.lng), level:TRAIL_INITIAL_CENTER.level });
+      trailState.map = new kakao.maps.Map(container, { center:new kakao.maps.LatLng(36.10,127.85), level:12 });
       trailState.map.addControl(new kakao.maps.ZoomControl(), kakao.maps.ControlPosition.RIGHT);
       if(trailState.restoreCenter && Number.isFinite(Number(trailState.restoreCenter.lat)) && Number.isFinite(Number(trailState.restoreCenter.lng))){
         try{ trailState.map.setCenter(new kakao.maps.LatLng(Number(trailState.restoreCenter.lat), Number(trailState.restoreCenter.lng))); }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -836,12 +792,11 @@
       trailState.restoreCenter = null;
       trailState.restoreLevel = null;
       syncTrailMarkers();
-      if(trailState.pendingInitialCenterOnce){
-        setTimeout(applyTrailInitialCenterOnce, 80);
-      }else if(trailState.pendingFitBounds){
+      if(trailState.pendingFitBounds){
         setTimeout(function(){ fitTrailMapToBounds(); trailState.pendingFitBounds = false; }, 80);
       }
-      relayoutTrailMap(180);
+      relayoutTrailMap(60);
+      relayoutTrailMap(220);
       kakao.maps.event.addListener(trailState.map,'click', trailCloseSheet);
       trailState.inited = true;
       if(Number.isInteger(trailState.pendingOpenIndex) && TRAIL_ITEMS[trailState.pendingOpenIndex]){
