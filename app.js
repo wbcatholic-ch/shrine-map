@@ -59,39 +59,21 @@ try{ window.oaiPrimeExternalDestination = oaiPrimeExternalDestination; }catch(e)
 
 function oaiShowExternalEntryGuard(kind){
   try{
-    var body = document.body;
-    if(!body) return;
-    var guard = document.getElementById('oai-external-entry-guard');
-    if(!guard){
-      guard = document.createElement('div');
-      guard.id = 'oai-external-entry-guard';
-      guard.setAttribute('aria-hidden','true');
-      guard.innerHTML = '<div class="oai-external-entry-cross" aria-hidden="true">✝</div>'; // V89: 외부 진입 보호창 로딩 십자가 복구
-      body.appendChild(guard);
-    }
-    guard.innerHTML = '<div class="oai-external-entry-cross" aria-hidden="true">✝</div>';
-    guard.setAttribute('data-oai-kind', String(kind || 'external-site'));
-    guard.classList.remove('hide');
-    guard.classList.add('show');
-    guard.style.display = 'flex';
-    try{
-      guard.style.setProperty('position','fixed','important');
-      guard.style.setProperty('inset','0','important');
-      guard.style.setProperty('z-index','2147483640','important');
-      guard.style.setProperty('display','flex','important');
-      guard.style.setProperty('align-items','center','important');
-      guard.style.setProperty('justify-content','center','important');
-      guard.style.setProperty('background','#f5f0e8','important');
-      guard.style.setProperty('opacity','1','important');
-      guard.style.setProperty('visibility','visible','important');
-      guard.style.setProperty('pointer-events','auto','important');
-      void guard.offsetHeight;
-    }catch(_e){}
-    try{ document.documentElement.style.backgroundColor = '#f5f0e8'; if(document.body) document.body.style.backgroundColor = '#f5f0e8'; document.documentElement.style.colorScheme = 'light'; }catch(_e){}
+    // Android 233/239 기준: 외부 http/https는 Android WebViewClient가 브라우저로 넘긴다.
+    // PWA 보호창을 띄우면 브라우저 진입/복귀 뒤 앱 화면에 아이보리 십자가가 남을 수 있어 사용하지 않는다.
     clearTimeout(window.__oaiExternalEntryGuardTimer);
-    window.__oaiExternalEntryGuardTimer = setTimeout(function(){
-      try{ oaiHideExternalEntryGuard('hard-timeout'); }catch(_e){}
-    }, OAI_EXTERNAL_ENTRY_GUARD_HARD_MS || 18000);
+    var guard = document.getElementById('oai-external-entry-guard');
+    if(guard){
+      guard.classList.remove('show');
+      guard.classList.add('hide');
+      guard.style.display = 'none';
+      if(guard.parentNode) guard.parentNode.removeChild(guard);
+    }
+    document.documentElement.classList.remove('oai-external-leaving','oai-external-return-freeze');
+    if(document.documentElement.getAttribute('data-oai-stability-reason') === 'external-leave'){
+      document.documentElement.classList.remove('oai-stability-veil','oai-stability-veil-releasing');
+      document.documentElement.removeAttribute('data-oai-stability-reason');
+    }
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 function oaiHideExternalEntryGuard(reason){
@@ -116,16 +98,18 @@ try{ window.oaiShowExternalEntryGuard = oaiShowExternalEntryGuard; window.oaiHid
 
 function markExternalReturnStabilize(kind){
   try{
+    // Android 233/239 기준 복원: 외부사이트는 앱 WebView 안에 쌓지 않고 Android가 외부 브라우저로 넘긴다.
+    // 따라서 PWA는 외부 진입/복귀 보호창 상태를 만들지 않고, 오래 남아 있던 이전 상태만 정리한다.
     var now = Date.now ? Date.now() : new Date().getTime();
-    var stamp = String(now);
-    sessionStorage.setItem('oai_external_nav_started_at', stamp);
+    sessionStorage.setItem('oai_external_nav_started_at', String(now));
     sessionStorage.setItem('oai_external_nav_kind', kind || 'external');
-    sessionStorage.setItem('oai_external_nav_pending', '1');
-    sessionStorage.setItem('oai_external_nav_hold_until', String(now + OAI_EXTERNAL_LEAVE_HOLD_MS));
-    sessionStorage.setItem('oai_external_nav_force_release_at', String(now + OAI_EXTERNAL_LEAVE_HARD_MS));
-    document.documentElement.classList.add('oai-external-leaving');
-    try{ if(typeof oaiShowExternalEntryGuard === 'function') oaiShowExternalEntryGuard(kind); }catch(_e){}
-    /* V8-1-14-130: 외부사이트 진입은 #oai-external-entry-guard 한 개만 사용한다. 일반 stability veil을 겹치지 않는다. */
+    sessionStorage.removeItem('oai_external_nav_pending');
+    sessionStorage.removeItem('oai_external_nav_hold_until');
+    sessionStorage.removeItem('oai_external_nav_force_release_at');
+    sessionStorage.removeItem('oai_external_nav_committed');
+    sessionStorage.removeItem('oai_external_nav_pagehide');
+    document.documentElement.classList.remove('oai-external-leaving','oai-external-return-freeze');
+    try{ if(typeof oaiHideExternalEntryGuard === 'function') oaiHideExternalEntryGuard('android233-external-browser'); }catch(_e){}
   }catch(e){ console.warn("[가톨릭길동무]", e); }
 }
 
@@ -179,6 +163,7 @@ function oaiReleaseStabilityVeil(){
           sessionStorage.removeItem('oai_external_nav_pending');
           sessionStorage.removeItem('oai_external_nav_hold_until');
           sessionStorage.removeItem('oai_external_nav_force_release_at');
+    sessionStorage.removeItem('oai_external_nav_committed');
         }catch(_e){}
       }
     }
@@ -323,6 +308,7 @@ function oaiClearExternalNavigationState(opts){
     sessionStorage.removeItem('oai_external_nav_pending');
     sessionStorage.removeItem('oai_external_nav_hold_until');
     sessionStorage.removeItem('oai_external_nav_force_release_at');
+    sessionStorage.removeItem('oai_external_nav_committed');
   }catch(e){ console.warn("[가톨릭길동무]", e); }
   try{ if(typeof oaiHideExternalEntryGuard === 'function') oaiHideExternalEntryGuard('clear-state'); }catch(_e){}
   try{
@@ -337,7 +323,7 @@ function oaiClearExternalNavigationState(opts){
   if(window.__OAI_IDLE_RESTART_GUARD__) return;
   window.__OAI_IDLE_RESTART_GUARD__ = true;
 
-  /* V8-1-14-148-EXTERNAL-SINGLE-WEBVIEW: 미사용 후 복귀는 예전 WebView 방식으로 단순화한다.
+  /* V8-1-14-148-ANDROID233-EXTERNAL-RESTORE: 미사용 후 복귀는 예전 WebView 방식으로 단순화한다.
      짧은 복귀: 원래 화면 유지 / 1분 이상: 아이보리 안정막 1회 / 10분 이상: 커버 인트로 복귀 */
   var LONG_BG_RETURN_MS = 10 * 60 * 1000;
   var MEDIUM_BG_RETURN_MS = 60 * 1000;
@@ -593,14 +579,14 @@ function oaiNormalizeExternalSiteUrl(url){
 }
 
 function oaiBuildAndroidExternalIntent(url){
-  // V8-1-14-148-EXTERNAL-SINGLE-WEBVIEW:
+  // V8-1-14-148-ANDROID233-EXTERNAL-RESTORE:
   // 현재 Android WebView/PWA 환경에서는 intent:// URL이 Chrome으로 위임되지 않고
   // WebView 안에서 ERR_UNKNOWN_URL_SCHEME 화면으로 열릴 수 있다.
   // 그래서 외부 http/https 링크는 표준 https 주소 그대로 이동한다.
   return '';
 }
 function oaiTryOpenExternalBlank(url){
-  // V8-1-14-148-EXTERNAL-SINGLE-WEBVIEW:
+  // V8-1-14-148-ANDROID233-EXTERNAL-RESTORE:
   // WebView 안정화를 위해 자동 _blank/숨은 a 외부브라우저 열기는 사용하지 않는다.
   // 이 함수는 혹시 남은 호출이 있어도 Chrome 전환을 시작하지 않도록 비활성화한다.
   return false;
@@ -608,14 +594,9 @@ function oaiTryOpenExternalBlank(url){
 function oaiNavigateExternalNow(url){
   url = String(url || '').trim();
   if(!url) return;
-  // V8-1-14-148-EXTERNAL-SINGLE-WEBVIEW:
-  // 일반 외부사이트는 iframe도, Chrome 자동 전환도 쓰지 않고 한 가지 흐름만 사용한다.
-  // 현재 WebView에서 원본 URL로 직접 이동하면 외부사이트 배너/쿠키 흐름은 보존하면서
-  // _blank/숨은 a/intent로 인한 Chrome 표시·깜빡임·복귀 흔들림을 줄일 수 있다.
-  try{
-    if(sessionStorage.getItem('oai_external_nav_pending') !== '1') return;
-    sessionStorage.setItem('oai_external_nav_committed', '1');
-  }catch(_e){}
+  // Android 233/239 기준: 외부 http/https 요청은 Android WebViewClient가 브라우저로 넘긴다.
+  // PWA는 현재 화면을 덮는 보호창/복귀 freeze를 만들지 않고 URL 요청만 한 번 보낸다.
+  try{ sessionStorage.setItem('oai_external_nav_committed', '1'); }catch(_e){}
   try{ location.assign(url); }
   catch(e){ try{ location.href = url; }catch(_e){ console.warn('[가톨릭길동무]', _e); } }
 }
@@ -629,22 +610,18 @@ function oaiOpenExternalSite(url, options){
     if(/^(tel:|mailto:|sms:|javascript:)/i.test(url)) return false;
   }catch(_e){}
   var kind = options.kind || options.source || 'external-site';
-  // V8-1-14-148-EXTERNAL-SINGLE-WEBVIEW: 십자가 보호창이 실제로 보인 뒤 단일 WebView 외부 이동이 시작되도록 표시 시간을 확보한다.
-  var requestedDelay = typeof options.delay === 'number' ? options.delay : 0;
-  var delay = Math.max(900, requestedDelay || 0);
   try{ document.activeElement && document.activeElement.blur && document.activeElement.blur(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   try{ if(typeof oaiPrimeExternalDestination === 'function') oaiPrimeExternalDestination(url); }catch(e){ console.warn("[가톨릭길동무]", e); }
   try{ if(typeof _resetCoverExitReady === 'function') _resetCoverExitReady(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   try{ if(typeof _clearCoverExitArmed === 'function') _clearCoverExitArmed(); }catch(e){ console.warn("[가톨릭길동무]", e); }
-  try{ if(window.oaiReturnConductorRequest) window.oaiReturnConductorRequest('external-enter', {ms:delay+3600, force:true}); }catch(_e){}
   try{ markExternalReturnStabilize(kind); }catch(e){ console.warn("[가톨릭길동무]", e); }
   function goExternalNow(){
+    try{ oaiClearExternalNavigationState(); }catch(_e){}
     try{ oaiNavigateExternalNow(url); }
     catch(e){ try{ location.assign(url); }catch(_e){ try{ location.href = url; }catch(__e){ console.warn('[가톨릭길동무]', __e); } } }
   }
-  try{
-    requestAnimationFrame(function(){ setTimeout(goExternalNow, delay); });
-  }catch(_e){ setTimeout(goExternalNow, delay); }
+  try{ requestAnimationFrame(function(){ setTimeout(goExternalNow, 30); }); }
+  catch(_e){ setTimeout(goExternalNow, 30); }
   return true;
 }
 
@@ -669,9 +646,9 @@ function oaiMeasureExternalViewport(){
 function oaiReleasePassiveVeil(){
   try{
     var root = document.documentElement;
-    // V8-1-14-148-EXTERNAL-SINGLE-WEBVIEW:
-    // 외부사이트 복귀 보호창은 oaiStartExternalReturnStabilize/finish 흐름만 해제한다.
-    // 일반 passive veil 정리 타이머가 중간에 external-return-freeze를 지우면 십자가가 끊겨 보인다.
+    // V8-1-14-148-ANDROID233-EXTERNAL-RESTORE:
+    // Android 233/239 기준에서는 외부 브라우저 복귀를 PWA freeze로 덮지 않는다.
+    // 남아 있는 일반 안정막만 정리한다.
     if(window.__oaiExternalReturnStabilizing || root.classList.contains('oai-external-return-freeze')) return;
     var reason = root.getAttribute('data-oai-stability-reason') || '';
     if(/external-leave|external-return/i.test(reason)) return;
@@ -689,19 +666,15 @@ function oaiGetExternalNavInfo(){
   }catch(_e){ return {now:0, ts:0, pending:false, pageHidden:false, forceAt:0}; }
 }
 function oaiHasExternalReturnPending(){
-  try{
-    var info = oaiGetExternalNavInfo();
-    return !!(info.ts && info.pageHidden && info.now && info.now - info.ts < 10 * 60 * 1000);
-  }catch(_e){ return false; }
+  // Android 233/239 기준에서는 외부 브라우저 복귀를 PWA freeze로 덮지 않는다.
+  return false;
 }
 function oaiExternalReturnKind(){
   try{ return String(sessionStorage.getItem('oai_external_nav_kind') || ''); }catch(_e){ return ''; }
 }
 function oaiIsExternalLeaveStillOpening(){
-  try{
-    var info = oaiGetExternalNavInfo();
-    return !!(info.pending && !info.pageHidden && info.forceAt && info.now && info.now < info.forceAt);
-  }catch(_e){ return false; }
+  // 외부 브라우저 위임 방식에서는 PWA 보호창을 유지할 이유가 없다.
+  return false;
 }
 function oaiStartExternalReturnStabilize(){
   try{
@@ -1690,7 +1663,7 @@ function _renderShrineVisitDetail(idx){
   const goodnewsUrl=_getShrineGoodnewsUrl(item);
   const telText=item.tel?_visitHtmlEsc(item.tel):'—';
   const telHref=item.tel?'tel:'+String(item.tel).replace(/[^0-9+]/g,''):'';
-  // V8-1-14-148-EXTERNAL-SINGLE-WEBVIEW: V117 기준에서 V118 성지정보 카드 색상과 V123 굿뉴스 파란색을 실제 생성 버튼에 직접 적용한다.
+  // V8-1-14-148-ANDROID233-EXTERNAL-RESTORE: V117 기준에서 V118 성지정보 카드 색상과 V123 굿뉴스 파란색을 실제 생성 버튼에 직접 적용한다.
   const detailInfoStyle='background:linear-gradient(180deg,#fbfdff 0%,#fffaf0 100%)!important;border:2px solid #9db7cc!important;box-shadow:0 8px 22px rgba(17,35,60,.08)!important;';
   const detailMapBtnStyle='background:#fff8e6!important;color:#5f4515!important;border:1.5px solid #d5b86d!important;box-shadow:0 2px 6px rgba(95,69,21,.08)!important;';
   const detailTelStyle='background:linear-gradient(180deg,#f4fbf5 0%,#dff2e5 100%)!important;color:#244f38!important;border:1.5px solid #a8d5b5!important;box-shadow:0 3px 8px rgba(35,78,56,.10), inset 0 1px 0 rgba(255,255,255,.90)!important;text-shadow:none!important;';
@@ -2956,7 +2929,7 @@ window.addEventListener('load', syncCoverUpdateVersionState, true);
     try{
       var frame=document.getElementById('privacy-policy-frame');
       if(frame){
-        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-148-EXTERNAL-SINGLE-WEBVIEW'));
+        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-148-ANDROID233-EXTERNAL-RESTORE'));
         if(frame.getAttribute('src') === 'about:blank' || !frame.getAttribute('src')) frame.setAttribute('src', src);
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -3210,7 +3183,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V8-1-14-148-EXTERNAL-SINGLE-WEBVIEW';
+    frame.src='diocese.html?v=V8-1-14-148-ANDROID233-EXTERNAL-RESTORE';
     setTimeout(armDioceseOverlayBack, 0);
   }else{
     if(!restore){
@@ -3824,7 +3797,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V8-1-14-148-EXTERNAL-SINGLE-WEBVIEW';
+const _PRAYER_ASSET_VERSION='V8-1-14-148-ANDROID233-EXTERNAL-RESTORE';
 let _prayerModuleLoadPromise=null;
 function _isPrayerDataReady(){
   return !!(window.PRAYER_DATA && typeof window.PRAYER_DATA === 'object');
@@ -4169,7 +4142,7 @@ function _navFetch(origin, dest) {
 const $=id=>document.getElementById(id);
 const $$=s=>document.querySelectorAll(s);
 const _GEO=navigator.geolocation;
-// V8-1-14-148-EXTERNAL-SINGLE-WEBVIEW: 오래 미사용 후 복귀 시 마지막 위치를 먼저 보여주고, 새 GPS가 잡히면 최신 위치로 교체한다.
+// V8-1-14-148-ANDROID233-EXTERNAL-RESTORE: 오래 미사용 후 복귀 시 마지막 위치를 먼저 보여주고, 새 GPS가 잡히면 최신 위치로 교체한다.
 const _GO1={enableHighAccuracy:true,timeout:6500,maximumAge:0};
 const _GO2={enableHighAccuracy:false,timeout:1200,maximumAge:60000};
 const _GO_FAST_FRESH={enableHighAccuracy:false,timeout:1100,maximumAge:60000};
@@ -6882,7 +6855,7 @@ function _loadNearby(){
     return;
   }
 
-  // V8-1-14-148-EXTERNAL-SINGLE-WEBVIEW:
+  // V8-1-14-148-ANDROID233-EXTERNAL-RESTORE:
   // 저장 위치와 새 GPS를 모두 즉시 화면에 그리면 내주변 로딩/목록이 두 번 보인다.
   // 캐시는 대기용 예비값으로만 잡아 두고, 새 GPS가 빠르게 오면 새 GPS로 한 번만 계산한다.
   // 새 GPS가 늦거나 실패할 때만 캐시 기준으로 한 번 계산한다.
@@ -8853,6 +8826,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         sessionStorage.removeItem('oai_external_nav_pending');
         sessionStorage.removeItem('oai_external_nav_hold_until');
         sessionStorage.removeItem('oai_external_nav_force_release_at');
+    sessionStorage.removeItem('oai_external_nav_committed');
         sessionStorage.removeItem('oai_refresh_veil_until');
         sessionStorage.removeItem('oai_refresh_veil_hold_ms');
         sessionStorage.removeItem('oai_refresh_veil_reason');
