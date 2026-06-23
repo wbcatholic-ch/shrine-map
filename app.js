@@ -337,7 +337,7 @@ function oaiClearExternalNavigationState(opts){
   if(window.__OAI_IDLE_RESTART_GUARD__) return;
   window.__OAI_IDLE_RESTART_GUARD__ = true;
 
-  /* V8-1-14-149-BANNER-PRIORITY: 미사용 후 복귀는 예전 WebView 방식으로 단순화한다.
+  /* V8-1-14-150-SWIPE-MAP-STABILIZE: 미사용 후 복귀는 예전 WebView 방식으로 단순화한다.
      짧은 복귀: 원래 화면 유지 / 1분 이상: 아이보리 안정막 1회 / 10분 이상: 커버 인트로 복귀 */
   var LONG_BG_RETURN_MS = 10 * 60 * 1000;
   var MEDIUM_BG_RETURN_MS = 60 * 1000;
@@ -593,14 +593,14 @@ function oaiNormalizeExternalSiteUrl(url){
 }
 
 function oaiBuildAndroidExternalIntent(url){
-  // V8-1-14-149-BANNER-PRIORITY:
+  // V8-1-14-150-SWIPE-MAP-STABILIZE:
   // 현재 Android WebView/PWA 환경에서는 intent:// URL이 Chrome으로 위임되지 않고
   // WebView 안에서 ERR_UNKNOWN_URL_SCHEME 화면으로 열릴 수 있다.
   // 그래서 외부 http/https 링크는 표준 https 주소 그대로 이동한다.
   return '';
 }
 function oaiTryOpenExternalBlank(url){
-  // V8-1-14-149-BANNER-PRIORITY:
+  // V8-1-14-150-SWIPE-MAP-STABILIZE:
   // WebView 안정화를 위해 자동 _blank/숨은 a 외부브라우저 열기는 사용하지 않는다.
   // 이 함수는 혹시 남은 호출이 있어도 Chrome 전환을 시작하지 않도록 비활성화한다.
   return false;
@@ -608,7 +608,7 @@ function oaiTryOpenExternalBlank(url){
 function oaiNavigateExternalNow(url){
   url = String(url || '').trim();
   if(!url) return;
-  // V8-1-14-149-BANNER-PRIORITY:
+  // V8-1-14-150-SWIPE-MAP-STABILIZE:
   // 일반 외부사이트는 iframe도, Chrome 자동 전환도 쓰지 않고 한 가지 흐름만 사용한다.
   // 현재 WebView에서 원본 URL로 직접 이동하면 외부사이트 배너/쿠키 흐름은 보존하면서
   // _blank/숨은 a/intent로 인한 Chrome 표시·깜빡임·복귀 흔들림을 줄일 수 있다.
@@ -629,7 +629,7 @@ function oaiOpenExternalSite(url, options){
     if(/^(tel:|mailto:|sms:|javascript:)/i.test(url)) return false;
   }catch(_e){}
   var kind = options.kind || options.source || 'external-site';
-  // V8-1-14-149-BANNER-PRIORITY: 십자가 보호창이 실제로 보인 뒤 단일 WebView 외부 이동이 시작되도록 표시 시간을 확보한다.
+  // V8-1-14-150-SWIPE-MAP-STABILIZE: 십자가 보호창이 실제로 보인 뒤 단일 WebView 외부 이동이 시작되도록 표시 시간을 확보한다.
   var requestedDelay = typeof options.delay === 'number' ? options.delay : 0;
   var delay = Math.max(900, requestedDelay || 0);
   try{ document.activeElement && document.activeElement.blur && document.activeElement.blur(); }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -669,7 +669,7 @@ function oaiMeasureExternalViewport(){
 function oaiReleasePassiveVeil(){
   try{
     var root = document.documentElement;
-    // V8-1-14-149-BANNER-PRIORITY:
+    // V8-1-14-150-SWIPE-MAP-STABILIZE:
     // 외부사이트 복귀 보호창은 oaiStartExternalReturnStabilize/finish 흐름만 해제한다.
     // 일반 passive veil 정리 타이머가 중간에 external-return-freeze를 지우면 십자가가 끊겨 보인다.
     if(window.__oaiExternalReturnStabilizing || root.classList.contains('oai-external-return-freeze')) return;
@@ -1690,7 +1690,7 @@ function _renderShrineVisitDetail(idx){
   const goodnewsUrl=_getShrineGoodnewsUrl(item);
   const telText=item.tel?_visitHtmlEsc(item.tel):'—';
   const telHref=item.tel?'tel:'+String(item.tel).replace(/[^0-9+]/g,''):'';
-  // V8-1-14-149-BANNER-PRIORITY: V117 기준에서 V118 성지정보 카드 색상과 V123 굿뉴스 파란색을 실제 생성 버튼에 직접 적용한다.
+  // V8-1-14-150-SWIPE-MAP-STABILIZE: V117 기준에서 V118 성지정보 카드 색상과 V123 굿뉴스 파란색을 실제 생성 버튼에 직접 적용한다.
   const detailInfoStyle='background:linear-gradient(180deg,#fbfdff 0%,#fffaf0 100%)!important;border:2px solid #9db7cc!important;box-shadow:0 8px 22px rgba(17,35,60,.08)!important;';
   const detailMapBtnStyle='background:#fff8e6!important;color:#5f4515!important;border:1.5px solid #d5b86d!important;box-shadow:0 2px 6px rgba(95,69,21,.08)!important;';
   const detailTelStyle='background:linear-gradient(180deg,#f4fbf5 0%,#dff2e5 100%)!important;color:#244f38!important;border:1.5px solid #a8d5b5!important;box-shadow:0 3px 8px rgba(35,78,56,.10), inset 0 1px 0 rgba(255,255,255,.90)!important;text-shadow:none!important;';
@@ -2956,7 +2956,7 @@ window.addEventListener('load', syncCoverUpdateVersionState, true);
     try{
       var frame=document.getElementById('privacy-policy-frame');
       if(frame){
-        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-149-BANNER-PRIORITY'));
+        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-150-SWIPE-MAP-STABILIZE'));
         if(frame.getAttribute('src') === 'about:blank' || !frame.getAttribute('src')) frame.setAttribute('src', src);
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -3210,7 +3210,7 @@ function openDioceseView(opts){
       if(!restore) try{ frame.contentWindow && frame.contentWindow.resetDioceseFirstPage && frame.contentWindow.resetDioceseFirstPage(); }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(typeof dioceseLoaded==='function') dioceseLoaded();
     };
-    frame.src='diocese.html?v=V8-1-14-149-BANNER-PRIORITY';
+    frame.src='diocese.html?v=V8-1-14-150-SWIPE-MAP-STABILIZE';
     setTimeout(armDioceseOverlayBack, 0);
   }else{
     if(!restore){
@@ -3824,7 +3824,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V8-1-14-149-BANNER-PRIORITY';
+const _PRAYER_ASSET_VERSION='V8-1-14-150-SWIPE-MAP-STABILIZE';
 let _prayerModuleLoadPromise=null;
 function _isPrayerDataReady(){
   return !!(window.PRAYER_DATA && typeof window.PRAYER_DATA === 'object');
@@ -4169,7 +4169,7 @@ function _navFetch(origin, dest) {
 const $=id=>document.getElementById(id);
 const $$=s=>document.querySelectorAll(s);
 const _GEO=navigator.geolocation;
-// V8-1-14-149-BANNER-PRIORITY: 오래 미사용 후 복귀 시 마지막 위치를 먼저 보여주고, 새 GPS가 잡히면 최신 위치로 교체한다.
+// V8-1-14-150-SWIPE-MAP-STABILIZE: 오래 미사용 후 복귀 시 마지막 위치를 먼저 보여주고, 새 GPS가 잡히면 최신 위치로 교체한다.
 const _GO1={enableHighAccuracy:true,timeout:6500,maximumAge:0};
 const _GO2={enableHighAccuracy:false,timeout:1200,maximumAge:60000};
 const _GO_FAST_FRESH={enableHighAccuracy:false,timeout:1100,maximumAge:60000};
@@ -4972,7 +4972,10 @@ function openTab(name, opts){
   try{ if(typeof oaiClearMapInfoSelection === 'function') oaiClearMapInfoSelection('tab-switch:'+name); }catch(e){ console.warn('[가톨릭길동무]', e); }
   _updateSheetPanelTitles();
   const prevName = _activeTab;
-  // V8-1-14-134: 성지/성당/피정의집 시트 전환은 무거운 가로 swiper 애니메이션 없이 즉시 전환하고, 내부 좌우 스와이프 전환은 비활성화한다.
+  const noMotionSheetSwitch = !!(prevName && prevName !== name && (_mode==='shrine' || _mode==='parish' || _mode==='retreat'));
+  if(noMotionSheetSwitch){
+    try{ document.documentElement.classList.add('oai-sheet-switching'); }catch(_e){}
+  }
   if(prevName) _closeSheetOnly(prevName);
 
   closeInfoCard({keepMap:true});
@@ -5005,6 +5008,9 @@ function openTab(name, opts){
   else if(name==='region'){ if(shouldAutoFocusKeyboard) oaiFocusSearchKeyboardInput('region-inp'); }
   else if(name==='route') _enterRouteMode();
   setTimeout(()=>_scrollSheetTop(name), 30);
+  if(noMotionSheetSwitch){
+    setTimeout(function(){ try{ document.documentElement.classList.remove('oai-sheet-switching'); }catch(_e){} }, 120);
+  }
 }
 
 function closeTab(name){
@@ -6882,7 +6888,7 @@ function _loadNearby(){
     return;
   }
 
-  // V8-1-14-149-BANNER-PRIORITY:
+  // V8-1-14-150-SWIPE-MAP-STABILIZE:
   // 저장 위치와 새 GPS를 모두 즉시 화면에 그리면 내주변 로딩/목록이 두 번 보인다.
   // 캐시는 대기용 예비값으로만 잡아 두고, 새 GPS가 빠르게 오면 새 GPS로 한 번만 계산한다.
   // 새 GPS가 늦거나 실패할 때만 캐시 기준으로 한 번 계산한다.
@@ -8465,8 +8471,7 @@ function _fmtTime(s){
 
   function _doMainSwipe(dx){
     if(typeof _screen === 'undefined' || _screen !== 'map') return;
-    /* V8-1-14-134: 성지·성당·피정의집 시트 내부 좌우 스와이프 전환은 그림자/무거운 반응을 만들 수 있어 탭 버튼 전환만 사용한다. */
-    if(_mode==='shrine' || _mode==='parish' || _mode==='retreat') return;
+    /* V8-1-14-150: 성지·성당·피정의집 swiper는 기능만 복구하고, sheet 이동/그림자 효과는 CSS에서 차단한다. */
     if(document.getElementById('srch-modal')?.classList.contains('open')) return;
     const idx = (typeof _activeTab !== 'undefined' && _activeTab)
       ? TABS.indexOf(_activeTab) : -1;
@@ -8496,9 +8501,13 @@ function _fmtTime(s){
     const tv = document.getElementById('trail-view');
     if(tv?.classList.contains('open')){
       if(tgt.closest('#trail-map') || tgt.closest('.trail-tabs')) return;
-      if(typeof trailSetView === 'function')
-        trailSetView(dx < 0 ? 'list' : 'map');
-      if(typeof window.oaiSwipeAction === 'function') window.oaiSwipeAction(document.getElementById('trail-list') || document.querySelector('#trail-view .trail-panel.on'), dx < 0 ? 'left' : 'right');
+      if(typeof trailSetView === 'function'){
+        const order=['map','list'];
+        const cur=document.getElementById('trail-panel-list')?.classList.contains('on') ? 'list' : 'map';
+        const idx=Math.max(0, order.indexOf(cur));
+        const next=order[(idx + (dx < 0 ? 1 : -1) + order.length) % order.length];
+        trailSetView(next);
+      }
       return;
     }
 

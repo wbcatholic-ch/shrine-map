@@ -192,7 +192,8 @@
   };
   const TRAIL_COLORS = {d:'#1D4ED8', l:'#2A8040'};
   const RETURN_KEY = 'catholic_integrated_return_v2';
-  const trailState = {inited:false, map:null, markers:[], selected:-1, myOverlay:null, view:'map', pendingOpenIndex:null, restoreCenter:null, restoreLevel:null, needsHardReset:false, pendingFitBounds:false};
+  const TRAIL_INITIAL_CENTER = {lat:36.10, lng:127.85, level:12};
+  const trailState = {inited:false, map:null, markers:[], selected:-1, myOverlay:null, view:'map', pendingOpenIndex:null, restoreCenter:null, restoreLevel:null, needsHardReset:false, pendingFitBounds:false, pendingInitialCenterOnce:false};
   const webState = {built:false, curCat:'⭐ 즐겨찾기'};
   const WEB_FAV_KEY = 'web_favorites_v1';
   const MY_DIOCESE_KEY = 'oai_my_diocese_name';
@@ -392,7 +393,8 @@
       trailState.pendingOpenIndex=null;
       trailState.restoreCenter=null;
       trailState.restoreLevel=null;
-      trailState.pendingFitBounds=true;
+      trailState.pendingFitBounds=false;
+      trailState.pendingInitialCenterOnce=true;
       trailCloseSheet();
       const list=ig$('trail-list');
       if(list) list.scrollTop=0;
@@ -403,9 +405,7 @@
     initTrailModule();
     trailSetView(trailState.view || 'map');
     if(!restore){
-      relayoutTrailMap(80);
-      relayoutTrailMap(260);
-      relayoutTrailMap(520);
+      relayoutTrailMap(220);
     }
   };
 
@@ -707,6 +707,17 @@
     }, wait);
   }
 
+  function applyTrailInitialCenterOnce(){
+    if(!(trailState.map && window.kakao && window.kakao.maps)) return;
+    if(!trailState.pendingInitialCenterOnce) return;
+    try{
+      if(typeof trailState.map.relayout === 'function') trailState.map.relayout();
+      if(typeof trailState.map.setLevel === 'function') trailState.map.setLevel(TRAIL_INITIAL_CENTER.level);
+      trailState.map.setCenter(new kakao.maps.LatLng(TRAIL_INITIAL_CENTER.lat, TRAIL_INITIAL_CENTER.lng));
+    }catch(e){ console.warn("[가톨릭길동무]", e); }
+    trailState.pendingInitialCenterOnce = false;
+  }
+
   function hardResetTrailModule(){
     try{ if(trailState.myOverlay) trailState.myOverlay.setMap(null); }catch(e){ console.warn("[가톨릭길동무]", e); }
     trailState.myOverlay = null;
@@ -768,7 +779,9 @@
       syncTrailMarkers();
       if(trailState.map){
         relayoutTrailMap(30); relayoutTrailMap(180);
-        if(trailState.pendingFitBounds){
+        if(trailState.pendingInitialCenterOnce){
+          setTimeout(applyTrailInitialCenterOnce, 90);
+        }else if(trailState.pendingFitBounds){
           setTimeout(function(){ fitTrailMapToBounds(); trailState.pendingFitBounds = false; }, 90);
         }
       }
@@ -781,7 +794,7 @@
       }
       const container = ig$('trail-map');
       if(!container || !(window.kakao && window.kakao.maps)) return;
-      trailState.map = new kakao.maps.Map(container, { center:new kakao.maps.LatLng(36.10,127.85), level:12 });
+      trailState.map = new kakao.maps.Map(container, { center:new kakao.maps.LatLng(TRAIL_INITIAL_CENTER.lat, TRAIL_INITIAL_CENTER.lng), level:TRAIL_INITIAL_CENTER.level });
       trailState.map.addControl(new kakao.maps.ZoomControl(), kakao.maps.ControlPosition.RIGHT);
       if(trailState.restoreCenter && Number.isFinite(Number(trailState.restoreCenter.lat)) && Number.isFinite(Number(trailState.restoreCenter.lng))){
         try{ trailState.map.setCenter(new kakao.maps.LatLng(Number(trailState.restoreCenter.lat), Number(trailState.restoreCenter.lng))); }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -792,11 +805,12 @@
       trailState.restoreCenter = null;
       trailState.restoreLevel = null;
       syncTrailMarkers();
-      if(trailState.pendingFitBounds){
+      if(trailState.pendingInitialCenterOnce){
+        setTimeout(applyTrailInitialCenterOnce, 80);
+      }else if(trailState.pendingFitBounds){
         setTimeout(function(){ fitTrailMapToBounds(); trailState.pendingFitBounds = false; }, 80);
       }
-      relayoutTrailMap(60);
-      relayoutTrailMap(220);
+      relayoutTrailMap(180);
       kakao.maps.event.addListener(trailState.map,'click', trailCloseSheet);
       trailState.inited = true;
       if(Number.isInteger(trailState.pendingOpenIndex) && TRAIL_ITEMS[trailState.pendingOpenIndex]){

@@ -172,7 +172,7 @@ header{flex-shrink:0;background:var(--d);border-bottom:none;z-index:30;
 .lv-card{background:var(--card);border-radius:var(--r);border:1.25px solid #C8B79F;
   box-shadow:0 1px 8px rgba(0,0,0,.06);margin-bottom:12px;overflow:hidden;cursor:pointer;
   transition:transform .12s,box-shadow .12s;}
-.lv-card.oai-touch-pressed{transform:translateY(6px) scale(.982);box-shadow:none;filter:brightness(.96);}
+.lv-card.oai-touch-pressed{transform:scale(.992);box-shadow:none;filter:brightness(.98);}
 .lv-card.my-diocese-card{border-color:#B7791F!important;border-width:2px!important;box-shadow:0 8px 18px rgba(183,121,31,.12),0 2px 8px rgba(31,42,68,.07)!important;}
 .lv-my-diocese-badge{display:inline-flex;align-items:center;justify-content:center;margin-left:7px;padding:4px 10px;border-radius:999px;background:#FFF3D8;border:1.5px solid rgba(183,121,31,.52);color:#7A4F10;font-size:12px;font-weight:900;line-height:1.1;letter-spacing:-.035em;vertical-align:1px;white-space:nowrap;}
 
@@ -295,3 +295,30 @@ html.ios-device .cb{width:34px!important;height:34px!important;border-radius:10p
 .hd-icon::before{top:50%;width:3px;height:24px;transform:translate(-50%,-50%);}
 .hd-icon::after{top:42%;width:14px;height:3px;transform:translate(-50%,-50%);}
 
+
+
+/* V8-1-14-150-SWIPE-MAP-STABILIZE: 관구·교구 swipe 중 상단 헤더/탭이 아래로 밀리는 현상 방지 */
+html.oai-dio-swiping body > header,
+html.oai-dio-swiping .tab-bar,
+html.oai-dio-swiping .tab,
+body > header,
+.tab-bar{
+  transform:none!important;
+  transition:none!important;
+  animation:none!important;
+  will-change:auto!important;
+  backface-visibility:hidden!important;
+  -webkit-backface-visibility:hidden!important;
+}
+html.oai-dio-swiping #list-view,
+html.oai-dio-swiping #search-view,
+html.oai-dio-swiping #map-view{
+  scroll-behavior:auto!important;
+}
+html.oai-dio-swiping #map-view.on,
+html.oai-dio-swiping #list-view.on,
+html.oai-dio-swiping #search-view.on{
+  animation:none!important;
+  transform:none!important;
+  transition:none!important;
+}

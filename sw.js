@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-149-BANNER-PRIORITY';
-const ASSET_VERSION = 'V8-1-14-149-BANNER-PRIORITY';
+const CACHE_VERSION = 'catholic-way-V8-1-14-150-SWIPE-MAP-STABILIZE';
+const ASSET_VERSION = 'V8-1-14-150-SWIPE-MAP-STABILIZE';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }
