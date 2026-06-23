@@ -1870,7 +1870,7 @@ window.addEventListener('pageshow',function(){
     // 탭 click 이벤트를 다시 실행하지 않는다. click 이벤트는 지도 초기화, 카드 닫기,
     // 목록 스크롤 재적용을 동반해 복귀 순간에 흔들림처럼 보일 수 있다.
     try{ window.__OAI_DIO_PARENT_RETURNING__ = true; window.__OAI_DIO_EXTERNAL_LEAVING__ = false; }catch(e){}
-    // V8-1-14-162-SAVED-SCREEN-FIRST: 관구·교구 iframe은 부모 외부복귀 보호창 위에 별도 복귀 레이어를 얹지 않는다.
+    // V8-1-14-163-REF-EXTERNAL-COVER-EXIT: 관구·교구 iframe은 부모 외부복귀 보호창 위에 별도 복귀 레이어를 얹지 않는다.
     try{ document.documentElement.classList.remove('oai-dio-external-stabilize','oai-dio-external-return','oai-dio-returning'); }catch(e){}
     var tab=state.tab||'gwangu';
     setReturnTabSilently(tab);
@@ -1978,8 +1978,9 @@ window.addEventListener('pageshow',function(){
     var state=window.getDioceseReturnState(source||'link', extra || {});
     try{ sessionStorage.setItem('oai_diocese_last_return_state', JSON.stringify(state)); localStorage.setItem('oai_diocese_last_return_state', JSON.stringify(state)); }catch(e){}
     if(window.parent && window.parent!==window){
-      // iframe 내부 클릭은 부모의 지연 이동에 맡기지 않고, 클릭 흐름 안에서 top을 즉시 이동한다.
-      // 이렇게 해야 웹페이지 카테고리처럼 Android/PWA에서도 외부 교구 홈페이지가 바로 열린다.
+      // V8-1-14-163-REF-EXTERNAL-COVER-EXIT:
+      // 관구·교구 외부 홈페이지는 첨부 기준 파일(26.06.20)처럼 부모 공통 opener/지연 이동을 거치지 않는다.
+      // HTTP 교구 주소를 그대로 top 이동시켜 Android 233의 외부 브라우저 처리 흐름을 다시 타게 한다.
       try{
         if(typeof window.parent.prepareExternalUrl === 'function') url = window.parent.prepareExternalUrl(url) || url;
       }catch(e){}
@@ -1989,19 +1990,11 @@ window.addEventListener('pageshow',function(){
         window.parent.localStorage.setItem('catholic_diocese_external_return_v1', payload);
         window.parent.__OAI_DIOCESE_EXTERNAL_LEAVING__ = true;
       }catch(e){}
-      // V6-112: 관구·교구 외부 홈페이지도 부모 앱의 공통 외부사이트 이동 함수만 사용한다.
-      document.documentElement.classList.remove('oai-dio-external-stabilize','oai-dio-external-return','oai-dio-returning');
       try{
-        if(typeof window.parent.oaiOpenExternalSite === 'function'){
-          window.parent.oaiOpenExternalSite(url, {kind:'diocese-external', source:'diocese-frame'});
-        }else if(typeof window.parent.oaiNavigateExternalNow === 'function'){
-          try{ if(typeof window.parent.markExternalReturnStabilize === 'function') window.parent.markExternalReturnStabilize('diocese-external'); }catch(_e){}
-          window.parent.oaiNavigateExternalNow(url);
-        }else{
-          try{ if(typeof window.parent.markExternalReturnStabilize === 'function') window.parent.markExternalReturnStabilize('diocese-external'); }catch(_e){}
-          window.top.location.assign(url);
-        }
-      }
+        if(typeof window.parent.markExternalReturnStabilize === 'function') window.parent.markExternalReturnStabilize('diocese-external');
+      }catch(e){}
+      document.documentElement.classList.remove('oai-dio-external-stabilize','oai-dio-external-return','oai-dio-returning');
+      try{ window.top.location.assign(url); }
       catch(e){ try{ window.top.location.href = url; }catch(_e){ window.__OAI_DIO_EXTERNAL_LEAVING__ = false; } }
       setTimeout(function(){
         try{
