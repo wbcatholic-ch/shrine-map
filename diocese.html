@@ -1870,7 +1870,7 @@ window.addEventListener('pageshow',function(){
     // 탭 click 이벤트를 다시 실행하지 않는다. click 이벤트는 지도 초기화, 카드 닫기,
     // 목록 스크롤 재적용을 동반해 복귀 순간에 흔들림처럼 보일 수 있다.
     try{ window.__OAI_DIO_PARENT_RETURNING__ = true; window.__OAI_DIO_EXTERNAL_LEAVING__ = false; }catch(e){}
-    // V8-1-14-153-ANDROID233-EXTERNAL-GUARD-FIX: 관구·교구 iframe은 부모 외부복귀 보호창 위에 별도 복귀 레이어를 얹지 않는다.
+    // V8-1-14-154-ANDROID233-EXTERNAL-STABILIZE: 관구·교구 iframe은 부모 외부복귀 보호창 위에 별도 복귀 레이어를 얹지 않는다.
     try{ document.documentElement.classList.remove('oai-dio-external-stabilize','oai-dio-external-return','oai-dio-returning'); }catch(e){}
     var tab=state.tab||'gwangu';
     setReturnTabSilently(tab);
