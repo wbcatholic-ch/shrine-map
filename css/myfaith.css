@@ -310,7 +310,7 @@
 }
 
 
-/* V8-1-14-148-ANDROID233-EXTERNAL-GUARD-FIX: Android WebView 하단 여백 상한/최소값 표준화 */
+/* V8-1-14-153-ANDROID233-EXTERNAL-GUARD-FIX: Android WebView 하단 여백 상한/최소값 표준화 */
 html:not(.ios-device) .my-faith-body{padding-bottom:calc(14px + var(--oai-android-bottom-gap, 10px))!important;}
 html:not(.ios-device) .my-faith-body.my-faith-search-body{padding-bottom:calc(10px + var(--oai-android-bottom-gap, 10px))!important;}
 html:not(.ios-device) .my-faith-search-results{padding-bottom:calc(14px + var(--oai-android-bottom-gap, 10px))!important;}
