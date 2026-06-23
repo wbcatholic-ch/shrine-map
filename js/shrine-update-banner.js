@@ -59,6 +59,26 @@
     try{ if(document.documentElement.classList.contains('oai-cover-booting') || document.documentElement.classList.contains('oai-cover-revealing')) return false; }catch(_e){}
     return true;
   }
+  function elementVisible(el){
+    try{
+      if(!el || el.hidden) return false;
+      if(el.getAttribute && el.getAttribute('aria-hidden') === 'true') return false;
+      var st = window.getComputedStyle ? getComputedStyle(el) : null;
+      if(st && (st.display === 'none' || st.visibility === 'hidden' || st.opacity === '0')) return false;
+      return true;
+    }catch(_e){ return false; }
+  }
+  function myFaithSetupBlocking(){
+    try{
+      var modal = document.getElementById('my-diocese-modal');
+      if(modal && modal.classList && (modal.classList.contains('show') || modal.classList.contains('open'))) return true;
+      var setup = document.getElementById('my-diocese-setup-banner');
+      if(elementVisible(setup)) return true;
+      var cover = document.getElementById('cover');
+      if(cover && cover.classList && cover.classList.contains('my-diocese-setup-active')) return true;
+    }catch(_e){}
+    return false;
+  }
   function hide(){ var el=document.getElementById('shrine-update-banner'); if(el) el.classList.remove('show'); }
   function create(){
     var el=document.getElementById('shrine-update-banner');
@@ -118,6 +138,7 @@
   function show(){
     try{ if(window.oaiReturnConductorBusy && window.oaiReturnConductorBusy(['passive'])) return; }catch(_e){}
     if(!ENABLED || hiddenForever() || hiddenToday() || shownThisSession() || !isInstalledRun()) return;
+    if(myFaithSetupBlocking()) return;
     if(!coverReady()){ setTimeout(show,350); return; }
     markFirstShownDate();
     var el=create();
@@ -130,4 +151,6 @@
   else boot();
   window.addEventListener('pageshow', function(){ setTimeout(show,900); });
   window.addEventListener('focus', function(){ setTimeout(show,900); });
+  window.addEventListener('oai-myfaith-setup-banner-state', function(){ setTimeout(show,700); });
+  window.addEventListener('oai-myfaith-cover-returned', function(){ setTimeout(show,700); });
 })();

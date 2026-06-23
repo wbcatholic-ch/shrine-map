@@ -166,6 +166,7 @@
         setupBanner.hidden = !showBanner;
         setupBanner.classList.toggle('show', showBanner);
         setupBanner.setAttribute('aria-hidden', showBanner ? 'false' : 'true');
+        try{ window.dispatchEvent(new CustomEvent('oai-myfaith-setup-banner-state', {detail:{active:!!showBanner}})); }catch(_e){}
       }catch(e){ console.warn('[가톨릭길동무]', e); }
     }
     window.refreshMyDioceseSetupBanner = scheduleSetupBannerUpdate;
@@ -252,6 +253,7 @@
           if(typeof window.oaiSetMainMapLayerHidden === 'function') window.oaiSetMainMapLayerHidden(false);
         }
       }catch(e){ console.warn('[가톨릭길동무]', e); }
+      try{ setTimeout(function(){ window.dispatchEvent(new CustomEvent('oai-myfaith-cover-returned')); }, 160); }catch(_e){}
     }
     function openModal(opts){
       try{ clearLegacyMyFaithBackFlags('open'); }catch(_e){}
