@@ -318,8 +318,11 @@
     function stabilizeCoverAfterMyFaithExternal(reason){
       if(!hasRecentMyFaithExternalLink()) return;
       try{
+        if(window.oaiReturnConductorBusy && window.oaiReturnConductorBusy(['myfaith-return','external-return'])) return;
+        if(window.oaiReturnConductorRequest && !window.oaiReturnConductorRequest('myfaith-return', {ms:1300})) return;
         openModal({keepContent:false, fromExternal:true});
         markMyFaithExternalSettling(900);
+        setTimeout(function(){ try{ if(window.oaiReturnConductorFinish) window.oaiReturnConductorFinish('myfaith-return'); }catch(_e){} }, 950);
       }catch(e){ console.warn('[가톨릭길동무]', e); }
     }
     function goExternal(url){
