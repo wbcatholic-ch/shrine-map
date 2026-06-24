@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-171-QNA-FAST-ENTRY';
-const ASSET_VERSION = 'V8-1-14-171-QNA-FAST-ENTRY';
+const CACHE_VERSION = 'catholic-way-V8-1-14-172-COVER-BACK-TRAP';
+const ASSET_VERSION = 'V8-1-14-172-COVER-BACK-TRAP';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }
