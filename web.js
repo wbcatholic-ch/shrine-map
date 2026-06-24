@@ -724,9 +724,9 @@
   function fitTrailMapToBounds(){
     if(!(trailState.map && window.kakao && window.kakao.maps)) return;
     try{
-      // V8-1-14-182-RETURN-CLEAN-TRAIL-ZOOM:
-      // 첫 진입 시 setBounds를 되살리지 않고 중심 이동은 1회로 유지한다.
-      // 다만 기본 줌이 너무 확대되어 보이지 않도록 전국 순례길 기준으로 한 단계 넓게 둔다.
+      // V8-1-14-183-RETURN-SOFT-TRAIL:
+      // setBounds는 되살리지 않고 중심 이동은 1회만 유지한다.
+      // 순례길 첫 화면이 너무 확대되어 보이지 않도록 기본 줌을 한 단계 넓게 둔다.
       if(typeof trailState.map.setLevel === "function") trailState.map.setLevel(13);
       trailState.map.setCenter(new kakao.maps.LatLng(36.10, 127.85));
     }catch(e){ console.warn("[가톨릭길동무]", e); }
