@@ -1698,49 +1698,6 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, var(--v4-retreat
 .missa-open-link { display: flex; align-items: center; justify-content: center; width: 100%; height: 48px; border-radius: 12px; background: #0e1535; color: var(--v4-gold); text-decoration: none; font-size: 16px; font-weight: 800; }
 
 #missa-frame { flex: 1 1 auto; min-height: 0; width: 100%; border: 0; background: #fffaf2; }
-/* V8-1-14-179-COVER-EXIT-TOAST: 매일미사·성경 iframe 진입 보호창에 로딩 십자가만 추가 */
-#missa-loading {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: calc(52px + env(safe-area-inset-top, 0px));
-  bottom: calc(68px + env(safe-area-inset-bottom, 0px));
-  z-index: 3;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 12px;
-  background: #fffaf2;
-  pointer-events: auto;
-  opacity: 1;
-  visibility: visible;
-}
-#missa-view.oai-faith-frame-loading #missa-loading {
-  display: flex;
-}
-#missa-loading .missa-spinner {
-  width: var(--oai-loading-cross-size, 36px);
-  height: var(--oai-loading-cross-size, 36px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--oai-loading-cross-color, #d4aa6a);
-  font-size: var(--oai-loading-cross-font, 32px);
-  line-height: 1;
-  animation: oaiUnifiedLoadingCrossSpin var(--oai-loading-cross-speed, 2.8s) linear infinite;
-}
-#missa-loading .missa-spinner::before {
-  content: "✝";
-  display: block;
-  font-weight: 900;
-}
-#missa-loading .missa-loading-txt {
-  font-size: 13px;
-  font-weight: 800;
-  color: rgba(111,79,35,.82);
-  letter-spacing: .01em;
-}
 .faith-bottom-nav {
   flex: 0 0 auto;
   display: flex;
@@ -8004,7 +7961,7 @@ html.oai-category-dissolve.oai-category-dissolving #oai-category-entry-veil{
 
 
 
-/* V8-1-14-179-COVER-EXIT-TOAST: 외부사이트 진입/복귀 보호창 단일화 최종 우선순위.
+/* V8-1-14-170-EXTERNAL-UNIFIED-RETURN: 외부사이트 진입/복귀 보호창 단일화 최종 우선순위.
    진입 십자가는 #oai-external-entry-guard, 복귀 십자가는 oai-external-return-freeze만 표시한다. */
 html.oai-stability-veil[data-oai-stability-reason="external-leave"]::before,
 html.oai-stability-veil[data-oai-stability-reason="external-leave"]::after,
