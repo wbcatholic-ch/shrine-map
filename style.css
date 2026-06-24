@@ -7961,7 +7961,7 @@ html.oai-category-dissolve.oai-category-dissolving #oai-category-entry-veil{
 
 
 
-/* V8-1-14-170-EXTERNAL-UNIFIED-RETURN: 외부사이트 진입/복귀 보호창 단일화 최종 우선순위.
+/* V8-1-14-171-QNA-FAST-ENTRY: 외부사이트 진입/복귀 보호창 단일화 최종 우선순위.
    진입 십자가는 #oai-external-entry-guard, 복귀 십자가는 oai-external-return-freeze만 표시한다. */
 html.oai-stability-veil[data-oai-stability-reason="external-leave"]::before,
 html.oai-stability-veil[data-oai-stability-reason="external-leave"]::after,
