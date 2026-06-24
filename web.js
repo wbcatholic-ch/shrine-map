@@ -724,11 +724,16 @@
   function fitTrailMapToBounds(){
     if(!(trailState.map && window.kakao && window.kakao.maps)) return;
     try{
-      // V8-1-14-177-INTRO-NO-BLEED:
-      // 첫 진입 시 setBounds가 먼저 중심을 이동시키고, 직후 setCenter가 다시 이동시키면서
-      // 지도가 두 번 중심 이동하는 현상이 있었다. 확대/축소 레벨은 그대로 두고
-      // 최종 기준 중심만 1회 적용한다.
-      trailState.map.setCenter(new kakao.maps.LatLng(36.10, 127.85));
+      const bounds = new kakao.maps.LatLngBounds();
+      TRAIL_ITEMS.forEach(function(d){ bounds.extend(new kakao.maps.LatLng(d.lat, d.lng)); });
+      trailState.map.setBounds(bounds);
+      setTimeout(function(){
+        try{
+          const lv = trailState.map.getLevel();
+          if(Number.isFinite(lv) && lv < 12) trailState.map.setLevel(12);
+          trailState.map.setCenter(new kakao.maps.LatLng(36.10, 127.85));
+        }catch(e){ console.warn("[가톨릭길동무]", e); }
+      }, 60);
     }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
 
