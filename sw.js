@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-174-DIOCESE-FAST-ENTRY';
-const ASSET_VERSION = 'V8-1-14-174-DIOCESE-FAST-ENTRY';
+const CACHE_VERSION = 'catholic-way-V8-1-14-175-TRAIL-SINGLE-CENTER';
+const ASSET_VERSION = 'V8-1-14-175-TRAIL-SINGLE-CENTER';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }
