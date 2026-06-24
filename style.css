@@ -1698,7 +1698,7 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, var(--v4-retreat
 .missa-open-link { display: flex; align-items: center; justify-content: center; width: 100%; height: 48px; border-radius: 12px; background: #0e1535; color: var(--v4-gold); text-decoration: none; font-size: 16px; font-weight: 800; }
 
 #missa-frame { flex: 1 1 auto; min-height: 0; width: 100%; border: 0; background: #fffaf2; }
-/* V8-1-14-188-NEARBY-MAP-NO-BLANK: 매일미사·성경 iframe 로딩 십자가는 표시하지 않는다 */
+/* V8-1-14-189-INTRO-ENTRY-RULE: 매일미사·성경 iframe 로딩 십자가는 표시하지 않는다 */
 #missa-loading {
   position: absolute;
   left: 0;
@@ -8004,7 +8004,7 @@ html.oai-category-dissolve.oai-category-dissolving #oai-category-entry-veil{
 
 
 
-/* V8-1-14-188-NEARBY-MAP-NO-BLANK: 외부사이트 진입/복귀 보호창 단일화 최종 우선순위.
+/* V8-1-14-189-INTRO-ENTRY-RULE: 외부사이트 진입/복귀 보호창 단일화 최종 우선순위.
    진입 십자가는 #oai-external-entry-guard, 복귀 십자가는 oai-external-return-freeze만 표시한다. */
 html.oai-stability-veil[data-oai-stability-reason="external-leave"]::before,
 html.oai-stability-veil[data-oai-stability-reason="external-leave"]::after,
@@ -8056,7 +8056,7 @@ html.oai-external-return-freeze::after{
 }
 
 
-/* V8-1-14-188-NEARBY-MAP-NO-BLANK: 외부사이트 복귀 보호창은 유지하고, 마지막 사라짐만 부드럽게 처리 */
+/* V8-1-14-189-INTRO-ENTRY-RULE: 외부사이트 복귀 보호창은 유지하고, 마지막 사라짐만 부드럽게 처리 */
 html.oai-external-return-freeze.oai-external-return-releasing::before,
 html.oai-external-return-freeze.oai-external-return-releasing::after{
   opacity:0!important;
@@ -8067,7 +8067,7 @@ html.oai-external-return-freeze.oai-external-return-releasing::after{
   animation:none!important;
 }
 
-/* V8-1-14-188-NEARBY-MAP-NO-BLANK: 매일미사·성경 로딩 십자가 강제 비표시 */
+/* V8-1-14-189-INTRO-ENTRY-RULE: 매일미사·성경 로딩 십자가 강제 비표시 */
 #missa-view.oai-faith-frame-loading #missa-loading{
   display:none!important;
   opacity:0!important;
@@ -8076,7 +8076,7 @@ html.oai-external-return-freeze.oai-external-return-releasing::after{
 }
 
 
-/* V8-1-14-188-NEARBY-MAP-NO-BLANK: Chrome/외부브라우저 복귀 때 진입 보호창 DOM을 즉시 숨기지 않고 복귀 보호창 위에서 그대로 이어 유지한다. */
+/* V8-1-14-189-INTRO-ENTRY-RULE: Chrome/외부브라우저 복귀 때 진입 보호창 DOM을 즉시 숨기지 않고 복귀 보호창 위에서 그대로 이어 유지한다. */
 html.oai-external-return-freeze #oai-external-entry-guard.show{
   display:flex!important;
   opacity:1!important;
@@ -8104,7 +8104,7 @@ html.oai-external-return-freeze #oai-external-entry-guard.hide .oai-external-ent
 }
 
 
-/* V8-1-14-188-NEARBY-MAP-NO-BLANK: 홈 버튼/짧은 백그라운드 복귀 때 WebView 재부착 흰 프레임을 가리는 무십자가 안정막 */
+/* V8-1-14-189-INTRO-ENTRY-RULE: 홈 버튼/짧은 백그라운드 복귀 때 WebView 재부착 흰 프레임을 가리는 무십자가 안정막 */
 html.oai-home-return-soft-veil:not(.oai-external-return-freeze):not(.oai-stability-veil):not(.oai-cover-booting)::before{
   content:""!important;
   position:fixed!important;
