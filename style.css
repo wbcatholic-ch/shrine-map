@@ -7959,3 +7959,55 @@ html.oai-category-dissolve.oai-category-dissolving #oai-category-entry-veil{
   animation:none!important;
 }
 
+
+
+/* V8-1-14-170-EXTERNAL-UNIFIED-RETURN: 외부사이트 진입/복귀 보호창 단일화 최종 우선순위.
+   진입 십자가는 #oai-external-entry-guard, 복귀 십자가는 oai-external-return-freeze만 표시한다. */
+html.oai-stability-veil[data-oai-stability-reason="external-leave"]::before,
+html.oai-stability-veil[data-oai-stability-reason="external-leave"]::after,
+html.oai-stability-veil[data-oai-stability-reason="external-return"]::before,
+html.oai-stability-veil[data-oai-stability-reason="external-return"]::after{
+  content:""!important;
+  display:none!important;
+  opacity:0!important;
+  visibility:hidden!important;
+  animation:none!important;
+}
+html.oai-external-return-freeze::before{
+  content:""!important;
+  position:fixed!important;
+  inset:0!important;
+  z-index:2147483000!important;
+  background:#fbf8f1!important;
+  opacity:1!important;
+  visibility:visible!important;
+  display:block!important;
+  animation:none!important;
+  transition:none!important;
+  pointer-events:none!important;
+}
+html.oai-external-return-freeze::after{
+  content:"✝"!important;
+  position:fixed!important;
+  left:50%!important;
+  top:50%!important;
+  width:var(--oai-loading-cross-size,36px)!important;
+  height:var(--oai-loading-cross-size,36px)!important;
+  margin:calc(var(--oai-loading-cross-size,36px) / -2) 0 0 calc(var(--oai-loading-cross-size,36px) / -2)!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  color:var(--oai-loading-cross-color,#d4aa6a)!important;
+  font-size:var(--oai-loading-cross-font,32px)!important;
+  font-weight:900!important;
+  line-height:1!important;
+  background:transparent!important;
+  border:0!important;
+  z-index:2147483001!important;
+  opacity:1!important;
+  visibility:visible!important;
+  pointer-events:none!important;
+  transform-origin:center center!important;
+  animation:oaiUnifiedLoadingCrossSpin var(--oai-loading-cross-speed,2.8s) linear infinite!important;
+  transition:none!important;
+}
