@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-187-RETURN-TIME-RULE';
-const ASSET_VERSION = 'V8-1-14-187-RETURN-TIME-RULE';
+const CACHE_VERSION = 'catholic-way-V8-1-14-188-NEARBY-MAP-NO-BLANK';
+const ASSET_VERSION = 'V8-1-14-188-NEARBY-MAP-NO-BLANK';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }
