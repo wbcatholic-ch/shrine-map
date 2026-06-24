@@ -1698,7 +1698,7 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, var(--v4-retreat
 .missa-open-link { display: flex; align-items: center; justify-content: center; width: 100%; height: 48px; border-radius: 12px; background: #0e1535; color: var(--v4-gold); text-decoration: none; font-size: 16px; font-weight: 800; }
 
 #missa-frame { flex: 1 1 auto; min-height: 0; width: 100%; border: 0; background: #fffaf2; }
-/* V8-1-14-176-MISSA-BIBLE-LOADING-CROSS: 매일미사·성경 iframe 진입 보호창에 로딩 십자가만 추가 */
+/* V8-1-14-177-INTRO-NO-BLEED: 매일미사·성경 iframe 진입 보호창에 로딩 십자가만 추가 */
 #missa-loading {
   position: absolute;
   left: 0;
@@ -6320,13 +6320,13 @@ html.oai-font-global #map-wrap #shrine-visit-map-filter > button[data-shrine-vis
 
 /* V8-1-14-164-STEP1-DIOCESE-EXTERNAL: Google 배포용 첫 커버 인트로는 금색 십자가 대신 업로드된 십자가 사진을 사용한다. */
 @keyframes oaiGoogleIntroPhotoDesktop{
-  0%{opacity:.02; transform:translate(-50%,-49%) scale(.94); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
+  0%{opacity:1; transform:translate(-50%,-49%) scale(.94); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
   42%{opacity:1; transform:translate(-50%,-50%) scale(1); filter:contrast(1.015) saturate(1.02) drop-shadow(0 6px 16px rgba(80,54,18,.05));}
   82%{opacity:1; transform:translate(-50%,-50%) scale(1); filter:contrast(1.015) saturate(1.02) drop-shadow(0 6px 16px rgba(80,54,18,.05));}
   100%{opacity:1; transform:translate(-50%,-50%) scale(1); filter:contrast(1.015) saturate(1.02) drop-shadow(0 6px 16px rgba(80,54,18,.05));}
 }
 @keyframes oaiGoogleIntroPhotoMobile{
-  0%{opacity:.02; transform:scale(.94); filter:contrast(1.005) saturate(1.01);}
+  0%{opacity:1; transform:scale(.985); filter:contrast(1.005) saturate(1.01);}
   42%{opacity:1; transform:scale(1); filter:contrast(1.015) saturate(1.02);}
   82%{opacity:1; transform:scale(1); filter:contrast(1.015) saturate(1.02);}
   100%{opacity:1; transform:scale(1); filter:contrast(1.015) saturate(1.02);}
@@ -6365,7 +6365,7 @@ html.oai-cover-revealing::after{
     linear-gradient(to right, #fbf8f1 0%, rgba(251,248,241,.96) 5%, rgba(251,248,241,.60) 13%, rgba(251,248,241,.16) 24%, rgba(251,248,241,0) 36%, rgba(251,248,241,0) 64%, rgba(251,248,241,.16) 76%, rgba(251,248,241,.60) 87%, rgba(251,248,241,.96) 95%, #fbf8f1 100%),
     linear-gradient(to bottom, #fbf8f1 0%, rgba(251,248,241,.90) 6%, rgba(251,248,241,.36) 17%, rgba(251,248,241,0) 30%, rgba(251,248,241,0) 70%, rgba(251,248,241,.36) 83%, rgba(251,248,241,.90) 94%, #fbf8f1 100%),
     radial-gradient(ellipse 96% 88% at 50% 48%, rgba(251,248,241,0) 50%, rgba(251,248,241,.08) 62%, rgba(251,248,241,.34) 76%, rgba(251,248,241,.76) 90%, rgba(251,248,241,1) 100%),
-    url("intro-cross-jesus.jpg?v=V8-1-14-164-STEP1-DIOCESE-EXTERNAL") !important;
+    url("intro-cross-jesus.jpg?v=V8-1-14-177-INTRO-NO-BLEED") !important;
   background-position:center center, center center, center center, center center !important;
   background-size:100% 100%, 100% 100%, 100% 100%, auto 106% !important;
   background-repeat:no-repeat, no-repeat, no-repeat, no-repeat !important;
@@ -6651,13 +6651,13 @@ html:not(.ios-device).oai-screen-compact-short #shrine-visit-cards-modal .shrine
 /* OAI-V75-INTRO-SCALE-VISIBLE-FINAL
    V8-1-14-164-STEP1-DIOCESE-EXTERNAL: 인트로 십자가 사진이 작은 상태에서 커지는 효과가 더 분명하게 보이도록 확대 시작값을 낮추고 중간 확대 단계를 추가한다. */
 @keyframes oaiGoogleIntroPhotoDesktop{
-  0%{opacity:.02; transform:translate(-50%,-49%) scale(.78); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
+  0%{opacity:1; transform:translate(-50%,-49%) scale(.78); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
   28%{opacity:.78; transform:translate(-50%,-50%) scale(.91); filter:contrast(1.012) saturate(1.018) drop-shadow(0 5px 14px rgba(80,54,18,.045));}
   62%{opacity:1; transform:translate(-50%,-50%) scale(1); filter:contrast(1.015) saturate(1.02) drop-shadow(0 6px 16px rgba(80,54,18,.05));}
   100%{opacity:1; transform:translate(-50%,-50%) scale(1); filter:contrast(1.015) saturate(1.02) drop-shadow(0 6px 16px rgba(80,54,18,.05));}
 }
 @keyframes oaiGoogleIntroPhotoMobile{
-  0%{opacity:.02; transform:scale(.78); filter:contrast(1.005) saturate(1.01);}
+  0%{opacity:1; transform:scale(.78); filter:contrast(1.005) saturate(1.01);}
   28%{opacity:.78; transform:scale(.91); filter:contrast(1.012) saturate(1.018);}
   62%{opacity:1; transform:scale(1); filter:contrast(1.015) saturate(1.02);}
   100%{opacity:1; transform:scale(1); filter:contrast(1.015) saturate(1.02);}
@@ -6700,14 +6700,14 @@ html.oai-stability-veil.oai-external-leaving::after{
 /* OAI-V78-INTRO-SLOW-GROWTH-FINAL
    V8-1-14-164-STEP1-DIOCESE-EXTERNAL: 인트로 전체 시간은 그대로 두고, 작은 상태에서 최종 크기까지 커지는 속도만 더 천천히 조정한다. */
 @keyframes oaiGoogleIntroPhotoDesktop{
-  0%{opacity:.02; transform:translate(-50%,-49%) scale(.78); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
+  0%{opacity:1; transform:translate(-50%,-49%) scale(.78); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
   32%{opacity:.72; transform:translate(-50%,-50%) scale(.86); filter:contrast(1.010) saturate(1.014) drop-shadow(0 5px 14px rgba(80,54,18,.040));}
   68%{opacity:1; transform:translate(-50%,-50%) scale(.95); filter:contrast(1.014) saturate(1.019) drop-shadow(0 6px 15px rgba(80,54,18,.048));}
   88%{opacity:1; transform:translate(-50%,-50%) scale(1); filter:contrast(1.015) saturate(1.02) drop-shadow(0 6px 16px rgba(80,54,18,.05));}
   100%{opacity:1; transform:translate(-50%,-50%) scale(1); filter:contrast(1.015) saturate(1.02) drop-shadow(0 6px 16px rgba(80,54,18,.05));}
 }
 @keyframes oaiGoogleIntroPhotoMobile{
-  0%{opacity:.02; transform:scale(.78); filter:contrast(1.005) saturate(1.01);}
+  0%{opacity:1; transform:scale(.78); filter:contrast(1.005) saturate(1.01);}
   32%{opacity:.72; transform:scale(.86); filter:contrast(1.010) saturate(1.014);}
   68%{opacity:1; transform:scale(.95); filter:contrast(1.014) saturate(1.019);}
   88%{opacity:1; transform:scale(1); filter:contrast(1.015) saturate(1.02);}
@@ -6768,7 +6768,7 @@ html:not(.ios-device) .shrine-visit-cards-modal .shrine-visit-cards-head .module
 /* OAI-V80-INTRO-GROWTH-CLEAR-FINAL
    V8-1-14-164-STEP1-DIOCESE-EXTERNAL: 인트로 전체 시간은 그대로 두고, 작게 시작해 거의 끝까지 천천히 커지는 동작이 눈에 보이도록 확대 폭을 더 크게 조정한다. */
 @keyframes oaiGoogleIntroPhotoDesktop{
-  0%{opacity:.02; transform:translate(-50%,-49%) scale(.60); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
+  0%{opacity:1; transform:translate(-50%,-49%) scale(.60); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
   28%{opacity:.62; transform:translate(-50%,-50%) scale(.74); filter:contrast(1.010) saturate(1.014) drop-shadow(0 5px 14px rgba(80,54,18,.040));}
   58%{opacity:1; transform:translate(-50%,-50%) scale(.88); filter:contrast(1.014) saturate(1.019) drop-shadow(0 6px 15px rgba(80,54,18,.048));}
   84%{opacity:1; transform:translate(-50%,-50%) scale(.97); filter:contrast(1.015) saturate(1.02) drop-shadow(0 6px 16px rgba(80,54,18,.05));}
@@ -6776,7 +6776,7 @@ html:not(.ios-device) .shrine-visit-cards-modal .shrine-visit-cards-head .module
   100%{opacity:1; transform:translate(-50%,-50%) scale(1); filter:contrast(1.015) saturate(1.02) drop-shadow(0 6px 16px rgba(80,54,18,.05));}
 }
 @keyframes oaiGoogleIntroPhotoMobile{
-  0%{opacity:.02; transform:scale(.60); filter:contrast(1.005) saturate(1.01);}
+  0%{opacity:1; transform:scale(.60); filter:contrast(1.005) saturate(1.01);}
   28%{opacity:.62; transform:scale(.74); filter:contrast(1.010) saturate(1.014);}
   58%{opacity:1; transform:scale(.88); filter:contrast(1.014) saturate(1.019);}
   84%{opacity:1; transform:scale(.97); filter:contrast(1.015) saturate(1.02);}
@@ -6792,14 +6792,14 @@ html.oai-cover-revealing::after{
 /* OAI-V81-INTRO-SLOWER-GROWTH-FINAL
    V8-1-14-164-STEP1-DIOCESE-EXTERNAL: 인트로 전체 시간은 그대로 두고, 십자가 확대가 거의 끝까지 계속되도록 더 천천히 조정한다. */
 @keyframes oaiGoogleIntroPhotoDesktop{
-  0%{opacity:.02; transform:translate(-50%,-49%) scale(.54); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
+  0%{opacity:1; transform:translate(-50%,-49%) scale(.54); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
   42%{opacity:.60; transform:translate(-50%,-50%) scale(.66); filter:contrast(1.010) saturate(1.014) drop-shadow(0 5px 14px rgba(80,54,18,.040));}
   72%{opacity:.92; transform:translate(-50%,-50%) scale(.82); filter:contrast(1.014) saturate(1.019) drop-shadow(0 6px 15px rgba(80,54,18,.048));}
   92%{opacity:1; transform:translate(-50%,-50%) scale(.94); filter:contrast(1.015) saturate(1.02) drop-shadow(0 6px 16px rgba(80,54,18,.05));}
   100%{opacity:1; transform:translate(-50%,-50%) scale(1); filter:contrast(1.015) saturate(1.02) drop-shadow(0 6px 16px rgba(80,54,18,.05));}
 }
 @keyframes oaiGoogleIntroPhotoMobile{
-  0%{opacity:.02; transform:scale(.54); filter:contrast(1.005) saturate(1.01);}
+  0%{opacity:1; transform:scale(.54); filter:contrast(1.005) saturate(1.01);}
   42%{opacity:.60; transform:scale(.66); filter:contrast(1.010) saturate(1.014);}
   72%{opacity:.92; transform:scale(.82); filter:contrast(1.014) saturate(1.019);}
   92%{opacity:1; transform:scale(.94); filter:contrast(1.015) saturate(1.02);}
@@ -6836,14 +6836,14 @@ html.oai-cover-revealing::after{
 /* OAI-V84-INTRO-LOCATION-FAST-FINAL
    V8-1-14-164-STEP1-DIOCESE-EXTERNAL: 인트로는 전체 길이와 확대 폭을 줄이고, 위치는 짧은 최신 캐시/빠른 위치 우선으로 다시 빠르게 조정한다. */
 @keyframes oaiGoogleIntroPhotoDesktop{
-  0%{opacity:.10; transform:translate(-50%,-49%) scale(.78); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
+  0%{opacity:1; transform:translate(-50%,-49%) scale(.78); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
   18%{opacity:.76; transform:translate(-50%,-50%) scale(.84); filter:contrast(1.010) saturate(1.014) drop-shadow(0 5px 14px rgba(80,54,18,.040));}
   46%{opacity:1; transform:translate(-50%,-50%) scale(.93); filter:contrast(1.014) saturate(1.019) drop-shadow(0 6px 15px rgba(80,54,18,.048));}
   76%{opacity:1; transform:translate(-50%,-50%) scale(1); filter:contrast(1.015) saturate(1.02) drop-shadow(0 6px 16px rgba(80,54,18,.05));}
   100%{opacity:1; transform:translate(-50%,-50%) scale(1); filter:contrast(1.015) saturate(1.02) drop-shadow(0 6px 16px rgba(80,54,18,.05));}
 }
 @keyframes oaiGoogleIntroPhotoMobile{
-  0%{opacity:.10; transform:scale(.78); filter:contrast(1.005) saturate(1.01);}
+  0%{opacity:1; transform:scale(.985); filter:contrast(1.005) saturate(1.01);}
   18%{opacity:.76; transform:scale(.84); filter:contrast(1.010) saturate(1.014);}
   46%{opacity:1; transform:scale(.93); filter:contrast(1.014) saturate(1.019);}
   76%{opacity:1; transform:scale(1); filter:contrast(1.015) saturate(1.02);}
@@ -6863,11 +6863,11 @@ html.oai-cover-revealing::after{
 /* OAI-V85-INTRO-SMOOTH-NO-STUTTER-FINAL
    V8-1-14-164-STEP1-DIOCESE-EXTERNAL: 인트로 속도는 유지하고, 중간 끊김처럼 보이던 다단계 확대를 전용 keyframes의 단일 연속 곡선으로 정리한다. */
 @keyframes oaiIntroSmoothPhotoDesktopV85{
-  0%{opacity:.12; transform:translate(-50%,-49%) scale(.84); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
+  0%{opacity:1; transform:translate(-50%,-50%) scale(.985); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
   100%{opacity:1; transform:translate(-50%,-50%) scale(1); filter:contrast(1.015) saturate(1.02) drop-shadow(0 6px 16px rgba(80,54,18,.05));}
 }
 @keyframes oaiIntroSmoothPhotoMobileV85{
-  0%{opacity:.12; transform:scale(.84); filter:contrast(1.005) saturate(1.01);}
+  0%{opacity:1; transform:scale(.985); filter:contrast(1.005) saturate(1.01);}
   100%{opacity:1; transform:scale(1); filter:contrast(1.015) saturate(1.02);}
 }
 html.oai-cover-booting::after,
@@ -8004,7 +8004,7 @@ html.oai-category-dissolve.oai-category-dissolving #oai-category-entry-veil{
 
 
 
-/* V8-1-14-176-MISSA-BIBLE-LOADING-CROSS: 외부사이트 진입/복귀 보호창 단일화 최종 우선순위.
+/* V8-1-14-177-INTRO-NO-BLEED: 외부사이트 진입/복귀 보호창 단일화 최종 우선순위.
    진입 십자가는 #oai-external-entry-guard, 복귀 십자가는 oai-external-return-freeze만 표시한다. */
 html.oai-stability-veil[data-oai-stability-reason="external-leave"]::before,
 html.oai-stability-veil[data-oai-stability-reason="external-leave"]::after,
@@ -8053,4 +8053,61 @@ html.oai-external-return-freeze::after{
   transform-origin:center center!important;
   animation:oaiUnifiedLoadingCrossSpin var(--oai-loading-cross-speed,2.8s) linear infinite!important;
   transition:none!important;
+}
+
+
+/* OAI-V177-INTRO-NO-BLEED-FINAL
+   V8-1-14-177-INTRO-NO-BLEED: 인트로 십자가 시작/끝의 흰색 새어 보임을 제거한다.
+   사진 opacity를 처음부터 1로 고정하고, 추가 흰색 그라데이션/마스크를 사용하지 않는다. */
+@keyframes oaiIntroNoBleedDesktopV177{
+  0%{opacity:1; transform:translate(-50%,-50%) scale(.985); filter:contrast(1.012) saturate(1.018) drop-shadow(0 5px 14px rgba(80,54,18,.045));}
+  100%{opacity:1; transform:translate(-50%,-50%) scale(1); filter:contrast(1.015) saturate(1.02) drop-shadow(0 6px 16px rgba(80,54,18,.05));}
+}
+@keyframes oaiIntroNoBleedMobileV177{
+  0%{opacity:1; transform:scale(.985); filter:contrast(1.012) saturate(1.018);}
+  100%{opacity:1; transform:scale(1); filter:contrast(1.015) saturate(1.02);}
+}
+html.oai-cover-booting::after,
+html.oai-cover-revealing::after{
+  content:""!important;
+  background-image:url("intro-cross-jesus.jpg?v=V8-1-14-177-INTRO-NO-BLEED")!important;
+  background-position:center center!important;
+  background-size:auto 106%!important;
+  background-repeat:no-repeat!important;
+  background-color:transparent!important;
+  box-shadow:0 0 0 999px #fbf8f1,0 8px 18px rgba(80,54,18,.04)!important;
+  -webkit-mask-image:none!important;
+  mask-image:none!important;
+  opacity:1!important;
+  animation-name:oaiIntroNoBleedDesktopV177!important;
+  animation-duration:1.85s!important;
+  animation-timing-function:cubic-bezier(.22,.61,.36,1)!important;
+  animation-fill-mode:both!important;
+  will-change:transform!important;
+  backface-visibility:hidden!important;
+}
+html.oai-cover-revealing::before{
+  background:transparent!important;
+  opacity:0!important;
+  transition:opacity .22s ease-out!important;
+}
+html.oai-cover-revealing::after{
+  opacity:0!important;
+  transition:opacity .22s ease-out!important;
+}
+@media (max-width:540px) and (max-aspect-ratio:3/4){
+  html.oai-cover-booting::after,
+  html.oai-cover-revealing::after{
+    left:0!important;
+    top:0!important;
+    width:100vw!important;
+    height:100vh!important;
+    transform:none!important;
+    border-radius:0!important;
+    background-image:url("intro-cross-jesus.jpg?v=V8-1-14-177-INTRO-NO-BLEED")!important;
+    background-position:center center!important;
+    background-size:auto 108%!important;
+    background-repeat:no-repeat!important;
+    animation-name:oaiIntroNoBleedMobileV177!important;
+  }
 }
