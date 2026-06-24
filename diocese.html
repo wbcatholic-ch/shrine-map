@@ -1994,8 +1994,18 @@ window.addEventListener('pageshow',function(){
         if(typeof window.parent.markExternalReturnStabilize === 'function') window.parent.markExternalReturnStabilize('diocese-external');
       }catch(e){}
       document.documentElement.classList.remove('oai-dio-external-stabilize','oai-dio-external-return','oai-dio-returning');
-      try{ window.top.location.assign(url); }
-      catch(e){ try{ window.top.location.href = url; }catch(_e){ window.__OAI_DIO_EXTERNAL_LEAVING__ = false; } }
+      try{
+        if(typeof window.parent.oaiShowExternalEntryGuard === 'function') window.parent.oaiShowExternalEntryGuard('diocese-external');
+      }catch(e){}
+      var navDelay = 550;
+      try{
+        var parentDelay = parseInt(window.parent.OAI_EXTERNAL_ENTRY_NAV_DELAY_MS || '0', 10) || 0;
+        if(parentDelay >= 300 && parentDelay <= 1200) navDelay = parentDelay;
+      }catch(e){}
+      setTimeout(function(){
+        try{ window.top.location.assign(url); }
+        catch(e){ try{ window.top.location.href = url; }catch(_e){ window.__OAI_DIO_EXTERNAL_LEAVING__ = false; } }
+      }, navDelay);
       setTimeout(function(){
         try{
           if(document.visibilityState !== 'hidden') window.__OAI_DIO_EXTERNAL_LEAVING__ = false;
