@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-192-button-border-weight';
-const ASSET_VERSION = 'V8-1-14-192-button-border-weight';
+const CACHE_VERSION = 'catholic-way-V8-1-14-193-button-color-clarity';
+const ASSET_VERSION = 'V8-1-14-193-button-color-clarity';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }
