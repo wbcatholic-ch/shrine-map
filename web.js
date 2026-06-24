@@ -724,10 +724,10 @@
   function fitTrailMapToBounds(){
     if(!(trailState.map && window.kakao && window.kakao.maps)) return;
     try{
-      // V8-1-14-181-NEARBY-LOADING-ONCE:
-      // 첫 진입 시 setBounds가 먼저 중심을 이동시키고, 직후 setCenter가 다시 이동시키면서
-      // 지도가 두 번 중심 이동하는 현상이 있었다. 확대/축소 레벨은 그대로 두고
-      // 최종 기준 중심만 1회 적용한다.
+      // V8-1-14-182-RETURN-CLEAN-TRAIL-ZOOM:
+      // 첫 진입 시 setBounds를 되살리지 않고 중심 이동은 1회로 유지한다.
+      // 다만 기본 줌이 너무 확대되어 보이지 않도록 전국 순례길 기준으로 한 단계 넓게 둔다.
+      if(typeof trailState.map.setLevel === "function") trailState.map.setLevel(13);
       trailState.map.setCenter(new kakao.maps.LatLng(36.10, 127.85));
     }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -776,7 +776,7 @@
       }
       const container = ig$('trail-map');
       if(!container || !(window.kakao && window.kakao.maps)) return;
-      trailState.map = new kakao.maps.Map(container, { center:new kakao.maps.LatLng(36.10,127.85), level:12 });
+      trailState.map = new kakao.maps.Map(container, { center:new kakao.maps.LatLng(36.10,127.85), level:13 });
       trailState.map.addControl(new kakao.maps.ZoomControl(), kakao.maps.ControlPosition.RIGHT);
       if(trailState.restoreCenter && Number.isFinite(Number(trailState.restoreCenter.lat)) && Number.isFinite(Number(trailState.restoreCenter.lng))){
         try{ trailState.map.setCenter(new kakao.maps.LatLng(Number(trailState.restoreCenter.lat), Number(trailState.restoreCenter.lng))); }catch(e){ console.warn("[가톨릭길동무]", e); }

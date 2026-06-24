@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-181-NEARBY-LOADING-ONCE';
-const ASSET_VERSION = 'V8-1-14-181-NEARBY-LOADING-ONCE';
+const CACHE_VERSION = 'catholic-way-V8-1-14-182-RETURN-CLEAN-TRAIL-ZOOM';
+const ASSET_VERSION = 'V8-1-14-182-RETURN-CLEAN-TRAIL-ZOOM';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }
