@@ -724,7 +724,7 @@
   function fitTrailMapToBounds(){
     if(!(trailState.map && window.kakao && window.kakao.maps)) return;
     try{
-      // V8-1-14-178-INTRO-GROW-NO-FLASH:
+      // V8-1-14-179-COVER-EXIT-TOAST:
       // 첫 진입 시 setBounds가 먼저 중심을 이동시키고, 직후 setCenter가 다시 이동시키면서
       // 지도가 두 번 중심 이동하는 현상이 있었다. 확대/축소 레벨은 그대로 두고
       // 최종 기준 중심만 1회 적용한다.

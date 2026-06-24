@@ -16,8 +16,22 @@
       opts = opts || {};
       var href = location.href.split('#')[0];
       _href = href;
+
+      /* V8-1-14-179-COVER-EXIT-TOAST:
+         커버 trap을 새로 장착할 때는 오래 남아 있던 종료 armed 상태를 먼저 비운다.
+         단, 첫 Back에서 토스트를 띄운 직후 다시 trap을 심는 cover-toast 경로만 종료 창을 유지한다. */
+      if(!opts.keepExitArmed){
+        try{ if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady(); }catch(_e){}
+        try{ if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed(); }catch(_e){}
+        try{ if(typeof window._clearHardCoverExitFlags === 'function') window._clearHardCoverExitFlags(reason || 'cover-trap'); }catch(_e){}
+      }
+
       var st = history.state;
       if(!opts.force && st && st._p === 1 && st.oai_cover_trap) return;
+      if(st && st._p === 1 && !st.oai_cover_trap){
+        history.replaceState({_p:1, oai_cover_trap:reason||'cover-trap'}, '', href);
+        return;
+      }
       history.replaceState({_p:0, oai_cover_root:reason||'cover-root'}, '', href);
       history.pushState({_p:1, oai_cover_trap:reason||'cover-trap'}, '', href);
     }catch(e){
@@ -92,7 +106,12 @@
 
   function stabilizeCoverFirstBack(reason){
     try{
-      try{ if(window.oaiReturnConductorBusy && window.oaiReturnConductorBusy(['cover-back','passive'])) return false; }catch(_e){}
+      try{
+        if(window.oaiReturnConductorBusy && window.oaiReturnConductorBusy(['cover-back','passive'])){
+          setTimeout(function(){ try{ stabilizeCoverFirstBack((reason || 'cover-return-stabilize') + '-retry'); }catch(_e){} }, 320);
+          return false;
+        }
+      }catch(_e){}
       if(!isCoverOnlyVisible()) return false;
       if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady();
       if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed();
@@ -134,6 +153,27 @@
     return false;
   }
   try{ window._oaiSuppressNextCoverBackToast = suppressNextCoverBackToast; }catch(_e){}
+  function showCoverExitToastFallback(){
+    try{
+      if(window._showBackToast && typeof window._showBackToast === 'function') return window._showBackToast() === true;
+      var old = document.getElementById('_bt');
+      if(old && old.parentNode) old.parentNode.removeChild(old);
+      var t = document.createElement('div');
+      t.id = '_bt';
+      t.textContent = '한 번 더 누르면 앱이 종료됩니다';
+      t.style.cssText = 'position:fixed;top:50%;left:50%;bottom:auto;transform:translate(-50%,-50%);background:rgba(14,21,53,.94);color:#fff;padding:12px 24px;border-radius:24px;font-size:14px;font-weight:800;z-index:2147483600;white-space:nowrap;pointer-events:none;box-shadow:0 14px 36px rgba(0,0,0,.32);';
+      if(document.body) document.body.appendChild(t);
+      window.__oaiCoverExitUntil = now() + 2500;
+      try{ sessionStorage.setItem('oai_cover_exit_armed_until', String(window.__oaiCoverExitUntil)); }catch(_e){}
+      clearTimeout(window.__OAI_COVER_EXIT_FALLBACK_TIMER__);
+      window.__OAI_COVER_EXIT_FALLBACK_TIMER__ = setTimeout(function(){
+        try{ var e=document.getElementById('_bt'); if(e && e.parentNode) e.parentNode.removeChild(e); }catch(_e){}
+        try{ window.__oaiCoverExitUntil=0; sessionStorage.removeItem('oai_cover_exit_armed_until'); }catch(_e){}
+      },2500);
+      return false;
+    }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
+  }
+
   function closeRefreshDialog(){
     try{
       var el = document.getElementById('oai-refresh-content-dialog');
@@ -430,8 +470,8 @@
     if(!appActive()){
       if(consumeSuppressedCoverBackToast()) return;
       var exiting = false;
-      if(typeof window._showBackToast==='function') exiting = window._showBackToast() === true;
-      if(!exiting){ armCoverBackTrap('cover-toast'); }
+      exiting = showCoverExitToastFallback() === true;
+      if(!exiting){ armCoverBackTrap('cover-toast', {keepExitArmed:true}); }
       return;
     }
 
@@ -462,7 +502,8 @@
     }
     if(!appActive()){
       if(consumeSuppressedCoverBackToast()) return;
-      if(typeof window._showBackToast==='function') window._showBackToast();
+      showCoverExitToastFallback();
+      armCoverBackTrap('cover-toast-hardware', {keepExitArmed:true});
       return;
     }
     if(closeModuleInnerLayer()){ return; }
