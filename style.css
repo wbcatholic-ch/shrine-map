@@ -1698,6 +1698,49 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, var(--v4-retreat
 .missa-open-link { display: flex; align-items: center; justify-content: center; width: 100%; height: 48px; border-radius: 12px; background: #0e1535; color: var(--v4-gold); text-decoration: none; font-size: 16px; font-weight: 800; }
 
 #missa-frame { flex: 1 1 auto; min-height: 0; width: 100%; border: 0; background: #fffaf2; }
+/* V8-1-14-178-INTRO-GROW-NO-FLASH: 매일미사·성경 iframe 진입 보호창에 로딩 십자가만 추가 */
+#missa-loading {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: calc(52px + env(safe-area-inset-top, 0px));
+  bottom: calc(68px + env(safe-area-inset-bottom, 0px));
+  z-index: 3;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  gap: 12px;
+  background: #fffaf2;
+  pointer-events: auto;
+  opacity: 1;
+  visibility: visible;
+}
+#missa-view.oai-faith-frame-loading #missa-loading {
+  display: flex;
+}
+#missa-loading .missa-spinner {
+  width: var(--oai-loading-cross-size, 36px);
+  height: var(--oai-loading-cross-size, 36px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--oai-loading-cross-color, #d4aa6a);
+  font-size: var(--oai-loading-cross-font, 32px);
+  line-height: 1;
+  animation: oaiUnifiedLoadingCrossSpin var(--oai-loading-cross-speed, 2.8s) linear infinite;
+}
+#missa-loading .missa-spinner::before {
+  content: "✝";
+  display: block;
+  font-weight: 900;
+}
+#missa-loading .missa-loading-txt {
+  font-size: 13px;
+  font-weight: 800;
+  color: rgba(111,79,35,.82);
+  letter-spacing: .01em;
+}
 .faith-bottom-nav {
   flex: 0 0 auto;
   display: flex;
@@ -6317,35 +6360,23 @@ html.oai-cover-revealing::after{
   z-index:2147482501 !important;
   width:min(84vw, 540px) !important;
   height:min(84vh, 740px) !important;
-  transform:translate(-50%,-50%) scale(.54);
-  background-image:
-    linear-gradient(to right, #fbf8f1 0%, rgba(251,248,241,.96) 5%, rgba(251,248,241,.60) 13%, rgba(251,248,241,.16) 24%, rgba(251,248,241,0) 36%, rgba(251,248,241,0) 64%, rgba(251,248,241,.16) 76%, rgba(251,248,241,.60) 87%, rgba(251,248,241,.96) 95%, #fbf8f1 100%),
-    linear-gradient(to bottom, #fbf8f1 0%, rgba(251,248,241,.90) 6%, rgba(251,248,241,.36) 17%, rgba(251,248,241,0) 30%, rgba(251,248,241,0) 70%, rgba(251,248,241,.36) 83%, rgba(251,248,241,.90) 94%, #fbf8f1 100%),
-    radial-gradient(ellipse 96% 88% at 50% 48%, rgba(251,248,241,0) 50%, rgba(251,248,241,.08) 62%, rgba(251,248,241,.34) 76%, rgba(251,248,241,.76) 90%, rgba(251,248,241,1) 100%),
-    url("intro-cross-jesus.jpg?v=V8-1-14-164-STEP1-DIOCESE-EXTERNAL") !important;
-  background-position:center center, center center, center center, center center !important;
-  background-size:100% 100%, 100% 100%, 100% 100%, auto 106% !important;
-  background-repeat:no-repeat, no-repeat, no-repeat, no-repeat !important;
+  transform:translate(-50%,-50%) scale(.84);
+  background-image:url("intro-cross-jesus.jpg?v=V8-1-14-178-INTRO-GROW-NO-FLASH") !important;
+  background-position:center center !important;
+  background-size:auto 106% !important;
+  background-repeat:no-repeat !important;
   border-radius:38px !important;
-  background-color:#fbf8f1 !important;
-  box-shadow:
-    0 0 0 999px #fbf8f1,
-    0 8px 18px rgba(80,54,18,.05),
-    inset 0 0 72px rgba(251,248,241,.28),
-    inset 0 0 150px rgba(251,248,241,.18) !important;
-  -webkit-mask-image:
-    linear-gradient(to right, transparent 0%, rgba(0,0,0,.35) 6%, rgba(0,0,0,.82) 15%, #000 28%, #000 72%, rgba(0,0,0,.82) 85%, rgba(0,0,0,.35) 94%, transparent 100%),
-    linear-gradient(to bottom, transparent 0%, rgba(0,0,0,.50) 5%, rgba(0,0,0,.90) 13%, #000 24%, #000 76%, rgba(0,0,0,.90) 87%, rgba(0,0,0,.50) 95%, transparent 100%) !important;
-  -webkit-mask-composite:source-in !important;
-  mask-image:
-    linear-gradient(to right, transparent 0%, rgba(0,0,0,.35) 6%, rgba(0,0,0,.82) 15%, #000 28%, #000 72%, rgba(0,0,0,.82) 85%, rgba(0,0,0,.35) 94%, transparent 100%),
-    linear-gradient(to bottom, transparent 0%, rgba(0,0,0,.50) 5%, rgba(0,0,0,.90) 13%, #000 24%, #000 76%, rgba(0,0,0,.90) 87%, rgba(0,0,0,.50) 95%, transparent 100%) !important;
-  mask-composite:intersect !important;
+  background-color:transparent !important;
+  box-shadow:0 0 0 999px #fbf8f1, 0 8px 18px rgba(80,54,18,.05) !important;
+  -webkit-mask-image:none !important;
+  mask-image:none !important;
   pointer-events:none !important;
   display:block !important;
   visibility:visible !important;
   opacity:1 !important;
-  animation:oaiGoogleIntroPhotoDesktop 2.45s cubic-bezier(.18,.76,.22,1) both !important;
+  animation:oaiIntroSmoothPhotoDesktopV85 1.85s cubic-bezier(.22,.61,.36,1) both !important;
+  will-change:transform,opacity !important;
+  backface-visibility:hidden !important;
 }
 html.oai-cover-revealing::before,
 html.oai-cover-revealing::after{
@@ -6361,7 +6392,7 @@ html.oai-cover-revealing::after{
     height:100vh !important;
     transform:none;
     border-radius:0 !important;
-    background-size:100% 100%, 100% 100%, 100% 100%, auto 108% !important;
+    background-size:auto 108% !important;
     -webkit-mask-image:none !important;
     mask-image:none !important;
     box-shadow:0 0 0 999px #fbf8f1 !important;
@@ -6793,14 +6824,14 @@ html.oai-cover-revealing::after{
 /* OAI-V84-INTRO-LOCATION-FAST-FINAL
    V8-1-14-164-STEP1-DIOCESE-EXTERNAL: 인트로는 전체 길이와 확대 폭을 줄이고, 위치는 짧은 최신 캐시/빠른 위치 우선으로 다시 빠르게 조정한다. */
 @keyframes oaiGoogleIntroPhotoDesktop{
-  0%{opacity:.10; transform:translate(-50%,-49%) scale(.78); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
+  0%{opacity:1; transform:translate(-50%,-49%) scale(.78); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
   18%{opacity:.76; transform:translate(-50%,-50%) scale(.84); filter:contrast(1.010) saturate(1.014) drop-shadow(0 5px 14px rgba(80,54,18,.040));}
   46%{opacity:1; transform:translate(-50%,-50%) scale(.93); filter:contrast(1.014) saturate(1.019) drop-shadow(0 6px 15px rgba(80,54,18,.048));}
   76%{opacity:1; transform:translate(-50%,-50%) scale(1); filter:contrast(1.015) saturate(1.02) drop-shadow(0 6px 16px rgba(80,54,18,.05));}
   100%{opacity:1; transform:translate(-50%,-50%) scale(1); filter:contrast(1.015) saturate(1.02) drop-shadow(0 6px 16px rgba(80,54,18,.05));}
 }
 @keyframes oaiGoogleIntroPhotoMobile{
-  0%{opacity:.10; transform:scale(.78); filter:contrast(1.005) saturate(1.01);}
+  0%{opacity:1; transform:scale(.78); filter:contrast(1.005) saturate(1.01);}
   18%{opacity:.76; transform:scale(.84); filter:contrast(1.010) saturate(1.014);}
   46%{opacity:1; transform:scale(.93); filter:contrast(1.014) saturate(1.019);}
   76%{opacity:1; transform:scale(1); filter:contrast(1.015) saturate(1.02);}
@@ -6820,11 +6851,11 @@ html.oai-cover-revealing::after{
 /* OAI-V85-INTRO-SMOOTH-NO-STUTTER-FINAL
    V8-1-14-164-STEP1-DIOCESE-EXTERNAL: 인트로 속도는 유지하고, 중간 끊김처럼 보이던 다단계 확대를 전용 keyframes의 단일 연속 곡선으로 정리한다. */
 @keyframes oaiIntroSmoothPhotoDesktopV85{
-  0%{opacity:.12; transform:translate(-50%,-49%) scale(.84); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
+  0%{opacity:1; transform:translate(-50%,-49%) scale(.84); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
   100%{opacity:1; transform:translate(-50%,-50%) scale(1); filter:contrast(1.015) saturate(1.02) drop-shadow(0 6px 16px rgba(80,54,18,.05));}
 }
 @keyframes oaiIntroSmoothPhotoMobileV85{
-  0%{opacity:.12; transform:scale(.84); filter:contrast(1.005) saturate(1.01);}
+  0%{opacity:1; transform:scale(.84); filter:contrast(1.005) saturate(1.01);}
   100%{opacity:1; transform:scale(1); filter:contrast(1.015) saturate(1.02);}
 }
 html.oai-cover-booting::after,
@@ -7961,7 +7992,7 @@ html.oai-category-dissolve.oai-category-dissolving #oai-category-entry-veil{
 
 
 
-/* V8-1-14-174-DIOCESE-FAST-ENTRY: 외부사이트 진입/복귀 보호창 단일화 최종 우선순위.
+/* V8-1-14-178-INTRO-GROW-NO-FLASH: 외부사이트 진입/복귀 보호창 단일화 최종 우선순위.
    진입 십자가는 #oai-external-entry-guard, 복귀 십자가는 oai-external-return-freeze만 표시한다. */
 html.oai-stability-veil[data-oai-stability-reason="external-leave"]::before,
 html.oai-stability-veil[data-oai-stability-reason="external-leave"]::after,
