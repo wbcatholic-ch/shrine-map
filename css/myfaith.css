@@ -310,7 +310,7 @@
 }
 
 
-/* V8-1-14-206-my-info-fullscreen-restore-fix: 나의 신앙생활 하단 내 정보 관리 내부창 */
+/* V8-1-14-207-my-info-section-clarity: 나의 신앙생활 하단 내 정보 관리 내부창 */
 .my-faith-data-section {
   margin-top: 22px !important;
   border: 0 !important;
@@ -523,7 +523,7 @@
   .my-faith-data-actions { grid-template-columns: 1fr !important; }
 }
 
-/* V8-1-14-206-my-info-fullscreen-restore-fix: 내 정보 백업/복원/공유 진행 상태 표시 */
+/* V8-1-14-207-my-info-section-clarity: 내 정보 백업/복원/공유 진행 상태 표시 */
 .my-faith-info-action-status {
   display: block !important;
   margin: 0 16px 10px !important;
@@ -578,7 +578,7 @@
   to { transform: rotate(360deg); }
 }
 
-/* V8-1-14-206-my-info-fullscreen-restore-fix: 카카오톡용 백업 코드 복사/복원 UI */
+/* V8-1-14-207-my-info-section-clarity: 카카오톡용 백업 코드 복사/복원 UI */
 .my-faith-data-code-backup-btn {
   color: #14532D !important;
   border: 2.5px solid rgba(34,139,74,.68) !important;
@@ -671,7 +671,7 @@
   cursor: wait !important;
 }
 
-/* V8-1-14-206-my-info-fullscreen-restore-fix: 내 정보 관리 파일/코드 묶음 구분 */
+/* V8-1-14-207-my-info-section-clarity: 내 정보 관리 파일/코드 묶음 구분 */
 .my-faith-data-action-group {
   margin: 0 16px 16px !important;
   padding: 13px 12px 14px !important;
@@ -721,7 +721,7 @@
   margin: 13px 0 0 !important;
 }
 
-/* V8-1-14-206-my-info-fullscreen-restore-fix: 내 정보 관리를 작은 팝업이 아니라 전체 화면 관리창으로 표시 */
+/* V8-1-14-207-my-info-section-clarity: 내 정보 관리를 작은 팝업이 아니라 전체 화면 관리창으로 표시 */
 .my-faith-info-layer {
   position: fixed !important;
   inset: 0 !important;
@@ -792,4 +792,86 @@
 .my-faith-data-action-group,
 .my-faith-info-action-status {
   max-width: 560px !important;
+}
+
+
+/* V8-1-14-207-my-info-section-clarity: 내 정보 관리의 파일/코드 영역을 더 명확하게 구분 */
+.my-faith-info-content .my-faith-data-desc {
+  margin: 0 16px 18px !important;
+  padding: 13px 14px !important;
+  border-radius: 16px !important;
+  border: 2px solid rgba(183,121,31,.34) !important;
+  background: linear-gradient(180deg,#fffdf8 0%,#fff3dc 100%) !important;
+  color: #4b3313 !important;
+  font-size: calc(13.4px * var(--app-font-scale,1)) !important;
+  font-weight: 950 !important;
+  line-height: 1.36 !important;
+  text-align: center !important;
+  box-shadow: 0 5px 13px rgba(91,64,28,.07) !important;
+}
+.my-faith-data-action-group {
+  margin: 0 16px 30px !important;
+  padding: 0 14px 17px !important;
+  border-radius: 22px !important;
+  border-width: 3px !important;
+  overflow: hidden !important;
+  box-shadow: 0 8px 18px rgba(31,42,68,.08), inset 0 1px 0 rgba(255,255,255,.88) !important;
+}
+.my-faith-data-action-group.is-file-backup {
+  border-color: rgba(73,111,166,.54) !important;
+  background: linear-gradient(180deg,#F7FAFF 0%,#EFF5FF 100%) !important;
+}
+.my-faith-data-action-group.is-code-backup {
+  border-color: rgba(183,121,31,.58) !important;
+  background: linear-gradient(180deg,#FFFDF7 0%,#FFF0D7 100%) !important;
+}
+.my-faith-data-action-group .my-faith-data-group-title {
+  margin: 0 -14px 12px !important;
+  padding: 13px 12px 12px !important;
+  font-size: calc(16.2px * var(--app-font-scale,1)) !important;
+  font-weight: 950 !important;
+  line-height: 1.25 !important;
+  border-bottom: 2px solid rgba(31,42,68,.08) !important;
+}
+.my-faith-data-action-group.is-file-backup .my-faith-data-group-title {
+  color: #183E73 !important;
+  background: linear-gradient(180deg,#EAF2FF 0%,#DCE9FB 100%) !important;
+  border-bottom-color: rgba(73,111,166,.26) !important;
+}
+.my-faith-data-action-group.is-code-backup .my-faith-data-group-title {
+  color: #5A3915 !important;
+  background: linear-gradient(180deg,#FFEBC7 0%,#F6D9A5 100%) !important;
+  border-bottom-color: rgba(183,121,31,.28) !important;
+}
+.my-faith-data-action-group .my-faith-data-group-guide {
+  margin: 0 0 16px !important;
+  padding: 0 2px !important;
+  font-size: calc(12.8px * var(--app-font-scale,1)) !important;
+  font-weight: 850 !important;
+  line-height: 1.38 !important;
+  color: rgba(48,42,35,.80) !important;
+}
+.my-faith-data-action-group .my-faith-data-actions {
+  gap: 18px !important;
+}
+.my-faith-data-action-group .my-faith-data-action-item {
+  gap: 7px !important;
+  padding-bottom: 2px !important;
+}
+.my-faith-data-action-group + .my-faith-data-action-group {
+  margin-top: 4px !important;
+}
+.my-faith-data-action-group.is-code-backup .my-faith-code-box {
+  margin-top: 18px !important;
+  border-width: 2px !important;
+  border-color: rgba(183,121,31,.34) !important;
+  background: rgba(255,253,248,.92) !important;
+}
+.my-faith-info-action-status {
+  margin-top: 2px !important;
+  margin-bottom: 18px !important;
+}
+.my-faith-data-restore-note {
+  margin-top: 2px !important;
+  padding: 0 18px !important;
 }
