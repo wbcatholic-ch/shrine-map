@@ -116,7 +116,7 @@
     }
     function safeText(x){ return String(x || '').replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] || c); }); }
     var DATA_BACKUP_TYPE = 'catholic-gildongmu-user-data-backup';
-    var DATA_BACKUP_BUILD = 'V8-1-14-205-my-info-backup-groups';
+    var DATA_BACKUP_BUILD = 'V8-1-14-206-my-info-fullscreen-restore-fix';
     var DATA_BACKUP_LAST_TIME_KEY = 'oai_data_backup_last_exported_at_v1';
     var myFaithInfoManagementOpen = false;
     var myFaithInfoManagementLayer = null;
@@ -493,6 +493,15 @@
         setMyInfoActionStatus('백업 코드 입력창을 열지 못했습니다.', 'error', false);
       }
     }
+    function cancelUserDataCodeRestore(){
+      try{
+        setMyInfoActionButtonsDisabled(false);
+        var ta=document.getElementById('my-faith-info-code-restore-text');
+        if(ta) ta.value='';
+        hideBackupCodeBoxes('restore');
+        setMyInfoActionStatus('백업 코드 복원창을 닫았습니다.', 'ok', false);
+      }catch(e){ console.warn('[가톨릭길동무]', e); }
+    }
     function restoreUserDataBackupFromCodeText(text){
       try{
         text=String(text || '').trim();
@@ -575,7 +584,7 @@
       return restored;
     }
     function restoreUserDataBackupFromFile(file){
-      if(!file){ setMyInfoActionStatus('복원할 백업 파일을 선택하지 않았습니다.', 'warn', false); return; }
+      if(!file){ setMyInfoActionStatus('선택된 백업 파일이 없습니다. 다시 백업 파일 복원을 눌러 파일을 선택해 주세요.', 'warn', false); return; }
       if(typeof FileReader === 'undefined'){
         setMyInfoActionStatus('이 기기에서는 파일 복원을 사용할 수 없습니다.', 'error', false);
         try{ alert('이 기기에서는 파일 복원을 사용할 수 없습니다.'); }catch(_e){}
@@ -604,8 +613,8 @@
           setTimeout(function(){
             try{
               var restored=applyUserDataBackup(payload);
-              setMyInfoActionStatus('복원이 완료되었습니다. 화면을 새로고침합니다...', 'ok', true);
-              try{ alert('복원 완료: '+(restored.length?restored.join(', '):'복원할 항목 없음')+'\n\n화면을 새로고침합니다.'); }catch(_e){}
+              setMyInfoActionStatus('백업 파일 복원이 완료되었습니다. 화면을 새로고침합니다...', 'ok', true);
+              try{ alert('백업 파일 복원이 완료되었습니다.\n\n화면을 새로고침합니다.'); }catch(_e){}
               setTimeout(function(){ try{ location.reload(); }catch(_e){} }, 300);
             }catch(e){
               console.warn('[가톨릭길동무]', e);
@@ -630,25 +639,22 @@
     }
     function openUserDataRestorePicker(){
       try{
-        setMyInfoActionStatus('백업 파일 선택창을 여는 중입니다...', 'busy', true);
+        setMyInfoActionStatus('백업 파일을 선택해 주세요. 파일을 선택하면 복원이 시작됩니다.', 'ok', false);
         var input=document.createElement('input');
-        var handled=false;
         input.type='file';
         input.accept='application/json,.json';
         input.style.position='fixed';
         input.style.left='-9999px';
         input.style.top='0';
         input.addEventListener('change', function(){
-          handled=true;
           var file=input.files && input.files[0];
-          if(!file) setMyInfoActionStatus('백업 파일 선택을 취소했습니다.', 'warn', false);
+          if(!file) setMyInfoActionStatus('선택된 백업 파일이 없습니다. 다시 백업 파일 복원을 눌러 파일을 선택해 주세요.', 'warn', false);
           else restoreUserDataBackupFromFile(file);
           setTimeout(function(){ try{ input.remove(); }catch(_e){} }, 1000);
         });
         try{
           input.addEventListener('cancel', function(){
-            handled=true;
-            setMyInfoActionStatus('백업 파일 선택을 취소했습니다.', 'warn', false);
+            setMyInfoActionStatus('선택된 백업 파일이 없습니다. 다시 백업 파일 복원을 눌러 파일을 선택해 주세요.', 'warn', false);
             setTimeout(function(){ try{ input.remove(); }catch(_e){} }, 1000);
           });
         }catch(_e){}
@@ -657,14 +663,6 @@
           try{ input.click(); }
           catch(_e){ setMyInfoActionStatus('백업 파일 선택창을 열지 못했습니다.', 'error', false); }
         }, 40);
-        setMyInfoActionStatusLater('백업 파일 선택창이 열렸습니다. 파일을 선택하면 복원이 시작됩니다.', 'ok', false, 650);
-        setTimeout(function(){
-          try{
-            if(!handled && input && input.parentNode){
-              setMyInfoActionStatus('파일 선택을 취소했다면 다시 백업 파일 복원을 눌러 주세요.', 'warn', false);
-            }
-          }catch(_e){}
-        }, 12000);
       }catch(e){
         console.warn('[가톨릭길동무]', e);
         setMyInfoActionStatus('백업 파일 선택창을 열지 못했습니다.', 'error', false);
@@ -839,7 +837,26 @@
       restoreCancel.type='button';
       restoreCancel.className='my-faith-code-btn my-faith-code-cancel-btn';
       restoreCancel.textContent='취소';
-      bindMyFaithClick(restoreCancel, function(){ hideBackupCodeBoxes('restore'); setMyInfoActionStatus('백업 코드 복원을 취소했습니다.', 'warn', false); });
+      (function(){
+        var lastCancelAt=0;
+        function runCancel(e){
+          try{
+            if(e){
+              if(e.preventDefault) e.preventDefault();
+              if(e.stopPropagation) e.stopPropagation();
+              if(e.stopImmediatePropagation) e.stopImmediatePropagation();
+            }
+            var now=Date.now ? Date.now() : new Date().getTime();
+            if(now-lastCancelAt<260) return false;
+            lastCancelAt=now;
+            cancelUserDataCodeRestore();
+          }catch(_e){}
+          return false;
+        }
+        try{ restoreCancel.addEventListener('pointerdown', runCancel, true); }catch(_e){}
+        try{ restoreCancel.addEventListener('touchstart', runCancel, {capture:true, passive:false}); }catch(_e){}
+        try{ restoreCancel.addEventListener('click', runCancel, true); }catch(_e){}
+      })();
       restoreRow.appendChild(restoreRun);
       restoreRow.appendChild(restoreCancel);
       restoreBox.appendChild(restoreCodeNote);
