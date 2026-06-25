@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-207-my-info-section-clarity';
-const ASSET_VERSION = 'V8-1-14-207-my-info-section-clarity';
+const CACHE_VERSION = 'catholic-way-V8-1-14-208-file-restore-picker-fix';
+const ASSET_VERSION = 'V8-1-14-208-file-restore-picker-fix';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }
