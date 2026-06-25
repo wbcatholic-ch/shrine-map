@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-217_background_original_return_no_flicker_full';
-const ASSET_VERSION = 'V8-1-14-217_background_original_return_no_flicker_full';
+const CACHE_VERSION = 'catholic-way-V8-1-14-218_restore_paste_button_and_map_swipe_full';
+const ASSET_VERSION = 'V8-1-14-218_restore_paste_button_and_map_swipe_full';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }

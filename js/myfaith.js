@@ -116,7 +116,7 @@
     }
     function safeText(x){ return String(x || '').replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] || c); }); }
     var DATA_BACKUP_TYPE = 'catholic-gildongmu-user-data-backup';
-    var DATA_BACKUP_BUILD = 'V8-1-14-217_background_original_return_no_flicker_full';
+    var DATA_BACKUP_BUILD = 'V8-1-14-218_restore_paste_button_and_map_swipe_full';
     var DATA_BACKUP_LAST_TIME_KEY = 'oai_data_backup_last_exported_at_v1';
     var myFaithInfoManagementOpen = false;
     var myFaithInfoManagementLayer = null;
@@ -488,11 +488,42 @@
           return;
         }
         box.hidden=false;
-        setMyInfoActionStatus('카카오톡에 보관한 백업 코드를 붙여넣고 복원 실행을 눌러주세요.', 'ok', false);
-        setTimeout(function(){ try{ ta.focus(); }catch(_e){} }, 60);
+        /* V8-1-14-218: 복원창을 열 때 textarea에 즉시 포커스하지 않는다.
+           키보드가 바로 올라오면 붙여넣기 영역과 버튼이 가려져 불편하므로, 사용자가 붙여넣기 버튼이나 입력칸을 직접 선택하게 한다. */
+        setMyInfoActionStatus('붙여넣기 버튼을 누르거나, 입력칸을 눌러 백업 코드를 붙여넣은 뒤 복원 실행을 눌러주세요.', 'ok', false);
+        setTimeout(function(){ try{ box.scrollIntoView({block:'center', behavior:'smooth'}); }catch(_e){} }, 60);
       }catch(e){
         console.warn('[가톨릭길동무]', e);
         setMyInfoActionStatus('백업 코드 입력창을 열지 못했습니다.', 'error', false);
+      }
+    }
+    function pasteUserDataBackupCodeFromClipboard(){
+      try{
+        var ta=document.getElementById('my-faith-info-code-restore-text');
+        if(!ta){
+          setMyInfoActionStatus('백업 코드 입력칸을 찾지 못했습니다.', 'error', false);
+          return;
+        }
+        if(navigator && navigator.clipboard && navigator.clipboard.readText){
+          navigator.clipboard.readText().then(function(text){
+            text=String(text || '').trim();
+            if(!text){
+              setMyInfoActionStatus('클립보드에 백업 코드가 없습니다. 입력칸을 눌러 직접 붙여넣어 주세요.', 'warn', false);
+              return;
+            }
+            ta.value=text;
+            setMyInfoActionStatus('백업 코드를 붙여넣었습니다. 복원 실행을 눌러주세요.', 'ok', false);
+          }).catch(function(){
+            setMyInfoActionStatus('자동 붙여넣기가 안 되면 입력칸을 길게 눌러 붙여넣어 주세요.', 'warn', false);
+            try{ ta.focus(); }catch(_e){}
+          });
+        }else{
+          setMyInfoActionStatus('이 기기에서는 자동 붙여넣기를 지원하지 않습니다. 입력칸을 길게 눌러 붙여넣어 주세요.', 'warn', false);
+          try{ ta.focus(); }catch(_e){}
+        }
+      }catch(e){
+        console.warn('[가톨릭길동무]', e);
+        setMyInfoActionStatus('붙여넣기를 실행하지 못했습니다. 입력칸을 길게 눌러 붙여넣어 주세요.', 'warn', false);
       }
     }
     function cancelUserDataCodeRestore(){
@@ -648,7 +679,7 @@
     }
     function openUserDataRestorePicker(){
       try{
-        /* V8-1-14-217_background_original_return_no_flicker_full:
+        /* V8-1-14-218_restore_paste_button_and_map_swipe_full:
            Android/WebView와 일부 모바일 브라우저는 파일 선택창(input.click)을
            사용자 터치 흐름 안에서 바로 실행해야 한다. setTimeout 뒤에 실행하면
            사용자 선택 동작으로 인정되지 않아 파일 선택이 실패하거나 취소처럼 보일 수 있다. */
@@ -836,7 +867,12 @@
       restoreBox.hidden=true;
       var restoreCodeNote=document.createElement('p');
       restoreCodeNote.className='my-faith-code-box-note';
-      restoreCodeNote.textContent='보관한 백업 코드를 아래에 붙여넣으세요.';
+      restoreCodeNote.textContent='카카오톡 나에게 보내기에 보관한 백업 코드를 붙여넣으세요.';
+      var restorePaste=document.createElement('button');
+      restorePaste.type='button';
+      restorePaste.className='my-faith-code-btn my-faith-code-paste-btn';
+      restorePaste.textContent='붙여넣기';
+      bindMyFaithImmediateClick(restorePaste, pasteUserDataBackupCodeFromClipboard);
       var restoreText=document.createElement('textarea');
       restoreText.id='my-faith-info-code-restore-text';
       restoreText.className='my-faith-code-textarea';
@@ -876,6 +912,7 @@
       restoreRow.appendChild(restoreRun);
       restoreRow.appendChild(restoreCancel);
       restoreBox.appendChild(restoreCodeNote);
+      restoreBox.appendChild(restorePaste);
       restoreBox.appendChild(restoreText);
       restoreBox.appendChild(restoreRow);
       codeGroup.appendChild(restoreBox);
