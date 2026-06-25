@@ -310,7 +310,7 @@
 }
 
 
-/* V8-1-14-200-my-info-soft-spacing: 나의 신앙생활 하단 내 정보 관리 내부창 */
+/* V8-1-14-201-my-info-action-feedback: 나의 신앙생활 하단 내 정보 관리 내부창 */
 .my-faith-data-section {
   margin-top: 22px !important;
   border: 0 !important;
@@ -521,4 +521,59 @@
 @media (max-width:390px){
   .my-faith-info-layer { padding-left: 12px !important; padding-right: 12px !important; }
   .my-faith-data-actions { grid-template-columns: 1fr !important; }
+}
+
+/* V8-1-14-201-my-info-action-feedback: 내 정보 백업/복원/공유 진행 상태 표시 */
+.my-faith-info-action-status {
+  display: block !important;
+  margin: 0 16px 10px !important;
+  padding: 10px 12px !important;
+  border-radius: 13px !important;
+  border: 1.5px solid rgba(183,121,31,.30) !important;
+  background: #fffdf8 !important;
+  color: #4f432f !important;
+  font-size: calc(12.6px * var(--app-font-scale,1)) !important;
+  font-weight: 850 !important;
+  line-height: 1.38 !important;
+  letter-spacing: -.03em !important;
+  text-align: center !important;
+  word-break: keep-all !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.82) !important;
+}
+.my-faith-info-action-status[hidden] {
+  display: none !important;
+}
+.my-faith-info-action-status.is-busy::before {
+  content: "" !important;
+  display: inline-block !important;
+  width: 13px !important;
+  height: 13px !important;
+  margin-right: 7px !important;
+  vertical-align: -2px !important;
+  border-radius: 999px !important;
+  border: 2px solid rgba(31,42,68,.22) !important;
+  border-top-color: rgba(31,42,68,.75) !important;
+  animation: myFaithInfoSpin .75s linear infinite !important;
+}
+.my-faith-info-action-status.is-ok {
+  border-color: rgba(34,139,74,.34) !important;
+  background: #f6fff8 !important;
+  color: #14532D !important;
+}
+.my-faith-info-action-status.is-warn {
+  border-color: rgba(183,121,31,.38) !important;
+  background: #fff9ed !important;
+  color: #5f3f14 !important;
+}
+.my-faith-info-action-status.is-error {
+  border-color: rgba(172,55,55,.36) !important;
+  background: #fff6f6 !important;
+  color: #7f1d1d !important;
+}
+.my-faith-data-btn:disabled {
+  opacity: .68 !important;
+  cursor: wait !important;
+}
+@keyframes myFaithInfoSpin {
+  to { transform: rotate(360deg); }
 }

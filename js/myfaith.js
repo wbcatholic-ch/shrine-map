@@ -116,10 +116,11 @@
     }
     function safeText(x){ return String(x || '').replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] || c); }); }
     var DATA_BACKUP_TYPE = 'catholic-gildongmu-user-data-backup';
-    var DATA_BACKUP_BUILD = 'V8-1-14-200-my-info-soft-spacing';
+    var DATA_BACKUP_BUILD = 'V8-1-14-201-my-info-action-feedback';
     var DATA_BACKUP_LAST_TIME_KEY = 'oai_data_backup_last_exported_at_v1';
     var myFaithInfoManagementOpen = false;
     var myFaithInfoManagementLayer = null;
+    var myFaithInfoActionTimer = null;
     var DATA_BACKUP_KEYS = [
       {key:'oai_my_diocese_name', label:'나의 교구'},
       {key:'oai_my_parish_data', label:'나의 본당'},
@@ -204,6 +205,41 @@
     function getLastDataBackupTimeText(){
       try{ return formatDataBackupTime(localStorage.getItem(DATA_BACKUP_LAST_TIME_KEY)); }catch(_e){ return ''; }
     }
+    function setMyInfoActionStatus(message, kind, busy){
+      try{
+        var el=document.getElementById('my-faith-info-action-status');
+        if(!el) return;
+        var text=String(message || '').trim();
+        if(!text){
+          el.hidden=true;
+          el.textContent='';
+          el.className='my-faith-info-action-status';
+          return;
+        }
+        if(myFaithInfoActionTimer){ try{ clearTimeout(myFaithInfoActionTimer); }catch(_e){} myFaithInfoActionTimer=null; }
+        el.hidden=false;
+        el.textContent=text;
+        el.className='my-faith-info-action-status '+(busy?'is-busy ':'')+(kind?('is-'+kind):'');
+      }catch(_e){}
+    }
+    function setMyInfoActionStatusLater(message, kind, busy, delay){
+      try{
+        if(myFaithInfoActionTimer){ try{ clearTimeout(myFaithInfoActionTimer); }catch(_e){} myFaithInfoActionTimer=null; }
+        myFaithInfoActionTimer=setTimeout(function(){
+          myFaithInfoActionTimer=null;
+          setMyInfoActionStatus(message, kind, busy);
+        }, Math.max(0, Number(delay)||0));
+      }catch(_e){}
+    }
+    function setMyInfoActionButtonsDisabled(disabled){
+      try{
+        var layer=document.getElementById('my-faith-info-management-layer');
+        if(!layer) return;
+        Array.prototype.forEach.call(layer.querySelectorAll('.my-faith-data-btn'), function(btn){
+          try{ btn.disabled=!!disabled; }catch(_e){}
+        });
+      }catch(_e){}
+    }
     function refreshMyFaithDataPanelAfterBackup(){
       try{
         if(!myFaithInfoManagementOpen) return;
@@ -229,39 +265,76 @@
     }
     function downloadUserDataBackup(){
       try{
-        saveBlobAsDownload(buildUserDataBackupFile(), false);
+        setMyInfoActionButtonsDisabled(true);
+        setMyInfoActionStatus('내 정보 백업 파일을 만드는 중입니다...', 'busy', true);
+        setTimeout(function(){
+          try{
+            var fileInfo=buildUserDataBackupFile();
+            saveBlobAsDownload(fileInfo, false);
+            setMyInfoActionStatus('백업 파일을 저장했습니다. 기기 변경 전에는 공유하기로 카카오톡 등에 보관하세요.', 'ok', false);
+          }catch(e){
+            console.warn('[가톨릭길동무]', e);
+            setMyInfoActionStatus('백업 파일을 만들지 못했습니다. 저장 권한을 확인해 주세요.', 'error', false);
+            try{ alert('백업 파일을 만들지 못했습니다. 브라우저 저장 권한을 확인해 주세요.'); }catch(_e){}
+          }finally{
+            setMyInfoActionButtonsDisabled(false);
+          }
+        }, 80);
       }catch(e){
         console.warn('[가톨릭길동무]', e);
+        setMyInfoActionButtonsDisabled(false);
+        setMyInfoActionStatus('백업 파일을 만들지 못했습니다. 저장 권한을 확인해 주세요.', 'error', false);
         try{ alert('백업 파일을 만들지 못했습니다. 브라우저 저장 권한을 확인해 주세요.'); }catch(_e){}
       }
     }
     function shareUserDataBackup(){
       try{
-        var fileInfo=buildUserDataBackupFile();
-        var file=null;
-        try{ file=new File([fileInfo.blob], fileInfo.name, {type:'application/json'}); }catch(_e){ file=null; }
-        var canShareFile=!!(navigator && navigator.share && file && (!navigator.canShare || navigator.canShare({files:[file]})));
-        if(canShareFile){
-          navigator.share({
-            title:'가톨릭길동무 백업 파일',
-            text:'휴대폰 변경 시 새 기기에서 복원할 가톨릭길동무 백업 파일입니다.',
-            files:[file]
-          }).then(function(){
-            recordUserDataBackupTime();
-            refreshMyFaithDataPanelAfterBackup();
-          }).catch(function(err){
-            if(err && (err.name === 'AbortError' || err.name === 'NotAllowedError')) return;
-            console.warn('[가톨릭길동무]', err);
-            try{ alert('이 기기에서는 파일 공유가 원활하지 않아 백업 파일을 저장합니다. 저장된 파일을 카카오톡 나에게 보내기 등에 보관해 주세요.'); }catch(_e){}
+        setMyInfoActionButtonsDisabled(true);
+        setMyInfoActionStatus('백업 파일 공유창을 여는 중입니다...', 'busy', true);
+        setTimeout(function(){
+          try{
+            var fileInfo=buildUserDataBackupFile();
+            var file=null;
+            try{ file=new File([fileInfo.blob], fileInfo.name, {type:'application/json'}); }catch(_e){ file=null; }
+            var canShareFile=!!(navigator && navigator.share && file && (!navigator.canShare || navigator.canShare({files:[file]})));
+            if(canShareFile){
+              navigator.share({
+                title:'가톨릭길동무 백업 파일',
+                text:'휴대폰 변경 시 새 기기에서 복원할 가톨릭길동무 백업 파일입니다.',
+                files:[file]
+              }).then(function(){
+                recordUserDataBackupTime();
+                refreshMyFaithDataPanelAfterBackup();
+                setMyInfoActionStatus('공유창을 열었습니다. 카카오톡 나에게 보내기 등에 보관해 주세요.', 'ok', false);
+                setMyInfoActionButtonsDisabled(false);
+              }).catch(function(err){
+                setMyInfoActionButtonsDisabled(false);
+                if(err && (err.name === 'AbortError' || err.name === 'NotAllowedError')){
+                  setMyInfoActionStatus('공유를 취소했습니다.', 'warn', false);
+                  return;
+                }
+                console.warn('[가톨릭길동무]', err);
+                setMyInfoActionStatus('공유창을 열지 못해 백업 파일을 저장했습니다. 저장된 파일을 카카오톡 등에 보관해 주세요.', 'warn', false);
+                try{ alert('이 기기에서는 파일 공유가 원활하지 않아 백업 파일을 저장합니다. 저장된 파일을 카카오톡 나에게 보내기 등에 보관해 주세요.'); }catch(_e){}
+                saveBlobAsDownload(fileInfo, true);
+              });
+              return;
+            }
+            setMyInfoActionStatus('이 기기에서는 공유창을 열 수 없어 백업 파일을 저장했습니다. 저장된 파일을 카카오톡 등에 보관해 주세요.', 'warn', false);
+            try{ alert('이 기기에서는 백업 파일 공유하기를 사용할 수 없어 백업 파일을 저장합니다. 저장된 파일을 카카오톡 나에게 보내기, Google Drive, 이메일 등에 보관해 주세요.'); }catch(_e){}
             saveBlobAsDownload(fileInfo, true);
-          });
-          return;
-        }
-        try{ alert('이 기기에서는 백업 파일 공유하기를 사용할 수 없어 백업 파일을 저장합니다. 저장된 파일을 카카오톡 나에게 보내기, Google Drive, 이메일 등에 보관해 주세요.'); }catch(_e){}
-        saveBlobAsDownload(fileInfo, true);
+            setMyInfoActionButtonsDisabled(false);
+          }catch(e){
+            console.warn('[가톨릭길동무]', e);
+            setMyInfoActionButtonsDisabled(false);
+            setMyInfoActionStatus('백업 파일 공유하기를 실행하지 못했습니다. 내 정보 백업으로 파일을 저장해 주세요.', 'error', false);
+            try{ alert('백업 파일 공유하기를 실행하지 못했습니다. 내 정보 백업으로 파일을 저장한 뒤 카카오톡 등에 보관해 주세요.'); }catch(_e){}
+          }
+        }, 80);
       }catch(e){
         console.warn('[가톨릭길동무]', e);
-        try{ alert('백업 파일 공유하기를 실행하지 못했습니다. 내 정보 백업으로 파일을 저장한 뒤 카카오톡 등에 보관해 주세요.'); }catch(_e){}
+        setMyInfoActionButtonsDisabled(false);
+        setMyInfoActionStatus('백업 파일 공유하기를 실행하지 못했습니다.', 'error', false);
       }
     }
     function normalizeRestorePayload(payload){
@@ -285,31 +358,62 @@
       return restored;
     }
     function restoreUserDataBackupFromFile(file){
-      if(!file) return;
+      if(!file){ setMyInfoActionStatus('복원할 백업 파일을 선택하지 않았습니다.', 'warn', false); return; }
       if(typeof FileReader === 'undefined'){
+        setMyInfoActionStatus('이 기기에서는 파일 복원을 사용할 수 없습니다.', 'error', false);
         try{ alert('이 기기에서는 파일 복원을 사용할 수 없습니다.'); }catch(_e){}
         return;
       }
+      setMyInfoActionButtonsDisabled(true);
+      setMyInfoActionStatus('백업 파일을 읽는 중입니다...', 'busy', true);
       var reader=new FileReader();
       reader.onload=function(){
         try{
+          setMyInfoActionStatus('백업 파일을 확인하는 중입니다...', 'busy', true);
           var payload=normalizeRestorePayload(JSON.parse(String(reader.result||'')));
-          if(!payload){ try{ alert('가톨릭길동무 백업 파일이 아닙니다.'); }catch(_e){} return; }
+          if(!payload){
+            setMyInfoActionButtonsDisabled(false);
+            setMyInfoActionStatus('가톨릭길동무 백업 파일이 아닙니다.', 'error', false);
+            try{ alert('가톨릭길동무 백업 파일이 아닙니다.'); }catch(_e){}
+            return;
+          }
           var msg='복원하면 현재 저장된 즐겨찾기, 순례현황, 나의 설정이 백업 파일 내용으로 바뀝니다.\n\n'+summarizeBackupPayload(payload)+'\n\n계속할까요?';
-          if(!window.confirm(msg)) return;
-          var restored=applyUserDataBackup(payload);
-          try{ alert('복원 완료: '+(restored.length?restored.join(', '):'복원할 항목 없음')+'\n\n화면을 새로고침합니다.'); }catch(_e){}
-          setTimeout(function(){ try{ location.reload(); }catch(_e){} }, 250);
+          if(!window.confirm(msg)){
+            setMyInfoActionButtonsDisabled(false);
+            setMyInfoActionStatus('복원을 취소했습니다.', 'warn', false);
+            return;
+          }
+          setMyInfoActionStatus('내 정보를 복원하는 중입니다...', 'busy', true);
+          setTimeout(function(){
+            try{
+              var restored=applyUserDataBackup(payload);
+              setMyInfoActionStatus('복원이 완료되었습니다. 화면을 새로고침합니다...', 'ok', true);
+              try{ alert('복원 완료: '+(restored.length?restored.join(', '):'복원할 항목 없음')+'\n\n화면을 새로고침합니다.'); }catch(_e){}
+              setTimeout(function(){ try{ location.reload(); }catch(_e){} }, 300);
+            }catch(e){
+              console.warn('[가톨릭길동무]', e);
+              setMyInfoActionButtonsDisabled(false);
+              setMyInfoActionStatus('복원 중 오류가 발생했습니다.', 'error', false);
+              try{ alert('복원 중 오류가 발생했습니다.'); }catch(_e){}
+            }
+          }, 120);
         }catch(e){
           console.warn('[가톨릭길동무]', e);
+          setMyInfoActionButtonsDisabled(false);
+          setMyInfoActionStatus('백업 파일을 읽지 못했습니다. 파일 형식을 확인해 주세요.', 'error', false);
           try{ alert('백업 파일을 읽지 못했습니다. 파일이 손상되었거나 형식이 다릅니다.'); }catch(_e){}
         }
       };
-      reader.onerror=function(){ try{ alert('백업 파일을 읽지 못했습니다.'); }catch(_e){} };
+      reader.onerror=function(){
+        setMyInfoActionButtonsDisabled(false);
+        setMyInfoActionStatus('백업 파일을 읽지 못했습니다.', 'error', false);
+        try{ alert('백업 파일을 읽지 못했습니다.'); }catch(_e){}
+      };
       reader.readAsText(file, 'utf-8');
     }
     function openUserDataRestorePicker(){
       try{
+        setMyInfoActionStatus('복원할 백업 파일 선택창을 여는 중입니다...', 'busy', true);
         var input=document.createElement('input');
         input.type='file';
         input.accept='application/json,.json';
@@ -318,13 +422,16 @@
         input.style.top='0';
         input.addEventListener('change', function(){
           var file=input.files && input.files[0];
-          restoreUserDataBackupFromFile(file);
+          if(!file) setMyInfoActionStatus('복원할 백업 파일을 선택하지 않았습니다.', 'warn', false);
+          else restoreUserDataBackupFromFile(file);
           setTimeout(function(){ try{ input.remove(); }catch(_e){} }, 1000);
         });
         document.body.appendChild(input);
-        input.click();
+        setTimeout(function(){ try{ input.click(); }catch(_e){} }, 40);
+        setMyInfoActionStatusLater('백업 파일을 선택해 주세요.', 'busy', false, 650);
       }catch(e){
         console.warn('[가톨릭길동무]', e);
+        setMyInfoActionStatus('복원 파일 선택창을 열지 못했습니다.', 'error', false);
         try{ alert('복원 파일 선택창을 열지 못했습니다.'); }catch(_e){}
       }
     }
@@ -433,6 +540,12 @@
       last.id='my-faith-info-last-backup';
       last.className='my-faith-data-last';
       content.appendChild(last);
+
+      var status=document.createElement('p');
+      status.id='my-faith-info-action-status';
+      status.className='my-faith-info-action-status';
+      status.hidden=true;
+      content.appendChild(status);
 
       var restore=document.createElement('p');
       restore.className='my-faith-data-restore-note';

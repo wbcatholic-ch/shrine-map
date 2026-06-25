@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-200-my-info-soft-spacing';
-const ASSET_VERSION = 'V8-1-14-200-my-info-soft-spacing';
+const CACHE_VERSION = 'catholic-way-V8-1-14-201-my-info-action-feedback';
+const ASSET_VERSION = 'V8-1-14-201-my-info-action-feedback';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }

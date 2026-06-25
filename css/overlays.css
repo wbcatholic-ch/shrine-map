@@ -170,7 +170,7 @@ html.pr-external-guide-active.oai-stability-veil::after {
 }
 
 
-/* V8-1-14-200-my-info-soft-spacing: Android WebView 하단 여백 상한/최소값 표준화 */
+/* V8-1-14-201-my-info-action-feedback: Android WebView 하단 여백 상한/최소값 표준화 */
 html:not(.ios-device) .guide-modal{padding-bottom:calc(14px + var(--oai-android-bottom-gap, 10px))!important;}
 html:not(.ios-device) .modal-panel,
 html:not(.ios-device) .guide-panel{max-height:calc(100vh - 96px - var(--oai-android-bottom-gap, 10px))!important;}
@@ -182,13 +182,13 @@ html:not(.ios-device) .modal-panel,
 html:not(.ios-device) .guide-panel{max-height:calc(100vh - 96px - var(--oai-android-bottom-gap, 10px))!important;}
 
 
-/* V8-1-14-200-my-info-soft-spacing: 경로검색 선택창 버튼 테두리를 정보카드 버튼과 같은 2.5px로 통일 */
+/* V8-1-14-201-my-info-action-feedback: 경로검색 선택창 버튼 테두리를 정보카드 버튼과 같은 2.5px로 통일 */
 #route-choice-modal .route-choice-btn{
   border-width:2.5px!important;
   box-sizing:border-box!important;
 }
 
-/* V8-1-14-200-my-info-soft-spacing: 경로검색 선택창도 정보카드와 같은 두께로 두고 색상/테두리를 더 선명하게 조정한다. */
+/* V8-1-14-201-my-info-action-feedback: 경로검색 선택창도 정보카드와 같은 두께로 두고 색상/테두리를 더 선명하게 조정한다. */
 #route-choice-modal .route-choice-btn{
   border-width:2.5px!important;
   box-sizing:border-box!important;
