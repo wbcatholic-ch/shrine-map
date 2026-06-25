@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-215-background-return-30min-cover-stable';
-const ASSET_VERSION = 'V8-1-14-215-background-return-30min-cover-stable';
+const CACHE_VERSION = 'catholic-way-V8-1-14-217_background_original_return_no_flicker_full';
+const ASSET_VERSION = 'V8-1-14-217_background_original_return_no_flicker_full';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }

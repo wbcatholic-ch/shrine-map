@@ -116,7 +116,7 @@
     }
     function safeText(x){ return String(x || '').replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] || c); }); }
     var DATA_BACKUP_TYPE = 'catholic-gildongmu-user-data-backup';
-    var DATA_BACKUP_BUILD = 'V8-1-14-215-background-return-30min-cover-stable';
+    var DATA_BACKUP_BUILD = 'V8-1-14-217_background_original_return_no_flicker_full';
     var DATA_BACKUP_LAST_TIME_KEY = 'oai_data_backup_last_exported_at_v1';
     var myFaithInfoManagementOpen = false;
     var myFaithInfoManagementLayer = null;
@@ -225,7 +225,7 @@
       var payload=collectUserDataBackup();
       var compact=JSON.stringify(payload);
       var code='CGM-BACKUP-V1:'+encodeTextBase64Url(compact);
-      var text='가톨릭길동무 백업코드\n'+code+'\n\n가톨릭길동무 → 나의 신앙생활 → 내 정보 관리 → 백업 코드 복원에 붙여넣으세요.';
+      var text='가톨릭길동무 백업코드\n'+code+'\n\n가톨릭길동무 → 나의 신앙생활 → 내 정보 백업·복원 → 백업 코드 복원에 붙여넣으세요.';
       return {payload:payload, code:code, text:text};
     }
     function extractUserDataBackupCode(text){
@@ -648,7 +648,7 @@
     }
     function openUserDataRestorePicker(){
       try{
-        /* V8-1-14-215-background-return-30min-cover-stable:
+        /* V8-1-14-217_background_original_return_no_flicker_full:
            Android/WebView와 일부 모바일 브라우저는 파일 선택창(input.click)을
            사용자 터치 흐름 안에서 바로 실행해야 한다. setTimeout 뒤에 실행하면
            사용자 선택 동작으로 인정되지 않아 파일 선택이 실패하거나 취소처럼 보일 수 있다. */
@@ -749,11 +749,11 @@
       head.className='my-faith-info-head';
       var h=document.createElement('h3');
       h.id='my-faith-info-title';
-      h.textContent='내 정보 관리';
+      h.textContent='내 정보 백업·복원';
       var close=document.createElement('button');
       close.type='button';
       close.className='my-faith-info-close';
-      close.setAttribute('aria-label','내 정보 관리 닫기');
+      close.setAttribute('aria-label','내 정보 백업·복원 닫기');
       close.textContent='×';
       bindMyFaithClick(close, closeMyInfoManagementModal);
       head.appendChild(h);
@@ -920,7 +920,7 @@
       var toggle=document.createElement('button');
       toggle.type='button';
       toggle.className='my-faith-data-toggle-btn';
-      toggle.textContent='내 정보 관리';
+      toggle.textContent='내 정보 백업·복원';
       toggle.setAttribute('aria-haspopup','dialog');
       toggle.setAttribute('aria-expanded','false');
       bindMyFaithClick(toggle, openMyInfoManagementModal);
