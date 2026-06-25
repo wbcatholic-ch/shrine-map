@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-196-data-management-panel';
-const ASSET_VERSION = 'V8-1-14-196-data-management-panel';
+const CACHE_VERSION = 'catholic-way-V8-1-14-197-my-info-management-modal';
+const ASSET_VERSION = 'V8-1-14-197-my-info-management-modal';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }
