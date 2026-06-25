@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-198-my-info-modal-spacing-note';
-const ASSET_VERSION = 'V8-1-14-198-my-info-modal-spacing-note';
+const CACHE_VERSION = 'catholic-way-V8-1-14-199-my-info-management-notes-color';
+const ASSET_VERSION = 'V8-1-14-199-my-info-management-notes-color';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }

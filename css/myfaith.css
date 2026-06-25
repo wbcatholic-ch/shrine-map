@@ -310,25 +310,27 @@
 }
 
 
-/* V8-1-14-198-my-info-modal-spacing-note: 나의 신앙생활 하단 내 정보 관리 내부창 */
+/* V8-1-14-199-my-info-management-notes-color: 나의 신앙생활 하단 내 정보 관리 내부창 */
 .my-faith-data-section {
-  margin-top: 16px !important;
-  border: 2px solid rgba(183,121,31,.24) !important;
-  background: #fffaf2 !important;
+  margin-top: 22px !important;
+  border: 0 !important;
+  background: transparent !important;
+  padding-top: 2px !important;
 }
 .my-faith-data-toggle-btn {
   width: 100% !important;
-  min-height: 52px !important;
-  border: 0 !important;
-  background: linear-gradient(180deg,#FFFDF8 0%,#F6EBD8 100%) !important;
-  color: var(--v4-header-navy) !important;
+  min-height: 54px !important;
+  border: 2.5px solid rgba(183,121,31,.86) !important;
+  border-radius: 17px !important;
+  background: linear-gradient(180deg,#33456F 0%,#1F2A44 100%) !important;
+  color: #FFFDF8 !important;
   font-family: inherit !important;
   font-size: calc(15.5px * var(--app-font-scale,1)) !important;
   font-weight: 950 !important;
   letter-spacing: -.035em !important;
   cursor: pointer !important;
   box-sizing: border-box !important;
-  box-shadow: inset 0 1px 0 rgba(255,255,255,.86) !important;
+  box-shadow: 0 7px 15px rgba(31,42,68,.18), inset 0 1px 0 rgba(255,255,255,.18) !important;
 }
 .my-faith-data-toggle-btn:active,
 .my-faith-data-btn:active,
@@ -465,11 +467,29 @@
 .my-faith-data-actions {
   display: grid !important;
   grid-template-columns: 1fr !important;
-  gap: 9px !important;
+  gap: 11px !important;
   padding: 0 16px 12px !important;
   box-sizing: border-box !important;
 }
+.my-faith-data-action-item {
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 5px !important;
+  min-width: 0 !important;
+}
+.my-faith-data-btn-note {
+  margin: 0 !important;
+  padding: 0 4px !important;
+  color: #625541 !important;
+  font-size: calc(12px * var(--app-font-scale,1)) !important;
+  font-weight: 760 !important;
+  line-height: 1.36 !important;
+  letter-spacing: -.03em !important;
+  text-align: center !important;
+  word-break: keep-all !important;
+}
 .my-faith-data-btn {
+  width: 100% !important;
   min-height: 50px !important;
   border-radius: 16px !important;
   font-family: inherit !important;
@@ -496,7 +516,7 @@
   background: linear-gradient(180deg,#F7FAFF 0%,#E1ECFA 100%) !important;
 }
 @media (min-width:371px){
-  .my-faith-data-actions { grid-template-columns: 1fr 1fr 1fr !important; }
+  .my-faith-data-actions { grid-template-columns: 1fr !important; }
 }
 @media (max-width:390px){
   .my-faith-info-layer { padding-left: 12px !important; padding-right: 12px !important; }

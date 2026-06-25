@@ -116,7 +116,7 @@
     }
     function safeText(x){ return String(x || '').replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] || c); }); }
     var DATA_BACKUP_TYPE = 'catholic-gildongmu-user-data-backup';
-    var DATA_BACKUP_BUILD = 'V8-1-14-198-my-info-modal-spacing-note';
+    var DATA_BACKUP_BUILD = 'V8-1-14-199-my-info-management-notes-color';
     var DATA_BACKUP_LAST_TIME_KEY = 'oai_data_backup_last_exported_at_v1';
     var myFaithInfoManagementOpen = false;
     var myFaithInfoManagementLayer = null;
@@ -397,29 +397,41 @@
 
       var actions=document.createElement('div');
       actions.className='my-faith-data-actions';
+      function makeActionItem(btn, noteText){
+        var item=document.createElement('div');
+        item.className='my-faith-data-action-item';
+        item.appendChild(btn);
+        if(noteText){
+          var note=document.createElement('p');
+          note.className='my-faith-data-btn-note';
+          note.textContent=noteText;
+          item.appendChild(note);
+        }
+        return item;
+      }
       var backupBtn=document.createElement('button');
       backupBtn.type='button';
       backupBtn.className='my-faith-data-btn my-faith-data-backup-btn';
       backupBtn.textContent='내 정보 백업';
       bindMyFaithClick(backupBtn, downloadUserDataBackup);
-      var shareBtn=document.createElement('button');
-      shareBtn.type='button';
-      shareBtn.className='my-faith-data-btn my-faith-data-share-btn';
-      shareBtn.textContent='백업 파일 공유하기';
-      bindMyFaithClick(shareBtn, shareUserDataBackup);
       var restoreBtn=document.createElement('button');
       restoreBtn.type='button';
       restoreBtn.className='my-faith-data-btn my-faith-data-restore-btn';
       restoreBtn.textContent='내 정보 복원';
       bindMyFaithClick(restoreBtn, openUserDataRestorePicker);
-      actions.appendChild(backupBtn);
-      actions.appendChild(shareBtn);
-      actions.appendChild(restoreBtn);
+      var shareBtn=document.createElement('button');
+      shareBtn.type='button';
+      shareBtn.className='my-faith-data-btn my-faith-data-share-btn';
+      shareBtn.textContent='백업 파일 공유하기';
+      bindMyFaithClick(shareBtn, shareUserDataBackup);
+      actions.appendChild(makeActionItem(backupBtn, '현재 휴대폰의 즐겨찾기·순례현황·나의 신앙생활 정보를 백업 파일로 저장합니다.'));
+      actions.appendChild(makeActionItem(restoreBtn, '새 휴대폰에서 받은 백업 파일을 선택해 정보를 다시 불러옵니다.'));
+      actions.appendChild(makeActionItem(shareBtn, '백업 파일을 카카오톡 나에게 보내기 등에 보관할 때 사용합니다.'));
       content.appendChild(actions);
 
       var actionNote=document.createElement('p');
       actionNote.className='my-faith-data-action-note';
-      actionNote.textContent='기기 변경 전에는 내 정보 백업 → 백업 파일 공유하기 순서로 카카오톡 나에게 보내기 등에 보관하세요.';
+      actionNote.textContent='기기 변경 전에는 내 정보 백업 후 백업 파일 공유하기를 눌러 보관하세요.';
       content.appendChild(actionNote);
 
       var last=document.createElement('p');
