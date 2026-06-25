@@ -116,9 +116,10 @@
     }
     function safeText(x){ return String(x || '').replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] || c); }); }
     var DATA_BACKUP_TYPE = 'catholic-gildongmu-user-data-backup';
-    var DATA_BACKUP_BUILD = 'V8-1-14-196-data-management-panel';
+    var DATA_BACKUP_BUILD = 'V8-1-14-197-my-info-management-modal';
     var DATA_BACKUP_LAST_TIME_KEY = 'oai_data_backup_last_exported_at_v1';
-    var myFaithDataPanelOpen = false;
+    var myFaithInfoManagementOpen = false;
+    var myFaithInfoManagementLayer = null;
     var DATA_BACKUP_KEYS = [
       {key:'oai_my_diocese_name', label:'나의 교구'},
       {key:'oai_my_parish_data', label:'나의 본당'},
@@ -178,7 +179,7 @@
         var web=items.web_favorites_v1 ? JSON.parse(items.web_favorites_v1) : [];
         if(Array.isArray(web) && web.length) summary.push('가톨릭 정보 즐겨찾기 '+web.length+'개');
       }catch(_e){}
-      return summary.length ? summary.join('\n') : '저장된 사용자 데이터가 거의 없습니다.';
+      return summary.length ? summary.join('\n') : '저장된 사용자 정보가 거의 없습니다.';
     }
     function dataBackupFileName(){ return 'catholic-gildongmu-backup-'+dataBackupTodayName()+'.json'; }
     function buildUserDataBackupFile(){
@@ -205,13 +206,10 @@
     }
     function refreshMyFaithDataPanelAfterBackup(){
       try{
-        if(!myFaithDataPanelOpen) return;
+        if(!myFaithInfoManagementOpen) return;
         setTimeout(function(){
-          try{
-            if(body && body.classList && body.classList.contains('my-faith-edit-accordion-body') && typeof myFaithRenderSettingsEdit === 'function') myFaithRenderSettingsEdit();
-            else renderHome();
-          }catch(_e){}
-        }, 180);
+          try{ updateMyInfoManagementLastBackupText(); }catch(_e){}
+        }, 120);
       }catch(_e){}
     }
     function saveBlobAsDownload(fileInfo, silent){
@@ -263,7 +261,7 @@
         saveBlobAsDownload(fileInfo, true);
       }catch(e){
         console.warn('[가톨릭길동무]', e);
-        try{ alert('백업 파일 공유하기를 실행하지 못했습니다. 내 데이터 백업으로 파일을 저장한 뒤 카카오톡 등에 보관해 주세요.'); }catch(_e){}
+        try{ alert('백업 파일 공유하기를 실행하지 못했습니다. 내 정보 백업으로 파일을 저장한 뒤 카카오톡 등에 보관해 주세요.'); }catch(_e){}
       }
     }
     function normalizeRestorePayload(payload){
@@ -330,44 +328,84 @@
         try{ alert('복원 파일 선택창을 열지 못했습니다.'); }catch(_e){}
       }
     }
-    function appendDataBackupSection(rerender){
-      var sec=document.createElement('section');
-      sec.className='my-faith-section my-faith-data-section'+(myFaithDataPanelOpen?' is-open':' is-closed');
-      var toggle=document.createElement('button');
-      toggle.type='button';
-      toggle.className='my-faith-data-toggle-btn';
-      toggle.textContent=myFaithDataPanelOpen?'내 데이터 관리 닫기':'내 데이터 관리';
-      toggle.setAttribute('aria-expanded', myFaithDataPanelOpen?'true':'false');
-      bindMyFaithClick(toggle, function(){
-        myFaithDataPanelOpen=!myFaithDataPanelOpen;
-        if(typeof rerender === 'function') rerender();
-        else renderHome();
-      });
-      sec.appendChild(toggle);
-      if(!myFaithDataPanelOpen) return sec;
+    function updateMyInfoManagementLastBackupText(){
+      try{
+        var el=document.getElementById('my-faith-info-last-backup');
+        if(!el) return;
+        var lastText=getLastDataBackupTimeText();
+        if(lastText){
+          el.hidden=false;
+          el.textContent='마지막 백업: '+lastText;
+        }else{
+          el.hidden=true;
+          el.textContent='';
+        }
+      }catch(_e){}
+    }
+    function closeMyInfoManagementModal(){
+      try{
+        myFaithInfoManagementOpen=false;
+        if(modal && modal.classList) modal.classList.remove('my-faith-info-modal-open');
+        var layer=myFaithInfoManagementLayer || document.getElementById('my-faith-info-management-layer');
+        myFaithInfoManagementLayer=null;
+        if(layer){
+          layer.classList.remove('show');
+          layer.setAttribute('aria-hidden','true');
+          setTimeout(function(){ try{ if(layer && layer.parentNode) layer.parentNode.removeChild(layer); }catch(_e){} }, 90);
+        }
+      }catch(e){ console.warn('[가톨릭길동무]', e); }
+    }
+    function buildMyInfoManagementModal(){
+      var layer=document.createElement('div');
+      layer.id='my-faith-info-management-layer';
+      layer.className='my-faith-info-layer show';
+      layer.setAttribute('aria-hidden','false');
 
-      var panel=document.createElement('div');
-      panel.className='my-faith-data-panel';
+      var backdrop=document.createElement('div');
+      backdrop.className='my-faith-info-backdrop';
+      backdrop.setAttribute('data-my-info-close','true');
+      layer.appendChild(backdrop);
+
+      var dialog=document.createElement('section');
+      dialog.className='my-faith-info-dialog';
+      dialog.setAttribute('role','dialog');
+      dialog.setAttribute('aria-modal','true');
+      dialog.setAttribute('aria-labelledby','my-faith-info-title');
+      dialog.tabIndex=-1;
+
+      var head=document.createElement('div');
+      head.className='my-faith-info-head';
       var h=document.createElement('h3');
-      h.textContent='내 데이터 관리';
-      panel.appendChild(h);
+      h.id='my-faith-info-title';
+      h.textContent='내 정보 관리';
+      var close=document.createElement('button');
+      close.type='button';
+      close.className='my-faith-info-close';
+      close.setAttribute('aria-label','내 정보 관리 닫기');
+      close.textContent='×';
+      bindMyFaithClick(close, closeMyInfoManagementModal);
+      head.appendChild(h);
+      head.appendChild(close);
+      dialog.appendChild(head);
 
+      var content=document.createElement('div');
+      content.className='my-faith-info-content';
       var desc=document.createElement('p');
       desc.className='my-faith-data-desc';
       desc.textContent='휴대폰을 변경하면 즐겨찾기, 성지 순례현황, 나의 교구·본당 설정이 새 휴대폰으로 자동 이전되지 않을 수 있습니다.';
-      panel.appendChild(desc);
+      content.appendChild(desc);
 
       var guide=document.createElement('p');
       guide.className='my-faith-data-desc my-faith-data-guide';
-      guide.textContent='휴대폰을 바꾸기 전에는 내 데이터 백업으로 백업 파일을 만든 뒤, 백업 파일 공유하기를 눌러 카카오톡 나에게 보내기, Google Drive, 이메일 등에 보관해 주세요.';
-      panel.appendChild(guide);
+      guide.textContent='휴대폰을 바꾸기 전에는 내 정보 백업으로 백업 파일을 만든 뒤, 백업 파일 공유하기를 눌러 카카오톡 나에게 보내기, Google Drive, 이메일 등에 보관해 주세요.';
+      content.appendChild(guide);
 
       var actions=document.createElement('div');
       actions.className='my-faith-data-actions';
       var backupBtn=document.createElement('button');
       backupBtn.type='button';
       backupBtn.className='my-faith-data-btn my-faith-data-backup-btn';
-      backupBtn.textContent='내 데이터 백업';
+      backupBtn.textContent='내 정보 백업';
       bindMyFaithClick(backupBtn, downloadUserDataBackup);
       var shareBtn=document.createElement('button');
       shareBtn.type='button';
@@ -377,27 +415,55 @@
       var restoreBtn=document.createElement('button');
       restoreBtn.type='button';
       restoreBtn.className='my-faith-data-btn my-faith-data-restore-btn';
-      restoreBtn.textContent='내 데이터 복원';
+      restoreBtn.textContent='내 정보 복원';
       bindMyFaithClick(restoreBtn, openUserDataRestorePicker);
       actions.appendChild(backupBtn);
       actions.appendChild(shareBtn);
       actions.appendChild(restoreBtn);
-      panel.appendChild(actions);
+      content.appendChild(actions);
 
-      var lastText=getLastDataBackupTimeText();
-      if(lastText){
-        var last=document.createElement('p');
-        last.className='my-faith-data-last';
-        last.textContent='마지막 백업: '+lastText;
-        panel.appendChild(last);
-      }
+      var last=document.createElement('p');
+      last.id='my-faith-info-last-backup';
+      last.className='my-faith-data-last';
+      content.appendChild(last);
 
       var restore=document.createElement('p');
       restore.className='my-faith-data-restore-note';
-      restore.textContent='복원 안내: 새 휴대폰에서는 카카오톡 등에서 백업 파일을 내려받은 뒤, 내 데이터 복원을 눌러 파일을 선택하면 복원됩니다. 현재 저장된 데이터는 백업 파일의 내용으로 바뀔 수 있습니다.';
-      panel.appendChild(restore);
-
-      sec.appendChild(panel);
+      restore.textContent='복원 안내: 새 휴대폰에서는 카카오톡 등에서 백업 파일을 내려받은 뒤, 내 정보 복원을 눌러 파일을 선택하면 복원됩니다. 현재 저장된 정보는 백업 파일의 내용으로 바뀔 수 있습니다.';
+      content.appendChild(restore);
+      dialog.appendChild(content);
+      layer.appendChild(dialog);
+      layer.addEventListener('click', function(e){
+        try{
+          if(e && e.target && e.target.getAttribute && e.target.getAttribute('data-my-info-close') === 'true') closeMyInfoManagementModal();
+        }catch(_e){}
+      });
+      return layer;
+    }
+    function openMyInfoManagementModal(){
+      try{
+        if(myFaithInfoManagementOpen && myFaithInfoManagementLayer) return;
+        myFaithInfoManagementOpen=true;
+        if(modal && modal.classList) modal.classList.add('my-faith-info-modal-open');
+        var old=document.getElementById('my-faith-info-management-layer');
+        if(old && old.parentNode) old.parentNode.removeChild(old);
+        myFaithInfoManagementLayer=buildMyInfoManagementModal();
+        modal.appendChild(myFaithInfoManagementLayer);
+        updateMyInfoManagementLastBackupText();
+        setTimeout(function(){ try{ var d=myFaithInfoManagementLayer && myFaithInfoManagementLayer.querySelector('.my-faith-info-dialog'); if(d && d.focus) d.focus(); }catch(_e){} }, 40);
+      }catch(e){ console.warn('[가톨릭길동무]', e); }
+    }
+    function appendDataBackupSection(rerender){
+      var sec=document.createElement('section');
+      sec.className='my-faith-section my-faith-data-section is-closed';
+      var toggle=document.createElement('button');
+      toggle.type='button';
+      toggle.className='my-faith-data-toggle-btn';
+      toggle.textContent='내 정보 관리';
+      toggle.setAttribute('aria-haspopup','dialog');
+      toggle.setAttribute('aria-expanded','false');
+      bindMyFaithClick(toggle, openMyInfoManagementModal);
+      sec.appendChild(toggle);
       return sec;
     }
     function setHeader(main, sub){ if(title){ title.textContent = main || '나의 신앙생활'; try{ title.setAttribute('data-myfaith-title', title.textContent); }catch(_e){} } if(subtitle) subtitle.textContent = sub || ''; }
@@ -519,6 +585,7 @@
 
     function closeModal(){
       var reason = 'my-faith-category-close';
+      closeMyInfoManagementModal();
       cancelMyFaithPendingEdit();
       modal.classList.remove('show','open','keyboard-open','return-settling');
       modal.setAttribute('aria-hidden','true');
@@ -566,7 +633,8 @@
       setTimeout(updateMyFaithViewport, opts.fromExternal ? 180 : 80);
     }
     window.isMyFaithLifeModalOpen = function(){ try{ return !!(modal && modal.classList && (modal.classList.contains('show') || modal.classList.contains('open'))); }catch(_e){ return false; } };
-    window.closeMyFaithLifeModal = function(){ closeModal(); };
+    window.isMyFaithInfoManagementOpen = function(){ return !!myFaithInfoManagementOpen; };
+    window.closeMyFaithLifeModal = function(){ if(myFaithInfoManagementOpen){ closeMyInfoManagementModal(); return; } closeModal(); };
     function normalizeMyFaithExternalUrl(url){
       url = String(url || '').trim();
       if(!url) return '';
@@ -927,6 +995,6 @@
     if(menuBtn) on(menuBtn, 'click', openFromButton);
     on('my-diocese-close','click', function(e){ if(e&&e.preventDefault)e.preventDefault(); closeModal(); });
     modal.addEventListener('click', function(e){ if(e && e.target && e.target.getAttribute && e.target.getAttribute('data-my-diocese-close') === 'true') closeModal(); });
-    document.addEventListener('keydown', function(e){ if(e && e.key === 'Escape' && modal.classList.contains('show')) closeModal(); });
+    document.addEventListener('keydown', function(e){ if(e && e.key === 'Escape' && modal.classList.contains('show')){ if(myFaithInfoManagementOpen) closeMyInfoManagementModal(); else closeModal(); } });
   };
 })();
