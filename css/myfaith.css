@@ -310,20 +310,7 @@
 }
 
 
-/* V8-1-14-196-data-management-panel: Android WebView 하단 여백 상한/최소값 표준화 */
-html:not(.ios-device) .my-faith-body{padding-bottom:calc(14px + var(--oai-android-bottom-gap, 10px))!important;}
-html:not(.ios-device) .my-faith-body.my-faith-search-body{padding-bottom:calc(10px + var(--oai-android-bottom-gap, 10px))!important;}
-html:not(.ios-device) .my-faith-search-results{padding-bottom:calc(14px + var(--oai-android-bottom-gap, 10px))!important;}
-html:not(.ios-device) .my-faith-inline-privacy-note{padding-bottom:calc(6px + var(--oai-android-bottom-gap-tight, 8px))!important;}
-
-
-/* OAI-V67-STAMPBOOK-HEADER-BOTTOM-SAFE-FINAL: Android WebView 하단 여백 표준화 */
-html:not(.ios-device) .my-faith-body{padding-bottom:calc(14px + var(--oai-android-bottom-gap, 10px))!important;}
-html:not(.ios-device) .my-faith-body.my-faith-search-body{padding-bottom:calc(10px + var(--oai-android-bottom-gap, 10px))!important;}
-html:not(.ios-device) .my-faith-search-results{padding-bottom:calc(14px + var(--oai-android-bottom-gap, 10px))!important;}
-html:not(.ios-device) .my-faith-inline-privacy-note{padding-bottom:calc(6px + var(--oai-android-bottom-gap-tight, 8px))!important;}
-
-/* V8-1-14-196-data-management-panel: 나의 신앙생활 하단 내 데이터 관리 접이식 패널 */
+/* V8-1-14-197-my-info-management-modal: 나의 신앙생활 하단 내 정보 관리 내부창 */
 .my-faith-data-section {
   border: 2px solid rgba(183,121,31,.24) !important;
   background: #fffaf2 !important;
@@ -343,22 +330,90 @@ html:not(.ios-device) .my-faith-inline-privacy-note{padding-bottom:calc(6px + va
   box-shadow: inset 0 1px 0 rgba(255,255,255,.86) !important;
 }
 .my-faith-data-toggle-btn:active,
-.my-faith-data-btn:active {
+.my-faith-data-btn:active,
+.my-faith-info-close:active {
   transform: translateY(2px) scale(.985) !important;
 }
-.my-faith-data-panel {
-  border-top: 1px solid rgba(183,121,31,.20) !important;
-  padding-top: 0 !important;
+.my-faith-info-layer {
+  position: fixed !important;
+  inset: 0 !important;
+  z-index: 2147481200 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  padding: calc(18px + env(safe-area-inset-top,0px)) 16px calc(18px + env(safe-area-inset-bottom,0px)) !important;
+  box-sizing: border-box !important;
+  opacity: 0 !important;
+  pointer-events: none !important;
+  transition: opacity .14s ease !important;
 }
-.my-faith-data-panel h3 {
+.my-faith-info-layer.show {
+  opacity: 1 !important;
+  pointer-events: auto !important;
+}
+.my-faith-info-backdrop {
+  position: absolute !important;
+  inset: 0 !important;
+  background: rgba(16,24,40,.35) !important;
+  backdrop-filter: blur(2px) !important;
+  -webkit-backdrop-filter: blur(2px) !important;
+}
+.my-faith-info-dialog {
+  position: relative !important;
+  z-index: 1 !important;
+  width: min(520px, 100%) !important;
+  max-height: min(78vh, calc(var(--my-faith-visible-vh, 720px) - 48px)) !important;
+  overflow: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  border-radius: 22px !important;
+  border: 2px solid rgba(183,121,31,.32) !important;
+  background: #fffaf2 !important;
+  box-shadow: 0 20px 46px rgba(31,42,68,.22), inset 0 1px 0 rgba(255,255,255,.9) !important;
+  box-sizing: border-box !important;
+  outline: none !important;
+}
+.my-faith-info-head {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 2 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 10px !important;
+  padding: 15px 14px 11px !important;
+  background: linear-gradient(180deg,#FFFDF8 0%,#F7ECDD 100%) !important;
+  border-bottom: 1px solid rgba(183,121,31,.20) !important;
+  box-sizing: border-box !important;
+}
+.my-faith-info-head h3 {
+  margin: 0 !important;
   color: var(--v4-header-navy) !important;
-  padding-bottom: 8px !important;
+  font-size: calc(17px * var(--app-font-scale,1)) !important;
+  font-weight: 950 !important;
+  letter-spacing: -.04em !important;
+}
+.my-faith-info-close {
+  width: 38px !important;
+  height: 38px !important;
+  border-radius: 999px !important;
+  border: 2px solid rgba(31,42,68,.22) !important;
+  background: #fffdf8 !important;
+  color: var(--v4-header-navy) !important;
+  font-size: 26px !important;
+  font-weight: 900 !important;
+  line-height: 1 !important;
+  cursor: pointer !important;
+  box-shadow: 0 4px 10px rgba(31,42,68,.08), inset 0 1px 0 rgba(255,255,255,.9) !important;
+}
+.my-faith-info-content {
+  padding: 14px 0 15px !important;
+  box-sizing: border-box !important;
 }
 .my-faith-data-desc,
 .my-faith-data-restore-note,
 .my-faith-data-last {
   margin: 0 !important;
-  padding: 0 14px 12px !important;
+  padding: 0 16px 12px !important;
   color: #6b5b44 !important;
   font-size: calc(13px * var(--app-font-scale,1)) !important;
   font-weight: 750 !important;
@@ -377,8 +432,11 @@ html:not(.ios-device) .my-faith-inline-privacy-note{padding-bottom:calc(6px + va
   font-weight: 900 !important;
   text-align: center !important;
 }
+.my-faith-data-last[hidden] {
+  display: none !important;
+}
 .my-faith-data-restore-note {
-  padding-bottom: 15px !important;
+  padding-bottom: 0 !important;
   color: #5b6474 !important;
   font-size: calc(12.4px * var(--app-font-scale,1)) !important;
   font-weight: 760 !important;
@@ -387,7 +445,7 @@ html:not(.ios-device) .my-faith-inline-privacy-note{padding-bottom:calc(6px + va
   display: grid !important;
   grid-template-columns: 1fr !important;
   gap: 9px !important;
-  padding: 0 14px 12px !important;
+  padding: 0 16px 12px !important;
   box-sizing: border-box !important;
 }
 .my-faith-data-btn {
@@ -420,5 +478,6 @@ html:not(.ios-device) .my-faith-inline-privacy-note{padding-bottom:calc(6px + va
   .my-faith-data-actions { grid-template-columns: 1fr 1fr 1fr !important; }
 }
 @media (max-width:390px){
+  .my-faith-info-layer { padding-left: 12px !important; padding-right: 12px !important; }
   .my-faith-data-actions { grid-template-columns: 1fr !important; }
 }
