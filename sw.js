@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-201-my-info-action-feedback';
-const ASSET_VERSION = 'V8-1-14-201-my-info-action-feedback';
+const CACHE_VERSION = 'catholic-way-V8-1-14-202-backup-code-copy-restore';
+const ASSET_VERSION = 'V8-1-14-202-backup-code-copy-restore';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }
