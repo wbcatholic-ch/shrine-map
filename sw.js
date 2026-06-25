@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-211-backup-code-only';
-const ASSET_VERSION = 'V8-1-14-211-backup-code-only';
+const CACHE_VERSION = 'catholic-way-V8-1-14-213-restore-one-tap-pilgrimage-button-ready';
+const ASSET_VERSION = 'V8-1-14-213-restore-one-tap-pilgrimage-button-ready';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }

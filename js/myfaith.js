@@ -116,7 +116,7 @@
     }
     function safeText(x){ return String(x || '').replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] || c); }); }
     var DATA_BACKUP_TYPE = 'catholic-gildongmu-user-data-backup';
-    var DATA_BACKUP_BUILD = 'V8-1-14-211-backup-code-only';
+    var DATA_BACKUP_BUILD = 'V8-1-14-213-restore-one-tap-pilgrimage-button-ready';
     var DATA_BACKUP_LAST_TIME_KEY = 'oai_data_backup_last_exported_at_v1';
     var myFaithInfoManagementOpen = false;
     var myFaithInfoManagementLayer = null;
@@ -225,7 +225,7 @@
       var payload=collectUserDataBackup();
       var compact=JSON.stringify(payload);
       var code='CGM-BACKUP-V1:'+encodeTextBase64Url(compact);
-      var text='가톨릭길동무 백업코드\n'+code+'\n\n새 휴대폰에서 가톨릭길동무 → 나의 신앙생활 → 내 정보 관리 → 백업 코드 복원에 붙여넣으세요.';
+      var text='가톨릭길동무 백업코드\n'+code+'\n\n가톨릭길동무 → 나의 신앙생활 → 내 정보 관리 → 백업 코드 복원에 붙여넣으세요.';
       return {payload:payload, code:code, text:text};
     }
     function extractUserDataBackupCode(text){
@@ -385,7 +385,7 @@
             if(canShareFile){
               navigator.share({
                 title:'가톨릭길동무 백업 파일',
-                text:'휴대폰 변경 시 새 기기에서 복원할 가톨릭길동무 백업 파일입니다.',
+                text:'기기 변경 시 복원할 가톨릭길동무 백업 파일입니다.',
                 files:[file]
               }).then(function(){
                 recordUserDataBackupTime();
@@ -555,10 +555,17 @@
         setMyInfoActionStatus('백업 코드를 읽지 못했습니다.', 'error', false);
       }
     }
-    function executeUserDataCodeRestore(){
+    function executeUserDataCodeRestore(e){
       try{
+        if(e){
+          if(e.preventDefault) e.preventDefault();
+          if(e.stopPropagation) e.stopPropagation();
+        }
         var ta=document.getElementById('my-faith-info-code-restore-text');
-        restoreUserDataBackupFromCodeText(ta ? ta.value : '');
+        var text=ta ? ta.value : '';
+        try{ if(ta && ta.blur) ta.blur(); }catch(_e){}
+        try{ document.activeElement && document.activeElement.blur && document.activeElement.blur(); }catch(_e){}
+        restoreUserDataBackupFromCodeText(text);
       }catch(e){
         console.warn('[가톨릭길동무]', e);
         setMyInfoActionStatus('백업 코드 복원을 실행하지 못했습니다.', 'error', false);
@@ -641,7 +648,7 @@
     }
     function openUserDataRestorePicker(){
       try{
-        /* V8-1-14-211-backup-code-only:
+        /* V8-1-14-213-restore-one-tap-pilgrimage-button-ready:
            Android/WebView와 일부 모바일 브라우저는 파일 선택창(input.click)을
            사용자 터치 흐름 안에서 바로 실행해야 한다. setTimeout 뒤에 실행하면
            사용자 선택 동작으로 인정되지 않아 파일 선택이 실패하거나 취소처럼 보일 수 있다. */
@@ -757,7 +764,7 @@
       content.className='my-faith-info-content';
       var desc=document.createElement('p');
       desc.className='my-faith-data-desc';
-      desc.textContent='파일을 찾을 필요 없이, 백업 코드를 복사해 카카오톡 나에게 보내기에 보관하세요.';
+      desc.textContent='앱을 삭제하거나 기기를 변경할 때는 백업 코드를 복사해 카카오톡 나에게 보내기에 보관하세요. 즐겨찾기·순례 스탬프·나의 신앙생활 정보가 저장됩니다.';
       content.appendChild(desc);
 
       function makeActionItem(btn, noteText){
@@ -792,7 +799,7 @@
         return group;
       }
 
-      var codeGroup=makeActionGroup('백업 코드로 내 정보 옮기기', '기존 휴대폰에서 백업 코드를 복사해 카카오톡 나에게 보내기에 보관하고, 새 휴대폰에서 붙여넣어 복원합니다.', 'is-code-backup is-code-only');
+      var codeGroup=makeActionGroup('백업 코드 관리', '', 'is-code-backup is-code-only');
 
       var codeCopyBtn=document.createElement('button');
       codeCopyBtn.type='button';
@@ -804,8 +811,8 @@
       codeRestoreBtn.className='my-faith-data-btn my-faith-data-code-restore-btn';
       codeRestoreBtn.textContent='백업 코드 복원';
       bindMyFaithClick(codeRestoreBtn, openUserDataCodeRestoreBox);
-      codeGroup._myFaithActionList.appendChild(makeActionItem(codeCopyBtn, '기존 휴대폰에서 눌러 코드를 복사합니다.'));
-      codeGroup._myFaithActionList.appendChild(makeActionItem(codeRestoreBtn, '새 휴대폰에서 카카오톡에 보관한 코드를 붙여넣습니다.'));
+      codeGroup._myFaithActionList.appendChild(makeActionItem(codeCopyBtn, '코드를 복사해 카카오톡 나에게 보내기에 보관합니다.'));
+      codeGroup._myFaithActionList.appendChild(makeActionItem(codeRestoreBtn, '보관한 코드를 붙여넣어 정보를 복원합니다.'));
 
       var copyBox=document.createElement('div');
       copyBox.id='my-faith-info-code-copy-box';
@@ -829,7 +836,7 @@
       restoreBox.hidden=true;
       var restoreCodeNote=document.createElement('p');
       restoreCodeNote.className='my-faith-code-box-note';
-      restoreCodeNote.textContent='카카오톡에 보관한 백업 코드를 아래에 붙여넣으세요.';
+      restoreCodeNote.textContent='보관한 백업 코드를 아래에 붙여넣으세요.';
       var restoreText=document.createElement('textarea');
       restoreText.id='my-faith-info-code-restore-text';
       restoreText.className='my-faith-code-textarea';
@@ -841,7 +848,7 @@
       restoreRun.type='button';
       restoreRun.className='my-faith-code-btn my-faith-code-run-btn';
       restoreRun.textContent='복원 실행';
-      bindMyFaithClick(restoreRun, executeUserDataCodeRestore);
+      bindMyFaithImmediateClick(restoreRun, executeUserDataCodeRestore);
       var restoreCancel=document.createElement('button');
       restoreCancel.type='button';
       restoreCancel.className='my-faith-code-btn my-faith-code-cancel-btn';
@@ -885,10 +892,6 @@
       status.hidden=true;
       content.appendChild(status);
 
-      var restore=document.createElement('p');
-      restore.className='my-faith-data-restore-note';
-      restore.textContent='복원하면 현재 정보가 백업 코드 내용으로 바뀔 수 있습니다.';
-      content.appendChild(restore);
       dialog.appendChild(content);
       layer.appendChild(dialog);
       layer.addEventListener('click', function(e){
@@ -924,7 +927,7 @@
       sec.appendChild(toggle);
       var note=document.createElement('p');
       note.className='my-faith-data-toggle-note';
-      note.textContent='휴대폰 변경 전 백업·공유·복원을 관리합니다.';
+      note.textContent='앱 삭제·기기 변경 시 백업 코드를 보관하세요.';
       sec.appendChild(note);
       return sec;
     }
@@ -1168,6 +1171,28 @@
         fn();
         return false;
       }, false);
+    }
+    function bindMyFaithImmediateClick(el, fn){
+      if(!el || typeof fn !== 'function') return;
+      var lastRunAt=0;
+      function run(e){
+        try{
+          if(e){
+            if(e.preventDefault) e.preventDefault();
+            if(e.stopPropagation) e.stopPropagation();
+            if(e.stopImmediatePropagation) e.stopImmediatePropagation();
+          }
+          if(el.disabled || el.getAttribute('aria-disabled') === 'true') return false;
+          var now=Date.now ? Date.now() : new Date().getTime();
+          if(now-lastRunAt<520) return false;
+          lastRunAt=now;
+          fn(e);
+        }catch(err){ console.warn('[가톨릭길동무]', err); }
+        return false;
+      }
+      try{ el.addEventListener('pointerdown', run, true); }catch(_e){}
+      try{ el.addEventListener('touchstart', run, {capture:true, passive:false}); }catch(_e){}
+      try{ el.addEventListener('click', run, true); }catch(_e){}
     }
     function smallButton(label, fn){
       var b=document.createElement('button');
