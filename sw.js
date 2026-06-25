@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-219_background_return_single_judgment_watchdog_full';
-const ASSET_VERSION = 'V8-1-14-219_background_return_single_judgment_watchdog_full';
+const CACHE_VERSION = 'catholic-way-V8-1-14-221_short_background_resume_no_white_flash_full';
+const ASSET_VERSION = 'V8-1-14-221_short_background_resume_no_white_flash_full';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }
