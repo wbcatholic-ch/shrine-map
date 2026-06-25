@@ -116,7 +116,7 @@
     }
     function safeText(x){ return String(x || '').replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] || c); }); }
     var DATA_BACKUP_TYPE = 'catholic-gildongmu-user-data-backup';
-    var DATA_BACKUP_BUILD = 'V8-1-14-197-my-info-management-modal';
+    var DATA_BACKUP_BUILD = 'V8-1-14-198-my-info-modal-spacing-note';
     var DATA_BACKUP_LAST_TIME_KEY = 'oai_data_backup_last_exported_at_v1';
     var myFaithInfoManagementOpen = false;
     var myFaithInfoManagementLayer = null;
@@ -392,13 +392,8 @@
       content.className='my-faith-info-content';
       var desc=document.createElement('p');
       desc.className='my-faith-data-desc';
-      desc.textContent='휴대폰을 변경하면 즐겨찾기, 성지 순례현황, 나의 교구·본당 설정이 새 휴대폰으로 자동 이전되지 않을 수 있습니다.';
+      desc.textContent='휴대폰 변경 전·후에 내 정보를 백업하고 복원하는 곳입니다.';
       content.appendChild(desc);
-
-      var guide=document.createElement('p');
-      guide.className='my-faith-data-desc my-faith-data-guide';
-      guide.textContent='휴대폰을 바꾸기 전에는 내 정보 백업으로 백업 파일을 만든 뒤, 백업 파일 공유하기를 눌러 카카오톡 나에게 보내기, Google Drive, 이메일 등에 보관해 주세요.';
-      content.appendChild(guide);
 
       var actions=document.createElement('div');
       actions.className='my-faith-data-actions';
@@ -422,6 +417,11 @@
       actions.appendChild(restoreBtn);
       content.appendChild(actions);
 
+      var actionNote=document.createElement('p');
+      actionNote.className='my-faith-data-action-note';
+      actionNote.textContent='기기 변경 전에는 내 정보 백업 → 백업 파일 공유하기 순서로 카카오톡 나에게 보내기 등에 보관하세요.';
+      content.appendChild(actionNote);
+
       var last=document.createElement('p');
       last.id='my-faith-info-last-backup';
       last.className='my-faith-data-last';
@@ -429,7 +429,7 @@
 
       var restore=document.createElement('p');
       restore.className='my-faith-data-restore-note';
-      restore.textContent='복원 안내: 새 휴대폰에서는 카카오톡 등에서 백업 파일을 내려받은 뒤, 내 정보 복원을 눌러 파일을 선택하면 복원됩니다. 현재 저장된 정보는 백업 파일의 내용으로 바뀔 수 있습니다.';
+      restore.textContent='새 휴대폰에서는 받은 백업 파일을 내려받아 내 정보 복원에서 선택하세요. 복원하면 현재 정보가 백업 파일 내용으로 바뀔 수 있습니다.';
       content.appendChild(restore);
       dialog.appendChild(content);
       layer.appendChild(dialog);
@@ -464,6 +464,10 @@
       toggle.setAttribute('aria-expanded','false');
       bindMyFaithClick(toggle, openMyInfoManagementModal);
       sec.appendChild(toggle);
+      var note=document.createElement('p');
+      note.className='my-faith-data-toggle-note';
+      note.textContent='휴대폰 변경 전 백업·공유·복원을 관리합니다.';
+      sec.appendChild(note);
       return sec;
     }
     function setHeader(main, sub){ if(title){ title.textContent = main || '나의 신앙생활'; try{ title.setAttribute('data-myfaith-title', title.textContent); }catch(_e){} } if(subtitle) subtitle.textContent = sub || ''; }
@@ -885,7 +889,6 @@
         }
 
         body.appendChild(settings);
-        body.appendChild(appendDataBackupSection(renderSettingsEdit));
         var tools=document.createElement('div');
         tools.className='my-faith-tools my-faith-change-tools';
         var backBtn=smallButton('취소', cancelMyFaithSettingsAndReturn);
@@ -897,6 +900,7 @@
           renderHome();
           return 'stay';
         });
+        body.appendChild(appendDataBackupSection(renderSettingsEdit));
         appendMyFaithPrivacyNote();
         settleMyFaithHomeScroll();
       }
@@ -917,7 +921,6 @@
           if(parishDetailRow) parishDetailRow.classList.add('my-faith-parish-info-row');
         }
         body.appendChild(quick);
-        body.appendChild(appendDataBackupSection(renderHome));
         var changeWrap=document.createElement('div');
         changeWrap.className='my-faith-change-settings-wrap';
         var changeBtn=document.createElement('button');
@@ -932,7 +935,7 @@
         renderSettingsEdit();
         return;
       }
-      appendMyFaithConfirmButton(); appendMyFaithPrivacyNote(); settleMyFaithHomeScroll();
+      appendMyFaithConfirmButton(); body.appendChild(appendDataBackupSection(renderHome)); appendMyFaithPrivacyNote(); settleMyFaithHomeScroll();
     }
     function renderDioceseList(){
       var current=getMyFaithEditName(); setHeader('나의 교구 선택','확인을 눌러야 저장됩니다'); setBodyMode('my-diocese-list');
