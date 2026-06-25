@@ -310,7 +310,7 @@
 }
 
 
-/* V8-1-14-208-file-restore-picker-fix: 나의 신앙생활 하단 내 정보 관리 내부창 */
+/* V8-1-14-211-backup-code-only: 나의 신앙생활 하단 내 정보 관리 내부창 */
 .my-faith-data-section {
   margin-top: 22px !important;
   border: 0 !important;
@@ -499,6 +499,11 @@
   cursor: pointer !important;
   box-sizing: border-box !important;
   box-shadow: 0 7px 14px rgba(31,42,68,.08), inset 0 1px 0 rgba(255,255,255,.85) !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  text-align: center !important;
+  user-select: none !important;
 }
 .my-faith-data-backup-btn {
   color: #14532D !important;
@@ -523,7 +528,7 @@
   .my-faith-data-actions { grid-template-columns: 1fr !important; }
 }
 
-/* V8-1-14-208-file-restore-picker-fix: 내 정보 백업/복원/공유 진행 상태 표시 */
+/* V8-1-14-211-backup-code-only: 내 정보 백업/복원/공유 진행 상태 표시 */
 .my-faith-info-action-status {
   display: block !important;
   margin: 0 16px 10px !important;
@@ -570,15 +575,28 @@
   background: #fff6f6 !important;
   color: #7f1d1d !important;
 }
-.my-faith-data-btn:disabled {
+.my-faith-data-btn:disabled,
+.my-faith-data-btn.is-disabled {
   opacity: .68 !important;
   cursor: wait !important;
+  pointer-events: none !important;
+}
+.my-faith-file-restore-input {
+  position: absolute !important;
+  width: 1px !important;
+  height: 1px !important;
+  padding: 0 !important;
+  margin: -1px !important;
+  overflow: hidden !important;
+  clip: rect(0 0 0 0) !important;
+  white-space: nowrap !important;
+  border: 0 !important;
 }
 @keyframes myFaithInfoSpin {
   to { transform: rotate(360deg); }
 }
 
-/* V8-1-14-208-file-restore-picker-fix: 카카오톡용 백업 코드 복사/복원 UI */
+/* V8-1-14-211-backup-code-only: 카카오톡용 백업 코드 복사/복원 UI */
 .my-faith-data-code-backup-btn {
   color: #14532D !important;
   border: 2.5px solid rgba(34,139,74,.68) !important;
@@ -671,7 +689,7 @@
   cursor: wait !important;
 }
 
-/* V8-1-14-208-file-restore-picker-fix: 내 정보 관리 파일/코드 묶음 구분 */
+/* V8-1-14-211-backup-code-only: 내 정보 관리 파일/코드 묶음 구분 */
 .my-faith-data-action-group {
   margin: 0 16px 16px !important;
   padding: 13px 12px 14px !important;
@@ -721,7 +739,7 @@
   margin: 13px 0 0 !important;
 }
 
-/* V8-1-14-208-file-restore-picker-fix: 내 정보 관리를 작은 팝업이 아니라 전체 화면 관리창으로 표시 */
+/* V8-1-14-211-backup-code-only: 내 정보 관리를 작은 팝업이 아니라 전체 화면 관리창으로 표시 */
 .my-faith-info-layer {
   position: fixed !important;
   inset: 0 !important;
@@ -795,7 +813,7 @@
 }
 
 
-/* V8-1-14-208-file-restore-picker-fix: 내 정보 관리의 파일/코드 영역을 더 명확하게 구분 */
+/* V8-1-14-211-backup-code-only: 내 정보 관리의 파일/코드 영역을 더 명확하게 구분 */
 .my-faith-info-content .my-faith-data-desc {
   margin: 0 16px 18px !important;
   padding: 13px 14px !important;
@@ -874,4 +892,30 @@
 .my-faith-data-restore-note {
   margin-top: 2px !important;
   padding: 0 18px !important;
+}
+
+
+/* V8-1-14-211-backup-code-only: 파일 선택 방식 제거, 백업 코드 방식만 노출 */
+.my-faith-info-content .my-faith-data-desc {
+  margin-bottom: 20px !important;
+}
+.my-faith-data-action-group.is-code-only {
+  margin: 0 16px 24px !important;
+  border-color: rgba(183,121,31,.62) !important;
+  background: linear-gradient(180deg,#FFFDF7 0%,#FFF2DD 100%) !important;
+}
+.my-faith-data-action-group.is-code-only .my-faith-data-group-title {
+  color: #54350F !important;
+  background: linear-gradient(180deg,#FFECCB 0%,#F7DAA5 100%) !important;
+  border-bottom-color: rgba(183,121,31,.30) !important;
+}
+.my-faith-data-action-group.is-code-only .my-faith-data-actions {
+  gap: 22px !important;
+}
+.my-faith-data-action-group.is-code-only .my-faith-data-btn-note {
+  font-size: calc(12.5px * var(--app-font-scale,1)) !important;
+  line-height: 1.36 !important;
+}
+.my-faith-data-action-group.is-code-only .my-faith-code-box {
+  margin-top: 20px !important;
 }

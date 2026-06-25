@@ -116,7 +116,7 @@
     }
     function safeText(x){ return String(x || '').replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] || c); }); }
     var DATA_BACKUP_TYPE = 'catholic-gildongmu-user-data-backup';
-    var DATA_BACKUP_BUILD = 'V8-1-14-208-file-restore-picker-fix';
+    var DATA_BACKUP_BUILD = 'V8-1-14-211-backup-code-only';
     var DATA_BACKUP_LAST_TIME_KEY = 'oai_data_backup_last_exported_at_v1';
     var myFaithInfoManagementOpen = false;
     var myFaithInfoManagementLayer = null;
@@ -320,6 +320,8 @@
         if(!layer) return;
         Array.prototype.forEach.call(layer.querySelectorAll('.my-faith-data-btn, .my-faith-code-btn'), function(btn){
           try{ btn.disabled=!!disabled; }catch(_e){}
+          try{ btn.classList.toggle('is-disabled', !!disabled); }catch(_e){}
+          try{ btn.setAttribute('aria-disabled', disabled ? 'true' : 'false'); }catch(_e){}
         });
       }catch(_e){}
     }
@@ -584,7 +586,7 @@
       return restored;
     }
     function restoreUserDataBackupFromFile(file){
-      if(!file){ setMyInfoActionStatus('선택된 백업 파일이 없습니다. 다시 백업 파일 복원을 눌러 파일을 선택해 주세요.', 'warn', false); return; }
+      if(!file){ setMyInfoActionStatus('백업 파일을 선택하지 않아 복원하지 않았습니다.', 'warn', false); return; }
       if(typeof FileReader === 'undefined'){
         setMyInfoActionStatus('이 기기에서는 파일 복원을 사용할 수 없습니다.', 'error', false);
         try{ alert('이 기기에서는 파일 복원을 사용할 수 없습니다.'); }catch(_e){}
@@ -639,13 +641,13 @@
     }
     function openUserDataRestorePicker(){
       try{
-        /* V8-1-14-208-file-restore-picker-fix:
+        /* V8-1-14-211-backup-code-only:
            Android/WebView와 일부 모바일 브라우저는 파일 선택창(input.click)을
            사용자 터치 흐름 안에서 바로 실행해야 한다. setTimeout 뒤에 실행하면
            사용자 선택 동작으로 인정되지 않아 파일 선택이 실패하거나 취소처럼 보일 수 있다. */
         setMyInfoActionButtonsDisabled(false);
         hideBackupCodeBoxes();
-        setMyInfoActionStatus('백업 파일 선택창을 엽니다. 저장한 백업 파일을 선택해 주세요.', 'ok', false);
+        setMyInfoActionStatus('백업 파일 선택창을 엽니다. 파일을 선택하면 복원이 시작됩니다.', 'ok', false);
         var input=document.createElement('input');
         input.type='file';
         input.accept='application/json,.json';
@@ -665,7 +667,7 @@
         input.addEventListener('change', function(){
           var file=input.files && input.files[0];
           if(!file){
-            setMyInfoActionStatus('파일이 선택되지 않았습니다. 백업 파일 복원을 다시 눌러 주세요.', 'warn', false);
+            setMyInfoActionStatus('백업 파일을 선택하지 않아 복원하지 않았습니다.', 'warn', false);
             cleanupInput();
             return;
           }
@@ -674,7 +676,7 @@
         });
         try{
           input.addEventListener('cancel', function(){
-            setMyInfoActionStatus('파일이 선택되지 않았습니다. 백업 파일 복원을 다시 눌러 주세요.', 'warn', false);
+            setMyInfoActionStatus('백업 파일을 선택하지 않아 복원하지 않았습니다.', 'warn', false);
             cleanupInput();
           });
         }catch(_e){}
@@ -755,7 +757,7 @@
       content.className='my-faith-info-content';
       var desc=document.createElement('p');
       desc.className='my-faith-data-desc';
-      desc.textContent='목적에 맞는 박스 하나만 선택하세요.';
+      desc.textContent='파일을 찾을 필요 없이, 백업 코드를 복사해 카카오톡 나에게 보내기에 보관하세요.';
       content.appendChild(desc);
 
       function makeActionItem(btn, noteText){
@@ -790,22 +792,7 @@
         return group;
       }
 
-      var fileGroup=makeActionGroup('① 앱 재설치용 · 백업 파일', '같은 휴대폰에서 앱을 다시 설치할 때 사용합니다.', 'is-file-backup');
-      var codeGroup=makeActionGroup('② 휴대폰 변경용 · 백업 코드', '새 휴대폰으로 옮길 때 카카오톡에 코드를 보관합니다.', 'is-code-backup');
-
-      var fileSaveBtn=document.createElement('button');
-      fileSaveBtn.type='button';
-      fileSaveBtn.className='my-faith-data-btn my-faith-data-backup-btn';
-      fileSaveBtn.textContent='백업 파일 저장';
-      bindMyFaithClick(fileSaveBtn, downloadUserDataBackup);
-      var fileRestoreBtn=document.createElement('button');
-      fileRestoreBtn.type='button';
-      fileRestoreBtn.className='my-faith-data-btn my-faith-data-restore-btn';
-      fileRestoreBtn.textContent='백업 파일 복원';
-      bindMyFaithClick(fileRestoreBtn, openUserDataRestorePicker);
-      fileGroup._myFaithActionList.appendChild(makeActionItem(fileSaveBtn, '현재 정보를 파일로 저장합니다.'));
-      fileGroup._myFaithActionList.appendChild(makeActionItem(fileRestoreBtn, '저장한 파일로 복원합니다.'));
-      content.appendChild(fileGroup);
+      var codeGroup=makeActionGroup('백업 코드로 내 정보 옮기기', '기존 휴대폰에서 백업 코드를 복사해 카카오톡 나에게 보내기에 보관하고, 새 휴대폰에서 붙여넣어 복원합니다.', 'is-code-backup is-code-only');
 
       var codeCopyBtn=document.createElement('button');
       codeCopyBtn.type='button';
@@ -817,8 +804,8 @@
       codeRestoreBtn.className='my-faith-data-btn my-faith-data-code-restore-btn';
       codeRestoreBtn.textContent='백업 코드 복원';
       bindMyFaithClick(codeRestoreBtn, openUserDataCodeRestoreBox);
-      codeGroup._myFaithActionList.appendChild(makeActionItem(codeCopyBtn, '기존 휴대폰에서 복사해 카카오톡에 보관합니다.'));
-      codeGroup._myFaithActionList.appendChild(makeActionItem(codeRestoreBtn, '새 휴대폰에서 붙여넣어 복원합니다.'));
+      codeGroup._myFaithActionList.appendChild(makeActionItem(codeCopyBtn, '기존 휴대폰에서 눌러 코드를 복사합니다.'));
+      codeGroup._myFaithActionList.appendChild(makeActionItem(codeRestoreBtn, '새 휴대폰에서 카카오톡에 보관한 코드를 붙여넣습니다.'));
 
       var copyBox=document.createElement('div');
       copyBox.id='my-faith-info-code-copy-box';
@@ -900,7 +887,7 @@
 
       var restore=document.createElement('p');
       restore.className='my-faith-data-restore-note';
-      restore.textContent='복원하면 현재 정보가 백업 코드 또는 백업 파일 내용으로 바뀔 수 있습니다.';
+      restore.textContent='복원하면 현재 정보가 백업 코드 내용으로 바뀔 수 있습니다.';
       content.appendChild(restore);
       dialog.appendChild(content);
       layer.appendChild(dialog);
