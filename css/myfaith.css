@@ -310,7 +310,7 @@
 }
 
 
-/* V8-1-14-202-backup-code-copy-restore: 나의 신앙생활 하단 내 정보 관리 내부창 */
+/* V8-1-14-203-restore-code-primary-spinner-fix: 나의 신앙생활 하단 내 정보 관리 내부창 */
 .my-faith-data-section {
   margin-top: 22px !important;
   border: 0 !important;
@@ -523,7 +523,7 @@
   .my-faith-data-actions { grid-template-columns: 1fr !important; }
 }
 
-/* V8-1-14-202-backup-code-copy-restore: 내 정보 백업/복원/공유 진행 상태 표시 */
+/* V8-1-14-203-restore-code-primary-spinner-fix: 내 정보 백업/복원/공유 진행 상태 표시 */
 .my-faith-info-action-status {
   display: block !important;
   margin: 0 16px 10px !important;
@@ -578,7 +578,7 @@
   to { transform: rotate(360deg); }
 }
 
-/* V8-1-14-202-backup-code-copy-restore: 카카오톡용 백업 코드 복사/복원 UI */
+/* V8-1-14-203-restore-code-primary-spinner-fix: 카카오톡용 백업 코드 복사/복원 UI */
 .my-faith-data-code-backup-btn {
   color: #14532D !important;
   border: 2.5px solid rgba(34,139,74,.68) !important;
