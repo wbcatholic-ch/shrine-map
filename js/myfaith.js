@@ -116,7 +116,7 @@
     }
     function safeText(x){ return String(x || '').replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] || c); }); }
     var DATA_BACKUP_TYPE = 'catholic-gildongmu-user-data-backup';
-    var DATA_BACKUP_BUILD = 'V8-1-14-199-my-info-management-notes-color';
+    var DATA_BACKUP_BUILD = 'V8-1-14-200-my-info-soft-spacing';
     var DATA_BACKUP_LAST_TIME_KEY = 'oai_data_backup_last_exported_at_v1';
     var myFaithInfoManagementOpen = false;
     var myFaithInfoManagementLayer = null;
@@ -424,15 +424,10 @@
       shareBtn.className='my-faith-data-btn my-faith-data-share-btn';
       shareBtn.textContent='백업 파일 공유하기';
       bindMyFaithClick(shareBtn, shareUserDataBackup);
-      actions.appendChild(makeActionItem(backupBtn, '현재 휴대폰의 즐겨찾기·순례현황·나의 신앙생활 정보를 백업 파일로 저장합니다.'));
-      actions.appendChild(makeActionItem(restoreBtn, '새 휴대폰에서 받은 백업 파일을 선택해 정보를 다시 불러옵니다.'));
-      actions.appendChild(makeActionItem(shareBtn, '백업 파일을 카카오톡 나에게 보내기 등에 보관할 때 사용합니다.'));
+      actions.appendChild(makeActionItem(backupBtn, '즐겨찾기·순례현황·나의 신앙생활 정보를 저장합니다.'));
+      actions.appendChild(makeActionItem(restoreBtn, '받은 백업 파일을 선택해 정보를 다시 불러옵니다.'));
+      actions.appendChild(makeActionItem(shareBtn, '기기 변경 전 카카오톡 등에 보관할 때 사용합니다.'));
       content.appendChild(actions);
-
-      var actionNote=document.createElement('p');
-      actionNote.className='my-faith-data-action-note';
-      actionNote.textContent='기기 변경 전에는 내 정보 백업 후 백업 파일 공유하기를 눌러 보관하세요.';
-      content.appendChild(actionNote);
 
       var last=document.createElement('p');
       last.id='my-faith-info-last-backup';
@@ -441,7 +436,7 @@
 
       var restore=document.createElement('p');
       restore.className='my-faith-data-restore-note';
-      restore.textContent='새 휴대폰에서는 받은 백업 파일을 내려받아 내 정보 복원에서 선택하세요. 복원하면 현재 정보가 백업 파일 내용으로 바뀔 수 있습니다.';
+      restore.textContent='복원하면 현재 정보가 백업 파일 내용으로 바뀔 수 있습니다.';
       content.appendChild(restore);
       dialog.appendChild(content);
       layer.appendChild(dialog);
