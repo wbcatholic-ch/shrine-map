@@ -310,8 +310,9 @@
 }
 
 
-/* V8-1-14-197-my-info-management-modal: 나의 신앙생활 하단 내 정보 관리 내부창 */
+/* V8-1-14-198-my-info-modal-spacing-note: 나의 신앙생활 하단 내 정보 관리 내부창 */
 .my-faith-data-section {
+  margin-top: 16px !important;
   border: 2px solid rgba(183,121,31,.24) !important;
   background: #fffaf2 !important;
 }
@@ -333,6 +334,17 @@
 .my-faith-data-btn:active,
 .my-faith-info-close:active {
   transform: translateY(2px) scale(.985) !important;
+}
+.my-faith-data-toggle-note {
+  margin: 0 !important;
+  padding: 8px 12px 11px !important;
+  color: rgba(95,85,73,.78) !important;
+  font-size: calc(12px * var(--app-font-scale,1)) !important;
+  font-weight: 760 !important;
+  line-height: 1.35 !important;
+  text-align: center !important;
+  letter-spacing: -.03em !important;
+  word-break: keep-all !important;
 }
 .my-faith-info-layer {
   position: fixed !important;
@@ -410,16 +422,25 @@
   box-sizing: border-box !important;
 }
 .my-faith-data-desc,
+.my-faith-data-action-note,
 .my-faith-data-restore-note,
 .my-faith-data-last {
   margin: 0 !important;
-  padding: 0 16px 12px !important;
+  padding: 0 16px 10px !important;
   color: #6b5b44 !important;
   font-size: calc(13px * var(--app-font-scale,1)) !important;
   font-weight: 750 !important;
   line-height: 1.44 !important;
   letter-spacing: -.03em !important;
   word-break: keep-all !important;
+}
+.my-faith-data-action-note {
+  padding-top: 1px !important;
+  padding-bottom: 8px !important;
+  color: #4f432f !important;
+  font-size: calc(12.5px * var(--app-font-scale,1)) !important;
+  font-weight: 850 !important;
+  text-align: center !important;
 }
 .my-faith-data-guide {
   color: #4f432f !important;
