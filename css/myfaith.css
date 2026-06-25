@@ -310,7 +310,7 @@
 }
 
 
-/* V8-1-14-203-restore-code-primary-spinner-fix: 나의 신앙생활 하단 내 정보 관리 내부창 */
+/* V8-1-14-205-my-info-backup-groups: 나의 신앙생활 하단 내 정보 관리 내부창 */
 .my-faith-data-section {
   margin-top: 22px !important;
   border: 0 !important;
@@ -523,7 +523,7 @@
   .my-faith-data-actions { grid-template-columns: 1fr !important; }
 }
 
-/* V8-1-14-203-restore-code-primary-spinner-fix: 내 정보 백업/복원/공유 진행 상태 표시 */
+/* V8-1-14-205-my-info-backup-groups: 내 정보 백업/복원/공유 진행 상태 표시 */
 .my-faith-info-action-status {
   display: block !important;
   margin: 0 16px 10px !important;
@@ -578,7 +578,7 @@
   to { transform: rotate(360deg); }
 }
 
-/* V8-1-14-203-restore-code-primary-spinner-fix: 카카오톡용 백업 코드 복사/복원 UI */
+/* V8-1-14-205-my-info-backup-groups: 카카오톡용 백업 코드 복사/복원 UI */
 .my-faith-data-code-backup-btn {
   color: #14532D !important;
   border: 2.5px solid rgba(34,139,74,.68) !important;
@@ -669,4 +669,54 @@
 .my-faith-code-btn:disabled {
   opacity: .68 !important;
   cursor: wait !important;
+}
+
+/* V8-1-14-205-my-info-backup-groups: 내 정보 관리 파일/코드 묶음 구분 */
+.my-faith-data-action-group {
+  margin: 0 16px 16px !important;
+  padding: 13px 12px 14px !important;
+  border-radius: 18px !important;
+  border: 1.8px solid rgba(183,121,31,.26) !important;
+  background: #fffdf8 !important;
+  box-sizing: border-box !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.82), 0 5px 12px rgba(31,42,68,.05) !important;
+}
+.my-faith-data-action-group.is-file-backup {
+  border-color: rgba(112,121,138,.30) !important;
+  background: linear-gradient(180deg,#FFFFFF 0%,#F5F7FB 100%) !important;
+}
+.my-faith-data-action-group.is-code-backup {
+  border-color: rgba(183,121,31,.30) !important;
+  background: linear-gradient(180deg,#FFFDF8 0%,#FFF5E6 100%) !important;
+}
+.my-faith-data-group-title {
+  margin: 0 0 4px !important;
+  color: var(--v4-header-navy) !important;
+  font-size: calc(14.2px * var(--app-font-scale,1)) !important;
+  font-weight: 950 !important;
+  line-height: 1.25 !important;
+  letter-spacing: -.04em !important;
+  text-align: center !important;
+  word-break: keep-all !important;
+}
+.my-faith-data-group-guide {
+  margin: 0 0 12px !important;
+  padding: 0 4px !important;
+  color: rgba(91,78,58,.78) !important;
+  font-size: calc(11.8px * var(--app-font-scale,1)) !important;
+  font-weight: 760 !important;
+  line-height: 1.34 !important;
+  letter-spacing: -.03em !important;
+  text-align: center !important;
+  word-break: keep-all !important;
+}
+.my-faith-data-action-group .my-faith-data-actions {
+  padding: 0 !important;
+  gap: 14px !important;
+}
+.my-faith-data-action-group .my-faith-data-action-item {
+  gap: 6px !important;
+}
+.my-faith-data-action-group .my-faith-code-box {
+  margin: 13px 0 0 !important;
 }
