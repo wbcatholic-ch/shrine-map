@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-194-parish-nearby-loading-once';
-const ASSET_VERSION = 'V8-1-14-194-parish-nearby-loading-once';
+const CACHE_VERSION = 'catholic-way-V8-1-14-196-data-management-panel';
+const ASSET_VERSION = 'V8-1-14-196-data-management-panel';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }

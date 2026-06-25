@@ -310,7 +310,7 @@
 }
 
 
-/* V8-1-14-194-parish-nearby-loading-once: Android WebView 하단 여백 상한/최소값 표준화 */
+/* V8-1-14-196-data-management-panel: Android WebView 하단 여백 상한/최소값 표준화 */
 html:not(.ios-device) .my-faith-body{padding-bottom:calc(14px + var(--oai-android-bottom-gap, 10px))!important;}
 html:not(.ios-device) .my-faith-body.my-faith-search-body{padding-bottom:calc(10px + var(--oai-android-bottom-gap, 10px))!important;}
 html:not(.ios-device) .my-faith-search-results{padding-bottom:calc(14px + var(--oai-android-bottom-gap, 10px))!important;}
@@ -322,3 +322,103 @@ html:not(.ios-device) .my-faith-body{padding-bottom:calc(14px + var(--oai-androi
 html:not(.ios-device) .my-faith-body.my-faith-search-body{padding-bottom:calc(10px + var(--oai-android-bottom-gap, 10px))!important;}
 html:not(.ios-device) .my-faith-search-results{padding-bottom:calc(14px + var(--oai-android-bottom-gap, 10px))!important;}
 html:not(.ios-device) .my-faith-inline-privacy-note{padding-bottom:calc(6px + var(--oai-android-bottom-gap-tight, 8px))!important;}
+
+/* V8-1-14-196-data-management-panel: 나의 신앙생활 하단 내 데이터 관리 접이식 패널 */
+.my-faith-data-section {
+  border: 2px solid rgba(183,121,31,.24) !important;
+  background: #fffaf2 !important;
+}
+.my-faith-data-toggle-btn {
+  width: 100% !important;
+  min-height: 52px !important;
+  border: 0 !important;
+  background: linear-gradient(180deg,#FFFDF8 0%,#F6EBD8 100%) !important;
+  color: var(--v4-header-navy) !important;
+  font-family: inherit !important;
+  font-size: calc(15.5px * var(--app-font-scale,1)) !important;
+  font-weight: 950 !important;
+  letter-spacing: -.035em !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.86) !important;
+}
+.my-faith-data-toggle-btn:active,
+.my-faith-data-btn:active {
+  transform: translateY(2px) scale(.985) !important;
+}
+.my-faith-data-panel {
+  border-top: 1px solid rgba(183,121,31,.20) !important;
+  padding-top: 0 !important;
+}
+.my-faith-data-panel h3 {
+  color: var(--v4-header-navy) !important;
+  padding-bottom: 8px !important;
+}
+.my-faith-data-desc,
+.my-faith-data-restore-note,
+.my-faith-data-last {
+  margin: 0 !important;
+  padding: 0 14px 12px !important;
+  color: #6b5b44 !important;
+  font-size: calc(13px * var(--app-font-scale,1)) !important;
+  font-weight: 750 !important;
+  line-height: 1.44 !important;
+  letter-spacing: -.03em !important;
+  word-break: keep-all !important;
+}
+.my-faith-data-guide {
+  color: #4f432f !important;
+  font-weight: 850 !important;
+}
+.my-faith-data-last {
+  padding-top: 0 !important;
+  color: #14532D !important;
+  font-size: calc(12.5px * var(--app-font-scale,1)) !important;
+  font-weight: 900 !important;
+  text-align: center !important;
+}
+.my-faith-data-restore-note {
+  padding-bottom: 15px !important;
+  color: #5b6474 !important;
+  font-size: calc(12.4px * var(--app-font-scale,1)) !important;
+  font-weight: 760 !important;
+}
+.my-faith-data-actions {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 9px !important;
+  padding: 0 14px 12px !important;
+  box-sizing: border-box !important;
+}
+.my-faith-data-btn {
+  min-height: 50px !important;
+  border-radius: 16px !important;
+  font-family: inherit !important;
+  font-size: calc(14.5px * var(--app-font-scale,1)) !important;
+  font-weight: 900 !important;
+  letter-spacing: -.035em !important;
+  cursor: pointer !important;
+  box-sizing: border-box !important;
+  box-shadow: 0 7px 14px rgba(31,42,68,.08), inset 0 1px 0 rgba(255,255,255,.85) !important;
+}
+.my-faith-data-backup-btn {
+  color: #14532D !important;
+  border: 2.5px solid rgba(34,139,74,.68) !important;
+  background: linear-gradient(180deg,#F5FFF8 0%,#DFF5E7 100%) !important;
+}
+.my-faith-data-share-btn {
+  color: #4B3313 !important;
+  border: 2.5px solid rgba(183,121,31,.72) !important;
+  background: linear-gradient(180deg,#FFF9ED 0%,#F3E0BB 100%) !important;
+}
+.my-faith-data-restore-btn {
+  color: #183E73 !important;
+  border: 2.5px solid rgba(47,102,166,.68) !important;
+  background: linear-gradient(180deg,#F7FAFF 0%,#E1ECFA 100%) !important;
+}
+@media (min-width:371px){
+  .my-faith-data-actions { grid-template-columns: 1fr 1fr 1fr !important; }
+}
+@media (max-width:390px){
+  .my-faith-data-actions { grid-template-columns: 1fr !important; }
+}
