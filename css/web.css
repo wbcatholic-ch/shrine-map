@@ -148,7 +148,7 @@ html.oai-font-global .web-card-desc{font-size:calc(15px * var(--app-inner-font-s
 
 
 
-/* V8-1-14-245_restore_wrong_parish_compact_rule: 웹사이트 목록 compact 비율 정리 */
+/* V8-1-14-247_compact_pilgrimage_record_text_unify: 웹사이트 목록 compact 비율 정리 */
 html:not(.ios-device).oai-screen-compact-short .web-card-body{
   gap:9px!important;
   padding:8px 11px 9px!important;
@@ -174,7 +174,7 @@ html:not(.ios-device).oai-screen-compact-short .web-card-badge{
   line-height:1.25!important;
 }
 
-/* V8-1-14-245_restore_wrong_parish_compact_rule: 웹사이트 목록 compact 최종 축소 */
+/* V8-1-14-247_compact_pilgrimage_record_text_unify: 웹사이트 목록 compact 최종 축소 */
 html:not(.ios-device).oai-screen-compact-short .web-card{
   border-radius:13px!important;
   margin-bottom:9px!important;

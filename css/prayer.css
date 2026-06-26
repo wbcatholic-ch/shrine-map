@@ -261,7 +261,7 @@
 
 
 
-/* V8-1-14-245_restore_wrong_parish_compact_rule: Android WebView 하단 여백 상한/최소값 표준화 */
+/* V8-1-14-247_compact_pilgrimage_record_text_unify: Android WebView 하단 여백 상한/최소값 표준화 */
 html:not(.ios-device) .pr-list{padding-bottom:calc(18px + var(--oai-android-bottom-gap, 10px))!important;}
 
 
@@ -269,7 +269,7 @@ html:not(.ios-device) .pr-list{padding-bottom:calc(18px + var(--oai-android-bott
 html:not(.ios-device) .pr-list{padding-bottom:calc(18px + var(--oai-android-bottom-gap, 10px))!important;}
 
 
-/* V8-1-14-245_restore_wrong_parish_compact_rule: 기도문 목록/본문 compact 비율 정리 */
+/* V8-1-14-247_compact_pilgrimage_record_text_unify: 기도문 목록/본문 compact 비율 정리 */
 html:not(.ios-device).oai-screen-compact-short .pr-item{
   min-height:56px!important;
   padding:10px 11px!important;
@@ -281,7 +281,7 @@ html:not(.ios-device).oai-screen-compact-short .pr-sub{font-size:10.8px!importan
 html:not(.ios-device).oai-screen-compact-short #prayer-detail .prayer-detail-title{font-size:17px!important;line-height:1.25!important;}
 html:not(.ios-device).oai-screen-compact-short #prayer-detail .prayer-detail-body{font-size:14px!important;line-height:1.55!important;}
 
-/* V8-1-14-245_restore_wrong_parish_compact_rule: 기도문 목록/본문 후순위 CSS에서 compact 최종 축소 */
+/* V8-1-14-247_compact_pilgrimage_record_text_unify: 기도문 목록/본문 후순위 CSS에서 compact 최종 축소 */
 html:not(.ios-device).oai-screen-compact-short #prayer-search-inp,
 html:not(.ios-device).oai-screen-compact-short #prayer-search-inp::placeholder{
   font-size:12.8px!important;

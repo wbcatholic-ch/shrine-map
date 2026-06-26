@@ -296,7 +296,7 @@ html.ios-device .cb{width:34px!important;height:34px!important;border-radius:10p
 .hd-icon::after{top:42%;width:14px;height:3px;transform:translate(-50%,-50%);}
 
 
-/* V8-1-14-245_restore_wrong_parish_compact_rule: 관구 설명 탭 */
+/* V8-1-14-247_compact_pilgrimage_record_text_unify: 관구 설명 탭 */
 #province-info-view{position:absolute;inset:0;overflow-y:auto;padding:16px 14px 64px;display:none;background:var(--bg);}
 #province-info-view.on{display:block;}
 .province-info-card{background:var(--card);border:1.5px solid #D8C49E;border-radius:18px;padding:18px 18px;margin:0 0 14px;box-shadow:0 4px 14px rgba(31,42,68,.06);color:var(--tx);}
@@ -388,7 +388,7 @@ html.ios-device .cb{width:34px!important;height:34px!important;border-radius:10p
 #map-view.on,#list-view.on,#search-view.on,#province-info-view.on{animation:oaiDioFadeIn .22s ease both;}
 html.oai-dio-returning #map-view.on,html.oai-dio-returning #list-view.on,html.oai-dio-returning #search-view.on,html.oai-dio-returning #province-info-view.on{animation:none!important;}
 
-/* V8-1-14-245_restore_wrong_parish_compact_rule: 관구·교구 compact에서 목록/검색/관구란 후순위 최종 축소 */
+/* V8-1-14-247_compact_pilgrimage_record_text_unify: 관구·교구 compact에서 목록/검색/관구란 후순위 최종 축소 */
 @media(max-width:370px){
   :root{
     --dio-compact-font-scale:.89;
@@ -436,7 +436,7 @@ html.oai-dio-returning #map-view.on,html.oai-dio-returning #list-view.on,html.oa
   .province-info-source{font-size:calc(10px * var(--dio-effective-font-scale,1))!important;margin-top:6px!important;}
 }
 
-/* V8-1-14-245_restore_wrong_parish_compact_rule: 관구·교구 목록 카드의 본당수/교구명 compact 최종 보정 */
+/* V8-1-14-247_compact_pilgrimage_record_text_unify: 관구·교구 목록 카드의 본당수/교구명 compact 최종 보정 */
 @media(max-width:370px){
   #list-view .lv-name{font-size:calc(13.2px * var(--dio-effective-font-scale,1))!important;line-height:1.22!important;letter-spacing:-.045em!important;}
   #list-view .lv-rg,#list-view .lv-det{font-size:calc(10.2px * var(--dio-effective-font-scale,1))!important;line-height:1.26!important;letter-spacing:-.035em!important;}
