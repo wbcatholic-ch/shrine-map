@@ -116,7 +116,7 @@
     }
     function safeText(x){ return String(x || '').replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] || c); }); }
     var DATA_BACKUP_TYPE = 'catholic-gildongmu-user-data-backup';
-    var DATA_BACKUP_BUILD = 'V8-1-14-221_short_background_resume_no_white_flash_full';
+    var DATA_BACKUP_BUILD = 'V8-1-14-222_sheet_swipe_no_bottom_flash_map_stable_full';
     var DATA_BACKUP_LAST_TIME_KEY = 'oai_data_backup_last_exported_at_v1';
     var myFaithInfoManagementOpen = false;
     var myFaithInfoManagementLayer = null;
@@ -679,7 +679,7 @@
     }
     function openUserDataRestorePicker(){
       try{
-        /* V8-1-14-221_short_background_resume_no_white_flash_full:
+        /* V8-1-14-222_sheet_swipe_no_bottom_flash_map_stable_full:
            Android/WebView와 일부 모바일 브라우저는 파일 선택창(input.click)을
            사용자 터치 흐름 안에서 바로 실행해야 한다. setTimeout 뒤에 실행하면
            사용자 선택 동작으로 인정되지 않아 파일 선택이 실패하거나 취소처럼 보일 수 있다. */
