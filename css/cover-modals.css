@@ -365,3 +365,75 @@
 #cover #mass-quick-modal #mass-quick-bible.mass-quick-btn strong {
   color:#172033 !important;
 }
+
+/* V8-1-14-242_compact_missing_items_cleanup: compact에서 메뉴/미사 빠른사용 버튼이 뒤쪽 고정값에 덮이지 않게 최종 위치에서 축소 */
+html:not(.ios-device).oai-screen-compact-short #cover .cover-menu-panel,
+html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-panel{
+  width:min(332px,calc(100vw - 26px))!important;
+  padding:14px 12px 14px!important;
+  border-radius:20px!important;
+}
+html:not(.ios-device).oai-screen-compact-short #cover .cover-menu-head,
+html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-head{
+  min-height:66px!important;
+  margin-bottom:10px!important;
+  padding:10px 11px!important;
+  gap:8px!important;
+  border-radius:16px!important;
+}
+html:not(.ios-device).oai-screen-compact-short #cover .cover-menu-title,
+html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-title{
+  font-size:15.8px!important;
+  line-height:1.16!important;
+}
+html:not(.ios-device).oai-screen-compact-short #cover .cover-menu-subtitle,
+html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-subtitle{
+  font-size:10.8px!important;
+  line-height:1.2!important;
+}
+html:not(.ios-device).oai-screen-compact-short #cover .cover-menu-list,
+html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-actions{
+  gap:7px!important;
+  padding:2px!important;
+  border-radius:18px!important;
+}
+html:not(.ios-device).oai-screen-compact-short #cover .cover-menu-item,
+html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-btn,
+html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-primary,
+html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal #mass-quick-missa.mass-quick-btn,
+html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal #mass-quick-prayer.mass-quick-btn,
+html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal #mass-quick-hymn.mass-quick-btn,
+html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal #mass-quick-bible.mass-quick-btn{
+  min-height:68px!important;
+  height:68px!important;
+  padding:9px 12px!important;
+  border-radius:15px!important;
+  border-width:1.6px!important;
+  grid-template-columns:42px 1fr!important;
+}
+html:not(.ios-device).oai-screen-compact-short #cover .cover-menu-icon,
+html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-btn span{
+  width:36px!important;
+  height:36px!important;
+  min-width:36px!important;
+  flex-basis:36px!important;
+  font-size:22px!important;
+}
+html:not(.ios-device).oai-screen-compact-short #cover .cover-menu-text,
+html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-btn strong,
+html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal #mass-quick-missa.mass-quick-btn strong,
+html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal #mass-quick-prayer.mass-quick-btn strong,
+html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal #mass-quick-hymn.mass-quick-btn strong,
+html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal #mass-quick-bible.mass-quick-btn strong{
+  font-size:12.8px!important;
+  line-height:1.15!important;
+}
+html:not(.ios-device).oai-screen-compact-short #cover .cover-menu-close,
+html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-close,
+html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .guide-x{
+  width:32px!important;
+  height:32px!important;
+  min-width:32px!important;
+  min-height:32px!important;
+  font-size:22px!important;
+}
