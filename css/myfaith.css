@@ -310,7 +310,7 @@
 }
 
 
-/* V8-1-14-223_restore_code_no_keyboard_strict_full: 나의 신앙생활 하단 내 정보 관리 내부창 */
+/* V8-1-14-224_restore_paste_area_move_up_simple_full: 나의 신앙생활 하단 내 정보 관리 내부창 */
 .my-faith-data-section {
   margin-top: 22px !important;
   border: 0 !important;
@@ -528,7 +528,7 @@
   .my-faith-data-actions { grid-template-columns: 1fr !important; }
 }
 
-/* V8-1-14-223_restore_code_no_keyboard_strict_full: 내 정보 백업/복원/공유 진행 상태 표시 */
+/* V8-1-14-224_restore_paste_area_move_up_simple_full: 내 정보 백업/복원/공유 진행 상태 표시 */
 .my-faith-info-action-status {
   display: block !important;
   margin: 0 16px 10px !important;
@@ -596,7 +596,7 @@
   to { transform: rotate(360deg); }
 }
 
-/* V8-1-14-223_restore_code_no_keyboard_strict_full: 카카오톡용 백업 코드 복사/복원 UI */
+/* V8-1-14-224_restore_paste_area_move_up_simple_full: 카카오톡용 백업 코드 복사/복원 UI */
 .my-faith-data-code-backup-btn {
   color: #14532D !important;
   border: 2.5px solid rgba(34,139,74,.68) !important;
@@ -697,7 +697,20 @@
   cursor: wait !important;
 }
 
-/* V8-1-14-223_restore_code_no_keyboard_strict_full: 내 정보 관리 파일/코드 묶음 구분 */
+
+/* V8-1-14-224_restore_paste_area_move_up_simple_full: 복원 입력 영역을 위로 올렸을 때 키보드에 덜 가리도록 여백과 높이를 줄인다. */
+#my-faith-info-code-restore-box {
+  margin: 8px 0 14px !important;
+  padding: 10px !important;
+}
+#my-faith-info-code-restore-box .my-faith-code-textarea {
+  min-height: 96px !important;
+}
+#my-faith-info-code-restore-box .my-faith-code-row {
+  margin-top: 8px !important;
+}
+
+/* V8-1-14-224_restore_paste_area_move_up_simple_full: 내 정보 관리 파일/코드 묶음 구분 */
 .my-faith-data-action-group {
   margin: 0 16px 16px !important;
   padding: 13px 12px 14px !important;
@@ -747,7 +760,7 @@
   margin: 13px 0 0 !important;
 }
 
-/* V8-1-14-223_restore_code_no_keyboard_strict_full: 내 정보 관리를 작은 팝업이 아니라 전체 화면 관리창으로 표시 */
+/* V8-1-14-224_restore_paste_area_move_up_simple_full: 내 정보 관리를 작은 팝업이 아니라 전체 화면 관리창으로 표시 */
 .my-faith-info-layer {
   position: fixed !important;
   inset: 0 !important;
@@ -821,7 +834,7 @@
 }
 
 
-/* V8-1-14-223_restore_code_no_keyboard_strict_full: 내 정보 관리의 파일/코드 영역을 더 명확하게 구분 */
+/* V8-1-14-224_restore_paste_area_move_up_simple_full: 내 정보 관리의 파일/코드 영역을 더 명확하게 구분 */
 .my-faith-info-content .my-faith-data-desc {
   margin: 0 16px 18px !important;
   padding: 13px 14px !important;
@@ -903,7 +916,7 @@
 }
 
 
-/* V8-1-14-223_restore_code_no_keyboard_strict_full: 파일 선택 방식 제거, 백업 코드 방식만 노출 */
+/* V8-1-14-224_restore_paste_area_move_up_simple_full: 파일 선택 방식 제거, 백업 코드 방식만 노출 */
 .my-faith-info-content .my-faith-data-desc {
   margin-bottom: 20px !important;
 }
@@ -928,44 +941,9 @@
   margin-top: 20px !important;
 }
 
-.my-faith-code-manual-btn {
-  width: 100% !important;
-  margin: 0 0 10px !important;
-  color: #5A3915 !important;
-  border: 2px solid rgba(183,121,31,.46) !important;
-  background: linear-gradient(180deg,#fffdf7 0%,#f8ead2 100%) !important;
-}
 
 
-.my-faith-code-textarea[readonly]:not(.is-manual-input) {
-  background: #fbfcff !important;
-  color: #6b7280 !important;
-  caret-color: transparent !important;
-  resize: none !important;
-  user-select: text !important;
-}
 
 
-.my-faith-code-textarea[readonly]:not(.is-manual-input):focus {
-  border-color: rgba(31,42,68,.18) !important;
-  box-shadow: none !important;
-}
 
 
-/* V8-1-14-223_restore_code_no_keyboard_strict_full: 백업 코드 복원 입력칸은 자동 붙여넣기 전에는 키보드를 열지 않는다. */
-.my-faith-code-manual-btn {
-  width: 100% !important;
-  margin: 0 0 10px !important;
-  color: #5B4A2A !important;
-  border: 2px solid rgba(183,121,31,.42) !important;
-  background: linear-gradient(180deg,#fffdf8 0%,#f5ead4 100%) !important;
-}
-.my-faith-code-textarea[readonly]:not(.is-manual-input) {
-  background: #f8fafc !important;
-  color: #697386 !important;
-  caret-color: transparent !important;
-}
-.my-faith-code-textarea[readonly]:not(.is-manual-input):focus {
-  border-color: rgba(31,42,68,.18) !important;
-  box-shadow: none !important;
-}

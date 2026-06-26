@@ -116,7 +116,7 @@
     }
     function safeText(x){ return String(x || '').replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] || c); }); }
     var DATA_BACKUP_TYPE = 'catholic-gildongmu-user-data-backup';
-    var DATA_BACKUP_BUILD = 'V8-1-14-223_restore_code_no_keyboard_strict_full';
+    var DATA_BACKUP_BUILD = 'V8-1-14-224_restore_paste_area_move_up_simple_full';
     var DATA_BACKUP_LAST_TIME_KEY = 'oai_data_backup_last_exported_at_v1';
     var myFaithInfoManagementOpen = false;
     var myFaithInfoManagementLayer = null;
@@ -483,20 +483,25 @@
         hideBackupCodeBoxes('copy');
         var box=document.getElementById('my-faith-info-code-restore-box');
         var ta=document.getElementById('my-faith-info-code-restore-text');
+        var group=box && box.closest ? box.closest('.my-faith-data-action-group') : null;
+        var list=group ? group.querySelector('.my-faith-data-actions') : null;
         if(!box || !ta){
           setMyInfoActionStatus('백업 코드 입력창을 열지 못했습니다.', 'error', false);
           return;
         }
+        /* V8-1-14-224_restore_paste_area_move_up_simple_full:
+           복잡한 키보드 차단 방식은 제거하고, 복원 입력 영역 자체를
+           백업 코드 관리 상단으로 올려 키보드가 올라와도 붙여넣기 영역이 보이게 한다. */
+        try{ if(group && list && box.previousElementSibling !== list) group.insertBefore(box, list); }catch(_e){}
         box.hidden=false;
         try{
-          ta.readOnly=true;
-          ta.setAttribute('readonly','readonly');
-          ta.setAttribute('inputmode','none');
-          ta.classList.remove('is-manual-input');
+          ta.readOnly=false;
+          ta.removeAttribute('readonly');
+          ta.setAttribute('inputmode','text');
           ta.blur && ta.blur();
         }catch(_e){}
-        setMyInfoActionStatus('붙여넣기 버튼을 누르면 키보드 없이 백업 코드를 가져옵니다. 자동 붙여넣기가 안 될 때만 직접 붙여넣기를 누르세요.', 'ok', false);
-        setTimeout(function(){ try{ box.scrollIntoView({block:'start', behavior:'smooth'}); }catch(_e){} }, 60);
+        setMyInfoActionStatus('아래 입력칸에 백업 코드를 붙여넣은 뒤 복원 실행을 누르세요.', 'ok', false);
+        setTimeout(function(){ try{ box.scrollIntoView({block:'center', behavior:'smooth'}); }catch(_e){} }, 60);
       }catch(e){
         console.warn('[가톨릭길동무]', e);
         setMyInfoActionStatus('백업 코드 입력창을 열지 못했습니다.', 'error', false);
@@ -517,37 +522,17 @@
               return;
             }
             ta.value=text;
-            try{ ta.readOnly=true; ta.setAttribute('readonly','readonly'); ta.setAttribute('inputmode','none'); ta.blur && ta.blur(); }catch(_e){}
-            setMyInfoActionStatus('백업 코드를 붙여넣었습니다. 키보드가 올라오지 않습니다. 복원 실행을 눌러주세요.', 'ok', false);
+            try{ ta.readOnly=false; ta.removeAttribute('readonly'); ta.setAttribute('inputmode','text'); }catch(_e){}
+            setMyInfoActionStatus('백업 코드를 붙여넣었습니다. 복원 실행을 눌러주세요.', 'ok', false);
           }).catch(function(){
-            setMyInfoActionStatus('자동 붙여넣기가 안 되면 직접 붙여넣기 버튼을 누른 뒤 붙여넣어 주세요.', 'warn', false);
+            setMyInfoActionStatus('자동 붙여넣기가 안 되면 입력칸을 길게 눌러 붙여넣어 주세요.', 'warn', false);
           });
         }else{
-          setMyInfoActionStatus('이 기기에서는 자동 붙여넣기를 지원하지 않습니다. 직접 붙여넣기 버튼을 누른 뒤 붙여넣어 주세요.', 'warn', false);
+          setMyInfoActionStatus('이 기기에서는 자동 붙여넣기를 지원하지 않습니다. 입력칸을 길게 눌러 붙여넣어 주세요.', 'warn', false);
         }
       }catch(e){
         console.warn('[가톨릭길동무]', e);
         setMyInfoActionStatus('붙여넣기를 실행하지 못했습니다. 입력칸을 길게 눌러 붙여넣어 주세요.', 'warn', false);
-      }
-    }
-    function enableUserDataManualCodeInput(){
-      try{
-        var ta=document.getElementById('my-faith-info-code-restore-text');
-        if(!ta){
-          setMyInfoActionStatus('백업 코드 입력칸을 찾지 못했습니다.', 'error', false);
-          return;
-        }
-        ta.readOnly=false;
-        ta.removeAttribute('readonly');
-        ta.setAttribute('inputmode','text');
-        ta.classList.add('is-manual-input');
-        setMyInfoActionStatus('이제 입력칸을 길게 눌러 붙여넣으세요. 붙여넣은 뒤 복원 실행을 누르세요.', 'warn', false);
-        setTimeout(function(){
-          try{ ta.scrollIntoView({block:'center', behavior:'smooth'}); }catch(_e){}
-        }, 40);
-      }catch(e){
-        console.warn('[가톨릭길동무]', e);
-        setMyInfoActionStatus('직접 붙여넣기를 열지 못했습니다.', 'error', false);
       }
     }
     function cancelUserDataCodeRestore(){
@@ -703,7 +688,7 @@
     }
     function openUserDataRestorePicker(){
       try{
-        /* V8-1-14-223_restore_code_no_keyboard_strict_full:
+        /* V8-1-14-224_restore_paste_area_move_up_simple_full:
            Android/WebView와 일부 모바일 브라우저는 파일 선택창(input.click)을
            사용자 터치 흐름 안에서 바로 실행해야 한다. setTimeout 뒤에 실행하면
            사용자 선택 동작으로 인정되지 않아 파일 선택이 실패하거나 취소처럼 보일 수 있다. */
@@ -897,27 +882,13 @@
       restorePaste.className='my-faith-code-btn my-faith-code-paste-btn';
       restorePaste.textContent='붙여넣기';
       bindMyFaithImmediateClick(restorePaste, pasteUserDataBackupCodeFromClipboard);
-      var restoreManual=document.createElement('button');
-      restoreManual.type='button';
-      restoreManual.className='my-faith-code-btn my-faith-code-manual-btn';
-      restoreManual.textContent='직접 붙여넣기';
-      bindMyFaithImmediateClick(restoreManual, enableUserDataManualCodeInput);
       var restoreText=document.createElement('textarea');
       restoreText.id='my-faith-info-code-restore-text';
       restoreText.className='my-faith-code-textarea';
-      restoreText.placeholder='붙여넣기 버튼으로 자동 입력됩니다. 자동 붙여넣기가 안 될 때만 직접 붙여넣기를 누르세요.';
+      restoreText.placeholder='가톨릭길동무 백업코드 또는 CGM-BACKUP-V1:...';
       restoreText.setAttribute('aria-label','복원할 백업 코드');
-      restoreText.readOnly=true;
-      restoreText.setAttribute('readonly','readonly');
-      restoreText.setAttribute('inputmode','none');
-      restoreText.addEventListener('focus', function(){
-        try{
-          if(restoreText.readOnly){
-            restoreText.blur();
-            setMyInfoActionStatus('입력칸을 누르면 키보드가 올라옵니다. 먼저 붙여넣기 버튼을 사용하세요.', 'warn', false);
-          }
-        }catch(_e){}
-      });
+      restoreText.readOnly=false;
+      restoreText.setAttribute('inputmode','text');
       var restoreRow=document.createElement('div');
       restoreRow.className='my-faith-code-row';
       var restoreRun=document.createElement('button');
@@ -953,7 +924,6 @@
       restoreRow.appendChild(restoreCancel);
       restoreBox.appendChild(restoreCodeNote);
       restoreBox.appendChild(restorePaste);
-      restoreBox.appendChild(restoreManual);
       restoreBox.appendChild(restoreText);
       restoreBox.appendChild(restoreRow);
       codeGroup.appendChild(restoreBox);
