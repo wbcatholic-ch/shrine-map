@@ -116,7 +116,7 @@
     }
     function safeText(x){ return String(x || '').replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] || c); }); }
     var DATA_BACKUP_TYPE = 'catholic-gildongmu-user-data-backup';
-    var DATA_BACKUP_BUILD = 'V8-1-14-227_restore_paste_box_higher_simple_full';
+    var DATA_BACKUP_BUILD = 'V8-1-14-228_restore_manual_paste_spacing_full';
     var DATA_BACKUP_LAST_TIME_KEY = 'oai_data_backup_last_exported_at_v1';
     var myFaithInfoManagementOpen = false;
     var myFaithInfoManagementLayer = null;
@@ -504,7 +504,7 @@
           setMyInfoActionStatus('백업 코드 입력창을 열지 못했습니다.', 'error', false);
           return;
         }
-        /* V8-1-14-227_restore_paste_box_higher_simple_full:
+        /* V8-1-14-228_restore_manual_paste_spacing_full:
            복원 입력 영역을 위쪽에 보여 주되, 아래의 백업 코드 복사/복원 버튼 묶음은
            함께 숨겨 중복 화면처럼 보이지 않게 한다. */
         try{ if(group && list && box.previousElementSibling !== list) group.insertBefore(box, list); }catch(_e){}
@@ -518,41 +518,12 @@
           ta.setAttribute('inputmode','text');
           ta.blur && ta.blur();
         }catch(_e){}
-        setMyInfoActionStatus('백업 코드를 붙여넣은 뒤 복원 실행을 누르세요.', 'ok', false);
+        setMyInfoActionStatus('입력칸을 길게 눌러 백업 코드를 붙여넣은 뒤 복원 실행을 누르세요.', 'ok', false);
         setTimeout(scrollUserDataRestoreBoxUp, 40);
         setTimeout(scrollUserDataRestoreBoxUp, 180);
       }catch(e){
         console.warn('[가톨릭길동무]', e);
         setMyInfoActionStatus('백업 코드 입력창을 열지 못했습니다.', 'error', false);
-      }
-    }
-    function pasteUserDataBackupCodeFromClipboard(){
-      try{
-        var ta=document.getElementById('my-faith-info-code-restore-text');
-        if(!ta){
-          setMyInfoActionStatus('백업 코드 입력칸을 찾지 못했습니다.', 'error', false);
-          return;
-        }
-        if(navigator && navigator.clipboard && navigator.clipboard.readText){
-          navigator.clipboard.readText().then(function(text){
-            text=String(text || '').trim();
-            if(!text){
-              setMyInfoActionStatus('클립보드에 백업 코드가 없습니다. 입력칸을 눌러 직접 붙여넣어 주세요.', 'warn', false);
-              return;
-            }
-            ta.value=text;
-            try{ ta.readOnly=false; ta.removeAttribute('readonly'); ta.setAttribute('inputmode','text'); }catch(_e){}
-            setMyInfoActionStatus('백업 코드를 붙여넣었습니다. 복원 실행을 눌러주세요.', 'ok', false);
-            setTimeout(scrollUserDataRestoreBoxUp, 40);
-          }).catch(function(){
-            setMyInfoActionStatus('자동 붙여넣기가 안 되면 입력칸을 길게 눌러 붙여넣어 주세요.', 'warn', false);
-          });
-        }else{
-          setMyInfoActionStatus('이 기기에서는 자동 붙여넣기를 지원하지 않습니다. 입력칸을 길게 눌러 붙여넣어 주세요.', 'warn', false);
-        }
-      }catch(e){
-        console.warn('[가톨릭길동무]', e);
-        setMyInfoActionStatus('붙여넣기를 실행하지 못했습니다. 입력칸을 길게 눌러 붙여넣어 주세요.', 'warn', false);
       }
     }
     function cancelUserDataCodeRestore(){
@@ -709,7 +680,7 @@
     }
     function openUserDataRestorePicker(){
       try{
-        /* V8-1-14-227_restore_paste_box_higher_simple_full:
+        /* V8-1-14-228_restore_manual_paste_spacing_full:
            Android/WebView와 일부 모바일 브라우저는 파일 선택창(input.click)을
            사용자 터치 흐름 안에서 바로 실행해야 한다. setTimeout 뒤에 실행하면
            사용자 선택 동작으로 인정되지 않아 파일 선택이 실패하거나 취소처럼 보일 수 있다. */
@@ -897,12 +868,7 @@
       restoreBox.hidden=true;
       var restoreCodeNote=document.createElement('p');
       restoreCodeNote.className='my-faith-code-box-note';
-      restoreCodeNote.textContent='카카오톡 나에게 보내기에 보관한 백업 코드를 붙여넣으세요.';
-      var restorePaste=document.createElement('button');
-      restorePaste.type='button';
-      restorePaste.className='my-faith-code-btn my-faith-code-paste-btn';
-      restorePaste.textContent='붙여넣기';
-      bindMyFaithImmediateClick(restorePaste, pasteUserDataBackupCodeFromClipboard);
+      restoreCodeNote.textContent='카카오톡 나에게 보내기에 보관한 백업 코드를 입력칸에 길게 눌러 붙여넣으세요.';
       var restoreText=document.createElement('textarea');
       restoreText.id='my-faith-info-code-restore-text';
       restoreText.className='my-faith-code-textarea';
@@ -945,7 +911,6 @@
       restoreRow.appendChild(restoreRun);
       restoreRow.appendChild(restoreCancel);
       restoreBox.appendChild(restoreCodeNote);
-      restoreBox.appendChild(restorePaste);
       restoreBox.appendChild(restoreText);
       restoreBox.appendChild(restoreRow);
       codeGroup.appendChild(restoreBox);
