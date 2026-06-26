@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-224_restore_paste_area_move_up_simple_full';
-const ASSET_VERSION = 'V8-1-14-224_restore_paste_area_move_up_simple_full';
+const CACHE_VERSION = 'catholic-way-V8-1-14-226_restore_box_hide_duplicate_buttons_full';
+const ASSET_VERSION = 'V8-1-14-226_restore_box_hide_duplicate_buttons_full';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }

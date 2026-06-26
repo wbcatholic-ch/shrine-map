@@ -116,7 +116,7 @@
     }
     function safeText(x){ return String(x || '').replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] || c); }); }
     var DATA_BACKUP_TYPE = 'catholic-gildongmu-user-data-backup';
-    var DATA_BACKUP_BUILD = 'V8-1-14-224_restore_paste_area_move_up_simple_full';
+    var DATA_BACKUP_BUILD = 'V8-1-14-226_restore_box_hide_duplicate_buttons_full';
     var DATA_BACKUP_LAST_TIME_KEY = 'oai_data_backup_last_exported_at_v1';
     var myFaithInfoManagementOpen = false;
     var myFaithInfoManagementLayer = null;
@@ -440,7 +440,13 @@
         }
         if(!which || which === 'restore'){
           var restoreBox=document.getElementById('my-faith-info-code-restore-box');
-          if(restoreBox) restoreBox.hidden=true;
+          if(restoreBox){
+            restoreBox.hidden=true;
+            var group=restoreBox.closest ? restoreBox.closest('.my-faith-data-action-group') : null;
+            var list=group ? group.querySelector('.my-faith-data-actions') : null;
+            if(list) list.hidden=false;
+            if(group) group.classList.remove('is-code-restore-open');
+          }
         }
       }catch(_e){}
     }
@@ -489,10 +495,12 @@
           setMyInfoActionStatus('백업 코드 입력창을 열지 못했습니다.', 'error', false);
           return;
         }
-        /* V8-1-14-224_restore_paste_area_move_up_simple_full:
-           복잡한 키보드 차단 방식은 제거하고, 복원 입력 영역 자체를
-           백업 코드 관리 상단으로 올려 키보드가 올라와도 붙여넣기 영역이 보이게 한다. */
+        /* V8-1-14-226_restore_box_hide_duplicate_buttons_full:
+           복원 입력 영역을 위쪽에 보여 주되, 아래의 백업 코드 복사/복원 버튼 묶음은
+           함께 숨겨 중복 화면처럼 보이지 않게 한다. */
         try{ if(group && list && box.previousElementSibling !== list) group.insertBefore(box, list); }catch(_e){}
+        try{ if(group) group.classList.add('is-code-restore-open'); }catch(_e){}
+        try{ if(list) list.hidden=true; }catch(_e){}
         box.hidden=false;
         try{
           ta.readOnly=false;
@@ -688,7 +696,7 @@
     }
     function openUserDataRestorePicker(){
       try{
-        /* V8-1-14-224_restore_paste_area_move_up_simple_full:
+        /* V8-1-14-226_restore_box_hide_duplicate_buttons_full:
            Android/WebView와 일부 모바일 브라우저는 파일 선택창(input.click)을
            사용자 터치 흐름 안에서 바로 실행해야 한다. setTimeout 뒤에 실행하면
            사용자 선택 동작으로 인정되지 않아 파일 선택이 실패하거나 취소처럼 보일 수 있다. */

@@ -60,7 +60,7 @@ function oaiPrimeExternalDestination(url){
 try{ window.oaiPrimeExternalDestination = oaiPrimeExternalDestination; }catch(e){ console.warn('[가톨릭길동무]', e); }
 
 function oaiShowExternalEntryGuard(kind){
-  // V8-1-14-224_restore_paste_area_move_up_simple_full:
+  // V8-1-14-226_restore_box_hide_duplicate_buttons_full:
   // Android 233/239 외부 브라우저 위임 전후에 쓰는 단일 보호창. entry/return 모두 같은 DOM 하나만 사용한다.
   try{
     var body = document.body;
@@ -201,7 +201,7 @@ function markExternalReturnStabilize(kind){
     sessionStorage.removeItem('oai_external_browser_return_pending');
     sessionStorage.removeItem('oai_external_browser_hidden');
     document.documentElement.classList.add('oai-external-leaving');
-    // V8-1-14-224_restore_paste_area_move_up_simple_full: 외부 이동 전 보호창은 #oai-external-entry-guard로 유지하고, 숨김 복귀 때도 같은 보호창을 이어서 사용한다.
+    // V8-1-14-226_restore_box_hide_duplicate_buttons_full: 외부 이동 전 보호창은 #oai-external-entry-guard로 유지하고, 숨김 복귀 때도 같은 보호창을 이어서 사용한다.
   }catch(e){ console.warn("[가톨릭길동무]", e); }
 }
 try{ window.markExternalReturnStabilize = markExternalReturnStabilize; }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -278,7 +278,7 @@ function oaiReleaseStabilityVeil(){
     }
     clearTimeout(window.__oaiStabilityVeilTimer);
     if(root.classList.contains('oai-external-return-freeze') && !root.classList.contains('oai-stability-veil')){
-      // V8-1-14-224_restore_paste_area_move_up_simple_full:
+      // V8-1-14-226_restore_box_hide_duplicate_buttons_full:
       // 외부사이트 복귀 보호창은 유지하되, 마지막 제거 순간을 부드럽게 처리해 첫 화면 깜빡임을 줄인다.
       if(!root.classList.contains('oai-external-return-releasing')){
         root.classList.add('oai-external-return-releasing');
@@ -471,168 +471,68 @@ function oaiClearExternalNavigationState(opts){
 
 
 
+
 (function(){
   'use strict';
   if(window.__OAI_IDLE_RESTART_GUARD__) return;
   window.__OAI_IDLE_RESTART_GUARD__ = true;
 
-  /* V8-1-14-224_restore_paste_area_move_up_simple_full:
-     10분 미만 복귀는 완전 no-op(재측정/relayout/로딩/보호막 없음).
-     10분 이상~30분 미만은 십자가 안정막 후 원래 화면으로 복귀한다.
-     30분 이상은 십자가 인트로 후 커버로 보낸다. */
+  /* V8-1-14-226_restore_box_hide_duplicate_buttons_full:
+     백그라운드 복귀 흔들림을 줄이기 위해 V215~V224의 freeze/watchdog/resize-lock 계열을 제거한다.
+     10분 미만 복귀는 완전 무동작, 10~30분은 단순 십자가 덮기 후 원래 화면, 30분 이상은 단순 십자가 덮기 후 커버로 이동한다. */
   var MEDIUM_BG_RETURN_MS = 10 * 60 * 1000;
   var COVER_BG_RETURN_MS = 30 * 60 * 1000;
-  var LONG_BG_RETURN_MS = COVER_BG_RETURN_MS;
   var BG_KEY = 'oai_home_backgrounded_at';
   var OLD_HIDDEN_AT_KEY = 'oai_pwa_backgrounded_at_v356';
   var OLD_RESTART_LOCK_KEY = 'oai_pwa_idle_restart_lock_v356';
   var _bgIntroRunning = false;
-  var _bgReturnStabilizing = false;
-  var _returnCoordinatorTimer = 0;
-  var _returnCoordinatorReason = '';
-  var _returnCoordinatorUnlockTimer = 0;
-  var EARLY_LONG_BG_CONSUMED_KEY = 'oai_long_background_early_intro_consumed';
-  var RESUME_FREEZE_MIN_MS = 850;
   var _bgReturnTimer = 0;
-  var _bgReturnReadyRetry = 0;
-  var _bgReturnWatchdogTimer = 0;
-
 
   function now(){ return Date.now ? Date.now() : new Date().getTime(); }
-  function armResumeFreeze(reason, ms){
-    try{
-      var hold = Math.max(250, ms || RESUME_FREEZE_MIN_MS);
-      var until = now() + hold;
-      window.__OAI_BACKGROUND_RESUME_FREEZE_UNTIL__ = Math.max(window.__OAI_BACKGROUND_RESUME_FREEZE_UNTIL__ || 0, until);
-      window.__OAI_BACKGROUND_RESUME_FREEZE_REASON__ = reason || 'background-return';
-      document.documentElement.setAttribute('data-oai-resume-freeze', reason || 'background-return');
-      clearTimeout(window.__OAI_BACKGROUND_RESUME_FREEZE_TIMER__);
-      window.__OAI_BACKGROUND_RESUME_FREEZE_TIMER__ = setTimeout(function(){
-        try{
-          if((window.__OAI_BACKGROUND_RESUME_FREEZE_UNTIL__ || 0) <= now()){
-            window.__OAI_BACKGROUND_RESUME_FREEZE_UNTIL__ = 0;
-            window.__OAI_BACKGROUND_RESUME_FREEZE_REASON__ = '';
-            document.documentElement.removeAttribute('data-oai-resume-freeze');
-          }
-        }catch(_e){}
-      }, hold + 25);
-    }catch(e){ console.warn('[가톨릭길동무]', e); }
-  }
-  function isResumeFreezeActive(){
-    try{ return !!(window.__OAI_BACKGROUND_RESUME_FREEZE_UNTIL__ && now() < window.__OAI_BACKGROUND_RESUME_FREEZE_UNTIL__); }catch(_e){ return false; }
-  }
-  try{
-    window.__oaiArmResumeFreeze = armResumeFreeze;
-    window.__oaiIsResumeFreeze = function(){ return isResumeFreezeActive(); };
-  }catch(_e){}
-  function setReturnCoordinatorLock(reason, ms){
-    try{
-      var hold = Math.max(300, ms || 1200);
-      var until = now() + hold;
-      window.__OAI_RETURN_COORDINATOR_UNTIL__ = until;
-      window.__OAI_RETURN_COORDINATOR_REASON__ = reason || 'return';
-      document.documentElement.setAttribute('data-oai-return-coordinator', reason || 'return');
-      try{ if(window.oaiReturnConductorRequest) window.oaiReturnConductorRequest(reason || 'return', {ms:hold, force:true}); }catch(_e){}
-      clearTimeout(_returnCoordinatorUnlockTimer);
-      _returnCoordinatorUnlockTimer = setTimeout(function(){
-        try{
-          if((window.__OAI_RETURN_COORDINATOR_UNTIL__ || 0) <= now()){
-            window.__OAI_RETURN_COORDINATOR_UNTIL__ = 0;
-            window.__OAI_RETURN_COORDINATOR_REASON__ = '';
-            document.documentElement.removeAttribute('data-oai-return-coordinator');
-          }
-        }catch(_e){}
-      }, hold + 20);
-    }catch(e){ console.warn('[가톨릭길동무]', e); }
-  }
-  function isReturnCoordinatorLocked(){
-    try{
-      if(window.__OAI_RETURN_COORDINATOR_UNTIL__ && now() < window.__OAI_RETURN_COORDINATOR_UNTIL__) return true;
-      if(window.oaiReturnConductorBusy && window.oaiReturnConductorBusy(['long-background'])) return true;
-    }catch(e){}
-    return false;
-  }
-  function clearReturnCoordinatorLock(){
-    try{
-      var finishReason = window.__OAI_RETURN_COORDINATOR_REASON__ || 'return';
-      window.__OAI_RETURN_COORDINATOR_UNTIL__ = 0;
-      window.__OAI_RETURN_COORDINATOR_REASON__ = '';
-      document.documentElement.removeAttribute('data-oai-return-coordinator');
-      try{ if(window.oaiReturnConductorFinish) window.oaiReturnConductorFinish(finishReason, {force:true}); }catch(_e){}
-      clearTimeout(_returnCoordinatorUnlockTimer);
-    }catch(_e){}
-  }
-  function consumeEarlyLongBackgroundIntro(reason){
-    try{
-      var consumed = parseInt(sessionStorage.getItem(EARLY_LONG_BG_CONSUMED_KEY) || '0', 10) || 0;
-      if(consumed && (now() - consumed) < 15000){
-        sessionStorage.removeItem(EARLY_LONG_BG_CONSUMED_KEY);
-        clearBgStamp();
-        setReturnCoordinatorLock(reason || 'long-background-early-intro-consumed', 4200);
-        return true;
-      }
-      if(consumed) sessionStorage.removeItem(EARLY_LONG_BG_CONSUMED_KEY);
-    }catch(e){ console.warn('[가톨릭길동무]', e); }
-    return false;
-  }
-  function scheduleBackgroundReturn(reason){
-    try{
-      if(document.visibilityState === 'hidden') return;
-      var r = String(reason || 'return');
-      var started = parseInt(sessionStorage.getItem(BG_KEY) || '0', 10) || 0;
-      var elapsed = started ? (now() - started) : 0;
-      clearTimeout(_bgReturnTimer);
-      /* V8-1-14-221: 10분 미만의 짧은 백그라운드 복귀는 화면을 절대 덮거나 freeze하지 않는다.
-         기존에는 짧은 복귀에도 resume-freeze를 걸어 Android WebView 첫 페인트가 흰색으로 스치는 경우가 있었다.
-         긴 복귀만 1회 지연 판단하고, 짧은 복귀는 기록 정리만 빠르게 실행한다. */
-      if(!started || elapsed < MEDIUM_BG_RETURN_MS){
-        _bgReturnTimer = setTimeout(function(){
-          try{ checkBackgroundReturn(r + '-short-no-freeze'); }catch(_e){ console.warn('[가톨릭길동무]', _e); }
-        }, 80);
-        return;
-      }
-      /* 10분 이상 복귀는 visible/pageshow/focus가 연속으로 들어와도 한 번만 판단한다.
-         너무 이른 첫 이벤트가 BG_KEY를 지워 원래 화면 복귀가 누락되는 문제를 막는다. */
-      armResumeFreeze(r, RESUME_FREEZE_MIN_MS);
-      _bgReturnTimer = setTimeout(function(){
-        try{ checkBackgroundReturn(r); }catch(_e){ console.warn('[가톨릭길동무]', _e); }
-      }, 320);
-    }catch(e){ console.warn('[가톨릭길동무]', e); checkBackgroundReturn(reason); }
-  }
-  function clearOldRestartKeys(){
+
+  function clearLegacyBackgroundReturnState(){
     try{
       localStorage.removeItem(OLD_HIDDEN_AT_KEY);
       localStorage.removeItem(OLD_HIDDEN_AT_KEY + '_reason');
       sessionStorage.removeItem(OLD_RESTART_LOCK_KEY);
       sessionStorage.removeItem('oai_resume_return_veil_pending');
-    }catch(e){ console.warn('[가톨릭길동무]', e); }
-  }
-  function clearRecentResumePatchClasses(){
-    try{
-      document.documentElement.classList.remove('oai-resume-freeze','oai-resume-return-veil');
-      document.documentElement.removeAttribute('data-oai-resume-reason');
-    }catch(_e){}
-  }
-  function clearHomeReturnSoftVeil(immediate){
-    try{
+      sessionStorage.removeItem('oai_background_intro_return_until');
+      sessionStorage.removeItem('oai_long_background_early_intro_consumed');
       var root = document.documentElement;
-      clearTimeout(window.__oaiHomeReturnSoftVeilTimer);
       if(root && root.classList){
-        root.classList.remove('oai-home-return-soft-veil','oai-home-return-soft-veil-releasing');
+        root.classList.remove(
+          'oai-resume-freeze','oai-resume-return-veil',
+          'oai-home-return-soft-veil','oai-home-return-soft-veil-releasing',
+          'oai-background-return-stabilizing','oai-background-return-stabilizing-release',
+          'oai-background-return-intro','oai-cover-under-intro-reveal'
+        );
+        root.removeAttribute('data-oai-resume-freeze');
+        root.removeAttribute('data-oai-resume-reason');
         root.removeAttribute('data-oai-home-return-reason');
+        root.removeAttribute('data-oai-background-return-reason');
+        root.removeAttribute('data-oai-return-coordinator');
       }
+      window.__OAI_BACKGROUND_RESUME_FREEZE_UNTIL__ = 0;
+      window.__OAI_BACKGROUND_RESUME_FREEZE_REASON__ = '';
+      window.__OAI_RETURN_COORDINATOR_UNTIL__ = 0;
+      window.__OAI_RETURN_COORDINATOR_REASON__ = '';
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
-  function armHomeReturnSoftVeil(reason){
-    /* 10분 미만 복귀는 화면을 덮지 않는다. */
+
+  try{
+    window.__oaiArmResumeFreeze = function(){};
+    window.__oaiIsResumeFreeze = function(){ return false; };
+  }catch(_e){}
+
+  function clearBgStamp(){
+    try{ sessionStorage.removeItem(BG_KEY); }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
-  function releaseHomeReturnSoftVeil(reason, holdMs){
-    clearHomeReturnSoftVeil(true);
-  }
+
   function isAppScreenActive(){
     try{ return document.documentElement.classList.contains('app-active'); }
     catch(e){ return false; }
   }
+
   function isCoverScreenVisible(){
     try{
       var root = document.documentElement;
@@ -640,38 +540,23 @@ function oaiClearExternalNavigationState(opts){
       return !!(cover && root && !root.classList.contains('app-active') && cover.style.display !== 'none');
     }catch(e){ return false; }
   }
+
   function isReturnableScreenActive(){
     return isAppScreenActive() || isCoverScreenVisible();
   }
+
   function isExternalReturnContext(){
     try{
-      var ts = parseInt(sessionStorage.getItem('oai_external_nav_started_at') || '0', 10) || 0;
-      var n = now();
       return sessionStorage.getItem('oai_external_nav_pending') === '1' ||
              sessionStorage.getItem('oai_external_nav_pagehide') === '1' ||
-             sessionStorage.getItem('oai_my_faith_external_open') === '1' ||
-             (ts && (n - ts) < LONG_BG_RETURN_MS);
+             sessionStorage.getItem('oai_external_return_expected') === '1' ||
+             sessionStorage.getItem('oai_my_faith_external_open') === '1';
     }catch(e){ return false; }
   }
-  function isCoverIntroResetActive(){
-    try{
-      var root = document.documentElement;
-      return root.classList.contains('oai-first-entry-intro') ||
-             root.classList.contains('oai-cover-resetting-to-intro') ||
-             root.classList.contains('oai-cover-booting');
-    }catch(e){ return false; }
-  }
-  function clearBgStamp(){
-    try{ sessionStorage.removeItem(BG_KEY); }catch(e){ console.warn('[가톨릭길동무]', e); }
-    clearOldRestartKeys();
-  }
+
   function markBackgrounded(){
     try{
       clearTimeout(_bgReturnTimer);
-      _bgReturnReadyRetry = 0;
-      clearOldRestartKeys();
-      clearRecentResumePatchClasses();
-      clearHomeReturnSoftVeil(true);
       if(isReturnableScreenActive() && !isExternalReturnContext()){
         sessionStorage.setItem(BG_KEY, String(now()));
       }else{
@@ -679,37 +564,8 @@ function oaiClearExternalNavigationState(opts){
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
-  function settleCurrentScreen(reason){
-    /* 백그라운드 복귀 직후에는 지도 relayout/화면 재계산을 하지 않는다.
-       복귀 순간의 잘못된 viewport 값이 화면 깜빡임을 만들기 때문이다. */
-    try{ if(typeof window.oaiSettleMyFaithLifeReturn === 'function') window.oaiSettleMyFaithLifeReturn(reason || 'background-return'); }catch(e){ console.warn('[가톨릭길동무]', e); }
-  }
-  function stabilizeMediumBackgroundReturn(reason){
-    _bgReturnStabilizing = false;
-    clearHomeReturnSoftVeil(true);
-  }
-  function clearBackgroundReturnWatchdog(){
-    try{ clearTimeout(_bgReturnWatchdogTimer); _bgReturnWatchdogTimer = 0; }catch(_e){}
-  }
-  function armBackgroundReturnWatchdog(reason, ms){
-    try{
-      clearBackgroundReturnWatchdog();
-      _bgReturnWatchdogTimer = setTimeout(function(){
-        try{
-          var veil = document.getElementById('oai-background-return-photo-veil');
-          if(veil && veil.parentNode) veil.parentNode.removeChild(veil);
-          document.documentElement.classList.remove('oai-background-return-intro','oai-cover-booting','oai-cover-revealing','oai-cover-under-intro-reveal');
-          document.documentElement.removeAttribute('data-oai-background-return-reason');
-          sessionStorage.removeItem('oai_background_intro_return_until');
-        }catch(_e){}
-        _bgIntroRunning = false;
-        clearReturnCoordinatorLock();
-        settleCurrentScreen(reason || 'background-return-watchdog');
-      }, Math.max(2200, ms || 5200));
-    }catch(e){ console.warn('[가톨릭길동무]', e); }
-  }
 
-  function ensureBackgroundReturnPhotoVeil(){
+  function ensureSimpleBackgroundVeil(){
     try{
       var id = 'oai-background-return-photo-veil';
       var old = document.getElementById(id);
@@ -718,9 +574,9 @@ function oaiClearExternalNavigationState(opts){
         var st = document.createElement('style');
         st.id = 'oai-background-return-photo-veil-style';
         st.textContent = '\n'
-          + '#oai-background-return-photo-veil{position:fixed;inset:0;z-index:2147482498;background:#fbf8f1;opacity:0;transition:opacity .34s ease;pointer-events:none;display:block;visibility:visible;contain:layout paint style;}\n'
+          + '#oai-background-return-photo-veil{position:fixed;inset:0;z-index:2147482498;background:#fbf8f1;opacity:0;transition:opacity .24s ease;pointer-events:none;display:block;visibility:visible;}\n'
           + '#oai-background-return-photo-veil.oai-show{opacity:1;}\n'
-          + '#oai-background-return-photo-veil .oai-bg-photo{position:absolute;left:50%;top:50%;width:min(84vw,540px);height:min(84vh,740px);transform:translate(-50%,-50%) scale(.84);background-image:linear-gradient(to right,#fbf8f1 0%,rgba(251,248,241,.96) 5%,rgba(251,248,241,.60) 13%,rgba(251,248,241,.16) 24%,rgba(251,248,241,0) 36%,rgba(251,248,241,0) 64%,rgba(251,248,241,.16) 76%,rgba(251,248,241,.60) 87%,rgba(251,248,241,.96) 95%,#fbf8f1 100%),linear-gradient(to bottom,#fbf8f1 0%,rgba(251,248,241,.90) 6%,rgba(251,248,241,.36) 17%,rgba(251,248,241,0) 30%,rgba(251,248,241,0) 70%,rgba(251,248,241,.36) 83%,rgba(251,248,241,.90) 94%,#fbf8f1 100%),radial-gradient(ellipse 96% 88% at 50% 48%,rgba(251,248,241,0) 50%,rgba(251,248,241,.08) 62%,rgba(251,248,241,.34) 76%,rgba(251,248,241,.76) 90%,rgba(251,248,241,1) 100%),url("intro-cross-jesus.jpg?v=V8-1-14-224_restore_paste_area_move_up_simple_full");background-position:center center,center center,center center,center center;background-size:100% 100%,100% 100%,100% 100%,auto 106%;background-repeat:no-repeat,no-repeat,no-repeat,no-repeat;border-radius:38px;background-color:#fbf8f1;box-shadow:0 0 0 999px #fbf8f1,0 8px 18px rgba(80,54,18,.05),inset 0 0 72px rgba(251,248,241,.28),inset 0 0 150px rgba(251,248,241,.18);will-change:transform,opacity;backface-visibility:hidden;animation:oaiIntroSmoothPhotoDesktopV85 1.85s cubic-bezier(.22,.61,.36,1) both;}\n'
+          + '#oai-background-return-photo-veil .oai-bg-photo{position:absolute;left:50%;top:50%;width:min(84vw,540px);height:min(84vh,740px);transform:translate(-50%,-50%) scale(.84);background-image:linear-gradient(to right,#fbf8f1 0%,rgba(251,248,241,.96) 5%,rgba(251,248,241,.60) 13%,rgba(251,248,241,.16) 24%,rgba(251,248,241,0) 36%,rgba(251,248,241,0) 64%,rgba(251,248,241,.16) 76%,rgba(251,248,241,.60) 87%,rgba(251,248,241,.96) 95%,#fbf8f1 100%),linear-gradient(to bottom,#fbf8f1 0%,rgba(251,248,241,.90) 6%,rgba(251,248,241,.36) 17%,rgba(251,248,241,0) 30%,rgba(251,248,241,0) 70%,rgba(251,248,241,.36) 83%,rgba(251,248,241,.90) 94%,#fbf8f1 100%),radial-gradient(ellipse 96% 88% at 50% 48%,rgba(251,248,241,0) 50%,rgba(251,248,241,.08) 62%,rgba(251,248,241,.34) 76%,rgba(251,248,241,.76) 90%,rgba(251,248,241,1) 100%),url("intro-cross-jesus.jpg?v=V8-1-14-226_restore_box_hide_duplicate_buttons_full");background-position:center center,center center,center center,center center;background-size:100% 100%,100% 100%,100% 100%,auto 106%;background-repeat:no-repeat,no-repeat,no-repeat,no-repeat;border-radius:38px;background-color:#fbf8f1;box-shadow:0 0 0 999px #fbf8f1,0 8px 18px rgba(80,54,18,.05),inset 0 0 72px rgba(251,248,241,.28),inset 0 0 150px rgba(251,248,241,.18);backface-visibility:hidden;animation:oaiIntroSmoothPhotoDesktopV85 1.85s cubic-bezier(.22,.61,.36,1) both;}\n'
           + '@media (max-width:540px) and (max-aspect-ratio:3/4){#oai-background-return-photo-veil .oai-bg-photo{left:0;top:0;width:100vw;height:100vh;transform:none;border-radius:0;background-size:100% 100%,100% 100%,100% 100%,auto 108%;box-shadow:0 0 0 999px #fbf8f1;animation:oaiIntroSmoothPhotoMobileV85 1.85s cubic-bezier(.22,.61,.36,1) both;}}\n';
         (document.head || document.documentElement).appendChild(st);
       }
@@ -734,152 +590,71 @@ function oaiClearExternalNavigationState(opts){
       return veil;
     }catch(e){ console.warn('[가톨릭길동무]', e); return null; }
   }
-  function showMediumBackgroundReturnOverlay(reason){
+
+  function removeSimpleBackgroundVeil(veil){
+    try{ if(veil && veil.parentNode) veil.parentNode.removeChild(veil); }catch(_e){}
+    _bgIntroRunning = false;
+    clearLegacyBackgroundReturnState();
+  }
+
+  function showSimpleBackgroundIntro(toCover){
     if(_bgIntroRunning) return;
     _bgIntroRunning = true;
-    var finished = false;
-    function finishMedium(veil){
-      if(finished) return;
-      finished = true;
-      clearBackgroundReturnWatchdog();
-      try{ if(veil && veil.parentNode) veil.parentNode.removeChild(veil); }catch(_e){}
-      try{ sessionStorage.removeItem('oai_background_intro_return_until'); }catch(_e){}
-      settleCurrentScreen(reason || 'medium-background-return');
-      _bgIntroRunning = false;
-      clearReturnCoordinatorLock();
-    }
+    clearBgStamp();
+    var veil = ensureSimpleBackgroundVeil();
     try{
-      clearBgStamp();
-      _bgReturnReadyRetry = 0;
-      clearHomeReturnSoftVeil(true);
-      clearRecentResumePatchClasses();
-      armResumeFreeze(reason || 'medium-background-return', 3900);
-      setReturnCoordinatorLock(reason || 'medium-background-return', 3900);
-      armBackgroundReturnWatchdog(reason || 'medium-background-return', 5600);
-      try{ sessionStorage.setItem('oai_background_intro_return_until', String(now() + 4200)); }catch(_e){}
-      var veil = ensureBackgroundReturnPhotoVeil();
       if(veil){
         veil.classList.remove('oai-show');
         void veil.offsetHeight;
         requestAnimationFrame(function(){ try{ veil.classList.add('oai-show'); }catch(_e){} });
       }
-      setTimeout(function(){
-        try{ if(veil) veil.classList.remove('oai-show'); }catch(_e){}
-        setTimeout(function(){ finishMedium(veil); }, 390);
-      }, 2050);
-    }catch(e){
-      console.warn('[가톨릭길동무]', e);
-      finishMedium(document.getElementById('oai-background-return-photo-veil'));
-    }
+    }catch(_e){}
+    setTimeout(function(){
+      try{ if(toCover && typeof goToCover === 'function') goToCover(); }catch(_e){}
+      try{ if(veil) veil.classList.remove('oai-show'); }catch(_e){}
+      setTimeout(function(){ removeSimpleBackgroundVeil(veil); }, 260);
+    }, toCover ? 1850 : 1650);
   }
-
-  function showBackgroundReturnIntro(reason, toCover){
-    if(!toCover){ showMediumBackgroundReturnOverlay(reason || 'medium-background-return'); return; }
-    if(_bgIntroRunning) return;
-    _bgIntroRunning = true;
-    var root = document.documentElement;
-    var finished = false;
-    function finishLong(){
-      if(finished) return;
-      finished = true;
-      clearBackgroundReturnWatchdog();
-      try{
-        root.classList.remove('oai-cover-revealing','oai-cover-under-intro-reveal','oai-background-return-intro','oai-cover-booting');
-        root.removeAttribute('data-oai-background-return-reason');
-        sessionStorage.removeItem('oai_background_intro_return_until');
-      }catch(_e){}
-      _bgIntroRunning = false;
-      clearReturnCoordinatorLock();
-    }
-    try{
-      clearBgStamp();
-      _bgReturnReadyRetry = 0;
-      clearHomeReturnSoftVeil(true);
-      clearRecentResumePatchClasses();
-      armResumeFreeze(reason || 'background-return-intro', 4700);
-      setReturnCoordinatorLock(reason || 'background-return-intro', 4700);
-      armBackgroundReturnWatchdog(reason || 'background-return-intro', 6800);
-      root.classList.remove('oai-cover-revealing','oai-cover-first-reveal','oai-cover-under-intro-reveal','oai-background-return-stabilizing','oai-background-return-stabilizing-release');
-      root.classList.add('oai-cover-booting','oai-background-return-intro');
-      root.setAttribute('data-oai-background-return-reason', reason || 'background-return');
-      try{ sessionStorage.setItem('oai_background_intro_return_until', String(now() + 5200)); }catch(_e){}
-      setTimeout(function(){
-        try{
-          if(toCover && typeof goToCover === 'function') goToCover();
-          root.classList.add('oai-cover-revealing','oai-cover-under-intro-reveal');
-          root.classList.remove('oai-cover-booting');
-        }catch(_e){}
-        setTimeout(function(){ finishLong(); }, 1150);
-      }, 2200);
-    }catch(e){
-      console.warn('[가톨릭길동무]', e);
-      finishLong();
-    }
-  }
-  function showLongBackgroundReturnIntroToCover(reason){ showBackgroundReturnIntro(reason || 'cover-background-return', true); }
-  function showMediumBackgroundReturnIntro(reason){ showBackgroundReturnIntro(reason || 'medium-background-return', false); }
-
 
   function checkBackgroundReturn(reason){
     try{
-      clearOldRestartKeys();
-      clearRecentResumePatchClasses();
-
-      if(_bgIntroRunning) return;
-      if(consumeEarlyLongBackgroundIntro('early-cover-intro-consumed')) return;
-
+      if(document.visibilityState === 'hidden') return;
       var started = parseInt(sessionStorage.getItem(BG_KEY) || '0', 10) || 0;
-      var elapsed = started ? (now() - started) : 0;
-
-      if(!started){
-        _bgReturnReadyRetry = 0;
-        clearHomeReturnSoftVeil(true);
-        return;
-      }
-
+      if(!started) return;
       if(isExternalReturnContext()){
-        _bgReturnReadyRetry = 0;
-        clearHomeReturnSoftVeil(true);
         clearBgStamp();
         return;
       }
-
+      var elapsed = now() - started;
+      if(elapsed < MEDIUM_BG_RETURN_MS){
+        clearBgStamp();
+        return;
+      }
       if(!isReturnableScreenActive()){
-        clearHomeReturnSoftVeil(true);
-        if(elapsed >= MEDIUM_BG_RETURN_MS && _bgReturnReadyRetry < 5){
-          _bgReturnReadyRetry += 1;
-          clearTimeout(_bgReturnTimer);
-          _bgReturnTimer = setTimeout(function(){
-            try{ checkBackgroundReturn((reason || 'return') + '-ready-retry'); }catch(_e){ console.warn('[가톨릭길동무]', _e); }
-          }, 260);
-          return;
-        }
-        _bgReturnReadyRetry = 0;
         clearBgStamp();
         return;
       }
-
-      if(elapsed >= COVER_BG_RETURN_MS){
-        showLongBackgroundReturnIntroToCover('cover-background-return');
-        return;
-      }
-
-      if(elapsed >= MEDIUM_BG_RETURN_MS){
-        showMediumBackgroundReturnIntro('medium-background-return');
-        return;
-      }
-
-      /* 10분 미만 복귀는 완전 no-op: 화면 측정, 지도 relayout, 보호막, 로딩을 실행하지 않는다. */
-      _bgReturnReadyRetry = 0;
-      clearHomeReturnSoftVeil(true);
-      clearBgStamp();
-    }catch(e){ console.warn('[가톨릭길동무]', e); clearBgStamp(); clearHomeReturnSoftVeil(true); }
+      if(elapsed >= COVER_BG_RETURN_MS) showSimpleBackgroundIntro(true);
+      else showSimpleBackgroundIntro(false);
+    }catch(e){ console.warn('[가톨릭길동무]', e); clearBgStamp(); }
   }
 
+  function scheduleBackgroundReturn(reason){
+    try{
+      if(document.visibilityState === 'hidden') return;
+      clearTimeout(_bgReturnTimer);
+      var started = parseInt(sessionStorage.getItem(BG_KEY) || '0', 10) || 0;
+      if(!started) return;
+      var elapsed = now() - started;
+      if(elapsed < MEDIUM_BG_RETURN_MS){
+        clearBgStamp();
+        return;
+      }
+      _bgReturnTimer = setTimeout(function(){ checkBackgroundReturn(reason || 'return'); }, 220);
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }
 
-
-  clearOldRestartKeys();
-  clearRecentResumePatchClasses();
+  clearLegacyBackgroundReturnState();
   document.addEventListener('visibilitychange', function(){
     if(document.visibilityState === 'hidden') markBackgrounded();
     else scheduleBackgroundReturn('visibility-visible');
@@ -887,8 +662,8 @@ function oaiClearExternalNavigationState(opts){
   window.addEventListener('pagehide', markBackgrounded, {passive:true});
   window.addEventListener('pageshow', function(){ scheduleBackgroundReturn('pageshow'); }, {passive:true});
   window.addEventListener('focus', function(){ scheduleBackgroundReturn('focus'); }, {passive:true});
-  scheduleBackgroundReturn('boot');
 })();
+
 
 function oaiNormalizeExternalSiteUrl(url){
   try{
@@ -990,7 +765,7 @@ function oaiStartExternalReturnStabilize(){
     root.classList.add('oai-external-return-freeze');
     root.removeAttribute('data-oai-external-return-early');
     try{ oaiShowExternalEntryGuard('external-return'); }catch(_e){}
-    // V8-1-14-224_restore_paste_area_move_up_simple_full:
+    // V8-1-14-226_restore_box_hide_duplicate_buttons_full:
     // Chrome/외부브라우저에서 돌아온 순간 진입 보호창을 바로 끄지 않고 같은 DOM 보호창을 이어서 유지한다.
 
     var started = Date.now ? Date.now() : new Date().getTime();
@@ -1052,7 +827,7 @@ window.addEventListener('pagehide', function(){
   try{
     if(sessionStorage.getItem('oai_external_nav_pending') === '1'){
       sessionStorage.setItem('oai_external_nav_pagehide','1');
-      /* V8-1-14-224_restore_paste_area_move_up_simple_full:
+      /* V8-1-14-226_restore_box_hide_duplicate_buttons_full:
          외부 브라우저로 나간 뒤 돌아올 때 첫 화면이 비치지 않도록 진입 보호창을 숨겨진 동안 그대로 유지한다.
          정상 복귀 시 return-freeze가 잡은 뒤 같은 DOM 보호창을 부드럽게 제거한다. */
       clearTimeout(window.__oaiExternalEntryGuardTimer);
@@ -1148,7 +923,7 @@ function _clearFaithFrame(){
   try{ _replaceFaithFrameWith('about:blank'); }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 function _setFaithFrameLoading(on, kind, url){
-  // V8-1-14-224_restore_paste_area_move_up_simple_full:
+  // V8-1-14-226_restore_box_hide_duplicate_buttons_full:
   // 매일미사·성경 iframe 로딩 십자가는 너무 짧게 스쳐 오류처럼 보이므로 표시하지 않는다.
   // 기존 상태가 남아 있을 경우만 정리한다.
   try{
@@ -2009,7 +1784,7 @@ function _renderShrineVisitDetail(idx){
   const goodnewsUrl=_getShrineGoodnewsUrl(item);
   const telText=item.tel?_visitHtmlEsc(item.tel):'—';
   const telHref=item.tel?'tel:'+String(item.tel).replace(/[^0-9+]/g,''):'';
-  // V8-1-14-224_restore_paste_area_move_up_simple_full: V117 기준에서 V118 성지정보 카드 색상과 V123 굿뉴스 파란색을 실제 생성 버튼에 직접 적용한다.
+  // V8-1-14-226_restore_box_hide_duplicate_buttons_full: V117 기준에서 V118 성지정보 카드 색상과 V123 굿뉴스 파란색을 실제 생성 버튼에 직접 적용한다.
   const detailInfoStyle='background:linear-gradient(180deg,#fbfdff 0%,#fffaf0 100%)!important;border:2px solid #9db7cc!important;box-shadow:0 8px 22px rgba(17,35,60,.08)!important;';
   const detailMapBtnStyle='background:#fff8e6!important;color:#5f4515!important;border:1.5px solid #d5b86d!important;box-shadow:0 2px 6px rgba(95,69,21,.08)!important;';
   const detailTelStyle='background:linear-gradient(180deg,#fbfdff 0%,#fffaf0 100%)!important;color:#213245!important;border:2.5px solid #9db7cc!important;box-shadow:0 3px 9px rgba(17,35,60,.10), inset 0 1px 0 rgba(255,255,255,.86)!important;text-shadow:none!important;font-weight:950!important;';
@@ -3212,7 +2987,7 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || (window.APP_VERSION || 'V8-1-14-224_restore_paste_area_move_up_simple_full');
+    var target = btn.getAttribute('data-target-version') || (window.APP_VERSION || 'V8-1-14-226_restore_box_hide_duplicate_buttons_full');
     var current = '';
     if(window.APP_VERSION) current = String(window.APP_VERSION).trim();
     if(!current && marker) current = String(marker.textContent || '').trim();
@@ -3280,7 +3055,7 @@ window.addEventListener('load', syncCoverUpdateVersionState, true);
     try{
       var frame=document.getElementById('privacy-policy-frame');
       if(frame){
-        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-224_restore_paste_area_move_up_simple_full'));
+        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-226_restore_box_hide_duplicate_buttons_full'));
         if(frame.getAttribute('src') === 'about:blank' || !frame.getAttribute('src')) frame.setAttribute('src', src);
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -3525,7 +3300,7 @@ function openDioceseView(opts){
   var loading=document.getElementById('diocese-loading');
   if(!view||!frame) return;
   var restore = !!(opts && opts.restore);
-  var url = (typeof oaiGetDioceseFrameUrl === 'function') ? oaiGetDioceseFrameUrl() : 'diocese.html?v=V8-1-14-224_restore_paste_area_move_up_simple_full';
+  var url = (typeof oaiGetDioceseFrameUrl === 'function') ? oaiGetDioceseFrameUrl() : 'diocese.html?v=V8-1-14-226_restore_box_hide_duplicate_buttons_full';
   var currentSrc = frame.getAttribute('src') || '';
   var needsLoad = (!currentSrc || currentSrc==='about:blank' || currentSrc.indexOf('diocese.html') < 0 || !frame._loaded);
 
@@ -3625,7 +3400,7 @@ function dioceseLoaded(){
   if(loading) loading.style.display='none';
 }
 function oaiGetDioceseFrameUrl(){
-  return 'diocese.html?v=V8-1-14-224_restore_paste_area_move_up_simple_full';
+  return 'diocese.html?v=V8-1-14-226_restore_box_hide_duplicate_buttons_full';
 }
 function oaiBindDioceseFrameLoad(frame, loading, restore){
   if(!frame) return;
@@ -3693,7 +3468,7 @@ function normalizeCatholicExternalUrl(url){
     var u = new URL(url);
     u.pathname = u.pathname.replace(/\/\/+/g, '/');
     var host = u.hostname.toLowerCase();
-    // V8-1-14-224_restore_paste_area_move_up_simple_full:
+    // V8-1-14-226_restore_box_hide_duplicate_buttons_full:
     // 원래 HTTP로 쓰던 교구는 HTTPS로 끌어올리지 않고 HTTP를 명시 유지한다.
     if(host === 'caincheon.or.kr' || host === 'www.caincheon.or.kr'){
       u.protocol = 'http:';
@@ -4121,7 +3896,7 @@ function _showParishDataLoadingMessage(msg){
     if(listBody && _mode==='parish') listBody.innerHTML='<div class="empty-msg">'+(msg||'성당 정보를 불러오는 중입니다...')+'</div>';
     const nearbyBody=document.getElementById('nearby-body');
     if(nearbyBody && _mode==='parish' && _activeTab==='nearby'){
-      /* V8-1-14-224_restore_paste_area_move_up_simple_full:
+      /* V8-1-14-226_restore_box_hide_duplicate_buttons_full:
          성당 내주변은 전체 교구 데이터 로딩이 길어져도 첫 로딩 화면을 유지한다.
          여기서 다른 문구로 다시 그리면 사용자에게 같은 로딩 화면이 두 번 나타난 것처럼 보인다. */
       if(nearbyBody.querySelector && nearbyBody.querySelector('.nearby-distance-loading')) return;
@@ -4203,7 +3978,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V8-1-14-224_restore_paste_area_move_up_simple_full';
+const _PRAYER_ASSET_VERSION='V8-1-14-226_restore_box_hide_duplicate_buttons_full';
 let _prayerModuleLoadPromise=null;
 function _isPrayerDataReady(){
   return !!(window.PRAYER_DATA && typeof window.PRAYER_DATA === 'object');
@@ -4548,7 +4323,7 @@ function _navFetch(origin, dest) {
 const $=id=>document.getElementById(id);
 const $$=s=>document.querySelectorAll(s);
 const _GEO=navigator.geolocation;
-// V8-1-14-224_restore_paste_area_move_up_simple_full: 오래 미사용 후 복귀 시 마지막 위치를 먼저 보여주고, 새 GPS가 잡히면 최신 위치로 교체한다.
+// V8-1-14-226_restore_box_hide_duplicate_buttons_full: 오래 미사용 후 복귀 시 마지막 위치를 먼저 보여주고, 새 GPS가 잡히면 최신 위치로 교체한다.
 const _GO1={enableHighAccuracy:true,timeout:6500,maximumAge:0};
 const _GO2={enableHighAccuracy:false,timeout:1200,maximumAge:60000};
 const _GO_FAST_FRESH={enableHighAccuracy:false,timeout:1100,maximumAge:60000};
@@ -5041,7 +4816,7 @@ function oaiEnterPopup(el){
 }
 
 function oaiShowCategoryEntryVeil(mode){
-  // V8-1-14-224_restore_paste_area_move_up_simple_full: 성지/성당/피정 진입은 cover를 내리기 전 내위치 안내 화면을 먼저 열어 첫 화면으로 고정한다.
+  // V8-1-14-226_restore_box_hide_duplicate_buttons_full: 성지/성당/피정 진입은 cover를 내리기 전 내위치 안내 화면을 먼저 열어 첫 화면으로 고정한다.
   try{ oaiHideCategoryEntryVeil(); }catch(e){ console.warn("[가톨릭길동무]", e); }
 }
 function oaiHideCategoryEntryVeil(){
@@ -5074,7 +4849,7 @@ function oaiPreopenNearbySheetForCategory(){
       sheet.classList.add('open','oai-preopen-nearby');
     }
     if(body){
-      // V8-1-14-224_restore_paste_area_move_up_simple_full: 데이터 지연 후 startApp이 다시 호출되어도 같은 내주변 로딩 화면을 다시 그리지 않는다.
+      // V8-1-14-226_restore_box_hide_duplicate_buttons_full: 데이터 지연 후 startApp이 다시 호출되어도 같은 내주변 로딩 화면을 다시 그리지 않는다.
       try{
         if(!body.querySelector || !body.querySelector('.nearby-distance-loading')){
           body.innerHTML='<div class="empty-msg nearby-distance-loading"><span class="nearby-distance-spinner" aria-hidden="true"></span><span class="nearby-distance-title">📍 내 위치 기준 자동차 거리 계산 중</span><span class="nearby-distance-sub">위치 확인 후 가까운 장소를 준비합니다.</span></div>';
@@ -5160,7 +4935,7 @@ function startApp(mode){
   try{ _cancelNearbyLoad(); }catch(e){ console.warn('[가톨릭길동무]', e); }
   _curFromRegion=false;
   _curInfoItem=null;
-  // V8-1-14-224_restore_paste_area_move_up_simple_full:
+  // V8-1-14-226_restore_box_hide_duplicate_buttons_full:
   // 성지/성당/피정 데이터 로드 대기 중 이미 내주변 로딩 sheet를 열어 둔 경우,
   // 두 번째 startApp 호출에서 closeAllTabs()로 닫았다가 다시 여는 동작을 막는다.
   const _carryNearbyPreopen = !!((mode==='shrine' || mode==='parish' || mode==='retreat') &&
@@ -5228,7 +5003,7 @@ function _resetMapState(){
   _myLat=null; _myLng=null;
   const mapEl=$('map');
   if(mapEl){
-    // V8-1-14-224_restore_paste_area_move_up_simple_full:
+    // V8-1-14-226_restore_box_hide_duplicate_buttons_full:
     // 성지/성당/피정 첫 진입에서 데이터 로딩 후 startApp이 다시 호출될 때,
     // 기존 map-loading을 비워 버리면 "로딩 십자가 → 빈 화면 → 로딩 십자가"로 보인다.
     // 이미 내주변 선진입 상태에서 지도 로딩 화면이 보이는 경우에는 비우지 않고 그대로 이어간다.
@@ -5271,7 +5046,7 @@ function goToCover(){
   try{ if(typeof _clearCoverExitArmed === 'function') _clearCoverExitArmed(); }catch(e){ console.warn('[가톨릭길동무]', e); }
   try{ if(typeof _clearHardCoverExitFlags === 'function') _clearHardCoverExitFlags('go-to-cover'); }catch(e){ console.warn('[가톨릭길동무]', e); }
   try{ if(typeof _forceNextCoverBackToast === 'function') _forceNextCoverBackToast('go-to-cover'); }catch(e){ console.warn('[가톨릭길동무]', e); }
-  // V8-1-14-224_restore_paste_area_move_up_simple_full: 커버 복귀 때 화면 높이/폰 화면 크기를 다시 계산하지 않는다.
+  // V8-1-14-226_restore_box_hide_duplicate_buttons_full: 커버 복귀 때 화면 높이/폰 화면 크기를 다시 계산하지 않는다.
 }
 
 function _loadMap(){
@@ -7226,7 +7001,7 @@ function _loadNearby(){
   }
   try{ _updateShrineVisitCardsButtonUI(); }catch(_e){}
   try{ _updateShrineNearbyLocationButtonUI(); }catch(_e){}
-  // V8-1-14-224_restore_paste_area_move_up_simple_full: 카테고리 진입 직후 이미 열린 로딩 화면은 유지하고, 빈 화면/이전 목록일 때만 로딩 화면을 그린다.
+  // V8-1-14-226_restore_box_hide_duplicate_buttons_full: 카테고리 진입 직후 이미 열린 로딩 화면은 유지하고, 빈 화면/이전 목록일 때만 로딩 화면을 그린다.
   try{
     if(!body.querySelector || !body.querySelector('.nearby-distance-loading')){
       body.innerHTML='<div class="empty-msg nearby-distance-loading"><span class="nearby-distance-spinner" aria-hidden="true"></span><span class="nearby-distance-title">📍 내 위치 기준 자동차 거리 계산 중</span><span class="nearby-distance-sub">위치 확인 후 가까운 장소를 준비합니다.</span></div>';
@@ -7299,7 +7074,7 @@ function _loadNearby(){
     return;
   }
 
-  // V8-1-14-224_restore_paste_area_move_up_simple_full:
+  // V8-1-14-226_restore_box_hide_duplicate_buttons_full:
   // 저장 위치와 새 GPS를 모두 즉시 화면에 그리면 내주변 로딩/목록이 두 번 보인다.
   // 캐시는 대기용 예비값으로만 잡아 두고, 새 GPS가 빠르게 오면 새 GPS로 한 번만 계산한다.
   // 새 GPS가 늦거나 실패할 때만 캐시 기준으로 한 번 계산한다.
@@ -7350,7 +7125,7 @@ function _loadNearbyWithDist(lat,lng,items,getIdx,getColor,getLabel){
   }
 
   if(body && _isNearbyLoadCurrent(requestMode,requestToken,body)){
-    // V8-1-14-224_restore_paste_area_move_up_simple_full: 자동차 거리 계산 단계에서 같은 로딩 화면을 다시 렌더링하지 않는다.
+    // V8-1-14-226_restore_box_hide_duplicate_buttons_full: 자동차 거리 계산 단계에서 같은 로딩 화면을 다시 렌더링하지 않는다.
     try{
       if(!body.querySelector || !body.querySelector('.nearby-distance-loading')){
         body.innerHTML='<div class="empty-msg nearby-distance-loading"><span class="nearby-distance-spinner" aria-hidden="true"></span><span class="nearby-distance-title">📍 내 위치 기준 자동차 거리 계산 중</span><span class="nearby-distance-sub">위치 확인 후 가까운 장소를 준비합니다.</span></div>';
@@ -7422,7 +7197,7 @@ function _loadNearbyParishes(lat,lng){
     const waitMode=_mode;
     let waitToken=0;
     try{ waitToken = AppState && AppState.nearbyLoadToken ? AppState.nearbyLoadToken : 0; }catch(_e){ waitToken = window.__oaiNearbyLoadToken || 0; }
-    /* V8-1-14-224_restore_paste_area_move_up_simple_full:
+    /* V8-1-14-226_restore_box_hide_duplicate_buttons_full:
        성당은 교구별 JS를 추가로 불러오기 때문에 로딩이 길어질 수 있다.
        기존 로딩 화면을 "성당 정보 불러오는 중"으로 다시 그렸다가, 거리 계산에서 또 다시 그리면
        같은 안내 화면이 두 번 나타나는 것처럼 보이므로 기존 로딩 DOM을 유지한다. */
@@ -8993,7 +8768,7 @@ function _fmtTime(s){
           return;
         }
       }catch(_e){}
-      /* V8-1-14-224_restore_paste_area_move_up_simple_full:
+      /* V8-1-14-226_restore_box_hide_duplicate_buttons_full:
          10분 규칙은 백그라운드 복귀 전용으로만 사용한다.
          앱이 켜진 상태에서 10분 동안 조작이 없어도 현재 화면을 커버로 강제 이동하지 않는다. */
       return;
