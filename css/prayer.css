@@ -261,7 +261,7 @@
 
 
 
-/* V8-1-14-233_diocese_vicariate_key_features_restore_full: Android WebView 하단 여백 상한/최소값 표준화 */
+/* V8-1-14-234_diocese_province_info_font_scale_full: Android WebView 하단 여백 상한/최소값 표준화 */
 html:not(.ios-device) .pr-list{padding-bottom:calc(18px + var(--oai-android-bottom-gap, 10px))!important;}
 
 
