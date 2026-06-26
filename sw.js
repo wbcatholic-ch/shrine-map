@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-232_diocese_province_info_source_exact_spacing_full';
-const ASSET_VERSION = 'V8-1-14-232_diocese_province_info_source_exact_spacing_full';
+const CACHE_VERSION = 'catholic-way-V8-1-14-233_diocese_vicariate_key_features_restore_full';
+const ASSET_VERSION = 'V8-1-14-233_diocese_vicariate_key_features_restore_full';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }

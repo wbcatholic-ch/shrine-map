@@ -1003,11 +1003,11 @@ function oaiReturnToAppCover(reason){
   try{
     var url = new URL('index.html', location.href);
     url.searchParams.set('oai_cover_return', reason || 'qna-return-cover');
-    url.searchParams.set('v', 'V8-1-14-232_diocese_province_info_source_exact_spacing_full');
+    url.searchParams.set('v', 'V8-1-14-233_diocese_vicariate_key_features_restore_full');
     location.replace(url.href);
     return;
   }catch(e){
-    location.replace('index.html?oai_cover_return=' + encodeURIComponent(reason || 'qna-return-cover') + '&v=V8-1-14-232_diocese_province_info_source_exact_spacing_full');
+    location.replace('index.html?oai_cover_return=' + encodeURIComponent(reason || 'qna-return-cover') + '&v=V8-1-14-233_diocese_vicariate_key_features_restore_full');
   }
 }
 function handleQaBack(){
@@ -1055,7 +1055,7 @@ if (QA_PRIVATE_MODE) {
 <script id="oai-cache-lifecycle-V6-146">
 (function(){
   'use strict';
-  var APP_VERSION = 'V8-1-14-232_diocese_province_info_source_exact_spacing_full';
+  var APP_VERSION = 'V8-1-14-233_diocese_vicariate_key_features_restore_full';
   if('serviceWorker' in navigator){
     try{ navigator.serviceWorker.register('./sw.js?v=' + encodeURIComponent(APP_VERSION)).then(function(reg){try{reg.update();}catch(e){}}).catch(function(){}); }catch(e){}
   }
