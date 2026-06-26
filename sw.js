@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-229_bible_external_browser_like_hymn_full';
-const ASSET_VERSION = 'V8-1-14-229_bible_external_browser_like_hymn_full';
+const CACHE_VERSION = 'catholic-way-V8-1-14-230_restore_placeholder_clean_kakao_title_full';
+const ASSET_VERSION = 'V8-1-14-230_restore_placeholder_clean_kakao_title_full';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }
