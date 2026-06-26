@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-228_restore_manual_paste_spacing_full';
-const ASSET_VERSION = 'V8-1-14-228_restore_manual_paste_spacing_full';
+const CACHE_VERSION = 'catholic-way-V8-1-14-229_bible_external_browser_like_hymn_full';
+const ASSET_VERSION = 'V8-1-14-229_bible_external_browser_like_hymn_full';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }
