@@ -17,7 +17,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>교구지도</title>
-<link rel="stylesheet" href="css/diocese.css?v=V8-1-14-230_restore_placeholder_clean_kakao_title_full">
+<link rel="stylesheet" href="css/diocese.css?v=V8-1-14-231_diocese_province_info_tab_full">
 </head>
 <body>
 <header>
@@ -27,6 +27,7 @@
   <div class="tab on" data-tab="gwangu">관구별 보기</div>
   <div class="tab" data-tab="list">목록</div>
   <div class="tab" data-tab="search">지역 검색</div>
+  <div class="tab" data-tab="province-info">관구란?</div>
 </div>
 <div id="main">
   <div id="map-view" class="on">
@@ -134,6 +135,31 @@
   </div>
   <div id="list-view">
     <div id="list-content"></div>
+  </div>
+  <div id="province-info-view" aria-label="관구 설명">
+    <section class="province-info-card province-info-main">
+      <div class="province-info-kicker">관구란?</div>
+      <h2>가까운 교구들이 함께 사목하는 교회 구역</h2>
+      <p>관구는 지리적으로 가까운 여러 교구가 공동 사목 활동을 촉진하고, 교구장 주교들의 상호 관계를 강화하기 위하여 결합된 교회 구역입니다.</p>
+      <p>보통 하나의 대교구와 하나 이상의 교구로 이루어지며, 교회법 제431조에서 그 취지를 확인할 수 있습니다.</p>
+    </section>
+
+    <section class="province-info-card">
+      <h3>한국 천주교의 3개 관구</h3>
+      <div class="province-chip-wrap" aria-label="한국 천주교 관구 목록">
+        <span class="province-chip seoul">서울관구</span>
+        <span class="province-chip daegu">대구관구</span>
+        <span class="province-chip gwangju">광주관구</span>
+      </div>
+      <p>한국에서는 1962년에 서울대교구, 광주대교구, 대구대교구가 대교구로 승격되면서 서울관구, 광주관구, 대구관구가 설정되었습니다.</p>
+    </section>
+
+    <section class="province-info-card">
+      <h3>수도회에서 쓰는 관구</h3>
+      <p>관구는 수도회에서도 사용됩니다. 한 수도회에서 관구장 아래에 있는 여러 수도원으로 이루어진 일정한 관할 구역, 곧 수도회 관구를 뜻하기도 합니다.</p>
+    </section>
+
+    <div class="province-info-source">출처: 가톨릭 용어사전</div>
   </div>
 </div>
 
@@ -1088,6 +1114,8 @@ document.querySelectorAll('.tab').forEach(function(t){
     document.getElementById('map-view').classList.toggle('on',tab==='gwangu');
     document.getElementById('search-view').classList.toggle('on',tab==='search');
     document.getElementById('list-view').classList.toggle('on',tab==='list');
+    var provinceInfoView=document.getElementById('province-info-view');
+    if(provinceInfoView) provinceInfoView.classList.toggle('on',tab==='province-info');
     if(tab==='search'){
       var si=document.getElementById('si');
       if(si){
@@ -1746,7 +1774,7 @@ window.addEventListener('pageshow',function(){
 });
 /* ── 스와이프 탭 전환: 목록에서 관구별 지도로 복귀 가능, 지도 화면 자체에는 스와이프 없음 ── */
 (function(){
-  var SWIPE_TABS=['gwangu','list','search'];
+  var SWIPE_TABS=['gwangu','list','search','province-info'];
   var sx=0,sy=0,sMoving=false,sLocked=false;
   var THRESHOLD=60;
   function addSwipe(el){
@@ -1777,6 +1805,7 @@ window.addEventListener('pageshow',function(){
   }
   addSwipe(document.getElementById('list-view'));
   addSwipe(document.getElementById('search-view'));
+  addSwipe(document.getElementById('province-info-view'));
 })();
 
 </script>
@@ -1800,6 +1829,7 @@ window.addEventListener('pageshow',function(){
       tab:activeTab(),
       listScroll:(document.getElementById('list-view')||{}).scrollTop||0,
       searchScroll:(document.getElementById('search-view')||{}).scrollTop||0,
+      provinceInfoScroll:(document.getElementById('province-info-view')||{}).scrollTop||0,
       searchValue:(document.getElementById('si')||{}).value||'',
       gw:(g&&g.dataset?g.dataset.gw:''),
       cardDiocese:cardOpen?cardName:'',
@@ -1825,6 +1855,13 @@ window.addEventListener('pageshow',function(){
         if(isNaN(saved)) saved=0;
         return Math.abs((lv.scrollTop||0)-saved) <= 24;
       }
+      if(tab === 'province-info'){
+        var pv=document.getElementById('province-info-view');
+        if(!pv) return false;
+        var savedP=Number(state.provinceInfoScroll||0);
+        if(isNaN(savedP)) savedP=0;
+        return Math.abs((pv.scrollTop||0)-savedP) <= 24;
+      }
       if(tab === 'search'){
         var sv=document.getElementById('search-view');
         if(!sv) return false;
@@ -1847,9 +1884,11 @@ window.addEventListener('pageshow',function(){
         var map=document.getElementById('map-view');
         var search=document.getElementById('search-view');
         var list=document.getElementById('list-view');
+        var provinceInfo=document.getElementById('province-info-view');
         if(map) map.classList.toggle('on',tab==='gwangu');
         if(search) search.classList.toggle('on',tab==='search');
         if(list) list.classList.toggle('on',tab==='list');
+        if(provinceInfo) provinceInfo.classList.toggle('on',tab==='province-info');
         var gw=document.getElementById('gw-bar');
         if(gw) gw.style.display=tab==='gwangu'?'flex':'none';
       }
@@ -1870,7 +1909,7 @@ window.addEventListener('pageshow',function(){
     // 탭 click 이벤트를 다시 실행하지 않는다. click 이벤트는 지도 초기화, 카드 닫기,
     // 목록 스크롤 재적용을 동반해 복귀 순간에 흔들림처럼 보일 수 있다.
     try{ window.__OAI_DIO_PARENT_RETURNING__ = true; window.__OAI_DIO_EXTERNAL_LEAVING__ = false; }catch(e){}
-    // V8-1-14-230_restore_placeholder_clean_kakao_title_full: 관구·교구 iframe은 부모 외부복귀 보호창 위에 별도 복귀 레이어를 얹지 않는다.
+    // V8-1-14-231_diocese_province_info_tab_full: 관구·교구 iframe은 부모 외부복귀 보호창 위에 별도 복귀 레이어를 얹지 않는다.
     try{ document.documentElement.classList.remove('oai-dio-external-stabilize','oai-dio-external-return','oai-dio-returning'); }catch(e){}
     var tab=state.tab||'gwangu';
     setReturnTabSilently(tab);
@@ -1903,6 +1942,7 @@ window.addEventListener('pageshow',function(){
         }
       }catch(e){}
       try{ var sv=document.getElementById('search-view'); if(sv && state.tab==='search') sv.scrollTop=Number(state.searchScroll||0); }catch(e){}
+      try{ var pv=document.getElementById('province-info-view'); if(pv && state.tab==='province-info') pv.scrollTop=Number(state.provinceInfoScroll||0); }catch(e){}
     }
     restoreScrollQuietly();
     requestAnimationFrame(function(){ restoreScrollQuietly(); restoreOpenCard(); });
@@ -1916,6 +1956,7 @@ window.addEventListener('pageshow',function(){
     var sres=document.getElementById('sres'); if(sres) sres.innerHTML='';
     var lv=document.getElementById('list-view'); if(lv) lv.scrollTop=0;
     var sv=document.getElementById('search-view'); if(sv) sv.scrollTop=0;
+    var pv=document.getElementById('province-info-view'); if(pv) pv.scrollTop=0;
     var btn=document.querySelector('.tab[data-tab="gwangu"]'); if(btn) btn.click();
   };
   function markDioceseStandaloneExternal(){
@@ -1978,7 +2019,7 @@ window.addEventListener('pageshow',function(){
     var state=window.getDioceseReturnState(source||'link', extra || {});
     try{ sessionStorage.setItem('oai_diocese_last_return_state', JSON.stringify(state)); localStorage.setItem('oai_diocese_last_return_state', JSON.stringify(state)); }catch(e){}
     if(window.parent && window.parent!==window){
-      // V8-1-14-230_restore_placeholder_clean_kakao_title_full:
+      // V8-1-14-231_diocese_province_info_tab_full:
       // 첨부 기준 파일(26.06.20) 방식으로 복원한다.
       // 관구·교구 외부 홈페이지는 부모 공통 opener/지연/감시 함수를 거치지 않고 top 이동만 사용한다.
       try{
