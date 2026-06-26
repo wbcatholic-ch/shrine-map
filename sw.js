@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-240_version_string_sync';
-const ASSET_VERSION = 'V8-1-14-240_version_string_sync';
+const CACHE_VERSION = 'catholic-way-V8-1-14-241_compact_body_ratio_cleanup';
+const ASSET_VERSION = 'V8-1-14-241_compact_body_ratio_cleanup';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }

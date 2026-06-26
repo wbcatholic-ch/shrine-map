@@ -261,9 +261,22 @@
 
 
 
-/* V8-1-14-240_version_string_sync: Android WebView 하단 여백 상한/최소값 표준화 */
+/* V8-1-14-241_compact_body_ratio_cleanup: Android WebView 하단 여백 상한/최소값 표준화 */
 html:not(.ios-device) .pr-list{padding-bottom:calc(18px + var(--oai-android-bottom-gap, 10px))!important;}
 
 
 /* OAI-V67-STAMPBOOK-HEADER-BOTTOM-SAFE-FINAL: Android WebView 하단 여백 표준화 */
 html:not(.ios-device) .pr-list{padding-bottom:calc(18px + var(--oai-android-bottom-gap, 10px))!important;}
+
+
+/* V8-1-14-241_compact_body_ratio_cleanup: 기도문 목록/본문 compact 비율 정리 */
+html:not(.ios-device).oai-screen-compact-short .pr-item{
+  min-height:56px!important;
+  padding:10px 11px!important;
+  border-radius:12px!important;
+}
+html:not(.ios-device).oai-screen-compact-short .pr-item-left{gap:8px!important;}
+html:not(.ios-device).oai-screen-compact-short .pr-title{font-size:13.5px!important;line-height:1.25!important;}
+html:not(.ios-device).oai-screen-compact-short .pr-sub{font-size:10.8px!important;line-height:1.3!important;}
+html:not(.ios-device).oai-screen-compact-short #prayer-detail .prayer-detail-title{font-size:17px!important;line-height:1.25!important;}
+html:not(.ios-device).oai-screen-compact-short #prayer-detail .prayer-detail-body{font-size:14px!important;line-height:1.55!important;}

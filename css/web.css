@@ -146,3 +146,30 @@ html.oai-font-global .web-card-name{font-size:calc(17px * var(--app-inner-font-s
 
 html.oai-font-global .web-card-desc{font-size:calc(15px * var(--app-inner-font-scale,1))!important}
 
+
+
+/* V8-1-14-241_compact_body_ratio_cleanup: 웹사이트 목록 compact 비율 정리 */
+html:not(.ios-device).oai-screen-compact-short .web-card-body{
+  gap:9px!important;
+  padding:8px 11px 9px!important;
+}
+html:not(.ios-device).oai-screen-compact-short .web-card-ico{
+  width:42px!important;
+  height:42px!important;
+  min-width:42px!important;
+  font-size:22px!important;
+}
+html:not(.ios-device).oai-screen-compact-short .web-card-name{
+  font-size:14.2px!important;
+  line-height:1.24!important;
+}
+html:not(.ios-device).oai-screen-compact-short .web-card-desc{
+  font-size:11px!important;
+  line-height:1.32!important;
+}
+html:not(.ios-device).oai-screen-compact-short .web-card-op,
+html:not(.ios-device).oai-screen-compact-short .web-card-url,
+html:not(.ios-device).oai-screen-compact-short .web-card-badge{
+  font-size:10.5px!important;
+  line-height:1.25!important;
+}
