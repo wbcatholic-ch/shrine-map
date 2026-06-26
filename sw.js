@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-242_compact_missing_items_cleanup';
-const ASSET_VERSION = 'V8-1-14-242_compact_missing_items_cleanup';
+const CACHE_VERSION = 'catholic-way-V8-1-14-245_restore_wrong_parish_compact_rule';
+const ASSET_VERSION = 'V8-1-14-245_restore_wrong_parish_compact_rule';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }
