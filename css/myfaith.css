@@ -310,7 +310,7 @@
 }
 
 
-/* V8-1-14-226_restore_box_hide_duplicate_buttons_full: 나의 신앙생활 하단 내 정보 관리 내부창 */
+/* V8-1-14-227_restore_paste_box_higher_simple_full: 나의 신앙생활 하단 내 정보 관리 내부창 */
 .my-faith-data-section {
   margin-top: 22px !important;
   border: 0 !important;
@@ -528,7 +528,7 @@
   .my-faith-data-actions { grid-template-columns: 1fr !important; }
 }
 
-/* V8-1-14-226_restore_box_hide_duplicate_buttons_full: 내 정보 백업/복원/공유 진행 상태 표시 */
+/* V8-1-14-227_restore_paste_box_higher_simple_full: 내 정보 백업/복원/공유 진행 상태 표시 */
 .my-faith-info-action-status {
   display: block !important;
   margin: 0 16px 10px !important;
@@ -596,7 +596,7 @@
   to { transform: rotate(360deg); }
 }
 
-/* V8-1-14-226_restore_box_hide_duplicate_buttons_full: 카카오톡용 백업 코드 복사/복원 UI */
+/* V8-1-14-227_restore_paste_box_higher_simple_full: 카카오톡용 백업 코드 복사/복원 UI */
 .my-faith-data-code-backup-btn {
   color: #14532D !important;
   border: 2.5px solid rgba(34,139,74,.68) !important;
@@ -698,7 +698,7 @@
 }
 
 
-/* V8-1-14-226_restore_box_hide_duplicate_buttons_full: 복원 입력 영역을 위로 올렸을 때 키보드에 덜 가리도록 여백과 높이를 줄인다. */
+/* V8-1-14-227_restore_paste_box_higher_simple_full: 복원 입력 영역을 위로 올렸을 때 키보드에 덜 가리도록 여백과 높이를 줄인다. */
 #my-faith-info-code-restore-box {
   margin: 8px 0 14px !important;
   padding: 10px !important;
@@ -710,7 +710,7 @@
   margin-top: 8px !important;
 }
 
-/* V8-1-14-226_restore_box_hide_duplicate_buttons_full: 내 정보 관리 파일/코드 묶음 구분 */
+/* V8-1-14-227_restore_paste_box_higher_simple_full: 내 정보 관리 파일/코드 묶음 구분 */
 .my-faith-data-action-group {
   margin: 0 16px 16px !important;
   padding: 13px 12px 14px !important;
@@ -760,7 +760,7 @@
   margin: 13px 0 0 !important;
 }
 
-/* V8-1-14-226_restore_box_hide_duplicate_buttons_full: 내 정보 관리를 작은 팝업이 아니라 전체 화면 관리창으로 표시 */
+/* V8-1-14-227_restore_paste_box_higher_simple_full: 내 정보 관리를 작은 팝업이 아니라 전체 화면 관리창으로 표시 */
 .my-faith-info-layer {
   position: fixed !important;
   inset: 0 !important;
@@ -834,7 +834,7 @@
 }
 
 
-/* V8-1-14-226_restore_box_hide_duplicate_buttons_full: 내 정보 관리의 파일/코드 영역을 더 명확하게 구분 */
+/* V8-1-14-227_restore_paste_box_higher_simple_full: 내 정보 관리의 파일/코드 영역을 더 명확하게 구분 */
 .my-faith-info-content .my-faith-data-desc {
   margin: 0 16px 18px !important;
   padding: 13px 14px !important;
@@ -916,7 +916,7 @@
 }
 
 
-/* V8-1-14-226_restore_box_hide_duplicate_buttons_full: 파일 선택 방식 제거, 백업 코드 방식만 노출 */
+/* V8-1-14-227_restore_paste_box_higher_simple_full: 파일 선택 방식 제거, 백업 코드 방식만 노출 */
 .my-faith-info-content .my-faith-data-desc {
   margin-bottom: 20px !important;
 }
@@ -948,11 +948,38 @@
 
 
 
-/* V8-1-14-226_restore_box_hide_duplicate_buttons_full: 복원 입력창 표시 중에는 아래 백업 코드 복사/복원 버튼 묶음을 숨긴다. */
+/* V8-1-14-227_restore_paste_box_higher_simple_full: 복원 입력창 표시 중에는 아래 백업 코드 복사/복원 버튼 묶음을 숨긴다. */
 .my-faith-data-action-group.is-code-restore-open .my-faith-data-actions {
   display: none !important;
 }
 .my-faith-data-action-group.is-code-restore-open #my-faith-info-code-restore-box {
   margin-top: 12px !important;
   margin-bottom: 6px !important;
+}
+
+
+/* V8-1-14-227_restore_paste_box_higher_simple_full: 복원 입력 중에는 위 안내문을 접고 입력 박스를 화면 위쪽에 고정한다. */
+.my-faith-info-dialog.is-code-restore-active .my-faith-info-content .my-faith-data-desc {
+  display: none !important;
+}
+.my-faith-info-dialog.is-code-restore-active .my-faith-data-action-group.is-code-backup,
+.my-faith-info-dialog.is-code-restore-active .my-faith-data-action-group.is-code-only {
+  margin-top: 8px !important;
+}
+.my-faith-info-dialog.is-code-restore-active .my-faith-data-action-group.is-code-backup .my-faith-data-group-title,
+.my-faith-info-dialog.is-code-restore-active .my-faith-data-action-group.is-code-only .my-faith-data-group-title {
+  display: none !important;
+}
+.my-faith-info-dialog.is-code-restore-active #my-faith-info-code-restore-box {
+  margin-top: 0 !important;
+  padding: 10px 12px 12px !important;
+}
+.my-faith-info-dialog.is-code-restore-active #my-faith-info-code-restore-box .my-faith-code-box-note {
+  margin-bottom: 7px !important;
+}
+.my-faith-info-dialog.is-code-restore-active #my-faith-info-code-restore-box .my-faith-code-textarea {
+  min-height: 86px !important;
+}
+.my-faith-info-dialog.is-code-restore-active #my-faith-info-code-restore-box .my-faith-code-row {
+  margin-top: 7px !important;
 }

@@ -116,7 +116,7 @@
     }
     function safeText(x){ return String(x || '').replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] || c); }); }
     var DATA_BACKUP_TYPE = 'catholic-gildongmu-user-data-backup';
-    var DATA_BACKUP_BUILD = 'V8-1-14-226_restore_box_hide_duplicate_buttons_full';
+    var DATA_BACKUP_BUILD = 'V8-1-14-227_restore_paste_box_higher_simple_full';
     var DATA_BACKUP_LAST_TIME_KEY = 'oai_data_backup_last_exported_at_v1';
     var myFaithInfoManagementOpen = false;
     var myFaithInfoManagementLayer = null;
@@ -225,7 +225,7 @@
       var payload=collectUserDataBackup();
       var compact=JSON.stringify(payload);
       var code='CGM-BACKUP-V1:'+encodeTextBase64Url(compact);
-      var text='가톨릭길동무 백업코드\n'+code+'\n\n가톨릭길동무 → 나의 신앙생활 → 내 정보 백업·복원 → 백업 코드 복원에 붙여넣으세요.';
+      var text='가톨릭길동무 백업코드\n'+code;
       return {payload:payload, code:code, text:text};
     }
     function extractUserDataBackupCode(text){
@@ -484,6 +484,15 @@
         setMyInfoActionStatus('백업 코드를 만들지 못했습니다.', 'error', false);
       }
     }
+    function scrollUserDataRestoreBoxUp(){
+      try{
+        var box=document.getElementById('my-faith-info-code-restore-box');
+        var content=box && box.closest ? box.closest('.my-faith-info-content') : null;
+        if(!box || !content) return;
+        var top=Math.max(0, box.offsetTop - 6);
+        content.scrollTop=top;
+      }catch(_e){}
+    }
     function openUserDataCodeRestoreBox(){
       try{
         hideBackupCodeBoxes('copy');
@@ -495,11 +504,12 @@
           setMyInfoActionStatus('백업 코드 입력창을 열지 못했습니다.', 'error', false);
           return;
         }
-        /* V8-1-14-226_restore_box_hide_duplicate_buttons_full:
+        /* V8-1-14-227_restore_paste_box_higher_simple_full:
            복원 입력 영역을 위쪽에 보여 주되, 아래의 백업 코드 복사/복원 버튼 묶음은
            함께 숨겨 중복 화면처럼 보이지 않게 한다. */
         try{ if(group && list && box.previousElementSibling !== list) group.insertBefore(box, list); }catch(_e){}
         try{ if(group) group.classList.add('is-code-restore-open'); }catch(_e){}
+        try{ var dialog=box.closest ? box.closest('.my-faith-info-dialog') : null; if(dialog) dialog.classList.add('is-code-restore-active'); }catch(_e){}
         try{ if(list) list.hidden=true; }catch(_e){}
         box.hidden=false;
         try{
@@ -508,8 +518,9 @@
           ta.setAttribute('inputmode','text');
           ta.blur && ta.blur();
         }catch(_e){}
-        setMyInfoActionStatus('아래 입력칸에 백업 코드를 붙여넣은 뒤 복원 실행을 누르세요.', 'ok', false);
-        setTimeout(function(){ try{ box.scrollIntoView({block:'center', behavior:'smooth'}); }catch(_e){} }, 60);
+        setMyInfoActionStatus('백업 코드를 붙여넣은 뒤 복원 실행을 누르세요.', 'ok', false);
+        setTimeout(scrollUserDataRestoreBoxUp, 40);
+        setTimeout(scrollUserDataRestoreBoxUp, 180);
       }catch(e){
         console.warn('[가톨릭길동무]', e);
         setMyInfoActionStatus('백업 코드 입력창을 열지 못했습니다.', 'error', false);
@@ -532,6 +543,7 @@
             ta.value=text;
             try{ ta.readOnly=false; ta.removeAttribute('readonly'); ta.setAttribute('inputmode','text'); }catch(_e){}
             setMyInfoActionStatus('백업 코드를 붙여넣었습니다. 복원 실행을 눌러주세요.', 'ok', false);
+            setTimeout(scrollUserDataRestoreBoxUp, 40);
           }).catch(function(){
             setMyInfoActionStatus('자동 붙여넣기가 안 되면 입력칸을 길게 눌러 붙여넣어 주세요.', 'warn', false);
           });
@@ -547,6 +559,7 @@
       try{
         setMyInfoActionButtonsDisabled(false);
         var ta=document.getElementById('my-faith-info-code-restore-text');
+        try{ var dialog=ta && ta.closest ? ta.closest('.my-faith-info-dialog') : null; if(dialog) dialog.classList.remove('is-code-restore-active'); }catch(_e){}
         if(ta) ta.value='';
         hideBackupCodeBoxes('restore');
         setMyInfoActionStatus('백업 코드 복원창을 닫았습니다.', 'ok', false);
@@ -696,7 +709,7 @@
     }
     function openUserDataRestorePicker(){
       try{
-        /* V8-1-14-226_restore_box_hide_duplicate_buttons_full:
+        /* V8-1-14-227_restore_paste_box_higher_simple_full:
            Android/WebView와 일부 모바일 브라우저는 파일 선택창(input.click)을
            사용자 터치 흐름 안에서 바로 실행해야 한다. setTimeout 뒤에 실행하면
            사용자 선택 동작으로 인정되지 않아 파일 선택이 실패하거나 취소처럼 보일 수 있다. */
@@ -897,6 +910,7 @@
       restoreText.setAttribute('aria-label','복원할 백업 코드');
       restoreText.readOnly=false;
       restoreText.setAttribute('inputmode','text');
+      try{ restoreText.addEventListener('focus', function(){ setTimeout(scrollUserDataRestoreBoxUp, 80); setTimeout(scrollUserDataRestoreBoxUp, 260); }, false); }catch(_e){}
       var restoreRow=document.createElement('div');
       restoreRow.className='my-faith-code-row';
       var restoreRun=document.createElement('button');
