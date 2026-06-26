@@ -25,6 +25,7 @@
   --map-tab-gap:    6px;
   --map-tab-icon-fs: 20px;
   --map-tab-icon-active-fs: 22px;
+  --oai-map-sheet-title-fs: 18px;
   --oai-search-input-h: 44px;
   --oai-search-input-fs: 15px;
   --oai-search-input-color: #111827;
@@ -248,6 +249,12 @@ html:not(.ios-device).oai-screen-compact-short {
   --oai-fixed-module-sub-fs: var(--oai-std-sub-fs);
   --oai-fixed-module-ico-fs: 20px;
   --oai-fixed-module-ico-box: 38px;
+  --map-tab-btn-h: 56px;
+  --map-tab-fs: 13.2px;
+  --map-tab-gap: 4px;
+  --map-tab-icon-fs: 18px;
+  --map-tab-icon-active-fs: 19px;
+  --oai-map-sheet-title-fs: 16px;
   --cover-action-h: 42px;
 }
 html:not(.ios-device).oai-screen-tall-phone {
@@ -3283,7 +3290,7 @@ html.oai-font-global .nearby-name,html.oai-font-global #region-body .nearby-name
 html.oai-font-global .nearby-addr,html.oai-font-global #region-body .nearby-addr,html.oai-font-global #region-body .li-sub,html.oai-font-global .region-item .nearby-addr,html.oai-font-global .li-sub,html.oai-font-global .sm-sub,html.oai-font-global .sm-place-addr{font-size:calc(12px * var(--app-inner-font-scale,1))!important;line-height:1.35!important}
 html.oai-font-global .nearby-type,html.oai-font-global .li-badge,html.oai-font-global .ic-type-badge{font-size:calc(11px * var(--app-inner-font-scale,1))!important}
 html.oai-font-global .nearby-dist{font-size:calc(13px * var(--app-inner-font-scale,1))!important}
-html.oai-font-global .sheet-title{font-size:calc(18px * var(--app-inner-font-scale,1))!important}
+html.oai-font-global .sheet-title{font-size:var(--oai-map-sheet-title-fs)!important}
 html.oai-font-global .module-bar-title{font-size:var(--oai-fixed-module-title-fs)!important}
 html.oai-font-global .module-bar-sub{font-size:var(--oai-fixed-module-sub-fs)!important}
 html.oai-font-global .filter-btn,html.oai-font-global .region-search-btn,html.oai-font-global .sm-fb,html.oai-font-global .sm-tab,html.oai-font-global .web-cat-btn,html.oai-font-global .trail-tab{font-size:calc(14px * var(--app-inner-font-scale,1))!important}
@@ -3996,7 +4003,7 @@ html.oai-font-global #sheet-list .sheet-title,
 html.oai-font-global #sheet-region .sheet-title,
 html.oai-font-global #sheet-route .sheet-title,
 html.oai-font-global #srch-modal .sm-hd .sm-title{
-  font-size:18px!important;
+  font-size:var(--oai-map-sheet-title-fs)!important;
   line-height:1.22!important;
 }
 html.oai-font-global #missa-bar-title,
@@ -4058,7 +4065,7 @@ html.oai-font-global #diocese-view .module-bar-ico::after{
 
 html.oai-font-global #app .sheet-hd .sheet-title,
 html.oai-font-global #srch-modal .sm-hd .sm-title{
-  font-size:20px!important;
+  font-size:var(--oai-map-sheet-title-fs)!important;
   line-height:1.24!important;
 }
 html.oai-font-global #missa-bar-title,
@@ -4074,7 +4081,7 @@ html.oai-font-global #diocese-view .module-bar-title{
 }
 html.oai-font-global #app .sheet-hd .sheet-title,
 html.oai-font-global #srch-modal .sm-hd .sm-title{
-  font-size:18px!important;
+  font-size:var(--oai-map-sheet-title-fs)!important;
 }
 
 
