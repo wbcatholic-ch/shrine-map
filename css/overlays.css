@@ -170,7 +170,7 @@ html.pr-external-guide-active.oai-stability-veil::after {
 }
 
 
-/* V8-1-14-247_compact_pilgrimage_record_text_unify: Android WebView 하단 여백 상한/최소값 표준화 */
+/* V8-1-14-235_parish_retreat_myloc_button_lower_full: Android WebView 하단 여백 상한/최소값 표준화 */
 html:not(.ios-device) .guide-modal{padding-bottom:calc(14px + var(--oai-android-bottom-gap, 10px))!important;}
 html:not(.ios-device) .modal-panel,
 html:not(.ios-device) .guide-panel{max-height:calc(100vh - 96px - var(--oai-android-bottom-gap, 10px))!important;}
@@ -182,13 +182,13 @@ html:not(.ios-device) .modal-panel,
 html:not(.ios-device) .guide-panel{max-height:calc(100vh - 96px - var(--oai-android-bottom-gap, 10px))!important;}
 
 
-/* V8-1-14-247_compact_pilgrimage_record_text_unify: 경로검색 선택창 버튼 테두리를 정보카드 버튼과 같은 2.5px로 통일 */
+/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 경로검색 선택창 버튼 테두리를 정보카드 버튼과 같은 2.5px로 통일 */
 #route-choice-modal .route-choice-btn{
   border-width:2.5px!important;
   box-sizing:border-box!important;
 }
 
-/* V8-1-14-247_compact_pilgrimage_record_text_unify: 경로검색 선택창도 정보카드와 같은 두께로 두고 색상/테두리를 더 선명하게 조정한다. */
+/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 경로검색 선택창도 정보카드와 같은 두께로 두고 색상/테두리를 더 선명하게 조정한다. */
 #route-choice-modal .route-choice-btn{
   border-width:2.5px!important;
   box-sizing:border-box!important;
@@ -210,32 +210,4 @@ html:not(.ios-device) .guide-panel{max-height:calc(100vh - 96px - var(--oai-andr
   background:linear-gradient(180deg,#edf9f1 0%,#d2eedc 100%)!important;
   color:#12633b!important;
   border-color:#269457!important;
-}
-
-/* V8-1-14-247_compact_pilgrimage_record_text_unify: compact 경로검색 선택 모달은 overlays.css의 후순위 고정값에서 직접 축소 */
-html:not(.ios-device).oai-screen-compact-short #route-choice-modal .route-choice-panel{
-  width:min(320px,calc(100vw - 28px))!important;
-  padding:14px 12px 12px!important;
-  border-radius:18px!important;
-}
-html:not(.ios-device).oai-screen-compact-short #route-choice-modal .route-choice-title{
-  font-size:15.8px!important;
-  line-height:1.22!important;
-}
-html:not(.ios-device).oai-screen-compact-short #route-choice-modal .route-choice-desc{
-  font-size:11.2px!important;
-  line-height:1.34!important;
-  margin-top:4px!important;
-}
-html:not(.ios-device).oai-screen-compact-short #route-choice-modal .route-choice-actions{
-  gap:7px!important;
-  margin-top:10px!important;
-}
-html:not(.ios-device).oai-screen-compact-short #route-choice-modal .route-choice-btn{
-  min-height:43px!important;
-  height:43px!important;
-  padding:0 10px!important;
-  font-size:12.4px!important;
-  border-radius:12px!important;
-  border-width:2px!important;
 }
