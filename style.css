@@ -4109,7 +4109,8 @@ html.oai-font-global .shrine-visit-map-filter button{font-size:calc(12px * var(-
 .li-pilgrim-register:active{transform:translateY(1px);filter:brightness(.95)}
 .ic-type-badge.shrine-pilgrim-visited{background:#111!important;color:#f6d58a!important;border:1px solid #d4aa6a!important;font-weight:900!important;box-shadow:0 1px 5px rgba(0,0,0,.16)!important}
 html.oai-font-global .li-pilgrim-register{font-size:calc(12px * var(--app-inner-font-scale,1))!important}
-@media (max-width:370px){.li-side{max-width:88px}.li-pilgrim-register{min-width:68px;padding:0 7px;font-size:11px}}
+html:not(.ios-device).oai-screen-compact-short .li-side{max-width:88px}
+html:not(.ios-device).oai-screen-compact-short .li-pilgrim-register{min-width:68px;padding:0 7px;font-size:11px}
 
 /* V6-123: 지도 인포카드 주소 라벨 숨김 */
 #info-card .ic-addr-lbl{display:none!important}
@@ -4142,11 +4143,13 @@ html.oai-font-global .li-pilgrim-register{font-size:calc(12px * var(--app-inner-
 #info-card .ic-header .ic-type-badge.shrine-pilgrim-register-badge{max-width:none!important;min-width:72px!important;height:30px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;padding:0 10px!important;border-radius:999px!important;background:#fff3c4!important;color:#6c4a00!important;border:1px solid #e1bd59!important;font-size:12px!important;font-weight:900!important;box-shadow:0 1px 5px rgba(180,134,24,.18)!important;cursor:pointer!important;touch-action:manipulation!important}
 #info-card .ic-header .ic-type-badge.shrine-pilgrim-register-badge:active{background:#ffe8a1!important;transform:translateY(1px)}
 .li-pilgrim-register{touch-action:pan-y!important}
-@media (max-width:370px){#info-card .ic-meta .ic-dist-lbl{font-size:9px!important}#info-card .ic-meta .ic-dist-box{font-size:12px!important;padding:4px 7px!important}#info-card .ic-header .ic-type-badge.shrine-pilgrim-register-badge{min-width:68px!important;font-size:11px!important}}
+html:not(.ios-device).oai-screen-compact-short #info-card .ic-meta .ic-dist-lbl{font-size:9px!important}
+html:not(.ios-device).oai-screen-compact-short #info-card .ic-meta .ic-dist-box{font-size:12px!important;padding:4px 7px!important}
+html:not(.ios-device).oai-screen-compact-short #info-card .ic-header .ic-type-badge.shrine-pilgrim-register-badge{min-width:68px!important;font-size:11px!important}
 
 /* V6-123: 등록된 성지 인포카드 표시 */
 #info-card .ic-header .ic-type-badge.shrine-pilgrim-visited{max-width:none!important;min-width:86px!important;height:30px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;padding:0 10px!important;border-radius:999px!important;cursor:default!important;touch-action:auto!important}
-@media (max-width:370px){#info-card .ic-header .ic-type-badge.shrine-pilgrim-visited{min-width:78px!important;font-size:11px!important}}
+html:not(.ios-device).oai-screen-compact-short #info-card .ic-header .ic-type-badge.shrine-pilgrim-visited{min-width:78px!important;font-size:11px!important}
 
 
 /* V6-123: 인포카드 이름 확대 / 순례기록 카드 */
@@ -4254,7 +4257,7 @@ html.oai-font-global .shrine-visit-cards-title{font-size:calc(15px * var(--app-i
 #shrine-visit-cards-btn{display:none!important}
 .shrine-visit-sheet-btn{display:none;margin-left:auto;margin-right:4px;height:30px;min-height:30px;padding:0 10px;border-radius:999px;border:1px solid rgba(196,155,86,.65);background:#fff7e4;color:#5c3b0c;font-size:12px;font-weight:900;font-family:inherit;white-space:nowrap;line-height:1;box-shadow:0 1px 5px rgba(0,0,0,.12);touch-action:manipulation;flex:0 0 auto}.shrine-visit-sheet-btn.show{display:inline-flex;align-items:center;justify-content:center}.shrine-visit-sheet-btn:active{transform:translateY(1px);filter:brightness(.96)}
 html.oai-font-global .shrine-visit-sheet-btn{font-size:calc(12px * var(--app-inner-font-scale,1))!important}
-@media (max-width:370px){.shrine-visit-sheet-btn{height:28px;min-height:28px;padding:0 8px;font-size:11px;margin-right:2px}}
+html:not(.ios-device).oai-screen-compact-short .shrine-visit-sheet-btn{height:28px;min-height:28px;padding:0 8px;font-size:11px;margin-right:2px}
 
 /* V6-123: 파란 표시 위치에 나의순례 플로팅 버튼 배치 */
 #shrine-visit-cards-btn{display:none!important}.shrine-visit-sheet-btn{display:none!important}.shrine-visit-sheet-btn.show{display:none!important}
@@ -4847,10 +4850,6 @@ html.oai-font-global .shrine-visit-stat-item em{font-size:calc(14px * var(--app-
   border-color:#fb923c!important;
 }
 html.oai-font-global .shrine-visit-detail-action{font-size:calc(14px * var(--app-inner-font-scale,1))!important;}
-@media (max-width:370px){
-  .shrine-visit-detail-actions{gap:8px!important;}
-  .shrine-visit-detail-action{height:43px!important;min-height:43px!important;font-size:13px!important;}
-}
 
 /* V6-123: 나의순례현황 표시 타이밍, 통계 데이터 스크롤, 순례등록 버튼 색상 */
 .shrine-visit-stat-row.active{
@@ -5017,10 +5016,6 @@ html.oai-font-global .shrine-auto-visit-dist{font-size:calc(15px * var(--app-inn
   align-items:center!important;
   justify-content:center!important;
   text-align:center!important;
-}
-@media (max-width:370px){
-  .shrine-visit-detail-actions{gap:8px!important;}
-  .shrine-visit-detail-action{height:43px!important;min-height:43px!important;font-size:13px!important;}
 }
 
 
@@ -5321,10 +5316,6 @@ html:not(.ios-device).oai-screen-compact-short .shrine-visit-floating-list-btn{r
   width:100%!important;
 }
 .shrine-visit-detail-action .detail-tel-icon{font-size:18px!important;line-height:1!important;}
-@media (max-width:370px){
-  .shrine-visit-detail-actions{gap:6px!important;}
-  .shrine-visit-detail-action{height:43px!important;min-height:43px!important;font-size:14px!important;padding:0 6px!important;}
-}
 
 
 /* V6-123: 지도 필터 선택 시 확대/이동 제거, 성지 상세 버튼 행 구조를 정보카드처럼 안정화 */
@@ -5348,10 +5339,6 @@ html:not(.ios-device).oai-screen-compact-short .shrine-visit-floating-list-btn{r
 .shrine-visit-detail-action.detail-kakao{
   grid-column:auto!important;
   width:100%!important;
-}
-@media (max-width:370px){
-  .shrine-visit-detail-actions,
-  .shrine-visit-detail-action-row{gap:6px!important;}
 }
 
 
@@ -5432,14 +5419,12 @@ html:not(.ios-device).oai-screen-compact-short.retreat-mode #app #loc-btn{
   transform:translateY(1px)!important;
   filter:brightness(.96)!important;
 }
-@media (max-width:370px){
-  .shrine-visit-detail-info-head{gap:7px!important;}
-  .shrine-visit-detail-map-btn{
-    height:30px!important;
-    min-height:30px!important;
-    padding:0 9px!important;
-    font-size:12px!important;
-  }
+html:not(.ios-device).oai-screen-compact-short .shrine-visit-detail-info-head{gap:7px!important;}
+html:not(.ios-device).oai-screen-compact-short .shrine-visit-detail-map-btn{
+  height:30px!important;
+  min-height:30px!important;
+  padding:0 9px!important;
+  font-size:12px!important;
 }
 
 
@@ -6876,17 +6861,15 @@ html.oai-font-global .category-source-note { font-size: calc(11px * var(--app-in
 #app .shrine-visit-detail-action.detail-guide{background:#fff4cc!important;color:#7c5600!important;border:1.5px solid #e6c766!important;}
 #app .shrine-visit-detail-action.detail-goodnews{background:#eaf7ff!important;color:#075985!important;border:1.5px solid #7ec8f3!important;}
 #app .shrine-visit-detail-action.detail-kakao{width:0!important;}
-@media (max-width:370px){
-  #app #info-card .ic-btn-row,
-  #app #info-card .ic-links,
-  #app #info-card .ic-kakao-row,
-  #app .shrine-visit-detail-action-row{gap:6px!important;}
-  #app #info-card .ic-tel-btn,
-  #app #info-card .ic-route-btn,
-  #app #info-card .ic-link-btn,
-  #app #info-card .btn-kakao-nav,
-  #app .shrine-visit-detail-action{height:43px!important;min-height:43px!important;font-size:13px!important;padding:0 6px!important;}
-}
+html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-btn-row,
+html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-links,
+html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-kakao-row,
+html:not(.ios-device).oai-screen-compact-short #app .shrine-visit-detail-action-row{gap:6px!important;}
+html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-tel-btn,
+html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-route-btn,
+html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-link-btn,
+html:not(.ios-device).oai-screen-compact-short #app #info-card .btn-kakao-nav,
+html:not(.ios-device).oai-screen-compact-short #app .shrine-visit-detail-action{height:43px!important;min-height:43px!important;font-size:13px!important;padding:0 6px!important;}
 
 /* V8-1-14-109: 정보카드/나의 성지순례 현황 6버튼 색상 통일 */
 #app #info-card .ic-tel-btn,
