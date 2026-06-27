@@ -377,3 +377,14 @@ html:not(.ios-device).oai-screen-compact-short #cover-menu .cover-menu-panel,
 html:not(.ios-device).oai-screen-compact-short .cover-menu-panel{
   max-width:min(88vw,330px)!important;
 }
+
+/* V8-1-14-257_compact_cover_menu_mass_font_sync:
+   compact(370px 이하)에서 메뉴/미사 빠른사용 버튼 글자를 커버 카테고리 글자 기준과 동일하게 연동한다. */
+html:not(.ios-device).oai-screen-compact-short .cover-menu-text,
+html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-btn strong,
+html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-primary strong{
+  font-size:calc(16px * var(--app-font-scale,1))!important;
+  line-height:1.18!important;
+  letter-spacing:-.03em!important;
+}
+
