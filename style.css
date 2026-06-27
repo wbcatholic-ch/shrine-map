@@ -5538,8 +5538,8 @@ html:not(.ios-device).oai-screen-compact-short .cover-card{
   border-radius:15px!important;
 }
 html:not(.ios-device).oai-screen-compact-short .cover-name{
-  font-size:calc(13.5px * var(--app-font-scale,1))!important;
-  line-height:1.16!important;
+  font-size:calc(16.8px * var(--app-font-scale,1))!important;
+  line-height:1.18!important;
 }
 html:not(.ios-device).oai-screen-compact-short #cover-action-row,
 html:not(.ios-device).oai-screen-compact-short #cover-diocese-box,
