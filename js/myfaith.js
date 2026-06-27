@@ -1453,7 +1453,7 @@
         renderSettingsEdit();
         return;
       }
-      appendMyFaithConfirmButton(); body.appendChild(appendDataBackupSection(renderHome)); appendMyFaithPrivacyNote(); settleMyFaithHomeScroll();
+      body.appendChild(appendDataBackupSection(renderHome)); appendMyFaithConfirmButton(); appendMyFaithPrivacyNote(); settleMyFaithHomeScroll();
     }
     function renderDioceseList(){
       var current=getMyFaithEditName(); setHeader('나의 교구 선택','확인을 눌러야 저장됩니다'); setBodyMode('my-diocese-list');

@@ -1043,16 +1043,28 @@ html:not(.ios-device).oai-screen-compact-short .my-faith-code-btn {
   min-height: 40px !important;
 }
 
-/* V8-1-14-266: compact에서도 내 정보 백업·복원 버튼이 숨지지 않도록 표시/간격만 보정 */
-html:not(.ios-device).oai-screen-compact-short .my-faith-data-section {
-  display: block !important;
-  flex: 0 0 auto !important;
-  margin-top: 12px !important;
-  padding-top: 0 !important;
+
+/* V8-1-14-267: 사진 기준 compact 나의 신앙생활에서 내 정보 백업·복원 버튼을 확인 버튼 위에 확실히 보이게 정리 */
+html:not(.ios-device).oai-screen-compact-short .my-faith-body.my-faith-home-list-body .my-faith-data-section{
+  display:block!important;
+  flex:0 0 auto!important;
+  order:2!important;
+  margin:6px 0 2px!important;
+  padding:0!important;
 }
-html:not(.ios-device).oai-screen-compact-short .my-faith-data-toggle-btn {
-  min-height: 50px !important;
+html:not(.ios-device).oai-screen-compact-short .my-faith-body.my-faith-home-list-body .my-faith-data-toggle-btn{
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  min-height:44px!important;
 }
-html:not(.ios-device).oai-screen-compact-short .my-faith-data-toggle-note {
-  padding: 6px 10px 8px !important;
+html:not(.ios-device).oai-screen-compact-short .my-faith-body.my-faith-home-list-body .my-faith-data-toggle-note{
+  display:none!important;
+}
+html:not(.ios-device).oai-screen-compact-short .my-faith-body.my-faith-home-list-body .my-faith-inline-confirm{
+  order:3!important;
+  margin-top:6px!important;
+}
+html:not(.ios-device).oai-screen-compact-short .my-faith-body.my-faith-home-list-body .my-faith-inline-privacy-note{
+  order:4!important;
 }
