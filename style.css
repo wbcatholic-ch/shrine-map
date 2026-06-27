@@ -240,6 +240,14 @@ html:not(.ios-device).oai-screen-compact-short {
   --oai-std-sub-fs: 9.4px;
   --oai-std-btn-fs: 12px;
   --oai-std-gap: 5px;
+  --oai-std-close-sz: 34px;
+  --v4-close-size: 34px;
+  --v4-close-size-sm: 26px;
+  --map-tab-btn-h: 56px;
+  --map-tab-fs: 13.2px;
+  --map-tab-gap: 4px;
+  --map-tab-icon-fs: 17px;
+  --map-tab-icon-active-fs: 18px;
   --cover-action-h: 42px;
 }
 html:not(.ios-device).oai-screen-tall-phone {
@@ -8077,4 +8085,80 @@ html.oai-external-return-freeze #oai-external-entry-guard.hide .oai-external-ent
   border-color:#7f9fba!important;
   filter:none!important;
   transform:translateY(1px)!important;
+}
+
+
+/* V8-1-14-253: compact(370px 이하) 전용 - 지도 탭/순례 스탬프북 탭/X 최소 보정 */
+html:not(.ios-device).oai-screen-compact-short #tabbar{
+  height:calc(66px + env(safe-area-inset-top,0px))!important;
+  min-height:calc(66px + env(safe-area-inset-top,0px))!important;
+  padding:calc(env(safe-area-inset-top,0px) + 4px) 6px 5px!important;
+  gap:5px!important;
+}
+html:not(.ios-device).oai-screen-compact-short #tabbar .tab-btn{
+  height:56px!important;
+  min-height:56px!important;
+  padding:4px 2px 4px!important;
+  border-radius:12px!important;
+  font-size:13.2px!important;
+  gap:4px!important;
+  letter-spacing:-.055em!important;
+}
+html:not(.ios-device).oai-screen-compact-short #tabbar .tab-btn .tab-icon{
+  font-size:17px!important;
+}
+html:not(.ios-device).oai-screen-compact-short #tabbar .tab-btn.active .tab-icon{
+  font-size:18px!important;
+}
+html:not(.ios-device).oai-screen-compact-short #map-wrap{
+  top:calc(66px + env(safe-area-inset-top,0px))!important;
+}
+html:not(.ios-device).oai-screen-compact-short .map-category-close,
+html:not(.ios-device).oai-screen-compact-short .ic-close-btn,
+html:not(.ios-device).oai-screen-compact-short .sheet-x,
+html:not(.ios-device).oai-screen-compact-short .route-sheet-x,
+html:not(.ios-device).oai-screen-compact-short .sm-x,
+html:not(.ios-device).oai-screen-compact-short .srch-x,
+html:not(.ios-device).oai-screen-compact-short .rs-x{
+  width:34px!important;
+  height:34px!important;
+  min-width:34px!important;
+  flex-basis:34px!important;
+  font-size:22px!important;
+  line-height:1!important;
+}
+html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-tabs{
+  height:auto!important;
+  min-height:0!important;
+  gap:7px!important;
+  margin:9px 0 7px!important;
+}
+html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-tabs button{
+  height:34px!important;
+  min-height:34px!important;
+  border-radius:12px!important;
+  padding:0 8px!important;
+  font-size:12.5px!important;
+  letter-spacing:-.045em!important;
+}
+html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-diocese .filter-btn{
+  height:30px!important;
+  min-height:30px!important;
+  padding:0 10px!important;
+  font-size:11.5px!important;
+}
+html:not(.ios-device).oai-screen-compact-short #shrine-visit-floating-list-btn,
+html:not(.ios-device).oai-screen-compact-short .shrine-visit-floating-list-btn{
+  font-size:13px!important;
+  min-height:36px!important;
+  padding:0 14px!important;
+}
+html:not(.ios-device).oai-screen-compact-short #shrine-visit-cards-modal .module-close,
+html:not(.ios-device).oai-screen-compact-short #shrine-visit-detail-view .module-close,
+html:not(.ios-device).oai-screen-compact-short #shrine-visit-cards-close,
+html:not(.ios-device).oai-screen-compact-short #shrine-visit-detail-close{
+  width:34px!important;
+  height:34px!important;
+  min-width:34px!important;
+  font-size:22px!important;
 }
