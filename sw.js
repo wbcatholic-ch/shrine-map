@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-262_body_myfaith_qna_text';
-const ASSET_VERSION = 'V8-1-14-262_body_myfaith_qna_text';
+const CACHE_VERSION = 'catholic-way-V8-1-14-264';
+const ASSET_VERSION = 'V8-1-14-264';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }
