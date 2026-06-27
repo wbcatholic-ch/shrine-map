@@ -15,12 +15,12 @@
 .my-faith-quick-section h3 { background:#E6D4B6 !important; color:var(--v4-text-strong) !important; border-bottom-color:rgba(17,24,39,.22) !important; }
 .my-faith-intro-card, .my-faith-next-step-note { border-radius:17px !important; background:var(--v4-surface-paper) !important; border:1.5px solid rgba(183,121,31,.42) !important; padding:15px !important; color:var(--v4-header-navy) !important; box-shadow:0 8px 18px rgba(183,121,31,.12), 0 2px 8px rgba(31,42,68,.05) !important; word-break:keep-all !important; }
 .my-faith-intro-card strong { display:block !important; font-size:calc(16px * var(--app-font-scale,1)) !important; font-weight:900 !important; margin-bottom:4px !important; color:#8F1D1D !important; }
-.my-faith-intro-card span, .my-faith-next-step-note { font-size:calc(13.2px * var(--app-font-scale,1)) !important; line-height:1.45 !important; font-weight:700 !important; color:#5f5549 !important; }
+.my-faith-intro-card span, .my-faith-next-step-note { font-size:calc(16px * var(--app-font-scale,1)) !important; line-height:1.45 !important; font-weight:700 !important; color:#5f5549 !important; }
 .my-faith-list-row { display:flex !important; align-items:center !important; gap:10px !important; padding:12px 14px !important; border-bottom:1px solid rgba(183,121,31,.18) !important; background:var(--v4-surface-white) !important; }
 .my-faith-list-row:last-child { border-bottom:0 !important; }
 .my-faith-row-main { flex:1 1 auto !important; min-width:0 !important; display:flex !important; flex-direction:column !important; gap:4px !important; }
 .my-faith-row-top { display:flex !important; align-items:center !important; gap:6px !important; min-width:0 !important; }
-.my-faith-row-top strong { min-width:0 !important; overflow:hidden !important; text-overflow:ellipsis !important; white-space:nowrap !important; font-size:calc(15px * var(--app-font-scale,1)) !important; font-weight:900 !important; color:var(--v4-header-navy) !important; }
+.my-faith-row-top strong { min-width:0 !important; overflow:hidden !important; text-overflow:ellipsis !important; white-space:nowrap !important; font-size:calc(16px * var(--app-font-scale,1)) !important; font-weight:900 !important; color:var(--v4-header-navy) !important; }
 .my-faith-row-sub { min-width:0 !important; overflow:hidden !important; text-overflow:ellipsis !important; white-space:nowrap !important; color:var(--v4-text-muted) !important; font-size:calc(12.5px * var(--app-font-scale,1)) !important; font-weight:750 !important; }
 .my-faith-row-status { flex:0 0 auto !important; border-radius:999px !important; padding:3px 7px !important; font-size:10.5px !important; font-weight:900 !important; }
 .my-faith-row-status.done { background:#E8F0E7 !important; color:#166534 !important; }
@@ -36,8 +36,8 @@
 .my-faith-body.my-faith-search-body .my-faith-search-section { flex:1 1 auto !important; min-height:0 !important; display:flex !important; flex-direction:column !important; }
 .my-faith-search-results { display:flex !important; flex-direction:column !important; gap:8px !important; margin:11px 0 0 !important; overflow-y:auto !important; -webkit-overflow-scrolling:touch !important; padding:0 14px calc(env(safe-area-inset-bottom,0px) + 22px) !important; flex:1 1 auto !important; min-height:0 !important; }
 .my-faith-parish-result { width:100% !important; text-align:left !important; border-radius:14px !important; border:1.4px solid rgba(183,121,31,.34) !important; background:var(--v4-surface-white) !important; padding:13px 14px !important; font-family:inherit !important; color:var(--v4-header-navy) !important; box-sizing:border-box !important; box-shadow:0 8px 16px rgba(183,121,31,.10), inset 0 1px 0 rgba(255,255,255,.90) !important; cursor:pointer !important; }
-.my-faith-parish-result strong { display:block !important; font-size:calc(15px * var(--app-font-scale,1)) !important; line-height:1.25 !important; font-weight:900 !important; }
-.my-faith-parish-result span { display:block !important; margin-top:4px !important; font-size:calc(11.5px * var(--app-font-scale,1)) !important; line-height:1.35 !important; color:#5f5549 !important; font-weight:700 !important; }
+.my-faith-parish-result strong { display:block !important; font-size:calc(16px * var(--app-font-scale,1)) !important; line-height:1.25 !important; font-weight:900 !important; }
+.my-faith-parish-result span { display:block !important; margin-top:4px !important; font-size:calc(12px * var(--app-font-scale,1)) !important; line-height:1.35 !important; color:#5f5549 !important; font-weight:700 !important; }
 .my-faith-empty { padding:18px 10px !important; text-align:center !important; color:var(--v4-text-muted) !important; font-size:calc(13px * var(--app-font-scale,1)) !important; font-weight:750 !important; }
 .my-faith-inline-confirm { width:100% !important; margin:10px 0 6px !important; display:flex !important; align-items:center !important; justify-content:center !important; }
 .my-faith-confirm-btn { width:100% !important; min-height:50px !important; border:1px solid var(--v4-text-strong) !important; border-radius:15px !important; background:var(--v4-text-main) !important; color:var(--v4-surface-white) !important; font-family:inherit !important; font-size:calc(16px * var(--app-font-scale,1)) !important; font-weight:900 !important; }
@@ -322,7 +322,7 @@
   background: linear-gradient(180deg,#FFFDF8 0%,#F3E5C8 100%) !important;
   color: #25385E !important;
   font-family: inherit !important;
-  font-size: calc(15.5px * var(--app-font-scale,1)) !important;
+  font-size: calc(16px * var(--app-font-scale,1)) !important;
   font-weight: 950 !important;
   letter-spacing: -.035em !important;
   cursor: pointer !important;
@@ -427,7 +427,7 @@
   margin: 0 !important;
   padding: 0 16px 10px !important;
   color: #6b5b44 !important;
-  font-size: calc(13px * var(--app-font-scale,1)) !important;
+  font-size: calc(16px * var(--app-font-scale,1)) !important;
   font-weight: 750 !important;
   line-height: 1.44 !important;
   letter-spacing: -.03em !important;
@@ -437,7 +437,7 @@
   padding-top: 1px !important;
   padding-bottom: 8px !important;
   color: #4f432f !important;
-  font-size: calc(12.5px * var(--app-font-scale,1)) !important;
+  font-size: calc(16px * var(--app-font-scale,1)) !important;
   font-weight: 850 !important;
   text-align: center !important;
 }
@@ -448,7 +448,7 @@
 .my-faith-data-last {
   padding-top: 0 !important;
   color: #14532D !important;
-  font-size: calc(12.5px * var(--app-font-scale,1)) !important;
+  font-size: calc(16px * var(--app-font-scale,1)) !important;
   font-weight: 900 !important;
   text-align: center !important;
 }
@@ -458,7 +458,7 @@
 .my-faith-data-restore-note {
   padding-bottom: 0 !important;
   color: #5b6474 !important;
-  font-size: calc(12.4px * var(--app-font-scale,1)) !important;
+  font-size: calc(16px * var(--app-font-scale,1)) !important;
   font-weight: 760 !important;
 }
 .my-faith-data-actions {
@@ -478,7 +478,7 @@
   margin: 0 !important;
   padding: 0 7px !important;
   color: rgba(91,78,58,.76) !important;
-  font-size: calc(11.7px * var(--app-font-scale,1)) !important;
+  font-size: calc(16px * var(--app-font-scale,1)) !important;
   font-weight: 720 !important;
   line-height: 1.34 !important;
   letter-spacing: -.03em !important;
@@ -490,7 +490,7 @@
   min-height: 50px !important;
   border-radius: 16px !important;
   font-family: inherit !important;
-  font-size: calc(14.5px * var(--app-font-scale,1)) !important;
+  font-size: calc(16px * var(--app-font-scale,1)) !important;
   font-weight: 900 !important;
   letter-spacing: -.035em !important;
   cursor: pointer !important;
@@ -534,7 +534,7 @@
   border: 1.5px solid rgba(183,121,31,.30) !important;
   background: #fffdf8 !important;
   color: #4f432f !important;
-  font-size: calc(12.6px * var(--app-font-scale,1)) !important;
+  font-size: calc(16px * var(--app-font-scale,1)) !important;
   font-weight: 850 !important;
   line-height: 1.38 !important;
   letter-spacing: -.03em !important;
@@ -628,7 +628,7 @@
 .my-faith-code-box-note {
   margin: 0 0 8px !important;
   color: #5b4e3a !important;
-  font-size: calc(12.4px * var(--app-font-scale,1)) !important;
+  font-size: calc(16px * var(--app-font-scale,1)) !important;
   font-weight: 820 !important;
   line-height: 1.38 !important;
   text-align: center !important;
@@ -645,7 +645,7 @@
   background: #fff !important;
   color: #1f2a44 !important;
   font-family: inherit !important;
-  font-size: calc(12.3px * var(--app-font-scale,1)) !important;
+  font-size: calc(16px * var(--app-font-scale,1)) !important;
   font-weight: 650 !important;
   line-height: 1.42 !important;
   padding: 10px 11px !important;
@@ -666,7 +666,7 @@
   min-height: 42px !important;
   border-radius: 13px !important;
   font-family: inherit !important;
-  font-size: calc(13.2px * var(--app-font-scale,1)) !important;
+  font-size: calc(16px * var(--app-font-scale,1)) !important;
   font-weight: 900 !important;
   letter-spacing: -.035em !important;
   cursor: pointer !important;
@@ -721,7 +721,7 @@
 .my-faith-data-group-title {
   margin: 0 0 4px !important;
   color: var(--v4-header-navy) !important;
-  font-size: calc(14.2px * var(--app-font-scale,1)) !important;
+  font-size: calc(17px * var(--app-font-scale,1)) !important;
   font-weight: 950 !important;
   line-height: 1.25 !important;
   letter-spacing: -.04em !important;
@@ -732,7 +732,7 @@
   margin: 0 0 12px !important;
   padding: 0 4px !important;
   color: rgba(91,78,58,.78) !important;
-  font-size: calc(11.8px * var(--app-font-scale,1)) !important;
+  font-size: calc(16px * var(--app-font-scale,1)) !important;
   font-weight: 760 !important;
   line-height: 1.34 !important;
   letter-spacing: -.03em !important;
@@ -832,7 +832,7 @@
   border: 2px solid rgba(183,121,31,.34) !important;
   background: linear-gradient(180deg,#fffdf8 0%,#fff3dc 100%) !important;
   color: #4b3313 !important;
-  font-size: calc(13.4px * var(--app-font-scale,1)) !important;
+  font-size: calc(16px * var(--app-font-scale,1)) !important;
   font-weight: 950 !important;
   line-height: 1.36 !important;
   text-align: center !important;
@@ -857,7 +857,7 @@
 .my-faith-data-action-group .my-faith-data-group-title {
   margin: 0 -14px 12px !important;
   padding: 13px 12px 12px !important;
-  font-size: calc(16.2px * var(--app-font-scale,1)) !important;
+  font-size: calc(17px * var(--app-font-scale,1)) !important;
   font-weight: 950 !important;
   line-height: 1.25 !important;
   border-bottom: 2px solid rgba(31,42,68,.08) !important;
@@ -875,7 +875,7 @@
 .my-faith-data-action-group .my-faith-data-group-guide {
   margin: 0 0 16px !important;
   padding: 0 2px !important;
-  font-size: calc(12.8px * var(--app-font-scale,1)) !important;
+  font-size: calc(16px * var(--app-font-scale,1)) !important;
   font-weight: 850 !important;
   line-height: 1.38 !important;
   color: rgba(48,42,35,.80) !important;
@@ -924,7 +924,7 @@
   gap: 22px !important;
 }
 .my-faith-data-action-group.is-code-only .my-faith-data-btn-note {
-  font-size: calc(12.5px * var(--app-font-scale,1)) !important;
+  font-size: calc(16px * var(--app-font-scale,1)) !important;
   line-height: 1.36 !important;
 }
 .my-faith-data-action-group.is-code-only .my-faith-code-box {

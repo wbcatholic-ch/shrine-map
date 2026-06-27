@@ -1869,15 +1869,15 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, var(--v4-retreat
 #diocese-frame { flex: 1 1 auto; min-height: 0; width: 100%; border: 0; background: var(--v4-bg-ivory); }
 
 .qna-tabs { display: flex; gap: 8px; padding: 12px 14px; background: var(--v4-surface-white); border-bottom: 1px solid var(--v4-line-soft); }
-.qna-tab { flex: 1; height: 42px; border-radius: 12px; border: 1.5px solid #dde3ee; background: var(--v4-surface-white); color: #475569; font-family: inherit; font-size: calc(15px * var(--app-inner-font-scale)); font-weight: 800; }
+.qna-tab { flex: 1; height: 42px; border-radius: 12px; border: 1.5px solid #dde3ee; background: var(--v4-surface-white); color: #475569; font-family: inherit; font-size: calc(16px * var(--app-inner-font-scale)); font-weight: 800; }
 .qna-tab.on { background: var(--v4-header-navy); color: var(--v4-surface-white); border-color: var(--v4-header-navy); }
 .qna-list { padding: 14px; }
 .qna-card { background: var(--v4-surface-white); border: 1px solid var(--v4-line-soft); border-radius: 18px; padding: 16px; margin-bottom: 12px; box-shadow: 0 10px 24px rgba(15,23,42,.06); }
 .qna-kicker { font-size: calc(12px * var(--app-inner-font-scale)); font-weight: 800; color: #64748b; margin-bottom: 7px; }
 .qna-title { font-size: calc(17px * var(--app-inner-font-scale)); font-weight: 900; color: var(--v4-text-main); line-height: 1.35; margin-bottom: 8px; }
-.qna-text { font-size: calc(14px * var(--app-inner-font-scale)); color: var(--v4-parish-gray); line-height: 1.65; word-break: keep-all; }
+.qna-text { font-size: calc(16px * var(--app-inner-font-scale)); color: var(--v4-parish-gray); line-height: 1.65; word-break: keep-all; }
 .qna-actions { display: flex; gap: 8px; margin-top: 14px; }
-.qna-actions button { flex: 1; height: 44px; border-radius: 12px; border: 1.5px solid #dde3ee; background: var(--v4-surface-white); color: var(--v4-text-main); font-family: inherit; font-size: calc(14px * var(--app-inner-font-scale)); font-weight: 800; }
+.qna-actions button { flex: 1; height: 44px; border-radius: 12px; border: 1.5px solid #dde3ee; background: var(--v4-surface-white); color: var(--v4-text-main); font-family: inherit; font-size: calc(16px * var(--app-inner-font-scale)); font-weight: 800; }
 .qna-actions button.primary { background: var(--v4-header-navy); color: var(--v4-surface-white); border-color: var(--v4-header-navy); }
 
 #qna-cover-btn {
@@ -8193,7 +8193,7 @@ html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-stats{
   margin-top:9px!important;
 }
 
-/* V8-1-14-262_font_space_header_tabs: 길찾기 시트는 compact의 전체 .sheet top 보정을 받지 않고 지도 위 하단시트로만 표시한다. */
+/* V8-1-14-262_body_myfaith_qna_text: 길찾기 시트는 compact의 전체 .sheet top 보정을 받지 않고 지도 위 하단시트로만 표시한다. */
 #app #sheet-route[hidden]{
   display:none!important;
 }

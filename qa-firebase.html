@@ -50,7 +50,7 @@
     --icon-r:12px;
     --icon-fs:15px;
     --fs-header:22px;
-    --fs-tab:15px;
+    --fs-tab:16px;
     --fs-sub:10px;
     --qa-top-gap: env(safe-area-inset-top, 0px);
   }
@@ -116,7 +116,7 @@
     border: none;
     color: #fff;
     font-family: 'Noto Sans KR', sans-serif;
-    font-size: 13px;
+    font-size: 16px;
     font-weight: 700;
     line-height: 1;
     cursor: pointer;
@@ -203,7 +203,7 @@
   .list-limit-note {
     flex: 0 0 auto;
     padding: 8px 14px 6px;
-    font-size: 12px;
+    font-size: 16px;
     line-height: 1.35;
     color: #64748B;
     background: var(--card);
@@ -221,7 +221,7 @@
     border-radius: 999px;
     background: #fffaf2;
     color: var(--d);
-    font-size: 15px;
+    font-size: 16px;
     font-weight: 700;
     font-family: inherit;
     box-shadow: 0 2px 8px rgba(0,0,0,.06);
@@ -231,7 +231,7 @@
   .qa-more-status {
     padding: 10px 12px 2px;
     color: #94A3B8;
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.45;
   }
   .card {
@@ -307,7 +307,7 @@
     background: #FFF7E7;
     border: 1px solid #E7D5B3;
     color: #5B4630;
-    font-size: 14px;
+    font-size: 16px;
     line-height: 1.65;
     font-weight: 600;
   }
@@ -387,7 +387,7 @@
     min-height: 40px !important;
     padding: 0 16px !important;
     border-radius: 20px !important;
-    font-size: 14px !important;
+    font-size: 16px !important;
     font-weight: 800 !important;
     background: var(--blue) !important;
     color: #fff !important;
@@ -410,22 +410,22 @@
   }
   .cat-opt {
     padding: 6px 11px !important;
-    font-size: 15px !important;
+    font-size: 16px !important;
     letter-spacing: -.04em !important;
   }
   #f-title::placeholder,
   #f-content::placeholder {
-    font-size: 14px !important;
+    font-size: 16px !important;
     color: var(--gray-400) !important;
     opacity: 1 !important;
   }
   .notice-txt {
-    font-size: 13px !important;
+    font-size: 16px !important;
     line-height: 1.55 !important;
     color: var(--gray-400) !important;
   }
   .char-count {
-    font-size: 13px !important;
+    font-size: 16px !important;
   }
 
 
@@ -1000,11 +1000,11 @@ function oaiReturnToAppCover(reason){
   try{
     var url = new URL('index.html', location.href);
     url.searchParams.set('oai_cover_return', reason || 'qna-return-cover');
-    url.searchParams.set('v', 'V8-1-14-235_parish_retreat_myloc_button_lower_full');
+    url.searchParams.set('v', 'V8-1-14-262_body_myfaith_qna_text');
     location.replace(url.href);
     return;
   }catch(e){
-    location.replace('index.html?oai_cover_return=' + encodeURIComponent(reason || 'qna-return-cover') + '&v=V8-1-14-235_parish_retreat_myloc_button_lower_full');
+    location.replace('index.html?oai_cover_return=' + encodeURIComponent(reason || 'qna-return-cover') + '&v=V8-1-14-262_body_myfaith_qna_text');
   }
 }
 function handleQaBack(){
@@ -1052,7 +1052,7 @@ if (QA_PRIVATE_MODE) {
 <script id="oai-cache-lifecycle-V6-146">
 (function(){
   'use strict';
-  var APP_VERSION = 'V8-1-14-235_parish_retreat_myloc_button_lower_full';
+  var APP_VERSION = 'V8-1-14-262_body_myfaith_qna_text';
   if('serviceWorker' in navigator){
     try{ navigator.serviceWorker.register('./sw.js?v=' + encodeURIComponent(APP_VERSION)).then(function(reg){try{reg.update();}catch(e){}}).catch(function(){}); }catch(e){}
   }
