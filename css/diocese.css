@@ -55,7 +55,7 @@ header{flex-shrink:0;background:var(--d);border-bottom:none;z-index:30;
 .tab-bar::-webkit-scrollbar{display:none;}
 .tab{flex:1;height:var(--tab-btn-h);padding:0 8px;border-radius:12px;
   border:1.5px solid var(--d);background:var(--card-sub);
-  color:#475569;font-size:calc(var(--fs-tab) * var(--dio-effective-font-scale,1));font-weight:800;
+  color:#475569;font-size:calc(var(--fs-tab) * var(--dio-effective-font-scale,1));font-weight:700;
   cursor:pointer;font-family:inherit;white-space:nowrap;
   display:flex;align-items:center;justify-content:center;gap:4px;letter-spacing:-.02em;
   transition:opacity .15s,transform .12s,box-shadow .15s;}
