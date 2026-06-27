@@ -4153,7 +4153,7 @@ html.oai-font-global .li-pilgrim-register{font-size:calc(12px * var(--app-inner-
 #app #info-card .ic-name{font-size:18px!important;font-weight:900!important;line-height:1.25!important}
 html.oai-font-global #app #info-card .ic-name{font-size:calc(18px * var(--app-inner-font-scale,1))!important}
 html.oai-font-global .shrine-visit-cards-btn{font-size:calc(12px * var(--app-inner-font-scale,1))!important}
-@media (max-width:370px){.shrine-visit-cards-btn{right:8px;top:50px;height:32px;padding:0 10px;font-size:11px}}
+html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-btn{right:8px;top:50px;height:32px;padding:0 10px;font-size:11px}
 .shrine-visit-cards-btn{position:absolute;right:12px;top:12px;z-index:37;display:none;height:34px;padding:0 12px;border-radius:999px;border:1px solid #d4aa6a;background:#fff3c4;color:#6c4a00;font-size:12px;font-weight:900;box-shadow:0 3px 12px rgba(0,0,0,.16);font-family:inherit;touch-action:manipulation}
 .shrine-visit-cards-btn.show{display:inline-flex;align-items:center;justify-content:center}
 .shrine-visit-cards-btn:active{transform:translateY(1px);filter:brightness(.96)}
@@ -4260,7 +4260,7 @@ html.oai-font-global .shrine-visit-sheet-btn{font-size:calc(12px * var(--app-inn
 #shrine-visit-cards-btn{display:none!important}.shrine-visit-sheet-btn{display:none!important}.shrine-visit-sheet-btn.show{display:none!important}
 .shrine-visit-floating-list-btn{position:fixed;right:16px;bottom:calc(env(safe-area-inset-bottom,0px) + 138px);z-index:72;display:none;height:42px;min-width:104px;padding:0 15px;border-radius:999px;border:1.5px solid rgba(21,101,192,.72);background:#1565c0;color:#fff;font-size:14px;font-weight:900;font-family:inherit;letter-spacing:-.04em;box-shadow:0 8px 22px rgba(21,101,192,.26),0 2px 7px rgba(0,0,0,.18);touch-action:manipulation;white-space:nowrap}.shrine-visit-floating-list-btn.show{display:inline-flex;align-items:center;justify-content:center}.shrine-visit-floating-list-btn:active{transform:translateY(1px);filter:brightness(.96)}
 html.oai-font-global .shrine-visit-floating-list-btn{font-size:calc(14px * var(--app-inner-font-scale,1))!important}
-@media (max-width:370px){.shrine-visit-floating-list-btn{right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 124px);height:38px;min-width:94px;padding:0 12px;font-size:13px}}
+html:not(.ios-device).oai-screen-compact-short .shrine-visit-floating-list-btn{right:12px;bottom:calc(env(safe-area-inset-bottom,0px) + 124px);height:38px;min-width:94px;padding:0 12px;font-size:13px}
 
 /* V6-123: 순례 스탬프북 헤더/탭을 실제 공통 모듈 기준으로 재표준화 */
 .shrine-visit-cards-head.module-bar{display:flex!important;align-items:center!important;gap:0!important;height:calc(var(--oai-std-header-h) + env(safe-area-inset-top,0px))!important;min-height:calc(var(--oai-std-header-h) + env(safe-area-inset-top,0px))!important;max-height:calc(var(--oai-std-header-h) + env(safe-area-inset-top,0px))!important;padding:var(--oai-std-hdr-pad) 16px 10px!important;box-sizing:border-box!important;flex-shrink:0!important;width:100%!important;max-width:none!important;background:#0e1535!important;color:var(--v4-surface-white)!important;border-bottom:2px solid var(--gold)!important;box-shadow:0 4px 16px rgba(14,21,53,.22)!important;margin:0!important;border-radius:0!important}.shrine-visit-cards-head.module-bar::before,.shrine-visit-cards-head.module-bar::after{content:none!important;display:none!important}.shrine-visit-cards-head .module-bar-main{display:flex!important;align-items:center!important;gap:14px!important;flex:1!important;min-width:0!important}.shrine-visit-cards-head .module-bar-ico{width:44px!important;height:44px!important;min-width:44px!important;flex:0 0 44px!important;border-radius:12px!important;background:rgba(255,255,255,.12)!important;border:1px solid rgba(255,255,255,.2)!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:var(--oai-std-icon-sz)!important;line-height:1!important;color:var(--v4-surface-white)!important}.shrine-visit-cards-head .module-bar-txt{display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:center!important;min-width:0!important;gap:2px!important}.shrine-visit-cards-head .module-bar-title{font-size:var(--oai-std-title-fs)!important;font-weight:800!important;line-height:1.2!important;letter-spacing:-.02em!important;color:var(--v4-surface-white)!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;margin:0!important;text-align:left!important}.shrine-visit-cards-head .module-bar-sub{font-size:var(--oai-std-sub-fs)!important;font-weight:500!important;line-height:1.2!important;color:rgba(255,255,255,.65)!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;margin:0!important;opacity:1!important}.shrine-visit-cards-head .module-close{width:var(--oai-std-close-sz)!important;height:var(--oai-std-close-sz)!important;min-width:var(--oai-std-close-sz)!important;flex:0 0 var(--oai-std-close-sz)!important;border-radius:999px!important;background:transparent!important;border:1.5px solid currentColor!important;color:rgba(212,170,106,.9)!important;font-size:28px!important;font-weight:900!important;display:flex!important;align-items:center!important;justify-content:center!important;box-shadow:none!important}
@@ -4573,9 +4573,7 @@ html.oai-font-global .shrine-visit-stat-row{font-size:calc(14px * var(--app-inne
   border:2px solid rgba(21,101,192,.85)!important;
   box-shadow:0 9px 24px rgba(21,101,192,.30),0 3px 9px rgba(0,0,0,.20)!important;
 }
-@media (max-width:370px){
-  .shrine-visit-floating-list-btn{bottom:calc(env(safe-area-inset-bottom,0px) + 168px)!important;}
-}
+html:not(.ios-device).oai-screen-compact-short .shrine-visit-floating-list-btn{bottom:calc(env(safe-area-inset-bottom,0px) + 168px)!important;}
 
 /* V6-123: 순례 지도 필터 줌/미방문 활성/탭 색상 통일 */
 .shrine-visit-map-filter{
@@ -4630,9 +4628,7 @@ html.oai-font-global .shrine-visit-stat-row{font-size:calc(14px * var(--app-inne
   bottom:calc(env(safe-area-inset-bottom,0px) + 68px)!important;
   z-index:860!important;
 }
-@media (max-width:370px){
-  .shrine-visit-floating-list-btn{right:10px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 64px)!important;}
-}
+html:not(.ios-device).oai-screen-compact-short .shrine-visit-floating-list-btn{right:10px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 64px)!important;}
 .shrine-visit-cards-tabs{
   min-height:60px!important;
   height:64px!important;
@@ -5250,10 +5246,8 @@ html:not(.ios-device).oai-screen-compact-short #loc-btn{right:10px!important;bot
 .shrine-visit-card-badge.new.type-pilgrim{border-color:rgba(11,132,255,.62)!important;}
 .shrine-visit-card-badge.new.type-martyr{border-color:rgba(0,166,106,.62)!important;}
 html.oai-font-global .shrine-visit-cards-tabs button{font-size:calc(13px * var(--app-inner-font-scale,1))!important;}
-@media (max-width:370px){
-  #loc-btn{right:10px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 72px)!important;}
-  .shrine-visit-floating-list-btn{right:10px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 16px)!important;}
-}
+html:not(.ios-device).oai-screen-compact-short #loc-btn{right:10px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 72px)!important;}
+html:not(.ios-device).oai-screen-compact-short .shrine-visit-floating-list-btn{right:10px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 16px)!important;}
 
 
 /* V6-123: 통계 중복 상단 박스 제거, 활성 교구탭 자동 노출 보강, 방문 성지 상세 버튼을 정보카드와 동일 구조/색상으로 정리 */
@@ -5392,19 +5386,17 @@ html.parish-mode #app #loc-btn,
 html.retreat-mode #app #loc-btn{
   bottom:calc(env(safe-area-inset-bottom,0px) + 80px)!important;
 }
-@media (max-width:370px){
-  .shrine-visit-floating-list-btn{
-    right:10px!important;
-    bottom:calc(env(safe-area-inset-bottom,0px) + 30px)!important;
-  }
-  #loc-btn{
-    right:10px!important;
-    bottom:calc(env(safe-area-inset-bottom,0px) + 86px)!important;
-  }
-  html.parish-mode #app #loc-btn,
-  html.retreat-mode #app #loc-btn{
-    bottom:calc(env(safe-area-inset-bottom,0px) + 76px)!important;
-  }
+html:not(.ios-device).oai-screen-compact-short .shrine-visit-floating-list-btn{
+  right:10px!important;
+  bottom:calc(env(safe-area-inset-bottom,0px) + 30px)!important;
+}
+html:not(.ios-device).oai-screen-compact-short #loc-btn{
+  right:10px!important;
+  bottom:calc(env(safe-area-inset-bottom,0px) + 86px)!important;
+}
+html:not(.ios-device).oai-screen-compact-short.parish-mode #app #loc-btn,
+html:not(.ios-device).oai-screen-compact-short.retreat-mode #app #loc-btn{
+  bottom:calc(env(safe-area-inset-bottom,0px) + 76px)!important;
 }
 
 
@@ -5770,14 +5762,6 @@ html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-stamp{
 html.oai-font-global .shrine-visit-card-badge.visited .shrine-visit-card-seal::after{
   font-size:calc(13px * var(--app-inner-font-scale,1))!important;
 }
-@media (max-width:370px){
-  .shrine-visit-card-badge.visited .shrine-visit-card-seal{
-    right:10px!important;
-    bottom:9px!important;
-    width:38px!important;
-    height:38px!important;
-  }
-}
 html:not(.ios-device).oai-screen-compact-short .shrine-visit-card-badge.visited .shrine-visit-card-seal{
   right:9px!important;
   bottom:8px!important;
@@ -5997,15 +5981,13 @@ html.oai-map-search-keyboard-lock #sheet-region.open{
 html.oai-font-global .shrine-visit-floating-list-btn{
   font-size:calc(15px * var(--app-inner-font-scale,1))!important;
 }
-@media (max-width:370px){
-  .shrine-visit-floating-list-btn{
-    min-width:126px!important;
-    height:44px!important;
-    padding:0 14px!important;
-    font-size:14px!important;
-    right:10px!important;
-    bottom:calc(env(safe-area-inset-bottom,0px) + 30px)!important;
-  }
+html:not(.ios-device).oai-screen-compact-short .shrine-visit-floating-list-btn{
+  min-width:126px!important;
+  height:44px!important;
+  padding:0 14px!important;
+  font-size:14px!important;
+  right:10px!important;
+  bottom:calc(env(safe-area-inset-bottom,0px) + 30px)!important;
 }
 
 
@@ -6351,10 +6333,8 @@ html:not(.ios-device) #app .shrine-visit-floating-list-btn{
 html:not(.ios-device) #app #loc-btn{
   bottom:calc(var(--oai-android-bottom-gap) + 76px)!important;
 }
-@media (max-width:370px){
-  html:not(.ios-device) #app .shrine-visit-floating-list-btn{bottom:calc(var(--oai-android-bottom-gap) + 22px)!important;}
-  html:not(.ios-device) #app #loc-btn{bottom:calc(var(--oai-android-bottom-gap) + 70px)!important;}
-}
+html:not(.ios-device).oai-screen-compact-short #app .shrine-visit-floating-list-btn{bottom:calc(var(--oai-android-bottom-gap) + 22px)!important;}
+html:not(.ios-device).oai-screen-compact-short #app #loc-btn{bottom:calc(var(--oai-android-bottom-gap) + 70px)!important;}
 html:not(.ios-device) .shrine-visit-panel,
 html:not(.ios-device) .shrine-auto-visit-panel{
   padding-bottom:var(--oai-android-bottom-gap-roomy)!important;
@@ -6395,17 +6375,15 @@ html:not(.ios-device).parish-mode #app #loc-btn,
 html:not(.ios-device).retreat-mode #app #loc-btn{
   bottom:calc(var(--oai-android-bottom-gap, 10px) + 80px)!important;
 }
-@media (max-width:370px){
-  html:not(.ios-device) #app .shrine-visit-floating-list-btn{
-    bottom:calc(var(--oai-android-bottom-gap, 10px) + 34px)!important;
-  }
-  html:not(.ios-device) #app #loc-btn{
-    bottom:calc(var(--oai-android-bottom-gap, 10px) + 88px)!important;
-  }
-  html:not(.ios-device).parish-mode #app #loc-btn,
-  html:not(.ios-device).retreat-mode #app #loc-btn{
-    bottom:calc(var(--oai-android-bottom-gap, 10px) + 76px)!important;
-  }
+html:not(.ios-device).oai-screen-compact-short #app .shrine-visit-floating-list-btn{
+  bottom:calc(var(--oai-android-bottom-gap, 10px) + 34px)!important;
+}
+html:not(.ios-device).oai-screen-compact-short #app #loc-btn{
+  bottom:calc(var(--oai-android-bottom-gap, 10px) + 88px)!important;
+}
+html:not(.ios-device).oai-screen-compact-short.parish-mode #app #loc-btn,
+html:not(.ios-device).oai-screen-compact-short.retreat-mode #app #loc-btn{
+  bottom:calc(var(--oai-android-bottom-gap, 10px) + 76px)!important;
 }
 
 
