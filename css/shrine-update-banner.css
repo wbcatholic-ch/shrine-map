@@ -121,7 +121,7 @@
   color:#334155;
   border:1.5px solid #CBD5E1;
 }
-@media(max-width:390px){
+@media(max-width:370px){
   #cover #shrine-update-banner{left:10px;right:10px;}
   #cover #shrine-update-banner .shrine-update-card{border-radius:20px;}
   #cover #shrine-update-banner .shrine-update-body{line-height:1.5;}
