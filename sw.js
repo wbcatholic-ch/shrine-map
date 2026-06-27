@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-235_parish_retreat_myloc_button_lower_full';
-const ASSET_VERSION = 'V8-1-14-235_parish_retreat_myloc_button_lower_full';
+const CACHE_VERSION = 'catholic-way-V8-1-14-249_compact_map_tabs_loc_button_fix';
+const ASSET_VERSION = 'V8-1-14-249_compact_map_tabs_loc_button_fix';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }
