@@ -5203,15 +5203,31 @@ function closeCategoryToCoverFromMap(){
 }
 
 function _closeRoutePanelForNonRouteTab(){
+  try{ window.__OAI_ROUTE_PANEL_SUPPRESS_UNTIL__ = Date.now() + 900; }catch(e){ console.warn('[가톨릭길동무]', e); }
   try{ if(typeof _blurAll === 'function') _blurAll(); }catch(e){ console.warn('[가톨릭길동무]', e); }
+  try{
+    if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
+    document.querySelectorAll('#sheet-route input,#sheet-route textarea,#srch-modal input,#srch-modal textarea').forEach(function(el){
+      try{ el.blur(); }catch(_e){}
+    });
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+  try{
+    const routeSearchModal = $('srch-modal');
+    if(routeSearchModal) routeSearchModal.classList.remove('open');
+    const routeChoiceModal = $('route-choice-modal');
+    if(routeChoiceModal) routeChoiceModal.classList.remove('open');
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
   try{
     const routeSheet = $('sheet-route');
     if(routeSheet){
       routeSheet.classList.remove('open','route-waypoint-scroll');
+      routeSheet.classList.add('oai-route-force-closed');
+      routeSheet.setAttribute('aria-hidden','true');
     }
   }catch(e){ console.warn('[가톨릭길동무]', e); }
   try{
     _routeMode = false;
+    _suppressNextRouteGuide = true;
     if(typeof _hideRouteGuide === 'function') _hideRouteGuide();
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
@@ -5267,7 +5283,7 @@ function openTab(name, opts){
   }
   else if(name==='list')  { renderList(); if(shouldAutoFocusKeyboard) oaiFocusSearchKeyboardInput('list-srch-inp'); }
   else if(name==='region'){ if(shouldAutoFocusKeyboard) oaiFocusSearchKeyboardInput('region-inp'); }
-  else if(name==='route') _enterRouteMode();
+  else if(name==='route') { try{ window.__OAI_ROUTE_PANEL_SUPPRESS_UNTIL__ = 0; }catch(e){ console.warn('[가톨릭길동무]', e); } _enterRouteMode(); }
   setTimeout(()=>_scrollSheetTop(name), 30);
 }
 
@@ -5375,7 +5391,7 @@ function toggleTab(name){
     setTimeout(()=>_scrollSheetTop(name),30);
     return;
   }
-  if(name==='route') resetRoute({fresh:true});
+  if(name==='route') { try{ window.__OAI_ROUTE_PANEL_SUPPRESS_UNTIL__ = 0; }catch(e){ console.warn('[가톨릭길동무]', e); } resetRoute({fresh:true}); }
   openTab(name, {keyboard:true});
 }
 
@@ -7723,9 +7739,23 @@ function _ensureCurrentLocationStart(){
 }
 
 function _enterRouteMode(){
+  try{
+    const suppressUntil = Number(window.__OAI_ROUTE_PANEL_SUPPRESS_UNTIL__ || 0);
+    if(_activeTab !== 'route' || (suppressUntil && Date.now() < suppressUntil)){
+      const blocked=$('sheet-route');
+      if(blocked){
+        blocked.classList.remove('open','route-waypoint-scroll');
+        blocked.classList.add('oai-route-force-closed');
+        blocked.setAttribute('aria-hidden','true');
+      }
+      _routeMode=false;
+      _hideRouteGuide();
+      return;
+    }
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
   _routeMode=true;
   const rs=$('sheet-route');
-  if(rs){ rs.style.display=''; rs.classList.add('open'); }
+  if(rs){ rs.style.display=''; rs.classList.remove('oai-route-force-closed'); rs.removeAttribute('aria-hidden'); rs.classList.add('open'); }
   _syncRouteWaypointBox();
   _ensureCurrentLocationStart();
   if(_suppressNextRouteGuide){

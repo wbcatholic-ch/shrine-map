@@ -8221,3 +8221,12 @@ html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-diocese{
 html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-stats{
   margin-top:9px!important;
 }
+
+/* V8-1-14-259_route_panel_hard_close_on_nonroute: 길찾기가 아닌 탭에서는 길찾기 하단 패널을 강제로 화면 밖에 둔다. */
+#app #sheet-route.oai-route-force-closed,
+#app #sheet-route.oai-route-force-closed.open{
+  transform:translateY(112%)!important;
+  transition:none!important;
+  pointer-events:none!important;
+  visibility:hidden!important;
+}
