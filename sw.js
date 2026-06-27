@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-249_compact_map_tabs_loc_button_fix';
-const ASSET_VERSION = 'V8-1-14-249_compact_map_tabs_loc_button_fix';
+const CACHE_VERSION = 'catholic-way-V8-1-14-250_compact_tabs_close_unify';
+const ASSET_VERSION = 'V8-1-14-250_compact_tabs_close_unify';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }

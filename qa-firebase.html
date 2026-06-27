@@ -1003,11 +1003,11 @@ function oaiReturnToAppCover(reason){
   try{
     var url = new URL('index.html', location.href);
     url.searchParams.set('oai_cover_return', reason || 'qna-return-cover');
-    url.searchParams.set('v', 'V8-1-14-249_compact_map_tabs_loc_button_fix');
+    url.searchParams.set('v', 'V8-1-14-250_compact_tabs_close_unify');
     location.replace(url.href);
     return;
   }catch(e){
-    location.replace('index.html?oai_cover_return=' + encodeURIComponent(reason || 'qna-return-cover') + '&v=V8-1-14-249_compact_map_tabs_loc_button_fix');
+    location.replace('index.html?oai_cover_return=' + encodeURIComponent(reason || 'qna-return-cover') + '&v=V8-1-14-250_compact_tabs_close_unify');
   }
 }
 function handleQaBack(){
@@ -1055,7 +1055,7 @@ if (QA_PRIVATE_MODE) {
 <script id="oai-cache-lifecycle-V6-146">
 (function(){
   'use strict';
-  var APP_VERSION = 'V8-1-14-249_compact_map_tabs_loc_button_fix';
+  var APP_VERSION = 'V8-1-14-250_compact_tabs_close_unify';
   if('serviceWorker' in navigator){
     try{ navigator.serviceWorker.register('./sw.js?v=' + encodeURIComponent(APP_VERSION)).then(function(reg){try{reg.update();}catch(e){}}).catch(function(){}); }catch(e){}
   }
