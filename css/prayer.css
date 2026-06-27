@@ -261,7 +261,7 @@
 
 
 
-/* V8-1-14-249_compact_map_tabs_loc_button_fix: Android WebView 하단 여백 상한/최소값 표준화 */
+/* V8-1-14-250_compact_tabs_close_unify: Android WebView 하단 여백 상한/최소값 표준화 */
 html:not(.ios-device) .pr-list{padding-bottom:calc(18px + var(--oai-android-bottom-gap, 10px))!important;}
 
 
@@ -269,7 +269,7 @@ html:not(.ios-device) .pr-list{padding-bottom:calc(18px + var(--oai-android-bott
 html:not(.ios-device) .pr-list{padding-bottom:calc(18px + var(--oai-android-bottom-gap, 10px))!important;}
 
 
-/* V8-1-14-249_compact_map_tabs_loc_button_fix: 기도문 목록/본문 compact 비율 정리 */
+/* V8-1-14-250_compact_tabs_close_unify: 기도문 목록/본문 compact 비율 정리 */
 html:not(.ios-device).oai-screen-compact-short .pr-item{
   min-height:56px!important;
   padding:10px 11px!important;
@@ -281,7 +281,7 @@ html:not(.ios-device).oai-screen-compact-short .pr-sub{font-size:10.8px!importan
 html:not(.ios-device).oai-screen-compact-short #prayer-detail .prayer-detail-title{font-size:17px!important;line-height:1.25!important;}
 html:not(.ios-device).oai-screen-compact-short #prayer-detail .prayer-detail-body{font-size:14px!important;line-height:1.55!important;}
 
-/* V8-1-14-249_compact_map_tabs_loc_button_fix: 기도문 목록/본문 후순위 CSS에서 compact 최종 축소 */
+/* V8-1-14-250_compact_tabs_close_unify: 기도문 목록/본문 후순위 CSS에서 compact 최종 축소 */
 html:not(.ios-device).oai-screen-compact-short #prayer-search-inp,
 html:not(.ios-device).oai-screen-compact-short #prayer-search-inp::placeholder{
   font-size:12.8px!important;
@@ -324,4 +324,19 @@ html:not(.ios-device).oai-screen-compact-short .pr-body-title{
   line-height:1.35!important;
   margin-bottom:12px!important;
   padding-bottom:10px!important;
+}
+
+
+/* V8-1-14-250_compact_tabs_close_unify: compact 기도문 탭/X/하단 빠른버튼 최종 보정 */
+html:not(.ios-device).oai-screen-compact-short #prayer-tabs{
+  height:45px!important;min-height:45px!important;max-height:45px!important;padding:5px 8px!important;gap:5px!important;
+}
+html:not(.ios-device).oai-screen-compact-short #prayer-tabs .pr-tab,
+html:not(.ios-device).oai-screen-compact-short .pr-tab{
+  height:33px!important;min-height:33px!important;padding:0 9px!important;border-radius:9px!important;font-size:12px!important;line-height:1!important;gap:3px!important;
+}
+html:not(.ios-device).oai-screen-compact-short #prayer-close,
+html:not(.ios-device).oai-screen-compact-short #prayer-bar .module-close,
+html:not(.ios-device).oai-screen-compact-short #pr-back-btn{
+  width:34px!important;height:34px!important;min-width:34px!important;flex:0 0 34px!important;font-size:21px!important;border-width:1.3px!important;
 }

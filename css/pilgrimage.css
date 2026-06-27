@@ -127,7 +127,7 @@
 #trail-view .trail-tab{height:40px!important;min-height:40px!important;padding:0 12px!important;border-radius:10px!important;font-size:15px!important;line-height:1!important;align-items:center!important;box-sizing:border-box!important;}
 
 
-/* V8-1-14-249_compact_map_tabs_loc_button_fix: Android WebView 하단 여백 상한/최소값 표준화 */
+/* V8-1-14-250_compact_tabs_close_unify: Android WebView 하단 여백 상한/최소값 표준화 */
 html:not(.ios-device) .trail-loc-btn{bottom:calc(10px + var(--oai-android-bottom-gap, 10px))!important;}
 html:not(.ios-device) .trail-sheet{padding-bottom:calc(18px + var(--oai-android-bottom-gap, 10px))!important;}
 
@@ -137,7 +137,7 @@ html:not(.ios-device) .trail-loc-btn{bottom:calc(10px + var(--oai-android-bottom
 html:not(.ios-device) .trail-sheet{padding-bottom:calc(18px + var(--oai-android-bottom-gap, 10px))!important;}
 
 
-/* V8-1-14-249_compact_map_tabs_loc_button_fix: 순례길 목록 compact 비율 정리 */
+/* V8-1-14-250_compact_tabs_close_unify: 순례길 목록 compact 비율 정리 */
 html:not(.ios-device).oai-screen-compact-short #trail-list > .trail-card,
 html:not(.ios-device).oai-screen-compact-short .trail-card{
   min-height:92px!important;
@@ -163,7 +163,7 @@ html:not(.ios-device).oai-screen-compact-short .trail-meta{
   line-height:1.3!important;
 }
 
-/* V8-1-14-249_compact_map_tabs_loc_button_fix: 순례길 목록/상세 시트 compact 최종 축소 */
+/* V8-1-14-250_compact_tabs_close_unify: 순례길 목록/상세 시트 compact 최종 축소 */
 html:not(.ios-device).oai-screen-compact-short #trail-list > .trail-card,
 html:not(.ios-device).oai-screen-compact-short .trail-card{
   min-height:82px!important;
@@ -215,4 +215,17 @@ html:not(.ios-device).oai-screen-compact-short .trail-sh-bdg,
 html:not(.ios-device).oai-screen-compact-short .trail-sh-region{
   font-size:10px!important;
   line-height:1.25!important;
+}
+
+
+/* V8-1-14-250_compact_tabs_close_unify: compact 순례길 탭/X 최종 보정 */
+html:not(.ios-device).oai-screen-compact-short #trail-view .trail-tabs{
+  height:45px!important;min-height:45px!important;max-height:45px!important;padding:5px 8px!important;gap:6px!important;
+}
+html:not(.ios-device).oai-screen-compact-short #trail-view .trail-tab{
+  height:33px!important;min-height:33px!important;padding:0 9px!important;border-radius:9px!important;font-size:12.5px!important;line-height:1!important;
+}
+html:not(.ios-device).oai-screen-compact-short #trail-view .module-close,
+html:not(.ios-device).oai-screen-compact-short .trail-sh-close{
+  width:34px!important;height:34px!important;min-width:34px!important;flex:0 0 34px!important;font-size:21px!important;border-width:1.3px!important;
 }
