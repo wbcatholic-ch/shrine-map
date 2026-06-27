@@ -46,12 +46,12 @@
     --bdr:#DDD5C8;
     --tab-h:55px;
     --tab-btn-h:40px;
-    --icon-size:35px;
+    --icon-size:42px;
     --icon-r:12px;
-    --icon-fs:15px;
-    --fs-header:22px;
+    --icon-fs:0px;
+    --fs-header:20px;
     --fs-tab:16px;
-    --fs-sub:10px;
+    --fs-sub:11px;
     --qa-top-gap: env(safe-area-inset-top, 0px);
   }
   html, body { height: 100%; overflow: hidden; }
@@ -76,7 +76,7 @@
     height: calc(var(--header-h,70px) + var(--qa-top-gap)); min-height: calc(var(--header-h,70px) + var(--qa-top-gap)); padding: var(--qa-top-gap) 16px 0;
     display: flex; align-items: center; gap: 10px; flex: 0 0 auto;
     position: relative; top: auto; z-index: 100;
-    border-radius: 0; border-bottom: none; box-shadow: none;
+    border-radius: 0; border-bottom: 2px solid var(--gold); box-shadow: 0 4px 16px rgba(14,21,53,.22);
   }
   #qna-cross-icon {
     width: var(--icon-size); height: var(--icon-size); min-width: var(--icon-size); flex: 0 0 var(--icon-size);
@@ -431,7 +431,7 @@
 
 
 
-  /* V8-1-14-269: compact 문의·건의는 글자 크기 유지, 공간만 축소 */
+  /* V8-1-14-270: compact 문의·건의는 글자 크기 유지, 공간만 축소 */
   @media (max-width: 370px) {
     :root {
       --tab-h: 50px;
@@ -1051,11 +1051,11 @@ function oaiReturnToAppCover(reason){
   try{
     var url = new URL('index.html', location.href);
     url.searchParams.set('oai_cover_return', reason || 'qna-return-cover');
-    url.searchParams.set('v', 'V8-1-14-269');
+    url.searchParams.set('v', 'V8-1-14-270');
     location.replace(url.href);
     return;
   }catch(e){
-    location.replace('index.html?oai_cover_return=' + encodeURIComponent(reason || 'qna-return-cover') + '&v=V8-1-14-269');
+    location.replace('index.html?oai_cover_return=' + encodeURIComponent(reason || 'qna-return-cover') + '&v=V8-1-14-270');
   }
 }
 function handleQaBack(){
@@ -1103,7 +1103,7 @@ if (QA_PRIVATE_MODE) {
 <script id="oai-cache-lifecycle-V6-146">
 (function(){
   'use strict';
-  var APP_VERSION = 'V8-1-14-269';
+  var APP_VERSION = 'V8-1-14-270';
   if('serviceWorker' in navigator){
     try{ navigator.serviceWorker.register('./sw.js?v=' + encodeURIComponent(APP_VERSION)).then(function(reg){try{reg.update();}catch(e){}}).catch(function(){}); }catch(e){}
   }

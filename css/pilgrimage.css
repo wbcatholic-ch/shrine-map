@@ -139,10 +139,10 @@ html:not(.ios-device) .trail-sheet{padding-bottom:calc(18px + var(--oai-android-
 
 /* V8-1-14-253: compact(370px 이하) 전용 - 순례길 탭/X 최소 보정 */
 html:not(.ios-device).oai-screen-compact-short #trail-view .trail-tabs{
-  height:48px!important;min-height:48px!important;max-height:48px!important;padding:0 8px!important;gap:6px!important;
+  height:var(--oai-std-tabbar-h,46px)!important;min-height:var(--oai-std-tabbar-h,46px)!important;max-height:var(--oai-std-tabbar-h,46px)!important;padding:0 8px!important;gap:5px!important;
 }
 html:not(.ios-device).oai-screen-compact-short #trail-view .trail-tab{
-  height:35px!important;min-height:35px!important;padding:0 10px!important;border-radius:10px!important;
+  height:var(--oai-std-tab-h,33px)!important;min-height:var(--oai-std-tab-h,33px)!important;padding:0 10px!important;border-radius:10px!important;
 }
 html:not(.ios-device).oai-screen-compact-short #trail-close-btn,
 html:not(.ios-device).oai-screen-compact-short .trail-sh-close{

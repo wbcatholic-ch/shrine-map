@@ -71,7 +71,8 @@
   padding: 0 10px;
   box-sizing: border-box;
   background: var(--v4-bg-ivory);
-  border-bottom: 1px solid #d8d0c8;
+  border-top: 1px solid #ddd5c8;
+  border-bottom: 2px solid #ddd5c8;
   flex-shrink: 0;
   overscroll-behavior-x: contain;
   -webkit-overflow-scrolling: touch;
@@ -271,11 +272,11 @@ html:not(.ios-device) .pr-list{padding-bottom:calc(18px + var(--oai-android-bott
 
 /* V8-1-14-253: compact(370px 이하) 전용 - 기도문 탭/X/하단 버튼 최소 보정 */
 html:not(.ios-device).oai-screen-compact-short #prayer-tabs{
-  height:48px!important;min-height:48px!important;max-height:48px!important;padding:0 8px!important;gap:5px!important;
+  height:var(--oai-std-tabbar-h,46px)!important;min-height:var(--oai-std-tabbar-h,46px)!important;max-height:var(--oai-std-tabbar-h,46px)!important;padding:0 8px!important;gap:5px!important;
 }
 html:not(.ios-device).oai-screen-compact-short #prayer-tabs .pr-tab,
 html:not(.ios-device).oai-screen-compact-short .pr-tab{
-  height:35px!important;min-height:35px!important;padding:0 10px!important;border-radius:10px!important;gap:4px!important;
+  height:var(--oai-std-tab-h,33px)!important;min-height:var(--oai-std-tab-h,33px)!important;padding:0 10px!important;border-radius:10px!important;gap:4px!important;
 }
 html:not(.ios-device).oai-screen-compact-short #prayer-close,
 html:not(.ios-device).oai-screen-compact-short #prayer-bar .module-close{

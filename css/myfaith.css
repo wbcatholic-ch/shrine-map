@@ -1068,3 +1068,53 @@ html:not(.ios-device).oai-screen-compact-short .my-faith-body.my-faith-home-list
 html:not(.ios-device).oai-screen-compact-short .my-faith-body.my-faith-home-list-body .my-faith-inline-privacy-note{
   order:4!important;
 }
+
+
+/* V8-1-14-270: 내 정보 백업·복원 헤더를 웹사이트 헤더 기준으로 표준화 */
+.my-faith-info-head{
+  position:relative!important;
+  top:auto!important;
+  z-index:2!important;
+  flex:0 0 auto!important;
+  height:calc(var(--oai-std-header-h,70px) + env(safe-area-inset-top,0px))!important;
+  min-height:calc(var(--oai-std-header-h,70px) + env(safe-area-inset-top,0px))!important;
+  max-height:calc(var(--oai-std-header-h,70px) + env(safe-area-inset-top,0px))!important;
+  padding:var(--oai-std-hdr-pad, calc(10px + env(safe-area-inset-top,0px))) 16px 10px!important;
+  background:#0e1535!important;
+  color:var(--v4-surface-white)!important;
+  border-bottom:2px solid var(--gold,#d4aa6a)!important;
+  box-shadow:0 4px 16px rgba(14,21,53,.22)!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:flex-start!important;
+  gap:14px!important;
+  box-sizing:border-box!important;
+}
+.my-faith-info-head::before{
+  content:""!important;
+  flex:0 0 42px!important;
+  width:42px!important;height:42px!important;min-width:42px!important;
+  border-radius:12px!important;
+  border:1px solid rgba(255,255,255,.2)!important;
+  background:
+    linear-gradient(var(--v4-surface-white),var(--v4-surface-white)) center center / 3px 24px no-repeat,
+    linear-gradient(var(--v4-surface-white),var(--v4-surface-white)) center 42% / 14px 3px no-repeat,
+    rgba(255,255,255,.12)!important;
+  box-sizing:border-box!important;
+}
+.my-faith-info-head h3{
+  flex:1 1 auto!important;min-width:0!important;margin:0!important;
+  color:var(--v4-surface-white)!important;
+  font-size:var(--oai-std-title-fs,20px)!important;
+  line-height:1.24!important;
+  font-weight:800!important;
+  letter-spacing:-.02em!important;
+  white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;
+}
+.my-faith-info-close{
+  width:var(--oai-std-close-sz,40px)!important;height:var(--oai-std-close-sz,40px)!important;min-width:var(--oai-std-close-sz,40px)!important;flex:0 0 var(--oai-std-close-sz,40px)!important;
+  border-radius:999px!important;background:transparent!important;border:1.5px solid currentColor!important;color:rgba(212,170,106,.9)!important;
+  font-size:28px!important;font-weight:900!important;line-height:1!important;box-shadow:none!important;display:flex!important;align-items:center!important;justify-content:center!important;
+}
+html:not(.ios-device).oai-screen-compact-short .my-faith-info-head::before{width:42px!important;height:42px!important;min-width:42px!important;flex-basis:42px!important;}
+html:not(.ios-device).oai-screen-compact-short .my-faith-info-close{width:var(--oai-std-close-sz,34px)!important;height:var(--oai-std-close-sz,34px)!important;min-width:var(--oai-std-close-sz,34px)!important;flex-basis:var(--oai-std-close-sz,34px)!important;}

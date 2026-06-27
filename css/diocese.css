@@ -19,13 +19,13 @@
   --header-h:   70px;
   --tab-h:      55px;
   --tab-btn-h:  40px;
-  --icon-size:  35px;
+  --icon-size:  42px;
   --icon-r:     12px;
-  --icon-fs:    15px;
+  --icon-fs:    0px;
   
   --fs-header:  20px;
   --fs-tab:     15px;
-  --fs-sub:     10px;
+  --fs-sub:     11px;
   --oai-search-input-h:44px;
   --oai-search-input-fs:15px;
   --oai-search-input-color:#111827;
@@ -50,11 +50,11 @@ header{flex-shrink:0;background:var(--d);border-bottom:none;z-index:30;
 
 .tab-bar{flex-shrink:0;display:flex;align-items:center;gap:8px;padding:8px 10px;
   height:var(--tab-h);background:var(--card);
-  border-top:0;border-bottom:1px solid var(--bdr);
+  border-top:1px solid var(--bdr);border-bottom:2px solid var(--bdr);
   overflow-x:hidden;scrollbar-width:none;}
 .tab-bar::-webkit-scrollbar{display:none;}
 .tab{flex:1;height:var(--tab-btn-h);padding:0 8px;border-radius:12px;
-  border:1.5px solid #dde3ee;background:#F8FAFC;
+  border:1.5px solid var(--d);background:var(--card-sub);
   color:#475569;font-size:calc(var(--fs-tab) * var(--dio-effective-font-scale,1));font-weight:800;
   cursor:pointer;font-family:inherit;white-space:nowrap;
   display:flex;align-items:center;justify-content:center;gap:4px;letter-spacing:-.02em;
@@ -325,8 +325,8 @@ html.oai-dio-returning #map-view.on,html.oai-dio-returning #list-view.on,html.oa
 
 /* V8-1-14-253: compact(370px 이하) 전용 - 관구·교구 탭 최소 보정 */
 @media(max-width:370px){
-  :root{--tab-h:48px;--tab-btn-h:35px;}
-  .tab-bar{height:48px!important;padding:6px 8px!important;gap:5px!important;}
-  .tab{height:35px!important;padding:0 8px!important;border-radius:10px!important;}
+  :root{--tab-h:46px;--tab-btn-h:33px;}
+  .tab-bar{height:46px!important;padding:0 8px!important;gap:5px!important;}
+  .tab{height:33px!important;padding:0 8px!important;border-radius:10px!important;}
   .filter-btn,.province-filter-btn{height:31px!important;min-height:31px!important;padding:0 10px!important;}
 }
