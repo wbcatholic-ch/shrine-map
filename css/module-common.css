@@ -279,9 +279,9 @@ html:not(.ios-device).oai-screen-compact-short #prayer-tabs,
 html:not(.ios-device).oai-screen-compact-short #web-view .web-cats,
 html:not(.ios-device).oai-screen-compact-short #trail-view .trail-tabs,
 html:not(.ios-device).oai-screen-compact-short #qna-view .qna-tabs{
-  height:48px!important;
-  min-height:48px!important;
-  max-height:48px!important;
+  height:var(--oai-std-tabbar-h,46px)!important;
+  min-height:var(--oai-std-tabbar-h,46px)!important;
+  max-height:var(--oai-std-tabbar-h,46px)!important;
   padding:0 8px!important;
   gap:5px!important;
 }
@@ -289,11 +289,10 @@ html:not(.ios-device).oai-screen-compact-short #prayer-tabs .pr-tab,
 html:not(.ios-device).oai-screen-compact-short #web-view .web-cat-btn,
 html:not(.ios-device).oai-screen-compact-short #trail-view .trail-tab,
 html:not(.ios-device).oai-screen-compact-short #qna-view .qna-tab{
-  height:35px!important;
-  min-height:35px!important;
+  height:var(--oai-std-tab-h,33px)!important;
+  min-height:var(--oai-std-tab-h,33px)!important;
   padding:0 10px!important;
   border-radius:10px!important;
-  
   line-height:1!important;
   gap:4px!important;
 }

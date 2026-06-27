@@ -23,7 +23,7 @@
   --icon-r:     12px;
   --icon-fs:    15px;
   
-  --fs-header:  22px;
+  --fs-header:  20px;
   --fs-tab:     15px;
   --fs-sub:     10px;
   --oai-search-input-h:44px;
@@ -234,7 +234,7 @@ html.oai-dio-external-return *{transition:none!important;animation:none!importan
 .lv-foot .lv-url{min-width:0;}
 .lv-priest-btn{flex:0 0 auto;min-height:34px;padding:0 13px;border:0;border-radius:10px;background:#0F766E;color:#fff;font-size:12px;font-weight:900;font-family:inherit;letter-spacing:-.04em;white-space:nowrap;box-shadow:0 3px 8px rgba(15,118,110,.16);cursor:pointer;}
 .lv-priest-btn:active{transform:scale(.985);}
-@media(max-width:560px){.lv-priest-btn{min-height:32px;padding:0 10px;font-size:11.5px;}#c-act{gap:7px;}}
+@media(max-width:560px){.lv-priest-btn{min-height:32px;padding:0 10px;}#c-act{gap:7px;}}
 
 #search-view .sh{font-size:calc(11px * var(--dio-effective-font-scale,1))!important;}
 #search-view .se{font-size:calc(13px * var(--dio-effective-font-scale,1))!important;}
@@ -314,12 +314,10 @@ html.ios-device .cb{width:34px!important;height:34px!important;border-radius:10p
 .province-info-source{text-align:right;font-size:calc(12px * var(--dio-effective-font-scale,1));font-weight:800;color:#7A6A54;margin:8px 4px 0;}
 @media(max-width:560px){
   .tab-bar{gap:7px;padding-left:8px!important;padding-right:8px!important;}
-  .tab{padding:0 4px!important;font-size:calc(12.8px * var(--dio-effective-font-scale,1))!important;border-radius:10px!important;letter-spacing:-.06em;}
+  .tab{padding:0 4px!important;border-radius:10px!important;letter-spacing:-.06em;}
   #province-info-view{padding-left:12px;padding-right:12px;}
   .province-info-card{padding:16px 15px;border-radius:17px;}
-  .province-info-card h2{font-size:calc(20px * var(--dio-effective-font-scale,1));}
-  .province-info-card h3{font-size:calc(17px * var(--dio-effective-font-scale,1));}
-  .province-info-card p{font-size:calc(14.5px * var(--dio-effective-font-scale,1));line-height:1.68;}
+  .province-info-card p{line-height:1.68;}
 }
 #map-view.on,#list-view.on,#search-view.on,#province-info-view.on{animation:oaiDioFadeIn .22s ease both;}
 html.oai-dio-returning #map-view.on,html.oai-dio-returning #list-view.on,html.oai-dio-returning #search-view.on,html.oai-dio-returning #province-info-view.on{animation:none!important;}

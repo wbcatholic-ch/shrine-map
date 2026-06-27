@@ -2142,7 +2142,7 @@ html.oai-cover-revealing #cover > * {
   word-break: keep-all;
   color: var(--text-main);
 }
-#cc-5 .cover-name { font-size: 13px; letter-spacing: -.04em; }
+#cc-5 .cover-name { letter-spacing: -.04em; }
 
 #cover-action-row {
   width: 100%;
@@ -3039,7 +3039,7 @@ html.oai-font-global .btn-kakao-route,
 html.oai-font-global .btn-route-reset { font-size: calc(14px * var(--app-inner-font-scale)); }
 html.oai-font-global .pr-icon-dot { width: calc(36px * var(--app-inner-font-scale)); height: calc(36px * var(--app-inner-font-scale)); flex-basis: calc(36px * var(--app-inner-font-scale)); font-size: calc(17px * var(--app-inner-font-scale)); }
 html.oai-font-global .nearby-dist { font-size: calc(13px * var(--app-inner-font-scale)); }
-html.oai-font-global .sheet-title, html.oai-font-global .module-bar-title { font-size: calc(18px * var(--app-inner-font-scale)); }
+html.oai-font-global .sheet-title { font-size: calc(18px * var(--app-inner-font-scale)); }
 html.oai-font-global .module-bar-sub { font-size: 11px; line-height: 1.25; }
 html.oai-font-global .module-bar-ico { font-size: 22px; width: 42px; height: 42px; min-width: 42px; }
 html.oai-font-global .lv-rg, html.oai-font-global .lv-det, html.oai-font-global .lv-op,
@@ -3089,23 +3089,20 @@ html.oai-font-global #region-body .dio-hd { font-size: calc(17px * var(--app-inn
   .mass-quick-actions { gap: 12px; }
   .mass-quick-btn { min-height: 92px; padding: 16px 18px; grid-template-columns: 62px 1fr; }
   .mass-quick-btn span { width: 50px; height: 50px; font-size: calc(30px * var(--app-font-scale)); }
-  .mass-quick-btn strong { font-size: calc(16px * var(--app-font-scale)); }
-  .mass-quick-panel .guide-badge { font-size: calc(18px * var(--app-font-scale)); min-height: 40px; margin-bottom: 16px; }
+  .mass-quick-panel .guide-badge { min-height: 40px; margin-bottom: 16px; }
 }
 @media (max-height: 650px) {
   #cover { --cover-top-safe: calc(env(safe-area-inset-top, 0px) + clamp(58px, calc(var(--cover-vh, 1vh) * 9.4), 74px)); --cover-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + clamp(6px, calc(var(--cover-vh, 1vh) * 1.0), 10px)); --cover-note-reserve: clamp(58px, calc(var(--cover-vh, 1vh) * 6.6), 70px); padding-top: var(--cover-top-safe); padding-bottom: calc(var(--cover-bottom-safe) + var(--cover-note-reserve)); }
   #cover-bottom-note { bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(12px, calc(var(--cover-vh, 1vh) * 2.0), 18px)); }
   #cover .cover-header { padding-bottom: 6px; }
-  #cover .cover-subtitle { font-size: 10px; }
   #cover .cover-grid { row-gap: clamp(2px, calc(var(--cover-vh, 1vh) * 0.5), 4px); }
   #cover .cover-card { padding: clamp(4px, calc(var(--cover-vh, 1vh) * 0.8), 8px) 6px; }
   #cover .cover-emoji { font-size: 22px; }
-  #cover .cover-name { font-size: 12px; }
-  #cover #qna-cover-btn { min-height: 34px; font-size: calc(10.5px * var(--app-font-scale)); }
-  #cover #cover-update-btn { min-height: 32px; height: 32px; font-size: calc(10.2px * var(--app-font-scale)); padding: 0 10px; }
+  #cover #qna-cover-btn { min-height: 34px; }
+  #cover #cover-update-btn { min-height: 32px; height: 32px; padding: 0 10px; }
   #cover #cover-update-hint { font-size: 8.5px; }
-  #cover #cover-guide-btn { height: 34px; min-height: 34px; font-size: calc(10.5px * var(--app-font-scale)); padding: 0 10px; }
-  #cover #cover-menu-btn.cover-menu-btn { height: 34px; min-height: 34px; font-size: calc(10.5px * var(--app-font-scale)); padding: 0 11px; }
+  #cover #cover-guide-btn { height: 34px; min-height: 34px; padding: 0 10px; }
+  #cover #cover-menu-btn.cover-menu-btn { height: 34px; min-height: 34px; padding: 0 11px; }
   .guide-panel { max-height: 90dvh; padding: 16px 14px 14px; }
   html.ios-kakao-inapp #cover .ios-safari-banner { top: 49%; transform: translateY(-36%); padding: 20px 16px 16px; gap: 10px; border-radius: 24px; }
 }
@@ -8196,7 +8193,7 @@ html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-stats{
   margin-top:9px!important;
 }
 
-/* V8-1-14-261_route_sheet_overlay_restore: 길찾기 시트는 compact의 전체 .sheet top 보정을 받지 않고 지도 위 하단시트로만 표시한다. */
+/* V8-1-14-262_font_space_header_tabs: 길찾기 시트는 compact의 전체 .sheet top 보정을 받지 않고 지도 위 하단시트로만 표시한다. */
 #app #sheet-route[hidden]{
   display:none!important;
 }

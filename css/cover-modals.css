@@ -163,7 +163,7 @@
 #cover #mass-quick-modal .mass-quick-btn strong {
   min-width: 0 !important;
   color: var(--oai-modal-standard-ink) !important;
-  font-size: calc(15.5px * var(--app-font-scale, 1)) !important;
+  font-size: calc(16px * var(--app-font-scale, 1)) !important;
   line-height: 1.18 !important;
   font-weight: 900 !important;
   letter-spacing: -.03em !important;
