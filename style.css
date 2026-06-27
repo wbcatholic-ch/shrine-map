@@ -8040,7 +8040,7 @@ html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-stats{
 }
 
 
-/* V8-1-14-264: compact 글자 크기 유지, 성지/순례 공간 보정 최종 위치 통합 */
+/* V8-1-14-265: compact 글자 크기 유지, 성지/순례 공간 보정 최종 위치 통합 */
 html:not(.ios-device).oai-screen-compact-short #map-wrap #shrine-visit-map-filter,
 html:not(.ios-device).oai-screen-compact-short #map-wrap .shrine-visit-map-filter{
   min-height:46px!important;
@@ -8103,7 +8103,20 @@ html:not(.ios-device).oai-screen-compact-short.retreat-mode #app #loc-btn{
   bottom:calc(var(--oai-android-bottom-gap, 10px) + 76px)!important;
 }
 
-/* V8-1-14-264: 길찾기 시트는 compact의 전체 .sheet top 보정을 받지 않고 지도 위 하단시트로만 표시한다. */
+
+/* V8-1-14-265: compact 매일미사 하단 빠른사용 버튼은 글자 크기를 유지하고 높이/위치만 조정 */
+html:not(.ios-device).oai-screen-compact-short #missa-view .faith-bottom-nav{
+  gap:6px!important;
+  padding:5px 10px calc(2px + var(--oai-android-bottom-gap, env(safe-area-inset-bottom, 0px)))!important;
+}
+html:not(.ios-device).oai-screen-compact-short #missa-view .faith-bottom-btn{
+  height:46px!important;
+  min-height:46px!important;
+  border-radius:14px!important;
+  gap:4px!important;
+}
+
+/* V8-1-14-265: 길찾기 시트는 compact의 전체 .sheet top 보정을 받지 않고 지도 위 하단시트로만 표시한다. */
 #app #sheet-route[hidden]{
   display:none!important;
 }
