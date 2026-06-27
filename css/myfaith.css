@@ -1044,7 +1044,7 @@ html:not(.ios-device).oai-screen-compact-short .my-faith-code-btn {
 }
 
 
-/* V8-1-14-268: 사진 기준 compact 나의 신앙생활에서 내 정보 백업·복원 버튼을 확인 버튼 위에 확실히 보이게 정리 */
+/* V8-1-14-269: 사진 기준 compact 나의 신앙생활에서 내 정보 백업·복원 버튼을 확인 버튼 위에 확실히 보이게 정리 */
 html:not(.ios-device).oai-screen-compact-short .my-faith-body.my-faith-home-list-body .my-faith-data-section{
   display:block!important;
   flex:0 0 auto!important;

@@ -1484,7 +1484,7 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active {
 .rs-route-stack.has-waypoint2 .rs-end-box { grid-row: 7; }
 .rs-route-stack.has-waypoint3 .rs-end-box { grid-row: 9; }
 .rs-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
-.rs-lbl { flex: 1; font-size: 14px; color: #555; font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rs-lbl { flex: 1; font-size: calc(16px * var(--app-inner-font-scale,1)); color: #555; font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rs-lbl.filled { color: var(--ink); font-weight: 700; }
 .rs-lbl.empty  { color: #aaa; }
 .rs-myloc { background: none; border: 1px solid var(--border); border-radius: 14px; padding: 6px 11px; font-size: 12px; color: var(--pilgrim); cursor: pointer; font-family: inherit; white-space: nowrap; }
@@ -3052,10 +3052,10 @@ html.oai-font-global #cover .cover-emoji { font-size: var(--cover-emoji-size, 40
 html.oai-font-global #prayer-bar-ttl, html.oai-font-global .module-bar-title { font-size: 20px; line-height: 1.24; }
 
 html.oai-font-global #region-body .nearby-item,
-html.oai-font-global #region-body .region-place-cand { font-size: calc(17px * var(--app-inner-font-scale)); }
+html.oai-font-global #region-body .region-place-cand { font-size: calc(16px * var(--app-inner-font-scale)); }
 html.oai-font-global #region-body .region-item .nearby-name,
 html.oai-font-global #region-body .nearby-item .nearby-name,
-html.oai-font-global #region-body .li-name { font-size: calc(17px * var(--app-inner-font-scale)); line-height: 1.34; font-weight: 700; }
+html.oai-font-global #region-body .li-name { font-size: calc(16px * var(--app-inner-font-scale)); line-height: 1.34; font-weight: 700; }
 html.oai-font-global #region-body .region-item .nearby-addr,
 html.oai-font-global #region-body .nearby-item .nearby-addr,
 html.oai-font-global #region-body .li-sub { font-size: calc(13px * var(--app-inner-font-scale)); line-height: 1.38; }
@@ -5653,7 +5653,7 @@ html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-badge{
   min-height:100px!important;
   padding:10px 11px 9px!important;
 }
-html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-badge strong{font-size:14px!important;line-height:1.18!important;}
+html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-badge strong{line-height:1.18!important;}
 html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-badge .shrine-visit-card-count{font-size:11.5px!important;}
 html:not(.ios-device).oai-screen-fold-wide .shrine-visit-detail-head{height:52px!important;min-height:52px!important;}
 html:not(.ios-device).oai-screen-fold-wide .shrine-visit-detail-body{padding:11px 12px max(48px,env(safe-area-inset-bottom))!important;}
@@ -5684,7 +5684,6 @@ html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-badge .shrine-visi
   font-size:10.5px!important;
 }
 html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-badge strong{
-  font-size:13px!important;
   line-height:1.16!important;
   -webkit-line-clamp:2!important;
 }
@@ -8040,7 +8039,7 @@ html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-stats{
 }
 
 
-/* V8-1-14-268: compact 글자 크기 유지, 성지/순례 공간 보정 최종 위치 통합 */
+/* V8-1-14-269: compact 글자 크기 유지, 성지/순례 공간 보정 최종 위치 통합 */
 html:not(.ios-device).oai-screen-compact-short #map-wrap #shrine-visit-map-filter,
 html:not(.ios-device).oai-screen-compact-short #map-wrap .shrine-visit-map-filter{
   min-height:46px!important;
@@ -8116,7 +8115,7 @@ html:not(.ios-device).oai-screen-compact-short.retreat-mode #app #loc-btn{
 }
 
 
-/* V8-1-14-268: compact 매일미사 하단 빠른사용 버튼은 글자 크기를 유지하고 높이/위치만 조정 */
+/* V8-1-14-269: compact 매일미사 하단 빠른사용 버튼은 글자 크기를 유지하고 높이/위치만 조정 */
 html:not(.ios-device).oai-screen-compact-short #missa-view .faith-bottom-nav{
   gap:6px!important;
   padding:5px 10px calc(2px + var(--oai-android-bottom-gap, env(safe-area-inset-bottom, 0px)))!important;
@@ -8128,7 +8127,7 @@ html:not(.ios-device).oai-screen-compact-short #missa-view .faith-bottom-btn{
   gap:4px!important;
 }
 
-/* V8-1-14-268: 길찾기 시트는 compact의 전체 .sheet top 보정을 받지 않고 지도 위 하단시트로만 표시한다. */
+/* V8-1-14-269: 길찾기 시트는 compact의 전체 .sheet top 보정을 받지 않고 지도 위 하단시트로만 표시한다. */
 #app #sheet-route[hidden]{
   display:none!important;
 }
