@@ -6270,13 +6270,38 @@ html.oai-font-global #map-wrap #shrine-visit-map-filter > button[data-shrine-vis
   font-weight:900!important;
   line-height:1.1!important;
 }
-@media (max-width:370px){
-  #map-wrap #shrine-visit-map-filter,
-  html.oai-font-global #map-wrap #shrine-visit-map-filter{min-height:50px!important;padding:7px!important;gap:6px!important;}
-  #map-wrap #shrine-visit-map-filter > button[data-shrine-visit-filter],
-  html.oai-font-global #map-wrap #shrine-visit-map-filter > button[data-shrine-visit-filter]{
-    min-height:40px!important;height:40px!important;padding:0 12px!important;font-size:15px!important;
-  }
+html:not(.ios-device).oai-screen-compact-short #map-wrap #shrine-visit-map-filter,
+html:not(.ios-device).oai-screen-compact-short.oai-font-global #map-wrap #shrine-visit-map-filter{
+  min-height:46px!important;
+  height:46px!important;
+  padding:6px 42px 6px 5px!important;
+  gap:4px!important;
+  box-sizing:border-box!important;
+  overflow:hidden!important;
+}
+html:not(.ios-device).oai-screen-compact-short #map-wrap #shrine-visit-map-filter > button[data-shrine-visit-filter],
+html:not(.ios-device).oai-screen-compact-short.oai-font-global #map-wrap #shrine-visit-map-filter > button[data-shrine-visit-filter]{
+  min-height:32px!important;
+  height:32px!important;
+  min-width:64px!important;
+  padding:0 7px!important;
+  font-size:12.5px!important;
+  line-height:1.08!important;
+}
+html:not(.ios-device).oai-screen-compact-short #map-wrap #shrine-visit-map-filter > button[data-shrine-visit-filter="visited"],
+html:not(.ios-device).oai-screen-compact-short #map-wrap #shrine-visit-map-filter > button[data-shrine-visit-filter="unvisited"],
+html:not(.ios-device).oai-screen-compact-short.oai-font-global #map-wrap #shrine-visit-map-filter > button[data-shrine-visit-filter="visited"],
+html:not(.ios-device).oai-screen-compact-short.oai-font-global #map-wrap #shrine-visit-map-filter > button[data-shrine-visit-filter="unvisited"]{
+  min-width:96px!important;
+}
+html:not(.ios-device).oai-screen-compact-short #map-wrap .map-category-close{
+  top:7px!important;
+  right:7px!important;
+  width:32px!important;
+  height:32px!important;
+  min-width:32px!important;
+  min-height:32px!important;
+  font-size:21px!important;
 }
 
 
