@@ -5616,46 +5616,6 @@ html:not(.ios-device).oai-screen-fold-wide #app .region-item{
 }
 
 /* V6-123: Android/비 iOS 화면 분류 3단계 적용 - 순례 스탬프북 세로 비율 조정 */
-html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-head.module-bar,
-html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-head{
-  min-height:calc(58px + env(safe-area-inset-top,0px))!important;
-  height:calc(58px + env(safe-area-inset-top,0px))!important;
-  max-height:calc(58px + env(safe-area-inset-top,0px))!important;
-  padding-top:calc(8px + env(safe-area-inset-top,0px))!important;
-  padding-bottom:8px!important;
-}
-html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-head .module-bar-ico{width:38px!important;height:38px!important;min-width:38px!important;}
-html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-head .module-bar-title{font-size:18px!important;}
-html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-tabs{
-  height:54px!important;
-  min-height:54px!important;
-  max-height:54px!important;
-  padding:7px 6px!important;
-  gap:5px!important;
-}
-html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-tabs button{
-  height:37px!important;
-  min-height:37px!important;
-  font-size:12px!important;
-  padding:0 3px!important;
-}
-html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-diocese{
-  min-height:42px!important;
-  height:42px!important;
-  max-height:42px!important;
-  padding:5px 8px!important;
-}
-html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-diocese .filter-btn{
-  height:30px!important;
-  min-height:30px!important;
-  font-size:12px!important;
-  padding:0 10px!important;
-}
-html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-stats{
-  min-height:40px!important;
-  height:40px!important;
-  padding:5px 8px!important;
-}
 html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-body{
   padding:8px 8px max(46px,calc(env(safe-area-inset-bottom,0px) + 38px))!important;
 }
@@ -6347,35 +6307,6 @@ html:not(.ios-device) #shrine-visit-cards-modal .shrine-visit-cards-panel,
 html:not(.ios-device) .shrine-visit-cards-modal .shrine-visit-cards-panel{
   padding-top:0!important;
   padding-bottom:var(--oai-android-bottom-gap)!important;
-}
-html:not(.ios-device) #shrine-visit-cards-modal .shrine-visit-cards-head.module-bar,
-html:not(.ios-device) #shrine-visit-cards-modal .shrine-visit-cards-head,
-html:not(.ios-device) .shrine-visit-cards-modal .shrine-visit-cards-head.module-bar,
-html:not(.ios-device) .shrine-visit-cards-modal .shrine-visit-cards-head,
-html:not(.ios-device).oai-screen-compact-short #shrine-visit-cards-modal .shrine-visit-cards-head.module-bar,
-html:not(.ios-device).oai-screen-compact-short #shrine-visit-cards-modal .shrine-visit-cards-head,
-html:not(.ios-device).oai-screen-tall-phone #shrine-visit-cards-modal .shrine-visit-cards-head.module-bar,
-html:not(.ios-device).oai-screen-tall-phone #shrine-visit-cards-modal .shrine-visit-cards-head,
-html:not(.ios-device).oai-screen-fold-wide #shrine-visit-cards-modal .shrine-visit-cards-head.module-bar,
-html:not(.ios-device).oai-screen-fold-wide #shrine-visit-cards-modal .shrine-visit-cards-head{
-  height:var(--oai-std-header-h)!important;
-  min-height:var(--oai-std-header-h)!important;
-  max-height:var(--oai-std-header-h)!important;
-  padding:10px 16px 10px!important;
-  margin:0!important;
-  margin-left:0!important;
-  margin-right:0!important;
-  width:100%!important;
-  box-sizing:border-box!important;
-  flex-shrink:0!important;
-  align-items:center!important;
-  background:#0e1535!important;
-  border-bottom:2px solid var(--gold)!important;
-  border-radius:0!important;
-}
-html:not(.ios-device).oai-screen-compact-short #shrine-visit-cards-modal .shrine-visit-cards-head.module-bar,
-html:not(.ios-device).oai-screen-compact-short #shrine-visit-cards-modal .shrine-visit-cards-head{
-  padding:8px 14px 8px!important;
 }
 html:not(.ios-device) #cover{
   --cover-bottom-safe:var(--oai-android-bottom-gap)!important;
@@ -8016,7 +7947,7 @@ html.oai-external-return-freeze #oai-external-entry-guard.hide .oai-external-ent
 }
 
 
-/* V8-1-14-253: compact(370px 이하) 전용 - 지도 탭/순례 스탬프북 탭/X 최소 보정 */
+/* V8-1-14-253: compact(370px 이하) 전용 - 지도 탭/공통 X 최소 보정 */
 html:not(.ios-device).oai-screen-compact-short #tabbar{
   height:calc(66px + env(safe-area-inset-top,0px))!important;
   min-height:calc(66px + env(safe-area-inset-top,0px))!important;
@@ -8054,41 +7985,6 @@ html:not(.ios-device).oai-screen-compact-short .rs-x{
   flex-basis:34px!important;
   font-size:22px!important;
   line-height:1!important;
-}
-html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-tabs{
-  height:auto!important;
-  min-height:0!important;
-  gap:7px!important;
-  margin:9px 0 7px!important;
-}
-html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-tabs button{
-  height:34px!important;
-  min-height:34px!important;
-  border-radius:12px!important;
-  padding:0 8px!important;
-  font-size:12.5px!important;
-  letter-spacing:-.045em!important;
-}
-html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-diocese .filter-btn{
-  height:30px!important;
-  min-height:30px!important;
-  padding:0 10px!important;
-  font-size:11.5px!important;
-}
-html:not(.ios-device).oai-screen-compact-short #shrine-visit-floating-list-btn,
-html:not(.ios-device).oai-screen-compact-short .shrine-visit-floating-list-btn{
-  font-size:13px!important;
-  min-height:36px!important;
-  padding:0 14px!important;
-}
-html:not(.ios-device).oai-screen-compact-short #shrine-visit-cards-modal .module-close,
-html:not(.ios-device).oai-screen-compact-short #shrine-visit-detail-view .module-close,
-html:not(.ios-device).oai-screen-compact-short #shrine-visit-cards-close,
-html:not(.ios-device).oai-screen-compact-short #shrine-visit-detail-close{
-  width:34px!important;
-  height:34px!important;
-  min-width:34px!important;
-  font-size:22px!important;
 }
 
 /* V8-1-14-255_from235_compact_tab_gap_stamp_line: compact 상부탭 여백/스탬프북 분리선 정리 */
