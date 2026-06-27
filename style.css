@@ -8162,3 +8162,58 @@ html:not(.ios-device).oai-screen-compact-short #shrine-visit-detail-close{
   min-width:34px!important;
   font-size:22px!important;
 }
+
+/* V8-1-14-255_from235_compact_tab_gap_stamp_line: compact 상부탭 여백/스탬프북 분리선 정리 */
+html:not(.ios-device).oai-screen-compact-short{
+  --tab-h:62px;
+  --map-tab-btn-h:52px;
+}
+html:not(.ios-device).oai-screen-compact-short #tabbar{
+  height:calc(62px + env(safe-area-inset-top,0px))!important;
+  min-height:calc(62px + env(safe-area-inset-top,0px))!important;
+  padding:calc(env(safe-area-inset-top,0px) + 3px) 6px 4px!important;
+  gap:5px!important;
+  align-items:stretch!important;
+}
+html:not(.ios-device).oai-screen-compact-short #tabbar .tab-btn{
+  height:52px!important;
+  min-height:52px!important;
+  padding:3px 2px 3px!important;
+}
+html:not(.ios-device).oai-screen-compact-short #map-wrap,
+html:not(.ios-device).oai-screen-compact-short .sheet{
+  top:calc(62px + env(safe-area-inset-top,0px))!important;
+}
+html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-head,
+html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-head.module-bar,
+html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-tabs,
+html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-diocese{
+  border-bottom:1px solid rgba(212,170,106,.28)!important;
+  box-shadow:none!important;
+}
+html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-head.module-bar::after,
+html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-tabs::after,
+html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-diocese::after{
+  display:none!important;
+  content:none!important;
+}
+html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-tabs{
+  min-height:46px!important;
+  height:46px!important;
+  margin:0!important;
+  padding:5px 8px!important;
+  gap:6px!important;
+  align-items:center!important;
+}
+html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-tabs button{
+  height:35px!important;
+  min-height:35px!important;
+}
+html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-diocese{
+  padding-top:6px!important;
+  padding-bottom:6px!important;
+  min-height:44px!important;
+}
+html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-stats{
+  margin-top:9px!important;
+}

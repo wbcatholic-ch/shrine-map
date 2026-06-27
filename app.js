@@ -477,11 +477,10 @@ function oaiClearExternalNavigationState(opts){
   if(window.__OAI_IDLE_RESTART_GUARD__) return;
   window.__OAI_IDLE_RESTART_GUARD__ = true;
 
-  /* V8-1-14-252_from235_location_fresh_nearby:
-     백그라운드 복귀 흔들림을 줄이기 위해 V215~V224의 freeze/watchdog/resize-lock 계열을 제거한다.
-     10분 미만 복귀는 완전 무동작, 10~30분은 단순 십자가 덮기 후 원래 화면, 30분 이상은 단순 십자가 덮기 후 커버로 이동한다. */
+  /* V8-1-14-256_from235_bg_return_fold_guard:
+     백그라운드 복귀는 10분 이상이어도 커버로 강제 이동하지 않는다.
+     십자가/사진 덮개는 복귀 안정막으로만 사용하고, 최종 화면은 사용자가 나가기 전 화면을 유지한다. */
   var MEDIUM_BG_RETURN_MS = 10 * 60 * 1000;
-  var COVER_BG_RETURN_MS = 30 * 60 * 1000;
   var BG_KEY = 'oai_home_backgrounded_at';
   var OLD_HIDDEN_AT_KEY = 'oai_pwa_backgrounded_at_v356';
   var OLD_RESTART_LOCK_KEY = 'oai_pwa_idle_restart_lock_v356';
@@ -576,7 +575,7 @@ function oaiClearExternalNavigationState(opts){
         st.textContent = '\n'
           + '#oai-background-return-photo-veil{position:fixed;inset:0;z-index:2147482498;background:#fbf8f1;opacity:0;transition:opacity .24s ease;pointer-events:none;display:block;visibility:visible;}\n'
           + '#oai-background-return-photo-veil.oai-show{opacity:1;}\n'
-          + '#oai-background-return-photo-veil .oai-bg-photo{position:absolute;left:50%;top:50%;width:min(84vw,540px);height:min(84vh,740px);transform:translate(-50%,-50%) scale(.84);background-image:linear-gradient(to right,#fbf8f1 0%,rgba(251,248,241,.96) 5%,rgba(251,248,241,.60) 13%,rgba(251,248,241,.16) 24%,rgba(251,248,241,0) 36%,rgba(251,248,241,0) 64%,rgba(251,248,241,.16) 76%,rgba(251,248,241,.60) 87%,rgba(251,248,241,.96) 95%,#fbf8f1 100%),linear-gradient(to bottom,#fbf8f1 0%,rgba(251,248,241,.90) 6%,rgba(251,248,241,.36) 17%,rgba(251,248,241,0) 30%,rgba(251,248,241,0) 70%,rgba(251,248,241,.36) 83%,rgba(251,248,241,.90) 94%,#fbf8f1 100%),radial-gradient(ellipse 96% 88% at 50% 48%,rgba(251,248,241,0) 50%,rgba(251,248,241,.08) 62%,rgba(251,248,241,.34) 76%,rgba(251,248,241,.76) 90%,rgba(251,248,241,1) 100%),url("intro-cross-jesus.jpg?v=V8-1-14-252_from235_location_fresh_nearby");background-position:center center,center center,center center,center center;background-size:100% 100%,100% 100%,100% 100%,auto 106%;background-repeat:no-repeat,no-repeat,no-repeat,no-repeat;border-radius:38px;background-color:#fbf8f1;box-shadow:0 0 0 999px #fbf8f1,0 8px 18px rgba(80,54,18,.05),inset 0 0 72px rgba(251,248,241,.28),inset 0 0 150px rgba(251,248,241,.18);backface-visibility:hidden;animation:oaiIntroSmoothPhotoDesktopV85 1.85s cubic-bezier(.22,.61,.36,1) both;}\n'
+          + '#oai-background-return-photo-veil .oai-bg-photo{position:absolute;left:50%;top:50%;width:min(84vw,540px);height:min(84vh,740px);transform:translate(-50%,-50%) scale(.84);background-image:linear-gradient(to right,#fbf8f1 0%,rgba(251,248,241,.96) 5%,rgba(251,248,241,.60) 13%,rgba(251,248,241,.16) 24%,rgba(251,248,241,0) 36%,rgba(251,248,241,0) 64%,rgba(251,248,241,.16) 76%,rgba(251,248,241,.60) 87%,rgba(251,248,241,.96) 95%,#fbf8f1 100%),linear-gradient(to bottom,#fbf8f1 0%,rgba(251,248,241,.90) 6%,rgba(251,248,241,.36) 17%,rgba(251,248,241,0) 30%,rgba(251,248,241,0) 70%,rgba(251,248,241,.36) 83%,rgba(251,248,241,.90) 94%,#fbf8f1 100%),radial-gradient(ellipse 96% 88% at 50% 48%,rgba(251,248,241,0) 50%,rgba(251,248,241,.08) 62%,rgba(251,248,241,.34) 76%,rgba(251,248,241,.76) 90%,rgba(251,248,241,1) 100%),url("intro-cross-jesus.jpg?v=V8-1-14-256_from235_bg_return_fold_guard");background-position:center center,center center,center center,center center;background-size:100% 100%,100% 100%,100% 100%,auto 106%;background-repeat:no-repeat,no-repeat,no-repeat,no-repeat;border-radius:38px;background-color:#fbf8f1;box-shadow:0 0 0 999px #fbf8f1,0 8px 18px rgba(80,54,18,.05),inset 0 0 72px rgba(251,248,241,.28),inset 0 0 150px rgba(251,248,241,.18);backface-visibility:hidden;animation:oaiIntroSmoothPhotoDesktopV85 1.85s cubic-bezier(.22,.61,.36,1) both;}\n'
           + '@media (max-width:540px) and (max-aspect-ratio:3/4){#oai-background-return-photo-veil .oai-bg-photo{left:0;top:0;width:100vw;height:100vh;transform:none;border-radius:0;background-size:100% 100%,100% 100%,100% 100%,auto 108%;box-shadow:0 0 0 999px #fbf8f1;animation:oaiIntroSmoothPhotoMobileV85 1.85s cubic-bezier(.22,.61,.36,1) both;}}\n';
         (document.head || document.documentElement).appendChild(st);
       }
@@ -634,8 +633,7 @@ function oaiClearExternalNavigationState(opts){
         clearBgStamp();
         return;
       }
-      if(elapsed >= COVER_BG_RETURN_MS) showSimpleBackgroundIntro(true);
-      else showSimpleBackgroundIntro(false);
+      showSimpleBackgroundIntro(false);
     }catch(e){ console.warn('[가톨릭길동무]', e); clearBgStamp(); }
   }
 
@@ -664,6 +662,72 @@ function oaiClearExternalNavigationState(opts){
   window.addEventListener('focus', function(){ scheduleBackgroundReturn('focus'); }, {passive:true});
 })();
 
+/* V8-1-14-256_from235_bg_return_fold_guard:
+   Fold 작은화면↔큰화면 전환을 백그라운드/첫 진입으로 오인하지 않도록
+   큰 폭 변화 직후의 reload/pageshow에서는 인트로를 억제한다.
+   화면 복원은 안전 범위에서 지도 카테고리만 저장하고, 그 외 화면은 인트로만 막는다. */
+(function(){
+  'use strict';
+  if(window.__OAI_FOLD_VIEWPORT_GUARD__) return;
+  window.__OAI_FOLD_VIEWPORT_GUARD__ = true;
+  var KEY_UNTIL = 'oai_fold_transition_no_intro_until';
+  var KEY_W = 'oai_fold_transition_last_width';
+  var KEY_STATE = 'oai_fold_transition_basic_state';
+  function now(){ return Date.now ? Date.now() : new Date().getTime(); }
+  function width(){ try{ return Math.round(window.innerWidth || document.documentElement.clientWidth || 0); }catch(_e){ return 0; } }
+  function screenClass(w){ return w >= 600 ? 'wide' : (w <= 370 ? 'compact' : 'phone'); }
+  function saveBasicState(reason){
+    try{
+      var state = { t: now(), reason: String(reason||''), screen: (typeof _screen !== 'undefined' ? _screen : ''), mode: (typeof _mode !== 'undefined' ? _mode : ''), tab: (typeof _activeTab !== 'undefined' ? _activeTab : '') };
+      sessionStorage.setItem(KEY_STATE, JSON.stringify(state));
+    }catch(_e){}
+  }
+  function arm(reason){
+    try{
+      sessionStorage.setItem(KEY_UNTIL, String(now() + 15000));
+      sessionStorage.setItem(KEY_W, String(width()));
+      saveBasicState(reason);
+    }catch(_e){}
+  }
+  var lastW = width();
+  try{ sessionStorage.setItem(KEY_W, String(lastW)); }catch(_e){}
+  function onViewportChange(reason){
+    var w = width();
+    if(!w) return;
+    var diff = Math.abs(w - (lastW || w));
+    var classChanged = screenClass(w) !== screenClass(lastW || w);
+    if(diff >= 120 || classChanged) arm(reason || 'viewport-change');
+    lastW = w;
+    try{ sessionStorage.setItem(KEY_W, String(w)); }catch(_e){}
+  }
+  window.addEventListener('resize', function(){ onViewportChange('resize'); }, {passive:true});
+  window.addEventListener('orientationchange', function(){ arm('orientationchange'); setTimeout(function(){ onViewportChange('orientation-late'); }, 180); }, {passive:true});
+  window.addEventListener('pagehide', function(){ saveBasicState('pagehide'); }, {passive:true});
+  try{ if(window.visualViewport) window.visualViewport.addEventListener('resize', function(){ onViewportChange('visualViewport-resize'); }, {passive:true}); }catch(_e){}
+  document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'hidden') saveBasicState('hidden'); }, {passive:true});
+
+  function maybeRestoreAfterFoldReload(){
+    try{
+      var until = parseInt(sessionStorage.getItem(KEY_UNTIL) || '0', 10) || 0;
+      if(!until || now() > until) return;
+      var raw = sessionStorage.getItem(KEY_STATE) || '';
+      if(!raw) return;
+      var st = JSON.parse(raw);
+      if(!st || (now() - Number(st.t || 0)) > 30000) return;
+      if(st.screen === 'map' && /^(shrine|parish|retreat)$/.test(String(st.mode || '')) && typeof startApp === 'function'){
+        setTimeout(function(){
+          try{
+            if(document.documentElement.classList.contains('app-active')) return;
+            startApp(st.mode);
+            if(st.tab && typeof openTab === 'function') setTimeout(function(){ try{ openTab(st.tab); }catch(_e){} }, 260);
+          }catch(_e){}
+        }, 360);
+      }
+    }catch(_e){}
+  }
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', maybeRestoreAfterFoldReload, {once:true});
+  else maybeRestoreAfterFoldReload();
+})();
 
 function oaiNormalizeExternalSiteUrl(url){
   try{
