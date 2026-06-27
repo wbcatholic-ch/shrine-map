@@ -1891,7 +1891,7 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, var(--v4-retreat
   color: var(--v4-surface-white);
   padding: 9px 13px;
   font-family: inherit;
-  font-size: 12.5px;
+  font-size: calc(16px * var(--app-font-scale, 1));
   font-weight: 800;
   box-shadow: 0 10px 24px rgba(31,42,68,.22);
   display: flex;
@@ -2279,9 +2279,9 @@ html.app-active #cover-diocese-box { display: none; }
   display: flex;
   align-items: center;
   justify-content: center;
-  min-height: 36px;
-  padding: 0 13px;
-  font-size: calc(11.5px * var(--app-font-scale));
+  min-height: 40px;
+  padding: 0 14px;
+  font-size: calc(16px * var(--app-font-scale));
 }
 
 #cover-bottom-note {
@@ -2378,16 +2378,16 @@ html.app-active #cover-guide-btn { display: none; }
   left: 12px;
   top: calc(env(safe-area-inset-top, 0px) + 12px);
   z-index: 82;
-  height: 36px;
-  min-height: 36px;
-  max-width: min(142px, calc(50vw - 18px));
-  padding: 0 13px;
+  height: 40px;
+  min-height: 40px;
+  max-width: min(150px, calc(54vw - 18px));
+  padding: 0 14px;
   border: 1.5px solid rgba(31,42,68,.16);
   border-radius: 999px;
   background: #ffffff;
   color: var(--v4-header-navy);
   font-family: inherit;
-  font-size: calc(12px * var(--app-font-scale));
+  font-size: calc(16px * var(--app-font-scale));
   font-weight: 900;
   line-height: 1;
   box-shadow: 0 6px 14px rgba(31,42,68,.10);
@@ -3098,11 +3098,11 @@ html.oai-font-global #region-body .dio-hd { font-size: calc(17px * var(--app-inn
   #cover .cover-grid { row-gap: clamp(2px, calc(var(--cover-vh, 1vh) * 0.5), 4px); }
   #cover .cover-card { padding: clamp(4px, calc(var(--cover-vh, 1vh) * 0.8), 8px) 6px; }
   #cover .cover-emoji { font-size: 22px; }
-  #cover #qna-cover-btn { min-height: 34px; }
+  #cover #qna-cover-btn { min-height: 36px; }
   #cover #cover-update-btn { min-height: 32px; height: 32px; padding: 0 10px; }
   #cover #cover-update-hint { font-size: 8.5px; }
   #cover #cover-guide-btn { height: 34px; min-height: 34px; padding: 0 10px; }
-  #cover #cover-menu-btn.cover-menu-btn { height: 34px; min-height: 34px; padding: 0 11px; }
+  #cover #cover-menu-btn.cover-menu-btn { height: 36px; min-height: 36px; padding: 0 12px; }
   .guide-panel { max-height: 90dvh; padding: 16px 14px 14px; }
   html.ios-kakao-inapp #cover .ios-safari-banner { top: 49%; transform: translateY(-36%); padding: 20px 16px 16px; gap: 10px; border-radius: 24px; }
 }
@@ -8040,7 +8040,7 @@ html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-stats{
 }
 
 
-/* V8-1-14-267: compact 글자 크기 유지, 성지/순례 공간 보정 최종 위치 통합 */
+/* V8-1-14-268: compact 글자 크기 유지, 성지/순례 공간 보정 최종 위치 통합 */
 html:not(.ios-device).oai-screen-compact-short #map-wrap #shrine-visit-map-filter,
 html:not(.ios-device).oai-screen-compact-short #map-wrap .shrine-visit-map-filter{
   min-height:46px!important;
@@ -8116,7 +8116,7 @@ html:not(.ios-device).oai-screen-compact-short.retreat-mode #app #loc-btn{
 }
 
 
-/* V8-1-14-267: compact 매일미사 하단 빠른사용 버튼은 글자 크기를 유지하고 높이/위치만 조정 */
+/* V8-1-14-268: compact 매일미사 하단 빠른사용 버튼은 글자 크기를 유지하고 높이/위치만 조정 */
 html:not(.ios-device).oai-screen-compact-short #missa-view .faith-bottom-nav{
   gap:6px!important;
   padding:5px 10px calc(2px + var(--oai-android-bottom-gap, env(safe-area-inset-bottom, 0px)))!important;
@@ -8128,7 +8128,7 @@ html:not(.ios-device).oai-screen-compact-short #missa-view .faith-bottom-btn{
   gap:4px!important;
 }
 
-/* V8-1-14-267: 길찾기 시트는 compact의 전체 .sheet top 보정을 받지 않고 지도 위 하단시트로만 표시한다. */
+/* V8-1-14-268: 길찾기 시트는 compact의 전체 .sheet top 보정을 받지 않고 지도 위 하단시트로만 표시한다. */
 #app #sheet-route[hidden]{
   display:none!important;
 }
