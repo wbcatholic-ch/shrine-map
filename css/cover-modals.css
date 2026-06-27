@@ -366,7 +366,7 @@
   color:#172033 !important;
 }
 
-/* V8-1-14-250_compact_tabs_close_unify: compact에서 메뉴/미사 빠른사용 버튼이 뒤쪽 고정값에 덮이지 않게 최종 위치에서 축소 */
+/* V8-1-14-251_compact_tabs_close_final_cascade: compact에서 메뉴/미사 빠른사용 버튼이 뒤쪽 고정값에 덮이지 않게 최종 위치에서 축소 */
 html:not(.ios-device).oai-screen-compact-short #cover .cover-menu-panel,
 html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-panel{
   width:min(332px,calc(100vw - 26px))!important;
@@ -439,7 +439,7 @@ html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .guide-x
 }
 
 
-/* V8-1-14-250_compact_tabs_close_unify: compact 안내/미사 빠른사용 X 최종 보정 */
+/* V8-1-14-251_compact_tabs_close_final_cascade: compact 안내/미사 빠른사용 X 최종 보정 */
 html:not(.ios-device).oai-screen-compact-short #cover .guide-x,
 html:not(.ios-device).oai-screen-compact-short #cover .cover-menu-close,
 html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-close{

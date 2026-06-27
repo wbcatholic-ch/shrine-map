@@ -274,7 +274,7 @@
 #trail-view .trail-tabs, #qna-view .qna-tabs { -webkit-overflow-scrolling: touch; touch-action: auto; }
 
 
-/* V8-1-14-250_compact_tabs_close_unify: compact 공통 모듈 탭/X 최종 보정 */
+/* V8-1-14-251_compact_tabs_close_final_cascade: compact 공통 모듈 탭/X 최종 보정 */
 html:not(.ios-device).oai-screen-compact-short #prayer-tabs,
 html:not(.ios-device).oai-screen-compact-short #web-view .web-cats,
 html:not(.ios-device).oai-screen-compact-short #trail-view .trail-tabs,

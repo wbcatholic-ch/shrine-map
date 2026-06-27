@@ -92,9 +92,193 @@
 }
 
 
-/* V8-1-14-250_compact_tabs_close_unify: Android WebView 하단 여백 상한/최소값 표준화 */
+/* V8-1-14-251_compact_tabs_close_final_cascade: Android WebView 하단 여백 상한/최소값 표준화 */
 html:not(.ios-device) .my-diocese-list{padding-bottom:calc(12px + var(--oai-android-bottom-gap, 10px))!important;}
 
 
 /* OAI-V67-STAMPBOOK-HEADER-BOTTOM-SAFE-FINAL: Android WebView 하단 여백 표준화 */
 html:not(.ios-device) .my-diocese-list{padding-bottom:calc(12px + var(--oai-android-bottom-gap, 10px))!important;}
+
+/* V8-1-14-251_compact_tabs_close_final_cascade
+   마지막 로드 CSS에서 compact 탭/X를 최종 적용한다.
+   V250의 style.css 보정은 뒤쪽 CSS에 밀려 실제 화면에 안 먹었으므로 제거하고 여기로 이동한다.
+   적용 범위는 370px 이하 compact뿐이며 Plus/Ultra/Fold 큰 화면은 제외한다. */
+html:not(.ios-device).oai-screen-compact-short{
+  --oai-final-tabbar-h:44px;
+  --oai-final-tab-h:32px;
+  --oai-final-tab-fs:11px;
+  --oai-final-tab-radius:9px;
+  --oai-final-close-sz:30px;
+  --oai-final-close-fs:19px;
+}
+
+/* 성지·성당·피정 지도 상단 4탭 */
+html:not(.ios-device).oai-screen-compact-short #tabbar{
+  height:calc(var(--oai-final-tabbar-h) + env(safe-area-inset-top,0px))!important;
+  min-height:calc(var(--oai-final-tabbar-h) + env(safe-area-inset-top,0px))!important;
+  max-height:calc(var(--oai-final-tabbar-h) + env(safe-area-inset-top,0px))!important;
+  padding:calc(env(safe-area-inset-top,0px) + 4px) 7px 5px!important;
+  gap:5px!important;
+}
+html:not(.ios-device).oai-screen-compact-short #tabbar .tab-btn{
+  height:var(--oai-final-tab-h)!important;
+  min-height:var(--oai-final-tab-h)!important;
+  max-height:var(--oai-final-tab-h)!important;
+  padding:2px 2px!important;
+  border-radius:var(--oai-final-tab-radius)!important;
+  gap:2px!important;
+  font-size:var(--oai-final-tab-fs)!important;
+  line-height:1.04!important;
+}
+html:not(.ios-device).oai-screen-compact-short #tabbar .tab-icon{
+  font-size:13px!important;
+  line-height:1!important;
+}
+html:not(.ios-device).oai-screen-compact-short #tabbar .tab-btn.active .tab-icon{
+  font-size:14px!important;
+}
+html:not(.ios-device).oai-screen-compact-short #tabbar .tab-btn span:not(.tab-icon),
+html:not(.ios-device).oai-screen-compact-short #tabbar #tab-list-lbl{
+  font-size:var(--oai-final-tab-fs)!important;
+  line-height:1.04!important;
+  letter-spacing:-.055em!important;
+  white-space:nowrap!important;
+}
+html:not(.ios-device).oai-screen-compact-short #map-wrap{
+  top:calc(var(--oai-final-tabbar-h) + env(safe-area-inset-top,0px))!important;
+}
+
+/* 공통 모듈 탭: 기도문/웹사이트/순례길/Q&A */
+html:not(.ios-device).oai-screen-compact-short #prayer-tabs,
+html:not(.ios-device).oai-screen-compact-short #web-view .web-cats,
+html:not(.ios-device).oai-screen-compact-short #trail-view .trail-tabs,
+html:not(.ios-device).oai-screen-compact-short #qna-view .qna-tabs{
+  height:var(--oai-final-tabbar-h)!important;
+  min-height:var(--oai-final-tabbar-h)!important;
+  max-height:var(--oai-final-tabbar-h)!important;
+  padding:5px 8px!important;
+  gap:5px!important;
+  align-items:center!important;
+  box-sizing:border-box!important;
+}
+html:not(.ios-device).oai-screen-compact-short #prayer-tabs .pr-tab,
+html:not(.ios-device).oai-screen-compact-short #web-view .web-cat-btn,
+html:not(.ios-device).oai-screen-compact-short #trail-view .trail-tab,
+html:not(.ios-device).oai-screen-compact-short #qna-view .qna-tab{
+  height:var(--oai-final-tab-h)!important;
+  min-height:var(--oai-final-tab-h)!important;
+  max-height:var(--oai-final-tab-h)!important;
+  padding:0 8px!important;
+  border-radius:var(--oai-final-tab-radius)!important;
+  font-size:var(--oai-final-tab-fs)!important;
+  line-height:1!important;
+  letter-spacing:-.045em!important;
+  white-space:nowrap!important;
+  box-sizing:border-box!important;
+}
+html:not(.ios-device).oai-screen-compact-short #web-view .web-cat-btn .cnt{
+  min-width:16px!important;
+  height:16px!important;
+  padding:0 5px!important;
+  border-radius:9px!important;
+  font-size:9px!important;
+  line-height:16px!important;
+}
+
+/* 지도 위 순례 필터 탭 */
+html:not(.ios-device).oai-screen-compact-short #map-wrap .shrine-visit-map-filter{
+  min-height:39px!important;
+  height:39px!important;
+  padding:5px 42px 5px 5px!important;
+  gap:4px!important;
+  border-radius:13px!important;
+}
+html:not(.ios-device).oai-screen-compact-short #map-wrap .shrine-visit-map-filter button,
+html:not(.ios-device).oai-screen-compact-short #map-wrap .shrine-visit-map-filter button[data-shrine-visit-filter="all"],
+html:not(.ios-device).oai-screen-compact-short #map-wrap .shrine-visit-map-filter button[data-shrine-visit-filter="visited"],
+html:not(.ios-device).oai-screen-compact-short #map-wrap .shrine-visit-map-filter button[data-shrine-visit-filter="unvisited"]{
+  height:28px!important;
+  min-height:28px!important;
+  min-width:56px!important;
+  padding:0 7px!important;
+  font-size:10.5px!important;
+  border-radius:8px!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+}
+html:not(.ios-device).oai-screen-compact-short #map-wrap .shrine-visit-map-filter button[data-shrine-visit-filter="visited"]{min-width:84px!important;}
+html:not(.ios-device).oai-screen-compact-short #map-wrap .shrine-visit-map-filter button[data-shrine-visit-filter="unvisited"]{min-width:82px!important;}
+
+/* 순례 스탬프북 탭 */
+html:not(.ios-device).oai-screen-compact-short #app #shrine-visit-cards-modal .shrine-visit-cards-tabs{
+  height:44px!important;
+  min-height:44px!important;
+  max-height:44px!important;
+  padding:5px 5px!important;
+  gap:5px!important;
+}
+html:not(.ios-device).oai-screen-compact-short #app #shrine-visit-cards-modal .shrine-visit-cards-tabs button{
+  height:31px!important;
+  min-height:31px!important;
+  max-height:31px!important;
+  padding:0 7px!important;
+  font-size:10.8px!important;
+  border-radius:8px!important;
+  letter-spacing:-.055em!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+}
+
+/* 하단 빠른메뉴 버튼 */
+html:not(.ios-device).oai-screen-compact-short .faith-bottom-nav{
+  padding:6px 10px calc(env(safe-area-inset-bottom,0px) + 6px)!important;
+  gap:8px!important;
+}
+html:not(.ios-device).oai-screen-compact-short .faith-bottom-btn{
+  min-height:45px!important;
+  padding:7px 8px!important;
+  border-radius:14px!important;
+}
+html:not(.ios-device).oai-screen-compact-short .faith-bottom-btn strong{
+  font-size:12.8px!important;
+  line-height:1.05!important;
+}
+
+/* compact의 X 닫기 버튼 최종값 */
+html:not(.ios-device).oai-screen-compact-short .module-close,
+html:not(.ios-device).oai-screen-compact-short #diocese-close-btn,
+html:not(.ios-device).oai-screen-compact-short #web-close-btn,
+html:not(.ios-device).oai-screen-compact-short #trail-close-btn,
+html:not(.ios-device).oai-screen-compact-short #qna-close-btn,
+html:not(.ios-device).oai-screen-compact-short #prayer-close,
+html:not(.ios-device).oai-screen-compact-short #pr-back-btn,
+html:not(.ios-device).oai-screen-compact-short .pr-back,
+html:not(.ios-device).oai-screen-compact-short .my-diocese-close,
+html:not(.ios-device).oai-screen-compact-short .cover-menu-close,
+html:not(.ios-device).oai-screen-compact-short .guide-x,
+html:not(.ios-device).oai-screen-compact-short .mass-quick-close,
+html:not(.ios-device).oai-screen-compact-short .sheet-x,
+html:not(.ios-device).oai-screen-compact-short .sm-x,
+html:not(.ios-device).oai-screen-compact-short .srch-x,
+html:not(.ios-device).oai-screen-compact-short .route-sheet-x,
+html:not(.ios-device).oai-screen-compact-short .rs-x,
+html:not(.ios-device).oai-screen-compact-short .map-category-close,
+html:not(.ios-device).oai-screen-compact-short .ic-close-btn,
+html:not(.ios-device).oai-screen-compact-short .trail-sh-close,
+html:not(.ios-device).oai-screen-compact-short .shrine-visit-x,
+html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-x,
+html:not(.ios-device).oai-screen-compact-short .shrine-visit-detail-x,
+html:not(.ios-device).oai-screen-compact-short button[aria-label*="닫기"]{
+  width:var(--oai-final-close-sz)!important;
+  height:var(--oai-final-close-sz)!important;
+  min-width:var(--oai-final-close-sz)!important;
+  min-height:var(--oai-final-close-sz)!important;
+  max-width:var(--oai-final-close-sz)!important;
+  max-height:var(--oai-final-close-sz)!important;
+  flex:0 0 var(--oai-final-close-sz)!important;
+  padding:0!important;
+  font-size:var(--oai-final-close-fs)!important;
+  line-height:1!important;
+  border-width:1.2px!important;
+  box-sizing:border-box!important;
+}
