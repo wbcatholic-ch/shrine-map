@@ -267,3 +267,21 @@ html:not(.ios-device) .pr-list{padding-bottom:calc(18px + var(--oai-android-bott
 
 /* OAI-V67-STAMPBOOK-HEADER-BOTTOM-SAFE-FINAL: Android WebView 하단 여백 표준화 */
 html:not(.ios-device) .pr-list{padding-bottom:calc(18px + var(--oai-android-bottom-gap, 10px))!important;}
+
+
+/* V8-1-14-253: compact(370px 이하) 전용 - 기도문 탭/X/하단 버튼 최소 보정 */
+html:not(.ios-device).oai-screen-compact-short #prayer-tabs{
+  height:48px!important;min-height:48px!important;max-height:48px!important;padding:0 8px!important;gap:5px!important;
+}
+html:not(.ios-device).oai-screen-compact-short #prayer-tabs .pr-tab,
+html:not(.ios-device).oai-screen-compact-short .pr-tab{
+  height:35px!important;min-height:35px!important;padding:0 10px!important;border-radius:10px!important;font-size:13.2px!important;gap:4px!important;
+}
+html:not(.ios-device).oai-screen-compact-short #prayer-close,
+html:not(.ios-device).oai-screen-compact-short #prayer-bar .module-close{
+  width:34px!important;height:34px!important;min-width:34px!important;flex-basis:34px!important;font-size:22px!important;
+}
+html:not(.ios-device).oai-screen-compact-short #prayer-quickbar .prayer-quick-btn,
+html:not(.ios-device).oai-screen-compact-short .prayer-quick-btn{
+  height:42px!important;min-height:42px!important;font-size:13px!important;border-radius:14px!important;
+}

@@ -977,3 +977,11 @@
 .my-faith-info-dialog.is-code-restore-active #my-faith-info-code-restore-box .my-faith-code-row {
   margin-top: 7px !important;
 }
+
+
+/* V8-1-14-253: compact(370px 이하) 전용 - 나의 신앙생활/정보관리 X 최소 보정 */
+html:not(.ios-device).oai-screen-compact-short .my-faith-info-close,
+html:not(.ios-device).oai-screen-compact-short #my-faith-close,
+html:not(.ios-device).oai-screen-compact-short .my-faith-close{
+  width:34px!important;height:34px!important;min-width:34px!important;flex-basis:34px!important;font-size:22px!important;line-height:1!important;
+}
