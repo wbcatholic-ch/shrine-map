@@ -102,5 +102,5 @@ html:not(.ios-device) .my-diocese-list{padding-bottom:calc(12px + var(--oai-andr
 
 /* V8-1-14-253: compact(370px 이하) 전용 - 나의 설정 X 최소 보정 */
 html:not(.ios-device).oai-screen-compact-short .my-diocese-close{
-  width:34px!important;height:34px!important;min-width:34px!important;flex-basis:34px!important;font-size:22px!important;
+  width:34px!important;height:34px!important;min-width:34px!important;flex-basis:34px!important;
 }

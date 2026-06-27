@@ -293,7 +293,7 @@ html:not(.ios-device).oai-screen-compact-short #qna-view .qna-tab{
   min-height:35px!important;
   padding:0 10px!important;
   border-radius:10px!important;
-  font-size:13.2px!important;
+  
   line-height:1!important;
   gap:4px!important;
 }
@@ -303,6 +303,6 @@ html:not(.ios-device).oai-screen-compact-short #prayer-close{
   height:34px!important;
   min-width:34px!important;
   flex:0 0 34px!important;
-  font-size:22px!important;
+  
   line-height:1!important;
 }

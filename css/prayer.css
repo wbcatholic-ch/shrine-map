@@ -275,13 +275,13 @@ html:not(.ios-device).oai-screen-compact-short #prayer-tabs{
 }
 html:not(.ios-device).oai-screen-compact-short #prayer-tabs .pr-tab,
 html:not(.ios-device).oai-screen-compact-short .pr-tab{
-  height:35px!important;min-height:35px!important;padding:0 10px!important;border-radius:10px!important;font-size:13.2px!important;gap:4px!important;
+  height:35px!important;min-height:35px!important;padding:0 10px!important;border-radius:10px!important;gap:4px!important;
 }
 html:not(.ios-device).oai-screen-compact-short #prayer-close,
 html:not(.ios-device).oai-screen-compact-short #prayer-bar .module-close{
-  width:34px!important;height:34px!important;min-width:34px!important;flex-basis:34px!important;font-size:22px!important;
+  width:34px!important;height:34px!important;min-width:34px!important;flex-basis:34px!important;
 }
 html:not(.ios-device).oai-screen-compact-short #prayer-quickbar .prayer-quick-btn,
 html:not(.ios-device).oai-screen-compact-short .prayer-quick-btn{
-  height:42px!important;min-height:42px!important;font-size:13px!important;border-radius:14px!important;
+  height:42px!important;min-height:42px!important;border-radius:14px!important;
 }

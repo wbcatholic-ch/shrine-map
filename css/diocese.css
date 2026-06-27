@@ -327,8 +327,8 @@ html.oai-dio-returning #map-view.on,html.oai-dio-returning #list-view.on,html.oa
 
 /* V8-1-14-253: compact(370px 이하) 전용 - 관구·교구 탭 최소 보정 */
 @media(max-width:370px){
-  :root{--tab-h:48px;--tab-btn-h:35px;--fs-tab:13.2px;}
+  :root{--tab-h:48px;--tab-btn-h:35px;}
   .tab-bar{height:48px!important;padding:6px 8px!important;gap:5px!important;}
-  .tab{height:35px!important;padding:0 8px!important;border-radius:10px!important;font-size:calc(13.2px * var(--dio-effective-font-scale,1))!important;}
-  .filter-btn,.province-filter-btn{height:31px!important;min-height:31px!important;padding:0 10px!important;font-size:12.2px!important;}
+  .tab{height:35px!important;padding:0 8px!important;border-radius:10px!important;}
+  .filter-btn,.province-filter-btn{height:31px!important;min-height:31px!important;padding:0 10px!important;}
 }

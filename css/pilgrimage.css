@@ -142,9 +142,9 @@ html:not(.ios-device).oai-screen-compact-short #trail-view .trail-tabs{
   height:48px!important;min-height:48px!important;max-height:48px!important;padding:0 8px!important;gap:6px!important;
 }
 html:not(.ios-device).oai-screen-compact-short #trail-view .trail-tab{
-  height:35px!important;min-height:35px!important;padding:0 10px!important;border-radius:10px!important;font-size:13.2px!important;
+  height:35px!important;min-height:35px!important;padding:0 10px!important;border-radius:10px!important;
 }
 html:not(.ios-device).oai-screen-compact-short #trail-close-btn,
 html:not(.ios-device).oai-screen-compact-short .trail-sh-close{
-  width:34px!important;height:34px!important;min-width:34px!important;flex-basis:34px!important;font-size:22px!important;
+  width:34px!important;height:34px!important;min-width:34px!important;flex-basis:34px!important;
 }

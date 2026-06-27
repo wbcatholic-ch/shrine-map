@@ -124,7 +124,5 @@
 @media(max-width:390px){
   #cover #shrine-update-banner{left:10px;right:10px;}
   #cover #shrine-update-banner .shrine-update-card{border-radius:20px;}
-  #cover #shrine-update-banner .shrine-update-title{font-size:16px;}
-  #cover #shrine-update-banner .shrine-update-body{font-size:13.5px;line-height:1.5;}
-  #cover #shrine-update-banner .shrine-update-actions button{font-size:13.5px;}
+  #cover #shrine-update-banner .shrine-update-body{line-height:1.5;}
 }
