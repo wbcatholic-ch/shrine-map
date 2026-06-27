@@ -1042,3 +1042,17 @@ html:not(.ios-device).oai-screen-compact-short .my-faith-code-textarea {
 html:not(.ios-device).oai-screen-compact-short .my-faith-code-btn {
   min-height: 40px !important;
 }
+
+/* V8-1-14-266: compact에서도 내 정보 백업·복원 버튼이 숨지지 않도록 표시/간격만 보정 */
+html:not(.ios-device).oai-screen-compact-short .my-faith-data-section {
+  display: block !important;
+  flex: 0 0 auto !important;
+  margin-top: 12px !important;
+  padding-top: 0 !important;
+}
+html:not(.ios-device).oai-screen-compact-short .my-faith-data-toggle-btn {
+  min-height: 50px !important;
+}
+html:not(.ios-device).oai-screen-compact-short .my-faith-data-toggle-note {
+  padding: 6px 10px 8px !important;
+}

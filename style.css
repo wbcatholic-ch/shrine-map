@@ -5617,7 +5617,7 @@ html:not(.ios-device).oai-screen-tall-phone .shrine-visit-detail-body{padding-bo
 
 html:not(.ios-device).oai-screen-fold-wide .shrine-visit-cards-head.module-bar,
 html:not(.ios-device).oai-screen-fold-wide .shrine-visit-cards-head{
-  min-height:calc(60px + env(safe-area-inset-top,0px))!important;
+  min-height:calc(63px + env(safe-area-inset-top,0px))!important;
   height:calc(60px + env(safe-area-inset-top,0px))!important;
   max-height:calc(60px + env(safe-area-inset-top,0px))!important;
   padding-top:calc(8px + env(safe-area-inset-top,0px))!important;
@@ -7986,24 +7986,24 @@ html:not(.ios-device).oai-screen-compact-short #shrine-visit-detail-close{
 
 /* V8-1-14-255_from235_compact_tab_gap_stamp_line: compact 상부탭 여백/스탬프북 분리선 정리 */
 html:not(.ios-device).oai-screen-compact-short{
-  --tab-h:60px;
-  --map-tab-btn-h:50px;
+  --tab-h:63px;
+  --map-tab-btn-h:53px;
 }
 html:not(.ios-device).oai-screen-compact-short #tabbar{
-  height:calc(60px + env(safe-area-inset-top,0px))!important;
-  min-height:calc(60px + env(safe-area-inset-top,0px))!important;
-  padding:calc(env(safe-area-inset-top,0px) + 3px) 6px 4px!important;
+  height:calc(63px + env(safe-area-inset-top,0px))!important;
+  min-height:calc(63px + env(safe-area-inset-top,0px))!important;
+  padding:calc(env(safe-area-inset-top,0px) + 4px) 6px 5px!important;
   gap:5px!important;
   align-items:stretch!important;
 }
 html:not(.ios-device).oai-screen-compact-short #tabbar .tab-btn{
-  height:50px!important;
-  min-height:50px!important;
-  padding:3px 2px 3px!important;
+  height:53px!important;
+  min-height:53px!important;
+  padding:4px 2px 4px!important;
 }
 html:not(.ios-device).oai-screen-compact-short #map-wrap,
 html:not(.ios-device).oai-screen-compact-short .sheet{
-  top:calc(60px + env(safe-area-inset-top,0px))!important;
+  top:calc(63px + env(safe-area-inset-top,0px))!important;
 }
 html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-head,
 html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-head.module-bar,
@@ -8040,7 +8040,7 @@ html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-stats{
 }
 
 
-/* V8-1-14-265: compact 글자 크기 유지, 성지/순례 공간 보정 최종 위치 통합 */
+/* V8-1-14-266: compact 글자 크기 유지, 성지/순례 공간 보정 최종 위치 통합 */
 html:not(.ios-device).oai-screen-compact-short #map-wrap #shrine-visit-map-filter,
 html:not(.ios-device).oai-screen-compact-short #map-wrap .shrine-visit-map-filter{
   min-height:46px!important;
@@ -8075,6 +8075,18 @@ html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-kakao-row,
 html:not(.ios-device).oai-screen-compact-short #app .shrine-visit-detail-action-row{
   gap:6px!important;
 }
+html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-btn-row > *,
+html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-links > *,
+html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-kakao-row > *,
+html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-tel-link,
+html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-route-btn,
+html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-hp,
+html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-guide,
+html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-goodnews,
+html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-kakao-nav{
+  height:48px!important;
+  min-height:48px!important;
+}
 html:not(.ios-device).oai-screen-compact-short #app .shrine-visit-detail-actions{gap:6px!important;}
 html:not(.ios-device).oai-screen-compact-short #app .shrine-visit-detail-action{height:42px!important;min-height:42px!important;padding:0 6px!important;}
 html:not(.ios-device).oai-screen-compact-short #app .shrine-visit-detail-info-head{gap:7px!important;}
@@ -8104,7 +8116,7 @@ html:not(.ios-device).oai-screen-compact-short.retreat-mode #app #loc-btn{
 }
 
 
-/* V8-1-14-265: compact 매일미사 하단 빠른사용 버튼은 글자 크기를 유지하고 높이/위치만 조정 */
+/* V8-1-14-266: compact 매일미사 하단 빠른사용 버튼은 글자 크기를 유지하고 높이/위치만 조정 */
 html:not(.ios-device).oai-screen-compact-short #missa-view .faith-bottom-nav{
   gap:6px!important;
   padding:5px 10px calc(2px + var(--oai-android-bottom-gap, env(safe-area-inset-bottom, 0px)))!important;
@@ -8116,7 +8128,7 @@ html:not(.ios-device).oai-screen-compact-short #missa-view .faith-bottom-btn{
   gap:4px!important;
 }
 
-/* V8-1-14-265: 길찾기 시트는 compact의 전체 .sheet top 보정을 받지 않고 지도 위 하단시트로만 표시한다. */
+/* V8-1-14-266: 길찾기 시트는 compact의 전체 .sheet top 보정을 받지 않고 지도 위 하단시트로만 표시한다. */
 #app #sheet-route[hidden]{
   display:none!important;
 }
