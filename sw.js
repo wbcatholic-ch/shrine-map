@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-257_compact_cover_menu_mass_font_sync';
-const ASSET_VERSION = 'V8-1-14-257_compact_cover_menu_mass_font_sync';
+const CACHE_VERSION = 'catholic-way-V8-1-14-258_route_panel_close_on_tab_switch';
+const ASSET_VERSION = 'V8-1-14-258_route_panel_close_on_tab_switch';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }

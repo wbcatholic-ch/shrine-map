@@ -5202,6 +5202,20 @@ function closeCategoryToCoverFromMap(){
   if(typeof goToCover === 'function') goToCover();
 }
 
+function _closeRoutePanelForNonRouteTab(){
+  try{ if(typeof _blurAll === 'function') _blurAll(); }catch(e){ console.warn('[가톨릭길동무]', e); }
+  try{
+    const routeSheet = $('sheet-route');
+    if(routeSheet){
+      routeSheet.classList.remove('open','route-waypoint-scroll');
+    }
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+  try{
+    _routeMode = false;
+    if(typeof _hideRouteGuide === 'function') _hideRouteGuide();
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+}
+
 function zoomCategoryMap(delta){
   if(!_map || typeof _map.getLevel !== 'function' || typeof _map.setLevel !== 'function') return;
   try{
@@ -5220,6 +5234,7 @@ function openTab(name, opts){
   const prevName = _activeTab;
   // V8-1-14-134: 성지/성당/피정의집 시트 전환은 무거운 가로 swiper 애니메이션 없이 즉시 전환하고, 내부 좌우 스와이프 전환은 비활성화한다.
   if(prevName) _closeSheetOnly(prevName);
+  if(name!=='route') _closeRoutePanelForNonRouteTab();
 
   closeInfoCard({keepMap:true});
   _curFromRegion=false;
@@ -5341,6 +5356,7 @@ function _resetTabWork(name){
 }
 
 function toggleTab(name){
+  if(name!=='route') _closeRoutePanelForNonRouteTab();
   if(_activeTab===name){
     closeInfoCard({keepMap:true});
     _resetTabWork(name);
