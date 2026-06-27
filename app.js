@@ -557,6 +557,7 @@ function oaiClearExternalNavigationState(opts){
     try{
       clearTimeout(_bgReturnTimer);
       if(isReturnableScreenActive() && !isExternalReturnContext()){
+        try{ if(window.oaiSaveResumeScreenState) window.oaiSaveResumeScreenState('background-hidden'); }catch(_e){}
         sessionStorage.setItem(BG_KEY, String(now()));
       }else{
         clearBgStamp();
@@ -662,10 +663,10 @@ function oaiClearExternalNavigationState(opts){
   window.addEventListener('focus', function(){ scheduleBackgroundReturn('focus'); }, {passive:true});
 })();
 
-/* V8-1-14-256_from235_bg_return_fold_guard:
-   Fold 작은화면↔큰화면 전환을 백그라운드/첫 진입으로 오인하지 않도록
-   큰 폭 변화 직후의 reload/pageshow에서는 인트로를 억제한다.
-   화면 복원은 안전 범위에서 지도 카테고리만 저장하고, 그 외 화면은 인트로만 막는다. */
+/* V8-1-14-272:
+   Fold 작은화면↔큰화면 전환 및 백그라운드 reload 복귀 때
+   인트로/커버로 강제 이동하지 않고 마지막으로 보던 주요 화면을 복원한다.
+   Back/외부사이트/지도/길찾기 핵심 로직은 건드리지 않는다. */
 (function(){
   'use strict';
   if(window.__OAI_FOLD_VIEWPORT_GUARD__) return;
@@ -673,15 +674,50 @@ function oaiClearExternalNavigationState(opts){
   var KEY_UNTIL = 'oai_fold_transition_no_intro_until';
   var KEY_W = 'oai_fold_transition_last_width';
   var KEY_STATE = 'oai_fold_transition_basic_state';
+  var KEY_RESUME = 'oai_resume_screen_state_v272';
+  var BG_KEY = 'oai_home_backgrounded_at';
+  var MEDIUM_BG_RETURN_MS = 10 * 60 * 1000;
   function now(){ return Date.now ? Date.now() : new Date().getTime(); }
   function width(){ try{ return Math.round(window.innerWidth || document.documentElement.clientWidth || 0); }catch(_e){ return 0; } }
   function screenClass(w){ return w >= 600 ? 'wide' : (w <= 370 ? 'compact' : 'phone'); }
+  function isOpen(id){ try{ var el=document.getElementById(id); return !!(el && el.classList && (el.classList.contains('open') || el.classList.contains('show'))); }catch(_e){ return false; } }
+  function readMyFaithSub(){
+    try{
+      if(window.isMyFaithInfoManagementOpen && window.isMyFaithInfoManagementOpen()) return 'info';
+      var title=document.getElementById('my-diocese-title');
+      var text=String((title && (title.getAttribute('data-myfaith-title') || title.textContent)) || '').trim();
+      if(text.indexOf('나의 설정') >= 0 || text.indexOf('교구 선택') >= 0 || text.indexOf('본당 찾기') >= 0) return 'settings';
+    }catch(_e){}
+    return 'home';
+  }
+  function buildScreenState(reason){
+    var st = { t: now(), reason: String(reason||''), kind:'cover', screen:(typeof _screen !== 'undefined' ? _screen : ''), mode:(typeof _mode !== 'undefined' ? _mode : ''), tab:(typeof _activeTab !== 'undefined' ? _activeTab : '') };
+    try{
+      if(isOpen('shrine-visit-cards-modal')){
+        st.kind='stampbook'; st.mode='shrine';
+        st.visitTab = (typeof _shrineVisitCardsTab !== 'undefined' ? _shrineVisitCardsTab : 'visited');
+        st.visitDiocese = (typeof _shrineVisitCardsDiocese !== 'undefined' ? _shrineVisitCardsDiocese : 'all');
+        return st;
+      }
+      if(isOpen('missa-view')){ st.kind='missa'; return st; }
+      if(isOpen('prayer-view')){ st.kind='prayer'; st.prayerDetail = isOpen('prayer-detail'); return st; }
+      if(isOpen('web-view')){ st.kind='web'; return st; }
+      if(isOpen('trail-view')){ st.kind='trail'; return st; }
+      if(isOpen('qna-view')){ st.kind='qna'; return st; }
+      if(isOpen('diocese-view')){ st.kind='diocese'; return st; }
+      if(isOpen('my-diocese-modal')){ st.kind='myfaith'; st.sub=readMyFaithSub(); return st; }
+      if(st.screen === 'map' && /^(shrine|parish|retreat)$/.test(String(st.mode||''))){ st.kind='map'; return st; }
+    }catch(_e){}
+    return st;
+  }
   function saveBasicState(reason){
     try{
-      var state = { t: now(), reason: String(reason||''), screen: (typeof _screen !== 'undefined' ? _screen : ''), mode: (typeof _mode !== 'undefined' ? _mode : ''), tab: (typeof _activeTab !== 'undefined' ? _activeTab : '') };
+      var state = buildScreenState(reason);
       sessionStorage.setItem(KEY_STATE, JSON.stringify(state));
+      sessionStorage.setItem(KEY_RESUME, JSON.stringify(state));
     }catch(_e){}
   }
+  window.oaiSaveResumeScreenState = saveBasicState;
   function arm(reason){
     try{
       sessionStorage.setItem(KEY_UNTIL, String(now() + 15000));
@@ -700,33 +736,83 @@ function oaiClearExternalNavigationState(opts){
     lastW = w;
     try{ sessionStorage.setItem(KEY_W, String(w)); }catch(_e){}
   }
+  function readSavedState(){
+    try{
+      var raw = sessionStorage.getItem(KEY_RESUME) || sessionStorage.getItem(KEY_STATE) || '';
+      if(!raw) return null;
+      var st = JSON.parse(raw);
+      if(!st || !st.t || (now() - Number(st.t)) > 12*60*60*1000) return null;
+      return st;
+    }catch(_e){ return null; }
+  }
+  function restoreMyFaith(st){
+    try{
+      if(window.openMyFaithLifeModal) window.openMyFaithLifeModal({restore:true});
+      else { var btn=document.getElementById('cover-diocese-btn'); if(btn) btn.click(); }
+      if(st && st.sub === 'settings') setTimeout(function(){ try{ if(window.openMyFaithSettingsEdit) window.openMyFaithSettingsEdit({restore:true}); }catch(_e){} }, 180);
+      if(st && st.sub === 'info') setTimeout(function(){ try{ if(window.openMyFaithInfoManagementModal) window.openMyFaithInfoManagementModal(); }catch(_e){} }, 220);
+    }catch(_e){}
+  }
+  function restoreStampbook(st){
+    try{
+      if(typeof startApp !== 'function') return;
+      startApp('shrine');
+      setTimeout(function(){
+        try{
+          if(typeof _openShrineVisitCardsModal === 'function') _openShrineVisitCardsModal();
+          if(st && st.visitTab && typeof _shrineVisitCardsTab !== 'undefined') _shrineVisitCardsTab = st.visitTab;
+          if(st && st.visitDiocese && typeof _shrineVisitCardsDiocese !== 'undefined') _shrineVisitCardsDiocese = st.visitDiocese;
+          if(typeof _renderShrineVisitCardsModal === 'function') _renderShrineVisitCardsModal();
+        }catch(_e){}
+      }, 760);
+    }catch(_e){}
+  }
+  function restoreSavedState(st){
+    if(!st || !st.kind || st.kind === 'cover') return false;
+    try{
+      if(document.documentElement.classList.contains('app-active')){
+        if(st.kind !== 'stampbook' && st.kind !== 'myfaith') return true;
+      }
+      if(st.kind === 'map'){
+        if(/^(shrine|parish|retreat)$/.test(String(st.mode||'')) && typeof startApp === 'function'){
+          startApp(st.mode);
+          if(st.tab && typeof openTab === 'function') setTimeout(function(){ try{ openTab(st.tab); }catch(_e){} }, 280);
+          return true;
+        }
+      }
+      if(st.kind === 'missa' && typeof openMissa === 'function'){ openMissa(); return true; }
+      if(st.kind === 'prayer' && typeof openPrayerBook === 'function'){ openPrayerBook({restore:true}); return true; }
+      if(st.kind === 'web' && typeof window.openWebView === 'function'){ window.openWebView({restore:true}); return true; }
+      if(st.kind === 'trail' && typeof window.openTrailView === 'function'){ window.openTrailView({restore:true}); return true; }
+      if(st.kind === 'qna' && typeof window.openQnaView === 'function'){ window.openQnaView(); return true; }
+      if(st.kind === 'diocese' && typeof openDioceseView === 'function'){ openDioceseView({restore:true}); return true; }
+      if(st.kind === 'myfaith'){ restoreMyFaith(st); return true; }
+      if(st.kind === 'stampbook'){ restoreStampbook(st); return true; }
+    }catch(_e){}
+    return false;
+  }
+  function maybeRestoreAfterResumeReload(){
+    try{
+      var foldUntil = parseInt(sessionStorage.getItem(KEY_UNTIL) || '0', 10) || 0;
+      var foldActive = !!(foldUntil && now() <= foldUntil);
+      var bgStarted = parseInt(sessionStorage.getItem(BG_KEY) || '0', 10) || 0;
+      var bgActive = !!bgStarted;
+      if(!foldActive && !bgActive) return;
+      var st = readSavedState();
+      if(!st) return;
+      var age = now() - Number(st.t || 0);
+      if(age > 12*60*60*1000) return;
+      var delay = (bgStarted && (now() - bgStarted) >= MEDIUM_BG_RETURN_MS && !foldActive) ? 2100 : 360;
+      setTimeout(function(){ restoreSavedState(st); }, delay);
+    }catch(_e){}
+  }
   window.addEventListener('resize', function(){ onViewportChange('resize'); }, {passive:true});
   window.addEventListener('orientationchange', function(){ arm('orientationchange'); setTimeout(function(){ onViewportChange('orientation-late'); }, 180); }, {passive:true});
   window.addEventListener('pagehide', function(){ saveBasicState('pagehide'); }, {passive:true});
   try{ if(window.visualViewport) window.visualViewport.addEventListener('resize', function(){ onViewportChange('visualViewport-resize'); }, {passive:true}); }catch(_e){}
   document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'hidden') saveBasicState('hidden'); }, {passive:true});
-
-  function maybeRestoreAfterFoldReload(){
-    try{
-      var until = parseInt(sessionStorage.getItem(KEY_UNTIL) || '0', 10) || 0;
-      if(!until || now() > until) return;
-      var raw = sessionStorage.getItem(KEY_STATE) || '';
-      if(!raw) return;
-      var st = JSON.parse(raw);
-      if(!st || (now() - Number(st.t || 0)) > 30000) return;
-      if(st.screen === 'map' && /^(shrine|parish|retreat)$/.test(String(st.mode || '')) && typeof startApp === 'function'){
-        setTimeout(function(){
-          try{
-            if(document.documentElement.classList.contains('app-active')) return;
-            startApp(st.mode);
-            if(st.tab && typeof openTab === 'function') setTimeout(function(){ try{ openTab(st.tab); }catch(_e){} }, 260);
-          }catch(_e){}
-        }, 360);
-      }
-    }catch(_e){}
-  }
-  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', maybeRestoreAfterFoldReload, {once:true});
-  else maybeRestoreAfterFoldReload();
+  if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', maybeRestoreAfterResumeReload, {once:true});
+  else maybeRestoreAfterResumeReload();
 })();
 
 function oaiNormalizeExternalSiteUrl(url){

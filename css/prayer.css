@@ -15,21 +15,16 @@
   margin-right: 0;
 }
 
-#prayer-tabs .pr-tab.on[data-cat="favorites"] { background: var(--v4-header-navy); }
-#prayer-tabs .pr-tab.on[data-cat="aim"]       { background: #1565c0; }
-#prayer-tabs .pr-tab.on[data-cat="basic"]     { background: #1e40af; }
-#prayer-tabs .pr-tab.on[data-cat="special"]   { background: #be185d; }
-#prayer-tabs .pr-tab.on[data-cat="etc"]       { background: #15803d; }
-#prayer-tabs .pr-tab.on[data-cat="bong1"]     { background: #475569; }
-#prayer-tabs .pr-tab.on[data-cat="bong2"]     { background: #7e22ce; }
-#prayer-tabs .pr-tab.on[data-cat="bong3"]     { background: #c2410c; }
-#prayer-tabs .pr-tab.on[data-cat="fasting"]   { background: #6b48ad; }
-#prayer-tabs .pr-tab.on[data-cat="liturgy"]   { background: #7b2d8b; }
-#prayer-tabs .pr-tab.on[data-cat="season"]    { background: #2e7d32; }
-#prayer-tabs .pr-tab.on[data-cat="mary"]      { background: #ad1457; }
-#prayer-tabs .pr-tab.on[data-cat="saints"]    { background: #c17900; }
-#prayer-tabs .pr-tab.on[data-cat="funeral"]   { background: #546e7a; }
-#prayer-tabs .pr-tab.on[data-cat="novena"]    { background: #1565c0; }
+/* V8-1-14-272: 주요기도문 탭은 레이아웃을 유지하고 색/굵기만 웹사이트 탭 기준으로 통일 */
+#prayer-tabs .pr-tab.on,
+#prayer-tabs .pr-tab.active,
+#prayer-tabs .pr-tab.on[data-cat],
+#prayer-tabs .pr-tab.active[data-cat] {
+  background: var(--v4-header-navy) !important;
+  color: var(--v4-surface-white) !important;
+  border-color: transparent !important;
+  font-weight: 800 !important;
+}
 
 #prayer-view {
   display: none;
@@ -86,7 +81,7 @@
   padding: 0 12px;
   border-radius: 10px;
   border: 1.5px solid transparent;
-  font-size: 15px;
+  font-size: calc(15px * var(--app-inner-font-scale,1));
   line-height: 1;
   box-sizing: border-box;
   font-weight: 700;

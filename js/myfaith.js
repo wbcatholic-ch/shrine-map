@@ -1134,6 +1134,8 @@
     }
     window.isMyFaithLifeModalOpen = function(){ try{ return !!(modal && modal.classList && (modal.classList.contains('show') || modal.classList.contains('open'))); }catch(_e){ return false; } };
     window.isMyFaithInfoManagementOpen = function(){ return !!myFaithInfoManagementOpen; };
+    window.openMyFaithLifeModal = function(opts){ openModal(opts || {}); };
+    window.openMyFaithInfoManagementModal = function(){ openModal({restore:true}); setTimeout(function(){ try{ openMyInfoManagementModal(); }catch(_e){} }, 70); };
     window.closeMyFaithLifeModal = function(){ if(myFaithInfoManagementOpen){ closeMyInfoManagementModal(); return; } closeModal(); };
     function normalizeMyFaithExternalUrl(url){
       url = String(url || '').trim();
@@ -1423,6 +1425,7 @@
         settleMyFaithHomeScroll();
       }
       myFaithRenderSettingsEdit = renderSettingsEdit;
+      window.openMyFaithSettingsEdit = function(){ openModal({restore:true, keepContent:true}); beginMyFaithPendingEdit(); renderSettingsEdit(); };
       if(name){
         var quick=listSection('내 교구·본당 정보','my-faith-quick-section');
         appendExternalRow(quick, name+' 홈페이지','', '', '열기', info&&info.home, !(info&&info.home), 'my-faith-row-btn-open');

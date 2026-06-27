@@ -50,7 +50,7 @@
     --icon-r:12px;
     --icon-fs:0px;
     --fs-header:20px;
-    --fs-tab:16px;
+    --fs-tab:15px;
     --fs-sub:11px;
     --qa-top-gap: env(safe-area-inset-top, 0px);
   }
@@ -179,11 +179,11 @@
     flex: 1 0 auto; min-width: 62px; height: var(--tab-btn-h); min-height: var(--tab-btn-h);
     border: 1.5px solid var(--d); border-radius: 10px;
     padding: 0 8px; font-size: var(--fs-tab); background: var(--card-sub); color: var(--d);
-    cursor: pointer; font-weight: 600; font-family: inherit; transition: opacity .15s,transform .12s,box-shadow .15s;
+    cursor: pointer; font-weight: 700; font-family: inherit; transition: opacity .15s,transform .12s,box-shadow .15s;
     display: flex; align-items: center; justify-content: center; gap: 4px; line-height: 1; white-space: nowrap; letter-spacing: -.02em;
     box-shadow: none;
   }
-  .filter-btn.active { background: var(--d); color: #fff; border-color: transparent; font-weight: 700; box-shadow: 0 2px 8px rgba(31,42,68,.28); }
+  .filter-btn.active { background: var(--d); color: #fff; border-color: transparent; font-weight: 800; box-shadow: 0 2px 8px rgba(31,42,68,.28); }
   .filter-btn:active { transform: scale(.992); }
   .filter-btn.active,.filter-btn.active:active { transform: none!important; }
 
@@ -431,7 +431,7 @@
 
 
 
-  /* V8-1-14-270: compact 문의·건의는 글자 크기 유지, 공간만 축소 */
+  /* V8-1-14-272: compact 문의·건의는 글자 크기 유지, 공간만 축소 */
   @media (max-width: 370px) {
     :root {
       --tab-h: 50px;
@@ -1051,11 +1051,11 @@ function oaiReturnToAppCover(reason){
   try{
     var url = new URL('index.html', location.href);
     url.searchParams.set('oai_cover_return', reason || 'qna-return-cover');
-    url.searchParams.set('v', 'V8-1-14-270');
+    url.searchParams.set('v', 'V8-1-14-272');
     location.replace(url.href);
     return;
   }catch(e){
-    location.replace('index.html?oai_cover_return=' + encodeURIComponent(reason || 'qna-return-cover') + '&v=V8-1-14-270');
+    location.replace('index.html?oai_cover_return=' + encodeURIComponent(reason || 'qna-return-cover') + '&v=V8-1-14-272');
   }
 }
 function handleQaBack(){
@@ -1103,7 +1103,7 @@ if (QA_PRIVATE_MODE) {
 <script id="oai-cache-lifecycle-V6-146">
 (function(){
   'use strict';
-  var APP_VERSION = 'V8-1-14-270';
+  var APP_VERSION = 'V8-1-14-272';
   if('serviceWorker' in navigator){
     try{ navigator.serviceWorker.register('./sw.js?v=' + encodeURIComponent(APP_VERSION)).then(function(reg){try{reg.update();}catch(e){}}).catch(function(){}); }catch(e){}
   }
