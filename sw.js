@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-260_route_cleanup_no_force';
-const ASSET_VERSION = 'V8-1-14-260_route_cleanup_no_force';
+const CACHE_VERSION = 'catholic-way-V8-1-14-261_route_sheet_overlay_restore';
+const ASSET_VERSION = 'V8-1-14-261_route_sheet_overlay_restore';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }

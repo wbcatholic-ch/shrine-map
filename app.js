@@ -5219,6 +5219,8 @@ function _closeRouteUiForNonRouteTab(){
     if(routeSheet){
       routeSheet.classList.remove('open','from-right','from-left','exit-left','exit-right','route-waypoint-scroll','route-result-showing');
       routeSheet.setAttribute('aria-hidden','true');
+      routeSheet.hidden = true;
+      routeSheet.style.display = 'none';
     }
   }catch(e){ console.warn('[가톨릭길동무]', e); }
   try{
@@ -5266,6 +5268,11 @@ function openTab(name, opts){
 
   const sheet=$('sheet-'+name);
   if(sheet){
+    if(name==='route'){
+      sheet.hidden = false;
+      sheet.removeAttribute('hidden');
+      sheet.setAttribute('aria-hidden','false');
+    }
     sheet.style.display='';
     sheet.classList.remove('oai-preopen-nearby','from-right','from-left','exit-left','exit-right');
     sheet.classList.add('open');
@@ -5331,7 +5338,14 @@ function closeTab(name){
 
 function _closeSheetOnly(name){
   if(!name) return;
-  $('sheet-'+name)?.classList.remove('open');
+  const sh = $('sheet-'+name);
+  if(!sh) return;
+  sh.classList.remove('open');
+  if(name==='route'){
+    sh.setAttribute('aria-hidden','true');
+    sh.hidden = true;
+    sh.style.display = 'none';
+  }
 }
 
 function closeAllTabs(){
