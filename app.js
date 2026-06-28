@@ -663,7 +663,7 @@ function oaiClearExternalNavigationState(opts){
   window.addEventListener('focus', function(){ scheduleBackgroundReturn('focus'); }, {passive:true});
 })();
 
-/* V8-1-14-276:
+/* V8-1-14-277:
    Fold 작은화면↔큰화면 전환 및 백그라운드 reload 복귀 때
    인트로/커버로 강제 이동하지 않고 마지막으로 보던 주요 화면을 복원한다.
    Back/외부사이트/지도/길찾기 핵심 로직은 건드리지 않는다. */
@@ -720,7 +720,7 @@ function oaiClearExternalNavigationState(opts){
   window.oaiSaveResumeScreenState = saveBasicState;
   function arm(reason){
     try{
-      sessionStorage.setItem(KEY_UNTIL, String(now() + 15000));
+      sessionStorage.setItem(KEY_UNTIL, String(now() + 45000));
       sessionStorage.setItem(KEY_W, String(width()));
       saveBasicState(reason);
     }catch(_e){}
@@ -793,24 +793,37 @@ function oaiClearExternalNavigationState(opts){
   }
   function maybeRestoreAfterResumeReload(){
     try{
+      var n = now();
       var foldUntil = parseInt(sessionStorage.getItem(KEY_UNTIL) || '0', 10) || 0;
-      var foldActive = !!(foldUntil && now() <= foldUntil);
+      var foldActive = !!(foldUntil && n <= foldUntil);
       var bgStarted = parseInt(sessionStorage.getItem(BG_KEY) || '0', 10) || 0;
       var bgActive = !!bgStarted;
-      if(!foldActive && !bgActive) return;
+      var navType = '';
+      try{ var navEntry = (performance && performance.getEntriesByType) ? performance.getEntriesByType('navigation')[0] : null; navType = navEntry && navEntry.type || ''; }catch(_ne){}
       var st = readSavedState();
       if(!st) return;
-      var age = now() - Number(st.t || 0);
+      var age = n - Number(st.t || 0);
       if(age > 12*60*60*1000) return;
-      var delay = (bgStarted && (now() - bgStarted) >= MEDIUM_BG_RETURN_MS && !foldActive) ? 2100 : 360;
+      var navResume = !!(st.kind && st.kind !== 'cover' && age >= 0 && age < 10*60*1000 && (navType === 'reload' || navType === 'back_forward'));
+      if(!foldActive && !bgActive && !navResume) return;
+      var bgElapsed = bgStarted ? (n - bgStarted) : 0;
+      var shortResume = foldActive || navResume || (bgStarted && bgElapsed >= 0 && bgElapsed < MEDIUM_BG_RETURN_MS);
+      if(shortResume){
+        try{
+          document.documentElement.classList.remove('oai-cover-booting','oai-cover-revealing','oai-first-entry-intro','oai-background-return-intro','oai-cover-under-intro-reveal','oai-cover-first-reveal');
+          document.documentElement.classList.add('oai-refresh-no-intro');
+          setTimeout(function(){ try{ document.documentElement.classList.remove('oai-refresh-no-intro'); }catch(_r){} }, 900);
+        }catch(_r){}
+      }
+      var delay = (bgStarted && bgElapsed >= MEDIUM_BG_RETURN_MS && !foldActive && !navResume) ? 2100 : 260;
       setTimeout(function(){ restoreSavedState(st); }, delay);
     }catch(_e){}
   }
   window.addEventListener('resize', function(){ onViewportChange('resize'); }, {passive:true});
   window.addEventListener('orientationchange', function(){ arm('orientationchange'); setTimeout(function(){ onViewportChange('orientation-late'); }, 180); }, {passive:true});
-  window.addEventListener('pagehide', function(){ saveBasicState('pagehide'); }, {passive:true});
+  window.addEventListener('pagehide', function(){ arm('pagehide'); }, {passive:true});
   try{ if(window.visualViewport) window.visualViewport.addEventListener('resize', function(){ onViewportChange('visualViewport-resize'); }, {passive:true}); }catch(_e){}
-  document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'hidden') saveBasicState('hidden'); }, {passive:true});
+  document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'hidden') arm('hidden'); }, {passive:true});
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', maybeRestoreAfterResumeReload, {once:true});
   else maybeRestoreAfterResumeReload();
 })();

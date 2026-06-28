@@ -5429,7 +5429,6 @@ html:not(.ios-device).oai-screen-fold-wide #app #info-card .ic-link-btn,
 html:not(.ios-device).oai-screen-fold-wide #app #info-card .btn-kakao-nav{
   height:42px!important;
   min-height:42px!important;
-  font-size:15px!important;
 }
 html:not(.ios-device).oai-screen-fold-wide #app .list-item,
 html:not(.ios-device).oai-screen-fold-wide #app .nearby-item,
@@ -5513,7 +5512,6 @@ html:not(.ios-device).oai-screen-fold-wide .shrine-visit-cards-tabs{
 html:not(.ios-device).oai-screen-fold-wide .shrine-visit-cards-tabs button{
   height:36.5px!important;
   min-height:36.5px!important;
-  font-size:12.4px!important;
 }
 html:not(.ios-device).oai-screen-fold-wide .shrine-visit-cards-diocese{
   height:42px!important;
@@ -5524,7 +5522,6 @@ html:not(.ios-device).oai-screen-fold-wide .shrine-visit-cards-diocese{
 html:not(.ios-device).oai-screen-fold-wide .shrine-visit-cards-diocese .filter-btn{
   height:30px!important;
   min-height:30px!important;
-  font-size:12.5px!important;
 }
 html:not(.ios-device).oai-screen-fold-wide .shrine-visit-cards-body{
   padding:10px 12px max(48px,calc(env(safe-area-inset-bottom,0px) + 40px))!important;
@@ -5535,14 +5532,14 @@ html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-badge{
   padding:10px 11px 9px!important;
 }
 html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-badge strong{line-height:1.18!important;}
-html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-badge .shrine-visit-card-count{font-size:11.5px!important;}
+
 html:not(.ios-device).oai-screen-fold-wide .shrine-visit-detail-head{height:52px!important;min-height:52px!important;}
 html:not(.ios-device).oai-screen-fold-wide .shrine-visit-detail-body{padding:11px 12px max(48px,env(safe-area-inset-bottom))!important;}
 html:not(.ios-device).oai-screen-fold-wide .shrine-visit-detail-hero{padding:14px 14px!important;border-radius:18px!important;margin-bottom:10px!important;}
 html:not(.ios-device).oai-screen-fold-wide .shrine-visit-detail-info{padding:13px 12px!important;border-radius:16px!important;}
-html:not(.ios-device).oai-screen-fold-wide .shrine-visit-detail-name{font-size:19px!important;margin-bottom:9px!important;}
+html:not(.ios-device).oai-screen-fold-wide .shrine-visit-detail-name{margin-bottom:9px!important;}
 html:not(.ios-device).oai-screen-fold-wide .shrine-visit-detail-row{padding:8px 0!important;}
-html:not(.ios-device).oai-screen-fold-wide .shrine-visit-detail-action{height:42px!important;min-height:42px!important;font-size:13px!important;}
+html:not(.ios-device).oai-screen-fold-wide .shrine-visit-detail-action{height:42px!important;min-height:42px!important;}
 html:not(.ios-device).oai-screen-tall-phone #app .shrine-visit-detail-action{height:45px!important;min-height:45px!important;}
 
 html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-grid{
@@ -5562,14 +5559,12 @@ html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-badge.visited:afte
 }
 html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-badge .shrine-visit-card-dio{
   max-width:66%!important;
-  font-size:10.5px!important;
 }
 html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-badge strong{
   line-height:1.16!important;
   -webkit-line-clamp:2!important;
 }
 html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-badge .shrine-visit-card-count{
-  font-size:11px!important;
   padding:3px 7px!important;
 }
 html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-stamp{
@@ -5578,7 +5573,6 @@ html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-stamp{
   height:22px!important;
   padding:0 6px!important;
   border-radius:6px!important;
-  font-size:8.5px!important;
 }
 
 .shrine-visit-card-badge.visited .shrine-visit-card-seal{
@@ -5655,9 +5649,7 @@ html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-badge.visited .shr
 .shrine-visit-card-badge.visited .shrine-visit-card-seal::after{
   font-size:13px!important;
 }
-html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-badge.visited .shrine-visit-card-seal::after{
-  font-size:10.5px!important;
-}
+
 
 .shrine-visit-card-badge.type-shrine.visited .shrine-visit-card-seal{
   color:#ef2f2f!important;
@@ -6592,313 +6584,7 @@ html.oai-font-global .category-source-note { font-size: calc(11px * var(--app-in
 #app .shrine-visit-detail-action.detail-goodnews{background:#eaf7ff!important;color:#075985!important;border:1.5px solid #7ec8f3!important;}
 #app .shrine-visit-detail-action.detail-kakao{width:0!important;}
 
-#app #info-card .ic-tel-btn,
-#app #info-card .ic-route-btn,
-#app #info-card .ic-hp-btn,
-#app #info-card .ic-guide-btn,
-#app #info-card .ic-goodnews-btn,
-#app #info-card .btn-kakao-nav{
-  background:#fff8e8!important;
-  color:#5b3c00!important;
-  border:1.5px solid #d8c28f!important;
-  box-shadow:0 1px 4px rgba(91,60,0,.08)!important;
-}
-#app #info-card .ic-tel-btn .ic-tel-icon{color:#5b3c00!important;}
-#app #info-card .ic-route-btn,
-#app #info-card .btn-kakao-nav{
-  font-weight:900!important;
-}
-#app #info-card .ic-tel-btn:active,
-#app #info-card .ic-route-btn:active,
-#app #info-card .ic-hp-btn:active,
-#app #info-card .ic-guide-btn:active,
-#app #info-card .ic-goodnews-btn:active,
-#app #info-card .btn-kakao-nav:active{
-  background:#fff0c9!important;
-  filter:none!important;
-  transform:translateY(1px);
-}
-#app .shrine-visit-detail-action.detail-tel,
-#app .shrine-visit-detail-action.detail-route,
-#app .shrine-visit-detail-action.detail-home,
-#app .shrine-visit-detail-action.detail-guide,
-#app .shrine-visit-detail-action.detail-goodnews,
-#app .shrine-visit-detail-action.detail-kakao{
-  background:#fff8e8!important;
-  color:#5b3c00!important;
-  border:1.5px solid #d8c28f!important;
-  box-shadow:0 1px 4px rgba(91,60,0,.08)!important;
-}
-#app .shrine-visit-detail-action.detail-tel:active,
-#app .shrine-visit-detail-action.detail-route:active,
-#app .shrine-visit-detail-action.detail-home:active,
-#app .shrine-visit-detail-action.detail-guide:active,
-#app .shrine-visit-detail-action.detail-goodnews:active,
-#app .shrine-visit-detail-action.detail-kakao:active{
-  background:#fff0c9!important;
-  filter:none!important;
-}
-
-#app #info-card .ic-btn-row > *,
-#app #info-card .ic-links > *,
-#app #info-card .ic-kakao-row > *,
-#app #info-card a.ic-tel-btn,
-#app #info-card button.ic-route-btn,
-#app #info-card button.ic-home-btn,
-#app #info-card .ic-detail-btn,
-#app #info-card .ic-goodnews-btn,
-#app #info-card .ic-kakao-btn{
-  background:linear-gradient(180deg,#fffdf8 0%,#f8efe0 100%)!important;
-  color:#3b2a16!important;
-  border:1.5px solid #d3bb8d!important;
-  box-shadow:0 2px 7px rgba(64,46,18,.08), inset 0 1px 0 rgba(255,255,255,.85)!important;
-  text-shadow:none!important;
-}
-#app #info-card .ic-btn-row > *:active,
-#app #info-card .ic-links > *:active,
-#app #info-card .ic-kakao-row > *:active,
-#app #info-card a.ic-tel-btn:active,
-#app #info-card button.ic-route-btn:active,
-#app #info-card button.ic-home-btn:active,
-#app #info-card .ic-detail-btn:active,
-#app #info-card .ic-goodnews-btn:active,
-#app #info-card .ic-kakao-btn:active{
-  background:linear-gradient(180deg,#f5e5c6 0%,#ead1a1 100%)!important;
-  border-color:#bd9655!important;
-  transform:translateY(1px)!important;
-}
-#app .shrine-visit-detail-actions .shrine-visit-detail-action,
-#app .shrine-visit-detail-action.detail-home,
-#app .shrine-visit-detail-action.detail-guide,
-#app .shrine-visit-detail-action.detail-goodnews,
-#app .shrine-visit-detail-action.detail-kakao,
-#app .shrine-visit-detail-action.detail-route{
-  background:linear-gradient(180deg,#fffdf8 0%,#f8efe0 100%)!important;
-  color:#3b2a16!important;
-  border:1.5px solid #d3bb8d!important;
-  box-shadow:0 2px 7px rgba(64,46,18,.08), inset 0 1px 0 rgba(255,255,255,.85)!important;
-  text-shadow:none!important;
-}
-#app .shrine-visit-detail-actions .shrine-visit-detail-action:active,
-#app .shrine-visit-detail-action.detail-home:active,
-#app .shrine-visit-detail-action.detail-guide:active,
-#app .shrine-visit-detail-action.detail-goodnews:active,
-#app .shrine-visit-detail-action.detail-kakao:active,
-#app .shrine-visit-detail-action.detail-route:active{
-  background:linear-gradient(180deg,#f5e5c6 0%,#ead1a1 100%)!important;
-  border-color:#bd9655!important;
-  transform:translateY(1px)!important;
-}
-
-#app #info-card .ic-btn-row > *,
-#app #info-card .ic-links > *,
-#app #info-card .ic-kakao-row > *,
-#app #info-card a.ic-tel-btn,
-#app #info-card button.ic-route-btn,
-#app #info-card button.ic-home-btn,
-#app #info-card .ic-detail-btn,
-#app #info-card .ic-goodnews-btn,
-#app #info-card .ic-kakao-btn{
-  background:linear-gradient(180deg,#253c63 0%,#172b4d 100%)!important;
-  color:#fff8e6!important;
-  border:1.5px solid #d7b56d!important;
-  box-shadow:0 3px 9px rgba(12,24,48,.18), inset 0 1px 0 rgba(255,255,255,.14)!important;
-  text-shadow:0 1px 1px rgba(0,0,0,.18)!important;
-}
-#app #info-card .ic-btn-row > *:active,
-#app #info-card .ic-links > *:active,
-#app #info-card .ic-kakao-row > *:active,
-#app #info-card a.ic-tel-btn:active,
-#app #info-card button.ic-route-btn:active,
-#app #info-card button.ic-home-btn:active,
-#app #info-card .ic-detail-btn:active,
-#app #info-card .ic-goodnews-btn:active,
-#app #info-card .ic-kakao-btn:active{
-  background:linear-gradient(180deg,#1c3155 0%,#102342 100%)!important;
-  border-color:#e3c47b!important;
-  transform:translateY(1px)!important;
-}
-#app .shrine-visit-detail-actions .shrine-visit-detail-action,
-#app .shrine-visit-detail-action.detail-home,
-#app .shrine-visit-detail-action.detail-guide,
-#app .shrine-visit-detail-action.detail-goodnews,
-#app .shrine-visit-detail-action.detail-kakao,
-#app .shrine-visit-detail-action.detail-route{
-  background:linear-gradient(180deg,#253c63 0%,#172b4d 100%)!important;
-  color:#fff8e6!important;
-  border:1.5px solid #d7b56d!important;
-  box-shadow:0 3px 9px rgba(12,24,48,.18), inset 0 1px 0 rgba(255,255,255,.14)!important;
-  text-shadow:0 1px 1px rgba(0,0,0,.18)!important;
-}
-#app .shrine-visit-detail-actions .shrine-visit-detail-action:active,
-#app .shrine-visit-detail-action.detail-home:active,
-#app .shrine-visit-detail-action.detail-guide:active,
-#app .shrine-visit-detail-action.detail-goodnews:active,
-#app .shrine-visit-detail-action.detail-kakao:active,
-#app .shrine-visit-detail-action.detail-route:active{
-  background:linear-gradient(180deg,#1c3155 0%,#102342 100%)!important;
-  border-color:#e3c47b!important;
-  transform:translateY(1px)!important;
-}
-
-#app #info-card #ic-tel-link,
-#app .shrine-visit-detail-action-row.detail-primary-row > .detail-tel{
-  background:linear-gradient(180deg,#f5fbff 0%,#e4f3ff 100%)!important;
-  color:#17456b!important;
-  border:1.5px solid #9cc9ea!important;
-  box-shadow:0 3px 8px rgba(15,35,60,.13), inset 0 1px 0 rgba(255,255,255,.92)!important;
-  text-shadow:none!important;
-}
-#app #info-card #ic-route-btn,
-#app .shrine-visit-detail-action-row.detail-primary-row > .detail-route{
-  background:linear-gradient(180deg,#38557d 0%,#27446f 100%)!important;
-  color:#fff8e6!important;
-  border:1.5px solid #d8bd79!important;
-  box-shadow:0 3px 8px rgba(15,35,60,.18), inset 0 1px 0 rgba(255,255,255,.18)!important;
-  text-shadow:0 1px 1px rgba(0,0,0,.18)!important;
-}
-#app #info-card #ic-hp,
-#app .shrine-visit-detail-action-row.detail-link-row > .detail-home{
-  background:linear-gradient(180deg,#e8f6ff 0%,#cfeaff 100%)!important;
-  color:#123e63!important;
-  border:1.5px solid #82badf!important;
-  box-shadow:0 3px 8px rgba(15,35,60,.13), inset 0 1px 0 rgba(255,255,255,.86)!important;
-  text-shadow:none!important;
-}
-#app #info-card #ic-guide,
-#app .shrine-visit-detail-action-row.detail-link-row > .detail-guide{
-  background:linear-gradient(180deg,#2f4b75 0%,#1d3863 100%)!important;
-  color:#fff8e6!important;
-  border:1.5px solid #d3b46e!important;
-  box-shadow:0 3px 8px rgba(15,35,60,.18), inset 0 1px 0 rgba(255,255,255,.17)!important;
-  text-shadow:0 1px 1px rgba(0,0,0,.18)!important;
-}
-#app #info-card #ic-goodnews,
-#app .shrine-visit-detail-action-row.detail-kakao-row > .detail-goodnews{
-  background:linear-gradient(180deg,#d7efff 0%,#acd7f4 100%)!important;
-  color:#0f385c!important;
-  border:1.5px solid #6facd5!important;
-  box-shadow:0 3px 8px rgba(15,35,60,.13), inset 0 1px 0 rgba(255,255,255,.78)!important;
-  text-shadow:none!important;
-}
-#app #info-card #ic-kakao-nav,
-#app .shrine-visit-detail-action-row.detail-kakao-row > .detail-kakao{
-  background:linear-gradient(180deg,#253c63 0%,#162c4f 100%)!important;
-  color:#fff8e6!important;
-  border:1.5px solid #cda95f!important;
-  box-shadow:0 3px 8px rgba(15,35,60,.20), inset 0 1px 0 rgba(255,255,255,.16)!important;
-  text-shadow:0 1px 1px rgba(0,0,0,.18)!important;
-}
-#app #info-card #ic-tel-link:active,
-#app #info-card #ic-route-btn:active,
-#app #info-card #ic-hp:active,
-#app #info-card #ic-guide:active,
-#app #info-card #ic-goodnews:active,
-#app #info-card #ic-kakao-nav:active,
-#app .shrine-visit-detail-action-row > .shrine-visit-detail-action:active{
-  filter:brightness(.94)!important;
-  transform:translateY(1px)!important;
-}
-
-#app #info-card #ic-tel-link,
-#app .shrine-visit-detail-action-row.detail-primary-row > .detail-tel{
-  background:linear-gradient(180deg,#f4fbf5 0%,#dff2e5 100%)!important;
-  color:#244f38!important;
-  border:1.5px solid #a8d5b5!important;
-  box-shadow:0 3px 8px rgba(35,78,56,.10), inset 0 1px 0 rgba(255,255,255,.90)!important;
-  text-shadow:none!important;
-}
-#app #info-card #ic-route-btn,
-#app .shrine-visit-detail-action-row.detail-primary-row > .detail-route{
-  background:linear-gradient(180deg,#f4f7fc 0%,#e2eaf6 100%)!important;
-  color:#2e466b!important;
-  border:1.5px solid #a8bbd8!important;
-  box-shadow:0 3px 8px rgba(46,70,107,.10), inset 0 1px 0 rgba(255,255,255,.90)!important;
-  text-shadow:none!important;
-}
-#app #info-card #ic-hp,
-#app .shrine-visit-detail-action-row.detail-link-row > .detail-home{
-  background:linear-gradient(180deg,#eaf7ee 0%,#cfeadb 100%)!important;
-  color:#204a35!important;
-  border:1.5px solid #8fc79f!important;
-  box-shadow:0 3px 8px rgba(35,78,56,.11), inset 0 1px 0 rgba(255,255,255,.84)!important;
-  text-shadow:none!important;
-}
-#app #info-card #ic-guide,
-#app .shrine-visit-detail-action-row.detail-link-row > .detail-guide{
-  background:linear-gradient(180deg,#e8eff8 0%,#cfddf0 100%)!important;
-  color:#283f63!important;
-  border:1.5px solid #8da7cc!important;
-  box-shadow:0 3px 8px rgba(46,70,107,.11), inset 0 1px 0 rgba(255,255,255,.84)!important;
-  text-shadow:none!important;
-}
-#app #info-card #ic-goodnews,
-#app .shrine-visit-detail-action-row.detail-kakao-row > .detail-goodnews{
-  background:linear-gradient(180deg,#def1e5 0%,#bddfc9 100%)!important;
-  color:#1d4630!important;
-  border:1.5px solid #77b98a!important;
-  box-shadow:0 3px 8px rgba(35,78,56,.12), inset 0 1px 0 rgba(255,255,255,.75)!important;
-  text-shadow:none!important;
-}
-#app #info-card #ic-kakao-nav,
-#app .shrine-visit-detail-action-row.detail-kakao-row > .detail-kakao{
-  background:linear-gradient(180deg,#dce7f5 0%,#b9cce7 100%)!important;
-  color:#233b5d!important;
-  border:1.5px solid #7391bd!important;
-  box-shadow:0 3px 8px rgba(46,70,107,.12), inset 0 1px 0 rgba(255,255,255,.75)!important;
-  text-shadow:none!important;
-}
-#app #info-card #ic-tel-link:active,
-#app #info-card #ic-route-btn:active,
-#app #info-card #ic-hp:active,
-#app #info-card #ic-guide:active,
-#app #info-card #ic-goodnews:active,
-#app #info-card #ic-kakao-nav:active,
-#app .shrine-visit-detail-action-row > .shrine-visit-detail-action:active{
-  filter:brightness(.96) saturate(.96)!important;
-  transform:translateY(1px)!important;
-}
-
-#app #info-card #ic-kakao-nav,
-#app .shrine-visit-detail-action-row.detail-kakao-row > .detail-kakao{
-  background:linear-gradient(180deg,#ffe812 0%,#fee500 100%)!important;
-  color:#3c1e1e!important;
-  border:1.5px solid #e2c900!important;
-  box-shadow:0 3px 8px rgba(60,30,30,.13), inset 0 1px 0 rgba(255,255,255,.45)!important;
-  text-shadow:none!important;
-}
-#app #info-card #ic-kakao-nav:active,
-#app .shrine-visit-detail-action-row.detail-kakao-row > .detail-kakao:active{
-  background:linear-gradient(180deg,#efd700 0%,#dfc900 100%)!important;
-  border-color:#c8b300!important;
-  filter:none!important;
-  transform:translateY(1px)!important;
-}
-
-#app #info-card #ic-hp,
-#app .shrine-visit-detail-action-row.detail-link-row > .detail-home{
-  background:linear-gradient(180deg,#d9f0e1 0%,#b8dec6 100%)!important;
-  color:#1b432e!important;
-  border:1.5px solid #75b688!important;
-  font-weight:950!important;
-  box-shadow:0 3px 9px rgba(28,94,55,.17), inset 0 1px 0 rgba(255,255,255,.42)!important;
-}
-#app #info-card #ic-guide,
-#app .shrine-visit-detail-action-row.detail-link-row > .detail-guide{
-  background:linear-gradient(180deg,#d5e2f2 0%,#b8cae4 100%)!important;
-  color:#203858!important;
-  border:1.5px solid #6f8fba!important;
-  font-weight:900!important;
-}
-#app #info-card #ic-goodnews,
-#app .shrine-visit-detail-action-row.detail-kakao-row > .detail-goodnews{
-  background:linear-gradient(180deg,#cce8d5 0%,#97caa8 100%)!important;
-  color:#173d29!important;
-  border:2px solid #5ba773!important;
-  font-weight:950!important;
-  box-shadow:0 3px 9px rgba(31,86,54,.16), inset 0 1px 0 rgba(255,255,255,.62)!important;
-}
-
+/* V8-1-14-277: 인포카드/상세 버튼 색상은 아래 최종 통합 블록 하나만 사용한다. */
 #app .shrine-visit-detail-info{
   background:linear-gradient(180deg,#fbfdff 0%,#fffaf0 100%)!important;
   border:2px solid #9db7cc!important;
@@ -6910,40 +6596,7 @@ html.oai-font-global .category-source-note { font-size: calc(11px * var(--app-in
   border:1.5px solid #d5b86d!important;
   box-shadow:0 2px 6px rgba(95,69,21,.08)!important;
 }
-#app #info-card #ic-goodnews,
-#app .shrine-visit-detail-action.detail-goodnews{
-  background:#3f8f7d!important;
-  color:#ffffff!important;
-  border:1.8px solid #2d6f61!important;
-  box-shadow:0 2px 9px rgba(63,143,125,.28)!important;
-  text-shadow:0 1px 1px rgba(0,0,0,.18)!important;
-  font-weight:950!important;
-}
-
-#app #info-card #ic-hp,
-#app .shrine-visit-detail-action.detail-home{
-  background:linear-gradient(180deg,#d9f0e1 0%,#b8dec6 100%)!important;
-  color:#1b432e!important;
-  border:1.5px solid #75b688!important;
-  font-weight:950!important;
-  box-shadow:0 3px 9px rgba(28,94,55,.17), inset 0 1px 0 rgba(255,255,255,.42)!important;
-}
-#app #info-card #ic-hp,
-#app .shrine-visit-detail-action.detail-home{
-  background:linear-gradient(180deg,#d9f0e1 0%,#b8dec6 100%)!important;
-  color:#1b432e!important;
-  border:1.5px solid #75b688!important;
-  font-weight:900!important;
-}
-#app #info-card #ic-goodnews,
-#app .shrine-visit-detail-action.detail-goodnews{
-  background:#3f8f7d!important;
-  color:#ffffff!important;
-  border:1.8px solid #2d6f61!important;
-  box-shadow:0 2px 9px rgba(63,143,125,.28)!important;
-  text-shadow:0 1px 1px rgba(0,0,0,.20)!important;
-  font-weight:950!important;
-}
+/* V8-1-14-277: 상세 버튼 개별 색상 중복 override 제거. */
 .map-loading-icon,
 #diocese-loading .missa-spinner,
 #nearby-body .nearby-distance-spinner{
@@ -7492,6 +7145,65 @@ html.oai-external-return-freeze #oai-external-entry-guard.hide .oai-external-ent
   transform:translateY(1px)!important;
 }
 
+/* V8-1-14-277: 인포카드 버튼과 성지 상세정보 버튼의 크기 기준을 한곳에서 확정한다. */
+#app #info-card #ic-tel-link,
+#app #info-card #ic-route-btn,
+#app #info-card #ic-hp,
+#app #info-card #ic-guide,
+#app #info-card #ic-goodnews,
+#app #info-card #ic-kakao-nav,
+#app #info-card .ic-tel-btn,
+#app #info-card .ic-route-btn,
+#app #info-card .ic-link-btn,
+#app #info-card .btn-kakao-nav{
+  height:46px!important;
+  min-height:46px!important;
+  font-size:calc(16px * var(--app-inner-font-scale,1))!important;
+}
+#app .shrine-visit-detail-action-row > .shrine-visit-detail-action,
+#app .shrine-visit-detail-actions .shrine-visit-detail-action,
+#app .shrine-visit-detail-action{
+  height:46px!important;
+  min-height:46px!important;
+}
+html:not(.ios-device).oai-screen-tall-phone #app #info-card #ic-tel-link,
+html:not(.ios-device).oai-screen-tall-phone #app #info-card #ic-route-btn,
+html:not(.ios-device).oai-screen-tall-phone #app #info-card #ic-hp,
+html:not(.ios-device).oai-screen-tall-phone #app #info-card #ic-guide,
+html:not(.ios-device).oai-screen-tall-phone #app #info-card #ic-goodnews,
+html:not(.ios-device).oai-screen-tall-phone #app #info-card #ic-kakao-nav,
+html:not(.ios-device).oai-screen-tall-phone #app .shrine-visit-detail-action-row > .shrine-visit-detail-action,
+html:not(.ios-device).oai-screen-tall-phone #app .shrine-visit-detail-action{
+  height:45px!important;
+  min-height:45px!important;
+}
+html:not(.ios-device).oai-screen-fold-wide #app #info-card #ic-tel-link,
+html:not(.ios-device).oai-screen-fold-wide #app #info-card #ic-route-btn,
+html:not(.ios-device).oai-screen-fold-wide #app #info-card #ic-hp,
+html:not(.ios-device).oai-screen-fold-wide #app #info-card #ic-guide,
+html:not(.ios-device).oai-screen-fold-wide #app #info-card #ic-goodnews,
+html:not(.ios-device).oai-screen-fold-wide #app #info-card #ic-kakao-nav,
+html:not(.ios-device).oai-screen-fold-wide #app .shrine-visit-detail-action-row > .shrine-visit-detail-action,
+html:not(.ios-device).oai-screen-fold-wide #app .shrine-visit-detail-action{
+  height:42px!important;
+  min-height:42px!important;
+}
+html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-tel-link,
+html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-route-btn,
+html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-hp,
+html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-guide,
+html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-goodnews,
+html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-kakao-nav,
+html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-tel-btn,
+html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-route-btn,
+html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-link-btn,
+html:not(.ios-device).oai-screen-compact-short #app #info-card .btn-kakao-nav,
+html:not(.ios-device).oai-screen-compact-short #app .shrine-visit-detail-action-row > .shrine-visit-detail-action,
+html:not(.ios-device).oai-screen-compact-short #app .shrine-visit-detail-action{
+  height:48px!important;
+  min-height:48px!important;
+}
+
 html:not(.ios-device).oai-screen-compact-short #tabbar{
   height:calc(66px + env(safe-area-inset-top,0px))!important;
   min-height:calc(66px + env(safe-area-inset-top,0px))!important;
@@ -7658,11 +7370,11 @@ html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-guide,
 html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-goodnews,
 html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-kakao-nav,
 html:not(.ios-device).oai-screen-compact-short #app .shrine-visit-detail-action-row > .shrine-visit-detail-action{
-  height:50px!important;
-  min-height:50px!important;
+  height:48px!important;
+  min-height:48px!important;
 }
 html:not(.ios-device).oai-screen-compact-short #app .shrine-visit-detail-actions{gap:6px!important;}
-html:not(.ios-device).oai-screen-compact-short #app .shrine-visit-detail-action{height:50px!important;min-height:50px!important;padding:0 6px!important;}
+html:not(.ios-device).oai-screen-compact-short #app .shrine-visit-detail-action{height:48px!important;min-height:48px!important;padding:0 6px!important;}
 html:not(.ios-device).oai-screen-compact-short #app .shrine-visit-detail-info-head{gap:7px!important;}
 html:not(.ios-device).oai-screen-compact-short #app .shrine-visit-detail-map-btn{height:30px!important;min-height:30px!important;padding:0 9px!important;}
 html:not(.ios-device).oai-screen-compact-short #app .shrine-visit-card-badge.visited .shrine-visit-card-seal{right:10px!important;bottom:9px!important;width:38px!important;height:38px!important;}
