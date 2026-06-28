@@ -5476,8 +5476,8 @@ html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-tel-btn,
 html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-route-btn,
 html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-link-btn,
 html:not(.ios-device).oai-screen-compact-short #app #info-card .btn-kakao-nav{
-  height:36.5px!important;
-  min-height:36.5px!important;
+  height:50px!important;
+  min-height:50px!important;
   
   border-radius:9px!important;
 }
@@ -5609,7 +5609,7 @@ html:not(.ios-device).oai-screen-compact-short .shrine-visit-detail-hero{padding
 html:not(.ios-device).oai-screen-compact-short .shrine-visit-detail-info{padding:12px 11px!important;border-radius:15px!important;}
 html:not(.ios-device).oai-screen-compact-short .shrine-visit-detail-name{margin-bottom:8px!important;}
 html:not(.ios-device).oai-screen-compact-short .shrine-visit-detail-row{padding:8px 0!important;gap:9px!important;}
-html:not(.ios-device).oai-screen-compact-short .shrine-visit-detail-action{height:38px!important;min-height:38px!important;}
+html:not(.ios-device).oai-screen-compact-short .shrine-visit-detail-action{height:50px!important;min-height:50px!important;}
 
 html:not(.ios-device).oai-screen-tall-phone .shrine-visit-cards-tabs{height:58px!important;min-height:58px!important;max-height:58px!important;}
 html:not(.ios-device).oai-screen-tall-phone .shrine-visit-cards-diocese{height:46px!important;min-height:46px!important;max-height:46px!important;}
@@ -5663,7 +5663,8 @@ html:not(.ios-device).oai-screen-fold-wide .shrine-visit-detail-hero{padding:14p
 html:not(.ios-device).oai-screen-fold-wide .shrine-visit-detail-info{padding:13px 12px!important;border-radius:16px!important;}
 html:not(.ios-device).oai-screen-fold-wide .shrine-visit-detail-name{font-size:19px!important;margin-bottom:9px!important;}
 html:not(.ios-device).oai-screen-fold-wide .shrine-visit-detail-row{padding:8px 0!important;}
-html:not(.ios-device).oai-screen-fold-wide .shrine-visit-detail-action{height:39px!important;min-height:39px!important;font-size:13px!important;}
+html:not(.ios-device).oai-screen-fold-wide .shrine-visit-detail-action{height:42px!important;min-height:42px!important;font-size:13px!important;}
+html:not(.ios-device).oai-screen-tall-phone #app .shrine-visit-detail-action{height:45px!important;min-height:45px!important;}
 
 /* V6-123: 폴드 큰 화면에서 순례카드가 가로폭에 비례해 세로로 과하게 커지는 문제 보정 */
 html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-grid{
@@ -8084,12 +8085,13 @@ html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-route-btn,
 html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-hp,
 html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-guide,
 html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-goodnews,
-html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-kakao-nav{
+html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-kakao-nav,
+html:not(.ios-device).oai-screen-compact-short #app .shrine-visit-detail-action-row > .shrine-visit-detail-action{
   height:50px!important;
   min-height:50px!important;
 }
 html:not(.ios-device).oai-screen-compact-short #app .shrine-visit-detail-actions{gap:6px!important;}
-html:not(.ios-device).oai-screen-compact-short #app .shrine-visit-detail-action{height:42px!important;min-height:42px!important;padding:0 6px!important;}
+html:not(.ios-device).oai-screen-compact-short #app .shrine-visit-detail-action{height:50px!important;min-height:50px!important;padding:0 6px!important;}
 html:not(.ios-device).oai-screen-compact-short #app .shrine-visit-detail-info-head{gap:7px!important;}
 html:not(.ios-device).oai-screen-compact-short #app .shrine-visit-detail-map-btn{height:30px!important;min-height:30px!important;padding:0 9px!important;}
 html:not(.ios-device).oai-screen-compact-short #app .shrine-visit-card-badge.visited .shrine-visit-card-seal{right:10px!important;bottom:9px!important;width:38px!important;height:38px!important;}
@@ -8118,7 +8120,7 @@ html:not(.ios-device).oai-screen-compact-short.retreat-mode #app #loc-btn{
 
 
 /* V8-1-14-269: compact 매일미사 하단 빠른사용 버튼은 글자 크기를 유지하고 높이/위치만 조정 */
-/* V8-1-14-272: compact에서 주요기도문/매일미사 하단 빠른사용 버튼은 글자 유지, 높이만 더 낮추고 위치를 더 아래로 */
+/* V8-1-14-273: compact에서 주요기도문/매일미사 하단 빠른사용 버튼은 글자 유지, 높이만 더 낮추고 위치를 더 아래로 */
 html:not(.ios-device).oai-screen-compact-short #prayer-view .faith-bottom-nav,
 html:not(.ios-device).oai-screen-compact-short #missa-view .faith-bottom-nav{
   gap:6px!important;
@@ -8159,7 +8161,7 @@ html:not(.ios-device).oai-screen-compact-short #app #sheet-route.open,
 }
 
 
-/* V8-1-14-272: 가톨릭 웹사이트 헤더 기준으로 순례 스탬프북 헤더/탭만 표준화 */
+/* V8-1-14-273: 가톨릭 웹사이트 헤더 기준으로 순례 스탬프북 헤더/탭만 표준화 */
 #app #shrine-visit-cards-modal .shrine-visit-cards-head.module-bar,
 #app .shrine-visit-cards-modal .shrine-visit-cards-head.module-bar,
 #app .shrine-visit-cards-head.module-bar{

@@ -663,7 +663,7 @@ function oaiClearExternalNavigationState(opts){
   window.addEventListener('focus', function(){ scheduleBackgroundReturn('focus'); }, {passive:true});
 })();
 
-/* V8-1-14-272:
+/* V8-1-14-273:
    Fold 작은화면↔큰화면 전환 및 백그라운드 reload 복귀 때
    인트로/커버로 강제 이동하지 않고 마지막으로 보던 주요 화면을 복원한다.
    Back/외부사이트/지도/길찾기 핵심 로직은 건드리지 않는다. */
