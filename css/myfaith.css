@@ -112,6 +112,47 @@ html:not(.ios-device).oai-screen-compact-short .my-diocese-list{grid-template-co
   padding: 8px 12px max(10px, env(safe-area-inset-bottom, 0px)) !important;
   flex: 0 0 auto !important;
 }
+
+.my-faith-body.my-faith-home-list-body .my-faith-quick-section {
+  order: 1 !important;
+}
+.my-faith-body.my-faith-home-list-body .my-faith-change-settings-wrap {
+  order: 2 !important;
+}
+.my-faith-body.my-faith-home-list-body .my-faith-inline-confirm {
+  order: 3 !important;
+}
+.my-faith-body.my-faith-home-list-body .my-faith-data-section {
+  order: 4 !important;
+  display: block !important;
+  flex: 0 0 auto !important;
+  width: 100% !important;
+  margin: 8px 0 4px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  overflow: visible !important;
+}
+.my-faith-body.my-faith-home-list-body .my-faith-data-toggle-btn {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  width: 100% !important;
+  min-height: 52px !important;
+  height: auto !important;
+  padding: 0 18px !important;
+  border-radius: 18px !important;
+  line-height: 1.22 !important;
+  box-sizing: border-box !important;
+  overflow: visible !important;
+}
+.my-faith-body.my-faith-home-list-body .my-faith-data-toggle-note {
+  display: none !important;
+}
+.my-faith-body.my-faith-home-list-body .my-faith-inline-privacy-note {
+  order: 5 !important;
+}
 @media (max-height: 820px) {
   html:not(.ios-device).oai-screen-compact-short .my-faith-body.my-faith-home-list-body {
     gap: 7px !important;
@@ -870,25 +911,33 @@ html:not(.ios-device).oai-screen-compact-short .my-faith-code-btn {
   min-height: 40px !important;
 }
 
+html:not(.ios-device).oai-screen-compact-short .my-faith-body.my-faith-home-list-body .my-faith-inline-confirm{
+  order:3!important;
+  margin:6px 0 3px!important;
+}
 html:not(.ios-device).oai-screen-compact-short .my-faith-body.my-faith-home-list-body .my-faith-data-section{
   display:block!important;
   flex:0 0 auto!important;
   order:4!important;
-  margin:6px 0 2px!important;
+  margin:7px 0 3px!important;
   padding:0!important;
+  border:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  overflow:visible!important;
 }
 html:not(.ios-device).oai-screen-compact-short .my-faith-body.my-faith-home-list-body .my-faith-data-toggle-btn{
   display:flex!important;
   align-items:center!important;
   justify-content:center!important;
-  min-height:44px!important;
+  min-height:48px!important;
+  height:auto!important;
+  padding:0 14px!important;
+  line-height:1.22!important;
+  overflow:visible!important;
 }
 html:not(.ios-device).oai-screen-compact-short .my-faith-body.my-faith-home-list-body .my-faith-data-toggle-note{
   display:none!important;
-}
-html:not(.ios-device).oai-screen-compact-short .my-faith-body.my-faith-home-list-body .my-faith-inline-confirm{
-  order:3!important;
-  margin-top:6px!important;
 }
 html:not(.ios-device).oai-screen-compact-short .my-faith-body.my-faith-home-list-body .my-faith-inline-privacy-note{
   order:5!important;
