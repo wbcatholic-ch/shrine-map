@@ -78,8 +78,6 @@
 .my-diocese-option.selected { background:#f6ead5 !important; border-color:rgba(183,121,31,.48) !important; box-shadow:inset 0 0 0 1px rgba(183,121,31,.18), 0 6px 12px rgba(31,42,68,.07) !important; }
 .my-diocese-option.my-diocese-none { color:var(--v4-text-muted) !important; background:#f8fafc !important; border-style:dashed !important; }
 
-
-/* V8-1-14-43: 나의 신앙생활을 다른 카테고리와 같은 module-view 화면으로 사용 */
 .my-diocese-modal.module-view {
   display: none !important;
   flex-direction: column !important;
@@ -90,17 +88,8 @@
 .my-diocese-modal.module-view.show {
   display: flex !important;
 }
-
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: Android WebView 하단 여백 상한/최소값 표준화 */
 html:not(.ios-device) .my-diocese-list{padding-bottom:calc(12px + var(--oai-android-bottom-gap, 10px))!important;}
 
-
-/* OAI-V67-STAMPBOOK-HEADER-BOTTOM-SAFE-FINAL: Android WebView 하단 여백 표준화 */
-html:not(.ios-device) .my-diocese-list{padding-bottom:calc(12px + var(--oai-android-bottom-gap, 10px))!important;}
-
-
-/* V8-1-14-253: compact(370px 이하) 전용 - 나의 설정 X 최소 보정 */
 html:not(.ios-device).oai-screen-compact-short .my-diocese-close{
   width:34px!important;height:34px!important;min-width:34px!important;flex-basis:34px!important;
 }

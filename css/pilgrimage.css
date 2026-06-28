@@ -125,19 +125,9 @@
 #trail-view .trail-body { flex: 1; min-height: 0; display: flex; flex-direction: column; width: 100%; }
 
 #trail-view .trail-tab{height:40px!important;min-height:40px!important;padding:0 12px!important;border-radius:10px!important;font-size:15px!important;line-height:1!important;align-items:center!important;box-sizing:border-box!important;}
-
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: Android WebView 하단 여백 상한/최소값 표준화 */
 html:not(.ios-device) .trail-loc-btn{bottom:calc(10px + var(--oai-android-bottom-gap, 10px))!important;}
 html:not(.ios-device) .trail-sheet{padding-bottom:calc(18px + var(--oai-android-bottom-gap, 10px))!important;}
 
-
-/* OAI-V67-STAMPBOOK-HEADER-BOTTOM-SAFE-FINAL: Android WebView 하단 여백 표준화 */
-html:not(.ios-device) .trail-loc-btn{bottom:calc(10px + var(--oai-android-bottom-gap, 10px))!important;}
-html:not(.ios-device) .trail-sheet{padding-bottom:calc(18px + var(--oai-android-bottom-gap, 10px))!important;}
-
-
-/* V8-1-14-253: compact(370px 이하) 전용 - 순례길 탭/X 최소 보정 */
 html:not(.ios-device).oai-screen-compact-short #trail-view .trail-tabs{
   height:var(--oai-std-tabbar-h,46px)!important;min-height:var(--oai-std-tabbar-h,46px)!important;max-height:var(--oai-std-tabbar-h,46px)!important;padding:0 8px!important;gap:5px!important;
 }

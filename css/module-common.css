@@ -273,8 +273,6 @@
 
 #trail-view .trail-tabs, #qna-view .qna-tabs { -webkit-overflow-scrolling: touch; touch-action: auto; }
 
-
-/* V8-1-14-253: compact(370px 이하) 전용 - 공통 모듈 탭/X 최소 보정 */
 html:not(.ios-device).oai-screen-compact-short #prayer-tabs,
 html:not(.ios-device).oai-screen-compact-short #web-view .web-cats,
 html:not(.ios-device).oai-screen-compact-short #trail-view .trail-tabs,

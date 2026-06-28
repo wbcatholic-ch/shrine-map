@@ -313,8 +313,6 @@
   scroll-behavior: auto !important;
 }
 
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 나의 신앙생활 하단 내 정보 관리 내부창 */
 .my-faith-data-section {
   margin-top: 22px !important;
   border: 0 !important;
@@ -364,10 +362,6 @@
   opacity: 0 !important;
   pointer-events: none !important;
   transition: opacity .14s ease !important;
-}
-.my-faith-info-layer.show {
-  opacity: 1 !important;
-  pointer-events: auto !important;
 }
 .my-faith-info-backdrop {
   position: absolute !important;
@@ -532,7 +526,6 @@
   .my-faith-data-actions { grid-template-columns: 1fr !important; }
 }
 
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 내 정보 백업/복원/공유 진행 상태 표시 */
 .my-faith-info-action-status {
   display: block !important;
   margin: 0 16px 10px !important;
@@ -600,7 +593,6 @@
   to { transform: rotate(360deg); }
 }
 
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 카카오톡용 백업 코드 복사/복원 UI */
 .my-faith-data-code-backup-btn {
   color: #14532D !important;
   border: 2.5px solid rgba(34,139,74,.68) !important;
@@ -694,8 +686,6 @@
   cursor: wait !important;
 }
 
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 복원 입력 영역을 위로 올렸을 때 키보드에 덜 가리도록 여백과 높이를 줄인다. */
 #my-faith-info-code-restore-box {
   margin: 8px 0 14px !important;
   padding: 10px !important;
@@ -707,7 +697,6 @@
   margin-top: 8px !important;
 }
 
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 내 정보 관리 파일/코드 묶음 구분 */
 .my-faith-data-action-group {
   margin: 0 16px 16px !important;
   padding: 13px 12px 14px !important;
@@ -757,7 +746,6 @@
   margin: 13px 0 0 !important;
 }
 
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 내 정보 관리를 작은 팝업이 아니라 전체 화면 관리창으로 표시 */
 .my-faith-info-layer {
   position: fixed !important;
   inset: 0 !important;
@@ -830,8 +818,6 @@
   max-width: 560px !important;
 }
 
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 내 정보 관리의 파일/코드 영역을 더 명확하게 구분 */
 .my-faith-info-content .my-faith-data-desc {
   margin: 0 16px 18px !important;
   padding: 13px 14px !important;
@@ -912,8 +898,6 @@
   padding: 0 18px !important;
 }
 
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 파일 선택 방식 제거, 백업 코드 방식만 노출 */
 .my-faith-info-content .my-faith-data-desc {
   margin-bottom: 20px !important;
 }
@@ -938,14 +922,6 @@
   margin-top: 20px !important;
 }
 
-
-
-
-
-
-
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 복원 입력창 표시 중에는 아래 백업 코드 복사/복원 버튼 묶음을 숨긴다. */
 .my-faith-data-action-group.is-code-restore-open .my-faith-data-actions {
   display: none !important;
 }
@@ -954,8 +930,6 @@
   margin-bottom: 10px !important;
 }
 
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 복원 입력 중에는 위 안내문을 접고 입력 박스를 화면 위쪽에 고정한다. */
 .my-faith-info-dialog.is-code-restore-active .my-faith-info-content .my-faith-data-desc {
   display: none !important;
 }
@@ -982,16 +956,12 @@
   margin-top: 7px !important;
 }
 
-
-/* V8-1-14-253: compact(370px 이하) 전용 - 나의 신앙생활/정보관리 X 최소 보정 */
 html:not(.ios-device).oai-screen-compact-short .my-faith-info-close,
 html:not(.ios-device).oai-screen-compact-short #my-faith-close,
 html:not(.ios-device).oai-screen-compact-short .my-faith-close{
   width:34px!important;height:34px!important;min-width:34px!important;flex-basis:34px!important;line-height:1!important;
 }
 
-
-/* V8-1-14-264: compact 글자 크기는 유지하고 내정보관리 공간만 축소 */
 html:not(.ios-device).oai-screen-compact-short .my-faith-info-head {
   padding: calc(11px + env(safe-area-inset-top,0px)) 14px 10px !important;
   gap: 8px !important;
@@ -1043,8 +1013,6 @@ html:not(.ios-device).oai-screen-compact-short .my-faith-code-btn {
   min-height: 40px !important;
 }
 
-
-/* V8-1-14-269: 사진 기준 compact 나의 신앙생활에서 내 정보 백업·복원 버튼을 확인 버튼 위에 확실히 보이게 정리 */
 html:not(.ios-device).oai-screen-compact-short .my-faith-body.my-faith-home-list-body .my-faith-data-section{
   display:block!important;
   flex:0 0 auto!important;
@@ -1069,8 +1037,6 @@ html:not(.ios-device).oai-screen-compact-short .my-faith-body.my-faith-home-list
   order:4!important;
 }
 
-
-/* V8-1-14-270: 내 정보 백업·복원 헤더를 웹사이트 헤더 기준으로 표준화 */
 .my-faith-info-head{
   position:relative!important;
   top:auto!important;

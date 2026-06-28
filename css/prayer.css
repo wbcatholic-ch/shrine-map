@@ -15,7 +15,6 @@
   margin-right: 0;
 }
 
-/* V8-1-14-274: 주요기도문 탭은 레이아웃을 유지하고 색/굵기만 웹사이트 탭 기준으로 통일 */
 #prayer-tabs .pr-tab.on,
 #prayer-tabs .pr-tab.active,
 #prayer-tabs .pr-tab.on[data-cat],
@@ -254,18 +253,8 @@
 #goodnews-prayer-btn:active { opacity: .82; transform: scale(.97); }
 
 .qna-body { background: #f8fafc; display: flex; flex-direction: column; }
-
-
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: Android WebView 하단 여백 상한/최소값 표준화 */
 html:not(.ios-device) .pr-list{padding-bottom:calc(18px + var(--oai-android-bottom-gap, 10px))!important;}
 
-
-/* OAI-V67-STAMPBOOK-HEADER-BOTTOM-SAFE-FINAL: Android WebView 하단 여백 표준화 */
-html:not(.ios-device) .pr-list{padding-bottom:calc(18px + var(--oai-android-bottom-gap, 10px))!important;}
-
-
-/* V8-1-14-253: compact(370px 이하) 전용 - 기도문 탭/X/하단 버튼 최소 보정 */
 html:not(.ios-device).oai-screen-compact-short #prayer-tabs{
   height:var(--oai-std-tabbar-h,46px)!important;min-height:var(--oai-std-tabbar-h,46px)!important;max-height:var(--oai-std-tabbar-h,46px)!important;padding:0 8px!important;gap:5px!important;
 }

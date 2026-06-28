@@ -146,9 +146,6 @@ html.oai-font-global .web-card-name{font-size:calc(17px * var(--app-inner-font-s
 
 html.oai-font-global .web-card-desc{font-size:calc(15px * var(--app-inner-font-scale,1))!important}
 
-
-
-/* V8-1-14-253: compact(370px 이하) 전용 - 웹사이트 탭 최소 보정 */
 html:not(.ios-device).oai-screen-compact-short #web-view .web-cats{
   height:var(--oai-std-tabbar-h,46px)!important;min-height:var(--oai-std-tabbar-h,46px)!important;max-height:var(--oai-std-tabbar-h,46px)!important;padding:0 8px!important;gap:5px!important;
 }

@@ -152,8 +152,6 @@ html.pr-external-guide-active.oai-stability-veil::after {
   .route-choice-btn{min-height:56px;font-size:14.5px;}
 }
 
-
-/* V8-1-14-50: 경로검색 선택 모달 하단 버튼 테두리와 글자 크기 보강 */
 .route-choice-btn{
   min-height:62px!important;
   font-size:16px!important;
@@ -168,27 +166,15 @@ html.pr-external-guide-active.oai-stability-veil::after {
 @media(max-width:520px){
   .route-choice-btn{min-height:60px!important;font-size:15.5px!important;border-width:2.5px!important;}
 }
-
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: Android WebView 하단 여백 상한/최소값 표준화 */
 html:not(.ios-device) .guide-modal{padding-bottom:calc(14px + var(--oai-android-bottom-gap, 10px))!important;}
 html:not(.ios-device) .modal-panel,
 html:not(.ios-device) .guide-panel{max-height:calc(100vh - 96px - var(--oai-android-bottom-gap, 10px))!important;}
 
-
-/* OAI-V67-STAMPBOOK-HEADER-BOTTOM-SAFE-FINAL: Android WebView 하단 여백 표준화 */
-html:not(.ios-device) .guide-modal{padding-bottom:calc(14px + var(--oai-android-bottom-gap, 10px))!important;}
-html:not(.ios-device) .modal-panel,
-html:not(.ios-device) .guide-panel{max-height:calc(100vh - 96px - var(--oai-android-bottom-gap, 10px))!important;}
-
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 경로검색 선택창 버튼 테두리를 정보카드 버튼과 같은 2.5px로 통일 */
 #route-choice-modal .route-choice-btn{
   border-width:2.5px!important;
   box-sizing:border-box!important;
 }
 
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 경로검색 선택창도 정보카드와 같은 두께로 두고 색상/테두리를 더 선명하게 조정한다. */
 #route-choice-modal .route-choice-btn{
   border-width:2.5px!important;
   box-sizing:border-box!important;
