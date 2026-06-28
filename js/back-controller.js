@@ -26,19 +26,6 @@
   }
   try{ window._oaiArmCoverBackTrap = armCoverBackTrap; }catch(_e){}
 
-  function armAppBackTrap(reason, opts){
-    try{
-      opts = opts || {};
-      var href = location.href.split('#')[0];
-      _href = href;
-      var st = history.state;
-      if(!opts.force && st && st._p === 1 && (st.oai_app_trap || st.oai_cover_trap)) return;
-      history.replaceState({_p:0, oai_app_root:reason||'app-root'}, '', href);
-      history.pushState({_p:1, oai_app_trap:reason||'app-trap'}, '', href);
-    }catch(e){ console.warn('[가톨릭길동무]', e); }
-  }
-  try{ window._oaiArmAppBackTrap = armAppBackTrap; }catch(_e){}
-
   try{
     var refreshReason = '';
     try{
@@ -491,27 +478,17 @@
       if(st && st._p === 1) return;  // 트랩 유지 중이면 스킵
       try{ if(window.oaiReturnConductorBusy && window.oaiReturnConductorBusy(['cover-back','passive'])) return; }catch(_e){}
       if(!appActive()) armCoverBackTrap('pageshow-cover');
-      else { armAppBackTrap('pageshow-app-active'); }
+      else { history.replaceState({_p:0}, '', _href); history.pushState({_p:1}, '', _href); }
     }catch(e){ console.warn("[가톨릭길동무]", e); }
   }, true);
 
   window.addEventListener('focus', function(){
-    try{
-      setTimeout(function(){
-        if(appActive()) armAppBackTrap('focus-app-active');
-        else stabilizeCoverFirstBack('focus-cover-return');
-      }, 40);
-    }catch(e){ console.warn('[가톨릭길동무]', e); }
+    try{ setTimeout(function(){ stabilizeCoverFirstBack('focus-cover-return'); }, 40); }catch(e){ console.warn('[가톨릭길동무]', e); }
   }, true);
 
   document.addEventListener('visibilitychange', function(){
     if(document.visibilityState === 'visible'){
-      try{
-        setTimeout(function(){
-          if(appActive()) armAppBackTrap('visible-app-active');
-          else stabilizeCoverFirstBack('visible-cover-return');
-        }, 60);
-      }catch(e){ console.warn('[가톨릭길동무]', e); }
+      try{ setTimeout(function(){ stabilizeCoverFirstBack('visible-cover-return'); }, 60); }catch(e){ console.warn('[가톨릭길동무]', e); }
     }
   }, true);
 
