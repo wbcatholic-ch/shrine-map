@@ -3144,8 +3144,6 @@ html:not(.app-active), html:not(.app-active) body { scroll-behavior: auto; }
 .srch-bar,.filter-bar,.region-wrap{backdrop-filter:blur(8px)}
 .list-item.app-pressing,.nearby-item.app-pressing,.region-item.app-pressing{transform:translateY(6px) scale(.985)!important;background:#f8faff!important;box-shadow:0 1px 4px rgba(14,21,53,.04)!important;filter:brightness(.96)!important}
 #list-body,#nearby-body,#region-body{padding:8px 0 calc(24px + env(safe-area-inset-bottom,0))!important;background:var(--bg-unified)!important}
-.module-bar::after{content:'';position:absolute;left:0;right:0;bottom:0;height:1px;background:linear-gradient(90deg,transparent,rgba(255,255,255,.55),transparent)}
-.web-cats,.trail-tabs{padding:9px 14px!important;background:rgba(255,255,255,.88);backdrop-filter:none!important;border-bottom:1px solid #e8ecf3;min-height:var(--mod-tabbar-h)!important;align-items:center!important;height:var(--mod-tabbar-h)!important;max-height:var(--mod-tabbar-h)!important;display:flex!important;box-sizing:border-box;flex-shrink:0;-webkit-backdrop-filter:none!important}
 .web-list,#trail-list{padding:14px 14px calc(86px + env(safe-area-inset-bottom,0))}
 
 .cv-bg,.cv-stars,.cv-wave,.cv-arches,.cv-chip-row,.cv-section-hd,.cv-hero-note,.cv-orn,.cv-div{display:none}
@@ -3278,9 +3276,6 @@ html.oai-font-global .nearby-name,html.oai-font-global #region-body .nearby-name
 html.oai-font-global .nearby-addr,html.oai-font-global #region-body .nearby-addr,html.oai-font-global #region-body .li-sub,html.oai-font-global .region-item .nearby-addr,html.oai-font-global .li-sub,html.oai-font-global .sm-sub,html.oai-font-global .sm-place-addr{font-size:calc(12px * var(--app-inner-font-scale,1))!important;line-height:1.35!important}
 html.oai-font-global .nearby-type,html.oai-font-global .li-badge,html.oai-font-global .ic-type-badge{font-size:calc(11px * var(--app-inner-font-scale,1))!important}
 html.oai-font-global .nearby-dist{font-size:calc(13px * var(--app-inner-font-scale,1))!important}
-html.oai-font-global .sheet-title,html.oai-font-global .module-bar-title{font-size:calc(18px * var(--app-inner-font-scale,1))!important}
-html.oai-font-global .module-bar-sub{font-size:calc(12px * var(--app-inner-font-scale,1))!important}
-html.oai-font-global .filter-btn,html.oai-font-global .region-search-btn,html.oai-font-global .sm-fb,html.oai-font-global .sm-tab,html.oai-font-global .web-cat-btn,html.oai-font-global .trail-tab{font-size:calc(14px * var(--app-inner-font-scale,1))!important}
 html.oai-font-global .ic-name{font-size:calc(17px * var(--app-inner-font-scale,1))!important}
 html.oai-font-global .ic-addr-val,html.oai-font-global .ic-link-btn,html.oai-font-global .ic-route-btn,html.oai-font-global .ic-tel-btn,html.oai-font-global .btn-kakao-nav,html.oai-font-global .btn-kakao-route,html.oai-font-global .btn-route-reset{font-size:calc(14px * var(--app-inner-font-scale,1))!important}
 
@@ -7782,6 +7777,7 @@ html.oai-font-global #app .shrine-visit-cards-head .module-bar-sub,
   height:var(--oai-std-tab-h)!important;min-height:var(--oai-std-tab-h)!important;padding:0 12px!important;border-radius:10px!important;
   border:1.5px solid var(--v4-header-navy)!important;background:var(--v4-bg-cream)!important;color:var(--v4-header-navy)!important;
   font-size:calc(15px * var(--app-inner-font-scale,1))!important;font-weight:700!important;line-height:1!important;box-shadow:none!important;
+  font-family:inherit!important;letter-spacing:-.02em!important;display:flex!important;align-items:center!important;justify-content:center!important;
 }
 #app #shrine-visit-cards-modal .shrine-visit-cards-tabs button.on,
 #app #shrine-visit-cards-modal .shrine-visit-cards-tabs button.active,
