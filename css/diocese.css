@@ -35,7 +35,7 @@
 html,body{height:100%;overflow:hidden;}
 body{font-family:'Apple SD Gothic Neo','Noto Sans KR',sans-serif;background:var(--bg);display:flex;flex-direction:column;}
 
-header{flex-shrink:0;background:var(--d);border-bottom:none;z-index:30;
+header{flex-shrink:0;background:var(--d);border-bottom:2px solid #D4AA6A;z-index:30;
   padding:0 16px;height:var(--header-h);display:flex;align-items:center;}
 .hd{display:flex;align-items:center;justify-content:space-between;width:100%;}
 .hd-left{display:flex;align-items:center;gap:10px;}
@@ -207,7 +207,7 @@ header{flex-shrink:0;background:var(--d);border-bottom:none;z-index:30;
 html,body{width:100%!important;max-width:none!important;margin:0!important;overflow-x:hidden!important;-webkit-text-size-adjust:100%;text-size-adjust:100%;}
 html.ios-device{--ios-dio-font-scale:.94;}
 body{background:var(--bg)!important;}
-header{width:100%!important;max-width:none!important;min-height:70px!important;height:70px!important;padding:0 16px!important;background:#1f2a44!important;background-image:none!important;background-color:#1f2a44!important;color:#fff!important;display:flex!important;align-items:center!important;border-bottom:0!important;box-shadow:none!important;box-sizing:border-box!important;}
+header{width:100%!important;max-width:none!important;min-height:70px!important;height:70px!important;padding:0 16px!important;background:#1f2a44!important;background-image:none!important;background-color:#1f2a44!important;color:#fff!important;display:flex!important;align-items:center!important;border-bottom:2px solid #D4AA6A!important;box-shadow:0 4px 16px rgba(14,21,53,.22)!important;box-sizing:border-box!important;}
 .hd{width:100%!important;display:flex!important;align-items:center!important;justify-content:space-between!important;}
 .hd-left{display:flex!important;align-items:center!important;gap:12px!important;min-width:0!important;}
 .hd-icon{width:42px!important;height:42px!important;min-width:42px!important;flex:0 0 42px!important;border-radius:12px!important;background:rgba(255,255,255,.14)!important;border:1px solid rgba(255,255,255,.24)!important;color:#fff!important;font-size:24px!important;font-weight:900!important;line-height:1!important;display:flex!important;align-items:center!important;justify-content:center!important;}
