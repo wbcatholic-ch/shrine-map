@@ -15,7 +15,7 @@
   margin-right: 0;
 }
 
-/* V8-1-14-272: 주요기도문 탭은 레이아웃을 유지하고 색/굵기만 웹사이트 탭 기준으로 통일 */
+/* V8-1-14-273: 주요기도문 탭은 레이아웃을 유지하고 색/굵기만 웹사이트 탭 기준으로 통일 */
 #prayer-tabs .pr-tab.on,
 #prayer-tabs .pr-tab.active,
 #prayer-tabs .pr-tab.on[data-cat],
