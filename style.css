@@ -6557,7 +6557,7 @@ html.oai-font-global .category-source-note { font-size: calc(11px * var(--app-in
 #app .shrine-visit-detail-action.detail-goodnews{background:#eaf7ff!important;color:#075985!important;border:1.5px solid #7ec8f3!important;}
 #app .shrine-visit-detail-action.detail-kakao{width:0!important;}
 
-/* V8-1-14-279: 인포카드/상세 버튼 색상은 아래 최종 통합 블록 하나만 사용한다. */
+/* V8-1-14-281: 인포카드/상세 버튼 색상은 아래 최종 통합 블록 하나만 사용한다. */
 #app .shrine-visit-detail-info{
   background:linear-gradient(180deg,#fbfdff 0%,#fffaf0 100%)!important;
   border:2px solid #9db7cc!important;
@@ -6569,7 +6569,7 @@ html.oai-font-global .category-source-note { font-size: calc(11px * var(--app-in
   border:1.5px solid #d5b86d!important;
   box-shadow:0 2px 6px rgba(95,69,21,.08)!important;
 }
-/* V8-1-14-279: 상세 버튼 개별 색상 중복 override 제거. */
+/* V8-1-14-281: 상세 버튼 개별 색상 중복 override 제거. */
 .map-loading-icon,
 #diocese-loading .missa-spinner,
 #nearby-body .nearby-distance-spinner{
@@ -7118,7 +7118,7 @@ html.oai-external-return-freeze #oai-external-entry-guard.hide .oai-external-ent
   transform:translateY(1px)!important;
 }
 
-/* V8-1-14-279: 인포카드 버튼과 성지 상세정보 버튼의 크기 기준을 한곳에서 확정한다. */
+/* V8-1-14-281: 인포카드 버튼과 성지 상세정보 버튼의 크기 기준을 한곳에서 확정한다. */
 #app #info-card #ic-tel-link,
 #app #info-card #ic-route-btn,
 #app #info-card #ic-hp,
@@ -7425,7 +7425,7 @@ html.oai-font-global .shrine-visit-cards-head .module-bar-sub,
 .shrine-visit-cards-head .module-bar-sub{font-size:11px!important;line-height:1.25!important;color:rgba(255,255,255,.65)!important;}
 #shrine-visit-cards-modal .shrine-visit-cards-head .module-close,
 .shrine-visit-cards-head .module-close{width:var(--oai-std-close-sz)!important;height:var(--oai-std-close-sz)!important;min-width:var(--oai-std-close-sz)!important;flex:0 0 var(--oai-std-close-sz)!important;border-radius:999px!important;background:transparent!important;border:1.5px solid currentColor!important;color:rgba(212,170,106,.9)!important;font-size:28px!important;box-shadow:none!important;}
-/* V8-1-14-279: 순례 스탬프북 탭은 이 최종 블록 하나를 기준으로 사용한다. */
+/* V8-1-14-281: 순례 스탬프북 탭은 이 최종 블록 하나를 기준으로 사용한다. */
 #shrine-visit-cards-modal .shrine-visit-cards-tabs,
 .shrine-visit-cards-tabs{
   height:var(--oai-std-tabbar-h)!important;min-height:var(--oai-std-tabbar-h)!important;max-height:var(--oai-std-tabbar-h)!important;

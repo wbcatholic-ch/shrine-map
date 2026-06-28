@@ -663,7 +663,7 @@ function oaiClearExternalNavigationState(opts){
   window.addEventListener('focus', function(){ scheduleBackgroundReturn('focus'); }, {passive:true});
 })();
 
-/* V8-1-14-279:
+/* V8-1-14-281:
    Fold 작은화면↔큰화면 전환 및 백그라운드 reload 복귀 때
    인트로/커버로 강제 이동하지 않고 마지막으로 보던 주요 화면을 복원한다.
    Back/외부사이트/지도/길찾기 핵심 로직은 건드리지 않는다. */
@@ -680,6 +680,14 @@ function oaiClearExternalNavigationState(opts){
   function now(){ return Date.now ? Date.now() : new Date().getTime(); }
   function width(){ try{ return Math.round(window.innerWidth || document.documentElement.clientWidth || 0); }catch(_e){ return 0; } }
   function screenClass(w){ return w >= 600 ? 'wide' : (w <= 370 ? 'compact' : 'phone'); }
+  function isExternalResumeContext(){
+    try{
+      return sessionStorage.getItem('oai_external_nav_pending') === '1' ||
+             sessionStorage.getItem('oai_external_nav_pagehide') === '1' ||
+             sessionStorage.getItem('oai_external_return_expected') === '1' ||
+             sessionStorage.getItem('oai_my_faith_external_open') === '1';
+    }catch(_e){ return false; }
+  }
   function isOpen(id){ try{ var el=document.getElementById(id); return !!(el && el.classList && (el.classList.contains('open') || el.classList.contains('show'))); }catch(_e){ return false; } }
   function readMyFaithSub(){
     try{
@@ -710,17 +718,27 @@ function oaiClearExternalNavigationState(opts){
     }catch(_e){}
     return st;
   }
+  var _lastResumeStateSig = '';
   function saveBasicState(reason){
     try{
+      if(isExternalResumeContext()) return;
       var state = buildScreenState(reason);
-      sessionStorage.setItem(KEY_STATE, JSON.stringify(state));
-      sessionStorage.setItem(KEY_RESUME, JSON.stringify(state));
+      var raw = JSON.stringify(state);
+      var sig = String(state.kind||'') + '|' + String(state.mode||'') + '|' + String(state.tab||'') + '|' + String(state.sub||'') + '|' + String(state.visitTab||'') + '|' + String(state.visitDiocese||'');
+      if(sig === _lastResumeStateSig && state.kind !== 'cover'){
+        sessionStorage.setItem(KEY_STATE, raw);
+        sessionStorage.setItem(KEY_RESUME, raw);
+        return;
+      }
+      _lastResumeStateSig = sig;
+      sessionStorage.setItem(KEY_STATE, raw);
+      sessionStorage.setItem(KEY_RESUME, raw);
     }catch(_e){}
   }
   window.oaiSaveResumeScreenState = saveBasicState;
   function arm(reason){
     try{
-      sessionStorage.setItem(KEY_UNTIL, String(now() + 45000));
+      sessionStorage.setItem(KEY_UNTIL, String(now() + 90000));
       sessionStorage.setItem(KEY_W, String(width()));
       saveBasicState(reason);
     }catch(_e){}
@@ -804,7 +822,8 @@ function oaiClearExternalNavigationState(opts){
       if(!st) return;
       var age = n - Number(st.t || 0);
       if(age > 12*60*60*1000) return;
-      var navResume = !!(st.kind && st.kind !== 'cover' && age >= 0 && age < 10*60*1000 && (navType === 'reload' || navType === 'back_forward'));
+      var recentScreenResume = !!(st.kind && st.kind !== 'cover' && age >= 0 && age < 10*60*1000);
+      var navResume = !!(recentScreenResume && (navType === 'reload' || navType === 'back_forward' || navType === 'navigate' || !navType));
       if(!foldActive && !bgActive && !navResume) return;
       var bgElapsed = bgStarted ? (n - bgStarted) : 0;
       var shortResume = foldActive || navResume || (bgStarted && bgElapsed >= 0 && bgElapsed < MEDIUM_BG_RETURN_MS);
@@ -812,18 +831,38 @@ function oaiClearExternalNavigationState(opts){
         try{
           document.documentElement.classList.remove('oai-cover-booting','oai-cover-revealing','oai-first-entry-intro','oai-background-return-intro','oai-cover-under-intro-reveal','oai-cover-first-reveal');
           document.documentElement.classList.add('oai-refresh-no-intro');
-          setTimeout(function(){ try{ document.documentElement.classList.remove('oai-refresh-no-intro'); }catch(_r){} }, 900);
+          window.__OAI_EARLY_COVER_PHOTO_BOOT__ = false;
+          setTimeout(function(){ try{ document.documentElement.classList.remove('oai-refresh-no-intro'); }catch(_r){} }, 1200);
         }catch(_r){}
       }
       var delay = (bgStarted && bgElapsed >= MEDIUM_BG_RETURN_MS && !foldActive && !navResume) ? 2100 : 260;
-      setTimeout(function(){ restoreSavedState(st); }, delay);
+      var tries = 0;
+      function tryRestore(){
+        tries += 1;
+        var ok = restoreSavedState(st);
+        if(!ok && tries < 8) setTimeout(tryRestore, 180);
+      }
+      setTimeout(tryRestore, delay);
+    }catch(_e){}
+  }
+  function startResumeStateHeartbeat(){
+    try{
+      saveBasicState('heartbeat-start');
+      if(window.__OAI_RESUME_STATE_HEARTBEAT__) clearInterval(window.__OAI_RESUME_STATE_HEARTBEAT__);
+      window.__OAI_RESUME_STATE_HEARTBEAT__ = setInterval(function(){
+        try{
+          if(document.visibilityState === 'hidden') return;
+          saveBasicState('heartbeat');
+        }catch(_e){}
+      }, 1200);
     }catch(_e){}
   }
   window.addEventListener('resize', function(){ onViewportChange('resize'); }, {passive:true});
   window.addEventListener('orientationchange', function(){ arm('orientationchange'); setTimeout(function(){ onViewportChange('orientation-late'); }, 180); }, {passive:true});
   window.addEventListener('pagehide', function(){ arm('pagehide'); }, {passive:true});
   try{ if(window.visualViewport) window.visualViewport.addEventListener('resize', function(){ onViewportChange('visualViewport-resize'); }, {passive:true}); }catch(_e){}
-  document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'hidden') arm('hidden'); }, {passive:true});
+  document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'hidden') arm('hidden'); else saveBasicState('visible'); }, {passive:true});
+  startResumeStateHeartbeat();
   if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', maybeRestoreAfterResumeReload, {once:true});
   else maybeRestoreAfterResumeReload();
 })();
