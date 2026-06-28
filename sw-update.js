@@ -3,11 +3,11 @@
   if(window.__APP_CACHE_LIFECYCLE_GUARD__) return;
   window.__APP_CACHE_LIFECYCLE_GUARD__ = true;
 
-  var APP_VERSION = 'V8-1-14-287';
-  var SW_BUILD_VERSION = 'V8-1-14-287';
+  var APP_VERSION = 'V8-1-14-290';
+  var SW_BUILD_VERSION = 'V8-1-14-290';
   window.APP_VERSION = APP_VERSION;
 
-  /* V8-1-14-287:
+  /* V8-1-14-290:
      오래 미사용 후 복귀는 app.js의 공통 복귀 지휘자만 담당한다.
      예전 sw-update의 background 자동 reload / cover reset 함수들은
      인트로와 로딩 보호창을 다시 시작시켜 복귀 품질을 낮췄으므로 제거했다.
