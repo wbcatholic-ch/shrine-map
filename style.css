@@ -224,9 +224,6 @@
   --martyr:        #1b7a3e;
 }
 
-
-
-/* V6-123: iOS는 기존 ios-device 보정을 유지하고, Android/비 iOS만 화면 비율별 기본 스케일을 분류한다. */
 html:not(.ios-device).oai-screen-compact-short {
   
   --app-ui-scale: .90;
@@ -1710,7 +1707,7 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, var(--v4-retreat
 .missa-open-link { display: flex; align-items: center; justify-content: center; width: 100%; height: 48px; border-radius: 12px; background: #0e1535; color: var(--v4-gold); text-decoration: none; font-size: 16px; font-weight: 800; }
 
 #missa-frame { flex: 1 1 auto; min-height: 0; width: 100%; border: 0; background: #fffaf2; }
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 매일미사·성경 iframe 로딩 십자가는 표시하지 않는다 */
+
 #missa-loading {
   position: absolute;
   left: 0;
@@ -1918,7 +1915,7 @@ html.oai-cover-revealing::before {
   pointer-events: none;
   opacity: 1;
 }
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 커버 인트로 ::after는 사진 전용 최종 블록에서만 정의한다. */
+
 html.oai-cover-revealing::before,
 html.oai-cover-revealing::after {
   opacity: 0;
@@ -3680,7 +3677,6 @@ html.oai-external-return-freeze::after {
   animation-fill-mode: none !important;
 }
 
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 사용하지 않는 oai-first-entry-intro 숨김 규칙 제거. */
 .map-loading-icon,
 #diocese-loading .missa-spinner {
   width: 28px !important;
@@ -3770,8 +3766,6 @@ html.oai-external-return-freeze::after,
   color: transparent !important;
   text-shadow: none !important;
 }
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 첫 진입 인트로 숨김 잔여 규칙 제거. */
 
 #cover .my-diocese-setup-banner {
   display: none !important;
@@ -4071,9 +4065,6 @@ html.oai-font-global #srch-modal .sm-hd .sm-title{
   font-size:18px!important;
 }
 
-
-
-/* V6-123: 방문한 성지 2단계 - 지도 필터/수동 등록 표시 */
 .shrine-visited-chip{display:inline-flex;align-items:center;width:max-content;margin-top:5px;padding:3px 7px;border-radius:999px;background:#111;color:#f6d58a;border:1px solid rgba(212,170,106,.78);font-size:11px;font-weight:900;line-height:1.1;box-shadow:0 1px 4px rgba(0,0,0,.14)}
 .shrine-new-chip{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;height:16px;min-width:27px;margin-left:5px;padding:0 5px;border-radius:999px;background:#f1e8ff;color:#6d45a8;border:1px solid rgba(109,69,168,.38);font-size:9px;font-weight:900;line-height:1;vertical-align:middle;white-space:nowrap;box-shadow:none}
 .ic-name .shrine-new-chip{margin-top:0}
@@ -4092,7 +4083,6 @@ html.oai-font-global #srch-modal .sm-hd .sm-title{
 .shrine-visit-list{margin-top:12px;border-top:1px solid #f0e6d2;padding-top:10px;max-height:28vh;overflow:auto}.shrine-visit-list-title{font-size:13px;font-weight:900;color:#111;margin-bottom:7px}.shrine-visit-empty{font-size:13px;font-weight:700;color:#8b6914;background:#fff8e8;border-radius:10px;padding:10px}.shrine-visit-date-row{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:8px 0;border-bottom:1px solid #f4eedf;font-size:14px;font-weight:800;color:#111}.shrine-visit-date-row button{border:1px solid #e5d7bd;background:#fff;color:#8b0000;border-radius:9px;padding:5px 8px;font-size:12px;font-weight:900}
 html.oai-font-global .shrine-visited-chip{font-size:calc(11px * var(--app-inner-font-scale,1))!important}html.oai-font-global .ic-shrine-visit-text strong{font-size:calc(13px * var(--app-inner-font-scale,1))!important}html.oai-font-global .ic-shrine-visit-text span,html.oai-font-global #ic-shrine-visit-btn{font-size:calc(12px * var(--app-inner-font-scale,1))!important}
 
-/* V6-123: 방문한 성지 지도 필터 */
 .shrine-visit-map-filter{position:absolute;left:12px;top:12px;z-index:36;display:none;align-items:center;gap:6px;padding:6px;border-radius:999px;background:rgba(255,255,255,.92);border:1px solid rgba(17,17,17,.12);box-shadow:0 4px 14px rgba(0,0,0,.16);backdrop-filter:blur(8px);-webkit-backdrop-filter:blur(8px)}
 .shrine-visit-map-filter.show{display:flex}
 .shrine-visit-map-filter button{height:30px;padding:0 10px;border-radius:999px;border:1px solid #d8ccb8;background:#fffdf7;color:#3b2e18;font-size:12px;font-weight:900;white-space:nowrap;box-shadow:0 1px 3px rgba(0,0,0,.06)}
@@ -4102,19 +4092,14 @@ html.oai-font-global .shrine-visited-chip{font-size:calc(11px * var(--app-inner-
 .shrine-visit-map-filter button[data-shrine-visit-filter="unvisited"].active{background:#e9f3ff;color:#1d3d63;border-color:#6a93c2}
 html.oai-font-global .shrine-visit-map-filter button{font-size:calc(12px * var(--app-inner-font-scale,1))!important}
 
-
-/* V6-123: 성지찾기 순례등록 버튼 / 인포카드 순례한 성지 표시 */
 .li-side{display:flex;flex-shrink:0;flex-direction:column;align-items:flex-end;justify-content:center;gap:6px;max-width:96px}
 .li-pilgrim-register{min-width:72px;height:28px;padding:0 9px;border-radius:999px;border:1px solid #d4aa6a;background:#111;color:#f6d58a;font-size:12px;font-weight:900;letter-spacing:-.03em;white-space:nowrap;box-shadow:0 2px 7px rgba(0,0,0,.18);font-family:inherit}
 .li-pilgrim-register:active{transform:translateY(1px);filter:brightness(.95)}
 .ic-type-badge.shrine-pilgrim-visited{background:#111!important;color:#f6d58a!important;border:1px solid #d4aa6a!important;font-weight:900!important;box-shadow:0 1px 5px rgba(0,0,0,.16)!important}
 html.oai-font-global .li-pilgrim-register{font-size:calc(12px * var(--app-inner-font-scale,1))!important}
 
-
-/* V6-123: 지도 인포카드 주소 라벨 숨김 */
 #info-card .ic-addr-lbl{display:none!important}
 
-/* V6-123: 순례등록/지도필터/인포카드 위치 보정 */
 #info-card .ic-header{gap:8px;align-items:center}
 #info-card .ic-name{flex:1 1 auto;min-width:0}
 #info-card .ic-header .ic-type-badge{margin-left:8px;align-self:center;max-width:94px;overflow:hidden;text-overflow:ellipsis;text-align:center}
@@ -4127,12 +4112,9 @@ html.oai-font-global .li-pilgrim-register{font-size:calc(12px * var(--app-inner-
 .shrine-visit-map-filter button[data-shrine-visit-filter="visited"]{min-width:102px}
 .shrine-visit-map-filter button[data-shrine-visit-filter="unvisited"]{min-width:92px}
 
-
-/* V6-123: 순례등록 버튼 터치 보강 */
 .li-pilgrim-register{position:relative!important;z-index:30!important;pointer-events:auto!important;touch-action:manipulation!important}
 .li-side{pointer-events:auto!important}
 
-/* V6-123: 인포카드 순례등록 버튼 / 거리 위치 / 리스트 등록 감도 보정 */
 #info-card .ic-meta{align-items:center!important;justify-content:space-between!important;gap:10px!important;padding-top:0!important;padding-bottom:6px!important}
 #info-card .ic-meta .ic-sub{min-width:0;flex:1 1 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 #info-card .ic-meta .ic-dist-col{visibility:hidden;display:flex!important;flex-direction:row!important;align-items:center!important;gap:6px!important;min-width:0!important;flex-shrink:0!important;transform:none!important;margin:0!important}
@@ -4144,13 +4126,8 @@ html.oai-font-global .li-pilgrim-register{font-size:calc(12px * var(--app-inner-
 #info-card .ic-header .ic-type-badge.shrine-pilgrim-register-badge:active{background:#ffe8a1!important;transform:translateY(1px)}
 .li-pilgrim-register{touch-action:pan-y!important}
 
-
-/* V6-123: 등록된 성지 인포카드 표시 */
 #info-card .ic-header .ic-type-badge.shrine-pilgrim-visited{max-width:none!important;min-width:86px!important;height:30px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;padding:0 10px!important;border-radius:999px!important;cursor:default!important;touch-action:auto!important}
 
-
-
-/* V6-123: 인포카드 이름 확대 / 순례기록 카드 */
 #app #info-card .ic-name{font-size:18px!important;font-weight:900!important;line-height:1.25!important}
 html.oai-font-global #app #info-card .ic-name{font-size:calc(18px * var(--app-inner-font-scale,1))!important}
 html.oai-font-global .shrine-visit-cards-btn{font-size:calc(12px * var(--app-inner-font-scale,1))!important}
@@ -4163,18 +4140,14 @@ html.oai-font-global .shrine-visit-cards-btn{font-size:calc(12px * var(--app-inn
 .shrine-visit-cards-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.shrine-visit-cards-kicker{font-size:12px;font-weight:900;color:#8b6914}.shrine-visit-cards-title{font-size:19px;font-weight:900;color:#111}.shrine-visit-cards-x{width:34px;height:34px;border-radius:50%;border:1px solid #e6dcc8;background:#fff8e8;color:#5b3c00;font-size:22px;font-weight:900}
 .shrine-visit-cards-body{overflow:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:9px;padding:1px 2px 4px}.shrine-visit-cards-empty{padding:18px;border-radius:14px;background:#fff8e8;color:#6c4a00;font-size:14px;font-weight:800;text-align:center}
 
-/* V6-123: 순례한 성지 라벨도 추가 등록 가능 */
 #info-card .ic-header .ic-type-badge.shrine-pilgrim-visited{cursor:pointer!important;touch-action:manipulation!important}
 #info-card .ic-header .ic-type-badge.shrine-pilgrim-visited:active{transform:translateY(1px);filter:brightness(.94)}
 
-
-/* V6-123: GPS 500m 순례등록 확인창 */
 .shrine-auto-visit-modal{position:fixed;inset:0;z-index:10070;display:none;align-items:flex-end;justify-content:center}.shrine-auto-visit-modal.show{display:flex}.shrine-auto-visit-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.38)}
 .shrine-auto-visit-panel{position:relative;width:min(520px,100%);background:#fff;border-radius:22px 22px 0 0;padding:18px 16px max(18px,env(safe-area-inset-bottom));box-shadow:0 -10px 28px rgba(0,0,0,.24);border:1px solid rgba(212,170,106,.35)}
 .shrine-auto-visit-kicker{font-size:12px;font-weight:900;color:#8b6914;margin-bottom:5px}.shrine-auto-visit-title{font-size:16px;font-weight:900;color:#111;line-height:1.35}.shrine-auto-visit-name{margin-top:8px;font-size:20px;font-weight:900;color:#111;line-height:1.28;word-break:keep-all}.shrine-auto-visit-dist{margin-top:5px;font-size:13px;font-weight:800;color:#6b7280}.shrine-auto-visit-actions{display:flex;gap:8px;margin-top:14px}.shrine-auto-visit-actions button{flex:1;height:44px;border-radius:13px;font-size:14px;font-weight:900;font-family:inherit}.shrine-auto-visit-save{border:1px solid #111;background:#111;color:#f6d58a}.shrine-auto-visit-later{border:1px solid #ddd2bb;background:#fff8e8;color:#5b3c00}
 html.oai-font-global .shrine-auto-visit-title{font-size:calc(16px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-auto-visit-name{font-size:calc(20px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-auto-visit-dist{font-size:calc(13px * var(--app-inner-font-scale,1))!important}
 
-/* V6-123: 순례기록 카드 전체화면 상세 */
 .shrine-visit-detail-view{position:fixed;inset:0;z-index:10045;display:none;flex-direction:column;background:#fffdf7;color:#111;padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom)}
 .shrine-visit-detail-view.show{display:flex}
 .shrine-visit-detail-head{height:56px;min-height:56px;display:flex;align-items:center;gap:10px;padding:0 12px;background:#fff8e8;border-bottom:1px solid #eadfcd;box-shadow:0 2px 10px rgba(0,0,0,.05)}
@@ -4196,8 +4169,6 @@ html.oai-font-global .shrine-auto-visit-title{font-size:calc(16px * var(--app-in
 .shrine-visit-detail-info{border:1px solid rgba(17,17,17,.12);background:#fff;border-radius:18px;padding:15px 14px;box-shadow:0 2px 10px rgba(14,21,53,.05)}.shrine-visit-detail-section-title{font-size:12px;font-weight:900;color:#8b6914;margin-bottom:5px}.shrine-visit-detail-name{font-size:22px;font-weight:900;line-height:1.25;color:#111;letter-spacing:-.04em;word-break:keep-all;margin-bottom:12px}.shrine-visit-detail-row{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid #f0e7d8}.shrine-visit-detail-row span{width:48px;flex-shrink:0;font-size:13px;font-weight:900;color:#8b6914}.shrine-visit-detail-row strong{flex:1;min-width:0;font-size:14px;font-weight:800;color:#1f2937;line-height:1.45;word-break:keep-all}.shrine-visit-detail-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.shrine-visit-detail-action{height:40px;display:inline-flex;align-items:center;justify-content:center;padding:0 12px;border-radius:12px;border:1px solid #d8ccb8;background:#fff8e8;color:#5b3c00;font-size:13px;font-weight:900;text-decoration:none;font-family:inherit;touch-action:manipulation}.shrine-visit-detail-action:active{transform:translateY(1px);filter:brightness(.96)}.shrine-visit-detail-empty{margin:18px;padding:16px;border-radius:16px;background:#fff8e8;color:#6c4a00;font-size:14px;font-weight:900;text-align:center}
 html.oai-font-global .shrine-visit-detail-head-title{font-size:calc(18px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-detail-kicker,html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(12px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-detail-count{font-size:calc(32px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-detail-recent,html.oai-font-global .shrine-visit-detail-add{font-size:calc(14px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-detail-date-chip,html.oai-font-global .shrine-visit-detail-action,html.oai-font-global .shrine-visit-detail-row span{font-size:calc(13px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-detail-name{font-size:calc(22px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-detail-row strong{font-size:calc(14px * var(--app-inner-font-scale,1))!important}
 
-
-/* V6-123: 순례기록 전체화면 스탬프북 */
 .shrine-visit-cards-modal{position:fixed!important;inset:0!important;z-index:10060!important;display:none!important;align-items:stretch!important;justify-content:stretch!important;background:#fffdf7!important}.shrine-visit-cards-modal.show{display:flex!important}.shrine-visit-cards-backdrop{display:none!important}
 .shrine-visit-cards-panel{width:100%!important;max-width:none!important;height:100%!important;max-height:none!important;border-radius:0!important;border:0!important;background:#fffdf7!important;padding:env(safe-area-inset-top) 12px max(18px,env(safe-area-inset-bottom))!important;box-shadow:none!important;display:flex!important;flex-direction:column!important}
 .shrine-visit-cards-head{height:56px;min-height:56px;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;margin:0!important;border-bottom:1px solid #eadfcd;background:#fff8e8;margin-left:-12px!important;margin-right:-12px!important;padding:0 12px!important;box-shadow:0 2px 10px rgba(0,0,0,.05)}
@@ -4207,8 +4178,6 @@ html.oai-font-global .shrine-visit-detail-head-title{font-size:calc(18px * var(-
 .shrine-visit-cards-body{flex:1!important;overflow:auto!important;-webkit-overflow-scrolling:touch!important;display:block!important;padding:2px 1px 18px!important}.shrine-visit-card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.shrine-visit-card-badge{position:relative;aspect-ratio:1/1.05;width:100%;min-height:142px;text-align:left;border-radius:20px;padding:13px 11px 12px;border:1px solid rgba(17,17,17,.12);background:#fff;box-shadow:0 4px 13px rgba(14,21,53,.08);font-family:inherit;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;gap:5px;touch-action:manipulation}.shrine-visit-card-badge:before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 25% 15%,rgba(255,255,255,.9),transparent 32%),linear-gradient(180deg,rgba(255,248,232,.9),rgba(255,253,247,.96));z-index:0}.shrine-visit-card-badge>*{position:relative;z-index:1}.shrine-visit-card-badge:active{transform:translateY(1px);filter:brightness(.97)}.shrine-visit-card-badge.visited{border-color:rgba(212,170,106,.55)}.shrine-visit-card-badge.unvisited{background:#f7f4ee!important;filter:saturate(.68)}.shrine-visit-card-badge.unvisited:before{background:linear-gradient(180deg,rgba(250,247,239,.95),rgba(255,253,247,.96))}.shrine-visit-card-badge .shrine-visit-card-dio{font-size:11px;font-weight:900;color:#8b6914;line-height:1.15;max-width:72%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.shrine-visit-card-badge strong{font-size:16px;font-weight:900;color:#111;line-height:1.22;letter-spacing:-.04em;word-break:keep-all;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}.shrine-visit-card-badge .shrine-visit-card-count{font-size:13px;font-weight:900;color:#2f2517;line-height:1.1}.shrine-visit-card-stamp{position:absolute;right:8px;top:8px;min-width:44px;height:44px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;text-align:center;padding:0 5px;transform:rotate(10deg);font-size:10px;font-weight:900;letter-spacing:-.06em;border:2px solid currentColor;background:rgba(255,255,255,.78);box-shadow:0 1px 6px rgba(0,0,0,.08)}.shrine-visit-card-badge.type-shrine .shrine-visit-card-stamp{color:#c0392b}.shrine-visit-card-badge.type-pilgrim .shrine-visit-card-stamp{color:#1565c0}.shrine-visit-card-badge.type-martyr .shrine-visit-card-stamp{color:#1b7a3e}.shrine-visit-card-badge.unvisited .shrine-visit-card-stamp{opacity:.38;filter:grayscale(.25)}.shrine-visit-card-badge.visited:after{content:"순례완료";position:absolute;left:-24px;bottom:18px;width:110px;height:22px;display:flex;align-items:center;justify-content:center;transform:rotate(45deg);background:rgba(17,17,17,.88);color:#f6d58a;font-size:10px;font-weight:900;letter-spacing:-.04em}.shrine-visit-cards-empty{padding:24px 16px!important;border-radius:18px!important;background:#fff8e8!important;color:#6c4a00!important;font-size:14px!important;font-weight:900!important;text-align:center!important;border:1px solid #eadfcd!important}
 html.oai-font-global .shrine-visit-cards-title{font-size:calc(18px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-cards-kicker,.shrine-visit-card-stamp{font-size:calc(10px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-cards-tabs button{font-size:calc(14px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-card-badge .shrine-visit-card-dio{font-size:calc(11px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-card-badge strong{font-size:calc(16px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-card-badge .shrine-visit-card-count{font-size:calc(13px * var(--app-inner-font-scale,1))!important}
 
-
-/* V6-123: 순례 스탬프북 고급 색감/스탬프 재정리 */
 .shrine-visit-cards-modal{background:#f1f3ee!important;color:#1f2933!important}
 .shrine-visit-cards-panel{background:linear-gradient(180deg,#f4f6f1 0%,#ecefe8 100%)!important}
 .shrine-visit-cards-head{background:#ffffff!important;border-bottom:1px solid rgba(31,41,51,.10)!important;box-shadow:0 2px 16px rgba(31,41,51,.06)!important}
@@ -4220,67 +4189,50 @@ html.oai-font-global .shrine-visit-cards-title{font-size:calc(18px * var(--app-i
 .shrine-visit-card-stamp{right:12px!important;top:12px!important;min-width:0!important;width:auto!important;height:28px!important;border-radius:9px!important;padding:0 8px!important;transform:rotate(-3deg)!important;background:rgba(255,255,255,.62)!important;border:1.5px dashed currentColor!important;box-shadow:none!important;font-size:10px!important;letter-spacing:-.04em!important}.shrine-visit-card-badge.type-shrine .shrine-visit-card-stamp{color:#b94a45!important}.shrine-visit-card-badge.type-pilgrim .shrine-visit-card-stamp{color:#2f74a8!important}.shrine-visit-card-badge.type-martyr .shrine-visit-card-stamp{color:#4d8a5f!important}.shrine-visit-card-badge.unvisited .shrine-visit-card-stamp{opacity:.48!important;border-style:solid!important;background:transparent!important}
 .shrine-visit-card-badge .shrine-visit-card-dio{color:#75643c!important;max-width:68%!important}.shrine-visit-card-badge strong{color:#17201b!important}.shrine-visit-card-badge .shrine-visit-card-count{color:#405247!important}.shrine-visit-card-badge.visited .shrine-visit-card-count{color:#17201b!important}.shrine-visit-card-badge.unvisited .shrine-visit-card-count{color:#7b837c!important}
 
-/* V6-123: 순례 상세화면 고급 색감/날짜 표시 정리 */
 .shrine-visit-detail-view{background:#f1f3ee!important;color:#17201b!important}.shrine-visit-detail-head{background:#ffffff!important;border-bottom:1px solid rgba(31,41,51,.10)!important;box-shadow:0 2px 16px rgba(31,41,51,.06)!important}.shrine-visit-detail-back,.shrine-visit-detail-x{background:#f6f7f3!important;border-color:#d8dcd1!important;color:#324137!important;box-shadow:0 1px 7px rgba(31,41,51,.06)!important}.shrine-visit-detail-head-title{color:#17201b!important}
 .shrine-visit-detail-hero{background:#ffffff!important;border-color:rgba(47,59,52,.14)!important;box-shadow:0 6px 22px rgba(31,41,51,.07)!important;border-radius:20px!important}.shrine-visit-detail-kicker,.shrine-visit-detail-date-title,.shrine-visit-detail-section-title{color:#75643c!important}.shrine-visit-detail-count{color:#17201b!important}.shrine-visit-detail-recent{color:#405247!important}.shrine-visit-detail-date-list{display:flex!important;flex-direction:column!important;gap:0!important;border-top:1px solid #e4e8df!important;border-bottom:1px solid #e4e8df!important;background:transparent!important;margin-top:4px!important}.shrine-visit-detail-date-chip{display:flex!important;justify-content:flex-start!important;align-items:center!important;border:0!important;border-radius:0!important;background:transparent!important;color:#17201b!important;padding:10px 2px 10px 18px!important;font-size:15px!important;font-weight:900!important;position:relative!important;box-shadow:none!important}.shrine-visit-detail-date-chip:before{content:"";position:absolute;left:3px;top:50%;width:7px;height:7px;border-radius:50%;background:#bda360;transform:translateY(-50%)}.shrine-visit-detail-date-chip+ .shrine-visit-detail-date-chip{border-top:1px solid #edf0e9!important}.shrine-visit-detail-empty-date{background:transparent!important;color:#7b837c!important;border:1px dashed #cbd2c6!important;border-radius:12px!important}.shrine-visit-detail-add{height:40px!important;margin-top:12px!important;background:#ffffff!important;color:#2f3b34!important;border:1px solid #bda360!important;box-shadow:0 2px 8px rgba(31,41,51,.05)!important}.shrine-visit-detail-add:active{background:#f6f0dc!important;filter:none!important}.shrine-visit-detail-info{background:#ffffff!important;border-color:rgba(31,41,51,.10)!important;box-shadow:0 5px 18px rgba(31,41,51,.06)!important}.shrine-visit-detail-name{color:#17201b!important}.shrine-visit-detail-row{border-top-color:#e4e8df!important}.shrine-visit-detail-row span{color:#75643c!important}.shrine-visit-detail-row strong{color:#24312a!important}.shrine-visit-detail-action{background:#f7f8f4!important;color:#324137!important;border-color:#d7ddd2!important}.shrine-visit-detail-action:active{background:#eef1ec!important}
 
-/* V6-123: 순례 스탬프북 헤더/교구탭/통계 위치 정리 */
 .shrine-visit-cards-head{height:54px!important;min-height:54px!important;background:#ffffff!important;border-bottom:1px solid rgba(31,41,51,.12)!important;box-shadow:0 2px 12px rgba(31,41,51,.06)!important;display:flex!important;align-items:center!important;justify-content:space-between!important}
 .shrine-visit-cards-title{flex:1!important;text-align:center!important;font-size:20px!important;font-weight:900!important;color:#17201b!important;letter-spacing:-.04em!important;line-height:1.1!important}.shrine-visit-cards-kicker,.shrine-visit-cards-head-main{display:none!important}
 .shrine-visit-cards-tabs{order:1;margin:12px 0 8px!important;gap:8px!important}.shrine-visit-cards-tabs button{height:38px!important;border-radius:13px!important;font-size:13px!important;background:#fff!important;color:#334238!important;border-color:#d7ddd2!important}.shrine-visit-cards-tabs button.active{background:#2f3b34!important;color:#f3e5b3!important;border-color:#bda360!important}
-.shrine-visit-cards-diocese{order:2;display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:1px 1px 8px;margin:0 -2px 6px;scrollbar-width:none}.shrine-visit-cards-diocese::-webkit-scrollbar{display:none}.shrine-visit-cards-diocese button{flex:0 0 auto;height:32px;padding:0 11px;border-radius:999px;border:1px solid #d7ddd2;background:#fff;color:#405247;font-size:12px;font-weight:900;font-family:inherit;white-space:nowrap;box-shadow:0 1px 5px rgba(31,41,51,.04);touch-action:manipulation}.shrine-visit-cards-diocese button.active{background:#e9efe7;color:#17201b;border-color:#7f927e;box-shadow:0 2px 8px rgba(47,59,52,.12)}
+.shrine-visit-cards-diocese{order:2;display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:1px 1px 8px;margin:0 -2px 6px;scrollbar-width:none}
+.shrine-visit-cards-diocese button{flex:0 0 auto;height:32px;padding:0 11px;border-radius:999px;border:1px solid #d7ddd2;background:#fff;color:#405247;font-size:12px;font-weight:900;font-family:inherit;white-space:nowrap;box-shadow:0 1px 5px rgba(31,41,51,.04);touch-action:manipulation}.shrine-visit-cards-diocese button.active{background:#e9efe7;color:#17201b;border-color:#7f927e;box-shadow:0 2px 8px rgba(47,59,52,.12)}
 .shrine-visit-cards-stats{order:3;margin:0 0 10px!important;padding:8px 12px!important;min-height:38px!important;border-radius:13px!important;background:linear-gradient(135deg,#2f3b34 0%,#17201b 100%)!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:5px!important}.shrine-visit-cards-stats strong{font-size:22px!important;line-height:1!important}.shrine-visit-cards-stats span{font-size:12px!important}.shrine-visit-cards-stats em{margin-left:6px;padding-left:8px;border-left:1px solid rgba(243,229,179,.35);font-style:normal;font-size:11px;font-weight:900;color:#d6ded2;white-space:nowrap}
 .shrine-visit-cards-body{order:4!important}.shrine-visit-card-grid{padding-bottom:4px}
 html.oai-font-global .shrine-visit-cards-title{font-size:calc(20px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-cards-tabs button{font-size:calc(13px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-cards-diocese button{font-size:calc(12px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-cards-stats strong{font-size:calc(22px * var(--app-inner-font-scale,1))!important}
 
-
-/* V6-123: 순례 스탬프북 흰 배경/글로시 그레이 카드/선명한 색상 */
 .shrine-visit-cards-modal{background:#ffffff!important}.shrine-visit-cards-panel{background:#ffffff!important}.shrine-visit-cards-head{background:#ffffff!important}.shrine-visit-cards-body{background:#ffffff!important}
 .shrine-visit-card-grid{gap:10px!important}.shrine-visit-card-badge{aspect-ratio:1.18/1!important;min-height:112px!important;border-radius:17px!important;padding:12px 12px 11px!important;background:linear-gradient(145deg,#ffffff 0%,#f3f5f7 48%,#e4e8ed 100%)!important;border:1px solid #cfd6dd!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 5px 14px rgba(37,48,58,.10)!important}.shrine-visit-card-badge:before{background:linear-gradient(135deg,rgba(255,255,255,.88) 0%,rgba(255,255,255,.38) 32%,rgba(226,231,236,.48) 100%)!important}.shrine-visit-card-badge:active{filter:brightness(.98)!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.9),0 3px 10px rgba(37,48,58,.11)!important}
 .shrine-visit-card-badge.visited:after{content:""!important;position:absolute!important;right:0!important;top:0!important;bottom:0!important;width:7px!important;height:auto!important;transform:none!important;border-radius:0 17px 17px 0!important;background:#d6dde4!important}.shrine-visit-card-badge.type-shrine.visited:after{background:#ef2f2f!important}.shrine-visit-card-badge.type-pilgrim.visited:after{background:#0b84ff!important}.shrine-visit-card-badge.type-martyr.visited:after{background:#00a66a!important}
 .shrine-visit-card-badge.type-shrine .shrine-visit-card-stamp{color:#ef2f2f!important}.shrine-visit-card-badge.type-pilgrim .shrine-visit-card-stamp{color:#0b84ff!important}.shrine-visit-card-badge.type-martyr .shrine-visit-card-stamp{color:#00a66a!important}.shrine-visit-card-stamp{top:10px!important;right:10px!important;height:26px!important;border-radius:8px!important;background:rgba(255,255,255,.70)!important;border:1.5px solid currentColor!important;box-shadow:0 1px 5px rgba(37,48,58,.08)!important;transform:rotate(-2deg)!important}.shrine-visit-card-badge .shrine-visit-card-dio{color:#5e6a73!important}.shrine-visit-card-badge strong{color:#111820!important}.shrine-visit-card-badge .shrine-visit-card-count{font-size:12px!important;color:#26333d!important}.shrine-visit-card-badge.visited .shrine-visit-card-count{display:inline-flex!important;width:max-content!important;max-width:100%!important;align-items:center!important;padding:4px 8px!important;border-radius:999px!important;background:rgba(255,255,255,.68)!important;box-shadow:inset 0 0 0 1px rgba(37,48,58,.08),0 1px 4px rgba(37,48,58,.06)!important;color:#111820!important}.shrine-visit-card-badge.unvisited{background:linear-gradient(145deg,#f7f8fa 0%,#eceff3 100%)!important;border-color:#d8dde2!important;opacity:1!important}.shrine-visit-card-badge.unvisited .shrine-visit-card-count{color:#7b858e!important}.shrine-visit-card-badge.unvisited .shrine-visit-card-stamp{opacity:.52!important;background:rgba(255,255,255,.45)!important}
 .shrine-visit-cards-stats{background:linear-gradient(135deg,#26333d 0%,#101820 100%)!important;border-color:rgba(11,132,255,.16)!important}.shrine-visit-cards-tabs button.active{background:#26333d!important;color:#ffffff!important;border-color:#26333d!important}.shrine-visit-cards-diocese button.active{background:#eef4ff!important;border-color:#0b84ff!important;color:#0757a6!important}
 
-/* V6-123: 순례 상세화면도 흰 배경과 글로시 그레이 카드로 정리 */
 .shrine-visit-detail-view{background:#ffffff!important}.shrine-visit-detail-head{background:#ffffff!important}.shrine-visit-detail-hero,.shrine-visit-detail-info{background:linear-gradient(145deg,#ffffff 0%,#f4f6f8 50%,#e9edf1 100%)!important;border-color:#d3d9df!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.95),0 6px 16px rgba(37,48,58,.08)!important}.shrine-visit-detail-date-chip:before{background:#0b84ff!important}.shrine-visit-detail-add{background:#ffffff!important;border-color:#aeb8c2!important;color:#26333d!important}.shrine-visit-detail-action{background:#ffffff!important;border-color:#cfd6dd!important;color:#26333d!important}
 .shrine-visit-detail-register{background:#ffffff!important;border-color:#aeb8c2!important;color:#26333d!important}
 
-
-/* V6-123: 순례 스탬프북 공통 헤더/교구탭/통계 문구 표준화 */
 .shrine-visit-cards-head{height:48px!important;min-height:48px!important;background:var(--mode-header-solid)!important;border-bottom:2px solid var(--gold)!important;box-shadow:none!important;padding:8px 14px!important;margin-left:-12px!important;margin-right:-12px!important}
 .shrine-visit-cards-title{font-size:15px!important;font-weight:800!important;color:#c49b56!important;line-height:1.2!important;letter-spacing:.04em!important;text-align:center!important}.shrine-visit-cards-back,.shrine-visit-cards-x{width:var(--v4-close-size)!important;height:var(--v4-close-size)!important;min-width:var(--v4-close-size)!important;border:none!important;border-radius:0!important;background:transparent!important;color:#c49b56!important;box-shadow:none!important;font-size:28px!important;font-weight:900!important;line-height:1!important}.shrine-visit-cards-back:active,.shrine-visit-cards-x:active{background:transparent!important;transform:scale(.96)!important}
 .shrine-visit-cards-tabs{height:48px!important;min-height:48px!important;display:flex!important;overflow-x:auto!important;gap:6px!important;padding:6px 10px!important;margin:0 -12px 0!important;align-items:center!important;background:var(--mode-header-solid)!important;border-bottom:2px solid var(--gold)!important;scrollbar-width:none!important}.shrine-visit-cards-tabs::-webkit-scrollbar{display:none}.shrine-visit-cards-tabs button{flex-shrink:0!important;width:auto!important;min-width:118px!important;height:34px!important;min-height:34px!important;padding:0 12px!important;border-radius:12px!important;border:1.5px solid var(--ui-line-strong)!important;background:var(--v4-surface-white)!important;color:#7b8794!important;font-size:14px!important;line-height:1.15!important;font-weight:600!important;font-family:inherit!important;box-shadow:none!important}.shrine-visit-cards-tabs button.active{background:var(--oai-gold)!important;color:var(--v4-text-main)!important;border-color:var(--oai-gold-border)!important;font-weight:800!important}
-.shrine-visit-cards-diocese{height:48px!important;min-height:48px!important;display:flex!important;overflow-x:auto!important;gap:6px!important;padding:6px 10px!important;margin:0 -12px 0!important;align-items:center!important;background:var(--mode-header-solid)!important;border-bottom:2px solid var(--gold)!important;scrollbar-width:none!important}.shrine-visit-cards-diocese::-webkit-scrollbar{display:none}.shrine-visit-cards-diocese .filter-btn{height:34px!important;min-height:34px!important;padding:0 12px!important;border-radius:12px!important;font-size:14px!important;line-height:1.15!important;font-weight:600!important}.shrine-visit-cards-diocese .filter-btn.active{font-weight:800!important}.shrine-visit-cards-diocese .filter-btn.my-diocese-filter{border-color:var(--v4-brown)!important;color:#5C3B0C!important;background:#FFF7E4!important}.shrine-visit-cards-diocese .filter-btn.my-diocese-filter.active{background:var(--v4-brown)!important;border-color:#9B641A!important;color:var(--v4-surface-white)!important}
+.shrine-visit-cards-diocese{height:48px!important;min-height:48px!important;display:flex!important;overflow-x:auto!important;gap:6px!important;padding:6px 10px!important;margin:0 -12px 0!important;align-items:center!important;background:var(--mode-header-solid)!important;border-bottom:2px solid var(--gold)!important;scrollbar-width:none!important}.shrine-visit-cards-diocese::-webkit-scrollbar{display:none}.shrine-visit-cards-diocese .filter-btn{height:34px!important;min-height:34px!important;padding:0 12px!important;border-radius:12px!important;font-size:14px!important;line-height:1.15!important;font-weight:600!important}.shrine-visit-cards-diocese .filter-btn.active{font-weight:800!important}
 .shrine-visit-cards-stats{height:34px!important;min-height:34px!important;margin:7px 0 9px!important;padding:0 10px!important;border-radius:10px!important;background:#f5f7f9!important;border:1px solid #d9e0e6!important;color:#24313b!important;box-shadow:none!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:5px!important;white-space:nowrap!important}.shrine-visit-cards-stats strong{font-size:13px!important;font-weight:900!important;color:#17201b!important;line-height:1!important}.shrine-visit-cards-stats span{font-size:12px!important;font-weight:800!important;color:#46525c!important}.shrine-visit-cards-stats b{font-size:12px!important;color:#9aa4ae!important;font-weight:900!important}.shrine-visit-cards-stats em{margin-left:4px!important;padding-left:6px!important;border-left:1px solid #cfd6dd!important;font-size:11px!important;font-weight:900!important;color:#6b7680!important;font-style:normal!important}
 html.oai-font-global .shrine-visit-cards-title{font-size:calc(15px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-cards-tabs button,html.oai-font-global .shrine-visit-cards-diocese .filter-btn{font-size:calc(14px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-cards-stats strong{font-size:calc(13px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-cards-stats span,html.oai-font-global .shrine-visit-cards-stats b{font-size:calc(12px * var(--app-inner-font-scale,1))!important}
-
-
-/* V6-123: 지도 플로팅 순례기록 제거, 시트 헤더 나의순례 버튼 */
-#shrine-visit-cards-btn{display:none!important}
 .shrine-visit-sheet-btn{display:none;margin-left:auto;margin-right:4px;height:30px;min-height:30px;padding:0 10px;border-radius:999px;border:1px solid rgba(196,155,86,.65);background:#fff7e4;color:#5c3b0c;font-size:12px;font-weight:900;font-family:inherit;white-space:nowrap;line-height:1;box-shadow:0 1px 5px rgba(0,0,0,.12);touch-action:manipulation;flex:0 0 auto}.shrine-visit-sheet-btn.show{display:inline-flex;align-items:center;justify-content:center}.shrine-visit-sheet-btn:active{transform:translateY(1px);filter:brightness(.96)}
 html.oai-font-global .shrine-visit-sheet-btn{font-size:calc(12px * var(--app-inner-font-scale,1))!important}
 
-
-/* V6-123: 파란 표시 위치에 나의순례 플로팅 버튼 배치 */
 #shrine-visit-cards-btn{display:none!important}.shrine-visit-sheet-btn{display:none!important}.shrine-visit-sheet-btn.show{display:none!important}
 .shrine-visit-floating-list-btn{position:fixed;right:16px;bottom:calc(env(safe-area-inset-bottom,0px) + 138px);z-index:72;display:none;height:42px;min-width:104px;padding:0 15px;border-radius:999px;border:1.5px solid rgba(21,101,192,.72);background:#1565c0;color:#fff;font-size:14px;font-weight:900;font-family:inherit;letter-spacing:-.04em;box-shadow:0 8px 22px rgba(21,101,192,.26),0 2px 7px rgba(0,0,0,.18);touch-action:manipulation;white-space:nowrap}.shrine-visit-floating-list-btn.show{display:inline-flex;align-items:center;justify-content:center}.shrine-visit-floating-list-btn:active{transform:translateY(1px);filter:brightness(.96)}
 html.oai-font-global .shrine-visit-floating-list-btn{font-size:calc(14px * var(--app-inner-font-scale,1))!important}
 
-
-/* V6-123: 순례 스탬프북 헤더/탭을 실제 공통 모듈 기준으로 재표준화 */
 .shrine-visit-cards-head.module-bar{display:flex!important;align-items:center!important;gap:0!important;height:calc(var(--oai-std-header-h) + env(safe-area-inset-top,0px))!important;min-height:calc(var(--oai-std-header-h) + env(safe-area-inset-top,0px))!important;max-height:calc(var(--oai-std-header-h) + env(safe-area-inset-top,0px))!important;padding:var(--oai-std-hdr-pad) 16px 10px!important;box-sizing:border-box!important;flex-shrink:0!important;width:100%!important;max-width:none!important;background:#0e1535!important;color:var(--v4-surface-white)!important;border-bottom:2px solid var(--gold)!important;box-shadow:0 4px 16px rgba(14,21,53,.22)!important;margin:0!important;border-radius:0!important}.shrine-visit-cards-head.module-bar::before,.shrine-visit-cards-head.module-bar::after{content:none!important;display:none!important}.shrine-visit-cards-head .module-bar-main{display:flex!important;align-items:center!important;gap:14px!important;flex:1!important;min-width:0!important}.shrine-visit-cards-head .module-bar-ico{width:44px!important;height:44px!important;min-width:44px!important;flex:0 0 44px!important;border-radius:12px!important;background:rgba(255,255,255,.12)!important;border:1px solid rgba(255,255,255,.2)!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:var(--oai-std-icon-sz)!important;line-height:1!important;color:var(--v4-surface-white)!important}.shrine-visit-cards-head .module-bar-txt{display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:center!important;min-width:0!important;gap:2px!important}.shrine-visit-cards-head .module-bar-title{font-size:var(--oai-std-title-fs)!important;font-weight:800!important;line-height:1.2!important;letter-spacing:-.02em!important;color:var(--v4-surface-white)!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;margin:0!important;text-align:left!important}.shrine-visit-cards-head .module-bar-sub{font-size:var(--oai-std-sub-fs)!important;font-weight:500!important;line-height:1.2!important;color:rgba(255,255,255,.65)!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;margin:0!important;opacity:1!important}.shrine-visit-cards-head .module-close{width:var(--oai-std-close-sz)!important;height:var(--oai-std-close-sz)!important;min-width:var(--oai-std-close-sz)!important;flex:0 0 var(--oai-std-close-sz)!important;border-radius:999px!important;background:transparent!important;border:1.5px solid currentColor!important;color:rgba(212,170,106,.9)!important;font-size:28px!important;font-weight:900!important;display:flex!important;align-items:center!important;justify-content:center!important;box-shadow:none!important}
 .shrine-visit-cards-tabs{padding:9px 14px!important;background:rgba(255,255,255,.88)!important;backdrop-filter:none!important;border-bottom:1px solid #e8ecf3!important;min-height:var(--mod-tabbar-h)!important;height:var(--mod-tabbar-h)!important;max-height:var(--mod-tabbar-h)!important;display:flex!important;align-items:center!important;gap:8px!important;box-sizing:border-box!important;flex-shrink:0!important;overflow-x:auto!important;scrollbar-width:none!important;margin:0!important}.shrine-visit-cards-tabs::-webkit-scrollbar{display:none!important}.shrine-visit-cards-tabs button{height:40px!important;min-height:40px!important;padding:0 12px!important;border-radius:10px!important;border:1px solid #e2e7f1!important;background:#f7f9fd!important;color:#657086!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.7)!important;font-size:15px!important;font-weight:800!important;font-family:inherit!important;line-height:1!important;display:flex!important;align-items:center!important;justify-content:center!important;white-space:nowrap!important;box-sizing:border-box!important;flex:1 1 0!important;cursor:pointer!important}.shrine-visit-cards-tabs button.on,.shrine-visit-cards-tabs button.active{color:var(--v4-surface-white)!important;border-color:transparent!important;font-weight:800!important;box-shadow:0 2px 8px rgba(31,42,68,.28)!important;background:#0e1535!important}
 .shrine-visit-cards-diocese{display:flex!important;overflow-x:auto!important;gap:6px!important;min-height:48px!important;height:48px!important;padding:6px 10px!important;align-items:center!important;background:var(--mode-header-solid)!important;flex-shrink:0!important;border-bottom:2px solid var(--gold)!important;scrollbar-width:none!important;margin:0!important;box-sizing:border-box!important}.shrine-visit-cards-diocese::-webkit-scrollbar{display:none!important}.shrine-visit-cards-diocese .filter-btn{flex-shrink:0!important;height:34px!important;min-height:34px!important;padding:0 12px!important;border-radius:12px!important;border:1.5px solid var(--mode-filter-border)!important;background:var(--mode-filter-bg)!important;color:var(--mode-filter-color)!important;font-size:14px!important;line-height:1.15!important;font-weight:600!important;font-family:inherit!important;cursor:pointer!important;white-space:nowrap!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;box-shadow:none!important}.shrine-visit-cards-diocese .filter-btn.active{background:var(--mode-filter-active-bg)!important;color:var(--mode-filter-active-color)!important;border-color:var(--mode-filter-active-border)!important;font-weight:800!important}.shrine-visit-cards-diocese .filter-btn.my-diocese-filter{border-color:var(--v4-brown)!important;color:#5C3B0C!important;background:#FFF7E4!important}.shrine-visit-cards-diocese .filter-btn.my-diocese-filter.active{background:var(--v4-brown)!important;border-color:#9B641A!important;color:var(--v4-surface-white)!important}
-html.oai-font-global .shrine-visit-cards-head .module-bar-title{font-size:20px!important;line-height:1.24!important}html.oai-font-global .shrine-visit-cards-head .module-bar-sub{font-size:11px!important;line-height:1.25!important}html.oai-font-global .shrine-visit-cards-head .module-bar-ico{font-size:22px!important;width:42px!important;height:42px!important;min-width:42px!important}html.oai-font-global .shrine-visit-cards-tabs button{font-size:calc(15px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-cards-diocese .filter-btn{font-size:calc(14px * var(--app-inner-font-scale,1))!important}
-
-/* V6-123: 나의순례현황 버튼 표시 조건/간격, 버튼 R값 조정 */
+html.oai-font-global .shrine-visit-cards-head .module-bar-title{font-size:20px!important;line-height:1.24!important}html.oai-font-global .shrine-visit-cards-head .module-bar-sub{font-size:11px!important;line-height:1.25!important}html.oai-font-global .shrine-visit-cards-head .module-bar-ico{font-size:22px!important;width:42px!important;height:42px!important;min-width:42px!important}
 .shrine-visit-floating-list-btn{min-width:118px!important;height:42px!important;right:16px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 172px)!important;border-radius:12px!important;font-size:13px!important;background:#1565c0!important;color:#fff!important}.shrine-visit-floating-list-btn.show{display:inline-flex!important}
 .shrine-visit-card-badge{border-radius:12px!important}.shrine-visit-card-badge.visited:after{border-radius:0 12px 12px 0!important}.shrine-visit-card-stamp{border-radius:6px!important}
 .shrine-visit-cards-tabs button{height:44px!important;min-height:44px!important;border-radius:8px!important;font-size:15px!important;padding:0 15px!important}.shrine-visit-cards-diocese .filter-btn{height:36px!important;min-height:36px!important;border-radius:8px!important;font-size:14px!important;padding:0 14px!important}.shrine-visit-map-filter button{height:36px!important;min-width:86px!important;border-radius:8px!important;font-size:13px!important;padding-left:16px!important;padding-right:16px!important}.shrine-visit-map-filter button[data-shrine-visit-filter="visited"]{min-width:112px!important}.shrine-visit-map-filter button[data-shrine-visit-filter="unvisited"]{min-width:104px!important}
-html.oai-font-global .shrine-visit-floating-list-btn{font-size:calc(13px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-cards-tabs button{font-size:calc(15px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-map-filter button{font-size:calc(13px * var(--app-inner-font-scale,1))!important}
+html.oai-font-global .shrine-visit-floating-list-btn{font-size:calc(13px * var(--app-inner-font-scale,1))!important}
+html.oai-font-global .shrine-visit-map-filter button{font-size:calc(13px * var(--app-inner-font-scale,1))!important}
 
-
-/* V6-123: 순례 스탬프북 전체폭/3탭/통계/카드 경계/상세 뒤로가기 정리 */
 .shrine-visit-cards-modal,
 .shrine-visit-cards-panel{
   width:100vw!important;
@@ -4324,13 +4276,6 @@ html.oai-font-global .shrine-visit-floating-list-btn{font-size:calc(13px * var(-
   font-size:15px!important;
   font-weight:900!important;
   box-shadow:none!important;
-}
-.shrine-visit-cards-tabs button.on,
-.shrine-visit-cards-tabs button.active{
-  background:#d4aa6a!important;
-  color:#0e1535!important;
-  border-color:#d4aa6a!important;
-  box-shadow:0 3px 10px rgba(0,0,0,.18)!important;
 }
 .shrine-visit-cards-diocese{
   width:100vw!important;
@@ -4441,11 +4386,8 @@ html.oai-font-global .shrine-visit-floating-list-btn{font-size:calc(13px * var(-
 .shrine-visit-stat-name{font-weight:900;color:#1d2939;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .shrine-visit-stat-row strong{font-weight:900;color:#0e1535;white-space:nowrap}
 .shrine-visit-stat-row em{font-style:normal;font-weight:900;color:#8b6914;white-space:nowrap}
-html.oai-font-global .shrine-visit-cards-tabs button{font-size:calc(15px * var(--app-inner-font-scale,1))!important}
 html.oai-font-global .shrine-visit-stat-row{font-size:calc(14px * var(--app-inner-font-scale,1))!important}
 
-
-/* V6-123: 순례카드 배경/미방문 색상/탭 흰색/통계 클릭/스탬프 수평 정리 */
 .shrine-visit-card-badge.visited{
   background:#ffffff!important;
   box-shadow:inset 0 1px 0 rgba(255,255,255,.98),0 6px 15px rgba(26,38,51,.13)!important;
@@ -4493,9 +4435,6 @@ html.oai-font-global .shrine-visit-stat-row{font-size:calc(14px * var(--app-inne
 }
 .shrine-visit-card-badge.unvisited .shrine-visit-card-dio{
   color:#334155!important;
-}
-.shrine-visit-card-badge.unvisited strong{
-  color:#0f172a!important;
 }
 .shrine-visit-card-badge.unvisited .shrine-visit-card-count{
   color:#111827!important;
@@ -4568,7 +4507,6 @@ html.oai-font-global .shrine-visit-stat-row{font-size:calc(14px * var(--app-inne
   border-top-color:transparent!important;
 }
 
-/* V6-123: 나의순례현황 버튼 표시 안정화 및 내위치 버튼 구분 보강 */
 #loc-btn{
   z-index:74!important;
   border:1.5px solid rgba(21,101,192,.32)!important;
@@ -4581,8 +4519,6 @@ html.oai-font-global .shrine-visit-stat-row{font-size:calc(14px * var(--app-inne
   box-shadow:0 9px 24px rgba(21,101,192,.30),0 3px 9px rgba(0,0,0,.20)!important;
 }
 
-
-/* V6-123: 순례 지도 필터 줌/미방문 활성/탭 색상 통일 */
 .shrine-visit-map-filter{
   background:rgba(255,255,255,.94)!important;
   border:1.5px solid rgba(15,23,42,.18)!important;
@@ -4609,7 +4545,6 @@ html.oai-font-global .shrine-visit-stat-row{font-size:calc(14px * var(--app-inne
   box-shadow:0 3px 10px rgba(15,23,42,.18)!important;
 }
 
-/* V6-123: 순례 지도 필터 줌 기준/활성색 통일/나의순례현황 버튼 표시 보강 */
 .shrine-visit-map-filter button.active,
 .shrine-visit-map-filter button[data-shrine-visit-filter="all"].active,
 .shrine-visit-map-filter button[data-shrine-visit-filter="visited"].active,
@@ -4629,7 +4564,6 @@ html.oai-font-global .shrine-visit-stat-row{font-size:calc(14px * var(--app-inne
   pointer-events:auto!important;
 }
 
-/* V6-123: 순례 스탬프북 탭/교구탭 표준화, 나의순례현황 위치 복귀 */
 .shrine-visit-floating-list-btn{
   right:12px!important;
   bottom:calc(env(safe-area-inset-bottom,0px) + 68px)!important;
@@ -4687,8 +4621,6 @@ html.oai-font-global .shrine-visit-stat-row{font-size:calc(14px * var(--app-inne
 html.oai-font-global .shrine-visit-cards-tabs button{font-size:calc(15px * var(--app-inner-font-scale,1))!important}
 html.oai-font-global .shrine-visit-cards-diocese .filter-btn{font-size:calc(14px * var(--app-inner-font-scale,1))!important}
 
-
-/* V6-123: 미방문 카드 흰 배경, 교구탭 스크롤 보강, 순례현황 박스 가독성 개선 */
 .shrine-visit-card-badge.unvisited,
 .shrine-visit-card-badge.type-shrine.unvisited,
 .shrine-visit-card-badge.type-pilgrim.unvisited,
@@ -4735,7 +4667,6 @@ html.oai-font-global .shrine-visit-cards-stats span,
 html.oai-font-global .shrine-visit-cards-stats b,
 html.oai-font-global .shrine-visit-cards-stats em{font-size:calc(15px * var(--app-inner-font-scale,1))!important;}
 
-/* V6-123: 통계 데이터 확대, 상세 배너/버튼 개선, 나의순례현황 표시 보강 */
 .shrine-visit-floating-list-btn{
   z-index:880!important;
 }
@@ -4856,8 +4787,6 @@ html.oai-font-global .shrine-visit-stat-item em{font-size:calc(14px * var(--app-
 }
 html.oai-font-global .shrine-visit-detail-action{font-size:calc(14px * var(--app-inner-font-scale,1))!important;}
 
-
-/* V6-123: 나의순례현황 표시 타이밍, 통계 데이터 스크롤, 순례등록 버튼 색상 */
 .shrine-visit-stat-row.active{
   background:#eaf3ff!important;
   color:#0e3f78!important;
@@ -4891,7 +4820,6 @@ html.oai-font-global .shrine-visit-detail-action{font-size:calc(14px * var(--app
   filter:none!important;
 }
 
-/* V6-123: 순례등록 모달 색상 가독성 개선 및 지도 필터 시 정보카드 숨김 */
 .shrine-visit-panel{
   border:2px solid #1976d2!important;
   background:#ffffff!important;
@@ -4939,13 +4867,11 @@ html.oai-font-global .shrine-visit-detail-action{font-size:calc(14px * var(--app
   border:1px solid #bbdefb!important;
 }
 
-/* V6-123: 성지 정보 카드 테두리 가시성 강화 */
 .shrine-visit-detail-info{
   border:2px solid #9fb3c8!important;
   box-shadow:0 6px 20px rgba(15,23,42,.11)!important;
 }
 
-/* V6-123: GPS 순례등록 안내 문구 2줄 정리 */
 .shrine-auto-visit-title{
   font-size:19px!important;
   line-height:1.35!important;
@@ -4963,8 +4889,6 @@ html.oai-font-global .shrine-visit-detail-action{font-size:calc(14px * var(--app
 html.oai-font-global .shrine-auto-visit-title{font-size:calc(19px * var(--app-inner-font-scale,1))!important;}
 html.oai-font-global .shrine-auto-visit-dist{font-size:calc(15px * var(--app-inner-font-scale,1))!important;}
 
-
-/* V6-123: 순례 스탬프북 신규 성지 탭, 얇은 구분선, 상세버튼 표준 정렬 */
 .shrine-visit-cards-head{
   border-bottom:1px solid rgba(212,170,106,.45)!important;
   margin-bottom:0!important;
@@ -5024,9 +4948,6 @@ html.oai-font-global .shrine-auto-visit-dist{font-size:calc(15px * var(--app-inn
   text-align:center!important;
 }
 
-
-
-/* V6-123: 신규 배지 세로 정렬, 나의순례현황 위치 하향, 스탬프북 구분선 동일 두께 */
 .shrine-new-chip{
   position:relative!important;
   top:-2px!important;
@@ -5062,8 +4983,6 @@ html.oai-font-global .shrine-auto-visit-dist{font-size:calc(15px * var(--app-inn
   box-shadow:none!important;
 }
 
-
-/* V6-123: 지도 필터 레이어 전체폭, X만 축소, 내위치 버튼 위치 재조정, 검색 교구 레이어/스탬프북 선 정리 */
 #map-wrap .shrine-visit-map-filter{
   left:0!important;
   right:0!important;
@@ -5122,11 +5041,6 @@ html.oai-font-global .shrine-auto-visit-dist{font-size:calc(15px * var(--app-inn
   justify-content:center!important;
   z-index:660!important;
 }
-.shrine-visit-floating-list-btn{
-  right:12px!important;
-  bottom:calc(env(safe-area-inset-bottom,0px) + 18px)!important;
-  z-index:860!important;
-}
 #loc-btn{
   right:12px!important;
   bottom:calc(env(safe-area-inset-bottom,0px) + 68px)!important;
@@ -5157,9 +5071,6 @@ html.oai-font-global .shrine-auto-visit-dist{font-size:calc(15px * var(--app-inn
 .shrine-visit-cards-head.module-bar::after{display:none!important;content:none!important;}
 .shrine-visit-cards-tabs{border-top:0!important;}
 
-
-
-/* V6-123: 순례 스탬프북 상단선/4탭 비율, 통계 교구탭 숨김, 내위치 버튼, 신규 카드 테두리 정리 */
 .shrine-visit-cards-head,
 .shrine-visit-cards-head.module-bar,
 .shrine-visit-cards-tabs,
@@ -5218,9 +5129,6 @@ html.oai-font-global .shrine-auto-visit-dist{font-size:calc(15px * var(--app-inn
 .shrine-visit-card-badge.new.type-martyr{border-color:rgba(0,166,106,.62)!important;}
 html.oai-font-global .shrine-visit-cards-tabs button{font-size:calc(13px * var(--app-inner-font-scale,1))!important;}
 
-
-
-/* V6-123: 통계 중복 상단 박스 제거, 활성 교구탭 자동 노출 보강, 방문 성지 상세 버튼을 정보카드와 동일 구조/색상으로 정리 */
 .shrine-visit-cards-stats.stats-tab-hidden{
   display:none!important;
   height:0!important;
@@ -5292,9 +5200,6 @@ html.oai-font-global .shrine-visit-cards-tabs button{font-size:calc(13px * var(-
 }
 .shrine-visit-detail-action .detail-tel-icon{font-size:18px!important;line-height:1!important;}
 
-
-
-/* V6-123: 지도 필터 선택 시 확대/이동 제거, 성지 상세 버튼 행 구조를 정보카드처럼 안정화 */
 .shrine-visit-detail-actions{
   display:flex!important;
   flex-direction:column!important;
@@ -5317,9 +5222,6 @@ html.oai-font-global .shrine-visit-cards-tabs button{font-size:calc(13px * var(-
   width:100%!important;
 }
 
-
-
-/* V6-123: 스탬프북 상단탭/통계 스크롤 안정화 및 자체 스와이프 보강 */
 .shrine-visit-cards-panel{
   overscroll-behavior:contain!important;
 }
@@ -5334,8 +5236,6 @@ html.oai-font-global .shrine-visit-cards-tabs button{font-size:calc(13px * var(-
   scroll-margin-top:8px!important;
 }
 
-
-/* V6-123: V6-123 상단 배치 폐기, 기존 하단 기준에서 버튼만 조금 위로 조정 */
 .shrine-visit-floating-list-btn{
   right:12px!important;
   bottom:calc(env(safe-area-inset-bottom,0px) + 34px)!important;
@@ -5351,9 +5251,6 @@ html.retreat-mode #app #loc-btn{
   bottom:calc(env(safe-area-inset-bottom,0px) + 80px)!important;
 }
 
-
-
-/* V6-123: 스탬프북 성지 정보 박스 우측 상단 지도 보기 버튼 */
 .shrine-visit-detail-info-head{
   display:flex!important;
   align-items:center!important;
@@ -5386,9 +5283,6 @@ html.retreat-mode #app #loc-btn{
   filter:brightness(.96)!important;
 }
 
-
-
-/* V6-123: 스탬프북 카드 배경은 건드리지 않고 바탕 영역만 아이보리 적용 */
 .shrine-visit-cards-modal,
 .shrine-visit-cards-panel,
 .shrine-visit-cards-body{
@@ -5402,8 +5296,6 @@ html.retreat-mode #app #loc-btn{
   /* 카드/정보 박스 배경은 기존 스타일 유지 */
 }
 
-
-/* V6-123: 통계 화면 상단 여백과 펼침 목록 하단 잘림 방지 */
 .shrine-visit-cards-body.stats{
   padding-top:14px!important;
   padding-bottom:max(68px,calc(env(safe-area-inset-bottom,0px) + 58px))!important;
@@ -5428,9 +5320,6 @@ html.retreat-mode #app #loc-btn{
   margin-bottom:8px!important;
 }
 
-/* V6-123: 스탬프북 CSS 2차 안전 정리 - 사용되지 않는 옛 카드 스타일/중복 지도 필터 블록/빈 오타 선택자 제거 */
-
-/* V6-123: Android/비 iOS 화면 분류 2단계 적용 - 커버, 지도 정보카드, 기본 목록 세로 비율 조정 */
 html:not(.ios-device).oai-screen-compact-short #cover-main-block{
   gap:5px!important;
   padding-left:8px!important;
@@ -5555,7 +5444,6 @@ html:not(.ios-device).oai-screen-fold-wide #app .region-item{
   gap:10px!important;
 }
 
-/* V6-123: Android/비 iOS 화면 분류 3단계 적용 - 순례 스탬프북 세로 비율 조정 */
 html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-head.module-bar,
 html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-head{
   min-height:calc(58px + env(safe-area-inset-top,0px))!important;
@@ -5583,12 +5471,6 @@ html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-diocese{
   height:42px!important;
   max-height:42px!important;
   padding:5px 8px!important;
-}
-html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-diocese .filter-btn{
-  height:30px!important;
-  min-height:30px!important;
-  
-  padding:0 10px!important;
 }
 html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-stats{
   min-height:40px!important;
@@ -5668,7 +5550,6 @@ html:not(.ios-device).oai-screen-fold-wide .shrine-visit-detail-row{padding:8px 
 html:not(.ios-device).oai-screen-fold-wide .shrine-visit-detail-action{height:42px!important;min-height:42px!important;font-size:13px!important;}
 html:not(.ios-device).oai-screen-tall-phone #app .shrine-visit-detail-action{height:45px!important;min-height:45px!important;}
 
-/* V6-123: 폴드 큰 화면에서 순례카드가 가로폭에 비례해 세로로 과하게 커지는 문제 보정 */
 html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-grid{
   grid-template-columns:repeat(3,minmax(0,1fr))!important;
   gap:8px!important;
@@ -5705,7 +5586,6 @@ html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-stamp{
   font-size:8.5px!important;
 }
 
-/* V6-123: 순례한 성지 카드 오른쪽 아래 CSS 원형 도장 - 이미지 파일 사용 없음 */
 .shrine-visit-card-badge.visited .shrine-visit-card-seal{
   position:absolute!important;
   right:13px!important;
@@ -5766,11 +5646,6 @@ html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-badge.visited .shr
 html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-badge.visited .shrine-visit-card-seal::before{
   inset:3.5px!important;
 }
-html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-badge.visited .shrine-visit-card-seal::after{
-  font-size:10.5px!important;
-}
-
-/* V6-123: 통계 교구 선택 강조는 교구 탭과 분리하고, 강조색을 테두리까지 적용 */
 .shrine-visit-stat-row.active{
   background:#eaf4ff!important;
   border:2px solid rgba(22,140,255,.50)!important;
@@ -5789,7 +5664,6 @@ html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-badge.visited .shr
   font-size:10.5px!important;
 }
 
-/* V6-123: 순례 도장은 타입별 고유색으로 표시 */
 .shrine-visit-card-badge.type-shrine.visited .shrine-visit-card-seal{
   color:#ef2f2f!important;
   background:rgba(255,241,241,.72)!important;
@@ -5812,7 +5686,6 @@ html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-badge.visited .shr
 }
 .shrine-visit-card-badge.type-martyr.visited .shrine-visit-card-seal::before{border-color:rgba(0,166,106,.64)!important;}
 
-/* V6-123: 수동 순례등록 카드 배경을 지도 정보카드와 같은 아이보리 계열로 통일 */
 .shrine-visit-panel{
   background:linear-gradient(180deg,#fffdf9,#f6efe6)!important;
   border-color:#e4d7c5!important;
@@ -5835,7 +5708,6 @@ html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-badge.visited .shr
   white-space:nowrap!important;
 }
 
-/* V6-123: 통계 선택 박스를 좌우로 넓히고 교구명 간섭 제거 */
 .shrine-visit-stat-row.active{
   margin-left:-14px!important;
   margin-right:-14px!important;
@@ -5860,7 +5732,6 @@ html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-badge.visited .shr
   box-shadow:0 8px 16px rgba(22,140,255,.07)!important;
 }
 
-/* V6-123: 동그라미 로딩을 작은 황금 십자가 로딩으로 통일 */
 @keyframes oaiGoldCrossSlowSpin{
   from{transform:rotate(0deg);}
   to{transform:rotate(360deg);}
@@ -5928,8 +5799,6 @@ html.oai-external-return-freeze::after,
   z-index:2147483647!important;
 }
 
-
-/* V6-123: 성지/성당/피정의 성지검색·지역검색 입력 시 키보드가 올라와도 화면 전체가 위로 밀리지 않게 고정한다. */
 html.oai-map-search-keyboard-lock,
 html.oai-map-search-keyboard-lock body{
   overscroll-behavior:none!important;
@@ -5949,8 +5818,6 @@ html.oai-map-search-keyboard-lock #sheet-region.open{
   transform:none!important;
 }
 
-
-/* V6-137: 나의순례현황 버튼 가시성 확대 */
 .shrine-visit-floating-list-btn{
   min-width:138px!important;
   height:48px!important;
@@ -5970,15 +5837,11 @@ html.oai-font-global .shrine-visit-floating-list-btn{
   font-size:calc(15px * var(--app-inner-font-scale,1))!important;
 }
 
-
-
-/* V6-140: 순례등록 창은 순례기록 상세 위에 표시 */
 #shrine-visit-modal.show,
 .shrine-visit-modal.show{
   z-index:10080!important;
 }
 
-/* V6-151: 모든 X 닫기/삭제 버튼은 속이 투명한 원형 테두리로 통일 */
 .module-close,
 #prayer-close,
 #pr-back-btn,
@@ -6008,11 +5871,6 @@ html.oai-font-global .shrine-visit-floating-list-btn{
   line-height: 1 !important;
 }
 
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 오래된 인트로 숨김/금색 십자가 보정 제거. */
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 오래된 인트로 숨김/금색 십자가 보정 제거. */
-
-/* V6-165 확인용: 기존 뒤로가기 UI는 숨기고, 닫기는 X 버튼만 사용한다. */
 #shrine-visit-detail-back,
 .shrine-visit-detail-back {
   display:none !important;
@@ -6020,8 +5878,6 @@ html.oai-font-global .shrine-visit-floating-list-btn{
   pointer-events:none !important;
 }
 
-
-/* V8-1-14-10-QNA-NOTICE-IN-TEXTAREA: 개인정보는 주요기능처럼 내부 모달, 문의·건의는 매일미사/성경처럼 내부 iframe */
 .privacy-policy-panel {
   width: min(94vw, 920px);
   height: min(86vh, 780px);
@@ -6049,7 +5905,6 @@ html.oai-font-global .shrine-visit-floating-list-btn{
 }
 #qna-view.open { display: flex; flex-direction: column; }
 
-/* V8-1-14-10-QNA-NOTICE-IN-TEXTAREA: 외부복귀/새로고침 안정막의 금색 로딩 십자가 복원 */
 html.oai-stability-veil::after {
   content:"✝" !important;
   position:fixed !important;
@@ -6074,9 +5929,7 @@ html.oai-stability-veil::after {
   visibility:visible !important;
   animation:oaiStabilitySpin 2.8s linear infinite !important;
 }
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 오래된 인트로 숨김/금색 십자가 보정 제거. */
 
-/* V8-1-14-47: 성지 지도 상단 필터(전체/순례한 성지/미방문 성지) 글자와 높이 확대 */
 .shrine-visit-map-filter{
   min-height:48px!important;
   padding:7px!important;
@@ -6093,8 +5946,6 @@ html.oai-stability-veil::after {
   line-height:1.15!important;
 }
 
-
-/* V8-1-14-48: 글자크기 연동 상태에서도 성지 지도 상단 필터 확대를 우선 적용 */
 html.oai-font-global .shrine-visit-map-filter{
   min-height:48px!important;
   padding:7px!important;
@@ -6111,8 +5962,6 @@ html.oai-font-global .shrine-visit-map-filter button[data-shrine-visit-filter="u
   line-height:1.15!important;
 }
 
-
-/* V8-1-14-49: 성지 지도 상단 필터 글자 크기 강제 확대 - ID 선택자로 최종 우선 적용 */
 #map-wrap #shrine-visit-map-filter,
 html.oai-font-global #map-wrap #shrine-visit-map-filter{
   min-height:52px!important;
@@ -6129,9 +5978,6 @@ html.oai-font-global #map-wrap #shrine-visit-map-filter > button[data-shrine-vis
   line-height:1.1!important;
 }
 
-
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: Google 배포용 첫 커버 인트로는 금색 십자가 대신 업로드된 십자가 사진을 사용한다. */
 @keyframes oaiGoogleIntroPhotoDesktop{
   0%{opacity:.02; transform:translate(-50%,-49%) scale(.94); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
   42%{opacity:1; transform:translate(-50%,-50%) scale(1); filter:contrast(1.015) saturate(1.02) drop-shadow(0 6px 16px rgba(80,54,18,.05));}
@@ -6225,9 +6071,6 @@ html.oai-cover-revealing::after{
   }
 }
 
-
-/* OAI-V67-STAMPBOOK-HEADER-BOTTOM-SAFE-FINAL
-   V8-1-14-235_parish_retreat_myloc_button_lower_full: 스탬프북 헤더의 status-bar 중복 보정 제거 + Android WebView 하단 안전영역 표준화. */
 html:not(.ios-device){
   --oai-android-bottom-gap:clamp(10px, env(safe-area-inset-bottom,0px), 18px);
   --oai-android-bottom-gap-tight:clamp(8px, env(safe-area-inset-bottom,0px), 14px);
@@ -6331,9 +6174,6 @@ html:not(.ios-device) .shrine-visit-detail-body{
   padding-bottom:max(44px, calc(32px + var(--oai-android-bottom-gap)))!important;
 }
 
-
-/* OAI-V68-KEYBOARD-BUTTON-POSITION-FINAL
-   V8-1-14-235_parish_retreat_myloc_button_lower_full: 지도/지역검색 키보드 중 나의순례현황 버튼 숨김, 내위치/나의순례현황 버튼 위치 중간 상향. */
 html.oai-map-search-keyboard-lock #app #shrine-visit-floating-list-btn,
 html.oai-map-search-keyboard-lock #app #shrine-visit-floating-list-btn.show,
 html.kb-open #app #shrine-visit-floating-list-btn,
@@ -6355,10 +6195,6 @@ html:not(.ios-device).retreat-mode #app #loc-btn{
   bottom:calc(var(--oai-android-bottom-gap, 10px) + 80px)!important;
 }
 
-
-
-/* OAI-V69-NO-RELOAD-INTRO-CROSS-FINAL
-   V8-1-14-235_parish_retreat_myloc_button_lower_full: 새로고침/리로드 끝부분에 다시 나타나는 인트로 십자가를 제거한다. */
 html.oai-refresh-no-intro.oai-cover-booting::after,
 html.oai-refresh-no-intro.oai-cover-revealing::after,
 html.oai-stability-veil[data-oai-stability-reason*="refresh"]::after,
@@ -6372,9 +6208,6 @@ html.oai-stability-veil[data-oai-refresh-early-veil="1"]::after{
   background-image:none!important;
 }
 
-
-/* OAI-V71-SMOOTH-TIMING-FINAL
-   V8-1-14-235_parish_retreat_myloc_button_lower_full: 인트로는 유지하고, 외부페이지 보호막/성지·성당·피정 전환 체감만 부드럽게 정리한다. */
 html:not(.ios-device){
   --oai-category-enter-ms:360ms!important;
   --oai-popup-enter-ms:320ms!important;
@@ -6412,12 +6245,6 @@ html.oai-stability-veil[data-oai-stability-reason*="external"] *{
   will-change:auto!important;
 }
 
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 오래된 단계별 인트로 조정 블록 제거. 최종 V85 사진 인트로만 유지한다. */
-
-/* OAI-V74-STAMPBOOK-HEADER-TOP-FIX-FINAL
-   V8-1-14-235_parish_retreat_myloc_button_lower_full: V67에서 스탬프북 헤더의 상단 safe-area를 완전히 빼면서 일부 Android WebView에서 헤더가 위로 잘리는 문제를 보정한다.
-   다른 카테고리 헤더/뒤로가기/보호창/인트로는 건드리지 않고 스탬프북 헤더에만 최소 상단 여유를 준다. */
 html:not(.ios-device){
   --oai-stampbook-header-top-gap:clamp(16px, env(safe-area-inset-top, 0px), 24px);
 }
@@ -6448,11 +6275,6 @@ html:not(.ios-device).oai-screen-compact-short #shrine-visit-cards-modal .shrine
   padding:calc(8px + var(--oai-stampbook-header-top-gap)) 14px 8px!important;
 }
 
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 오래된 단계별 인트로 조정 블록 제거. 최종 V85 사진 인트로만 유지한다. */
-
-/* OAI-V77-EXTERNAL-ENTRY-VEIL-FINAL
-   V8-1-14-235_parish_retreat_myloc_button_lower_full: 모든 외부사이트 진입 직전 보호창이 보이도록 external-leave 보호막을 즉시 표시하고 최소 표시 시간을 확보한다. */
 html.oai-stability-veil[data-oai-stability-reason="external-leave"]::before,
 html.oai-stability-veil.oai-external-leaving::before{
   content:""!important;
@@ -6471,12 +6293,6 @@ html.oai-stability-veil.oai-external-leaving::after{
   animation:oaiUnifiedLoadingCrossSpin 2.8s linear infinite!important;
 }
 
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 오래된 단계별 인트로 조정 블록 제거. 최종 V85 사진 인트로만 유지한다. */
-
-/* OAI-V79-STAMPBOOK-HEADER-REPAIR-FINAL
-   V8-1-14-235_parish_retreat_myloc_button_lower_full: V74의 16~24px 상단 여유가 일부 Android WebView에서 부족해 스탬프북 헤더가 계속 잘리는 문제를 재보정한다.
-   관구·교구/다른 헤더는 건드리지 않고, 스탬프북 헤더 내부 여백만 충분히 확보한다. */
 html:not(.ios-device){
   --oai-stampbook-header-top-gap:clamp(38px, calc(env(safe-area-inset-top, 0px) + 18px), 46px);
 }
@@ -6519,11 +6335,6 @@ html:not(.ios-device) .shrine-visit-cards-modal .shrine-visit-cards-head .module
   align-items:center!important;
 }
 
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 오래된 단계별 인트로 조정 블록 제거. 최종 V85 사진 인트로만 유지한다. */
-
-/* OAI-V82-LOCATION-EXTERNAL-STABLE-FINAL
-   V8-1-14-235_parish_retreat_myloc_button_lower_full: 이동 후 이전 위치가 남는 문제를 줄이기 위해 위치 캐시 의존을 낮추고, 외부사이트가 늦게 열릴 때 보호창이 먼저 사라지지 않도록 보강했다. */
 html.oai-stability-veil[data-oai-stability-reason="external-leave"]::before,
 html.oai-stability-veil.oai-external-leaving::before{
   opacity:1!important;
@@ -6533,11 +6344,6 @@ html.oai-stability-veil.oai-external-leaving::after{
   opacity:.86!important;
 }
 
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 오래된 단계별 인트로 조정 블록 제거. 최종 V85 사진 인트로만 유지한다. */
-
-/* OAI-V85-INTRO-SMOOTH-NO-STUTTER-FINAL
-   V8-1-14-235_parish_retreat_myloc_button_lower_full: 인트로 속도는 유지하고, 중간 끊김처럼 보이던 다단계 확대를 전용 keyframes의 단일 연속 곡선으로 정리한다. */
 @keyframes oaiIntroSmoothPhotoDesktopV85{
   0%{opacity:.12; transform:translate(-50%,-49%) scale(.84); filter:contrast(1.005) saturate(1.01) drop-shadow(0 4px 12px rgba(80,54,18,.035));}
   100%{opacity:1; transform:translate(-50%,-50%) scale(1); filter:contrast(1.015) saturate(1.02) drop-shadow(0 6px 16px rgba(80,54,18,.05));}
@@ -6567,9 +6373,6 @@ html.oai-cover-revealing::after{
   }
 }
 
-
-/* OAI-V86-EXTERNAL-VEIL-STABLE-FINAL
-   V8-1-14-235_parish_retreat_myloc_button_lower_full: 외부사이트 진입 때 CSS pseudo 보호막이 WebView 로딩과 겹치며 사라져 보이는 현상을 줄이기 위해 실제 DOM 보호창을 최상단에 유지한다. */
 #oai-external-entry-guard{
   position:fixed!important;
   inset:0!important;
@@ -6585,11 +6388,6 @@ html.oai-cover-revealing::after{
   transform:translateZ(0)!important;
   backface-visibility:hidden!important;
   contain:layout paint style!important;
-}
-#oai-external-entry-guard.show{
-  display:flex!important;
-  opacity:1!important;
-  visibility:visible!important;
 }
 #oai-external-entry-guard.hide{
   opacity:0!important;
@@ -6622,20 +6420,6 @@ html.oai-stability-veil.oai-external-leaving::after{
   visibility:hidden!important;
   animation:none!important;
 }
-
-
-/* OAI-V87-NO-PULL-EXTERNAL-PLAIN-FINAL
-   V8-1-14-235_parish_retreat_myloc_button_lower_full: 커버 당김 새로고침 원형 화살표를 완전히 숨기고, 외부사이트 진입 보호창은 단색 화면만 사용해 검은 화면/원형 표시처럼 보이는 중간 단계를 줄인다. */
-#cv-pull-modern,
-#cv-pull-modern.show,
-#cv-pull-modern.ready,
-#cv-pull-modern.refreshing{
-  display:none!important;
-  opacity:0!important;
-  visibility:hidden!important;
-  pointer-events:none!important;
-  animation:none!important;
-}
 html.oai-external-leaving,
 html.oai-external-leaving body,
 html.oai-stability-veil[data-oai-stability-reason="external-leave"],
@@ -6663,49 +6447,6 @@ html.oai-stability-veil[data-oai-stability-reason="external-leave"] body{
   visibility:hidden!important;
   animation:none!important;
 }
-html.oai-stability-veil[data-oai-stability-reason="external-leave"]::before,
-html.oai-stability-veil.oai-external-leaving::before{
-  background:#f5f0e8!important;
-  opacity:1!important;
-  visibility:visible!important;
-  animation:none!important;
-}
-html.oai-stability-veil[data-oai-stability-reason="external-leave"]::after,
-html.oai-stability-veil.oai-external-leaving::after{
-  content:""!important;
-  display:none!important;
-  opacity:0!important;
-  visibility:hidden!important;
-  animation:none!important;
-}
-
-
-/* OAI-V88-EXTERNAL-VEIL-HOLD-FINAL
-   V8-1-14-235_parish_retreat_myloc_button_lower_full: 외부사이트 진입 보호창이 너무 짧게 느껴지지 않도록, 보호창은 단색 아이보리 상태를 유지하고 이동 전 최소 표시 시간을 app.js에서 늘렸다. */
-#oai-external-entry-guard.show{
-  display:flex!important;
-  opacity:1!important;
-  visibility:visible!important;
-  background:#f5f0e8!important;
-}
-
-
-/* OAI-V89-EXTERNAL-CROSS-RESTORE-FINAL
-   V8-1-14-235_parish_retreat_myloc_button_lower_full: V87에서 제거했던 외부사이트 진입 로딩 십자가를 복구한다. 원형 당김 새로고침 표시는 계속 제거한다. */
-#oai-external-entry-guard.show{
-  display:flex!important;
-  opacity:1!important;
-  visibility:visible!important;
-  background:#f5f0e8!important;
-}
-#oai-external-entry-guard::before,
-#oai-external-entry-guard::after{
-  content:""!important;
-  display:none!important;
-  opacity:0!important;
-  visibility:hidden!important;
-  animation:none!important;
-}
 #oai-external-entry-guard .oai-external-entry-cross{
   width:56px!important;
   height:56px!important;
@@ -6727,14 +6468,6 @@ html.oai-stability-veil.oai-external-leaving::before{
   visibility:visible!important;
   animation:none!important;
 }
-html.oai-stability-veil[data-oai-stability-reason="external-leave"]::after,
-html.oai-stability-veil.oai-external-leaving::after{
-  content:""!important;
-  display:none!important;
-  opacity:0!important;
-  visibility:hidden!important;
-  animation:none!important;
-}
 #cv-pull-modern,
 #cv-pull-modern.show,
 #cv-pull-modern.ready,
@@ -6746,9 +6479,6 @@ html.oai-stability-veil.oai-external-leaving::after{
   animation:none!important;
 }
 
-
-/* OAI-V90-EXTERNAL-CROSS-CHROME-SMOOTH-FINAL
-   V8-1-14-235_parish_retreat_myloc_button_lower_full: Chrome 전환 전에 로딩 십자가가 확실히 보이도록 보호창을 더 선명하게 표시한다. */
 #oai-external-entry-guard.show{
   display:flex!important;
   opacity:1!important;
@@ -6771,14 +6501,6 @@ html.oai-stability-veil.oai-external-leaving::after{
   animation:oaiStabilitySpin 1.9s linear infinite!important;
   transform-origin:center center!important;
 }
-#oai-external-entry-guard::before,
-#oai-external-entry-guard::after{
-  content:""!important;
-  display:none!important;
-  opacity:0!important;
-  visibility:hidden!important;
-  animation:none!important;
-}
 html.oai-stability-veil[data-oai-stability-reason="external-leave"]::after,
 html.oai-stability-veil.oai-external-leaving::after{
   content:""!important;
@@ -6788,10 +6510,6 @@ html.oai-stability-veil.oai-external-leaving::after{
   animation:none!important;
 }
 
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 폐기된 background stabilizing veil CSS 제거. */
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 성지/성당/피정의집 카테고리별 정보 출처 표기 */
 .category-source-note {
   display: block;
   flex-shrink: 0;
@@ -6819,14 +6537,12 @@ html.retreat-mode .category-source-note .source-retreat { display: inline; }
 #sheet-region .category-source-note { position: relative; z-index: 2; }
 html.oai-font-global .category-source-note { font-size: calc(11px * var(--app-inner-font-scale,1)); }
 
-/* V8-1-14-105: 성지 상세페이지/굿뉴스 성지안내 버튼 색상 밝게 통일 */
 #app #info-card .ic-guide-btn{background:#fff3c4!important;color:#6c4a00!important;border:1px solid #e1bd59!important;}
 #app #info-card .ic-goodnews-btn{background:#e8f7ff!important;color:#075985!important;border:1px solid #66bdf2!important;}
 #app .shrine-visit-detail-action.detail-guide{background:#fff3c4!important;color:#6c4a00!important;border:1px solid #e1bd59!important;}
 #app .shrine-visit-detail-action.detail-goodnews{background:#e8f7ff!important;color:#075985!important;border:1px solid #66bdf2!important;}
 #app .shrine-visit-detail-action.detail-kakao{width:auto!important;}
 
-/* V8-1-14-106: 정보카드/스탬프북 버튼 폭 통일 */
 #app #info-card .ic-btn-row,
 #app #info-card .ic-links,
 #app #info-card .ic-kakao-row{
@@ -6881,8 +6597,6 @@ html.oai-font-global .category-source-note { font-size: calc(11px * var(--app-in
 #app .shrine-visit-detail-action.detail-goodnews{background:#eaf7ff!important;color:#075985!important;border:1.5px solid #7ec8f3!important;}
 #app .shrine-visit-detail-action.detail-kakao{width:0!important;}
 
-
-/* V8-1-14-109: 정보카드/나의 성지순례 현황 6버튼 색상 통일 */
 #app #info-card .ic-tel-btn,
 #app #info-card .ic-route-btn,
 #app #info-card .ic-hp-btn,
@@ -6930,8 +6644,6 @@ html.oai-font-global .category-source-note { font-size: calc(11px * var(--app-in
   filter:none!important;
 }
 
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 성지 정보카드 6개 버튼 색상을 부드러운 아이보리/골드 계열로 정리한다. */
 #app #info-card .ic-btn-row > *,
 #app #info-card .ic-links > *,
 #app #info-card .ic-kakao-row > *,
@@ -6983,8 +6695,6 @@ html.oai-font-global .category-source-note { font-size: calc(11px * var(--app-in
   transform:translateY(1px)!important;
 }
 
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 1안 적용 - 남색 배경 + 금색 테두리 + 아이보리 글자. */
 #app #info-card .ic-btn-row > *,
 #app #info-card .ic-links > *,
 #app #info-card .ic-kakao-row > *,
@@ -7036,8 +6746,6 @@ html.oai-font-global .category-source-note { font-size: calc(11px * var(--app-in
   transform:translateY(1px)!important;
 }
 
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 실제 버튼 ID/행 클래스에 직접 적용해 이전 색상 최종 오버라이드를 덮는다. */
 #app #info-card #ic-tel-link,
 #app .shrine-visit-detail-action-row.detail-primary-row > .detail-tel{
   background:linear-gradient(180deg,#f5fbff 0%,#e4f3ff 100%)!important;
@@ -7097,8 +6805,6 @@ html.oai-font-global .category-source-note { font-size: calc(11px * var(--app-in
   transform:translateY(1px)!important;
 }
 
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 좌우 모두 파스텔 톤으로 맞춘다. 왼쪽은 파스텔 그린, 오른쪽은 파스텔 네이비. */
 #app #info-card #ic-tel-link,
 #app .shrine-visit-detail-action-row.detail-primary-row > .detail-tel{
   background:linear-gradient(180deg,#f4fbf5 0%,#dff2e5 100%)!important;
@@ -7158,8 +6864,6 @@ html.oai-font-global .category-source-note { font-size: calc(11px * var(--app-in
   transform:translateY(1px)!important;
 }
 
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 카카오내비 버튼은 원래 카카오 노란색으로 복원한다. */
 #app #info-card #ic-kakao-nav,
 #app .shrine-visit-detail-action-row.detail-kakao-row > .detail-kakao{
   background:linear-gradient(180deg,#ffe812 0%,#fee500 100%)!important;
@@ -7176,8 +6880,6 @@ html.oai-font-global .category-source-note { font-size: calc(11px * var(--app-in
   transform:translateY(1px)!important;
 }
 
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 홈페이지/성지 상세페이지는 한 톤 더 진하게, 굿뉴스는 더 굵고 선명하게 조정. */
 #app #info-card #ic-hp,
 #app .shrine-visit-detail-action-row.detail-link-row > .detail-home{
   background:linear-gradient(180deg,#d9f0e1 0%,#b8dec6 100%)!important;
@@ -7202,8 +6904,6 @@ html.oai-font-global .category-source-note { font-size: calc(11px * var(--app-in
   box-shadow:0 3px 9px rgba(31,86,54,.16), inset 0 1px 0 rgba(255,255,255,.62)!important;
 }
 
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: V117 기준 유지. V118의 나의 성지순례 현황 성지정보 카드 색상만 적용하고, 흔들림을 만들었던 홈복귀 보호막은 넣지 않는다. */
 #app .shrine-visit-detail-info{
   background:linear-gradient(180deg,#fbfdff 0%,#fffaf0 100%)!important;
   border:2px solid #9db7cc!important;
@@ -7225,9 +6925,6 @@ html.oai-font-global .category-source-note { font-size: calc(11px * var(--app-in
   font-weight:950!important;
 }
 
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 버튼 색상은 굿뉴스/홈페이지만 한 톤 진하게 하고, 로딩 십자가는 하나의 규격으로 통일한다. */
-@keyframes oaiUnifiedLoadingCrossSpin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
 #app #info-card #ic-hp,
 #app .shrine-visit-detail-action.detail-home{
   background:linear-gradient(180deg,#d9f0e1 0%,#b8dec6 100%)!important;
@@ -7236,98 +6933,6 @@ html.oai-font-global .category-source-note { font-size: calc(11px * var(--app-in
   font-weight:950!important;
   box-shadow:0 3px 9px rgba(28,94,55,.17), inset 0 1px 0 rgba(255,255,255,.42)!important;
 }
-#app #info-card #ic-goodnews,
-#app .shrine-visit-detail-action.detail-goodnews{
-  background:#3f8f7d!important;
-  color:#ffffff!important;
-  border:1.8px solid #2d6f61!important;
-  box-shadow:0 2px 9px rgba(63,143,125,.28)!important;
-  text-shadow:0 1px 1px rgba(0,0,0,.20)!important;
-  font-weight:950!important;
-}
-.map-loading-icon,
-#diocese-loading .missa-spinner,
-#nearby-body .nearby-distance-spinner{
-  width:36px!important;
-  height:36px!important;
-  min-width:36px!important;
-  min-height:36px!important;
-  border:0!important;
-  border-radius:0!important;
-  background:transparent!important;
-  box-shadow:none!important;
-  color:#d4aa6a!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  animation:oaiUnifiedLoadingCrossSpin 2.8s linear infinite!important;
-  transform-origin:50% 50%!important;
-}
-.map-loading-icon::before,
-#diocese-loading .missa-spinner::before,
-#nearby-body .nearby-distance-spinner::before{
-  content:"✝"!important;
-  color:#d4aa6a!important;
-  font-size:32px!important;
-  font-weight:900!important;
-  line-height:1!important;
-  text-shadow:0 2px 8px rgba(212,170,106,.22)!important;
-}
-#oai-category-entry-veil::after,
-html.oai-stability-veil::after,
-html.oai-external-return-freeze::after{
-  content:"✝"!important;
-  position:fixed!important;
-  left:50%!important;
-  top:50%!important;
-  width:36px!important;
-  height:36px!important;
-  margin:-18px 0 0 -18px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  border:0!important;
-  border-radius:0!important;
-  background:transparent!important;
-  box-shadow:none!important;
-  color:#d4aa6a!important;
-  font-size:32px!important;
-  font-weight:900!important;
-  line-height:1!important;
-  text-shadow:0 2px 8px rgba(212,170,106,.22)!important;
-  animation:oaiUnifiedLoadingCrossSpin 2.8s linear infinite!important;
-  animation-delay:0s!important;
-  animation-fill-mode:none!important;
-  opacity:1!important;
-  visibility:visible!important;
-  transform-origin:50% 50%!important;
-  pointer-events:none!important;
-  z-index:2147483001!important;
-}
-#oai-external-entry-guard .oai-external-entry-cross{
-  width:36px!important;
-  height:36px!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  color:#d4aa6a!important;
-  font-size:32px!important;
-  font-weight:900!important;
-  line-height:1!important;
-  text-shadow:0 2px 8px rgba(212,170,106,.22)!important;
-  animation:oaiUnifiedLoadingCrossSpin 2.8s linear infinite!important;
-  transform-origin:center center!important;
-}
-html.oai-stability-veil[data-oai-stability-reason="external-leave"]::after,
-html.oai-stability-veil.oai-external-leaving::after{
-  content:""!important;
-  display:none!important;
-  opacity:0!important;
-  animation:none!important;
-}
-
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 홈페이지는 V117 색상으로 되돌리고, 굿뉴스만 더 진한 청록색으로 강조한다. 십자가는 겹치는 구간을 하나로 통일한다. */
 #app #info-card #ic-hp,
 #app .shrine-visit-detail-action.detail-home{
   background:linear-gradient(180deg,#d9f0e1 0%,#b8dec6 100%)!important;
@@ -7344,7 +6949,6 @@ html.oai-stability-veil.oai-external-leaving::after{
   text-shadow:0 1px 1px rgba(0,0,0,.20)!important;
   font-weight:950!important;
 }
-@keyframes oaiUnifiedLoadingCrossSpin{from{transform:rotate(0deg);}to{transform:rotate(360deg);}}
 .map-loading-icon,
 #diocese-loading .missa-spinner,
 #nearby-body .nearby-distance-spinner{
@@ -7435,7 +7039,6 @@ html.oai-external-return-freeze::after{
   animation:oaiUnifiedLoadingCrossSpin 2.8s linear infinite!important;
 }
 
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 성지 내주변 거리 계산 중에는 내위치 버튼을 숨기고, 내주변 목록이 준비될 때 함께 표시한다. */
 #app #loc-btn.oai-wait-nearby-list{
   opacity:0!important;
   visibility:hidden!important;
@@ -7443,7 +7046,6 @@ html.oai-external-return-freeze::after{
   transform:translateY(6px)!important;
 }
 
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 목적별 보호창은 하나만 사용하고, 로딩 십자가 규격을 하나로 통일한다. */
 @keyframes oaiUnifiedLoadingCrossSpin{to{transform:rotate(360deg)}}
 :root{
   --oai-loading-cross-size:36px;
@@ -7586,7 +7188,6 @@ html.oai-external-return-freeze::after{
 #oai-external-entry-guard .oai-external-entry-cross{font-size:var(--oai-loading-cross-font)!important;}
 html.oai-external-return-freeze #oai-external-entry-guard{display:none!important;opacity:0!important;visibility:hidden!important;animation:none!important;}
 
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 성지·성당·피정의집 내주변/찾기/지역검색 시트 열림·전환 애니메이션을 제거하고, 시트 내부 좌우 스와이프 전환의 그림자/잔상을 없앤다. */
 #app .sheet{
   will-change:auto!important;
 }
@@ -7631,7 +7232,6 @@ html.oai-external-return-freeze #oai-external-entry-guard{display:none!important
   animation:none!important;
 }
 
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 성지/성당/피정 진입 시 하단 보호창을 쓰지 않고 내위치 안내문구를 먼저 보여준다. */
 #oai-category-entry-veil,
 html.oai-category-entering #oai-category-entry-veil,
 html.oai-category-dissolve #oai-category-entry-veil,
@@ -7652,10 +7252,6 @@ html.oai-category-dissolve.oai-category-dissolving #oai-category-entry-veil{
   animation:none!important;
 }
 
-
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 외부사이트 진입/복귀 보호창 단일화 최종 우선순위.
-   진입 십자가는 #oai-external-entry-guard, 복귀 십자가는 oai-external-return-freeze만 표시한다. */
 html.oai-stability-veil[data-oai-stability-reason="external-leave"]::before,
 html.oai-stability-veil[data-oai-stability-reason="external-leave"]::after,
 html.oai-stability-veil[data-oai-stability-reason="external-return"]::before,
@@ -7705,8 +7301,6 @@ html.oai-external-return-freeze::after{
   transition:none!important;
 }
 
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 외부사이트 복귀 보호창은 유지하고, 마지막 사라짐만 부드럽게 처리 */
 html.oai-external-return-freeze.oai-external-return-releasing::before,
 html.oai-external-return-freeze.oai-external-return-releasing::after{
   opacity:0!important;
@@ -7717,7 +7311,6 @@ html.oai-external-return-freeze.oai-external-return-releasing::after{
   animation:none!important;
 }
 
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 매일미사·성경 로딩 십자가 강제 비표시 */
 #missa-view.oai-faith-frame-loading #missa-loading{
   display:none!important;
   opacity:0!important;
@@ -7725,8 +7318,6 @@ html.oai-external-return-freeze.oai-external-return-releasing::after{
   animation:none!important;
 }
 
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: Chrome/외부브라우저 복귀 때 진입 보호창 DOM을 즉시 숨기지 않고 복귀 보호창 위에서 그대로 이어 유지한다. */
 html.oai-external-return-freeze #oai-external-entry-guard.show{
   display:flex!important;
   opacity:1!important;
@@ -7753,10 +7344,6 @@ html.oai-external-return-freeze #oai-external-entry-guard.hide .oai-external-ent
   transition:opacity .18s ease-out!important;
 }
 
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 짧은 복귀 soft veil CSS 제거. */
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 정보카드 하단 버튼 테두리를 더 굵게 통일 */
 #app #info-card #ic-tel-link,
 #app #info-card #ic-route-btn,
 #app #info-card #ic-hp,
@@ -7778,7 +7365,6 @@ html.oai-external-return-freeze #oai-external-entry-guard.hide .oai-external-ent
   border-width:2.5px!important;
 }
 
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: 카카오내비 노란색은 유지하고, 정보카드의 나머지 버튼 색상/테두리만 더 선명하게 조정한다. */
 #app #info-card #ic-tel-link,
 #app .shrine-visit-detail-action-row.detail-primary-row > .detail-tel{
   background:linear-gradient(180deg,#ecfbf1 0%,#cfeeda 100%)!important;
@@ -7833,11 +7419,6 @@ html.oai-external-return-freeze #oai-external-entry-guard.hide .oai-external-ent
   transform:translateY(1px)!important;
 }
 
-
-/* V8-1-14-214: 정보카드 전화번호/경로검색 버튼을 원색 느낌으로 선명하게 조정.
-   - 전화번호: 선명한 초록 계열
-   - 경로검색: 선명한 파랑 계열
-   - 굿뉴스/카카오내비 등 나머지 버튼은 기존 색상 유지 */
 #app #info-card #ic-tel-link,
 #app .shrine-visit-detail-action-row.detail-primary-row > .detail-tel{
   background:linear-gradient(180deg,#dcfce7 0%,#86efac 100%)!important;
@@ -7875,8 +7456,6 @@ html.oai-external-return-freeze #oai-external-entry-guard.hide .oai-external-ent
   transform:translateY(1px)!important;
 }
 
-
-/* V8-1-14-235_parish_retreat_myloc_button_lower_full: FINAL_UNIFIED_INFO_CARD_BUTTONS */
 #app #info-card #ic-tel-link,
 #app #info-card #ic-route-btn,
 #app #info-card #ic-hp,
@@ -7918,8 +7497,6 @@ html.oai-external-return-freeze #oai-external-entry-guard.hide .oai-external-ent
   transform:translateY(1px)!important;
 }
 
-
-/* V8-1-14-253: compact(370px 이하) 전용 - 지도 탭/순례 스탬프북 탭/X 최소 보정 */
 html:not(.ios-device).oai-screen-compact-short #tabbar{
   height:calc(66px + env(safe-area-inset-top,0px))!important;
   min-height:calc(66px + env(safe-area-inset-top,0px))!important;
@@ -7988,7 +7565,6 @@ html:not(.ios-device).oai-screen-compact-short #shrine-visit-detail-close{
   
 }
 
-/* V8-1-14-255_from235_compact_tab_gap_stamp_line: compact 상부탭 여백/스탬프북 분리선 정리 */
 html:not(.ios-device).oai-screen-compact-short{
   --tab-h:66px;
   --map-tab-btn-h:56px;
@@ -8043,8 +7619,6 @@ html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-stats{
   margin-top:8px!important;
 }
 
-
-/* V8-1-14-269: compact 글자 크기 유지, 성지/순례 공간 보정 최종 위치 통합 */
 html:not(.ios-device).oai-screen-compact-short #map-wrap #shrine-visit-map-filter,
 html:not(.ios-device).oai-screen-compact-short #map-wrap .shrine-visit-map-filter{
   min-height:46px!important;
@@ -8120,9 +7694,6 @@ html:not(.ios-device).oai-screen-compact-short.retreat-mode #app #loc-btn{
   bottom:calc(var(--oai-android-bottom-gap, 10px) + 76px)!important;
 }
 
-
-/* V8-1-14-269: compact 매일미사 하단 빠른사용 버튼은 글자 크기를 유지하고 높이/위치만 조정 */
-/* V8-1-14-274: compact에서 주요기도문/매일미사 하단 빠른사용 버튼은 글자 유지, 높이만 더 낮추고 위치를 더 아래로 */
 html:not(.ios-device).oai-screen-compact-short #prayer-view .faith-bottom-nav,
 html:not(.ios-device).oai-screen-compact-short #missa-view .faith-bottom-nav{
   gap:6px!important;
@@ -8142,7 +7713,6 @@ html:not(.ios-device).oai-screen-compact-short #prayer-detail-body{
   padding-bottom:calc(76px + var(--oai-android-bottom-gap, env(safe-area-inset-bottom, 0px)))!important;
 }
 
-/* V8-1-14-269: 길찾기 시트는 compact의 전체 .sheet top 보정을 받지 않고 지도 위 하단시트로만 표시한다. */
 #app #sheet-route[hidden]{
   display:none!important;
 }
@@ -8162,8 +7732,6 @@ html:not(.ios-device).oai-screen-compact-short #app #sheet-route.open,
   transform:translateY(0)!important;
 }
 
-
-/* V8-1-14-274: 가톨릭 웹사이트 헤더 기준으로 순례 스탬프북 헤더/탭만 표준화 */
 #app #shrine-visit-cards-modal .shrine-visit-cards-head.module-bar,
 #app .shrine-visit-cards-modal .shrine-visit-cards-head.module-bar,
 #app .shrine-visit-cards-head.module-bar{
