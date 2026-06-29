@@ -836,6 +836,77 @@ function oaiClearExternalNavigationState(opts){
   }
   try{ window.oaiSaveResumeScreenState = saveVisibleScreen; }catch(_e){}
 
+  var _visibleRestoreSeq = 0;
+  function currentVisibleRestore(){
+    try{
+      var r = window.__OAI_VISIBLE_RESTORE_COORDINATOR__ || null;
+      if(!r || !r.active) return null;
+      if(r.started && now() - Number(r.started || 0) > 30000){
+        r.active = false;
+        return null;
+      }
+      return r;
+    }catch(_e){ return null; }
+  }
+  function visibleRestoreActive(){ return !!currentVisibleRestore(); }
+  function beginVisibleRestore(kind, st){
+    var token = 'v301-' + (++_visibleRestoreSeq) + '-' + now();
+    try{
+      window.__OAI_VISIBLE_RESTORE_COORDINATOR__ = {
+        token: token,
+        kind: String(kind || 'screen'),
+        state: st || null,
+        active: true,
+        ready: false,
+        started: now()
+      };
+      window.__OAI_VISIBLE_RESTORE_ACTIVE_UNTIL__ = now() + 30000;
+      window.__OAI_SKIP_AUTO_LOCATE_UNTIL__ = now() + 30000;
+      window._noAutoNearby = true;
+      document.documentElement.setAttribute('data-oai-visible-restore-kind', String(kind || 'screen'));
+    }catch(_e){}
+    return token;
+  }
+  function clearVisibleRestoreLocks(){
+    try{ window.__OAI_VISIBLE_RESTORE_ACTIVE_UNTIL__ = 0; }catch(_e){}
+    try{ window.__OAI_SKIP_AUTO_LOCATE_UNTIL__ = 0; }catch(_e){}
+    try{ window._noAutoNearby = false; }catch(_e){}
+    try{ delete window.__OAI_RESTORE_MAP_CAMERA__; }catch(_e){ window.__OAI_RESTORE_MAP_CAMERA__ = null; }
+    try{ delete window.__OAI_TRAIL_RESTORE_ACTIVE__; }catch(_e){ window.__OAI_TRAIL_RESTORE_ACTIVE__ = null; }
+    try{ document.documentElement.removeAttribute('data-oai-visible-restore-kind'); }catch(_e){}
+  }
+  function completeVisibleRestore(reason){
+    try{
+      var r = window.__OAI_VISIBLE_RESTORE_COORDINATOR__ || null;
+      if(r){ r.active = false; r.ready = true; r.doneAt = now(); r.reason = String(reason || 'restore-complete'); }
+      clearVisibleRestoreLocks();
+      quietIntro();
+      releasePendingVisibleRestore(reason || 'restore-complete');
+      try{ window._appExiting=false; document.documentElement.classList.remove('app-exiting'); delTransient(KEY_EXIT_UNTIL); }catch(_e){}
+      try{ if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady(); }catch(_e){}
+      try{ if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed(); }catch(_e){}
+      try{ if(typeof window._clearHardCoverExitFlags === 'function') window._clearHardCoverExitFlags(reason || 'visible-restore-complete'); }catch(_e){}
+      try{ if(typeof window.oaiPrimeAppBackAfterRestore === 'function') window.oaiPrimeAppBackAfterRestore(reason || 'visible-restore-complete'); }catch(_e){}
+      saveVisibleScreen(reason || 'restore-complete');
+      return true;
+    }catch(_e){ return false; }
+  }
+  function waitVisibleRestoreComplete(done){
+    var started = now();
+    function tick(){
+      var r = currentVisibleRestore();
+      if(!r){ if(done) done(true); return; }
+      if(now() - started > 9000){ completeVisibleRestore('restore-timeout-fallback'); if(done) done(true); return; }
+      setTimeout(tick, 120);
+    }
+    tick();
+  }
+  try{
+    window.oaiIsVisibleRestoreActive = visibleRestoreActive;
+    window.oaiCompleteVisibleRestore = completeVisibleRestore;
+    window.oaiCurrentVisibleRestore = currentVisibleRestore;
+  }catch(_e){}
+
   function readState(){
     try{
       var raw=getTransient(KEY_STATE);
@@ -914,10 +985,18 @@ function oaiClearExternalNavigationState(opts){
     try{
       if(st.kind === 'map'){
         if(/^(shrine|parish|retreat)$/.test(String(st.mode||'')) && typeof startApp === 'function'){
-          try{ window.__OAI_VISIBLE_RESTORE_ACTIVE_UNTIL__ = now()+6500; window.__OAI_SKIP_AUTO_LOCATE_UNTIL__ = now()+6500; }catch(_e){}
-          startApp(st.mode, {restore:true});
+          var mapToken = beginVisibleRestore('map', st);
+          try{
+            window.__OAI_RESTORE_MAP_CAMERA__ = {
+              token: mapToken,
+              mode: String(st.mode || ''),
+              center: st.mapCenter || null,
+              level: Number.isFinite(Number(st.mapLevel)) ? Number(st.mapLevel) : null,
+              tab: st.tab || ''
+            };
+          }catch(_e){}
+          startApp(st.mode, {restore:true, restoreState:st, restoreToken:mapToken});
           applyMapCameraAfterRestore(st);
-          if(st.tab && st.tab !== 'nearby' && typeof openTab === 'function') setTimeout(function(){ try{ openTab(st.tab, {restore:true}); }catch(_e){} },520);
           return true;
         }
       }
@@ -925,8 +1004,9 @@ function oaiClearExternalNavigationState(opts){
       if(st.kind === 'prayer' && typeof openPrayerBook === 'function'){ openPrayerBook({restore:true}); return true; }
       if(st.kind === 'web' && typeof window.openWebView === 'function'){ window.openWebView({restore:true}); return true; }
       if(st.kind === 'trail' && typeof window.openTrailView === 'function'){
-        try{ window.__OAI_VISIBLE_RESTORE_ACTIVE_UNTIL__ = now()+6500; }catch(_e){}
-        window.openTrailView({restore:true, trailState:st.trail || null});
+        var trailToken = beginVisibleRestore('trail', st);
+        try{ window.__OAI_TRAIL_RESTORE_ACTIVE__ = {token:trailToken, started:now()}; }catch(_e){}
+        window.openTrailView({restore:true, trailState:st.trail || null, restoreToken:trailToken});
         return true;
       }
       if(st.kind === 'qna' && typeof window.openQnaView === 'function'){ window.openQnaView(); return true; }
@@ -979,8 +1059,14 @@ function oaiClearExternalNavigationState(opts){
           try{ if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady(); }catch(_e){}
           try{ if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed(); }catch(_e){}
           try{ if(typeof window._clearHardCoverExitFlags === 'function') window._clearHardCoverExitFlags('visible-restore-success'); }catch(_e){}
+          if(visibleRestoreActive()){
+            waitVisibleRestoreComplete(done);
+            return;
+          }
           try{ if(typeof window.oaiPrimeAppBackAfterRestore === 'function') window.oaiPrimeAppBackAfterRestore('visible-restore-success'); }catch(_e){}
           saveVisibleScreen('restore-success');
+        }else{
+          clearVisibleRestoreLocks();
         }
         setTimeout(function(){ releasePendingVisibleRestore(ok?'restore-success':'restore-failed'); }, ok?120:0); if(done) done(!!ok);
       }
@@ -5285,7 +5371,7 @@ function startApp(mode, opts){
       if(typeof oaiSetMainMapLayerHidden==='function') oaiSetMainMapLayerHidden(false);
       document.documentElement.classList.add('app-active','parish-mode');
       document.documentElement.classList.remove('retreat-mode');
-      try{ if(typeof window.oaiPrimeAppBackAfterRestore === 'function') window.oaiPrimeAppBackAfterRestore('parish-data-loading'); }catch(e){ console.warn('[가톨릭길동무]', e); }
+      try{ if(!restoreStart && typeof window.oaiPrimeAppBackAfterRestore === 'function') window.oaiPrimeAppBackAfterRestore('parish-data-loading'); }catch(e){ console.warn('[가톨릭길동무]', e); }
       const mapEl=$('map');
       if(mapEl && !(mapEl.querySelector && mapEl.querySelector('.map-loading'))) mapEl.innerHTML='<div class="map-loading"><div class="map-loading-icon" aria-hidden="true"></div><div class="map-loading-txt">성당 정보를 불러오는 중...</div></div>';
     }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -5337,8 +5423,10 @@ function startApp(mode, opts){
   document.documentElement.classList.toggle('parish-mode',mode==='parish');
   document.documentElement.classList.toggle('retreat-mode',mode==='retreat');
   try{
-    if(typeof window.oaiPrimeAppBackAfterRestore === 'function') window.oaiPrimeAppBackAfterRestore((restoreStart ? 'restore-startApp-' : 'startApp-') + mode);
-    else if(typeof window.oaiScheduleAppBackTrap === 'function') window.oaiScheduleAppBackTrap((restoreStart ? 'restore-startApp-' : 'startApp-') + mode);
+    if(!restoreStart){
+      if(typeof window.oaiPrimeAppBackAfterRestore === 'function') window.oaiPrimeAppBackAfterRestore('startApp-' + mode);
+      else if(typeof window.oaiScheduleAppBackTrap === 'function') window.oaiScheduleAppBackTrap('startApp-' + mode);
+    }
   }catch(e){ console.warn('[가톨릭길동무]', e); }
   if(mode==='shrine'){
     if(restoreStart){
@@ -5455,14 +5543,29 @@ function _mapError(msg){
   m.innerHTML=`<div class="map-loading"><div style="font-size:40px;margin-bottom:16px">🗺️</div><div style="font-size:15px;font-weight:700;color:var(--gold);margin-bottom:12px">지도를 불러올 수 없습니다</div><div style="font-size:12px;color:rgba(255,255,255,.7);line-height:1.8;max-width:280px;word-break:keep-all">${msg}</div></div>`;
   _markers=new Array(SHRINES.length).fill(null);
   renderList();
-  openTab('nearby');
+  if(!(window.oaiIsVisibleRestoreActive && window.oaiIsVisibleRestoreActive())) openTab('nearby');
+  else { try{ if(typeof window.oaiCompleteVisibleRestore === 'function') window.oaiCompleteVisibleRestore('map-error'); }catch(_e){} }
   if(typeof oaiHideCategoryEntryVeil==='function') setTimeout(oaiHideCategoryEntryVeil, 260);
 }
 
 function _onMapReady(){
  const KM=kakao.maps;window._LL=KM.LatLng;window._MM=KM.Marker;window._MI=KM.MarkerImage;window._SZ=KM.Size;window._PT=KM.Point;window._LB=KM.LatLngBounds;window._PL=KM.Polyline;window._EL=KM.event.addListener;
+  var restoreActive=false, restoreCam=null;
+  try{
+    restoreActive = !!(window.oaiIsVisibleRestoreActive && window.oaiIsVisibleRestoreActive());
+    restoreCam = restoreActive ? (window.__OAI_RESTORE_MAP_CAMERA__ || null) : null;
+    if(restoreCam && restoreCam.mode && restoreCam.mode !== _mode) restoreCam = null;
+  }catch(_e){ restoreActive=false; restoreCam=null; }
+  var initCenter = new _LL(36.2,127.9);
+  var initLevel = 8;
+  try{
+    if(restoreCam && restoreCam.center && Number.isFinite(Number(restoreCam.center.lat)) && Number.isFinite(Number(restoreCam.center.lng))){
+      initCenter = new _LL(Number(restoreCam.center.lat), Number(restoreCam.center.lng));
+    }
+    if(restoreCam && Number.isFinite(Number(restoreCam.level))) initLevel = Number(restoreCam.level);
+  }catch(_e){}
   _map=new kakao.maps.Map($('map'),{
-  center:new _LL(36.2,127.9),level:8
+  center:initCenter,level:initLevel
   });
   kakao.maps.event.addListener(_map,'click',()=>{
   closeInfoCard();
@@ -5476,14 +5579,27 @@ function _onMapReady(){
   renderList();
   try{
     var skipAutoLocateUntil = Number(window.__OAI_SKIP_AUTO_LOCATE_UNTIL__ || 0);
-    if(!(skipAutoLocateUntil && (Date.now ? Date.now() : new Date().getTime()) < skipAutoLocateUntil)) _autoLocate();
-  }catch(_e){ _autoLocate(); }
+    if(!restoreActive && !(skipAutoLocateUntil && (Date.now ? Date.now() : new Date().getTime()) < skipAutoLocateUntil)) _autoLocate();
+  }catch(_e){ if(!restoreActive) _autoLocate(); }
   if(_mode==='parish') { _buildParishDioSystem(); _syncParishDioLabels(); }
   else if(_mode==='retreat') _buildRetreatMarkers();
-  if(!window._noAutoNearby){
+  if(!window._noAutoNearby && !restoreActive){
     openTab('nearby');
   }
-  window._noAutoNearby = false;
+  if(!restoreActive) window._noAutoNearby = false;
+  try{
+    if(restoreActive && restoreCam){
+      if(restoreCam.center && Number.isFinite(Number(restoreCam.center.lat)) && Number.isFinite(Number(restoreCam.center.lng))){
+        _map.setCenter(new _LL(Number(restoreCam.center.lat), Number(restoreCam.center.lng)));
+      }
+      if(Number.isFinite(Number(restoreCam.level))) _map.setLevel(Number(restoreCam.level));
+      var restoreTab = String(restoreCam.tab || '');
+      if(restoreTab && restoreTab !== 'nearby' && typeof openTab === 'function'){
+        setTimeout(function(){ try{ openTab(restoreTab, {restore:true}); }catch(_e){} }, 180);
+      }
+      setTimeout(function(){ try{ if(typeof window.oaiCompleteVisibleRestore === 'function') window.oaiCompleteVisibleRestore('map-ready-' + _mode); }catch(_e){} }, (restoreTab && restoreTab !== 'nearby') ? 360 : 160);
+    }
+  }catch(_e){}
   try{ _updateShrineVisitMapFilterUI(); _updateShrineVisitCardsButtonUI(); }catch(e){ console.warn('[가톨릭길동무]', e); }
   if(typeof oaiHideCategoryEntryVeil==='function') setTimeout(oaiHideCategoryEntryVeil, 260);
 }
@@ -5604,7 +5720,7 @@ function openTab(name, opts){
   _updateTabBtns(name);
   if(name==='nearby'){
     try{ window.__OAI_NEARBY_PREOPEN_MODE__ = null; }catch(_e){}
-    _loadNearby();
+    if(!(window.oaiIsVisibleRestoreActive && window.oaiIsVisibleRestoreActive())) _loadNearby();
   }
   else if(name==='list')  { renderList(); if(shouldAutoFocusKeyboard) oaiFocusSearchKeyboardInput('list-srch-inp'); }
   else if(name==='region'){ if(shouldAutoFocusKeyboard) oaiFocusSearchKeyboardInput('region-inp'); }
@@ -7322,6 +7438,7 @@ function _nearestDioCode(lat,lng){
   return best;
 }
 function _showCurrentParishDioIfIdle(){
+  if(window.oaiIsVisibleRestoreActive && window.oaiIsVisibleRestoreActive()) return;
   if(_activeTab==='nearby' || (_nearbyCache && _nearbyCache.length)) return;
   if(_mode!=='parish'||!_map||!_myLat||!_myLng||_paSelMkr||_routeMode||_rS||_rE) return;
   if(!_parishSysInited) return;
@@ -7416,6 +7533,7 @@ function _isNearbyLoadCurrent(mode, token, body){
 }
 
 function _loadNearby(){
+  if(window.oaiIsVisibleRestoreActive && window.oaiIsVisibleRestoreActive()) return;
   const body=$('nearby-body');
   if(!body) return;
   _cancelNearbyLoad();

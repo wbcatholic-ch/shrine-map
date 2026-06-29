@@ -395,6 +395,18 @@
     scheduleWebCatSync(webState.curCat || webDefaultCat());
   };
 
+  function completeTrailRestoreOnce(reason){
+    try{
+      var r = window.__OAI_TRAIL_RESTORE_ACTIVE__ || null;
+      if(!r || r.done) return;
+      if(!(window.oaiIsVisibleRestoreActive && window.oaiIsVisibleRestoreActive())) return;
+      r.done = true;
+      setTimeout(function(){
+        try{ if(typeof window.oaiCompleteVisibleRestore === 'function') window.oaiCompleteVisibleRestore(reason || 'trail-ready'); }catch(e){ console.warn('[가톨릭길동무]', e); }
+      }, 90);
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }
+
   window.openTrailView = function(opts){
     const restore = !!(opts&&opts.restore);
     const restoreTrailState = (opts && opts.trailState) || null;
@@ -424,7 +436,10 @@
     enterIntegratedView('trail-view');
     initTrailModule();
     trailSetView(trailState.view || 'map', {restore:restore, trailState:restoreTrailState});
-    if(!restore){
+    if(restore){
+      if((trailState.view || 'map') === 'list') completeTrailRestoreOnce('trail-list-ready');
+      else setTimeout(function(){ completeTrailRestoreOnce('trail-map-fallback-ready'); }, 1800);
+    }else{
       relayoutTrailMap(80);
       relayoutTrailMap(260);
       relayoutTrailMap(520);
@@ -452,7 +467,7 @@
         trailState.restoreLevel = state.level || null;
         trailState.pendingFitBounds = false;
         initTrailModule();
-        trailSetView(trailState.view || 'map');
+        trailSetView(trailState.view || 'map', {restore:true, trailState:state});
         if(state.view === 'list' || trailState.view === 'list'){
           var list = ig$('trail-list');
           if(list){
@@ -722,8 +737,10 @@
       if(!(trailState.map && window.kakao && window.kakao.maps)) return;
       try{
         const center = trailState.map.getCenter ? trailState.map.getCenter() : null;
+        const level = trailState.map.getLevel ? trailState.map.getLevel() : null;
         trailState.map.relayout();
         if(center) trailState.map.setCenter(center);
+        if(Number.isFinite(Number(level)) && (window.oaiIsVisibleRestoreActive && window.oaiIsVisibleRestoreActive()) && trailState.map.setLevel) trailState.map.setLevel(Number(level));
       }catch(e){ console.warn("[가톨릭길동무]", e); }
       syncTrailMarkers();
     }, wait);
@@ -744,6 +761,7 @@
   }
 
   function fitTrailMapToBounds(){
+    if(window.oaiIsVisibleRestoreActive && window.oaiIsVisibleRestoreActive()) return;
     if(!(trailState.map && window.kakao && window.kakao.maps)) return;
     try{
       // V8-1-14-300:
@@ -784,16 +802,24 @@
     if(trailState.inited){
       syncTrailMarkers();
       if(trailState.map){
-        relayoutTrailMap(30); relayoutTrailMap(180);
-        if(trailState.pendingFitBounds){
+        if(!(window.oaiIsVisibleRestoreActive && window.oaiIsVisibleRestoreActive())){
+          relayoutTrailMap(30);
+          relayoutTrailMap(180);
+        }
+        if(trailState.pendingFitBounds && !(window.oaiIsVisibleRestoreActive && window.oaiIsVisibleRestoreActive())){
           setTimeout(function(){ fitTrailMapToBounds(); trailState.pendingFitBounds = false; }, 90);
         }
+        completeTrailRestoreOnce('trail-map-existing-ready');
       }
       return;
     }
     ensureKakaoSdk(function(){
       if(trailState.inited){
-        if(trailState.map){ relayoutTrailMap(30); relayoutTrailMap(180); }
+        if(trailState.map && !(window.oaiIsVisibleRestoreActive && window.oaiIsVisibleRestoreActive())){
+          relayoutTrailMap(30);
+          relayoutTrailMap(180);
+        }
+        if(trailState.map) completeTrailRestoreOnce('trail-map-existing-async-ready');
         return;
       }
       const container = ig$('trail-map');
@@ -809,11 +835,13 @@
       trailState.restoreCenter = null;
       trailState.restoreLevel = null;
       syncTrailMarkers();
-      if(trailState.pendingFitBounds){
+      if(trailState.pendingFitBounds && !(window.oaiIsVisibleRestoreActive && window.oaiIsVisibleRestoreActive())){
         setTimeout(function(){ fitTrailMapToBounds(); trailState.pendingFitBounds = false; }, 80);
       }
-      relayoutTrailMap(60);
-      relayoutTrailMap(220);
+      if(!(window.oaiIsVisibleRestoreActive && window.oaiIsVisibleRestoreActive())){
+        relayoutTrailMap(60);
+        relayoutTrailMap(220);
+      }
       kakao.maps.event.addListener(trailState.map,'click', trailCloseSheet);
       trailState.inited = true;
       if(Number.isInteger(trailState.pendingOpenIndex) && TRAIL_ITEMS[trailState.pendingOpenIndex]){
@@ -822,7 +850,10 @@
         setTimeout(function(){
           trailSelectMarker(idx);
           trailOpenSheet(idx);
+          completeTrailRestoreOnce('trail-map-created-sheet-ready');
         }, 120);
+      }else{
+        completeTrailRestoreOnce('trail-map-created-ready');
       }
     });
   }
@@ -937,7 +968,9 @@
       if(!restoreView) trailCloseSheet();
       initTrailModule();
       syncTrailMarkers();
-      relayoutTrailMap(30); relayoutTrailMap(180); relayoutTrailMap(360);
+      if(!restoreView && !(window.oaiIsVisibleRestoreActive && window.oaiIsVisibleRestoreActive())){
+        relayoutTrailMap(30); relayoutTrailMap(180); relayoutTrailMap(360);
+      }
     } else {
       if(!restoreView) trailCloseSheet();
       buildTrailList();

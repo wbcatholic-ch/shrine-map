@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="ko" class="oai-font-global" style="background:#f5f0e8;">
 <head>
-<link rel="preload" href="intro-cross-jesus.jpg?v=V8-1-14-300" as="image" fetchpriority="high">
+<link rel="preload" href="intro-cross-jesus.jpg?v=V8-1-14-301" as="image" fetchpriority="high">
 <style id="oai-first-entry-bg">html,body{margin:0;width:100%;min-height:100%;background:#f5f0e8;color-scheme:light;}body{background:#f5f0e8;}</style>
 
 <style id="oai-cover-intro-early-photo-style">
@@ -16,7 +16,7 @@
 }
 html.oai-cover-booting,html.oai-cover-booting body{background:#fbf8f1!important;}
 html.oai-cover-booting::before{content:"";position:fixed;inset:0;z-index:2147482500;background:#fbf8f1;pointer-events:none;opacity:1;}
-html.oai-cover-booting::after{content:"";position:fixed;left:50%;top:50%;z-index:2147482501;width:min(84vw,540px);height:min(84vh,740px);transform:translate(-50%,-50%) scale(.84);background-image:linear-gradient(to right,#fbf8f1 0%,rgba(251,248,241,.96) 5%,rgba(251,248,241,.60) 13%,rgba(251,248,241,.16) 24%,rgba(251,248,241,0) 36%,rgba(251,248,241,0) 64%,rgba(251,248,241,.16) 76%,rgba(251,248,241,.60) 87%,rgba(251,248,241,.96) 95%,#fbf8f1 100%),linear-gradient(to bottom,#fbf8f1 0%,rgba(251,248,241,.90) 6%,rgba(251,248,241,.36) 17%,rgba(251,248,241,0) 30%,rgba(251,248,241,0) 70%,rgba(251,248,241,.36) 83%,rgba(251,248,241,.90) 94%,#fbf8f1 100%),radial-gradient(ellipse 96% 88% at 50% 48%,rgba(251,248,241,0) 50%,rgba(251,248,241,.08) 62%,rgba(251,248,241,.34) 76%,rgba(251,248,241,.76) 90%,rgba(251,248,241,1) 100%),url("intro-cross-jesus.jpg?v=V8-1-14-300");background-position:center center,center center,center center,center center;background-size:100% 100%,100% 100%,100% 100%,auto 106%;background-repeat:no-repeat,no-repeat,no-repeat,no-repeat;border-radius:38px;background-color:#fbf8f1;box-shadow:0 0 0 999px #fbf8f1,0 8px 18px rgba(80,54,18,.05),inset 0 0 72px rgba(251,248,241,.28),inset 0 0 150px rgba(251,248,241,.18);pointer-events:none;display:block;visibility:visible;opacity:1;animation:oaiIntroSmoothPhotoDesktopV85 1.85s cubic-bezier(.22,.61,.36,1) both;will-change:transform,opacity;backface-visibility:hidden;}
+html.oai-cover-booting::after{content:"";position:fixed;left:50%;top:50%;z-index:2147482501;width:min(84vw,540px);height:min(84vh,740px);transform:translate(-50%,-50%) scale(.84);background-image:linear-gradient(to right,#fbf8f1 0%,rgba(251,248,241,.96) 5%,rgba(251,248,241,.60) 13%,rgba(251,248,241,.16) 24%,rgba(251,248,241,0) 36%,rgba(251,248,241,0) 64%,rgba(251,248,241,.16) 76%,rgba(251,248,241,.60) 87%,rgba(251,248,241,.96) 95%,#fbf8f1 100%),linear-gradient(to bottom,#fbf8f1 0%,rgba(251,248,241,.90) 6%,rgba(251,248,241,.36) 17%,rgba(251,248,241,0) 30%,rgba(251,248,241,0) 70%,rgba(251,248,241,.36) 83%,rgba(251,248,241,.90) 94%,#fbf8f1 100%),radial-gradient(ellipse 96% 88% at 50% 48%,rgba(251,248,241,0) 50%,rgba(251,248,241,.08) 62%,rgba(251,248,241,.34) 76%,rgba(251,248,241,.76) 90%,rgba(251,248,241,1) 100%),url("intro-cross-jesus.jpg?v=V8-1-14-301");background-position:center center,center center,center center,center center;background-size:100% 100%,100% 100%,100% 100%,auto 106%;background-repeat:no-repeat,no-repeat,no-repeat,no-repeat;border-radius:38px;background-color:#fbf8f1;box-shadow:0 0 0 999px #fbf8f1,0 8px 18px rgba(80,54,18,.05),inset 0 0 72px rgba(251,248,241,.28),inset 0 0 150px rgba(251,248,241,.18);pointer-events:none;display:block;visibility:visible;opacity:1;animation:oaiIntroSmoothPhotoDesktopV85 1.85s cubic-bezier(.22,.61,.36,1) both;will-change:transform,opacity;backface-visibility:hidden;}
 html.oai-cover-booting #cover>*,html.oai-cover-revealing #cover>*{opacity:0;transition:none;}
 html.oai-refresh-no-intro.oai-cover-booting::before,html.oai-refresh-no-intro.oai-cover-booting::after{content:""!important;display:none!important;opacity:0!important;animation:none!important;background-image:none!important;}
 /* V8-1-14-300: Fold 전환 복원 중에는 커버가 먼저 보이지 않도록 첫 페인트부터 숨긴다. */
@@ -151,6 +151,7 @@ html.oai-pending-visible-restore.oai-cover-booting::before,html.oai-pending-visi
       root.classList.remove('oai-cover-booting','oai-stability-veil','oai-stability-veil-releasing');
       root.removeAttribute('data-oai-stability-reason');
       root.setAttribute('data-oai-external-return-early','1');
+      try{ window.__OAI_EARLY_BOOT_DECISION_V301={externalReturn:true,internalReturn:false,refreshNoIntro:true,pendingVisibleRestore:false,shouldRunCoverBoot:false,reason:'external-return'}; }catch(_e){}
       return;
     }
     var softRefresh=parseInt(sessionStorage.getItem('oai_soft_refresh_requested')||'0',10)||0;
@@ -204,9 +205,23 @@ html.oai-pending-visible-restore.oai-cover-booting::before,html.oai-pending-visi
     /* V8-1-14-300: 첫 페인트 no-intro는 명시적 Fold 전환/짧은·중간 background/refresh에만 허용한다. */
     var refreshNoIntro=!!(stableReloadReason&&navType==='reload')||!!(softRefresh&&(now-softRefresh)<120000)||!!(refreshVeilUntil&&refreshVeilUntil>now)||!!(foldNoIntroUntil&&now<foldNoIntroUntil)||recentBgNoIntro||inferredFoldReload;
     var pendingVisibleRestore=!!(storedVisibleState&&storedVisibleState.kind&&storedVisibleState.kind!=='cover'&&refreshNoIntro&&(inferredFoldReload||(foldNoIntroUntil&&now<foldNoIntroUntil)||recentBgNoIntro||(stableReloadReason&&navType==='reload')));
+    var shouldRunCoverBoot=!!(!internalReturn&&!externalReturn&&!refreshNoIntro);
+    try{
+      window.__OAI_EARLY_BOOT_DECISION_V301={
+        externalReturn:!!externalReturn,
+        internalReturn:!!internalReturn,
+        refreshNoIntro:!!refreshNoIntro,
+        pendingVisibleRestore:!!pendingVisibleRestore,
+        shouldRunCoverBoot:!!shouldRunCoverBoot,
+        inferredFoldReload:!!inferredFoldReload,
+        recentBgNoIntro:!!recentBgNoIntro,
+        navType:navType||'',
+        reason: pendingVisibleRestore ? 'visible-restore' : (refreshNoIntro ? 'no-intro' : (shouldRunCoverBoot ? 'cover-boot' : 'internal-return'))
+      };
+    }catch(_e){}
     if(refreshNoIntro){root.classList.add('oai-refresh-no-intro'); if(pendingVisibleRestore){root.classList.add('oai-pending-visible-restore'); root.setAttribute('data-oai-pending-visible-restore','1');} window.__OAI_EARLY_COVER_PHOTO_BOOT__=false;return;}
     root.classList.remove('oai-pending-visible-restore'); root.removeAttribute('data-oai-pending-visible-restore');
-    if(!internalReturn&&!externalReturn){root.classList.add('oai-cover-booting');window.__OAI_EARLY_COVER_PHOTO_BOOT__=true;}
+    if(shouldRunCoverBoot){root.classList.add('oai-cover-booting');window.__OAI_EARLY_COVER_PHOTO_BOOT__=true;}
   }catch(_e){}
 })();
 </script>
@@ -610,99 +625,30 @@ html.oai-internal-no-return-effect #cover > * {
   var KEY = 'oai_cover_vh_px_v48';
   var WIDTH_KEY = 'oai_cover_width_px_v48';
   var root = document.documentElement;
+  var earlyBootDecision = null;
   var isInternalNoEffectReturn = false;
   var isExternalReturnNoIntro = false;
   try{
-    var internalNow = Date.now ? Date.now() : new Date().getTime();
-    var navEntryForInternal = (performance && performance.getEntriesByType) ? performance.getEntriesByType('navigation')[0] : null;
-    var navTypeForInternal = navEntryForInternal && navEntryForInternal.type || '';
-    var internalUntil = parseInt(sessionStorage.getItem('oai_internal_return_no_effect_until') || '0', 10) || 0;
-    var internalOnce = sessionStorage.getItem('oai_internal_return_no_effect_once') === '1';
-    var explicitCoverReturn = /[?&]oai_cover_return=/.test(location.search || '');
-    isInternalNoEffectReturn = !!((internalUntil && internalNow < internalUntil) || (internalOnce && (navTypeForInternal === 'back_forward' || explicitCoverReturn)));
-    if(!isInternalNoEffectReturn && (internalOnce || internalUntil)){
-      try{
-        sessionStorage.removeItem('oai_internal_return_no_effect_once');
-        sessionStorage.removeItem('oai_internal_return_no_effect_until');
-        sessionStorage.removeItem('oai_internal_return_no_effect_reason');
-        sessionStorage.removeItem('oai_internal_page_nav');
-      }catch(_e){}
-    }
-    var extTs = parseInt(sessionStorage.getItem('oai_external_nav_started_at') || '0', 10) || 0;
-    var extPending = sessionStorage.getItem('oai_external_nav_pending') === '1' || sessionStorage.getItem('oai_external_nav_pagehide') === '1' || sessionStorage.getItem('oai_external_return_expected') === '1';
-    var extSuppressUntil = parseInt(sessionStorage.getItem('oai_external_return_back_suppress_until') || '0', 10) || 0;
-    isExternalReturnNoIntro = !!(extPending && extTs && (internalNow - extTs) < 10*60*1000 && !(extSuppressUntil && internalNow < extSuppressUntil));
-    if(isExternalReturnNoIntro){
-      root.classList.add('oai-external-return-freeze');
-      root.classList.remove('oai-cover-booting','oai-cover-revealing','oai-first-entry-intro','oai-background-return-intro','oai-cover-under-intro-reveal','oai-cover-first-reveal','oai-stability-veil','oai-stability-veil-releasing');
-      root.removeAttribute('data-oai-stability-reason');
-      root.setAttribute('data-oai-external-return-early','1');
-    }
-  }catch(_e){}
+    earlyBootDecision = window.__OAI_EARLY_BOOT_DECISION_V301 || null;
+    isInternalNoEffectReturn = !!(earlyBootDecision && earlyBootDecision.internalReturn);
+    isExternalReturnNoIntro = !!(earlyBootDecision && earlyBootDecision.externalReturn);
+  }catch(_e){ earlyBootDecision = null; }
   function now(){ return Date.now ? Date.now() : new Date().getTime(); }
-  var isRefreshBootNoIntro = false;
+  var isRefreshBootNoIntro = !!(earlyBootDecision && earlyBootDecision.refreshNoIntro);
+  var shouldRunCoverBoot = !!(earlyBootDecision ? earlyBootDecision.shouldRunCoverBoot : root.classList.contains('oai-cover-booting'));
   try{
-    var navEntry = (performance && performance.getEntriesByType) ? performance.getEntriesByType('navigation')[0] : null;
-    var navType = navEntry && navEntry.type || '';
-    var n = now();
-    var softRefresh = parseInt(sessionStorage.getItem('oai_soft_refresh_requested') || '0', 10) || 0;
-    var refreshVeilUntil = parseInt(sessionStorage.getItem('oai_refresh_veil_until') || '0', 10) || 0;
-    var stableReloadReason = sessionStorage.getItem('oai_stable_auto_reload_reason') || '';
-    function readAnyInt(k){ var v=''; try{ v=sessionStorage.getItem(k)||''; }catch(_e){} if(!v){ try{ v=localStorage.getItem(k)||''; }catch(_e){} } return parseInt(v||'0',10)||0; }
-    function readAnyJson(keys){
-      for(var i=0;i<keys.length;i++){
-        var raw='';
-        try{ raw=sessionStorage.getItem(keys[i])||''; }catch(_e){}
-        if(!raw){ try{ raw=localStorage.getItem(keys[i])||''; }catch(_e){} }
-        if(!raw) continue;
-        try{ var obj=JSON.parse(raw); if(obj&&obj.t) return obj; }catch(_e){}
-      }
-      return null;
+    if(earlyBootDecision && earlyBootDecision.pendingVisibleRestore){
+      root.classList.add('oai-pending-visible-restore');
+      root.setAttribute('data-oai-pending-visible-restore','1');
     }
-    function currentWidth(){ try{ return Math.round(window.innerWidth || document.documentElement.clientWidth || 0); }catch(_e){ return 0; } }
-    function crossedFoldBoundary(a,b){
-      a=Math.round(Number(a||0)); b=Math.round(Number(b||0));
-      if(!a || !b) return false;
-      return (a<600&&b>=600)||(a>=600&&b<600);
+    if(!shouldRunCoverBoot){
+      window.__OAI_EARLY_COVER_PHOTO_BOOT__ = false;
+      root.classList.remove('oai-cover-booting','oai-cover-revealing','oai-first-entry-intro','oai-cover-under-intro-reveal','oai-cover-first-reveal');
+      if(isRefreshBootNoIntro) root.classList.add('oai-refresh-no-intro');
+      root.classList.add('oai-internal-no-return-effect');
+      setTimeout(function(){ try{ root.classList.remove('oai-internal-no-return-effect','oai-refresh-no-intro'); }catch(_e){} }, isExternalReturnNoIntro ? 900 : 420);
     }
-    var foldNoIntroUntil = readAnyInt('oai_fold_transition_no_intro_until_v300');
-    var inferredFoldReload = false;
-    var storedVisibleState = readAnyJson(['oai_visible_screen_state_v300']);
-    if(storedVisibleState && storedVisibleState.kind && storedVisibleState.kind !== 'cover'){
-      var stAge = n - Number(storedVisibleState.t || 0);
-      if(stAge >= 0 && stAge < 120000 && crossedFoldBoundary(storedVisibleState.vw, currentWidth())){
-        inferredFoldReload = true;
-        var inferredUntil = n + 120000;
-        try{ sessionStorage.setItem('oai_fold_transition_no_intro_until_v300', String(inferredUntil)); }catch(_e){}
-        try{ localStorage.setItem('oai_fold_transition_no_intro_until_v300', String(inferredUntil)); }catch(_e){}
-        try{ sessionStorage.setItem('oai_visible_screen_state_v300', JSON.stringify(storedVisibleState)); }catch(_e){}
-        try{ localStorage.setItem('oai_visible_screen_state_v300', JSON.stringify(storedVisibleState)); }catch(_e){}
-        foldNoIntroUntil = inferredUntil;
-      }
-    }
-    var bgStarted = parseInt(sessionStorage.getItem('oai_home_backgrounded_at') || '0', 10) || 0;
-    var bgElapsed = bgStarted ? (n - bgStarted) : 0;
-    var bgShortNoIntro = !!(bgStarted && bgElapsed >= 0 && bgElapsed < 30*60*1000);
-    var realExitUntil = readAnyInt('oai_real_app_exit_until_v300');
-    if(realExitUntil && n < realExitUntil){ bgShortNoIntro = false; foldNoIntroUntil = 0; inferredFoldReload = false; }
-    if(stableReloadReason && navType !== 'reload'){ try{ sessionStorage.removeItem('oai_stable_auto_reload_reason'); }catch(_e){} }
-    isRefreshBootNoIntro = !!(stableReloadReason && navType === 'reload') || !!(softRefresh && (n - softRefresh) < 120000) || !!(refreshVeilUntil && refreshVeilUntil > n) || !!(foldNoIntroUntil && n < foldNoIntroUntil) || bgShortNoIntro || inferredFoldReload;
-    var pendingVisibleRestore = !!(storedVisibleState && storedVisibleState.kind && storedVisibleState.kind !== 'cover' && isRefreshBootNoIntro && (inferredFoldReload || (foldNoIntroUntil && n < foldNoIntroUntil) || bgShortNoIntro || (stableReloadReason && navType === 'reload')));
-    if(pendingVisibleRestore){ root.classList.add('oai-pending-visible-restore'); root.setAttribute('data-oai-pending-visible-restore','1'); }
   }catch(_e){}
-  var shouldRunCoverBoot = false;
-  if(!isInternalNoEffectReturn && !isExternalReturnNoIntro && !isRefreshBootNoIntro){
-    shouldRunCoverBoot = true;
-    root.classList.remove('oai-pending-visible-restore');
-    root.removeAttribute('data-oai-pending-visible-restore');
-    root.classList.add('oai-cover-booting');
-  }else{
-    window.__OAI_EARLY_COVER_PHOTO_BOOT__ = false;
-    root.classList.remove('oai-cover-booting','oai-cover-revealing','oai-first-entry-intro','oai-cover-under-intro-reveal','oai-cover-first-reveal');
-    if(isRefreshBootNoIntro) root.classList.add('oai-refresh-no-intro');
-    root.classList.add('oai-internal-no-return-effect');
-    setTimeout(function(){ try{ root.classList.remove('oai-internal-no-return-effect','oai-refresh-no-intro'); }catch(_e){} }, isExternalReturnNoIntro ? 900 : 420);
-  }
   function readStored(){
     try{
       if(window.__oaiViewportProfile){
