@@ -37,7 +37,7 @@
       sessionStorage.removeItem('oai_refresh_history_compact_reason');
     }catch(_e){}
     if(refreshReason){
-      armCoverBackTrap(refreshReason, {force:true});
+      history.replaceState({_p:1, oai_cover_trap: refreshReason}, '', _href);
     }else{
       armCoverBackTrap('init', {force:true});
     }
