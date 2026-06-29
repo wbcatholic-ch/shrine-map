@@ -7,6 +7,7 @@
   window.__OAI_FULL_BACK_CTRL_ACTIVE__ = true;
 
   var _href = location.href.split('#')[0];
+  var KEY_BACK_TO_COVER_UNTIL = 'oai_app_surface_back_to_cover_until_v303';
 
   /* 진단 표시 코드는 V8-1-13에서 제거했습니다. */
 
@@ -53,9 +54,11 @@
       var href = location.href.split('#')[0];
       _href = href;
       var st = history.state;
-      if(!opts.force && st && st._p === 1 && (st.oai_app_trap || st.oai_cover_trap || st.oai_restore_trap)) return true;
+      if(st && Number(st._p || 0) >= 1 && st.oai_app_trap) return true;
+      if(!opts.force && st && Number(st._p || 0) >= 1 && (st.oai_cover_trap || st.oai_restore_trap)) return true;
       history.replaceState({_p:0, oai_app_root:reason||'app-root'}, '', href);
-      history.pushState({_p:1, oai_app_trap:reason||'app-trap'}, '', href);
+      history.pushState({_p:1, oai_app_trap:reason||'app-trap', oai_app_guard:1}, '', href);
+      history.pushState({_p:2, oai_app_trap:reason||'app-trap', oai_app_guard:2}, '', href);
       return true;
     }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
   }
@@ -86,15 +89,27 @@
   function clearLastRestoredAppSurface(reason){
     try{ window.__OAI_LAST_RESTORED_APP_SURFACE_UNTIL__ = 0; }catch(e){}
   }
+  function markAppSurfaceBackToCover(reason, ms){
+    try{
+      var until = backNow() + (Number(ms || 0) || 9000);
+      window.__OAI_APP_SURFACE_BACK_TO_COVER_UNTIL__ = until;
+      window.__OAI_APP_SURFACE_BACK_TO_COVER_REASON__ = String(reason || 'app-back-to-cover');
+      try{ sessionStorage.setItem(KEY_BACK_TO_COVER_UNTIL, String(until)); }catch(_e){}
+      try{ localStorage.setItem(KEY_BACK_TO_COVER_UNTIL, String(until)); }catch(_e){}
+      try{ if(typeof window.oaiMarkAppSurfaceBackToCover === 'function') window.oaiMarkAppSurfaceBackToCover(reason || 'app-back-to-cover', ms || 9000); }catch(_e){}
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }
   function armRestorePendingBackTrap(reason, opts){
     try{
       opts = opts || {};
       var href = location.href.split('#')[0];
       _href = href;
       var st = history.state;
-      if(!opts.force && st && st._p === 1 && (st.oai_restore_trap || st.oai_app_trap)) return true;
+      if(st && Number(st._p || 0) >= 1 && st.oai_restore_trap) return true;
+      if(!opts.force && st && Number(st._p || 0) >= 1 && st.oai_app_trap) return true;
       history.replaceState({_p:0, oai_restore_root:reason||'restore-root'}, '', href);
-      history.pushState({_p:1, oai_restore_trap:reason||'restore-trap'}, '', href);
+      history.pushState({_p:1, oai_restore_trap:reason||'restore-trap', oai_restore_guard:1}, '', href);
+      history.pushState({_p:2, oai_restore_trap:reason||'restore-trap', oai_restore_guard:2}, '', href);
       return true;
     }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
   }
@@ -116,6 +131,7 @@
     window.oaiScheduleAppBackTrap = scheduleAppBackTrap;
     window.oaiResetExitForAppSurface = resetExitForAppSurface;
     window.oaiArmRestorePendingBackTrap = armRestorePendingBackTrap;
+    window.oaiMarkAppSurfaceBackToCoverIntent = markAppSurfaceBackToCover;
   }catch(_e){}
   try{
     if(restoreBackGuardActive() && !restoreBackGuardReady()) armRestorePendingBackTrap('back-controller-load-restore-guard', {force:true});
@@ -206,6 +222,23 @@
     return false;
   }
 
+  var _viewportBackRearmTimer = 0;
+  function rearmBackAfterViewportChange(reason){
+    try{
+      clearTimeout(_viewportBackRearmTimer);
+      _viewportBackRearmTimer = setTimeout(function(){
+        try{
+          if(visibleRestoreBusy()) armRestorePendingBackTrap(reason || 'viewport-restore', {force:true});
+          else if(appActive()) scheduleAppBackTrap(reason || 'viewport-app');
+          else if(coverVisible()) armCoverBackTrap(reason || 'viewport-cover');
+        }catch(e){ console.warn('[가톨릭길동무]', e); }
+      }, 40);
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }
+  try{ window.addEventListener('resize', function(){ rearmBackAfterViewportChange('viewport-resize'); }, {passive:true}); }catch(_e){}
+  try{ window.addEventListener('orientationchange', function(){ rearmBackAfterViewportChange('viewport-orientation'); }, {passive:true}); }catch(_e){}
+  try{ if(window.visualViewport) window.visualViewport.addEventListener('resize', function(){ rearmBackAfterViewportChange('visual-viewport-resize'); }, {passive:true}); }catch(_e){}
+
   function isRefreshDialogOpen(){
     try{ return !!document.getElementById('oai-refresh-content-dialog'); }catch(e){ return false; }
   }
@@ -275,6 +308,7 @@
   }
 
   function callGTC(){
+    markAppSurfaceBackToCover('go-to-cover', 9000);
     clearLastRestoredAppSurface('go-to-cover');
     try{ window.__OAI_RESTORE_BACK_GUARD_READY__ = true; }catch(_e){}
     if(typeof window.goToCover === 'function') window.goToCover();
@@ -364,6 +398,7 @@
   }
   function closeDioceseViewToCoverDirect(reason){
     try{
+      markAppSurfaceBackToCover(reason || 'diocese-to-cover', 9000);
       if(typeof window.closeDioceseView === 'function') window.closeDioceseView();
       else { var el=$b('diocese-view'); if(el) el.classList.remove('open'); callGTC(); }
       return true;
@@ -578,6 +613,7 @@
       return;
     }
 
+    markAppSurfaceBackToCover('popstate-app-to-cover', 9000);
     _restoring = true;
     try{ history.go(1); }catch(e){ _restoring = false; console.warn("[가톨릭길동무]", e); }
 
@@ -614,6 +650,7 @@
       if(typeof window._showBackToast==='function') window._showBackToast();
       return;
     }
+    markAppSurfaceBackToCover('hardware-app-to-cover', 9000);
     if(closeModuleInnerLayer()){ return; }
     if(closeExtOrModule()){ return; }
     if(closeLayer()){ return; }
@@ -626,7 +663,7 @@
       if(appActive()){ scheduleAppBackTrap('pageshow-app'); return; }
       if(stabilizeCoverFirstBack('pageshow-cover-return')) return;
       var st = history.state;
-      if(st && st._p === 1) return;  // 트랩 유지 중이면 스킵
+      if(st && Number(st._p || 0) >= 1) return;  // 트랩 유지 중이면 스킵
       try{ if(window.oaiReturnConductorBusy && window.oaiReturnConductorBusy(['cover-back','passive'])) return; }catch(_e){}
       if(!appActive()) armCoverBackTrap('pageshow-cover');
       else scheduleAppBackTrap('pageshow-app-fallback');
