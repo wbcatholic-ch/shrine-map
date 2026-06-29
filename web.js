@@ -363,7 +363,7 @@
 
   window.openWebView = function(opts){
     const restore = !!(opts && opts.restore);
-    try{ if(window.oaiRememberCurrentSurface && !restore) window.oaiRememberCurrentSurface({type:'web'}, 'openWebView'); }catch(_e){}
+    try{ if(window.oaiStoreFoldSurface && !(opts && (opts.restore || opts.foldRestore))) window.oaiStoreFoldSurface({type:'web'}, 'openWebView'); }catch(_e){}
     if(!restore){
       resetWebTransientState();
       webState.curCat = webDefaultCat();
@@ -383,7 +383,7 @@
 
   window.openTrailView = function(opts){
     const restore = !!(opts&&opts.restore);
-    try{ if(window.oaiRememberCurrentSurface && !restore) window.oaiRememberCurrentSurface({type:'trail'}, 'openTrailView'); }catch(_e){}
+    try{ if(window.oaiStoreFoldSurface && !(opts && (opts.restore || opts.foldRestore))) window.oaiStoreFoldSurface({type:'trail'}, 'openTrailView'); }catch(_e){}
     const forceRebuild = !!(opts&&(opts.forceRebuild||opts.hardReset));
     if(forceRebuild || trailState.needsHardReset){
       hardResetTrailModule();
@@ -728,7 +728,7 @@
   function fitTrailMapToBounds(){
     if(!(trailState.map && window.kakao && window.kakao.maps)) return;
     try{
-      // V8-1-14-319:
+      // V8-1-14-320:
       // setBounds는 되살리지 않고 중심 이동은 1회만 유지한다.
       // 순례길 첫 화면이 너무 확대되어 보이지 않도록 기본 줌을 한 단계 넓게 둔다.
       if(typeof trailState.map.setLevel === "function") trailState.map.setLevel(13);
