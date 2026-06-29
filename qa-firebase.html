@@ -454,7 +454,7 @@
 
 
 
-  /* V8-1-14-309: compact 문의·건의는 글자 크기 유지, 공간만 축소 */
+  /* V8-1-14-310: compact 문의·건의는 글자 크기 유지, 공간만 축소 */
   html.oai-screen-compact-short {
     --tab-h: 50px;
     --tab-btn-h: 36px;
@@ -1073,11 +1073,11 @@ function oaiReturnToAppCover(reason){
   try{
     var url = new URL('index.html', location.href);
     url.searchParams.set('oai_cover_return', reason || 'qna-return-cover');
-    url.searchParams.set('v', 'V8-1-14-309');
+    url.searchParams.set('v', 'V8-1-14-310');
     location.replace(url.href);
     return;
   }catch(e){
-    location.replace('index.html?oai_cover_return=' + encodeURIComponent(reason || 'qna-return-cover') + '&v=V8-1-14-309');
+    location.replace('index.html?oai_cover_return=' + encodeURIComponent(reason || 'qna-return-cover') + '&v=V8-1-14-310');
   }
 }
 function handleQaBack(){
@@ -1122,10 +1122,10 @@ if (QA_PRIVATE_MODE) {
 }
 </script>
 
-<script id="oai-cache-lifecycle-V8-1-14-309">
+<script id="oai-cache-lifecycle-V8-1-14-310">
 (function(){
   'use strict';
-  var APP_VERSION = 'V8-1-14-309';
+  var APP_VERSION = 'V8-1-14-310';
   if('serviceWorker' in navigator){
     try{ navigator.serviceWorker.register('./sw.js?v=' + encodeURIComponent(APP_VERSION)).then(function(reg){try{reg.update();}catch(e){}}).catch(function(){}); }catch(e){}
   }

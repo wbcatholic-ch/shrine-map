@@ -156,9 +156,9 @@
   }
 
   function appActive(){
-    try{ if(document.documentElement.classList.contains('app-active')) return true; }catch(e){}
     try{ if(hasOpenAppSurface()) return true; }catch(e){}
-    try{ if(typeof window._isAppScreenActive === 'function') return window._isAppScreenActive(); }catch(e){}
+    try{ if(typeof window._isAppScreenActive === 'function' && window._isAppScreenActive()) return true; }catch(e){}
+    try{ return document.documentElement.classList.contains('app-active') && !coverVisible(); }catch(e){}
     return false;
   }
 
@@ -591,21 +591,13 @@
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 
   window.addEventListener('resize', function(){
-    try{
-      [80, 220, 520, 1100].forEach(function(delay){
-        setTimeout(function(){ rearmAppBackIfVisible('viewport-resize-app-check-' + delay); }, delay);
-      });
-    }catch(e){ console.warn('[가톨릭길동무]', e); }
+    try{ setTimeout(function(){ rearmAppBackIfVisible('viewport-resize-app-check'); }, 120); }catch(e){ console.warn('[가톨릭길동무]', e); }
   }, true);
 
   try{
     if(window.visualViewport){
       window.visualViewport.addEventListener('resize', function(){
-        try{
-          [100, 260, 620, 1300].forEach(function(delay){
-            setTimeout(function(){ rearmAppBackIfVisible('visual-viewport-resize-app-check-' + delay); }, delay);
-          });
-        }catch(e){ console.warn('[가톨릭길동무]', e); }
+        try{ setTimeout(function(){ rearmAppBackIfVisible('visual-viewport-resize-app-check'); }, 160); }catch(e){ console.warn('[가톨릭길동무]', e); }
       }, true);
     }
   }catch(e){ console.warn('[가톨릭길동무]', e); }
