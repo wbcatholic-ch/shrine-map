@@ -46,6 +46,10 @@
     }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
   }
 
+  function hasBackTrapState(st){
+    try{ return !!(st && st._p === 1 && (st.oai_app_trap || st.oai_cover_trap || st.oai_fold_app_trap)); }catch(e){ return false; }
+  }
+
   function armAppBackTrap(reason, opts){
     try{
       opts = opts || {};
@@ -53,19 +57,27 @@
       var href = location.href.split('#')[0];
       _href = href;
       var st = history.state;
-      if(!opts.force && st && st._p === 1 && (st.oai_app_trap || st.oai_cover_trap)) return true;
-      history.replaceState({_p:0, oai_app_root:reason||'app-root'}, '', href);
-      history.pushState({_p:1, oai_app_trap:reason||'app-trap'}, '', href);
+      /* V8-1-14-308:
+         앱 화면에서 이미 어떤 trap이 살아 있으면 보통은 중복 push를 하지 않는다.
+         단 Fold 직후 force 호출은 replaceState만 남은 가짜 trap 가능성을 지우기 위해
+         root/trap 한 쌍을 다시 만든다. */
+      if(hasBackTrapState(st) && !opts.force) return true;
+      if(st && st._p === 0 && !opts.force){
+        history.pushState({_p:1, oai_app_trap:reason||'app-trap'}, '', href);
+      }else{
+        history.replaceState({_p:0, oai_app_root:reason||'app-root'}, '', href);
+        history.pushState({_p:1, oai_app_trap:reason||'app-trap'}, '', href);
+      }
       return true;
     }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
   }
 
   function scheduleAppBackTrap(reason){
     try{
-      [0, 80, 240, 620, 1200].forEach(function(delay, idx){
+      [0, 80, 240, 620, 1200, 2200, 3800].forEach(function(delay){
         setTimeout(function(){
           try{
-            if(appActive()) armAppBackTrap((reason || 'app-visible') + '-' + delay, {force: idx === 0});
+            if(appActive()) armAppBackTrap((reason || 'app-visible') + '-' + delay, {force:false});
           }catch(e){ console.warn('[가톨릭길동무]', e); }
         }, delay);
       });
@@ -76,6 +88,7 @@
     window.oaiArmAppBackTrap = armAppBackTrap;
     window.oaiScheduleAppBackTrap = scheduleAppBackTrap;
     window.oaiResetExitForAppSurface = resetExitForAppSurface;
+    window._ensureAppBackTrap = armAppBackTrap;
   }catch(_e){}
 
   try{
