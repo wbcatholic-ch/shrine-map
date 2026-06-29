@@ -7,7 +7,6 @@
   window.__OAI_FULL_BACK_CTRL_ACTIVE__ = true;
 
   var _href = location.href.split('#')[0];
-  var KEY_BACK_TO_COVER_UNTIL = 'oai_app_surface_back_to_cover_until_v303';
 
   /* 진단 표시 코드는 V8-1-13에서 제거했습니다. */
 
@@ -53,79 +52,10 @@
       resetExitForAppSurface(reason || 'app-back-trap');
       var href = location.href.split('#')[0];
       _href = href;
-      var st = history.state || {};
-      var p = Number(st._p || 0);
-      /* V8-1-14-304:
-         Fold 전환/복원 뒤 현재 history.state가 app trap 1단(_p:1)에 남아 있으면
-         기존 V303은 '트랩 있음'으로 착각하고 return했다. 그 상태에서 Back을 누르면
-         더 막을 2단 guard가 없어 Android WebView가 앱을 밖으로 보낼 수 있다.
-         app trap은 반드시 현재 위치가 2단 guard(_p:2)일 때만 충분한 것으로 본다. */
-      if(!opts.force && st && p >= 2 && st.oai_app_trap) return true;
-      if(st && p === 1 && st.oai_app_trap){
-        history.pushState({_p:2, oai_app_trap:reason||'app-trap', oai_app_guard:2}, '', href);
-        return true;
-      }
-      if(!opts.force && st && p >= 1 && (st.oai_cover_trap || st.oai_restore_trap)) return true;
+      var st = history.state;
+      if(!opts.force && st && st._p === 1 && (st.oai_app_trap || st.oai_cover_trap)) return true;
       history.replaceState({_p:0, oai_app_root:reason||'app-root'}, '', href);
-      history.pushState({_p:1, oai_app_trap:reason||'app-trap', oai_app_guard:1}, '', href);
-      history.pushState({_p:2, oai_app_trap:reason||'app-trap', oai_app_guard:2}, '', href);
-      return true;
-    }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
-  }
-
-  function backNow(){ return Date.now ? Date.now() : new Date().getTime(); }
-  function restoreBackGuardUntil(){
-    try{ return Number(window.__OAI_RESTORE_BACK_GUARD_UNTIL__ || 0); }catch(e){ return 0; }
-  }
-  function restoreBackGuardActive(){
-    try{
-      var until = restoreBackGuardUntil();
-      return !!(until && backNow() < until);
-    }catch(e){ return false; }
-  }
-  function restoreBackGuardReady(){
-    try{ return window.__OAI_RESTORE_BACK_GUARD_READY__ === true; }catch(e){ return false; }
-  }
-  function visibleRestoreBusy(){
-    try{ if(typeof window.oaiIsVisibleRestoreActive === 'function' && window.oaiIsVisibleRestoreActive()) return true; }catch(e){}
-    return restoreBackGuardActive() && !restoreBackGuardReady();
-  }
-  function lastRestoredAppSurfaceActive(){
-    try{
-      var until = Number(window.__OAI_LAST_RESTORED_APP_SURFACE_UNTIL__ || 0);
-      return !!(until && backNow() < until);
-    }catch(e){ return false; }
-  }
-  function clearLastRestoredAppSurface(reason){
-    try{ window.__OAI_LAST_RESTORED_APP_SURFACE_UNTIL__ = 0; }catch(e){}
-  }
-  function markAppSurfaceBackToCover(reason, ms){
-    try{
-      var until = backNow() + (Number(ms || 0) || 9000);
-      window.__OAI_APP_SURFACE_BACK_TO_COVER_UNTIL__ = until;
-      window.__OAI_APP_SURFACE_BACK_TO_COVER_REASON__ = String(reason || 'app-back-to-cover');
-      try{ sessionStorage.setItem(KEY_BACK_TO_COVER_UNTIL, String(until)); }catch(_e){}
-      try{ localStorage.setItem(KEY_BACK_TO_COVER_UNTIL, String(until)); }catch(_e){}
-      try{ if(typeof window.oaiMarkAppSurfaceBackToCover === 'function') window.oaiMarkAppSurfaceBackToCover(reason || 'app-back-to-cover', ms || 9000); }catch(_e){}
-    }catch(e){ console.warn('[가톨릭길동무]', e); }
-  }
-  function armRestorePendingBackTrap(reason, opts){
-    try{
-      opts = opts || {};
-      var href = location.href.split('#')[0];
-      _href = href;
-      var st = history.state || {};
-      var p = Number(st._p || 0);
-      /* V8-1-14-304: restore trap도 1단에 멈춰 있으면 2단 guard를 보강한다. */
-      if(!opts.force && st && p >= 2 && st.oai_restore_trap) return true;
-      if(st && p === 1 && st.oai_restore_trap){
-        history.pushState({_p:2, oai_restore_trap:reason||'restore-trap', oai_restore_guard:2}, '', href);
-        return true;
-      }
-      if(!opts.force && st && p >= 1 && st.oai_app_trap) return true;
-      history.replaceState({_p:0, oai_restore_root:reason||'restore-root'}, '', href);
-      history.pushState({_p:1, oai_restore_trap:reason||'restore-trap', oai_restore_guard:1}, '', href);
-      history.pushState({_p:2, oai_restore_trap:reason||'restore-trap', oai_restore_guard:2}, '', href);
+      history.pushState({_p:1, oai_app_trap:reason||'app-trap'}, '', href);
       return true;
     }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
   }
@@ -146,11 +76,6 @@
     window.oaiArmAppBackTrap = armAppBackTrap;
     window.oaiScheduleAppBackTrap = scheduleAppBackTrap;
     window.oaiResetExitForAppSurface = resetExitForAppSurface;
-    window.oaiArmRestorePendingBackTrap = armRestorePendingBackTrap;
-    window.oaiMarkAppSurfaceBackToCoverIntent = markAppSurfaceBackToCover;
-  }catch(_e){}
-  try{
-    if(restoreBackGuardActive() && !restoreBackGuardReady()) armRestorePendingBackTrap('back-controller-load-restore-guard', {force:true});
   }catch(_e){}
 
   try{
@@ -231,34 +156,11 @@
   }
 
   function appActive(){
-    try{ if(lastRestoredAppSurfaceActive()) return true; }catch(e){}
     try{ if(document.documentElement.classList.contains('app-active')) return true; }catch(e){}
     try{ if(hasOpenAppSurface()) return true; }catch(e){}
     try{ if(typeof window._isAppScreenActive === 'function') return window._isAppScreenActive(); }catch(e){}
     return false;
   }
-
-  var _viewportBackRearmTimer = 0;
-  function rearmBackAfterViewportChange(reason){
-    try{
-      var until = backNow() + 14000;
-      window.__OAI_VIEWPORT_BACK_REARM_UNTIL__ = until;
-      try{ sessionStorage.setItem('oai_viewport_back_rearm_until_v304', String(until)); }catch(_e){}
-      clearTimeout(_viewportBackRearmTimer);
-      [0, 40, 140, 360, 900, 1800].forEach(function(delay, idx){
-        setTimeout(function(){
-          try{
-            if(visibleRestoreBusy()) armRestorePendingBackTrap(reason || 'viewport-restore', {force:true});
-            else if(appActive()) armAppBackTrap((reason || 'viewport-app') + '-' + delay, {force: idx === 0});
-            else if(coverVisible()) armCoverBackTrap(reason || 'viewport-cover', {force: idx === 0});
-          }catch(e){ console.warn('[가톨릭길동무]', e); }
-        }, delay);
-      });
-    }catch(e){ console.warn('[가톨릭길동무]', e); }
-  }
-  try{ window.addEventListener('resize', function(){ rearmBackAfterViewportChange('viewport-resize'); }, {passive:true}); }catch(_e){}
-  try{ window.addEventListener('orientationchange', function(){ rearmBackAfterViewportChange('viewport-orientation'); }, {passive:true}); }catch(_e){}
-  try{ if(window.visualViewport) window.visualViewport.addEventListener('resize', function(){ rearmBackAfterViewportChange('visual-viewport-resize'); }, {passive:true}); }catch(_e){}
 
   function isRefreshDialogOpen(){
     try{ return !!document.getElementById('oai-refresh-content-dialog'); }catch(e){ return false; }
@@ -329,9 +231,6 @@
   }
 
   function callGTC(){
-    markAppSurfaceBackToCover('go-to-cover', 9000);
-    clearLastRestoredAppSurface('go-to-cover');
-    try{ window.__OAI_RESTORE_BACK_GUARD_READY__ = true; }catch(_e){}
     if(typeof window.goToCover === 'function') window.goToCover();
     else {
       document.documentElement.classList.remove('app-active','parish-mode','retreat-mode');
@@ -356,13 +255,9 @@
       try{ if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady(); }catch(_e){}
       try{ if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed(); }catch(_e){}
       try{ if(typeof window._clearHardCoverExitFlags === 'function') window._clearHardCoverExitFlags(reason || 'app-restore'); }catch(_e){}
-      try{ window.__OAI_RESTORE_BACK_GUARD_READY__ = true; }catch(_e){}
-      try{ window.__OAI_LAST_RESTORED_APP_SURFACE_UNTIL__ = backNow() + 12000; }catch(_e){}
       if(appActive()){
         armAppBackTrap(reason || 'restore', {force:true});
         scheduleAppBackTrap(reason || 'restore-repeat');
-      }else if(restoreBackGuardActive()){
-        armRestorePendingBackTrap(reason || 'restore-pending', {force:true});
       }
       return true;
     }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
@@ -419,7 +314,6 @@
   }
   function closeDioceseViewToCoverDirect(reason){
     try{
-      markAppSurfaceBackToCover(reason || 'diocese-to-cover', 9000);
       if(typeof window.closeDioceseView === 'function') window.closeDioceseView();
       else { var el=$b('diocese-view'); if(el) el.classList.remove('open'); callGTC(); }
       return true;
@@ -545,19 +439,6 @@
     try{ if(typeof window.oaiSuppressExternalReturnForUserBack === 'function') window.oaiSuppressExternalReturnForUserBack('popstate-first-back-after-external-return'); }catch(e){ console.warn('[가톨릭길동무]', e); }
     try{ if(appActive()) resetExitForAppSurface('popstate-app-active'); }catch(e){ console.warn('[가톨릭길동무]', e); }
 
-    if(visibleRestoreBusy()){
-      try{
-        _restoring = true;
-        history.go(1);
-        setTimeout(function(){ try{ if(visibleRestoreBusy()) armRestorePendingBackTrap('restore-busy-popstate-fallback', {force:true}); }catch(_e){} }, 90);
-      }catch(e){
-        _restoring = false;
-        armRestorePendingBackTrap('restore-busy-popstate-error', {force:true});
-        console.warn('[가톨릭길동무]', e);
-      }
-      return;
-    }
-
     if(_restoring){
       _restoring = false;
       if(typeof window._oaiPrayerRunPendingCoverReset === 'function' && window._oaiPrayerRunPendingCoverReset()) return;
@@ -634,7 +515,6 @@
       return;
     }
 
-    markAppSurfaceBackToCover('popstate-app-to-cover', 9000);
     _restoring = true;
     try{ history.go(1); }catch(e){ _restoring = false; console.warn("[가톨릭길동무]", e); }
 
@@ -649,10 +529,6 @@
     try{ if(evt && typeof evt.preventDefault === 'function') evt.preventDefault(); }catch(_e){}
     try{ if(typeof window.oaiSuppressExternalReturnForUserBack === 'function') window.oaiSuppressExternalReturnForUserBack('hardware-first-back-after-external-return'); }catch(e){ console.warn('[가톨릭길동무]', e); }
     try{ if(appActive()) resetExitForAppSurface('hardware-app-active'); }catch(e){ console.warn('[가톨릭길동무]', e); }
-    if(visibleRestoreBusy()){
-      armRestorePendingBackTrap('restore-busy-hardware', {force:true});
-      return;
-    }
     if(typeof window._oaiPrayerBackHandle === 'function' && window._oaiPrayerBackHandle('prayer-hardware-back')) return;
     if(closeRefreshDialog()){ try{ armCoverBackTrap('refresh-dialog-hardware', {force:true}); }catch(e){} return; }
     if(isGuideModalOpen()){
@@ -671,7 +547,6 @@
       if(typeof window._showBackToast==='function') window._showBackToast();
       return;
     }
-    markAppSurfaceBackToCover('hardware-app-to-cover', 9000);
     if(closeModuleInnerLayer()){ return; }
     if(closeExtOrModule()){ return; }
     if(closeLayer()){ return; }
@@ -680,11 +555,10 @@
 
   window.addEventListener('pageshow', function(){
     try{
-      if(visibleRestoreBusy()){ armRestorePendingBackTrap('pageshow-restore-busy', {force:true}); return; }
       if(appActive()){ scheduleAppBackTrap('pageshow-app'); return; }
       if(stabilizeCoverFirstBack('pageshow-cover-return')) return;
       var st = history.state;
-      if(st && Number(st._p || 0) >= 1) return;  // 트랩 유지 중이면 스킵
+      if(st && st._p === 1) return;  // 트랩 유지 중이면 스킵
       try{ if(window.oaiReturnConductorBusy && window.oaiReturnConductorBusy(['cover-back','passive'])) return; }catch(_e){}
       if(!appActive()) armCoverBackTrap('pageshow-cover');
       else scheduleAppBackTrap('pageshow-app-fallback');
@@ -692,14 +566,41 @@
   }, true);
 
   window.addEventListener('focus', function(){
-    try{ setTimeout(function(){ if(visibleRestoreBusy()) armRestorePendingBackTrap('focus-restore-busy', {force:true}); else if(appActive()) scheduleAppBackTrap('focus-app'); else stabilizeCoverFirstBack('focus-cover-return'); }, 40); }catch(e){ console.warn('[가톨릭길동무]', e); }
+    try{ setTimeout(function(){ if(appActive()) scheduleAppBackTrap('focus-app'); else stabilizeCoverFirstBack('focus-cover-return'); }, 40); }catch(e){ console.warn('[가톨릭길동무]', e); }
   }, true);
 
   document.addEventListener('visibilitychange', function(){
     if(document.visibilityState === 'visible'){
-      try{ setTimeout(function(){ if(visibleRestoreBusy()) armRestorePendingBackTrap('visible-restore-busy', {force:true}); else if(appActive()) scheduleAppBackTrap('visible-app'); else stabilizeCoverFirstBack('visible-cover-return'); }, 60); }catch(e){ console.warn('[가톨릭길동무]', e); }
+      try{ setTimeout(function(){ if(appActive()) scheduleAppBackTrap('visible-app'); else stabilizeCoverFirstBack('visible-cover-return'); }, 60); }catch(e){ console.warn('[가톨릭길동무]', e); }
     }
   }, true);
+
+  function rearmAppBackIfVisible(reason){
+    try{
+      if(appActive()){
+        resetExitForAppSurface(reason || 'rearm-app-visible');
+        scheduleAppBackTrap(reason || 'rearm-app-visible');
+      }
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }
+
+  try{
+    [0, 120, 420, 900, 1500].forEach(function(delay){
+      setTimeout(function(){ rearmAppBackIfVisible('controller-load-app-check-' + delay); }, delay);
+    });
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+
+  window.addEventListener('resize', function(){
+    try{ setTimeout(function(){ rearmAppBackIfVisible('viewport-resize-app-check'); }, 120); }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }, true);
+
+  try{
+    if(window.visualViewport){
+      window.visualViewport.addEventListener('resize', function(){
+        try{ setTimeout(function(){ rearmAppBackIfVisible('visual-viewport-resize-app-check'); }, 160); }catch(e){ console.warn('[가톨릭길동무]', e); }
+      }, true);
+    }
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
 
 })();
 
