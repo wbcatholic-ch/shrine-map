@@ -185,6 +185,22 @@
     }
   }
 
+  function primeAppBackAfterRestore(reason){
+    try{
+      window._appExiting = false;
+      try{ document.documentElement.classList.remove('app-exiting'); }catch(_e){}
+      try{ if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady(); }catch(_e){}
+      try{ if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed(); }catch(_e){}
+      try{ if(typeof window._clearHardCoverExitFlags === 'function') window._clearHardCoverExitFlags(reason || 'app-restore'); }catch(_e){}
+      if(appActive()){
+        history.replaceState({_p:0, oai_app_restore_base: reason || 'restore'}, '', _href);
+        history.pushState({_p:1, oai_app_restore_trap: reason || 'restore'}, '', _href);
+      }
+      return true;
+    }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
+  }
+  try{ window.oaiPrimeAppBackAfterRestore = primeAppBackAfterRestore; }catch(_e){}
+
   function closeGeneralModuleToCover(reason){
     var diocese = $b('diocese-view');
     if(diocese && diocese.classList.contains('open')){
