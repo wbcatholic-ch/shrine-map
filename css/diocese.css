@@ -320,8 +320,9 @@ html.ios-device .cb{width:34px!important;height:34px!important;border-radius:10p
 #map-view.on,#list-view.on,#search-view.on,#province-info-view.on{animation:oaiDioFadeIn .22s ease both;}
 html.oai-dio-returning #map-view.on,html.oai-dio-returning #list-view.on,html.oai-dio-returning #search-view.on,html.oai-dio-returning #province-info-view.on{animation:none!important;}
 
-html.oai-screen-compact-short{--tab-h:46px;--tab-btn-h:33px;}
-html.oai-screen-compact-short .tab-bar{height:46px!important;padding:0 8px!important;gap:5px!important;}
-html.oai-screen-compact-short .tab{height:33px!important;padding:0 8px!important;border-radius:10px!important;}
-html.oai-screen-compact-short .filter-btn,
-html.oai-screen-compact-short .province-filter-btn{height:31px!important;min-height:31px!important;padding:0 10px!important;}
+@media(max-width:370px){
+  :root{--tab-h:46px;--tab-btn-h:33px;}
+  .tab-bar{height:46px!important;padding:0 8px!important;gap:5px!important;}
+  .tab{height:33px!important;padding:0 8px!important;border-radius:10px!important;}
+  .filter-btn,.province-filter-btn{height:31px!important;min-height:31px!important;padding:0 10px!important;}
+}

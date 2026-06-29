@@ -193,21 +193,6 @@
   const TRAIL_COLORS = {d:'#1D4ED8', l:'#2A8040'};
   const RETURN_KEY = 'catholic_integrated_return_v2';
   const trailState = {inited:false, map:null, markers:[], selected:-1, myOverlay:null, view:'map', pendingOpenIndex:null, restoreCenter:null, restoreLevel:null, needsHardReset:false, pendingFitBounds:false};
-  window.oaiGetTrailVisibleState = function(){
-    const st = {view: trailState.view || 'map'};
-    try{
-      if(trailState.map && window.kakao && kakao.maps){
-        const c = trailState.map.getCenter ? trailState.map.getCenter() : null;
-        if(c && typeof c.getLat === 'function' && typeof c.getLng === 'function') st.center = {lat:c.getLat(), lng:c.getLng()};
-        if(trailState.map.getLevel) st.level = trailState.map.getLevel();
-      }
-      const list = ig$('trail-list');
-      if(list) st.scroll = list.scrollTop || 0;
-      st.selected = trailState.selected;
-      st.sheetOpen = !!(ig$('trail-sheet') && ig$('trail-sheet').classList.contains('open'));
-    }catch(e){ console.warn('[가톨릭길동무]', e); }
-    return st;
-  };
   const webState = {built:false, curCat:'⭐ 즐겨찾기'};
   const WEB_FAV_KEY = 'web_favorites_v1';
   const MY_DIOCESE_KEY = 'oai_my_diocese_name';
@@ -397,7 +382,6 @@
 
   window.openTrailView = function(opts){
     const restore = !!(opts&&opts.restore);
-    const restoreTrailState = (opts && opts.trailState) || null;
     const forceRebuild = !!(opts&&(opts.forceRebuild||opts.hardReset));
     if(forceRebuild || trailState.needsHardReset){
       hardResetTrailModule();
@@ -414,16 +398,10 @@
       if(list) list.scrollTop=0;
     }else{
       trailState.pendingFitBounds=false;
-      if(restoreTrailState){
-        trailState.view = restoreTrailState.view || trailState.view || 'map';
-        trailState.restoreCenter = restoreTrailState.center || null;
-        trailState.restoreLevel = Number.isFinite(Number(restoreTrailState.level)) ? Number(restoreTrailState.level) : null;
-        if(Number.isInteger(Number(restoreTrailState.selected)) && restoreTrailState.sheetOpen) trailState.pendingOpenIndex = Number(restoreTrailState.selected);
-      }
     }
     enterIntegratedView('trail-view');
     initTrailModule();
-    trailSetView(trailState.view || 'map', {restore:restore, trailState:restoreTrailState});
+    trailSetView(trailState.view || 'map');
     if(!restore){
       relayoutTrailMap(80);
       relayoutTrailMap(260);
@@ -746,7 +724,7 @@
   function fitTrailMapToBounds(){
     if(!(trailState.map && window.kakao && window.kakao.maps)) return;
     try{
-      // V8-1-14-314:
+      // V8-1-14-235_parish_retreat_myloc_button_lower_full:
       // setBounds는 되살리지 않고 중심 이동은 1회만 유지한다.
       // 순례길 첫 화면이 너무 확대되어 보이지 않도록 기본 줌을 한 단계 넓게 둔다.
       if(typeof trailState.map.setLevel === "function") trailState.map.setLevel(13);
@@ -924,9 +902,7 @@
     }
   };
 
-  window.trailSetView = function(v, opts){
-    opts = opts || {};
-    const restoreView = !!opts.restore;
+  window.trailSetView = function(v){
     trailState.view = v;
     ig$('trail-panel-map')?.classList.toggle('on', v==='map');
     ig$('trail-panel-list')?.classList.toggle('on', v==='list');
@@ -934,17 +910,17 @@
     ig$('trail-tab-list')?.classList.toggle('on', v==='list');
     try{ if(typeof window.oaiKeepActiveTabsVisible === 'function') window.oaiKeepActiveTabsVisible('trail'); }catch(e){ console.warn('[가톨릭길동무]', e); }
     if(v==='map'){
-      if(!restoreView) trailCloseSheet();
+      trailCloseSheet();
       initTrailModule();
       syncTrailMarkers();
       relayoutTrailMap(30); relayoutTrailMap(180); relayoutTrailMap(360);
     } else {
-      if(!restoreView) trailCloseSheet();
+      trailCloseSheet();
       buildTrailList();
       const list = ig$('trail-list');
       if(list){
         list.style.scrollBehavior = 'auto';
-        list.scrollTop = restoreView && opts.trailState ? Number(opts.trailState.scroll || 0) : 0;
+        list.scrollTop = 0;
         list.style.scrollBehavior = '';
       }
     }

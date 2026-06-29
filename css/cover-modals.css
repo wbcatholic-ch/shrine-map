@@ -169,60 +169,66 @@
   letter-spacing: -.03em !important;
   text-align: left !important;
 }
-html:not(.ios-device).oai-screen-compact-short .cover-menu-panel,
-html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-panel {
-  width: min(360px, calc(100vw - 28px)) !important;
-  padding: 16px 13px 15px !important;
+@media (max-width: 370px) and (max-height: 820px) {
+  html:not(.ios-device) .cover-menu-panel,
+  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-panel {
+    width: min(360px, calc(100vw - 28px)) !important;
+    padding: 16px 13px 15px !important;
+  }
+  html:not(.ios-device) .cover-menu-panel { min-height: 326px !important; }
+  html:not(.ios-device) .cover-menu-head,
+  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-head {
+    min-height: 74px !important;
+    border-radius: 18px !important;
+    margin-bottom: 12px !important;
+    padding: 12px !important;
+    gap: 10px !important;
+  }
+  html:not(.ios-device) .cover-menu-title,
+  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-title {
+    
+    line-height: 1.16 !important;
+  }
+  html:not(.ios-device) .cover-menu-subtitle,
+  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-subtitle {
+    margin-top: 4px !important;
+    
+    line-height: 1.2 !important;
+  }
+  html:not(.ios-device) .cover-menu-close,
+  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-head .guide-x,
+  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-close {
+    width: 36px !important;
+    height: 36px !important;
+    min-width: 36px !important;
+    min-height: 36px !important;
+    
+  }
+  html:not(.ios-device) .cover-menu-list,
+  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-actions { gap: 8px !important; }
+  html:not(.ios-device) .cover-menu-item,
+  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-btn,
+  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-primary {
+    min-height: 78px !important;
+    height: 78px !important;
+    padding: 12px 14px !important;
+    border-radius: 17px !important;
+  }
+  html:not(.ios-device) .cover-menu-icon,
+  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-btn span {
+    width: 40px !important;
+    height: 40px !important;
+    min-width: 40px !important;
+    flex-basis: 40px !important;
+    
+  }
+  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-btn { grid-template-columns: 50px 1fr !important; }
+  html:not(.ios-device) .cover-menu-text,
+  html:not(.ios-device) #cover #mass-quick-modal .mass-quick-btn strong {
+    
+    line-height: 1.14 !important;
+  }
 }
-html:not(.ios-device).oai-screen-compact-short .cover-menu-panel { min-height: 326px !important; }
-html:not(.ios-device).oai-screen-compact-short .cover-menu-head,
-html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-head {
-  min-height: 74px !important;
-  border-radius: 18px !important;
-  margin-bottom: 12px !important;
-  padding: 12px !important;
-  gap: 10px !important;
-}
-html:not(.ios-device).oai-screen-compact-short .cover-menu-title,
-html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-title {
-  line-height: 1.16 !important;
-}
-html:not(.ios-device).oai-screen-compact-short .cover-menu-subtitle,
-html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-subtitle {
-  margin-top: 4px !important;
-  line-height: 1.2 !important;
-}
-html:not(.ios-device).oai-screen-compact-short .cover-menu-close,
-html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-head .guide-x,
-html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-close {
-  width: 36px !important;
-  height: 36px !important;
-  min-width: 36px !important;
-  min-height: 36px !important;
-}
-html:not(.ios-device).oai-screen-compact-short .cover-menu-list,
-html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-actions { gap: 8px !important; }
-html:not(.ios-device).oai-screen-compact-short .cover-menu-item,
-html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-btn,
-html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-primary {
-  min-height: 78px !important;
-  height: 78px !important;
-  padding: 12px 14px !important;
-  border-radius: 17px !important;
-}
-html:not(.ios-device).oai-screen-compact-short .cover-menu-icon,
-html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-btn span {
-  width: 40px !important;
-  height: 40px !important;
-  min-width: 40px !important;
-  flex-basis: 40px !important;
-}
-html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-btn { grid-template-columns: 50px 1fr !important; }
-html:not(.ios-device).oai-screen-compact-short .cover-menu-text,
-html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-btn strong {
-  line-height: 1.14 !important;
-}
-
 
 .cover-menu-panel,
 #cover #mass-quick-modal .mass-quick-panel {
