@@ -743,15 +743,10 @@
     if(typeof trailCloseSheet === 'function') trailCloseSheet();
   }
 
-  function isTrailVisibleRestoreActive(){
-    try{ return !!(window.__OAI_VISIBLE_RESTORE_ACTIVE_UNTIL__ && (Date.now ? Date.now() : new Date().getTime()) < Number(window.__OAI_VISIBLE_RESTORE_ACTIVE_UNTIL__ || 0)); }catch(e){ return false; }
-  }
-
   function fitTrailMapToBounds(){
-    if(isTrailVisibleRestoreActive()) return;
     if(!(trailState.map && window.kakao && window.kakao.maps)) return;
     try{
-      // V8-1-14-311:
+      // V8-1-14-312:
       // setBounds는 되살리지 않고 중심 이동은 1회만 유지한다.
       // 순례길 첫 화면이 너무 확대되어 보이지 않도록 기본 줌을 한 단계 넓게 둔다.
       if(typeof trailState.map.setLevel === "function") trailState.map.setLevel(13);
@@ -789,8 +784,8 @@
     if(trailState.inited){
       syncTrailMarkers();
       if(trailState.map){
-        if(!isTrailVisibleRestoreActive()){ relayoutTrailMap(30); relayoutTrailMap(180); }
-        if(trailState.pendingFitBounds && !isTrailVisibleRestoreActive()){
+        relayoutTrailMap(30); relayoutTrailMap(180);
+        if(trailState.pendingFitBounds){
           setTimeout(function(){ fitTrailMapToBounds(); trailState.pendingFitBounds = false; }, 90);
         }
       }
@@ -798,7 +793,7 @@
     }
     ensureKakaoSdk(function(){
       if(trailState.inited){
-        if(trailState.map && !isTrailVisibleRestoreActive()){ relayoutTrailMap(30); relayoutTrailMap(180); }
+        if(trailState.map){ relayoutTrailMap(30); relayoutTrailMap(180); }
         return;
       }
       const container = ig$('trail-map');
@@ -814,13 +809,11 @@
       trailState.restoreCenter = null;
       trailState.restoreLevel = null;
       syncTrailMarkers();
-      if(trailState.pendingFitBounds && !isTrailVisibleRestoreActive()){
+      if(trailState.pendingFitBounds){
         setTimeout(function(){ fitTrailMapToBounds(); trailState.pendingFitBounds = false; }, 80);
       }
-      if(!isTrailVisibleRestoreActive()){
-        relayoutTrailMap(60);
-        relayoutTrailMap(220);
-      }
+      relayoutTrailMap(60);
+      relayoutTrailMap(220);
       kakao.maps.event.addListener(trailState.map,'click', trailCloseSheet);
       trailState.inited = true;
       if(Number.isInteger(trailState.pendingOpenIndex) && TRAIL_ITEMS[trailState.pendingOpenIndex]){
@@ -944,7 +937,7 @@
       if(!restoreView) trailCloseSheet();
       initTrailModule();
       syncTrailMarkers();
-      if(!restoreView && !isTrailVisibleRestoreActive()){ relayoutTrailMap(30); relayoutTrailMap(180); relayoutTrailMap(360); }
+      relayoutTrailMap(30); relayoutTrailMap(180); relayoutTrailMap(360);
     } else {
       if(!restoreView) trailCloseSheet();
       buildTrailList();
