@@ -37,7 +37,9 @@
       sessionStorage.removeItem('oai_refresh_history_compact_reason');
     }catch(_e){}
     if(refreshReason){
-      history.replaceState({_p:1, oai_cover_trap: refreshReason}, '', _href);
+      // V8-1-14-313: refresh/업데이트 직후에도 한 겹 trap만 남기지 말고 root/trap 두 겹을 반드시 만든다.
+      // 한 겹만 있으면 커버에서 Back 시 종료 안내문구 없이 WebView가 바로 닫힐 수 있다.
+      armCoverBackTrap(refreshReason || 'refresh-init', {force:true});
     }else{
       armCoverBackTrap('init', {force:true});
     }
@@ -468,6 +470,26 @@
     callGTC();
   }, false);
 
+  function armActiveScreenBackTrap(reason){
+    try{
+      if(!appActive()) return false;
+      var href = location.href.split('#')[0];
+      _href = href;
+      var st = history.state;
+      if(st && st._p === 1) return true;
+      history.replaceState({_p:0, oai_active_root:reason || 'active-root'}, '', href);
+      history.pushState({_p:1, oai_active_trap:reason || 'active-trap'}, '', href);
+      return true;
+    }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
+  }
+  function scheduleActiveScreenBackTrap(reason){
+    try{
+      [40,160,360].forEach(function(delay){
+        setTimeout(function(){ armActiveScreenBackTrap(reason || 'active-resize'); }, delay);
+      });
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }
+
   window.addEventListener('pageshow', function(){
     try{
       if(stabilizeCoverFirstBack('pageshow-cover-return')) return;
@@ -477,6 +499,10 @@
       else { history.replaceState({_p:0}, '', _href); history.pushState({_p:1}, '', _href); }
     }catch(e){ console.warn("[가톨릭길동무]", e); }
   }, true);
+
+  window.addEventListener('resize', function(){ scheduleActiveScreenBackTrap('resize-active-trap'); }, {passive:true});
+  window.addEventListener('orientationchange', function(){ scheduleActiveScreenBackTrap('orientation-active-trap'); }, {passive:true});
+  try{ if(window.visualViewport) window.visualViewport.addEventListener('resize', function(){ scheduleActiveScreenBackTrap('visualViewport-active-trap'); }, {passive:true}); }catch(_e){}
 
   window.addEventListener('focus', function(){
     try{ setTimeout(function(){ stabilizeCoverFirstBack('focus-cover-return'); }, 40); }catch(e){ console.warn('[가톨릭길동무]', e); }

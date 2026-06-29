@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-312';
-const ASSET_VERSION = 'V8-1-14-312';
+const CACHE_VERSION = 'catholic-way-V8-1-14-313';
+const ASSET_VERSION = 'V8-1-14-313';
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }
