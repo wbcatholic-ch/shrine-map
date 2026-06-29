@@ -53,9 +53,19 @@
       resetExitForAppSurface(reason || 'app-back-trap');
       var href = location.href.split('#')[0];
       _href = href;
-      var st = history.state;
-      if(st && Number(st._p || 0) >= 1 && st.oai_app_trap) return true;
-      if(!opts.force && st && Number(st._p || 0) >= 1 && (st.oai_cover_trap || st.oai_restore_trap)) return true;
+      var st = history.state || {};
+      var p = Number(st._p || 0);
+      /* V8-1-14-304:
+         Fold 전환/복원 뒤 현재 history.state가 app trap 1단(_p:1)에 남아 있으면
+         기존 V303은 '트랩 있음'으로 착각하고 return했다. 그 상태에서 Back을 누르면
+         더 막을 2단 guard가 없어 Android WebView가 앱을 밖으로 보낼 수 있다.
+         app trap은 반드시 현재 위치가 2단 guard(_p:2)일 때만 충분한 것으로 본다. */
+      if(!opts.force && st && p >= 2 && st.oai_app_trap) return true;
+      if(st && p === 1 && st.oai_app_trap){
+        history.pushState({_p:2, oai_app_trap:reason||'app-trap', oai_app_guard:2}, '', href);
+        return true;
+      }
+      if(!opts.force && st && p >= 1 && (st.oai_cover_trap || st.oai_restore_trap)) return true;
       history.replaceState({_p:0, oai_app_root:reason||'app-root'}, '', href);
       history.pushState({_p:1, oai_app_trap:reason||'app-trap', oai_app_guard:1}, '', href);
       history.pushState({_p:2, oai_app_trap:reason||'app-trap', oai_app_guard:2}, '', href);
@@ -104,9 +114,15 @@
       opts = opts || {};
       var href = location.href.split('#')[0];
       _href = href;
-      var st = history.state;
-      if(st && Number(st._p || 0) >= 1 && st.oai_restore_trap) return true;
-      if(!opts.force && st && Number(st._p || 0) >= 1 && st.oai_app_trap) return true;
+      var st = history.state || {};
+      var p = Number(st._p || 0);
+      /* V8-1-14-304: restore trap도 1단에 멈춰 있으면 2단 guard를 보강한다. */
+      if(!opts.force && st && p >= 2 && st.oai_restore_trap) return true;
+      if(st && p === 1 && st.oai_restore_trap){
+        history.pushState({_p:2, oai_restore_trap:reason||'restore-trap', oai_restore_guard:2}, '', href);
+        return true;
+      }
+      if(!opts.force && st && p >= 1 && st.oai_app_trap) return true;
       history.replaceState({_p:0, oai_restore_root:reason||'restore-root'}, '', href);
       history.pushState({_p:1, oai_restore_trap:reason||'restore-trap', oai_restore_guard:1}, '', href);
       history.pushState({_p:2, oai_restore_trap:reason||'restore-trap', oai_restore_guard:2}, '', href);
@@ -225,14 +241,19 @@
   var _viewportBackRearmTimer = 0;
   function rearmBackAfterViewportChange(reason){
     try{
+      var until = backNow() + 14000;
+      window.__OAI_VIEWPORT_BACK_REARM_UNTIL__ = until;
+      try{ sessionStorage.setItem('oai_viewport_back_rearm_until_v304', String(until)); }catch(_e){}
       clearTimeout(_viewportBackRearmTimer);
-      _viewportBackRearmTimer = setTimeout(function(){
-        try{
-          if(visibleRestoreBusy()) armRestorePendingBackTrap(reason || 'viewport-restore', {force:true});
-          else if(appActive()) scheduleAppBackTrap(reason || 'viewport-app');
-          else if(coverVisible()) armCoverBackTrap(reason || 'viewport-cover');
-        }catch(e){ console.warn('[가톨릭길동무]', e); }
-      }, 40);
+      [0, 40, 140, 360, 900, 1800].forEach(function(delay, idx){
+        setTimeout(function(){
+          try{
+            if(visibleRestoreBusy()) armRestorePendingBackTrap(reason || 'viewport-restore', {force:true});
+            else if(appActive()) armAppBackTrap((reason || 'viewport-app') + '-' + delay, {force: idx === 0});
+            else if(coverVisible()) armCoverBackTrap(reason || 'viewport-cover', {force: idx === 0});
+          }catch(e){ console.warn('[가톨릭길동무]', e); }
+        }, delay);
+      });
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
   try{ window.addEventListener('resize', function(){ rearmBackAfterViewportChange('viewport-resize'); }, {passive:true}); }catch(_e){}
