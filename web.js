@@ -191,6 +191,41 @@
     "교구":"#f0f5f0"
   };
   const TRAIL_COLORS = {d:'#1D4ED8', l:'#2A8040'};
+  /* V8-1-14-342: 순례길 지도 확대/축소 체감 개선을 위해 마커 이미지를 캐시하고
+     같은 이미지/지도 상태를 반복 적용하지 않는다. */
+  const TRAIL_MARKER_IMG_CACHE = Object.create(null);
+  function trailMarkerImageCached(key, maker){
+    try{
+      if(TRAIL_MARKER_IMG_CACHE[key]) return TRAIL_MARKER_IMG_CACHE[key];
+      const img = maker();
+      TRAIL_MARKER_IMG_CACHE[key] = img;
+      return img;
+    }catch(_e){ return maker(); }
+  }
+  function trailSetMarkerImage(marker, img, key){
+    if(!marker || !img) return;
+    try{
+      if(key && marker.__trailImgKey === key) return;
+      marker.setImage(img);
+      if(key) marker.__trailImgKey = key;
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }
+  function trailSetMarkerMap(marker, map){
+    if(!marker) return;
+    try{
+      if(marker.__trailMapTarget === map) return;
+      marker.setMap(map);
+      marker.__trailMapTarget = map;
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }
+  function trailMarkerImg(i, big){
+    const d = TRAIL_ITEMS[i];
+    const color = TRAIL_COLORS[d && d.t] || '#1D4ED8';
+    const key = 'trail:'+String(i)+':' + (big?'1':'0');
+    return trailMarkerImageCached(key, function(){
+      return new kakao.maps.MarkerImage(trailMkSvg(color, !!big), new kakao.maps.Size(big?54:42,big?66:52), {offset:new kakao.maps.Point(big?27:21,big?66:52)});
+    });
+  }
   const RETURN_KEY = 'catholic_integrated_return_v2';
   const trailState = {inited:false, map:null, markers:[], selected:-1, myOverlay:null, view:'map', pendingOpenIndex:null, restoreCenter:null, restoreLevel:null, needsHardReset:false, pendingFitBounds:false};
   const webState = {built:false, curCat:'⭐ 즐겨찾기'};
@@ -723,7 +758,7 @@
           trailState.map.setCenter(center);
         }
       }catch(e){ console.warn("[가톨릭길동무]", e); }
-      syncTrailMarkers();
+      if(trailState.markers.length !== TRAIL_ITEMS.length) syncTrailMarkers();
     }, wait);
   }
 
@@ -734,7 +769,7 @@
     trailState.myOverlay = null;
     trailState.markers.forEach(function(marker){ try{ marker.setMap(null); }catch(e){ console.warn("[가톨릭길동무]", e); } });
     trailState.markers = [];
-    trailState.selected = -1;
+    if(trailState.selected >= trailState.markers.length) trailState.selected = -1;
     trailState.inited = false;
     trailState.map = null;
     trailState.pendingFitBounds = false;
@@ -746,7 +781,7 @@
   function fitTrailMapToBounds(){
     if(!(trailState.map && window.kakao && window.kakao.maps)) return;
     try{
-      // V8-1-14-341:
+      // V8-1-14-342:
       // setBounds는 되살리지 않고 중심 이동은 1회만 유지한다.
       // 순례길 첫 화면이 너무 확대되어 보이지 않도록 기본 줌을 한 단계 넓게 둔다.
       if(typeof trailState.map.setLevel === "function") trailState.map.setLevel(13);
@@ -763,20 +798,25 @@
         const marker = new kakao.maps.Marker({
           position:new kakao.maps.LatLng(d.lat,d.lng),
           map:trailState.map,
-          image:new kakao.maps.MarkerImage(trailMkSvg(TRAIL_COLORS[d.t], false), new kakao.maps.Size(42,52), {offset:new kakao.maps.Point(21,52)}),
+          image:trailMarkerImg(i,false),
           zIndex:1
         });
+        marker.__trailMapTarget=trailState.map;
+        marker.__trailImgKey='trail:'+String(i)+':0';
+        marker.__trailZIndex=1;
         kakao.maps.event.addListener(marker, 'click', function(){ trailSelectMarker(i); trailOpenSheet(i); });
         trailState.markers.push(marker);
       });
       return;
     }
     trailState.markers.forEach(function(marker, i){
-      try{ marker.setMap(trailState.map); }catch(e){ console.warn("[가톨릭길동무]", e); }
-      try{ marker.setImage(new kakao.maps.MarkerImage(trailMkSvg(TRAIL_COLORS[TRAIL_ITEMS[i].t], false), new kakao.maps.Size(42,52), {offset:new kakao.maps.Point(21,52)})); }catch(e){ console.warn("[가톨릭길동무]", e); }
-      try{ marker.setZIndex(1); }catch(e){ console.warn("[가톨릭길동무]", e); }
+      trailSetMarkerMap(marker, trailState.map);
+      if(i !== trailState.selected){
+        trailSetMarkerImage(marker, trailMarkerImg(i,false), 'trail:'+String(i)+':0');
+        try{ if(marker.__trailZIndex!==1){ marker.setZIndex(1); marker.__trailZIndex=1; } }catch(e){ console.warn("[가톨릭길동무]", e); }
+      }
     });
-    trailState.selected = -1;
+    if(trailState.selected >= trailState.markers.length) trailState.selected = -1;
   }
 
   function initTrailModule(){
@@ -878,13 +918,13 @@
   function trailSelectMarker(i){
     if(!(trailState.map && window.kakao && window.kakao.maps)) return;
     if(trailState.selected >= 0 && trailState.markers[trailState.selected]){
-      trailState.markers[trailState.selected].setImage(new kakao.maps.MarkerImage(trailMkSvg(TRAIL_COLORS[TRAIL_ITEMS[trailState.selected].t], false), new kakao.maps.Size(42,52), {offset:new kakao.maps.Point(21,52)}));
-      trailState.markers[trailState.selected].setZIndex(1);
+      trailSetMarkerImage(trailState.markers[trailState.selected], trailMarkerImg(trailState.selected,false), 'trail:'+String(trailState.selected)+':0');
+      try{ if(trailState.markers[trailState.selected].__trailZIndex!==1){ trailState.markers[trailState.selected].setZIndex(1); trailState.markers[trailState.selected].__trailZIndex=1; } }catch(e){ console.warn('[가톨릭길동무]', e); }
     }
     trailState.selected = i;
     if(trailState.markers[i]){
-      trailState.markers[i].setImage(new kakao.maps.MarkerImage(trailMkSvg(TRAIL_COLORS[TRAIL_ITEMS[i].t], true), new kakao.maps.Size(54,66), {offset:new kakao.maps.Point(27,66)}));
-      trailState.markers[i].setZIndex(999);
+      trailSetMarkerImage(trailState.markers[i], trailMarkerImg(i,true), 'trail:'+String(i)+':1');
+      try{ if(trailState.markers[i].__trailZIndex!==999){ trailState.markers[i].setZIndex(999); trailState.markers[i].__trailZIndex=999; } }catch(e){ console.warn('[가톨릭길동무]', e); }
     }
   }
 
@@ -918,8 +958,8 @@
     if(!(trailState.map && window.kakao && window.kakao.maps)) return;
     if(trailState.selected >= 0 && trailState.markers[trailState.selected]){
       const idx = trailState.selected;
-      trailState.markers[idx].setImage(new kakao.maps.MarkerImage(trailMkSvg(TRAIL_COLORS[TRAIL_ITEMS[idx].t], false), new kakao.maps.Size(42,52), {offset:new kakao.maps.Point(21,52)}));
-      trailState.markers[idx].setZIndex(1);
+      trailSetMarkerImage(trailState.markers[idx], trailMarkerImg(idx,false), 'trail:'+String(idx)+':0');
+      try{ if(trailState.markers[idx].__trailZIndex!==1){ trailState.markers[idx].setZIndex(1); trailState.markers[idx].__trailZIndex=1; } }catch(e){ console.warn('[가톨릭길동무]', e); }
       trailState.selected = -1;
     }
   };
