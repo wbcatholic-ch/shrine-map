@@ -408,7 +408,7 @@
     }else{
       trailState.pendingFitBounds=false;
       if(opts && opts.foldRestore){
-        // Fold 복귀 때는 순례길 지도를 과하게 확대하지 않고 넓은 기본 줌으로 안정화한다.
+        // V8-1-14-325: Fold 복귀 때 순례길 지도를 과하게 확대하지 않고 넓은 기본 줌으로 안정화한다.
         if(!Number.isFinite(Number(trailState.restoreLevel))) trailState.restoreLevel = 14;
       }
     }
@@ -739,7 +739,7 @@
   function fitTrailMapToBounds(){
     if(!(trailState.map && window.kakao && window.kakao.maps)) return;
     try{
-      // V8-1-14-324:
+      // V8-1-14-325:
       // setBounds는 되살리지 않고 중심 이동은 1회만 유지한다.
       // 순례길 첫 화면이 너무 확대되어 보이지 않도록 기본 줌을 한 단계 넓게 둔다.
       if(typeof trailState.map.setLevel === "function") trailState.map.setLevel(14);
