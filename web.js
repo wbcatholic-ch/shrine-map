@@ -191,7 +191,7 @@
     "교구":"#f0f5f0"
   };
   const TRAIL_COLORS = {d:'#1D4ED8', l:'#2A8040'};
-  /* V8-1-14-343: 순례길 지도 확대/축소 체감 개선을 위해 마커 이미지를 캐시하고
+  /* V8-1-14-344: 순례길 지도 확대/축소 체감 개선을 위해 마커 이미지를 캐시하고
      같은 이미지/지도 상태를 반복 적용하지 않는다. */
   const TRAIL_MARKER_IMG_CACHE = Object.create(null);
   function trailMarkerImageCached(key, maker){
@@ -438,9 +438,8 @@
     initTrailModule();
     trailSetView(trailState.view || 'map');
     if(!restore){
-      relayoutTrailMap(80);
-      relayoutTrailMap(260);
-      relayoutTrailMap(520);
+      relayoutTrailMap(120);
+      relayoutTrailMap(320);
     }
   };
 
@@ -747,15 +746,22 @@
     setTimeout(function(){
       if(!(trailState.map && window.kakao && window.kakao.maps)) return;
       try{
-        const center = trailState.map.getCenter ? trailState.map.getCenter() : null;
-        const level = trailState.map.getLevel ? trailState.map.getLevel() : null;
+        const isFoldViewport = /viewport|resize|fold|orientation|settle|late|final/.test(String(reason || ''));
+        const plain = trailIsPlainMapOpen() && isFoldViewport;
+        const targetCenter = plain ? trailDefaultCenter() : (trailState.map.getCenter ? trailState.map.getCenter() : null);
+        const targetLevel = plain ? 13 : (trailState.map.getLevel ? trailState.map.getLevel() : null);
+        if(targetLevel != null && typeof trailState.map.setLevel === 'function') trailState.map.setLevel(targetLevel);
+        if(targetCenter && typeof trailState.map.setCenter === 'function') trailState.map.setCenter(targetCenter);
         trailState.map.relayout();
-        if(level != null && typeof trailState.map.setLevel === 'function') trailState.map.setLevel(level);
-        if(trailIsPlainMapOpen() && /viewport|resize|fold|orientation|settle|late|final/.test(String(reason || ''))){
-          trailState.map.setLevel(13);
-          trailState.map.setCenter(trailDefaultCenter());
-        }else if(center){
-          trailState.map.setCenter(center);
+        if(targetLevel != null && typeof trailState.map.setLevel === 'function') trailState.map.setLevel(targetLevel);
+        if(targetCenter && typeof trailState.map.setCenter === 'function') trailState.map.setCenter(targetCenter);
+        if(plain){
+          setTimeout(function(){
+            try{
+              trailState.map.setLevel(13);
+              trailState.map.setCenter(trailDefaultCenter());
+            }catch(_e){}
+          }, 80);
         }
       }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(trailState.markers.length !== TRAIL_ITEMS.length) syncTrailMarkers();
@@ -781,7 +787,7 @@
   function fitTrailMapToBounds(){
     if(!(trailState.map && window.kakao && window.kakao.maps)) return;
     try{
-      // V8-1-14-343:
+      // V8-1-14-344:
       // setBounds는 되살리지 않고 중심 이동은 1회만 유지한다.
       // 순례길 첫 화면이 너무 확대되어 보이지 않도록 기본 줌을 한 단계 넓게 둔다.
       if(typeof trailState.map.setLevel === "function") trailState.map.setLevel(13);
@@ -975,7 +981,7 @@
       trailCloseSheet();
       initTrailModule();
       syncTrailMarkers();
-      relayoutTrailMap(30); relayoutTrailMap(180); relayoutTrailMap(360);
+      relayoutTrailMap(60); relayoutTrailMap(220);
     } else {
       trailCloseSheet();
       buildTrailList();
