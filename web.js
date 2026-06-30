@@ -363,7 +363,6 @@
 
   window.openWebView = function(opts){
     const restore = !!(opts && opts.restore);
-    try{ if(window.oaiStoreFoldSurface && !(opts && (opts.restore || opts.foldRestore))) window.oaiStoreFoldSurface({type:'web'}, 'openWebView'); }catch(_e){}
     if(!restore){
       resetWebTransientState();
       webState.curCat = webDefaultCat();
@@ -383,14 +382,6 @@
 
   window.openTrailView = function(opts){
     const restore = !!(opts&&opts.restore);
-    try{
-      if(window.oaiStoreFoldSurface && !(opts && (opts.restore || opts.foldRestore))){
-        var center=null, level=null;
-        try{ if(trailState.map && trailState.map.getCenter){ var c=trailState.map.getCenter(); center={lat:c.getLat(), lng:c.getLng()}; } }catch(_e){}
-        try{ if(trailState.map && trailState.map.getLevel) level=trailState.map.getLevel(); }catch(_e){}
-        window.oaiStoreFoldSurface({type:'trail', view:trailState.view||'map', center:center, level:level}, 'openTrailView');
-      }
-    }catch(_e){}
     const forceRebuild = !!(opts&&(opts.forceRebuild||opts.hardReset));
     if(forceRebuild || trailState.needsHardReset){
       hardResetTrailModule();
@@ -407,10 +398,6 @@
       if(list) list.scrollTop=0;
     }else{
       trailState.pendingFitBounds=false;
-      if(opts && opts.foldRestore){
-        // V8-1-14-325: Fold 복귀 때 순례길 지도를 과하게 확대하지 않고 넓은 기본 줌으로 안정화한다.
-        if(!Number.isFinite(Number(trailState.restoreLevel))) trailState.restoreLevel = 14;
-      }
     }
     enterIntegratedView('trail-view');
     initTrailModule();
@@ -739,10 +726,10 @@
   function fitTrailMapToBounds(){
     if(!(trailState.map && window.kakao && window.kakao.maps)) return;
     try{
-      // V8-1-14-325:
+      // V8-1-14-326:
       // setBounds는 되살리지 않고 중심 이동은 1회만 유지한다.
       // 순례길 첫 화면이 너무 확대되어 보이지 않도록 기본 줌을 한 단계 넓게 둔다.
-      if(typeof trailState.map.setLevel === "function") trailState.map.setLevel(14);
+      if(typeof trailState.map.setLevel === "function") trailState.map.setLevel(13);
       trailState.map.setCenter(new kakao.maps.LatLng(36.10, 127.85));
     }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
@@ -791,17 +778,13 @@
       }
       const container = ig$('trail-map');
       if(!container || !(window.kakao && window.kakao.maps)) return;
-      trailState.map = new kakao.maps.Map(container, { center:new kakao.maps.LatLng(36.10,127.85), level:14 });
+      trailState.map = new kakao.maps.Map(container, { center:new kakao.maps.LatLng(36.10,127.85), level:13 });
       trailState.map.addControl(new kakao.maps.ZoomControl(), kakao.maps.ControlPosition.RIGHT);
       if(trailState.restoreCenter && Number.isFinite(Number(trailState.restoreCenter.lat)) && Number.isFinite(Number(trailState.restoreCenter.lng))){
         try{ trailState.map.setCenter(new kakao.maps.LatLng(Number(trailState.restoreCenter.lat), Number(trailState.restoreCenter.lng))); }catch(e){ console.warn("[가톨릭길동무]", e); }
       }
       if(Number.isFinite(Number(trailState.restoreLevel))){
-        try{
-          var lv = Number(trailState.restoreLevel);
-          if(lv < 13) lv = 14;
-          trailState.map.setLevel(lv);
-        }catch(e){ console.warn("[가톨릭길동무]", e); }
+        try{ trailState.map.setLevel(Number(trailState.restoreLevel)); }catch(e){ console.warn("[가톨릭길동무]", e); }
       }
       trailState.restoreCenter = null;
       trailState.restoreLevel = null;
