@@ -411,9 +411,11 @@ html.oai-internal-no-return-effect #cover > * {
     root.setAttribute('data-oai-layout-profile-key', key);
     root.setAttribute('data-oai-vw', String(raw.w));
     root.setAttribute('data-oai-vh', String(raw.h));
+    if(raw.h > 300 && raw.h < 2000) root.style.setProperty('--cover-vh', (raw.h * 0.01) + 'px');
     root.classList.add(nextClass);
     if(!raw.keyboardLikely) oaiSaveViewportProfile(key, raw, nextClass);
   }
+  try{ window.oaiApplyAndroidScreenClass = applyAndroidScreenClass; }catch(_e){}
   applyAndroidScreenClass('boot');
   /* V8-1-14-331:
      복귀/focus/visible/visualViewport/resize에서 폰 화면 크기와 화면 등급을 다시 계산하지 않는다.
@@ -828,6 +830,25 @@ html.oai-internal-no-return-effect #cover > * {
       settleTimer = setTimeout(function(){ root.classList.remove('oai-cover-resizing'); }, 80);
     }catch(e){}
   }
+  function recalibrateCoverViewport(reason){
+    try{
+      if(isCoverHeightLockedByOverlay()) return;
+      var width = measureWidth();
+      var next = measure();
+      if(!next) return;
+      apply(next, true, width);
+      if(width) baseCoverWidth = width;
+      if(isCoverVisible()){
+        try{
+          var c = document.getElementById('cover');
+          if(c) c.scrollTop = 0;
+          if(window.scrollTo) window.scrollTo(0,0);
+          if(document.scrollingElement) document.scrollingElement.scrollTop = 0;
+          if(document.body) document.body.scrollTop = 0;
+        }catch(_x){}
+      }
+    }catch(_e){}
+  }
   function scheduleSettle(reason){
     clearTimeout(settleTimer);
     var wait = 120;
@@ -844,6 +865,7 @@ html.oai-internal-no-return-effect #cover > * {
     window.addEventListener('load', function(){ afterStableFirstPaint(releaseBooting); }, {once:true});
   }
   window.oaiSettleCoverSize = settleCoverSize;
+  window.oaiRecalibrateCoverViewport = recalibrateCoverViewport;
 })();
 </script>
 <script>

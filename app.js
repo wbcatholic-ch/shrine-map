@@ -736,12 +736,49 @@ function oaiClearExternalNavigationState(opts){
       setTimeout(function(){ try{ document.documentElement.classList.remove('oai-refresh-no-intro'); }catch(_e){} }, 1200);
     }catch(_e){}
   }
+  function captureMainMapView(){
+    try{
+      if(typeof _map === 'undefined' || !_map) return null;
+      return {
+        center: (typeof _map.getCenter === 'function') ? _map.getCenter() : null,
+        level:  (typeof _map.getLevel  === 'function') ? _map.getLevel()  : null
+      };
+    }catch(_e){ return null; }
+  }
+  function restoreMainMapView(view, reason){
+    try{
+      if(!view || typeof _map === 'undefined' || !_map) return;
+      if(view.level != null && typeof _map.setLevel === 'function'){
+        var cur = (typeof _map.getLevel === 'function') ? _map.getLevel() : null;
+        if(cur !== view.level) _map.setLevel(view.level);
+      }
+      if(view.center && typeof _map.setCenter === 'function') _map.setCenter(view.center);
+    }catch(_e){}
+  }
+  function recalibrateFoldViewport(reason){
+    try{
+      if(typeof window.oaiApplyAndroidScreenClass === 'function'){
+        window.oaiApplyAndroidScreenClass((reason || 'viewport') + '-force-remeasure');
+      }
+    }catch(_e){}
+    try{
+      if(typeof window.oaiRecalibrateCoverViewport === 'function'){
+        window.oaiRecalibrateCoverViewport((reason || 'viewport') + '-cover-remeasure');
+      }else if(typeof window.oaiSettleCoverSize === 'function'){
+        window.oaiSettleCoverSize((reason || 'viewport') + '-force');
+      }
+    }catch(_e){}
+  }
   function relayoutCurrentMaps(reason){
+    var mapView = captureMainMapView();
     try{
       if(window._appExiting) return;
       if(!isAppActive()) return;
       if(typeof _map !== 'undefined' && _map && typeof _map.relayout === 'function'){
         _map.relayout();
+        restoreMainMapView(mapView, reason || 'viewport');
+        setTimeout(function(){ restoreMainMapView(mapView, (reason || 'viewport') + '-settle'); }, 40);
+        setTimeout(function(){ restoreMainMapView(mapView, (reason || 'viewport') + '-late'); }, 180);
       }
     }catch(_e){}
     try{
@@ -752,10 +789,13 @@ function oaiClearExternalNavigationState(opts){
     }catch(_e){}
   }
   function settleViewport(reason){
-    markViewportNoIntro(reason || 'viewport');
+    reason = reason || 'viewport';
+    markViewportNoIntro(reason);
+    recalibrateFoldViewport(reason);
+    setTimeout(function(){ recalibrateFoldViewport(reason + '-late'); }, 180);
     clearTimeout(_settleTimer);
-    _settleTimer = setTimeout(function(){ relayoutCurrentMaps(reason || 'viewport-settle'); }, 90);
-    setTimeout(function(){ relayoutCurrentMaps((reason || 'viewport') + '-late'); }, 320);
+    _settleTimer = setTimeout(function(){ relayoutCurrentMaps(reason + '-settle'); }, 120);
+    setTimeout(function(){ relayoutCurrentMaps(reason + '-late'); }, 360);
   }
   function onViewportChange(reason){
     var w=width();

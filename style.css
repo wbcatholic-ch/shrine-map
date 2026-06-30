@@ -371,9 +371,9 @@ html, body {
   padding-top: var(--cover-top-safe);
   padding-bottom: calc(var(--cover-bottom-safe) + var(--cover-note-reserve));
   box-sizing: border-box;
-  height: var(--cover-h);
-  min-height: var(--cover-h);
-  max-height: var(--cover-h);
+  height: auto;
+  min-height: 0;
+  max-height: none;
 }
 
 html.app-active #cover { display: none; }
