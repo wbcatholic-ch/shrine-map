@@ -5908,7 +5908,7 @@ html.oai-cover-revealing::after{
     linear-gradient(to right, #fbf8f1 0%, rgba(251,248,241,.96) 5%, rgba(251,248,241,.60) 13%, rgba(251,248,241,.16) 24%, rgba(251,248,241,0) 36%, rgba(251,248,241,0) 64%, rgba(251,248,241,.16) 76%, rgba(251,248,241,.60) 87%, rgba(251,248,241,.96) 95%, #fbf8f1 100%),
     linear-gradient(to bottom, #fbf8f1 0%, rgba(251,248,241,.90) 6%, rgba(251,248,241,.36) 17%, rgba(251,248,241,0) 30%, rgba(251,248,241,0) 70%, rgba(251,248,241,.36) 83%, rgba(251,248,241,.90) 94%, #fbf8f1 100%),
     radial-gradient(ellipse 96% 88% at 50% 48%, rgba(251,248,241,0) 50%, rgba(251,248,241,.08) 62%, rgba(251,248,241,.34) 76%, rgba(251,248,241,.76) 90%, rgba(251,248,241,1) 100%),
-    url("intro-cross-jesus.jpg?v=V8-1-14-335") !important;
+    url("intro-cross-jesus.jpg?v=V8-1-14-336") !important;
   background-position:center center, center center, center center, center center !important;
   background-size:100% 100%, 100% 100%, 100% 100%, auto 106% !important;
   background-repeat:no-repeat, no-repeat, no-repeat, no-repeat !important;
@@ -6328,7 +6328,7 @@ html.oai-font-global .category-source-note { font-size: calc(11px * var(--app-in
 #app .shrine-visit-detail-action.detail-goodnews{background:#eaf7ff!important;color:#075985!important;border:1.5px solid #7ec8f3!important;}
 #app .shrine-visit-detail-action.detail-kakao{width:0!important;}
 
-/* V8-1-14-335: 인포카드/상세 버튼 색상은 아래 최종 통합 블록 하나만 사용한다. */
+/* V8-1-14-336: 인포카드/상세 버튼 색상은 아래 최종 통합 블록 하나만 사용한다. */
 #app .shrine-visit-detail-info{
   background:linear-gradient(180deg,#fbfdff 0%,#fffaf0 100%)!important;
   border:2px solid #9db7cc!important;
@@ -6340,7 +6340,7 @@ html.oai-font-global .category-source-note { font-size: calc(11px * var(--app-in
   border:1.5px solid #d5b86d!important;
   box-shadow:0 2px 6px rgba(95,69,21,.08)!important;
 }
-/* V8-1-14-335: 상세 버튼 개별 색상 중복 override 제거. */
+/* V8-1-14-336: 상세 버튼 개별 색상 중복 override 제거. */
 .map-loading-icon,
 #diocese-loading .missa-spinner,
 #nearby-body .nearby-distance-spinner{
@@ -6425,7 +6425,7 @@ html.oai-stability-veil[data-oai-refresh-early-veil="1"]::after{
   animation:oaiUnifiedLoadingCrossSpin var(--oai-loading-cross-speed) linear infinite!important;
   transition:none!important;
 }
-/* V8-1-14-335: 외부사이트 진입/복귀 보호창 CSS 단일 기준. JS 흐름은 유지하고, 중복 십자가만 막는다. */
+/* V8-1-14-336: 외부사이트 진입/복귀 보호창 CSS 단일 기준. JS 흐름은 유지하고, 중복 십자가만 막는다. */
 #oai-external-entry-guard{
   position:fixed!important;
   inset:0!important;
@@ -6793,7 +6793,7 @@ html.oai-external-return-freeze.oai-external-return-releasing::after{
   transform:translateY(1px)!important;
 }
 
-/* V8-1-14-335: 인포카드 버튼과 성지 상세정보 버튼의 크기 기준을 한곳에서 확정한다. */
+/* V8-1-14-336: 인포카드 버튼과 성지 상세정보 버튼의 크기 기준을 한곳에서 확정한다. */
 #app #info-card #ic-tel-link,
 #app #info-card #ic-route-btn,
 #app #info-card #ic-hp,
@@ -7100,7 +7100,7 @@ html.oai-font-global .shrine-visit-cards-head .module-bar-sub,
 .shrine-visit-cards-head .module-bar-sub{font-size:11px!important;line-height:1.25!important;color:rgba(255,255,255,.65)!important;}
 #shrine-visit-cards-modal .shrine-visit-cards-head .module-close,
 .shrine-visit-cards-head .module-close{width:var(--oai-std-close-sz)!important;height:var(--oai-std-close-sz)!important;min-width:var(--oai-std-close-sz)!important;flex:0 0 var(--oai-std-close-sz)!important;border-radius:999px!important;background:transparent!important;border:1.5px solid currentColor!important;color:rgba(212,170,106,.9)!important;font-size:28px!important;box-shadow:none!important;}
-/* V8-1-14-335: 순례 스탬프북 탭은 다른 카테고리보다 글자 수가 길어 최종 블록에서만 14px로 낮춘다. */
+/* V8-1-14-336: 순례 스탬프북 탭은 다른 카테고리보다 글자 수가 길어 최종 블록에서만 14px로 낮춘다. */
 #shrine-visit-cards-modal .shrine-visit-cards-tabs,
 .shrine-visit-cards-tabs{
   height:var(--oai-std-tabbar-h)!important;min-height:var(--oai-std-tabbar-h)!important;max-height:var(--oai-std-tabbar-h)!important;
@@ -7123,7 +7123,7 @@ html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-tabs{height:v
 html:not(.ios-device).oai-screen-compact-short #shrine-visit-cards-modal .shrine-visit-cards-tabs button,
 html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-tabs button{height:var(--oai-std-tab-h)!important;min-height:var(--oai-std-tab-h)!important;padding:0 8px!important;}
 
-/* V8-1-14-335: 인트로 종료(revealing) 때 십자가 사진 확대 애니메이션을 재시작하지 않는다.
+/* V8-1-14-336: 인트로 종료(revealing) 때 십자가 사진 확대 애니메이션을 재시작하지 않는다.
    booting 단계에서만 .84→1로 커지고, revealing 단계는 최종 크기에서 opacity만 사라진다. */
 html.oai-cover-revealing::after{
   animation:none!important;
@@ -7136,4 +7136,31 @@ html.oai-cover-revealing::after{
     transform:none!important;
     will-change:opacity!important;
   }
+}
+
+/* V8-1-14-336: Fold 접힘/펼침 중간 프레임 안정화
+   화면 폭이 바뀌는 동안 커버/지도/시트의 transition과 스크롤 보정을 잠시 멈춰
+   화면이 한 번 커지거나 흔들리는 느낌을 줄인다. */
+html.oai-fold-resizing,
+html.oai-fold-resizing body{
+  scroll-behavior:auto!important;
+  overscroll-behavior:none!important;
+}
+html.oai-fold-resizing #cover,
+html.oai-fold-resizing #cover *,
+html.oai-fold-resizing #app,
+html.oai-fold-resizing #app *,
+html.oai-fold-resizing #map-wrap,
+html.oai-fold-resizing #map,
+html.oai-fold-resizing #trail-map,
+html.oai-fold-resizing .sheet,
+html.oai-fold-resizing .trail-panel,
+html.oai-fold-resizing .trail-tabs{
+  transition:none!important;
+  animation:none!important;
+}
+html.oai-fold-resizing #map,
+html.oai-fold-resizing #trail-map{
+  transform:translateZ(0)!important;
+  backface-visibility:hidden!important;
 }
