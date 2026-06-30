@@ -109,6 +109,22 @@
     return document.documentElement.classList.contains('app-active') && !coverVisible();
   }
 
+
+  function armAppBackTrap(reason, opts){
+    try{
+      opts = opts || {};
+      if(!appActive()) return false;
+      var href = location.href.split('#')[0];
+      _href = href;
+      var st = history.state;
+      if(!opts.force && st && st._p === 1 && st.oai_app_trap) return true;
+      history.replaceState({_p:0, oai_app_root:reason||'app-root'}, '', href);
+      history.pushState({_p:1, oai_app_trap:reason||'app-trap'}, '', href);
+      return true;
+    }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
+  }
+  try{ window._oaiArmAppBackTrap = armAppBackTrap; }catch(_e){}
+
   function isRefreshDialogOpen(){
     try{ return !!document.getElementById('oai-refresh-content-dialog'); }catch(e){ return false; }
   }
