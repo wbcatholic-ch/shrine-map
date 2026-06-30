@@ -35,7 +35,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>교구지도</title>
-<link rel="stylesheet" href="css/diocese.css?v=V8-1-14-345">
+<link rel="stylesheet" href="css/diocese.css?v=V8-1-14-346">
 </head>
 <body>
 <header>
@@ -1926,7 +1926,7 @@ window.addEventListener('pageshow',function(){
     // 탭 click 이벤트를 다시 실행하지 않는다. click 이벤트는 지도 초기화, 카드 닫기,
     // 목록 스크롤 재적용을 동반해 복귀 순간에 흔들림처럼 보일 수 있다.
     try{ window.__OAI_DIO_PARENT_RETURNING__ = true; window.__OAI_DIO_EXTERNAL_LEAVING__ = false; }catch(e){}
-    // V8-1-14-345: 관구·교구 iframe은 부모 외부복귀 보호창 위에 별도 복귀 레이어를 얹지 않는다.
+    // V8-1-14-346: 관구·교구 iframe은 부모 외부복귀 보호창 위에 별도 복귀 레이어를 얹지 않는다.
     try{ document.documentElement.classList.remove('oai-dio-external-stabilize','oai-dio-external-return','oai-dio-returning'); }catch(e){}
     var tab=state.tab||'gwangu';
     setReturnTabSilently(tab);
@@ -2036,7 +2036,7 @@ window.addEventListener('pageshow',function(){
     var state=window.getDioceseReturnState(source||'link', extra || {});
     try{ sessionStorage.setItem('oai_diocese_last_return_state', JSON.stringify(state)); localStorage.setItem('oai_diocese_last_return_state', JSON.stringify(state)); }catch(e){}
     if(window.parent && window.parent!==window){
-      // V8-1-14-345:
+      // V8-1-14-346:
       // 첨부 기준 파일(26.06.20) 방식으로 복원한다.
       // 관구·교구 외부 홈페이지는 부모 공통 opener/지연/감시 함수를 거치지 않고 top 이동만 사용한다.
       try{
