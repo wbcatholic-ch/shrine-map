@@ -191,7 +191,7 @@
     "교구":"#f0f5f0"
   };
   const TRAIL_COLORS = {d:'#1D4ED8', l:'#2A8040'};
-  /* V8-1-14-357: 순례길 지도 확대/축소 체감 개선을 위해 마커 이미지를 캐시하고
+  /* V8-1-14-359: 순례길 지도 확대/축소 체감 개선을 위해 마커 이미지를 캐시하고
      같은 이미지/지도 상태를 반복 적용하지 않는다. */
   const TRAIL_MARKER_IMG_CACHE = Object.create(null);
   function trailMarkerImageCached(key, maker){
@@ -743,7 +743,7 @@
   function relayoutTrailMap(delay, reason){
     const wait = Number.isFinite(Number(delay)) ? Number(delay) : 0;
     const isFoldViewport = /viewport|resize|fold|orientation|settle|late|final|android-fold/i.test(String(reason || ''));
-    /* V8-1-14-357 Step 3: 순례길 지도 숨김막 제거. relayout은 공통 Fold 관리자 흐름에서만 보정한다. */
+    /* V8-1-14-359 Step 3: 순례길 지도 숨김막 제거. relayout은 공통 Fold 관리자 흐름에서만 보정한다. */
     setTimeout(function(){
       if(!(trailState.map && window.kakao && window.kakao.maps)){
         return;
@@ -754,7 +754,7 @@
         const currentLevel = (trailState.map.getLevel ? trailState.map.getLevel() : null);
         const targetCenter = plain ? trailDefaultCenter() : currentCenter;
         const targetLevel = plain ? 13 : currentLevel;
-        /* V8-1-14-357:
+        /* V8-1-14-359:
            순례길은 Fold 전환 때 오래된 컨테이너 폭으로 먼저 그려졌다가 중앙으로 이동해 보였다.
            지도는 잠시 숨긴 상태에서 relayout→level→center 순서로 한 번 확정하고 그 뒤에만 보인다. */
         trailState.map.relayout();
@@ -795,7 +795,7 @@
   function fitTrailMapToBounds(){
     if(!(trailState.map && window.kakao && window.kakao.maps)) return;
     try{
-      // V8-1-14-357:
+      // V8-1-14-359:
       // setBounds는 되살리지 않고 중심 이동은 1회만 유지한다.
       // 순례길 첫 화면이 너무 확대되어 보이지 않도록 기본 줌을 한 단계 넓게 둔다.
       if(typeof trailState.map.setLevel === "function") trailState.map.setLevel(13);
