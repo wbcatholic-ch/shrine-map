@@ -191,7 +191,7 @@
     "교구":"#f0f5f0"
   };
   const TRAIL_COLORS = {d:'#1D4ED8', l:'#2A8040'};
-  /* V8-1-14-344: 순례길 지도 확대/축소 체감 개선을 위해 마커 이미지를 캐시하고
+  /* V8-1-14-345: 순례길 지도 확대/축소 체감 개선을 위해 마커 이미지를 캐시하고
      같은 이미지/지도 상태를 반복 적용하지 않는다. */
   const TRAIL_MARKER_IMG_CACHE = Object.create(null);
   function trailMarkerImageCached(key, maker){
@@ -438,8 +438,7 @@
     initTrailModule();
     trailSetView(trailState.view || 'map');
     if(!restore){
-      relayoutTrailMap(120);
-      relayoutTrailMap(320);
+      relayoutTrailMap(120, 'trail-open-stable');
     }
   };
 
@@ -748,20 +747,23 @@
       try{
         const isFoldViewport = /viewport|resize|fold|orientation|settle|late|final/.test(String(reason || ''));
         const plain = trailIsPlainMapOpen() && isFoldViewport;
-        const targetCenter = plain ? trailDefaultCenter() : (trailState.map.getCenter ? trailState.map.getCenter() : null);
-        const targetLevel = plain ? 13 : (trailState.map.getLevel ? trailState.map.getLevel() : null);
-        if(targetLevel != null && typeof trailState.map.setLevel === 'function') trailState.map.setLevel(targetLevel);
-        if(targetCenter && typeof trailState.map.setCenter === 'function') trailState.map.setCenter(targetCenter);
+        const currentCenter = (trailState.map.getCenter ? trailState.map.getCenter() : null);
+        const currentLevel = (trailState.map.getLevel ? trailState.map.getLevel() : null);
+        const targetCenter = plain ? trailDefaultCenter() : currentCenter;
+        const targetLevel = plain ? 13 : currentLevel;
+        // Fold 전환에서는 오래된 컨테이너 크기에서 먼저 중심을 바꾸면 좌/우로 보였다가 중앙으로 이동한다.
+        // 그래서 relayout을 먼저 실행하고, 안정된 컨테이너에서 중심과 줌을 한 번만 되돌린다.
         trailState.map.relayout();
         if(targetLevel != null && typeof trailState.map.setLevel === 'function') trailState.map.setLevel(targetLevel);
         if(targetCenter && typeof trailState.map.setCenter === 'function') trailState.map.setCenter(targetCenter);
         if(plain){
           setTimeout(function(){
             try{
+              trailState.map.relayout();
               trailState.map.setLevel(13);
               trailState.map.setCenter(trailDefaultCenter());
             }catch(_e){}
-          }, 80);
+          }, 120);
         }
       }catch(e){ console.warn("[가톨릭길동무]", e); }
       if(trailState.markers.length !== TRAIL_ITEMS.length) syncTrailMarkers();
@@ -787,7 +789,7 @@
   function fitTrailMapToBounds(){
     if(!(trailState.map && window.kakao && window.kakao.maps)) return;
     try{
-      // V8-1-14-344:
+      // V8-1-14-345:
       // setBounds는 되살리지 않고 중심 이동은 1회만 유지한다.
       // 순례길 첫 화면이 너무 확대되어 보이지 않도록 기본 줌을 한 단계 넓게 둔다.
       if(typeof trailState.map.setLevel === "function") trailState.map.setLevel(13);
@@ -830,7 +832,7 @@
     if(trailState.inited){
       syncTrailMarkers();
       if(trailState.map){
-        relayoutTrailMap(30); relayoutTrailMap(180);
+        relayoutTrailMap(90, 'trail-init-stable');
         if(trailState.pendingFitBounds){
           setTimeout(function(){ fitTrailMapToBounds(); trailState.pendingFitBounds = false; }, 90);
         }
@@ -839,7 +841,7 @@
     }
     ensureKakaoSdk(function(){
       if(trailState.inited){
-        if(trailState.map){ relayoutTrailMap(30); relayoutTrailMap(180); }
+        if(trailState.map){ relayoutTrailMap(90, 'trail-init-stable'); }
         return;
       }
       const container = ig$('trail-map');
@@ -858,8 +860,7 @@
       if(trailState.pendingFitBounds){
         setTimeout(function(){ fitTrailMapToBounds(); trailState.pendingFitBounds = false; }, 80);
       }
-      relayoutTrailMap(60);
-      relayoutTrailMap(220);
+      relayoutTrailMap(90, 'trail-map-open-stable');
       kakao.maps.event.addListener(trailState.map,'click', trailCloseSheet);
       trailState.inited = true;
       if(Number.isInteger(trailState.pendingOpenIndex) && TRAIL_ITEMS[trailState.pendingOpenIndex]){
@@ -981,7 +982,7 @@
       trailCloseSheet();
       initTrailModule();
       syncTrailMarkers();
-      relayoutTrailMap(60); relayoutTrailMap(220);
+      relayoutTrailMap(90, 'trail-set-view-stable');
     } else {
       trailCloseSheet();
       buildTrailList();
