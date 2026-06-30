@@ -694,14 +694,34 @@
     return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(s);
   }
 
-  function relayoutTrailMap(delay){
+  function trailIsPlainMapOpen(){
+    try{
+      var viewOpen = ig$('trail-view') && ig$('trail-view').classList.contains('open');
+      var mapOn = ig$('trail-panel-map') && ig$('trail-panel-map').classList.contains('on');
+      var sheetOpen = ig$('trail-sheet') && ig$('trail-sheet').classList.contains('open');
+      return !!(viewOpen && mapOn && !sheetOpen && trailState.selected < 0 && !trailState.myOverlay);
+    }catch(_e){ return false; }
+  }
+
+  function trailDefaultCenter(){
+    return new kakao.maps.LatLng(36.10, 127.85);
+  }
+
+  function relayoutTrailMap(delay, reason){
     const wait = Number.isFinite(Number(delay)) ? Number(delay) : 0;
     setTimeout(function(){
       if(!(trailState.map && window.kakao && window.kakao.maps)) return;
       try{
         const center = trailState.map.getCenter ? trailState.map.getCenter() : null;
+        const level = trailState.map.getLevel ? trailState.map.getLevel() : null;
         trailState.map.relayout();
-        if(center) trailState.map.setCenter(center);
+        if(level != null && typeof trailState.map.setLevel === 'function') trailState.map.setLevel(level);
+        if(trailIsPlainMapOpen() && /viewport|resize|fold|orientation|settle|late|final/.test(String(reason || ''))){
+          trailState.map.setLevel(13);
+          trailState.map.setCenter(trailDefaultCenter());
+        }else if(center){
+          trailState.map.setCenter(center);
+        }
       }catch(e){ console.warn("[가톨릭길동무]", e); }
       syncTrailMarkers();
     }, wait);
@@ -726,11 +746,11 @@
   function fitTrailMapToBounds(){
     if(!(trailState.map && window.kakao && window.kakao.maps)) return;
     try{
-      // V8-1-14-334:
+      // V8-1-14-335:
       // setBounds는 되살리지 않고 중심 이동은 1회만 유지한다.
       // 순례길 첫 화면이 너무 확대되어 보이지 않도록 기본 줌을 한 단계 넓게 둔다.
       if(typeof trailState.map.setLevel === "function") trailState.map.setLevel(13);
-      trailState.map.setCenter(new kakao.maps.LatLng(36.10, 127.85));
+      trailState.map.setCenter(trailDefaultCenter());
     }catch(e){ console.warn("[가톨릭길동무]", e); }
   }
 
@@ -778,7 +798,7 @@
       }
       const container = ig$('trail-map');
       if(!container || !(window.kakao && window.kakao.maps)) return;
-      trailState.map = new kakao.maps.Map(container, { center:new kakao.maps.LatLng(36.10,127.85), level:13 });
+      trailState.map = new kakao.maps.Map(container, { center:trailDefaultCenter(), level:13 });
       trailState.map.addControl(new kakao.maps.ZoomControl(), kakao.maps.ControlPosition.RIGHT);
       if(trailState.restoreCenter && Number.isFinite(Number(trailState.restoreCenter.lat)) && Number.isFinite(Number(trailState.restoreCenter.lng))){
         try{ trailState.map.setCenter(new kakao.maps.LatLng(Number(trailState.restoreCenter.lat), Number(trailState.restoreCenter.lng))); }catch(e){ console.warn("[가톨릭길동무]", e); }
