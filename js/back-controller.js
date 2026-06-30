@@ -26,6 +26,26 @@
   }
   try{ window._oaiArmCoverBackTrap = armCoverBackTrap; }catch(_e){}
 
+
+  function armAppBackTrap(reason, opts){
+    try{
+      opts = opts || {};
+      if(!appActive()) return false;
+      if(coverVisible()) return false;
+      var href = location.href.split('#')[0];
+      _href = href;
+      var st = history.state;
+      if(!opts.force && st && st._p === 1 && st.oai_app_trap) return true;
+      history.replaceState({_p:0, oai_app_root:reason||'app-root'}, '', href);
+      history.pushState({_p:1, oai_app_trap:reason||'app-trap'}, '', href);
+      return true;
+    }catch(e){
+      console.warn("[가톨릭길동무]", e);
+      return false;
+    }
+  }
+  try{ window._oaiArmAppBackTrap = armAppBackTrap; }catch(_e){}
+
   try{
     var refreshReason = '';
     try{
@@ -108,22 +128,6 @@
     try{ if(typeof window._isAppScreenActive === 'function') return window._isAppScreenActive(); }catch(e){}
     return document.documentElement.classList.contains('app-active') && !coverVisible();
   }
-
-
-  function armAppBackTrap(reason, opts){
-    try{
-      opts = opts || {};
-      if(!appActive()) return false;
-      var href = location.href.split('#')[0];
-      _href = href;
-      var st = history.state;
-      if(!opts.force && st && st._p === 1 && st.oai_app_trap) return true;
-      history.replaceState({_p:0, oai_app_root:reason||'app-root'}, '', href);
-      history.pushState({_p:1, oai_app_trap:reason||'app-trap'}, '', href);
-      return true;
-    }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
-  }
-  try{ window._oaiArmAppBackTrap = armAppBackTrap; }catch(_e){}
 
   function isRefreshDialogOpen(){
     try{ return !!document.getElementById('oai-refresh-content-dialog'); }catch(e){ return false; }
@@ -494,7 +498,7 @@
       if(st && st._p === 1) return;  // 트랩 유지 중이면 스킵
       try{ if(window.oaiReturnConductorBusy && window.oaiReturnConductorBusy(['cover-back','passive'])) return; }catch(_e){}
       if(!appActive()) armCoverBackTrap('pageshow-cover');
-      else { history.replaceState({_p:0}, '', _href); history.pushState({_p:1}, '', _href); }
+      else { armAppBackTrap('pageshow-app', {force:true}); }
     }catch(e){ console.warn("[가톨릭길동무]", e); }
   }, true);
 
