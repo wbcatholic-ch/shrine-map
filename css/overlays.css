@@ -79,6 +79,8 @@ html.pr-external-guide-active.oai-stability-veil::after {
   display: none !important;
 }
 
+/* V8-1-14-357 Step 5: route choice modal CSS consolidated.
+   The duplicated button size/border/color overrides were merged into this single block. */
 #route-choice-modal{
   position:fixed;
   inset:0;
@@ -129,71 +131,45 @@ html.pr-external-guide-active.oai-stability-veil::after {
   grid-template-columns:1fr 1fr;
   gap:10px;
 }
-.route-choice-btn{
+#route-choice-modal .route-choice-btn{
   width:100%;
-  min-height:58px;
+  min-height:62px;
   padding:0 16px;
   border-radius:14px;
-  border:2px solid transparent;
-  font-size:15px;
+  border:2.5px solid transparent;
+  box-sizing:border-box;
+  font-size:16px;
   font-weight:900;
   font-family:inherit;
   letter-spacing:-.04em;
   line-height:1.15;
   touch-action:manipulation;
+  box-shadow:none;
 }
-.route-choice-btn.start{background:#FDE8E5;color:#9F1D18;border-color:#D24B43;box-shadow:none;order:1;}
-.route-choice-btn.end{background:#E8F2FF;color:#135BA1;border-color:#2D7DD2;box-shadow:none;order:2;}
-.route-choice-btn.cancel{background:#EAF7F0;color:#167448;border-color:#35A86B;box-shadow:none;order:3;grid-column:1 / -1;}
-.route-choice-btn.keep{background:#EAF7F0;color:#167448;border-color:#35A86B;box-shadow:none;}
-.route-choice-btn.danger{background:#FDE8E5;color:#9F1D18;border-color:#D24B43;box-shadow:none;}
-@media(max-width:420px){
-  .route-choice-panel{width:calc(100vw - 36px);padding:18px 14px 16px;}
-  .route-choice-btn{min-height:56px;font-size:14.5px;}
+#route-choice-modal .route-choice-btn.start{order:1;}
+#route-choice-modal .route-choice-btn.end{order:2;}
+#route-choice-modal .route-choice-btn.cancel{order:3;grid-column:1 / -1;}
+#route-choice-modal .route-choice-btn.start,
+#route-choice-modal .route-choice-btn.danger{
+  background:linear-gradient(180deg,#fff0ed 0%,#fbd5cf 100%);
+  color:#8f1a16;
+  border-color:#bf2f28;
 }
-
-.route-choice-btn{
-  min-height:62px!important;
-  font-size:16px!important;
-  font-weight:900!important;
-  border-width:2.5px!important;
+#route-choice-modal .route-choice-btn.end{
+  background:linear-gradient(180deg,#eef5ff 0%,#d5e5f8 100%);
+  color:#1f4f8e;
+  border-color:#2f69bd;
 }
-.route-choice-btn.start{border-color:#B91C1C!important;color:#991B1B!important;}
-.route-choice-btn.end{border-color:#1D4ED8!important;color:#1E40AF!important;}
-.route-choice-btn.cancel{border-color:#15803D!important;color:#166534!important;}
-.route-choice-btn.keep{border-color:#15803D!important;color:#166534!important;}
-.route-choice-btn.danger{border-color:#B91C1C!important;color:#991B1B!important;}
+#route-choice-modal .route-choice-btn.cancel,
+#route-choice-modal .route-choice-btn.keep{
+  background:linear-gradient(180deg,#edf9f1 0%,#d2eedc 100%);
+  color:#12633b;
+  border-color:#269457;
+}
 @media(max-width:520px){
-  .route-choice-btn{min-height:60px!important;font-size:15.5px!important;border-width:2.5px!important;}
+  .route-choice-panel{width:calc(100vw - 36px);padding:18px 14px 16px;}
+  #route-choice-modal .route-choice-btn{min-height:60px;font-size:15.5px;}
 }
 html:not(.ios-device) .guide-modal{padding-bottom:calc(14px + var(--oai-android-bottom-gap, 10px))!important;}
 html:not(.ios-device) .modal-panel,
 html:not(.ios-device) .guide-panel{max-height:calc(100vh - 96px - var(--oai-android-bottom-gap, 10px))!important;}
-
-#route-choice-modal .route-choice-btn{
-  border-width:2.5px!important;
-  box-sizing:border-box!important;
-}
-
-#route-choice-modal .route-choice-btn{
-  border-width:2.5px!important;
-  box-sizing:border-box!important;
-  font-weight:900!important;
-}
-#route-choice-modal .route-choice-btn.start,
-#route-choice-modal .route-choice-btn.danger{
-  background:linear-gradient(180deg,#fff0ed 0%,#fbd5cf 100%)!important;
-  color:#8f1a16!important;
-  border-color:#bf2f28!important;
-}
-#route-choice-modal .route-choice-btn.end{
-  background:linear-gradient(180deg,#eef5ff 0%,#d5e5f8 100%)!important;
-  color:#1f4f8e!important;
-  border-color:#2f69bd!important;
-}
-#route-choice-modal .route-choice-btn.cancel,
-#route-choice-modal .route-choice-btn.keep{
-  background:linear-gradient(180deg,#edf9f1 0%,#d2eedc 100%)!important;
-  color:#12633b!important;
-  border-color:#269457!important;
-}

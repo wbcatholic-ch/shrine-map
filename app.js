@@ -60,7 +60,7 @@ function oaiPrimeExternalDestination(url){
 try{ window.oaiPrimeExternalDestination = oaiPrimeExternalDestination; }catch(e){ console.warn('[가톨릭길동무]', e); }
 
 function oaiShowExternalEntryGuard(kind){
-  // V8-1-14-354:
+  // V8-1-14-357:
   // Android 233/239 외부 브라우저 위임 전후에 쓰는 단일 보호창. entry/return 모두 같은 DOM 하나만 사용한다.
   try{
     var body = document.body;
@@ -201,7 +201,7 @@ function markExternalReturnStabilize(kind){
     sessionStorage.removeItem('oai_external_browser_return_pending');
     sessionStorage.removeItem('oai_external_browser_hidden');
     document.documentElement.classList.add('oai-external-leaving');
-    // V8-1-14-354: 외부 이동 전 보호창은 #oai-external-entry-guard로 유지하고, 숨김 복귀 때도 같은 보호창을 이어서 사용한다.
+    // V8-1-14-357: 외부 이동 전 보호창은 #oai-external-entry-guard로 유지하고, 숨김 복귀 때도 같은 보호창을 이어서 사용한다.
   }catch(e){ console.warn("[가톨릭길동무]", e); }
 }
 try{ window.markExternalReturnStabilize = markExternalReturnStabilize; }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -278,7 +278,7 @@ function oaiReleaseStabilityVeil(){
     }
     clearTimeout(window.__oaiStabilityVeilTimer);
     if(root.classList.contains('oai-external-return-freeze') && !root.classList.contains('oai-stability-veil')){
-      // V8-1-14-354:
+      // V8-1-14-357:
       // 외부사이트 복귀 보호창은 유지하되, 마지막 제거 순간을 부드럽게 처리해 첫 화면 깜빡임을 줄인다.
       if(!root.classList.contains('oai-external-return-releasing')){
         root.classList.add('oai-external-return-releasing');
@@ -474,38 +474,38 @@ function oaiClearExternalNavigationState(opts){
 
 (function(){
   'use strict';
-  if(window.__OAI_IDLE_RESTART_GUARD__) return;
+  if(window.__OAI_BACKGROUND_RETURN_MANAGER_V356__) return;
+  window.__OAI_BACKGROUND_RETURN_MANAGER_V356__ = true;
   window.__OAI_IDLE_RESTART_GUARD__ = true;
 
-  /* V8-1-14-354:
-     백그라운드 복귀는 visibility hidden에서 시작된 현재 세션 토큰만 신뢰한다.
-     복귀 첫 프레임에 원화면이 보이지 않도록 숨김 순간에 단순 아이보리 막을 미리 올리고,
-     30분 미만은 커버 이동 경로를 완전히 차단한다. */
-  var MEDIUM_BG_RETURN_MS = 10 * 60 * 1000;
+  /* V8-1-14-357 Step 4:
+     백그라운드 복귀 판단을 PWA 한 곳으로 통일한다.
+     Android는 elapsed/forceCover 신호만 전달하고, 실제 cover 이동은 여기서만 결정한다.
+     30분 미만 복귀는 즉시 원화면 유지, 30분 이상 복귀만 아이보리 막 아래에서 cover로 정리한다. */
   var COVER_BG_RETURN_MS = 30 * 60 * 1000;
-  var BG_KEY = 'oai_home_backgrounded_at';
-  var BG_TOKEN_KEY = 'oai_home_background_token_v345';
-  var BG_SHORT_RETURN_UNTIL_KEY = 'oai_short_background_return_until_v345';
-  var OLD_HIDDEN_AT_KEY = 'oai_pwa_backgrounded_at_v356';
-  var OLD_RESTART_LOCK_KEY = 'oai_pwa_idle_restart_lock_v356';
-  var _bgReturnTimer = 0;
-  var _bgVeilRemoveTimer = 0;
-  var _bgRuntimeStarted = 0;
-  var _bgRuntimeToken = '';
-  var _bgRuntimeArmed = false;
-  var _bgReturnDecisionId = 0;
+  var BG_KEY = 'oai_bg_started_at_v356';
+  var BG_TOKEN_KEY = 'oai_bg_token_v356';
+  var SHORT_SUPPRESS_KEY = 'oai_short_background_return_until_v356';
+  var _bgStarted = 0;
+  var _bgToken = '';
+  var _bgArmed = false;
+  var _returnTimer = 0;
+  var _veilTimer = 0;
+  var _decisionSeq = 0;
 
   function now(){ return Date.now ? Date.now() : new Date().getTime(); }
 
-  function clearLegacyBackgroundReturnState(opts){
-    opts = opts || {};
+  function removeKey(store, key){ try{ store.removeItem(key); }catch(_e){} }
+  function clearLegacyBackgroundReturnState(){
     try{
-      localStorage.removeItem(OLD_HIDDEN_AT_KEY);
-      localStorage.removeItem(OLD_HIDDEN_AT_KEY + '_reason');
-      sessionStorage.removeItem(OLD_RESTART_LOCK_KEY);
-      sessionStorage.removeItem('oai_resume_return_veil_pending');
-      sessionStorage.removeItem('oai_background_intro_return_until');
-      sessionStorage.removeItem('oai_long_background_early_intro_consumed');
+      var ss = sessionStorage, ls = localStorage;
+      [
+        'oai_home_backgrounded_at','oai_home_background_token_v345','oai_home_background_token_v344','oai_home_background_token_v340',
+        'oai_pwa_backgrounded_at_v356','oai_pwa_idle_restart_lock_v356','oai_resume_return_veil_pending',
+        'oai_background_intro_return_until','oai_long_background_early_intro_consumed',
+        'oai_background_cover_reset_requested','oai_hidden_at','oai_hidden_at_v292','oai_hidden_at_v293',
+        'oai_short_background_return_until_v345','oai_short_background_return_until_v344','oai_short_background_return_until_v340'
+      ].forEach(function(k){ removeKey(ss,k); removeKey(ls,k); });
       var root = document.documentElement;
       if(root && root.classList){
         root.classList.remove(
@@ -524,6 +524,8 @@ function oaiClearExternalNavigationState(opts){
       window.__OAI_BACKGROUND_RESUME_FREEZE_REASON__ = '';
       window.__OAI_RETURN_COORDINATOR_UNTIL__ = 0;
       window.__OAI_RETURN_COORDINATOR_REASON__ = '';
+      window.__OAI_ANDROID_NATIVE_SHORT_RESUME_UNTIL__ = 0;
+      window.__OAI_ANDROID_NATIVE_FORCE_COVER_UNTIL = 0;
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
 
@@ -533,245 +535,191 @@ function oaiClearExternalNavigationState(opts){
   }catch(_e){}
 
   function clearBgStamp(){
-    _bgRuntimeStarted = 0;
-    _bgRuntimeToken = '';
-    _bgRuntimeArmed = false;
+    _bgStarted = 0;
+    _bgToken = '';
+    _bgArmed = false;
     try{
       sessionStorage.removeItem(BG_KEY);
       sessionStorage.removeItem(BG_TOKEN_KEY);
+      sessionStorage.removeItem('oai_home_backgrounded_at');
+      sessionStorage.removeItem('oai_home_background_token_v345');
+      sessionStorage.removeItem('oai_home_background_token_v344');
       sessionStorage.removeItem('oai_home_background_token_v340');
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
 
-  function readFreshRuntimeBackground(){
+  function readRuntimeBackground(){
     try{
+      if(!_bgArmed || !_bgStarted || !_bgToken) return null;
       var stored = parseInt(sessionStorage.getItem(BG_KEY) || '0', 10) || 0;
       var storedToken = sessionStorage.getItem(BG_TOKEN_KEY) || '';
-      if(!_bgRuntimeArmed || !_bgRuntimeStarted || !_bgRuntimeToken) return null;
-      if(!stored || !storedToken) return null;
-      if(stored !== _bgRuntimeStarted || storedToken !== _bgRuntimeToken) return null;
-      return {started: stored, token: storedToken};
+      if(stored !== _bgStarted || storedToken !== _bgToken) return null;
+      return {started: stored, token: storedToken, elapsed: Math.max(0, now() - stored)};
     }catch(_e){ return null; }
   }
 
-  function armShortBackgroundReturnSuppress(reason){
+  function armShortSuppress(){
     try{
-      var until = now() + 8000;
+      var until = now() + 12000;
       window.__OAI_SHORT_BACKGROUND_RETURN_UNTIL__ = until;
-      sessionStorage.setItem(BG_SHORT_RETURN_UNTIL_KEY, String(until));
+      sessionStorage.setItem(SHORT_SUPPRESS_KEY, String(until));
     }catch(_e){}
-  }
-
-  function isShortBackgroundReturnSuppressed(){
-    try{
-      var until = Number(window.__OAI_SHORT_BACKGROUND_RETURN_UNTIL__ || sessionStorage.getItem(BG_SHORT_RETURN_UNTIL_KEY) || 0) || 0;
-      if(until && now() < until) return true;
-      if(until){
-        window.__OAI_SHORT_BACKGROUND_RETURN_UNTIL__ = 0;
-        sessionStorage.removeItem(BG_SHORT_RETURN_UNTIL_KEY);
-      }
-    }catch(_e){}
-    return false;
-  }
-
-  function isAndroidNativeShortResume(){
-    try{
-      var until = Number(window.__OAI_ANDROID_NATIVE_SHORT_RESUME_UNTIL__ || 0) || 0;
-      if(until && now() < until) return true;
-      if(until) window.__OAI_ANDROID_NATIVE_SHORT_RESUME_UNTIL__ = 0;
-    }catch(_e){}
-    return false;
-  }
-
-  function cancelForAndroidNativeShortResume(reason){
-    if(!isAndroidNativeShortResume()) return false;
-    try{ armShortBackgroundReturnSuppress('android-native-short-' + String(reason || 'resume')); }catch(_e){}
-    cancelPendingBackgroundReturn('android-native-short-resume');
-    return true;
   }
 
   function isAppScreenActive(){
-    try{ return document.documentElement.classList.contains('app-active'); }
-    catch(e){ return false; }
+    try{ return document.documentElement.classList.contains('app-active'); }catch(_e){ return false; }
   }
-
   function isCoverScreenVisible(){
     try{
-      var root = document.documentElement;
       var cover = document.getElementById('cover');
-      return !!(cover && root && !root.classList.contains('app-active') && cover.style.display !== 'none');
-    }catch(e){ return false; }
+      return !!(cover && !document.documentElement.classList.contains('app-active') && cover.style.display !== 'none');
+    }catch(_e){ return false; }
   }
-
-  function isReturnableScreenActive(){
-    return isAppScreenActive() || isCoverScreenVisible();
-  }
-
+  function isReturnableScreenActive(){ return isAppScreenActive() || isCoverScreenVisible(); }
   function isExternalReturnContext(){
     try{
       return sessionStorage.getItem('oai_external_nav_pending') === '1' ||
              sessionStorage.getItem('oai_external_nav_pagehide') === '1' ||
              sessionStorage.getItem('oai_external_return_expected') === '1' ||
              sessionStorage.getItem('oai_my_faith_external_open') === '1';
-    }catch(e){ return false; }
+    }catch(_e){ return false; }
   }
 
-  function ensureSimpleBackgroundVeil(showNow){
+  function ensureLongReturnVeil(){
     try{
-      var id = 'oai-background-return-photo-veil';
-      var old = document.getElementById(id);
-      if(!document.getElementById('oai-background-return-photo-veil-style')){
+      var id = 'oai-background-return-veil';
+      if(!document.getElementById('oai-background-return-veil-style')){
         var st = document.createElement('style');
-        st.id = 'oai-background-return-photo-veil-style';
-        st.textContent = '\n'
-          + '#oai-background-return-photo-veil{position:fixed;inset:0;z-index:2147482498;background:#fbf8f1;opacity:0;transition:opacity .10s ease;pointer-events:none;display:block;visibility:visible;contain:strict;}\n'
-          + '#oai-background-return-photo-veil.oai-show{opacity:1;}\n'
-          + '#oai-background-return-photo-veil .oai-bg-photo{display:none!important;}\n';
+        st.id = 'oai-background-return-veil-style';
+        st.textContent = '#oai-background-return-veil{position:fixed;inset:0;z-index:2147482498;background:#fbf8f1;opacity:0;transition:opacity .08s ease;pointer-events:none;display:block;visibility:visible;contain:strict;}#oai-background-return-veil.oai-show{opacity:1;}';
         (document.head || document.documentElement).appendChild(st);
       }
-      var veil = old;
+      var veil = document.getElementById(id);
       if(!veil){
         veil = document.createElement('div');
         veil.id = id;
         veil.setAttribute('aria-hidden','true');
         (document.body || document.documentElement).appendChild(veil);
       }
-      if(showNow) veil.classList.add('oai-show');
+      veil.classList.add('oai-show');
       return veil;
     }catch(e){ console.warn('[가톨릭길동무]', e); return null; }
   }
 
-  function removeSimpleBackgroundVeil(delay){
-    clearTimeout(_bgVeilRemoveTimer);
-    var veil = null;
-    try{ veil = document.getElementById('oai-background-return-photo-veil'); }catch(_e){}
-    if(!veil){ clearLegacyBackgroundReturnState(); return; }
-    try{ veil.classList.remove('oai-show'); }catch(_e){}
-    _bgVeilRemoveTimer = setTimeout(function(){
-      try{ if(veil && veil.parentNode) veil.parentNode.removeChild(veil); }catch(_e){}
+  function removeLongReturnVeil(delay){
+    clearTimeout(_veilTimer);
+    _veilTimer = setTimeout(function(){
+      try{
+        var veil = document.getElementById('oai-background-return-veil');
+        if(veil){
+          veil.classList.remove('oai-show');
+          setTimeout(function(){ try{ if(veil && veil.parentNode) veil.parentNode.removeChild(veil); }catch(_e){} }, 90);
+        }
+        var old = document.getElementById('oai-background-return-photo-veil');
+        if(old && old.parentNode) old.parentNode.removeChild(old);
+      }catch(_e){}
       clearLegacyBackgroundReturnState();
-    }, Number.isFinite(Number(delay)) ? Number(delay) : 120);
+    }, Number.isFinite(Number(delay)) ? Number(delay) : 80);
   }
 
-  function applyLongBackgroundCoverNow(started, token, reason){
-    try{
-      var fresh = readFreshRuntimeBackground();
-      if(!fresh || fresh.started !== started || fresh.token !== token) return false;
-      var elapsed = now() - started;
-      if(elapsed < COVER_BG_RETURN_MS) return false;
-      if(isShortBackgroundReturnSuppressed()) return false;
-      if(!isReturnableScreenActive()) return false;
-      if(typeof goToCover !== 'function') return false;
-      goToCover();
-      return true;
-    }catch(_e){ return false; }
-  }
-
-  function cancelPendingBackgroundReturn(reason, keepVeil){
-    try{ clearTimeout(_bgReturnTimer); }catch(_e){}
+  function cancelBackgroundReturn(){
+    clearTimeout(_returnTimer);
     clearBgStamp();
-    if(!keepVeil) removeSimpleBackgroundVeil(80);
+    removeLongReturnVeil(0);
   }
 
   function markBackgrounded(reason){
     try{
-      clearTimeout(_bgReturnTimer);
-      clearTimeout(_bgVeilRemoveTimer);
+      clearTimeout(_returnTimer);
       if(document.visibilityState !== 'hidden') return;
-      if(isReturnableScreenActive() && !isExternalReturnContext()){
-        try{ if(window.oaiSaveResumeScreenState) window.oaiSaveResumeScreenState('background-hidden'); }catch(_e){}
-        var t = now();
-        var token = String(t) + '-' + Math.random().toString(36).slice(2,8);
-        _bgRuntimeStarted = t;
-        _bgRuntimeToken = token;
-        _bgRuntimeArmed = true;
-        sessionStorage.setItem(BG_KEY, String(t));
-        sessionStorage.setItem(BG_TOKEN_KEY, token);
-        /* V8-1-14-354: 짧은 백그라운드 복귀 때 아이보리 막이 두 번 깜빡이는 것을 막기 위해
-           숨김 순간에는 막을 올리지 않는다. 30분 이상 장기 복귀일 때만 복귀 판단 직후 막을 사용한다. */
-      }else{
-        clearBgStamp();
-        removeSimpleBackgroundVeil(60);
+      if(!isReturnableScreenActive() || isExternalReturnContext()){
+        cancelBackgroundReturn();
+        return;
       }
+      try{ if(window.oaiSaveResumeScreenState) window.oaiSaveResumeScreenState('background-hidden'); }catch(_e){}
+      var t = now();
+      var token = String(t) + '-' + Math.random().toString(36).slice(2, 8);
+      _bgStarted = t;
+      _bgToken = token;
+      _bgArmed = true;
+      sessionStorage.setItem(BG_KEY, String(t));
+      sessionStorage.setItem(BG_TOKEN_KEY, token);
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
 
-  function decideBackgroundReturn(reason, decisionId, expectedStarted, expectedToken){
+  function applyCoverForLongReturn(reason){
     try{
-      if(cancelForAndroidNativeShortResume(reason || 'decide')) return;
-      if(document.visibilityState === 'hidden') return;
-      if(decisionId !== _bgReturnDecisionId) return;
-      var fresh = readFreshRuntimeBackground();
-      if(!fresh){ cancelPendingBackgroundReturn('stale-background-stamp'); return; }
-      if(expectedStarted && fresh.started !== expectedStarted) return;
-      if(expectedToken && fresh.token !== expectedToken) return;
-      if(isExternalReturnContext()){ cancelPendingBackgroundReturn('external-return'); return; }
-      var elapsed = now() - fresh.started;
-      if(elapsed < COVER_BG_RETURN_MS){
-        armShortBackgroundReturnSuppress(reason || 'short-return');
-        clearBgStamp();
-        removeSimpleBackgroundVeil(elapsed < MEDIUM_BG_RETURN_MS ? 70 : 140);
-        return;
-      }
-      if(!isReturnableScreenActive()){
-        cancelPendingBackgroundReturn('not-returnable');
-        return;
-      }
-      ensureSimpleBackgroundVeil(true);
-      applyLongBackgroundCoverNow(fresh.started, fresh.token, 'long-background-' + String(reason || 'return'));
+      if(!isReturnableScreenActive()) { cancelBackgroundReturn(); return; }
+      if(isExternalReturnContext()) { cancelBackgroundReturn(); return; }
+      ensureLongReturnVeil();
       clearBgStamp();
-      removeSimpleBackgroundVeil(160);
-    }catch(e){ console.warn('[가톨릭길동무]', e); cancelPendingBackgroundReturn('error'); }
+      if(typeof goToCover === 'function') goToCover();
+      removeLongReturnVeil(140);
+    }catch(e){ console.warn('[가톨릭길동무]', e); cancelBackgroundReturn(); }
   }
 
-  function scheduleBackgroundReturn(reason){
+  function keepOriginalForShortReturn(reason){
     try{
-      if(cancelForAndroidNativeShortResume(reason || 'schedule')) return;
+      armShortSuppress();
+      clearBgStamp();
+      removeLongReturnVeil(0);
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }
+
+  function decideReturn(reason, nativeElapsed, nativeForceCover, seq){
+    try{
       if(document.visibilityState === 'hidden') return;
-      var fresh = readFreshRuntimeBackground();
-      if(!fresh){
-        removeSimpleBackgroundVeil(60);
-        clearBgStamp();
-        return;
+      if(seq && seq !== _decisionSeq) return;
+      if(isExternalReturnContext()) { cancelBackgroundReturn(); return; }
+      var elapsed = Number.isFinite(Number(nativeElapsed)) ? Math.max(0, Number(nativeElapsed)) : -1;
+      if(elapsed < 0){
+        var bg = readRuntimeBackground();
+        if(!bg){ removeLongReturnVeil(0); clearBgStamp(); return; }
+        elapsed = bg.elapsed;
       }
-      clearTimeout(_bgReturnTimer);
-      var decisionId = ++_bgReturnDecisionId;
-      var elapsed = now() - fresh.started;
-      if(elapsed < COVER_BG_RETURN_MS){
-        _bgReturnTimer = setTimeout(function(){ decideBackgroundReturn(reason || 'return', decisionId, fresh.started, fresh.token); }, elapsed < MEDIUM_BG_RETURN_MS ? 35 : 90);
+      if(nativeForceCover || elapsed >= COVER_BG_RETURN_MS){
+        applyCoverForLongReturn(reason || 'long-return');
       }else{
-        decideBackgroundReturn(reason || 'return', decisionId, fresh.started, fresh.token);
+        keepOriginalForShortReturn(reason || 'short-return');
       }
+    }catch(e){ console.warn('[가톨릭길동무]', e); cancelBackgroundReturn(); }
+  }
+
+  function scheduleReturn(reason){
+    try{
+      if(document.visibilityState === 'hidden') return;
+      clearTimeout(_returnTimer);
+      var seq = ++_decisionSeq;
+      _returnTimer = setTimeout(function(){ decideReturn(reason || 'return', -1, false, seq); }, 40);
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
 
   clearLegacyBackgroundReturnState();
+
   window.addEventListener('oai-android-native-resume', function(ev){
     try{
       var detail = ev && ev.detail || {};
-      if(detail && detail.forceCover){
-        ensureSimpleBackgroundVeil(true);
-        clearBgStamp();
-        if(typeof goToCover === 'function') goToCover();
-        removeSimpleBackgroundVeil(120);
-        return;
-      }
-      window.__OAI_ANDROID_NATIVE_SHORT_RESUME_UNTIL__ = now() + 12000;
-      cancelForAndroidNativeShortResume('native-event');
+      var elapsed = Number(detail.elapsed);
+      var forceCover = !!detail.forceCover;
+      clearTimeout(_returnTimer);
+      var seq = ++_decisionSeq;
+      setTimeout(function(){ decideReturn('android-native-resume', elapsed, forceCover, seq); }, forceCover ? 0 : 20);
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }, {passive:true});
+
   document.addEventListener('visibilitychange', function(){
     if(document.visibilityState === 'hidden') markBackgrounded('visibility-hidden');
-    else scheduleBackgroundReturn('visibility-visible');
+    else scheduleReturn('visibility-visible');
   }, {passive:true});
+
   window.addEventListener('pagehide', function(){
-    if(document.visibilityState === 'hidden') markBackgrounded('pagehide-hidden');
+    if(document.visibilityState === 'hidden' && !_bgArmed) markBackgrounded('pagehide-hidden');
   }, {passive:true});
-  window.addEventListener('pageshow', function(){ scheduleBackgroundReturn('pageshow'); }, {passive:true});
-  window.addEventListener('focus', function(){ scheduleBackgroundReturn('focus'); }, {passive:true});
+  window.addEventListener('pageshow', function(){ scheduleReturn('pageshow'); }, {passive:true});
+  window.addEventListener('focus', function(){ scheduleReturn('focus'); }, {passive:true});
 })();
 
-/* V8-1-14-354:
+/* V8-1-14-357:
    Fold 화면 전환 / 백그라운드 복귀 / Back 탈출을 카테고리 자동복원으로 묶던
    visible_screen_state 계열을 제거한다.
    - 화면 저장/복원으로 카테고리를 다시 여는 동작 금지
@@ -926,33 +874,29 @@ function oaiClearExternalNavigationState(opts){
     reason = reason || 'viewport';
     if(!_pendingMainMapView) _pendingMainMapView = captureMainMapView();
     markViewportNoIntro(reason);
-    try{
-      document.documentElement.classList.add('oai-fold-resizing');
-      window.__OAI_FOLD_VIEWPORT_SETTLING__ = true;
-    }catch(_e){}
+    try{ window.__OAI_FOLD_VIEWPORT_SETTLING__ = true; }catch(_e){}
   }
   function finishFoldViewportSettle(reason){
     reason = reason || 'viewport';
     clearTimeout(_settleTimer);
-    recalibrateFoldViewport(reason + '-stable');
-    _settleTimer = setTimeout(function(){ relayoutCurrentMaps(reason + '-stable'); }, 90);
+    /* V8-1-14-357 Step 3:
+       화면 등급/폭은 즉시 확정하고, 지도 relayout만 짧게 안정 후 한 곳에서 실행한다. */
+    recalibrateFoldViewport(reason + '-immediate');
+    _settleTimer = setTimeout(function(){ relayoutCurrentMaps(reason + '-stable'); }, 120);
     setTimeout(function(){
-      try{
-        document.documentElement.classList.remove('oai-fold-resizing','oai-trail-map-settling');
-        window.__OAI_FOLD_VIEWPORT_SETTLING__ = false;
-      }catch(_e){}
+      try{ window.__OAI_FOLD_VIEWPORT_SETTLING__ = false; }catch(_e){}
       _pendingMainMapView = null;
       _foldTransitionBaseW = 0;
-    }, 460);
+    }, 360);
   }
   function scheduleStableViewport(reason){
     beginFoldViewportSettle(reason);
     clearTimeout(_foldStableTimer);
-    /* V8-1-14-354: Fold 중간 프레임을 버리고, 마지막 폭 이벤트 뒤 화면이 가라앉은 후 한 번만 확정한다. */
+    finishFoldViewportSettle(reason || 'fold-viewport-change');
     _foldStableTimer = setTimeout(function(){
       _foldStableTimer = 0;
-      finishFoldViewportSettle(reason || 'fold-viewport-change');
-    }, 320);
+      relayoutCurrentMaps((reason || 'fold-viewport-change') + '-late');
+    }, 260);
   }
   function onViewportChange(reason){
     var snap = viewportSnapshot();
@@ -960,7 +904,7 @@ function oaiClearExternalNavigationState(opts){
     if(!w) return;
     if(!_lastW){ _lastW = w; return; }
     var diff = Math.abs(w - _lastW);
-    var active = !!(_foldStableTimer || document.documentElement.classList.contains('oai-fold-resizing'));
+    var active = !!_foldStableTimer;
     if(diff >= 80 || active){
       if(!_foldTransitionBaseW) _foldTransitionBaseW = _lastW;
       var base = _foldTransitionBaseW || _lastW;
@@ -1091,7 +1035,7 @@ function oaiStartExternalReturnStabilize(){
     root.classList.add('oai-external-return-freeze');
     root.removeAttribute('data-oai-external-return-early');
     try{ oaiShowExternalEntryGuard('external-return'); }catch(_e){}
-    // V8-1-14-354:
+    // V8-1-14-357:
     // Chrome/외부브라우저에서 돌아온 순간 진입 보호창을 바로 끄지 않고 같은 DOM 보호창을 이어서 유지한다.
 
     var started = Date.now ? Date.now() : new Date().getTime();
@@ -1153,7 +1097,7 @@ window.addEventListener('pagehide', function(){
   try{
     if(sessionStorage.getItem('oai_external_nav_pending') === '1'){
       sessionStorage.setItem('oai_external_nav_pagehide','1');
-      /* V8-1-14-354:
+      /* V8-1-14-357:
          외부 브라우저로 나간 뒤 돌아올 때 첫 화면이 비치지 않도록 진입 보호창을 숨겨진 동안 그대로 유지한다.
          정상 복귀 시 return-freeze가 잡은 뒤 같은 DOM 보호창을 부드럽게 제거한다. */
       clearTimeout(window.__oaiExternalEntryGuardTimer);
@@ -1249,7 +1193,7 @@ function _clearFaithFrame(){
   try{ _replaceFaithFrameWith('about:blank'); }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 function _setFaithFrameLoading(on, kind, url){
-  // V8-1-14-354:
+  // V8-1-14-357:
   // 매일미사·성경 iframe 로딩 십자가는 너무 짧게 스쳐 오류처럼 보이므로 표시하지 않는다.
   // 기존 상태가 남아 있을 경우만 정리한다.
   try{
@@ -2111,7 +2055,7 @@ function _renderShrineVisitDetail(idx){
   const goodnewsUrl=_getShrineGoodnewsUrl(item);
   const telText=item.tel?_visitHtmlEsc(item.tel):'—';
   const telHref=item.tel?'tel:'+String(item.tel).replace(/[^0-9+]/g,''):'';
-  // V8-1-14-354: V117 기준에서 V118 성지정보 카드 색상과 V123 굿뉴스 파란색을 실제 생성 버튼에 직접 적용한다.
+  // V8-1-14-357: V117 기준에서 V118 성지정보 카드 색상과 V123 굿뉴스 파란색을 실제 생성 버튼에 직접 적용한다.
   const detailInfoStyle='background:linear-gradient(180deg,#fbfdff 0%,#fffaf0 100%)!important;border:2px solid #9db7cc!important;box-shadow:0 8px 22px rgba(17,35,60,.08)!important;';
   const detailMapBtnStyle='background:#fff8e6!important;color:#5f4515!important;border:1.5px solid #d5b86d!important;box-shadow:0 2px 6px rgba(95,69,21,.08)!important;';
   const detailTelStyle='background:linear-gradient(180deg,#fbfdff 0%,#fffaf0 100%)!important;color:#213245!important;border:2.5px solid #9db7cc!important;box-shadow:0 3px 9px rgba(17,35,60,.10), inset 0 1px 0 rgba(255,255,255,.86)!important;text-shadow:none!important;font-weight:950!important;';
@@ -2640,7 +2584,7 @@ function _setMassQuickReturn(on){
       var stamp = String(Date.now());
       sessionStorage.setItem('oai_mass_quick_return','1');
       sessionStorage.setItem('oai_mass_quick_return_ts', stamp);
-      /* V8-1-14-354: 매일미사/성가/성경 배너 복귀 상태는 장기 보존하지 않고 세션 안에서만 유지한다. */
+      /* V8-1-14-357: 매일미사/성가/성경 배너 복귀 상태는 장기 보존하지 않고 세션 안에서만 유지한다. */
       try{ localStorage.removeItem('oai_mass_quick_return'); localStorage.removeItem('oai_mass_quick_return_ts'); }catch(_e){}
     }else{
       sessionStorage.removeItem('oai_mass_quick_return');
@@ -3318,7 +3262,7 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || (window.APP_VERSION || 'V8-1-14-354');
+    var target = btn.getAttribute('data-target-version') || (window.APP_VERSION || 'V8-1-14-357');
     var current = '';
     if(window.APP_VERSION) current = String(window.APP_VERSION).trim();
     if(!current && marker) current = String(marker.textContent || '').trim();
@@ -3386,7 +3330,7 @@ window.addEventListener('load', syncCoverUpdateVersionState, true);
     try{
       var frame=document.getElementById('privacy-policy-frame');
       if(frame){
-        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-354'));
+        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-357'));
         if(frame.getAttribute('src') === 'about:blank' || !frame.getAttribute('src')) frame.setAttribute('src', src);
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -3631,7 +3575,7 @@ function openDioceseView(opts){
   var loading=document.getElementById('diocese-loading');
   if(!view||!frame) return;
   var restore = !!(opts && opts.restore);
-  var url = (typeof oaiGetDioceseFrameUrl === 'function') ? oaiGetDioceseFrameUrl() : 'diocese.html?v=V8-1-14-354';
+  var url = (typeof oaiGetDioceseFrameUrl === 'function') ? oaiGetDioceseFrameUrl() : 'diocese.html?v=V8-1-14-357';
   var currentSrc = frame.getAttribute('src') || '';
   var needsLoad = (!currentSrc || currentSrc==='about:blank' || currentSrc.indexOf('diocese.html') < 0 || !frame._loaded);
 
@@ -3731,7 +3675,7 @@ function dioceseLoaded(){
   if(loading) loading.style.display='none';
 }
 function oaiGetDioceseFrameUrl(){
-  return 'diocese.html?v=V8-1-14-354';
+  return 'diocese.html?v=V8-1-14-357';
 }
 function oaiBindDioceseFrameLoad(frame, loading, restore){
   if(!frame) return;
@@ -3772,7 +3716,7 @@ try{ window.oaiPreloadDioceseFrame=oaiPreloadDioceseFrame; window.oaiScheduleDio
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', oaiScheduleDiocesePreload, {once:true});
 else oaiScheduleDiocesePreload();
 window.addEventListener('load', function(){ setTimeout(oaiScheduleDiocesePreload, 300); }, {once:true});
-/* V8-1-14-354: 성지 외부 링크는 웹사이트 카테고리와 같은 보호창 이동 흐름으로 통일하고 옛 core return 저장 함수는 제거 */
+/* V8-1-14-357: 성지 외부 링크는 웹사이트 카테고리와 같은 보호창 이동 흐름으로 통일하고 옛 core return 저장 함수는 제거 */
 function oaiPreserveExplicitHttpUrl(url){
   url = String(url || '').trim();
   if(!url) return '';
@@ -3799,7 +3743,7 @@ function normalizeCatholicExternalUrl(url){
     var u = new URL(url);
     u.pathname = u.pathname.replace(/\/\/+/g, '/');
     var host = u.hostname.toLowerCase();
-    // V8-1-14-354:
+    // V8-1-14-357:
     // 원래 HTTP로 쓰던 교구는 HTTPS로 끌어올리지 않고 HTTP를 명시 유지한다.
     if(host === 'caincheon.or.kr' || host === 'www.caincheon.or.kr'){
       u.protocol = 'http:';
@@ -3830,14 +3774,14 @@ function _isShrineDetailGuideUrl(url){
 function _getShrineHomepageUrl(item){
   var hp = item && item.hp ? normalizeCatholicExternalUrl(item.hp) : '';
   if(!hp) return '';
-  /* V8-1-14-354: 신규 성지는 성지추가.xlsx의 '홈페이지' 열을 그대로 홈페이지 버튼에 연결한다. */
+  /* V8-1-14-357: 신규 성지는 성지추가.xlsx의 '홈페이지' 열을 그대로 홈페이지 버튼에 연결한다. */
   if(item && item.isNew) return hp;
   if(_isShrineDetailGuideUrl(hp)) return '';
   return hp;
 }
 function _getShrineGuideUrl(item){
   if(!item) return '';
-  /* V8-1-14-354: 성지추가.xlsx의 '주교회의 성지안내/성지 상세' URL을 우선 사용한다. */
+  /* V8-1-14-357: 성지추가.xlsx의 '주교회의 성지안내/성지 상세' URL을 우선 사용한다. */
   if(item.guideUrl) return normalizeCatholicExternalUrl(item.guideUrl);
   if(item.seq) return _SU + item.seq;
   var hp = item.hp ? normalizeCatholicExternalUrl(item.hp) : '';
@@ -3866,7 +3810,7 @@ function openCatholicExternalPreserveApp(url, kind){
   }catch(e){ console.warn("[가톨릭길동무]", e); }
   try{ if(typeof _resetCoverExitReady==='function') _resetCoverExitReady(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   try{ if(typeof _clearCoverExitArmed==='function') _clearCoverExitArmed(); }catch(e){ console.warn("[가톨릭길동무]", e); }
-  /* V8-1-14-354: 성지·성당·피정 외부 웹사이트도 웹사이트 카테고리와 같은 보호창 이동 흐름으로 통일한다. */
+  /* V8-1-14-357: 성지·성당·피정 외부 웹사이트도 웹사이트 카테고리와 같은 보호창 이동 흐름으로 통일한다. */
   try{
     if(typeof oaiSmoothNavigate === 'function'){
       oaiSmoothNavigate(url, kind || 'external-site');
@@ -3883,7 +3827,7 @@ function openShrineExternalLikeFaithPortal(url, extra){
   url = prepareExternalUrl(url);
   if(!url) return;
   extra = extra || {};
-  /* V8-1-14-354: 성지 상세/홈페이지 외부 링크는 웹사이트 카테고리와 같은 보호창 이동 흐름을 사용한다. */
+  /* V8-1-14-357: 성지 상세/홈페이지 외부 링크는 웹사이트 카테고리와 같은 보호창 이동 흐름을 사용한다. */
   openCatholicExternalPreserveApp(url, extra.source || 'shrine-external');
 }
 function openCoreExternalUrl(url, extra){
@@ -4069,7 +4013,7 @@ document.addEventListener('visibilitychange', function(){
     try{ setTimeout(function(){ restoreDioceseExternalState({source:'visible'}); }, 80); }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
 }, true);
-/* V8-1-14-354: 동작 없는 빈 포커스 리스너와 빈 지도 진입 훅 제거 */
+/* V8-1-14-357: 동작 없는 빈 포커스 리스너와 빈 지도 진입 훅 제거 */
 function clearRouteNoFocus(){
   try{
     if(_mode==='shrine'){
@@ -4087,7 +4031,7 @@ function clearRouteNoFocus(){
     var guide=document.getElementById('route-guide'); if(guide) guide.classList.remove('on');
   }catch(e){ console.warn("[가톨릭길동무]", e); }
 }
-/* V8-1-14-354: 현재 성지 외부 링크는 웹사이트 카테고리와 같은 보호창 이동 방식이므로 옛 core external return 복원 로직은 제거하고,
+/* V8-1-14-357: 현재 성지 외부 링크는 웹사이트 카테고리와 같은 보호창 이동 방식이므로 옛 core external return 복원 로직은 제거하고,
    pageshow 시 지도 DOM이 비어 있는 경우에만 기존 지도 재로딩 보호 흐름을 유지한다. */
 window.addEventListener('pageshow', function(e){
   setTimeout(()=>{
@@ -4140,7 +4084,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V8-1-14-354';
+const _PARISH_ASSET_VERSION='V8-1-14-357';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -4227,7 +4171,7 @@ function _showParishDataLoadingMessage(msg){
     if(listBody && _mode==='parish') listBody.innerHTML='<div class="empty-msg">'+(msg||'성당 정보를 불러오는 중입니다...')+'</div>';
     const nearbyBody=document.getElementById('nearby-body');
     if(nearbyBody && _mode==='parish' && _activeTab==='nearby'){
-      /* V8-1-14-354:
+      /* V8-1-14-357:
          성당 내주변은 전체 교구 데이터 로딩이 길어져도 첫 로딩 화면을 유지한다.
          여기서 다른 문구로 다시 그리면 사용자에게 같은 로딩 화면이 두 번 나타난 것처럼 보인다. */
       if(nearbyBody.querySelector && nearbyBody.querySelector('.nearby-distance-loading')) return;
@@ -4309,7 +4253,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V8-1-14-354';
+const _PRAYER_ASSET_VERSION='V8-1-14-357';
 let _prayerModuleLoadPromise=null;
 function _isPrayerDataReady(){
   return !!(window.PRAYER_DATA && typeof window.PRAYER_DATA === 'object');
@@ -4370,7 +4314,7 @@ try{ window.ensurePrayerModuleLoaded=ensurePrayerModuleLoaded; }catch(e){ consol
 let _RT_RAW = [];
 let _retreatRawLoaded = false;
 let _retreatDataLoadPromise = null;
-const _RETREAT_ASSET_VERSION='V8-1-14-354';
+const _RETREAT_ASSET_VERSION='V8-1-14-357';
 
 let RETREATS = [];
 function _buildRetreatList(raw){
@@ -4654,7 +4598,7 @@ function _navFetch(origin, dest) {
 const $=id=>document.getElementById(id);
 const $$=s=>document.querySelectorAll(s);
 const _GEO=navigator.geolocation;
-// V8-1-14-354: 오래 미사용 후 복귀 시 마지막 위치를 먼저 보여주고, 새 GPS가 잡히면 최신 위치로 교체한다.
+// V8-1-14-357: 오래 미사용 후 복귀 시 마지막 위치를 먼저 보여주고, 새 GPS가 잡히면 최신 위치로 교체한다.
 const _GO1={enableHighAccuracy:true,timeout:6500,maximumAge:0};
 const _GO2={enableHighAccuracy:false,timeout:1200,maximumAge:60000};
 const _GO_FAST_FRESH={enableHighAccuracy:false,timeout:2500,maximumAge:120000};
@@ -4701,12 +4645,12 @@ function _refreshFreshLocationThen(apply,fail){
 const _EC=encodeURIComponent;
 const _NS='xmlns="http://www.w3.org/2000/svg"';
 const _svgUrl=s=>'data:image/svg+xml;charset=utf-8,'+_EC(s);
-/* V8-1-14-354: 지도 확대/축소 중 버벅임을 줄이기 위해
+/* V8-1-14-357: 지도 확대/축소 중 버벅임을 줄이기 위해
    같은 색/크기의 MarkerImage를 반복 생성하지 않고 재사용한다. */
 const _OAI_MARKER_IMG_CACHE=Object.create(null);
 function _oaiMarkerImageCached(key, maker){
   try{
-    /* V8-1-14-354:
+    /* V8-1-14-357:
        Kakao MarkerImage 객체를 여러 마커가 공유하면 Android WebView에서 축소/확대 중
        마커가 네모처럼 보이거나 갱신이 꼬일 수 있다. 데이터 생성은 가볍게 유지하되
        MarkerImage 인스턴스 자체는 마커마다 새로 만들어 안전하게 사용한다. */
@@ -4724,7 +4668,7 @@ function _setMarkerMapIfChanged(marker, map){
   try{
     const actual = _getMarkerActualMap(marker);
     if(actual !== undefined && actual === map){ marker.__oaiMapTarget = map; return; }
-    /* V8-1-14-354: 일부 Kakao Marker는 getMap이 없어 __oaiMapTarget만 남는데,
+    /* V8-1-14-357: 일부 Kakao Marker는 getMap이 없어 __oaiMapTarget만 남는데,
        다른 경로에서 setMap(null)이 실행되면 이 값이 실제와 달라져 마커가 복원되지 않는다.
        getMap 확인이 불가능한 경우에는 안전하게 setMap을 다시 호출한다. */
     marker.setMap(map);
@@ -4765,7 +4709,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 let _myLocAt = 0;
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V8-1-14-354';
+const _SHRINE_ASSET_VERSION='V8-1-14-357';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -5206,7 +5150,7 @@ function oaiEnterPopup(el){
 }
 
 function oaiShowCategoryEntryVeil(mode){
-  // V8-1-14-354: 성지/성당/피정 진입은 cover를 내리기 전 내위치 안내 화면을 먼저 열어 첫 화면으로 고정한다.
+  // V8-1-14-357: 성지/성당/피정 진입은 cover를 내리기 전 내위치 안내 화면을 먼저 열어 첫 화면으로 고정한다.
   try{ oaiHideCategoryEntryVeil(); }catch(e){ console.warn("[가톨릭길동무]", e); }
 }
 function oaiHideCategoryEntryVeil(){
@@ -5239,7 +5183,7 @@ function oaiPreopenNearbySheetForCategory(){
       sheet.classList.add('open','oai-preopen-nearby');
     }
     if(body){
-      // V8-1-14-354: 데이터 지연 후 startApp이 다시 호출되어도 같은 내주변 로딩 화면을 다시 그리지 않는다.
+      // V8-1-14-357: 데이터 지연 후 startApp이 다시 호출되어도 같은 내주변 로딩 화면을 다시 그리지 않는다.
       try{
         if(!body.querySelector || !body.querySelector('.nearby-distance-loading')){
           body.innerHTML='<div class="empty-msg nearby-distance-loading"><span class="nearby-distance-spinner" aria-hidden="true"></span><span class="nearby-distance-title">📍 내 위치 기준 자동차 거리 계산 중</span><span class="nearby-distance-sub">위치 확인 후 가까운 장소를 준비합니다.</span></div>';
@@ -5325,7 +5269,7 @@ function startApp(mode){
   try{ _cancelNearbyLoad(); }catch(e){ console.warn('[가톨릭길동무]', e); }
   _curFromRegion=false;
   _curInfoItem=null;
-  // V8-1-14-354:
+  // V8-1-14-357:
   // 성지/성당/피정 데이터 로드 대기 중 이미 내주변 로딩 sheet를 열어 둔 경우,
   // 두 번째 startApp 호출에서 closeAllTabs()로 닫았다가 다시 여는 동작을 막는다.
   const _carryNearbyPreopen = !!((mode==='shrine' || mode==='parish' || mode==='retreat') &&
@@ -5393,7 +5337,7 @@ function _resetMapState(){
   _myLat=null; _myLng=null;
   const mapEl=$('map');
   if(mapEl){
-    // V8-1-14-354:
+    // V8-1-14-357:
     // 성지/성당/피정 첫 진입에서 데이터 로딩 후 startApp이 다시 호출될 때,
     // 기존 map-loading을 비워 버리면 "로딩 십자가 → 빈 화면 → 로딩 십자가"로 보인다.
     // 이미 내주변 선진입 상태에서 지도 로딩 화면이 보이는 경우에는 비우지 않고 그대로 이어간다.
@@ -5436,7 +5380,7 @@ function goToCover(){
   try{ if(typeof _clearCoverExitArmed === 'function') _clearCoverExitArmed(); }catch(e){ console.warn('[가톨릭길동무]', e); }
   try{ if(typeof _clearHardCoverExitFlags === 'function') _clearHardCoverExitFlags('go-to-cover'); }catch(e){ console.warn('[가톨릭길동무]', e); }
   try{ if(typeof _forceNextCoverBackToast === 'function') _forceNextCoverBackToast('go-to-cover'); }catch(e){ console.warn('[가톨릭길동무]', e); }
-  // V8-1-14-354: Fold 화면 전환 뒤 커버로 돌아올 때는 현재 화면 크기를 다시 확정한다.
+  // V8-1-14-357: Fold 화면 전환 뒤 커버로 돌아올 때는 현재 화면 크기를 다시 확정한다.
   try{ if(typeof window.oaiApplyAndroidScreenClass === 'function') window.oaiApplyAndroidScreenClass('go-to-cover-force-remeasure'); }catch(e){ console.warn('[가톨릭길동무]', e); }
   try{ if(typeof window.oaiRecalibrateCoverViewport === 'function') window.oaiRecalibrateCoverViewport('go-to-cover-force'); }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
@@ -5811,7 +5755,7 @@ function _restoreNearbyMyLocationPlain(reason, opts){
 function _scheduleNearbyMyLocationPlainRestore(reason){
   try{
     if(!_map || !_myLat || !_myLng) return;
-    // V8-1-14-354: 성지·성당·피정의집 내주변 목록을 닫은 뒤에는
+    // V8-1-14-357: 성지·성당·피정의집 내주변 목록을 닫은 뒤에는
     // 정보카드/교구/bounds 보정값을 쓰지 않고 내 위치를 같은 화면 기준으로 복원한다.
     setTimeout(function(){ _restoreNearbyMyLocationPlain(reason,{setDefaultLevel:false}); }, 40);
     setTimeout(function(){ _restoreNearbyMyLocationPlain(reason + ':settled',{setDefaultLevel:false}); }, 180);
@@ -7075,7 +7019,7 @@ function _focusParishPointAround(lat, lng, opts){
         _map.setLevel(targetLevel);
       }
     }
-    // V8-1-14-354: 성당의 현재 위치 기준 화면은 성지/피정과 동일하게
+    // V8-1-14-357: 성당의 현재 위치 기준 화면은 성지/피정과 동일하게
     // 실제 내 위치 좌표를 중심으로 둔다. 정보카드 보정은 실제 정보카드 포커스에서만 사용한다.
     if(opts && opts.infoCardStandard===true && typeof _setMapCenterByInfoCardStandard==='function'){
       return _setMapCenterByInfoCardStandard(pos);
@@ -7281,7 +7225,7 @@ function _showParishDioMkrs(code){
     try{kakao.maps.event.removeListener(_parishIdleListener);}catch(e){ console.warn('[가톨릭길동무]',e); }
     _parishIdleListener=null;
   }
-  /* V8-1-14-354: 성당 지도는 idle 때마다 교구 전체 마커 setMap을 반복해
+  /* V8-1-14-357: 성당 지도는 idle 때마다 교구 전체 마커 setMap을 반복해
      확대·축소 후 버벅임이 커졌다. 현재 _updateParishViewport는 실제 뷰포트 필터링을 하지
      않으므로 최초 표시 때 한 번만 실행하고 zoom/idle 반복 리스너는 붙이지 않는다. */
 }
@@ -7657,7 +7601,7 @@ function _loadNearbyWithDist(lat,lng,items,getIdx,getColor,getLabel){
   }
 
   if(body && _isNearbyLoadCurrent(requestMode,requestToken,body)){
-    // V8-1-14-354: 자동차 거리 계산 단계에서 같은 로딩 화면을 다시 렌더링하지 않는다.
+    // V8-1-14-357: 자동차 거리 계산 단계에서 같은 로딩 화면을 다시 렌더링하지 않는다.
     try{
       if(!body.querySelector || !body.querySelector('.nearby-distance-loading')){
         body.innerHTML='<div class="empty-msg nearby-distance-loading"><span class="nearby-distance-spinner" aria-hidden="true"></span><span class="nearby-distance-title">📍 내 위치 기준 자동차 거리 계산 중</span><span class="nearby-distance-sub">위치 확인 후 가까운 장소를 준비합니다.</span></div>';
@@ -7736,7 +7680,7 @@ function _loadNearbyParishes(lat,lng){
     const waitMode=_mode;
     let waitToken=0;
     try{ waitToken = AppState && AppState.nearbyLoadToken ? AppState.nearbyLoadToken : 0; }catch(_e){ waitToken = window.__oaiNearbyLoadToken || 0; }
-    /* V8-1-14-354:
+    /* V8-1-14-357:
        성당은 교구별 JS를 추가로 불러오기 때문에 로딩이 길어질 수 있다.
        기존 로딩 화면을 "성당 정보 불러오는 중"으로 다시 그렸다가, 거리 계산에서 또 다시 그리면
        같은 안내 화면이 두 번 나타나는 것처럼 보이므로 기존 로딩 DOM을 유지한다. */
@@ -9315,7 +9259,7 @@ function _fmtTime(s){
           return;
         }
       }catch(_e){}
-      /* V8-1-14-354:
+      /* V8-1-14-357:
          10분 규칙은 백그라운드 복귀 전용으로만 사용한다.
          앱이 켜진 상태에서 10분 동안 조작이 없어도 현재 화면을 커버로 강제 이동하지 않는다. */
       return;
