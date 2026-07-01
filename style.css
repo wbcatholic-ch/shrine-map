@@ -7213,3 +7213,37 @@ html:not(.ios-device) #app #sheet-route{
   padding-bottom:6px!important;
 }
 /* V8-1-14-367 release cleanup: visible cover version kept during testing; hide only in final production release. */
+
+/* V8-1-14-376: 검색 키보드가 열린 상태에서 성지/성당/피정 리스트를 처음 스크롤할 때
+   키보드 닫힘/viewport 복원/카드 눌림 효과가 겹쳐 생기던 첫 버벅임을 줄인다. */
+#list-body,
+#region-body,
+#nearby-body,
+#srch-modal .sm-body,
+#sm-body,
+#sm-body-place{
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  touch-action:pan-y;
+  scroll-behavior:auto;
+}
+#list-body .list-item,
+#region-body .region-item,
+#nearby-body .nearby-item,
+#srch-modal .sm-item,
+#srch-modal .sm-place-item{
+  touch-action:pan-y;
+}
+html.oai-result-scroll-kb-dismiss #list-body .list-item,
+html.oai-result-scroll-kb-dismiss #region-body .region-item,
+html.oai-result-scroll-kb-dismiss #nearby-body .nearby-item,
+html.oai-result-scroll-kb-dismiss #srch-modal .sm-item,
+html.oai-result-scroll-kb-dismiss #srch-modal .sm-place-item,
+html.oai-result-scroll-kb-dismiss .list-item.app-pressing,
+html.oai-result-scroll-kb-dismiss .nearby-item.app-pressing,
+html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
+  transition:none!important;
+  transform:none!important;
+  filter:none!important;
+}

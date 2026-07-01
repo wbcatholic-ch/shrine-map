@@ -9780,8 +9780,28 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function getSheetNameForInput(el){ return el && el.id==='region-inp' ? 'region' : (el && el.id==='sm-inp' ? 'search' : 'list'); }
   function getPanel(name){ return name==='search' ? document.getElementById('srch-modal') : document.getElementById('sheet-'+name); }
   function getScrollBox(name){
-    if(name==='search') return document.getElementById('sm-body') || document.getElementById('sm-body-place');
+    if(name==='search') {
+      var place=document.getElementById('sm-body-place');
+      var cat=document.getElementById('sm-body');
+      try{ if(place && place.style.display!=='none') return place; }catch(_e){}
+      return cat || place;
+    }
     return name==='region' ? document.getElementById('region-body') : document.getElementById('list-body');
+  }
+  function hasResultScrollIntent(){
+    try{ return Date.now() < (window.__OAI_RESULT_SCROLL_INTENT_UNTIL__ || 0); }catch(_e){ return false; }
+  }
+  function finishResultScrollKeyboardDismiss(snapshot){
+    [160,360,720].forEach(function(delay){
+      setTimeout(function(){
+        try{
+          if(getActiveTarget()) return;
+          document.documentElement.classList.remove('oai-map-search-keyboard-lock');
+          document.documentElement.classList.remove('oai-result-scroll-kb-dismiss');
+          if(lock===snapshot) lock=null;
+        }catch(e){ console.warn('[가톨릭길동무]', e); }
+      }, delay);
+    });
   }
   function makeLock(el){
     var name=getSheetNameForInput(el);
@@ -9822,6 +9842,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function stop(){
     var snapshot=lock;
+    if(hasResultScrollIntent()){
+      /* V8-1-14-376:
+         검색 키보드가 열린 상태에서 성지/성당/피정 리스트를 바로 끌어올리면
+         기존 viewport 복원 타이머가 첫 스크롤 위치를 다시 되돌려 버벅임을 만들었다.
+         리스트 스크롤 의도가 확인된 경우에는 키보드만 닫고, 스크롤 위치 복원은 하지 않는다. */
+      finishResultScrollKeyboardDismiss(snapshot);
+      return;
+    }
     [0,80,160,300,520].forEach(function(delay){
       setTimeout(function(){ try{ if(!getActiveTarget()) restore('stop-'+delay, snapshot); }catch(e){ console.warn('[가톨릭길동무]', e); } }, delay);
     });
@@ -9830,6 +9858,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(getActiveTarget()) return;
         restore('stop-final', snapshot);
         document.documentElement.classList.remove('oai-map-search-keyboard-lock');
+        document.documentElement.classList.remove('oai-result-scroll-kb-dismiss');
         if(lock===snapshot) lock=null;
       }catch(e){ console.warn('[가톨릭길동무]', e); }
     }, 680);
@@ -9868,15 +9897,30 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       return !!(ae && (ae.tagName==='INPUT'||ae.tagName==='TEXTAREA'||ae.isContentEditable));
     }catch(e){ return false; }
   }
+  function markResultScrollIntent(){
+    try{
+      window.__OAI_RESULT_SCROLL_INTENT_UNTIL__ = Date.now() + 950;
+      document.documentElement.classList.add('oai-result-scroll-kb-dismiss');
+      setTimeout(function(){
+        try{
+          if(Date.now() >= (window.__OAI_RESULT_SCROLL_INTENT_UNTIL__ || 0)){
+            document.documentElement.classList.remove('oai-result-scroll-kb-dismiss');
+          }
+        }catch(_e){}
+      }, 1050);
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }
   function scheduleScrollBlur(){
     try{
       if(scrollBlurTimer) clearTimeout(scrollBlurTimer);
-      scrollBlurTimer=setTimeout(function(){ if(hasActiveEditable()) blurActive(); }, 60);
+      markResultScrollIntent();
+      scrollBlurTimer=setTimeout(function(){ if(hasActiveEditable()) blurActive(); }, 20);
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
   function blurOnOutsidePointer(e){
     try{
       if(!hasActiveEditable() || isEditable(e.target)) return;
+      if(isResultScrollSurface(e.target)) markResultScrollIntent();
       blurActive();
       setTimeout(function(){ if(hasActiveEditable()) blurActive(); }, 40);
     }catch(err){ console.warn('[가톨릭길동무]', err); }
