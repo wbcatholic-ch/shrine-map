@@ -2263,7 +2263,7 @@ html:not(.ios-device).oai-screen-compact-short #cover {
 
 #cover-update-hint { display: none; margin-top: 4px; padding-left: 2px; color: #dc2626; font-size: 9.5px; font-weight: 800; line-height: 1.15; white-space: normal; max-width: 100%; word-break: keep-all; }
 #cover-update-box.update-needed #cover-update-hint { display: block; }
-/* V8-1-14-364: update-needed text is a small status badge, not a main category title.
+/* V8-1-14-365: update-needed text is a small status badge, not a main category title.
    Keep it independent from the user's enlarged app font scale so it does not overflow on Fold/phone covers. */
 #cover-update-box.update-needed #cover-update-btn {
   font-size: 12.8px !important;
@@ -5949,7 +5949,7 @@ html.oai-cover-revealing::after{
     linear-gradient(to right, #fbf8f1 0%, rgba(251,248,241,.96) 5%, rgba(251,248,241,.60) 13%, rgba(251,248,241,.16) 24%, rgba(251,248,241,0) 36%, rgba(251,248,241,0) 64%, rgba(251,248,241,.16) 76%, rgba(251,248,241,.60) 87%, rgba(251,248,241,.96) 95%, #fbf8f1 100%),
     linear-gradient(to bottom, #fbf8f1 0%, rgba(251,248,241,.90) 6%, rgba(251,248,241,.36) 17%, rgba(251,248,241,0) 30%, rgba(251,248,241,0) 70%, rgba(251,248,241,.36) 83%, rgba(251,248,241,.90) 94%, #fbf8f1 100%),
     radial-gradient(ellipse 96% 88% at 50% 48%, rgba(251,248,241,0) 50%, rgba(251,248,241,.08) 62%, rgba(251,248,241,.34) 76%, rgba(251,248,241,.76) 90%, rgba(251,248,241,1) 100%),
-    url("intro-cross-jesus.jpg?v=V8-1-14-364") !important;
+    url("intro-cross-jesus.jpg?v=V8-1-14-365") !important;
   background-position:center center, center center, center center, center center !important;
   background-size:100% 100%, 100% 100%, 100% 100%, auto 106% !important;
   background-repeat:no-repeat, no-repeat, no-repeat, no-repeat !important;
@@ -6369,7 +6369,7 @@ html.oai-font-global .category-source-note { font-size: calc(11px * var(--app-in
 #app .shrine-visit-detail-action.detail-goodnews{background:#eaf7ff!important;color:#075985!important;border:1.5px solid #7ec8f3!important;}
 #app .shrine-visit-detail-action.detail-kakao{width:0!important;}
 
-/* V8-1-14-364: 인포카드/상세 버튼 색상은 아래 최종 통합 블록 하나만 사용한다. */
+/* V8-1-14-365: 인포카드/상세 버튼 색상은 아래 최종 통합 블록 하나만 사용한다. */
 #app .shrine-visit-detail-info{
   background:linear-gradient(180deg,#fbfdff 0%,#fffaf0 100%)!important;
   border:2px solid #9db7cc!important;
@@ -6381,7 +6381,7 @@ html.oai-font-global .category-source-note { font-size: calc(11px * var(--app-in
   border:1.5px solid #d5b86d!important;
   box-shadow:0 2px 6px rgba(95,69,21,.08)!important;
 }
-/* V8-1-14-364: 상세 버튼 개별 색상 중복 override 제거. */
+/* V8-1-14-365: 상세 버튼 개별 색상 중복 override 제거. */
 .map-loading-icon,
 #diocese-loading .missa-spinner,
 #nearby-body .nearby-distance-spinner{
@@ -6466,7 +6466,7 @@ html.oai-stability-veil[data-oai-refresh-early-veil="1"]::after{
   animation:oaiUnifiedLoadingCrossSpin var(--oai-loading-cross-speed) linear infinite!important;
   transition:none!important;
 }
-/* V8-1-14-364: 외부사이트 진입/복귀 보호창 CSS 단일 기준. JS 흐름은 유지하고, 중복 십자가만 막는다. */
+/* V8-1-14-365: 외부사이트 진입/복귀 보호창 CSS 단일 기준. JS 흐름은 유지하고, 중복 십자가만 막는다. */
 #oai-external-entry-guard{
   position:fixed!important;
   inset:0!important;
@@ -6681,118 +6681,7 @@ html.oai-external-return-freeze.oai-external-return-releasing::after{
   animation:none!important;
 }
 
-#app #info-card #ic-tel-link,
-#app #info-card #ic-route-btn,
-#app #info-card #ic-hp,
-#app #info-card #ic-guide,
-#app #info-card #ic-goodnews,
-#app #info-card #ic-kakao-nav,
-#app #info-card .ic-btn-row > *,
-#app #info-card .ic-links > *,
-#app #info-card .ic-kakao-row > *{
-  border-width:2.5px!important;
-  box-sizing:border-box!important;
-}
-#app #info-card #ic-tel-link:active,
-#app #info-card #ic-route-btn:active,
-#app #info-card #ic-hp:active,
-#app #info-card #ic-guide:active,
-#app #info-card #ic-goodnews:active,
-#app #info-card #ic-kakao-nav:active{
-  border-width:2.5px!important;
-}
-
-#app #info-card #ic-tel-link,
-#app .shrine-visit-detail-action-row.detail-primary-row > .detail-tel{
-  background:linear-gradient(180deg,#ecfbf1 0%,#cfeeda 100%)!important;
-  color:#16492d!important;
-  border:2.5px solid #63bd7a!important;
-  box-shadow:0 3px 9px rgba(31,112,65,.15), inset 0 1px 0 rgba(255,255,255,.82)!important;
-  text-shadow:none!important;
-}
-#app #info-card #ic-route-btn,
-#app .shrine-visit-detail-action-row.detail-primary-row > .detail-route{
-  background:linear-gradient(180deg,#eef5ff 0%,#d5e5f8 100%)!important;
-  color:#23466e!important;
-  border:2.5px solid #6f93c3!important;
-  box-shadow:0 3px 9px rgba(46,80,125,.15), inset 0 1px 0 rgba(255,255,255,.82)!important;
-  text-shadow:none!important;
-}
-#app #info-card #ic-hp,
-#app .shrine-visit-detail-action-row.detail-link-row > .detail-home{
-  background:linear-gradient(180deg,#dff5e7 0%,#bde3ca 100%)!important;
-  color:#16452d!important;
-  border:2.5px solid #55ad6f!important;
-  box-shadow:0 3px 9px rgba(31,112,65,.17), inset 0 1px 0 rgba(255,255,255,.62)!important;
-  text-shadow:none!important;
-}
-#app #info-card #ic-guide,
-#app .shrine-visit-detail-action-row.detail-link-row > .detail-guide{
-  background:linear-gradient(180deg,#e5eefb 0%,#c6d8f0 100%)!important;
-  color:#203f65!important;
-  border:2.5px solid #5f86b8!important;
-  box-shadow:0 3px 9px rgba(46,80,125,.17), inset 0 1px 0 rgba(255,255,255,.62)!important;
-  text-shadow:none!important;
-}
-#app #info-card #ic-goodnews,
-#app .shrine-visit-detail-action-row.detail-kakao-row > .detail-goodnews{
-  background:linear-gradient(180deg,#d8f1e2 0%,#a9d7b8 100%)!important;
-  color:#153f29!important;
-  border:2.5px solid #45a363!important;
-  box-shadow:0 3px 9px rgba(31,112,65,.18), inset 0 1px 0 rgba(255,255,255,.62)!important;
-  text-shadow:none!important;
-}
-#app #info-card #ic-tel-link:active,
-#app #info-card #ic-route-btn:active,
-#app #info-card #ic-hp:active,
-#app #info-card #ic-guide:active,
-#app #info-card #ic-goodnews:active,
-#app .shrine-visit-detail-action-row.detail-primary-row > .detail-tel:active,
-#app .shrine-visit-detail-action-row.detail-primary-row > .detail-route:active,
-#app .shrine-visit-detail-action-row.detail-link-row > .detail-home:active,
-#app .shrine-visit-detail-action-row.detail-link-row > .detail-guide:active,
-#app .shrine-visit-detail-action-row.detail-kakao-row > .detail-goodnews:active{
-  filter:brightness(.95) saturate(1.05)!important;
-  transform:translateY(1px)!important;
-}
-
-#app #info-card #ic-tel-link,
-#app .shrine-visit-detail-action-row.detail-primary-row > .detail-tel{
-  background:linear-gradient(180deg,#dcfce7 0%,#86efac 100%)!important;
-  color:#064e3b!important;
-  border:2px solid #22c55e!important;
-  box-shadow:0 3px 10px rgba(34,197,94,.22), inset 0 1px 0 rgba(255,255,255,.65)!important;
-  text-shadow:none!important;
-  font-weight:950!important;
-}
-#app #info-card #ic-tel-link .ic-tel-icon,
-#app .shrine-visit-detail-action-row.detail-primary-row > .detail-tel .detail-tel-icon{
-  color:#064e3b!important;
-}
-#app #info-card #ic-route-btn,
-#app .shrine-visit-detail-action-row.detail-primary-row > .detail-route{
-  background:linear-gradient(180deg,#dbeafe 0%,#93c5fd 100%)!important;
-  color:#123e6f!important;
-  border:2px solid #3b82f6!important;
-  box-shadow:0 3px 10px rgba(59,130,246,.22), inset 0 1px 0 rgba(255,255,255,.65)!important;
-  text-shadow:none!important;
-  font-weight:950!important;
-}
-#app #info-card #ic-tel-link:active,
-#app .shrine-visit-detail-action-row.detail-primary-row > .detail-tel:active{
-  background:linear-gradient(180deg,#bbf7d0 0%,#4ade80 100%)!important;
-  border-color:#16a34a!important;
-  filter:none!important;
-  transform:translateY(1px)!important;
-}
-#app #info-card #ic-route-btn:active,
-#app .shrine-visit-detail-action-row.detail-primary-row > .detail-route:active{
-  background:linear-gradient(180deg,#bfdbfe 0%,#60a5fa 100%)!important;
-  border-color:#2563eb!important;
-  filter:none!important;
-  transform:translateY(1px)!important;
-}
-
+/* V8-1-14-365: 인포카드/상세 버튼의 이전 색상·테두리 override 묶음은 삭제하고, 아래 최종 공통색 기준 하나만 유지한다. */
 #app #info-card #ic-tel-link,
 #app #info-card #ic-route-btn,
 #app #info-card #ic-hp,
@@ -6834,7 +6723,7 @@ html.oai-external-return-freeze.oai-external-return-releasing::after{
   transform:translateY(1px)!important;
 }
 
-/* V8-1-14-364: 인포카드 버튼과 성지 상세정보 버튼의 크기 기준을 한곳에서 확정한다. */
+/* V8-1-14-365: 인포카드 버튼과 성지 상세정보 버튼의 크기 기준을 한곳에서 확정한다. */
 #app #info-card #ic-tel-link,
 #app #info-card #ic-route-btn,
 #app #info-card #ic-hp,
@@ -6847,7 +6736,8 @@ html.oai-external-return-freeze.oai-external-return-releasing::after{
 #app #info-card .btn-kakao-nav{
   height:46px!important;
   min-height:46px!important;
-  font-size:calc(16px * var(--app-inner-font-scale,1))!important;
+  font-size:calc(14.5px * var(--app-inner-font-scale,1))!important;
+  letter-spacing:-.035em!important;
 }
 #app .shrine-visit-detail-action-row > .shrine-visit-detail-action,
 #app .shrine-visit-detail-actions .shrine-visit-detail-action,
@@ -6893,24 +6783,7 @@ html:not(.ios-device).oai-screen-compact-short #app .shrine-visit-detail-action{
   min-height:48px!important;
 }
 
-html:not(.ios-device).oai-screen-compact-short #tabbar{
-  height:calc(66px + env(safe-area-inset-top,0px))!important;
-  min-height:calc(66px + env(safe-area-inset-top,0px))!important;
-  padding:calc(env(safe-area-inset-top,0px) + 4px) 6px 5px!important;
-  gap:5px!important;
-}
-html:not(.ios-device).oai-screen-compact-short #tabbar .tab-btn{
-  height:56px!important;
-  min-height:56px!important;
-  padding:4px 2px 4px!important;
-  border-radius:12px!important;
-  
-  gap:4px!important;
-  letter-spacing:-.055em!important;
-}
-html:not(.ios-device).oai-screen-compact-short #map-wrap{
-  top:calc(66px + env(safe-area-inset-top,0px))!important;
-}
+/* V8-1-14-365: compact-short 탭바/지도 top 기준은 아래 변수 블록 하나로 통합한다. */
 html:not(.ios-device).oai-screen-compact-short .map-category-close,
 html:not(.ios-device).oai-screen-compact-short .ic-close-btn,
 html:not(.ios-device).oai-screen-compact-short .sheet-x,
@@ -7142,7 +7015,7 @@ html.oai-font-global .shrine-visit-cards-head .module-bar-sub,
 .shrine-visit-cards-head .module-bar-sub{font-size:11px!important;line-height:1.25!important;color:rgba(255,255,255,.65)!important;}
 #shrine-visit-cards-modal .shrine-visit-cards-head .module-close,
 .shrine-visit-cards-head .module-close{width:var(--oai-std-close-sz)!important;height:var(--oai-std-close-sz)!important;min-width:var(--oai-std-close-sz)!important;flex:0 0 var(--oai-std-close-sz)!important;border-radius:999px!important;background:transparent!important;border:1.5px solid currentColor!important;color:rgba(212,170,106,.9)!important;font-size:28px!important;box-shadow:none!important;}
-/* V8-1-14-364: 순례 스탬프북 헤더/탭/십자가 기준을 다른 카테고리 공통값과 통일한다. */
+/* V8-1-14-365: 순례 스탬프북 헤더/탭/십자가 기준을 다른 카테고리 공통값과 통일한다. */
 #shrine-visit-cards-modal .shrine-visit-cards-tabs,
 .shrine-visit-cards-tabs{
   height:var(--oai-std-tabbar-h)!important;min-height:var(--oai-std-tabbar-h)!important;max-height:var(--oai-std-tabbar-h)!important;
@@ -7173,7 +7046,7 @@ html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-tabs{height:v
 html:not(.ios-device).oai-screen-compact-short #shrine-visit-cards-modal .shrine-visit-cards-tabs button,
 html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-tabs button{height:var(--oai-std-tab-h)!important;min-height:var(--oai-std-tab-h)!important;padding:0 8px!important;}
 
-/* V8-1-14-364: 인트로 종료(revealing) 때 십자가 사진 확대 애니메이션을 재시작하지 않는다.
+/* V8-1-14-365: 인트로 종료(revealing) 때 십자가 사진 확대 애니메이션을 재시작하지 않는다.
    booting 단계에서만 .84→1로 커지고, revealing 단계는 최종 크기에서 opacity만 사라진다. */
 html.oai-cover-revealing::after{
   animation:none!important;
@@ -7188,7 +7061,7 @@ html.oai-cover-revealing::after{
   }
 }
 
-/* V8-1-14-364: Step 2 tablet top standard.
+/* V8-1-14-365: Step 2 tablet top standard.
    Native Android moves real tablets below the status bar. Inside the WebView, tablet pages must not add another top safe-area to primary tab/header surfaces.
    Fold devices do not receive oai-android-tablet, so Fold sizing stays on the restored baseline. */
 html.oai-android-tablet:not(.ios-device) #tabbar{
@@ -7215,12 +7088,12 @@ html.oai-android-tablet:not(.ios-device) .module-view.open{
   padding-top:0!important;
 }
 
-/* V8-1-14-364 Step 5: CSS cleanup baseline.
+/* V8-1-14-365 Step 5: CSS cleanup baseline.
    Route-choice and cover/mass-quick modal duplicated override chains were consolidated in their module CSS files. */
 
-/* V8-1-14-364: Fold 전환 아이보리 안정막은 Android native 한 곳에서만 처리한다. PWA overlay는 제거했다. */
+/* V8-1-14-365: Fold 전환 아이보리 안정막은 Android native 한 곳에서만 처리한다. PWA overlay는 제거했다. */
 
-/* V8-1-14-364: 성당/피정의집 내위치 버튼은 조금 아래로 내리되 바닥에는 붙이지 않는다. */
+/* V8-1-14-365: 성당/피정의집 내위치 버튼은 조금 아래로 내리되 바닥에는 붙이지 않는다. */
 html:not(.ios-device).parish-mode #app #loc-btn,
 html:not(.ios-device).retreat-mode #app #loc-btn{
   bottom:calc(var(--oai-android-bottom-gap, 10px) + 66px)!important;
@@ -7230,21 +7103,7 @@ html:not(.ios-device).oai-screen-compact-short.retreat-mode #app #loc-btn{
   bottom:calc(var(--oai-android-bottom-gap, 10px) + 62px)!important;
 }
 
-/* V8-1-14-364: 성지 인포카드/길찾기 결과 하단 여백과 버튼 글자 크기 미세 조정.
-   첫 사진의 6개 인포카드 버튼은 조금 작게, 카드/길찾기 시트의 하단 빈 공간은 줄인다. */
-#app #info-card #ic-tel-link,
-#app #info-card #ic-route-btn,
-#app #info-card #ic-hp,
-#app #info-card #ic-guide,
-#app #info-card #ic-goodnews,
-#app #info-card #ic-kakao-nav,
-#app #info-card .ic-tel-btn,
-#app #info-card .ic-route-btn,
-#app #info-card .ic-link-btn,
-#app #info-card .btn-kakao-nav{
-  font-size:calc(14.5px * var(--app-inner-font-scale,1))!important;
-  letter-spacing:-.035em!important;
-}
+/* V8-1-14-365: 성지 인포카드/길찾기 결과 하단 여백 정리. 버튼 글자 크기는 위의 인포카드 크기 기준 블록에 통합했다. */
 html:not(.ios-device) #app #info-card{
   padding-bottom:6px!important;
 }
@@ -7263,4 +7122,4 @@ html:not(.ios-device) #app #info-card .ic-body{
 html:not(.ios-device) #app #sheet-route{
   padding-bottom:6px!important;
 }
-
+/* V8-1-14-365 release cleanup: visible cover version kept during testing; hide only in final production release. */
