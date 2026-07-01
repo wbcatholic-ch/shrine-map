@@ -2183,7 +2183,7 @@ html.oai-cover-revealing #cover > * {
   width: 100%;
   margin: 0;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   align-items: stretch;
   justify-content: stretch;
   gap: var(--cover-action-gap);
@@ -2196,8 +2196,26 @@ html.oai-cover-revealing #cover > * {
   box-sizing: border-box;
 }
 html.app-active #cover-action-row { display: none; }
+#cover-action-row.cover-action-triple {
+  --cover-action-gap: clamp(4px, 1vw, 7px);
+  --cover-action-font: calc(12.6px * var(--app-font-scale, 1));
+}
+#cover-share-box {
+  display: flex;
+  align-items: stretch;
+  justify-content: stretch;
+  width: 100%;
+  min-width: 0;
+  height: var(--cover-action-h);
+  min-height: var(--cover-action-h);
+  max-height: var(--cover-action-h);
+  margin: 0;
+  box-sizing: border-box;
+}
+
 
 #cover-diocese-box,
+#cover-share-box,
 #cover-update-box {
   display: flex;
   align-items: stretch;
@@ -2213,10 +2231,13 @@ html.app-active #cover-action-row { display: none; }
   box-sizing: border-box;
 }
 #cover-diocese-box { grid-column: 1; }
-#cover-update-box { grid-column: 2; }
+#cover-share-box { grid-column: 2; }
+#cover-update-box { grid-column: 3; }
 
 #cover-update-btn,
+#cover-share-btn,
 #cover .cover-diocese-btn,
+#cover .cover-share-main-btn,
 #cover .cover-refresh-main-btn {
   position: relative;
   width: 100%;
@@ -2242,8 +2263,8 @@ html.app-active #cover-action-row { display: none; }
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
-  padding: 0 12px;
+  gap: 4px;
+  padding: 0 7px;
   box-shadow: 0 1px 2px rgba(31,42,68,.045), inset 0 1px 0 rgba(255,255,255,.96), inset 0 -7px 13px rgba(136,112,78,.13), inset 0 0 0 1px rgba(255,255,255,.34);
   user-select: none;
   -webkit-user-select: none;
@@ -2251,10 +2272,13 @@ html.app-active #cover-action-row { display: none; }
 }
 #cover-update-box.update-needed #cover-update-btn { background: #dc2626; color: var(--v4-surface-white); box-shadow: 0 10px 24px rgba(220,38,38,.22); }
 #cover-update-btn:active,
+#cover-share-btn:active,
 #cover .cover-diocese-btn:active,
+#cover .cover-share-main-btn:active,
 #cover .cover-refresh-main-btn:active { transform: translateY(2px) scale(.985); }
 #cover-update-btn:disabled { opacity: .62; }
 #cover .cover-diocese-btn::before,
+#cover .cover-share-main-btn::before,
 #cover .cover-refresh-main-btn::before {
   content: "";
   position: absolute;
@@ -2266,8 +2290,10 @@ html.app-active #cover-action-row { display: none; }
   opacity: .46;
 }
 #cover .cover-diocese-btn::before { background: #C94343; }
+#cover .cover-share-main-btn::before { background: #C9A24D; }
 #cover .cover-refresh-main-btn::before { background: #8D98A8; }
-#cover .cover-diocese-btn { color: var(--v4-header-navy); }
+#cover .cover-diocese-btn,
+#cover .cover-share-main-btn { color: var(--v4-header-navy); }
 #cover .cover-faith-cross {
   display: inline-flex;
   align-items: center;
@@ -2284,7 +2310,8 @@ html.app-active #cover-action-row { display: none; }
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-html.app-active #cover-diocese-box { display: none; }
+html.app-active #cover-diocese-box,
+html.app-active #cover-share-box { display: none; }
 
 html:not(.ios-device).oai-screen-compact-short #cover {
   --cover-action-h: var(--cover-action-h-compact);
@@ -5402,9 +5429,12 @@ html:not(.ios-device).oai-screen-compact-short .cover-emoji{
 }
 html:not(.ios-device).oai-screen-compact-short #cover-action-row,
 html:not(.ios-device).oai-screen-compact-short #cover-diocese-box,
+html:not(.ios-device).oai-screen-compact-short #cover-share-box,
 html:not(.ios-device).oai-screen-compact-short #cover-update-box,
 html:not(.ios-device).oai-screen-compact-short #cover-update-btn,
+html:not(.ios-device).oai-screen-compact-short #cover-share-btn,
 html:not(.ios-device).oai-screen-compact-short #cover .cover-diocese-btn,
+html:not(.ios-device).oai-screen-compact-short #cover .cover-share-main-btn,
 html:not(.ios-device).oai-screen-compact-short #cover .cover-refresh-main-btn{
   height:41px!important;
   min-height:41px!important;
@@ -5463,9 +5493,12 @@ html:not(.ios-device).oai-screen-fold-wide .cover-grid{
 }
 html:not(.ios-device).oai-screen-fold-wide #cover-action-row,
 html:not(.ios-device).oai-screen-fold-wide #cover-diocese-box,
+html:not(.ios-device).oai-screen-fold-wide #cover-share-box,
 html:not(.ios-device).oai-screen-fold-wide #cover-update-box,
 html:not(.ios-device).oai-screen-fold-wide #cover-update-btn,
+html:not(.ios-device).oai-screen-fold-wide #cover-share-btn,
 html:not(.ios-device).oai-screen-fold-wide #cover .cover-diocese-btn,
+html:not(.ios-device).oai-screen-fold-wide #cover .cover-share-main-btn,
 html:not(.ios-device).oai-screen-fold-wide #cover .cover-refresh-main-btn{
   height:50px!important;
   min-height:50px!important;

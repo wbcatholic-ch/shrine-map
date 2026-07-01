@@ -9362,6 +9362,50 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     try{ fn(); }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
+  function shareGildongmuApp(e) {
+    try{ if(e){ e.preventDefault(); e.stopPropagation(); } }catch(_e){}
+    var shareUrl = 'https://play.google.com/store/apps/details?id=kr.catholic.gildonmu';
+    var shareTitle = '가톨릭길동무';
+    var shareText = '가톨릭길동무 앱을 추천합니다.\n\n전국 성당, 성지, 피정의집, 순례길 정보를 한눈에 볼 수 있는 가톨릭 생활 앱입니다.\n\nGoogle Play에서 설치하기:\n' + shareUrl;
+    try{
+      if(window.GildongmuNative && typeof window.GildongmuNative.shareApp === 'function'){
+        window.GildongmuNative.shareApp(shareText);
+        return;
+      }
+    }catch(_bridgeErr){}
+    if(navigator.share){
+      navigator.share({ title: shareTitle, text: shareText, url: shareUrl }).catch(function(){});
+      return;
+    }
+    function copied(){
+      try{ alert('공유 링크를 복사했습니다. 카카오톡, 문자, 밴드 등에 붙여넣어 공유해 주세요.'); }catch(_e){}
+    }
+    try{
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(shareText).then(copied).catch(function(){ fallbackCopy(); });
+        return;
+      }
+    }catch(_clipErr){}
+    fallbackCopy();
+    function fallbackCopy(){
+      try{
+        var ta=document.createElement('textarea');
+        ta.value=shareText;
+        ta.setAttribute('readonly','readonly');
+        ta.style.position='fixed';
+        ta.style.left='-9999px';
+        ta.style.top='0';
+        document.body.appendChild(ta);
+        ta.focus();
+        ta.select();
+        try{ document.execCommand('copy'); }catch(_e){}
+        if(ta.parentNode) ta.parentNode.removeChild(ta);
+        copied();
+      }catch(copyErr){
+        try{ alert(shareText); }catch(_e){}
+      }
+    }
+  }
   function prepareSearchKeyboardInput(id) {
     var el = document.getElementById(id);
     if (!el) return null;
@@ -9537,6 +9581,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     on(refreshBtn, 'selectstart', preventNativePressMenu, {capture:true});
     on(refreshBtn, 'dragstart', preventNativePressMenu, {capture:true});
   })();
+  on('cover-share-btn', 'click', shareGildongmuApp);
   on('qna-cover-btn',  'click', function() { openQnaView(); });
 
   (function bindCoverMenu(){
