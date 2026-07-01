@@ -907,6 +907,11 @@ function oaiClearExternalNavigationState(opts){
     }, 260);
   }
   function onViewportChange(reason){
+    try{
+      if(window.__OAI_MAP_GESTURE_ACTIVE__ && isAppActive() && /resize|visualViewport|viewport/i.test(String(reason || ''))){
+        return;
+      }
+    }catch(_e){}
     var snap = viewportSnapshot();
     var w = snap.w || 0;
     if(!w) return;
@@ -5393,6 +5398,49 @@ function goToCover(){
   try{ if(typeof window.oaiRecalibrateCoverViewport === 'function') window.oaiRecalibrateCoverViewport('go-to-cover-force'); }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 
+
+var _oaiMapGestureTimer = 0;
+function _setMapGestureActive(reason, holdMs){
+  try{
+    window.__OAI_MAP_GESTURE_ACTIVE__ = true;
+    document.documentElement.classList.add('oai-map-gesture-active');
+    if(_oaiMapGestureTimer) clearTimeout(_oaiMapGestureTimer);
+    _oaiMapGestureTimer = setTimeout(function(){
+      try{
+        window.__OAI_MAP_GESTURE_ACTIVE__ = false;
+        document.documentElement.classList.remove('oai-map-gesture-active');
+      }catch(_e){}
+    }, holdMs || 320);
+  }catch(_e){}
+}
+function _installMapGestureStabilizer(){
+  try{
+    const mapEl = $('map');
+    if(!mapEl || mapEl.__oaiMapGestureStabilizerBound) return;
+    mapEl.__oaiMapGestureStabilizerBound = true;
+    mapEl.addEventListener('touchstart', function(e){
+      if(e.touches && e.touches.length >= 2) _setMapGestureActive('map-pinch-start', 760);
+    }, {passive:true});
+    mapEl.addEventListener('touchmove', function(e){
+      if(e.touches && e.touches.length >= 2) _setMapGestureActive('map-pinch-move', 760);
+    }, {passive:true});
+    mapEl.addEventListener('touchend', function(){ _setMapGestureActive('map-pinch-end', 300); }, {passive:true});
+    mapEl.addEventListener('touchcancel', function(){ _setMapGestureActive('map-pinch-cancel', 300); }, {passive:true});
+    mapEl.addEventListener('wheel', function(){ _setMapGestureActive('map-wheel', 420); }, {passive:true});
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+}
+function _installMapZoomRenderStabilizer(){
+  try{
+    _installMapGestureStabilizer();
+    if(_map && !_map.__oaiZoomRenderStabilizerBound && window.kakao && kakao.maps && kakao.maps.event){
+      _map.__oaiZoomRenderStabilizerBound = true;
+      kakao.maps.event.addListener(_map, 'zoom_changed', function(){
+        _setMapGestureActive('kakao-zoom-changed', 320);
+      });
+    }
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+}
+
 function _loadMap(){
   const wrap=$('map');
   if(wrap && !(wrap.querySelector && wrap.querySelector('.map-loading'))){
@@ -5424,6 +5472,7 @@ function _onMapReady(){
   _map=new kakao.maps.Map($('map'),{
   center:new _LL(36.2,127.9),level:8
   });
+  _installMapZoomRenderStabilizer();
   kakao.maps.event.addListener(_map,'click',()=>{
   closeInfoCard();
   document.activeElement?.blur();
@@ -5513,9 +5562,13 @@ function _closeRouteUiForNonRouteTab(){
 function zoomCategoryMap(delta){
   if(!_map || typeof _map.getLevel !== 'function' || typeof _map.setLevel !== 'function') return;
   try{
+    _setMapGestureActive('button-zoom-start', 420);
     const cur = _map.getLevel();
     const next = Math.max(1, Math.min(14, cur + delta));
-    if(next !== cur) _map.setLevel(next);
+    if(next !== cur){
+      _map.setLevel(next);
+      _setMapGestureActive('button-zoom-end', 420);
+    }
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 

@@ -493,7 +493,42 @@ html.retreat-mode #tab-list-lbl {
   bottom: 0;
   background: #e9e4dc;
 }
-#map { width: 100%; height: 100%; background: #e9e4dc; }
+#map {
+  width: 100%;
+  height: 100%;
+  background: #e9e4dc;
+  overflow: hidden;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+#map-wrap {
+  overflow: hidden;
+  contain: layout paint;
+  isolation: isolate;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+}
+html.oai-map-gesture-active #map,
+html.oai-map-gesture-active #map-wrap {
+  will-change: transform;
+}
+html.oai-map-gesture-active #loc-btn,
+html.oai-map-gesture-active #legend,
+html.oai-map-gesture-active #route-guide,
+html.oai-map-gesture-active #info-card,
+html.oai-map-gesture-active #map-wrap .map-category-close,
+html.oai-map-gesture-active #map-wrap .shrine-visit-map-filter,
+html.oai-map-gesture-active #app .sheet {
+  transition: none !important;
+  animation: none !important;
+}
+html.oai-map-gesture-active .dio-label {
+  transition: none !important;
+}
 
 #loc-btn {
   position: absolute;
