@@ -481,8 +481,8 @@ function oaiClearExternalNavigationState(opts){
   /* V8-1-14-367 Step 4:
      백그라운드 복귀 판단을 PWA 한 곳으로 통일한다.
      Android는 elapsed/forceCover 신호만 전달하고, 실제 cover 이동은 여기서만 결정한다.
-     30분 미만 복귀는 즉시 원화면 유지, 30분 이상 복귀만 아이보리 막 아래에서 cover로 정리한다. */
-  var COVER_BG_RETURN_MS = 30 * 60 * 1000;
+     10분 미만 복귀는 즉시 원화면 유지, 10분 이상 복귀는 인트로를 다시 재생한 뒤 cover로 정리한다. */
+  var COVER_BG_RETURN_MS = 10 * 60 * 1000;
   var BG_KEY = 'oai_bg_started_at_v356';
   var BG_TOKEN_KEY = 'oai_bg_token_v356';
   var SHORT_SUPPRESS_KEY = 'oai_short_background_return_until_v356';
@@ -647,14 +647,67 @@ function oaiClearExternalNavigationState(opts){
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
 
+  var _longIntroTimer = 0;
+  var _longIntroReleaseTimer = 0;
+
+  function playLongReturnIntro(reason){
+    try{
+      var root = document.documentElement;
+      var until = now() + 4300;
+      try{
+        sessionStorage.setItem('oai_background_intro_return_until', String(until));
+        localStorage.setItem('oai_background_intro_return_until', String(until));
+      }catch(_e){}
+      try{
+        root.classList.remove(
+          'oai-refresh-no-intro',
+          'oai-cover-revealing',
+          'oai-cover-booting',
+          'oai-stability-veil',
+          'oai-stability-veil-releasing',
+          'oai-resume-freeze',
+          'oai-resume-return-veil',
+          'oai-background-return-stabilizing',
+          'oai-background-return-stabilizing-release'
+        );
+        root.removeAttribute('data-oai-stability-reason');
+        root.removeAttribute('data-oai-resume-reason');
+        root.removeAttribute('data-oai-background-return-reason');
+        /* 같은 세션에서 다시 들어와도 ::after 애니메이션이 반드시 재시작되게 한다. */
+        void root.offsetWidth;
+        root.classList.add('oai-background-return-intro', 'oai-cover-booting');
+        root.setAttribute('data-oai-background-return-reason', String(reason || 'long-background'));
+        window.__OAI_EARLY_COVER_PHOTO_BOOT__ = true;
+      }catch(_e){}
+      clearTimeout(_longIntroTimer);
+      clearTimeout(_longIntroReleaseTimer);
+      _longIntroTimer = setTimeout(function(){
+        try{
+          root.classList.add('oai-cover-revealing');
+          root.classList.remove('oai-cover-booting');
+        }catch(_e){}
+        _longIntroReleaseTimer = setTimeout(function(){
+          try{
+            root.classList.remove('oai-cover-revealing','oai-background-return-intro');
+            root.removeAttribute('data-oai-background-return-reason');
+            sessionStorage.removeItem('oai_background_intro_return_until');
+            localStorage.removeItem('oai_background_intro_return_until');
+          }catch(_e){}
+        }, 1150);
+      }, 2100);
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }
+
   function applyCoverForLongReturn(reason){
     try{
       if(!isReturnableScreenActive()) { cancelBackgroundReturn(); return; }
       if(isExternalReturnContext()) { cancelBackgroundReturn(); return; }
+      /* 먼저 짧은 아이보리 막으로 현재 화면을 가리고, cover 정리 후 인트로 사진을 다시 태운다. */
       ensureLongReturnVeil();
       clearBgStamp();
       if(typeof goToCover === 'function') goToCover();
-      removeLongReturnVeil(140);
+      playLongReturnIntro(reason || 'long-return');
+      removeLongReturnVeil(90);
     }catch(e){ console.warn('[가톨릭길동무]', e); cancelBackgroundReturn(); }
   }
 
@@ -3275,9 +3328,9 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || (window.OAI_APP_BUILD_VERSION || window.APP_VERSION || 'V8-1-14-393');
+    var target = btn.getAttribute('data-target-version') || (window.OAI_APP_BUILD_VERSION || window.APP_VERSION || 'V8-1-14-394');
     var current = '';
-    /* V8-1-14-393:
+    /* V8-1-14-394:
        현재 화면의 실제 빌드 기준은 index.html이 먼저 선언한 OAI_APP_BUILD_VERSION/숨김 marker를 우선한다.
        늦게 로드되거나 캐시에 남은 sw-update.js의 APP_VERSION 값이 덮어써도 커버 버튼이 잘못 "업데이트 필요"로 바뀌지 않게 한다. */
     if(window.OAI_APP_BUILD_VERSION) current = String(window.OAI_APP_BUILD_VERSION).trim();
