@@ -526,7 +526,7 @@ html.oai-map-gesture-active #app .sheet {
   transition: none !important;
   animation: none !important;
 }
-/* V8-1-14-382: 성당·성지·피정의집 지도 확대/축소 중 마커 SVG와 교구 라벨을
+/* V8-1-14-384: 성당·성지·피정의집 지도 확대/축소 중 마커 SVG와 교구 라벨을
    잠깐 숨겨 Android WebView의 핀치 줌 재페인트 부담을 줄인다. */
 html.oai-map-gesture-active #map img[src^="data:image/svg+xml"],
 html.oai-map-gesture-active .dio-label {
@@ -7293,7 +7293,7 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
 }
 
 
-/* V8-1-14-382: 지도 정보카드/성지 상세정보 버튼을 흐린 테두리형에서 더 선명한 원색 계열로 조정. */
+/* V8-1-14-384: 지도 정보카드/성지 상세정보 버튼을 흐린 테두리형에서 더 선명한 원색 계열로 조정. */
 #app #info-card #ic-tel-link,
 #app #info-card .ic-tel-btn,
 #app .shrine-visit-detail-action-row.detail-primary-row > .detail-tel{

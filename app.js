@@ -3275,10 +3275,14 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || (window.APP_VERSION || 'V8-1-14-367');
+    var target = btn.getAttribute('data-target-version') || (window.OAI_APP_BUILD_VERSION || window.APP_VERSION || 'V8-1-14-384');
     var current = '';
-    if(window.APP_VERSION) current = String(window.APP_VERSION).trim();
+    /* V8-1-14-384:
+       현재 화면의 실제 빌드 기준은 index.html이 먼저 선언한 OAI_APP_BUILD_VERSION/숨김 marker를 우선한다.
+       늦게 로드되거나 캐시에 남은 sw-update.js의 APP_VERSION 값이 덮어써도 커버 버튼이 잘못 "업데이트 필요"로 바뀌지 않게 한다. */
+    if(window.OAI_APP_BUILD_VERSION) current = String(window.OAI_APP_BUILD_VERSION).trim();
     if(!current && marker) current = String(marker.textContent || '').trim();
+    if(!current && window.APP_VERSION) current = String(window.APP_VERSION).trim();
     if(!current) current = target;
     var mismatch = current !== target;
     btn.textContent = mismatch ? '업데이트 필요' : '새로고침';
@@ -5400,14 +5404,17 @@ function goToCover(){
 
 
 var _oaiMapGestureTimer = 0;
+var _oaiMapGestureLastReason = '';
 function _setMapGestureActive(reason, holdMs){
   try{
+    _oaiMapGestureLastReason = reason || '';
     window.__OAI_MAP_GESTURE_ACTIVE__ = true;
     document.documentElement.classList.add('oai-map-gesture-active');
     if(_oaiMapGestureTimer) clearTimeout(_oaiMapGestureTimer);
     _oaiMapGestureTimer = setTimeout(function(){
       try{
         window.__OAI_MAP_GESTURE_ACTIVE__ = false;
+        _oaiMapGestureLastReason = '';
         document.documentElement.classList.remove('oai-map-gesture-active');
       }catch(_e){}
     }, holdMs || 320);
@@ -5419,14 +5426,14 @@ function _installMapGestureStabilizer(){
     if(!mapEl || mapEl.__oaiMapGestureStabilizerBound) return;
     mapEl.__oaiMapGestureStabilizerBound = true;
     mapEl.addEventListener('touchstart', function(e){
-      if(e.touches && e.touches.length >= 2) _setMapGestureActive('map-pinch-start', 760);
+      if(e.touches && e.touches.length >= 2) _setMapGestureActive('map-pinch-start', 900);
     }, {passive:true});
     mapEl.addEventListener('touchmove', function(e){
-      if(e.touches && e.touches.length >= 2) _setMapGestureActive('map-pinch-move', 760);
+      if(e.touches && e.touches.length >= 2) _setMapGestureActive('map-pinch-move', 900);
     }, {passive:true});
-    mapEl.addEventListener('touchend', function(){ _setMapGestureActive('map-pinch-end', 300); }, {passive:true});
-    mapEl.addEventListener('touchcancel', function(){ _setMapGestureActive('map-pinch-cancel', 300); }, {passive:true});
-    mapEl.addEventListener('wheel', function(){ _setMapGestureActive('map-wheel', 420); }, {passive:true});
+    mapEl.addEventListener('touchend', function(){ _setMapGestureActive('map-pinch-end', 420); }, {passive:true});
+    mapEl.addEventListener('touchcancel', function(){ _setMapGestureActive('map-pinch-cancel', 420); }, {passive:true});
+    mapEl.addEventListener('wheel', function(){ _setMapGestureActive('map-wheel', 520); }, {passive:true});
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 function _installMapZoomRenderStabilizer(){
@@ -5435,7 +5442,7 @@ function _installMapZoomRenderStabilizer(){
     if(_map && !_map.__oaiZoomRenderStabilizerBound && window.kakao && kakao.maps && kakao.maps.event){
       _map.__oaiZoomRenderStabilizerBound = true;
       kakao.maps.event.addListener(_map, 'zoom_changed', function(){
-        _setMapGestureActive('kakao-zoom-changed', 320);
+        _setMapGestureActive('kakao-zoom-changed', 520);
       });
     }
   }catch(e){ console.warn('[가톨릭길동무]', e); }
