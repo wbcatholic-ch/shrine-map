@@ -5895,7 +5895,38 @@ html.oai-font-global .shrine-visit-floating-list-btn{
   flex-direction: column;
   overflow: hidden;
 }
-.privacy-policy-panel .privacy-policy-hero { flex: 0 0 auto; }
+.privacy-policy-panel .privacy-policy-hero {
+  flex: 0 0 auto;
+  margin: 0 0 10px;
+  padding: 0;
+  border-radius: 0;
+  background: transparent;
+  color: var(--v4-header-navy);
+  box-shadow: none;
+}
+.privacy-policy-panel .privacy-policy-hero .guide-badge {
+  display: inline-flex;
+  min-height: 24px;
+  padding: 0 10px;
+  margin: 0 0 10px;
+  border-radius: 999px;
+  background: #efe4d2;
+  color: #7a5a2b;
+  font-size: calc(11px * var(--app-font-scale));
+  line-height: 1.25;
+  font-weight: 900;
+  letter-spacing: -.02em;
+  text-align: center;
+}
+.privacy-policy-panel .privacy-policy-hero h2 {
+  margin: 0 46px 0 0;
+  min-height: 30px;
+  color: var(--v4-header-navy);
+  font-size: calc(20px * var(--app-font-scale));
+  line-height: 1.35;
+  font-weight: 900;
+  letter-spacing: -.03em;
+}
 .privacy-policy-frame {
   flex: 1 1 auto;
   min-height: 0;
