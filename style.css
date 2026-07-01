@@ -7093,14 +7093,14 @@ html.oai-android-tablet:not(.ios-device) .module-view.open{
 
 /* V8-1-14-367: Fold 전환 아이보리 안정막은 Android native 한 곳에서만 처리한다. PWA overlay는 제거했다. */
 
-/* V8-1-14-367: 성당/피정의집 내위치 버튼은 조금 아래로 내리되 바닥에는 붙이지 않는다. */
+/* V8-1-14-369: 성당/피정의집 내위치 버튼을 더 아래로 내려 지도 위에서 떠 보이는 위치를 완화한다. */
 html:not(.ios-device).parish-mode #app #loc-btn,
 html:not(.ios-device).retreat-mode #app #loc-btn{
-  bottom:calc(var(--oai-android-bottom-gap, 10px) + 66px)!important;
+  bottom:calc(var(--oai-android-bottom-gap, 10px) + 38px)!important;
 }
 html:not(.ios-device).oai-screen-compact-short.parish-mode #app #loc-btn,
 html:not(.ios-device).oai-screen-compact-short.retreat-mode #app #loc-btn{
-  bottom:calc(var(--oai-android-bottom-gap, 10px) + 62px)!important;
+  bottom:calc(var(--oai-android-bottom-gap, 10px) + 36px)!important;
 }
 
 /* V8-1-14-367: 성지 인포카드 하단 여백을 조금 되살려 마지막 버튼이 바닥에 붙어 보이지 않게 한다. */
