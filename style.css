@@ -7565,7 +7565,7 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
 }
 
 
-/* V8-1-14-395: 굿뉴스 성지안내 버튼 내부 흰색 고정. */
+/* V8-1-14-396: 굿뉴스 성지안내 버튼 내부 흰색 고정. */
 #app #info-card #ic-goodnews,
 #app #info-card .ic-goodnews-btn,
 #app .shrine-visit-detail-action.detail-goodnews,
@@ -7588,5 +7588,88 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
   background-color:transparent!important;
   background-image:none!important;
   box-shadow:none!important;
+}
+
+
+/* V8-1-14-396: 매일미사/주요기도문 상단바 정렬 보정. */
+/* 매일미사: 왼쪽 화살표 제거, 오른쪽 X 닫기 버튼으로 배치 */
+#missa-bar{
+  position:relative!important;
+  justify-content:center!important;
+  padding-left:14px!important;
+  padding-right:14px!important;
+}
+#missa-bar-title{
+  flex:1 1 auto!important;
+  text-align:left!important;
+  font-size:18px!important;
+  font-weight:900!important;
+  color:#6f4f23!important;
+}
+#missa-close{
+  margin-left:auto!important;
+  margin-right:0!important;
+  width:44px!important;
+  height:44px!important;
+  min-width:44px!important;
+  border-radius:999px!important;
+  border:2px solid #8a6a38!important;
+  background:#fffaf1!important;
+  color:#1f2a44!important;
+  font-size:34px!important;
+  font-weight:800!important;
+  line-height:1!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  box-shadow:0 2px 7px rgba(31,42,68,.08)!important;
+}
+#missa-close i{display:none!important;}
+
+/* 주요기도문: 웹사이트 헤더처럼 왼쪽 십자가 박스, 오른쪽 X */
+#prayer-bar{
+  justify-content:flex-start!important;
+  align-items:center!important;
+  gap:10px!important;
+}
+#prayer-bar .module-bar-main{
+  order:0!important;
+  flex:1 1 auto!important;
+  min-width:0!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:10px!important;
+}
+#prayer-bar .module-bar-ico{
+  display:flex!important;
+  width:44px!important;
+  height:44px!important;
+  min-width:44px!important;
+  border-radius:14px!important;
+  background:rgba(255,255,255,.14)!important;
+  border:1px solid rgba(255,255,255,.22)!important;
+  color:#ffffff!important;
+  align-items:center!important;
+  justify-content:center!important;
+  font-size:25px!important;
+  font-weight:900!important;
+}
+#prayer-bar .module-bar-txt{
+  min-width:0!important;
+}
+#goodnews-prayer-btn{
+  order:1!important;
+  margin-left:4px!important;
+  margin-right:6px!important;
+  flex:0 0 auto!important;
+  transform:translateX(-6px)!important;
+}
+#prayer-close,
+#prayer-bar .module-close{
+  order:2!important;
+  margin-left:0!important;
+  margin-right:0!important;
+  flex:0 0 auto!important;
+  color:#d5b86d!important;
 }
 
