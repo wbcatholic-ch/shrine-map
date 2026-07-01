@@ -10,7 +10,7 @@
   --oai-modal-standard-ink: #172033;
 }
 
-/* V8-1-14-366 Step 5: cover guide / mass quick modal CSS consolidated.
+/* V8-1-14-367 Step 5: cover guide / mass quick modal CSS consolidated.
    Removed old gradient overrides and repeated button reset blocks. */
 .cover-menu-panel,
 #cover #mass-quick-modal .mass-quick-panel {
@@ -159,7 +159,7 @@
   letter-spacing: -.035em !important;
   text-align: left !important;
 }
-/* V8-1-14-366: menu / mass quick use share the compact visual palette on every screen size.
+/* V8-1-14-367: menu / mass quick use share the compact visual palette on every screen size.
    Keep menu category accent borders, but do not color the mass quick sub-buttons like a separate compact test style. */
 #cover-menu-guide-btn { border-color: #9CC9F5 !important; }
 #cover-menu-privacy-btn { border-color: #D7C4F2 !important; }
