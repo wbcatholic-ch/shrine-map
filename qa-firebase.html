@@ -532,6 +532,60 @@
     box-shadow:0 0 0 2px rgba(212,170,106,.16) !important;
   }
 
+
+  /* V8-1-14-377: 문의·건의 글쓰기 안내문구 크기 조정 - 주요기능 화면 기준으로 연한 안내 글자를 더 작고 안정적으로 표시 */
+  #write-view .field-label {
+    font-size: 15px !important;
+    line-height: 1.35 !important;
+  }
+  #f-title {
+    font-size: 15px !important;
+    line-height: 1.5 !important;
+  }
+  #f-title::placeholder {
+    font-size: 15px !important;
+    line-height: 1.5 !important;
+    color: #A4AAB4 !important;
+  }
+  #f-content {
+    font-size: 15px !important;
+    line-height: 1.55 !important;
+    min-height: 178px !important;
+    padding: 12px 14px !important;
+  }
+  #f-content::placeholder {
+    font-size: 14px !important;
+    line-height: 1.55 !important;
+    color: #A4AAB4 !important;
+    opacity: 1 !important;
+    font-weight: 500 !important;
+  }
+  .char-count {
+    font-size: 14px !important;
+    line-height: 1.35 !important;
+    margin-top: 5px !important;
+  }
+  .notice-txt {
+    font-size: 14px !important;
+    line-height: 1.55 !important;
+    color: #A4AAB4 !important;
+    letter-spacing: -.02em !important;
+  }
+  html.oai-screen-compact-short #f-content {
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+    min-height: 168px !important;
+    padding: 11px 12px !important;
+  }
+  html.oai-screen-compact-short #f-content::placeholder {
+    font-size: 13px !important;
+    line-height: 1.5 !important;
+  }
+  html.oai-screen-compact-short .notice-txt,
+  html.oai-screen-compact-short .char-count {
+    font-size: 13px !important;
+  }
+
 </style>
 
 <style id="oai-touch-ux-standard-20260506">
@@ -1073,11 +1127,11 @@ function oaiReturnToAppCover(reason){
   try{
     var url = new URL('index.html', location.href);
     url.searchParams.set('oai_cover_return', reason || 'qna-return-cover');
-    url.searchParams.set('v', 'V8-1-14-367');
+    url.searchParams.set('v', 'V8-1-14-377');
     location.replace(url.href);
     return;
   }catch(e){
-    location.replace('index.html?oai_cover_return=' + encodeURIComponent(reason || 'qna-return-cover') + '&v=V8-1-14-367');
+    location.replace('index.html?oai_cover_return=' + encodeURIComponent(reason || 'qna-return-cover') + '&v=V8-1-14-377');
   }
 }
 function handleQaBack(){
@@ -1125,7 +1179,7 @@ if (QA_PRIVATE_MODE) {
 <script id="oai-cache-lifecycle-V8-1-14-367">
 (function(){
   'use strict';
-  var APP_VERSION = 'V8-1-14-367';
+  var APP_VERSION = 'V8-1-14-377';
   if('serviceWorker' in navigator){
     try{ navigator.serviceWorker.register('./sw.js?v=' + encodeURIComponent(APP_VERSION)).then(function(reg){try{reg.update();}catch(e){}}).catch(function(){}); }catch(e){}
   }
