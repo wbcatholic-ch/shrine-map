@@ -893,7 +893,7 @@ html.retreat-mode .region-search-btn {
   border-bottom: 1px solid var(--ui-line);
   position: sticky;
   top: 0;
-  z-index: 1;
+  z-index: 64;
   color: #b65a59;
 }
 
@@ -4057,7 +4057,7 @@ html.parish-mode #list-body .dio-hd:first-child{
 }
 #list-body .list-item:first-of-type,
 #list-body .nearby-item:first-of-type{
-  margin-top:0 !important;
+  margin-top:8px !important;
 }
 
 #diocese-frame{
@@ -4201,7 +4201,7 @@ html.oai-font-global .li-pilgrim-register{font-size:calc(12px * var(--app-inner-
 .shrine-visit-map-filter button[data-shrine-visit-filter="visited"]{min-width:102px}
 .shrine-visit-map-filter button[data-shrine-visit-filter="unvisited"]{min-width:92px}
 
-.li-pilgrim-register{position:relative!important;z-index:30!important;pointer-events:auto!important;touch-action:manipulation!important}
+.li-pilgrim-register{position:relative!important;z-index:2!important;pointer-events:auto!important;touch-action:manipulation!important}
 .li-side{pointer-events:auto!important}
 
 #info-card .ic-meta{align-items:center!important;justify-content:space-between!important;gap:10px!important;padding-top:0!important;padding-bottom:6px!important}
@@ -5145,6 +5145,20 @@ html.oai-font-global .shrine-auto-visit-dist{font-size:calc(15px * var(--app-inn
 #list-body,
 #sm-results,
 #sheet-list .sheet-body{
+  position:relative!important;
+  z-index:1!important;
+}
+
+html:not(.parish-mode):not(.retreat-mode) #app #sheet-list.open #list-body{
+  padding-bottom:calc(156px + env(safe-area-inset-bottom,0px))!important;
+}
+html:not(.parish-mode):not(.retreat-mode) #app #list-body .dio-hd{
+  z-index:64!important;
+}
+html:not(.parish-mode):not(.retreat-mode) #app #list-body .li-pilgrim-register{
+  z-index:2!important;
+}
+html:not(.parish-mode):not(.retreat-mode) #app #list-body .list-item{
   position:relative!important;
   z-index:1!important;
 }
