@@ -2294,6 +2294,14 @@ html.app-active #cover-action-row { display: none; }
 #cover .cover-refresh-main-btn::before { background: #8D98A8; }
 #cover .cover-diocese-btn,
 #cover .cover-share-main-btn { color: var(--v4-header-navy); }
+/* V8-1-14-374: 가운데 공유 버튼 문구가 길어져도 3버튼 한 줄에서 잘리지 않도록 조정 */
+#cover .cover-share-main-btn{
+  font-size:calc(var(--cover-action-font) * .88);
+  letter-spacing:-.075em;
+  padding-left:4px;
+  padding-right:4px;
+}
+
 #cover .cover-faith-cross {
   display: inline-flex;
   align-items: center;
