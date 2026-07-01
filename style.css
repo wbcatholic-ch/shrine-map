@@ -7293,7 +7293,7 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
 }
 
 
-/* V8-1-14-388: 버튼 내부는 완전 흰색 유지, 파란색 테두리는 더 원색에 가깝게 조정. */
+/* V8-1-14-389: 4번 스타일로 복귀. 버튼 내부는 흰색, 모든 버튼 테두리는 같은 연한 파란색으로 통일. */
 #app #info-card #ic-tel-link,
 #app #info-card .ic-tel-btn,
 #app #info-card #ic-route-btn,
@@ -7316,8 +7316,8 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
   background-color:#ffffff!important;
   background-image:none!important;
   color:#1f2a44!important;
-  border:2.2px solid #006fe6!important;
-  box-shadow:0 2px 7px rgba(0,111,230,.11)!important;
+  border:2.2px solid #9db7cc!important;
+  box-shadow:0 2px 7px rgba(157,183,204,.12)!important;
 }
 #app #info-card #ic-tel-link::before,
 #app #info-card .ic-tel-btn::before,
@@ -7358,7 +7358,7 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
 }
 
 
-/* V8-1-14-388: 커버 하단 3버튼과 아래 안내문구 사이 여백 축소. */
+/* V8-1-14-389: 커버 하단 3버튼과 아래 안내문구 사이 여백 축소 유지. */
 #cover .cover-bottom-actions,
 #cover .cover-utility-actions,
 #cover .cover-bottom-buttons,
