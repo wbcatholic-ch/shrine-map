@@ -3,14 +3,14 @@
   --oai-modal-standard-head: #1F2937;
   --oai-modal-standard-head-text: #FFFDF7;
   --oai-modal-standard-sub: rgba(255,255,255,.82);
-  --oai-modal-standard-panel: #F5F1E8;
-  --oai-modal-standard-box: #FFFDF7;
+  --oai-modal-standard-panel: #FFF8EA;
+  --oai-modal-standard-box: #FFFDF8;
   --oai-modal-standard-box-press: #FAF1E3;
-  --oai-modal-standard-line: rgba(148,163,184,.90);
+  --oai-modal-standard-line: #CBD5E1;
   --oai-modal-standard-ink: #172033;
 }
 
-/* V8-1-14-365 Step 5: cover guide / mass quick modal CSS consolidated.
+/* V8-1-14-366 Step 5: cover guide / mass quick modal CSS consolidated.
    Removed old gradient overrides and repeated button reset blocks. */
 .cover-menu-panel,
 #cover #mass-quick-modal .mass-quick-panel {
@@ -20,7 +20,10 @@
   width: min(370px, calc(100vw - 32px)) !important;
   padding: 22px 18px 20px !important;
   border-radius: 24px !important;
-  background: var(--oai-modal-standard-panel) !important;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255,239,198,.82) 0%, rgba(255,239,198,.30) 35%, transparent 60%),
+    radial-gradient(circle at 86% 92%, rgba(214,165,48,.20) 0%, rgba(214,165,48,.10) 34%, transparent 62%),
+    linear-gradient(145deg, #FFFDF7 0%, #FFF8EA 58%, #F3E1BA 100%) !important;
   border: 1.8px solid rgba(196,161,92,.72) !important;
   box-shadow: 0 24px 54px rgba(58,47,34,.20), inset 0 1px 0 rgba(255,255,255,.92) !important;
   color: var(--oai-modal-standard-ink) !important;
@@ -156,14 +159,16 @@
   letter-spacing: -.035em !important;
   text-align: left !important;
 }
+/* V8-1-14-366: menu / mass quick use share the compact visual palette on every screen size.
+   Keep menu category accent borders, but do not color the mass quick sub-buttons like a separate compact test style. */
 #cover-menu-guide-btn { border-color: #9CC9F5 !important; }
 #cover-menu-privacy-btn { border-color: #D7C4F2 !important; }
 #cover-menu-qna-btn { border-color: #A9DDB7 !important; }
 #cover #mass-quick-missa,
 #cover #mass-quick-modal .mass-quick-primary { border-color: #D2A10D !important; }
-#cover #mass-quick-prayer { border-color: #26956E !important; }
-#cover #mass-quick-hymn { border-color: #C45284 !important; }
-#cover #mass-quick-bible { border-color: #5E7FA5 !important; }
+#cover #mass-quick-prayer,
+#cover #mass-quick-hymn,
+#cover #mass-quick-bible { border-color: #CBD5E1 !important; }
 
 html:not(.ios-device).oai-screen-compact-short .cover-menu-panel,
 html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-panel {

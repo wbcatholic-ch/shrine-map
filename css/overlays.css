@@ -79,7 +79,7 @@ html.pr-external-guide-active.oai-stability-veil::after {
   display: none !important;
 }
 
-/* V8-1-14-365 Step 5: route choice modal CSS consolidated.
+/* V8-1-14-366 Step 5: route choice modal CSS consolidated.
    The duplicated button size/border/color overrides were merged into this single block. */
 #route-choice-modal{
   position:fixed;
