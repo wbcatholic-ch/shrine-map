@@ -41,7 +41,7 @@
 .my-faith-empty { padding:18px 10px !important; text-align:center !important; color:var(--v4-text-muted) !important; font-size:calc(13px * var(--app-font-scale,1)) !important; font-weight:750 !important; }
 .my-faith-inline-confirm { width:100% !important; margin:10px 0 6px !important; display:flex !important; align-items:center !important; justify-content:center !important; }
 .my-faith-confirm-btn { width:100% !important; min-height:50px !important; border:1px solid var(--v4-text-strong) !important; border-radius:15px !important; background:var(--v4-text-main) !important; color:var(--v4-surface-white) !important; font-family:inherit !important; font-size:calc(16px * var(--app-font-scale,1)) !important; font-weight:900 !important; }
-.my-faith-inline-privacy-note { margin:2px 4px 0 !important; padding:12px 14px calc(env(safe-area-inset-bottom,0px) + 8px) !important; color:rgba(95,85,73,.62) !important; text-align:center !important; font-size:calc(16px * var(--app-font-scale,1)) !important; line-height:1.45 !important; font-weight:650 !important; word-break:keep-all !important; }
+.my-faith-inline-privacy-note { margin:2px 4px 0 !important; padding:10px 14px calc(env(safe-area-inset-bottom,0px) + 8px) !important; color:rgba(95,85,73,.62) !important; text-align:center !important; font-size:calc(13px * var(--app-font-scale,1)) !important; line-height:1.42 !important; font-weight:650 !important; word-break:keep-all !important; }
 .my-diocese-panel > .my-faith-privacy-note { display:none !important; }
 .my-diocese-modal.keyboard-open .my-faith-inline-privacy-note,
 .my-diocese-modal.keyboard-open .my-faith-inline-confirm { display:none !important; }
@@ -110,6 +110,8 @@ html:not(.ios-device).oai-screen-compact-short .my-diocese-list{grid-template-co
 .my-faith-body.my-faith-home-list-body .my-faith-inline-privacy-note {
   margin: 0 4px !important;
   padding: 8px 12px max(10px, env(safe-area-inset-bottom, 0px)) !important;
+  font-size: calc(13px * var(--app-font-scale,1)) !important;
+  line-height: 1.42 !important;
   flex: 0 0 auto !important;
 }
 
