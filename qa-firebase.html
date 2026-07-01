@@ -533,7 +533,7 @@
   }
 
 
-  /* V8-1-14-384: 문의·건의 글쓰기 안내문구 크기 조정 - 주요기능 화면 기준으로 연한 안내 글자를 더 작고 안정적으로 표시 */
+  /* V8-1-14-385: 문의·건의 글쓰기 안내문구 크기 조정 - 주요기능 화면 기준으로 연한 안내 글자를 더 작고 안정적으로 표시 */
   #write-view .field-label {
     font-size: 15px !important;
     line-height: 1.35 !important;
@@ -1127,11 +1127,11 @@ function oaiReturnToAppCover(reason){
   try{
     var url = new URL('index.html', location.href);
     url.searchParams.set('oai_cover_return', reason || 'qna-return-cover');
-    url.searchParams.set('v', 'V8-1-14-384');
+    url.searchParams.set('v', 'V8-1-14-385');
     location.replace(url.href);
     return;
   }catch(e){
-    location.replace('index.html?oai_cover_return=' + encodeURIComponent(reason || 'qna-return-cover') + '&v=V8-1-14-384');
+    location.replace('index.html?oai_cover_return=' + encodeURIComponent(reason || 'qna-return-cover') + '&v=V8-1-14-385');
   }
 }
 function handleQaBack(){
@@ -1179,7 +1179,7 @@ if (QA_PRIVATE_MODE) {
 <script id="oai-cache-lifecycle-V8-1-14-367">
 (function(){
   'use strict';
-  var APP_VERSION = 'V8-1-14-384';
+  var APP_VERSION = 'V8-1-14-385';
   if('serviceWorker' in navigator){
     try{ navigator.serviceWorker.register('./sw.js?v=' + encodeURIComponent(APP_VERSION)).then(function(reg){try{reg.update();}catch(e){}}).catch(function(){}); }catch(e){}
   }

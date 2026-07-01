@@ -526,7 +526,7 @@ html.oai-map-gesture-active #app .sheet {
   transition: none !important;
   animation: none !important;
 }
-/* V8-1-14-384: 성당·성지·피정의집 지도 확대/축소 중 마커 SVG와 교구 라벨을
+/* V8-1-14-385: 성당·성지·피정의집 지도 확대/축소 중 마커 SVG와 교구 라벨을
    잠깐 숨겨 Android WebView의 핀치 줌 재페인트 부담을 줄인다. */
 html.oai-map-gesture-active #map img[src^="data:image/svg+xml"],
 html.oai-map-gesture-active .dio-label {
@@ -7293,58 +7293,58 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
 }
 
 
-/* V8-1-14-384: 지도 정보카드/성지 상세정보 버튼을 흐린 테두리형에서 더 선명한 원색 계열로 조정. */
+/* V8-1-14-385: 지도 정보카드/성지 상세정보 버튼은 흰색 바탕을 유지하고, 테두리만 더 진하게 조정. */
 #app #info-card #ic-tel-link,
 #app #info-card .ic-tel-btn,
 #app .shrine-visit-detail-action-row.detail-primary-row > .detail-tel{
-  background:linear-gradient(180deg,#1fa37a 0%,#0f766e 100%)!important;
-  color:#ffffff!important;
+  background:#ffffff!important;
+  color:#172033!important;
   border:2.5px solid #0f766e!important;
-  box-shadow:0 4px 11px rgba(15,118,110,.26), inset 0 1px 0 rgba(255,255,255,.22)!important;
+  box-shadow:0 3px 9px rgba(15,118,110,.14), inset 0 1px 0 rgba(255,255,255,.9)!important;
 }
 #app #info-card #ic-tel-link .ic-tel-icon,
 #app .shrine-visit-detail-action-row.detail-primary-row > .detail-tel .detail-tel-icon{
-  color:#ffffff!important;
+  color:#172033!important;
 }
 #app #info-card #ic-route-btn,
 #app #info-card .ic-route-btn,
 #app .shrine-visit-detail-action-row.detail-primary-row > .detail-route{
-  background:linear-gradient(180deg,#263754 0%,#101827 100%)!important;
-  color:#ffffff!important;
-  border:2.5px solid #101827!important;
-  box-shadow:0 4px 11px rgba(16,24,39,.28), inset 0 1px 0 rgba(255,255,255,.18)!important;
+  background:#ffffff!important;
+  color:#172033!important;
+  border:2.5px solid #182238!important;
+  box-shadow:0 3px 9px rgba(24,34,56,.16), inset 0 1px 0 rgba(255,255,255,.9)!important;
 }
 #app #info-card #ic-hp,
 #app #info-card .ic-hp-btn,
 #app .shrine-visit-detail-action-row.detail-link-row > .detail-home{
-  background:linear-gradient(180deg,#22a64f 0%,#15803d 100%)!important;
-  color:#ffffff!important;
+  background:#ffffff!important;
+  color:#172033!important;
   border:2.5px solid #15803d!important;
-  box-shadow:0 4px 11px rgba(21,128,61,.24), inset 0 1px 0 rgba(255,255,255,.20)!important;
+  box-shadow:0 3px 9px rgba(21,128,61,.14), inset 0 1px 0 rgba(255,255,255,.9)!important;
 }
 #app #info-card #ic-guide,
 #app #info-card .ic-guide-btn,
 #app .shrine-visit-detail-action-row.detail-link-row > .detail-guide{
-  background:linear-gradient(180deg,#4f83ff 0%,#2563eb 100%)!important;
-  color:#ffffff!important;
+  background:#ffffff!important;
+  color:#172033!important;
   border:2.5px solid #2563eb!important;
-  box-shadow:0 4px 11px rgba(37,99,235,.24), inset 0 1px 0 rgba(255,255,255,.20)!important;
+  box-shadow:0 3px 9px rgba(37,99,235,.14), inset 0 1px 0 rgba(255,255,255,.9)!important;
 }
 #app #info-card #ic-goodnews,
 #app #info-card .ic-goodnews-btn,
 #app .shrine-visit-detail-action-row.detail-kakao-row > .detail-goodnews{
-  background:linear-gradient(180deg,#20aeea 0%,#0284c7 100%)!important;
-  color:#ffffff!important;
+  background:#ffffff!important;
+  color:#172033!important;
   border:2.5px solid #0284c7!important;
-  box-shadow:0 4px 11px rgba(2,132,199,.24), inset 0 1px 0 rgba(255,255,255,.20)!important;
+  box-shadow:0 3px 9px rgba(2,132,199,.14), inset 0 1px 0 rgba(255,255,255,.9)!important;
 }
 #app #info-card #ic-kakao-nav,
 #app #info-card .btn-kakao-nav,
 #app .shrine-visit-detail-action-row.detail-kakao-row > .detail-kakao{
-  background:linear-gradient(180deg,#ffec3d 0%,#fee500 100%)!important;
-  color:#281800!important;
+  background:#ffffff!important;
+  color:#172033!important;
   border:2.5px solid #d6a900!important;
-  box-shadow:0 4px 11px rgba(214,169,0,.26), inset 0 1px 0 rgba(255,255,255,.36)!important;
+  box-shadow:0 3px 9px rgba(214,169,0,.16), inset 0 1px 0 rgba(255,255,255,.9)!important;
 }
 #app #info-card #ic-tel-link:active,
 #app #info-card #ic-route-btn:active,
@@ -7358,6 +7358,8 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
 #app .shrine-visit-detail-action-row.detail-link-row > .detail-guide:active,
 #app .shrine-visit-detail-action-row.detail-kakao-row > .detail-goodnews:active,
 #app .shrine-visit-detail-action-row.detail-kakao-row > .detail-kakao:active{
-  filter:brightness(.92)!important;
+  background:#f6f8fb!important;
+  filter:none!important;
   transform:translateY(1px)!important;
 }
+
