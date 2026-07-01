@@ -7564,3 +7564,29 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
   row-gap:8px!important;
 }
 
+
+/* V8-1-14-395: 굿뉴스 성지안내 버튼 내부 흰색 고정. */
+#app #info-card #ic-goodnews,
+#app #info-card .ic-goodnews-btn,
+#app .shrine-visit-detail-action.detail-goodnews,
+#app .shrine-visit-detail-action-row.detail-kakao-row > .detail-goodnews{
+  background:#ffffff!important;
+  background-color:#ffffff!important;
+  background-image:none!important;
+  color:#1f2a44!important;
+  border-color:#5e96c6!important;
+}
+#app #info-card #ic-goodnews::before,
+#app #info-card .ic-goodnews-btn::before,
+#app .shrine-visit-detail-action.detail-goodnews::before,
+#app .shrine-visit-detail-action-row.detail-kakao-row > .detail-goodnews::before,
+#app #info-card #ic-goodnews::after,
+#app #info-card .ic-goodnews-btn::after,
+#app .shrine-visit-detail-action.detail-goodnews::after,
+#app .shrine-visit-detail-action-row.detail-kakao-row > .detail-goodnews::after{
+  background:transparent!important;
+  background-color:transparent!important;
+  background-image:none!important;
+  box-shadow:none!important;
+}
+
