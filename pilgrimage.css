@@ -131,3 +131,31 @@ html:not(.ios-device).oai-screen-compact-short #trail-close-btn,
 html:not(.ios-device).oai-screen-compact-short .trail-sh-close{
   width:34px!important;height:34px!important;min-width:34px!important;flex-basis:34px!important;
 }
+
+
+/* V8-1-14-390: 순례 스탬프북 카드 선명도 보강. */
+.pilgrimage-summary,.stamp-summary,.stampbook-summary,.pilgrim-summary{
+  border:2.4px solid #1d7fc5!important;
+  background:#eef7ff!important;
+  color:#113b5d!important;
+  box-shadow:0 3px 10px rgba(29,127,197,.12)!important;
+}
+.pilgrimage-card,.stamp-card,.pilgrim-card,.shrine-visit-card,.stampbook-card{
+  background:#fff!important;
+  box-shadow:0 3px 10px rgba(31,42,68,.07)!important;
+}
+.pilgrimage-card.visited,.stamp-card.visited,.pilgrim-card.visited,.shrine-visit-card.visited,.stampbook-card.visited{
+  border:2.2px solid #1d8ed6!important;
+}
+.pilgrimage-card.unvisited,.stamp-card.unvisited,.pilgrim-card.unvisited,.shrine-visit-card.unvisited,.stampbook-card.unvisited,
+.pilgrimage-card.new,.stamp-card.new,.pilgrim-card.new,.shrine-visit-card.new,.stampbook-card.new{
+  border:2.2px solid #45b99a!important;
+}
+.visit-status,.stamp-status,.pilgrimage-card .status,.stamp-card .status,.pilgrim-card .status,.shrine-visit-card .status,.stampbook-card .status{
+  background:#fff!important;
+  color:#1f2a44!important;
+  border:1.6px solid #b9c7d3!important;
+  box-shadow:0 1px 4px rgba(31,42,68,.07)!important;
+  font-weight:900!important;
+}
+

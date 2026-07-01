@@ -7389,3 +7389,132 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
   margin-bottom:0!important;
 }
 
+
+/* V8-1-14-390: 순례 스탬프북 카드/상세 버튼 선명도 강화. */
+#app .pilgrimage-summary,
+#app .stamp-summary,
+#app .stampbook-summary,
+#app .pilgrim-summary{
+  border:2.4px solid #1d7fc5!important;
+  background:#eef7ff!important;
+  color:#113b5d!important;
+  box-shadow:0 3px 10px rgba(29,127,197,.12)!important;
+}
+#app .pilgrimage-card,
+#app .stamp-card,
+#app .pilgrim-card,
+#app .shrine-visit-card,
+#app .stampbook-card{
+  background:#ffffff!important;
+  box-shadow:0 3px 10px rgba(31,42,68,.07)!important;
+}
+#app .pilgrimage-card.visited,
+#app .stamp-card.visited,
+#app .pilgrim-card.visited,
+#app .shrine-visit-card.visited,
+#app .stampbook-card.visited{
+  border:2.2px solid #1d8ed6!important;
+}
+#app .pilgrimage-card.unvisited,
+#app .stamp-card.unvisited,
+#app .pilgrim-card.unvisited,
+#app .shrine-visit-card.unvisited,
+#app .stampbook-card.unvisited{
+  border:2.2px solid #45b99a!important;
+}
+#app .pilgrimage-card.new,
+#app .stamp-card.new,
+#app .pilgrim-card.new,
+#app .shrine-visit-card.new,
+#app .stampbook-card.new{
+  border:2.2px solid #45b99a!important;
+}
+#app .pilgrimage-card .diocese,
+#app .stamp-card .diocese,
+#app .pilgrim-card .diocese,
+#app .shrine-visit-card .diocese,
+#app .stampbook-card .diocese,
+#app .pilgrimage-card .card-diocese,
+#app .stamp-card .card-diocese,
+#app .pilgrim-card .card-diocese,
+#app .shrine-visit-card .card-diocese,
+#app .stampbook-card .card-diocese{
+  color:#59636e!important;
+  font-weight:900!important;
+}
+#app .pilgrimage-card .name,
+#app .stamp-card .name,
+#app .pilgrim-card .name,
+#app .shrine-visit-card .name,
+#app .stampbook-card .name,
+#app .pilgrimage-card .card-title,
+#app .stamp-card .card-title,
+#app .pilgrim-card .card-title,
+#app .shrine-visit-card .card-title,
+#app .stampbook-card .card-title{
+  color:#101827!important;
+  font-weight:950!important;
+}
+#app .pilgrimage-card .status,
+#app .stamp-card .status,
+#app .pilgrim-card .status,
+#app .shrine-visit-card .status,
+#app .stampbook-card .status,
+#app .visit-status,
+#app .stamp-status{
+  background:#ffffff!important;
+  color:#1f2a44!important;
+  border:1.6px solid #b9c7d3!important;
+  box-shadow:0 1px 4px rgba(31,42,68,.07)!important;
+  font-weight:900!important;
+}
+#app .pilgrimage-card .status.unvisited,
+#app .stamp-card .status.unvisited,
+#app .pilgrim-card .status.unvisited,
+#app .shrine-visit-card .status.unvisited,
+#app .stampbook-card .status.unvisited,
+#app .visit-status.unvisited,
+#app .stamp-status.unvisited{
+  background:#ffffff!important;
+  color:#1f2a44!important;
+  border-color:#b9c7d3!important;
+}
+#app .pilgrimage-card .status.new,
+#app .stamp-card .status.new,
+#app .pilgrim-card .status.new,
+#app .shrine-visit-card .status.new,
+#app .stampbook-card .status.new,
+#app .visit-status.new,
+#app .stamp-status.new{
+  background:#f5eaff!important;
+  color:#7140a8!important;
+  border-color:#d1b5ed!important;
+}
+#app .pilgrimage-card .type-badge,
+#app .stamp-card .type-badge,
+#app .pilgrim-card .type-badge,
+#app .shrine-visit-card .type-badge,
+#app .stampbook-card .type-badge,
+#app .shrine-type-badge{
+  background:#ffffff!important;
+  font-weight:900!important;
+  border-width:1.8px!important;
+  box-shadow:0 1px 5px rgba(31,42,68,.08)!important;
+}
+#app .shrine-visit-detail-info{
+  border:2.2px solid #9db7cc!important;
+  background:#ffffff!important;
+}
+#app .shrine-visit-detail-action{
+  background:#ffffff!important;
+  background-image:none!important;
+  color:#1f2a44!important;
+  border:2.2px solid #9db7cc!important;
+  box-shadow:0 2px 7px rgba(157,183,204,.12)!important;
+}
+#app .shrine-visit-detail-action.detail-goodnews{
+  background:#ffffff!important;
+  color:#1f2a44!important;
+  border-color:#9db7cc!important;
+}
+
