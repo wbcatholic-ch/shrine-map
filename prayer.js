@@ -710,55 +710,122 @@ window.prCloseDetail = window.prCloseDetail;
 
 (function(){
   var el = document.getElementById('prayer-list-view');
-  if (!el) return;
-  var sx = 0, sy = 0;
-  var THRESHOLD = 32;
-  var HORIZONTAL_RATIO = 1.03;
-  var SWIPE_BLOCK_MS = 700;
+  if (!el || el.__OAI_PRAYER_SWIPE_V397__) return;
+  el.__OAI_PRAYER_SWIPE_V397__ = true;
+
+  var sx = 0, sy = 0, lx = 0, ly = 0, st = 0;
+  var tracking = false;
   var horizontalLocked = false;
+  var handled = false;
+
+  /* V8-1-14-397:
+     기도문 목록 스와이프가 세로 스크롤/탭/즐겨찾기 터치와 섞여 잘 안 잡히는 문제 보정.
+     너무 짧은 흔들림은 무시하되, 실제 좌우 움직임은 더 빨리 lock해서 카테고리 전환을 안정화한다. */
+  var THRESHOLD = 30;
+  var LOCK_THRESHOLD = 14;
+  var HORIZONTAL_RATIO = 1.12;
+  var MAX_VERTICAL_DRIFT = 92;
+  var SWIPE_BLOCK_MS = 760;
 
   function getIdx(cat) { prEnsureCurrentCat(); return PR_CATS.indexOf(cat); }
   function blockFavAfterSwipe(){ prSwipeBlockUntil = Date.now() + SWIPE_BLOCK_MS; }
+  function point(ev){
+    var t = ev && ev.changedTouches && ev.changedTouches[0] ? ev.changedTouches[0] :
+            ev && ev.touches && ev.touches[0] ? ev.touches[0] : ev;
+    return {
+      x: t && typeof t.clientX === 'number' ? t.clientX : 0,
+      y: t && typeof t.clientY === 'number' ? t.clientY : 0
+    };
+  }
+  function blockedTarget(target){
+    return !!(target && target.closest && target.closest(
+      '#prayer-bar,#prayer-tabs,#prayer-search-bar,#prayer-detail,.pr-star,button,a,input,textarea,select'
+    ));
+  }
   function isHorizontalSwipe(dx, dy){
-    return Math.abs(dx) >= THRESHOLD && Math.abs(dx) >= Math.abs(dy) * HORIZONTAL_RATIO;
+    return Math.abs(dx) >= THRESHOLD &&
+           Math.abs(dx) >= Math.abs(dy) * HORIZONTAL_RATIO &&
+           Math.abs(dy) <= MAX_VERTICAL_DRIFT;
   }
   function goNext() {
     var idx = getIdx(prCurCat);
-    var next = (idx + 1) % PR_CATS.length; // 순환
+    var next = (idx + 1) % PR_CATS.length;
     prSwitchCat(PR_CATS[next]);
     if(typeof window.oaiSwipeAction === 'function') window.oaiSwipeAction(document.getElementById('pr-list-ul'), 'left');
   }
   function goPrev() {
     var idx = getIdx(prCurCat);
-    var prev = (idx - 1 + PR_CATS.length) % PR_CATS.length; // 순환
+    var prev = (idx - 1 + PR_CATS.length) % PR_CATS.length;
     prSwitchCat(PR_CATS[prev]);
     if(typeof window.oaiSwipeAction === 'function') window.oaiSwipeAction(document.getElementById('pr-list-ul'), 'right');
   }
-
-  el.addEventListener('touchstart', function(e) {
-    if(!e.touches || !e.touches[0]) return;
-    sx = e.touches[0].clientX;
-    sy = e.touches[0].clientY;
+  function start(ev){
+    if(blockedTarget(ev.target)){ tracking=false; return; }
+    var p = point(ev);
+    sx = lx = p.x;
+    sy = ly = p.y;
+    st = Date.now();
+    tracking = true;
     horizontalLocked = false;
-  }, { passive: true });
-  el.addEventListener('touchmove', function(e) {
-    if(!e.touches || !e.touches[0]) return;
-    var dx = e.touches[0].clientX - sx;
-    var dy = e.touches[0].clientY - sy;
-    if(Math.abs(dx) > 7 && Math.abs(dx) > Math.abs(dy) * HORIZONTAL_RATIO){
+    handled = false;
+  }
+  function move(ev){
+    if(!tracking) return;
+    var p = point(ev);
+    lx = p.x; ly = p.y;
+    var dx = lx - sx;
+    var dy = ly - sy;
+    if(!horizontalLocked && Math.abs(dx) >= LOCK_THRESHOLD && Math.abs(dx) >= Math.abs(dy) * HORIZONTAL_RATIO){
       horizontalLocked = true;
       blockFavAfterSwipe();
-      if(e.cancelable) e.preventDefault();
     }
-  }, { passive: false });
-  el.addEventListener('touchend', function(e) {
-    if (!e.changedTouches || !e.changedTouches[0]) return;
-    var dx = e.changedTouches[0].clientX - sx;
-    var dy = e.changedTouches[0].clientY - sy;
-    if(Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) * HORIZONTAL_RATIO) blockFavAfterSwipe();
-    if (!isHorizontalSwipe(dx, dy)) return;
-    if (dx < 0) goNext(); else goPrev();
-  }, { passive: true });
+    if(horizontalLocked){
+      blockFavAfterSwipe();
+      if(ev.cancelable) ev.preventDefault();
+    }
+  }
+  function end(ev){
+    if(!tracking) return;
+    var p = point(ev);
+    lx = p.x || lx; ly = p.y || ly;
+    tracking = false;
+    var dx = lx - sx;
+    var dy = ly - sy;
+    var dt = Date.now() - st;
+    if(Math.abs(dx) > 10 && Math.abs(dx) > Math.abs(dy) * 1.04) blockFavAfterSwipe();
+    if(!isHorizontalSwipe(dx, dy)) return;
+    handled = true;
+    blockFavAfterSwipe();
+    if(ev.cancelable) ev.preventDefault();
+    try{ ev.stopPropagation(); if(ev.stopImmediatePropagation) ev.stopImmediatePropagation(); }catch(_e){}
+    if(dx < 0) goNext(); else goPrev();
+  }
+
+  el.addEventListener('touchstart', start, { passive: true });
+  el.addEventListener('touchmove', move, { passive: false });
+  el.addEventListener('touchend', end, { passive: false });
+  el.addEventListener('touchcancel', function(){ tracking=false; horizontalLocked=false; }, { passive: true });
+
+  if(window.PointerEvent){
+    var pointerId = 0;
+    el.addEventListener('pointerdown', function(ev){
+      if(ev.pointerType === 'mouse') return;
+      pointerId = ev.pointerId || 0;
+      start(ev);
+    }, { passive: true });
+    el.addEventListener('pointermove', function(ev){
+      if(pointerId && ev.pointerId !== pointerId) return;
+      if(ev.pointerType === 'mouse') return;
+      move(ev);
+    }, { passive: false });
+    el.addEventListener('pointerup', function(ev){
+      if(pointerId && ev.pointerId !== pointerId) return;
+      if(ev.pointerType === 'mouse') return;
+      end(ev);
+      pointerId = 0;
+    }, { passive: false });
+    el.addEventListener('pointercancel', function(){ pointerId=0; tracking=false; horizontalLocked=false; }, { passive: true });
+  }
 })();
 
 window.initPrayerView = function(){

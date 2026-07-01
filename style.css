@@ -7565,7 +7565,7 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
 }
 
 
-/* V8-1-14-396: 굿뉴스 성지안내 버튼 내부 흰색 고정. */
+/* V8-1-14-397: 굿뉴스 성지안내 버튼 내부 흰색 고정. */
 #app #info-card #ic-goodnews,
 #app #info-card .ic-goodnews-btn,
 #app .shrine-visit-detail-action.detail-goodnews,
@@ -7591,7 +7591,7 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
 }
 
 
-/* V8-1-14-396: 매일미사/주요기도문 상단바 정렬 보정. */
+/* V8-1-14-397: 매일미사/주요기도문 상단바 정렬 보정. */
 /* 매일미사: 왼쪽 화살표 제거, 오른쪽 X 닫기 버튼으로 배치 */
 #missa-bar{
   position:relative!important;
@@ -7671,5 +7671,19 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
   margin-right:0!important;
   flex:0 0 auto!important;
   color:#d5b86d!important;
+}
+
+
+/* V8-1-14-397: 기도문 목록 좌우 스와이프 인식 보강. */
+#prayer-list-view{
+  touch-action: pan-y!important;
+  overscroll-behavior-x: contain!important;
+}
+#prayer-list-view .pr-list,
+#prayer-list-view .pr-item{
+  touch-action: pan-y!important;
+}
+#prayer-tabs{
+  touch-action: pan-x!important;
 }
 
