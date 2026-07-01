@@ -7293,7 +7293,7 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
 }
 
 
-/* V8-1-14-387: 버튼 내부를 완전 흰색으로 고정하고, 파란색 테두리만 남김. */
+/* V8-1-14-388: 버튼 내부는 완전 흰색 유지, 파란색 테두리는 더 원색에 가깝게 조정. */
 #app #info-card #ic-tel-link,
 #app #info-card .ic-tel-btn,
 #app #info-card #ic-route-btn,
@@ -7316,8 +7316,8 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
   background-color:#ffffff!important;
   background-image:none!important;
   color:#1f2a44!important;
-  border:2.2px solid #2f6f9f!important;
-  box-shadow:0 2px 7px rgba(47,111,159,.10)!important;
+  border:2.2px solid #006fe6!important;
+  box-shadow:0 2px 7px rgba(0,111,230,.11)!important;
 }
 #app #info-card #ic-tel-link::before,
 #app #info-card .ic-tel-btn::before,
@@ -7356,3 +7356,36 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
   filter:none!important;
   transform:translateY(1px)!important;
 }
+
+
+/* V8-1-14-388: 커버 하단 3버튼과 아래 안내문구 사이 여백 축소. */
+#cover .cover-bottom-actions,
+#cover .cover-utility-actions,
+#cover .cover-bottom-buttons,
+#cover .cover-footer-actions,
+.cover-bottom-actions,
+.cover-utility-actions,
+.cover-bottom-buttons,
+.cover-footer-actions{
+  margin-bottom:4px!important;
+  padding-bottom:0!important;
+}
+#cover .cover-footer,
+#cover .cover-bottom-note,
+#cover .cover-bottom-text,
+#cover .cover-notice,
+#cover .cover-copy,
+.cover-footer,
+.cover-bottom-note,
+.cover-bottom-text,
+.cover-notice,
+.cover-copy{
+  margin-top:3px!important;
+  padding-top:0!important;
+}
+#cover .cover-refresh-main-btn,
+#cover .cover-share-main-btn,
+#cover .cover-myfaith-main-btn{
+  margin-bottom:0!important;
+}
+
