@@ -7293,7 +7293,7 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
 }
 
 
-/* V8-1-14-391: 정보카드 버튼 내부는 흰색 유지, 버튼 테두리색만 한 단계 더 진하게 조정. */
+/* V8-1-14-393: 6개 버튼 테두리를 더 원색에 가까운 파란색으로 조정. */
 #app #info-card #ic-tel-link,
 #app #info-card .ic-tel-btn,
 #app #info-card #ic-route-btn,
@@ -7316,8 +7316,8 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
   background-color:#ffffff!important;
   background-image:none!important;
   color:#1f2a44!important;
-  border:2.2px solid #7fa6c2!important;
-  box-shadow:0 2px 7px rgba(127,166,194,.14)!important;
+  border:2.2px solid #5e96c6!important;
+  box-shadow:0 2px 7px rgba(94,150,198,.16)!important;
 }
 #app #info-card #ic-tel-link::before,
 #app #info-card .ic-tel-btn::before,
@@ -7502,19 +7502,65 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
   box-shadow:0 1px 5px rgba(31,42,68,.08)!important;
 }
 #app .shrine-visit-detail-info{
-  border:2.2px solid #7fa6c2!important;
+  border:2.2px solid #5e96c6!important;
   background:#ffffff!important;
 }
 #app .shrine-visit-detail-action{
   background:#ffffff!important;
   background-image:none!important;
   color:#1f2a44!important;
-  border:2.2px solid #7fa6c2!important;
-  box-shadow:0 2px 7px rgba(127,166,194,.14)!important;
+  border:2.2px solid #5e96c6!important;
+  box-shadow:0 2px 7px rgba(94,150,198,.16)!important;
 }
 #app .shrine-visit-detail-action.detail-goodnews{
   background:#ffffff!important;
   color:#1f2a44!important;
-  border-color:#7fa6c2!important;
+  border-color:#5e96c6!important;
+}
+
+
+/* V8-1-14-393: 커버 하단 3버튼과 안내문구 사이 여백 추가 축소. */
+#cover .bottom-actions,
+#cover .cover-actions,
+#cover .cover-bottom-actions,
+#cover .cover-utility-actions,
+#cover .cover-bottom-buttons,
+#cover .cover-footer-actions,
+#cover .cover-quick-actions,
+#cover .cover-sub-actions,
+#cover .cover-mini-actions,
+#cover [class*="bottom"][class*="action"],
+#cover [class*="footer"][class*="action"]{
+  margin-bottom:0!important;
+  padding-bottom:0!important;
+}
+#cover .cover-source-note,
+#cover .category-source-note,
+#cover .source-note,
+#cover .cover-footer,
+#cover .cover-bottom-note,
+#cover .cover-bottom-text,
+#cover .cover-notice,
+#cover .cover-copy,
+#cover .app-source-note,
+#cover [class*="source"][class*="note"],
+#cover [class*="bottom"][class*="note"],
+#cover [class*="footer"]{
+  margin-top:-8px!important;
+  padding-top:0!important;
+}
+#cover .cover-refresh-main-btn,
+#cover .cover-share-main-btn,
+#cover .cover-myfaith-main-btn,
+#cover #cover-update-btn,
+#cover [id*="share"],
+#cover [id*="refresh"],
+#cover [id*="myfaith"]{
+  margin-bottom:0!important;
+}
+#cover .cover-buttons-wrap,
+#cover .cover-main-buttons-wrap,
+#cover .cover-menu-bottom{
+  row-gap:8px!important;
 }
 
