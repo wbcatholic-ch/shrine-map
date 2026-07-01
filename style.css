@@ -7293,7 +7293,7 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
 }
 
 
-/* V8-1-14-389: 4번 스타일로 복귀. 버튼 내부는 흰색, 모든 버튼 테두리는 같은 연한 파란색으로 통일. */
+/* V8-1-14-391: 정보카드 버튼 내부는 흰색 유지, 버튼 테두리색만 한 단계 더 진하게 조정. */
 #app #info-card #ic-tel-link,
 #app #info-card .ic-tel-btn,
 #app #info-card #ic-route-btn,
@@ -7316,8 +7316,8 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
   background-color:#ffffff!important;
   background-image:none!important;
   color:#1f2a44!important;
-  border:2.2px solid #9db7cc!important;
-  box-shadow:0 2px 7px rgba(157,183,204,.12)!important;
+  border:2.2px solid #7fa6c2!important;
+  box-shadow:0 2px 7px rgba(127,166,194,.14)!important;
 }
 #app #info-card #ic-tel-link::before,
 #app #info-card .ic-tel-btn::before,
@@ -7502,19 +7502,19 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
   box-shadow:0 1px 5px rgba(31,42,68,.08)!important;
 }
 #app .shrine-visit-detail-info{
-  border:2.2px solid #9db7cc!important;
+  border:2.2px solid #7fa6c2!important;
   background:#ffffff!important;
 }
 #app .shrine-visit-detail-action{
   background:#ffffff!important;
   background-image:none!important;
   color:#1f2a44!important;
-  border:2.2px solid #9db7cc!important;
-  box-shadow:0 2px 7px rgba(157,183,204,.12)!important;
+  border:2.2px solid #7fa6c2!important;
+  box-shadow:0 2px 7px rgba(127,166,194,.14)!important;
 }
 #app .shrine-visit-detail-action.detail-goodnews{
   background:#ffffff!important;
   color:#1f2a44!important;
-  border-color:#9db7cc!important;
+  border-color:#7fa6c2!important;
 }
 
