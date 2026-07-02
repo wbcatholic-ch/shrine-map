@@ -191,7 +191,7 @@
     "교구":"#f0f5f0"
   };
   const TRAIL_COLORS = {d:'#1D4ED8', l:'#2A8040'};
-  /* V8-1-14-444: 순례길 지도 확대/축소 체감 개선을 위해 마커 이미지를 캐시하고
+  /* V8-1-14-445: 순례길 지도 확대/축소 체감 개선을 위해 마커 이미지를 캐시하고
      같은 이미지/지도 상태를 반복 적용하지 않는다. */
   const TRAIL_MARKER_IMG_CACHE = Object.create(null);
   function trailMarkerImageCached(key, maker){
@@ -226,8 +226,114 @@
       return new kakao.maps.MarkerImage(trailMkSvg(color, !!big), new kakao.maps.Size(big?54:42,big?66:52), {offset:new kakao.maps.Point(big?27:21,big?66:52)});
     });
   }
+
+  function getHantiRouteData(){
+    return window.CATHOLIC_HANTI_ROUTE_DATA && window.CATHOLIC_HANTI_ROUTE_DATA.id === 'hanti'
+      ? window.CATHOLIC_HANTI_ROUTE_DATA : null;
+  }
+  function isHantiTrailItem(d){ return !!(d && d.n === '한티가는길'); }
+  function clearHantiRouteOverlays(){
+    try{
+      (trailState.hantiPolylines || []).forEach(function(line){ try{ line.setMap(null); }catch(_e){} });
+      (trailState.hantiStampOverlays || []).forEach(function(ov){ try{ ov.setMap(null); }catch(_e){} });
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+    trailState.hantiPolylines = [];
+    trailState.hantiStampOverlays = [];
+    trailState.hantiVisible = false;
+  }
+  function hantiStampMarkerClass(stamp){
+    var cls = 'hanti-stamp-marker';
+    if(stamp && stamp.role === 'start') cls += ' start';
+    else if(stamp && stamp.role === 'finish') cls += ' finish';
+    if(stamp && stamp.useGpxCoordinate === false) cls += ' exception';
+    return cls;
+  }
+  function showHantiStampInfo(stamp){
+    if(!stamp) return;
+    var bdg = ig$('trail-sh-bdg');
+    var region = ig$('trail-sh-region');
+    var ico = ig$('trail-sh-ico');
+    var name = ig$('trail-sh-name');
+    var sub = ig$('trail-sh-sub');
+    var url = ig$('trail-sh-url');
+    var body = ig$('trail-sh-body');
+    var foot = ig$('trail-sh-foot');
+    if(bdg){ bdg.textContent = stamp.id || '스탬프'; bdg.className = 'trail-sh-bdg d'; }
+    if(region) region.textContent = '📍 한티가는길 스탬프';
+    if(ico){ ico.textContent = stamp.role === 'finish' ? '🏁' : (stamp.role === 'start' ? '⛪' : '✝️'); ico.className = 'trail-sh-ico d'; }
+    if(name) name.textContent = stamp.name || '';
+    if(sub) sub.textContent = (stamp.en || '') + (stamp.role === 'finish' ? ' · 완료 지점' : '');
+    if(url) url.textContent = '스탬프 위치 확인용';
+    if(body) body.onclick = function(ev){ if(ev){ ev.preventDefault(); ev.stopPropagation(); } };
+    if(foot) foot.onclick = function(ev){ if(ev){ ev.preventDefault(); ev.stopPropagation(); } };
+    ig$('trail-sheet')?.classList.add('open');
+  }
+  function createHantiStampOverlay(stamp){
+    if(!(stamp && Number.isFinite(Number(stamp.lat)) && Number.isFinite(Number(stamp.lng)))) return null;
+    var el = document.createElement('button');
+    el.type = 'button';
+    el.className = hantiStampMarkerClass(stamp);
+    el.setAttribute('aria-label', '한티가는길 ' + (stamp.id || '') + ' ' + (stamp.name || ''));
+    el.innerHTML = '<span class="hanti-stamp-id">' + esc(stamp.id || '') + '</span><span class="hanti-stamp-name">' + esc(stamp.name || '') + '</span>';
+    el.addEventListener('click', function(ev){
+      try{ ev.preventDefault(); ev.stopPropagation(); }catch(_e){}
+      showHantiStampInfo(stamp);
+      if(trailState.map && window.kakao && kakao.maps){
+        try{ trailState.map.panTo(new kakao.maps.LatLng(Number(stamp.lat), Number(stamp.lng))); }catch(_e){}
+      }
+    });
+    return new kakao.maps.CustomOverlay({
+      content: el,
+      position: new kakao.maps.LatLng(Number(stamp.lat), Number(stamp.lng)),
+      xAnchor: .5, yAnchor: .5, zIndex: 80
+    });
+  }
+  function showHantiRouteOverlays(){
+    var data = getHantiRouteData();
+    if(!(data && trailState.map && window.kakao && kakao.maps)) return;
+    clearHantiRouteOverlays();
+    try{
+      (data.routeSegments || []).forEach(function(seg){
+        var path = (seg.points || []).map(function(p){ return new kakao.maps.LatLng(Number(p.lat), Number(p.lng)); }).filter(Boolean);
+        if(path.length < 2) return;
+        var line = new kakao.maps.Polyline({
+          map: trailState.map,
+          path: path,
+          strokeWeight: 5,
+          strokeColor: '#B7791F',
+          strokeOpacity: .86,
+          strokeStyle: 'solid',
+          zIndex: 30
+        });
+        trailState.hantiPolylines.push(line);
+      });
+      (data.stamps || []).forEach(function(stamp){
+        var ov = createHantiStampOverlay(stamp);
+        if(!ov) return;
+        ov.setMap(trailState.map);
+        trailState.hantiStampOverlays.push(ov);
+      });
+      trailState.hantiVisible = true;
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }
+  function fitHantiRouteBounds(){
+    var data = getHantiRouteData();
+    if(!(data && trailState.map && window.kakao && kakao.maps)) return;
+    try{
+      var bounds = new kakao.maps.LatLngBounds();
+      var count = 0;
+      (data.routeSegments || []).forEach(function(seg){
+        (seg.points || []).forEach(function(p){
+          if(!Number.isFinite(Number(p.lat)) || !Number.isFinite(Number(p.lng))) return;
+          bounds.extend(new kakao.maps.LatLng(Number(p.lat), Number(p.lng)));
+          count++;
+        });
+      });
+      if(count > 1){ trailState.map.setBounds(bounds); }
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }
   const RETURN_KEY = 'catholic_integrated_return_v2';
-  const trailState = {inited:false, map:null, markers:[], selected:-1, myOverlay:null, view:'map', pendingOpenIndex:null, restoreCenter:null, restoreLevel:null, needsHardReset:false, pendingFitBounds:false};
+  const trailState = {inited:false, map:null, markers:[], selected:-1, myOverlay:null, view:'map', pendingOpenIndex:null, restoreCenter:null, restoreLevel:null, needsHardReset:false, pendingFitBounds:false, hantiPolylines:[], hantiStampOverlays:[], hantiVisible:false};
   const webState = {built:false, curCat:'⭐ 즐겨찾기'};
   const WEB_FAV_KEY = 'web_favorites_v1';
   const MY_DIOCESE_KEY = 'oai_my_diocese_name';
@@ -743,7 +849,7 @@
   function relayoutTrailMap(delay, reason){
     const wait = Number.isFinite(Number(delay)) ? Number(delay) : 0;
     const isFoldViewport = /viewport|resize|fold|orientation|settle|late|final|android-fold/i.test(String(reason || ''));
-    /* V8-1-14-444: 순례길 지도 relayout은 공통 Fold 관리자 흐름에서만 보정한다. */
+    /* V8-1-14-445: 순례길 지도 relayout은 공통 Fold 관리자 흐름에서만 보정한다. */
     setTimeout(function(){
       if(!(trailState.map && window.kakao && window.kakao.maps)){
         return;
@@ -754,7 +860,7 @@
         const currentLevel = (trailState.map.getLevel ? trailState.map.getLevel() : null);
         const targetCenter = plain ? trailDefaultCenter() : currentCenter;
         const targetLevel = plain ? 13 : currentLevel;
-        /* V8-1-14-444:
+        /* V8-1-14-445:
            순례길은 Fold 전환 때 오래된 컨테이너 폭으로 먼저 그려졌다가 중앙으로 이동해 보였다.
            지도는 잠시 숨긴 상태에서 relayout→level→center 순서로 한 번 확정하고 그 뒤에만 보인다. */
         trailState.map.relayout();
@@ -779,6 +885,7 @@
   try{ window.relayoutTrailMap = relayoutTrailMap; }catch(_e){}
 
   function hardResetTrailModule(){
+    clearHantiRouteOverlays();
     try{ if(trailState.myOverlay) trailState.myOverlay.setMap(null); }catch(e){ console.warn("[가톨릭길동무]", e); }
     trailState.myOverlay = null;
     trailState.markers.forEach(function(marker){ try{ marker.setMap(null); }catch(e){ console.warn("[가톨릭길동무]", e); } });
@@ -795,7 +902,7 @@
   function fitTrailMapToBounds(){
     if(!(trailState.map && window.kakao && window.kakao.maps)) return;
     try{
-      // V8-1-14-444:
+      // V8-1-14-445:
       // setBounds는 되살리지 않고 중심 이동은 1회만 유지한다.
       // 순례길 첫 화면이 너무 확대되어 보이지 않도록 기본 줌을 한 단계 넓게 둔다.
       if(typeof trailState.map.setLevel === "function") trailState.map.setLevel(13);
@@ -944,6 +1051,9 @@
   window.trailOpenSheet = function(i){
     const d = TRAIL_ITEMS[i];
     if(!d) return;
+    const hantiSelected = isHantiTrailItem(d);
+    if(hantiSelected) showHantiRouteOverlays();
+    else clearHantiRouteOverlays();
     ig$('trail-sh-bdg').textContent = d.op;
     ig$('trail-sh-bdg').className = 'trail-sh-bdg ' + d.t;
     ig$('trail-sh-region').textContent = '📍 ' + d.r;
@@ -962,12 +1072,17 @@
     ig$('trail-sh-foot').onclick = openFn;
     ig$('trail-sheet').classList.add('open');
     if(trailState.map && window.kakao && window.kakao.maps){
-      trailState.map.panTo(new kakao.maps.LatLng(d.lat,d.lng));
+      if(hantiSelected){
+        setTimeout(function(){ fitHantiRouteBounds(); }, 80);
+      }else{
+        trailState.map.panTo(new kakao.maps.LatLng(d.lat,d.lng));
+      }
     }
   };
 
   window.trailCloseSheet = function(){
     ig$('trail-sheet')?.classList.remove('open');
+    clearHantiRouteOverlays();
     if(!(trailState.map && window.kakao && window.kakao.maps)) return;
     if(trailState.selected >= 0 && trailState.markers[trailState.selected]){
       const idx = trailState.selected;

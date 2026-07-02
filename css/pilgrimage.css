@@ -131,3 +131,34 @@ html:not(.ios-device).oai-screen-compact-short #trail-close-btn,
 html:not(.ios-device).oai-screen-compact-short .trail-sh-close{
   width:34px!important;height:34px!important;min-width:34px!important;flex-basis:34px!important;
 }
+
+/* V8-1-14-445: 한티가는길 1차 표시(경로선 + 스탬프 마커, 자동도장 OFF) */
+.hanti-stamp-marker {
+  appearance: none;
+  border: 1.5px solid rgba(120, 72, 18, .55);
+  border-radius: 999px;
+  background: rgba(255, 250, 241, .96);
+  color: #6b3f08;
+  box-shadow: 0 3px 9px rgba(31, 42, 68, .20);
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  min-width: 38px;
+  max-width: 88px;
+  height: 24px;
+  padding: 0 7px;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: -.04em;
+  line-height: 1;
+  white-space: nowrap;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.hanti-stamp-marker .hanti-stamp-id { font-size: 10.5px; color: #8a4f0a; flex-shrink: 0; }
+.hanti-stamp-marker .hanti-stamp-name { overflow: hidden; text-overflow: ellipsis; max-width: 52px; }
+.hanti-stamp-marker.start { background: rgba(235, 248, 239, .98); border-color: rgba(42,128,64,.70); color: #166534; }
+.hanti-stamp-marker.finish { background: rgba(255, 243, 216, .98); border-color: rgba(183,121,31,.80); color: #7A4F10; }
+.hanti-stamp-marker.exception { border-width: 2px; box-shadow: 0 3px 10px rgba(183,121,31,.26); }
+.hanti-stamp-marker:active { transform: translateY(1px); filter: brightness(.96); }
