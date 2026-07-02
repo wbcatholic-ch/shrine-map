@@ -191,7 +191,7 @@
     "교구":"#f0f5f0"
   };
   const TRAIL_COLORS = {d:'#1D4ED8', l:'#2A8040'};
-  /* V8-1-14-449: 순례길 지도 확대/축소 체감 개선을 위해 마커 이미지를 캐시하고
+  /* V8-1-14-450: 순례길 지도 확대/축소 체감 개선을 위해 마커 이미지를 캐시하고
      같은 이미지/지도 상태를 반복 적용하지 않는다. */
   const TRAIL_MARKER_IMG_CACHE = Object.create(null);
   function trailMarkerImageCached(key, maker){
@@ -237,6 +237,7 @@
       (trailState.hantiPolylines || []).forEach(function(line){ try{ line.setMap(null); }catch(_e){} });
       (trailState.hantiStampOverlays || []).forEach(function(ov){ try{ ov.setMap(null); }catch(_e){} });
       clearHantiLocationGuideOverlay();
+      removeHantiTestPanel();
     }catch(e){ console.warn('[가톨릭길동무]', e); }
     trailState.hantiPolylines = [];
     trailState.hantiStampOverlays = [];
@@ -264,6 +265,7 @@
     if(ico){ ico.textContent = stamp.role === 'finish' ? '🏁' : (stamp.role === 'start' ? '⛪' : '✝️'); ico.className = 'trail-sh-ico d'; }
     if(name) name.textContent = stamp.name || '';
     if(sub) sub.textContent = (stamp.en || '') + (stamp.role === 'finish' ? ' · 완료 지점' : '');
+    ensureHantiTestPanel();
     if(stamp && (stamp.id === '3-4' || stamp.id === '4-1')){
       setTrailHantiNote('동명읍 안에서는 여러 길로 동명성당에 도착할 수 있습니다. 표시된 선은 대표선이며, 다음 스탬프 위치를 기준으로 이동하세요.');
     }else{
@@ -335,21 +337,100 @@
     });
     return best ? { stamp: best, distanceM: bestD } : null;
   }
+  function hantiTestModeEnabled(){
+    try{
+      var params = new URLSearchParams(window.location.search || '');
+      var q = String(params.get('hantiTest') || '').toLowerCase();
+      if(q === '1' || q === 'true' || q === 'yes') return true;
+      var hash = String(window.location.hash || '');
+      if(/(?:^|[?#&])hantiTest=(1|true|yes)(?:&|$)/i.test(hash)) return true;
+      return false;
+    }catch(_e){ return false; }
+  }
+  function removeHantiTestPanel(){
+    try{ var old = ig$('trail-hanti-test-panel'); if(old) old.remove(); }catch(_e){}
+  }
+  function hantiAutoStampJudgement(nearest){
+    if(!(nearest && nearest.stamp)) return {ok:false, radius:0};
+    var radius = Number(nearest.stamp.autoStampRadiusM || 70);
+    if(!Number.isFinite(radius) || radius <= 0) radius = 70;
+    return {ok:Number(nearest.distanceM) <= radius, radius:radius};
+  }
+  function updateHantiTestResult(sourceStamp, nearest){
+    var out = ig$('trail-hanti-test-result');
+    if(!out || !(nearest && nearest.stamp)) return;
+    var judge = hantiAutoStampJudgement(nearest);
+    var label = (nearest.stamp.id || '') + ' ' + (nearest.stamp.name || '');
+    var dist = hantiFormatDistance(nearest.distanceM);
+    var done = nearest.stamp.role === 'finish' ? ' · 5-5 완료 지점' : '';
+    out.innerHTML = '<strong>테스트 결과</strong>' +
+      '<span>테스트 위치: ' + esc((sourceStamp && sourceStamp.id || '') + ' ' + (sourceStamp && sourceStamp.name || '')) + '</span>' +
+      '<span>가장 가까운 스탬프: ' + esc(label) + (dist ? ' · 약 ' + esc(dist) : '') + done + '</span>' +
+      '<span>자동도장 판정: ' + (judge.ok ? '가능' : '불가') + ' / 기준 반경 ' + Math.round(judge.radius) + 'm</span>' +
+      '<span>실제 순례기록 저장: 안 함</span>';
+  }
+  function runHantiTestStamp(stampId){
+    var data = getHantiRouteData();
+    var stamp = findHantiStampById(data, stampId);
+    if(!(stamp && Number.isFinite(Number(stamp.lat)) && Number.isFinite(Number(stamp.lng)))) return;
+    var lat = Number(stamp.lat), lng = Number(stamp.lng);
+    showHantiLocationGuide(lat, lng, {test:true, sourceStamp:stamp});
+    try{
+      if(trailState && trailState.map && window.kakao && kakao.maps){
+        var ll = new kakao.maps.LatLng(lat, lng);
+        trailState.map.panTo(ll);
+        if(trailState.map.getLevel && trailState.map.setLevel && trailState.map.getLevel() > 5) trailState.map.setLevel(5);
+      }
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }
+  function ensureHantiTestPanel(){
+    if(!hantiTestModeEnabled()){ removeHantiTestPanel(); return; }
+    var data = getHantiRouteData();
+    var info = ig$('trail-sh-name') && ig$('trail-sh-name').parentElement;
+    if(!(data && info)) return;
+    var panel = ig$('trail-hanti-test-panel');
+    if(!panel){
+      panel = document.createElement('div');
+      panel.id = 'trail-hanti-test-panel';
+      panel.className = 'hanti-test-panel';
+      info.appendChild(panel);
+    }
+    var stamps = data.stamps || [];
+    var options = stamps.map(function(s){
+      return '<option value="' + esc(s.id || '') + '">' + esc((s.id || '') + ' ' + (s.name || '')) + '</option>';
+    }).join('');
+    panel.innerHTML = '<div class="hanti-test-title">한티가는길 테스트 모드</div>' +
+      '<div class="hanti-test-help">현장에 가지 않고 선택한 스탬프 좌표를 임시 현재 위치로 확인합니다. 실제 기록은 저장하지 않습니다.</div>' +
+      '<div class="hanti-test-row"><select id="trail-hanti-test-select" aria-label="테스트할 스탬프 선택">' + options + '</select>' +
+      '<button id="trail-hanti-test-run" type="button">테스트</button></div>' +
+      '<div id="trail-hanti-test-result" class="hanti-test-result">스탬프를 선택하고 테스트를 누르세요.</div>';
+    var sel = ig$('trail-hanti-test-select');
+    var btn = ig$('trail-hanti-test-run');
+    if(btn) btn.onclick = function(ev){ try{ ev.preventDefault(); ev.stopPropagation(); }catch(_e){} runHantiTestStamp(sel && sel.value); };
+    if(sel) sel.onchange = function(){ runHantiTestStamp(sel.value); };
+  }
   function clearHantiLocationGuideOverlay(){
     try{ if(trailState && trailState.hantiLocationOverlay) trailState.hantiLocationOverlay.setMap(null); }catch(_e){}
     if(trailState) trailState.hantiLocationOverlay = null;
   }
-  function showHantiLocationGuide(lat, lng){
+  function showHantiLocationGuide(lat, lng, opts){
+    opts = opts || {};
     if(!(trailState && trailState.hantiVisible && trailState.map && window.kakao && kakao.maps)) return;
     var nearest = findNearestHantiStampFromCoords(lat, lng);
     if(!(nearest && nearest.stamp)) return;
     var label = (nearest.stamp.id || '') + ' ' + (nearest.stamp.name || '');
     var dist = hantiFormatDistance(nearest.distanceM);
-    setTrailHantiNote('현재 위치 기준 가까운 스탬프: ' + label + (dist ? ' · 약 ' + dist : '') + ' / 자동도장은 아직 꺼져 있습니다.');
+    var judge = hantiAutoStampJudgement(nearest);
+    if(opts.test){
+      setTrailHantiNote('테스트 위치 기준 가까운 스탬프: ' + label + (dist ? ' · 약 ' + dist : '') + ' / 자동도장 판정: ' + (judge.ok ? '가능' : '불가') + ' / 실제 기록 저장 안 함');
+      updateHantiTestResult(opts.sourceStamp, nearest);
+    }else{
+      setTrailHantiNote('현재 위치 기준 가까운 스탬프: ' + label + (dist ? ' · 약 ' + dist : '') + ' / 자동도장은 아직 꺼져 있습니다.');
+    }
     clearHantiLocationGuideOverlay();
     var el = document.createElement('div');
-    el.className = 'hanti-location-guide';
-    el.innerHTML = '<strong>가까운 스탬프</strong><span>' + esc(label) + (dist ? ' · 약 ' + esc(dist) : '') + '</span>';
+    el.className = 'hanti-location-guide' + (opts.test ? ' test' : '');
+    el.innerHTML = '<strong>' + (opts.test ? '테스트 위치' : '가까운 스탬프') + '</strong><span>' + esc(label) + (dist ? ' · 약 ' + esc(dist) : '') + '</span>';
     trailState.hantiLocationOverlay = new kakao.maps.CustomOverlay({
       content: el,
       position: new kakao.maps.LatLng(Number(lat), Number(lng)),
@@ -433,7 +514,7 @@
     if(!(data && trailState.map && window.kakao && kakao.maps)) return;
     clearHantiRouteOverlays();
     try{
-      /* V8-1-14-449: 동명읍 내부는 실제 선택 가능한 길이 여러 개다.
+      /* V8-1-14-450: 동명읍 내부는 실제 선택 가능한 길이 여러 개다.
          동명약국 부근에서 도로를 건넜다가 다시 건너는 것처럼 보이는 세부 GPX 궤적은
          사용자가 추천 동선으로 오해하지 않도록, 동명읍 진입 지점부터 4-1 동명성당까지
          부드러운 대표선으로만 표시한다. */
@@ -1007,7 +1088,7 @@
   function relayoutTrailMap(delay, reason){
     const wait = Number.isFinite(Number(delay)) ? Number(delay) : 0;
     const isFoldViewport = /viewport|resize|fold|orientation|settle|late|final|android-fold/i.test(String(reason || ''));
-    /* V8-1-14-449: 순례길 지도 relayout은 공통 Fold 관리자 흐름에서만 보정한다. */
+    /* V8-1-14-450: 순례길 지도 relayout은 공통 Fold 관리자 흐름에서만 보정한다. */
     setTimeout(function(){
       if(!(trailState.map && window.kakao && window.kakao.maps)){
         return;
@@ -1018,7 +1099,7 @@
         const currentLevel = (trailState.map.getLevel ? trailState.map.getLevel() : null);
         const targetCenter = plain ? trailDefaultCenter() : currentCenter;
         const targetLevel = plain ? 13 : currentLevel;
-        /* V8-1-14-449:
+        /* V8-1-14-450:
            순례길은 Fold 전환 때 오래된 컨테이너 폭으로 먼저 그려졌다가 중앙으로 이동해 보였다.
            지도는 잠시 숨긴 상태에서 relayout→level→center 순서로 한 번 확정하고 그 뒤에만 보인다. */
         trailState.map.relayout();
@@ -1060,7 +1141,7 @@
   function fitTrailMapToBounds(){
     if(!(trailState.map && window.kakao && window.kakao.maps)) return;
     try{
-      // V8-1-14-449:
+      // V8-1-14-450:
       // setBounds는 되살리지 않고 중심 이동은 1회만 유지한다.
       // 순례길 첫 화면이 너무 확대되어 보이지 않도록 기본 줌을 한 단계 넓게 둔다.
       if(typeof trailState.map.setLevel === "function") trailState.map.setLevel(13);
@@ -1220,9 +1301,11 @@
     ig$('trail-sh-name').textContent = d.n;
     ig$('trail-sh-sub').textContent = d.op + ' · ' + d.r;
     if(hantiSelected){
+      ensureHantiTestPanel();
       setTrailHantiNote('동명읍 안에서는 여러 길로 동명성당에 도착할 수 있습니다. 다음 스탬프 위치를 기준으로 이동하세요.');
       ig$('trail-sh-url').textContent = '공식 홈페이지 열기';
     }else{
+      removeHantiTestPanel();
       setTrailHantiNote('');
       ig$('trail-sh-url').textContent = shortUrl(d.url);
     }

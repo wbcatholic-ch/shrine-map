@@ -132,7 +132,7 @@ html:not(.ios-device).oai-screen-compact-short .trail-sh-close{
   width:34px!important;height:34px!important;min-width:34px!important;flex-basis:34px!important;
 }
 
-/* V8-1-14-449: 한티가는길 표시. 동명읍 내부는 여러 길 가능 구간으로 보고, 도로를 오가며 건너는 듯한 세부 GPX 대신 대표선을 안내한다. */
+/* V8-1-14-450: 한티가는길 표시. 동명읍 내부는 여러 길 가능 구간으로 보고, 도로를 오가며 건너는 듯한 세부 GPX 대신 대표선을 안내한다. */
 .hanti-stamp-marker {
   appearance: none;
   border: 1.5px solid rgba(120, 72, 18, .55);
@@ -191,7 +191,7 @@ html:not(.ios-device).oai-screen-compact-short .trail-sh-close{
 .hanti-flex-guide strong { display: block; font-size: 11px; color: #5f3707; }
 .hanti-flex-guide span { display: block; margin-top: 2px; }
 
-/* V8-1-14-449: 한티가는길은 자동도장 전 단계로, 내 위치를 누르면 가장 가까운 스탬프 거리만 안내한다. */
+/* V8-1-14-450: 한티가는길은 자동도장 전 단계로, 내 위치를 누르면 가장 가까운 스탬프 거리만 안내한다. */
 .hanti-location-guide {
   pointer-events: none;
   min-width: 118px;
@@ -211,3 +211,77 @@ html:not(.ios-device).oai-screen-compact-short .trail-sh-close{
 }
 .hanti-location-guide strong { display:block; color:#1565c0; font-size:11px; margin-bottom:2px; }
 .hanti-location-guide span { display:block; }
+
+
+/* V8-1-14-450: 한티가는길 현장 방문 없이 확인하는 숨은 테스트 모드. URL에 ?hantiTest=1 이 있을 때만 JS가 패널을 만든다. */
+.hanti-test-panel {
+  margin-top: 8px;
+  padding: 8px;
+  border-radius: 14px;
+  border: 1px solid rgba(21, 101, 192, .24);
+  background: rgba(246, 250, 255, .96);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.62);
+  color: #1f2a44;
+  font-family: inherit;
+}
+.hanti-test-title {
+  font-size: 11px;
+  font-weight: 900;
+  color: #1565c0;
+  line-height: 1.25;
+}
+.hanti-test-help {
+  margin-top: 3px;
+  font-size: 10.5px;
+  font-weight: 800;
+  line-height: 1.34;
+  color: #5b6474;
+  word-break: keep-all;
+}
+.hanti-test-row {
+  margin-top: 7px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.hanti-test-row select {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid rgba(31, 42, 68, .22);
+  background: #fff;
+  color: #1f2a44;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 0 8px;
+}
+.hanti-test-row button {
+  flex: 0 0 auto;
+  height: 34px;
+  border: 0;
+  border-radius: 10px;
+  background: #1565c0;
+  color: #fff;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 0 10px;
+  cursor: pointer;
+}
+.hanti-test-result {
+  margin-top: 7px;
+  padding: 7px 8px;
+  border-radius: 11px;
+  background: rgba(255,255,255,.84);
+  color: #334155;
+  font-size: 10.5px;
+  font-weight: 800;
+  line-height: 1.35;
+  word-break: keep-all;
+}
+.hanti-test-result strong,
+.hanti-test-result span { display: block; }
+.hanti-test-result strong { color: #1f2a44; margin-bottom: 2px; }
+.hanti-location-guide.test { border-color: rgba(21,101,192,.34); background: rgba(246,250,255,.97); }
