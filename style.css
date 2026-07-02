@@ -7565,7 +7565,7 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
 }
 
 
-/* V8-1-14-397: 굿뉴스 성지안내 버튼 내부 흰색 고정. */
+/* V8-1-14-398: 굿뉴스 성지안내 버튼 내부 흰색 고정. */
 #app #info-card #ic-goodnews,
 #app #info-card .ic-goodnews-btn,
 #app .shrine-visit-detail-action.detail-goodnews,
@@ -7591,7 +7591,7 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
 }
 
 
-/* V8-1-14-397: 매일미사/주요기도문 상단바 정렬 보정. */
+/* V8-1-14-398: 매일미사/주요기도문 상단바 정렬 보정. */
 /* 매일미사: 왼쪽 화살표 제거, 오른쪽 X 닫기 버튼으로 배치 */
 #missa-bar{
   position:relative!important;
@@ -7674,7 +7674,7 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
 }
 
 
-/* V8-1-14-397: 기도문 목록 좌우 스와이프 인식 보강. */
+/* V8-1-14-398: 기도문 목록 좌우 스와이프 인식 보강. */
 #prayer-list-view{
   touch-action: pan-y!important;
   overscroll-behavior-x: contain!important;
@@ -7685,5 +7685,62 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
 }
 #prayer-tabs{
   touch-action: pan-x!important;
+}
+
+
+/* V8-1-14-398: 빠른 사용 버튼과 커버 메뉴 버튼 테두리/색상 보강. */
+/* 미사 중 빠른 사용 4개 버튼: 커버 메뉴 카드처럼 색 포인트를 넣고 테두리를 더 선명하게 */
+.mass-quick-btn{
+  border-width:2.4px!important;
+  border-style:solid!important;
+  background:#fffdf8!important;
+  box-shadow:
+    0 9px 22px rgba(31,42,68,.11),
+    inset 0 1px 0 rgba(255,255,255,.96),
+    inset 0 0 0 1px rgba(255,255,255,.35)!important;
+}
+#mass-quick-missa{
+  border-color:#d4a017!important;
+  background:linear-gradient(180deg,#fffdf8 0%,#fff0bd 100%)!important;
+}
+#mass-quick-prayer{
+  border-color:#23875f!important;
+  background:linear-gradient(180deg,#fffdf8 0%,#d9f3e4 100%)!important;
+}
+#mass-quick-hymn{
+  border-color:#b93f78!important;
+  background:linear-gradient(180deg,#fffdf8 0%,#ffe0ee 100%)!important;
+}
+#mass-quick-bible{
+  border-color:#3478b8!important;
+  background:linear-gradient(180deg,#fffdf8 0%,#dbeeff 100%)!important;
+}
+.mass-quick-btn span{
+  border:1.8px solid rgba(31,42,68,.16)!important;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.72)!important;
+}
+
+/* 매일미사/기도문/성가/성경 하단 빠른 사용 버튼도 테두리 강화 */
+.faith-bottom-btn{
+  border-width:2.8px!important;
+  box-shadow:0 4px 13px rgba(31,42,68,.13), inset 0 1px 0 rgba(255,255,255,.72)!important;
+}
+.faith-bottom-btn.faith-bible{border-color:#3478b8!important;background:#dbeeff!important;}
+.faith-bottom-btn.faith-hymn{border-color:#b93f78!important;background:#ffe0ee!important;}
+.faith-bottom-btn.faith-prayer{border-color:#23875f!important;background:#d9f3e4!important;}
+.faith-bottom-btn.faith-missa{border-color:#d4a017!important;background:#fff0bd!important;}
+
+/* 커버의 큰 메뉴 버튼 카드: 테두리를 조금 더 굵고 선명하게 */
+.cover-card{
+  border-width:1.8px!important;
+  border-color:rgba(126,104,74,.42)!important;
+}
+.cover-card::after{
+  border-color:rgba(126,104,74,.18)!important;
+}
+#cover #cover-menu-btn.cover-menu-btn,
+#cover #cover-guide-btn{
+  border-width:2px!important;
+  border-color:rgba(31,42,68,.28)!important;
 }
 
