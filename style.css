@@ -7553,7 +7553,7 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
 }
 
 
-/* V8-1-14-414: 굿뉴스 성지안내 버튼 내부 흰색 고정. */
+/* V8-1-14-417: 굿뉴스 성지안내 버튼 내부 흰색 고정. */
 #app #info-card #ic-goodnews,
 #app #info-card .ic-goodnews-btn,
 #app .shrine-visit-detail-action.detail-goodnews,
@@ -7579,7 +7579,7 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
 }
 
 
-/* V8-1-14-414: 매일미사/주요기도문 상단바 정렬 보정. */
+/* V8-1-14-417: 매일미사/주요기도문 상단바 정렬 보정. */
 /* 매일미사: 왼쪽 화살표 제거, 오른쪽 X 닫기 버튼으로 배치 */
 #missa-bar{
   position:relative!important;
