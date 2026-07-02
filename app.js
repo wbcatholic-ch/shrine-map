@@ -3328,9 +3328,9 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || (window.OAI_APP_BUILD_VERSION || window.APP_VERSION || 'V8-1-14-402');
+    var target = btn.getAttribute('data-target-version') || (window.OAI_APP_BUILD_VERSION || window.APP_VERSION || 'V8-1-14-403');
     var current = '';
-    /* V8-1-14-402:
+    /* V8-1-14-403:
        현재 화면의 실제 빌드 기준은 index.html이 먼저 선언한 OAI_APP_BUILD_VERSION/숨김 marker를 우선한다.
        늦게 로드되거나 캐시에 남은 sw-update.js의 APP_VERSION 값이 덮어써도 커버 버튼이 잘못 "업데이트 필요"로 바뀌지 않게 한다. */
     if(window.OAI_APP_BUILD_VERSION) current = String(window.OAI_APP_BUILD_VERSION).trim();
