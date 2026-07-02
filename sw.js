@@ -1,7 +1,7 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-453';
-const ASSET_VERSION = 'V8-1-14-453';
+const CACHE_VERSION = 'catholic-way-V8-1-14-454';
+const ASSET_VERSION = 'V8-1-14-454';
 
-/* V8-1-14-453: service worker cache strategy overview.
+/* V8-1-14-454: service worker cache strategy overview.
    - APP_SHELL: first-screen and internal helper files.
    - HTML navigation: networkFirst, then cached index fallback.
    - Versioned/static assets: cacheFirst.
@@ -34,6 +34,7 @@ const APP_SHELL = [
   withVersion('./js/cover-refresh.js'),
   withVersion('./js/app-state-guards.js'),
   withVersion('./hanti-route-data-v1.js'),
+  withVersion('./dowon-neighborhood-test-loop-data-v1.js'),
   withVersion('./web.js'),
   withVersion('./js/route-web-guards.js'),
   withVersion('./js/back-controller.js'),

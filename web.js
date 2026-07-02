@@ -191,7 +191,7 @@
     "교구":"#f0f5f0"
   };
   const TRAIL_COLORS = {d:'#1D4ED8', l:'#2A8040'};
-  /* V8-1-14-453: 순례길 지도 확대/축소 체감 개선을 위해 마커 이미지를 캐시하고
+  /* V8-1-14-454: 순례길 지도 확대/축소 체감 개선을 위해 마커 이미지를 캐시하고
      같은 이미지/지도 상태를 반복 적용하지 않는다. */
   const TRAIL_MARKER_IMG_CACHE = Object.create(null);
   function trailMarkerImageCached(key, maker){
@@ -231,6 +231,17 @@
     return window.CATHOLIC_HANTI_ROUTE_DATA && window.CATHOLIC_HANTI_ROUTE_DATA.id === 'hanti'
       ? window.CATHOLIC_HANTI_ROUTE_DATA : null;
   }
+  function getDowonTestRouteData(){
+    return window.CATHOLIC_DOWON_TEST_ROUTE_DATA && window.CATHOLIC_DOWON_TEST_ROUTE_DATA.id === 'dowon_test_loop'
+      ? window.CATHOLIC_DOWON_TEST_ROUTE_DATA : null;
+  }
+  function getActiveHantiRouteData(){
+    return (trailState && trailState.hantiActiveRouteData) || getHantiRouteData();
+  }
+  function getActiveHantiRouteTitle(){
+    var data = getActiveHantiRouteData();
+    return data && data.name || '한티가는길';
+  }
   function isHantiTrailItem(d){ return !!(d && d.n === '한티가는길'); }
   function clearHantiRouteOverlays(){
     try{
@@ -242,6 +253,8 @@
     trailState.hantiPolylines = [];
     trailState.hantiStampOverlays = [];
     trailState.hantiVisible = false;
+    trailState.hantiActiveRouteData = null;
+    trailState.hantiActiveRouteId = '';
   }
   function setHantiRouteActive(active){
     try{
@@ -288,10 +301,12 @@
     var body = ig$('trail-sh-body');
     var foot = ig$('trail-sh-foot');
     if(bdg){ bdg.textContent = stamp.id || '스탬프'; bdg.className = 'trail-sh-bdg d'; }
-    if(region) region.textContent = '📍 한티가는길 스탬프';
-    if(ico){ ico.textContent = stamp.role === 'finish' ? '🏁' : (stamp.role === 'start' ? '⛪' : '✝️'); ico.className = 'trail-sh-ico d'; }
+    var activeData = getActiveHantiRouteData();
+    var isTestLoop = activeData && activeData.id === 'dowon_test_loop';
+    if(region) region.textContent = isTestLoop ? '🧪 도원동 테스트 지점' : '📍 한티가는길 스탬프';
+    if(ico){ ico.textContent = stamp.role === 'finish' ? '🏁' : (stamp.role === 'start' ? '⛪' : (isTestLoop ? '📍' : '✝️')); ico.className = 'trail-sh-ico d'; }
     if(name) name.textContent = stamp.name || '';
-    if(sub) sub.textContent = (stamp.en || '') + (stamp.role === 'finish' ? ' · 완료 지점' : '');
+    if(sub) sub.textContent = isTestLoop ? 'GPX 따라가기 테스트 · 실제 기록 저장 없음' : ((stamp.en || '') + (stamp.role === 'finish' ? ' · 완료 지점' : ''));
     ensureHantiTestPanel();
     if(stamp && (stamp.id === '3-4' || stamp.id === '4-1')){
       setTrailHantiNote('동명읍 안에서는 여러 길로 동명성당에 도착할 수 있습니다. 표시된 경로선은 참고용입니다.');
@@ -308,7 +323,7 @@
     var el = document.createElement('button');
     el.type = 'button';
     el.className = hantiStampMarkerClass(stamp);
-    el.setAttribute('aria-label', '한티가는길 ' + (stamp.id || '') + ' ' + (stamp.name || ''));
+    el.setAttribute('aria-label', getActiveHantiRouteTitle() + ' ' + (stamp.id || '') + ' ' + (stamp.name || ''));
     el.innerHTML = '<span class="hanti-stamp-id">' + esc(stamp.id || '') + '</span><span class="hanti-stamp-name">' + esc(stamp.name || '') + '</span>';
     el.addEventListener('click', function(ev){
       try{ ev.preventDefault(); ev.stopPropagation(); }catch(_e){}
@@ -354,7 +369,7 @@
     return Math.round(m) + 'm';
   }
   function findNearestHantiStampFromCoords(lat, lng){
-    var data = getHantiRouteData();
+    var data = getActiveHantiRouteData();
     var list = data && data.stamps || [];
     var best = null, bestD = Infinity;
     list.forEach(function(stamp){
@@ -439,7 +454,7 @@
       '<span>실제 순례기록 저장: 안 함</span>';
   }
   function runHantiTestStamp(stampId){
-    var data = getHantiRouteData();
+    var data = getActiveHantiRouteData();
     var stamp = findHantiStampById(data, stampId);
     if(!(stamp && Number.isFinite(Number(stamp.lat)) && Number.isFinite(Number(stamp.lng)))) return;
     var lat = Number(stamp.lat), lng = Number(stamp.lng);
@@ -452,9 +467,21 @@
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
+  function activateHantiTestRoute(routeId){
+    var data = routeId === 'dowon' ? getDowonTestRouteData() : getHantiRouteData();
+    if(!(data && trailState && trailState.map && window.kakao && kakao.maps)) return;
+    showHantiRouteOverlays(data);
+    if(routeId === 'dowon'){
+      setTrailHantiNote('도원동 동네 테스트 루프입니다. 실제 순례기록은 저장하지 않고, 내 위치가 GPX 선을 따라가는지만 확인합니다.');
+    }else{
+      setTrailHantiNote('동명읍 안에서는 여러 길로 동명성당에 도착할 수 있습니다. 표시된 경로선은 참고용입니다.');
+    }
+    fitHantiRouteBounds(data);
+    ensureHantiTestPanel();
+  }
   function ensureHantiTestPanel(){
     if(!hantiTestModeEnabled()){ removeHantiTestPanel(); return; }
-    var data = getHantiRouteData();
+    var data = getActiveHantiRouteData();
     var info = ig$('trail-sh-name') && ig$('trail-sh-name').parentElement;
     if(!(data && info)) return;
     var panel = ig$('trail-hanti-test-panel');
@@ -464,16 +491,21 @@
       panel.className = 'hanti-test-panel';
       info.appendChild(panel);
     }
+    var activeId = data.id || 'hanti';
     var stamps = data.stamps || [];
     var options = stamps.map(function(s){
       return '<option value="' + esc(s.id || '') + '">' + esc((s.id || '') + ' ' + (s.name || '')) + '</option>';
     }).join('');
-    panel.innerHTML = '<div class="hanti-test-head"><div class="hanti-test-title">한티가는길 테스트 모드</div>' +
+    panel.innerHTML = '<div class="hanti-test-head"><div class="hanti-test-title">' + esc(data.name || '한티가는길') + ' 테스트 모드</div>' +
       '<button id="trail-hanti-test-close" type="button" class="hanti-test-close">테스트 닫기</button></div>' +
-      '<div class="hanti-test-help">현장에 가지 않고 선택한 스탬프 좌표를 임시 현재 위치로 확인합니다. 실제 기록은 저장하지 않습니다.</div>' +
-      '<div class="hanti-test-row"><select id="trail-hanti-test-select" aria-label="테스트할 스탬프 선택">' + options + '</select>' +
+      '<div class="hanti-test-help">숨은 테스트입니다. 실제 순례기록은 저장하지 않습니다.</div>' +
+      '<div class="hanti-test-switch" aria-label="테스트 경로 선택">' +
+      '<button id="trail-hanti-test-route-hanti" type="button" class="' + (activeId === 'hanti' ? 'on' : '') + '">한티가는길</button>' +
+      '<button id="trail-hanti-test-route-dowon" type="button" class="' + (activeId === 'dowon_test_loop' ? 'on' : '') + '">도원동 테스트 루프</button>' +
+      '</div>' +
+      '<div class="hanti-test-row"><select id="trail-hanti-test-select" aria-label="테스트할 지점 선택">' + options + '</select>' +
       '<button id="trail-hanti-test-run" type="button">테스트</button></div>' +
-      '<div id="trail-hanti-test-result" class="hanti-test-result">스탬프를 선택하고 테스트를 누르세요.</div>';
+      '<div id="trail-hanti-test-result" class="hanti-test-result">지점을 선택하고 테스트를 누르세요.</div>';
     panel.onclick = function(ev){ try{ ev.stopPropagation(); }catch(_e){} };
     var closeBtn = ig$('trail-hanti-test-close');
     if(closeBtn){
@@ -482,6 +514,10 @@
         closeHantiTestMode();
       };
     }
+    var hantiBtn = ig$('trail-hanti-test-route-hanti');
+    if(hantiBtn) hantiBtn.onclick = function(ev){ try{ ev.preventDefault(); ev.stopPropagation(); }catch(_e){} activateHantiTestRoute('hanti'); };
+    var dowonBtn = ig$('trail-hanti-test-route-dowon');
+    if(dowonBtn) dowonBtn.onclick = function(ev){ try{ ev.preventDefault(); ev.stopPropagation(); }catch(_e){} activateHantiTestRoute('dowon'); };
     var sel = ig$('trail-hanti-test-select');
     var btn = ig$('trail-hanti-test-run');
     if(btn) btn.onclick = function(ev){ try{ ev.preventDefault(); ev.stopPropagation(); }catch(_e){} runHantiTestStamp(sel && sel.value); };
@@ -588,28 +624,25 @@
     if(!old) info.appendChild(note);
     bindHantiSecretTapTarget(note);
   }
-  function showHantiRouteOverlays(){
-    var data = getHantiRouteData();
+  function showHantiRouteOverlays(routeData){
+    var data = routeData || getHantiRouteData();
     if(!(data && trailState.map && window.kakao && kakao.maps)) return;
     clearHantiRouteOverlays();
     try{
-      /* V8-1-14-453: 동명읍 내부의 인위적 대표선은 제거하고 GPX 원래 경로선으로 복원한다.
-         이 구간은 여러 길이 가능하므로 경로선은 참고용으로만 표시하고, 임의 직선/대표선으로
-         동명약국~동명성당 구간을 이상하게 연결하지 않는다. */
-      var mergedPath = [];
+      /* V8-1-14-454: 원본 GPX segment를 강제 병합하지 않고 그대로 그린다.
+         여러 segment를 하나로 합치면 없는 길이 직선처럼 이어질 수 있으므로, 테스트 루프도 같은 방식으로 표시한다. */
+      var isTestLoop = data.id === 'dowon_test_loop';
       (data.routeSegments || []).forEach(function(seg){
-        (seg.points || []).forEach(function(p){
-          var lat = Number(p && p.lat), lng = Number(p && p.lng);
-          if(!Number.isFinite(lat) || !Number.isFinite(lng)) return;
-          var ll = new kakao.maps.LatLng(lat, lng);
-          var last = mergedPath.length ? mergedPath[mergedPath.length - 1] : null;
-          if(last && Math.abs(last.getLat() - lat) < 0.000000001 && Math.abs(last.getLng() - lng) < 0.000000001) return;
-          mergedPath.push(ll);
-        });
+        var path = hantiLatLngPathFromPoints(seg && seg.points);
+        if(path.length > 1){
+          drawHantiPolyline(path, {
+            weight: isTestLoop ? 4 : 5,
+            color: isTestLoop ? '#2E7D32' : '#B7791F',
+            opacity: isTestLoop ? .9 : .86,
+            zIndex: isTestLoop ? 34 : 30
+          });
+        }
       });
-      if(mergedPath.length > 1){
-        drawHantiPolyline(mergedPath, {weight:5, color:'#B7791F', opacity:.86, zIndex:30});
-      }
       (data.stamps || []).forEach(function(stamp){
         var ov = createHantiStampOverlay(stamp);
         if(!ov) return;
@@ -617,10 +650,12 @@
         trailState.hantiStampOverlays.push(ov);
       });
       trailState.hantiVisible = true;
+      trailState.hantiActiveRouteData = data;
+      trailState.hantiActiveRouteId = data.id || 'hanti';
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
-  function fitHantiRouteBounds(){
-    var data = getHantiRouteData();
+  function fitHantiRouteBounds(routeData){
+    var data = routeData || getActiveHantiRouteData();
     if(!(data && trailState.map && window.kakao && kakao.maps)) return;
     try{
       var bounds = new kakao.maps.LatLngBounds();
@@ -636,7 +671,7 @@
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
   const RETURN_KEY = 'catholic_integrated_return_v2';
-  const trailState = {inited:false, map:null, markers:[], selected:-1, myOverlay:null, view:'map', pendingOpenIndex:null, restoreCenter:null, restoreLevel:null, needsHardReset:false, pendingFitBounds:false, hantiPolylines:[], hantiStampOverlays:[], hantiVisible:false, hantiLocationOverlay:null, hantiRouteActive:false, hantiTestUnlocked:false, hantiTestClosed:false, hantiTestTapCount:0, hantiTestTapStartedAt:0};
+  const trailState = {inited:false, map:null, markers:[], selected:-1, myOverlay:null, view:'map', pendingOpenIndex:null, restoreCenter:null, restoreLevel:null, needsHardReset:false, pendingFitBounds:false, hantiPolylines:[], hantiStampOverlays:[], hantiVisible:false, hantiLocationOverlay:null, hantiRouteActive:false, hantiActiveRouteData:null, hantiActiveRouteId:'', hantiTestUnlocked:false, hantiTestClosed:false, hantiTestTapCount:0, hantiTestTapStartedAt:0};
   const webState = {built:false, curCat:'⭐ 즐겨찾기'};
   const WEB_FAV_KEY = 'web_favorites_v1';
   const MY_DIOCESE_KEY = 'oai_my_diocese_name';
@@ -1152,7 +1187,7 @@
   function relayoutTrailMap(delay, reason){
     const wait = Number.isFinite(Number(delay)) ? Number(delay) : 0;
     const isFoldViewport = /viewport|resize|fold|orientation|settle|late|final|android-fold/i.test(String(reason || ''));
-    /* V8-1-14-453: 순례길 지도 relayout은 공통 Fold 관리자 흐름에서만 보정한다. */
+    /* V8-1-14-454: 순례길 지도 relayout은 공통 Fold 관리자 흐름에서만 보정한다. */
     setTimeout(function(){
       if(!(trailState.map && window.kakao && window.kakao.maps)){
         return;
@@ -1163,7 +1198,7 @@
         const currentLevel = (trailState.map.getLevel ? trailState.map.getLevel() : null);
         const targetCenter = plain ? trailDefaultCenter() : currentCenter;
         const targetLevel = plain ? 13 : currentLevel;
-        /* V8-1-14-453:
+        /* V8-1-14-454:
            순례길은 Fold 전환 때 오래된 컨테이너 폭으로 먼저 그려졌다가 중앙으로 이동해 보였다.
            지도는 잠시 숨긴 상태에서 relayout→level→center 순서로 한 번 확정하고 그 뒤에만 보인다. */
         trailState.map.relayout();
@@ -1205,7 +1240,7 @@
   function fitTrailMapToBounds(){
     if(!(trailState.map && window.kakao && window.kakao.maps)) return;
     try{
-      // V8-1-14-453:
+      // V8-1-14-454:
       // setBounds는 되살리지 않고 중심 이동은 1회만 유지한다.
       // 순례길 첫 화면이 너무 확대되어 보이지 않도록 기본 줌을 한 단계 넓게 둔다.
       if(typeof trailState.map.setLevel === "function") trailState.map.setLevel(13);
