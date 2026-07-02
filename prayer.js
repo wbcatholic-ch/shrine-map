@@ -718,7 +718,7 @@ window.prCloseDetail = window.prCloseDetail;
   var horizontalLocked = false;
   var handled = false;
 
-  /* V8-1-14-401:
+  /* V8-1-14-402:
      기도문 목록 스와이프가 세로 스크롤/탭/즐겨찾기 터치와 섞여 잘 안 잡히는 문제 보정.
      너무 짧은 흔들림은 무시하되, 실제 좌우 움직임은 더 빨리 lock해서 카테고리 전환을 안정화한다. */
   var THRESHOLD = 30;
