@@ -994,7 +994,7 @@ html:not(.ios-device).oai-screen-compact-short .my-faith-info-head::before{width
 html:not(.ios-device).oai-screen-compact-short .my-faith-info-close{width:var(--oai-std-close-sz,34px)!important;height:var(--oai-std-close-sz,34px)!important;min-width:var(--oai-std-close-sz,34px)!important;flex-basis:var(--oai-std-close-sz,34px)!important;}
 
 
-/* V8-1-14-402: 나의 신앙생활 확인 버튼 아래 안내문과 백업 설명 정리. */
+/* V8-1-14-403: 나의 신앙생활 확인 버튼 아래 안내문과 백업 설명 정리. */
 .my-faith-confirm-under-note{
   margin:6px 8px 2px!important;
   padding:0 10px!important;

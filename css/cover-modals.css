@@ -244,3 +244,30 @@ html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-qu
   line-height: 1.18 !important;
   letter-spacing: -.03em !important;
 }
+
+
+/* V8-1-14-403: 미사 중 빠른 사용 팝업 4버튼 테두리 색상 직접 적용.
+   cover-modals.css가 style.css보다 뒤에 로드되므로 여기에서 최종 고정한다. */
+#cover #mass-quick-modal .mass-quick-btn{
+  border-width:3px!important;
+  border-style:solid!important;
+  background:#fffdf8!important;
+  box-shadow:0 8px 18px rgba(74,47,34,.10), inset 0 1px 0 rgba(255,255,255,.94)!important;
+}
+#cover #mass-quick-modal #mass-quick-missa{
+  border-color:#b98300!important;
+  background:linear-gradient(180deg,#fffdf8 0%,#fff0bd 100%)!important;
+}
+#cover #mass-quick-modal #mass-quick-prayer{
+  border-color:#16724f!important;
+  background:linear-gradient(180deg,#fffdf8 0%,#d9f3e4 100%)!important;
+}
+#cover #mass-quick-modal #mass-quick-hymn{
+  border-color:#a7356c!important;
+  background:linear-gradient(180deg,#fffdf8 0%,#ffe0ee 100%)!important;
+}
+#cover #mass-quick-modal #mass-quick-bible{
+  border-color:#246ca8!important;
+  background:linear-gradient(180deg,#fffdf8 0%,#dbeeff 100%)!important;
+}
+
