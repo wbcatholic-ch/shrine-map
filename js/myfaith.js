@@ -959,7 +959,7 @@
       sec.appendChild(toggle);
       var note=document.createElement('p');
       note.className='my-faith-data-toggle-note';
-      note.textContent='앱 삭제·기기 변경 시 백업 코드를 보관하세요.';
+      note.textContent='즐겨찾기·순례 스탬프·나의 신앙생활 설정을 백업하고, 앱 삭제나 기기 변경 후 다시 복원할 수 있습니다.';
       sec.appendChild(note);
       return sec;
     }
@@ -1236,7 +1236,7 @@
       bindMyFaithClick(b, function(){ fn&&fn(); });
       return b;
     }
-    function appendMyFaithPrivacyNote(){ var note=document.createElement('div'); note.className='my-faith-inline-privacy-note'; note.textContent='선택한 교구와 본당 정보는 이 기기 안에만 저장되며, 외부로 수집되거나 전송되지 않습니다.'; body.appendChild(note); }
+    function appendMyFaithPrivacyNote(){ /* V8-1-14-400: 개인정보 안내문은 확인 버튼 바로 아래에 표시하므로 하단 중복 표시는 하지 않는다. */ return; }
     function appendMyFaithConfirmButton(onConfirm){
       var wrap=document.createElement('div');
       wrap.className='my-faith-inline-confirm';
@@ -1253,6 +1253,10 @@
       });
       wrap.appendChild(ok);
       body.appendChild(wrap);
+      var note=document.createElement('div');
+      note.className='my-faith-inline-privacy-note my-faith-confirm-under-note';
+      note.textContent='선택한 교구와 본당 정보는 이 기기 안에만 저장되며, 외부로 수집되거나 전송되지 않습니다.';
+      body.appendChild(note);
     }
     function settleMyFaithHomeScroll(){ try{ if(!body || !body.classList.contains('my-faith-home-list-body')) return; body.scrollTop=0; body.classList.remove('my-faith-no-scroll'); setTimeout(function(){ try{ body.classList.remove('my-faith-no-scroll'); }catch(_e){} },120); }catch(e){ console.warn('[가톨릭길동무]', e); } }
 

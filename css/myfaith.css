@@ -992,3 +992,22 @@ html:not(.ios-device).oai-screen-compact-short .my-faith-body.my-faith-home-list
 }
 html:not(.ios-device).oai-screen-compact-short .my-faith-info-head::before{width:42px!important;height:42px!important;min-width:42px!important;flex-basis:42px!important;}
 html:not(.ios-device).oai-screen-compact-short .my-faith-info-close{width:var(--oai-std-close-sz,34px)!important;height:var(--oai-std-close-sz,34px)!important;min-width:var(--oai-std-close-sz,34px)!important;flex-basis:var(--oai-std-close-sz,34px)!important;}
+
+
+/* V8-1-14-400: 나의 신앙생활 확인 버튼 아래 안내문과 백업 설명 정리. */
+.my-faith-confirm-under-note{
+  margin:6px 8px 2px!important;
+  padding:0 10px!important;
+  font-size:calc(14.5px * var(--app-font-scale,1))!important;
+  line-height:1.38!important;
+  font-weight:740!important;
+  text-align:center!important;
+  color:rgba(95,85,73,.78)!important;
+}
+.my-faith-data-toggle-note{
+  padding:9px 12px 10px!important;
+  font-size:calc(14.5px * var(--app-font-scale,1))!important;
+  line-height:1.42!important;
+  font-weight:760!important;
+}
+
