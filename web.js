@@ -191,7 +191,7 @@
     "교구":"#f0f5f0"
   };
   const TRAIL_COLORS = {d:'#1D4ED8', l:'#2A8040'};
-  /* V8-1-14-456: 순례길 지도 확대/축소 체감 개선을 위해 마커 이미지를 캐시하고
+  /* V8-1-14-457: 순례길 지도 확대/축소 체감 개선을 위해 마커 이미지를 캐시하고
      같은 이미지/지도 상태를 반복 적용하지 않는다. */
   const TRAIL_MARKER_IMG_CACHE = Object.create(null);
   function trailMarkerImageCached(key, maker){
@@ -249,6 +249,7 @@
       (trailState.hantiProgressPolylines || []).forEach(function(line){ try{ line.setMap(null); }catch(_e){} });
       (trailState.hantiStampOverlays || []).forEach(function(ov){ try{ ov.setMap(null); }catch(_e){} });
       try{ if(trailState.hantiGpsTracePolyline) trailState.hantiGpsTracePolyline.setMap(null); }catch(_e){}
+      removeHantiRouteControls();
       clearHantiLocationGuideOverlay();
       stopHantiGpxFollow();
       removeHantiTestPanel();
@@ -261,6 +262,7 @@
     trailState.hantiVisible = false;
     trailState.hantiActiveRouteData = null;
     trailState.hantiActiveRouteId = '';
+    trailState.hantiRouteViewMode = false;
     trailState.hantiLastRoutePointIndex = null;
     trailState.hantiLastProgressM = 0;
     trailState.hantiArrivedStampIds = {};
@@ -317,7 +319,8 @@
     if(ico){ ico.textContent = stamp.role === 'finish' ? '🏁' : (stamp.role === 'start' ? '⛪' : (isTestLoop ? '📍' : '✝️')); ico.className = 'trail-sh-ico d'; }
     if(name) name.textContent = stamp.name || '';
     if(sub) sub.textContent = isTestLoop ? 'GPX 따라가기 테스트 · 실제 기록 저장 없음' : ((stamp.en || '') + (stamp.role === 'finish' ? ' · 완료 지점' : ''));
-    ensureHantiTestPanel();
+    removeTrailSheetActions();
+    if(hantiTestModeEnabled()) ensureHantiTestPanel(); else removeHantiTestPanel();
     if(stamp && (stamp.id === '3-4' || stamp.id === '4-1')){
       setTrailHantiNote('동명읍 안에서는 여러 길로 동명성당에 도착할 수 있습니다. 표시된 경로선은 참고용입니다.');
     }else{
@@ -599,7 +602,7 @@
   }
   function hantiTestModeEnabled(){
     if(trailState && trailState.hantiTestClosed) return false;
-    return !!(trailState && trailState.hantiTestUnlocked) || hantiUrlTestModeEnabled();
+    return !!(trailState && trailState.hantiTestUnlocked);
   }
   function unlockHantiTestMode(){
     if(trailState){
@@ -617,7 +620,7 @@
     el.__hantiSecretTapBound = true;
     el.addEventListener('click', function(ev){
       try{ ev.preventDefault(); ev.stopPropagation(); }catch(_e){}
-      if(!(trailState && trailState.hantiVisible)) return;
+      if(!(trailState && trailState.hantiSecretTitleReady)) return;
       var now = Date.now();
       if(!trailState.hantiTestTapStartedAt || now - trailState.hantiTestTapStartedAt > 3500){
         trailState.hantiTestTapStartedAt = now;
@@ -655,6 +658,8 @@
     }
     var btn = ig$('trail-hanti-follow-toggle');
     if(btn) btn.textContent = 'GPX 따라가기 시작';
+    var routeBtn = ig$('trail-hanti-route-follow');
+    if(routeBtn) routeBtn.textContent = '경로 따라가기';
   }
   function startHantiGpxFollow(){
     if(!(window.navigator && navigator.geolocation)){ alert('위치 서비스를 지원하지 않습니다.'); return; }
@@ -664,6 +669,8 @@
     trailState.hantiFollowActive = true;
     var btn = ig$('trail-hanti-follow-toggle');
     if(btn) btn.textContent = 'GPX 따라가기 중지';
+    var routeBtn = ig$('trail-hanti-route-follow');
+    if(routeBtn) routeBtn.textContent = '정지';
     var first = true;
     function onpos(pos){
       var lat = pos.coords.latitude, lng = pos.coords.longitude;
@@ -721,17 +728,105 @@
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
+  function getHantiMainTrailIndex(){
+    try{
+      for(var i=0;i<TRAIL_ITEMS.length;i++){ if(isHantiTrailItem(TRAIL_ITEMS[i])) return i; }
+    }catch(_e){}
+    return -1;
+  }
+  function removeTrailSheetActions(){
+    try{ var old = ig$('trail-sh-actions'); if(old) old.remove(); }catch(_e){}
+  }
+  function ensureHantiMainSheetActions(item){
+    var foot = ig$('trail-sh-foot');
+    if(!foot) return;
+    removeTrailSheetActions();
+    var actions = document.createElement('div');
+    actions.id = 'trail-sh-actions';
+    actions.className = 'trail-sh-actions';
+    actions.innerHTML =
+      '<button id="trail-sh-home-btn" type="button" class="trail-sh-action-btn">홈페이지</button>' +
+      '<button id="trail-sh-full-route-btn" type="button" class="trail-sh-action-btn primary">전체경로보기</button>';
+    foot.parentNode.insertBefore(actions, foot.nextSibling);
+    var home = ig$('trail-sh-home-btn');
+    if(home) home.onclick = function(ev){
+      try{ ev.preventDefault(); ev.stopPropagation(); }catch(_e){}
+      if(item && item.url) openExternalUrl(item.url, {module:'trail', view:'map'});
+    };
+    var route = ig$('trail-sh-full-route-btn');
+    if(route) route.onclick = function(ev){
+      try{ ev.preventDefault(); ev.stopPropagation(); }catch(_e){}
+      trailState.hantiReturnTrailIndex = Number.isFinite(Number(trailState.selected)) && trailState.selected >= 0 ? trailState.selected : getHantiMainTrailIndex();
+      openHantiFullRoute(getHantiRouteData(), {source:'hanti-main'});
+    };
+  }
+  function removeHantiRouteControls(){
+    try{ var old = ig$('trail-hanti-route-controls'); if(old) old.remove(); }catch(_e){}
+  }
+  function ensureHantiRouteControls(){
+    var panel = ig$('trail-panel-map');
+    if(!panel) return;
+    var controls = ig$('trail-hanti-route-controls');
+    if(!controls){
+      controls = document.createElement('div');
+      controls.id = 'trail-hanti-route-controls';
+      controls.className = 'hanti-route-controls';
+      var loc = ig$('trail-loc-btn');
+      if(loc && loc.parentNode === panel) panel.insertBefore(controls, loc);
+      else panel.appendChild(controls);
+    }
+    controls.innerHTML =
+      '<button id="trail-hanti-route-follow" type="button" class="hanti-route-control-btn primary">' + (trailState.hantiFollowActive ? '정지' : '경로 따라가기') + '</button>' +
+      '<button id="trail-hanti-route-close" type="button" class="hanti-route-control-btn close">경로닫기 ×</button>';
+    var follow = ig$('trail-hanti-route-follow');
+    if(follow) follow.onclick = function(ev){
+      try{ ev.preventDefault(); ev.stopPropagation(); }catch(_e){}
+      startHantiGpxFollow();
+    };
+    var close = ig$('trail-hanti-route-close');
+    if(close) close.onclick = function(ev){
+      try{ ev.preventDefault(); ev.stopPropagation(); }catch(_e){}
+      closeHantiFullRouteToSheet('route-close-button');
+    };
+  }
+  function openHantiFullRoute(routeData, opts){
+    opts = opts || {};
+    var data = routeData || getHantiRouteData();
+    if(!(data && trailState && trailState.map && window.kakao && kakao.maps)) return;
+    if(!Number.isFinite(Number(trailState.hantiReturnTrailIndex)) || trailState.hantiReturnTrailIndex < 0){
+      trailState.hantiReturnTrailIndex = Number.isFinite(Number(trailState.selected)) && trailState.selected >= 0 ? trailState.selected : getHantiMainTrailIndex();
+    }
+    trailState.hantiRouteViewMode = true;
+    showHantiRouteOverlays(data);
+    setHantiRouteActive(true);
+    closeTrailSheetOnly();
+    removeTrailSheetActions();
+    ensureHantiRouteControls();
+    fitHantiRouteBounds(data);
+  }
+  function closeHantiFullRouteToSheet(reason){
+    if(!(trailState && (trailState.hantiRouteViewMode || trailState.hantiVisible))) return false;
+    var idx = Number.isFinite(Number(trailState.hantiReturnTrailIndex)) && trailState.hantiReturnTrailIndex >= 0 ? Number(trailState.hantiReturnTrailIndex) : getHantiMainTrailIndex();
+    stopHantiGpxFollow();
+    clearHantiRouteOverlays();
+    removeHantiRouteControls();
+    setHantiRouteActive(false);
+    trailState.hantiRouteViewMode = false;
+    trailState.hantiSecretTitleReady = false;
+    if(idx >= 0){
+      setTimeout(function(){
+        try{ window.trailOpenSheet(idx); }catch(e){ console.warn('[가톨릭길동무]', e); }
+      }, 60);
+    }
+    return true;
+  }
+  try{ window._oaiTrailBackHandle = function(reason){ return closeHantiFullRouteToSheet(reason || 'back'); }; }catch(_e){}
+
   function activateHantiTestRoute(routeId){
     var data = routeId === 'dowon' ? getDowonTestRouteData() : getHantiRouteData();
     if(!(data && trailState && trailState.map && window.kakao && kakao.maps)) return;
-    showHantiRouteOverlays(data);
-    if(routeId === 'dowon'){
-      setTrailHantiNote('도원동 테스트 GPX입니다. GPX 따라가기 시작을 누르고 걸으면서 경로까지 거리와 다음 지점을 확인하세요.');
-    }else{
-      setTrailHantiNote('동명읍 안에서는 여러 길로 동명성당에 도착할 수 있습니다. 표시된 경로선은 참고용입니다.');
-    }
-    fitHantiRouteBounds(data);
-    ensureHantiTestPanel();
+    trailState.hantiReturnTrailIndex = Number.isFinite(Number(trailState.selected)) && trailState.selected >= 0 ? trailState.selected : getHantiMainTrailIndex();
+    openHantiFullRoute(data, {source:'hidden-test'});
   }
   function ensureHantiTestPanel(){
     if(!hantiTestModeEnabled()){ removeHantiTestPanel(); return; }
@@ -911,14 +1006,13 @@
     note.className = 'trail-sh-note';
     note.textContent = text;
     if(!old) info.appendChild(note);
-    bindHantiSecretTapTarget(note);
   }
   function showHantiRouteOverlays(routeData){
     var data = routeData || getHantiRouteData();
     if(!(data && trailState.map && window.kakao && kakao.maps)) return;
     clearHantiRouteOverlays();
     try{
-      /* V8-1-14-456: 원본 GPX segment를 강제 병합하지 않고 그대로 그린다.
+      /* V8-1-14-457: 원본 GPX segment를 강제 병합하지 않고 그대로 그린다.
          여러 segment를 하나로 합치면 없는 길이 직선처럼 이어질 수 있으므로, 테스트 루프도 같은 방식으로 표시한다. */
       var isTestLoop = data.id === 'dowon_test_loop';
       trailState.hantiActiveRouteData = data;
@@ -960,7 +1054,7 @@
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
   const RETURN_KEY = 'catholic_integrated_return_v2';
-  const trailState = {inited:false, map:null, markers:[], selected:-1, myOverlay:null, view:'map', pendingOpenIndex:null, restoreCenter:null, restoreLevel:null, needsHardReset:false, pendingFitBounds:false, hantiPolylines:[], hantiProgressPolylines:[], hantiStampOverlays:[], hantiGpsTracePolyline:null, hantiGpsTracePoints:[], hantiShowGpsTrace:true, hantiVisible:false, hantiLocationOverlay:null, hantiRouteActive:false, hantiActiveRouteData:null, hantiActiveRouteId:'', hantiFollowWatchId:null, hantiFollowActive:false, hantiLastRoutePointIndex:null, hantiLastProgressM:0, hantiArrivedStampIds:{}, hantiTestUnlocked:false, hantiTestClosed:false, hantiTestTapCount:0, hantiTestTapStartedAt:0};
+  const trailState = {inited:false, map:null, markers:[], selected:-1, myOverlay:null, view:'map', pendingOpenIndex:null, restoreCenter:null, restoreLevel:null, needsHardReset:false, pendingFitBounds:false, hantiPolylines:[], hantiProgressPolylines:[], hantiStampOverlays:[], hantiGpsTracePolyline:null, hantiGpsTracePoints:[], hantiShowGpsTrace:true, hantiVisible:false, hantiLocationOverlay:null, hantiRouteActive:false, hantiRouteViewMode:false, hantiReturnTrailIndex:-1, hantiSecretTitleReady:false, hantiActiveRouteData:null, hantiActiveRouteId:'', hantiFollowWatchId:null, hantiFollowActive:false, hantiLastRoutePointIndex:null, hantiLastProgressM:0, hantiArrivedStampIds:{}, hantiTestUnlocked:false, hantiTestClosed:false, hantiTestTapCount:0, hantiTestTapStartedAt:0};
   const webState = {built:false, curCat:'⭐ 즐겨찾기'};
   const WEB_FAV_KEY = 'web_favorites_v1';
   const MY_DIOCESE_KEY = 'oai_my_diocese_name';
@@ -1476,7 +1570,7 @@
   function relayoutTrailMap(delay, reason){
     const wait = Number.isFinite(Number(delay)) ? Number(delay) : 0;
     const isFoldViewport = /viewport|resize|fold|orientation|settle|late|final|android-fold/i.test(String(reason || ''));
-    /* V8-1-14-456: 순례길 지도 relayout은 공통 Fold 관리자 흐름에서만 보정한다. */
+    /* V8-1-14-457: 순례길 지도 relayout은 공통 Fold 관리자 흐름에서만 보정한다. */
     setTimeout(function(){
       if(!(trailState.map && window.kakao && window.kakao.maps)){
         return;
@@ -1487,7 +1581,7 @@
         const currentLevel = (trailState.map.getLevel ? trailState.map.getLevel() : null);
         const targetCenter = plain ? trailDefaultCenter() : currentCenter;
         const targetLevel = plain ? 13 : currentLevel;
-        /* V8-1-14-456:
+        /* V8-1-14-457:
            순례길은 Fold 전환 때 오래된 컨테이너 폭으로 먼저 그려졌다가 중앙으로 이동해 보였다.
            지도는 잠시 숨긴 상태에서 relayout→level→center 순서로 한 번 확정하고 그 뒤에만 보인다. */
         trailState.map.relayout();
@@ -1529,7 +1623,7 @@
   function fitTrailMapToBounds(){
     if(!(trailState.map && window.kakao && window.kakao.maps)) return;
     try{
-      // V8-1-14-456:
+      // V8-1-14-457:
       // setBounds는 되살리지 않고 중심 이동은 1회만 유지한다.
       // 순례길 첫 화면이 너무 확대되어 보이지 않도록 기본 줌을 한 단계 넓게 둔다.
       if(typeof trailState.map.setLevel === "function") trailState.map.setLevel(13);
@@ -1681,11 +1775,14 @@
     if(!d) return;
     const hantiSelected = isHantiTrailItem(d);
     if(hantiSelected){
-      setHantiRouteActive(true);
-      showHantiRouteOverlays();
+      setHantiRouteActive(false);
+      clearHantiRouteOverlays();
+      trailState.hantiReturnTrailIndex = i;
+      trailState.hantiSecretTitleReady = true;
     }else{
       setHantiRouteActive(false);
       clearHantiRouteOverlays();
+      trailState.hantiSecretTitleReady = false;
     }
     ig$('trail-sh-bdg').textContent = d.op;
     ig$('trail-sh-bdg').className = 'trail-sh-bdg ' + d.t;
@@ -1695,10 +1792,13 @@
     ig$('trail-sh-name').textContent = d.n;
     ig$('trail-sh-sub').textContent = d.op + ' · ' + d.r;
     if(hantiSelected){
-      setTrailHantiNote('V456 테스트 빌드입니다. 도원동 테스트 루프를 선택하고 GPX 따라가기를 시작하세요.');
-      unlockHantiTestMode();
-      ig$('trail-sh-url').textContent = '공식 홈페이지 열기';
+      setTrailHantiNote('');
+      ig$('trail-sh-url').textContent = '홈페이지 · 전체경로보기';
+      ensureHantiMainSheetActions(d);
+      bindHantiSecretTapTarget(ig$('trail-sh-name'));
+      if(hantiTestModeEnabled()) ensureHantiTestPanel(); else removeHantiTestPanel();
     }else{
+      removeTrailSheetActions();
       removeHantiTestPanel();
       setTrailHantiNote('');
       ig$('trail-sh-url').textContent = shortUrl(d.url);
@@ -1709,19 +1809,24 @@
         view:'map'
       });
     };
-    ig$('trail-sh-body').onclick = openFn;
-    ig$('trail-sh-foot').onclick = openFn;
+    if(hantiSelected){
+      ig$('trail-sh-body').onclick = function(ev){ if(ev){ ev.preventDefault(); ev.stopPropagation(); } };
+      ig$('trail-sh-foot').onclick = function(ev){ if(ev){ ev.preventDefault(); ev.stopPropagation(); } };
+    }else{
+      ig$('trail-sh-body').onclick = openFn;
+      ig$('trail-sh-foot').onclick = openFn;
+    }
     ig$('trail-sheet').classList.add('open');
     if(trailState.map && window.kakao && window.kakao.maps){
-      if(hantiSelected){
-        setTimeout(function(){ fitHantiRouteBounds(); }, 80);
-      }else{
-        trailState.map.panTo(new kakao.maps.LatLng(d.lat,d.lng));
-      }
+      trailState.map.panTo(new kakao.maps.LatLng(d.lat,d.lng));
     }
   };
 
   window.trailCloseSheet = function(){
+    if(trailState && trailState.hantiRouteViewMode){
+      closeHantiFullRouteToSheet('trail-close-sheet-route-mode');
+      return;
+    }
     closeTrailSheetOnly();
     if(trailState && trailState.hantiVisible){
       setHantiRouteActive(false);
@@ -1729,6 +1834,8 @@
     }else{
       clearHantiRouteOverlays();
     }
+    trailState.hantiSecretTitleReady = false;
+    removeTrailSheetActions();
     if(!(trailState.map && window.kakao && window.kakao.maps)) return;
     if(trailState.selected >= 0 && trailState.markers[trailState.selected]){
       const idx = trailState.selected;
@@ -1749,7 +1856,7 @@
       closeTrailSheetOnly();
       initTrailModule();
       syncTrailMarkers();
-      setTimeout(restoreHantiRouteIfActive, 120);
+      if(isHantiRouteActive()) setTimeout(restoreHantiRouteIfActive, 120);
       relayoutTrailMap(90, 'trail-set-view-stable');
     } else {
       trailCloseSheet();
