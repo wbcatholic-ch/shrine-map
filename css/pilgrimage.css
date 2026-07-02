@@ -132,33 +132,61 @@ html:not(.ios-device).oai-screen-compact-short .trail-sh-close{
   width:34px!important;height:34px!important;min-width:34px!important;flex-basis:34px!important;
 }
 
-/* V8-1-14-445: 한티가는길 1차 표시(경로선 + 스탬프 마커, 자동도장 OFF) */
+/* V8-1-14-447: 한티가는길 1차 표시(경로선 + 스탬프 마커, 자동도장 OFF). 스탬프명은 생략 없이 전체 표시하고 동명읍 유연 경로 안내를 보인다. */
 .hanti-stamp-marker {
   appearance: none;
   border: 1.5px solid rgba(120, 72, 18, .55);
-  border-radius: 999px;
+  border-radius: 12px;
   background: rgba(255, 250, 241, .96);
   color: #6b3f08;
   box-shadow: 0 3px 9px rgba(31, 42, 68, .20);
   display: inline-flex;
   align-items: center;
-  gap: 3px;
+  gap: 4px;
   min-width: 38px;
-  max-width: 88px;
-  height: 24px;
-  padding: 0 7px;
+  max-width: 152px;
+  min-height: 24px;
+  height: auto;
+  padding: 4px 7px;
   font-family: inherit;
   font-size: 10px;
   font-weight: 900;
   letter-spacing: -.04em;
-  line-height: 1;
-  white-space: nowrap;
+  line-height: 1.12;
+  white-space: normal;
   cursor: pointer;
   touch-action: manipulation;
 }
 .hanti-stamp-marker .hanti-stamp-id { font-size: 10.5px; color: #8a4f0a; flex-shrink: 0; }
-.hanti-stamp-marker .hanti-stamp-name { overflow: hidden; text-overflow: ellipsis; max-width: 52px; }
+.hanti-stamp-marker .hanti-stamp-name { overflow: visible; text-overflow: clip; max-width: 110px; white-space: normal; word-break: keep-all; }
 .hanti-stamp-marker.start { background: rgba(235, 248, 239, .98); border-color: rgba(42,128,64,.70); color: #166534; }
 .hanti-stamp-marker.finish { background: rgba(255, 243, 216, .98); border-color: rgba(183,121,31,.80); color: #7A4F10; }
 .hanti-stamp-marker.exception { border-width: 2px; box-shadow: 0 3px 10px rgba(183,121,31,.26); }
 .hanti-stamp-marker:active { transform: translateY(1px); filter: brightness(.96); }
+
+.trail-sh-note {
+  margin-top: 5px;
+  color: #7A4F10;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.32;
+  word-break: keep-all;
+}
+.hanti-flex-guide {
+  pointer-events: none;
+  max-width: 172px;
+  padding: 6px 9px;
+  border-radius: 13px;
+  border: 1px solid rgba(183, 121, 31, .34);
+  background: rgba(255, 250, 241, .94);
+  box-shadow: 0 3px 10px rgba(31, 42, 68, .18);
+  color: #7A4F10;
+  font-family: inherit;
+  font-size: 10.5px;
+  font-weight: 900;
+  line-height: 1.25;
+  text-align: center;
+  word-break: keep-all;
+}
+.hanti-flex-guide strong { display: block; font-size: 11px; color: #5f3707; }
+.hanti-flex-guide span { display: block; margin-top: 2px; }

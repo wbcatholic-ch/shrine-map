@@ -7,14 +7,15 @@ window.CATHOLIC_HANTI_ROUTE_DATA = {
   "completionStampId": "5-5",
   "startName": "가실성당",
   "finishName": "한티마을",
-  "mode": "line_and_markers_first",
+  "mode": "line_markers_with_flexible_dongmyeong_approach",
   "features": {
     "showRouteLine": true,
     "showStampMarkers": true,
     "autoStamp": false,
     "nextStampDistance": false,
     "offRouteAlert": false,
-    "completionByFinishStamp": true
+    "completionByFinishStamp": true,
+    "flexibleDongmyeongApproach": true
   },
   "autoStampPolicy": {
     "enabled": false,
@@ -12737,6 +12738,18 @@ window.CATHOLIC_HANTI_ROUTE_DATA = {
           "lng": 128.6263611
         }
       ]
+    }
+  ],
+  "flexibleRouteSections": [
+    {
+      "id": "3-4_to_4-1_dongmyeong_eup_approach",
+      "fromStampId": "3-4",
+      "toStampId": "4-1",
+      "name": "여부재 → 동명성당",
+      "area": "동명읍 진입 후 동명성당 접근 구간",
+      "routeLineMeaning": "representative_reference_route",
+      "strictOffRouteCheck": false,
+      "message": "동명읍 안에서는 여러 길로 동명성당에 도착할 수 있습니다. 다음 스탬프 위치를 기준으로 이동하세요."
     }
   ]
 };

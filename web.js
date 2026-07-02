@@ -191,7 +191,7 @@
     "교구":"#f0f5f0"
   };
   const TRAIL_COLORS = {d:'#1D4ED8', l:'#2A8040'};
-  /* V8-1-14-445: 순례길 지도 확대/축소 체감 개선을 위해 마커 이미지를 캐시하고
+  /* V8-1-14-447: 순례길 지도 확대/축소 체감 개선을 위해 마커 이미지를 캐시하고
      같은 이미지/지도 상태를 반복 적용하지 않는다. */
   const TRAIL_MARKER_IMG_CACHE = Object.create(null);
   function trailMarkerImageCached(key, maker){
@@ -263,6 +263,11 @@
     if(ico){ ico.textContent = stamp.role === 'finish' ? '🏁' : (stamp.role === 'start' ? '⛪' : '✝️'); ico.className = 'trail-sh-ico d'; }
     if(name) name.textContent = stamp.name || '';
     if(sub) sub.textContent = (stamp.en || '') + (stamp.role === 'finish' ? ' · 완료 지점' : '');
+    if(stamp && (stamp.id === '3-4' || stamp.id === '4-1')){
+      setTrailHantiNote('여부재에서 동명읍으로 들어온 뒤에는 여러 길로 동명성당에 도착할 수 있습니다. 다음 스탬프 위치를 기준으로 이동하세요.');
+    }else{
+      setTrailHantiNote('');
+    }
     if(url) url.textContent = '스탬프 위치 확인용';
     if(body) body.onclick = function(ev){ if(ev){ ev.preventDefault(); ev.stopPropagation(); } };
     if(foot) foot.onclick = function(ev){ if(ev){ ev.preventDefault(); ev.stopPropagation(); } };
@@ -288,25 +293,102 @@
       xAnchor: .5, yAnchor: .5, zIndex: 80
     });
   }
+
+  function findHantiStampById(data, id){
+    var list = data && data.stamps || [];
+    for(var i=0;i<list.length;i++){ if(list[i] && list[i].id === id) return list[i]; }
+    return null;
+  }
+  function hantiDistanceScoreFromLatLng(ll, stamp){
+    if(!(ll && stamp)) return Infinity;
+    var lat = Number(stamp.lat), lng = Number(stamp.lng);
+    if(!Number.isFinite(lat) || !Number.isFinite(lng)) return Infinity;
+    var dLat = ll.getLat() - lat;
+    var dLng = ll.getLng() - lng;
+    return dLat*dLat + dLng*dLng;
+  }
+  function findNearestHantiPathIndex(path, stamp){
+    if(!(path && path.length && stamp)) return -1;
+    var best = -1, bestScore = Infinity;
+    for(var i=0;i<path.length;i++){
+      var score = hantiDistanceScoreFromLatLng(path[i], stamp);
+      if(score < bestScore){ bestScore = score; best = i; }
+    }
+    return best;
+  }
+  function drawHantiPolyline(path, option){
+    if(!(path && path.length > 1 && trailState.map && window.kakao && kakao.maps)) return null;
+    var line = new kakao.maps.Polyline({
+      map: trailState.map,
+      path: path,
+      strokeWeight: option && option.weight || 5,
+      strokeColor: option && option.color || '#B7791F',
+      strokeOpacity: option && option.opacity || .86,
+      strokeStyle: option && option.style || 'solid',
+      zIndex: option && option.zIndex || 30
+    });
+    trailState.hantiPolylines.push(line);
+    return line;
+  }
+  function createHantiFlexibleGuideOverlay(path){
+    if(!(path && path.length && trailState.map && window.kakao && kakao.maps)) return null;
+    var mid = path[Math.floor(path.length * 0.60)] || path[Math.floor(path.length / 2)];
+    if(!mid) return null;
+    var el = document.createElement('div');
+    el.className = 'hanti-flex-guide';
+    el.innerHTML = '<strong>동명읍 구간</strong><span>여러 길 가능 · 4-1 동명성당 기준</span>';
+    return new kakao.maps.CustomOverlay({
+      content: el,
+      position: mid,
+      xAnchor: .5, yAnchor: 1.2, zIndex: 75
+    });
+  }
+  function setTrailHantiNote(text){
+    var info = ig$('trail-sh-name') && ig$('trail-sh-name').parentElement;
+    if(!info) return;
+    var old = ig$('trail-sh-note');
+    if(!text){ if(old) old.remove(); return; }
+    var note = old || document.createElement('div');
+    note.id = 'trail-sh-note';
+    note.className = 'trail-sh-note';
+    note.textContent = text;
+    if(!old) info.appendChild(note);
+  }
   function showHantiRouteOverlays(){
     var data = getHantiRouteData();
     if(!(data && trailState.map && window.kakao && kakao.maps)) return;
     clearHantiRouteOverlays();
     try{
+      /* V8-1-14-447: 한티가는길은 하나의 대표 GPX 경로선을 보여주되,
+         3-4 여부재 → 4-1 동명성당의 동명읍 진입 이후는 여러 길이 가능하므로
+         해당 구간을 더 연한 '대표 경로'로 표시하고 엄격한 단일 경로처럼 보이지 않게 한다. */
+      var mergedPath = [];
       (data.routeSegments || []).forEach(function(seg){
-        var path = (seg.points || []).map(function(p){ return new kakao.maps.LatLng(Number(p.lat), Number(p.lng)); }).filter(Boolean);
-        if(path.length < 2) return;
-        var line = new kakao.maps.Polyline({
-          map: trailState.map,
-          path: path,
-          strokeWeight: 5,
-          strokeColor: '#B7791F',
-          strokeOpacity: .86,
-          strokeStyle: 'solid',
-          zIndex: 30
+        (seg.points || []).forEach(function(p){
+          var lat = Number(p && p.lat), lng = Number(p && p.lng);
+          if(!Number.isFinite(lat) || !Number.isFinite(lng)) return;
+          var ll = new kakao.maps.LatLng(lat, lng);
+          var last = mergedPath.length ? mergedPath[mergedPath.length - 1] : null;
+          if(last && Math.abs(last.getLat() - lat) < 0.000000001 && Math.abs(last.getLng() - lng) < 0.000000001) return;
+          mergedPath.push(ll);
         });
-        trailState.hantiPolylines.push(line);
       });
+      if(mergedPath.length > 1){
+        var flexFrom = findHantiStampById(data, '3-4');
+        var flexTo = findHantiStampById(data, '4-1');
+        var flexStart = findNearestHantiPathIndex(mergedPath, flexFrom);
+        var flexEnd = findNearestHantiPathIndex(mergedPath, flexTo);
+        if(flexStart >= 0 && flexEnd > flexStart + 1){
+          drawHantiPolyline(mergedPath.slice(0, flexStart + 1), {weight:5, color:'#B7791F', opacity:.86, zIndex:30});
+          var flexPath = mergedPath.slice(flexStart, flexEnd + 1);
+          drawHantiPolyline(flexPath, {weight:5, color:'#B7791F', opacity:.48, zIndex:31});
+          drawHantiPolyline(mergedPath.slice(flexEnd), {weight:5, color:'#B7791F', opacity:.86, zIndex:30});
+          var guide = createHantiFlexibleGuideOverlay(flexPath);
+          if(guide){ guide.setMap(trailState.map); trailState.hantiStampOverlays.push(guide); }
+        }else{
+          drawHantiPolyline(mergedPath, {weight:5, color:'#B7791F', opacity:.86, zIndex:30});
+        }
+      }
       (data.stamps || []).forEach(function(stamp){
         var ov = createHantiStampOverlay(stamp);
         if(!ov) return;
@@ -849,7 +931,7 @@
   function relayoutTrailMap(delay, reason){
     const wait = Number.isFinite(Number(delay)) ? Number(delay) : 0;
     const isFoldViewport = /viewport|resize|fold|orientation|settle|late|final|android-fold/i.test(String(reason || ''));
-    /* V8-1-14-445: 순례길 지도 relayout은 공통 Fold 관리자 흐름에서만 보정한다. */
+    /* V8-1-14-447: 순례길 지도 relayout은 공통 Fold 관리자 흐름에서만 보정한다. */
     setTimeout(function(){
       if(!(trailState.map && window.kakao && window.kakao.maps)){
         return;
@@ -860,7 +942,7 @@
         const currentLevel = (trailState.map.getLevel ? trailState.map.getLevel() : null);
         const targetCenter = plain ? trailDefaultCenter() : currentCenter;
         const targetLevel = plain ? 13 : currentLevel;
-        /* V8-1-14-445:
+        /* V8-1-14-447:
            순례길은 Fold 전환 때 오래된 컨테이너 폭으로 먼저 그려졌다가 중앙으로 이동해 보였다.
            지도는 잠시 숨긴 상태에서 relayout→level→center 순서로 한 번 확정하고 그 뒤에만 보인다. */
         trailState.map.relayout();
@@ -902,7 +984,7 @@
   function fitTrailMapToBounds(){
     if(!(trailState.map && window.kakao && window.kakao.maps)) return;
     try{
-      // V8-1-14-445:
+      // V8-1-14-447:
       // setBounds는 되살리지 않고 중심 이동은 1회만 유지한다.
       // 순례길 첫 화면이 너무 확대되어 보이지 않도록 기본 줌을 한 단계 넓게 둔다.
       if(typeof trailState.map.setLevel === "function") trailState.map.setLevel(13);
@@ -1061,7 +1143,13 @@
     ig$('trail-sh-ico').className = 'trail-sh-ico ' + d.t;
     ig$('trail-sh-name').textContent = d.n;
     ig$('trail-sh-sub').textContent = d.op + ' · ' + d.r;
-    ig$('trail-sh-url').textContent = shortUrl(d.url);
+    if(hantiSelected){
+      setTrailHantiNote('동명읍 안에서는 여러 길로 동명성당에 도착할 수 있습니다. 다음 스탬프 위치를 기준으로 이동하세요.');
+      ig$('trail-sh-url').textContent = '공식 홈페이지 열기';
+    }else{
+      setTrailHantiNote('');
+      ig$('trail-sh-url').textContent = shortUrl(d.url);
+    }
     const openFn = function(){
       openExternalUrl(d.url, {
         module:'trail',
