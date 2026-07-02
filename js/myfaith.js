@@ -1236,7 +1236,7 @@
       bindMyFaithClick(b, function(){ fn&&fn(); });
       return b;
     }
-    function appendMyFaithPrivacyNote(){ /* V8-1-14-400: 개인정보 안내문은 확인 버튼 바로 아래에 표시하므로 하단 중복 표시는 하지 않는다. */ return; }
+    function appendMyFaithPrivacyNote(){ /* V8-1-14-401: 개인정보 안내문은 확인 버튼 바로 아래에 표시하므로 하단 중복 표시는 하지 않는다. */ return; }
     function appendMyFaithConfirmButton(onConfirm){
       var wrap=document.createElement('div');
       wrap.className='my-faith-inline-confirm';
