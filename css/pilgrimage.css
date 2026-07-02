@@ -132,7 +132,7 @@ html:not(.ios-device).oai-screen-compact-short .trail-sh-close{
   width:34px!important;height:34px!important;min-width:34px!important;flex-basis:34px!important;
 }
 
-/* V8-1-14-448: 한티가는길 표시. 동명읍 내부는 여러 길 가능 구간으로 보고, 도로를 오가며 건너는 듯한 세부 GPX 대신 대표선을 안내한다. */
+/* V8-1-14-449: 한티가는길 표시. 동명읍 내부는 여러 길 가능 구간으로 보고, 도로를 오가며 건너는 듯한 세부 GPX 대신 대표선을 안내한다. */
 .hanti-stamp-marker {
   appearance: none;
   border: 1.5px solid rgba(120, 72, 18, .55);
@@ -190,3 +190,24 @@ html:not(.ios-device).oai-screen-compact-short .trail-sh-close{
 }
 .hanti-flex-guide strong { display: block; font-size: 11px; color: #5f3707; }
 .hanti-flex-guide span { display: block; margin-top: 2px; }
+
+/* V8-1-14-449: 한티가는길은 자동도장 전 단계로, 내 위치를 누르면 가장 가까운 스탬프 거리만 안내한다. */
+.hanti-location-guide {
+  pointer-events: none;
+  min-width: 118px;
+  max-width: 190px;
+  padding: 7px 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(31, 42, 68, .18);
+  background: rgba(255, 255, 255, .96);
+  box-shadow: 0 4px 12px rgba(31, 42, 68, .22);
+  color: #1f2a44;
+  font-family: inherit;
+  font-size: 10.5px;
+  font-weight: 900;
+  line-height: 1.25;
+  text-align: center;
+  word-break: keep-all;
+}
+.hanti-location-guide strong { display:block; color:#1565c0; font-size:11px; margin-bottom:2px; }
+.hanti-location-guide span { display:block; }

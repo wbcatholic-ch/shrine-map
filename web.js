@@ -191,7 +191,7 @@
     "교구":"#f0f5f0"
   };
   const TRAIL_COLORS = {d:'#1D4ED8', l:'#2A8040'};
-  /* V8-1-14-448: 순례길 지도 확대/축소 체감 개선을 위해 마커 이미지를 캐시하고
+  /* V8-1-14-449: 순례길 지도 확대/축소 체감 개선을 위해 마커 이미지를 캐시하고
      같은 이미지/지도 상태를 반복 적용하지 않는다. */
   const TRAIL_MARKER_IMG_CACHE = Object.create(null);
   function trailMarkerImageCached(key, maker){
@@ -236,6 +236,7 @@
     try{
       (trailState.hantiPolylines || []).forEach(function(line){ try{ line.setMap(null); }catch(_e){} });
       (trailState.hantiStampOverlays || []).forEach(function(ov){ try{ ov.setMap(null); }catch(_e){} });
+      clearHantiLocationGuideOverlay();
     }catch(e){ console.warn('[가톨릭길동무]', e); }
     trailState.hantiPolylines = [];
     trailState.hantiStampOverlays = [];
@@ -306,6 +307,55 @@
     var dLat = ll.getLat() - lat;
     var dLng = ll.getLng() - lng;
     return dLat*dLat + dLng*dLng;
+  }
+  function hantiDistanceMeters(lat1, lng1, lat2, lng2){
+    lat1 = Number(lat1); lng1 = Number(lng1); lat2 = Number(lat2); lng2 = Number(lng2);
+    if(!Number.isFinite(lat1) || !Number.isFinite(lng1) || !Number.isFinite(lat2) || !Number.isFinite(lng2)) return Infinity;
+    var R = 6371008.8;
+    var p1 = lat1 * Math.PI / 180, p2 = lat2 * Math.PI / 180;
+    var dp = (lat2 - lat1) * Math.PI / 180;
+    var dl = (lng2 - lng1) * Math.PI / 180;
+    var a = Math.sin(dp/2) * Math.sin(dp/2) + Math.cos(p1) * Math.cos(p2) * Math.sin(dl/2) * Math.sin(dl/2);
+    return 2 * R * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  }
+  function hantiFormatDistance(m){
+    m = Number(m);
+    if(!Number.isFinite(m)) return '';
+    if(m >= 1000) return (m >= 10000 ? Math.round(m/1000) : (m/1000).toFixed(1)) + 'km';
+    return Math.round(m) + 'm';
+  }
+  function findNearestHantiStampFromCoords(lat, lng){
+    var data = getHantiRouteData();
+    var list = data && data.stamps || [];
+    var best = null, bestD = Infinity;
+    list.forEach(function(stamp){
+      if(!(stamp && Number.isFinite(Number(stamp.lat)) && Number.isFinite(Number(stamp.lng)))) return;
+      var d = hantiDistanceMeters(lat, lng, stamp.lat, stamp.lng);
+      if(d < bestD){ bestD = d; best = stamp; }
+    });
+    return best ? { stamp: best, distanceM: bestD } : null;
+  }
+  function clearHantiLocationGuideOverlay(){
+    try{ if(trailState && trailState.hantiLocationOverlay) trailState.hantiLocationOverlay.setMap(null); }catch(_e){}
+    if(trailState) trailState.hantiLocationOverlay = null;
+  }
+  function showHantiLocationGuide(lat, lng){
+    if(!(trailState && trailState.hantiVisible && trailState.map && window.kakao && kakao.maps)) return;
+    var nearest = findNearestHantiStampFromCoords(lat, lng);
+    if(!(nearest && nearest.stamp)) return;
+    var label = (nearest.stamp.id || '') + ' ' + (nearest.stamp.name || '');
+    var dist = hantiFormatDistance(nearest.distanceM);
+    setTrailHantiNote('현재 위치 기준 가까운 스탬프: ' + label + (dist ? ' · 약 ' + dist : '') + ' / 자동도장은 아직 꺼져 있습니다.');
+    clearHantiLocationGuideOverlay();
+    var el = document.createElement('div');
+    el.className = 'hanti-location-guide';
+    el.innerHTML = '<strong>가까운 스탬프</strong><span>' + esc(label) + (dist ? ' · 약 ' + esc(dist) : '') + '</span>';
+    trailState.hantiLocationOverlay = new kakao.maps.CustomOverlay({
+      content: el,
+      position: new kakao.maps.LatLng(Number(lat), Number(lng)),
+      xAnchor: .5, yAnchor: 1.65, zIndex: 101
+    });
+    trailState.hantiLocationOverlay.setMap(trailState.map);
   }
   function findNearestHantiPathIndex(path, stamp){
     if(!(path && path.length && stamp)) return -1;
@@ -383,7 +433,7 @@
     if(!(data && trailState.map && window.kakao && kakao.maps)) return;
     clearHantiRouteOverlays();
     try{
-      /* V8-1-14-448: 동명읍 내부는 실제 선택 가능한 길이 여러 개다.
+      /* V8-1-14-449: 동명읍 내부는 실제 선택 가능한 길이 여러 개다.
          동명약국 부근에서 도로를 건넜다가 다시 건너는 것처럼 보이는 세부 GPX 궤적은
          사용자가 추천 동선으로 오해하지 않도록, 동명읍 진입 지점부터 4-1 동명성당까지
          부드러운 대표선으로만 표시한다. */
@@ -441,7 +491,7 @@
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
   const RETURN_KEY = 'catholic_integrated_return_v2';
-  const trailState = {inited:false, map:null, markers:[], selected:-1, myOverlay:null, view:'map', pendingOpenIndex:null, restoreCenter:null, restoreLevel:null, needsHardReset:false, pendingFitBounds:false, hantiPolylines:[], hantiStampOverlays:[], hantiVisible:false};
+  const trailState = {inited:false, map:null, markers:[], selected:-1, myOverlay:null, view:'map', pendingOpenIndex:null, restoreCenter:null, restoreLevel:null, needsHardReset:false, pendingFitBounds:false, hantiPolylines:[], hantiStampOverlays:[], hantiVisible:false, hantiLocationOverlay:null};
   const webState = {built:false, curCat:'⭐ 즐겨찾기'};
   const WEB_FAV_KEY = 'web_favorites_v1';
   const MY_DIOCESE_KEY = 'oai_my_diocese_name';
@@ -957,7 +1007,7 @@
   function relayoutTrailMap(delay, reason){
     const wait = Number.isFinite(Number(delay)) ? Number(delay) : 0;
     const isFoldViewport = /viewport|resize|fold|orientation|settle|late|final|android-fold/i.test(String(reason || ''));
-    /* V8-1-14-448: 순례길 지도 relayout은 공통 Fold 관리자 흐름에서만 보정한다. */
+    /* V8-1-14-449: 순례길 지도 relayout은 공통 Fold 관리자 흐름에서만 보정한다. */
     setTimeout(function(){
       if(!(trailState.map && window.kakao && window.kakao.maps)){
         return;
@@ -968,7 +1018,7 @@
         const currentLevel = (trailState.map.getLevel ? trailState.map.getLevel() : null);
         const targetCenter = plain ? trailDefaultCenter() : currentCenter;
         const targetLevel = plain ? 13 : currentLevel;
-        /* V8-1-14-448:
+        /* V8-1-14-449:
            순례길은 Fold 전환 때 오래된 컨테이너 폭으로 먼저 그려졌다가 중앙으로 이동해 보였다.
            지도는 잠시 숨긴 상태에서 relayout→level→center 순서로 한 번 확정하고 그 뒤에만 보인다. */
         trailState.map.relayout();
@@ -1010,7 +1060,7 @@
   function fitTrailMapToBounds(){
     if(!(trailState.map && window.kakao && window.kakao.maps)) return;
     try{
-      // V8-1-14-448:
+      // V8-1-14-449:
       // setBounds는 되살리지 않고 중심 이동은 1회만 유지한다.
       // 순례길 첫 화면이 너무 확대되어 보이지 않도록 기본 줌을 한 단계 넓게 둔다.
       if(typeof trailState.map.setLevel === "function") trailState.map.setLevel(13);
@@ -1241,6 +1291,7 @@
       dot.className = 'trail-myloc';
       trailState.myOverlay = new kakao.maps.CustomOverlay({content:dot, position:ll, yAnchor:.5, zIndex:100});
       trailState.myOverlay.setMap(trailState.map);
+      showHantiLocationGuide(pos.coords.latitude, pos.coords.longitude);
     }
     navigator.geolocation.getCurrentPosition(show, function(e){
       alert(e && e.code===1 ? '위치 권한을 허용해 주세요.' : '위치를 가져올 수 없습니다.');

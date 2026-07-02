@@ -7,16 +7,17 @@ window.CATHOLIC_HANTI_ROUTE_DATA = {
   "completionStampId": "5-5",
   "startName": "가실성당",
   "finishName": "한티마을",
-  "mode": "line_markers_with_dongmyeong_representative_line",
+  "mode": "line_markers_representative_line_nearest_stamp_distance",
   "features": {
     "showRouteLine": true,
     "showStampMarkers": true,
     "autoStamp": false,
-    "nextStampDistance": false,
+    "nextStampDistance": true,
     "offRouteAlert": false,
     "completionByFinishStamp": true,
     "flexibleDongmyeongApproach": true,
-    "dongmyeongRepresentativeLine": true
+    "dongmyeongRepresentativeLine": true,
+    "nearestStampDistance": true
   },
   "autoStampPolicy": {
     "enabled": false,
@@ -12777,5 +12778,5 @@ window.CATHOLIC_HANTI_ROUTE_DATA = {
       "fixNote": "동명약국 부근에서 도로를 건넜다가 다시 건너는 것처럼 보이던 세부 GPX 궤적은 앱 표시용 대표선으로 단순화한다."
     }
   ],
-  "version": "v1-dongmyeong-representative-line"
+  "version": "v1-nearest-stamp-distance"
 };
