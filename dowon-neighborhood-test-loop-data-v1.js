@@ -1,16 +1,17 @@
 window.CATHOLIC_DOWON_TEST_ROUTE_DATA = {
   "id": "dowon_test_loop",
-  "name": "도원동 동네 테스트 루프",
-  "en": "Dowon-dong Neighborhood Test Loop",
+  "name": "도원동 테스트 GPX",
+  "en": "Dowon-dong Test GPX",
   "type": "test_route",
-  "startStampId": "T-1",
-  "completionStampId": "T-6",
-  "startName": "도원동 테스트 출발",
-  "finishName": "도원동 테스트 완료",
+  "sourceFile": "bong0219_10758160.gpx",
+  "startStampId": "D-5",
+  "completionStampId": "D-1",
+  "startName": "5차",
+  "finishName": "1차",
   "mode": "gpx_follow_test",
   "hiddenTestOnly": true,
-  "roadVerified": false,
-  "safetyNote": "실제 도로 기반 경로가 아니라 GPX 따라가기 기능 검증용입니다. 걷기 전 지도에서 도로/횡단보도/통행 가능 여부를 확인하세요.",
+  "roadVerified": "user_provided",
+  "safetyNote": "사용자가 직접 제작한 도원동 GPX입니다. 실제 순례기록은 저장하지 않고 GPX 따라가기 기능 테스트에만 사용합니다.",
   "features": {
     "showRouteLine": true,
     "showStampMarkers": true,
@@ -20,547 +21,968 @@ window.CATHOLIC_DOWON_TEST_ROUTE_DATA = {
     "offRouteAlert": true,
     "completionByFinishStamp": false
   },
+  "followPolicy": {
+    "onRouteM": 30,
+    "nearRouteM": 80,
+    "offRouteM": 80,
+    "watchHighAccuracy": true
+  },
   "autoStampPolicy": {
     "enabled": false,
     "defaultRadiusM": 50
   },
   "stats": {
-    "routePointCount": 113,
-    "routeDistanceM": 2257.4,
-    "routeDistanceKm": 2.257,
-    "expectedWalkingMinutes": 31.5
+    "waypointCount": 5,
+    "routeSegmentCount": 1,
+    "routePointCount": 143,
+    "routeDistanceM": 4316.2,
+    "routeDistanceKm": 4.316,
+    "expectedWalkingMinutes": 60.2,
+    "maxPointGapM": 299.9
   },
   "stamps": [
     {
-      "id": "T-1",
+      "id": "D-5",
       "order": 1,
-      "name": "도원동 테스트 출발",
-      "en": "도원동 테스트 출발",
+      "name": "5차",
+      "en": "5차",
       "role": "start",
-      "lat": 35.8087847,
-      "lng": 128.5335521,
+      "lat": 35.80796859,
+      "lng": 128.53176422,
+      "routePointIndex": 134,
+      "routeDistanceM": 4110.3,
+      "distanceToRouteM": 3.5,
       "autoStampRadiusM": 50,
-      "coordinateSource": "generated_from_user_start_coordinate",
+      "coordinateSource": "user_uploaded_gpx_waypoint",
       "useGpxCoordinate": true
     },
     {
-      "id": "T-2",
+      "id": "D-4",
       "order": 2,
-      "name": "동쪽 확인 지점",
-      "en": "동쪽 확인 지점",
+      "name": "4차",
+      "en": "4차",
       "role": "test_point",
-      "lat": 35.8087847,
-      "lng": 128.53853672,
+      "lat": 35.80374854,
+      "lng": 128.52883525,
+      "routePointIndex": 109,
+      "routeDistanceM": 3365.2,
+      "distanceToRouteM": 5.5,
       "autoStampRadiusM": 50,
-      "coordinateSource": "generated_from_user_start_coordinate",
+      "coordinateSource": "user_uploaded_gpx_waypoint",
       "useGpxCoordinate": true
     },
     {
-      "id": "T-3",
+      "id": "D-3",
       "order": 3,
-      "name": "북동쪽 확인 지점",
-      "en": "북동쪽 확인 지점",
+      "name": "3차",
+      "en": "3차",
       "role": "test_point",
-      "lat": 35.81129997,
-      "lng": 128.53853672,
+      "lat": 35.7975387,
+      "lng": 128.53318182,
+      "routePointIndex": 24,
+      "routeDistanceM": 1681.3,
+      "distanceToRouteM": 2.6,
       "autoStampRadiusM": 50,
-      "coordinateSource": "generated_from_user_start_coordinate",
+      "coordinateSource": "user_uploaded_gpx_waypoint",
       "useGpxCoordinate": true
     },
     {
-      "id": "T-4",
+      "id": "D-2",
       "order": 4,
-      "name": "북서쪽 확인 지점",
-      "en": "북서쪽 확인 지점",
+      "name": "2차",
+      "en": "2차",
       "role": "test_point",
-      "lat": 35.81129997,
-      "lng": 128.53111517,
+      "lat": 35.80282905,
+      "lng": 128.53136023,
+      "routePointIndex": 12,
+      "routeDistanceM": 968.6,
+      "distanceToRouteM": 1.5,
       "autoStampRadiusM": 50,
-      "coordinateSource": "generated_from_user_start_coordinate",
+      "coordinateSource": "user_uploaded_gpx_waypoint",
       "useGpxCoordinate": true
     },
     {
-      "id": "T-5",
+      "id": "D-1",
       "order": 5,
-      "name": "남서쪽 확인 지점",
-      "en": "남서쪽 확인 지점",
-      "role": "test_point",
-      "lat": 35.80716774,
-      "lng": 128.53111517,
-      "autoStampRadiusM": 50,
-      "coordinateSource": "generated_from_user_start_coordinate",
-      "useGpxCoordinate": true
-    },
-    {
-      "id": "T-6",
-      "order": 6,
-      "name": "도원동 테스트 완료",
-      "en": "도원동 테스트 완료",
+      "name": "1차",
+      "en": "1차",
       "role": "finish",
-      "lat": 35.80716774,
-      "lng": 128.5335521,
+      "lat": 35.80712233,
+      "lng": 128.53365044,
+      "routePointIndex": 3,
+      "routeDistanceM": 233.6,
+      "distanceToRouteM": 0.3,
       "autoStampRadiusM": 50,
-      "coordinateSource": "generated_from_user_start_coordinate",
+      "coordinateSource": "user_uploaded_gpx_waypoint",
       "useGpxCoordinate": true
     }
   ],
   "routeSegments": [
     {
-      "id": "dowon-test-seg-1",
-      "pointCount": 113,
-      "distanceM": 2257.4,
+      "id": "dowon-user-gpx-seg-1",
+      "trackName": "도원동",
+      "segmentIndex": 1,
+      "pointCount": 143,
+      "distanceM": 4316.2,
+      "maxPointGapM": 299.9,
       "points": [
         {
-          "lat": 35.8087847,
-          "lng": 128.5335521
+          "lat": 35.80882781,
+          "lng": 128.53333593,
+          "routeIndex": 0,
+          "routeDistanceM": 0.0
         },
         {
-          "lat": 35.8087847,
-          "lng": 128.53377867
+          "lat": 35.80877996,
+          "lng": 128.533867,
+          "routeIndex": 1,
+          "routeDistanceM": 48.2
         },
         {
-          "lat": 35.8087847,
-          "lng": 128.53400525
+          "lat": 35.80823615,
+          "lng": 128.5337919,
+          "routeIndex": 2,
+          "routeDistanceM": 109.0
         },
         {
-          "lat": 35.8087847,
-          "lng": 128.53423182
+          "lat": 35.80712243,
+          "lng": 128.53364706,
+          "routeIndex": 3,
+          "routeDistanceM": 233.6
         },
         {
-          "lat": 35.8087847,
-          "lng": 128.5344584
+          "lat": 35.80737041,
+          "lng": 128.53169441,
+          "routeIndex": 4,
+          "routeDistanceM": 411.8
         },
         {
-          "lat": 35.8087847,
-          "lng": 128.53468497
+          "lat": 35.8056041,
+          "lng": 128.53147984,
+          "routeIndex": 5,
+          "routeDistanceM": 609.1
         },
         {
-          "lat": 35.8087847,
-          "lng": 128.53491154
+          "lat": 35.80457309,
+          "lng": 128.53216112,
+          "routeIndex": 6,
+          "routeDistanceM": 739.2
         },
         {
-          "lat": 35.8087847,
-          "lng": 128.53513812
+          "lat": 35.80431641,
+          "lng": 128.53182852,
+          "routeIndex": 7,
+          "routeDistanceM": 780.6
         },
         {
-          "lat": 35.8087847,
-          "lng": 128.53536469
+          "lat": 35.80404737,
+          "lng": 128.5318178,
+          "routeIndex": 8,
+          "routeDistanceM": 810.5
         },
         {
-          "lat": 35.8087847,
-          "lng": 128.53559126
+          "lat": 35.8039038,
+          "lng": 128.53186607,
+          "routeIndex": 9,
+          "routeDistanceM": 827.1
         },
         {
-          "lat": 35.8087847,
-          "lng": 128.53581784
+          "lat": 35.80379504,
+          "lng": 128.53193581,
+          "routeIndex": 10,
+          "routeDistanceM": 840.7
         },
         {
-          "lat": 35.8087847,
-          "lng": 128.53604441
+          "lat": 35.80376893,
+          "lng": 128.53200555,
+          "routeIndex": 11,
+          "routeDistanceM": 847.7
         },
         {
-          "lat": 35.8087847,
-          "lng": 128.53627099
+          "lat": 35.8028223,
+          "lng": 128.53134616,
+          "routeIndex": 12,
+          "routeDistanceM": 968.6
         },
         {
-          "lat": 35.8087847,
-          "lng": 128.53649756
+          "lat": 35.80073924,
+          "lng": 128.53345847,
+          "routeIndex": 13,
+          "routeDistanceM": 1268.5
         },
         {
-          "lat": 35.8087847,
-          "lng": 128.53672413
+          "lat": 35.80027805,
+          "lng": 128.53293275,
+          "routeIndex": 14,
+          "routeDistanceM": 1338.3
         },
         {
-          "lat": 35.8087847,
-          "lng": 128.53695071
+          "lat": 35.79995608,
+          "lng": 128.5330615,
+          "routeIndex": 15,
+          "routeDistanceM": 1375.9
         },
         {
-          "lat": 35.8087847,
-          "lng": 128.53717728
+          "lat": 35.79953404,
+          "lng": 128.5325036,
+          "routeIndex": 16,
+          "routeDistanceM": 1444.7
         },
         {
-          "lat": 35.8087847,
-          "lng": 128.53740385
+          "lat": 35.79929881,
+          "lng": 128.53249325,
+          "routeIndex": 17,
+          "routeDistanceM": 1470.9
         },
         {
-          "lat": 35.8087847,
-          "lng": 128.53763043
+          "lat": 35.79901164,
+          "lng": 128.53251471,
+          "routeIndex": 18,
+          "routeDistanceM": 1502.9
         },
         {
-          "lat": 35.8087847,
-          "lng": 128.537857
+          "lat": 35.7985809,
+          "lng": 128.53258445,
+          "routeIndex": 19,
+          "routeDistanceM": 1551.2
         },
         {
-          "lat": 35.8087847,
-          "lng": 128.53808358
+          "lat": 35.79826207,
+          "lng": 128.5326935,
+          "routeIndex": 20,
+          "routeDistanceM": 1588.0
         },
         {
-          "lat": 35.8087847,
-          "lng": 128.53831015
+          "lat": 35.79800971,
+          "lng": 128.53288662,
+          "routeIndex": 21,
+          "routeDistanceM": 1621.0
         },
         {
-          "lat": 35.8087847,
-          "lng": 128.53853672
+          "lat": 35.7978164,
+          "lng": 128.5330827,
+          "routeIndex": 22,
+          "routeDistanceM": 1648.9
         },
         {
-          "lat": 35.80896436,
-          "lng": 128.53853672
+          "lat": 35.79765541,
+          "lng": 128.53320072,
+          "routeIndex": 23,
+          "routeDistanceM": 1669.7
         },
         {
-          "lat": 35.80914402,
-          "lng": 128.53853672
+          "lat": 35.79755098,
+          "lng": 128.53320608,
+          "routeIndex": 24,
+          "routeDistanceM": 1681.3
         },
         {
-          "lat": 35.80932369,
-          "lng": 128.53853672
+          "lat": 35.79749007,
+          "lng": 128.53316853,
+          "routeIndex": 25,
+          "routeDistanceM": 1688.9
         },
         {
-          "lat": 35.80950335,
-          "lng": 128.53853672
+          "lat": 35.79746831,
+          "lng": 128.53307197,
+          "routeIndex": 26,
+          "routeDistanceM": 1697.9
         },
         {
-          "lat": 35.80968301,
-          "lng": 128.53853672
+          "lat": 35.79745091,
+          "lng": 128.5329915,
+          "routeIndex": 27,
+          "routeDistanceM": 1705.4
         },
         {
-          "lat": 35.80986267,
-          "lng": 128.53853672
+          "lat": 35.79745091,
+          "lng": 128.53287349,
+          "routeIndex": 28,
+          "routeDistanceM": 1716.1
         },
         {
-          "lat": 35.81004234,
-          "lng": 128.53853672
+          "lat": 35.79743929,
+          "lng": 128.53278464,
+          "routeIndex": 29,
+          "routeDistanceM": 1724.2
         },
         {
-          "lat": 35.810222,
-          "lng": 128.53853672
+          "lat": 35.79745235,
+          "lng": 128.5326398,
+          "routeIndex": 30,
+          "routeDistanceM": 1737.3
         },
         {
-          "lat": 35.81040166,
-          "lng": 128.53853672
+          "lat": 35.79745235,
+          "lng": 128.53249496,
+          "routeIndex": 31,
+          "routeDistanceM": 1750.4
         },
         {
-          "lat": 35.81058132,
-          "lng": 128.53853672
+          "lat": 35.79739578,
+          "lng": 128.53231793,
+          "routeIndex": 32,
+          "routeDistanceM": 1767.6
         },
         {
-          "lat": 35.81076098,
-          "lng": 128.53853672
+          "lat": 35.79729571,
+          "lng": 128.53218382,
+          "routeIndex": 33,
+          "routeDistanceM": 1784.0
         },
         {
-          "lat": 35.81094065,
-          "lng": 128.53853672
+          "lat": 35.79723295,
+          "lng": 128.53211831,
+          "routeIndex": 34,
+          "routeDistanceM": 1793.1
         },
         {
-          "lat": 35.81112031,
-          "lng": 128.53853672
+          "lat": 35.79705456,
+          "lng": 128.53194128,
+          "routeIndex": 35,
+          "routeDistanceM": 1818.6
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.53853672
+          "lat": 35.79691097,
+          "lng": 128.53176962,
+          "routeIndex": 36,
+          "routeDistanceM": 1840.8
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.53831183
+          "lat": 35.79671053,
+          "lng": 128.53164063,
+          "routeIndex": 37,
+          "routeDistanceM": 1866.0
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.53808693
+          "lat": 35.79651038,
+          "lng": 128.53158162,
+          "routeIndex": 38,
+          "routeDistanceM": 1888.9
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.53786204
+          "lat": 35.7963668,
+          "lng": 128.53145824,
+          "routeIndex": 39,
+          "routeDistanceM": 1908.3
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.53763714
+          "lat": 35.79612749,
+          "lng": 128.53130803,
+          "routeIndex": 40,
+          "routeDistanceM": 1938.2
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.53741225
+          "lat": 35.79593551,
+          "lng": 128.53119702,
+          "routeIndex": 41,
+          "routeDistanceM": 1961.8
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.53718735
+          "lat": 35.79583108,
+          "lng": 128.5312292,
+          "routeIndex": 42,
+          "routeDistanceM": 1973.7
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.53696245
+          "lat": 35.79569184,
+          "lng": 128.53131503,
+          "routeIndex": 43,
+          "routeDistanceM": 1991.0
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.53673756
+          "lat": 35.79560917,
+          "lng": 128.53142769,
+          "routeIndex": 44,
+          "routeDistanceM": 2004.7
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.53651266
+          "lat": 35.79542207,
+          "lng": 128.5314867,
+          "routeIndex": 45,
+          "routeDistanceM": 2026.2
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.53628777
+          "lat": 35.79524368,
+          "lng": 128.53150815,
+          "routeIndex": 46,
+          "routeDistanceM": 2046.1
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.53606287
+          "lat": 35.79510935,
+          "lng": 128.53135208,
+          "routeIndex": 47,
+          "routeDistanceM": 2066.7
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.53583798
+          "lat": 35.79499622,
+          "lng": 128.53119115,
+          "routeIndex": 48,
+          "routeDistanceM": 2085.9
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.53561308
+          "lat": 35.79482218,
+          "lng": 128.53103022,
+          "routeIndex": 49,
+          "routeDistanceM": 2110.1
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.53538819
+          "lat": 35.7947221,
+          "lng": 128.53092293,
+          "routeIndex": 50,
+          "routeDistanceM": 2124.8
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.53516329
+          "lat": 35.79456546,
+          "lng": 128.53087465,
+          "routeIndex": 51,
+          "routeDistanceM": 2142.8
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.5349384
+          "lat": 35.79450889,
+          "lng": 128.53080491,
+          "routeIndex": 52,
+          "routeDistanceM": 2151.7
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.5347135
+          "lat": 35.79447408,
+          "lng": 128.53064934,
+          "routeIndex": 53,
+          "routeDistanceM": 2166.2
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.5344886
+          "lat": 35.79440882,
+          "lng": 128.53039721,
+          "routeIndex": 54,
+          "routeDistanceM": 2190.1
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.53426371
+          "lat": 35.79446538,
+          "lng": 128.53022555,
+          "routeIndex": 55,
+          "routeDistanceM": 2206.8
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.53403881
+          "lat": 35.79443927,
+          "lng": 128.52991978,
+          "routeIndex": 56,
+          "routeDistanceM": 2234.5
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.53381392
+          "lat": 35.79443492,
+          "lng": 128.52978031,
+          "routeIndex": 57,
+          "routeDistanceM": 2247.1
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.53358902
+          "lat": 35.79441317,
+          "lng": 128.52960328,
+          "routeIndex": 58,
+          "routeDistanceM": 2263.3
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.53336413
+          "lat": 35.79479607,
+          "lng": 128.5294799,
+          "routeIndex": 59,
+          "routeDistanceM": 2307.3
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.53313923
+          "lat": 35.79503103,
+          "lng": 128.52939943,
+          "routeIndex": 60,
+          "routeDistanceM": 2334.4
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.53291434
+          "lat": 35.79526164,
+          "lng": 128.52923314,
+          "routeIndex": 61,
+          "routeDistanceM": 2364.1
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.53268944
+          "lat": 35.79548579,
+          "lng": 128.52917949,
+          "routeIndex": 62,
+          "routeDistanceM": 2389.5
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.53246455
+          "lat": 35.79579472,
+          "lng": 128.52904002,
+          "routeIndex": 63,
+          "routeDistanceM": 2426.1
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.53223965
+          "lat": 35.7960906,
+          "lng": 128.52896491,
+          "routeIndex": 64,
+          "routeDistanceM": 2459.7
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.53201475
+          "lat": 35.79621243,
+          "lng": 128.52894882,
+          "routeIndex": 65,
+          "routeDistanceM": 2473.3
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.53178986
+          "lat": 35.79642128,
+          "lng": 128.52894346,
+          "routeIndex": 66,
+          "routeDistanceM": 2496.5
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.53156496
+          "lat": 35.79659967,
+          "lng": 128.52893809,
+          "routeIndex": 67,
+          "routeDistanceM": 2516.4
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.53134007
+          "lat": 35.79677372,
+          "lng": 128.52892736,
+          "routeIndex": 68,
+          "routeDistanceM": 2535.7
         },
         {
-          "lat": 35.81129997,
-          "lng": 128.53111517
+          "lat": 35.79688605,
+          "lng": 128.52897174,
+          "routeIndex": 69,
+          "routeDistanceM": 2548.9
         },
         {
-          "lat": 35.81112031,
-          "lng": 128.53111517
+          "lat": 35.79705139,
+          "lng": 128.52903611,
+          "routeIndex": 70,
+          "routeDistanceM": 2568.1
         },
         {
-          "lat": 35.81094065,
-          "lng": 128.53111517
+          "lat": 35.7972733,
+          "lng": 128.52915413,
+          "routeIndex": 71,
+          "routeDistanceM": 2595.0
         },
         {
-          "lat": 35.81076098,
-          "lng": 128.53111517
+          "lat": 35.79746039,
+          "lng": 128.5292346,
+          "routeIndex": 72,
+          "routeDistanceM": 2617.0
         },
         {
-          "lat": 35.81058132,
-          "lng": 128.53111517
+          "lat": 35.79768229,
+          "lng": 128.52929361,
+          "routeIndex": 73,
+          "routeDistanceM": 2642.3
         },
         {
-          "lat": 35.81040166,
-          "lng": 128.53111517
+          "lat": 35.7979475,
+          "lng": 128.52937477,
+          "routeIndex": 74,
+          "routeDistanceM": 2672.7
         },
         {
-          "lat": 35.810222,
-          "lng": 128.53111517
+          "lat": 35.79812154,
+          "lng": 128.52943377,
+          "routeIndex": 75,
+          "routeDistanceM": 2692.7
         },
         {
-          "lat": 35.81004234,
-          "lng": 128.53111517
+          "lat": 35.79831298,
+          "lng": 128.52949278,
+          "routeIndex": 76,
+          "routeDistanceM": 2714.7
         },
         {
-          "lat": 35.80986267,
-          "lng": 128.53111517
+          "lat": 35.79847832,
+          "lng": 128.52953033,
+          "routeIndex": 77,
+          "routeDistanceM": 2733.4
         },
         {
-          "lat": 35.80968301,
-          "lng": 128.53111517
+          "lat": 35.79863495,
+          "lng": 128.52960007,
+          "routeIndex": 78,
+          "routeDistanceM": 2751.9
         },
         {
-          "lat": 35.80950335,
-          "lng": 128.53111517
+          "lat": 35.79870892,
+          "lng": 128.52962689,
+          "routeIndex": 79,
+          "routeDistanceM": 2760.5
         },
         {
-          "lat": 35.80932369,
-          "lng": 128.53111517
+          "lat": 35.79891673,
+          "lng": 128.52951424,
+          "routeIndex": 80,
+          "routeDistanceM": 2785.7
         },
         {
-          "lat": 35.80914402,
-          "lng": 128.53111517
+          "lat": 35.79915603,
+          "lng": 128.52950351,
+          "routeIndex": 81,
+          "routeDistanceM": 2812.3
         },
         {
-          "lat": 35.80896436,
-          "lng": 128.53111517
+          "lat": 35.79941709,
+          "lng": 128.52943914,
+          "routeIndex": 82,
+          "routeDistanceM": 2841.9
         },
         {
-          "lat": 35.8087847,
-          "lng": 128.53111517
+          "lat": 35.79957807,
+          "lng": 128.5293855,
+          "routeIndex": 83,
+          "routeDistanceM": 2860.5
         },
         {
-          "lat": 35.80860504,
-          "lng": 128.53111517
+          "lat": 35.79979997,
+          "lng": 128.52931039,
+          "routeIndex": 84,
+          "routeDistanceM": 2886.1
         },
         {
-          "lat": 35.80842538,
-          "lng": 128.53111517
+          "lat": 35.7999566,
+          "lng": 128.5292192,
+          "routeIndex": 85,
+          "routeDistanceM": 2905.3
         },
         {
-          "lat": 35.80824571,
-          "lng": 128.53111517
+          "lat": 35.80011758,
+          "lng": 128.5291441,
+          "routeIndex": 86,
+          "routeDistanceM": 2924.5
         },
         {
-          "lat": 35.80806605,
-          "lng": 128.53111517
+          "lat": 35.80030902,
+          "lng": 128.52901535,
+          "routeIndex": 87,
+          "routeDistanceM": 2948.7
         },
         {
-          "lat": 35.80788639,
-          "lng": 128.53111517
+          "lat": 35.80047,
+          "lng": 128.52891343,
+          "routeIndex": 88,
+          "routeDistanceM": 2968.8
         },
         {
-          "lat": 35.80770673,
-          "lng": 128.53111517
+          "lat": 35.80076447,
+          "lng": 128.52878834,
+          "routeIndex": 89,
+          "routeDistanceM": 3003.5
         },
         {
-          "lat": 35.80752706,
-          "lng": 128.53111517
+          "lat": 35.80095156,
+          "lng": 128.5288098,
+          "routeIndex": 90,
+          "routeDistanceM": 3024.4
         },
         {
-          "lat": 35.8073474,
-          "lng": 128.53111517
+          "lat": 35.80116475,
+          "lng": 128.52874542,
+          "routeIndex": 91,
+          "routeDistanceM": 3048.8
         },
         {
-          "lat": 35.80716774,
-          "lng": 128.53111517
+          "lat": 35.80139534,
+          "lng": 128.52867032,
+          "routeIndex": 92,
+          "routeDistanceM": 3075.3
         },
         {
-          "lat": 35.80716774,
-          "lng": 128.53133671
+          "lat": 35.80155632,
+          "lng": 128.52863814,
+          "routeIndex": 93,
+          "routeDistanceM": 3093.4
         },
         {
-          "lat": 35.80716774,
-          "lng": 128.53155825
+          "lat": 35.8017347,
+          "lng": 128.5285684,
+          "routeIndex": 94,
+          "routeDistanceM": 3114.2
         },
         {
-          "lat": 35.80716774,
-          "lng": 128.53177979
+          "lat": 35.80192139,
+          "lng": 128.52847476,
+          "routeIndex": 95,
+          "routeDistanceM": 3136.6
         },
         {
-          "lat": 35.80716774,
-          "lng": 128.53200133
+          "lat": 35.80205191,
+          "lng": 128.52842648,
+          "routeIndex": 96,
+          "routeDistanceM": 3151.8
         },
         {
-          "lat": 35.80716774,
-          "lng": 128.53222287
+          "lat": 35.80220854,
+          "lng": 128.52842648,
+          "routeIndex": 97,
+          "routeDistanceM": 3169.2
         },
         {
-          "lat": 35.80716774,
-          "lng": 128.53244441
+          "lat": 35.80236952,
+          "lng": 128.52838357,
+          "routeIndex": 98,
+          "routeDistanceM": 3187.5
         },
         {
-          "lat": 35.80716774,
-          "lng": 128.53266594
+          "lat": 35.80251745,
+          "lng": 128.52834065,
+          "routeIndex": 99,
+          "routeDistanceM": 3204.4
         },
         {
-          "lat": 35.80716774,
-          "lng": 128.53288748
+          "lat": 35.80266102,
+          "lng": 128.52831383,
+          "routeIndex": 100,
+          "routeDistanceM": 3220.6
         },
         {
-          "lat": 35.80716774,
-          "lng": 128.53310902
+          "lat": 35.8028481,
+          "lng": 128.52831383,
+          "routeIndex": 101,
+          "routeDistanceM": 3241.4
         },
         {
-          "lat": 35.80716774,
-          "lng": 128.53333056
+          "lat": 35.80296992,
+          "lng": 128.52832456,
+          "routeIndex": 102,
+          "routeDistanceM": 3254.9
         },
         {
-          "lat": 35.80716774,
-          "lng": 128.5335521
+          "lat": 35.80312485,
+          "lng": 128.52835566,
+          "routeIndex": 103,
+          "routeDistanceM": 3272.4
         },
         {
-          "lat": 35.8073474,
-          "lng": 128.5335521
+          "lat": 35.80320751,
+          "lng": 128.52838784,
+          "routeIndex": 104,
+          "routeDistanceM": 3282.0
         },
         {
-          "lat": 35.80752706,
-          "lng": 128.5335521
+          "lat": 35.80326842,
+          "lng": 128.52845758,
+          "routeIndex": 105,
+          "routeDistanceM": 3291.3
         },
         {
-          "lat": 35.80770673,
-          "lng": 128.5335521
+          "lat": 35.80338154,
+          "lng": 128.52856487,
+          "routeIndex": 106,
+          "routeDistanceM": 3307.2
         },
         {
-          "lat": 35.80788639,
-          "lng": 128.5335521
+          "lat": 35.80341634,
+          "lng": 128.52862924,
+          "routeIndex": 107,
+          "routeDistanceM": 3314.1
         },
         {
-          "lat": 35.80806605,
-          "lng": 128.5335521
+          "lat": 35.80349466,
+          "lng": 128.52891356,
+          "routeIndex": 108,
+          "routeDistanceM": 3341.2
         },
         {
-          "lat": 35.80824571,
-          "lng": 128.5335521
+          "lat": 35.80369914,
+          "lng": 128.52882773,
+          "routeIndex": 109,
+          "routeDistanceM": 3365.2
         },
         {
-          "lat": 35.80842538,
-          "lng": 128.5335521
+          "lat": 35.80394278,
+          "lng": 128.52869898,
+          "routeIndex": 110,
+          "routeDistanceM": 3394.7
         },
         {
-          "lat": 35.80860504,
-          "lng": 128.5335521
+          "lat": 35.80425602,
+          "lng": 128.52854878,
+          "routeIndex": 111,
+          "routeDistanceM": 3432.1
         },
         {
-          "lat": 35.8087847,
-          "lng": 128.5335521
+          "lat": 35.80434739,
+          "lng": 128.52851123,
+          "routeIndex": 112,
+          "routeDistanceM": 3442.8
+        },
+        {
+          "lat": 35.80468239,
+          "lng": 128.52841467,
+          "routeIndex": 113,
+          "routeDistanceM": 3481.0
+        },
+        {
+          "lat": 35.80484336,
+          "lng": 128.52838784,
+          "routeIndex": 114,
+          "routeDistanceM": 3499.1
+        },
+        {
+          "lat": 35.80509135,
+          "lng": 128.52835566,
+          "routeIndex": 115,
+          "routeDistanceM": 3526.8
+        },
+        {
+          "lat": 35.8051359,
+          "lng": 128.52871093,
+          "routeIndex": 116,
+          "routeDistanceM": 3559.2
+        },
+        {
+          "lat": 35.80517505,
+          "lng": 128.5290918,
+          "routeIndex": 117,
+          "routeDistanceM": 3593.9
+        },
+        {
+          "lat": 35.80521856,
+          "lng": 128.52929029,
+          "routeIndex": 118,
+          "routeDistanceM": 3612.4
+        },
+        {
+          "lat": 35.80530122,
+          "lng": 128.52960679,
+          "routeIndex": 119,
+          "routeDistanceM": 3642.4
+        },
+        {
+          "lat": 35.80540128,
+          "lng": 128.52991256,
+          "routeIndex": 120,
+          "routeDistanceM": 3672.1
+        },
+        {
+          "lat": 35.80550292,
+          "lng": 128.53011534,
+          "routeIndex": 121,
+          "routeDistanceM": 3693.6
+        },
+        {
+          "lat": 35.80558123,
+          "lng": 128.53028701,
+          "routeIndex": 122,
+          "routeDistanceM": 3711.4
+        },
+        {
+          "lat": 35.80563778,
+          "lng": 128.53056596,
+          "routeIndex": 123,
+          "routeDistanceM": 3737.3
+        },
+        {
+          "lat": 35.80563778,
+          "lng": 128.53091464,
+          "routeIndex": 124,
+          "routeDistanceM": 3768.8
+        },
+        {
+          "lat": 35.8055953,
+          "lng": 128.53115799,
+          "routeIndex": 125,
+          "routeDistanceM": 3791.2
+        },
+        {
+          "lat": 35.80554309,
+          "lng": 128.53132965,
+          "routeIndex": 126,
+          "routeDistanceM": 3807.7
+        },
+        {
+          "lat": 35.80546478,
+          "lng": 128.53152813,
+          "routeIndex": 127,
+          "routeDistanceM": 3827.6
+        },
+        {
+          "lat": 35.80591289,
+          "lng": 128.53152813,
+          "routeIndex": 128,
+          "routeDistanceM": 3877.5
+        },
+        {
+          "lat": 35.80640965,
+          "lng": 128.5315954,
+          "routeIndex": 129,
+          "routeDistanceM": 3933.0
+        },
+        {
+          "lat": 35.806805,
+          "lng": 128.5316487,
+          "routeIndex": 130,
+          "routeDistanceM": 3977.3
+        },
+        {
+          "lat": 35.80704862,
+          "lng": 128.53167016,
+          "routeIndex": 131,
+          "routeDistanceM": 4004.4
+        },
+        {
+          "lat": 35.80748802,
+          "lng": 128.53172381,
+          "routeIndex": 132,
+          "routeDistanceM": 4053.5
+        },
+        {
+          "lat": 35.80783735,
+          "lng": 128.5317399,
+          "routeIndex": 133,
+          "routeDistanceM": 4092.4
+        },
+        {
+          "lat": 35.80799832,
+          "lng": 128.53175063,
+          "routeIndex": 134,
+          "routeDistanceM": 4110.3
+        },
+        {
+          "lat": 35.80800252,
+          "lng": 128.53199185,
+          "routeIndex": 135,
+          "routeDistanceM": 4132.1
+        },
+        {
+          "lat": 35.8079236,
+          "lng": 128.53263581,
+          "routeIndex": 136,
+          "routeDistanceM": 4190.8
+        },
+        {
+          "lat": 35.80818028,
+          "lng": 128.53268409,
+          "routeIndex": 137,
+          "routeDistanceM": 4219.7
+        },
+        {
+          "lat": 35.80824988,
+          "lng": 128.53282356,
+          "routeIndex": 138,
+          "routeDistanceM": 4234.4
+        },
+        {
+          "lat": 35.80842825,
+          "lng": 128.53290838,
+          "routeIndex": 139,
+          "routeDistanceM": 4255.7
+        },
+        {
+          "lat": 35.80858487,
+          "lng": 128.53300494,
+          "routeIndex": 140,
+          "routeDistanceM": 4275.2
+        },
+        {
+          "lat": 35.80870668,
+          "lng": 128.53309614,
+          "routeIndex": 141,
+          "routeDistanceM": 4291.0
+        },
+        {
+          "lat": 35.80881979,
+          "lng": 128.53333754,
+          "routeIndex": 142,
+          "routeDistanceM": 4316.2
         }
       ]
     }
