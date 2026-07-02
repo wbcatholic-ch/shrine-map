@@ -12751,9 +12751,9 @@ window.CATHOLIC_HANTI_ROUTE_DATA = {
       "toStampId": "4-1",
       "name": "여부재 → 동명성당",
       "area": "동명네거리부터 동명성당 접근 구간",
-      "routeLineMeaning": "representative_line_from_dongmyeong_intersection_to_cathedral",
+      "routeLineMeaning": "gpx_reference_line_not_strict_navigation",
       "strictOffRouteCheck": false,
-      "message": "동명네거리부터 동명성당까지는 일반 지도 길찾기를 기준으로 이동하세요. 표시된 선은 동명성당까지의 대표선입니다.",
+      "message": "동명읍 안에서는 여러 길로 동명성당에 도착할 수 있습니다. 표시된 경로선은 참고용입니다.",
       "representativeStart": {
         "lat": 35.98321357,
         "lng": 128.55360672,
@@ -12785,8 +12785,8 @@ window.CATHOLIC_HANTI_ROUTE_DATA = {
           "lng": 128.55727876870878
         }
       ],
-      "fixNote": "동명읍 내부에서는 동명네거리부터 여러 길로 동명성당에 도착할 수 있으므로, 도로를 건넜다가 다시 건너는 듯한 세부 GPX 궤적 대신 일반 지도 길찾기 기준의 대표선을 표시한다."
+      "fixNote": "동명약국~동명성당 구간의 인위적 대표선은 제거하고 GPX 원래 경로선을 참고용으로 표시한다."
     }
   ],
-  "version": "v1-dongmyeong-intersection-card-test-unlock"
+  "version": "v1-sticky-route-restore-dongmyeong-gpx"
 };
