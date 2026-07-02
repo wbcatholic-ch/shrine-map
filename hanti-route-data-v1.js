@@ -7,7 +7,7 @@ window.CATHOLIC_HANTI_ROUTE_DATA = {
   "completionStampId": "5-5",
   "startName": "가실성당",
   "finishName": "한티마을",
-  "mode": "line_markers_with_flexible_dongmyeong_approach",
+  "mode": "line_markers_with_dongmyeong_representative_line",
   "features": {
     "showRouteLine": true,
     "showStampMarkers": true,
@@ -15,7 +15,8 @@ window.CATHOLIC_HANTI_ROUTE_DATA = {
     "nextStampDistance": false,
     "offRouteAlert": false,
     "completionByFinishStamp": true,
-    "flexibleDongmyeongApproach": true
+    "flexibleDongmyeongApproach": true,
+    "dongmyeongRepresentativeLine": true
   },
   "autoStampPolicy": {
     "enabled": false,
@@ -12742,14 +12743,39 @@ window.CATHOLIC_HANTI_ROUTE_DATA = {
   ],
   "flexibleRouteSections": [
     {
-      "id": "3-4_to_4-1_dongmyeong_eup_approach",
+      "id": "3-4_to_4-1_dongmyeong_eup_representative_line",
       "fromStampId": "3-4",
       "toStampId": "4-1",
       "name": "여부재 → 동명성당",
       "area": "동명읍 진입 후 동명성당 접근 구간",
-      "routeLineMeaning": "representative_reference_route",
+      "routeLineMeaning": "representative_reference_route_inside_dongmyeong_eup",
       "strictOffRouteCheck": false,
-      "message": "동명읍 안에서는 여러 길로 동명성당에 도착할 수 있습니다. 다음 스탬프 위치를 기준으로 이동하세요."
+      "message": "동명읍 안에서는 여러 길로 동명성당에 도착할 수 있습니다. 표시된 선은 대표선이며, 다음 스탬프 위치를 기준으로 이동하세요.",
+      "representativeStart": {
+        "lat": 35.98395762,
+        "lng": 128.55134235,
+        "note": "동명읍 내부 대표선 시작 기준점"
+      },
+      "representativePath": [
+        {
+          "lat": 35.98395762,
+          "lng": 128.55134235
+        },
+        {
+          "lat": 35.98315,
+          "lng": 128.55405
+        },
+        {
+          "lat": 35.98228,
+          "lng": 128.55585
+        },
+        {
+          "lat": 35.981694776907766,
+          "lng": 128.55727876870878
+        }
+      ],
+      "fixNote": "동명약국 부근에서 도로를 건넜다가 다시 건너는 것처럼 보이던 세부 GPX 궤적은 앱 표시용 대표선으로 단순화한다."
     }
-  ]
+  ],
+  "version": "v1-dongmyeong-representative-line"
 };

@@ -191,7 +191,7 @@
     "교구":"#f0f5f0"
   };
   const TRAIL_COLORS = {d:'#1D4ED8', l:'#2A8040'};
-  /* V8-1-14-447: 순례길 지도 확대/축소 체감 개선을 위해 마커 이미지를 캐시하고
+  /* V8-1-14-448: 순례길 지도 확대/축소 체감 개선을 위해 마커 이미지를 캐시하고
      같은 이미지/지도 상태를 반복 적용하지 않는다. */
   const TRAIL_MARKER_IMG_CACHE = Object.create(null);
   function trailMarkerImageCached(key, maker){
@@ -264,7 +264,7 @@
     if(name) name.textContent = stamp.name || '';
     if(sub) sub.textContent = (stamp.en || '') + (stamp.role === 'finish' ? ' · 완료 지점' : '');
     if(stamp && (stamp.id === '3-4' || stamp.id === '4-1')){
-      setTrailHantiNote('여부재에서 동명읍으로 들어온 뒤에는 여러 길로 동명성당에 도착할 수 있습니다. 다음 스탬프 위치를 기준으로 이동하세요.');
+      setTrailHantiNote('동명읍 안에서는 여러 길로 동명성당에 도착할 수 있습니다. 표시된 선은 대표선이며, 다음 스탬프 위치를 기준으로 이동하세요.');
     }else{
       setTrailHantiNote('');
     }
@@ -316,6 +316,30 @@
     }
     return best;
   }
+  function findNearestHantiPathIndexByPoint(path, point){
+    if(!(path && path.length && point)) return -1;
+    var lat = Number(point.lat), lng = Number(point.lng);
+    if(!Number.isFinite(lat) || !Number.isFinite(lng)) return -1;
+    var best = -1, bestScore = Infinity;
+    for(var i=0;i<path.length;i++){
+      var ll = path[i];
+      if(!ll) continue;
+      var dLat = ll.getLat() - lat;
+      var dLng = ll.getLng() - lng;
+      var score = dLat*dLat + dLng*dLng;
+      if(score < bestScore){ bestScore = score; best = i; }
+    }
+    return best;
+  }
+  function hantiLatLngPathFromPoints(points){
+    var out = [];
+    if(!(points && points.length) || !(window.kakao && kakao.maps)) return out;
+    points.forEach(function(p){
+      var lat = Number(p && p.lat), lng = Number(p && p.lng);
+      if(Number.isFinite(lat) && Number.isFinite(lng)) out.push(new kakao.maps.LatLng(lat, lng));
+    });
+    return out;
+  }
   function drawHantiPolyline(path, option){
     if(!(path && path.length > 1 && trailState.map && window.kakao && kakao.maps)) return null;
     var line = new kakao.maps.Polyline({
@@ -336,7 +360,7 @@
     if(!mid) return null;
     var el = document.createElement('div');
     el.className = 'hanti-flex-guide';
-    el.innerHTML = '<strong>동명읍 구간</strong><span>여러 길 가능 · 4-1 동명성당 기준</span>';
+    el.innerHTML = '<strong>동명읍 구간</strong><span>대표선 · 여러 길 가능 · 4-1 동명성당 기준</span>';
     return new kakao.maps.CustomOverlay({
       content: el,
       position: mid,
@@ -359,9 +383,10 @@
     if(!(data && trailState.map && window.kakao && kakao.maps)) return;
     clearHantiRouteOverlays();
     try{
-      /* V8-1-14-447: 한티가는길은 하나의 대표 GPX 경로선을 보여주되,
-         3-4 여부재 → 4-1 동명성당의 동명읍 진입 이후는 여러 길이 가능하므로
-         해당 구간을 더 연한 '대표 경로'로 표시하고 엄격한 단일 경로처럼 보이지 않게 한다. */
+      /* V8-1-14-448: 동명읍 내부는 실제 선택 가능한 길이 여러 개다.
+         동명약국 부근에서 도로를 건넜다가 다시 건너는 것처럼 보이는 세부 GPX 궤적은
+         사용자가 추천 동선으로 오해하지 않도록, 동명읍 진입 지점부터 4-1 동명성당까지
+         부드러운 대표선으로만 표시한다. */
       var mergedPath = [];
       (data.routeSegments || []).forEach(function(seg){
         (seg.points || []).forEach(function(p){
@@ -374,16 +399,17 @@
         });
       });
       if(mergedPath.length > 1){
-        var flexFrom = findHantiStampById(data, '3-4');
         var flexTo = findHantiStampById(data, '4-1');
-        var flexStart = findNearestHantiPathIndex(mergedPath, flexFrom);
+        var flexSection = data.flexibleRouteSections && data.flexibleRouteSections[0] || null;
+        var repPath = hantiLatLngPathFromPoints(flexSection && flexSection.representativePath);
+        var repStartPoint = flexSection && (flexSection.representativeStart || (flexSection.representativePath && flexSection.representativePath[0]));
+        var repStart = findNearestHantiPathIndexByPoint(mergedPath, repStartPoint);
         var flexEnd = findNearestHantiPathIndex(mergedPath, flexTo);
-        if(flexStart >= 0 && flexEnd > flexStart + 1){
-          drawHantiPolyline(mergedPath.slice(0, flexStart + 1), {weight:5, color:'#B7791F', opacity:.86, zIndex:30});
-          var flexPath = mergedPath.slice(flexStart, flexEnd + 1);
-          drawHantiPolyline(flexPath, {weight:5, color:'#B7791F', opacity:.48, zIndex:31});
+        if(repPath.length > 1 && repStart >= 0 && flexEnd > repStart + 1){
+          drawHantiPolyline(mergedPath.slice(0, repStart + 1), {weight:5, color:'#B7791F', opacity:.86, zIndex:30});
+          drawHantiPolyline(repPath, {weight:5, color:'#B7791F', opacity:.54, style:'shortdash', zIndex:31});
           drawHantiPolyline(mergedPath.slice(flexEnd), {weight:5, color:'#B7791F', opacity:.86, zIndex:30});
-          var guide = createHantiFlexibleGuideOverlay(flexPath);
+          var guide = createHantiFlexibleGuideOverlay(repPath);
           if(guide){ guide.setMap(trailState.map); trailState.hantiStampOverlays.push(guide); }
         }else{
           drawHantiPolyline(mergedPath, {weight:5, color:'#B7791F', opacity:.86, zIndex:30});
@@ -931,7 +957,7 @@
   function relayoutTrailMap(delay, reason){
     const wait = Number.isFinite(Number(delay)) ? Number(delay) : 0;
     const isFoldViewport = /viewport|resize|fold|orientation|settle|late|final|android-fold/i.test(String(reason || ''));
-    /* V8-1-14-447: 순례길 지도 relayout은 공통 Fold 관리자 흐름에서만 보정한다. */
+    /* V8-1-14-448: 순례길 지도 relayout은 공통 Fold 관리자 흐름에서만 보정한다. */
     setTimeout(function(){
       if(!(trailState.map && window.kakao && window.kakao.maps)){
         return;
@@ -942,7 +968,7 @@
         const currentLevel = (trailState.map.getLevel ? trailState.map.getLevel() : null);
         const targetCenter = plain ? trailDefaultCenter() : currentCenter;
         const targetLevel = plain ? 13 : currentLevel;
-        /* V8-1-14-447:
+        /* V8-1-14-448:
            순례길은 Fold 전환 때 오래된 컨테이너 폭으로 먼저 그려졌다가 중앙으로 이동해 보였다.
            지도는 잠시 숨긴 상태에서 relayout→level→center 순서로 한 번 확정하고 그 뒤에만 보인다. */
         trailState.map.relayout();
@@ -984,7 +1010,7 @@
   function fitTrailMapToBounds(){
     if(!(trailState.map && window.kakao && window.kakao.maps)) return;
     try{
-      // V8-1-14-447:
+      // V8-1-14-448:
       // setBounds는 되살리지 않고 중심 이동은 1회만 유지한다.
       // 순례길 첫 화면이 너무 확대되어 보이지 않도록 기본 줌을 한 단계 넓게 둔다.
       if(typeof trailState.map.setLevel === "function") trailState.map.setLevel(13);

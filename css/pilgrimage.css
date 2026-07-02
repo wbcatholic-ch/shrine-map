@@ -132,7 +132,7 @@ html:not(.ios-device).oai-screen-compact-short .trail-sh-close{
   width:34px!important;height:34px!important;min-width:34px!important;flex-basis:34px!important;
 }
 
-/* V8-1-14-447: 한티가는길 1차 표시(경로선 + 스탬프 마커, 자동도장 OFF). 스탬프명은 생략 없이 전체 표시하고 동명읍 유연 경로 안내를 보인다. */
+/* V8-1-14-448: 한티가는길 표시. 동명읍 내부는 여러 길 가능 구간으로 보고, 도로를 오가며 건너는 듯한 세부 GPX 대신 대표선을 안내한다. */
 .hanti-stamp-marker {
   appearance: none;
   border: 1.5px solid rgba(120, 72, 18, .55);
