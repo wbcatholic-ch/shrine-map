@@ -1,5 +1,12 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-427';
-const ASSET_VERSION = 'V8-1-14-427';
+const CACHE_VERSION = 'catholic-way-V8-1-14-431';
+const ASSET_VERSION = 'V8-1-14-431';
+
+/* V8-1-14-431: service worker cache strategy overview.
+   - APP_SHELL: first-screen and internal helper files.
+   - HTML navigation: networkFirst, then cached index fallback.
+   - Versioned/static assets: cacheFirst.
+   - Other same-origin GET requests: staleWhileRevalidate.
+   Strategy is documented here only; runtime behavior is unchanged. */
 function withVersion(path) {
   return path + '?v=' + ASSET_VERSION;
 }
