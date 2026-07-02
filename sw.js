@@ -1,7 +1,7 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-438';
-const ASSET_VERSION = 'V8-1-14-438';
+const CACHE_VERSION = 'catholic-way-V8-1-14-439';
+const ASSET_VERSION = 'V8-1-14-439';
 
-/* V8-1-14-438: service worker cache strategy overview.
+/* V8-1-14-439: service worker cache strategy overview.
    - APP_SHELL: first-screen and internal helper files.
    - HTML navigation: networkFirst, then cached index fallback.
    - Versioned/static assets: cacheFirst.
