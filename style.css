@@ -2245,7 +2245,7 @@ html.app-active #cover-action-row { display: none; }
 #cover .cover-refresh-main-btn::before { background: #8D98A8; }
 #cover .cover-diocese-btn,
 #cover .cover-share-main-btn { color: var(--v4-header-navy); }
-/* V8-1-14-461: 하단 3개 버튼 글자 크기를 ‘나의 신앙생활’ 기준으로 통일 */
+/* V8-1-14-464: 하단 3개 버튼 글자 크기를 ‘나의 신앙생활’ 기준으로 통일 */
 #cover .cover-share-main-btn,
 #cover .cover-refresh-main-btn{
   font-size:var(--cover-action-font);
@@ -2285,7 +2285,7 @@ html:not(.ios-device).oai-screen-compact-short #cover {
 
 #cover-update-hint { display: none; margin-top: 4px; padding-left: 2px; color: #dc2626; font-size: 9.5px; font-weight: 800; line-height: 1.15; white-space: normal; max-width: 100%; word-break: keep-all; }
 #cover-update-box.update-needed #cover-update-hint { display: block; }
-/* V8-1-14-461: update-needed text is a small status badge, not a main category title.
+/* V8-1-14-464: update-needed text is a small status badge, not a main category title.
    Keep it independent from the user's enlarged app font scale so it does not overflow on Fold/phone covers. */
 #cover-update-box.update-needed #cover-update-btn {
   font-size: 12.8px !important;
@@ -4204,18 +4204,18 @@ html.oai-font-global .shrine-auto-visit-title{font-size:calc(16px * var(--app-in
 .shrine-visit-detail-x{font-size:23px}.shrine-visit-detail-back:active,.shrine-visit-detail-x:active{transform:translateY(1px);background:#fff0c9}
 .shrine-visit-detail-head-title{flex:1;min-width:0;text-align:center;font-size:18px;font-weight:900;color:#111;letter-spacing:-.03em}
 
-.shrine-visit-detail-register{height:34px;padding:0 11px;border-radius:999px;border:1px solid #d7c299;background:#fff7df;color:#5b3c00;font-size:12.5px;font-weight:900;font-family:inherit;letter-spacing:-.04em;white-space:nowrap;touch-action:manipulation;display:inline-flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 1px 7px rgba(31,41,51,.05)}
+.shrine-visit-detail-register{height:36px;padding:0 13px;border-radius:14px;border:2.5px solid #0b84ff;background:#ffffff;color:#12324d;font-size:12.5px;font-weight:950;font-family:inherit;letter-spacing:-.04em;white-space:nowrap;touch-action:manipulation;display:inline-flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 3px 9px rgba(11,132,255,.12),inset 0 1px 0 rgba(255,255,255,.92)}
 .shrine-visit-detail-register:active{transform:translateY(1px);background:#fff0c9}
 
 .shrine-visit-detail-hero-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}
-.shrine-visit-detail-hero .shrine-visit-detail-register{height:34px;padding:0 12px;border-radius:999px;border:1px solid #d7c299;background:#fffdf7;color:#5b3c00;font-size:12.5px;font-weight:900;font-family:inherit;letter-spacing:-.04em;white-space:nowrap;touch-action:manipulation;display:inline-flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 1px 7px rgba(31,41,51,.05)}
+.shrine-visit-detail-hero .shrine-visit-detail-register{height:36px;padding:0 13px;border-radius:14px;border:2.5px solid #0b84ff;background:#ffffff;color:#12324d;font-size:12.5px;font-weight:950;font-family:inherit;letter-spacing:-.04em;white-space:nowrap;touch-action:manipulation;display:inline-flex;align-items:center;justify-content:center;line-height:1;box-shadow:0 3px 9px rgba(11,132,255,.12),inset 0 1px 0 rgba(255,255,255,.92)}
 .shrine-visit-detail-hero .shrine-visit-detail-register:active{transform:translateY(1px);background:#fff0c9}
 .shrine-visit-detail-body{flex:1;overflow:auto;-webkit-overflow-scrolling:touch;padding:14px 14px max(24px,env(safe-area-inset-bottom))}
-.shrine-visit-detail-hero{border:1px solid rgba(212,170,106,.5);background:linear-gradient(180deg,#fff8e8 0%,#fffdf7 100%);border-radius:22px;padding:18px 16px;box-shadow:0 4px 16px rgba(14,21,53,.08);margin-bottom:13px}
+.shrine-visit-detail-hero{border:3px solid #0b84ff;background:#ffffff;border-radius:22px;padding:18px 16px;box-shadow:0 8px 22px rgba(11,132,255,.10);margin-bottom:13px}
 .shrine-visit-detail-kicker{font-size:12px;font-weight:900;color:#8b6914;margin-bottom:5px}.shrine-visit-detail-count{font-size:32px;font-weight:900;line-height:1.08;color:#111;letter-spacing:-.04em}.shrine-visit-detail-recent{margin-top:5px;font-size:14px;font-weight:900;color:#4b3a1a}
 .shrine-visit-detail-date-title{margin-top:16px;margin-bottom:7px;font-size:13px;font-weight:900;color:#5b3c00}.shrine-visit-detail-date-list{display:flex;flex-wrap:wrap;gap:7px}.shrine-visit-detail-date-chip{display:inline-flex;align-items:center;justify-content:center;border-radius:999px;background:#111;color:#f6d58a;border:1px solid #d4aa6a;padding:6px 10px;font-size:13px;font-weight:900;line-height:1}.shrine-visit-detail-empty-date{font-size:13px;font-weight:800;color:#8b6914;background:#fff3c4;border-radius:12px;padding:9px 10px}
 .shrine-visit-detail-add{width:100%;height:42px;margin-top:14px;border-radius:14px;border:1px solid #d4aa6a;background:#111;color:#f6d58a;font-size:14px;font-weight:900;font-family:inherit;box-shadow:0 2px 8px rgba(0,0,0,.12);touch-action:manipulation}.shrine-visit-detail-add:active{transform:translateY(1px);filter:brightness(.94)}
-.shrine-visit-detail-info{border:1px solid rgba(17,17,17,.12);background:#fff;border-radius:18px;padding:15px 14px;box-shadow:0 2px 10px rgba(14,21,53,.05)}.shrine-visit-detail-section-title{font-size:12px;font-weight:900;color:#8b6914;margin-bottom:5px}.shrine-visit-detail-name{font-size:22px;font-weight:900;line-height:1.25;color:#111;letter-spacing:-.04em;word-break:keep-all;margin-bottom:12px}.shrine-visit-detail-row{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid #f0e7d8}.shrine-visit-detail-row span{width:48px;flex-shrink:0;font-size:13px;font-weight:900;color:#8b6914}.shrine-visit-detail-row strong{flex:1;min-width:0;font-size:14px;font-weight:800;color:#1f2937;line-height:1.45;word-break:keep-all}.shrine-visit-detail-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.shrine-visit-detail-action{height:40px;display:inline-flex;align-items:center;justify-content:center;padding:0 12px;border-radius:12px;border:1px solid #d8ccb8;background:#fff8e8;color:#5b3c00;font-size:13px;font-weight:900;text-decoration:none;font-family:inherit;touch-action:manipulation}.shrine-visit-detail-action:active{transform:translateY(1px);filter:brightness(.96)}.shrine-visit-detail-empty{margin:18px;padding:16px;border-radius:16px;background:#fff8e8;color:#6c4a00;font-size:14px;font-weight:900;text-align:center}
+.shrine-visit-detail-info{border:3px solid #0b84ff;background:#ffffff;border-radius:22px;padding:18px 16px;box-shadow:0 8px 22px rgba(11,132,255,.10)}.shrine-visit-detail-section-title{font-size:12px;font-weight:900;color:#8b6914;margin-bottom:5px}.shrine-visit-detail-name{font-size:22px;font-weight:900;line-height:1.25;color:#111;letter-spacing:-.04em;word-break:keep-all;margin-bottom:12px}.shrine-visit-detail-row{display:flex;gap:12px;align-items:flex-start;padding:10px 0;border-top:1px solid #f0e7d8}.shrine-visit-detail-row span{width:48px;flex-shrink:0;font-size:13px;font-weight:900;color:#8b6914}.shrine-visit-detail-row strong{flex:1;min-width:0;font-size:14px;font-weight:800;color:#1f2937;line-height:1.45;word-break:keep-all}.shrine-visit-detail-actions{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}.shrine-visit-detail-action{height:40px;display:inline-flex;align-items:center;justify-content:center;padding:0 13px;border-radius:14px;border:2.5px solid #0b84ff;background:#ffffff;color:#12324d;font-size:13px;font-weight:950;text-decoration:none;font-family:inherit;touch-action:manipulation;box-shadow:0 3px 9px rgba(11,132,255,.12),inset 0 1px 0 rgba(255,255,255,.92)}.shrine-visit-detail-action:active{transform:translateY(1px);filter:brightness(.96)}.shrine-visit-detail-empty{margin:18px;padding:16px;border-radius:16px;background:#fff8e8;color:#6c4a00;font-size:14px;font-weight:900;text-align:center}
 html.oai-font-global .shrine-visit-detail-head-title{font-size:calc(18px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-detail-kicker,html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(12px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-detail-count{font-size:calc(32px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-detail-recent,html.oai-font-global .shrine-visit-detail-add{font-size:calc(14px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-detail-date-chip,html.oai-font-global .shrine-visit-detail-action,html.oai-font-global .shrine-visit-detail-row span{font-size:calc(13px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-detail-name{font-size:calc(22px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-detail-row strong{font-size:calc(14px * var(--app-inner-font-scale,1))!important}
 
 .shrine-visit-cards-modal{position:fixed!important;inset:0!important;z-index:10060!important;display:none!important;align-items:stretch!important;justify-content:stretch!important;background:#fffdf7!important}.shrine-visit-cards-modal.show{display:flex!important}.shrine-visit-cards-backdrop{display:none!important}
@@ -5322,22 +5322,7 @@ html.retreat-mode #app #loc-btn{
   margin:0!important;
   flex:1 1 auto!important;
 }
-.shrine-visit-detail-map-btn{
-  flex:0 0 auto!important;
-  height:32px!important;
-  min-height:32px!important;
-  padding:0 11px!important;
-  border-radius:999px!important;
-  border:1.5px solid rgba(255,196,0,.72)!important;
-  background:#fff8d7!important;
-  color:#5b4300!important;
-  font-size:12.5px!important;
-  font-weight:900!important;
-  font-family:inherit!important;
-  letter-spacing:-.04em!important;
-  box-shadow:0 5px 14px rgba(255,196,0,.18)!important;
-  white-space:nowrap!important;
-}
+.shrine-visit-detail-map-btn{flex:0 0 auto!important;height:36px!important;min-height:36px!important;padding:0 13px!important;border-radius:14px!important;border:2.5px solid #0b84ff!important;background:#ffffff!important;color:#12324d!important;font-size:12.5px!important;font-weight:950!important;font-family:inherit!important;letter-spacing:-.04em!important;box-shadow:0 3px 9px rgba(11,132,255,.12),inset 0 1px 0 rgba(255,255,255,.92)!important;white-space:nowrap!important}
 .shrine-visit-detail-map-btn:active{
   transform:translateY(1px)!important;
   filter:brightness(.96)!important;
@@ -6022,7 +6007,7 @@ html.oai-cover-revealing::after{
     linear-gradient(to right, #fbf8f1 0%, rgba(251,248,241,.96) 5%, rgba(251,248,241,.60) 13%, rgba(251,248,241,.16) 24%, rgba(251,248,241,0) 36%, rgba(251,248,241,0) 64%, rgba(251,248,241,.16) 76%, rgba(251,248,241,.60) 87%, rgba(251,248,241,.96) 95%, #fbf8f1 100%),
     linear-gradient(to bottom, #fbf8f1 0%, rgba(251,248,241,.90) 6%, rgba(251,248,241,.36) 17%, rgba(251,248,241,0) 30%, rgba(251,248,241,0) 70%, rgba(251,248,241,.36) 83%, rgba(251,248,241,.90) 94%, #fbf8f1 100%),
     radial-gradient(ellipse 96% 88% at 50% 48%, rgba(251,248,241,0) 50%, rgba(251,248,241,.08) 62%, rgba(251,248,241,.34) 76%, rgba(251,248,241,.76) 90%, rgba(251,248,241,1) 100%),
-    url("intro-cross-jesus.jpg?v=V8-1-14-461") !important;
+    url("intro-cross-jesus.jpg?v=V8-1-14-464") !important;
   background-position:center center, center center, center center, center center !important;
   background-size:100% 100%, 100% 100%, 100% 100%, auto 106% !important;
   background-repeat:no-repeat, no-repeat, no-repeat, no-repeat !important;
@@ -6438,7 +6423,7 @@ html.oai-font-global .category-source-note { font-size: calc(11px * var(--app-in
 #app .shrine-visit-detail-action.detail-guide{background:#fff4cc!important;color:#7c5600!important;border:1.5px solid #e6c766!important;}
 #app .shrine-visit-detail-action.detail-kakao{width:0!important;}
 
-/* V8-1-14-461: 인포카드/상세 버튼 색상은 아래 최종 통합 블록 하나만 사용한다. */
+/* V8-1-14-464: 인포카드/상세 버튼 색상은 아래 최종 통합 블록 하나만 사용한다. */
 #app .shrine-visit-detail-info{
   background:linear-gradient(180deg,#fbfdff 0%,#fffaf0 100%)!important;
   border:2px solid #9db7cc!important;
@@ -6450,7 +6435,7 @@ html.oai-font-global .category-source-note { font-size: calc(11px * var(--app-in
   border:1.5px solid #d5b86d!important;
   box-shadow:0 2px 6px rgba(95,69,21,.08)!important;
 }
-/* V8-1-14-461: 상세 버튼 개별 색상 중복 override 제거. */
+/* V8-1-14-464: 상세 버튼 개별 색상 중복 override 제거. */
 .map-loading-icon,
 #diocese-loading .missa-spinner,
 #nearby-body .nearby-distance-spinner{
@@ -6535,7 +6520,7 @@ html.oai-stability-veil[data-oai-refresh-early-veil="1"]::after{
   animation:oaiUnifiedLoadingCrossSpin var(--oai-loading-cross-speed) linear infinite!important;
   transition:none!important;
 }
-/* V8-1-14-461: 외부사이트 진입/복귀 보호창 CSS 단일 기준. JS 흐름은 유지하고, 중복 십자가만 막는다. */
+/* V8-1-14-464: 외부사이트 진입/복귀 보호창 CSS 단일 기준. JS 흐름은 유지하고, 중복 십자가만 막는다. */
 #oai-external-entry-guard{
   position:fixed!important;
   inset:0!important;
@@ -6750,7 +6735,7 @@ html.oai-external-return-freeze.oai-external-return-releasing::after{
   animation:none!important;
 }
 
-/* V8-1-14-461: 인포카드/상세 버튼의 이전 색상·테두리 override 묶음은 삭제하고, 아래 최종 공통색 기준 하나만 유지한다. */
+/* V8-1-14-464: 인포카드/상세 버튼의 이전 색상·테두리 override 묶음은 삭제하고, 아래 최종 공통색 기준 하나만 유지한다. */
 #app #info-card #ic-tel-link,
 #app #info-card #ic-route-btn,
 #app #info-card #ic-hp,
@@ -6794,7 +6779,7 @@ html.oai-external-return-freeze.oai-external-return-releasing::after{
   transform:translateY(1px)!important;
 }
 
-/* V8-1-14-461: 인포카드 버튼과 성지 상세정보 버튼의 크기 기준을 한곳에서 확정한다. */
+/* V8-1-14-464: 인포카드 버튼과 성지 상세정보 버튼의 크기 기준을 한곳에서 확정한다. */
 #app #info-card #ic-tel-link,
 #app #info-card #ic-route-btn,
 #app #info-card #ic-hp,
@@ -6854,7 +6839,7 @@ html:not(.ios-device).oai-screen-compact-short #app .shrine-visit-detail-action{
   min-height:48px!important;
 }
 
-/* V8-1-14-461: compact-short 탭바/지도 top 기준은 아래 변수 블록 하나로 통합한다. */
+/* V8-1-14-464: compact-short 탭바/지도 top 기준은 아래 변수 블록 하나로 통합한다. */
 html:not(.ios-device).oai-screen-compact-short .map-category-close,
 html:not(.ios-device).oai-screen-compact-short .ic-close-btn,
 html:not(.ios-device).oai-screen-compact-short .sheet-x,
@@ -7086,38 +7071,7 @@ html.oai-font-global .shrine-visit-cards-head .module-bar-sub,
 .shrine-visit-cards-head .module-bar-sub{font-size:11px!important;line-height:1.25!important;color:rgba(255,255,255,.65)!important;}
 #shrine-visit-cards-modal .shrine-visit-cards-head .module-close,
 .shrine-visit-cards-head .module-close{width:var(--oai-std-close-sz)!important;height:var(--oai-std-close-sz)!important;min-width:var(--oai-std-close-sz)!important;flex:0 0 var(--oai-std-close-sz)!important;border-radius:999px!important;background:transparent!important;border:1.5px solid currentColor!important;color:rgba(212,170,106,.9)!important;font-size:28px!important;box-shadow:none!important;}
-/* V8-1-14-461: 순례 스탬프북 헤더/탭/십자가 기준을 다른 카테고리 공통값과 통일한다. */
-#shrine-visit-cards-modal .shrine-visit-cards-tabs,
-.shrine-visit-cards-tabs{
-  height:var(--oai-std-tabbar-h)!important;min-height:var(--oai-std-tabbar-h)!important;max-height:var(--oai-std-tabbar-h)!important;
-  padding:0 10px!important;gap:6px!important;display:flex!important;align-items:center!important;box-sizing:border-box!important;
-  background:#fffbf2!important;border-top:1px solid #ddd5c8!important;border-bottom:2px solid #ddd5c8!important;box-shadow:none!important;margin:0!important;
-}
-#shrine-visit-cards-modal .shrine-visit-cards-tabs button,
-.shrine-visit-cards-tabs button{
-  height:var(--oai-std-tab-h)!important;min-height:var(--oai-std-tab-h)!important;padding:0 10px!important;border-radius:10px!important;
-  border:1.5px solid var(--v4-header-navy)!important;background:var(--v4-bg-cream)!important;color:var(--v4-header-navy)!important;
-  font-size:calc(15px * var(--app-inner-font-scale,1))!important;font-weight:700!important;line-height:1!important;box-shadow:none!important;
-  font-family:inherit!important;letter-spacing:-.02em!important;display:flex!important;align-items:center!important;justify-content:center!important;flex:1 1 0!important;
-}
-#shrine-visit-cards-modal .shrine-visit-cards-tabs button[data-shrine-visit-cards-tab="visited"],
-.shrine-visit-cards-tabs button[data-shrine-visit-cards-tab="visited"]{flex:1.22 1 0!important;}
-#shrine-visit-cards-modal .shrine-visit-cards-tabs button[data-shrine-visit-cards-tab="unvisited"],
-.shrine-visit-cards-tabs button[data-shrine-visit-cards-tab="unvisited"]{flex:1.22 1 0!important;}
-#shrine-visit-cards-modal .shrine-visit-cards-tabs button[data-shrine-visit-cards-tab="new"],
-.shrine-visit-cards-tabs button[data-shrine-visit-cards-tab="new"]{flex:.94 1 0!important;}
-#shrine-visit-cards-modal .shrine-visit-cards-tabs button[data-shrine-visit-cards-tab="stats"],
-.shrine-visit-cards-tabs button[data-shrine-visit-cards-tab="stats"]{flex:.62 1 0!important;}
-#shrine-visit-cards-modal .shrine-visit-cards-tabs button.on,
-#shrine-visit-cards-modal .shrine-visit-cards-tabs button.active,
-.shrine-visit-cards-tabs button.on,
-.shrine-visit-cards-tabs button.active{background:#0e1535!important;color:var(--v4-surface-white)!important;border-color:transparent!important;box-shadow:0 2px 8px rgba(31,42,68,.28)!important;font-weight:800!important;}
-html:not(.ios-device).oai-screen-compact-short #shrine-visit-cards-modal .shrine-visit-cards-tabs,
-html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-tabs{height:var(--oai-std-tabbar-h)!important;min-height:var(--oai-std-tabbar-h)!important;max-height:var(--oai-std-tabbar-h)!important;padding:0 8px!important;gap:5px!important;}
-html:not(.ios-device).oai-screen-compact-short #shrine-visit-cards-modal .shrine-visit-cards-tabs button,
-html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-tabs button{height:var(--oai-std-tab-h)!important;min-height:var(--oai-std-tab-h)!important;padding:0 8px!important;}
-
-/* V8-1-14-461: 인트로 종료(revealing) 때 십자가 사진 확대 애니메이션을 재시작하지 않는다.
+/* V8-1-14-464: 인트로 종료(revealing) 때 십자가 사진 확대 애니메이션을 재시작하지 않는다.
    booting 단계에서만 .84→1로 커지고, revealing 단계는 최종 크기에서 opacity만 사라진다. */
 html.oai-cover-revealing::after{
   animation:none!important;
@@ -7132,7 +7086,7 @@ html.oai-cover-revealing::after{
   }
 }
 
-/* V8-1-14-461: Android tablet top spacing is standardized without adding a second WebView safe-area. */
+/* V8-1-14-464: Android tablet top spacing is standardized without adding a second WebView safe-area. */
 html.oai-android-tablet:not(.ios-device) #tabbar{
   height:var(--tab-h)!important;
   min-height:var(--tab-h)!important;
@@ -7157,11 +7111,11 @@ html.oai-android-tablet:not(.ios-device) .module-view.open{
   padding-top:0!important;
 }
 
-/* V8-1-14-461: route-choice and cover/mass-quick modal styles are managed in their module CSS files. */
+/* V8-1-14-464: route-choice and cover/mass-quick modal styles are managed in their module CSS files. */
 
-/* V8-1-14-461: Fold 전환 아이보리 안정막은 Android native 한 곳에서만 처리한다. PWA overlay는 제거했다. */
+/* V8-1-14-464: Fold 전환 아이보리 안정막은 Android native 한 곳에서만 처리한다. PWA overlay는 제거했다. */
 
-/* V8-1-14-461: 성당/피정의집 내위치 버튼을 더 아래로 내려 지도 위에서 떠 보이는 위치를 완화한다. */
+/* V8-1-14-464: 성당/피정의집 내위치 버튼을 더 아래로 내려 지도 위에서 떠 보이는 위치를 완화한다. */
 html:not(.ios-device).parish-mode #app #loc-btn,
 html:not(.ios-device).retreat-mode #app #loc-btn{
   bottom:calc(var(--oai-android-bottom-gap, 10px) + 38px)!important;
@@ -7171,7 +7125,7 @@ html:not(.ios-device).oai-screen-compact-short.retreat-mode #app #loc-btn{
   bottom:calc(var(--oai-android-bottom-gap, 10px) + 36px)!important;
 }
 
-/* V8-1-14-461: 성지 인포카드 하단 여백을 조금 되살려 마지막 버튼이 바닥에 붙어 보이지 않게 한다. */
+/* V8-1-14-464: 성지 인포카드 하단 여백을 조금 되살려 마지막 버튼이 바닥에 붙어 보이지 않게 한다. */
 html:not(.ios-device) #app #info-card{
   padding-bottom:10px!important;
 }
@@ -7190,9 +7144,9 @@ html:not(.ios-device) #app #info-card .ic-body{
 html:not(.ios-device) #app #sheet-route{
   padding-bottom:6px!important;
 }
-/* V8-1-14-461: visible cover version remains available for release verification. */
+/* V8-1-14-464: visible cover version remains available for release verification. */
 
-/* V8-1-14-461: 검색 키보드가 열린 상태에서 성지/성당/피정 리스트를 처음 스크롤할 때
+/* V8-1-14-464: 검색 키보드가 열린 상태에서 성지/성당/피정 리스트를 처음 스크롤할 때
    키보드 닫힘/viewport 복원/카드 눌림 효과가 겹쳐 생기던 첫 버벅임을 줄인다. */
 #list-body,
 #region-body,
@@ -7227,7 +7181,7 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
 }
 
 
-/* V8-1-14-461: 인포카드 버튼 색상 정리. 전화는 흰색, 카카오내비는 노랑, 나머지는 남색. */
+/* V8-1-14-464: 인포카드 버튼 색상 정리. 전화는 흰색, 카카오내비는 노랑, 나머지는 남색. */
 #app #info-card #ic-tel-link,
 #app #info-card .ic-tel-btn,
 #app .shrine-visit-detail-action-row.detail-primary-row > .detail-tel{
@@ -7321,7 +7275,7 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
 }
 
 
-/* V8-1-14-461: 커버 하단 3버튼과 아래 안내문구 사이 여백 축소 유지. */
+/* V8-1-14-464: 커버 하단 3버튼과 아래 안내문구 사이 여백 축소 유지. */
 #cover .cover-bottom-actions,
 #cover .cover-utility-actions,
 #cover .cover-bottom-buttons,
@@ -7351,138 +7305,7 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
 #cover .cover-myfaith-main-btn{
   margin-bottom:0!important;
 }
-
-
-/* V8-1-14-461: 순례 스탬프북 카드/상세 버튼 선명도 강화. */
-#app .pilgrimage-summary,
-#app .stamp-summary,
-#app .stampbook-summary,
-#app .pilgrim-summary{
-  border:2.4px solid #1d7fc5!important;
-  background:#eef7ff!important;
-  color:#113b5d!important;
-  box-shadow:0 3px 10px rgba(29,127,197,.12)!important;
-}
-#app .pilgrimage-card,
-#app .stamp-card,
-#app .pilgrim-card,
-#app .shrine-visit-card,
-#app .stampbook-card{
-  background:#ffffff!important;
-  box-shadow:0 3px 10px rgba(31,42,68,.07)!important;
-}
-#app .pilgrimage-card.visited,
-#app .stamp-card.visited,
-#app .pilgrim-card.visited,
-#app .shrine-visit-card.visited,
-#app .stampbook-card.visited{
-  border:2.2px solid #1d8ed6!important;
-}
-#app .pilgrimage-card.unvisited,
-#app .stamp-card.unvisited,
-#app .pilgrim-card.unvisited,
-#app .shrine-visit-card.unvisited,
-#app .stampbook-card.unvisited{
-  border:2.2px solid #45b99a!important;
-}
-#app .pilgrimage-card.new,
-#app .stamp-card.new,
-#app .pilgrim-card.new,
-#app .shrine-visit-card.new,
-#app .stampbook-card.new{
-  border:2.2px solid #45b99a!important;
-}
-#app .pilgrimage-card .diocese,
-#app .stamp-card .diocese,
-#app .pilgrim-card .diocese,
-#app .shrine-visit-card .diocese,
-#app .stampbook-card .diocese,
-#app .pilgrimage-card .card-diocese,
-#app .stamp-card .card-diocese,
-#app .pilgrim-card .card-diocese,
-#app .shrine-visit-card .card-diocese,
-#app .stampbook-card .card-diocese{
-  color:#59636e!important;
-  font-weight:900!important;
-}
-#app .pilgrimage-card .name,
-#app .stamp-card .name,
-#app .pilgrim-card .name,
-#app .shrine-visit-card .name,
-#app .stampbook-card .name,
-#app .pilgrimage-card .card-title,
-#app .stamp-card .card-title,
-#app .pilgrim-card .card-title,
-#app .shrine-visit-card .card-title,
-#app .stampbook-card .card-title{
-  color:#101827!important;
-  font-weight:950!important;
-}
-#app .pilgrimage-card .status,
-#app .stamp-card .status,
-#app .pilgrim-card .status,
-#app .shrine-visit-card .status,
-#app .stampbook-card .status,
-#app .visit-status,
-#app .stamp-status{
-  background:#ffffff!important;
-  color:#1f2a44!important;
-  border:1.6px solid #b9c7d3!important;
-  box-shadow:0 1px 4px rgba(31,42,68,.07)!important;
-  font-weight:900!important;
-}
-#app .pilgrimage-card .status.unvisited,
-#app .stamp-card .status.unvisited,
-#app .pilgrim-card .status.unvisited,
-#app .shrine-visit-card .status.unvisited,
-#app .stampbook-card .status.unvisited,
-#app .visit-status.unvisited,
-#app .stamp-status.unvisited{
-  background:#ffffff!important;
-  color:#1f2a44!important;
-  border-color:#b9c7d3!important;
-}
-#app .pilgrimage-card .status.new,
-#app .stamp-card .status.new,
-#app .pilgrim-card .status.new,
-#app .shrine-visit-card .status.new,
-#app .stampbook-card .status.new,
-#app .visit-status.new,
-#app .stamp-status.new{
-  background:#f5eaff!important;
-  color:#7140a8!important;
-  border-color:#d1b5ed!important;
-}
-#app .pilgrimage-card .type-badge,
-#app .stamp-card .type-badge,
-#app .pilgrim-card .type-badge,
-#app .shrine-visit-card .type-badge,
-#app .stampbook-card .type-badge,
-#app .shrine-type-badge{
-  background:#ffffff!important;
-  font-weight:900!important;
-  border-width:1.8px!important;
-  box-shadow:0 1px 5px rgba(31,42,68,.08)!important;
-}
-#app .shrine-visit-detail-info{
-  border:2.2px solid #1e73be!important;
-  background:#ffffff!important;
-}
-#app .shrine-visit-detail-action{
-  background:#ffffff!important;
-  background-image:none!important;
-  color:#1f2a44!important;
-  border:2.2px solid #1e73be!important;
-  box-shadow:0 2px 7px rgba(94,150,198,.16)!important;
-}
-#app .shrine-visit-detail-action.detail-goodnews{
-  background:#ffffff!important;
-  color:#1f2a44!important;
-  border-color:#5e96c6!important;
-}
-
-
-/* V8-1-14-461: 커버 하단 3버튼과 안내문구 사이 여백 추가 축소. */
+/* V8-1-14-464: 커버 하단 3버튼과 안내문구 사이 여백 추가 축소. */
 #cover .bottom-actions,
 #cover .cover-actions,
 #cover .cover-bottom-actions,
@@ -7530,7 +7353,7 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
 
 
 
-/* V8-1-14-461: 매일미사/주요기도문 상단바 정렬 보정. */
+/* V8-1-14-464: 매일미사/주요기도문 상단바 정렬 보정. */
 /* 매일미사: 왼쪽 화살표 제거, 오른쪽 X 닫기 버튼으로 배치 */
 #missa-bar{
   position:relative!important;
@@ -7613,7 +7436,7 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
 }
 
 
-/* V8-1-14-461: 검색 모달이 키보드/edge-to-edge 상태에서 상단에 붙어 제목줄이 잘리는 것을 방지한다. */
+/* V8-1-14-464: 검색 모달이 키보드/edge-to-edge 상태에서 상단에 붙어 제목줄이 잘리는 것을 방지한다. */
 #srch-modal .sm-inner{
   min-height:0!important;
   height:100%!important;
@@ -7632,7 +7455,7 @@ html.oai-result-scroll-kb-dismiss #srch-modal .sm-hd{
   flex-shrink:0!important;
 }
 
-/* V8-1-14-461: 마산교구·의정부교구 성당 상세페이지 미사시간 안내문. */
+/* V8-1-14-464: 마산교구·의정부교구 성당 상세페이지 미사시간 안내문. */
 #app #info-card .ic-parish-mass-notice{
   display:none;
   margin:7px 14px 2px;
@@ -7668,66 +7491,32 @@ html.oai-font-global #app #info-card .ic-parish-mass-notice-text{
 }
 
 
-/* V8-1-14-461: 순례 스탬프북 미방문/신규 카드 색을 순례한 성지 카드 기준으로 통일
-   - 미방문/신규 문구는 유지
-   - 배경은 흰색 계열로 통일
-   - 성지/순례지/순교 사적지 타입 색상과 우측 컬러바는 유지 */
+/* V8-1-14-464: 스탬프북 카드·순례 상세카드 디자인 통일 기준 */
 #app .shrine-visit-card-badge.unvisited,
 #app .shrine-visit-card-badge.new{
-  background:linear-gradient(145deg,#ffffff 0%,#fbfdff 58%,#f3f7fb 100%)!important;
-  border-width:2px!important;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.98),0 5px 14px rgba(37,48,58,.10)!important;
-  opacity:1!important;
+  background:#ffffff!important;
+  border-width:2.5px!important;
+  border-style:solid!important;
+  border-radius:20px!important;
   filter:none!important;
+  opacity:1!important;
+  box-shadow:0 5px 14px rgba(37,48,58,.10)!important;
 }
 #app .shrine-visit-card-badge.unvisited:before,
 #app .shrine-visit-card-badge.new:before{
-  background:linear-gradient(135deg,rgba(255,255,255,.96) 0%,rgba(255,255,255,.64) 42%,rgba(242,246,250,.38) 100%)!important;
-}
-#app .shrine-visit-card-badge.unvisited:after,
-#app .shrine-visit-card-badge.new:after{
-  content:""!important;
-  position:absolute!important;
-  left:auto!important;
-  right:0!important;
-  top:0!important;
-  bottom:0!important;
-  width:7px!important;
-  height:auto!important;
-  transform:none!important;
-  border-radius:0 17px 17px 0!important;
-  z-index:1!important;
+  background:linear-gradient(135deg,rgba(255,255,255,.98),rgba(245,249,252,.62))!important;
 }
 #app .shrine-visit-card-badge.type-shrine.unvisited,
-#app .shrine-visit-card-badge.type-shrine.new{
-  border-color:rgba(239,47,47,.46)!important;
-}
+#app .shrine-visit-card-badge.type-shrine.new{border-color:#ef2f2f!important}
 #app .shrine-visit-card-badge.type-pilgrim.unvisited,
-#app .shrine-visit-card-badge.type-pilgrim.new{
-  border-color:rgba(22,140,255,.48)!important;
-}
+#app .shrine-visit-card-badge.type-pilgrim.new{border-color:#0b84ff!important}
 #app .shrine-visit-card-badge.type-martyr.unvisited,
-#app .shrine-visit-card-badge.type-martyr.new{
-  border-color:rgba(0,166,106,.48)!important;
-}
-#app .shrine-visit-card-badge.type-shrine.unvisited:after,
-#app .shrine-visit-card-badge.type-shrine.new:after{
-  background:#ef2f2f!important;
-}
-#app .shrine-visit-card-badge.type-pilgrim.unvisited:after,
-#app .shrine-visit-card-badge.type-pilgrim.new:after{
-  background:#0b84ff!important;
-}
-#app .shrine-visit-card-badge.type-martyr.unvisited:after,
-#app .shrine-visit-card-badge.type-martyr.new:after{
-  background:#00a66a!important;
-}
+#app .shrine-visit-card-badge.type-martyr.new{border-color:#00a66a!important}
 #app .shrine-visit-card-badge.unvisited .shrine-visit-card-stamp,
 #app .shrine-visit-card-badge.new .shrine-visit-card-stamp{
   opacity:1!important;
   filter:none!important;
-  background:rgba(255,255,255,.82)!important;
-  border-style:solid!important;
+  background:rgba(255,255,255,.88)!important;
   box-shadow:0 1px 5px rgba(37,48,58,.08)!important;
 }
 #app .shrine-visit-card-badge.unvisited .shrine-visit-card-dio,
@@ -7747,113 +7536,9 @@ html.oai-font-global #app #info-card .ic-parish-mass-notice-text{
   justify-content:center!important;
   padding:4px 8px!important;
   border-radius:999px!important;
-  background:rgba(255,255,255,.76)!important;
-  border:1px solid rgba(37,48,58,.11)!important;
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.48),0 1px 4px rgba(37,48,58,.06)!important;
-  font-size:12px!important;
-  font-weight:900!important;
-  line-height:1.1!important;
-}
-#app .shrine-visit-card-badge.unvisited .shrine-visit-card-count{
-  color:#111827!important;
-}
-#app .shrine-visit-card-badge.new .shrine-visit-card-count{
-  color:#7c3aed!important;
-  border-color:rgba(124,58,237,.22)!important;
-  background:rgba(255,255,255,.82)!important;
-}
-
-
-/* V8-1-14-461: 순례 상세 인포카드 흰색 박스 + 원색 파랑 테두리/버튼 통일 */
-#app .shrine-visit-detail-hero,
-#app .shrine-visit-detail-info{
-  background:#ffffff!important;
-  border:3px solid #0b84ff!important;
-  box-shadow:0 8px 22px rgba(11,132,255,.10)!important;
-}
-#app .shrine-visit-detail-kicker,
-#app .shrine-visit-detail-date-title,
-#app .shrine-visit-detail-section-title,
-#app .shrine-visit-detail-row span{
-  color:#6f5a2a!important;
-}
-#app .shrine-visit-detail-count,
-#app .shrine-visit-detail-name,
-#app .shrine-visit-detail-row strong{
-  color:#111820!important;
-}
-#app .shrine-visit-detail-recent{
-  color:#2d463b!important;
-}
-#app .shrine-visit-detail-date-list{
-  background:transparent!important;
-}
-#app .shrine-visit-detail-empty-date{
-  background:#f7fbff!important;
-  border:1px dashed rgba(11,132,255,.25)!important;
-  color:#6b747b!important;
-}
-#app .shrine-visit-detail-register,
-#app .shrine-visit-detail-hero .shrine-visit-detail-register,
-#app .shrine-visit-detail-map-btn,
-#app .shrine-visit-detail-action{
-  background:#ffffff!important;
-  color:#12324d!important;
-  border:2.5px solid #0b84ff!important;
-  box-shadow:0 3px 9px rgba(11,132,255,.12), inset 0 1px 0 rgba(255,255,255,.92)!important;
-  text-shadow:none!important;
-  font-weight:950!important;
-}
-#app .shrine-visit-detail-register:active,
-#app .shrine-visit-detail-hero .shrine-visit-detail-register:active,
-#app .shrine-visit-detail-map-btn:active,
-#app .shrine-visit-detail-action:active{
-  background:#eef7ff!important;
-  transform:translateY(1px)!important;
-  filter:none!important;
-}
-#app .shrine-visit-detail-row{
-  border-top:1px solid rgba(11,132,255,.14)!important;
-}
-
-
-/* V8-1-14-461: 스탬프북/상세카드 색상 강제 적용 - 기존 정의와 인라인 모두 보정 */
-#app .shrine-visit-card-badge.unvisited,
-#app .shrine-visit-card-badge.new{
-  background:#ffffff!important;
-  filter:none!important;
-  opacity:1!important;
-  box-shadow:0 5px 14px rgba(37,48,58,.10)!important;
-}
-#app .shrine-visit-card-badge.unvisited:before,
-#app .shrine-visit-card-badge.new:before{
-  background:linear-gradient(135deg,rgba(255,255,255,.98),rgba(245,249,252,.62))!important;
-}
-#app .shrine-visit-card-badge.type-shrine.unvisited,
-#app .shrine-visit-card-badge.type-shrine.new{border:2.5px solid #ef2f2f!important}
-#app .shrine-visit-card-badge.type-pilgrim.unvisited,
-#app .shrine-visit-card-badge.type-pilgrim.new{border:2.5px solid #0b84ff!important}
-#app .shrine-visit-card-badge.type-martyr.unvisited,
-#app .shrine-visit-card-badge.type-martyr.new{border:2.5px solid #00a66a!important}
-#app .shrine-visit-card-badge.unvisited .shrine-visit-card-stamp,
-#app .shrine-visit-card-badge.new .shrine-visit-card-stamp{
-  opacity:1!important;
-  filter:none!important;
-  background:rgba(255,255,255,.86)!important;
-  box-shadow:0 1px 5px rgba(37,48,58,.08)!important;
-}
-#app .shrine-visit-card-badge.unvisited strong,
-#app .shrine-visit-card-badge.new strong{color:#111820!important}
-#app .shrine-visit-card-badge.unvisited .shrine-visit-card-dio,
-#app .shrine-visit-card-badge.new .shrine-visit-card-dio{color:#5e6a73!important}
-#app .shrine-visit-card-badge.unvisited .shrine-visit-card-count,
-#app .shrine-visit-card-badge.new .shrine-visit-card-count{
-  display:inline-flex!important;
-  width:max-content!important;
-  padding:4px 8px!important;
-  border-radius:999px!important;
   background:#ffffff!important;
   box-shadow:0 1px 4px rgba(37,48,58,.06)!important;
+  line-height:1.1!important;
 }
 #app .shrine-visit-card-badge.unvisited .shrine-visit-card-count{
   color:#111827!important;
@@ -7863,25 +7548,72 @@ html.oai-font-global #app #info-card .ic-parish-mass-notice-text{
   color:#7c3aed!important;
   border:1px solid rgba(124,58,237,.22)!important;
 }
+
+/* 순례 상세 상단 기록 박스와 하단 성지정보 박스를 같은 카드 디자인으로 통일 */
 #app .shrine-visit-detail-hero,
 #app .shrine-visit-detail-info{
   background:#ffffff!important;
   border:3px solid #0b84ff!important;
+  border-radius:22px!important;
+  padding:18px 16px!important;
   box-shadow:0 8px 22px rgba(11,132,255,.10)!important;
 }
-#app .shrine-visit-detail-register,
-#app .shrine-visit-detail-hero .shrine-visit-detail-register,
-#app .shrine-visit-detail-map-btn,
-#app .shrine-visit-detail-action{
-  background:#ffffff!important;
-  color:#12324d!important;
-  border:2.5px solid #0b84ff!important;
-  box-shadow:0 3px 9px rgba(11,132,255,.12), inset 0 1px 0 rgba(255,255,255,.92)!important;
-  text-shadow:none!important;
-  font-weight:950!important;
+#app .shrine-visit-detail-hero{
+  margin-bottom:13px!important;
+}
+#app .shrine-visit-detail-info-head{
+  margin-bottom:10px!important;
+}
+#app .shrine-visit-detail-section-title,
+#app .shrine-visit-detail-kicker,
+#app .shrine-visit-detail-date-title,
+#app .shrine-visit-detail-row span{
+  color:#56636f!important;
+}
+#app .shrine-visit-detail-count,
+#app .shrine-visit-detail-name,
+#app .shrine-visit-detail-row strong{
+  color:#111820!important;
+}
+#app .shrine-visit-detail-recent{
+  color:#315247!important;
+}
+#app .shrine-visit-detail-row{
+  border-top:1px solid rgba(11,132,255,.14)!important;
 }
 #app .shrine-visit-detail-empty-date{
   background:#f7fbff!important;
   border:1px dashed rgba(11,132,255,.25)!important;
   color:#6b747b!important;
+}
+#app .shrine-visit-detail-date-chip{
+  background:#111820!important;
+  color:#d8ecff!important;
+  border:1px solid rgba(11,132,255,.50)!important;
+}
+
+/* 성지정보 내 모든 버튼과 순례등록 버튼을 같은 크기·둥근값·파랑 테두리로 통일 */
+#app .shrine-visit-detail-register,
+#app .shrine-visit-detail-hero .shrine-visit-detail-register,
+#app .shrine-visit-detail-map-btn,
+#app .shrine-visit-detail-action{
+  min-height:36px!important;
+  border-radius:14px!important;
+  background:#ffffff!important;
+  color:#12324d!important;
+  border:2.5px solid #0b84ff!important;
+  box-shadow:0 3px 9px rgba(11,132,255,.12),inset 0 1px 0 rgba(255,255,255,.92)!important;
+  text-shadow:none!important;
+  font-weight:950!important;
+}
+#app .shrine-visit-detail-action{
+  height:40px!important;
+}
+#app .shrine-visit-detail-register:active,
+#app .shrine-visit-detail-hero .shrine-visit-detail-register:active,
+#app .shrine-visit-detail-map-btn:active,
+#app .shrine-visit-detail-action:active{
+  background:#eef7ff!important;
+  filter:none!important;
+  transform:translateY(1px)!important;
 }
