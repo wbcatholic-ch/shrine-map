@@ -1236,8 +1236,7 @@
       bindMyFaithClick(b, function(){ fn&&fn(); });
       return b;
     }
-    function appendMyFaithPrivacyNote(){ /* V8-1-14-406: 개인정보 안내문은 확인 버튼 바로 아래에 표시하므로 하단 중복 표시는 하지 않는다. */ return; }
-    function appendMyFaithConfirmButton(onConfirm){
+function appendMyFaithConfirmButton(onConfirm){
       var wrap=document.createElement('div');
       wrap.className='my-faith-inline-confirm';
       var ok=document.createElement('button');
@@ -1422,7 +1421,6 @@
           return 'stay';
         });
         body.appendChild(appendDataBackupSection(renderSettingsEdit));
-        appendMyFaithPrivacyNote();
         settleMyFaithHomeScroll();
       }
       myFaithRenderSettingsEdit = renderSettingsEdit;
@@ -1457,7 +1455,7 @@
         renderSettingsEdit();
         return;
       }
-      appendMyFaithConfirmButton(); body.appendChild(appendDataBackupSection(renderHome)); appendMyFaithPrivacyNote(); settleMyFaithHomeScroll();
+      appendMyFaithConfirmButton(); body.appendChild(appendDataBackupSection(renderHome)); settleMyFaithHomeScroll();
     }
     function renderDioceseList(){
       var current=getMyFaithEditName(); setHeader('나의 교구 선택','확인을 눌러야 저장됩니다'); setBodyMode('my-diocese-list');

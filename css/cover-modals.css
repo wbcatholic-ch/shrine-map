@@ -176,15 +176,11 @@
   letter-spacing: -.035em !important;
   text-align: left !important;
 }
-/* V8-1-14-370: menu / mass quick use share the compact visual palette on every screen size.
-   Keep menu category accent borders, and keep all mass quick sub-buttons identical. */
+/* V8-1-14-410: 커버 메뉴 버튼 포인트 색상만 유지.
+   미사 중 빠른 사용 4버튼 색상은 아래 항목별 ID 블록에서만 관리한다. */
 #cover-menu-guide-btn { border-color: #9CC9F5 !important; }
 #cover-menu-privacy-btn { border-color: #D7C4F2 !important; }
 #cover-menu-qna-btn { border-color: #A9DDB7 !important; }
-#cover #mass-quick-missa,
-#cover #mass-quick-prayer,
-#cover #mass-quick-hymn,
-#cover #mass-quick-bible { border-color: #CBD5E1 !important; }
 
 html:not(.ios-device).oai-screen-compact-short .cover-menu-panel,
 html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-panel {
@@ -246,7 +242,7 @@ html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-qu
 }
 
 
-/* V8-1-14-406: 미사 중 빠른 사용 팝업 4버튼 색상은 이 파일에서 최종 관리한다. */
+/* V8-1-14-410: 미사 중 빠른 사용 팝업 4버튼 색상은 이 파일에서 최종 관리한다. */
 #cover #mass-quick-modal #mass-quick-missa{
   border-color:#b98300!important;
   background:linear-gradient(180deg,#fffdf8 0%,#fff0bd 100%)!important;
