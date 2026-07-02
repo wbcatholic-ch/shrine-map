@@ -10,8 +10,7 @@
   --oai-modal-standard-ink: #172033;
 }
 
-/* V8-1-14-367 Step 5: cover guide / mass quick modal CSS consolidated.
-   Removed old gradient overrides and repeated button reset blocks. */
+/* V8-1-14-414: 커버 메뉴 / 미사 중 빠른 사용 팝업 공통 레이아웃. */
 .cover-menu-panel,
 #cover #mass-quick-modal .mass-quick-panel {
   position: relative !important;
@@ -176,7 +175,7 @@
   letter-spacing: -.035em !important;
   text-align: left !important;
 }
-/* V8-1-14-410: 커버 메뉴 버튼 포인트 색상만 유지.
+/* V8-1-14-414: 커버 메뉴 버튼 포인트 색상만 유지.
    미사 중 빠른 사용 4버튼 색상은 아래 항목별 ID 블록에서만 관리한다. */
 #cover-menu-guide-btn { border-color: #9CC9F5 !important; }
 #cover-menu-privacy-btn { border-color: #D7C4F2 !important; }
@@ -242,21 +241,23 @@ html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-qu
 }
 
 
-/* V8-1-14-410: 미사 중 빠른 사용 팝업 4버튼 색상은 이 파일에서 최종 관리한다. */
+/* V8-1-14-414: 미사 중 빠른 사용 팝업 4버튼 색상은 이 파일에서 최종 관리한다. */
+#cover #mass-quick-modal #mass-quick-missa,
+#cover #mass-quick-modal #mass-quick-prayer,
+#cover #mass-quick-modal #mass-quick-hymn,
+#cover #mass-quick-modal #mass-quick-bible{
+  background:#ffffff!important;
+}
 #cover #mass-quick-modal #mass-quick-missa{
   border-color:#b98300!important;
-  background:linear-gradient(180deg,#fffdf8 0%,#fff0bd 100%)!important;
 }
 #cover #mass-quick-modal #mass-quick-prayer{
   border-color:#16724f!important;
-  background:linear-gradient(180deg,#fffdf8 0%,#d9f3e4 100%)!important;
 }
 #cover #mass-quick-modal #mass-quick-hymn{
   border-color:#a7356c!important;
-  background:linear-gradient(180deg,#fffdf8 0%,#ffe0ee 100%)!important;
 }
 #cover #mass-quick-modal #mass-quick-bible{
   border-color:#246ca8!important;
-  background:linear-gradient(180deg,#fffdf8 0%,#dbeeff 100%)!important;
 }
 

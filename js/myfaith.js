@@ -116,7 +116,7 @@
     }
     function safeText(x){ return String(x || '').replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] || c); }); }
     var DATA_BACKUP_TYPE = 'catholic-gildongmu-user-data-backup';
-    var DATA_BACKUP_BUILD = 'V8-1-14-367';
+    var DATA_BACKUP_BUILD = 'V8-1-14-414';
     var DATA_BACKUP_LAST_TIME_KEY = 'oai_data_backup_last_exported_at_v1';
     var myFaithInfoManagementOpen = false;
     var myFaithInfoManagementLayer = null;
@@ -501,9 +501,8 @@
           setMyInfoActionStatus('백업 코드 입력창을 열지 못했습니다.', 'error', false);
           return;
         }
-        /* V8-1-14-367:
-           복원 입력 영역을 위쪽에 보여 주되, 아래의 백업 코드 복사/복원 버튼 묶음은
-           함께 숨겨 중복 화면처럼 보이지 않게 한다. */
+        /* V8-1-14-414:
+           복원 입력 영역을 위쪽에 보여 주고, 아래 버튼 묶음은 숨겨 중복 화면처럼 보이지 않게 한다. */
         try{ if(group && list && box.previousElementSibling !== list) group.insertBefore(box, list); }catch(_e){}
         try{ if(group) group.classList.add('is-code-restore-open'); }catch(_e){}
         try{ var dialog=box.closest ? box.closest('.my-faith-info-dialog') : null; if(dialog) dialog.classList.add('is-code-restore-active'); }catch(_e){}
@@ -677,10 +676,8 @@
     }
     function openUserDataRestorePicker(){
       try{
-        /* V8-1-14-367:
-           Android/WebView와 일부 모바일 브라우저는 파일 선택창(input.click)을
-           사용자 터치 흐름 안에서 바로 실행해야 한다. setTimeout 뒤에 실행하면
-           사용자 선택 동작으로 인정되지 않아 파일 선택이 실패하거나 취소처럼 보일 수 있다. */
+        /* V8-1-14-414:
+           Android/WebView와 일부 모바일 브라우저에서는 파일 선택창을 사용자 터치 흐름 안에서 바로 실행해야 한다. */
         setMyInfoActionButtonsDisabled(false);
         hideBackupCodeBoxes();
         setMyInfoActionStatus('백업 파일 선택창을 엽니다. 파일을 선택하면 복원이 시작됩니다.', 'ok', false);
@@ -1067,8 +1064,7 @@
       }catch(e){ console.warn('[가톨릭길동무]', e); }
     }
 
-    /* V8-1-14-44: 나의 신앙생활은 이제 module-view 카테고리로 동작한다.
-       예전 팝업 전용 cover guard / hash trap / popstate 가드는 공통 뒤로가기와 충돌하므로 제거한다. */
+    /* V8-1-14-414: 나의 신앙생활은 module-view 카테고리 흐름과 공통 뒤로가기를 사용한다. */
     function clearLegacyMyFaithBackFlags(reason){
       try{
         window.__OAI_MYFAITH_COVER_GUARD_UNTIL__ = 0;
