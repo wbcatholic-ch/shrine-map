@@ -36,7 +36,7 @@
   --oai-menu-modal-close-shadow: none;
 }
 
-/* V8-1-14-522: 메뉴 모달 3단계 정리.
+/* V8-1-14-526: 메뉴 모달 3단계 정리.
    커버 메뉴창과 미사 중 빠른 사용이 공유하는 시각 기준은 oai-menu-modal-* 클래스 한 곳에서 관리한다.
    버튼 높이·간격·아이콘·글자·테두리는 oai-menu-modal 변수로 한 곳에서 조정하고,
    미사 중 빠른 사용 4버튼의 반복 ID 규칙은 mass-quick-btn 한 곳으로 통합한다. */
@@ -124,7 +124,7 @@
   letter-spacing: -.025em !important;
   margin: 6px 0 0 !important;
 }
-/* V8-1-14-522: 메뉴 모달 닫기 버튼의 공통 모양은 oai-menu-modal-close 한 곳에서 관리한다.
+/* V8-1-14-526: 메뉴 모달 닫기 버튼의 공통 모양은 oai-menu-modal-close 한 곳에서 관리한다.
    커버 메뉴 X와 미사 빠른 사용 X는 크기·색상 변수를 다르게 주고, 위치 차이만 개별 선택자에서 처리한다. */
 .oai-menu-modal-close {
   width: var(--oai-menu-modal-close-size) !important;
@@ -265,7 +265,7 @@ html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal {
   --oai-menu-modal-item-grid: 50px 1fr;
 }
 
-/* V8-1-14-522: 미사 중 빠른 사용 4버튼의 공통값은 버튼 ID 4곳이 아니라 mass-quick-btn 한 곳에서 관리한다.
+/* V8-1-14-526: 미사 중 빠른 사용 4버튼의 공통값은 버튼 ID 4곳이 아니라 mass-quick-btn 한 곳에서 관리한다.
    각 버튼별 차이가 생길 때만 개별 ID 변수를 추가한다. */
 #cover #mass-quick-modal .mass-quick-btn {
   --oai-menu-modal-item-bg: #ffffff;
