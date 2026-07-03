@@ -147,7 +147,7 @@
   
   --bg-color:   #f7f0e5;
   
-  /* V8-1-14-531: 커버 레이아웃 소유권 선언.
+  /* V8-1-14-532: 커버 레이아웃 소유권 선언.
      커버 비율은 #cover / #cover-main-block / .cover-grid / #cover-action-row / #cover-bottom-note와
      아래 cover 전용 변수에서만 관리한다.
      하단 안내문구와 3버튼 사이 간격은 margin 덧씌움이 아니라 --cover-note-reserve/--cover-bottom-reserve로 조정한다. */
@@ -499,7 +499,14 @@ html.retreat-mode #tab-list-lbl {
   left: 0;
   right: 0;
   bottom: 0;
-  background: #e9e4dc;
+  background: var(--bg-unified,var(--v4-bg-cream));
+  overflow: hidden;
+  contain: layout paint;
+  isolation: isolate;
+  transform: translateZ(0);
+  -webkit-transform: translateZ(0);
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
 }
 #map {
   width: 100%;
@@ -511,16 +518,6 @@ html.retreat-mode #tab-list-lbl {
   backface-visibility: hidden;
   -webkit-backface-visibility: hidden;
 }
-#map-wrap {
-  overflow: hidden;
-  contain: layout paint;
-  isolation: isolate;
-  transform: translateZ(0);
-  -webkit-transform: translateZ(0);
-  backface-visibility: hidden;
-  -webkit-backface-visibility: hidden;
-}
-
 #legend {
   position: absolute;
   left: 12px;
@@ -870,7 +867,7 @@ html.retreat-mode .region-search-btn {
 
 #list-body, #nearby-body, #region-body {
   padding: 8px 0 calc(24px + env(safe-area-inset-bottom, 0));
-  background: var(--ui-bg);
+  background: var(--bg-unified, var(--ui-bg));
 }
 .list-item, .nearby-item, .region-item {
   margin: 0 10px 6px;
@@ -1618,7 +1615,7 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, var(--v4-retreat
 .exit-cancel { flex: 1; padding: 12px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--v4-surface-white); font-size: 15px; font-weight: 600; color: var(--ink); cursor: pointer; font-family: inherit; }
 .exit-ok { flex: 1; padding: 12px; border-radius: 10px; border: none; background: var(--ink); color: var(--v4-surface-white); font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; }
 
-/* V8-1-14-531: 지도 로딩 화면의 배경/글자색 기준은 이 원래 위치에서만 관리한다. */
+/* V8-1-14-532: 지도 로딩 화면의 배경/글자색 기준은 이 원래 위치에서만 관리한다. */
 .map-loading { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; background: var(--bg-unified,var(--v4-bg-cream))!important; height: 100%; }
 .map-loading-icon { font-size: 36px; margin-bottom: 14px; color: var(--gold,var(--v4-gold))!important; animation: oaiUnifiedLoadingCrossSpin 2.8s linear infinite; }
 .map-loading-txt { font-size: 13px; color: var(--v4-text-muted)!important; font-weight: 600; }
@@ -1726,7 +1723,7 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, var(--v4-retreat
 
 #missa-frame { flex: 1 1 auto; min-height: 0; width: 100%; border: 0; background: #fffaf2; }
 
-/* V8-1-14-531: 매일미사/주요기도문 하단 빠른 버튼은 이 블록을 단일 기준으로 관리한다.
+/* V8-1-14-532: 매일미사/주요기도문 하단 빠른 버튼은 이 블록을 단일 기준으로 관리한다.
    Android/compact 차이는 뒤쪽에서 같은 속성을 다시 쓰지 않고 변수만 바꾼다. */
 .faith-bottom-nav {
   --faith-bottom-gap: 8px;
@@ -1863,10 +1860,10 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, var(--v4-retreat
 }
 #diocese-frame { flex: 1 1 auto; min-height: 0; width: 100%; border: 0; background: var(--v4-bg-ivory); }
 
-/* V8-1-14-531: 문의·건의는 iframe 기반 qna-view만 사용한다. legacy qna card/tab and qna-cover floating button CSS removed. */
+/* V8-1-14-532: 문의·건의는 iframe 기반 qna-view만 사용한다. legacy qna card/tab and qna-cover floating button CSS removed. */
 
 #cover { overscroll-behavior-y: contain; }
-/* V8-1-14-531: 인트로 사진/보호막 pseudo-element 디자인은 아래 단일 사진 블록에서만 관리한다.
+/* V8-1-14-532: 인트로 사진/보호막 pseudo-element 디자인은 아래 단일 사진 블록에서만 관리한다.
    이 앞쪽 블록은 커버 본문 표시/숨김만 담당해 중복 CSS 충돌을 막는다. */
 html.oai-cover-booting body { background: var(--cream, var(--v4-bg-cream)) !important; }
 html.oai-cover-booting #cover {
@@ -2198,7 +2195,7 @@ html.app-active #cover-action-row { display: none; }
 #cover .cover-refresh-main-btn::before { background: #8D98A8; }
 #cover .cover-diocese-btn,
 #cover .cover-share-main-btn { color: var(--v4-header-navy); }
-/* V8-1-14-531: 하단 3개 버튼 글자 크기를 ‘나의 신앙생활’ 기준으로 통일 */
+/* V8-1-14-532: 하단 3개 버튼 글자 크기를 ‘나의 신앙생활’ 기준으로 통일 */
 #cover .cover-share-main-btn,
 #cover .cover-refresh-main-btn{
   font-size:var(--cover-action-font);
@@ -2238,7 +2235,7 @@ html:not(.ios-device).oai-screen-compact-short #cover {
 
 #cover-update-hint { display: none; margin-top: 4px; padding-left: 2px; color: #dc2626; font-size: 9.5px; font-weight: 800; line-height: 1.15; white-space: normal; max-width: 100%; word-break: keep-all; }
 #cover-update-box.update-needed #cover-update-hint { display: block; }
-/* V8-1-14-531: update-needed text is a small status badge, not a main category title.
+/* V8-1-14-532: update-needed text is a small status badge, not a main category title.
    Keep it independent from the user's enlarged app font scale so it does not overflow on Fold/phone covers. */
 #cover-update-box.update-needed #cover-update-btn {
   font-size: 12.8px !important;
@@ -2332,7 +2329,7 @@ html:not(.ios-device).oai-screen-compact-short #cover-update-box.update-needed #
 #cover-font-controls #cover-lg-btn { font-size: 22px; }
 #cover-font-controls .pr-font-divider { width: 1px; height: 20px; background: #ddd5c8; flex: 0 0 1px; margin: 0 2px; }
 
-/* V8-1-14-531: removed legacy direct guide-button styles; real menu entries are managed in cover-modals.css. */
+/* V8-1-14-532: removed legacy direct guide-button styles; real menu entries are managed in cover-modals.css. */
 
 #cover #cover-menu-btn.cover-menu-btn {
   position: absolute;
@@ -2381,7 +2378,7 @@ html.app-active #cover-menu-btn { display: none !important; }
   background: currentColor;
 }
 
-/* V8-1-14-531: cover menu modal shell is owned by css/cover-modals.css. */
+/* V8-1-14-532: cover menu modal shell is owned by css/cover-modals.css. */
 
 
 #oai-cover-exit-toast {
@@ -2443,7 +2440,7 @@ html.app-active #cover-menu-btn { display: none !important; }
 @media (display-mode: standalone) { #pwa-install-btn { display: none; } }
 html.app-active #pwa-install-btn { display: none; }
 
-/* V8-1-14-531: guide/privacy modal-specific styles are owned here; duplicated panel/hero rules are merged below. */
+/* V8-1-14-532: guide/privacy modal-specific styles are owned here; duplicated panel/hero rules are merged below. */
 
 .guide-modal { position: fixed; inset: 0; z-index: 10050; display: none; align-items: center; justify-content: center; padding: calc(env(safe-area-inset-top, 0px) + 14px) 18px calc(env(safe-area-inset-bottom, 0px) + 18px); box-sizing: border-box; font-family: 'Apple SD Gothic Neo','Noto Sans KR',sans-serif; }
 .guide-modal.show { display: flex; }
@@ -2634,7 +2631,7 @@ html:not(.ios-device) #ios-safari-guide-modal { display: none; }
 .sheet, .trail-sheet, #prayer-detail, #info-card { will-change: transform; }
 .module-view:not(.open), #missa-view:not(.open), #diocese-view:not(.open), #prayer-view:not(.open) { contain: strict; }
 
-/* V8-1-14-531: 성지/성당/피정 진입 첫 화면은 #sheet-nearby의 nearby-distance-loading이 기준이다.
+/* V8-1-14-532: 성지/성당/피정 진입 첫 화면은 #sheet-nearby의 nearby-distance-loading이 기준이다.
    이전 #oai-category-entry-veil은 stale class cleanup용 호환 요소로만 남긴다. */
 #oai-category-entry-veil {
   display: none !important;
@@ -2966,7 +2963,7 @@ html.oai-font-global #region-body .dio-hd { font-size: calc(17px * var(--app-inn
   }
   #cover #cover-action-row { margin-top: 0; }
 }
-/* V8-1-14-531: obsolete mass-quick short-height media override removed; css/cover-modals.css owns mass quick sizing. */
+/* V8-1-14-532: obsolete mass-quick short-height media override removed; css/cover-modals.css owns mass quick sizing. */
 @media (max-height: 650px) {
   #cover { --cover-top-safe: calc(env(safe-area-inset-top, 0px) + clamp(58px, calc(var(--cover-vh, 1vh) * 9.4), 74px)); --cover-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + clamp(6px, calc(var(--cover-vh, 1vh) * 1.0), 10px)); --cover-note-reserve: clamp(38px, calc(var(--cover-vh, 1vh) * 4.8), 50px); --cover-bottom-reserve: var(--cover-note-reserve); --cover-note-bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(12px, calc(var(--cover-vh, 1vh) * 2.0), 18px)); padding-top: var(--cover-top-safe); padding-bottom: calc(var(--cover-bottom-safe) + var(--cover-bottom-reserve)); }
   #cover-bottom-note { bottom: var(--cover-note-bottom); }
@@ -3016,8 +3013,6 @@ html:not(.app-active), html:not(.app-active) body { scroll-behavior: auto; }
 .cv-btn::before{content:'';position:absolute;right:-12px;bottom:-20px;width:118px;height:118px;border-radius:50%;background:rgba(255,255,255,.08)}
 .cv-btn::after{background:linear-gradient(140deg,rgba(255,255,255,.20) 0%,rgba(255,255,255,.03) 48%,transparent 72%)}
 .srch-bar,.filter-bar,.region-wrap{backdrop-filter:blur(8px)}
-.list-item.app-pressing,.nearby-item.app-pressing,.region-item.app-pressing{transform:translateY(6px) scale(.985)!important;background:#f8faff!important;box-shadow:0 1px 4px rgba(14,21,53,.04)!important;filter:brightness(.96)!important}
-#list-body,#nearby-body,#region-body{padding:8px 0 calc(24px + env(safe-area-inset-bottom,0))!important;background:var(--bg-unified)!important}
 .web-list,#trail-list{padding:14px 14px calc(86px + env(safe-area-inset-bottom,0))}
 
 .cv-bg,.cv-stars,.cv-wave,.cv-arches,.cv-chip-row,.cv-section-hd,.cv-hero-note,.cv-orn,.cv-div{display:none}
@@ -3062,81 +3057,12 @@ html:not(.app-active), html:not(.app-active) body { scroll-behavior: auto; }
 .cv-extra-btn.cv-btn-diocese .cv-btn-icon{background:rgba(255,255,255,.34);color:#334c6a}
 @media (max-width:420px){.cv-stage,.cv-extra-row{width:min(100%,calc((var(--cover-h) - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 112px) * .5625))}.cv-extra-row{gap:8px}.cv-extra-btn{min-height:78px;border-radius:18px;padding:8px 7px;gap:5px}.cv-extra-btn::before{inset:3px;border-radius:14px}.cv-extra-btn .cv-btn-icon{width:32px;height:32px;border-radius:11px}}
 @media (max-height:760px){.cv-stage,.cv-extra-row{width:min(100%,calc((var(--cover-h) - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 98px) * .5625))}.cv-extra-row{gap:7px}.cv-extra-btn{min-height:70px;border-radius:16px;padding:7px 6px;gap:4px}.cv-extra-btn::before{inset:3px;border-radius:13px}.cv-extra-btn .cv-btn-icon{width:28px;height:28px;border-radius:10px}.cv-extra-btn .cv-btn-label{line-height:1.06}}
-html.parish-mode .srch-bar,html.parish-mode .filter-bar,html.parish-mode .sheet-hd{background:#374151!important}
-html.parish-mode .ric-lbl,html.parish-mode .region-list-hd{color:var(--v4-parish-gray)!important}
-html.parish-mode .dio-hd{color:#374151!important;background:#F8FAFC!important}
-html.parish-mode .filter-btn.active{background:var(--v4-parish-gray)!important;color:var(--v4-surface-white)!important;border-color:#374151!important}
-html.parish-mode .sheet-hd,html.parish-mode .region-wrap,html.parish-mode .ric-hd{background:linear-gradient(135deg,#374151,var(--v4-parish-gray))!important}
-html.parish-mode .li-name,html.parish-mode .nearby-name{color:#334155!important}
-html.parish-mode .li-sub,html.parish-mode .nearby-addr{color:#64748B!important}
-html.parish-mode .li-badge,html.parish-mode .nearby-type{background:#ECEFF3!important;color:var(--v4-parish-gray)!important}
 .cv-title-only{font-size:clamp(34px,8vw,56px)!important;letter-spacing:.02em;line-height:1.18!important;margin-bottom:18px!important}
 .cv-shell-min{padding-top:calc(env(safe-area-inset-top,0) + 24px)!important;padding-bottom:40px!important}
 .cv-grid-big{gap:12px!important;max-width:440px!important}
 .cv-grid-big .cv-btn{min-height:138px!important;padding:18px 10px 14px!important;border-radius:20px!important}
 .cv-grid-big .cv-btn-icon{font-size:38px!important}
 .cv-grid-big .cv-btn-label{font-size:15px!important;line-height:1.28!important}
-html.parish-mode #tabbar,html.retreat-mode #tabbar,html:not(.parish-mode):not(.retreat-mode) #tabbar{background:rgba(255,255,255,.97)!important;border-bottom:1px solid rgba(203,213,225,.95)!important}
-html:not(.parish-mode):not(.retreat-mode) .tab-btn{border-color:rgba(26,36,86,.28)!important}
-html:not(.parish-mode):not(.retreat-mode) .tab-btn.active{background:linear-gradient(135deg,#243a83,#1f2f6b)!important;border-color:transparent!important;color:var(--v4-surface-paper)!important;box-shadow:0 4px 12px rgba(31,47,107,.18)!important}
-.web-body,.trail-body{background:var(--v4-bg-ivory)!important}
-html.parish-mode .sheet-body,html.parish-mode #list-body,html.parish-mode #nearby-body,html.parish-mode #region-body{background:var(--bg-unified)!important}
-html.retreat-mode .sheet-body,html.retreat-mode #list-body,html.retreat-mode #nearby-body,html.retreat-mode #region-body{background:var(--bg-unified)!important}
-html.parish-mode .srch-bar,html.parish-mode .filter-bar,html.parish-mode .sheet-hd,html.parish-mode .region-wrap{background:linear-gradient(135deg,#374151,var(--v4-parish-gray))!important}
-html.retreat-mode .srch-bar,html.retreat-mode .filter-bar,html.retreat-mode .sheet-hd,html.retreat-mode .region-wrap{background:linear-gradient(135deg,var(--v4-retreat-green),#4F846C)!important}
-
-.list-item,.nearby-item,.region-item{margin:0 10px 6px;padding:12px 14px!important;border:1px solid #e8edf5!important;border-radius:13px!important;background:var(--v4-surface-white)!important;box-shadow:0 2px 8px rgba(14,21,53,.06)!important;display:flex!important;align-items:center!important;gap:12px!important;transition:transform .12s,box-shadow .12s;min-height:72px!important;box-sizing:border-box}
-.li-info,.nearby-info{flex:1;min-width:0}
-html.parish-mode .nearby-dist{color:var(--v4-parish-gray)!important}
-.li-badge[style*="c0392b"],.nearby-type[style*="c0392b"]{background:#fde8e8!important;color:#c0392b!important}
-.li-badge[style*="1565c0"],.nearby-type[style*="1565c0"]{background:#e3eeff!important;color:#1565c0!important}
-.li-badge[style*="1b7a3e"],.nearby-type[style*="1b7a3e"]{background:#e8f5ee!important;color:#1b7a3e!important}
-html.parish-mode .li-badge{background:#ECEFF3!important;color:var(--v4-parish-gray)!important}
-html.parish-mode .nearby-type{background:#ECEFF3!important;color:var(--v4-parish-gray)!important}
-html.retreat-mode .li-badge{background:#DDECE5!important;color:var(--v4-retreat-green)!important}
-html.retreat-mode .nearby-type{background:#DDECE5!important;color:var(--v4-retreat-green)!important}
-html.retreat-mode .dio-hd{color:var(--v4-retreat-green)!important;background:#F6FBF8!important}
-
-html.retreat-mode .nearby-num{background:#4F846C!important;color:var(--v4-surface-paper)!important}
-html.retreat-mode .region-item .nearby-num{background:#4F846C!important}
-html.retreat-mode .filter-btn.active{background:#4F846C!important;color:var(--v4-surface-white)!important;border-color:#4F846C!important}
-html.parish-mode .sm-fb.on{background:var(--gold)!important;color:var(--navy)!important;border-color:var(--gold)!important}
-html.retreat-mode .sm-fb.on{background:var(--gold)!important;color:var(--navy)!important;border-color:var(--gold)!important}
-html:not(.parish-mode):not(.retreat-mode) .sm-tab.active{background:linear-gradient(135deg,var(--shrine-main),var(--shrine-main-2))!important;color:var(--v4-surface-paper)!important;border-color:transparent!important}
-html.retreat-mode #list-body .li-name{color:var(--v4-text-strong)!important}
-
-.nearby-name,.li-name,.sm-name,.sm-place-name{font-size:16px;font-weight:800;line-height:1.35;letter-spacing:-.03em;white-space:normal;overflow:visible;word-break:keep-all}
-.nearby-addr,.li-sub,.sm-sub,.sm-place-addr{font-size:13px;line-height:1.45;letter-spacing:-.02em;white-space:normal;overflow:visible;word-break:keep-all}
-.ic-sub,.ic-type-badge,.ic-addr-lbl{font-size:12px!important}
-.ic-tel-btn,.ic-route-btn,.ic-link-btn,.btn-kakao-nav{font-size:16px!important}
-#sm-tab-bar{display:flex;gap:10px;padding:10px 12px;height:55px;align-items:center;background:#f5efe5;border-bottom:1px solid var(--ui-line);box-sizing:border-box}
-
-@media (min-width:600px){.sm-tab{font-size:16px!important}#sm-tab-bar{height:60px!important}}
-html:not(.parish-mode):not(.retreat-mode) #tabbar,html.parish-mode #tabbar,html.retreat-mode #tabbar{background:rgba(255,255,255,.96)!important;border-bottom:1px solid #d8dee6!important}
-.tab-btn .tab-icon{color:inherit!important}
-html:not(.parish-mode):not(.retreat-mode) .sheet-hd,html:not(.parish-mode):not(.retreat-mode) .filter-bar,html:not(.parish-mode):not(.retreat-mode) .region-wrap,html:not(.parish-mode):not(.retreat-mode) .sm-hd,html:not(.parish-mode):not(.retreat-mode) .sm-filter{background:var(--oai-shrine-header)!important}
-html.parish-mode .sheet-hd,html.parish-mode .filter-bar,html.parish-mode .region-wrap,html.parish-mode .sm-hd,html.retreat-mode .sheet-hd,html.retreat-mode .filter-bar,html.retreat-mode .region-wrap,html.retreat-mode .sm-hd,.srch-x{color:var(--v4-parish-gray)!important}
-.sheet-title,.sm-title{color:#c49b56!important;font-weight:800!important}
-.sheet-x{color:#c49b56!important;border-color:transparent!important;background:transparent!important;border:none!important;box-shadow:none!important;border-radius:0!important}
-.sm-x{color:#c49b56!important;border-color:transparent!important;background:transparent!important;border:none!important;box-shadow:none!important;border-radius:0!important}
-.filter-btn,.sm-fb{background:var(--v4-surface-white)!important;color:#7b8794!important;border:1.5px solid var(--ui-line-strong)!important;box-shadow:none!important}
-.filter-btn.active,.sm-fb.on,html:not(.parish-mode):not(.retreat-mode) .filter-btn.active,html:not(.parish-mode):not(.retreat-mode) .sm-fb.on,html.parish-mode .filter-btn.active,html.parish-mode .sm-fb.on,html.retreat-mode .filter-btn.active,html.retreat-mode .sm-fb.on{background:var(--oai-gold)!important;color:var(--v4-text-main)!important;border-color:var(--oai-gold-border)!important}
-html.parish-mode .filter-btn.active,html.parish-mode .sm-fb.on{background:var(--v4-parish-gray)!important;color:var(--v4-surface-white)!important;border-color:#374151!important}
-html.retreat-mode .filter-btn.active,html.retreat-mode .sm-fb.on{background:#4F846C!important;color:var(--v4-surface-white)!important;border-color:var(--v4-retreat-green)!important}
-html.parish-mode #tabbar .tab-btn.active{background:linear-gradient(135deg,#374151,var(--v4-parish-gray))!important;color:var(--v4-surface-white)!important;border-color:transparent!important}
-html.retreat-mode #tabbar .tab-btn.active{background:linear-gradient(135deg,var(--v4-retreat-green),#4F846C)!important;color:var(--v4-surface-white)!important;border-color:transparent!important}
-
-html.retreat-mode .region-list-hd,html.retreat-mode .ric-lbl,html.retreat-mode .dio-hd,html.retreat-mode .li-name,html.retreat-mode .nearby-name,html.retreat-mode .nearby-dist{color:var(--v4-retreat-green)!important}
-html.retreat-mode #sheet-nearby #nearby-body .nearby-item .nearby-info>.nearby-name{color:var(--v4-text-strong)!important}
-html.retreat-mode .li-badge,html.retreat-mode .nearby-type,html.retreat-mode .ic-type-badge{background:var(--retreat-soft)!important;color:var(--v4-retreat-green)!important}
-
-html.oai-font-global #region-body .nearby-name,
-html.oai-font-global #region-body .li-name,
-html.oai-font-global #region-body .region-item .nearby-name{font-size:calc(16px * var(--app-inner-font-scale,1))!important;font-weight:700!important;line-height:1.3!important}
-html.oai-font-global #region-body .nearby-addr,
-html.oai-font-global #region-body .li-sub,
-html.oai-font-global #region-body .region-item .nearby-addr{font-size:calc(12px * var(--app-inner-font-scale,1))!important}
-
 #web-view.module-view.open,#trail-view.module-view.open,#qna-view.module-view.open{position:fixed;inset:0;width:100vw!important;height:auto!important;min-height:0!important;max-width:none!important;max-height:none!important;display:flex!important;align-items:stretch!important;justify-content:flex-start;overflow:hidden!important;z-index:1800;flex-direction:column}
 #web-view .module-bar,#trail-view .module-bar,#qna-view .module-bar,#web-view .web-body,#trail-view .trail-body{width:100%;max-width:none!important}
 #web-view .web-body,#trail-view .trail-body{flex:1 1 auto!important;min-height:0!important;height:auto!important;overflow:hidden!important}
@@ -3193,11 +3119,28 @@ html.kb-open .sheet.open { bottom: 0; }
   --retreat-list-dot-final:#c0392b;
 }
 
-/* V8-1-14-531: 지도 로딩 화면은 위 .map-loading 원래 위치에서 관리한다. */
-#app,
-#map-wrap{
+/* V8-1-14-532: 지도 로딩 화면은 위 .map-loading 원래 위치에서 관리한다. */
+#app{
   background:var(--bg-unified,var(--v4-bg-cream))!important;
 }
+html:not(.parish-mode):not(.retreat-mode) #tabbar,
+html.parish-mode #tabbar,
+html.retreat-mode #tabbar{
+  background:rgba(255,255,255,.96)!important;
+  border-bottom:1px solid #d8dee6!important;
+}
+.tab-btn .tab-icon{color:inherit!important;}
+html.parish-mode .sheet-body,
+html.parish-mode #list-body,
+html.parish-mode #nearby-body,
+html.parish-mode #region-body,
+html.retreat-mode .sheet-body,
+html.retreat-mode #list-body,
+html.retreat-mode #nearby-body,
+html.retreat-mode #region-body{
+  background:var(--bg-unified)!important;
+}
+.web-body,.trail-body{background:var(--v4-bg-ivory)!important;}
 
 html:not(.parish-mode):not(.retreat-mode) #tabbar .tab-btn.active{
   background:linear-gradient(135deg,var(--shrine-main,var(--v4-header-navy)),var(--shrine-main-2,#2d3a5f))!important;
@@ -3218,6 +3161,9 @@ html.parish-mode{
   --mode-name-color:var(--v4-text-strong);
   --mode-num-bg:var(--cathedral-category-final);
   --mode-srch-modal-bg:var(--cathedral-category-final);
+  --mode-filter-active-bg:linear-gradient(135deg,var(--cathedral-category-dark),var(--cathedral-category-final));
+  --mode-filter-active-color:var(--v4-surface-white);
+  --mode-filter-active-border:transparent;
 }
 html.parish-mode #tabbar .tab-btn.active,
 html.parish-mode .srch-bar,
@@ -3270,6 +3216,9 @@ html.retreat-mode{
   --mode-name-color:var(--v4-text-strong);
   --mode-num-bg:var(--retreat-category-final);
   --mode-srch-modal-bg:var(--retreat-category-final);
+  --mode-filter-active-bg:linear-gradient(135deg,var(--retreat-category-dark),var(--retreat-category-final));
+  --mode-filter-active-color:var(--v4-surface-white);
+  --mode-filter-active-border:transparent;
 }
 html.retreat-mode #tabbar .tab-btn.active,
 html.retreat-mode .srch-bar,
@@ -3342,14 +3291,10 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active{
 }
 
 .filter-btn.active,
-.sm-fb.on,
-html.parish-mode .filter-btn.active,
-html.parish-mode .sm-fb.on,
-html.retreat-mode .filter-btn.active,
-html.retreat-mode .sm-fb.on{
-  background:var(--gold,var(--v4-gold))!important;
-  color:var(--v4-text-main)!important;
-  border-color:var(--gold2,#b8965a)!important;
+.sm-fb.on{
+  background:var(--mode-filter-active-bg, var(--gold,var(--v4-gold)))!important;
+  color:var(--mode-filter-active-color, var(--v4-text-main))!important;
+  border-color:var(--mode-filter-active-border, var(--gold2,#b8965a))!important;
 }
 
 #app .li-name,
@@ -3433,7 +3378,7 @@ html.ios-device #qna-view.open {
   overflow: hidden !important;
 }
 
-/* V8-1-14-531: 지도/교구/내주변 로딩 십자가는 아래 oai-loading-cross 변수 블록 한 곳에서 관리한다.
+/* V8-1-14-532: 지도/교구/내주변 로딩 십자가는 아래 oai-loading-cross 변수 블록 한 곳에서 관리한다.
    이 위치의 과거 십자가/원형 스피너 중복 override는 제거했다. */
 
 #cover .my-diocese-setup-banner {
@@ -3600,12 +3545,6 @@ html.ios-device #qna-view.open {
   vertical-align: 1px;
 }
 
-html.parish-mode #list-body{
-  padding-top:0 !important;
-}
-html.parish-mode #list-body .dio-hd:first-child{
-  margin-top:0 !important;
-}
 #search-view .si-r-top,
 #list-view .lv-top{
   align-items:flex-start !important;
@@ -3813,7 +3752,7 @@ html.oai-font-global .shrine-visit-cards-btn{font-size:calc(12px * var(--app-inn
 
 
 
-/* V8-1-14-531: 스탬프북 카드는 성지목록 고유색(성지/순례지/순교 사적지)을 유지하되,
+/* V8-1-14-532: 스탬프북 카드는 성지목록 고유색(성지/순례지/순교 사적지)을 유지하되,
    오른쪽 종류 라벨은 고정하고 교구명은 한 글자씩 세로로 떨어지지 않게 가로 고정한다. */
 .shrine-visit-card-grid{
   display:grid!important;
@@ -4139,7 +4078,7 @@ html.oai-font-global .shrine-visit-detail-head-title{font-size:calc(18px * var(-
 .shrine-visit-cards-panel{width:100%!important;max-width:none!important;height:100%!important;max-height:none!important;border-radius:0!important;border:0!important;background:#fffdf7!important;padding:env(safe-area-inset-top) 12px max(18px,env(safe-area-inset-bottom))!important;box-shadow:none!important;display:flex!important;flex-direction:column!important}
 .shrine-visit-detail-view{background:#f1f3ee!important;color:#17201b!important}.shrine-visit-detail-head{background:#ffffff!important;border-bottom:1px solid rgba(31,41,51,.10)!important;box-shadow:0 2px 16px rgba(31,41,51,.06)!important}.shrine-visit-detail-back,.shrine-visit-detail-x{background:#f6f7f3!important;border-color:#d8dcd1!important;color:#324137!important;box-shadow:0 1px 7px rgba(31,41,51,.06)!important}.shrine-visit-detail-head-title{color:#17201b!important}.shrine-visit-detail-kicker,.shrine-visit-detail-date-title,.shrine-visit-detail-section-title{color:#75643c!important}.shrine-visit-detail-count{color:#17201b!important}.shrine-visit-detail-recent{color:#405247!important}.shrine-visit-detail-date-list{display:flex!important;flex-direction:column!important;gap:0!important;border-top:1px solid #e4e8df!important;border-bottom:1px solid #e4e8df!important;background:transparent!important;margin-top:4px!important}.shrine-visit-detail-date-chip{display:flex!important;justify-content:flex-start!important;align-items:center!important;border:0!important;border-radius:0!important;background:transparent!important;color:#17201b!important;padding:10px 2px 10px 18px!important;font-size:15px!important;font-weight:900!important;position:relative!important;box-shadow:none!important}.shrine-visit-detail-date-chip:before{content:"";position:absolute;left:3px;top:50%;width:7px;height:7px;border-radius:50%;background:#bda360;transform:translateY(-50%)}.shrine-visit-detail-date-chip+ .shrine-visit-detail-date-chip{border-top:1px solid #edf0e9!important}.shrine-visit-detail-empty-date{background:transparent!important;color:#7b837c!important;border:1px dashed #cbd2c6!important;border-radius:12px!important}.shrine-visit-detail-add{height:40px!important;margin-top:12px!important;background:#ffffff!important;color:#2f3b34!important;border:1px solid #bda360!important;box-shadow:0 2px 8px rgba(31,41,51,.05)!important}.shrine-visit-detail-add:active{background:#f6f0dc!important;filter:none!important}.shrine-visit-detail-name{color:#17201b!important}.shrine-visit-detail-row{border-top-color:#e4e8df!important}.shrine-visit-detail-row span{color:#75643c!important}.shrine-visit-detail-row strong{color:#24312a!important}
 
-/* V8-1-14-531: 순례 스탬프북/지도 보조 UI는 이 블록을 최종 소유 위치로 사용한다.
+/* V8-1-14-532: 순례 스탬프북/지도 보조 UI는 이 블록을 최종 소유 위치로 사용한다.
    이전 누적본에 같은 selector가 여러 번 반복되어 탭 높이, 위치 버튼, 스탬프북 레이어가 서로 덮어쓰던 부분을 하나로 통합했다. */
 #shrine-visit-cards-btn,.shrine-visit-sheet-btn,.shrine-visit-sheet-btn.show{display:none!important;}
 .shrine-visit-cards-head.module-bar{
@@ -4606,7 +4545,7 @@ html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-grid{
   box-shadow:0 8px 16px rgba(22,140,255,.07)!important;
 }
 
-/* V8-1-14-531: 과거 gold-cross 로딩 중복 블록 제거. 실제 로딩 십자가는 oai-loading-cross 변수 블록만 사용한다. */
+/* V8-1-14-532: 과거 gold-cross 로딩 중복 블록 제거. 실제 로딩 십자가는 oai-loading-cross 변수 블록만 사용한다. */
 html.oai-map-search-keyboard-lock,
 html.oai-map-search-keyboard-lock body{
   overscroll-behavior:none!important;
@@ -4698,7 +4637,7 @@ html.oai-stability-veil::after {
   animation:oaiStabilitySpin 2.8s linear infinite !important;
 }
 
-/* V8-1-14-531: 사용하지 않는 이전 Google-style intro keyframes는 제거하고, oaiIntroSmoothPhoto*만 유지한다. */
+/* V8-1-14-532: 사용하지 않는 이전 Google-style intro keyframes는 제거하고, oaiIntroSmoothPhoto*만 유지한다. */
 html.oai-cover-booting body,
 html.oai-cover-revealing body{
   background:#fbf8f1 !important;
@@ -4733,7 +4672,7 @@ html.oai-cover-revealing::after{
     linear-gradient(to right, #fbf8f1 0%, rgba(251,248,241,.96) 5%, rgba(251,248,241,.60) 13%, rgba(251,248,241,.16) 24%, rgba(251,248,241,0) 36%, rgba(251,248,241,0) 64%, rgba(251,248,241,.16) 76%, rgba(251,248,241,.60) 87%, rgba(251,248,241,.96) 95%, #fbf8f1 100%),
     linear-gradient(to bottom, #fbf8f1 0%, rgba(251,248,241,.90) 6%, rgba(251,248,241,.36) 17%, rgba(251,248,241,0) 30%, rgba(251,248,241,0) 70%, rgba(251,248,241,.36) 83%, rgba(251,248,241,.90) 94%, #fbf8f1 100%),
     radial-gradient(ellipse 96% 88% at 50% 48%, rgba(251,248,241,0) 50%, rgba(251,248,241,.08) 62%, rgba(251,248,241,.34) 76%, rgba(251,248,241,.76) 90%, rgba(251,248,241,1) 100%),
-    url("intro-cross-jesus.jpg?v=V8-1-14-531") !important;
+    url("intro-cross-jesus.jpg?v=V8-1-14-532") !important;
   background-position:center center, center center, center center, center center !important;
   background-size:100% 100%, 100% 100%, 100% 100%, auto 106% !important;
   background-repeat:no-repeat, no-repeat, no-repeat, no-repeat !important;
@@ -4894,7 +4833,7 @@ html.oai-stability-veil[data-oai-stability-reason*="external"] *{
   will-change:auto!important;
 }
 
-/* V8-1-14-531: Android/WebView 스탬프북 헤더 안전여백은 여기서만 관리한다.
+/* V8-1-14-532: Android/WebView 스탬프북 헤더 안전여백은 여기서만 관리한다.
    이전처럼 16px 블록과 38~46px 블록을 연속으로 두지 않아 상단이 과하게 늘어나지 않는다. */
 html:not(.ios-device){
   --oai-stampbook-header-top-gap:0px;
@@ -4945,7 +4884,7 @@ html:not(.ios-device) .shrine-visit-cards-modal .shrine-visit-cards-head .module
   0%{opacity:.12; transform:scale(.84); filter:contrast(1.005) saturate(1.01);}
   100%{opacity:1; transform:scale(1); filter:contrast(1.015) saturate(1.02);}
 }
-/* V8-1-14-531: intro animation 속도/이름 override 중복은 제거. 실제 값은 사진 블록과 keyframes에서만 관리한다. */
+/* V8-1-14-532: intro animation 속도/이름 override 중복은 제거. 실제 값은 사진 블록과 keyframes에서만 관리한다. */
 
 #cv-pull-modern,
 #cv-pull-modern.show,
@@ -5016,7 +4955,7 @@ html.oai-font-global .category-source-note { font-size: calc(11px * var(--app-in
   font-weight:900!important;
 }
 #app #info-card .ic-guide-btn{background:#fff4cc!important;color:#7c5600!important;border:1.5px solid #e6c766!important;}
-/* V8-1-14-531: 상세 버튼 색상과 로딩 십자가는 각각 원래 위치에서 관리한다.
+/* V8-1-14-532: 상세 버튼 색상과 로딩 십자가는 각각 원래 위치에서 관리한다.
    이 앞의 반복 로딩 십자가 override는 아래 oai-loading-cross 변수 블록으로 통합했다. */
 #app #loc-btn.oai-wait-nearby-list{
   opacity:0!important;
@@ -5074,7 +5013,7 @@ html.oai-stability-veil[data-oai-refresh-early-veil="1"]::after{
   animation:oaiUnifiedLoadingCrossSpin var(--oai-loading-cross-speed) linear infinite!important;
   transition:none!important;
 }
-/* V8-1-14-531: 외부사이트 진입/복귀 보호창 CSS 단일 기준. JS 흐름은 유지하고, 중복 십자가만 막는다. */
+/* V8-1-14-532: 외부사이트 진입/복귀 보호창 CSS 단일 기준. JS 흐름은 유지하고, 중복 십자가만 막는다. */
 #oai-external-entry-guard{
   position:fixed!important;
   inset:0!important;
@@ -5262,7 +5201,7 @@ html.oai-external-return-freeze.oai-external-return-releasing::after{
 }
 
 
-/* V8-1-14-531: 인포카드/상세 버튼의 이전 색상·테두리 override 묶음은 삭제하고,아래 최종 공통색 기준 하나만 유지한다. */
+/* V8-1-14-532: 인포카드/상세 버튼의 이전 색상·테두리 override 묶음은 삭제하고,아래 최종 공통색 기준 하나만 유지한다. */
 #app #info-card #ic-tel-link,#app #info-card #ic-route-btn,#app #info-card #ic-hp,#app #info-card #ic-guide,#app #info-card #ic-goodnews,#app #info-card #ic-kakao-nav{
   background:linear-gradient(180deg,#fbfdff 0%,#fffaf0 100%)!important;
   color:#213245!important;
@@ -5281,7 +5220,7 @@ html.oai-external-return-freeze.oai-external-return-releasing::after{
   transform:translateY(1px)!important;
 }
 
-/* V8-1-14-531: 인포카드 버튼과 성지 상세정보 버튼의 크기 기준을 한곳에서 확정한다. */
+/* V8-1-14-532: 인포카드 버튼과 성지 상세정보 버튼의 크기 기준을 한곳에서 확정한다. */
 #app #info-card #ic-tel-link,
 #app #info-card #ic-route-btn,
 #app #info-card #ic-hp,
@@ -5310,7 +5249,7 @@ html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-tel-link,html
   min-height:48px!important;
 }
 
-/* V8-1-14-531: compact-short 탭바/지도 top 기준은 아래 변수 블록 하나로 통합한다. */
+/* V8-1-14-532: compact-short 탭바/지도 top 기준은 아래 변수 블록 하나로 통합한다. */
 html:not(.ios-device).oai-screen-compact-short .map-category-close,
 html:not(.ios-device).oai-screen-compact-short .ic-close-btn,
 html:not(.ios-device).oai-screen-compact-short .sheet-x,
@@ -5484,7 +5423,7 @@ html:not(.ios-device).oai-screen-compact-short #app #sheet-route.open,
   transform:translateY(0)!important;
 }
 
-/* V8-1-14-531: 인트로 종료(revealing) 때 십자가 사진 확대 애니메이션을 재시작하지 않는다.
+/* V8-1-14-532: 인트로 종료(revealing) 때 십자가 사진 확대 애니메이션을 재시작하지 않는다.
    booting 단계에서만 .84→1로 커지고, revealing 단계는 최종 크기에서 opacity만 사라진다. */
 html.oai-cover-revealing::after{
   animation:none!important;
@@ -5499,7 +5438,7 @@ html.oai-cover-revealing::after{
   }
 }
 
-/* V8-1-14-531: Android tablet top spacing is standardized without adding a second WebView safe-area. */
+/* V8-1-14-532: Android tablet top spacing is standardized without adding a second WebView safe-area. */
 html.oai-android-tablet:not(.ios-device) #tabbar{
   height:var(--tab-h)!important;
   min-height:var(--tab-h)!important;
@@ -5525,11 +5464,11 @@ html.oai-android-tablet:not(.ios-device) .module-view.open{
   padding-top:0!important;
 }
 
-/* V8-1-14-531: route-choice and cover/mass-quick modal styles are managed in their module CSS files. */
+/* V8-1-14-532: route-choice and cover/mass-quick modal styles are managed in their module CSS files. */
 
-/* V8-1-14-531: Fold 전환 아이보리 안정막은 Android native 한 곳에서만 처리한다. PWA overlay는 제거했다. */
+/* V8-1-14-532: Fold 전환 아이보리 안정막은 Android native 한 곳에서만 처리한다. PWA overlay는 제거했다. */
 
-/* V8-1-14-531: 성지 인포카드 하단 여백을 조금 되살려 마지막 버튼이 바닥에 붙어 보이지 않게 한다. */
+/* V8-1-14-532: 성지 인포카드 하단 여백을 조금 되살려 마지막 버튼이 바닥에 붙어 보이지 않게 한다. */
 html:not(.ios-device) #app #info-card{
   padding-bottom:10px!important;
 }
@@ -5548,9 +5487,9 @@ html:not(.ios-device) #app #info-card .ic-body{
 html:not(.ios-device) #app #sheet-route{
   padding-bottom:6px!important;
 }
-/* V8-1-14-531: visible cover version remains available for release verification. */
+/* V8-1-14-532: visible cover version remains available for release verification. */
 
-/* V8-1-14-531: 검색 키보드가 열린 상태에서 성지/성당/피정 리스트를 처음 스크롤할 때
+/* V8-1-14-532: 검색 키보드가 열린 상태에서 성지/성당/피정 리스트를 처음 스크롤할 때
    키보드 닫힘/viewport 복원/카드 눌림 효과가 겹쳐 생기던 첫 버벅임을 줄인다. */
 #list-body,
 #region-body,
@@ -5585,7 +5524,7 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
 }
 
 
-/* V8-1-14-531: 인포카드 버튼 색상 정리. 전화는 흰색, 카카오내비는 노랑, 나머지는 남색이며, 색 버튼 테두리는 배경보다 한 단계 어둡게 유지한다. */
+/* V8-1-14-532: 인포카드 버튼 색상 정리. 전화는 흰색, 카카오내비는 노랑, 나머지는 남색이며, 색 버튼 테두리는 배경보다 한 단계 어둡게 유지한다. */
 #app #info-card #ic-tel-link,#app #info-card .ic-tel-btn{
   background:#ffffff!important;
   background-color:#ffffff!important;
@@ -5649,12 +5588,12 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
 }
 
 
-/* V8-1-14-531: 커버 하단 여백은 실제 요소가 아닌 과거 선택자 덧씌움으로 조정하지 않는다.
+/* V8-1-14-532: 커버 하단 여백은 실제 요소가 아닌 과거 선택자 덧씌움으로 조정하지 않는다.
    하단 3버튼과 안내문구 간격은 상단 cover 변수의 --cover-note-reserve에서만 조정한다. */
 
-/* V8-1-14-531: 매일미사/주요기도문 상단바 중복 보정은 원래 기준 위치로 병합했다. */
+/* V8-1-14-532: 매일미사/주요기도문 상단바 중복 보정은 원래 기준 위치로 병합했다. */
 
-/* V8-1-14-531: 검색 모달이 키보드/edge-to-edge 상태에서 상단에 붙어 제목줄이 잘리는 것을 방지한다. */
+/* V8-1-14-532: 검색 모달이 키보드/edge-to-edge 상태에서 상단에 붙어 제목줄이 잘리는 것을 방지한다. */
 #srch-modal .sm-inner{
   min-height:0!important;
   height:100%!important;
@@ -5673,7 +5612,7 @@ html.oai-result-scroll-kb-dismiss #srch-modal .sm-hd{
   flex-shrink:0!important;
 }
 
-/* V8-1-14-531: 마산교구·의정부교구 성당 상세페이지 미사시간 안내문. */
+/* V8-1-14-532: 마산교구·의정부교구 성당 상세페이지 미사시간 안내문. */
 #app #info-card .ic-parish-mass-notice{
   display:none;
   margin:7px 14px 2px;
