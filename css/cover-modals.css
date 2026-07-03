@@ -1,4 +1,3 @@
-
 :root {
   --oai-modal-standard-head: #1F2937;
   --oai-modal-standard-head-text: #FFFDF7;
@@ -10,9 +9,29 @@
   --oai-modal-standard-ink: #172033;
 }
 
-/* V8-1-14-471: 커버 메뉴 / 미사 중 빠른 사용 팝업 공통 레이아웃. */
-.cover-menu-panel,
-#cover #mass-quick-modal .mass-quick-panel {
+/* V8-1-14-501: 메뉴 모달 1단계 정리.
+   커버 메뉴창과 미사 중 빠른 사용이 공유하는 시각 기준은 oai-menu-modal-* 클래스 한 곳에서 관리한다.
+   각 기능별 선택자는 기능 차이만 담당한다. */
+.cover-menu-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10070;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+  box-sizing: border-box;
+}
+.cover-menu-modal.show { display: flex; }
+.cover-menu-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: rgba(14,21,53,.42);
+  backdrop-filter: blur(2px);
+}
+
+.oai-menu-modal-panel {
   position: relative !important;
   z-index: 1 !important;
   font-family: inherit !important;
@@ -33,8 +52,13 @@
   max-height: min(90dvh, 800px) !important;
   text-align: left !important;
 }
-.cover-menu-head,
-#cover #mass-quick-modal .mass-quick-head {
+#cover #mass-quick-modal .guide-backdrop {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: rgba(31,42,68,.30);
+}
+
+.oai-menu-modal-head {
   display: flex !important;
   align-items: center !important;
   justify-content: space-between !important;
@@ -50,15 +74,13 @@
   box-shadow: 0 10px 22px rgba(31,41,55,.22), inset 0 1px 0 rgba(255,255,255,.18), inset 0 -1px 0 rgba(15,23,42,.16) !important;
   text-align: left !important;
 }
-.cover-menu-head > div,
-#cover #mass-quick-modal .mass-quick-head-text {
+.oai-menu-modal-head-text {
   min-width: 0 !important;
   background: transparent !important;
   border: 0 !important;
   box-shadow: none !important;
 }
-.cover-menu-title,
-#cover #mass-quick-modal .mass-quick-title {
+.oai-menu-modal-title {
   color: var(--oai-modal-standard-head-text) !important;
   font-size: calc(20px * var(--app-font-scale, 1)) !important;
   line-height: 1.18 !important;
@@ -66,8 +88,7 @@
   letter-spacing: -.035em !important;
   margin: 0 !important;
 }
-.cover-menu-subtitle,
-#cover #mass-quick-modal .mass-quick-subtitle {
+.oai-menu-modal-subtitle {
   color: var(--oai-modal-standard-sub) !important;
   font-size: calc(12px * var(--app-font-scale, 1)) !important;
   line-height: 1.28 !important;
@@ -115,8 +136,7 @@
   box-shadow: 0 6px 14px rgba(31,41,55,.18) !important;
 }
 #cover #mass-quick-modal .guide-badge { display: none !important; }
-.cover-menu-list,
-#cover #mass-quick-modal .mass-quick-actions {
+.oai-menu-modal-actions {
   display: grid !important;
   grid-template-columns: 1fr !important;
   gap: 10px !important;
@@ -124,8 +144,7 @@
   border-radius: 22px !important;
   background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,248,232,.08)) !important;
 }
-.cover-menu-item,
-#cover #mass-quick-modal .mass-quick-btn {
+.oai-menu-modal-item {
   min-height: 84px !important;
   height: 84px !important;
   width: 100% !important;
@@ -145,13 +164,16 @@
   box-sizing: border-box !important;
   touch-action: manipulation !important;
 }
-.cover-menu-item:active,
-#cover #mass-quick-modal .mass-quick-btn:active {
+.oai-menu-modal-item:active {
   transform: translateY(1px) !important;
   background: var(--oai-modal-standard-box-press) !important;
 }
-.cover-menu-icon,
-#cover #mass-quick-modal .mass-quick-btn span {
+#cover #mass-quick-modal .mass-quick-btn.app-pressing {
+  transform: translateY(2px) scale(.995);
+  filter: brightness(.97);
+  transition: transform .08s, filter .08s, box-shadow .08s;
+}
+.oai-menu-modal-icon {
   width: 44px !important;
   height: 44px !important;
   min-width: 44px !important;
@@ -166,8 +188,7 @@
   line-height: 1 !important;
   filter: saturate(1.06) contrast(1.03) !important;
 }
-.cover-menu-text,
-#cover #mass-quick-modal .mass-quick-btn strong {
+.oai-menu-modal-text {
   color: var(--oai-modal-standard-ink) !important;
   font-size: calc(16px * var(--app-font-scale, 1)) !important;
   line-height: 1.18 !important;
@@ -175,29 +196,26 @@
   letter-spacing: -.035em !important;
   text-align: left !important;
 }
-/* V8-1-14-471: 커버 메뉴 버튼 포인트 색상만 유지.
-   미사 중 빠른 사용 4버튼 색상은 아래 항목별 ID 블록에서만 관리한다. */
+
+/* 커버 메뉴 버튼 포인트 색상은 커버 메뉴 전용 ID에서만 관리한다. */
 #cover-menu-guide-btn { border-color: #9CC9F5 !important; }
 #cover-menu-privacy-btn { border-color: #D7C4F2 !important; }
 #cover-menu-qna-btn { border-color: #A9DDB7 !important; }
 
-html:not(.ios-device).oai-screen-compact-short .cover-menu-panel,
-html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-panel {
+html:not(.ios-device).oai-screen-compact-short .oai-menu-modal-panel {
   width: min(360px, calc(100vw - 28px)) !important;
   max-width: min(88vw, 330px) !important;
   padding: 16px 13px 15px !important;
 }
 html:not(.ios-device).oai-screen-compact-short .cover-menu-panel { min-height: 326px !important; }
-html:not(.ios-device).oai-screen-compact-short .cover-menu-head,
-html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-head {
+html:not(.ios-device).oai-screen-compact-short .oai-menu-modal-head {
   min-height: 74px !important;
   border-radius: 18px !important;
   margin-bottom: 12px !important;
   padding: 12px !important;
   gap: 10px !important;
 }
-html:not(.ios-device).oai-screen-compact-short .cover-menu-subtitle,
-html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-subtitle {
+html:not(.ios-device).oai-screen-compact-short .oai-menu-modal-subtitle {
   margin-top: 4px !important;
   line-height: 1.2 !important;
 }
@@ -217,31 +235,26 @@ html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-qu
   flex-basis: 36px !important;
   font-size: 25px !important;
 }
-html:not(.ios-device).oai-screen-compact-short .cover-menu-list,
-html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-actions { gap: 8px !important; }
-html:not(.ios-device).oai-screen-compact-short .cover-menu-item,
-html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-btn {
+html:not(.ios-device).oai-screen-compact-short .oai-menu-modal-actions { gap: 8px !important; }
+html:not(.ios-device).oai-screen-compact-short .oai-menu-modal-item {
   min-height: 78px !important;
   height: 78px !important;
   padding: 12px 14px !important;
   border-radius: 17px !important;
 }
-html:not(.ios-device).oai-screen-compact-short .cover-menu-icon,
-html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-btn span {
+html:not(.ios-device).oai-screen-compact-short .oai-menu-modal-icon {
   width: 40px !important;
   height: 40px !important;
   min-width: 40px !important;
   flex-basis: 40px !important;
 }
 html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-btn { grid-template-columns: 50px 1fr !important; }
-html:not(.ios-device).oai-screen-compact-short .cover-menu-text,
-html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-btn strong {
+html:not(.ios-device).oai-screen-compact-short .oai-menu-modal-text {
   line-height: 1.18 !important;
   letter-spacing: -.03em !important;
 }
 
-
-/* V8-1-14-471: 미사 중 빠른 사용 4버튼 테두리는 성가 기준 파랑으로 통일하되 두께를 줄인다. */
+/* 미사 중 빠른 사용 4버튼 테두리는 이 ID 블록에서만 관리한다. */
 #cover #mass-quick-modal #mass-quick-missa,
 #cover #mass-quick-modal #mass-quick-prayer,
 #cover #mass-quick-modal #mass-quick-hymn,
@@ -250,4 +263,3 @@ html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-qu
   border-color:#246ca8!important;
   border-width:2px!important;
 }
-
