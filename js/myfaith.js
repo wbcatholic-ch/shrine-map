@@ -28,7 +28,6 @@
       '제주교구': {home:'https://www.diocesejeju.or.kr/', priest:'https://www.diocesejeju.or.kr/diocese_father'}
     };
     var btn = document.getElementById('cover-diocese-btn');
-    var menuBtn = document.getElementById('cover-menu-myfaith-btn');
     var setupBanner = document.getElementById('my-diocese-setup-banner');
     var modal = document.getElementById('my-diocese-modal');
     var body = document.getElementById('my-diocese-list');
@@ -116,7 +115,7 @@
     }
     function safeText(x){ return String(x || '').replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] || c); }); }
     var DATA_BACKUP_TYPE = 'catholic-gildongmu-user-data-backup';
-    var DATA_BACKUP_BUILD = 'V8-1-14-506';
+    var DATA_BACKUP_BUILD = 'V8-1-14-510';
     var DATA_BACKUP_LAST_TIME_KEY = 'oai_data_backup_last_exported_at_v1';
     var myFaithInfoManagementOpen = false;
     var myFaithInfoManagementLayer = null;
@@ -501,7 +500,7 @@
           setMyInfoActionStatus('백업 코드 입력창을 열지 못했습니다.', 'error', false);
           return;
         }
-        /* V8-1-14-506:
+        /* V8-1-14-510:
            복원 입력 영역을 위쪽에 보여 주고, 아래 버튼 묶음은 숨겨 중복 화면처럼 보이지 않게 한다. */
         try{ if(group && list && box.previousElementSibling !== list) group.insertBefore(box, list); }catch(_e){}
         try{ if(group) group.classList.add('is-code-restore-open'); }catch(_e){}
@@ -676,7 +675,7 @@
     }
     function openUserDataRestorePicker(){
       try{
-        /* V8-1-14-506:
+        /* V8-1-14-510:
            Android/WebView와 일부 모바일 브라우저에서는 파일 선택창을 사용자 터치 흐름 안에서 바로 실행해야 한다. */
         setMyInfoActionButtonsDisabled(false);
         hideBackupCodeBoxes();
@@ -1064,7 +1063,7 @@
       }catch(e){ console.warn('[가톨릭길동무]', e); }
     }
 
-    /* V8-1-14-506: 나의 신앙생활은 module-view 카테고리 흐름과 공통 뒤로가기를 사용한다. */
+    /* V8-1-14-510: 나의 신앙생활은 module-view 카테고리 흐름과 공통 뒤로가기를 사용한다. */
     function clearLegacyMyFaithBackFlags(reason){
       try{
         window.__OAI_MYFAITH_COVER_GUARD_UNTIL__ = 0;
@@ -1511,7 +1510,6 @@ function appendMyFaithConfirmButton(onConfirm){
     }
     on(btn, 'click', openFromButton);
     if(setupBanner) on(setupBanner, 'click', openFromButton);
-    if(menuBtn) on(menuBtn, 'click', openFromButton);
     on('my-diocese-close','click', function(e){ if(e&&e.preventDefault)e.preventDefault(); closeModal(); });
     modal.addEventListener('click', function(e){ if(e && e.target && e.target.getAttribute && e.target.getAttribute('data-my-diocese-close') === 'true') closeModal(); });
     document.addEventListener('keydown', function(e){ if(e && e.key === 'Escape' && modal.classList.contains('show')){ if(myFaithInfoManagementOpen) closeMyInfoManagementModal(); else closeModal(); } });

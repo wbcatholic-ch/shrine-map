@@ -3,7 +3,7 @@
 (function(){
   if(window.__APP_FONT_SCALE_GUARD__) return;
   window.__APP_FONT_SCALE_GUARD__=true;
-  var QA_URL="qa-firebase.html?embedded=1&v=V8-1-14-506";
+  var QA_URL="qa-firebase.html?embedded=1&v=V8-1-14-510";
   var FONT_KEY='prayer_font_size';
   var BASE=16;
   var FONT_SIZES=[13,14,15,16,17,18,19,20,21,22,24,26,28,30];
@@ -174,7 +174,6 @@
       else setTimeout(run,900);
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
-  function wireQnaButton(){var btn=el('qna-cover-btn');if(btn)btn.onclick=function(ev){if(ev)ev.preventDefault();window.openQnaView();};}
   function closeQnaFrameToCover(reason){
     try{
       var view=el('qna-view');
@@ -211,8 +210,7 @@
   window.openQnaView=function(){ goQnaWithLoading(); };
   window.goQaFirebase=function(){ goQnaWithLoading(); };
   window.closeQnaFrameToCover=function(reason){ closeQnaFrameToCover(reason); };
-  window.qnaShowTab=function(){ configureQna(); };
-  function boot(){ensureCoverControls();setEmojiIcons();configureQna();wireQnaButton();applyScale();scheduleCoverToastOnReturnCheck();scheduleQnaPreload();}
+  function boot(){ensureCoverControls();setEmojiIcons();configureQna();applyScale();scheduleCoverToastOnReturnCheck();scheduleQnaPreload();}
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',boot,{once:true});else boot();window.addEventListener('load',function(){boot();setTimeout(boot,250);setTimeout(boot,900);},{once:true});window.addEventListener('pageshow',boot);
 })();
 
