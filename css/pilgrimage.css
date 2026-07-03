@@ -132,7 +132,7 @@ html:not(.ios-device).oai-screen-compact-short .trail-sh-close{
   width:34px!important;height:34px!important;min-width:34px!important;flex-basis:34px!important;
 }
 
-/* V8-1-14-467: 한티가는길 표시. 동명읍 내부는 여러 길 가능 구간으로 보고, 도로를 오가며 건너는 듯한 세부 GPX 대신 대표선을 안내한다. */
+/* V8-1-14-468: 한티가는길 표시. 동명읍 내부는 여러 길 가능 구간으로 보고, 도로를 오가며 건너는 듯한 세부 GPX 대신 대표선을 안내한다. */
 .hanti-stamp-marker {
   appearance: none;
   border: 1.5px solid rgba(120, 72, 18, .55);
@@ -191,7 +191,7 @@ html:not(.ios-device).oai-screen-compact-short .trail-sh-close{
 .hanti-flex-guide strong { display: block; font-size: 11px; color: #5f3707; }
 .hanti-flex-guide span { display: block; margin-top: 2px; }
 
-/* V8-1-14-467: 한티가는길은 자동도장 전 단계로, 내 위치를 누르면 가장 가까운 스탬프 거리만 안내한다. */
+/* V8-1-14-468: 한티가는길은 자동도장 전 단계로, 내 위치를 누르면 가장 가까운 스탬프 거리만 안내한다. */
 .hanti-location-guide {
   pointer-events: none;
   min-width: 118px;
@@ -213,7 +213,7 @@ html:not(.ios-device).oai-screen-compact-short .trail-sh-close{
 .hanti-location-guide span { display:block; }
 
 
-/* V8-1-14-467: 한티가는길 현장 방문 없이 확인하는 숨은 테스트 모드. URL ?hantiTest=1 또는 한티 카드 안내줄 5회 터치 때만 JS가 패널을 만들고, 패널 안의 '테스트 닫기'로 다시 숨긴다. */
+/* V8-1-14-468: 한티가는길 현장 방문 없이 확인하는 숨은 테스트 모드. URL ?hantiTest=1 또는 한티 카드 안내줄 5회 터치 때만 JS가 패널을 만들고, 패널 안의 '테스트 닫기'로 다시 숨긴다. */
 .hanti-test-panel {
   margin-top: 8px;
   padding: 8px;
@@ -287,7 +287,7 @@ html:not(.ios-device).oai-screen-compact-short .trail-sh-close{
 .hanti-location-guide.test { border-color: rgba(21,101,192,.34); background: rgba(246,250,255,.97); }
 
 
-/* V8-1-14-467: 한티가는길 테스트 모드 닫기 버튼 */
+/* V8-1-14-468: 한티가는길 테스트 모드 닫기 버튼 */
 .hanti-test-head{
   display:flex;
   align-items:center;
@@ -310,7 +310,7 @@ html:not(.ios-device).oai-screen-compact-short .trail-sh-close{
 }
 
 
-/* V8-1-14-467: 숨은 테스트 모드 안에서 한티/도원동 테스트 루프 전환 */
+/* V8-1-14-468: 숨은 테스트 모드 안에서 한티/도원동 테스트 루프 전환 */
 .hanti-test-switch{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -334,7 +334,7 @@ html:not(.ios-device).oai-screen-compact-short .trail-sh-close{
 }
 
 
-/* V8-1-14-467: 사용자 도원동 GPX 실보행 테스트용 따라가기 버튼 */
+/* V8-1-14-468: 사용자 도원동 GPX 실보행 테스트용 따라가기 버튼 */
 .hanti-test-follow{
   margin-top:7px;
 }
@@ -354,7 +354,7 @@ html:not(.ios-device).oai-screen-compact-short .trail-sh-close{
 }
 
 
-/* V8-1-14-467: 도원동 GPX 테스트 표시 방식 선택 */
+/* V8-1-14-468: 도원동 GPX 테스트 표시 방식 선택 */
 .hanti-test-visual{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -399,7 +399,7 @@ html:not(.ios-device).oai-screen-compact-short .trail-sh-close{
   box-shadow:0 3px 8px rgba(22,163,74,.35);
 }
 
-/* V8-1-14-467: 한티가는길 인포카드 공개 버튼 + 전체경로보기 전용 지도 UI */
+/* V8-1-14-468: 한티가는길 인포카드 공개 버튼 + 전체경로보기 전용 지도 UI */
 .trail-sh-actions{
   display:grid;
   grid-template-columns:1fr 1fr;
@@ -508,7 +508,7 @@ html:not(.ios-device).oai-screen-compact-short .trail-sh-close{
 }
 
 
-/* V8-1-14-467: 한티가는길 인포카드 버튼 명확화 */
+/* V8-1-14-468: 한티가는길 인포카드 버튼 명확화 */
 .trail-sh-actions.hanti-main-actions{
   display:grid!important;
   grid-template-columns:1fr 1fr!important;
@@ -538,7 +538,7 @@ html:not(.ios-device).oai-screen-compact-short .trail-sh-close{
 }
 
 
-/* V8-1-14-467: 한티가는길 인포카드 하단 빈 공간 제거 */
+/* V8-1-14-468: 한티가는길 인포카드 하단 빈 공간 제거 */
 .trail-sheet.hanti-main-card{
   padding-bottom:calc(12px + env(safe-area-inset-bottom, 0))!important;
 }
@@ -557,4 +557,55 @@ html:not(.ios-device) .trail-sheet.hanti-main-card{
 }
 .trail-sheet.hanti-main-card .trail-sh-action-btn{
   min-height:42px!important;
+}
+
+
+/* V8-1-14-468: 전체경로보기 하단 버튼 확대 + 경로따라가기 오렌지 */
+.hanti-route-controls{
+  bottom:calc(20px + env(safe-area-inset-bottom, 0))!important;
+  gap:10px!important;
+}
+.hanti-route-controls .trail-loc-btn{
+  min-height:48px!important;
+  height:48px!important;
+  padding:0 18px!important;
+  border-radius:16px!important;
+  font-size:16px!important;
+  font-weight:950!important;
+  border:2.5px solid #d9dee8!important;
+  background:#ffffff!important;
+  color:#1f73d2!important;
+  box-shadow:0 7px 18px rgba(15,23,42,.16)!important;
+}
+.hanti-route-control-btn{
+  min-height:48px!important;
+  height:48px!important;
+  padding:0 22px!important;
+  border-radius:16px!important;
+  font-size:16px!important;
+  font-weight:950!important;
+  box-shadow:0 7px 18px rgba(15,23,42,.16)!important;
+}
+.hanti-route-control-btn.primary{
+  background:#f97316!important;
+  border:2.5px solid #ea580c!important;
+  color:#ffffff!important;
+  box-shadow:0 8px 20px rgba(249,115,22,.26), inset 0 1px 0 rgba(255,255,255,.28)!important;
+}
+.hanti-route-control-btn.primary:active{
+  background:#ea580c!important;
+  transform:translateY(1px)!important;
+}
+@media (max-width:360px){
+  .hanti-route-controls{
+    gap:8px!important;
+  }
+  .hanti-route-controls .trail-loc-btn,
+  .hanti-route-control-btn{
+    min-height:46px!important;
+    height:46px!important;
+    font-size:14px!important;
+    padding-left:14px!important;
+    padding-right:14px!important;
+  }
 }
