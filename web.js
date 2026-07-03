@@ -251,6 +251,7 @@
     try{
       (trailState.hantiPolylines || []).forEach(function(line){ try{ line.setMap(null); }catch(_e){} });
       (trailState.hantiProgressPolylines || []).forEach(function(line){ try{ line.setMap(null); }catch(_e){} });
+      clearHantiRouteDirectionOverlays();
       (trailState.hantiStampOverlays || []).forEach(function(ov){ try{ ov.setMap(null); }catch(_e){} });
       try{ if(trailState.hantiGpsTracePolyline) trailState.hantiGpsTracePolyline.setMap(null); }catch(_e){}
       removeHantiRouteControls();
@@ -260,6 +261,7 @@
     }catch(e){ console.warn('[가톨릭길동무]', e); }
     trailState.hantiPolylines = [];
     trailState.hantiProgressPolylines = [];
+    trailState.hantiRouteDirectionOverlays = [];
     trailState.hantiStampOverlays = [];
     trailState.hantiGpsTracePolyline = null;
     trailState.hantiGpsTracePoints = [];
@@ -344,6 +346,7 @@
         lastProgressM: Number.isFinite(Number(trailState && trailState.hantiLastProgressM)) ? Number(trailState.hantiLastProgressM) : 0,
         arrivedStampIds: (trailState && trailState.hantiArrivedStampIds) || {},
         showGpsTrace: !!(trailState && trailState.hantiShowGpsTrace),
+        routeReverse: !!(trailState && trailState.hantiRouteReverse),
         infoCardOpen: false
       };
     }catch(e){ console.warn('[가톨릭길동무]', e); return null; }
@@ -421,6 +424,7 @@
       trailState.restoreLevel = state.level || null;
       trailState.hantiReturnTrailIndex = Number.isFinite(Number(state.returnTrailIndex)) ? Number(state.returnTrailIndex) : getHantiMainTrailIndex();
       trailState.hantiShowGpsTrace = state.showGpsTrace !== false;
+      trailState.hantiRouteReverse = !!state.routeReverse;
       initTrailModule();
       trailSetView('map');
       setTimeout(function(){
@@ -432,7 +436,9 @@
           trailState.hantiArrivedStampIds = state.arrivedStampIds || {};
           try{ Object.keys(trailState.hantiArrivedStampIds || {}).forEach(markHantiStampOverlayArrived); }catch(_e){}
           if(Number.isFinite(Number(trailState.hantiLastRoutePointIndex))){
-            drawHantiProgressToIndex({pointIndex:Number(trailState.hantiLastRoutePointIndex)});
+            var resumeRouteInfo = {pointIndex:Number(trailState.hantiLastRoutePointIndex), progressM:Number(trailState.hantiLastProgressM || 0), routeReverse:!!trailState.hantiRouteReverse};
+            drawHantiProgressToIndex(resumeRouteInfo);
+            updateHantiRouteDirectionArrows(resumeRouteInfo);
           }
           restoreMapViewFromHantiState(state);
           closeTrailSheetOnly();
@@ -565,10 +571,7 @@
       var pts = hantiFlattenRoutePoints(data);
       if(!(routeInfo && pts && pts.length)) return null;
       var idx = Math.max(0, Math.min(pts.length - 1, Number(routeInfo.pointIndex || 0)));
-      var next = pts[Math.min(pts.length - 1, idx + 2)] || pts[Math.min(pts.length - 1, idx + 1)];
-      var cur = pts[idx];
-      if(!cur || !next || next === cur) return null;
-      return hantiBearingDegrees(cur.lat, cur.lng, next.lat, next.lng);
+      return hantiRouteBearingAtPointIndex(pts, idx, isHantiRouteReverse());
     }catch(_e){ return null; }
   }
   function hantiResolveHeading(lat, lng, routeInfo, pos){
@@ -596,6 +599,68 @@
       dot.setAttribute('aria-label', '진행 방향');
     }
     return dot;
+  }
+  function isHantiRouteReverse(){
+    return !!(trailState && trailState.hantiRouteReverse);
+  }
+  function updateHantiRouteReverseButton(){
+    var btn = ig$('trail-hanti-route-reverse');
+    if(!btn) return;
+    var reverse = isHantiRouteReverse();
+    btn.classList.toggle('on', reverse);
+    btn.setAttribute('aria-pressed', reverse ? 'true' : 'false');
+    btn.textContent = reverse ? '↔ 반대 진행 중' : '↔ 경로 반대';
+    btn.title = reverse ? '한티가는길을 반대 방향으로 따라가는 중입니다. 누르면 정방향으로 바뀝니다.' : '한티가는길을 반대 방향으로 따라갑니다.';
+  }
+  function getHantiRouteTotalDistanceM(data, pts){
+    var total = Number(data && data.stats && data.stats.routeDistanceM);
+    if(!Number.isFinite(total) || total <= 0){
+      total = (pts && pts.length) ? Number(pts[pts.length - 1].routeDistanceM || 0) : 0;
+    }
+    return Number.isFinite(total) && total > 0 ? total : 0;
+  }
+  function hantiDirectionalProgressM(routeDistanceM, total, reverse){
+    routeDistanceM = Number(routeDistanceM || 0);
+    total = Number(total || 0);
+    if(!Number.isFinite(routeDistanceM)) routeDistanceM = 0;
+    if(!Number.isFinite(total) || total <= 0) return Math.max(0, routeDistanceM);
+    return reverse ? Math.max(0, total - routeDistanceM) : Math.max(0, routeDistanceM);
+  }
+  function refreshHantiRouteAfterDirectionChange(){
+    try{
+      updateHantiRouteReverseButton();
+      var data = getActiveHantiRouteData();
+      var pts = hantiFlattenRoutePoints(data);
+      var total = getHantiRouteTotalDistanceM(data, pts);
+      if(Number.isFinite(Number(trailState && trailState.hantiLastGpsLat)) && Number.isFinite(Number(trailState && trailState.hantiLastGpsLng))){
+        var info = findNearestHantiRoutePointFromCoords(trailState.hantiLastGpsLat, trailState.hantiLastGpsLng, {follow:false});
+        if(info){
+          trailState.hantiLastRoutePointIndex = Number(info.pointIndex);
+          trailState.hantiLastProgressM = Number(info.progressM || 0);
+          drawHantiProgressToIndex(info);
+          updateHantiRouteDirectionArrows(info);
+          showHantiLocationGuide(trailState.hantiLastGpsLat, trailState.hantiLastGpsLng, {follow:!!trailState.hantiFollowActive, routeInfo:info});
+          return;
+        }
+      }
+      if(pts.length){
+        var idx = isHantiRouteReverse() ? pts.length - 1 : 0;
+        var info2 = {pointIndex:idx, progressM:0, totalDistanceM:total, routeReverse:isHantiRouteReverse()};
+        updateHantiRouteDirectionArrows(info2);
+      }
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }
+  function setHantiRouteReverse(reverse, opts){
+    opts = opts || {};
+    if(!trailState) return;
+    var next = !!reverse;
+    var changed = trailState.hantiRouteReverse !== next;
+    trailState.hantiRouteReverse = next;
+    if(changed && !opts.keepProgress){
+      resetHantiFollowSession();
+    }
+    refreshHantiRouteAfterDirectionChange();
+    if(trailState.hantiFollowActive) saveHantiFollowResumeState(next ? 'reverse-route-on' : 'reverse-route-off');
   }
   function clearHantiAutoPanResumeTimer(){
     try{ if(trailState && trailState.hantiAutoPanResumeTimer) clearTimeout(trailState.hantiAutoPanResumeTimer); }catch(_e){}
@@ -711,11 +776,14 @@
     var data = getActiveHantiRouteData();
     var pts = hantiFlattenRoutePoints(data);
     if(!pts.length) return null;
+    var reverse = isHantiRouteReverse();
+    var total = getHantiRouteTotalDistanceM(data, pts);
     var best = null, bestD = Infinity, bestIdx = -1;
     var start = 0, end = pts.length - 1;
     if(opts.follow && Number.isFinite(Number(trailState.hantiLastRoutePointIndex))){
-      start = Math.max(0, Number(trailState.hantiLastRoutePointIndex) - 6);
-      end = Math.min(pts.length - 1, Number(trailState.hantiLastRoutePointIndex) + 45);
+      var prev = Number(trailState.hantiLastRoutePointIndex);
+      start = reverse ? Math.max(0, prev - 45) : Math.max(0, prev - 6);
+      end = reverse ? Math.min(pts.length - 1, prev + 6) : Math.min(pts.length - 1, prev + 45);
     }
     for(var i=start;i<=end;i++){
       var d = hantiDistanceMeters(lat, lng, pts[i].lat, pts[i].lng);
@@ -728,38 +796,57 @@
       }
     }else if(opts.follow && !Number.isFinite(Number(trailState.hantiLastRoutePointIndex)) && data && data.type === 'test_route'){
       var startBest = null, startBestD = Infinity, startBestIdx = -1;
-      var startSearchM = data.id === 'company_test_route' ? 220 : 650;
+      var searchM = data.id === 'company_test_route' ? 220 : 650;
       for(var k=0;k<pts.length;k++){
-        if(Number(pts[k].routeDistanceM || 0) > startSearchM) break;
+        var rd = Number(pts[k].routeDistanceM || 0);
+        if(!reverse && rd > searchM) break;
+        if(reverse && total > 0 && rd < total - searchM) continue;
         var sd = hantiDistanceMeters(lat, lng, pts[k].lat, pts[k].lng);
         if(sd < startBestD){ startBestD = sd; startBest = pts[k]; startBestIdx = k; }
       }
       if(startBest && startBestD <= bestD + 35){ best = startBest; bestD = startBestD; bestIdx = startBestIdx; }
     }
     if(!best) return null;
+    var directionalProgress = hantiDirectionalProgressM(best.routeDistanceM, total, reverse);
     if(opts.follow){
       var prevIdx = Number(trailState.hantiLastRoutePointIndex);
-      if(Number.isFinite(prevIdx) && bestIdx < prevIdx - 6){
-        bestIdx = Math.max(0, Math.min(pts.length - 1, prevIdx));
-        best = pts[bestIdx];
-        bestD = hantiDistanceMeters(lat, lng, best.lat, best.lng);
+      if(Number.isFinite(prevIdx)){
+        if(!reverse && bestIdx < prevIdx - 6){
+          bestIdx = Math.max(0, Math.min(pts.length - 1, prevIdx));
+          best = pts[bestIdx];
+          bestD = hantiDistanceMeters(lat, lng, best.lat, best.lng);
+          directionalProgress = hantiDirectionalProgressM(best.routeDistanceM, total, reverse);
+        }else if(reverse && bestIdx > prevIdx + 6){
+          bestIdx = Math.max(0, Math.min(pts.length - 1, prevIdx));
+          best = pts[bestIdx];
+          bestD = hantiDistanceMeters(lat, lng, best.lat, best.lng);
+          directionalProgress = hantiDirectionalProgressM(best.routeDistanceM, total, reverse);
+        }
       }
       trailState.hantiLastRoutePointIndex = bestIdx;
-      trailState.hantiLastProgressM = Math.max(Number(trailState.hantiLastProgressM || 0), Number(best.routeDistanceM || 0));
+      trailState.hantiLastProgressM = Math.max(Number(trailState.hantiLastProgressM || 0), Number(directionalProgress || 0));
     }
-    var total = Number(data && data.stats && data.stats.routeDistanceM);
-    if(!Number.isFinite(total) || total <= 0){
-      total = pts.length ? Number(pts[pts.length-1].routeDistanceM || 0) : 0;
-    }
-    var progressM = opts.follow ? Math.max(Number(best.routeDistanceM || 0), Number(trailState.hantiLastProgressM || 0)) : Number(best.routeDistanceM || 0);
-    return { point: best, pointIndex: bestIdx, distanceM: bestD, totalDistanceM: total, progressM: progressM, progressRate: total > 0 ? progressM / total : 0 };
+    var progressM = opts.follow ? Math.max(Number(directionalProgress || 0), Number(trailState.hantiLastProgressM || 0)) : Number(directionalProgress || 0);
+    return { point: best, pointIndex: bestIdx, distanceM: bestD, totalDistanceM: total, progressM: progressM, actualRouteDistanceM:Number(best.routeDistanceM || 0), routeReverse:reverse, progressRate: total > 0 ? progressM / total : 0 };
+  }
+  function hantiStampDirectionalProgressM(stamp, total, reverse){
+    if(!(stamp && Number.isFinite(Number(stamp.routeDistanceM)))) return null;
+    return hantiDirectionalProgressM(Number(stamp.routeDistanceM), total, reverse);
   }
   function findNextHantiStampByProgress(progressM){
     var data = getActiveHantiRouteData();
+    var pts = hantiFlattenRoutePoints(data);
+    var total = getHantiRouteTotalDistanceM(data, pts);
+    var reverse = isHantiRouteReverse();
     var list = (data && data.stamps || []).slice().filter(function(s){ return Number.isFinite(Number(s.routeDistanceM)); });
-    list.sort(function(a,b){ return Number(a.routeDistanceM) - Number(b.routeDistanceM); });
+    list.sort(function(a,b){
+      var ap = hantiStampDirectionalProgressM(a, total, reverse);
+      var bp = hantiStampDirectionalProgressM(b, total, reverse);
+      return Number(ap || 0) - Number(bp || 0);
+    });
     for(var i=0;i<list.length;i++){
-      if(Number(list[i].routeDistanceM) + 15 >= Number(progressM || 0)) return list[i];
+      var sp = hantiStampDirectionalProgressM(list[i], total, reverse);
+      if(Number(sp) + 15 >= Number(progressM || 0)) return list[i];
     }
     return list.length ? list[list.length-1] : null;
   }
@@ -780,10 +867,17 @@
     var pts = hantiFlattenRoutePoints(data);
     if(!pts.length) return;
     var idx = Math.max(0, Math.min(pts.length - 1, Number(routeInfo.pointIndex || 0)));
+    var reverse = !!routeInfo.routeReverse || isHantiRouteReverse();
     clearHantiProgressOverlays();
     var path = [];
-    for(var i=0;i<=idx;i++){
-      path.push(new kakao.maps.LatLng(Number(pts[i].lat), Number(pts[i].lng)));
+    if(reverse){
+      for(var r=pts.length - 1;r>=idx;r--){
+        path.push(new kakao.maps.LatLng(Number(pts[r].lat), Number(pts[r].lng)));
+      }
+    }else{
+      for(var i=0;i<=idx;i++){
+        path.push(new kakao.maps.LatLng(Number(pts[i].lat), Number(pts[i].lng)));
+      }
     }
     if(path.length > 1){
       var line = new kakao.maps.Polyline({
@@ -792,6 +886,104 @@
         strokeStyle:'solid', zIndex:39
       });
       trailState.hantiProgressPolylines.push(line);
+    }
+  }
+  function clearHantiRouteDirectionOverlays(){
+    try{ (trailState && trailState.hantiRouteDirectionOverlays || []).forEach(function(ov){ try{ ov.setMap(null); }catch(_e){} }); }catch(_e){}
+    if(trailState) trailState.hantiRouteDirectionOverlays = [];
+  }
+  function findHantiPointIndexAtDistance(pts, targetM, startIdx){
+    if(!(pts && pts.length)) return -1;
+    var start = Math.max(0, Math.min(pts.length - 1, Number(startIdx || 0)));
+    targetM = Number(targetM);
+    if(!Number.isFinite(targetM)) return -1;
+    for(var i=start;i<pts.length;i++){
+      if(Number(pts[i].routeDistanceM || 0) >= targetM) return i;
+    }
+    return pts.length - 1;
+  }
+  function hantiRouteBearingAtPointIndex(pts, idx, reverse){
+    if(!(pts && pts.length > 1)) return null;
+    idx = Math.max(0, Math.min(pts.length - 1, Number(idx || 0)));
+    var cur = pts[idx];
+    if(!cur) return null;
+    if(reverse){
+      for(var prevIdx = idx - 1; prevIdx >= Math.max(0, idx - 10); prevIdx--){
+        var prev = pts[prevIdx];
+        if(prev && hantiDistanceMeters(cur.lat, cur.lng, prev.lat, prev.lng) >= 4){
+          return hantiBearingDegrees(cur.lat, cur.lng, prev.lat, prev.lng);
+        }
+      }
+      for(var nextIdxFallback = idx + 1; nextIdxFallback < Math.min(pts.length, idx + 10); nextIdxFallback++){
+        var nextFallback = pts[nextIdxFallback];
+        if(nextFallback && hantiDistanceMeters(nextFallback.lat, nextFallback.lng, cur.lat, cur.lng) >= 4){
+          return hantiBearingDegrees(nextFallback.lat, nextFallback.lng, cur.lat, cur.lng);
+        }
+      }
+      return null;
+    }
+    for(var nextIdx = idx + 1; nextIdx < Math.min(pts.length, idx + 10); nextIdx++){
+      var next = pts[nextIdx];
+      if(next && hantiDistanceMeters(cur.lat, cur.lng, next.lat, next.lng) >= 4){
+        return hantiBearingDegrees(cur.lat, cur.lng, next.lat, next.lng);
+      }
+    }
+    for(var prevIdx2 = idx - 1; prevIdx2 >= Math.max(0, idx - 10); prevIdx2--){
+      var prev2 = pts[prevIdx2];
+      if(prev2 && hantiDistanceMeters(prev2.lat, prev2.lng, cur.lat, cur.lng) >= 4){
+        return hantiBearingDegrees(prev2.lat, prev2.lng, cur.lat, cur.lng);
+      }
+    }
+    return null;
+  }
+  function createHantiRouteDirectionArrowOverlay(point, bearing, strong){
+    if(!(point && trailState && trailState.map && window.kakao && kakao.maps)) return null;
+    var lat = Number(point.lat), lng = Number(point.lng), b = Number(bearing);
+    if(!Number.isFinite(lat) || !Number.isFinite(lng) || !Number.isFinite(b)) return null;
+    var el = document.createElement('div');
+    el.className = 'hanti-route-dir-arrow' + (strong ? ' near' : '');
+    el.style.setProperty('--hanti-route-bearing', b.toFixed(1) + 'deg');
+    el.setAttribute('aria-label', '경로 진행 방향');
+    el.innerHTML = '<span class="hanti-route-dir-arrow-shape" aria-hidden="true"></span>';
+    return new kakao.maps.CustomOverlay({
+      content: el,
+      position: new kakao.maps.LatLng(lat, lng),
+      xAnchor: .5, yAnchor: .5, zIndex: 62
+    });
+  }
+  function updateHantiRouteDirectionArrows(routeInfo){
+    clearHantiRouteDirectionOverlays();
+    if(!(routeInfo && trailState && trailState.map && window.kakao && kakao.maps)) return;
+    if(!(trailState.hantiFollowActive && trailState.hantiRouteViewMode)) return;
+    var data = getActiveHantiRouteData();
+    var pts = hantiFlattenRoutePoints(data);
+    if(pts.length < 2) return;
+    var reverse = !!routeInfo.routeReverse || isHantiRouteReverse();
+    var total = getHantiRouteTotalDistanceM(data, pts);
+    var progressM = Number(routeInfo.progressM || 0);
+    var baseIdx = Math.max(0, Math.min(pts.length - 1, Number(routeInfo.pointIndex || 0)));
+    if(!Number.isFinite(progressM)) progressM = hantiDirectionalProgressM(pts[baseIdx].routeDistanceM, total, reverse);
+    var isTestRoute = data && data.type === 'test_route';
+    var firstGap = isTestRoute ? 35 : 70;
+    var interval = isTestRoute ? 80 : 150;
+    var maxArrows = isTestRoute ? 5 : 6;
+    var made = 0;
+    var lastIdx = -1;
+    for(var n=0;n<maxArrows;n++){
+      var targetProgressM = progressM + firstGap + interval * n;
+      if(total && targetProgressM > total + 25) break;
+      var actualM = reverse ? Math.max(0, total - targetProgressM) : targetProgressM;
+      var idx = findHantiPointIndexAtDistance(pts, actualM, reverse ? 0 : baseIdx + 1);
+      if(idx < 0 || idx >= pts.length) continue;
+      if(lastIdx >= 0 && hantiDistanceMeters(pts[lastIdx].lat, pts[lastIdx].lng, pts[idx].lat, pts[idx].lng) < interval * .45) continue;
+      var bearing = hantiRouteBearingAtPointIndex(pts, idx, reverse);
+      if(!Number.isFinite(Number(bearing))) continue;
+      var ov = createHantiRouteDirectionArrowOverlay(pts[idx], bearing, made === 0);
+      if(!ov) continue;
+      ov.setMap(trailState.map);
+      trailState.hantiRouteDirectionOverlays.push(ov);
+      lastIdx = idx;
+      made++;
     }
   }
   function clearHantiGpsTraceOverlay(){
@@ -866,6 +1058,7 @@
   }
   function resetHantiFollowSession(){
     clearHantiProgressOverlays();
+    clearHantiRouteDirectionOverlays();
     clearHantiGpsTraceOverlay();
     if(trailState){
       trailState.hantiGpsTracePoints = [];
@@ -942,6 +1135,7 @@
         navigator.geolocation.clearWatch(trailState.hantiFollowWatchId);
       }
     }catch(_e){}
+    clearHantiRouteDirectionOverlays();
     if(trailState){
       trailState.hantiFollowWatchId = null;
       trailState.hantiFollowActive = false;
@@ -954,6 +1148,7 @@
     if(btn) btn.textContent = 'GPX 따라가기 시작';
     var routeBtn = ig$('trail-hanti-route-follow');
     if(routeBtn) routeBtn.textContent = '▶ 경로 따라가기';
+    updateHantiRouteReverseButton();
   }
   function startHantiGpxFollow(opts){
     opts = opts || {};
@@ -980,6 +1175,7 @@
     if(btn) btn.textContent = 'GPX 따라가기 중지';
     var routeBtn = ig$('trail-hanti-route-follow');
     if(routeBtn) routeBtn.textContent = '■ 정지';
+    updateHantiRouteReverseButton();
     var first = !opts.resume;
     function onpos(pos){
       var lat = pos.coords.latitude, lng = pos.coords.longitude;
@@ -1122,17 +1318,30 @@
       panel.appendChild(controls);
     }
     controls.innerHTML = '';
+    var row = document.createElement('div');
+    row.className = 'hanti-route-control-row';
+    controls.appendChild(row);
     var follow = document.createElement('button');
     follow.id = 'trail-hanti-route-follow';
     follow.type = 'button';
     follow.className = 'hanti-route-control-btn primary';
     follow.textContent = trailState.hantiFollowActive ? '■ 정지' : '▶ 경로 따라가기';
-    controls.appendChild(follow);
+    row.appendChild(follow);
     var loc = ig$('trail-loc-btn');
-    if(loc) controls.appendChild(loc);
+    if(loc) row.appendChild(loc);
+    var reverse = document.createElement('button');
+    reverse.id = 'trail-hanti-route-reverse';
+    reverse.type = 'button';
+    reverse.className = 'hanti-route-control-btn reverse';
+    controls.appendChild(reverse);
+    updateHantiRouteReverseButton();
     follow.onclick = function(ev){
       try{ ev.preventDefault(); ev.stopPropagation(); }catch(_e){}
       startHantiGpxFollow();
+    };
+    reverse.onclick = function(ev){
+      try{ ev.preventDefault(); ev.stopPropagation(); }catch(_e){}
+      setHantiRouteReverse(!isHantiRouteReverse());
     };
     var x = ig$('trail-hanti-route-x');
     if(!x){
@@ -1171,6 +1380,7 @@
     if(!(trailState && (trailState.hantiRouteViewMode || trailState.hantiVisible))) return false;
     var idx = Number.isFinite(Number(trailState.hantiReturnTrailIndex)) && trailState.hantiReturnTrailIndex >= 0 ? Number(trailState.hantiReturnTrailIndex) : getHantiMainTrailIndex();
     stopHantiGpxFollow({reason:'close-route'});
+    if(trailState) trailState.hantiRouteReverse = false;
     clearHantiRouteOverlays();
     removeHantiRouteControls();
     setHantiRouteActive(false);
@@ -1189,6 +1399,7 @@
     var data = getHantiRouteDataById(routeId);
     if(!(data && trailState && trailState.map && window.kakao && kakao.maps)) return;
     trailState.hantiReturnTrailIndex = Number.isFinite(Number(trailState.selected)) && trailState.selected >= 0 ? trailState.selected : getHantiMainTrailIndex();
+    trailState.hantiRouteReverse = false;
     openHantiFullRoute(data, {source:'hidden-test'});
   }
   function ensureHantiTestPanel(){
@@ -1267,7 +1478,8 @@
     var nextLabel = nextStamp ? ((nextStamp.id || '') + ' ' + (nextStamp.name || '')) : '';
     var remainText = '';
     if(nextStamp && routeInfo && Number.isFinite(Number(nextStamp.routeDistanceM))){
-      remainText = hantiFormatDistance(Math.max(0, Number(nextStamp.routeDistanceM) - Number(routeInfo.progressM || 0)));
+      var nextProgressM = hantiStampDirectionalProgressM(nextStamp, Number(routeInfo.totalDistanceM || 0), !!routeInfo.routeReverse || isHantiRouteReverse());
+      remainText = hantiFormatDistance(Math.max(0, Number(nextProgressM || 0) - Number(routeInfo.progressM || 0)));
     }
     var judge = hantiAutoStampJudgement(nearest);
     var status = routeInfo ? hantiRouteStatusLabel(routeInfo.distanceM) : '';
@@ -1275,14 +1487,17 @@
     var newlyArrived = [];
     if(opts.follow){
       appendHantiGpsTracePoint(lat, lng);
-      if(routeInfo) drawHantiProgressToIndex(routeInfo);
+      if(routeInfo){
+        drawHantiProgressToIndex(routeInfo);
+        updateHantiRouteDirectionArrows(routeInfo);
+      }
       newlyArrived = checkHantiWaypointArrivals(lat, lng) || [];
     }
     if(opts.test){
       setTrailHantiNote('테스트 위치 기준 가까운 지점: ' + label + (dist ? ' · 약 ' + dist : '') + ' / 실제 기록 저장 안 함');
       updateHantiTestResult(opts.sourceStamp, nearest);
     }else{
-      var msg = (opts.follow ? 'GPX 따라가기 중' : '현재 위치 확인') + ': ' + (status || '경로 확인') + (routeDist ? ' · 경로까지 ' + routeDist : '');
+      var msg = (opts.follow ? ('GPX 따라가기 중' + (isHantiRouteReverse() ? '(역방향)' : '')) : '현재 위치 확인') + ': ' + (status || '경로 확인') + (routeDist ? ' · 경로까지 ' + routeDist : '');
       if(nextLabel) msg += ' / 다음 지점: ' + nextLabel + (remainText ? ' · 약 ' + remainText : '');
       if(progress != null) msg += ' / 진행률 ' + Math.round(progress) + '%';
       if(newlyArrived.length) msg += ' / ' + newlyArrived.map(function(s){ return (s.id || '') + ' ' + (s.name || ''); }).join(', ') + ' 도착 확인';
@@ -1292,7 +1507,7 @@
     clearHantiLocationGuideOverlay();
     var el = document.createElement('div');
     el.className = 'hanti-location-guide' + (opts.test ? ' test' : '');
-    el.innerHTML = '<strong>' + (opts.test ? '테스트 위치' : (opts.follow ? 'GPX 따라가기' : '현재 위치')) + '</strong>' +
+    el.innerHTML = '<strong>' + (opts.test ? '테스트 위치' : (opts.follow ? ('GPX 따라가기' + (isHantiRouteReverse() ? ' · 역방향' : '')) : '현재 위치')) + '</strong>' +
       '<span>' + esc(status || label) + (routeDist ? ' · 경로까지 ' + esc(routeDist) : '') + '</span>' +
       (nextLabel ? '<span>다음: ' + esc(nextLabel) + (remainText ? ' · 약 ' + esc(remainText) : '') + '</span>' : '');
     trailState.hantiLocationOverlay = new kakao.maps.CustomOverlay({
@@ -1420,7 +1635,7 @@
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
   const RETURN_KEY = 'catholic_integrated_return_v2';
-  const trailState = {inited:false, map:null, trailZoomControl:null, trailZoomControlVisible:true, markers:[], selected:-1, myOverlay:null, view:'map', pendingOpenIndex:null, restoreCenter:null, restoreLevel:null, needsHardReset:false, pendingFitBounds:false, hantiPolylines:[], hantiProgressPolylines:[], hantiStampOverlays:[], hantiGpsTracePolyline:null, hantiGpsTracePoints:[], hantiShowGpsTrace:true, hantiVisible:false, hantiLocationOverlay:null, hantiRouteActive:false, hantiRouteViewMode:false, hantiReturnTrailIndex:-1, hantiSecretTitleReady:false, hantiActiveRouteData:null, hantiActiveRouteId:'', hantiFollowWatchId:null, hantiFollowActive:false, hantiLastRoutePointIndex:null, hantiLastProgressM:0, hantiArrivedStampIds:{}, hantiLastGpsLat:null, hantiLastGpsLng:null, hantiLastHeading:0, hantiAutoPanPaused:false, hantiAutoPanHoldUntil:0, hantiAutoPanResumeTimer:0, hantiProgrammaticMoveUntil:0, hantiMapInteractionBound:false, hantiTestUnlocked:false, hantiTestClosed:false, hantiTestTapCount:0, hantiTestTapStartedAt:0};
+  const trailState = {inited:false, map:null, trailZoomControl:null, trailZoomControlVisible:true, markers:[], selected:-1, myOverlay:null, view:'map', pendingOpenIndex:null, restoreCenter:null, restoreLevel:null, needsHardReset:false, pendingFitBounds:false, hantiPolylines:[], hantiProgressPolylines:[], hantiRouteDirectionOverlays:[], hantiStampOverlays:[], hantiGpsTracePolyline:null, hantiGpsTracePoints:[], hantiShowGpsTrace:true, hantiVisible:false, hantiLocationOverlay:null, hantiRouteActive:false, hantiRouteViewMode:false, hantiRouteReverse:false, hantiReturnTrailIndex:-1, hantiSecretTitleReady:false, hantiActiveRouteData:null, hantiActiveRouteId:'', hantiFollowWatchId:null, hantiFollowActive:false, hantiLastRoutePointIndex:null, hantiLastProgressM:0, hantiArrivedStampIds:{}, hantiLastGpsLat:null, hantiLastGpsLng:null, hantiLastHeading:0, hantiAutoPanPaused:false, hantiAutoPanHoldUntil:0, hantiAutoPanResumeTimer:0, hantiProgrammaticMoveUntil:0, hantiMapInteractionBound:false, hantiTestUnlocked:false, hantiTestClosed:false, hantiTestTapCount:0, hantiTestTapStartedAt:0};
   const webState = {built:false, curCat:'⭐ 즐겨찾기'};
   const WEB_FAV_KEY = 'web_favorites_v1';
   const MY_DIOCESE_KEY = 'oai_my_diocese_name';
