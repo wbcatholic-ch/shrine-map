@@ -1,6 +1,7 @@
 
 'use strict';
 
+
 function hideCoverAndRun(callback) {
   try{
     document.querySelectorAll('.module-view.open,#prayer-view.open,#diocese-view.open,#missa-view.open').forEach(function(v){v.classList.remove('open');});
