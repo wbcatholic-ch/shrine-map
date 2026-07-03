@@ -307,7 +307,7 @@
   color: #d5b86d;
 }
 
-/* V8-1-14-517: removed obsolete inquiry-body rule; inquiry view is iframe-based and managed by module-common.css. */
+/* V8-1-14-521: removed obsolete inquiry-body rule; inquiry view is iframe-based and managed by module-common.css. */
 html:not(.ios-device) .pr-list{padding-bottom:calc(18px + var(--oai-android-bottom-gap, 10px))!important;}
 
 html:not(.ios-device).oai-screen-compact-short #prayer-quickbar .prayer-quick-btn,
