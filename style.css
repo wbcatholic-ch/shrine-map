@@ -147,7 +147,7 @@
   
   --bg-color:   #f7f0e5;
   
-  /* V8-1-14-528: 커버 레이아웃 소유권 선언.
+  /* V8-1-14-530: 커버 레이아웃 소유권 선언.
      커버 비율은 #cover / #cover-main-block / .cover-grid / #cover-action-row / #cover-bottom-note와
      아래 cover 전용 변수에서만 관리한다.
      하단 안내문구와 3버튼 사이 간격은 margin 덧씌움이 아니라 --cover-note-reserve/--cover-bottom-reserve로 조정한다. */
@@ -1618,7 +1618,7 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, var(--v4-retreat
 .exit-cancel { flex: 1; padding: 12px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--v4-surface-white); font-size: 15px; font-weight: 600; color: var(--ink); cursor: pointer; font-family: inherit; }
 .exit-ok { flex: 1; padding: 12px; border-radius: 10px; border: none; background: var(--ink); color: var(--v4-surface-white); font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; }
 
-/* V8-1-14-528: 지도 로딩 화면의 배경/글자색 기준은 이 원래 위치에서만 관리한다. */
+/* V8-1-14-530: 지도 로딩 화면의 배경/글자색 기준은 이 원래 위치에서만 관리한다. */
 .map-loading { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; background: var(--bg-unified,var(--v4-bg-cream))!important; height: 100%; }
 .map-loading-icon { font-size: 36px; margin-bottom: 14px; color: var(--gold,var(--v4-gold))!important; animation: oaiUnifiedLoadingCrossSpin 2.8s linear infinite; }
 .map-loading-txt { font-size: 13px; color: var(--v4-text-muted)!important; font-weight: 600; }
@@ -1726,7 +1726,7 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, var(--v4-retreat
 
 #missa-frame { flex: 1 1 auto; min-height: 0; width: 100%; border: 0; background: #fffaf2; }
 
-/* V8-1-14-528: 매일미사/주요기도문 하단 빠른 버튼은 이 블록을 단일 기준으로 관리한다.
+/* V8-1-14-530: 매일미사/주요기도문 하단 빠른 버튼은 이 블록을 단일 기준으로 관리한다.
    Android/compact 차이는 뒤쪽에서 같은 속성을 다시 쓰지 않고 변수만 바꾼다. */
 .faith-bottom-nav {
   --faith-bottom-gap: 8px;
@@ -1863,10 +1863,10 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, var(--v4-retreat
 }
 #diocese-frame { flex: 1 1 auto; min-height: 0; width: 100%; border: 0; background: var(--v4-bg-ivory); }
 
-/* V8-1-14-528: 문의·건의는 iframe 기반 qna-view만 사용한다. legacy qna card/tab and qna-cover floating button CSS removed. */
+/* V8-1-14-530: 문의·건의는 iframe 기반 qna-view만 사용한다. legacy qna card/tab and qna-cover floating button CSS removed. */
 
 #cover { overscroll-behavior-y: contain; }
-/* V8-1-14-528: 인트로 사진/보호막 pseudo-element 디자인은 아래 단일 사진 블록에서만 관리한다.
+/* V8-1-14-530: 인트로 사진/보호막 pseudo-element 디자인은 아래 단일 사진 블록에서만 관리한다.
    이 앞쪽 블록은 커버 본문 표시/숨김만 담당해 중복 CSS 충돌을 막는다. */
 html.oai-cover-booting body { background: var(--cream, var(--v4-bg-cream)) !important; }
 html.oai-cover-booting #cover {
@@ -2198,7 +2198,7 @@ html.app-active #cover-action-row { display: none; }
 #cover .cover-refresh-main-btn::before { background: #8D98A8; }
 #cover .cover-diocese-btn,
 #cover .cover-share-main-btn { color: var(--v4-header-navy); }
-/* V8-1-14-528: 하단 3개 버튼 글자 크기를 ‘나의 신앙생활’ 기준으로 통일 */
+/* V8-1-14-530: 하단 3개 버튼 글자 크기를 ‘나의 신앙생활’ 기준으로 통일 */
 #cover .cover-share-main-btn,
 #cover .cover-refresh-main-btn{
   font-size:var(--cover-action-font);
@@ -2238,7 +2238,7 @@ html:not(.ios-device).oai-screen-compact-short #cover {
 
 #cover-update-hint { display: none; margin-top: 4px; padding-left: 2px; color: #dc2626; font-size: 9.5px; font-weight: 800; line-height: 1.15; white-space: normal; max-width: 100%; word-break: keep-all; }
 #cover-update-box.update-needed #cover-update-hint { display: block; }
-/* V8-1-14-528: update-needed text is a small status badge, not a main category title.
+/* V8-1-14-530: update-needed text is a small status badge, not a main category title.
    Keep it independent from the user's enlarged app font scale so it does not overflow on Fold/phone covers. */
 #cover-update-box.update-needed #cover-update-btn {
   font-size: 12.8px !important;
@@ -2332,7 +2332,7 @@ html:not(.ios-device).oai-screen-compact-short #cover-update-box.update-needed #
 #cover-font-controls #cover-lg-btn { font-size: 22px; }
 #cover-font-controls .pr-font-divider { width: 1px; height: 20px; background: #ddd5c8; flex: 0 0 1px; margin: 0 2px; }
 
-/* V8-1-14-528: removed legacy direct guide-button styles; real menu entries are managed in cover-modals.css. */
+/* V8-1-14-530: removed legacy direct guide-button styles; real menu entries are managed in cover-modals.css. */
 
 #cover #cover-menu-btn.cover-menu-btn {
   position: absolute;
@@ -2381,7 +2381,7 @@ html.app-active #cover-menu-btn { display: none !important; }
   background: currentColor;
 }
 
-/* V8-1-14-528: cover menu modal shell is owned by css/cover-modals.css. */
+/* V8-1-14-530: cover menu modal shell is owned by css/cover-modals.css. */
 
 
 #oai-cover-exit-toast {
@@ -2443,7 +2443,7 @@ html.app-active #cover-menu-btn { display: none !important; }
 @media (display-mode: standalone) { #pwa-install-btn { display: none; } }
 html.app-active #pwa-install-btn { display: none; }
 
-/* V8-1-14-528: guide/privacy modal-specific styles are owned here; duplicated panel/hero rules are merged below. */
+/* V8-1-14-530: guide/privacy modal-specific styles are owned here; duplicated panel/hero rules are merged below. */
 
 .guide-modal { position: fixed; inset: 0; z-index: 10050; display: none; align-items: center; justify-content: center; padding: calc(env(safe-area-inset-top, 0px) + 14px) 18px calc(env(safe-area-inset-bottom, 0px) + 18px); box-sizing: border-box; font-family: 'Apple SD Gothic Neo','Noto Sans KR',sans-serif; }
 .guide-modal.show { display: flex; }
@@ -2634,7 +2634,7 @@ html:not(.ios-device) #ios-safari-guide-modal { display: none; }
 .sheet, .trail-sheet, #prayer-detail, #info-card { will-change: transform; }
 .module-view:not(.open), #missa-view:not(.open), #diocese-view:not(.open), #prayer-view:not(.open) { contain: strict; }
 
-/* V8-1-14-528: 성지/성당/피정 진입 첫 화면은 #sheet-nearby의 nearby-distance-loading이 기준이다.
+/* V8-1-14-530: 성지/성당/피정 진입 첫 화면은 #sheet-nearby의 nearby-distance-loading이 기준이다.
    이전 #oai-category-entry-veil은 stale class cleanup용 호환 요소로만 남긴다. */
 #oai-category-entry-veil {
   display: none !important;
@@ -2966,7 +2966,7 @@ html.oai-font-global #region-body .dio-hd { font-size: calc(17px * var(--app-inn
   }
   #cover #cover-action-row { margin-top: 0; }
 }
-/* V8-1-14-528: obsolete mass-quick short-height media override removed; css/cover-modals.css owns mass quick sizing. */
+/* V8-1-14-530: obsolete mass-quick short-height media override removed; css/cover-modals.css owns mass quick sizing. */
 @media (max-height: 650px) {
   #cover { --cover-top-safe: calc(env(safe-area-inset-top, 0px) + clamp(58px, calc(var(--cover-vh, 1vh) * 9.4), 74px)); --cover-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + clamp(6px, calc(var(--cover-vh, 1vh) * 1.0), 10px)); --cover-note-reserve: clamp(38px, calc(var(--cover-vh, 1vh) * 4.8), 50px); --cover-bottom-reserve: var(--cover-note-reserve); --cover-note-bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(12px, calc(var(--cover-vh, 1vh) * 2.0), 18px)); padding-top: var(--cover-top-safe); padding-bottom: calc(var(--cover-bottom-safe) + var(--cover-bottom-reserve)); }
   #cover-bottom-note { bottom: var(--cover-note-bottom); }
@@ -3193,7 +3193,7 @@ html.kb-open .sheet.open { bottom: 0; }
   --retreat-list-dot-final:#c0392b;
 }
 
-/* V8-1-14-528: 지도 로딩 화면은 위 .map-loading 원래 위치에서 관리한다. */
+/* V8-1-14-530: 지도 로딩 화면은 위 .map-loading 원래 위치에서 관리한다. */
 #app,
 #map-wrap{
   background:var(--bg-unified,var(--v4-bg-cream))!important;
@@ -3433,7 +3433,7 @@ html.ios-device #qna-view.open {
   overflow: hidden !important;
 }
 
-/* V8-1-14-528: 지도/교구/내주변 로딩 십자가는 아래 oai-loading-cross 변수 블록 한 곳에서 관리한다.
+/* V8-1-14-530: 지도/교구/내주변 로딩 십자가는 아래 oai-loading-cross 변수 블록 한 곳에서 관리한다.
    이 위치의 과거 십자가/원형 스피너 중복 override는 제거했다. */
 
 #cover .my-diocese-setup-banner {
@@ -3806,7 +3806,6 @@ html.oai-font-global .shrine-visit-cards-btn{font-size:calc(12px * var(--app-inn
 .shrine-visit-cards-btn:active{transform:translateY(1px);filter:brightness(.96)}
 .shrine-visit-cards-modal{position:fixed;inset:0;z-index:10060;display:none;align-items:flex-end;justify-content:center}.shrine-visit-cards-modal.show{display:flex}.shrine-visit-cards-backdrop{position:absolute;inset:0;background:rgba(0,0,0,.38)}
 .shrine-visit-cards-panel{position:relative;width:min(540px,100%);max-height:72vh;background:#fff;border-radius:22px 22px 0 0;padding:16px 14px max(18px,env(safe-area-inset-bottom));box-shadow:0 -10px 28px rgba(0,0,0,.24);border:1px solid rgba(212,170,106,.35);display:flex;flex-direction:column}
-.shrine-visit-cards-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px}.shrine-visit-cards-kicker{font-size:12px;font-weight:900;color:#8b6914}.shrine-visit-cards-title{font-size:19px;font-weight:900;color:#111}.shrine-visit-cards-x{width:34px;height:34px;border-radius:50%;border:1px solid #e6dcc8;background:#fff8e8;color:#5b3c00;font-size:22px;font-weight:900}
 .shrine-visit-cards-body{overflow:auto;-webkit-overflow-scrolling:touch;display:flex;flex-direction:column;gap:9px;padding:1px 2px 4px}.shrine-visit-cards-empty{padding:18px;border-radius:14px;background:#fff8e8;color:#6c4a00;font-size:14px;font-weight:800;text-align:center}
 
 #info-card .ic-header .ic-type-badge.shrine-pilgrim-visited{cursor:pointer!important;touch-action:manipulation!important}
@@ -3814,7 +3813,7 @@ html.oai-font-global .shrine-visit-cards-btn{font-size:calc(12px * var(--app-inn
 
 
 
-/* V8-1-14-528: 스탬프북 카드는 성지목록 고유색(성지/순례지/순교 사적지)을 유지하되,
+/* V8-1-14-530: 스탬프북 카드는 성지목록 고유색(성지/순례지/순교 사적지)을 유지하되,
    오른쪽 종류 라벨은 고정하고 교구명은 한 글자씩 세로로 떨어지지 않게 가로 고정한다. */
 .shrine-visit-card-grid{
   display:grid!important;
@@ -4137,311 +4136,89 @@ html.oai-font-global .shrine-auto-visit-title{font-size:calc(16px * var(--app-in
 html.oai-font-global .shrine-visit-detail-head-title{font-size:calc(18px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-detail-kicker,html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(12px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-detail-count{font-size:calc(32px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-detail-recent,html.oai-font-global .shrine-visit-detail-add{font-size:calc(14px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-detail-date-chip,html.oai-font-global .shrine-visit-detail-row span{font-size:calc(13px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-detail-name{font-size:calc(22px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-detail-row strong{font-size:calc(14px * var(--app-inner-font-scale,1))!important}
 
 .shrine-visit-cards-modal{position:fixed!important;inset:0!important;z-index:10060!important;display:none!important;align-items:stretch!important;justify-content:stretch!important;background:#fffdf7!important}.shrine-visit-cards-modal.show{display:flex!important}.shrine-visit-cards-backdrop{display:none!important}
-html.oai-shrine-detail-from-cards #shrine-visit-cards-modal.show{visibility:hidden;pointer-events:none}
+html.oai-shrine-detail-from-cards #shrine-visit-cards-modal.show,
+#shrine-visit-cards-modal.detail-covered.show{opacity:0!important;visibility:hidden!important;pointer-events:none!important}
 html.oai-shrine-detail-from-cards #shrine-visit-detail-view.show{visibility:visible;pointer-events:auto}
 .shrine-visit-cards-panel{width:100%!important;max-width:none!important;height:100%!important;max-height:none!important;border-radius:0!important;border:0!important;background:#fffdf7!important;padding:env(safe-area-inset-top) 12px max(18px,env(safe-area-inset-bottom))!important;box-shadow:none!important;display:flex!important;flex-direction:column!important}
-.shrine-visit-cards-head{height:56px;min-height:56px;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;margin:0!important;border-bottom:1px solid #eadfcd;background:#fff8e8;margin-left:-12px!important;margin-right:-12px!important;padding:0 12px!important;box-shadow:0 2px 10px rgba(0,0,0,.05)}
-.shrine-visit-cards-head-main{flex:1;min-width:0;text-align:center}.shrine-visit-cards-kicker{font-size:11px!important;font-weight:900!important;color:#8b6914!important;line-height:1.1}.shrine-visit-cards-title{font-size:18px!important;font-weight:900!important;color:#111!important;line-height:1.2;letter-spacing:-.03em}.shrine-visit-cards-back,.shrine-visit-cards-x{width:38px!important;height:38px!important;border-radius:50%!important;border:1px solid #e2d2b7!important;background:#fffdf7!important;color:#5b3c00!important;font-size:27px!important;font-weight:900!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;line-height:1!important;font-family:inherit!important;touch-action:manipulation!important}.shrine-visit-cards-x{font-size:23px!important}.shrine-visit-cards-back:active,.shrine-visit-cards-x:active{transform:translateY(1px);background:#fff0c9!important}
-.shrine-visit-cards-stats{margin:13px 0 10px;padding:13px 14px;border-radius:18px;background:linear-gradient(135deg,#111 0%,#3d2b10 100%);color:#f6d58a;border:1px solid #d4aa6a;box-shadow:0 4px 14px rgba(0,0,0,.16);font-weight:900;display:flex;align-items:baseline;justify-content:center;gap:5px}.shrine-visit-cards-stats strong{font-size:30px;line-height:1}.shrine-visit-cards-stats span{font-size:14px;color:#fff1c8}
-.shrine-visit-cards-body{flex:1!important;overflow:auto!important;-webkit-overflow-scrolling:touch!important;display:block!important;padding:2px 1px 18px!important}.shrine-visit-card-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}.shrine-visit-cards-empty{padding:24px 16px!important;border-radius:18px!important;background:#fff8e8!important;color:#6c4a00!important;font-size:14px!important;font-weight:900!important;text-align:center!important;border:1px solid #eadfcd!important}
-html.oai-font-global .shrine-visit-cards-title{font-size:calc(18px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-cards-kicker{font-size:calc(10px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-cards-tabs button{font-size:calc(14px * var(--app-inner-font-scale,1))!important}
-
-.shrine-visit-cards-modal{background:#f1f3ee!important;color:#1f2933!important}
-.shrine-visit-cards-panel{background:linear-gradient(180deg,#f4f6f1 0%,#ecefe8 100%)!important}
-.shrine-visit-cards-head{background:#ffffff!important;border-bottom:1px solid rgba(31,41,51,.10)!important;box-shadow:0 2px 16px rgba(31,41,51,.06)!important}
-.shrine-visit-cards-back,.shrine-visit-cards-x{background:#f6f7f3!important;border-color:#d8dcd1!important;color:#324137!important;box-shadow:0 1px 7px rgba(31,41,51,.06)!important}
-.shrine-visit-cards-kicker{color:#7a693f!important}.shrine-visit-cards-title{color:#17201b!important}
-.shrine-visit-cards-stats{background:linear-gradient(135deg,#25302a 0%,#111816 100%)!important;color:#d9bf76!important;border-color:rgba(217,191,118,.58)!important;box-shadow:0 6px 20px rgba(17,24,22,.18)!important}.shrine-visit-cards-stats span{color:#eee6d0!important}
-.shrine-visit-cards-tabs button{background:#fff!important;color:#344237!important;border-color:#d7ddd2!important;box-shadow:0 2px 8px rgba(31,41,51,.05)!important}.shrine-visit-cards-tabs button.active{background:#2f3b34!important;color:#f3e5b3!important;border-color:#bda360!important;box-shadow:0 5px 14px rgba(47,59,52,.22)!important}
-
 .shrine-visit-detail-view{background:#f1f3ee!important;color:#17201b!important}.shrine-visit-detail-head{background:#ffffff!important;border-bottom:1px solid rgba(31,41,51,.10)!important;box-shadow:0 2px 16px rgba(31,41,51,.06)!important}.shrine-visit-detail-back,.shrine-visit-detail-x{background:#f6f7f3!important;border-color:#d8dcd1!important;color:#324137!important;box-shadow:0 1px 7px rgba(31,41,51,.06)!important}.shrine-visit-detail-head-title{color:#17201b!important}.shrine-visit-detail-kicker,.shrine-visit-detail-date-title,.shrine-visit-detail-section-title{color:#75643c!important}.shrine-visit-detail-count{color:#17201b!important}.shrine-visit-detail-recent{color:#405247!important}.shrine-visit-detail-date-list{display:flex!important;flex-direction:column!important;gap:0!important;border-top:1px solid #e4e8df!important;border-bottom:1px solid #e4e8df!important;background:transparent!important;margin-top:4px!important}.shrine-visit-detail-date-chip{display:flex!important;justify-content:flex-start!important;align-items:center!important;border:0!important;border-radius:0!important;background:transparent!important;color:#17201b!important;padding:10px 2px 10px 18px!important;font-size:15px!important;font-weight:900!important;position:relative!important;box-shadow:none!important}.shrine-visit-detail-date-chip:before{content:"";position:absolute;left:3px;top:50%;width:7px;height:7px;border-radius:50%;background:#bda360;transform:translateY(-50%)}.shrine-visit-detail-date-chip+ .shrine-visit-detail-date-chip{border-top:1px solid #edf0e9!important}.shrine-visit-detail-empty-date{background:transparent!important;color:#7b837c!important;border:1px dashed #cbd2c6!important;border-radius:12px!important}.shrine-visit-detail-add{height:40px!important;margin-top:12px!important;background:#ffffff!important;color:#2f3b34!important;border:1px solid #bda360!important;box-shadow:0 2px 8px rgba(31,41,51,.05)!important}.shrine-visit-detail-add:active{background:#f6f0dc!important;filter:none!important}.shrine-visit-detail-name{color:#17201b!important}.shrine-visit-detail-row{border-top-color:#e4e8df!important}.shrine-visit-detail-row span{color:#75643c!important}.shrine-visit-detail-row strong{color:#24312a!important}
 
-.shrine-visit-cards-head{height:54px!important;min-height:54px!important;background:#ffffff!important;border-bottom:1px solid rgba(31,41,51,.12)!important;box-shadow:0 2px 12px rgba(31,41,51,.06)!important;display:flex!important;align-items:center!important;justify-content:space-between!important}
-.shrine-visit-cards-title{flex:1!important;text-align:center!important;font-size:20px!important;font-weight:900!important;color:#17201b!important;letter-spacing:-.04em!important;line-height:1.1!important}.shrine-visit-cards-kicker,.shrine-visit-cards-head-main{display:none!important}
-.shrine-visit-cards-diocese{order:2;display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:1px 1px 8px;margin:0 -2px 6px;scrollbar-width:none}
-.shrine-visit-cards-diocese button{flex:0 0 auto;height:32px;padding:0 11px;border-radius:999px;border:1px solid #d7ddd2;background:#fff;color:#405247;font-size:12px;font-weight:900;font-family:inherit;white-space:nowrap;box-shadow:0 1px 5px rgba(31,41,51,.04);touch-action:manipulation}.shrine-visit-cards-diocese button.active{background:#e9efe7;color:#17201b;border-color:#7f927e;box-shadow:0 2px 8px rgba(47,59,52,.12)}
-.shrine-visit-cards-stats{order:3;margin:0 0 10px!important;padding:8px 12px!important;min-height:38px!important;border-radius:13px!important;background:linear-gradient(135deg,#2f3b34 0%,#17201b 100%)!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:5px!important}.shrine-visit-cards-stats strong{font-size:22px!important;line-height:1!important}.shrine-visit-cards-stats span{font-size:12px!important}.shrine-visit-cards-stats em{margin-left:6px;padding-left:8px;border-left:1px solid rgba(243,229,179,.35);font-style:normal;font-size:11px;font-weight:900;color:#d6ded2;white-space:nowrap}
-.shrine-visit-cards-body{order:4!important}.shrine-visit-card-grid{padding-bottom:4px}
-html.oai-font-global .shrine-visit-cards-title{font-size:calc(20px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-cards-tabs button{font-size:calc(13px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-cards-diocese button{font-size:calc(12px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-cards-stats strong{font-size:calc(22px * var(--app-inner-font-scale,1))!important}
-
-.shrine-visit-cards-modal{background:#ffffff!important}.shrine-visit-cards-panel{background:#ffffff!important}.shrine-visit-cards-head{background:#ffffff!important}.shrine-visit-cards-body{background:#ffffff!important}
-.shrine-visit-card-grid{gap:10px!important}
-.shrine-visit-cards-stats{background:linear-gradient(135deg,#26333d 0%,#101820 100%)!important;border-color:rgba(11,132,255,.16)!important}.shrine-visit-cards-tabs button.active{background:#26333d!important;color:#ffffff!important;border-color:#26333d!important}.shrine-visit-cards-diocese button.active{background:#eef4ff!important;border-color:#0b84ff!important;color:#0757a6!important}
-
-.shrine-visit-detail-view{background:#ffffff!important}.shrine-visit-detail-head{background:#ffffff!important}.shrine-visit-detail-date-chip:before{background:#0b84ff!important}.shrine-visit-detail-add{background:#ffffff!important;border-color:#aeb8c2!important;color:#26333d!important}
-
-.shrine-visit-cards-head{height:48px!important;min-height:48px!important;background:var(--mode-header-solid)!important;border-bottom:2px solid var(--gold)!important;box-shadow:none!important;padding:8px 14px!important;margin-left:-12px!important;margin-right:-12px!important}
-.shrine-visit-cards-title{font-size:15px!important;font-weight:800!important;color:#c49b56!important;line-height:1.2!important;letter-spacing:.04em!important;text-align:center!important}.shrine-visit-cards-back,.shrine-visit-cards-x{width:var(--v4-close-size)!important;height:var(--v4-close-size)!important;min-width:var(--v4-close-size)!important;border:none!important;border-radius:0!important;background:transparent!important;color:#c49b56!important;box-shadow:none!important;font-size:28px!important;font-weight:900!important;line-height:1!important}.shrine-visit-cards-back:active,.shrine-visit-cards-x:active{background:transparent!important;transform:scale(.96)!important}
-.shrine-visit-cards-tabs{height:48px!important;min-height:48px!important;display:flex!important;overflow-x:auto!important;gap:6px!important;padding:6px 10px!important;margin:0 -12px 0!important;align-items:center!important;background:var(--mode-header-solid)!important;border-bottom:2px solid var(--gold)!important;scrollbar-width:none!important}.shrine-visit-cards-tabs::-webkit-scrollbar{display:none}.shrine-visit-cards-tabs button{flex-shrink:0!important;width:auto!important;min-width:118px!important;height:34px!important;min-height:34px!important;padding:0 12px!important;border-radius:12px!important;border:1.5px solid var(--ui-line-strong)!important;background:var(--v4-surface-white)!important;color:#7b8794!important;font-size:14px!important;line-height:1.15!important;font-weight:600!important;font-family:inherit!important;box-shadow:none!important}.shrine-visit-cards-tabs button.active{background:var(--oai-gold)!important;color:var(--v4-text-main)!important;border-color:var(--oai-gold-border)!important;font-weight:800!important}
-.shrine-visit-cards-diocese{height:48px!important;min-height:48px!important;display:flex!important;overflow-x:auto!important;gap:6px!important;padding:6px 10px!important;margin:0 -12px 0!important;align-items:center!important;background:var(--mode-header-solid)!important;border-bottom:2px solid var(--gold)!important;scrollbar-width:none!important}.shrine-visit-cards-diocese::-webkit-scrollbar{display:none}.shrine-visit-cards-diocese .filter-btn{height:34px!important;min-height:34px!important;padding:0 12px!important;border-radius:12px!important;font-size:14px!important;line-height:1.15!important;font-weight:600!important}.shrine-visit-cards-diocese .filter-btn.active{font-weight:800!important}
-.shrine-visit-cards-stats{height:34px!important;min-height:34px!important;margin:7px 0 9px!important;padding:0 10px!important;border-radius:10px!important;background:#f5f7f9!important;border:1px solid #d9e0e6!important;color:#24313b!important;box-shadow:none!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:5px!important;white-space:nowrap!important}.shrine-visit-cards-stats strong{font-size:13px!important;font-weight:900!important;color:#17201b!important;line-height:1!important}.shrine-visit-cards-stats span{font-size:12px!important;font-weight:800!important;color:#46525c!important}.shrine-visit-cards-stats b{font-size:12px!important;color:#9aa4ae!important;font-weight:900!important}.shrine-visit-cards-stats em{margin-left:4px!important;padding-left:6px!important;border-left:1px solid #cfd6dd!important;font-size:11px!important;font-weight:900!important;color:#6b7680!important;font-style:normal!important}
-html.oai-font-global .shrine-visit-cards-title{font-size:calc(15px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-cards-diocese .filter-btn{font-size:calc(14px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-cards-stats strong{font-size:calc(13px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-cards-stats span,html.oai-font-global .shrine-visit-cards-stats b{font-size:calc(12px * var(--app-inner-font-scale,1))!important}
-.shrine-visit-sheet-btn{display:none;margin-left:auto;margin-right:4px;height:30px;min-height:30px;padding:0 10px;border-radius:999px;border:1px solid rgba(196,155,86,.65);background:#fff7e4;color:#5c3b0c;font-size:12px;font-weight:900;font-family:inherit;white-space:nowrap;line-height:1;box-shadow:0 1px 5px rgba(0,0,0,.12);touch-action:manipulation;flex:0 0 auto}.shrine-visit-sheet-btn.show{display:inline-flex;align-items:center;justify-content:center}.shrine-visit-sheet-btn:active{transform:translateY(1px);filter:brightness(.96)}
-html.oai-font-global .shrine-visit-sheet-btn{font-size:calc(12px * var(--app-inner-font-scale,1))!important}
-
-#shrine-visit-cards-btn{display:none!important}.shrine-visit-sheet-btn{display:none!important}.shrine-visit-sheet-btn.show{display:none!important}
-.shrine-visit-floating-list-btn{position:fixed;right:16px;bottom:calc(env(safe-area-inset-bottom,0px) + 138px);z-index:72;display:none;height:42px;min-width:104px;padding:0 15px;border-radius:999px;border:1.5px solid rgba(21,101,192,.72);background:#1565c0;color:#fff;font-size:14px;font-weight:900;font-family:inherit;letter-spacing:-.04em;box-shadow:0 8px 22px rgba(21,101,192,.26),0 2px 7px rgba(0,0,0,.18);touch-action:manipulation;white-space:nowrap}.shrine-visit-floating-list-btn.show{display:inline-flex;align-items:center;justify-content:center}.shrine-visit-floating-list-btn:active{transform:translateY(1px);filter:brightness(.96)}
-html.oai-font-global .shrine-visit-floating-list-btn{font-size:calc(14px * var(--app-inner-font-scale,1))!important}
-
-.shrine-visit-cards-head.module-bar{display:flex!important;align-items:center!important;gap:0!important;height:calc(var(--oai-std-header-h) + env(safe-area-inset-top,0px))!important;min-height:calc(var(--oai-std-header-h) + env(safe-area-inset-top,0px))!important;max-height:calc(var(--oai-std-header-h) + env(safe-area-inset-top,0px))!important;padding:var(--oai-std-hdr-pad) 16px 10px!important;box-sizing:border-box!important;flex-shrink:0!important;width:100%!important;max-width:none!important;background:#0e1535!important;color:var(--v4-surface-white)!important;border-bottom:2px solid var(--gold)!important;box-shadow:0 4px 16px rgba(14,21,53,.22)!important;margin:0!important;border-radius:0!important}.shrine-visit-cards-head.module-bar::before,.shrine-visit-cards-head.module-bar::after{content:none!important;display:none!important}.shrine-visit-cards-head .module-bar-main{display:flex!important;align-items:center!important;gap:14px!important;flex:1!important;min-width:0!important}.shrine-visit-cards-head .module-bar-ico{width:44px!important;height:44px!important;min-width:44px!important;flex:0 0 44px!important;border-radius:12px!important;background:rgba(255,255,255,.12)!important;border:1px solid rgba(255,255,255,.2)!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:var(--oai-std-icon-sz)!important;line-height:1!important;color:var(--v4-surface-white)!important}.shrine-visit-cards-head .module-bar-txt{display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:center!important;min-width:0!important;gap:2px!important}.shrine-visit-cards-head .module-bar-title{font-size:var(--oai-std-title-fs)!important;font-weight:800!important;line-height:1.2!important;letter-spacing:-.02em!important;color:var(--v4-surface-white)!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;margin:0!important;text-align:left!important}.shrine-visit-cards-head .module-bar-sub{font-size:var(--oai-std-sub-fs)!important;font-weight:500!important;line-height:1.2!important;color:rgba(255,255,255,.65)!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;margin:0!important;opacity:1!important}.shrine-visit-cards-head .module-close{width:var(--oai-std-close-sz)!important;height:var(--oai-std-close-sz)!important;min-width:var(--oai-std-close-sz)!important;flex:0 0 var(--oai-std-close-sz)!important;border-radius:999px!important;background:transparent!important;border:1.5px solid currentColor!important;color:rgba(212,170,106,.9)!important;font-size:28px!important;font-weight:900!important;display:flex!important;align-items:center!important;justify-content:center!important;box-shadow:none!important}
-.shrine-visit-cards-tabs{padding:9px 14px!important;background:rgba(255,255,255,.88)!important;backdrop-filter:none!important;border-bottom:1px solid #e8ecf3!important;min-height:var(--mod-tabbar-h)!important;height:var(--mod-tabbar-h)!important;max-height:var(--mod-tabbar-h)!important;display:flex!important;align-items:center!important;gap:8px!important;box-sizing:border-box!important;flex-shrink:0!important;overflow-x:auto!important;scrollbar-width:none!important;margin:0!important}.shrine-visit-cards-tabs::-webkit-scrollbar{display:none!important}.shrine-visit-cards-tabs button{height:40px!important;min-height:40px!important;padding:0 12px!important;border-radius:10px!important;border:1px solid #e2e7f1!important;background:#f7f9fd!important;color:#657086!important;box-shadow:inset 0 1px 0 rgba(255,255,255,.7)!important;font-size:15px!important;font-weight:800!important;font-family:inherit!important;line-height:1!important;display:flex!important;align-items:center!important;justify-content:center!important;white-space:nowrap!important;box-sizing:border-box!important;flex:1 1 0!important;cursor:pointer!important}.shrine-visit-cards-tabs button.on,.shrine-visit-cards-tabs button.active{color:var(--v4-surface-white)!important;border-color:transparent!important;font-weight:800!important;box-shadow:0 2px 8px rgba(31,42,68,.28)!important;background:#0e1535!important}
-.shrine-visit-cards-diocese{display:flex!important;overflow-x:auto!important;gap:6px!important;min-height:48px!important;height:48px!important;padding:6px 10px!important;align-items:center!important;background:var(--mode-header-solid)!important;flex-shrink:0!important;border-bottom:2px solid var(--gold)!important;scrollbar-width:none!important;margin:0!important;box-sizing:border-box!important}.shrine-visit-cards-diocese::-webkit-scrollbar{display:none!important}.shrine-visit-cards-diocese .filter-btn{flex-shrink:0!important;height:34px!important;min-height:34px!important;padding:0 12px!important;border-radius:12px!important;border:1.5px solid var(--mode-filter-border)!important;background:var(--mode-filter-bg)!important;color:var(--mode-filter-color)!important;font-size:14px!important;line-height:1.15!important;font-weight:600!important;font-family:inherit!important;cursor:pointer!important;white-space:nowrap!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;box-sizing:border-box!important;box-shadow:none!important}.shrine-visit-cards-diocese .filter-btn.active{background:var(--mode-filter-active-bg)!important;color:var(--mode-filter-active-color)!important;border-color:var(--mode-filter-active-border)!important;font-weight:800!important}.shrine-visit-cards-diocese .filter-btn.my-diocese-filter{border-color:var(--v4-brown)!important;color:#5C3B0C!important;background:#FFF7E4!important}.shrine-visit-cards-diocese .filter-btn.my-diocese-filter.active{background:var(--v4-brown)!important;border-color:#9B641A!important;color:var(--v4-surface-white)!important}
-html.oai-font-global .shrine-visit-cards-head .module-bar-title{font-size:20px!important;line-height:1.24!important}html.oai-font-global .shrine-visit-cards-head .module-bar-sub{font-size:11px!important;line-height:1.25!important}html.oai-font-global .shrine-visit-cards-head .module-bar-ico{font-size:22px!important;width:42px!important;height:42px!important;min-width:42px!important}
-.shrine-visit-floating-list-btn{min-width:118px!important;height:42px!important;right:16px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 172px)!important;border-radius:12px!important;font-size:13px!important;background:#1565c0!important;color:#fff!important}.shrine-visit-floating-list-btn.show{display:inline-flex!important}
-.shrine-visit-cards-tabs button{height:44px!important;min-height:44px!important;border-radius:8px!important;font-size:15px!important;padding:0 15px!important}.shrine-visit-cards-diocese .filter-btn{height:36px!important;min-height:36px!important;border-radius:8px!important;font-size:14px!important;padding:0 14px!important}.shrine-visit-map-filter button{height:36px!important;min-width:86px!important;border-radius:8px!important;font-size:13px!important;padding-left:16px!important;padding-right:16px!important}.shrine-visit-map-filter button[data-shrine-visit-filter="visited"]{min-width:112px!important}.shrine-visit-map-filter button[data-shrine-visit-filter="unvisited"]{min-width:104px!important}
-html.oai-font-global .shrine-visit-floating-list-btn{font-size:calc(13px * var(--app-inner-font-scale,1))!important}
-html.oai-font-global .shrine-visit-map-filter button{font-size:calc(13px * var(--app-inner-font-scale,1))!important}
-
-.shrine-visit-cards-modal,
-.shrine-visit-cards-panel{
-  width:100vw!important;
-  max-width:none!important;
-  margin:0!important;
-  left:0!important;
-  right:0!important;
-  background:#fff!important;
-}
-.shrine-visit-cards-panel{
-  padding-left:0!important;
-  padding-right:0!important;
-}
+/* V8-1-14-530: 순례 스탬프북/지도 보조 UI는 이 블록을 최종 소유 위치로 사용한다.
+   이전 누적본에 같은 selector가 여러 번 반복되어 탭 높이, 위치 버튼, 스탬프북 레이어가 서로 덮어쓰던 부분을 하나로 통합했다. */
+#shrine-visit-cards-btn,.shrine-visit-sheet-btn,.shrine-visit-sheet-btn.show{display:none!important;}
 .shrine-visit-cards-head.module-bar{
-  width:100vw!important;
-  margin-left:0!important;
-  margin-right:0!important;
+  display:flex!important;
+  align-items:center!important;
+  gap:0!important;
+  height:var(--oai-std-header-h)!important;
+  min-height:var(--oai-std-header-h)!important;
+  max-height:var(--oai-std-header-h)!important;
+  padding:10px 16px!important;
+  box-sizing:border-box!important;
+  flex-shrink:0!important;
+  width:100%!important;
+  max-width:none!important;
+  background:#0e1535!important;
+  color:var(--v4-surface-white)!important;
+  border-bottom:1px solid rgba(212,170,106,.68)!important;
+  box-shadow:none!important;
+  margin:0!important;
   border-radius:0!important;
 }
+.shrine-visit-cards-head.module-bar::before,
+.shrine-visit-cards-head.module-bar::after{content:none!important;display:none!important;}
+.shrine-visit-cards-head .module-bar-main{display:flex!important;align-items:center!important;gap:14px!important;flex:1!important;min-width:0!important;}
+.shrine-visit-cards-head .module-bar-ico{width:44px!important;height:44px!important;min-width:44px!important;flex:0 0 44px!important;border-radius:12px!important;background:rgba(255,255,255,.12)!important;border:1px solid rgba(255,255,255,.2)!important;display:flex!important;align-items:center!important;justify-content:center!important;font-size:var(--oai-std-icon-sz)!important;line-height:1!important;color:var(--v4-surface-white)!important;}
+.shrine-visit-cards-head .module-bar-txt{display:flex!important;flex-direction:column!important;align-items:flex-start!important;justify-content:center!important;min-width:0!important;gap:2px!important;}
+.shrine-visit-cards-head .module-bar-title{font-size:var(--oai-std-title-fs)!important;font-weight:800!important;line-height:1.2!important;letter-spacing:-.02em!important;color:var(--v4-surface-white)!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;margin:0!important;text-align:left!important;}
+.shrine-visit-cards-head .module-bar-sub{font-size:var(--oai-std-sub-fs)!important;font-weight:500!important;line-height:1.2!important;color:rgba(255,255,255,.65)!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important;margin:0!important;opacity:1!important;}
+.shrine-visit-cards-head .module-close{width:var(--oai-std-close-sz)!important;height:var(--oai-std-close-sz)!important;min-width:var(--oai-std-close-sz)!important;flex:0 0 var(--oai-std-close-sz)!important;border-radius:999px!important;background:transparent!important;border:1.5px solid currentColor!important;color:rgba(212,170,106,.9)!important;font-size:28px!important;font-weight:900!important;display:flex!important;align-items:center!important;justify-content:center!important;box-shadow:none!important;}
 .shrine-visit-cards-tabs{
   width:100vw!important;
   max-width:none!important;
   margin:0!important;
-  padding:8px 10px!important;
-  background:#0e1535!important;
-  border-bottom:2px solid #d4aa6a!important;
-  gap:8px!important;
   min-height:58px!important;
   height:58px!important;
-  box-sizing:border-box!important;
-}
-.shrine-visit-cards-tabs button{
-  flex:1 1 0!important;
-  min-width:0!important;
-  height:42px!important;
-  min-height:42px!important;
-  border-radius:9px!important;
-  border:1.5px solid rgba(255,255,255,.32)!important;
-  background:rgba(255,255,255,.08)!important;
-  color:rgba(255,255,255,.92)!important;
-  font-size:15px!important;
-  font-weight:900!important;
-  box-shadow:none!important;
-}
-.shrine-visit-cards-diocese{
-  width:100vw!important;
-  max-width:none!important;
-  margin:0!important;
-  padding-left:10px!important;
-  padding-right:10px!important;
-  box-sizing:border-box!important;
-}
-.shrine-visit-cards-stats{
-  margin:10px 12px 10px!important;
-  border:1.5px solid #cfd6dd!important;
-  background:#f8fafc!important;
-  color:#122033!important;
-  box-shadow:0 2px 8px rgba(14,21,53,.06)!important;
-}
-.shrine-visit-cards-body{
-  padding:2px 12px max(18px,env(safe-area-inset-bottom))!important;
-  background:#fff!important;
-}
-.shrine-visit-card-grid{
-  gap:11px!important;
-}
-.shrine-visit-detail-view{
-  z-index:10075!important;
-}
-.shrine-visit-cards-body.stats{
-  padding-top:0!important;
-}
-.shrine-visit-stats-view{
-  display:flex;
-  flex-direction:column;
-  gap:12px;
-  padding:2px 0 18px;
-}
-.shrine-visit-stat-total,
-.shrine-visit-stat-list{
-  border:1.5px solid #cfd6dd;
-  border-radius:12px;
-  background:linear-gradient(180deg,#fff,#f7f9fb);
-  box-shadow:0 4px 14px rgba(26,38,51,.10);
-  padding:14px 14px;
-}
-.shrine-visit-stat-kicker{
-  font-size:12px;
-  font-weight:900;
-  color:#6d5a24;
-  margin-bottom:8px;
-}
-.shrine-visit-stat-total strong{
-  display:block;
-  font-size:22px;
-  line-height:1.2;
-  color:#101828;
-  font-weight:900;
-  letter-spacing:-.04em;
-}
-.shrine-visit-stat-total span{
-  display:inline-flex;
-  margin-top:6px;
-  font-size:14px;
-  font-weight:900;
-  color:#0e1535;
-}
-.shrine-visit-stat-row{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) auto auto;
-  align-items:center;
-  gap:10px;
-  min-height:40px;
-  padding:8px 0;
-  border-top:1px solid #e1e6ec;
-  font-size:14px;
-}
-.shrine-visit-stat-row:first-of-type{border-top:0}
-.shrine-visit-stat-row.active{background:rgba(212,170,106,.12);margin-left:-8px;margin-right:-8px;padding-left:8px;padding-right:8px;border-radius:9px}
-.shrine-visit-stat-name{font-weight:900;color:#1d2939;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.shrine-visit-stat-row strong{font-weight:900;color:#0e1535;white-space:nowrap}
-.shrine-visit-stat-row em{font-style:normal;font-weight:900;color:#8b6914;white-space:nowrap}
-html.oai-font-global .shrine-visit-stat-row{font-size:calc(14px * var(--app-inner-font-scale,1))!important}
-.shrine-visit-cards-tabs{
+  max-height:58px!important;
+  padding:8px 8px!important;
+  gap:6px!important;
   background:#0e1535!important;
+  border-top:0!important;
+  border-bottom:1px solid rgba(212,170,106,.68)!important;
+  box-shadow:none!important;
+  display:flex!important;
+  align-items:center!important;
+  overflow:hidden!important;
+  box-sizing:border-box!important;
+  flex-shrink:0!important;
+  touch-action:pan-x!important;
 }
 .shrine-visit-cards-tabs button{
+  min-width:0!important;
+  height:40px!important;
+  min-height:40px!important;
+  padding:0 4px!important;
+  border-radius:8px!important;
+  border:1.5px solid rgba(255,255,255,.32)!important;
   background:#ffffff!important;
   color:#0e1535!important;
-  border-color:#cbd5e1!important;
   box-shadow:0 1px 5px rgba(15,23,42,.10)!important;
-}
-.shrine-visit-cards-tabs button.on,
-.shrine-visit-cards-tabs button.active{
-  background:#d4aa6a!important;
-  color:#0e1535!important;
-  border-color:#d4aa6a!important;
-  box-shadow:0 3px 10px rgba(0,0,0,.18)!important;
-}
-.shrine-visit-cards-diocese .filter-btn{
-  background:#ffffff!important;
-  color:#253142!important;
-  border-color:#cbd5e1!important;
-  box-shadow:0 1px 5px rgba(15,23,42,.08)!important;
-}
-.shrine-visit-cards-diocese .filter-btn.active{
-  background:#d4aa6a!important;
-  color:#0e1535!important;
-  border-color:#d4aa6a!important;
-  box-shadow:0 2px 9px rgba(0,0,0,.14)!important;
-}
-.shrine-visit-cards-diocese .filter-btn.my-diocese-filter:not(.active){
-  background:#ffffff!important;
-  color:#5C3B0C!important;
-  border-color:#d4aa6a!important;
-}
-.shrine-visit-stat-row{
-  width:100%;
-  border:0;
-  border-top:1px solid #e1e6ec;
-  background:transparent;
-  font-family:inherit;
-  text-align:left;
-  cursor:pointer;
-}
-.shrine-visit-stat-row:active{
-  transform:translateY(1px);
-  background:rgba(212,170,106,.12)!important;
-}
-.shrine-visit-stat-row.active{
-  background:rgba(212,170,106,.16)!important;
-  border-top-color:transparent!important;
-}
-
-#loc-btn{
-  z-index:74!important;
-  border:1.5px solid rgba(21,101,192,.32)!important;
-  box-shadow:0 3px 10px rgba(0,0,0,.26)!important;
-}
-.shrine-visit-floating-list-btn{
-  z-index:76!important;
-  bottom:calc(env(safe-area-inset-bottom,0px) + 188px)!important;
-  border:2px solid rgba(21,101,192,.85)!important;
-  box-shadow:0 9px 24px rgba(21,101,192,.30),0 3px 9px rgba(0,0,0,.20)!important;
-}
-
-.shrine-visit-map-filter{
-  background:rgba(255,255,255,.94)!important;
-  border:1.5px solid rgba(15,23,42,.18)!important;
-  box-shadow:0 6px 18px rgba(15,23,42,.18)!important;
-  border-radius:18px!important;
-  gap:7px!important;
-}
-.shrine-visit-map-filter button,
-.shrine-visit-map-filter button[data-shrine-visit-filter="visited"],
-.shrine-visit-map-filter button[data-shrine-visit-filter="unvisited"]{
-  background:#ffffff!important;
-  color:#0e1535!important;
-  border:1.5px solid #cbd5e1!important;
-  box-shadow:0 1px 5px rgba(15,23,42,.08)!important;
-  border-radius:10px!important;
+  font-size:13px!important;
   font-weight:900!important;
+  font-family:inherit!important;
+  line-height:1.05!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  text-align:center!important;
+  white-space:nowrap!important;
+  box-sizing:border-box!important;
+  flex:1 1 0!important;
+  cursor:pointer!important;
 }
-.shrine-visit-map-filter button.active,
-.shrine-visit-map-filter button[data-shrine-visit-filter="visited"].active,
-.shrine-visit-map-filter button[data-shrine-visit-filter="unvisited"].active{
-  background:#d4aa6a!important;
-  color:#0e1535!important;
-  border-color:#b8893c!important;
-  box-shadow:0 3px 10px rgba(15,23,42,.18)!important;
-}
-
-.shrine-visit-map-filter button.active,
-.shrine-visit-map-filter button[data-shrine-visit-filter="all"].active,
-.shrine-visit-map-filter button[data-shrine-visit-filter="visited"].active,
-.shrine-visit-map-filter button[data-shrine-visit-filter="unvisited"].active{
-  background:#111111!important;
-  color:#f6d58a!important;
-  border-color:#d4aa6a!important;
-  box-shadow:0 3px 10px rgba(0,0,0,.18)!important;
-}
-.shrine-visit-floating-list-btn{
-  z-index:860!important;
-}
-.shrine-visit-floating-list-btn.show{
-  display:inline-flex!important;
-  opacity:1!important;
-  visibility:visible!important;
-  pointer-events:auto!important;
-}
-
-.shrine-visit-floating-list-btn{
-  right:12px!important;
-  bottom:calc(env(safe-area-inset-bottom,0px) + 68px)!important;
-  z-index:860!important;
-}
-
-.shrine-visit-cards-tabs{
-  min-height:60px!important;
-  height:64px!important;
-  max-height:64px!important;
-  padding:9px 10px!important;
-  border-bottom:1px solid rgba(212,170,106,.75)!important;
-}
-.shrine-visit-cards-tabs button{
-  height:46px!important;
-  min-height:46px!important;
-  font-size:15px!important;
-  border-radius:9px!important;
-}
+.shrine-visit-cards-tabs button[data-shrine-visit-cards-tab="visited"]{flex:28 1 0!important;}
+.shrine-visit-cards-tabs button[data-shrine-visit-cards-tab="unvisited"]{flex:31 1 0!important;}
+.shrine-visit-cards-tabs button[data-shrine-visit-cards-tab="new"]{flex:25 1 0!important;}
+.shrine-visit-cards-tabs button[data-shrine-visit-cards-tab="stats"]{flex:16 1 0!important;}
 .shrine-visit-cards-tabs button.on,
 .shrine-visit-cards-tabs button.active{
   background:#1565c0!important;
@@ -4450,489 +4227,133 @@ html.oai-font-global .shrine-visit-stat-row{font-size:calc(14px * var(--app-inne
   box-shadow:0 3px 10px rgba(21,101,192,.28)!important;
 }
 .shrine-visit-cards-diocese{
+  display:flex!important;
+  overflow-x:auto!important;
+  gap:6px!important;
   min-height:48px!important;
   height:48px!important;
   max-height:48px!important;
   padding:6px 10px!important;
-  gap:6px!important;
-  border-bottom:1px solid rgba(212,170,106,.75)!important;
+  align-items:center!important;
+  background:var(--mode-header-solid)!important;
+  flex-shrink:0!important;
+  border-bottom:1px solid rgba(212,170,106,.68)!important;
+  scrollbar-width:none!important;
+  margin:0!important;
+  box-sizing:border-box!important;
+  touch-action:pan-x!important;
 }
+.shrine-visit-cards-diocese::-webkit-scrollbar{display:none!important;}
+.shrine-visit-cards-diocese.stats-hidden{display:none!important;height:0!important;min-height:0!important;max-height:0!important;padding:0!important;border-bottom:0!important;overflow:hidden!important;}
 .shrine-visit-cards-diocese .filter-btn{
+  flex-shrink:0!important;
   height:34px!important;
   min-height:34px!important;
   padding:0 12px!important;
   border-radius:12px!important;
+  border:1.5px solid var(--mode-filter-border)!important;
+  background:#ffffff!important;
+  color:#253142!important;
   font-size:14px!important;
   line-height:1.15!important;
-  font-weight:600!important;
-}
-.shrine-visit-cards-diocese .filter-btn.active{
-  background:var(--mode-filter-active-bg)!important;
-  color:var(--mode-filter-active-color)!important;
-  border-color:var(--mode-filter-active-border)!important;
-  font-weight:800!important;
-}
-.shrine-visit-cards-diocese .filter-btn.my-diocese-filter.active{
-  background:var(--v4-brown)!important;
-  border-color:#9B641A!important;
-  color:var(--v4-surface-white)!important;
-}
-html.oai-font-global .shrine-visit-cards-tabs button{font-size:calc(15px * var(--app-inner-font-scale,1))!important}
-html.oai-font-global .shrine-visit-cards-diocese .filter-btn{font-size:calc(14px * var(--app-inner-font-scale,1))!important}
-.shrine-visit-cards-stats{
-  background:#eaf3ff!important;
-  border:1.8px solid #1565c0!important;
-  color:#0e3f78!important;
-  box-shadow:0 3px 11px rgba(21,101,192,.13)!important;
-  min-height:46px!important;
-}
-.shrine-visit-cards-stats strong{
-  font-size:20px!important;
-  color:#0b3d72!important;
-  font-weight:900!important;
-}
-.shrine-visit-cards-stats span,
-.shrine-visit-cards-stats b,
-.shrine-visit-cards-stats em{
-  font-size:15px!important;
-  color:#284b70!important;
-  font-weight:900!important;
-}
-html.oai-font-global .shrine-visit-cards-stats strong{font-size:calc(20px * var(--app-inner-font-scale,1))!important;}
-html.oai-font-global .shrine-visit-cards-stats span,
-html.oai-font-global .shrine-visit-cards-stats b,
-html.oai-font-global .shrine-visit-cards-stats em{font-size:calc(15px * var(--app-inner-font-scale,1))!important;}
-
-.shrine-visit-floating-list-btn{
-  z-index:880!important;
-}
-.shrine-visit-stat-row{
-  min-height:46px!important;
-  font-size:16px!important;
-}
-.shrine-visit-stat-name,
-.shrine-visit-stat-row strong,
-.shrine-visit-stat-row em{
-  font-size:16px!important;
-}
-.shrine-visit-stat-items{
-  margin:0 0 10px 0;
-  padding:8px 10px 10px;
-  border:1.5px solid #cbd5e1;
-  border-top:0;
-  border-radius:0 0 12px 12px;
-  background:#f8fbff;
-  box-shadow:0 2px 8px rgba(21,101,192,.06);
-}
-.shrine-visit-stat-item{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) auto;
-  gap:5px 10px;
-  align-items:center;
-  padding:8px 0;
-  border-top:1px solid #e2e8f0;
-  font-size:15px;
-  line-height:1.28;
-}
-.shrine-visit-stat-item:first-child{border-top:0}
-.shrine-visit-stat-item span{
-  grid-column:1 / -1;
-  font-size:16px;
-  font-weight:900;
-  color:#0f172a;
-  word-break:keep-all;
-}
-.shrine-visit-stat-item strong{
-  font-size:14px;
-  color:#1565c0;
-  font-weight:900;
-}
-.shrine-visit-stat-item em{
-  font-size:14px;
-  color:#475569;
-  font-style:normal;
-  font-weight:900;
-  text-align:right;
-}
-.shrine-visit-stat-item.empty{
-  display:block;
-  font-size:15px;
-  font-weight:900;
-  color:#64748b;
-  text-align:center;
-}
-html.oai-font-global .shrine-visit-stat-row,
-html.oai-font-global .shrine-visit-stat-name,
-html.oai-font-global .shrine-visit-stat-row strong,
-html.oai-font-global .shrine-visit-stat-row em{font-size:calc(16px * var(--app-inner-font-scale,1))!important;}
-html.oai-font-global .shrine-visit-stat-item span{font-size:calc(16px * var(--app-inner-font-scale,1))!important;}
-html.oai-font-global .shrine-visit-stat-item strong,
-html.oai-font-global .shrine-visit-stat-item em{font-size:calc(14px * var(--app-inner-font-scale,1))!important;}
-
-.shrine-visit-stat-row.active{
-  background:#eaf3ff!important;
-  color:#0e3f78!important;
-  margin-left:0!important;
-  margin-right:0!important;
-  padding-left:0!important;
-  padding-right:0!important;
-  transform:none!important;
-  border-radius:0!important;
-}
-.shrine-visit-stat-row:active{
-  transform:none!important;
-}
-.shrine-visit-stat-row.active .shrine-visit-stat-name,
-.shrine-visit-stat-row.active strong,
-.shrine-visit-stat-row.active em{
-  color:#0e3f78!important;
-  transform:none!important;
-}
-.li-pilgrim-register,
-#info-card .ic-header .ic-type-badge.shrine-pilgrim-register-badge{
-  background:#e3f2fd!important;
-  color:#0d47a1!important;
-  border:2px solid #1976d2!important;
-  font-weight:900!important;
-  box-shadow:0 2px 7px rgba(25,118,210,.15)!important;
-}
-.li-pilgrim-register:active,
-#info-card .ic-header .ic-type-badge.shrine-pilgrim-register-badge:active{
-  background:#d6ecff!important;
-  filter:none!important;
-}
-
-.shrine-visit-panel{
-  border:2px solid #1976d2!important;
-  background:#ffffff!important;
-  box-shadow:0 -12px 30px rgba(15,23,42,.25)!important;
-}
-.shrine-visit-head{
-  padding-bottom:10px!important;
-  border-bottom:1px solid #d7e9ff!important;
-}
-.shrine-visit-kicker{
-  color:#0d47a1!important;
-  font-weight:900!important;
-}
-.shrine-visit-title{
-  color:#0f172a!important;
-  font-weight:900!important;
-}
-.shrine-visit-label{
-  color:#0d47a1!important;
-  font-weight:900!important;
-}
-.shrine-visit-label input{
-  background:#f2f8ff!important;
-  border:1.8px solid #90caf9!important;
-  color:#0f172a!important;
-  font-weight:900!important;
-}
-.shrine-visit-save{
-  background:#1565c0!important;
-  border:2px solid #0d47a1!important;
-  color:#ffffff!important;
-  font-weight:900!important;
-  box-shadow:0 3px 10px rgba(21,101,192,.22)!important;
-}
-.shrine-visit-cancel{
-  background:#fffdf7!important;
-  border:1.8px solid #d6c7a6!important;
-  color:#5b3c00!important;
-  font-weight:900!important;
-}
-.shrine-visit-empty,
-.shrine-visit-list .shrine-visit-empty{
-  background:#eaf3ff!important;
-  color:#0d47a1!important;
-  border:1px solid #bbdefb!important;
-}
-
-.shrine-auto-visit-title{
-  font-size:19px!important;
-  line-height:1.35!important;
-  color:#0f172a!important;
-  font-weight:900!important;
-  word-break:keep-all!important;
-}
-.shrine-auto-visit-name:empty{display:none!important;}
-.shrine-auto-visit-dist{
-  margin-top:7px!important;
-  font-size:15px!important;
-  color:#1565c0!important;
-  font-weight:900!important;
-}
-html.oai-font-global .shrine-auto-visit-title{font-size:calc(19px * var(--app-inner-font-scale,1))!important;}
-html.oai-font-global .shrine-auto-visit-dist{font-size:calc(15px * var(--app-inner-font-scale,1))!important;}
-
-.shrine-visit-cards-head{
-  border-bottom:1px solid rgba(212,170,106,.45)!important;
-  margin-bottom:0!important;
-}
-.shrine-visit-cards-tabs{
-  width:100vw!important;
-  max-width:none!important;
-  margin:0!important;
-  padding:8px 8px!important;
-  gap:6px!important;
-  min-height:58px!important;
-  height:58px!important;
-  max-height:58px!important;
-  border-bottom:1px solid rgba(212,170,106,.55)!important;
-  box-sizing:border-box!important;
-  display:flex!important;
-  align-items:center!important;
-  overflow:visible!important;
-}
-.shrine-visit-cards-tabs button{
-  flex:1 1 0!important;
-  min-width:0!important;
-  height:40px!important;
-  min-height:40px!important;
-  padding:0 4px!important;
-  border-radius:8px!important;
-  font-size:13px!important;
-  line-height:1.05!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  text-align:center!important;
+  font-weight:700!important;
+  font-family:inherit!important;
+  cursor:pointer!important;
   white-space:nowrap!important;
-}
-.shrine-visit-cards-diocese{
-  border-bottom:1px solid rgba(212,170,106,.55)!important;
-}
-
-.shrine-new-chip{
-  position:relative!important;
-  top:-2px!important;
-  height:15px!important;
-  min-width:25px!important;
-  padding:0 5px!important;
-  font-size:8.8px!important;
-  line-height:1!important;
   display:inline-flex!important;
   align-items:center!important;
   justify-content:center!important;
-  vertical-align:middle!important;
   box-sizing:border-box!important;
-  background:#f1e8ff!important;
-  color:#6d45a8!important;
-  border:0.5px solid rgba(109,69,168,.42)!important;
+  box-shadow:0 1px 5px rgba(15,23,42,.08)!important;
+  scroll-margin-left:14px!important;
+  scroll-margin-right:14px!important;
 }
-.ic-name .shrine-new-chip,
-.nearby-name .shrine-new-chip,
-.li-name .shrine-new-chip{
-  top:-2px!important;
-  vertical-align:middle!important;
+.shrine-visit-cards-diocese .filter-btn.active{background:#d4aa6a!important;color:#0e1535!important;border-color:#d4aa6a!important;font-weight:900!important;box-shadow:0 2px 9px rgba(0,0,0,.14)!important;}
+.shrine-visit-cards-diocese .filter-btn.my-diocese-filter:not(.active){background:#ffffff!important;color:#5C3B0C!important;border-color:#d4aa6a!important;}
+.shrine-visit-cards-diocese .filter-btn.my-diocese-filter.active{background:var(--v4-brown)!important;border-color:#9B641A!important;color:var(--v4-surface-white)!important;}
+.shrine-visit-cards-stats{
+  margin:10px 12px!important;
+  min-height:46px!important;
+  border:1.8px solid #1565c0!important;
+  border-radius:12px!important;
+  background:#eaf3ff!important;
+  color:#0e3f78!important;
+  box-shadow:0 3px 11px rgba(21,101,192,.13)!important;
 }
-.shrine-visit-floating-list-btn{
-  bottom:calc(env(safe-area-inset-bottom,0px) + 132px)!important;
-}
-.shrine-visit-cards-head,
-.shrine-visit-cards-tabs,
-.shrine-visit-cards-diocese{
-  border-bottom:0.5px solid rgba(212,170,106,.50)!important;
-}
-.shrine-visit-cards-tabs{
-  box-shadow:none!important;
-}
-
-#map-wrap .shrine-visit-map-filter{
-  left:0!important;
-  right:0!important;
-  top:0!important;
-  width:100%!important;
-  max-width:none!important;
-  height:50px!important;
-  min-height:50px!important;
-  padding:7px 56px 7px 8px!important;
-  border-radius:0!important;
-  background:rgba(255,255,255,.94)!important;
-  border-left:0!important;
-  border-right:0!important;
-  border-top:0!important;
-  border-bottom:1px solid rgba(15,23,42,.16)!important;
-  box-shadow:0 4px 14px rgba(15,23,42,.12)!important;
-  backdrop-filter:blur(8px)!important;
-  -webkit-backdrop-filter:blur(8px)!important;
-  display:none;
-  align-items:center!important;
-  justify-content:flex-start!important;
-  gap:7px!important;
-  box-sizing:border-box!important;
-}
+.shrine-visit-cards-stats.stats-tab-hidden{display:none!important;height:0!important;min-height:0!important;margin:0!important;padding:0!important;border:0!important;overflow:hidden!important;}
+.shrine-visit-cards-stats strong{font-size:20px!important;color:#0b3d72!important;font-weight:900!important;}
+.shrine-visit-cards-stats span,
+.shrine-visit-cards-stats b,
+.shrine-visit-cards-stats em{font-size:15px!important;color:#284b70!important;font-weight:900!important;font-style:normal!important;}
+.shrine-visit-cards-body{padding:2px 12px max(18px,env(safe-area-inset-bottom))!important;background:#fff!important;touch-action:pan-y!important;}
+.shrine-visit-cards-body.stats{padding-top:0!important;}
+.shrine-visit-card-grid{gap:11px!important;}
+.shrine-visit-stats-view{display:flex;flex-direction:column;gap:12px;padding:2px 0 18px;}
+.shrine-visit-stat-total,
+.shrine-visit-stat-list{border:1.5px solid #cfd6dd;border-radius:12px;background:linear-gradient(180deg,#fff,#f7f9fb);box-shadow:0 4px 14px rgba(26,38,51,.10);padding:14px;}
+.shrine-visit-stat-kicker{font-size:12px;font-weight:900;color:#6d5a24;margin-bottom:8px;}
+.shrine-visit-stat-total strong{display:block;font-size:22px;line-height:1.2;color:#101828;font-weight:900;letter-spacing:-.04em;}
+.shrine-visit-stat-total span{display:inline-flex;margin-top:6px;font-size:14px;font-weight:900;color:#0e1535;}
+.shrine-visit-stat-row{display:grid;grid-template-columns:minmax(0,1fr) auto auto;align-items:center;gap:10px;min-height:46px;padding:8px 0;border:0;border-top:1px solid #e1e6ec;background:transparent;font-size:16px;font-family:inherit;text-align:left;cursor:pointer;width:100%;}
+.shrine-visit-stat-row:first-of-type{border-top:0;}
+.shrine-visit-stat-row:active{transform:translateY(1px);background:rgba(212,170,106,.12)!important;}
+.shrine-visit-stat-row.active{background:#eaf4ff!important;border:2px solid rgba(22,140,255,.48)!important;border-radius:9px;margin-left:-14px!important;margin-right:-14px!important;padding-left:20px!important;padding-right:14px!important;width:calc(100% + 28px)!important;box-sizing:border-box!important;scroll-margin-top:8px!important;}
+.shrine-visit-stat-name,.shrine-visit-stat-row strong,.shrine-visit-stat-row em{font-size:16px!important;font-weight:900;white-space:nowrap;}
+.shrine-visit-stat-name{color:#1d2939;overflow:hidden;text-overflow:ellipsis;}
+.shrine-visit-stat-row strong{color:#0e1535;}
+.shrine-visit-stat-row em{font-style:normal;color:#8b6914;}
+.shrine-visit-stat-items{margin:0 0 10px 0;padding:8px 10px 10px;border:1.5px solid #cbd5e1;border-top:0;border-radius:0 0 12px 12px;background:#f8fbff;box-shadow:0 2px 8px rgba(21,101,192,.06);}
+.shrine-visit-stat-row.active + .shrine-visit-stat-items{margin-left:-14px!important;margin-right:-14px!important;width:calc(100% + 28px)!important;padding-left:20px!important;padding-right:14px!important;border:2px solid rgba(22,140,255,.34)!important;border-top:0!important;box-sizing:border-box!important;box-shadow:0 8px 16px rgba(22,140,255,.07)!important;}
+.shrine-visit-stat-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:5px 10px;align-items:center;padding:8px 0;border-top:1px solid #e2e8f0;font-size:15px;line-height:1.28;}
+.shrine-visit-stat-item:first-child{border-top:0;}
+.shrine-visit-stat-item span{grid-column:1 / -1;font-size:16px;font-weight:900;color:#0f172a;word-break:keep-all;}
+.shrine-visit-stat-item strong{font-size:14px;color:#1565c0;font-weight:900;}
+.shrine-visit-stat-item em{font-size:14px;color:#475569;font-style:normal;font-weight:900;text-align:right;}
+.shrine-visit-stat-item.empty{display:block;font-size:15px;font-weight:900;color:#64748b;text-align:center;}
+.shrine-visit-map-filter{background:rgba(255,255,255,.94)!important;border:1.5px solid rgba(15,23,42,.18)!important;box-shadow:0 6px 18px rgba(15,23,42,.18)!important;border-radius:18px!important;gap:7px!important;}
+#map-wrap .shrine-visit-map-filter{left:0!important;right:0!important;top:0!important;width:100%!important;max-width:none!important;height:50px!important;min-height:50px!important;padding:7px 56px 7px 8px!important;border-radius:0!important;border-left:0!important;border-right:0!important;border-top:0!important;border-bottom:1px solid rgba(15,23,42,.16)!important;box-shadow:0 4px 14px rgba(15,23,42,.12)!important;backdrop-filter:blur(8px)!important;-webkit-backdrop-filter:blur(8px)!important;display:none;align-items:center!important;justify-content:flex-start!important;gap:7px!important;box-sizing:border-box!important;}
 #map-wrap .shrine-visit-map-filter.show{display:flex!important;}
 #map-wrap .shrine-visit-map-filter button,
 #map-wrap .shrine-visit-map-filter button[data-shrine-visit-filter="all"],
 #map-wrap .shrine-visit-map-filter button[data-shrine-visit-filter="visited"],
-#map-wrap .shrine-visit-map-filter button[data-shrine-visit-filter="unvisited"]{
-  height:34px!important;
-  min-height:34px!important;
-  min-width:78px!important;
-  padding:0 12px!important;
-  border-radius:10px!important;
-  font-size:13px!important;
-  font-weight:900!important;
-  line-height:1.1!important;
-  display:inline-flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  white-space:nowrap!important;
-}
-#map-wrap .shrine-visit-map-filter button[data-shrine-visit-filter="visited"]{min-width:112px!important;}
+#map-wrap .shrine-visit-map-filter button[data-shrine-visit-filter="unvisited"]{height:34px!important;min-height:34px!important;min-width:78px!important;padding:0 12px!important;border-radius:10px!important;font-size:13px!important;font-weight:900!important;line-height:1.1!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;white-space:nowrap!important;background:#ffffff!important;color:#0e1535!important;border:1.5px solid #cbd5e1!important;box-shadow:0 1px 5px rgba(15,23,42,.08)!important;}
+#map-wrap .shrine-visit-map-filter button[data-shrine-visit-filter="visited"],
 #map-wrap .shrine-visit-map-filter button[data-shrine-visit-filter="unvisited"]{min-width:112px!important;}
-#map-wrap .map-category-close{
-  top:7px!important;
-  right:10px!important;
-  width:36px!important;
-  height:36px!important;
-  min-width:36px!important;
-  min-height:36px!important;
-  font-size:24px!important;
-  line-height:1!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  z-index:660!important;
-}
-#loc-btn{
-  right:12px!important;
-  bottom:calc(env(safe-area-inset-bottom,0px) + 68px)!important;
-  z-index:858!important;
-}
+#map-wrap .shrine-visit-map-filter button.active,
+#map-wrap .shrine-visit-map-filter button[data-shrine-visit-filter="all"].active,
+#map-wrap .shrine-visit-map-filter button[data-shrine-visit-filter="visited"].active,
+#map-wrap .shrine-visit-map-filter button[data-shrine-visit-filter="unvisited"].active{background:#111111!important;color:#f6d58a!important;border-color:#d4aa6a!important;box-shadow:0 3px 10px rgba(0,0,0,.18)!important;}
+#map-wrap .map-category-close{top:7px!important;right:10px!important;width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important;font-size:24px!important;line-height:1!important;display:flex!important;align-items:center!important;justify-content:center!important;z-index:660!important;}
+.shrine-visit-floating-list-btn{right:12px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 34px)!important;z-index:860!important;min-width:138px!important;height:48px!important;padding:0 18px!important;border-radius:14px!important;font-size:15px!important;font-weight:900!important;background:#0b5fc8!important;color:#fff!important;border:2px solid rgba(255,255,255,.72)!important;box-shadow:0 10px 24px rgba(11,95,200,.34),0 3px 9px rgba(0,0,0,.22)!important;}
+.shrine-visit-floating-list-btn.show{display:inline-flex!important;align-items:center!important;justify-content:center!important;opacity:1!important;visibility:visible!important;pointer-events:auto!important;}
+#loc-btn{right:12px!important;bottom:calc(env(safe-area-inset-bottom,0px) + 92px)!important;z-index:858!important;border:1.5px solid rgba(21,101,192,.32)!important;box-shadow:0 3px 10px rgba(0,0,0,.26)!important;}
+html.parish-mode #app #loc-btn,
+html.retreat-mode #app #loc-btn{bottom:calc(env(safe-area-inset-bottom,0px) + 80px)!important;}
+html:not(.ios-device) #app .shrine-visit-floating-list-btn{bottom:calc(var(--oai-android-bottom-gap,10px) + 38px)!important;}
+html:not(.ios-device) #app #loc-btn{bottom:calc(var(--oai-android-bottom-gap,10px) + 94px)!important;}
+html:not(.ios-device).parish-mode #app #loc-btn,
+html:not(.ios-device).retreat-mode #app #loc-btn{bottom:calc(var(--oai-android-bottom-gap,10px) + 80px)!important;}
 #sheet-list .filter-bar,
 #list-filter-bar,
 #srch-modal .sm-filter,
-#sm-filter-bar{
-  position:relative!important;
-  z-index:70!important;
-  box-shadow:0 3px 10px rgba(15,23,42,.13)!important;
-  isolation:isolate!important;
-}
-#list-body,
-#sm-results,
-#sheet-list .sheet-body{
-  position:relative!important;
-  z-index:1!important;
-}
-
-html:not(.parish-mode):not(.retreat-mode) #app #sheet-list.open #list-body{
-  padding-bottom:calc(156px + env(safe-area-inset-bottom,0px))!important;
-}
-html:not(.parish-mode):not(.retreat-mode) #app #list-body .dio-hd{
-  z-index:64!important;
-}
-html:not(.parish-mode):not(.retreat-mode) #app #list-body .li-pilgrim-register{
-  z-index:2!important;
-}
-html:not(.parish-mode):not(.retreat-mode) #app #list-body .list-item{
-  position:relative!important;
-  z-index:1!important;
-}
-.shrine-visit-cards-head,
-.shrine-visit-cards-head.module-bar,
-.shrine-visit-cards-tabs,
-.shrine-visit-cards-diocese{
-  border-bottom:0.5px solid rgba(212,170,106,.45)!important;
-  box-shadow:none!important;
-}
-.shrine-visit-cards-head.module-bar::after{display:none!important;content:none!important;}
-.shrine-visit-cards-tabs{border-top:0!important;}
-
-.shrine-visit-cards-head,
-.shrine-visit-cards-head.module-bar,
-.shrine-visit-cards-tabs,
-.shrine-visit-cards-diocese{
-  border-bottom:1px solid rgba(212,170,106,.68)!important;
-  box-shadow:none!important;
-}
-.shrine-visit-cards-tabs{
-  width:100vw!important;
-  max-width:none!important;
-  overflow:hidden!important;
-  padding:8px 8px!important;
-  gap:6px!important;
-  min-height:58px!important;
-  height:58px!important;
-  max-height:58px!important;
-}
-.shrine-visit-cards-tabs button{
-  min-width:0!important;
-  height:40px!important;
-  min-height:40px!important;
-  padding:0 4px!important;
-  font-size:13px!important;
-  line-height:1.05!important;
-  white-space:nowrap!important;
-}
-.shrine-visit-cards-tabs button[data-shrine-visit-cards-tab="visited"]{flex:28 1 0!important;}
-.shrine-visit-cards-tabs button[data-shrine-visit-cards-tab="unvisited"]{flex:31 1 0!important;}
-.shrine-visit-cards-tabs button[data-shrine-visit-cards-tab="new"]{flex:25 1 0!important;}
-.shrine-visit-cards-tabs button[data-shrine-visit-cards-tab="stats"]{flex:16 1 0!important;}
-.shrine-visit-cards-diocese.stats-hidden{
-  display:none!important;
-  height:0!important;
-  min-height:0!important;
-  max-height:0!important;
-  padding:0!important;
-  border-bottom:0!important;
-  overflow:hidden!important;
-}
-#loc-btn{
-  right:12px!important;
-  bottom:calc(env(safe-area-inset-bottom,0px) + 76px)!important;
-  z-index:858!important;
-}
-.shrine-visit-floating-list-btn{
-  right:12px!important;
-  bottom:calc(env(safe-area-inset-bottom,0px) + 18px)!important;
-  z-index:860!important;
-}
-
-.shrine-visit-cards-stats.stats-tab-hidden{
-  display:none!important;
-  height:0!important;
-  min-height:0!important;
-  margin:0!important;
-  padding:0!important;
-  border:0!important;
-  overflow:hidden!important;
-}
-.shrine-visit-cards-diocese .filter-btn.active{
-  scroll-margin-left:14px!important;
-  scroll-margin-right:14px!important;
-}
-
-.shrine-visit-cards-panel{
-  overscroll-behavior:contain!important;
-}
-.shrine-visit-cards-body{
-  touch-action:pan-y!important;
-}
-.shrine-visit-cards-tabs,
-.shrine-visit-cards-diocese{
-  touch-action:pan-x!important;
-}
-.shrine-visit-stat-row.active{
-  scroll-margin-top:8px!important;
-}
-
-.shrine-visit-floating-list-btn{
-  right:12px!important;
-  bottom:calc(env(safe-area-inset-bottom,0px) + 34px)!important;
-  z-index:860!important;
-}
-#loc-btn{
-  right:12px!important;
-  bottom:calc(env(safe-area-inset-bottom,0px) + 92px)!important;
-  z-index:858!important;
-}
-html.parish-mode #app #loc-btn,
-html.retreat-mode #app #loc-btn{
-  bottom:calc(env(safe-area-inset-bottom,0px) + 80px)!important;
-}
+#sm-filter-bar{position:relative!important;z-index:70!important;box-shadow:0 3px 10px rgba(15,23,42,.13)!important;isolation:isolate!important;}
+#list-body,#sm-results,#sheet-list .sheet-body{position:relative!important;z-index:1!important;}
+html:not(.parish-mode):not(.retreat-mode) #app #sheet-list.open #list-body{padding-bottom:calc(156px + env(safe-area-inset-bottom,0px))!important;}
+html:not(.parish-mode):not(.retreat-mode) #app #list-body .dio-hd{z-index:64!important;}
+html:not(.parish-mode):not(.retreat-mode) #app #list-body .li-pilgrim-register{z-index:2!important;}
+html:not(.parish-mode):not(.retreat-mode) #app #list-body .list-item{position:relative!important;z-index:1!important;}
+html.oai-font-global .shrine-visit-cards-tabs button{font-size:calc(13px * var(--app-inner-font-scale,1))!important;}
+html.oai-font-global .shrine-visit-cards-diocese .filter-btn{font-size:calc(14px * var(--app-inner-font-scale,1))!important;}
+html.oai-font-global .shrine-visit-cards-stats strong{font-size:calc(20px * var(--app-inner-font-scale,1))!important;}
+html.oai-font-global .shrine-visit-cards-stats span,
+html.oai-font-global .shrine-visit-cards-stats b,
+html.oai-font-global .shrine-visit-cards-stats em{font-size:calc(15px * var(--app-inner-font-scale,1))!important;}
+html.oai-font-global .shrine-visit-stat-row,
+html.oai-font-global .shrine-visit-stat-name,
+html.oai-font-global .shrine-visit-stat-row strong,
+html.oai-font-global .shrine-visit-stat-row em{font-size:calc(16px * var(--app-inner-font-scale,1))!important;}
+html.oai-font-global .shrine-visit-floating-list-btn{font-size:calc(15px * var(--app-inner-font-scale,1))!important;}
+html.oai-font-global .shrine-visit-map-filter button{font-size:calc(13px * var(--app-inner-font-scale,1))!important;}
 
 .shrine-visit-detail-info-head{
   display:flex!important;
@@ -5089,15 +4510,6 @@ html:not(.ios-device).oai-screen-fold-wide #app #info-card .btn-kakao-nav{
   min-height:45px!important;
 }
 
-html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-head.module-bar,
-html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-head{
-  min-height:calc(58px + env(safe-area-inset-top,0px))!important;
-  height:calc(58px + env(safe-area-inset-top,0px))!important;
-  max-height:calc(58px + env(safe-area-inset-top,0px))!important;
-  padding-top:calc(8px + env(safe-area-inset-top,0px))!important;
-  padding-bottom:8px!important;
-}
-html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-head .module-bar-ico{width:38px!important;height:38px!important;min-width:38px!important;}
 html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-diocese{
   min-height:42px!important;
   height:42px!important;
@@ -5197,7 +4609,7 @@ html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-grid{
   box-shadow:0 8px 16px rgba(22,140,255,.07)!important;
 }
 
-/* V8-1-14-528: 과거 gold-cross 로딩 중복 블록 제거. 실제 로딩 십자가는 oai-loading-cross 변수 블록만 사용한다. */
+/* V8-1-14-530: 과거 gold-cross 로딩 중복 블록 제거. 실제 로딩 십자가는 oai-loading-cross 변수 블록만 사용한다. */
 html.oai-map-search-keyboard-lock,
 html.oai-map-search-keyboard-lock body{
   overscroll-behavior:none!important;
@@ -5215,25 +4627,6 @@ html.oai-map-search-keyboard-lock #sheet-region.open{
   top:var(--oai-map-top-h)!important;
   bottom:0!important;
   transform:none!important;
-}
-
-.shrine-visit-floating-list-btn{
-  min-width:138px!important;
-  height:48px!important;
-  padding:0 18px!important;
-  border-radius:14px!important;
-  font-size:15px!important;
-  font-weight:900!important;
-  right:12px!important;
-  bottom:calc(env(safe-area-inset-bottom,0px) + 34px)!important;
-  z-index:900!important;
-  background:#0b5fc8!important;
-  color:#fff!important;
-  border:2px solid rgba(255,255,255,.72)!important;
-  box-shadow:0 10px 24px rgba(11,95,200,.34),0 3px 9px rgba(0,0,0,.22)!important;
-}
-html.oai-font-global .shrine-visit-floating-list-btn{
-  font-size:calc(15px * var(--app-inner-font-scale,1))!important;
 }
 
 #shrine-visit-modal.show,
@@ -5308,61 +4701,7 @@ html.oai-stability-veil::after {
   animation:oaiStabilitySpin 2.8s linear infinite !important;
 }
 
-.shrine-visit-map-filter{
-  min-height:48px!important;
-  padding:7px!important;
-  gap:8px!important;
-}
-.shrine-visit-map-filter button,
-.shrine-visit-map-filter button[data-shrine-visit-filter="all"],
-.shrine-visit-map-filter button[data-shrine-visit-filter="visited"],
-.shrine-visit-map-filter button[data-shrine-visit-filter="unvisited"]{
-  min-height:36px!important;
-  height:36px!important;
-  padding:0 13px!important;
-  font-size:14px!important;
-  line-height:1.15!important;
-}
-
-html.oai-font-global .shrine-visit-map-filter{
-  min-height:48px!important;
-  padding:7px!important;
-  gap:8px!important;
-}
-html.oai-font-global .shrine-visit-map-filter button,
-html.oai-font-global .shrine-visit-map-filter button[data-shrine-visit-filter="all"],
-html.oai-font-global .shrine-visit-map-filter button[data-shrine-visit-filter="visited"],
-html.oai-font-global .shrine-visit-map-filter button[data-shrine-visit-filter="unvisited"]{
-  min-height:36px!important;
-  height:36px!important;
-  padding:0 13px!important;
-  font-size:14px!important;
-  line-height:1.15!important;
-}
-
-#map-wrap #shrine-visit-map-filter,
-html.oai-font-global #map-wrap #shrine-visit-map-filter{
-  min-height:52px!important;
-  padding:8px!important;
-  gap:8px!important;
-}
-#map-wrap #shrine-visit-map-filter > button[data-shrine-visit-filter],
-html.oai-font-global #map-wrap #shrine-visit-map-filter > button[data-shrine-visit-filter]{
-  min-height:42px!important;
-  height:42px!important;
-  padding:0 10px!important;
-  font-size:14px!important;
-  font-weight:900!important;
-  line-height:1.1!important;
-}
-#map-wrap #shrine-visit-map-filter > button[data-shrine-visit-filter="all"],
-html.oai-font-global #map-wrap #shrine-visit-map-filter > button[data-shrine-visit-filter="all"]{min-width:66px!important;}
-#map-wrap #shrine-visit-map-filter > button[data-shrine-visit-filter="visited"],
-#map-wrap #shrine-visit-map-filter > button[data-shrine-visit-filter="unvisited"],
-html.oai-font-global #map-wrap #shrine-visit-map-filter > button[data-shrine-visit-filter="visited"],
-html.oai-font-global #map-wrap #shrine-visit-map-filter > button[data-shrine-visit-filter="unvisited"]{min-width:96px!important;}
-
-/* V8-1-14-528: 사용하지 않는 이전 Google-style intro keyframes는 제거하고, oaiIntroSmoothPhoto*만 유지한다. */
+/* V8-1-14-530: 사용하지 않는 이전 Google-style intro keyframes는 제거하고, oaiIntroSmoothPhoto*만 유지한다. */
 html.oai-cover-booting body,
 html.oai-cover-revealing body{
   background:#fbf8f1 !important;
@@ -5397,7 +4736,7 @@ html.oai-cover-revealing::after{
     linear-gradient(to right, #fbf8f1 0%, rgba(251,248,241,.96) 5%, rgba(251,248,241,.60) 13%, rgba(251,248,241,.16) 24%, rgba(251,248,241,0) 36%, rgba(251,248,241,0) 64%, rgba(251,248,241,.16) 76%, rgba(251,248,241,.60) 87%, rgba(251,248,241,.96) 95%, #fbf8f1 100%),
     linear-gradient(to bottom, #fbf8f1 0%, rgba(251,248,241,.90) 6%, rgba(251,248,241,.36) 17%, rgba(251,248,241,0) 30%, rgba(251,248,241,0) 70%, rgba(251,248,241,.36) 83%, rgba(251,248,241,.90) 94%, #fbf8f1 100%),
     radial-gradient(ellipse 96% 88% at 50% 48%, rgba(251,248,241,0) 50%, rgba(251,248,241,.08) 62%, rgba(251,248,241,.34) 76%, rgba(251,248,241,.76) 90%, rgba(251,248,241,1) 100%),
-    url("intro-cross-jesus.jpg?v=V8-1-14-528") !important;
+    url("intro-cross-jesus.jpg?v=V8-1-14-530") !important;
   background-position:center center, center center, center center, center center !important;
   background-size:100% 100%, 100% 100%, 100% 100%, auto 106% !important;
   background-repeat:no-repeat, no-repeat, no-repeat, no-repeat !important;
@@ -5454,42 +4793,6 @@ html:not(.ios-device){
   --oai-map-safe-top:0px;
   --oai-map-top-h:var(--tab-h);
 }
-/* 스탬프북은 body 안 전체 모달이라 module-bar의 safe-area top을 한 번 더 더하면
-   관구·교구/다른 헤더보다 status bar 높이만큼 아래로 밀린다. */
-html:not(.ios-device) #shrine-visit-cards-modal .shrine-visit-cards-panel,
-html:not(.ios-device) .shrine-visit-cards-modal .shrine-visit-cards-panel{
-  padding-top:0!important;
-  padding-bottom:var(--oai-android-bottom-gap)!important;
-}
-html:not(.ios-device) #shrine-visit-cards-modal .shrine-visit-cards-head.module-bar,
-html:not(.ios-device) #shrine-visit-cards-modal .shrine-visit-cards-head,
-html:not(.ios-device) .shrine-visit-cards-modal .shrine-visit-cards-head.module-bar,
-html:not(.ios-device) .shrine-visit-cards-modal .shrine-visit-cards-head,
-html:not(.ios-device).oai-screen-compact-short #shrine-visit-cards-modal .shrine-visit-cards-head.module-bar,
-html:not(.ios-device).oai-screen-compact-short #shrine-visit-cards-modal .shrine-visit-cards-head,
-html:not(.ios-device).oai-screen-tall-phone #shrine-visit-cards-modal .shrine-visit-cards-head.module-bar,
-html:not(.ios-device).oai-screen-tall-phone #shrine-visit-cards-modal .shrine-visit-cards-head,
-html:not(.ios-device).oai-screen-fold-wide #shrine-visit-cards-modal .shrine-visit-cards-head.module-bar,
-html:not(.ios-device).oai-screen-fold-wide #shrine-visit-cards-modal .shrine-visit-cards-head{
-  height:var(--oai-std-header-h)!important;
-  min-height:var(--oai-std-header-h)!important;
-  max-height:var(--oai-std-header-h)!important;
-  padding:10px 16px 10px!important;
-  margin:0!important;
-  margin-left:0!important;
-  margin-right:0!important;
-  width:100%!important;
-  box-sizing:border-box!important;
-  flex-shrink:0!important;
-  align-items:center!important;
-  background:#0e1535!important;
-  border-bottom:2px solid var(--gold)!important;
-  border-radius:0!important;
-}
-html:not(.ios-device).oai-screen-compact-short #shrine-visit-cards-modal .shrine-visit-cards-head.module-bar,
-html:not(.ios-device).oai-screen-compact-short #shrine-visit-cards-modal .shrine-visit-cards-head{
-  padding:8px 14px 8px!important;
-}
 html:not(.ios-device) #cover{
   --cover-bottom-safe:var(--oai-android-bottom-gap)!important;
   padding-bottom:calc(var(--cover-bottom-reserve) + var(--oai-android-bottom-gap))!important;
@@ -5523,13 +4826,6 @@ html:not(.ios-device) #app #info-card .ic-body{
 html:not(.ios-device) #app .guide-modal{
   padding-bottom:calc(14px + var(--oai-android-bottom-gap))!important;
 }
-html:not(.ios-device) #app .shrine-visit-floating-list-btn{
-  bottom:calc(var(--oai-android-bottom-gap) + 24px)!important;
-}
-html:not(.ios-device) #app #loc-btn{
-  bottom:calc(var(--oai-android-bottom-gap) + 76px)!important;
-}
-
 html:not(.ios-device) .shrine-visit-panel,
 html:not(.ios-device) .shrine-auto-visit-panel{
   padding-bottom:var(--oai-android-bottom-gap-roomy)!important;
@@ -5557,17 +4853,6 @@ html.kb-open #app #shrine-visit-floating-list-btn.show{
   pointer-events:none!important;
   transform:none!important;
 }
-html:not(.ios-device) #app .shrine-visit-floating-list-btn{
-  bottom:calc(var(--oai-android-bottom-gap, 10px) + 38px)!important;
-}
-html:not(.ios-device) #app #loc-btn{
-  bottom:calc(var(--oai-android-bottom-gap, 10px) + 94px)!important;
-}
-html:not(.ios-device).parish-mode #app #loc-btn,
-html:not(.ios-device).retreat-mode #app #loc-btn{
-  bottom:calc(var(--oai-android-bottom-gap, 10px) + 80px)!important;
-}
-
 html.oai-refresh-no-intro.oai-cover-booting::after,
 html.oai-refresh-no-intro.oai-cover-revealing::after,
 html.oai-stability-veil[data-oai-stability-reason*="refresh"]::after,
@@ -5612,38 +4897,10 @@ html.oai-stability-veil[data-oai-stability-reason*="external"] *{
   will-change:auto!important;
 }
 
+/* V8-1-14-530: Android/WebView 스탬프북 헤더 안전여백은 여기서만 관리한다.
+   이전처럼 16px 블록과 38~46px 블록을 연속으로 두지 않아 상단이 과하게 늘어나지 않는다. */
 html:not(.ios-device){
-  --oai-stampbook-header-top-gap:clamp(16px, env(safe-area-inset-top, 0px), 24px);
-}
-html:not(.ios-device) #shrine-visit-cards-modal .shrine-visit-cards-head.module-bar,
-html:not(.ios-device) #shrine-visit-cards-modal .shrine-visit-cards-head,
-html:not(.ios-device) .shrine-visit-cards-modal .shrine-visit-cards-head.module-bar,
-html:not(.ios-device) .shrine-visit-cards-modal .shrine-visit-cards-head{
-  height:calc(var(--oai-std-header-h) + var(--oai-stampbook-header-top-gap))!important;
-  min-height:calc(var(--oai-std-header-h) + var(--oai-stampbook-header-top-gap))!important;
-  max-height:calc(var(--oai-std-header-h) + var(--oai-stampbook-header-top-gap))!important;
-  padding:calc(10px + var(--oai-stampbook-header-top-gap)) 16px 10px!important;
-  margin:0!important;
-  margin-left:0!important;
-  margin-right:0!important;
-  width:100%!important;
-  box-sizing:border-box!important;
-  flex-shrink:0!important;
-  align-items:center!important;
-  background:#0e1535!important;
-  border-bottom:2px solid var(--gold)!important;
-  border-radius:0!important;
-}
-html:not(.ios-device).oai-screen-compact-short #shrine-visit-cards-modal .shrine-visit-cards-head.module-bar,
-html:not(.ios-device).oai-screen-compact-short #shrine-visit-cards-modal .shrine-visit-cards-head{
-  height:calc(var(--oai-std-header-h) + var(--oai-stampbook-header-top-gap))!important;
-  min-height:calc(var(--oai-std-header-h) + var(--oai-stampbook-header-top-gap))!important;
-  max-height:calc(var(--oai-std-header-h) + var(--oai-stampbook-header-top-gap))!important;
-  padding:calc(8px + var(--oai-stampbook-header-top-gap)) 14px 8px!important;
-}
-
-html:not(.ios-device){
-  --oai-stampbook-header-top-gap:clamp(38px, calc(env(safe-area-inset-top, 0px) + 18px), 46px);
+  --oai-stampbook-header-top-gap:0px;
 }
 html:not(.ios-device) #shrine-visit-cards-modal .shrine-visit-cards-panel,
 html:not(.ios-device) .shrine-visit-cards-modal .shrine-visit-cards-panel{
@@ -5659,26 +4916,25 @@ html:not(.ios-device).oai-screen-tall-phone #shrine-visit-cards-modal .shrine-vi
 html:not(.ios-device).oai-screen-tall-phone #shrine-visit-cards-modal .shrine-visit-cards-head,
 html:not(.ios-device).oai-screen-fold-wide #shrine-visit-cards-modal .shrine-visit-cards-head.module-bar,
 html:not(.ios-device).oai-screen-fold-wide #shrine-visit-cards-modal .shrine-visit-cards-head{
-  height:calc(var(--oai-std-header-h) + var(--oai-stampbook-header-top-gap))!important;
-  min-height:calc(var(--oai-std-header-h) + var(--oai-stampbook-header-top-gap))!important;
-  max-height:calc(var(--oai-std-header-h) + var(--oai-stampbook-header-top-gap))!important;
-  padding:calc(8px + var(--oai-stampbook-header-top-gap)) 16px 10px!important;
+  height:var(--oai-std-header-h)!important;
+  min-height:var(--oai-std-header-h)!important;
+  max-height:var(--oai-std-header-h)!important;
+  padding:10px 16px!important;
   margin:0!important;
-  margin-left:0!important;
-  margin-right:0!important;
   width:100%!important;
   box-sizing:border-box!important;
   flex-shrink:0!important;
   align-items:center!important;
   overflow:visible!important;
   background:#0e1535!important;
-  border-bottom:2px solid var(--gold)!important;
+  border-bottom:1px solid rgba(212,170,106,.68)!important;
   border-radius:0!important;
 }
 html:not(.ios-device).oai-screen-compact-short #shrine-visit-cards-modal .shrine-visit-cards-head.module-bar,
 html:not(.ios-device).oai-screen-compact-short #shrine-visit-cards-modal .shrine-visit-cards-head{
-  padding:calc(6px + var(--oai-stampbook-header-top-gap)) 14px 8px!important;
+  padding:8px 14px!important;
 }
+
 html:not(.ios-device) #shrine-visit-cards-modal .shrine-visit-cards-head .module-bar-main,
 html:not(.ios-device) .shrine-visit-cards-modal .shrine-visit-cards-head .module-bar-main{
   align-items:center!important;
@@ -5692,7 +4948,7 @@ html:not(.ios-device) .shrine-visit-cards-modal .shrine-visit-cards-head .module
   0%{opacity:.12; transform:scale(.84); filter:contrast(1.005) saturate(1.01);}
   100%{opacity:1; transform:scale(1); filter:contrast(1.015) saturate(1.02);}
 }
-/* V8-1-14-528: intro animation 속도/이름 override 중복은 제거. 실제 값은 사진 블록과 keyframes에서만 관리한다. */
+/* V8-1-14-530: intro animation 속도/이름 override 중복은 제거. 실제 값은 사진 블록과 keyframes에서만 관리한다. */
 
 #cv-pull-modern,
 #cv-pull-modern.show,
@@ -5763,7 +5019,7 @@ html.oai-font-global .category-source-note { font-size: calc(11px * var(--app-in
   font-weight:900!important;
 }
 #app #info-card .ic-guide-btn{background:#fff4cc!important;color:#7c5600!important;border:1.5px solid #e6c766!important;}
-/* V8-1-14-528: 상세 버튼 색상과 로딩 십자가는 각각 원래 위치에서 관리한다.
+/* V8-1-14-530: 상세 버튼 색상과 로딩 십자가는 각각 원래 위치에서 관리한다.
    이 앞의 반복 로딩 십자가 override는 아래 oai-loading-cross 변수 블록으로 통합했다. */
 #app #loc-btn.oai-wait-nearby-list{
   opacity:0!important;
@@ -5821,7 +5077,7 @@ html.oai-stability-veil[data-oai-refresh-early-veil="1"]::after{
   animation:oaiUnifiedLoadingCrossSpin var(--oai-loading-cross-speed) linear infinite!important;
   transition:none!important;
 }
-/* V8-1-14-528: 외부사이트 진입/복귀 보호창 CSS 단일 기준. JS 흐름은 유지하고, 중복 십자가만 막는다. */
+/* V8-1-14-530: 외부사이트 진입/복귀 보호창 CSS 단일 기준. JS 흐름은 유지하고, 중복 십자가만 막는다. */
 #oai-external-entry-guard{
   position:fixed!important;
   inset:0!important;
@@ -6009,7 +5265,7 @@ html.oai-external-return-freeze.oai-external-return-releasing::after{
 }
 
 
-/* V8-1-14-528: 인포카드/상세 버튼의 이전 색상·테두리 override 묶음은 삭제하고,아래 최종 공통색 기준 하나만 유지한다. */
+/* V8-1-14-530: 인포카드/상세 버튼의 이전 색상·테두리 override 묶음은 삭제하고,아래 최종 공통색 기준 하나만 유지한다. */
 #app #info-card #ic-tel-link,#app #info-card #ic-route-btn,#app #info-card #ic-hp,#app #info-card #ic-guide,#app #info-card #ic-goodnews,#app #info-card #ic-kakao-nav{
   background:linear-gradient(180deg,#fbfdff 0%,#fffaf0 100%)!important;
   color:#213245!important;
@@ -6028,7 +5284,7 @@ html.oai-external-return-freeze.oai-external-return-releasing::after{
   transform:translateY(1px)!important;
 }
 
-/* V8-1-14-528: 인포카드 버튼과 성지 상세정보 버튼의 크기 기준을 한곳에서 확정한다. */
+/* V8-1-14-530: 인포카드 버튼과 성지 상세정보 버튼의 크기 기준을 한곳에서 확정한다. */
 #app #info-card #ic-tel-link,
 #app #info-card #ic-route-btn,
 #app #info-card #ic-hp,
@@ -6057,7 +5313,7 @@ html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-tel-link,html
   min-height:48px!important;
 }
 
-/* V8-1-14-528: compact-short 탭바/지도 top 기준은 아래 변수 블록 하나로 통합한다. */
+/* V8-1-14-530: compact-short 탭바/지도 top 기준은 아래 변수 블록 하나로 통합한다. */
 html:not(.ios-device).oai-screen-compact-short .map-category-close,
 html:not(.ios-device).oai-screen-compact-short .ic-close-btn,
 html:not(.ios-device).oai-screen-compact-short .sheet-x,
@@ -6231,46 +5487,7 @@ html:not(.ios-device).oai-screen-compact-short #app #sheet-route.open,
   transform:translateY(0)!important;
 }
 
-#shrine-visit-cards-modal .shrine-visit-cards-head.module-bar,
-.shrine-visit-cards-modal .shrine-visit-cards-head.module-bar,
-.shrine-visit-cards-head.module-bar{
-  height:calc(var(--oai-std-header-h) + env(safe-area-inset-top,0px))!important;
-  min-height:calc(var(--oai-std-header-h) + env(safe-area-inset-top,0px))!important;
-  max-height:calc(var(--oai-std-header-h) + env(safe-area-inset-top,0px))!important;
-  padding:var(--oai-std-hdr-pad) 16px 10px!important;
-  background:#0e1535!important;
-  color:var(--v4-surface-white)!important;
-  border-bottom:2px solid var(--gold)!important;
-  box-shadow:0 4px 16px rgba(14,21,53,.22)!important;
-  border-radius:0!important;
-}
-#shrine-visit-cards-modal .shrine-visit-cards-head .module-bar-main,
-.shrine-visit-cards-head .module-bar-main{gap:14px!important;}
-#shrine-visit-cards-modal .shrine-visit-cards-head .module-bar-ico,
-.shrine-visit-cards-head .module-bar-ico{
-  width:42px!important;height:42px!important;min-width:42px!important;flex:0 0 42px!important;
-  border-radius:12px!important;background:rgba(255,255,255,.12)!important;border:1px solid rgba(255,255,255,.2)!important;
-  color:transparent!important;font-size:0!important;position:relative!important;overflow:visible!important;
-}
-#shrine-visit-cards-modal .shrine-visit-cards-head .module-bar-ico::before,
-.shrine-visit-cards-head .module-bar-ico::before{
-  content:""!important;display:block!important;position:absolute!important;left:50%!important;top:50%!important;width:3px!important;height:24px!important;border-radius:2px!important;background:var(--v4-surface-white)!important;transform:translate(-50%,-50%)!important;
-}
-#shrine-visit-cards-modal .shrine-visit-cards-head .module-bar-ico::after,
-.shrine-visit-cards-head .module-bar-ico::after{
-  content:""!important;display:block!important;position:absolute!important;left:50%!important;top:42%!important;width:14px!important;height:3px!important;border-radius:2px!important;background:var(--v4-surface-white)!important;transform:translate(-50%,-50%)!important;
-}
-html.oai-font-global #shrine-visit-cards-modal .shrine-visit-cards-head .module-bar-title,
-html.oai-font-global .shrine-visit-cards-head .module-bar-title,
-#shrine-visit-cards-modal .shrine-visit-cards-head .module-bar-title,
-.shrine-visit-cards-head .module-bar-title{font-size:var(--oai-std-title-fs)!important;line-height:1.24!important;font-weight:800!important;color:var(--v4-surface-white)!important;}
-html.oai-font-global #shrine-visit-cards-modal .shrine-visit-cards-head .module-bar-sub,
-html.oai-font-global .shrine-visit-cards-head .module-bar-sub,
-#shrine-visit-cards-modal .shrine-visit-cards-head .module-bar-sub,
-.shrine-visit-cards-head .module-bar-sub{font-size:11px!important;line-height:1.25!important;color:rgba(255,255,255,.65)!important;}
-#shrine-visit-cards-modal .shrine-visit-cards-head .module-close,
-.shrine-visit-cards-head .module-close{width:var(--oai-std-close-sz)!important;height:var(--oai-std-close-sz)!important;min-width:var(--oai-std-close-sz)!important;flex:0 0 var(--oai-std-close-sz)!important;border-radius:999px!important;background:transparent!important;border:1.5px solid currentColor!important;color:rgba(212,170,106,.9)!important;font-size:28px!important;box-shadow:none!important;}
-/* V8-1-14-528: 인트로 종료(revealing) 때 십자가 사진 확대 애니메이션을 재시작하지 않는다.
+/* V8-1-14-530: 인트로 종료(revealing) 때 십자가 사진 확대 애니메이션을 재시작하지 않는다.
    booting 단계에서만 .84→1로 커지고, revealing 단계는 최종 크기에서 opacity만 사라진다. */
 html.oai-cover-revealing::after{
   animation:none!important;
@@ -6285,7 +5502,7 @@ html.oai-cover-revealing::after{
   }
 }
 
-/* V8-1-14-528: Android tablet top spacing is standardized without adding a second WebView safe-area. */
+/* V8-1-14-530: Android tablet top spacing is standardized without adding a second WebView safe-area. */
 html.oai-android-tablet:not(.ios-device) #tabbar{
   height:var(--tab-h)!important;
   min-height:var(--tab-h)!important;
@@ -6311,11 +5528,11 @@ html.oai-android-tablet:not(.ios-device) .module-view.open{
   padding-top:0!important;
 }
 
-/* V8-1-14-528: route-choice and cover/mass-quick modal styles are managed in their module CSS files. */
+/* V8-1-14-530: route-choice and cover/mass-quick modal styles are managed in their module CSS files. */
 
-/* V8-1-14-528: Fold 전환 아이보리 안정막은 Android native 한 곳에서만 처리한다. PWA overlay는 제거했다. */
+/* V8-1-14-530: Fold 전환 아이보리 안정막은 Android native 한 곳에서만 처리한다. PWA overlay는 제거했다. */
 
-/* V8-1-14-528: 성당/피정의집 내위치 버튼을 더 아래로 내려 지도 위에서 떠 보이는 위치를 완화한다. */
+/* V8-1-14-530: 성당/피정의집 내위치 버튼을 더 아래로 내려 지도 위에서 떠 보이는 위치를 완화한다. */
 html:not(.ios-device).parish-mode #app #loc-btn,
 html:not(.ios-device).retreat-mode #app #loc-btn{
   bottom:calc(var(--oai-android-bottom-gap, 10px) + 38px)!important;
@@ -6325,7 +5542,7 @@ html:not(.ios-device).oai-screen-compact-short.retreat-mode #app #loc-btn{
   bottom:calc(var(--oai-android-bottom-gap, 10px) + 36px)!important;
 }
 
-/* V8-1-14-528: 성지 인포카드 하단 여백을 조금 되살려 마지막 버튼이 바닥에 붙어 보이지 않게 한다. */
+/* V8-1-14-530: 성지 인포카드 하단 여백을 조금 되살려 마지막 버튼이 바닥에 붙어 보이지 않게 한다. */
 html:not(.ios-device) #app #info-card{
   padding-bottom:10px!important;
 }
@@ -6344,9 +5561,9 @@ html:not(.ios-device) #app #info-card .ic-body{
 html:not(.ios-device) #app #sheet-route{
   padding-bottom:6px!important;
 }
-/* V8-1-14-528: visible cover version remains available for release verification. */
+/* V8-1-14-530: visible cover version remains available for release verification. */
 
-/* V8-1-14-528: 검색 키보드가 열린 상태에서 성지/성당/피정 리스트를 처음 스크롤할 때
+/* V8-1-14-530: 검색 키보드가 열린 상태에서 성지/성당/피정 리스트를 처음 스크롤할 때
    키보드 닫힘/viewport 복원/카드 눌림 효과가 겹쳐 생기던 첫 버벅임을 줄인다. */
 #list-body,
 #region-body,
@@ -6381,7 +5598,7 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
 }
 
 
-/* V8-1-14-528: 인포카드 버튼 색상 정리. 전화는 흰색, 카카오내비는 노랑, 나머지는 남색이며, 색 버튼 테두리는 배경보다 한 단계 어둡게 유지한다. */
+/* V8-1-14-530: 인포카드 버튼 색상 정리. 전화는 흰색, 카카오내비는 노랑, 나머지는 남색이며, 색 버튼 테두리는 배경보다 한 단계 어둡게 유지한다. */
 #app #info-card #ic-tel-link,#app #info-card .ic-tel-btn{
   background:#ffffff!important;
   background-color:#ffffff!important;
@@ -6445,12 +5662,12 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
 }
 
 
-/* V8-1-14-528: 커버 하단 여백은 실제 요소가 아닌 과거 선택자 덧씌움으로 조정하지 않는다.
+/* V8-1-14-530: 커버 하단 여백은 실제 요소가 아닌 과거 선택자 덧씌움으로 조정하지 않는다.
    하단 3버튼과 안내문구 간격은 상단 cover 변수의 --cover-note-reserve에서만 조정한다. */
 
-/* V8-1-14-528: 매일미사/주요기도문 상단바 중복 보정은 원래 기준 위치로 병합했다. */
+/* V8-1-14-530: 매일미사/주요기도문 상단바 중복 보정은 원래 기준 위치로 병합했다. */
 
-/* V8-1-14-528: 검색 모달이 키보드/edge-to-edge 상태에서 상단에 붙어 제목줄이 잘리는 것을 방지한다. */
+/* V8-1-14-530: 검색 모달이 키보드/edge-to-edge 상태에서 상단에 붙어 제목줄이 잘리는 것을 방지한다. */
 #srch-modal .sm-inner{
   min-height:0!important;
   height:100%!important;
@@ -6469,7 +5686,7 @@ html.oai-result-scroll-kb-dismiss #srch-modal .sm-hd{
   flex-shrink:0!important;
 }
 
-/* V8-1-14-528: 마산교구·의정부교구 성당 상세페이지 미사시간 안내문. */
+/* V8-1-14-530: 마산교구·의정부교구 성당 상세페이지 미사시간 안내문. */
 #app #info-card .ic-parish-mass-notice{
   display:none;
   margin:7px 14px 2px;
