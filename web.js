@@ -279,6 +279,168 @@
       return !!(trailState && trailState.hantiRouteActive) || localStorage.getItem('catholic_hanti_route_active_v1') === '1';
     }catch(_e){ return !!(trailState && trailState.hantiRouteActive); }
   }
+  var HANTI_ROUTE_FOLLOW_RESUME_KEY = 'catholic_hanti_route_follow_resume_v1';
+  var HANTI_ROUTE_FOLLOW_ACTIVE_KEY = 'catholic_hanti_route_follow_active_v1';
+  var HANTI_ROUTE_FOLLOW_RESUME_MAX_MS = 8 * 60 * 60 * 1000;
+
+  function getHantiRouteDataById(id){
+    var routeId = String(id || 'hanti');
+    if(routeId === 'dowon_test_loop' || routeId === 'dowon') return getDowonTestRouteData() || getHantiRouteData();
+    return getHantiRouteData();
+  }
+  function hantiSafeJsonParse(raw){
+    if(!raw) return null;
+    try{ return JSON.parse(raw); }catch(_e){ return null; }
+  }
+  function getSavedHantiFollowResumeState(){
+    try{
+      var raw = sessionStorage.getItem(HANTI_ROUTE_FOLLOW_RESUME_KEY) || localStorage.getItem(HANTI_ROUTE_FOLLOW_RESUME_KEY) || '';
+      var state = hantiSafeJsonParse(raw);
+      if(!state || !state.followActive) return null;
+      var at = Number(state.savedAt || state.at || 0);
+      if(!Number.isFinite(at) || !at || Date.now() - at > HANTI_ROUTE_FOLLOW_RESUME_MAX_MS){
+        clearHantiFollowResumeState('expired');
+        return null;
+      }
+      return state;
+    }catch(_e){ return null; }
+  }
+  function clearHantiFollowResumeState(reason){
+    try{ sessionStorage.removeItem(HANTI_ROUTE_FOLLOW_RESUME_KEY); }catch(_e){}
+    try{ localStorage.removeItem(HANTI_ROUTE_FOLLOW_RESUME_KEY); }catch(_e){}
+    try{ localStorage.removeItem(HANTI_ROUTE_FOLLOW_ACTIVE_KEY); }catch(_e){}
+  }
+  function buildHantiFollowResumeState(reason){
+    try{
+      var data = getActiveHantiRouteData() || getHantiRouteData();
+      var center = null, level = null;
+      if(trailState && trailState.map && window.kakao && kakao.maps){
+        try{
+          var c = trailState.map.getCenter && trailState.map.getCenter();
+          center = c ? {lat:c.getLat(), lng:c.getLng()} : null;
+          level = trailState.map.getLevel ? trailState.map.getLevel() : null;
+        }catch(_e){}
+      }
+      return {
+        savedAt: Date.now(),
+        reason: reason || 'hanti-follow-resume',
+        routeId: (data && data.id) || (trailState && trailState.hantiActiveRouteId) || 'hanti',
+        routeActive: !!(trailState && (trailState.hantiRouteViewMode || trailState.hantiVisible || trailState.hantiRouteActive)),
+        followActive: !!(trailState && trailState.hantiFollowActive),
+        returnTrailIndex: Number.isFinite(Number(trailState && trailState.hantiReturnTrailIndex)) ? Number(trailState.hantiReturnTrailIndex) : getHantiMainTrailIndex(),
+        selected: Number.isFinite(Number(trailState && trailState.selected)) ? Number(trailState.selected) : getHantiMainTrailIndex(),
+        center: center,
+        level: level,
+        lastRoutePointIndex: Number.isFinite(Number(trailState && trailState.hantiLastRoutePointIndex)) ? Number(trailState.hantiLastRoutePointIndex) : null,
+        lastProgressM: Number.isFinite(Number(trailState && trailState.hantiLastProgressM)) ? Number(trailState.hantiLastProgressM) : 0,
+        arrivedStampIds: (trailState && trailState.hantiArrivedStampIds) || {},
+        showGpsTrace: !!(trailState && trailState.hantiShowGpsTrace),
+        infoCardOpen: true
+      };
+    }catch(e){ console.warn('[가톨릭길동무]', e); return null; }
+  }
+  function saveHantiFollowResumeState(reason){
+    try{
+      if(!(trailState && trailState.hantiFollowActive)){
+        if(reason && /manual-stop|close-route|test-close/i.test(String(reason))) clearHantiFollowResumeState(reason);
+        return false;
+      }
+      var state = buildHantiFollowResumeState(reason || 'save');
+      if(!(state && state.followActive)) return false;
+      var raw = JSON.stringify(state);
+      sessionStorage.setItem(HANTI_ROUTE_FOLLOW_RESUME_KEY, raw);
+      localStorage.setItem(HANTI_ROUTE_FOLLOW_RESUME_KEY, raw);
+      localStorage.setItem(HANTI_ROUTE_FOLLOW_ACTIVE_KEY, '1');
+      return true;
+    }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
+  }
+  function hasHantiFollowResumeState(){
+    try{
+      if(trailState && trailState.hantiFollowActive) return true;
+      if(localStorage.getItem(HANTI_ROUTE_FOLLOW_ACTIVE_KEY) === '1' && getSavedHantiFollowResumeState()) return true;
+      return !!getSavedHantiFollowResumeState();
+    }catch(_e){ return !!(trailState && trailState.hantiFollowActive); }
+  }
+  function restoreMapViewFromHantiState(state){
+    try{
+      if(!(state && state.center && trailState && trailState.map && window.kakao && kakao.maps)) return;
+      var lat = Number(state.center.lat), lng = Number(state.center.lng);
+      if(Number.isFinite(lat) && Number.isFinite(lng)) trailState.map.setCenter(new kakao.maps.LatLng(lat, lng));
+      if(Number.isFinite(Number(state.level)) && trailState.map.setLevel) trailState.map.setLevel(Number(state.level));
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }
+  function openHantiMainInfoCardPreservingRoute(reason){
+    try{
+      var idx = Number.isFinite(Number(trailState && trailState.hantiReturnTrailIndex)) && Number(trailState.hantiReturnTrailIndex) >= 0 ? Number(trailState.hantiReturnTrailIndex) : getHantiMainTrailIndex();
+      var d = TRAIL_ITEMS[idx];
+      if(!d || !isHantiTrailItem(d)) return;
+      trailState.selected = idx;
+      trailState.hantiSecretTitleReady = true;
+      var bdg = ig$('trail-sh-bdg');
+      var region = ig$('trail-sh-region');
+      var ico = ig$('trail-sh-ico');
+      var name = ig$('trail-sh-name');
+      var sub = ig$('trail-sh-sub');
+      var url = ig$('trail-sh-url');
+      var body = ig$('trail-sh-body');
+      var foot = ig$('trail-sh-foot');
+      if(bdg){ bdg.textContent = d.op; bdg.className = 'trail-sh-bdg ' + d.t; }
+      if(region) region.textContent = '📍 ' + d.r;
+      if(ico){ ico.textContent = d.ico; ico.className = 'trail-sh-ico ' + d.t; }
+      if(name) name.textContent = d.n;
+      if(sub) sub.textContent = d.op + ' · ' + d.r;
+      if(url) url.textContent = '';
+      if(body) body.onclick = function(ev){ if(ev){ ev.preventDefault(); ev.stopPropagation(); } };
+      if(foot) foot.onclick = function(ev){ if(ev){ ev.preventDefault(); ev.stopPropagation(); } };
+      ensureHantiMainSheetActions(d);
+      bindHantiSecretTapTarget(name);
+      if(hantiTestModeEnabled()) ensureHantiTestPanel(); else removeHantiTestPanel();
+      ig$('trail-sheet')?.classList.add('open');
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }
+  function restoreHantiFollowFromBackground(reason){
+    var state = getSavedHantiFollowResumeState();
+    if(!state && trailState && trailState.hantiFollowActive) state = buildHantiFollowResumeState(reason || 'runtime-restore');
+    if(!(state && state.followActive)) return false;
+    try{
+      var data = getHantiRouteDataById(state.routeId);
+      if(!data) return false;
+      if(!ig$('trail-view')?.classList.contains('open')) enterIntegratedView('trail-view');
+      trailState.view = 'map';
+      trailState.pendingFitBounds = false;
+      trailState.restoreCenter = state.center || null;
+      trailState.restoreLevel = state.level || null;
+      trailState.hantiReturnTrailIndex = Number.isFinite(Number(state.returnTrailIndex)) ? Number(state.returnTrailIndex) : getHantiMainTrailIndex();
+      trailState.hantiShowGpsTrace = state.showGpsTrace !== false;
+      initTrailModule();
+      trailSetView('map');
+      setTimeout(function(){
+        try{
+          if(!(trailState && trailState.map && window.kakao && kakao.maps)) return;
+          openHantiFullRoute(data, {source:'background-resume', noFitBounds:true});
+          trailState.hantiLastRoutePointIndex = Number.isFinite(Number(state.lastRoutePointIndex)) ? Number(state.lastRoutePointIndex) : null;
+          trailState.hantiLastProgressM = Number.isFinite(Number(state.lastProgressM)) ? Number(state.lastProgressM) : 0;
+          trailState.hantiArrivedStampIds = state.arrivedStampIds || {};
+          try{ Object.keys(trailState.hantiArrivedStampIds || {}).forEach(markHantiStampOverlayArrived); }catch(_e){}
+          if(Number.isFinite(Number(trailState.hantiLastRoutePointIndex))){
+            drawHantiProgressToIndex({pointIndex:Number(trailState.hantiLastRoutePointIndex)});
+          }
+          restoreMapViewFromHantiState(state);
+          openHantiMainInfoCardPreservingRoute('background-resume');
+          startHantiGpxFollow({resume:true, silent:true});
+          saveHantiFollowResumeState('background-restored');
+          try{ relayoutTrailMap(120, 'hanti-background-resume'); }catch(_e){}
+        }catch(e){ console.warn('[가톨릭길동무]', e); }
+      }, 140);
+      return true;
+    }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
+  }
+
+  try{
+    window.oaiSaveHantiBackgroundRouteState = saveHantiFollowResumeState;
+    window.oaiShouldKeepHantiRouteOnBackgroundReturn = hasHantiFollowResumeState;
+    window.oaiRestoreHantiBackgroundRouteResume = restoreHantiFollowFromBackground;
+  }catch(_e){}
   function closeTrailSheetOnly(){
     try{ ig$('trail-sheet')?.classList.remove('open'); }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
@@ -646,7 +808,8 @@
     stopHantiGpxFollow();
     removeHantiTestPanel();
   }
-  function stopHantiGpxFollow(){
+  function stopHantiGpxFollow(opts){
+    opts = opts || {};
     try{
       if(trailState && trailState.hantiFollowWatchId != null && navigator.geolocation){
         navigator.geolocation.clearWatch(trailState.hantiFollowWatchId);
@@ -656,22 +819,25 @@
       trailState.hantiFollowWatchId = null;
       trailState.hantiFollowActive = false;
     }
+    if(!opts.keepResumeState) clearHantiFollowResumeState(opts.reason || 'manual-stop');
     var btn = ig$('trail-hanti-follow-toggle');
     if(btn) btn.textContent = 'GPX 따라가기 시작';
     var routeBtn = ig$('trail-hanti-route-follow');
     if(routeBtn) routeBtn.textContent = '▶ 경로 따라가기';
   }
-  function startHantiGpxFollow(){
-    if(!(window.navigator && navigator.geolocation)){ alert('위치 서비스를 지원하지 않습니다.'); return; }
+  function startHantiGpxFollow(opts){
+    opts = opts || {};
+    if(!(window.navigator && navigator.geolocation)){ if(!opts.silent) alert('위치 서비스를 지원하지 않습니다.'); return; }
     if(!(trailState && trailState.map && window.kakao && kakao.maps)){ initTrailModule(); return; }
-    if(trailState.hantiFollowActive){ stopHantiGpxFollow(); return; }
-    resetHantiFollowSession();
+    if(trailState.hantiFollowActive){ if(opts.resume) return; stopHantiGpxFollow({reason:'manual-stop'}); return; }
+    if(!opts.resume) resetHantiFollowSession();
     trailState.hantiFollowActive = true;
+    saveHantiFollowResumeState(opts.resume ? 'resume-start' : 'manual-start');
     var btn = ig$('trail-hanti-follow-toggle');
     if(btn) btn.textContent = 'GPX 따라가기 중지';
     var routeBtn = ig$('trail-hanti-route-follow');
     if(routeBtn) routeBtn.textContent = '■ 정지';
-    var first = true;
+    var first = !opts.resume;
     function onpos(pos){
       var lat = pos.coords.latitude, lng = pos.coords.longitude;
       showHantiLocationGuide(lat, lng, {follow:true});
@@ -685,15 +851,16 @@
         trailState.map.panTo(ll);
         if(first && trailState.map.getLevel && trailState.map.setLevel && trailState.map.getLevel() > 4) trailState.map.setLevel(4);
         first = false;
+        saveHantiFollowResumeState('position-update');
       }catch(e){ console.warn('[가톨릭길동무]', e); }
     }
     function onerr(e){
-      stopHantiGpxFollow();
-      alert(e && e.code === 1 ? '위치 권한을 허용해 주세요.' : '위치를 가져올 수 없습니다.');
+      stopHantiGpxFollow({reason:'location-error'});
+      if(!opts.silent) alert(e && e.code === 1 ? '위치 권한을 허용해 주세요.' : '위치를 가져올 수 없습니다.');
     }
     try{
       trailState.hantiFollowWatchId = navigator.geolocation.watchPosition(onpos, onerr, {enableHighAccuracy:true, timeout:15000, maximumAge:2000});
-    }catch(e){ stopHantiGpxFollow(); alert('위치 추적을 시작할 수 없습니다.'); }
+    }catch(e){ stopHantiGpxFollow({reason:'watch-start-error'}); if(!opts.silent) alert('위치 추적을 시작할 수 없습니다.'); }
   }
   function hantiAutoStampJudgement(nearest){
     if(!(nearest && nearest.stamp)) return {ok:false, radius:0};
@@ -845,12 +1012,14 @@
     removeTrailSheetActions();
     setHantiRouteMapChrome(true);
     ensureHantiRouteControls();
-    fitHantiRouteBounds(data);
+    if(opts && opts.noFitBounds) restoreMapViewFromHantiState(opts.resumeState || null);
+    else fitHantiRouteBounds(data);
+    if(trailState.hantiFollowActive) saveHantiFollowResumeState('route-open');
   }
   function closeHantiFullRouteToSheet(reason){
     if(!(trailState && (trailState.hantiRouteViewMode || trailState.hantiVisible))) return false;
     var idx = Number.isFinite(Number(trailState.hantiReturnTrailIndex)) && trailState.hantiReturnTrailIndex >= 0 ? Number(trailState.hantiReturnTrailIndex) : getHantiMainTrailIndex();
-    stopHantiGpxFollow();
+    stopHantiGpxFollow({reason:'close-route'});
     clearHantiRouteOverlays();
     removeHantiRouteControls();
     setHantiRouteActive(false);
@@ -1365,6 +1534,25 @@
       }catch(e){ console.warn('[가톨릭길동무]', e); restoreIntegratedState(); }
     }, 0);
   });
+
+  function scheduleHantiFollowBackgroundRestore(reason){
+    try{
+      if(!hasHantiFollowResumeState()) return;
+      setTimeout(function(){ restoreHantiFollowFromBackground(reason || 'background-visible'); }, 180);
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }
+  document.addEventListener('visibilitychange', function(){
+    try{
+      if(document.visibilityState === 'hidden') saveHantiFollowResumeState('visibility-hidden');
+      else scheduleHantiFollowBackgroundRestore('visibility-visible');
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }, {passive:true});
+  window.addEventListener('pagehide', function(){
+    try{ saveHantiFollowResumeState('pagehide'); }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }, {passive:true});
+  window.addEventListener('pageshow', function(){
+    scheduleHantiFollowBackgroundRestore('pageshow');
+  }, {passive:true});
 
   function resetWebTransientState(){
     try{ sessionStorage.removeItem(RETURN_KEY); }catch(e){ console.warn("[가톨릭길동무]", e); }
