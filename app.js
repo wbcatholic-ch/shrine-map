@@ -2092,6 +2092,7 @@ function _ensureShrineVisitCardsModal(){
     e.preventDefault(); e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation();
     const idx=parseInt(card.getAttribute('data-shrine-visit-card'),10);
     window.__OAI_SHRINE_VISIT_DETAIL_FROM_CARDS__=true;
+    _setShrineVisitDetailFromCardsActive(true);
     _openShrineVisitDetail(idx);
   }, true);
   _bindShrineVisitCardsSwipe(modal);
@@ -2169,12 +2170,19 @@ function _isShrineVisitCardsModalOpen(){
   const modal=document.getElementById('shrine-visit-cards-modal');
   return !!(modal&&modal.classList.contains('show'));
 }
+function _setShrineVisitDetailFromCardsActive(active){
+  try{
+    document.documentElement.classList.toggle('oai-shrine-detail-from-cards', !!active);
+    document.body.classList.toggle('oai-shrine-detail-from-cards', !!active);
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+}
 function _pushShrineVisitCardsHistory(){
   return;
 }
 function _openShrineVisitCardsModal(){
   if(_mode!=='shrine') return;
   const modal=_ensureShrineVisitCardsModal();
+  _setShrineVisitDetailFromCardsActive(false);
   _shrineVisitCardsTab='visited';
   _shrineVisitCardsDiocese='all';
   window.__OAI_SHRINE_VISIT_STATS_EXPANDED_DIO__='';
@@ -2195,6 +2203,7 @@ function _closeShrineVisitCardsModal(opts){
   const modal=document.getElementById('shrine-visit-cards-modal');
   const wasOpen=!!(modal&&modal.classList.contains('show'));
   if(modal){ modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); }
+  if(!_isShrineVisitDetailOpen()) _setShrineVisitDetailFromCardsActive(false);
   _resetShrineVisitStatsExpansion();
   window.__OAI_SHRINE_VISIT_CARDS_HISTORY__=false;
   window.__OAI_SHRINE_VISIT_CARDS_CLOSING_BY_CODE__=false;
@@ -2321,6 +2330,8 @@ function _renderShrineVisitDetail(idx){
   body.innerHTML='<section class="shrine-visit-detail-hero"><div class="shrine-visit-detail-hero-head"><div class="shrine-visit-detail-kicker">순례 기록</div><button type="button" class="shrine-visit-detail-register" data-shrine-detail-register="1" aria-label="순례등록">순례등록</button></div><div class="shrine-visit-detail-count">순례 '+count+'회</div><div class="shrine-visit-detail-recent">최근 순례일 '+_visitHtmlEsc(recent)+'</div><div class="shrine-visit-detail-date-title">순례 날짜</div><div class="shrine-visit-detail-date-list">'+dateHtml+'</div></section><section class="shrine-visit-detail-info"><div class="shrine-visit-detail-info-head"><div class="shrine-visit-detail-section-title">성지 정보</div><button type="button" class="shrine-visit-detail-map-btn" data-shrine-detail-map="'+idx+'">지도에서 보기</button></div><div class="shrine-visit-detail-name">'+_visitHtmlEsc(item.name||'')+'</div><div class="shrine-visit-detail-row"><span>교구</span><strong>'+_visitHtmlEsc(item.diocese||'—')+'</strong></div><div class="shrine-visit-detail-row"><span>주소</span><strong>'+_visitHtmlEsc(item.addr||'—')+'</strong></div><div class="shrine-visit-detail-row"><span>전화</span><strong>'+telText+'</strong></div><div class="shrine-visit-detail-actions">'+primaryRow+linkRow+kakaoRow+'</div></section>';
 }
 function _openShrineVisitDetailOnMap(idx){
+  _setShrineVisitDetailFromCardsActive(false);
+  window.__OAI_SHRINE_VISIT_DETAIL_FROM_CARDS__=false;
   idx=parseInt(idx,10);
   if(!(idx>=0) || !SHRINES[idx]) return;
   const item=SHRINES[idx];
@@ -2374,6 +2385,8 @@ function _openShrineVisitDetail(idx){
   if(!(idx>=0)&&idx!==0) return;
   if(!SHRINES[idx]) return;
   const view=_ensureShrineVisitDetailView();
+  if(window.__OAI_SHRINE_VISIT_DETAIL_FROM_CARDS__===true) _setShrineVisitDetailFromCardsActive(true);
+  else _setShrineVisitDetailFromCardsActive(false);
   window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__=idx;
   _renderShrineVisitDetail(idx);
   view.classList.add('show');
@@ -2385,6 +2398,8 @@ function _closeShrineVisitDetail(opts){
   const view=document.getElementById('shrine-visit-detail-view');
   const wasOpen=!!(view&&view.classList.contains('show'));
   if(view){ view.classList.remove('show'); view.setAttribute('aria-hidden','true'); }
+  window.__OAI_SHRINE_VISIT_DETAIL_FROM_CARDS__=false;
+  _setShrineVisitDetailFromCardsActive(false);
   window.__OAI_SHRINE_VISIT_DETAIL_HISTORY__=false;
   window.__OAI_SHRINE_VISIT_DETAIL_CLOSING_BY_CODE__=false;
 }
@@ -4872,6 +4887,7 @@ const _navCache = new Map();
 const _navInflight = new Map();
 const _NAV_CONCURRENCY = 5;
 const OAI_NEARBY_ROUTE_CANDIDATE_LIMIT = 20;
+const OAI_NEARBY_ROUTE_BATCH_CONCURRENCY = 3;
 const OAI_NEARBY_ROUTE_TIMEOUT_MS = 3000;
 const OAI_MY_LOCATION_MARKER_ZINDEX = 1200;
 let _navActive = 0;
@@ -7954,20 +7970,31 @@ function _loadNearbyWithDist(lat,lng,items,getIdx,getColor,getLabel){
   }
 
   const results=new Array(prelim.length).fill(null);
-  let done=0;
+  let done=0, active=0, cursor=0;
+  const maxConcurrent=Math.max(1, Math.min(OAI_NEARBY_ROUTE_BATCH_CONCURRENCY, prelim.length));
 
-  prelim.forEach((x,i)=>{
-    _navFetch(`${lng},${lat}`,`${x.p.lng},${x.p.lat}`)
-    .then(val=>{ results[i]=val||{km:x.d*1.35,dur:null}; })
-    .catch(()=>{ results[i]={km:x.d*1.35,dur:null}; })
-    .finally(()=>{
-      done++;
-      if(done===prelim.length){
-        if(!_isNearbyLoadCurrent(requestMode,requestToken,body)) return;
-        _renderNearbyDone(prelim,results,getIdx,getColor,getLabel,'final',requestMode,requestToken);
-      }
-    });
-  });
+  function finishOne(){
+    done++;
+    if(done===prelim.length){
+      if(!_isNearbyLoadCurrent(requestMode,requestToken,body)) return;
+      _renderNearbyDone(prelim,results,getIdx,getColor,getLabel,'final',requestMode,requestToken);
+      return;
+    }
+    pump();
+  }
+  function pump(){
+    if(!_isNearbyLoadCurrent(requestMode,requestToken,body)) return;
+    while(active<maxConcurrent && cursor<prelim.length){
+      const i=cursor++;
+      const x=prelim[i];
+      active++;
+      _navFetch(`${lng},${lat}`,`${x.p.lng},${x.p.lat}`)
+        .then(val=>{ results[i]=val||{km:x.d*1.35,dur:null}; })
+        .catch(()=>{ results[i]={km:x.d*1.35,dur:null}; })
+        .finally(()=>{ active--; finishOne(); });
+    }
+  }
+  pump();
 }
 function _renderNearbyDone(prelim,results,getIdx,getColor,getLabel,phase,requestMode,requestToken){
   const body=$('nearby-body');

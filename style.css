@@ -13,6 +13,8 @@
 
   
   --tab-h:          80px;
+  --oai-map-safe-top: env(safe-area-inset-top, 0px);
+  --oai-map-top-h: calc(var(--tab-h) + var(--oai-map-safe-top));
   --mod-header-h:   70px;
   --sb:             0px;
   --st:             env(safe-area-inset-top, 0);
@@ -401,9 +403,9 @@ html.app-active #app { display: block; }
   z-index: 950;
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  height: calc(var(--tab-h) + env(safe-area-inset-top, 0px));
-  min-height: calc(var(--tab-h) + env(safe-area-inset-top, 0px));
-  padding: calc(env(safe-area-inset-top, 0px) + 5px) 7px 6px;
+  height: var(--oai-map-top-h);
+  min-height: var(--oai-map-top-h);
+  padding: calc(var(--oai-map-safe-top) + 5px) 7px 6px;
   gap: 5px;
   align-items: stretch;
   overflow: hidden;
@@ -493,7 +495,7 @@ html.retreat-mode #tab-list-lbl {
 
 #map-wrap {
   position: fixed;
-  top: calc(var(--tab-h) + env(safe-area-inset-top, 0px));
+  top: var(--oai-map-top-h);
   left: 0;
   right: 0;
   bottom: 0;
@@ -577,7 +579,7 @@ html.retreat-mode #tab-list-lbl {
 
 .sheet {
   position: fixed;
-  top: calc(var(--tab-h) + env(safe-area-inset-top, 0));
+  top: var(--oai-map-top-h);
   left: 0;
   right: 0;
   bottom: 0;
@@ -4135,6 +4137,8 @@ html.oai-font-global .shrine-auto-visit-title{font-size:calc(16px * var(--app-in
 html.oai-font-global .shrine-visit-detail-head-title{font-size:calc(18px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-detail-kicker,html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(12px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-detail-count{font-size:calc(32px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-detail-recent,html.oai-font-global .shrine-visit-detail-add{font-size:calc(14px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-detail-date-chip,html.oai-font-global .shrine-visit-detail-row span{font-size:calc(13px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-detail-name{font-size:calc(22px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-visit-detail-row strong{font-size:calc(14px * var(--app-inner-font-scale,1))!important}
 
 .shrine-visit-cards-modal{position:fixed!important;inset:0!important;z-index:10060!important;display:none!important;align-items:stretch!important;justify-content:stretch!important;background:#fffdf7!important}.shrine-visit-cards-modal.show{display:flex!important}.shrine-visit-cards-backdrop{display:none!important}
+html.oai-shrine-detail-from-cards #shrine-visit-cards-modal.show{visibility:hidden;pointer-events:none}
+html.oai-shrine-detail-from-cards #shrine-visit-detail-view.show{visibility:visible;pointer-events:auto}
 .shrine-visit-cards-panel{width:100%!important;max-width:none!important;height:100%!important;max-height:none!important;border-radius:0!important;border:0!important;background:#fffdf7!important;padding:env(safe-area-inset-top) 12px max(18px,env(safe-area-inset-bottom))!important;box-shadow:none!important;display:flex!important;flex-direction:column!important}
 .shrine-visit-cards-head{height:56px;min-height:56px;display:flex!important;align-items:center!important;justify-content:space-between!important;gap:10px!important;margin:0!important;border-bottom:1px solid #eadfcd;background:#fff8e8;margin-left:-12px!important;margin-right:-12px!important;padding:0 12px!important;box-shadow:0 2px 10px rgba(0,0,0,.05)}
 .shrine-visit-cards-head-main{flex:1;min-width:0;text-align:center}.shrine-visit-cards-kicker{font-size:11px!important;font-weight:900!important;color:#8b6914!important;line-height:1.1}.shrine-visit-cards-title{font-size:18px!important;font-weight:900!important;color:#111!important;line-height:1.2;letter-spacing:-.03em}.shrine-visit-cards-back,.shrine-visit-cards-x{width:38px!important;height:38px!important;border-radius:50%!important;border:1px solid #e2d2b7!important;background:#fffdf7!important;color:#5b3c00!important;font-size:27px!important;font-weight:900!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;line-height:1!important;font-family:inherit!important;touch-action:manipulation!important}.shrine-visit-cards-x{font-size:23px!important}.shrine-visit-cards-back:active,.shrine-visit-cards-x:active{transform:translateY(1px);background:#fff0c9!important}
@@ -4255,7 +4259,7 @@ html.oai-font-global .shrine-visit-map-filter button{font-size:calc(13px * var(-
   gap:11px!important;
 }
 .shrine-visit-detail-view{
-  z-index:10080!important;
+  z-index:10075!important;
 }
 .shrine-visit-cards-body.stats{
   padding-top:0!important;
@@ -5208,7 +5212,7 @@ html.oai-map-search-keyboard-lock #srch-modal .sm-inner{
 }
 html.oai-map-search-keyboard-lock #sheet-list.open,
 html.oai-map-search-keyboard-lock #sheet-region.open{
-  top:calc(var(--tab-h) + env(safe-area-inset-top, 0))!important;
+  top:var(--oai-map-top-h)!important;
   bottom:0!important;
   transform:none!important;
 }
@@ -5234,7 +5238,7 @@ html.oai-font-global .shrine-visit-floating-list-btn{
 
 #shrine-visit-modal.show,
 .shrine-visit-modal.show{
-  z-index:10080!important;
+  z-index:10090!important;
 }
 
 .module-close,
@@ -5445,6 +5449,10 @@ html:not(.ios-device){
   --oai-android-bottom-gap-tight:clamp(8px, env(safe-area-inset-bottom,0px), 14px);
   --oai-android-bottom-gap-roomy:clamp(12px, env(safe-area-inset-bottom,0px), 20px);
   --v4-list-pad-bottom:calc(72px + var(--oai-android-bottom-gap));
+  /* Android/WebView 지도 카테고리는 이미 네이티브 영역에서 상단 안전 여백을 받으므로
+     CSS safe-area를 다시 더하지 않는다. 큰 빈칸과 탭/시트 어긋남을 막는다. */
+  --oai-map-safe-top:0px;
+  --oai-map-top-h:var(--tab-h);
 }
 /* 스탬프북은 body 안 전체 모달이라 module-bar의 safe-area top을 한 번 더 더하면
    관구·교구/다른 헤더보다 status bar 높이만큼 아래로 밀린다. */
@@ -6091,9 +6099,9 @@ html:not(.ios-device).oai-screen-compact-short{
   --map-tab-btn-h:56px;
 }
 html:not(.ios-device).oai-screen-compact-short #tabbar{
-  height:calc(66px + env(safe-area-inset-top,0px))!important;
-  min-height:calc(66px + env(safe-area-inset-top,0px))!important;
-  padding:calc(env(safe-area-inset-top,0px) + 4px) 6px 5px!important;
+  height:var(--oai-map-top-h)!important;
+  min-height:var(--oai-map-top-h)!important;
+  padding:calc(var(--oai-map-safe-top) + 4px) 6px 5px!important;
   gap:5px!important;
   align-items:stretch!important;
 }
@@ -6104,7 +6112,7 @@ html:not(.ios-device).oai-screen-compact-short #tabbar .tab-btn{
 }
 html:not(.ios-device).oai-screen-compact-short #map-wrap,
 html:not(.ios-device).oai-screen-compact-short .sheet{
-  top:calc(66px + env(safe-area-inset-top,0px))!important;
+  top:var(--oai-map-top-h)!important;
 }
 html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-head,
 html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-head.module-bar,
@@ -6284,8 +6292,9 @@ html.oai-android-tablet:not(.ios-device) #tabbar{
   max-height:var(--tab-h)!important;
   padding:5px 7px 6px!important;
 }
-html.oai-android-tablet:not(.ios-device) #map-wrap{
-  top:var(--tab-h)!important;
+html.oai-android-tablet:not(.ios-device) #map-wrap,
+html.oai-android-tablet:not(.ios-device) .sheet{
+  top:var(--oai-map-top-h)!important;
 }
 html.oai-android-tablet:not(.ios-device) #app .module-bar,
 html.oai-android-tablet:not(.ios-device) #prayer-view .module-bar,
