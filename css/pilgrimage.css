@@ -120,7 +120,7 @@
 
 .trail-sh-arr { font-size: 15px; color: #94a3b8; flex-shrink: 0; }
 
-/* V8-1-14-503: 경로따라가기 중에는 내 위치 점에 진행방향 화살표를 붙인다. */
+/* V8-1-14-506: 경로따라가기 중에는 내 위치 점에 진행방향 화살표를 붙인다. */
 .trail-myloc { width: 16px; height: 16px; border-radius: 50%; background: #2255cc; border: 2.5px solid var(--v4-surface-white); box-shadow: 0 0 0 4px rgba(34,85,204,.22); }
 .trail-myloc.follow{
   position:relative;
@@ -154,7 +154,7 @@
   opacity:.95;
 }
 
-/* V8-1-14-503: 경로 자체의 앞으로 갈 진행 방향 표시. 내 위치 방향이 아니라 GPX 남은 경로 방향이다. */
+/* V8-1-14-506: 경로 자체의 앞으로 갈 진행 방향 표시. 내 위치 방향이 아니라 GPX 남은 경로 방향이다. */
 .hanti-route-dir-arrow{
   width:26px;
   height:26px;
@@ -627,7 +627,7 @@ html:not(.ios-device) .trail-sheet.hanti-main-card{
 }
 
 
-/* V8-1-14-503: 한티 경로보기 하단 조작 레이어. 배경을 넣고, 경로따라가기/내 위치는 위줄, 경로 반대는 아래줄에 둔다. */
+/* V8-1-14-506: 한티 경로보기 하단 조작 레이어. 배경을 넣고, 경로따라가기/내 위치는 위줄, 경로 반대는 아래줄에 둔다. */
 .hanti-route-controls{
   bottom:calc(8px + env(safe-area-inset-bottom, 0))!important;
   display:flex!important;

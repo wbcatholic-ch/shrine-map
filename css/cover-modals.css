@@ -30,10 +30,10 @@
   --oai-menu-modal-text-letter: -.035em;
 }
 
-/* V8-1-14-503: 메뉴 모달 2단계 정리.
+/* V8-1-14-506: 메뉴 모달 3단계 정리.
    커버 메뉴창과 미사 중 빠른 사용이 공유하는 시각 기준은 oai-menu-modal-* 클래스 한 곳에서 관리한다.
    버튼 높이·간격·아이콘·글자·테두리는 oai-menu-modal 변수로 한 곳에서 조정하고,
-   각 기능별 선택자는 기능 차이와 색상 변수만 담당한다. */
+   미사 중 빠른 사용 4버튼의 반복 ID 규칙은 mass-quick-btn 한 곳으로 통합한다. */
 .cover-menu-modal {
   position: fixed;
   inset: 0;
@@ -74,7 +74,7 @@
   max-height: min(90dvh, 800px) !important;
   text-align: left !important;
 }
-#cover #mass-quick-modal .guide-backdrop {
+#cover #mass-quick-modal .mass-quick-backdrop {
   -webkit-backdrop-filter: none;
   backdrop-filter: none;
   background: rgba(31,42,68,.30);
@@ -135,21 +135,26 @@
   justify-content: center !important;
   box-shadow: none !important;
 }
-#cover #mass-quick-modal .mass-quick-head .guide-x,
+#cover #mass-quick-modal {
+  --mass-quick-close-top: 10px;
+  --mass-quick-close-right: 10px;
+  --mass-quick-close-size: 38px;
+  --mass-quick-close-font: 27px;
+}
 #cover #mass-quick-modal .mass-quick-close {
   position: absolute !important;
-  top: 10px !important;
-  right: 10px !important;
+  top: var(--mass-quick-close-top) !important;
+  right: var(--mass-quick-close-right) !important;
   z-index: 4 !important;
-  width: 38px !important;
-  height: 38px !important;
-  min-width: 38px !important;
-  flex: 0 0 38px !important;
+  width: var(--mass-quick-close-size) !important;
+  height: var(--mass-quick-close-size) !important;
+  min-width: var(--mass-quick-close-size) !important;
+  flex: 0 0 var(--mass-quick-close-size) !important;
   border-radius: 999px !important;
   border: 1.6px solid rgba(201,208,220,.90) !important;
   background: #fffdf8 !important;
   color: var(--oai-modal-standard-head) !important;
-  font-size: 27px !important;
+  font-size: var(--mass-quick-close-font) !important;
   font-weight: 950 !important;
   line-height: 1 !important;
   display: inline-flex !important;
@@ -157,7 +162,6 @@
   justify-content: center !important;
   box-shadow: 0 6px 14px rgba(31,41,55,.18) !important;
 }
-#cover #mass-quick-modal .guide-badge { display: none !important; }
 .oai-menu-modal-actions {
   display: grid !important;
   grid-template-columns: 1fr !important;
@@ -247,15 +251,11 @@ html:not(.ios-device).oai-screen-compact-short .cover-menu-close {
   min-width: 32px !important;
   flex-basis: 32px !important;
 }
-html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-head .guide-x,
-html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal .mass-quick-close {
-  top: 8px !important;
-  right: 8px !important;
-  width: 36px !important;
-  height: 36px !important;
-  min-width: 36px !important;
-  flex-basis: 36px !important;
-  font-size: 25px !important;
+html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal {
+  --mass-quick-close-top: 8px;
+  --mass-quick-close-right: 8px;
+  --mass-quick-close-size: 36px;
+  --mass-quick-close-font: 25px;
 }
 html:not(.ios-device).oai-screen-compact-short .cover-menu-modal,
 html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal {
@@ -271,11 +271,9 @@ html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal {
   --oai-menu-modal-item-grid: 50px 1fr;
 }
 
-/* 미사 중 빠른 사용 4버튼은 기능별 변수만 지정하고, 실제 버튼 형태는 oai-menu-modal-item 한 곳에서 처리한다. */
-#cover #mass-quick-modal #mass-quick-missa,
-#cover #mass-quick-modal #mass-quick-prayer,
-#cover #mass-quick-modal #mass-quick-hymn,
-#cover #mass-quick-modal #mass-quick-bible{
+/* V8-1-14-506: 미사 중 빠른 사용 4버튼의 공통값은 버튼 ID 4곳이 아니라 mass-quick-btn 한 곳에서 관리한다.
+   각 버튼별 차이가 생길 때만 개별 ID 변수를 추가한다. */
+#cover #mass-quick-modal .mass-quick-btn {
   --oai-menu-modal-item-bg: #ffffff;
   --oai-menu-modal-item-border-color: #246ca8;
   --oai-menu-modal-item-border-width: 2px;
