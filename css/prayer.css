@@ -282,7 +282,7 @@
 }
 #goodnews-prayer-btn:active { opacity: .82; transform: scale(.97); }
 
-.qna-body { background: #f8fafc; display: flex; flex-direction: column; }
+/* V8-1-14-510: removed obsolete inquiry-body rule; inquiry view is iframe-based and managed by module-common.css. */
 html:not(.ios-device) .pr-list{padding-bottom:calc(18px + var(--oai-android-bottom-gap, 10px))!important;}
 
 html:not(.ios-device).oai-screen-compact-short #prayer-close,

@@ -30,6 +30,15 @@
 #trail-view.module-view.open,
 #qna-view.module-view.open { display: flex; flex-direction: column; align-items: stretch; }
 
+/* V8-1-14-510: 문의·건의 부모 화면은 qna-view + qna-frame iframe 구조만 module-common.css에서 관리한다. */
+#qna-view .qna-frame {
+  flex: 1 1 auto;
+  min-height: 0;
+  width: 100%;
+  border: 0;
+  background: #ede8e0;
+}
+
 .module-bar,
 #prayer-bar,
 #diocese-bar {
@@ -167,8 +176,7 @@
 
 #prayer-tabs,
 #web-view .web-cats,
-#trail-view .trail-tabs,
-#qna-view .qna-tabs {
+#trail-view .trail-tabs {
   height: 55px;
   min-height: 55px;
   max-height: 55px;
@@ -191,13 +199,11 @@
 }
 #prayer-tabs::-webkit-scrollbar,
 #web-view .web-cats::-webkit-scrollbar,
-#trail-view .trail-tabs::-webkit-scrollbar,
-#qna-view .qna-tabs::-webkit-scrollbar { display: none; }
+#trail-view .trail-tabs::-webkit-scrollbar { display: none; }
 
 #prayer-tabs .pr-tab,
 #web-view .web-cat-btn,
-#trail-view .trail-tab,
-#qna-view .qna-tab {
+#trail-view .trail-tab {
   height: 40px;
   min-height: 40px;
   padding: 0 12px;
@@ -222,13 +228,11 @@
   scroll-margin-inline: 18px;
 }
 #trail-view .trail-tab { flex: 1 1 0; }
-#qna-view .qna-tab { flex: 1 1 0; }
 
 #prayer-tabs .pr-tab.on,
 #prayer-tabs .pr-tab.active,
 #web-view .web-cat-btn.on,
-#trail-view .trail-tab.on,
-#qna-view .qna-tab.on {
+#trail-view .trail-tab.on {
   color: var(--v4-surface-white);
   border-color: transparent;
   font-weight: 800;
@@ -271,12 +275,11 @@
 }
 #trail-list::-webkit-scrollbar, .web-list::-webkit-scrollbar { display: none; }
 
-#trail-view .trail-tabs, #qna-view .qna-tabs { -webkit-overflow-scrolling: touch; touch-action: auto; }
+#trail-view .trail-tabs { -webkit-overflow-scrolling: touch; touch-action: auto; }
 
 html:not(.ios-device).oai-screen-compact-short #prayer-tabs,
 html:not(.ios-device).oai-screen-compact-short #web-view .web-cats,
-html:not(.ios-device).oai-screen-compact-short #trail-view .trail-tabs,
-html:not(.ios-device).oai-screen-compact-short #qna-view .qna-tabs{
+html:not(.ios-device).oai-screen-compact-short #trail-view .trail-tabs{
   height:var(--oai-std-tabbar-h,46px)!important;
   min-height:var(--oai-std-tabbar-h,46px)!important;
   max-height:var(--oai-std-tabbar-h,46px)!important;
@@ -285,8 +288,7 @@ html:not(.ios-device).oai-screen-compact-short #qna-view .qna-tabs{
 }
 html:not(.ios-device).oai-screen-compact-short #prayer-tabs .pr-tab,
 html:not(.ios-device).oai-screen-compact-short #web-view .web-cat-btn,
-html:not(.ios-device).oai-screen-compact-short #trail-view .trail-tab,
-html:not(.ios-device).oai-screen-compact-short #qna-view .qna-tab{
+html:not(.ios-device).oai-screen-compact-short #trail-view .trail-tab{
   height:var(--oai-std-tab-h,33px)!important;
   min-height:var(--oai-std-tab-h,33px)!important;
   padding:0 10px!important;

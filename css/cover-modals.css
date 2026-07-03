@@ -28,9 +28,15 @@
   --oai-menu-modal-text-font: calc(16px * var(--app-font-scale, 1));
   --oai-menu-modal-text-line: 1.18;
   --oai-menu-modal-text-letter: -.035em;
+  --oai-menu-modal-close-size: 42px;
+  --oai-menu-modal-close-font: 26px;
+  --oai-menu-modal-close-border: 1.5px solid rgba(255,255,255,.72);
+  --oai-menu-modal-close-bg: rgba(255,255,255,.10);
+  --oai-menu-modal-close-color: var(--oai-modal-standard-head-text);
+  --oai-menu-modal-close-shadow: none;
 }
 
-/* V8-1-14-506: 메뉴 모달 3단계 정리.
+/* V8-1-14-510: 메뉴 모달 3단계 정리.
    커버 메뉴창과 미사 중 빠른 사용이 공유하는 시각 기준은 oai-menu-modal-* 클래스 한 곳에서 관리한다.
    버튼 높이·간격·아이콘·글자·테두리는 oai-menu-modal 변수로 한 곳에서 조정하고,
    미사 중 빠른 사용 4버튼의 반복 ID 규칙은 mass-quick-btn 한 곳으로 통합한다. */
@@ -118,49 +124,40 @@
   letter-spacing: -.025em !important;
   margin: 6px 0 0 !important;
 }
-.cover-menu-close {
-  width: 42px !important;
-  height: 42px !important;
-  min-width: 42px !important;
-  flex: 0 0 42px !important;
+/* V8-1-14-510: 메뉴 모달 닫기 버튼의 공통 모양은 oai-menu-modal-close 한 곳에서 관리한다.
+   커버 메뉴 X와 미사 빠른 사용 X는 크기·색상 변수를 다르게 주고, 위치 차이만 개별 선택자에서 처리한다. */
+.oai-menu-modal-close {
+  width: var(--oai-menu-modal-close-size) !important;
+  height: var(--oai-menu-modal-close-size) !important;
+  min-width: var(--oai-menu-modal-close-size) !important;
+  flex: 0 0 var(--oai-menu-modal-close-size) !important;
   border-radius: 999px !important;
-  border: 1.5px solid rgba(255,255,255,.72) !important;
-  background: rgba(255,255,255,.10) !important;
-  color: var(--oai-modal-standard-head-text) !important;
-  font-size: 26px !important;
-  font-weight: 900 !important;
-  line-height: 1 !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  box-shadow: none !important;
-}
-#cover #mass-quick-modal {
-  --mass-quick-close-top: 10px;
-  --mass-quick-close-right: 10px;
-  --mass-quick-close-size: 38px;
-  --mass-quick-close-font: 27px;
-}
-#cover #mass-quick-modal .mass-quick-close {
-  position: absolute !important;
-  top: var(--mass-quick-close-top) !important;
-  right: var(--mass-quick-close-right) !important;
-  z-index: 4 !important;
-  width: var(--mass-quick-close-size) !important;
-  height: var(--mass-quick-close-size) !important;
-  min-width: var(--mass-quick-close-size) !important;
-  flex: 0 0 var(--mass-quick-close-size) !important;
-  border-radius: 999px !important;
-  border: 1.6px solid rgba(201,208,220,.90) !important;
-  background: #fffdf8 !important;
-  color: var(--oai-modal-standard-head) !important;
-  font-size: var(--mass-quick-close-font) !important;
+  border: var(--oai-menu-modal-close-border) !important;
+  background: var(--oai-menu-modal-close-bg) !important;
+  color: var(--oai-menu-modal-close-color) !important;
+  font-size: var(--oai-menu-modal-close-font) !important;
   font-weight: 950 !important;
   line-height: 1 !important;
   display: inline-flex !important;
   align-items: center !important;
   justify-content: center !important;
-  box-shadow: 0 6px 14px rgba(31,41,55,.18) !important;
+  box-shadow: var(--oai-menu-modal-close-shadow) !important;
+}
+#cover #mass-quick-modal {
+  --oai-menu-modal-close-top: 10px;
+  --oai-menu-modal-close-right: 10px;
+  --oai-menu-modal-close-size: 38px;
+  --oai-menu-modal-close-font: 27px;
+  --oai-menu-modal-close-border: 1.6px solid rgba(201,208,220,.90);
+  --oai-menu-modal-close-bg: #fffdf8;
+  --oai-menu-modal-close-color: var(--oai-modal-standard-head);
+  --oai-menu-modal-close-shadow: 0 6px 14px rgba(31,41,55,.18);
+}
+#cover #mass-quick-modal .mass-quick-close {
+  position: absolute !important;
+  top: var(--oai-menu-modal-close-top) !important;
+  right: var(--oai-menu-modal-close-right) !important;
+  z-index: 4 !important;
 }
 .oai-menu-modal-actions {
   display: grid !important;
@@ -245,17 +242,14 @@ html:not(.ios-device).oai-screen-compact-short .oai-menu-modal-subtitle {
   margin-top: 4px !important;
   line-height: 1.2 !important;
 }
-html:not(.ios-device).oai-screen-compact-short .cover-menu-close {
-  width: 32px !important;
-  height: 32px !important;
-  min-width: 32px !important;
-  flex-basis: 32px !important;
+html:not(.ios-device).oai-screen-compact-short .cover-menu-modal {
+  --oai-menu-modal-close-size: 32px;
 }
 html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal {
-  --mass-quick-close-top: 8px;
-  --mass-quick-close-right: 8px;
-  --mass-quick-close-size: 36px;
-  --mass-quick-close-font: 25px;
+  --oai-menu-modal-close-top: 8px;
+  --oai-menu-modal-close-right: 8px;
+  --oai-menu-modal-close-size: 36px;
+  --oai-menu-modal-close-font: 25px;
 }
 html:not(.ios-device).oai-screen-compact-short .cover-menu-modal,
 html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal {
@@ -271,7 +265,7 @@ html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal {
   --oai-menu-modal-item-grid: 50px 1fr;
 }
 
-/* V8-1-14-506: 미사 중 빠른 사용 4버튼의 공통값은 버튼 ID 4곳이 아니라 mass-quick-btn 한 곳에서 관리한다.
+/* V8-1-14-510: 미사 중 빠른 사용 4버튼의 공통값은 버튼 ID 4곳이 아니라 mass-quick-btn 한 곳에서 관리한다.
    각 버튼별 차이가 생길 때만 개별 ID 변수를 추가한다. */
 #cover #mass-quick-modal .mass-quick-btn {
   --oai-menu-modal-item-bg: #ffffff;
