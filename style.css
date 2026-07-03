@@ -145,7 +145,7 @@
   
   --bg-color:   #f7f0e5;
   
-  /* V8-1-14-510: 커버 레이아웃 소유권 선언.
+  /* V8-1-14-517: 커버 레이아웃 소유권 선언.
      커버 비율은 #cover / #cover-main-block / .cover-grid / #cover-action-row / #cover-bottom-note와
      아래 cover 전용 변수에서만 관리한다.
      하단 안내문구와 3버튼 사이 간격은 margin 덧씌움이 아니라 --cover-note-reserve/--cover-bottom-reserve로 조정한다. */
@@ -1681,28 +1681,40 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, var(--v4-retreat
   padding: env(safe-area-inset-top, 0) 14px 0;
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 12px;
   min-height: calc(52px + env(safe-area-inset-top, 0));
   flex-shrink: 0;
   border-bottom: 1.5px solid #e4d6bf;
+  position: relative;
 }
-#missa-bar-title { font-size: 16px; font-weight: 800; color: #6f4f23; letter-spacing: .02em; }
-#missa-close {
-  background: transparent;
-  border: none;
-  border-radius: 0;
-  color: #8a6a38;
-  font-size: 28px;
+#missa-bar-title {
+  flex: 1 1 auto;
+  text-align: left;
+  font-size: 18px;
   font-weight: 900;
+  color: #6f4f23;
+  letter-spacing: .02em;
+}
+#missa-close {
+  margin-left: auto;
+  margin-right: 0;
+  background: #fffaf1;
+  border: 2px solid #8a6a38;
+  border-radius: 999px;
+  color: #1f2a44;
+  font-size: 34px;
+  font-weight: 800;
   line-height: 1;
-  width: var(--v4-close-size);
-  height: var(--v4-close-size);
+  width: 44px;
+  height: 44px;
+  min-width: 44px;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  flex-shrink: 0;
-  box-shadow: none;
+  flex: 0 0 auto;
+  box-shadow: 0 2px 7px rgba(31,42,68,.08);
 }
 #missa-external-panel { flex: 1; display: flex; align-items: flex-start; justify-content: center; background: #f8f6f2; padding: 42px 18px 18px; overflow-y: auto; }
 .missa-external-card { width: min(420px,100%); background: var(--v4-surface-white); border: 1px solid #e5ded3; border-radius: 18px; padding: 28px 20px; text-align: center; box-shadow: 0 8px 26px rgba(14,21,53,.08); }
@@ -1713,58 +1725,26 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, var(--v4-retreat
 
 #missa-frame { flex: 1 1 auto; min-height: 0; width: 100%; border: 0; background: #fffaf2; }
 
-#missa-loading {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: calc(52px + env(safe-area-inset-top, 0px));
-  bottom: calc(68px + env(safe-area-inset-bottom, 0px));
-  z-index: 3;
-  display: none;
-  align-items: center;
-  justify-content: center;
-  flex-direction: column;
-  gap: 12px;
-  background: #fffaf2;
-  pointer-events: auto;
-  opacity: 1;
-  visibility: visible;
-}
-#missa-view.oai-faith-frame-loading #missa-loading {
-  display: flex;
-}
-#missa-loading .missa-spinner {
-  width: var(--oai-loading-cross-size, 36px);
-  height: var(--oai-loading-cross-size, 36px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--oai-loading-cross-color, #d4aa6a);
-  font-size: var(--oai-loading-cross-font, 32px);
-  line-height: 1;
-  animation: oaiUnifiedLoadingCrossSpin var(--oai-loading-cross-speed, 2.8s) linear infinite;
-}
-#missa-loading .missa-spinner::before {
-  content: "✝";
-  display: block;
-  font-weight: 900;
-}
-#missa-loading .missa-loading-txt {
-  font-size: 13px;
-  font-weight: 800;
-  color: rgba(111,79,35,.82);
-  letter-spacing: .01em;
-}
+/* V8-1-14-517: 매일미사/주요기도문 하단 빠른 버튼은 이 블록을 단일 기준으로 관리한다.
+   Android/compact 차이는 뒤쪽에서 같은 속성을 다시 쓰지 않고 변수만 바꾼다. */
 .faith-bottom-nav {
+  --faith-bottom-gap: 8px;
+  --faith-bottom-pad-top: 8px;
+  --faith-bottom-pad-x: 12px;
+  --faith-bottom-pad-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
   flex: 0 0 auto;
   display: flex;
-  gap: 8px;
+  gap: var(--faith-bottom-gap);
   width: 100%;
-  padding: 8px 12px calc(env(safe-area-inset-bottom, 0px) + 8px);
+  padding: var(--faith-bottom-pad-top) var(--faith-bottom-pad-x) var(--faith-bottom-pad-bottom);
   box-sizing: border-box;
   background: rgba(255,250,242,.96);
   border-top: 1px solid rgba(214,176,108,.62);
   box-shadow: 0 -8px 24px rgba(31,42,68,.10);
+}
+#prayer-view {
+  --faith-prayer-list-bottom-pad: calc(86px + env(safe-area-inset-bottom, 0px));
+  --faith-prayer-detail-bottom-pad: calc(96px + env(safe-area-inset-bottom, 0px));
 }
 #prayer-view .faith-bottom-nav {
   position: fixed;
@@ -1772,20 +1752,25 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, var(--v4-retreat
   z-index: 20120;
 }
 #prayer-view:not(.open) .faith-bottom-nav, #missa-view:not(.open) .faith-bottom-nav { display: none; }
-#prayer-list-view { padding-bottom: calc(86px + env(safe-area-inset-bottom, 0px)) !important; }
-#prayer-detail-body { padding-bottom: calc(96px + env(safe-area-inset-bottom, 0px)) !important; }
+#prayer-list-view { padding-bottom: var(--faith-prayer-list-bottom-pad) !important; }
+#prayer-detail-body { padding-bottom: var(--faith-prayer-detail-bottom-pad) !important; }
 .faith-bottom-btn {
+  --faith-bottom-btn-height: 52px;
+  --faith-bottom-btn-radius: 15px;
+  --faith-bottom-btn-gap: 5px;
   flex: 1 1 0;
   min-width: 0;
-  height: 52px;
-  border: 1.6px solid transparent;
-  border-radius: 15px;
+  height: var(--faith-bottom-btn-height);
+  min-height: var(--faith-bottom-btn-height);
+  border: 1.6px solid var(--faith-bottom-btn-border, transparent);
+  border-radius: var(--faith-bottom-btn-radius);
+  background: var(--faith-bottom-btn-bg, #fffaf2);
   font-family: inherit;
   font-weight: 950;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 5px;
+  gap: var(--faith-bottom-btn-gap);
   color: #172033;
   box-shadow: 0 2px 8px rgba(31,42,68,.08);
   cursor: pointer;
@@ -1802,10 +1787,10 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, var(--v4-retreat
   color: #172033;
   font-weight: 950;
 }
-.faith-bottom-btn.faith-bible { background: #dcebff; border-color: #6f9fca; }
-.faith-bottom-btn.faith-hymn { background: #ffd7eb; border-color: #d06d9c; }
-.faith-bottom-btn.faith-prayer { background: #cfeedd; border-color: #45a97f; }
-.faith-bottom-btn.faith-missa { background: #ffeca8; border-color: #d8ae23; }
+.faith-bottom-btn.faith-bible { --faith-bottom-btn-bg: #dcebff; --faith-bottom-btn-border: #6f9fca; }
+.faith-bottom-btn.faith-hymn { --faith-bottom-btn-bg: #ffd7eb; --faith-bottom-btn-border: #d06d9c; }
+.faith-bottom-btn.faith-prayer { --faith-bottom-btn-bg: #cfeedd; --faith-bottom-btn-border: #45a97f; }
+.faith-bottom-btn.faith-missa { --faith-bottom-btn-bg: #ffeca8; --faith-bottom-btn-border: #d8ae23; }
 .faith-bottom-btn:active { transform: translateY(1px); filter: brightness(.97); }
 
 #diocese-view {
@@ -1872,10 +1857,10 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, var(--v4-retreat
 }
 #diocese-frame { flex: 1 1 auto; min-height: 0; width: 100%; border: 0; background: var(--v4-bg-ivory); }
 
-/* V8-1-14-510: 문의·건의는 iframe 기반 qna-view만 사용한다. legacy qna card/tab and qna-cover floating button CSS removed. */
+/* V8-1-14-517: 문의·건의는 iframe 기반 qna-view만 사용한다. legacy qna card/tab and qna-cover floating button CSS removed. */
 
 #cover { overscroll-behavior-y: contain; }
-/* V8-1-14-510: 인트로 사진/보호막 pseudo-element 디자인은 아래 단일 사진 블록에서만 관리한다.
+/* V8-1-14-517: 인트로 사진/보호막 pseudo-element 디자인은 아래 단일 사진 블록에서만 관리한다.
    이 앞쪽 블록은 커버 본문 표시/숨김만 담당해 중복 CSS 충돌을 막는다. */
 html.oai-cover-booting body { background: var(--cream, var(--v4-bg-cream)) !important; }
 html.oai-cover-booting #cover {
@@ -2207,7 +2192,7 @@ html.app-active #cover-action-row { display: none; }
 #cover .cover-refresh-main-btn::before { background: #8D98A8; }
 #cover .cover-diocese-btn,
 #cover .cover-share-main-btn { color: var(--v4-header-navy); }
-/* V8-1-14-510: 하단 3개 버튼 글자 크기를 ‘나의 신앙생활’ 기준으로 통일 */
+/* V8-1-14-517: 하단 3개 버튼 글자 크기를 ‘나의 신앙생활’ 기준으로 통일 */
 #cover .cover-share-main-btn,
 #cover .cover-refresh-main-btn{
   font-size:var(--cover-action-font);
@@ -2247,7 +2232,7 @@ html:not(.ios-device).oai-screen-compact-short #cover {
 
 #cover-update-hint { display: none; margin-top: 4px; padding-left: 2px; color: #dc2626; font-size: 9.5px; font-weight: 800; line-height: 1.15; white-space: normal; max-width: 100%; word-break: keep-all; }
 #cover-update-box.update-needed #cover-update-hint { display: block; }
-/* V8-1-14-510: update-needed text is a small status badge, not a main category title.
+/* V8-1-14-517: update-needed text is a small status badge, not a main category title.
    Keep it independent from the user's enlarged app font scale so it does not overflow on Fold/phone covers. */
 #cover-update-box.update-needed #cover-update-btn {
   font-size: 12.8px !important;
@@ -2341,7 +2326,7 @@ html:not(.ios-device).oai-screen-compact-short #cover-update-box.update-needed #
 #cover-font-controls #cover-lg-btn { font-size: 22px; }
 #cover-font-controls .pr-font-divider { width: 1px; height: 20px; background: #ddd5c8; flex: 0 0 1px; margin: 0 2px; }
 
-/* V8-1-14-510: removed legacy direct guide-button styles; real menu entries are managed in cover-modals.css. */
+/* V8-1-14-517: removed legacy direct guide-button styles; real menu entries are managed in cover-modals.css. */
 
 #cover #cover-menu-btn.cover-menu-btn {
   position: absolute;
@@ -2390,7 +2375,7 @@ html.app-active #cover-menu-btn { display: none !important; }
   background: currentColor;
 }
 
-/* V8-1-14-510: cover menu modal shell is owned by css/cover-modals.css. */
+/* V8-1-14-517: cover menu modal shell is owned by css/cover-modals.css. */
 
 
 #oai-cover-exit-toast {
@@ -2452,7 +2437,7 @@ html.app-active #cover-menu-btn { display: none !important; }
 @media (display-mode: standalone) { #pwa-install-btn { display: none; } }
 html.app-active #pwa-install-btn { display: none; }
 
-/* V8-1-14-510: guide/privacy modal-specific styles are owned here; duplicated panel/hero rules are merged below. */
+/* V8-1-14-517: guide/privacy modal-specific styles are owned here; duplicated panel/hero rules are merged below. */
 
 .guide-modal { position: fixed; inset: 0; z-index: 10050; display: none; align-items: center; justify-content: center; padding: calc(env(safe-area-inset-top, 0px) + 14px) 18px calc(env(safe-area-inset-bottom, 0px) + 18px); box-sizing: border-box; font-family: 'Apple SD Gothic Neo','Noto Sans KR',sans-serif; }
 .guide-modal.show { display: flex; }
@@ -3000,7 +2985,7 @@ html.oai-font-global #region-body .dio-hd { font-size: calc(17px * var(--app-inn
   }
   #cover #cover-action-row { margin-top: 0; }
 }
-/* V8-1-14-510: obsolete mass-quick short-height media override removed; css/cover-modals.css owns mass quick sizing. */
+/* V8-1-14-517: obsolete mass-quick short-height media override removed; css/cover-modals.css owns mass quick sizing. */
 @media (max-height: 650px) {
   #cover { --cover-top-safe: calc(env(safe-area-inset-top, 0px) + clamp(58px, calc(var(--cover-vh, 1vh) * 9.4), 74px)); --cover-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + clamp(6px, calc(var(--cover-vh, 1vh) * 1.0), 10px)); --cover-note-reserve: clamp(38px, calc(var(--cover-vh, 1vh) * 4.8), 50px); --cover-bottom-reserve: var(--cover-note-reserve); --cover-note-bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(12px, calc(var(--cover-vh, 1vh) * 2.0), 18px)); padding-top: var(--cover-top-safe); padding-bottom: calc(var(--cover-bottom-safe) + var(--cover-bottom-reserve)); }
   #cover-bottom-note { bottom: var(--cover-note-bottom); }
@@ -4053,7 +4038,7 @@ html.oai-font-global .shrine-visit-cards-btn{font-size:calc(12px * var(--app-inn
 
 
 
-/* V8-1-14-510: 스탬프북 카드는 성지목록 고유색(성지/순례지/순교 사적지)을 유지하되,
+/* V8-1-14-517: 스탬프북 카드는 성지목록 고유색(성지/순례지/순교 사적지)을 유지하되,
    오른쪽 종류 라벨은 고정하고 교구명은 한 글자씩 세로로 떨어지지 않게 가로 고정한다. */
 .shrine-visit-card-grid{
   display:grid!important;
@@ -5665,7 +5650,7 @@ html.oai-font-global #map-wrap #shrine-visit-map-filter > button[data-shrine-vis
 html.oai-font-global #map-wrap #shrine-visit-map-filter > button[data-shrine-visit-filter="visited"],
 html.oai-font-global #map-wrap #shrine-visit-map-filter > button[data-shrine-visit-filter="unvisited"]{min-width:96px!important;}
 
-/* V8-1-14-510: 사용하지 않는 이전 Google-style intro keyframes는 제거하고, oaiIntroSmoothPhoto*만 유지한다. */
+/* V8-1-14-517: 사용하지 않는 이전 Google-style intro keyframes는 제거하고, oaiIntroSmoothPhoto*만 유지한다. */
 html.oai-cover-booting body,
 html.oai-cover-revealing body{
   background:#fbf8f1 !important;
@@ -5700,7 +5685,7 @@ html.oai-cover-revealing::after{
     linear-gradient(to right, #fbf8f1 0%, rgba(251,248,241,.96) 5%, rgba(251,248,241,.60) 13%, rgba(251,248,241,.16) 24%, rgba(251,248,241,0) 36%, rgba(251,248,241,0) 64%, rgba(251,248,241,.16) 76%, rgba(251,248,241,.60) 87%, rgba(251,248,241,.96) 95%, #fbf8f1 100%),
     linear-gradient(to bottom, #fbf8f1 0%, rgba(251,248,241,.90) 6%, rgba(251,248,241,.36) 17%, rgba(251,248,241,0) 30%, rgba(251,248,241,0) 70%, rgba(251,248,241,.36) 83%, rgba(251,248,241,.90) 94%, #fbf8f1 100%),
     radial-gradient(ellipse 96% 88% at 50% 48%, rgba(251,248,241,0) 50%, rgba(251,248,241,.08) 62%, rgba(251,248,241,.34) 76%, rgba(251,248,241,.76) 90%, rgba(251,248,241,1) 100%),
-    url("intro-cross-jesus.jpg?v=V8-1-14-510") !important;
+    url("intro-cross-jesus.jpg?v=V8-1-14-517") !important;
   background-position:center center, center center, center center, center center !important;
   background-size:100% 100%, 100% 100%, 100% 100%, auto 106% !important;
   background-repeat:no-repeat, no-repeat, no-repeat, no-repeat !important;
@@ -5805,16 +5790,12 @@ html:not(.ios-device) .web-list,
 html:not(.ios-device) #trail-list{
   padding-bottom:calc(72px + var(--oai-android-bottom-gap))!important;
 }
-html:not(.ios-device) #missa-view .faith-bottom-nav,
-html:not(.ios-device) #prayer-view .faith-bottom-nav,
 html:not(.ios-device) .faith-bottom-nav{
-  padding-bottom:calc(5px + var(--oai-android-bottom-gap))!important;
+  --faith-bottom-pad-bottom:calc(5px + var(--oai-android-bottom-gap));
 }
-html:not(.ios-device) #prayer-list-view{
-  padding-bottom:calc(78px + var(--oai-android-bottom-gap))!important;
-}
-html:not(.ios-device) #prayer-detail-body{
-  padding-bottom:calc(86px + var(--oai-android-bottom-gap))!important;
+html:not(.ios-device) #prayer-view{
+  --faith-prayer-list-bottom-pad:calc(78px + var(--oai-android-bottom-gap));
+  --faith-prayer-detail-bottom-pad:calc(86px + var(--oai-android-bottom-gap));
 }
 html:not(.ios-device) #app #info-card,
 html:not(.ios-device) #app #sheet-route{
@@ -6001,7 +5982,7 @@ html:not(.ios-device) .shrine-visit-cards-modal .shrine-visit-cards-head .module
   0%{opacity:.12; transform:scale(.84); filter:contrast(1.005) saturate(1.01);}
   100%{opacity:1; transform:scale(1); filter:contrast(1.015) saturate(1.02);}
 }
-/* V8-1-14-510: intro animation 속도/이름 override 중복은 제거. 실제 값은 사진 블록과 keyframes에서만 관리한다. */
+/* V8-1-14-517: intro animation 속도/이름 override 중복은 제거. 실제 값은 사진 블록과 keyframes에서만 관리한다. */
 
 #cv-pull-modern,
 #cv-pull-modern.show,
@@ -6072,7 +6053,7 @@ html.oai-font-global .category-source-note { font-size: calc(11px * var(--app-in
   font-weight:900!important;
 }
 #app #info-card .ic-guide-btn{background:#fff4cc!important;color:#7c5600!important;border:1.5px solid #e6c766!important;}
-/* V8-1-14-510: 상세 버튼 개별 색상 중복 override 제거. */
+/* V8-1-14-517: 상세 버튼 개별 색상 중복 override 제거. */
 .map-loading-icon,
 #diocese-loading .missa-spinner,
 #nearby-body .nearby-distance-spinner{
@@ -6157,7 +6138,7 @@ html.oai-stability-veil[data-oai-refresh-early-veil="1"]::after{
   animation:oaiUnifiedLoadingCrossSpin var(--oai-loading-cross-speed) linear infinite!important;
   transition:none!important;
 }
-/* V8-1-14-510: 외부사이트 진입/복귀 보호창 CSS 단일 기준. JS 흐름은 유지하고, 중복 십자가만 막는다. */
+/* V8-1-14-517: 외부사이트 진입/복귀 보호창 CSS 단일 기준. JS 흐름은 유지하고, 중복 십자가만 막는다. */
 #oai-external-entry-guard{
   position:fixed!important;
   inset:0!important;
@@ -6365,14 +6346,8 @@ html.oai-external-return-freeze.oai-external-return-releasing::after{
   animation:none!important;
 }
 
-#missa-view.oai-faith-frame-loading #missa-loading{
-  display:none!important;
-  opacity:0!important;
-  visibility:hidden!important;
-  animation:none!important;
-}
 
-/* V8-1-14-510: 인포카드/상세 버튼의 이전 색상·테두리 override 묶음은 삭제하고,아래 최종 공통색 기준 하나만 유지한다. */
+/* V8-1-14-517: 인포카드/상세 버튼의 이전 색상·테두리 override 묶음은 삭제하고,아래 최종 공통색 기준 하나만 유지한다. */
 #app #info-card #ic-tel-link,#app #info-card #ic-route-btn,#app #info-card #ic-hp,#app #info-card #ic-guide,#app #info-card #ic-goodnews,#app #info-card #ic-kakao-nav{
   background:linear-gradient(180deg,#fbfdff 0%,#fffaf0 100%)!important;
   color:#213245!important;
@@ -6391,7 +6366,7 @@ html.oai-external-return-freeze.oai-external-return-releasing::after{
   transform:translateY(1px)!important;
 }
 
-/* V8-1-14-510: 인포카드 버튼과 성지 상세정보 버튼의 크기 기준을 한곳에서 확정한다. */
+/* V8-1-14-517: 인포카드 버튼과 성지 상세정보 버튼의 크기 기준을 한곳에서 확정한다. */
 #app #info-card #ic-tel-link,
 #app #info-card #ic-route-btn,
 #app #info-card #ic-hp,
@@ -6420,7 +6395,7 @@ html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-tel-link,html
   min-height:48px!important;
 }
 
-/* V8-1-14-510: compact-short 탭바/지도 top 기준은 아래 변수 블록 하나로 통합한다. */
+/* V8-1-14-517: compact-short 탭바/지도 top 기준은 아래 변수 블록 하나로 통합한다. */
 html:not(.ios-device).oai-screen-compact-short .map-category-close,
 html:not(.ios-device).oai-screen-compact-short .ic-close-btn,
 html:not(.ios-device).oai-screen-compact-short .sheet-x,
@@ -6559,23 +6534,20 @@ html:not(.ios-device).oai-screen-compact-short.retreat-mode #app #loc-btn{
   bottom:calc(var(--oai-android-bottom-gap, 10px) + 76px)!important;
 }
 
-html:not(.ios-device).oai-screen-compact-short #prayer-view .faith-bottom-nav,
-html:not(.ios-device).oai-screen-compact-short #missa-view .faith-bottom-nav{
-  gap:6px!important;
-  padding:4px 10px calc(0px + var(--oai-android-bottom-gap, env(safe-area-inset-bottom, 0px)))!important;
+html:not(.ios-device).oai-screen-compact-short .faith-bottom-nav{
+  --faith-bottom-gap:6px;
+  --faith-bottom-pad-top:4px;
+  --faith-bottom-pad-x:10px;
+  --faith-bottom-pad-bottom:calc(0px + var(--oai-android-bottom-gap, env(safe-area-inset-bottom, 0px)));
 }
-html:not(.ios-device).oai-screen-compact-short #prayer-view .faith-bottom-btn,
-html:not(.ios-device).oai-screen-compact-short #missa-view .faith-bottom-btn{
-  height:42px!important;
-  min-height:42px!important;
-  border-radius:13px!important;
-  gap:4px!important;
+html:not(.ios-device).oai-screen-compact-short .faith-bottom-btn{
+  --faith-bottom-btn-height:42px;
+  --faith-bottom-btn-radius:13px;
+  --faith-bottom-btn-gap:4px;
 }
-html:not(.ios-device).oai-screen-compact-short #prayer-list-view{
-  padding-bottom:calc(66px + var(--oai-android-bottom-gap, env(safe-area-inset-bottom, 0px)))!important;
-}
-html:not(.ios-device).oai-screen-compact-short #prayer-detail-body{
-  padding-bottom:calc(76px + var(--oai-android-bottom-gap, env(safe-area-inset-bottom, 0px)))!important;
+html:not(.ios-device).oai-screen-compact-short #prayer-view{
+  --faith-prayer-list-bottom-pad:calc(66px + var(--oai-android-bottom-gap, env(safe-area-inset-bottom, 0px)));
+  --faith-prayer-detail-bottom-pad:calc(76px + var(--oai-android-bottom-gap, env(safe-area-inset-bottom, 0px)));
 }
 
 #app #sheet-route[hidden]{
@@ -6636,7 +6608,7 @@ html.oai-font-global .shrine-visit-cards-head .module-bar-sub,
 .shrine-visit-cards-head .module-bar-sub{font-size:11px!important;line-height:1.25!important;color:rgba(255,255,255,.65)!important;}
 #shrine-visit-cards-modal .shrine-visit-cards-head .module-close,
 .shrine-visit-cards-head .module-close{width:var(--oai-std-close-sz)!important;height:var(--oai-std-close-sz)!important;min-width:var(--oai-std-close-sz)!important;flex:0 0 var(--oai-std-close-sz)!important;border-radius:999px!important;background:transparent!important;border:1.5px solid currentColor!important;color:rgba(212,170,106,.9)!important;font-size:28px!important;box-shadow:none!important;}
-/* V8-1-14-510: 인트로 종료(revealing) 때 십자가 사진 확대 애니메이션을 재시작하지 않는다.
+/* V8-1-14-517: 인트로 종료(revealing) 때 십자가 사진 확대 애니메이션을 재시작하지 않는다.
    booting 단계에서만 .84→1로 커지고, revealing 단계는 최종 크기에서 opacity만 사라진다. */
 html.oai-cover-revealing::after{
   animation:none!important;
@@ -6651,7 +6623,7 @@ html.oai-cover-revealing::after{
   }
 }
 
-/* V8-1-14-510: Android tablet top spacing is standardized without adding a second WebView safe-area. */
+/* V8-1-14-517: Android tablet top spacing is standardized without adding a second WebView safe-area. */
 html.oai-android-tablet:not(.ios-device) #tabbar{
   height:var(--tab-h)!important;
   min-height:var(--tab-h)!important;
@@ -6676,11 +6648,11 @@ html.oai-android-tablet:not(.ios-device) .module-view.open{
   padding-top:0!important;
 }
 
-/* V8-1-14-510: route-choice and cover/mass-quick modal styles are managed in their module CSS files. */
+/* V8-1-14-517: route-choice and cover/mass-quick modal styles are managed in their module CSS files. */
 
-/* V8-1-14-510: Fold 전환 아이보리 안정막은 Android native 한 곳에서만 처리한다. PWA overlay는 제거했다. */
+/* V8-1-14-517: Fold 전환 아이보리 안정막은 Android native 한 곳에서만 처리한다. PWA overlay는 제거했다. */
 
-/* V8-1-14-510: 성당/피정의집 내위치 버튼을 더 아래로 내려 지도 위에서 떠 보이는 위치를 완화한다. */
+/* V8-1-14-517: 성당/피정의집 내위치 버튼을 더 아래로 내려 지도 위에서 떠 보이는 위치를 완화한다. */
 html:not(.ios-device).parish-mode #app #loc-btn,
 html:not(.ios-device).retreat-mode #app #loc-btn{
   bottom:calc(var(--oai-android-bottom-gap, 10px) + 38px)!important;
@@ -6690,7 +6662,7 @@ html:not(.ios-device).oai-screen-compact-short.retreat-mode #app #loc-btn{
   bottom:calc(var(--oai-android-bottom-gap, 10px) + 36px)!important;
 }
 
-/* V8-1-14-510: 성지 인포카드 하단 여백을 조금 되살려 마지막 버튼이 바닥에 붙어 보이지 않게 한다. */
+/* V8-1-14-517: 성지 인포카드 하단 여백을 조금 되살려 마지막 버튼이 바닥에 붙어 보이지 않게 한다. */
 html:not(.ios-device) #app #info-card{
   padding-bottom:10px!important;
 }
@@ -6709,9 +6681,9 @@ html:not(.ios-device) #app #info-card .ic-body{
 html:not(.ios-device) #app #sheet-route{
   padding-bottom:6px!important;
 }
-/* V8-1-14-510: visible cover version remains available for release verification. */
+/* V8-1-14-517: visible cover version remains available for release verification. */
 
-/* V8-1-14-510: 검색 키보드가 열린 상태에서 성지/성당/피정 리스트를 처음 스크롤할 때
+/* V8-1-14-517: 검색 키보드가 열린 상태에서 성지/성당/피정 리스트를 처음 스크롤할 때
    키보드 닫힘/viewport 복원/카드 눌림 효과가 겹쳐 생기던 첫 버벅임을 줄인다. */
 #list-body,
 #region-body,
@@ -6746,7 +6718,7 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
 }
 
 
-/* V8-1-14-510: 인포카드 버튼 색상 정리. 전화는 흰색,카카오내비는 노랑,나머지는 남색. */
+/* V8-1-14-517: 인포카드 버튼 색상 정리. 전화는 흰색,카카오내비는 노랑,나머지는 남색. */
 #app #info-card #ic-tel-link,#app #info-card .ic-tel-btn{
   background:#ffffff!important;
   background-color:#ffffff!important;
@@ -6810,93 +6782,12 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
 }
 
 
-/* V8-1-14-510: 커버 하단 여백은 실제 요소가 아닌 과거 선택자 덧씌움으로 조정하지 않는다.
+/* V8-1-14-517: 커버 하단 여백은 실제 요소가 아닌 과거 선택자 덧씌움으로 조정하지 않는다.
    하단 3버튼과 안내문구 간격은 상단 cover 변수의 --cover-note-reserve에서만 조정한다. */
 
-/* V8-1-14-510: 매일미사/주요기도문 상단바 정렬 보정. */
-/* 매일미사: 왼쪽 화살표 제거, 오른쪽 X 닫기 버튼으로 배치 */
-#missa-bar{
-  position:relative!important;
-  justify-content:center!important;
-  padding-left:14px!important;
-  padding-right:14px!important;
-}
-#missa-bar-title{
-  flex:1 1 auto!important;
-  text-align:left!important;
-  font-size:18px!important;
-  font-weight:900!important;
-  color:#6f4f23!important;
-}
-#missa-close{
-  margin-left:auto!important;
-  margin-right:0!important;
-  width:44px!important;
-  height:44px!important;
-  min-width:44px!important;
-  border-radius:999px!important;
-  border:2px solid #8a6a38!important;
-  background:#fffaf1!important;
-  color:#1f2a44!important;
-  font-size:34px!important;
-  font-weight:800!important;
-  line-height:1!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  box-shadow:0 2px 7px rgba(31,42,68,.08)!important;
-}
-#missa-close i{display:none!important;}
+/* V8-1-14-517: 매일미사/주요기도문 상단바 중복 보정은 원래 기준 위치로 병합했다. */
 
-/* 주요기도문: 웹사이트 헤더처럼 왼쪽 십자가 박스, 오른쪽 X */
-#prayer-bar{
-  justify-content:flex-start!important;
-  align-items:center!important;
-  gap:10px!important;
-}
-#prayer-bar .module-bar-main{
-  order:0!important;
-  flex:1 1 auto!important;
-  min-width:0!important;
-  display:flex!important;
-  align-items:center!important;
-  gap:10px!important;
-}
-#prayer-bar .module-bar-ico{
-  display:flex!important;
-  width:44px!important;
-  height:44px!important;
-  min-width:44px!important;
-  border-radius:14px!important;
-  background:rgba(255,255,255,.14)!important;
-  border:1px solid rgba(255,255,255,.22)!important;
-  color:#ffffff!important;
-  align-items:center!important;
-  justify-content:center!important;
-  font-size:25px!important;
-  font-weight:900!important;
-}
-#prayer-bar .module-bar-txt{
-  min-width:0!important;
-}
-#goodnews-prayer-btn{
-  order:1!important;
-  margin-left:4px!important;
-  margin-right:6px!important;
-  flex:0 0 auto!important;
-  transform:translateX(-6px)!important;
-}
-#prayer-close,
-#prayer-bar .module-close{
-  order:2!important;
-  margin-left:0!important;
-  margin-right:0!important;
-  flex:0 0 auto!important;
-  color:#d5b86d!important;
-}
-
-
-/* V8-1-14-510: 검색 모달이 키보드/edge-to-edge 상태에서 상단에 붙어 제목줄이 잘리는 것을 방지한다. */
+/* V8-1-14-517: 검색 모달이 키보드/edge-to-edge 상태에서 상단에 붙어 제목줄이 잘리는 것을 방지한다. */
 #srch-modal .sm-inner{
   min-height:0!important;
   height:100%!important;
@@ -6915,7 +6806,7 @@ html.oai-result-scroll-kb-dismiss #srch-modal .sm-hd{
   flex-shrink:0!important;
 }
 
-/* V8-1-14-510: 마산교구·의정부교구 성당 상세페이지 미사시간 안내문. */
+/* V8-1-14-517: 마산교구·의정부교구 성당 상세페이지 미사시간 안내문. */
 #app #info-card .ic-parish-mass-notice{
   display:none;
   margin:7px 14px 2px;
