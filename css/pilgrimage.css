@@ -120,7 +120,39 @@
 
 .trail-sh-arr { font-size: 15px; color: #94a3b8; flex-shrink: 0; }
 
+/* V8-1-14-478: 경로따라가기 중에는 내 위치 점에 진행방향 화살표를 붙인다. */
 .trail-myloc { width: 16px; height: 16px; border-radius: 50%; background: #2255cc; border: 2.5px solid var(--v4-surface-white); box-shadow: 0 0 0 4px rgba(34,85,204,.22); }
+.trail-myloc.follow{
+  position:relative;
+  width:22px;
+  height:22px;
+  border-width:3px;
+  background:#2563eb;
+  box-shadow:0 0 0 5px rgba(37,99,235,.20), 0 3px 10px rgba(15,23,42,.22);
+  transform:rotate(var(--hanti-bearing, 0deg));
+  transform-origin:50% 50%;
+}
+.trail-myloc.follow::before{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:-14px;
+  transform:translateX(-50%);
+  width:0;
+  height:0;
+  border-left:6px solid transparent;
+  border-right:6px solid transparent;
+  border-bottom:15px solid #2563eb;
+  filter:drop-shadow(0 2px 2px rgba(15,23,42,.22));
+}
+.trail-myloc.follow::after{
+  content:"";
+  position:absolute;
+  inset:5px;
+  border-radius:50%;
+  background:#ffffff;
+  opacity:.95;
+}
 
 #trail-view .trail-body { flex: 1; min-height: 0; display: flex; flex-direction: column; width: 100%; }
 
@@ -439,7 +471,7 @@ html:not(.ios-device).oai-screen-compact-short .trail-sh-close{
 .hanti-route-controls{
   position:absolute;
   left:50%;
-  bottom:calc(18px + env(safe-area-inset-bottom, 0));
+  bottom:calc(8px + env(safe-area-inset-bottom, 0));
   transform:translateX(-50%);
   z-index:75;
   display:flex;
@@ -562,8 +594,11 @@ html:not(.ios-device) .trail-sheet.hanti-main-card{
 
 /* V8-1-14-471: 전체경로보기 하단 버튼 확대 + 경로따라가기 오렌지 */
 .hanti-route-controls{
-  bottom:calc(20px + env(safe-area-inset-bottom, 0))!important;
+  bottom:calc(8px + env(safe-area-inset-bottom, 0))!important;
   gap:10px!important;
+}
+html:not(.ios-device) .hanti-route-controls{
+  bottom:calc(8px + var(--oai-android-bottom-gap, 0px))!important;
 }
 .hanti-route-controls .trail-loc-btn{
   min-height:48px!important;
