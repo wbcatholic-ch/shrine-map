@@ -310,7 +310,7 @@ html:not(.ios-device).oai-screen-compact-short .trail-sh-close{
 }
 
 
-/* V8-1-14-471: 숨은 테스트 모드 안에서 한티/도원동 테스트 루프 전환 */
+/* V8-1-14-471: 숨은 테스트 모드 안에서 한티/도원동/회사 근처 테스트 GPX 전환 */
 .hanti-test-switch{
   display:grid;
   grid-template-columns:1fr 1fr;

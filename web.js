@@ -235,6 +235,10 @@
     return window.CATHOLIC_DOWON_TEST_ROUTE_DATA && window.CATHOLIC_DOWON_TEST_ROUTE_DATA.id === 'dowon_test_loop'
       ? window.CATHOLIC_DOWON_TEST_ROUTE_DATA : null;
   }
+  function getCompanyTestRouteData(){
+    return window.CATHOLIC_COMPANY_TEST_ROUTE_DATA && window.CATHOLIC_COMPANY_TEST_ROUTE_DATA.id === 'company_test_route'
+      ? window.CATHOLIC_COMPANY_TEST_ROUTE_DATA : null;
+  }
   function getActiveHantiRouteData(){
     return (trailState && trailState.hantiActiveRouteData) || getHantiRouteData();
   }
@@ -286,6 +290,7 @@
   function getHantiRouteDataById(id){
     var routeId = String(id || 'hanti');
     if(routeId === 'dowon_test_loop' || routeId === 'dowon') return getDowonTestRouteData() || getHantiRouteData();
+    if(routeId === 'company_test_route' || routeId === 'company') return getCompanyTestRouteData() || getHantiRouteData();
     return getHantiRouteData();
   }
   function hantiSafeJsonParse(raw){
@@ -476,11 +481,11 @@
     var foot = ig$('trail-sh-foot');
     if(bdg){ bdg.textContent = stamp.id || '스탬프'; bdg.className = 'trail-sh-bdg d'; }
     var activeData = getActiveHantiRouteData();
-    var isTestLoop = activeData && activeData.id === 'dowon_test_loop';
-    if(region) region.textContent = isTestLoop ? '🧪 도원동 테스트 지점' : '📍 한티가는길 스탬프';
-    if(ico){ ico.textContent = stamp.role === 'finish' ? '🏁' : (stamp.role === 'start' ? '⛪' : (isTestLoop ? '📍' : '✝️')); ico.className = 'trail-sh-ico d'; }
+    var isTestRoute = activeData && activeData.type === 'test_route';
+    if(region) region.textContent = isTestRoute ? ('🧪 ' + ((activeData && activeData.name) || '테스트 GPX') + ' 지점') : '📍 한티가는길 스탬프';
+    if(ico){ ico.textContent = stamp.role === 'finish' ? '🏁' : (stamp.role === 'start' ? '⛪' : (isTestRoute ? '📍' : '✝️')); ico.className = 'trail-sh-ico d'; }
     if(name) name.textContent = stamp.name || '';
-    if(sub) sub.textContent = isTestLoop ? 'GPX 따라가기 테스트 · 실제 기록 저장 없음' : ((stamp.en || '') + (stamp.role === 'finish' ? ' · 완료 지점' : ''));
+    if(sub) sub.textContent = isTestRoute ? 'GPX 따라가기 테스트 · 실제 기록 저장 없음' : ((stamp.en || '') + (stamp.role === 'finish' ? ' · 완료 지점' : ''));
     removeTrailSheetActions();
     if(hantiTestModeEnabled()) ensureHantiTestPanel(); else removeHantiTestPanel();
     if(stamp && (stamp.id === '3-4' || stamp.id === '4-1')){
@@ -603,10 +608,11 @@
         var gd = hantiDistanceMeters(lat, lng, pts[j].lat, pts[j].lng);
         if(gd < bestD){ bestD = gd; best = pts[j]; bestIdx = j; }
       }
-    }else if(opts.follow && !Number.isFinite(Number(trailState.hantiLastRoutePointIndex)) && data && data.id === 'dowon_test_loop'){
+    }else if(opts.follow && !Number.isFinite(Number(trailState.hantiLastRoutePointIndex)) && data && data.type === 'test_route'){
       var startBest = null, startBestD = Infinity, startBestIdx = -1;
+      var startSearchM = data.id === 'company_test_route' ? 220 : 650;
       for(var k=0;k<pts.length;k++){
-        if(Number(pts[k].routeDistanceM || 0) > 650) break;
+        if(Number(pts[k].routeDistanceM || 0) > startSearchM) break;
         var sd = hantiDistanceMeters(lat, lng, pts[k].lat, pts[k].lng);
         if(sd < startBestD){ startBestD = sd; startBest = pts[k]; startBestIdx = k; }
       }
@@ -874,7 +880,8 @@
     var judge = hantiAutoStampJudgement(nearest);
     var label = (nearest.stamp.id || '') + ' ' + (nearest.stamp.name || '');
     var dist = hantiFormatDistance(nearest.distanceM);
-    var done = nearest.stamp.role === 'finish' ? ' · 5-5 완료 지점' : '';
+    var activeData = getActiveHantiRouteData();
+    var done = nearest.stamp.role === 'finish' ? (activeData && activeData.id === 'hanti' ? ' · 5-5 완료 지점' : ' · 완료 지점') : '';
     out.innerHTML = '<strong>테스트 결과</strong>' +
       '<span>테스트 위치: ' + esc((sourceStamp && sourceStamp.id || '') + ' ' + (sourceStamp && sourceStamp.name || '')) + '</span>' +
       '<span>가장 가까운 스탬프: ' + esc(label) + (dist ? ' · 약 ' + esc(dist) : '') + done + '</span>' +
@@ -1035,7 +1042,7 @@
   try{ window._oaiTrailBackHandle = function(reason){ return closeHantiFullRouteToSheet(reason || 'back'); }; }catch(_e){}
 
   function activateHantiTestRoute(routeId){
-    var data = routeId === 'dowon' ? getDowonTestRouteData() : getHantiRouteData();
+    var data = getHantiRouteDataById(routeId);
     if(!(data && trailState && trailState.map && window.kakao && kakao.maps)) return;
     trailState.hantiReturnTrailIndex = Number.isFinite(Number(trailState.selected)) && trailState.selected >= 0 ? trailState.selected : getHantiMainTrailIndex();
     openHantiFullRoute(data, {source:'hidden-test'});
@@ -1059,10 +1066,11 @@
     }).join('');
     panel.innerHTML = '<div class="hanti-test-head"><div class="hanti-test-title">' + esc(data.name || '한티가는길') + ' 테스트 모드</div>' +
       '<button id="trail-hanti-test-close" type="button" class="hanti-test-close">테스트 닫기</button></div>' +
-      '<div class="hanti-test-help">숨은 테스트입니다. 실제 순례기록은 저장하지 않습니다. 도원동 테스트 GPX는 사용자가 직접 올린 파일 기준입니다.</div>' +
+      '<div class="hanti-test-help">숨은 테스트입니다. 실제 순례기록은 저장하지 않습니다. 도원동/회사 근처 테스트 GPX는 사용자가 직접 올린 파일 기준입니다.</div>' +
       '<div class="hanti-test-switch" aria-label="테스트 경로 선택">' +
       '<button id="trail-hanti-test-route-hanti" type="button" class="' + (activeId === 'hanti' ? 'on' : '') + '">한티가는길</button>' +
       '<button id="trail-hanti-test-route-dowon" type="button" class="' + (activeId === 'dowon_test_loop' ? 'on' : '') + '">도원동 테스트 루프</button>' +
+      '<button id="trail-hanti-test-route-company" type="button" class="' + (activeId === 'company_test_route' ? 'on' : '') + '">회사 근처 테스트</button>' +
       '</div>' +
       '<div class="hanti-test-follow"><button id="trail-hanti-follow-toggle" type="button">GPX 따라가기 시작</button></div>' +
       '<div class="hanti-test-visual" aria-label="화면 표시 방식 선택">' +
@@ -1084,6 +1092,8 @@
     if(hantiBtn) hantiBtn.onclick = function(ev){ try{ ev.preventDefault(); ev.stopPropagation(); }catch(_e){} activateHantiTestRoute('hanti'); };
     var dowonBtn = ig$('trail-hanti-test-route-dowon');
     if(dowonBtn) dowonBtn.onclick = function(ev){ try{ ev.preventDefault(); ev.stopPropagation(); }catch(_e){} activateHantiTestRoute('dowon'); };
+    var companyBtn = ig$('trail-hanti-test-route-company');
+    if(companyBtn) companyBtn.onclick = function(ev){ try{ ev.preventDefault(); ev.stopPropagation(); }catch(_e){} activateHantiTestRoute('company'); };
     var followBtn = ig$('trail-hanti-follow-toggle');
     if(followBtn) followBtn.onclick = function(ev){ try{ ev.preventDefault(); ev.stopPropagation(); }catch(_e){} startHantiGpxFollow(); };
     var gpxOnlyBtn = ig$('trail-hanti-visual-gpx-only');
@@ -1226,16 +1236,16 @@
     try{
       /* V8-1-14-471: 원본 GPX segment를 강제 병합하지 않고 그대로 그린다.
          여러 segment를 하나로 합치면 없는 길이 직선처럼 이어질 수 있으므로, 테스트 루프도 같은 방식으로 표시한다. */
-      var isTestLoop = data.id === 'dowon_test_loop';
+      var isTestRoute = data && data.type === 'test_route';
       trailState.hantiActiveRouteData = data;
       trailState.hantiActiveRouteId = data.id || 'hanti';
       (data.routeSegments || []).forEach(function(seg){
         var path = hantiLatLngPathFromPoints(seg && seg.points);
         if(path.length > 1){
           drawHantiPolyline(path, {
-            weight: isTestLoop ? 5 : 5,
+            weight: isTestRoute ? 5 : 5,
             color: '#B7791F',
-            opacity: isTestLoop ? .68 : .86,
+            opacity: isTestRoute ? .68 : .86,
             zIndex: 30
           });
         }
