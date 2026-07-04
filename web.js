@@ -456,8 +456,29 @@
     window.oaiShouldKeepHantiRouteOnBackgroundReturn = hasHantiFollowResumeState;
     window.oaiRestoreHantiBackgroundRouteResume = restoreHantiFollowFromBackground;
   }catch(_e){}
+  function syncTrailLocButtonForSheet(open){
+    try{
+      var panel = ig$('trail-panel-map');
+      var sheet = ig$('trail-sheet');
+      if(!panel) return;
+      if(!open || !sheet){
+        panel.classList.remove('trail-sheet-is-open');
+        panel.style.removeProperty('--trail-sheet-open-height');
+        return;
+      }
+      requestAnimationFrame(function(){
+        try{
+          var rect = sheet.getBoundingClientRect ? sheet.getBoundingClientRect() : null;
+          var h = rect && rect.height ? Math.ceil(rect.height) : 0;
+          if(h > 0) panel.style.setProperty('--trail-sheet-open-height', h + 'px');
+          panel.classList.add('trail-sheet-is-open');
+        }catch(e){ console.warn('[가톨릭길동무]', e); }
+      });
+    }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }
+
   function closeTrailSheetOnly(){
-    try{ ig$('trail-sheet')?.classList.remove('open'); }catch(e){ console.warn('[가톨릭길동무]', e); }
+    try{ ig$('trail-sheet')?.classList.remove('open'); syncTrailLocButtonForSheet(false); }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
   function restoreHantiRouteIfActive(){
     if(!isHantiRouteActive()) return;
@@ -2521,6 +2542,7 @@
       ig$('trail-sh-foot').onclick = openFn;
     }
     ig$('trail-sheet').classList.add('open');
+    syncTrailLocButtonForSheet(true);
     if(trailState.map && window.kakao && window.kakao.maps){
       trailState.map.panTo(new kakao.maps.LatLng(d.lat,d.lng));
     }
