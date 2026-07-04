@@ -109,6 +109,7 @@ html.pr-external-guide-active.oai-stability-veil::after {
   padding:18px 16px 16px;
   box-sizing:border-box;
   text-align:left;
+  transform:translateY(24px);
 }
 .route-choice-title{
   font-size:20px;
