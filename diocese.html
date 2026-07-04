@@ -35,7 +35,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>교구지도</title>
-<link rel="stylesheet" href="css/diocese.css?v=V8-1-14-564">
+<link rel="stylesheet" href="css/diocese.css?v=V8-1-14-566">
 </head>
 <body>
 <header>
@@ -1860,7 +1860,8 @@ window.addEventListener('pageshow',function(){
       cardDetailOpen:cardOpen&&detOpen?1:0,
       listKey: extra.listKey || '',
       listUrl: extra.listUrl || '',
-      clickedSource: source || 'link'
+      clickedSource: source || 'link',
+      savedAt: (Date.now ? Date.now() : new Date().getTime())
     };
   };
 
@@ -1921,7 +1922,7 @@ window.addEventListener('pageshow',function(){
     // 탭 click 이벤트를 다시 실행하지 않는다. click 이벤트는 지도 초기화, 카드 닫기,
     // 목록 스크롤 재적용을 동반해 복귀 순간에 흔들림처럼 보일 수 있다.
     try{ window.__OAI_DIO_PARENT_RETURNING__ = true; window.__OAI_DIO_EXTERNAL_LEAVING__ = false; }catch(e){}
-    // V8-1-14-564: 관구·교구 iframe은 부모 외부복귀 보호창 위에 별도 복귀 레이어를 얹지 않는다.
+    // V8-1-14-566: 관구·교구 iframe은 부모 외부복귀 보호창 위에 별도 복귀 레이어를 얹지 않는다.
     try{ document.documentElement.classList.remove('oai-dio-external-stabilize','oai-dio-external-return','oai-dio-returning'); }catch(e){}
     var tab=state.tab||'gwangu';
     setReturnTabSilently(tab);
@@ -2031,33 +2032,26 @@ window.addEventListener('pageshow',function(){
     var state=window.getDioceseReturnState(source||'link', extra || {});
     try{ sessionStorage.setItem('oai_diocese_last_return_state', JSON.stringify(state)); localStorage.setItem('oai_diocese_last_return_state', JSON.stringify(state)); }catch(e){}
     if(window.parent && window.parent!==window){
-      // V8-1-14-564:
-      // 관구·교구 외부 홈페이지는 부모 복귀 상태를 저장한 뒤 안정 보호창을 유지하고 top 이동을 사용한다.
+      // V8-1-14-566:
+      // 관구·교구 외부 이동은 부모 app.js의 openDioceseExternal 한 곳에서 처리한다.
+      // iframe은 현재 탭/스크롤/카드 상태만 만들고, 보호창·URL 정규화·저장·실제 이동은 부모 공통 소유자에게 위임한다.
       try{
-        if(typeof window.parent.prepareExternalUrl === 'function') url = window.parent.prepareExternalUrl(url) || url;
+        if(typeof window.parent.openDioceseExternal === 'function'){
+          if(window.parent.openDioceseExternal(url, state || {})) return;
+        }
       }catch(e){}
+      // 부모 함수가 없는 예외 환경의 최소 fallback. 정상 앱에서는 위 openDioceseExternal 경로만 사용된다.
       try{
         var payload = JSON.stringify(state || {});
         window.parent.sessionStorage.setItem('catholic_diocese_external_return_v1', payload);
         window.parent.localStorage.setItem('catholic_diocese_external_return_v1', payload);
         window.parent.__OAI_DIOCESE_EXTERNAL_LEAVING__ = true;
       }catch(e){}
-      try{
-        if(typeof window.parent.markExternalReturnStabilize === 'function') window.parent.markExternalReturnStabilize('diocese-external');
-      }catch(e){}
       document.documentElement.classList.remove('oai-dio-external-stabilize','oai-dio-external-return','oai-dio-returning');
-      try{
-        if(typeof window.parent.oaiShowExternalEntryGuard === 'function') window.parent.oaiShowExternalEntryGuard('diocese-external');
-      }catch(e){}
-      var navDelay = 550;
-      try{
-        var parentDelay = parseInt(window.parent.OAI_EXTERNAL_ENTRY_NAV_DELAY_MS || '0', 10) || 0;
-        if(parentDelay >= 300 && parentDelay <= 1200) navDelay = parentDelay;
-      }catch(e){}
       setTimeout(function(){
         try{ window.top.location.assign(url); }
         catch(e){ try{ window.top.location.href = url; }catch(_e){ window.__OAI_DIO_EXTERNAL_LEAVING__ = false; } }
-      }, navDelay);
+      }, 550);
       setTimeout(function(){
         try{
           if(document.visibilityState !== 'hidden') window.__OAI_DIO_EXTERNAL_LEAVING__ = false;
