@@ -997,16 +997,6 @@ function resetForm() {
   document.getElementById('form-error').style.display = 'none';
 }
 
-var titleInput = document.getElementById('f-title');
-if(titleInput){
-  titleInput.addEventListener('keydown', function(e){
-    if(e.key === 'Enter'){
-      e.preventDefault();
-      try{ titleInput.blur(); }catch(_){}
-    }
-  });
-}
-
 function qaTodayKey(){
   const d = new Date();
   return 'qaSubmit:' + d.getFullYear() + '-' + String(d.getMonth()+1).padStart(2,'0') + '-' + String(d.getDate()).padStart(2,'0');
@@ -1192,6 +1182,8 @@ window.OAI_PAGE_TOUCH_CONFIG = {
   delayMs: 105,
   feedbackMs: 150,
   instantPress: true,
+  blurOnOutside: true,
+  enterBlurSelectors: '#f-title,#f-content',
   delayedSelectors: [
     '.cv-hotspot','.cv-extra-btn','.cv-btn',
     '.prayer-item','.prayer-card','.prayer-list-item',

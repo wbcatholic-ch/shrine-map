@@ -1817,17 +1817,8 @@ function setupDioceseActionButtons(){
 }
 setupDioceseActionButtons();
 document.getElementById('si').addEventListener('keydown',e=>{
-  if(e.key==='Enter'){
-    doSearch();
-    try{e.target.blur();document.activeElement&&document.activeElement.blur();}catch(_){}
-  }
+  if(e.key==='Enter') doSearch();
 });
-document.addEventListener('click',function(e){
-  var a=document.activeElement;
-  if(a && /INPUT|TEXTAREA|SELECT/.test(a.tagName) && e.target!==a){
-    try{a.blur();}catch(_){}
-  }
-},true);
 
 window.addEventListener('pageshow',function(){
   // 부모 앱 안에서 외부 교구 홈페이지를 다녀온 경우에는 브라우저가 보존한 목록 위치를 그대로 둔다.
@@ -2120,6 +2111,8 @@ window.OAI_PAGE_TOUCH_CONFIG = {
   feedbackMs: 170,
   pressDelayMs: 85,
   moveCancelPx: 7,
+  blurOnOutside: true,
+  enterBlurSelectors: '#si',
   delayedSelectors: '#list-view .lv-card',
   directSelectors: [
     'a','input','textarea','select','label',
