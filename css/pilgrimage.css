@@ -56,7 +56,7 @@
   flex-shrink: 0;
 }
 
-/* V8-1-14-560: 한티가는길은 제작 중이라 기존 카드 구조를 유지하고,
+/* V8-1-14-561: 한티가는길은 제작 중이라 기존 카드 구조를 유지하고,
    일반 순례길 카드만 이 블록에서 정리한다. */
 .trail-card.trail-general-card {
   background: #fffdf8;
@@ -188,7 +188,7 @@
 
 .trail-sh-arr { font-size: 15px; color: #94a3b8; flex-shrink: 0; }
 
-/* V8-1-14-560: 한티가는길은 제작 중이므로 기존 hanti 카드/경로 CSS를 건드리지 않고,
+/* V8-1-14-561: 한티가는길은 제작 중이므로 기존 hanti 카드/경로 CSS를 건드리지 않고,
    한티가 아닌 일반 순례길 지도 인포카드만 이 소유 블록에서 정리한다. */
 .trail-sheet.trail-general-sheet {
   background: #fffdf8;
