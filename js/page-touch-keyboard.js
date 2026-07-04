@@ -17,6 +17,8 @@
   var pressingKey = cfg.pressingKey || '__oaiPressing';
   var canceledUntilKey = cfg.canceledUntilKey || '__oaiTouchCanceledUntil';
   var clickDelayKey = cfg.clickDelayKey || '__oaiClickDelay';
+  var blurOnOutside = !!cfg.blurOnOutside;
+  var enterBlurSelectors = cfg.enterBlurSelectors || 'input,textarea';
 
   var activeTouch = null;
 
@@ -108,6 +110,30 @@
       el.setAttribute('enterkeyhint','done');
     });
   }
+  function isEditable(el){
+    return !!(el && (el.tagName === 'INPUT' || el.tagName === 'TEXTAREA' || el.tagName === 'SELECT' || el.isContentEditable));
+  }
+  function blurActiveEditable(){
+    try{
+      var a = document.activeElement;
+      if(isEditable(a) && a.blur) a.blur();
+    }catch(e){}
+  }
+  document.addEventListener('keydown', function(e){
+    if(e.key !== 'Enter') return;
+    var el = closest(e.target, enterBlurSelectors);
+    if(!el) return;
+    setTimeout(blurActiveEditable, 0);
+  }, true);
+  if(blurOnOutside){
+    document.addEventListener('click', function(e){
+      var a = document.activeElement;
+      if(isEditable(a) && e.target !== a){
+        blurActiveEditable();
+      }
+    }, true);
+  }
+
   disableKeyboardSuggestions(document);
   document.addEventListener('DOMContentLoaded', function(){ disableKeyboardSuggestions(document); });
   try{
