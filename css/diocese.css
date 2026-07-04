@@ -1,10 +1,8 @@
 
 
 :root{
-  --diocese-font-scale:1;
   --ios-dio-font-scale:1;
   --dio-effective-font-scale:calc(var(--dio-font-scale,1) * var(--ios-dio-font-scale,1));
-  --diocese-effective-font-scale:calc(var(--diocese-font-scale,1) * var(--ios-dio-font-scale,1));
   --d:#1f2a44;
   --d-lt:#E8EBF0;
   --bg:#F5F1E8;
@@ -61,22 +59,34 @@ body > header{display:none!important;visibility:hidden!important;height:0!import
 #map-svg{width:100%;height:100%;cursor:grab;display:block;touch-action:none;position:absolute;top:0;left:0;}
 #map-svg:active{cursor:grabbing;}
 .dp{cursor:pointer;transition:filter .08s ease,opacity .08s ease;}
+@media(hover:hover){.dp:hover{filter:brightness(.84);}}
 .dp.oai-dio-pressed{filter:brightness(.82);opacity:.88;}
 
-#card{position:absolute;top:10px;right:10px;width:206px;background:white;border-radius:13px;
+#card{--dio-card-color:var(--d);--dio-card-text-color:#fff;position:absolute;top:10px;right:10px;width:206px;background:white;border-radius:13px;
   overflow:hidden;box-shadow:0 6px 24px rgba(0,0,0,0.15);display:none;z-index:100;}
 #card.on{display:block;}
-.c-hd{padding:12px 13px 10px;position:relative;}
-.c-gw{font-size:9px;font-weight:700;letter-spacing:.7px;opacity:.85;margin-bottom:3px;}
-.c-nm{font-size:18px;font-weight:700;line-height:1.2;margin-bottom:3px;}
-.c-rg{font-size:11px;opacity:.75;line-height:1.4;}
+#outlines{display:none;}
+#card.dio-card-pos-right-top{right:10px;left:auto;top:10px;bottom:auto;}
+#card.dio-card-pos-right-bottom{right:10px;left:auto;top:auto;bottom:50px;}
+#card.dio-card-pos-left-top{right:auto;left:10px;top:10px;bottom:auto;}
+#card.dio-card-pos-left-bottom{right:auto;left:10px;top:auto;bottom:50px;}
+@media(max-width:560px){
+  #card.dio-card-pos-mobile-bottom{top:auto;bottom:10px;right:10px;left:auto;}
+  #card.dio-card-pos-mobile-top{top:6px;bottom:auto;right:6px;left:auto;}
+}
+
+.c-hd{padding:12px 13px 10px;position:relative;background:var(--dio-card-color);}
+.c-gw{font-size:9px;font-weight:700;letter-spacing:.7px;opacity:.85;margin-bottom:3px;color:var(--dio-card-text-color);}
+.c-nm{font-size:18px;font-weight:700;line-height:1.2;margin-bottom:3px;color:var(--dio-card-text-color);}
+.c-rg{font-size:11px;opacity:.75;line-height:1.4;color:var(--dio-card-text-color);}
 .c-x{position:absolute;top:8px;right:8px;width:26px;height:26px;border-radius:999px;
-  background:transparent;border:1.5px solid currentColor;box-shadow:none;cursor:pointer;font-size:18px;font-weight:900;line-height:1;color:white;
+  background:transparent;border:1.5px solid currentColor;box-shadow:none;cursor:pointer;font-size:18px;font-weight:900;line-height:1;color:var(--dio-card-text-color);
   display:flex;align-items:center;justify-content:center;}
 .c-x:hover{background:transparent;opacity:.82;}
 .c-bd{padding:10px 13px 12px;background:white;}
 .c-row{display:flex;align-items:baseline;gap:4px;margin-bottom:10px;padding-bottom:9px;border-bottom:1px solid #f0f0f0;}
-.c-n{font-size:26px;font-weight:700;line-height:1;}
+.c-row.is-hidden{display:none!important;}
+.c-n{font-size:26px;font-weight:700;line-height:1;color:var(--dio-card-color);}
 .c-lbl{font-size:11px;color:#aaa;}
 .c-dtbtn{width:100%;padding:6px;border:1px solid #eee;border-radius:7px;background:white;
   font-size:11px;color:#666;cursor:pointer;margin-bottom:8px;text-align:center;font-family:inherit;}
@@ -88,8 +98,9 @@ body > header{display:none!important;visibility:hidden!important;height:0!import
   font-weight:500;color:white;border-radius:7px;padding:7px;border:none;width:100%;text-decoration:none;cursor:pointer;}
 .c-nurl{font-size:11px;color:#ccc;text-align:center;padding:3px 0;}
 
-#gw-bar{position:absolute;top:10px;left:10px;display:flex;flex-direction:column;gap:5px;z-index:50;}
-.gb{--gb-color:#555;min-height:34px;padding:0 14px;border-radius:20px;border:2px solid var(--gb-color);font-size:calc(12px * var(--diocese-effective-font-scale,1));font-weight:700;
+#gw-bar{position:absolute;top:10px;left:10px;display:none;flex-direction:column;gap:5px;z-index:50;}
+#gw-bar.on{display:flex;}
+.gb{--gb-color:#555;min-height:34px;padding:0 14px;border-radius:20px;border:2px solid var(--gb-color);font-size:calc(12px * var(--dio-effective-font-scale,1));font-weight:700;
   cursor:pointer;background:white;color:var(--gb-color);box-shadow:0 2px 8px rgba(0,0,0,0.12);white-space:nowrap;font-family:inherit;}
 .gb[data-gw="서울관구"]{--gb-color:#1a6bb5;}
 .gb[data-gw="대구관구"]{--gb-color:#c05a00;}
@@ -117,6 +128,7 @@ body > header{display:none!important;visibility:hidden!important;height:0!import
 #sres{display:block;clear:both;position:relative;z-index:0;width:100%;max-width:100%;box-sizing:border-box;margin-top:20px;padding:2px 2px 0;overflow:visible;}
 .search-help-small{font-size:11px;color:#6B7280;}
 .se{text-align:center;padding:36px 0;color:var(--dim);font-size:calc(13px * var(--dio-effective-font-scale,1));}
+.search-limit-note{font-size:11px;padding:10px 0;}
 
 .si-r{width:calc(100% - 20px);max-width:calc(100% - 20px);box-sizing:border-box;background:var(--card);border-radius:13px;border:1px solid var(--bdr);
   box-shadow:0 1px 8px rgba(0,0,0,.06);margin:0 10px 12px;overflow:hidden;cursor:pointer;
@@ -160,7 +172,12 @@ body > header{display:none!important;visibility:hidden!important;height:0!import
 
 .lv-sec{display:flex;align-items:center;gap:10px;margin:18px 0 10px;}
 .lv-sec:first-child{margin-top:4px;}
-.lv-sec-bdg{font-size:calc(15px * var(--dio-effective-font-scale,1));font-weight:800;padding:7px 20px;border-radius:20px;color:#fff;flex-shrink:0;min-width:100px;text-align:center;}
+.lv-sec-bdg{font-size:calc(15px * var(--dio-effective-font-scale,1));font-weight:800;padding:7px 20px;border-radius:20px;color:#fff;flex-shrink:0;min-width:100px;text-align:center;background:#4A5568;}
+.lv-sec-bdg[data-dio-group="서울관구"],.lv-bdg[data-dio-group="서울관구"]{background:#1a6bb5;}
+.lv-sec-bdg[data-dio-group="대구관구"],.lv-bdg[data-dio-group="대구관구"]{background:#c05a00;}
+.lv-sec-bdg[data-dio-group="광주관구"],.lv-bdg[data-dio-group="광주관구"]{background:#7a1fa2;}
+.lv-sec-bdg[data-dio-group="군종교구"],.lv-bdg[data-dio-group="군종교구"]{background:#4A5568;}
+.lv-sec-bdg[data-dio-group="나의 교구"]{background:#B7791F;}
 .lv-sec-cnt{font-size:calc(14px * var(--dio-effective-font-scale,1));color:var(--sub);font-weight:500;}
 
 .lv-card{background:var(--card);border-radius:var(--r);border:1.25px solid #C8B79F;
@@ -171,7 +188,7 @@ body > header{display:none!important;visibility:hidden!important;height:0!import
 .lv-my-diocese-badge{display:inline-flex;align-items:center;justify-content:center;margin-left:7px;padding:4px 10px;border-radius:999px;background:#FFF3D8;border:1.5px solid rgba(183,121,31,.52);color:#7A4F10;font-size:12px;font-weight:900;line-height:1.1;letter-spacing:-.035em;vertical-align:1px;white-space:nowrap;}
 
 .lv-top{display:flex;align-items:center;justify-content:space-between;padding:12px 14px 0;gap:8px;}
-.lv-bdg{font-size:calc(12px * var(--dio-effective-font-scale,1));font-weight:800;padding:4px 10px;border-radius:6px;color:#fff;white-space:nowrap;flex-shrink:0;}
+.lv-bdg{font-size:calc(12px * var(--dio-effective-font-scale,1));font-weight:800;padding:4px 10px;border-radius:6px;color:#fff;white-space:nowrap;flex-shrink:0;background:#4A5568;}
 .lv-op{font-size:calc(11.5px * var(--dio-effective-font-scale,1));color:var(--dim);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
 
 .lv-body{display:flex;align-items:center;gap:12px;padding:9px 14px 10px;}
@@ -199,7 +216,7 @@ html.oai-dio-external-return *{transition:none!important;animation:none!importan
 
 #c-act{display:flex;flex-direction:column;gap:8px;}
 .c-btn.c-home-btn,.c-btn.c-priest-btn{min-height:42px;border-radius:10px;font-weight:800;}
-.c-btn.c-home-btn{box-shadow:0 6px 12px rgba(31,42,68,.10);}
+.c-btn.c-home-btn{background:var(--dio-card-color);color:var(--dio-card-text-color);border:1px solid rgba(31,42,68,.12);box-shadow:0 6px 12px rgba(31,42,68,.10);}
 .c-btn.c-priest-btn{background:#0F766E!important;color:#fff!important;border:1px solid rgba(15,118,110,.18);box-shadow:0 6px 12px rgba(15,118,110,.14);}
 .lv-foot.has-priest{gap:8px;}
 .lv-foot .lv-url{min-width:0;}
