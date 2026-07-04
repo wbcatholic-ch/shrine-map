@@ -2333,8 +2333,10 @@
     getTrailItemsForList().forEach(function(d){
       const card = document.createElement('div');
       const isMyTrailCard = isMyDioceseTrailItem(d, myName);
-      card.className = 'trail-card' + (isMyTrailCard ? ' trail-my-diocese-card' : '');
-      card.innerHTML = `
+      const isHantiCard = isHantiTrailItem(d);
+      card.className = 'trail-card ' + (isHantiCard ? 'trail-hanti-card' : 'trail-general-card') + (isMyTrailCard ? ' trail-my-diocese-card' : '');
+      if(isHantiCard){
+        card.innerHTML = `
         <div class="trail-r1">
           <span class="trail-bdg ${d.t}">${esc(d.op)}</span>
           <span class="trail-reg">📍 ${esc(d.r)}</span>
@@ -2348,6 +2350,24 @@
           <span class="trail-url">${esc(shortUrl(d.url))}</span>
           <span class="trail-arr">›</span>
         </div>`;
+      }else{
+        card.innerHTML = `
+        <div class="trail-general-head">
+          <span class="trail-bdg ${d.t}">${esc(d.op)}</span>
+          ${isMyTrailCard ? trailMyDioceseBadgeHtml() : ''}
+        </div>
+        <div class="trail-general-main">
+          <div class="trail-ico ${d.t}">${esc(d.ico)}</div>
+          <div class="trail-general-copy">
+            <div class="trail-nm">${esc(d.n)}</div>
+            <div class="trail-general-region">📍 ${esc(d.r)}</div>
+          </div>
+        </div>
+        <div class="trail-general-foot">
+          <span class="trail-url">${esc(shortUrl(d.url))}</span>
+          <span class="trail-general-open">웹사이트 열기</span>
+        </div>`;
+      }
       card.addEventListener('click', function(){
         openExternalUrl(d.url, {
           module:'trail',
