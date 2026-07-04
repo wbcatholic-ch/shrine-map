@@ -8838,6 +8838,9 @@ function _enterRouteMode(){
     _closeRouteUiForNonRouteTab();
     return;
   }
+  // V8-1-14-575: 경로검색 시트가 열리면 기존 장소 정보카드는 숨겨
+  // 경로 입력 화면과 겹쳐 보이지 않게 한다. 지도/경로 상태는 유지한다.
+  try{ closeInfoCard({keepMap:true}); }catch(e){ console.warn('[가톨릭길동무]', e); }
   _routeMode=true;
   const rs=$('sheet-route');
   if(rs){ rs.style.display=''; rs.removeAttribute('aria-hidden'); rs.classList.add('open'); }
