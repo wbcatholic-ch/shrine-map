@@ -6211,6 +6211,17 @@ function zoomCategoryMap(delta){
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 
+function _isRouteSelectionModeActive(){
+  try{
+    var root = document.documentElement;
+    var routeSheet = $('sheet-route');
+    return (_activeTab === 'route') || !!_routeMode ||
+      !!(root && root.classList.contains('route-tab-active')) ||
+      !!(routeSheet && routeSheet.classList.contains('open') && routeSheet.style.display !== 'none');
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+  return false;
+}
+
 function openTab(name, opts){
   opts = opts || {};
   var shouldAutoFocusKeyboard = opts.keyboard === true;
@@ -6662,6 +6673,19 @@ function _fitInfoCardButtons(){
 }
 
 function _showInfoCard(item, idx){
+  // V8-1-14-575: 길찾기 탭/경로검색 시트가 열린 동안에는
+  // 마커 클릭이나 비동기 후속 처리로 장소 정보카드가 다시 뜨지 않게 막는다.
+  // 경로 탭을 닫은 뒤 기존 선택 장소를 복원하는 흐름은 _activeTab/시트 상태가 route가 아니므로 유지된다.
+  try{
+    if(_isRouteSelectionModeActive()){
+      var card = $('info-card');
+      if(card) card.classList.remove('open');
+      _curInfoItem = null;
+      _curFromRegion = false;
+      return;
+    }
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+
   _curInfoItem = {item, idx};
 
   $('ic-name').innerHTML = String(item.name||'') + _shrineNewBadgeHtml(item);
@@ -7406,7 +7430,7 @@ function _buildShrineMarkers(){
    mk.__oaiZIndex=1;
    (function(index){
     kakao.maps.event.addListener(mk,'click',()=>{
-     if(_routeMode) _selectRouteItem(index);
+     if(_isRouteSelectionModeActive()) _selectRouteItem(index);
      else selectItem(index,{fromRegion:_isRegionSearchActiveForItem(SHRINES[index])});
     });
    })(i);
@@ -7969,7 +7993,7 @@ function _showParishDioMkrs(code){
       });
       kakao.maps.event.addListener(mk,'click',function(){
         const idx=PARISHES.indexOf(p);
-        if(_routeMode) _selectRouteItem(idx);
+        if(_isRouteSelectionModeActive()) _selectRouteItem(idx);
         else selectItem(idx,{fromNearby:false,fromRegion:_isRegionSearchActiveForItem(PARISHES[idx])});
       });
       _dioMkrs[code].push(mk);
@@ -8018,7 +8042,7 @@ function _buildRetreatMarkers(){
         zIndex:45
       });
       (function(idx){kakao.maps.event.addListener(mk,'click',function(){
-        if(_routeMode) _selectRouteItem(idx);
+        if(_isRouteSelectionModeActive()) _selectRouteItem(idx);
         else selectItem(idx,{fromNearby:false,fromRegion:_isRegionSearchActiveForItem(RETREATS[idx])});
       });})(i);
       _retreatMarkers.push({marker:mk,item:p,index:i});
@@ -8656,7 +8680,7 @@ function _showRegionResultsOnMap(items, lat, lng, name){
         if(!p||!p.lat||!p.lng) return;
         const idx=PARISHES.indexOf(p);
         const mk=new _MM({position:new _LL(p.lat,p.lng),image:_mkrImg(OAI_CATHEDRAL_CATEGORY_COLOR,false),title:p.name,zIndex:55});
-        kakao.maps.event.addListener(mk,'click',function(){ if(_routeMode) _selectRouteItem(idx); else selectItem(idx,{fromRegion:true}); });
+        kakao.maps.event.addListener(mk,'click',function(){ if(_isRouteSelectionModeActive()) _selectRouteItem(idx); else selectItem(idx,{fromRegion:true}); });
         mk.setMap(_map);
         _regionResultMarkers.push(mk);
       });
