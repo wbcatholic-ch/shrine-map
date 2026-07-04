@@ -4935,7 +4935,20 @@ function _ensureRetreatDataLoaded(){
 try{ window._setRetreatRawData=_setRetreatRawData; }catch(e){ console.warn('[가톨릭길동무]', e); }
 _initRetreatDataFromGlobal();
 function _getCurrentItems(){return _mode==='shrine'?SHRINES:(_mode==='retreat'?RETREATS:PARISHES);}
-function _getModeTypeText(){return _mode==='shrine'?'성지':(_mode==='retreat'?'피정의 집':'성당');}
+function _getModePlaceNoun(mode){
+  const m = mode || _mode;
+  return m==='shrine' ? '성지' : (m==='retreat' ? '피정의 집' : '성당');
+}
+function _getModeListTitle(mode){
+  const m = mode || _mode;
+  return m==='parish' ? '성당찾기' : (m==='retreat' ? '피정의집 찾기' : '성지찾기');
+}
+function _getModeSearchPlaceholder(mode, context){
+  const m = mode || _mode;
+  if(m==='parish') return '선택 교구 성당명, 주소 검색';
+  return context==='route' ? '이름 또는 장소 입력' : '이름, 주소 검색';
+}
+function _getModeTypeText(){return _getModePlaceNoun(_mode);}
 function _getModeTypeLabel(item){return _mode==='shrine'?item.type:(_mode==='retreat'?'🏔 피정의 집':'⛪ 성당');}
 function _itemSearchBlob(item){return String((item&&item.name)||'')+' '+String((item&&item.diocese)||'')+' '+String((item&&item.addr)||'')+' '+String((item&&item.kw)||'');}
 function _itemSearchNorm(item){return _itemSearchBlob(item).replace(/\s+/g,'');}
@@ -4945,7 +4958,7 @@ const OAI_RETREAT_CATEGORY_COLOR = '#3F6F5A';
 const OAI_RETREAT_LIST_DOT_COLOR = '#c0392b';
 function _getRetreatColor(item){return OAI_RETREAT_CATEGORY_COLOR;}
 function _getModeMarkerColor(item){return _mode==='shrine'?(TC[item.type]||'#555'):(_mode==='retreat'?_getRetreatColor(item):OAI_CATHEDRAL_CATEGORY_COLOR);}
-function _getRouteGuideTarget(){return _mode==='shrine'?'성지':(_mode==='retreat'?'피정의 집':'성당');}
+function _getRouteGuideTarget(){return _getModePlaceNoun(_mode);}
 const OAI_ROUTE_VISUAL_DELAY_MS = 260;
 
 const JSKEY = (window.APP_CONFIG && window.APP_CONFIG.KAKAO_JS_KEY) || '';
@@ -5964,10 +5977,10 @@ function startApp(mode){
   }
   try{ _ensureShrineVisitMapFilter(); _updateShrineVisitMapFilterUI(); _ensureShrineVisitCardsButton(); _updateShrineVisitCardsButtonUI(); }catch(e){ console.warn('[가톨릭길동무]', e); }
   const _setTxt=(id,v)=>{const el=$(id);if(el)el.textContent=v;};
-  const listLbl = mode==='parish' ? '성당찾기' : (mode==='retreat' ? '피정의집 찾기' : '성지찾기');
+  const listLbl = _getModeListTitle(mode);
   const listSearchInput=$('list-srch-inp');
   if(listSearchInput){
-    const ph = mode==='parish' ? '선택 교구 성당명, 주소 검색' : '이름, 주소 검색';
+    const ph = _getModeSearchPlaceholder(mode, 'list');
     listSearchInput.placeholder = ph;
     listSearchInput.setAttribute('aria-label', ph);
   }
@@ -6106,7 +6119,7 @@ function _onMapReady(){
 }
 
 function _modeTargetLabel(){
-  return _mode==='parish'?'성당':(_mode==='retreat'?'피정의 집':'성지');
+  return _getModePlaceNoun(_mode);
 }
 function _updateSheetPanelTitles(){
   const noun=_modeTargetLabel();
@@ -9639,7 +9652,7 @@ function openSearchModal(role){
   _smRole=role;_smDio='all';
   _smTab='cat';
   const catTab=$('sm-tab-cat');
-  if(catTab) catTab.textContent=_mode==='shrine'?'성지':_mode==='parish'?'성당':'피정의 집';
+  if(catTab) catTab.textContent=_getModePlaceNoun(_mode);
   if($('sm-tab-cat')) $('sm-tab-cat').classList.add('active');
   if($('sm-tab-place')) $('sm-tab-place').classList.remove('active');
   requestAnimationFrame(function(){
@@ -9676,7 +9689,7 @@ function openSearchModal(role){
   $('sm-title').textContent=_routeSearchTitle(role,noun);
   const smInput=$('sm-inp');
   if(smInput){
-    const smPh = _mode==='parish' ? '선택 교구 성당명, 주소 검색' : '이름 또는 장소 입력';
+    const smPh = _getModeSearchPlaceholder(_mode, 'route');
     smInput.placeholder = smPh;
     smInput.setAttribute('aria-label', smPh);
     smInput.value='';

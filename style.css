@@ -3185,7 +3185,7 @@ html.parish-mode .sheet-hd,
 html.parish-mode .region-wrap,
 html.parish-mode .sm-hd,
 html.parish-mode .ric-hd{
-  background:linear-gradient(135deg,var(--cathedral-category-dark),var(--cathedral-category-final))!important;
+  background:var(--mode-header-bg)!important;
   color:var(--v4-surface-white)!important;
   border-color:transparent!important;
 }
@@ -3193,7 +3193,7 @@ html.parish-mode #nearby-body .nearby-num,
 html.parish-mode .nearby-num,
 html.parish-mode #region-body .nearby-num,
 html.parish-mode #region-body .region-item .nearby-num{
-  background:var(--cathedral-category-final)!important;
+  background:var(--mode-num-bg)!important;
   color:var(--v4-surface-white)!important;
 }
 html.parish-mode .nearby-dist,
@@ -3201,15 +3201,15 @@ html.parish-mode #region-body .nearby-dist,
 html.parish-mode .region-list-hd,
 html.parish-mode .ric-lbl,
 html.parish-mode .dio-hd{
-  color:var(--cathedral-category-final)!important;
+  color:var(--mode-dist-color)!important;
 }
 html.parish-mode .li-badge,
 html.parish-mode .nearby-type,
 html.parish-mode #region-body .nearby-type,
 html.parish-mode #region-body .region-item .nearby-type,
 html.parish-mode .ic-type-badge{
-  background:var(--cathedral-category-soft-final)!important;
-  color:var(--cathedral-category-final)!important;
+  background:var(--mode-badge-bg)!important;
+  color:var(--mode-badge-color)!important;
 }
 
 html.retreat-mode{
@@ -3240,7 +3240,7 @@ html.retreat-mode .sheet-hd,
 html.retreat-mode .region-wrap,
 html.retreat-mode .sm-hd,
 html.retreat-mode .ric-hd{
-  background:linear-gradient(135deg,var(--retreat-category-dark),var(--retreat-category-final))!important;
+  background:var(--mode-header-bg)!important;
   color:var(--v4-surface-white)!important;
   border-color:transparent!important;
 }
@@ -3248,7 +3248,7 @@ html.retreat-mode #nearby-body .nearby-num,
 html.retreat-mode .nearby-num,
 html.retreat-mode #region-body .nearby-num,
 html.retreat-mode #region-body .region-item .nearby-num{
-  background:var(--retreat-category-final)!important;
+  background:var(--mode-num-bg)!important;
   color:var(--v4-surface-white)!important;
 }
 html.retreat-mode #list-body .li-dot{
@@ -3259,15 +3259,15 @@ html.retreat-mode #region-body .nearby-dist,
 html.retreat-mode .region-list-hd,
 html.retreat-mode .ric-lbl,
 html.retreat-mode .dio-hd{
-  color:var(--retreat-category-final)!important;
+  color:var(--mode-dist-color)!important;
 }
 html.retreat-mode .li-badge,
 html.retreat-mode .nearby-type,
 html.retreat-mode #region-body .nearby-type,
 html.retreat-mode #region-body .region-item .nearby-type,
 html.retreat-mode .ic-type-badge{
-  background:var(--retreat-category-soft-final)!important;
-  color:var(--retreat-category-final)!important;
+  background:var(--mode-badge-bg)!important;
+  color:var(--mode-badge-color)!important;
 }
 
 #app .sheet-hd .sheet-title,
@@ -3293,12 +3293,12 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab{
   border:1.5px solid #CBD5E1!important;
 }
 html.parish-mode #srch-modal #sm-tab-bar .sm-tab.active{
-  background:linear-gradient(135deg,var(--cathedral-category-dark),var(--cathedral-category-final))!important;
+  background:var(--mode-tab-active-bg)!important;
   color:var(--v4-surface-white)!important;
   border-color:transparent!important;
 }
 html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active{
-  background:linear-gradient(135deg,var(--retreat-category-dark),var(--retreat-category-final))!important;
+  background:var(--mode-tab-active-bg)!important;
   color:var(--v4-surface-white)!important;
   border-color:transparent!important;
 }
