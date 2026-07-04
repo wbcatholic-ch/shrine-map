@@ -35,7 +35,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>교구지도</title>
-<link rel="stylesheet" href="css/diocese.css?v=V8-1-14-561">
+<link rel="stylesheet" href="css/diocese.css?v=V8-1-14-563">
 </head>
 <body>
 <header>
@@ -1006,94 +1006,116 @@ const DIOCESE_PRIEST_URL={
   '군종교구':'https://www.gunjong.or.kr/organization/index.asp?SearchArmyCd='
 };
 function getDiocesePriestUrl(name){return DIOCESE_PRIEST_URL[String(name||'').trim()]||'';}
+
+const DIOCESE_GROUPS=[
+  {key:'서울관구',col:'#1a6bb5',dioceses:['서울대교구','인천교구','수원교구','의정부교구','원주교구','춘천교구','대전교구']},
+  {key:'대구관구',col:'#c05a00',dioceses:['대구대교구','청주교구','안동교구','마산교구','부산교구']},
+  {key:'광주관구',col:'#7a1fa2',dioceses:['광주대교구','전주교구','제주교구']},
+  {key:'군종교구',col:'#4A5568',dioceses:['군종교구']}
+];
+const DIOCESE_GROUP_COLOR=DIOCESE_GROUPS.reduce(function(acc,g){acc[g.key]=g.col;return acc;},{});
+function findDioceseGroup(dName){
+  return DIOCESE_GROUPS.find(function(g){ return g.dioceses.indexOf(dName)!==-1; }) || null;
+}
+function getDioceseGroupInfo(dName){
+  const m=DIOCESE_META[dName]||{};
+  const g=findDioceseGroup(dName);
+  const key=(g&&g.key)||GW_OF[dName]||m.gwangu||'';
+  return {key:key,col:(g&&g.col)||DIOCESE_GROUP_COLOR[key]||'#888',group:g};
+}
+function normalizeDioceseUrlLabel(url){
+  return url ? String(url).replace(/^https?:\/\//,'').replace(/\/$/,'') : '홈페이지 없음';
+}
+function formatDioceseListName(dName,m){
+  if(dName==='군종교구') return dName;
+  if(dName==='춘천교구' || dName==='부산교구') return dName+' · '+(m.parishes||0)+'개 본당(해외본당 제외)';
+  return dName+' · '+(m.parishes||0)+'개 본당';
+}
+function createDioceseListCard(opts){
+  opts=opts||{};
+  const dName=String(opts.dioceseName||'').trim();
+  const m=DIOCESE_META[dName];
+  if(!m) return null;
+  const groupInfo=opts.group ? {key:opts.group.key,col:opts.group.col,group:opts.group} : getDioceseGroupInfo(dName);
+  const variant=opts.variant||'list';
+  const url=m.url||'';
+  const card=document.createElement('div');
+  card.className='lv-card'+(isMyDioceseName(dName)?' my-diocese-card':'');
+
+  const top=document.createElement('div'); top.className='lv-top';
+  const bdg=document.createElement('span'); bdg.className='lv-bdg';
+  bdg.style.background=groupInfo.col; bdg.textContent=groupInfo.key;
+  const op=document.createElement('span'); op.className='lv-op';
+  op.textContent='천주교 '+dName;
+  if(isMyDioceseName(dName)) appendMyDioceseBadge(op);
+  top.appendChild(bdg); top.appendChild(op);
+
+  const body=document.createElement('div'); body.className='lv-body';
+  const ico=document.createElement('div'); ico.className='lv-ico';
+  ico.textContent='⛪';
+  const info=document.createElement('div'); info.className='lv-info';
+  const nm=document.createElement('div'); nm.className='lv-name';
+  nm.textContent=opts.nameText || (variant==='search' ? dName : formatDioceseListName(dName,m));
+  const rg=document.createElement('div'); rg.className='lv-rg';
+  rg.innerHTML='📍 '+(opts.regionText || m.region || '');
+  info.appendChild(nm); info.appendChild(rg);
+
+  let detailItems=Array.isArray(opts.detailItems) ? opts.detailItems.slice() : [];
+  if(!detailItems.length && variant==='list'){
+    detailItems=(m.detail||[]).filter(function(x){return String(x||'').trim()!==String(m.region||'').trim();});
+  }
+  if(detailItems.length){
+    const dt=document.createElement('div'); dt.className='lv-det';
+    const prefix=opts.detailPrefix || (variant==='search' ? '◾ ' : '');
+    dt.textContent=prefix+detailItems.join(variant==='search' ? ' · ' : ' / ');
+    info.appendChild(dt);
+  }
+  body.appendChild(ico); body.appendChild(info);
+
+  const foot=document.createElement('div'); foot.className='lv-foot';
+  const urlEl=document.createElement('span'); urlEl.className='lv-url';
+  urlEl.textContent=normalizeDioceseUrlLabel(url);
+  const priestUrl=getDiocesePriestUrl(dName);
+  if(priestUrl){
+    foot.classList.add('has-priest');
+    const priestBtn=document.createElement('button');
+    priestBtn.type='button';
+    priestBtn.className='lv-priest-btn';
+    priestBtn.textContent='✝ 사제찾기';
+    priestBtn.dataset.dioUrl=priestUrl;
+    priestBtn.dataset.dioSource=opts.priestSource || (variant==='search' ? 'priest-search' : 'priest-list');
+    priestBtn.dataset.dioKey=dName;
+    foot.appendChild(urlEl); foot.appendChild(priestBtn);
+  }else{
+    const arr=document.createElement('span'); arr.className='lv-arr'; arr.textContent='›';
+    foot.appendChild(urlEl); foot.appendChild(arr);
+  }
+
+  card.appendChild(top); card.appendChild(body); card.appendChild(foot);
+  if(url){
+    card.dataset.dioUrl=url;
+    card.dataset.dioSource=opts.cardSource || 'list';
+    card.dataset.dioKey=dName;
+  }
+  return card;
+}
 function buildListView(){
-  const gws=[
-    {key:'서울관구',col:'#1a6bb5',dioceses:['서울대교구','인천교구','수원교구','의정부교구','원주교구','춘천교구','대전교구']},
-    {key:'대구관구',col:'#c05a00',dioceses:['대구대교구','청주교구','안동교구','마산교구','부산교구']},
-    {key:'광주관구',col:'#7a1fa2',dioceses:['광주대교구','전주교구','제주교구']},
-    {key:'군종교구',col:'#4A5568',dioceses:['군종교구']},
-  ];
   const wrap=document.getElementById('list-content');
   wrap.innerHTML='';
 
-  function findGroup(dName){
-    return gws.find(function(g){ return g.dioceses.indexOf(dName)!==-1; }) || null;
-  }
-
-  function buildDioceseCard(dName,g){
-    const m=DIOCESE_META[dName]; if(!m || !g) return null;
-    const card=document.createElement('div');
-    card.className='lv-card'+(isMyDioceseName(dName)?' my-diocese-card':'');
-
-    const top=document.createElement('div'); top.className='lv-top';
-    const bdg=document.createElement('span'); bdg.className='lv-bdg';
-    bdg.style.background=g.col; bdg.textContent=g.key;
-    const op=document.createElement('span'); op.className='lv-op';
-    op.textContent='천주교 '+dName;
-    if(isMyDioceseName(dName)) appendMyDioceseBadge(op);
-    top.appendChild(bdg); top.appendChild(op);
-
-    const body=document.createElement('div'); body.className='lv-body';
-    const ico=document.createElement('div'); ico.className='lv-ico';
-    ico.textContent='⛪';
-    const info=document.createElement('div'); info.className='lv-info';
-    const nm=document.createElement('div'); nm.className='lv-name';
-    if(dName==='춘천교구' || dName==='부산교구'){
-      nm.textContent=dName+' · '+(m.parishes||0)+'개 본당(해외본당 제외)';
-    }else{
-      nm.textContent=(dName==='군종교구')?dName:(dName+' · '+(m.parishes||0)+'개 본당');
-    }
-    const rg=document.createElement('div'); rg.className='lv-rg';
-    rg.innerHTML='📍 '+m.region;
-    info.appendChild(nm); info.appendChild(rg);
-    const dets2=(m.detail||[]).filter(function(x){return x.trim()!==m.region.trim();});
-    if(dets2.length){
-      const dt=document.createElement('div'); dt.className='lv-det';
-      dt.textContent=dets2.join(' / '); info.appendChild(dt);
-    }
-    body.appendChild(ico); body.appendChild(info);
-
-    const foot=document.createElement('div'); foot.className='lv-foot';
-    const url=document.createElement('span'); url.className='lv-url';
-    url.textContent=m.url?m.url.replace(/^https?:\/\//,'').replace(/\/$/,''):'홈페이지 없음';
-    const priestUrl=getDiocesePriestUrl(dName);
-    if(priestUrl){
-      foot.classList.add('has-priest');
-      const priestBtn=document.createElement('button');
-      priestBtn.type='button';
-      priestBtn.className='lv-priest-btn';
-      priestBtn.textContent='✝ 사제찾기';
-      priestBtn.dataset.dioUrl=priestUrl;
-      priestBtn.dataset.dioSource='priest-list';
-      priestBtn.dataset.dioKey=dName;
-      foot.appendChild(url); foot.appendChild(priestBtn);
-    }else{
-      const arr=document.createElement('span'); arr.className='lv-arr'; arr.textContent='›';
-      foot.appendChild(url); foot.appendChild(arr);
-    }
-
-    card.appendChild(top); card.appendChild(body); card.appendChild(foot);
-    if(m.url){
-      card.dataset.dioUrl = m.url;
-      card.dataset.dioSource = 'list';
-      card.dataset.dioKey = dName;
-    }
-    return card;
-  }
-
   const myDiocese=getMyDioceseName();
-  const myGroup=findGroup(myDiocese);
+  const myGroup=findDioceseGroup(myDiocese);
   if(myDiocese && myGroup && DIOCESE_META[myDiocese]){
     const mySec=document.createElement('div'); mySec.className='lv-sec';
     const myBdg=document.createElement('span'); myBdg.className='lv-sec-bdg';
     myBdg.style.background='#B7791F'; myBdg.textContent='나의 교구';
     mySec.appendChild(myBdg);
     wrap.appendChild(mySec);
-    const myCard=buildDioceseCard(myDiocese,myGroup);
+    const myCard=createDioceseListCard({dioceseName:myDiocese,group:myGroup,variant:'list',priestSource:'priest-list'});
     if(myCard) wrap.appendChild(myCard);
   }
 
-  gws.forEach(function(g){
+  DIOCESE_GROUPS.forEach(function(g){
     const sec=document.createElement('div'); sec.className='lv-sec';
     const secBdg=document.createElement('span'); secBdg.className='lv-sec-bdg';
     secBdg.style.background=g.col; secBdg.textContent=g.key;
@@ -1102,11 +1124,12 @@ function buildListView(){
 
     sortDiocesesWithMyFirst(g.dioceses).forEach(function(dName){
       if(myDiocese && dName===myDiocese) return;
-      const card=buildDioceseCard(dName,g);
+      const card=createDioceseListCard({dioceseName:dName,group:g,variant:'list',priestSource:'priest-list'});
       if(card) wrap.appendChild(card);
     });
   });
 }
+
 
 (function(){
   var KEY='prayer_font_size', BASE=16;
@@ -1478,61 +1501,16 @@ document.addEventListener('touchstart',closeCardIfOutside,{capture:true,passive:
 /* diocese card click handled inside iframe */
 
 function makeRow(disp,diocese,overlapDongs){
-  const m=DIOCESE_META[diocese];if(!m)return document.createElement('div');
-  const url=m.url||'';
-  const isArch=diocese.includes('대교구');
-  const gwKey=GW_OF[diocese]||m.gwangu||'';
-  const gwCol={'서울관구':'#1a6bb5','대구관구':'#c05a00','광주관구':'#7a1fa2','군종교구':'#4A5568'}[gwKey]||'#888';
-  const card=document.createElement('div');card.className='lv-card'+(isMyDioceseName(diocese)?' my-diocese-card':'');
-  // top
-  const top=document.createElement('div');top.className='lv-top';
-  const bdg=document.createElement('span');bdg.className='lv-bdg';
-  bdg.style.background=gwCol;bdg.textContent=gwKey;
-  const op=document.createElement('span');op.className='lv-op';op.textContent='천주교 '+diocese;
-  if(isMyDioceseName(diocese)) appendMyDioceseBadge(op);
-  top.appendChild(bdg);top.appendChild(op);
-  // body
-  const body=document.createElement('div');body.className='lv-body';
-  const ico=document.createElement('div');ico.className='lv-ico';
-  ico.textContent='⛪';
-  const info=document.createElement('div');info.className='lv-info';
-  const nm=document.createElement('div');nm.className='lv-name';nm.textContent=diocese;
-  const rg=document.createElement('div');rg.className='lv-rg';rg.innerHTML='📍 '+(disp||m.region);
-  info.appendChild(nm);info.appendChild(rg);
-  // 세부지역: 중복지역일 때만 표시
-  if(overlapDongs&&overlapDongs.length){
-    const dt=document.createElement('div');dt.className='lv-det';
-    dt.textContent='◾ '+overlapDongs.join(' · ');info.appendChild(dt);
-  }
-  body.appendChild(ico);body.appendChild(info);
-  // foot
-  const foot=document.createElement('div');foot.className='lv-foot';
-  const urlEl=document.createElement('span');urlEl.className='lv-url';
-  urlEl.textContent=url?url.replace(/^https?:\/\//,'').replace(/\/$/,''):'홈페이지 없음';
-  const priestUrl=getDiocesePriestUrl(diocese);
-  if(priestUrl){
-    foot.classList.add('has-priest');
-    const priestBtn=document.createElement('button');
-    priestBtn.type='button';
-    priestBtn.className='lv-priest-btn';
-    priestBtn.textContent='✝ 사제찾기';
-    priestBtn.dataset.dioUrl=priestUrl;
-    priestBtn.dataset.dioSource='priest-search';
-    priestBtn.dataset.dioKey=diocese;
-    foot.appendChild(urlEl);foot.appendChild(priestBtn);
-  }else{
-    const arr=document.createElement('span');arr.className='lv-arr';arr.textContent='›';
-    foot.appendChild(urlEl);foot.appendChild(arr);
-  }
-  card.appendChild(top);card.appendChild(body);card.appendChild(foot);
-  if(url){
-    card.dataset.dioUrl = url;
-    card.dataset.dioSource = 'list';
-    card.dataset.dioKey = diocese;
-    /* 목록 홈페이지 이동은 아래 전역 [data-dio-url] 핸들러 한 곳에서만 처리한다. */
-  }
-  return card;
+  return createDioceseListCard({
+    dioceseName:diocese,
+    variant:'search',
+    regionText:disp||((DIOCESE_META[diocese]||{}).region||''),
+    detailItems:Array.isArray(overlapDongs)?overlapDongs:[],
+    priestSource:'priest-search',
+    cardSource:'list'
+  }) || document.createElement('div');
 }
+
 
 const AMBIGUOUS_GU_STANDALONE=['중구','동구','서구','남구','북구','강서','강서구'];
 const DIOCESE_DISTRICT_SEARCH=[
@@ -1926,7 +1904,7 @@ window.addEventListener('pageshow',function(){
     // 탭 click 이벤트를 다시 실행하지 않는다. click 이벤트는 지도 초기화, 카드 닫기,
     // 목록 스크롤 재적용을 동반해 복귀 순간에 흔들림처럼 보일 수 있다.
     try{ window.__OAI_DIO_PARENT_RETURNING__ = true; window.__OAI_DIO_EXTERNAL_LEAVING__ = false; }catch(e){}
-    // V8-1-14-561: 관구·교구 iframe은 부모 외부복귀 보호창 위에 별도 복귀 레이어를 얹지 않는다.
+    // V8-1-14-563: 관구·교구 iframe은 부모 외부복귀 보호창 위에 별도 복귀 레이어를 얹지 않는다.
     try{ document.documentElement.classList.remove('oai-dio-external-stabilize','oai-dio-external-return','oai-dio-returning'); }catch(e){}
     var tab=state.tab||'gwangu';
     setReturnTabSilently(tab);
@@ -2036,7 +2014,7 @@ window.addEventListener('pageshow',function(){
     var state=window.getDioceseReturnState(source||'link', extra || {});
     try{ sessionStorage.setItem('oai_diocese_last_return_state', JSON.stringify(state)); localStorage.setItem('oai_diocese_last_return_state', JSON.stringify(state)); }catch(e){}
     if(window.parent && window.parent!==window){
-      // V8-1-14-561:
+      // V8-1-14-563:
       // 관구·교구 외부 홈페이지는 부모 복귀 상태를 저장한 뒤 안정 보호창을 유지하고 top 이동을 사용한다.
       try{
         if(typeof window.parent.prepareExternalUrl === 'function') url = window.parent.prepareExternalUrl(url) || url;
