@@ -2113,106 +2113,22 @@ window.addEventListener('pageshow',function(){
 })();
 </script>
 
-<script id="oai-touch-ux-keyboard-20260506">
-(function(){
-  if(window.__oaiTouchUxKeyboard20260506) return;
-  window.__oaiTouchUxKeyboard20260506 = true;
-
-  var ACTION_DELAY_MS = 55;
-  var FEEDBACK_MS = 170;
-  var PRESS_DELAY_MS = 85;
-  var MOVE_CANCEL_PX = 7;
-  var delayedSelectors = '#list-view .lv-card';
-  var directSelectors = [
+<script>
+window.OAI_PAGE_TOUCH_CONFIG = {
+  flag: '__oaiTouchUxKeyboard20260506',
+  actionDelayMs: 55,
+  feedbackMs: 170,
+  pressDelayMs: 85,
+  moveCancelPx: 7,
+  delayedSelectors: '#list-view .lv-card',
+  directSelectors: [
     'a','input','textarea','select','label',
     '#card','#card *','.c-x','.c-btn','[data-dio-url]',
     '.tab','.tab-btn','#si','#font-controls button'
-  ].join(',');
-
-  var activeTouch = null;
-  function closest(el, sel){ try{return el && el.closest ? el.closest(sel) : null;}catch(e){return null;} }
-  function clearPress(el){ if(!el) return; try{el.classList.remove('oai-touch-pressed');}catch(e){} el.__oaiPressing=false; }
-  function press(el){
-    if(!el || el.__oaiPressing) return;
-    el.__oaiPressing = true;
-    el.classList.add('oai-touchable','oai-touch-pressed');
-    setTimeout(function(){ clearPress(el); }, FEEDBACK_MS);
-  }
-  function cancelActive(){
-    if(!activeTouch) return;
-    activeTouch.canceled = true;
-    if(activeTouch.timer){ clearTimeout(activeTouch.timer); activeTouch.timer = null; }
-    clearPress(activeTouch.el);
-    try{ activeTouch.el.__oaiTouchCanceledUntil = Date.now() + 350; }catch(e){}
-  }
-
-  document.addEventListener('pointerdown', function(e){
-    if(closest(e.target, directSelectors)) return;
-    var el = closest(e.target, delayedSelectors);
-    if(!el) return;
-    activeTouch = {el:el,id:e.pointerId,x:e.clientX,y:e.clientY,canceled:false,timer:null};
-    activeTouch.timer = setTimeout(function(){
-      if(activeTouch && activeTouch.el === el && !activeTouch.canceled) press(el);
-    }, PRESS_DELAY_MS);
-  }, true);
-  document.addEventListener('pointermove', function(e){
-    if(!activeTouch || activeTouch.id !== e.pointerId) return;
-    var dx=Math.abs(e.clientX-activeTouch.x), dy=Math.abs(e.clientY-activeTouch.y);
-    if(dx > MOVE_CANCEL_PX || dy > MOVE_CANCEL_PX) cancelActive();
-  }, true);
-  document.addEventListener('pointercancel', cancelActive, true);
-  document.addEventListener('pointerup', function(e){
-    if(!activeTouch || activeTouch.id !== e.pointerId) return;
-    if(activeTouch.timer){ clearTimeout(activeTouch.timer); activeTouch.timer = null; }
-    if(activeTouch.canceled) clearPress(activeTouch.el);
-    activeTouch = null;
-  }, true);
-
-  document.addEventListener('click', function(e){
-    if(e.__oaiTouchReplay) return;
-    if(closest(e.target, directSelectors)) return;
-    var el = closest(e.target, delayedSelectors);
-    if(!el) return;
-    if(el.__oaiTouchCanceledUntil && Date.now() < el.__oaiTouchCanceledUntil){ e.preventDefault(); e.stopImmediatePropagation(); return; }
-    if(el.__oaiClickDelay) return;
-    e.preventDefault();
-    e.stopImmediatePropagation();
-    press(el);
-    el.__oaiClickDelay = true;
-    setTimeout(function(){
-      try{
-        var ev = new MouseEvent('click', {bubbles:true,cancelable:true,view:window});
-        ev.__oaiTouchReplay = true;
-        el.dispatchEvent(ev);
-      }catch(err){ try{ el.click(); }catch(_e){} }
-      setTimeout(function(){ el.__oaiClickDelay = false; }, 0);
-    }, ACTION_DELAY_MS);
-  }, true);
-
-  function disableKeyboardSuggestions(root){
-    root = root || document;
-    var nodes = root.querySelectorAll ? root.querySelectorAll('input[type="text"], input[type="search"], input:not([type]), textarea') : [];
-    nodes.forEach(function(el){
-      if(el.type === 'password' || el.type === 'number' || el.type === 'tel' || el.type === 'email') return;
-      el.setAttribute('autocomplete','off');
-      el.setAttribute('autocorrect','off');
-      el.setAttribute('autocapitalize','off');
-      el.setAttribute('spellcheck','false');
-      el.setAttribute('enterkeyhint','done');
-    });
-  }
-  disableKeyboardSuggestions(document);
-  document.addEventListener('DOMContentLoaded', function(){ disableKeyboardSuggestions(document); });
-  try{
-    var mo = new MutationObserver(function(muts){
-      for(var i=0;i<muts.length;i++) for(var j=0;j<muts[i].addedNodes.length;j++){
-        var n=muts[i].addedNodes[j]; if(n && n.nodeType===1) disableKeyboardSuggestions(n);
-      }
-    });
-    mo.observe(document.documentElement,{childList:true,subtree:true});
-  }catch(e){}
-})();
+  ].join(',')
+};
 </script>
+<script src="js/page-touch-keyboard.js?v=V8-1-14-575"></script>
 
 
 </body>
