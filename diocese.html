@@ -35,7 +35,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>교구지도</title>
-<link rel="stylesheet" href="css/diocese.css?v=V8-1-14-566">
+<link rel="stylesheet" href="css/diocese.css?v=V8-1-14-567">
 </head>
 <body>
 <header>
@@ -1692,92 +1692,113 @@ function findDioceseDistrictMatches(q){
   });
   return rows;
 }
-function renderSearchRows(res, rows){
-  res.innerHTML='';
-  rows.forEach(function(i){ if(DIOCESE_META[i.d]) res.appendChild(makeRow(i.display||i.k, i.d)); });
+function normalizeDioceseSearchAlias(value){
+  return String(value||'').replace(/\s+/g,'');
 }
-
+function clearDioceseSearchResults(res){
+  if(res) res.innerHTML='';
+}
+function escapeDioceseSearchText(value){
+  return String(value||'').replace(/[&<>\"]/g,function(ch){return {'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;'}[ch]||ch;});
+}
+function renderDioceseSearchMessage(res, html, className){
+  clearDioceseSearchResults(res);
+  const msg=document.createElement('div');
+  msg.className=className||'se';
+  msg.innerHTML=html;
+  res.appendChild(msg);
+  return msg;
+}
+function appendDioceseSearchRow(res, display, diocese, overlapDongs){
+  if(!res || !DIOCESE_META[diocese]) return null;
+  const row=makeRow(display,diocese,overlapDongs);
+  res.appendChild(row);
+  return row;
+}
+function renderSearchRows(res, rows){
+  clearDioceseSearchResults(res);
+  rows.forEach(function(i){ appendDioceseSearchRow(res,i.display||i.k,i.d,i.overlapDongs); });
+}
+function renderDioceseDuplicateSearchRows(res, city, summary){
+  clearDioceseSearchResults(res);
+  const warn=document.createElement('div');
+  warn.className='sob duplicate-warning-box';
+  warn.innerHTML='<div class="sot duplicate-warning-text">⚠️ <strong>"'+city+'"</strong> 중복지역입니다</div>';
+  res.appendChild(warn);
+  Object.keys(summary||{}).forEach(function(d){ appendDioceseSearchRow(res,city,d,summary[d]); });
+}
+function renderDioceseNamedPlaceRows(res, rows){
+  clearDioceseSearchResults(res);
+  rows.forEach(function(row){ appendDioceseSearchRow(res,row.display,row.diocese); });
+}
+function appendDioceseSearchLimitNote(res){
+  const more=document.createElement('div');
+  more.className='se';
+  more.style.fontSize='11px';
+  more.style.padding='10px 0';
+  more.textContent='상위 20건만 표시';
+  res.appendChild(more);
+}
+function searchAliasIncludes(aliases,q){
+  return (aliases||[]).some(function(alias){return normalizeDioceseSearchAlias(alias).includes(q);});
+}
+function searchAliasEquals(aliases,q){
+  return (aliases||[]).some(function(alias){return normalizeDioceseSearchAlias(alias)===q;});
+}
+function getNamedPlaceSearchRows(city,groups,q){
+  if(city==='광주'){
+    if(searchAliasEquals(groups.gwangyeok,q)) return [{display:'광주광역시',diocese:'광주대교구'}];
+    if(searchAliasEquals(groups.gyeonggi,q)) return [{display:'경기 광주',diocese:'수원교구'}];
+    if(searchAliasEquals(groups.plain,q)) return [{display:'광주광역시',diocese:'광주대교구'},{display:'경기 광주',diocese:'수원교구'}];
+  }
+  if(city==='고성'){
+    if(searchAliasEquals(groups.gangwon,q)) return [{display:'강원 고성',diocese:'춘천교구'}];
+    if(searchAliasEquals(groups.gyeongnam,q)) return [{display:'경남 고성',diocese:'마산교구'}];
+    if(searchAliasEquals(groups.plain,q)) return [{display:'강원 고성',diocese:'춘천교구'},{display:'경남 고성',diocese:'마산교구'}];
+  }
+  return [];
+}
 function doSearch(){
   try{ document.activeElement && document.activeElement.blur && document.activeElement.blur(); }catch(e){}
-  const raw=document.getElementById('si').value.trim();
+  const input=document.getElementById('si');
+  const raw=(input&&input.value||'').trim();
   const res=document.getElementById('sres');
-  if(!raw){res.innerHTML='<div class="se">도·시·군·구 이름을 입력하세요</div>';return;}
+  if(!res) return;
+  if(!raw){renderDioceseSearchMessage(res,'도·시·군·구 이름을 입력하세요');return;}
 
-  const q=raw.replace(/\s+/g,'');
+  const q=normalizeDioceseSearchAlias(raw);
 
   if(AMBIGUOUS_GU_STANDALONE.includes(q)){
-    res.innerHTML='<div class="se">중구·동구·서구·남구·북구·강서구처럼 여러 도시에 있는 구는<br>도시명을 함께 입력하세요.<br><span style="font-size:11px;color:#6B7280">예: 대구 중구, 서울 중구, 부산 남구, 서울 강서구</span></div>';
+    renderDioceseSearchMessage(res,'중구·동구·서구·남구·북구·강서구처럼 여러 도시에 있는 구는<br>도시명을 함께 입력하세요.<br><span class="search-help-small">예: 대구 중구, 서울 중구, 부산 남구, 서울 강서구</span>');
     return;
   }
   const districtMatches=findDioceseDistrictMatches(q);
   if(districtMatches.length){renderSearchRows(res,districtMatches);return;}
 
   for(const [city,aliases] of Object.entries(REGION_OVERLAP_PLAIN)){
-    if(aliases.map(a=>a.replace(/\s+/g,'')).includes(q)){
-      const sm=OVERLAP_SUMMARY[city]||{};
-      res.innerHTML='';
-      const warn=document.createElement('div');warn.className='sob duplicate-warning-box';
-      warn.innerHTML=`<div class="sot duplicate-warning-text">⚠️ <strong>"${city}"</strong> 중복지역입니다</div>`;
-      res.appendChild(warn);
-      Object.keys(sm).forEach(function(d){
-        if(DIOCESE_META[d]) res.appendChild(makeRow(city,d,sm[d]));
-      });
+    if(searchAliasEquals(aliases,q)){
+      renderDioceseDuplicateSearchRows(res,city,OVERLAP_SUMMARY[city]||{});
       return;
     }
   }
 
   for(const [city,groups] of Object.entries(NAME_SAME)){
-    if(city==='광주'){
-      if(groups.gwangyeok.map(a=>a.replace(/\s+/g,'')).includes(q)){
-        res.innerHTML='';res.appendChild(makeRow('광주광역시','광주대교구'));return;
-      }
-      if(groups.gyeonggi.map(a=>a.replace(/\s+/g,'')).includes(q)){
-        res.innerHTML='';res.appendChild(makeRow('경기 광주','수원교구'));return;
-      }
-    } else if(city==='고성'){
-      if(groups.gangwon.map(a=>a.replace(/\s+/g,'')).includes(q)){
-        res.innerHTML='';res.appendChild(makeRow('강원 고성','춘천교구'));return;
-      }
-      if(groups.gyeongnam.map(a=>a.replace(/\s+/g,'')).includes(q)){
-        res.innerHTML='';res.appendChild(makeRow('경남 고성','마산교구'));return;
-      }
-    }
-    if(groups.plain.map(a=>a.replace(/\s+/g,'')).includes(q)){
-      let rows='';
-      res.innerHTML='';
-      if(city==='광주'){
-        res.appendChild(makeRow('광주광역시','광주대교구'));
-        res.appendChild(makeRow('경기 광주','수원교구'));
-      } else if(city==='고성'){
-        res.appendChild(makeRow('강원 고성','춘천교구'));
-        res.appendChild(makeRow('경남 고성','마산교구'));
-      }
-      return;
-    }
+    const namedRows=getNamedPlaceSearchRows(city,groups,q);
+    if(namedRows.length){ renderDioceseNamedPlaceRows(res,namedRows); return; }
   }
 
-  const matched=SEARCH_DB.filter(i=>{
-    const aliases=i.aliases||[i.k];
-    return aliases.some(alias=>alias.replace(/\s+/g,'')===q);
-  });
+  const matched=SEARCH_DB.filter(i=>searchAliasEquals(i.aliases||[i.k],q));
 
   const results=matched.length?matched:SEARCH_DB.filter(i=>{
     const aliases=i.aliases||[i.k];
-    return aliases.some(alias=>{
-      const af=alias.replace(/\s+/g,'');
-      return af.includes(q)&&q.length>=2;
-    });
+    return q.length>=2 && searchAliasIncludes(aliases,q);
   });
 
-  if(!results.length){res.innerHTML=`<div class="se">"${raw}"을 찾을 수 없습니다</div>`;return;}
+  if(!results.length){renderDioceseSearchMessage(res,'"'+escapeDioceseSearchText(raw)+'"을 찾을 수 없습니다');return;}
   const seen=new Set();
-  const u=results.filter(i=>{const k=i.k+'|'+i.d;if(seen.has(k))return false;seen.add(k);return true;});
-  res.innerHTML='';
-  u.slice(0,20).forEach(function(i){
-    const m=DIOCESE_META[i.d];if(!m)return;
-    res.appendChild(makeRow(i.display||i.k, i.d));
-  });
-  if(u.length>20){const more=document.createElement('div');more.className='se';more.style.fontSize='11px';more.style.padding='10px 0';more.textContent='상위 20건만 표시';res.appendChild(more);}
+  const unique=results.filter(function(i){const k=i.k+'|'+i.d;if(seen.has(k))return false;seen.add(k);return true;});
+  renderSearchRows(res,unique.slice(0,20));
+  if(unique.length>20) appendDioceseSearchLimitNote(res);
 }
 document.getElementById('si').addEventListener('keydown',e=>{
   if(e.key==='Enter'){
@@ -1922,7 +1943,7 @@ window.addEventListener('pageshow',function(){
     // 탭 click 이벤트를 다시 실행하지 않는다. click 이벤트는 지도 초기화, 카드 닫기,
     // 목록 스크롤 재적용을 동반해 복귀 순간에 흔들림처럼 보일 수 있다.
     try{ window.__OAI_DIO_PARENT_RETURNING__ = true; window.__OAI_DIO_EXTERNAL_LEAVING__ = false; }catch(e){}
-    // V8-1-14-566: 관구·교구 iframe은 부모 외부복귀 보호창 위에 별도 복귀 레이어를 얹지 않는다.
+    // V8-1-14-567: 관구·교구 iframe은 부모 외부복귀 보호창 위에 별도 복귀 레이어를 얹지 않는다.
     try{ document.documentElement.classList.remove('oai-dio-external-stabilize','oai-dio-external-return','oai-dio-returning'); }catch(e){}
     var tab=state.tab||'gwangu';
     setReturnTabSilently(tab);
@@ -2032,7 +2053,7 @@ window.addEventListener('pageshow',function(){
     var state=window.getDioceseReturnState(source||'link', extra || {});
     try{ sessionStorage.setItem('oai_diocese_last_return_state', JSON.stringify(state)); localStorage.setItem('oai_diocese_last_return_state', JSON.stringify(state)); }catch(e){}
     if(window.parent && window.parent!==window){
-      // V8-1-14-566:
+      // V8-1-14-567:
       // 관구·교구 외부 이동은 부모 app.js의 openDioceseExternal 한 곳에서 처리한다.
       // iframe은 현재 탭/스크롤/카드 상태만 만들고, 보호창·URL 정규화·저장·실제 이동은 부모 공통 소유자에게 위임한다.
       try{
