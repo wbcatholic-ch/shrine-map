@@ -1,3 +1,5 @@
+
+
 .my-faith-body.my-faith-home-list-body.my-faith-no-scroll,
 .my-faith-no-scroll {
   overflow-y: auto !important;
@@ -5,6 +7,7 @@
 }
 
 .my-faith-body { display:flex !important; flex-direction:column !important; gap:14px !important; flex:1 1 auto !important; min-height:0 !important; overflow-y:auto !important; -webkit-overflow-scrolling:touch !important; padding:16px 15px calc(env(safe-area-inset-bottom,0px) + 18px) !important; background:var(--v4-bg-ivory) !important; box-sizing:border-box !important; }
+.my-diocese-modal.keyboard-open .my-faith-body { padding-bottom:14px !important; }
 .my-faith-section { border-radius:18px !important; padding:0 !important; background:var(--v4-surface-white) !important; border:1.5px solid rgba(183,121,31,.42) !important; box-shadow:0 10px 22px rgba(183,121,31,.13), 0 2px 9px rgba(31,42,68,.06) !important; box-sizing:border-box !important; overflow:hidden !important; }
 .my-faith-section h3 { margin:0 !important; padding:15px 15px 13px !important; border-bottom:1px solid rgba(183,121,31,.28) !important; background:var(--v4-text-main) !important; color:var(--v4-surface-paper) !important; font-size:calc(17px * var(--app-font-scale,1)) !important; line-height:1.35 !important; font-weight:900 !important; letter-spacing:-.035em !important; }
 .my-faith-settings-section h3 { background:#8F1D1D !important; color:var(--v4-surface-paper) !important; border-bottom-color:rgba(183,121,31,.42) !important; }
@@ -55,6 +58,23 @@
 }
 .my-diocese-modal.keyboard-open .my-faith-inline-privacy-note,
 .my-diocese-modal.keyboard-open .my-faith-inline-confirm { display:none !important; }
+html:not(.ios-device).oai-screen-compact-short .my-diocese-list{grid-template-columns:1fr !important;}
+
+.my-diocese-modal.show,
+.my-diocese-modal.show .my-diocese-panel {
+  height: var(--my-faith-vh, 100dvh) !important;
+  max-height: var(--my-faith-vh, 100dvh) !important;
+  min-height: 0 !important;
+}
+.my-diocese-modal.show #my-diocese-list.my-faith-body {
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+  height: auto !important;
+  max-height: none !important;
+  overflow-y: auto !important;
+  -webkit-overflow-scrolling: touch !important;
+  overscroll-behavior-y: contain !important;
+}
 .my-faith-body.my-faith-home-list-body {
   gap: 10px !important;
   padding: 12px 15px calc(env(safe-area-inset-bottom, 0px) + 22px) !important;
@@ -339,6 +359,13 @@ html:not(.ios-device).oai-screen-compact-short .my-faith-inline-diocese-grid { g
 
 .my-faith-edit-status-row.is-static {
   grid-template-columns: minmax(0, 1fr) !important;
+}
+
+.my-diocese-modal.return-settling,
+.my-diocese-modal.return-settling * {
+  transition: none !important;
+  animation: none !important;
+  scroll-behavior: auto !important;
 }
 
 .my-faith-data-section {
@@ -849,6 +876,11 @@ html:not(.ios-device).oai-screen-compact-short .my-faith-inline-diocese-grid { g
   margin-top: 7px !important;
 }
 
+html:not(.ios-device).oai-screen-compact-short #my-faith-close,
+html:not(.ios-device).oai-screen-compact-short .my-faith-close{
+  width:34px!important;height:34px!important;min-width:34px!important;flex-basis:34px!important;line-height:1!important;
+}
+
 html:not(.ios-device).oai-screen-compact-short .my-faith-info-head {
   padding: calc(11px + env(safe-area-inset-top,0px)) 14px 10px !important;
   gap: 8px !important;
@@ -900,6 +932,7 @@ html:not(.ios-device).oai-screen-compact-short .my-faith-code-btn {
   min-height: 40px !important;
 }
 
+
 .my-faith-info-head{
   position:relative!important;
   top:auto!important;
@@ -947,6 +980,7 @@ html:not(.ios-device).oai-screen-compact-short .my-faith-code-btn {
 }
 html:not(.ios-device).oai-screen-compact-short .my-faith-info-head::before{width:42px!important;height:42px!important;min-width:42px!important;flex-basis:42px!important;}
 html:not(.ios-device).oai-screen-compact-short .my-faith-info-close{width:var(--oai-std-close-sz,34px)!important;height:var(--oai-std-close-sz,34px)!important;min-width:var(--oai-std-close-sz,34px)!important;flex-basis:var(--oai-std-close-sz,34px)!important;}
+
 
 /* 나의 신앙생활 확인 버튼 아래 안내문과 백업 설명은 각 소유 블록에서 관리한다. */
 .my-faith-confirm-under-note{
