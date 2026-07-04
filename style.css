@@ -149,7 +149,7 @@
   
   --bg-color:   #f7f0e5;
   
-  /* V8-1-14-560: 커버 레이아웃 소유권 선언.
+  /* V8-1-14-561: 커버 레이아웃 소유권 선언.
      커버 비율은 #cover / #cover-main-block / .cover-grid / #cover-action-row / #cover-bottom-note와
      아래 cover 전용 변수에서만 관리한다.
      하단 안내문구와 3버튼 사이 간격은 margin 덧씌움이 아니라 --cover-note-reserve/--cover-bottom-reserve로 조정한다. */
@@ -1428,7 +1428,7 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active {
 .ic-goodnews-btn { background: #e8f7ff; color: #075985; border: 1px solid #66bdf2; }
 .ic-kakao-row { display: flex; gap: 7px; padding: 7px 14px 0; align-items: stretch; }
 .ic-kakao-row > * { flex: 1 1 0; min-width: 0; max-width: 100%; box-sizing: border-box; }
-/* V8-1-14-560: info-card button rows keep a single visible button full-width instead of leaving an empty half row. */
+/* V8-1-14-561: info-card button rows keep a single visible button full-width instead of leaving an empty half row. */
 #app #info-card .ic-btn-row > :not([style*="display: none"]),
 #app #info-card .ic-links > :not([style*="display: none"]),
 #app #info-card .ic-kakao-row > :not([style*="display: none"]){flex:1 1 0!important;max-width:100%!important;}
@@ -1634,7 +1634,7 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, var(--v4-retreat
 .exit-cancel { flex: 1; padding: 12px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--v4-surface-white); font-size: 15px; font-weight: 600; color: var(--ink); cursor: pointer; font-family: inherit; }
 .exit-ok { flex: 1; padding: 12px; border-radius: 10px; border: none; background: var(--ink); color: var(--v4-surface-white); font-size: 15px; font-weight: 700; cursor: pointer; font-family: inherit; }
 
-/* V8-1-14-560: 지도 로딩 화면의 배경/글자색 기준은 이 원래 위치에서만 관리한다. */
+/* V8-1-14-561: 지도 로딩 화면의 배경/글자색 기준은 이 원래 위치에서만 관리한다. */
 .map-loading { display: flex; flex-direction: column; align-items: center; justify-content: flex-start; background: var(--bg-unified,var(--v4-bg-cream))!important; height: 100%; }
 .map-loading-icon { font-size: 36px; margin-bottom: 14px; color: var(--gold,var(--v4-gold))!important; animation: oaiUnifiedLoadingCrossSpin 2.8s linear infinite; }
 .map-loading-txt { font-size: 13px; color: var(--v4-text-muted)!important; font-weight: 600; }
@@ -1742,13 +1742,14 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, var(--v4-retreat
 
 #missa-frame { flex: 1 1 auto; min-height: 0; width: 100%; border: 0; background: #fffaf2; }
 
-/* V8-1-14-560: 매일미사/주요기도문 하단 빠른 버튼은 이 블록을 단일 기준으로 관리한다.
+/* V8-1-14-561: 매일미사/주요기도문 하단 빠른 버튼은 이 블록을 단일 기준으로 관리한다.
    Android/compact 차이는 뒤쪽에서 같은 속성을 다시 쓰지 않고 변수만 바꾼다. */
 .faith-bottom-nav {
   --faith-bottom-gap: 8px;
   --faith-bottom-pad-top: 8px;
   --faith-bottom-pad-x: 12px;
   --faith-bottom-pad-bottom: calc(env(safe-area-inset-bottom, 0px) + 8px);
+  --faith-bottom-btn-offset-y: 5px;
   flex: 0 0 auto;
   display: flex;
   gap: var(--faith-bottom-gap);
@@ -1777,6 +1778,8 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, var(--v4-retreat
   --faith-bottom-btn-gap: 5px;
   flex: 1 1 0;
   min-width: 0;
+  position: relative;
+  top: var(--faith-bottom-btn-offset-y, 0px);
   height: var(--faith-bottom-btn-height);
   min-height: var(--faith-bottom-btn-height);
   border: 1.6px solid var(--faith-bottom-btn-border, transparent);
@@ -1879,10 +1882,10 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, var(--v4-retreat
 }
 #diocese-frame { flex: 1 1 auto; min-height: 0; width: 100%; border: 0; background: var(--v4-bg-ivory); }
 
-/* V8-1-14-560: 문의·건의는 iframe 기반 qna-view만 사용한다. legacy qna card/tab and qna-cover floating button CSS removed. */
+/* V8-1-14-561: 문의·건의는 iframe 기반 qna-view만 사용한다. legacy qna card/tab and qna-cover floating button CSS removed. */
 
 #cover { overscroll-behavior-y: contain; }
-/* V8-1-14-560: 인트로 사진/보호막 pseudo-element 디자인은 아래 단일 사진 블록에서만 관리한다.
+/* V8-1-14-561: 인트로 사진/보호막 pseudo-element 디자인은 아래 단일 사진 블록에서만 관리한다.
    이 앞쪽 블록은 커버 본문 표시/숨김만 담당해 중복 CSS 충돌을 막는다. */
 html.oai-cover-booting body { background: var(--cream, var(--v4-bg-cream)) !important; }
 html.oai-cover-booting #cover {
@@ -2214,7 +2217,7 @@ html.app-active #cover-action-row { display: none; }
 #cover .cover-refresh-main-btn::before { background: #8D98A8; }
 #cover .cover-diocese-btn,
 #cover .cover-share-main-btn { color: var(--v4-header-navy); }
-/* V8-1-14-560: 하단 3개 버튼 글자 크기를 ‘나의 신앙생활’ 기준으로 통일 */
+/* V8-1-14-561: 하단 3개 버튼 글자 크기를 ‘나의 신앙생활’ 기준으로 통일 */
 #cover .cover-share-main-btn,
 #cover .cover-refresh-main-btn{
   font-size:var(--cover-action-font);
@@ -2254,7 +2257,7 @@ html:not(.ios-device).oai-screen-compact-short #cover {
 
 #cover-update-hint { display: none; margin-top: 4px; padding-left: 2px; color: #dc2626; font-size: 9.5px; font-weight: 800; line-height: 1.15; white-space: normal; max-width: 100%; word-break: keep-all; }
 #cover-update-box.update-needed #cover-update-hint { display: block; }
-/* V8-1-14-560: update-needed text is a small status badge, not a main category title.
+/* V8-1-14-561: update-needed text is a small status badge, not a main category title.
    Keep it independent from the user's enlarged app font scale so it does not overflow on Fold/phone covers. */
 #cover-update-box.update-needed #cover-update-btn {
   font-size: 12.8px !important;
@@ -2348,7 +2351,7 @@ html:not(.ios-device).oai-screen-compact-short #cover-update-box.update-needed #
 #cover-font-controls #cover-lg-btn { font-size: 22px; }
 #cover-font-controls .pr-font-divider { width: 1px; height: 20px; background: #ddd5c8; flex: 0 0 1px; margin: 0 2px; }
 
-/* V8-1-14-560: removed legacy direct guide-button styles; real menu entries are managed in cover-modals.css. */
+/* V8-1-14-561: removed legacy direct guide-button styles; real menu entries are managed in cover-modals.css. */
 
 #cover #cover-menu-btn.cover-menu-btn {
   position: absolute;
@@ -2397,7 +2400,7 @@ html.app-active #cover-menu-btn { display: none !important; }
   background: currentColor;
 }
 
-/* V8-1-14-560: cover menu modal shell is owned by css/cover-modals.css. */
+/* V8-1-14-561: cover menu modal shell is owned by css/cover-modals.css. */
 
 
 #oai-cover-exit-toast {
@@ -2459,7 +2462,7 @@ html.app-active #cover-menu-btn { display: none !important; }
 @media (display-mode: standalone) { #pwa-install-btn { display: none; } }
 html.app-active #pwa-install-btn { display: none; }
 
-/* V8-1-14-560: guide/privacy modal-specific styles are owned here; duplicated panel/hero rules are merged below. */
+/* V8-1-14-561: guide/privacy modal-specific styles are owned here; duplicated panel/hero rules are merged below. */
 
 .guide-modal { position: fixed; inset: 0; z-index: 10050; display: none; align-items: center; justify-content: center; padding: calc(env(safe-area-inset-top, 0px) + 14px) 18px calc(env(safe-area-inset-bottom, 0px) + 18px); box-sizing: border-box; font-family: 'Apple SD Gothic Neo','Noto Sans KR',sans-serif; }
 .guide-modal.show { display: flex; }
@@ -2650,7 +2653,7 @@ html:not(.ios-device) #ios-safari-guide-modal { display: none; }
 .sheet, .trail-sheet, #prayer-detail, #info-card { will-change: transform; }
 .module-view:not(.open), #missa-view:not(.open), #diocese-view:not(.open), #prayer-view:not(.open) { contain: strict; }
 
-/* V8-1-14-560: 성지/성당/피정 진입 첫 화면은 #sheet-nearby의 nearby-distance-loading이 기준이다.
+/* V8-1-14-561: 성지/성당/피정 진입 첫 화면은 #sheet-nearby의 nearby-distance-loading이 기준이다.
    이전 #oai-category-entry-veil은 stale class cleanup용 호환 요소로만 남긴다. */
 #oai-category-entry-veil {
   display: none !important;
@@ -2975,7 +2978,7 @@ html.oai-font-global #region-body .dio-hd { font-size: calc(17px * var(--app-inn
   }
   #cover #cover-action-row { margin-top: 0; }
 }
-/* V8-1-14-560: obsolete mass-quick short-height media override removed; css/cover-modals.css owns mass quick sizing. */
+/* V8-1-14-561: obsolete mass-quick short-height media override removed; css/cover-modals.css owns mass quick sizing. */
 @media (max-height: 650px) {
   #cover { --cover-top-safe: calc(env(safe-area-inset-top, 0px) + clamp(58px, calc(var(--cover-vh, 1vh) * 9.4), 74px)); --cover-bottom-safe: calc(env(safe-area-inset-bottom, 0px) + clamp(6px, calc(var(--cover-vh, 1vh) * 1.0), 10px)); --cover-note-reserve: clamp(38px, calc(var(--cover-vh, 1vh) * 4.8), 50px); --cover-bottom-reserve: var(--cover-note-reserve); --cover-note-bottom: calc(env(safe-area-inset-bottom, 0px) + clamp(12px, calc(var(--cover-vh, 1vh) * 2.0), 18px)); padding-top: var(--cover-top-safe); padding-bottom: calc(var(--cover-bottom-safe) + var(--cover-bottom-reserve)); }
   #cover-bottom-note { bottom: var(--cover-note-bottom); }
@@ -3129,7 +3132,7 @@ html.kb-open .sheet.open { bottom: 0; }
   --retreat-list-dot-final:#c0392b;
 }
 
-/* V8-1-14-560: 지도 로딩 화면은 위 .map-loading 원래 위치에서 관리한다. */
+/* V8-1-14-561: 지도 로딩 화면은 위 .map-loading 원래 위치에서 관리한다. */
 #app{
   background:var(--bg-unified,var(--v4-bg-cream))!important;
 }
@@ -3388,7 +3391,7 @@ html.ios-device #qna-view.open {
   overflow: hidden !important;
 }
 
-/* V8-1-14-560: 지도/교구/내주변 로딩 십자가는 아래 oai-loading-cross 변수 블록 한 곳에서 관리한다.
+/* V8-1-14-561: 지도/교구/내주변 로딩 십자가는 아래 oai-loading-cross 변수 블록 한 곳에서 관리한다.
    이 위치의 과거 십자가/원형 스피너 중복 override는 제거했다. */
 
 #cover .my-diocese-setup-banner {
@@ -3762,7 +3765,7 @@ html.oai-font-global .shrine-visit-cards-btn{font-size:calc(12px * var(--app-inn
 
 
 
-/* V8-1-14-560: 스탬프북 카드는 성지목록 고유색(성지/순례지/순교 사적지)을 유지하되,
+/* V8-1-14-561: 스탬프북 카드는 성지목록 고유색(성지/순례지/순교 사적지)을 유지하되,
    오른쪽 종류 라벨은 고정하고 교구명은 한 글자씩 세로로 떨어지지 않게 가로 고정한다. */
 .shrine-visit-card-grid{
   display:grid!important;
@@ -4094,7 +4097,7 @@ html.oai-font-global .shrine-visit-detail-head-title{font-size:calc(18px * var(-
 .shrine-visit-cards-panel{position:absolute!important;inset:0!important;width:100%!important;max-width:none!important;height:auto!important;min-height:0!important;max-height:none!important;border-radius:0!important;border:0!important;background:#fffdf7!important;padding:0!important;box-shadow:none!important;display:flex!important;flex-direction:column!important;overflow:hidden!important}
 .shrine-visit-detail-view{background:#f1f3ee!important;color:#17201b!important}.shrine-visit-detail-head{background:#ffffff!important;border-bottom:1px solid rgba(31,41,51,.10)!important;box-shadow:0 2px 16px rgba(31,41,51,.06)!important}.shrine-visit-detail-back,.shrine-visit-detail-x{background:#f6f7f3!important;border-color:#d8dcd1!important;color:#324137!important;box-shadow:0 1px 7px rgba(31,41,51,.06)!important}.shrine-visit-detail-head-title{color:#17201b!important}.shrine-visit-detail-kicker,.shrine-visit-detail-date-title,.shrine-visit-detail-section-title{color:#75643c!important}.shrine-visit-detail-count{color:#17201b!important}.shrine-visit-detail-recent{color:#405247!important}.shrine-visit-detail-date-list{display:flex!important;flex-direction:column!important;gap:0!important;border-top:1px solid #e4e8df!important;border-bottom:1px solid #e4e8df!important;background:transparent!important;margin-top:4px!important}.shrine-visit-detail-date-chip{display:flex!important;justify-content:flex-start!important;align-items:center!important;border:0!important;border-radius:0!important;background:transparent!important;color:#17201b!important;padding:10px 2px 10px 18px!important;font-size:15px!important;font-weight:900!important;position:relative!important;box-shadow:none!important}.shrine-visit-detail-date-chip:before{content:"";position:absolute;left:3px;top:50%;width:7px;height:7px;border-radius:50%;background:#bda360;transform:translateY(-50%)}.shrine-visit-detail-date-chip+ .shrine-visit-detail-date-chip{border-top:1px solid #edf0e9!important}.shrine-visit-detail-empty-date{background:transparent!important;color:#7b837c!important;border:1px dashed #cbd2c6!important;border-radius:12px!important}.shrine-visit-detail-add{height:40px!important;margin-top:12px!important;background:#ffffff!important;color:#2f3b34!important;border:1px solid #bda360!important;box-shadow:0 2px 8px rgba(31,41,51,.05)!important}.shrine-visit-detail-add:active{background:#f6f0dc!important;filter:none!important}.shrine-visit-detail-name{color:#17201b!important}.shrine-visit-detail-row{border-top-color:#e4e8df!important}.shrine-visit-detail-row span{color:#75643c!important}.shrine-visit-detail-row strong{color:#24312a!important}
 
-/* V8-1-14-560: 순례 스탬프북/지도 보조 UI는 이 블록을 최종 소유 위치로 사용한다.
+/* V8-1-14-561: 순례 스탬프북/지도 보조 UI는 이 블록을 최종 소유 위치로 사용한다.
    V542에서 하단 레이어와 내위치 버튼을 다시 크게 덮으면서 화면이 깨진 부분을 되돌리고,
    버튼 소유권만 이 원본 위치에 남긴다. */
 #shrine-visit-cards-btn,.shrine-visit-sheet-btn,.shrine-visit-sheet-btn.show{display:none!important;}
@@ -4163,6 +4166,7 @@ body > .shrine-visit-action-layer,
 }
 .shrine-visit-floating-list-btn{
   position:relative!important;
+  top:5px!important;
   left:auto!important;
   right:auto!important;
   bottom:auto!important;
@@ -4597,7 +4601,7 @@ html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-grid{
 
 
 
-/* V8-1-14-560: 과거 gold-cross 로딩 중복 블록 제거. 실제 로딩 십자가는 oai-loading-cross 변수 블록만 사용한다. */
+/* V8-1-14-561: 과거 gold-cross 로딩 중복 블록 제거. 실제 로딩 십자가는 oai-loading-cross 변수 블록만 사용한다. */
 html.oai-map-search-keyboard-lock,
 html.oai-map-search-keyboard-lock body{
   overscroll-behavior:none!important;
@@ -4689,7 +4693,7 @@ html.oai-stability-veil::after {
   animation:oaiStabilitySpin 2.8s linear infinite !important;
 }
 
-/* V8-1-14-560: 사용하지 않는 이전 Google-style intro keyframes는 제거하고, oaiIntroSmoothPhoto*만 유지한다. */
+/* V8-1-14-561: 사용하지 않는 이전 Google-style intro keyframes는 제거하고, oaiIntroSmoothPhoto*만 유지한다. */
 html.oai-cover-booting body,
 html.oai-cover-revealing body{
   background:#fbf8f1 !important;
@@ -4724,7 +4728,7 @@ html.oai-cover-revealing::after{
     linear-gradient(to right, #fbf8f1 0%, rgba(251,248,241,.96) 5%, rgba(251,248,241,.60) 13%, rgba(251,248,241,.16) 24%, rgba(251,248,241,0) 36%, rgba(251,248,241,0) 64%, rgba(251,248,241,.16) 76%, rgba(251,248,241,.60) 87%, rgba(251,248,241,.96) 95%, #fbf8f1 100%),
     linear-gradient(to bottom, #fbf8f1 0%, rgba(251,248,241,.90) 6%, rgba(251,248,241,.36) 17%, rgba(251,248,241,0) 30%, rgba(251,248,241,0) 70%, rgba(251,248,241,.36) 83%, rgba(251,248,241,.90) 94%, #fbf8f1 100%),
     radial-gradient(ellipse 96% 88% at 50% 48%, rgba(251,248,241,0) 50%, rgba(251,248,241,.08) 62%, rgba(251,248,241,.34) 76%, rgba(251,248,241,.76) 90%, rgba(251,248,241,1) 100%),
-    url("intro-cross-jesus.jpg?v=V8-1-14-560") !important;
+    url("intro-cross-jesus.jpg?v=V8-1-14-561") !important;
   background-position:center center, center center, center center, center center !important;
   background-size:100% 100%, 100% 100%, 100% 100%, auto 106% !important;
   background-repeat:no-repeat, no-repeat, no-repeat, no-repeat !important;
@@ -4776,7 +4780,7 @@ html:not(.ios-device){
   --oai-android-bottom-gap-tight:clamp(8px, env(safe-area-inset-bottom,0px), 14px);
   --oai-android-bottom-gap-roomy:clamp(12px, env(safe-area-inset-bottom,0px), 20px);
   --v4-list-pad-bottom:calc(72px + var(--oai-android-bottom-gap));
-  /* V8-1-14-560: Android/WebView map tabs were hidden under the status bar when this was forced to 0.
+  /* V8-1-14-561: Android/WebView map tabs were hidden under the status bar when this was forced to 0.
      Keep one owner variable here and let tabbar, map-wrap and sheets share the same top height. */
   --oai-map-safe-top:max(24px, env(safe-area-inset-top, 0px));
   --oai-map-top-h:calc(var(--tab-h) + var(--oai-map-safe-top));
@@ -4831,7 +4835,7 @@ html:not(.ios-device) .shrine-visit-detail-body{
   padding-bottom:max(44px, calc(32px + var(--oai-android-bottom-gap)))!important;
 }
 
-/* V8-1-14-560: 나의 성지순례 현황 버튼은 검색 키보드가 떠도 리스트 위에 남아야 하므로
+/* V8-1-14-561: 나의 성지순례 현황 버튼은 검색 키보드가 떠도 리스트 위에 남아야 하므로
    kb-open / map-search-keyboard-lock에서 숨기지 않는다. 표시 여부는 JS가 현재 화면 상태로만 결정한다. */
 html.oai-refresh-no-intro.oai-cover-booting::after,
 html.oai-refresh-no-intro.oai-cover-revealing::after,
@@ -4890,7 +4894,7 @@ html.oai-stability-veil[data-oai-stability-reason*="external"] *{
   will-change:auto!important;
 }
 
-/* V8-1-14-560: Android/WebView 스탬프북 상단 안전여백은 변수만 여기서 정하고,
+/* V8-1-14-561: Android/WebView 스탬프북 상단 안전여백은 변수만 여기서 정하고,
    헤더/탭/교구바 자체 스타일은 위의 스탬프북 원본 블록 한 곳에서만 관리한다. */
 html:not(.ios-device){
   --oai-stampbook-top-safe:max(28px, env(safe-area-inset-top, 0px));
@@ -4900,7 +4904,7 @@ html:not(.ios-device).oai-screen-compact-short{
 }
 
 
-/* V8-1-14-560: 스탬프북 전체화면은 modal/panel이 화면 높이를 소유하고, body만 스크롤을 소유한다. */
+/* V8-1-14-561: 스탬프북 전체화면은 modal/panel이 화면 높이를 소유하고, body만 스크롤을 소유한다. */
 #shrine-visit-cards-modal.show{display:block!important;inset:0!important;bottom:0!important;background:#fffdf7!important;}
 #shrine-visit-cards-modal .shrine-visit-cards-panel{position:absolute!important;inset:0!important;height:auto!important;min-height:0!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;background:#fffdf7!important;}
 #shrine-visit-cards-modal .shrine-visit-cards-body{flex:1 1 auto!important;height:0!important;min-height:0!important;overflow-y:auto!important;padding-bottom:12px!important;scroll-padding-bottom:12px!important;background:#fffdf7!important;}
@@ -4915,7 +4919,7 @@ html:not(.ios-device).oai-screen-compact-short{
   0%{opacity:.12; transform:scale(.84); filter:contrast(1.005) saturate(1.01);}
   100%{opacity:1; transform:scale(1); filter:contrast(1.015) saturate(1.02);}
 }
-/* V8-1-14-560: intro animation 속도/이름 override 중복은 제거. 실제 값은 사진 블록과 keyframes에서만 관리한다. */
+/* V8-1-14-561: intro animation 속도/이름 override 중복은 제거. 실제 값은 사진 블록과 keyframes에서만 관리한다. */
 
 #cv-pull-modern,
 #cv-pull-modern.show,
@@ -4986,7 +4990,7 @@ html.oai-font-global .category-source-note { font-size: calc(11px * var(--app-in
   font-weight:900!important;
 }
 #app #info-card .ic-guide-btn{background:#fff4cc!important;color:#7c5600!important;border:1.5px solid #e6c766!important;}
-/* V8-1-14-560: 상세 버튼 색상과 로딩 십자가는 각각 원래 위치에서 관리한다.
+/* V8-1-14-561: 상세 버튼 색상과 로딩 십자가는 각각 원래 위치에서 관리한다.
    이 앞의 반복 로딩 십자가 override는 아래 oai-loading-cross 변수 블록으로 통합했다. */
 #app #loc-btn.oai-wait-nearby-list{
   opacity:1!important;
@@ -5044,7 +5048,7 @@ html.oai-stability-veil[data-oai-refresh-early-veil="1"]::after{
   animation:oaiUnifiedLoadingCrossSpin var(--oai-loading-cross-speed) linear infinite!important;
   transition:none!important;
 }
-/* V8-1-14-560: 외부사이트 진입/복귀 보호창 CSS 단일 기준. JS 흐름은 유지하고, 중복 십자가만 막는다. */
+/* V8-1-14-561: 외부사이트 진입/복귀 보호창 CSS 단일 기준. JS 흐름은 유지하고, 중복 십자가만 막는다. */
 #oai-external-entry-guard{
   position:fixed!important;
   inset:0!important;
@@ -5232,7 +5236,7 @@ html.oai-external-return-freeze.oai-external-return-releasing::after{
 }
 
 
-/* V8-1-14-560: 인포카드/상세 버튼의 이전 색상·테두리 override 묶음은 삭제하고,아래 최종 공통색 기준 하나만 유지한다. */
+/* V8-1-14-561: 인포카드/상세 버튼의 이전 색상·테두리 override 묶음은 삭제하고,아래 최종 공통색 기준 하나만 유지한다. */
 #app #info-card #ic-tel-link,#app #info-card #ic-route-btn,#app #info-card #ic-hp,#app #info-card #ic-guide,#app #info-card #ic-goodnews,#app #info-card #ic-kakao-nav{
   background:linear-gradient(180deg,#fbfdff 0%,#fffaf0 100%)!important;
   color:#213245!important;
@@ -5251,7 +5255,7 @@ html.oai-external-return-freeze.oai-external-return-releasing::after{
   transform:translateY(1px)!important;
 }
 
-/* V8-1-14-560: 인포카드 버튼과 성지 상세정보 버튼의 크기 기준을 한곳에서 확정한다. */
+/* V8-1-14-561: 인포카드 버튼과 성지 상세정보 버튼의 크기 기준을 한곳에서 확정한다. */
 #app #info-card #ic-tel-link,
 #app #info-card #ic-route-btn,
 #app #info-card #ic-hp,
@@ -5280,7 +5284,7 @@ html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-tel-link,html
   min-height:48px!important;
 }
 
-/* V8-1-14-560: compact-short 탭바/지도 top 기준은 아래 변수 블록 하나로 통합한다. */
+/* V8-1-14-561: compact-short 탭바/지도 top 기준은 아래 변수 블록 하나로 통합한다. */
 html:not(.ios-device).oai-screen-compact-short .map-category-close,
 html:not(.ios-device).oai-screen-compact-short .ic-close-btn,
 html:not(.ios-device).oai-screen-compact-short .sheet-x,
@@ -5435,6 +5439,7 @@ html:not(.ios-device).oai-screen-compact-short .faith-bottom-nav{
   --faith-bottom-pad-top:4px;
   --faith-bottom-pad-x:10px;
   --faith-bottom-pad-bottom:calc(0px + var(--oai-android-bottom-gap, env(safe-area-inset-bottom, 0px)));
+  --faith-bottom-btn-offset-y:4px;
 }
 html:not(.ios-device).oai-screen-compact-short .faith-bottom-btn{
   --faith-bottom-btn-height:42px;
@@ -5465,7 +5470,7 @@ html:not(.ios-device).oai-screen-compact-short #app #sheet-route.open,
   transform:translateY(0)!important;
 }
 
-/* V8-1-14-560: 인트로 종료(revealing) 때 십자가 사진 확대 애니메이션을 재시작하지 않는다.
+/* V8-1-14-561: 인트로 종료(revealing) 때 십자가 사진 확대 애니메이션을 재시작하지 않는다.
    booting 단계에서만 .84→1로 커지고, revealing 단계는 최종 크기에서 opacity만 사라진다. */
 html.oai-cover-revealing::after{
   animation:none!important;
@@ -5480,7 +5485,7 @@ html.oai-cover-revealing::after{
   }
 }
 
-/* V8-1-14-560: Android tablet uses the same single map-top owner variable, so the status bar does not cover the top tabs. */
+/* V8-1-14-561: Android tablet uses the same single map-top owner variable, so the status bar does not cover the top tabs. */
 html.oai-android-tablet:not(.ios-device) #tabbar{
   height:var(--oai-map-top-h)!important;
   min-height:var(--oai-map-top-h)!important;
@@ -5506,11 +5511,11 @@ html.oai-android-tablet:not(.ios-device) .module-view.open{
   padding-top:0!important;
 }
 
-/* V8-1-14-560: route-choice and cover/mass-quick modal styles are managed in their module CSS files. */
+/* V8-1-14-561: route-choice and cover/mass-quick modal styles are managed in their module CSS files. */
 
-/* V8-1-14-560: Fold 전환 아이보리 안정막은 Android native 한 곳에서만 처리한다. PWA overlay는 제거했다. */
+/* V8-1-14-561: Fold 전환 아이보리 안정막은 Android native 한 곳에서만 처리한다. PWA overlay는 제거했다. */
 
-/* V8-1-14-560: 성지 인포카드 하단 여백을 조금 되살려 마지막 버튼이 바닥에 붙어 보이지 않게 한다. */
+/* V8-1-14-561: 성지 인포카드 하단 여백을 조금 되살려 마지막 버튼이 바닥에 붙어 보이지 않게 한다. */
 html:not(.ios-device) #app #info-card{
   padding-bottom:10px!important;
 }
@@ -5532,9 +5537,9 @@ html:not(.ios-device) #app #info-card .ic-body{
 html:not(.ios-device) #app #sheet-route{
   padding-bottom:4px!important;
 }
-/* V8-1-14-560: visible cover version remains available for release verification. */
+/* V8-1-14-561: visible cover version remains available for release verification. */
 
-/* V8-1-14-560: 검색 키보드가 열린 상태에서 성지/성당/피정 리스트를 처음 스크롤할 때
+/* V8-1-14-561: 검색 키보드가 열린 상태에서 성지/성당/피정 리스트를 처음 스크롤할 때
    키보드 닫힘/viewport 복원/카드 눌림 효과가 겹쳐 생기던 첫 버벅임을 줄인다. */
 #list-body,
 #region-body,
@@ -5569,7 +5574,7 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
 }
 
 
-/* V8-1-14-560: 인포카드 버튼 색상 정리. 전화는 흰색, 카카오내비는 노랑, 나머지는 남색이며, 색 버튼 테두리는 배경보다 한 단계 어둡게 유지한다. */
+/* V8-1-14-561: 인포카드 버튼 색상 정리. 전화는 흰색, 카카오내비는 노랑, 나머지는 남색이며, 색 버튼 테두리는 배경보다 한 단계 어둡게 유지한다. */
 #app #info-card #ic-tel-link,#app #info-card .ic-tel-btn{
   background:#ffffff!important;
   background-color:#ffffff!important;
@@ -5633,12 +5638,12 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
 }
 
 
-/* V8-1-14-560: 커버 하단 여백은 실제 요소가 아닌 과거 선택자 덧씌움으로 조정하지 않는다.
+/* V8-1-14-561: 커버 하단 여백은 실제 요소가 아닌 과거 선택자 덧씌움으로 조정하지 않는다.
    하단 3버튼과 안내문구 간격은 상단 cover 변수의 --cover-note-reserve에서만 조정한다. */
 
-/* V8-1-14-560: 매일미사/주요기도문 상단바 중복 보정은 원래 기준 위치로 병합했다. */
+/* V8-1-14-561: 매일미사/주요기도문 상단바 중복 보정은 원래 기준 위치로 병합했다. */
 
-/* V8-1-14-560: 검색 모달이 키보드/edge-to-edge 상태에서 상단에 붙어 제목줄이 잘리는 것을 방지한다. */
+/* V8-1-14-561: 검색 모달이 키보드/edge-to-edge 상태에서 상단에 붙어 제목줄이 잘리는 것을 방지한다. */
 #srch-modal .sm-inner{
   min-height:0!important;
   height:100%!important;
@@ -5657,7 +5662,7 @@ html.oai-result-scroll-kb-dismiss #srch-modal .sm-hd{
   flex-shrink:0!important;
 }
 
-/* V8-1-14-560: 마산교구·의정부교구 성당 상세페이지 미사시간 안내문. */
+/* V8-1-14-561: 마산교구·의정부교구 성당 상세페이지 미사시간 안내문. */
 #app #info-card .ic-parish-mass-notice{
   display:none;
   margin:7px 14px 2px;
