@@ -5712,3 +5712,12 @@ html.oai-font-global #app #info-card .ic-parish-mass-notice-title{
 html.oai-font-global #app #info-card .ic-parish-mass-notice-text{
   font-size:calc(12px * var(--app-inner-font-scale,1))!important;
 }
+
+
+/* V8-1-14-575: 길찾기 탭 활성 중에는 장소 정보카드를 강제로 숨겨
+   경로검색 시트와 겹치지 않게 한다. */
+html.route-tab-active #info-card,
+html.route-tab-active #info-card.open{
+  display: none !important;
+  pointer-events: none !important;
+}

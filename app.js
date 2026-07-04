@@ -6156,7 +6156,24 @@ function closeCategoryToCoverFromMap(){
   if(typeof goToCover === 'function') goToCover();
 }
 
+function _setRouteTabInfoCardHidden(on){
+  try{
+    var root = document.documentElement;
+    if(!root) return;
+    if(on){
+      root.classList.add('route-tab-active');
+      var card = $('info-card');
+      if(card) card.classList.remove('open');
+      _curInfoItem = null;
+      _curFromRegion = false;
+    }else{
+      root.classList.remove('route-tab-active');
+    }
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+}
+
 function _closeRouteUiForNonRouteTab(){
+  try{ _setRouteTabInfoCardHidden(false); }catch(e){ console.warn('[가톨릭길동무]', e); }
   try{ if(typeof _blurAll === 'function') _blurAll(); }catch(e){ console.warn('[가톨릭길동무]', e); }
   try{
     if(document.activeElement && document.activeElement.blur) document.activeElement.blur();
@@ -6201,6 +6218,14 @@ function openTab(name, opts){
   try{ if(typeof oaiClearMapInfoSelection === 'function') oaiClearMapInfoSelection('tab-switch:'+name); }catch(e){ console.warn('[가톨릭길동무]', e); }
   _updateSheetPanelTitles();
   const prevName = _activeTab;
+  if(name === 'route'){
+    // 길찾기 탭을 누르는 즉시 정보카드를 먼저 숨겨,
+    // 이후 시트가 열릴 때 정보카드가 다시 겹쳐 보이지 않게 한다.
+    try{ _setRouteTabInfoCardHidden(true); }catch(e){ console.warn('[가톨릭길동무]', e); }
+    try{ closeInfoCard({keepMap:true}); }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }else{
+    try{ _setRouteTabInfoCardHidden(false); }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }
   // V8-1-14-575: 성지/성당/피정의집 시트 전환은 무거운 가로 swiper 애니메이션 없이 즉시 전환하고, 내부 좌우 스와이프 전환은 비활성화한다.
   if(prevName) _closeSheetOnly(prevName);
   if(name!=='route') _closeRouteUiForNonRouteTab();
@@ -6356,11 +6381,14 @@ function toggleTab(name){
       if(rb) rb.innerHTML=_regionGuideHtml();
       oaiFocusSearchKeyboardInput('region-inp');
     }
-    else if(name==='route'){ resetRoute({fresh:true}); _enterRouteMode(); }
+    else if(name==='route'){ try{ _setRouteTabInfoCardHidden(true); closeInfoCard({keepMap:true}); }catch(e){ console.warn('[가톨릭길동무]', e); } resetRoute({fresh:true}); _enterRouteMode(); }
     setTimeout(()=>_scrollSheetTop(name),30);
     return;
   }
-  if(name==='route') resetRoute({fresh:true});
+  if(name==='route'){
+    try{ _setRouteTabInfoCardHidden(true); closeInfoCard({keepMap:true}); }catch(e){ console.warn('[가톨릭길동무]', e); }
+    resetRoute({fresh:true});
+  }
   openTab(name, {keyboard:true});
 }
 
@@ -8840,7 +8868,7 @@ function _enterRouteMode(){
   }
   // V8-1-14-575: 경로검색 시트가 열리면 기존 장소 정보카드는 숨겨
   // 경로 입력 화면과 겹쳐 보이지 않게 한다. 지도/경로 상태는 유지한다.
-  try{ closeInfoCard({keepMap:true}); }catch(e){ console.warn('[가톨릭길동무]', e); }
+  try{ _setRouteTabInfoCardHidden(true); closeInfoCard({keepMap:true}); }catch(e){ console.warn('[가톨릭길동무]', e); }
   _routeMode=true;
   const rs=$('sheet-route');
   if(rs){ rs.style.display=''; rs.removeAttribute('aria-hidden'); rs.classList.add('open'); }
@@ -8860,6 +8888,7 @@ function _enterRouteMode(){
 
 function _exitRouteMode(){
   _routeMode=false;
+  try{ _setRouteTabInfoCardHidden(false); }catch(e){ console.warn('[가톨릭길동무]', e); }
   _hideRouteGuide();
 }
 
