@@ -40,6 +40,7 @@
     var myFaithPendingParish = null;
     var myFaithRenderSettingsEdit = null;
     var myFaithExpandedSection = '';
+    /* === 나의 신앙생활 저장/선택 상태 소유 구역 === */
     function selectedName(){ try{ return (localStorage.getItem(DIO_KEY) || '').trim(); }catch(e){ return ''; } }
     function setSelectedName(name){ try{ localStorage.setItem(DIO_KEY, String(name || '').trim()); }catch(e){ console.warn('[가톨릭길동무]', e); } }
     function noParishItem(dioceseName){ return {name:NO_PARISH_NAME,diocese:String(dioceseName||''),addr:'',hp:'',url:'',none:true}; }
@@ -114,8 +115,9 @@
       else renderHome();
     }
     function safeText(x){ return String(x || '').replace(/[&<>"']/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c] || c); }); }
+    /* === 내정보관리/백업 데이터 소유 구역 === */
     var DATA_BACKUP_TYPE = 'catholic-gildongmu-user-data-backup';
-    var DATA_BACKUP_BUILD = 'V8-1-14-538';
+    var DATA_BACKUP_BUILD = 'V8-1-14-577';
     var DATA_BACKUP_LAST_TIME_KEY = 'oai_data_backup_last_exported_at_v1';
     var myFaithInfoManagementOpen = false;
     var myFaithInfoManagementLayer = null;
@@ -500,7 +502,7 @@
           setMyInfoActionStatus('백업 코드 입력창을 열지 못했습니다.', 'error', false);
           return;
         }
-        /* V8-1-14-538:
+        /* V8-1-14-577:
            복원 입력 영역을 위쪽에 보여 주고, 아래 버튼 묶음은 숨겨 중복 화면처럼 보이지 않게 한다. */
         try{ if(group && list && box.previousElementSibling !== list) group.insertBefore(box, list); }catch(_e){}
         try{ if(group) group.classList.add('is-code-restore-open'); }catch(_e){}
@@ -675,7 +677,7 @@
     }
     function openUserDataRestorePicker(){
       try{
-        /* V8-1-14-538:
+        /* V8-1-14-577:
            Android/WebView와 일부 모바일 브라우저에서는 파일 선택창을 사용자 터치 흐름 안에서 바로 실행해야 한다. */
         setMyInfoActionButtonsDisabled(false);
         hideBackupCodeBoxes();
@@ -1024,6 +1026,7 @@
       try{ if(typeof window.webRenderList === 'function') window.webRenderList(); }catch(_e){}
       try{ if(typeof window.prRefreshVisibleCats === 'function') window.prRefreshVisibleCats(); }catch(_e){}
     }
+    /* === 나의 신앙생활 열기/닫기·복귀 안정화 소유 구역 === */
     var myFaithExternalSettleUntil = 0;
     function nowMs(){ return Date.now ? Date.now() : new Date().getTime(); }
     function markMyFaithExternalSettling(ms){
@@ -1063,7 +1066,7 @@
       }catch(e){ console.warn('[가톨릭길동무]', e); }
     }
 
-    /* V8-1-14-538: 나의 신앙생활은 module-view 카테고리 흐름과 공통 뒤로가기를 사용한다. */
+    /* V8-1-14-577: 나의 신앙생활은 module-view 카테고리 흐름과 공통 뒤로가기를 사용한다. */
     function clearLegacyMyFaithBackFlags(reason){
       try{
         window.__OAI_MYFAITH_COVER_GUARD_UNTIL__ = 0;
@@ -1129,6 +1132,7 @@
     window.openMyFaithLifeModal = function(opts){ openModal(opts || {}); };
     window.openMyFaithInfoManagementModal = function(){ openModal({restore:true}); setTimeout(function(){ try{ openMyInfoManagementModal(); }catch(_e){} }, 70); };
     window.closeMyFaithLifeModal = function(){ if(myFaithInfoManagementOpen){ closeMyInfoManagementModal(); return; } closeModal(); };
+    /* === 나의 신앙생활 외부사이트 진입/복귀 소유 구역 === */
     function normalizeMyFaithExternalUrl(url){
       url = String(url || '').trim();
       if(!url) return '';
@@ -1140,6 +1144,8 @@
     }
     var MYFAITH_EXTERNAL_FLAG = 'oai_myfaith_external_link_pending';
     var MYFAITH_EXTERNAL_TS = 'oai_myfaith_external_link_ts';
+    var MYFAITH_EXTERNAL_TTL_MS = 30 * 60 * 1000;
+    var myFaithExternalReturnTimer = 0;
     function markMyFaithExternalLink(){
       try{
         sessionStorage.setItem(MYFAITH_EXTERNAL_FLAG, '1');
@@ -1155,7 +1161,7 @@
       try{
         if(sessionStorage.getItem(MYFAITH_EXTERNAL_FLAG) !== '1') return false;
         var ts = parseInt(sessionStorage.getItem(MYFAITH_EXTERNAL_TS) || '0', 10) || 0;
-        if(ts && Date.now && Date.now() - ts > 10 * 60 * 1000){
+        if(ts && Date.now && Date.now() - ts > MYFAITH_EXTERNAL_TTL_MS){
           clearMyFaithExternalLinkFlag();
           return false;
         }
@@ -1168,8 +1174,19 @@
         if(window.oaiReturnConductorBusy && window.oaiReturnConductorBusy(['myfaith-return','external-return'])) return;
         if(window.oaiReturnConductorRequest && !window.oaiReturnConductorRequest('myfaith-return', {ms:1300})) return;
         openModal({keepContent:false, fromExternal:true});
+        clearMyFaithExternalLinkFlag();
         markMyFaithExternalSettling(900);
         setTimeout(function(){ try{ if(window.oaiReturnConductorFinish) window.oaiReturnConductorFinish('myfaith-return'); }catch(_e){} }, 950);
+      }catch(e){ console.warn('[가톨릭길동무]', e); }
+    }
+    function scheduleMyFaithExternalReturn(reason){
+      try{
+        if(!hasRecentMyFaithExternalLink()) return;
+        clearTimeout(myFaithExternalReturnTimer);
+        myFaithExternalReturnTimer = setTimeout(function(){
+          myFaithExternalReturnTimer = 0;
+          stabilizeCoverAfterMyFaithExternal(reason || 'myfaith-external-return');
+        }, 70);
       }catch(e){ console.warn('[가톨릭길동무]', e); }
     }
     function goExternal(url){
@@ -1492,8 +1509,9 @@ function appendMyFaithConfirmButton(onConfirm){
     document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible' && modal.classList.contains('show')) updateMyFaithViewport(); }, true);
     window.addEventListener('focus', function(){ if(modal.classList.contains('show')) updateMyFaithViewport(); }, true);
 
-    window.addEventListener('pageshow', function(){ stabilizeCoverAfterMyFaithExternal('myfaith-external-pageshow'); }, true);
-    document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible') stabilizeCoverAfterMyFaithExternal('myfaith-external-visible'); }, true);
+    window.addEventListener('pageshow', function(){ scheduleMyFaithExternalReturn('myfaith-external-pageshow'); }, true);
+    document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible') scheduleMyFaithExternalReturn('myfaith-external-visible'); }, true);
+    window.addEventListener('focus', function(){ scheduleMyFaithExternalReturn('myfaith-external-focus'); }, true);
 
     bindSetupBannerVisibilityWatch();
     updateButton();
