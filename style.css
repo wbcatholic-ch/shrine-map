@@ -663,7 +663,7 @@ html:not(.ios-device).oai-screen-compact-short #map-wrap.oai-shrine-filter-open 
   border-radius: 16px 16px 0 0;
   border-top: 2px solid var(--gold2);
   box-shadow: 0 -3px 16px rgba(0,0,0,.25);
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 12px);
+  padding-bottom: 4px;
   overflow-y: auto;
   position: fixed;
 }
@@ -1594,7 +1594,7 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active {
   touch-action: manipulation;
 }
 .rs-add-waypoint-btn:active { opacity:.78; transform: translateX(-50%) translateY(1px); }
-.rs-result { background: var(--v4-surface-white); border-radius: 12px; padding: 12px; border: 1.5px solid var(--border); box-shadow: 0 2px 10px rgba(14,21,53,.08); }
+.rs-result { background: var(--v4-surface-white); border-radius: 12px; padding: 12px 12px 4px; border: 1.5px solid var(--border); box-shadow: 0 2px 10px rgba(14,21,53,.08); }
 .rs-stats { display: flex; gap: 8px; margin-bottom: 10px; }
 .rs-stat { flex: 1; background: var(--navy); border-radius: 10px; padding: 13px 8px; text-align: center; }
 .rs-stat-lbl { font-size: 11px; color: var(--gold); font-weight: 700; margin-bottom: 6px; letter-spacing: .03em; }
@@ -1608,7 +1608,7 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active {
 #rs-search-btn { display:flex; width: 100%; height:50px; min-height:50px; margin-top: 10px; padding: 0 13px; background: #1565c0; color: var(--v4-surface-white); border: none; border-radius: 12px; font-size: 17px; font-weight: 900; cursor: pointer; font-family: inherit; align-items: center; justify-content: center; gap: 8px; box-sizing:border-box; box-shadow:0 4px 12px rgba(21,101,192,.24); }
 #rs-search-btn.disabled,#rs-search-btn:disabled{background:#9fb5d2!important;color:rgba(255,255,255,.86)!important;box-shadow:none!important;cursor:default!important;}
 #rs-search-btn.ready{background:#1565c0!important;color:#fff!important;box-shadow:0 4px 12px rgba(21,101,192,.24)!important;}
-#app #sheet-route #rs-bottom{padding:0 14px 14px!important;}
+#app #sheet-route #rs-bottom{padding:0 14px 12px!important;}
 #app #sheet-route #rs-search-btn{margin-bottom:0!important;}
 
 .region-info-card { margin: 7px 12px 8px; background: var(--v4-surface-white); border-radius: 10px; overflow: hidden; box-shadow: 0 1px 7px rgba(14,21,53,.08); border: 1px solid rgba(21,101,192,.15); }
@@ -4824,9 +4824,11 @@ html:not(.ios-device) #prayer-view{
   --faith-prayer-list-bottom-pad:calc(78px + var(--oai-android-bottom-gap));
   --faith-prayer-detail-bottom-pad:calc(86px + var(--oai-android-bottom-gap));
 }
-html:not(.ios-device) #app #info-card,
-html:not(.ios-device) #app #sheet-route{
+html:not(.ios-device) #app #info-card{
   padding-bottom:var(--oai-android-bottom-gap)!important;
+}
+html:not(.ios-device) #app #sheet-route{
+  padding-bottom:4px!important;
 }
 html:not(.ios-device) #app #info-card .ic-body{
   padding-bottom:calc(8px + var(--oai-android-bottom-gap-tight))!important;
@@ -5540,18 +5542,6 @@ html:not(.ios-device) #app #info-card{
 }
 html:not(.ios-device) #app #info-card .ic-body{
   padding-bottom:8px!important;
-}
-#app #sheet-route .rs-result{
-  padding-bottom:4px!important;
-}
-#app #sheet-route .route-btns{
-  margin-bottom:0!important;
-}
-#app #sheet-route #rs-bottom{
-  padding-bottom:12px!important;
-}
-html:not(.ios-device) #app #sheet-route{
-  padding-bottom:4px!important;
 }
 /* V8-1-14-563: visible cover version remains available for release verification. */
 
