@@ -2074,8 +2074,7 @@
       const topRight = (s.cat==='교구' || s.cat==='사제찾기') ? (isMyWebCard ? myDioceseBadgeHtml() : '') : esc(s.op);
       const cardName = webCardNameHtml(s);
       const cardDesc = s.cat==='교구' ? '교구 공식 홈페이지' : esc(s.desc);
-      const icoBg = '#F5F0E8';
-      const icoStyle = 'background:' + icoBg + (s.cat==='사제찾기' ? ';color:' + color + ';font-weight:900;font-family:Georgia,serif' : '');
+      const icoStyle = s.cat==='사제찾기' ? 'color:' + color + ';font-weight:900;font-family:Georgia,serif' : '';
       card.innerHTML = `
         <div class="web-card-top">
           <span class="web-card-badge" style="background:${color}">${badgeText}</span>
