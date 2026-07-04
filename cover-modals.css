@@ -1,0 +1,274 @@
+:root {
+  --oai-modal-standard-head: #1F2937;
+  --oai-modal-standard-head-text: #FFFDF7;
+  --oai-modal-standard-sub: rgba(255,255,255,.82);
+  --oai-modal-standard-panel: #FFF8EA;
+  --oai-modal-standard-box: #FFFDF8;
+  --oai-modal-standard-box-press: #FAF1E3;
+  --oai-modal-standard-line: #CBD5E1;
+  --oai-modal-standard-ink: #172033;
+}
+
+.cover-menu-modal,
+#cover #mass-quick-modal {
+  --oai-menu-modal-actions-gap: 10px;
+  --oai-menu-modal-actions-padding: 2px;
+  --oai-menu-modal-actions-radius: 22px;
+  --oai-menu-modal-item-height: 84px;
+  --oai-menu-modal-item-grid: 56px 1fr;
+  --oai-menu-modal-item-gap: 14px;
+  --oai-menu-modal-item-padding: 14px 16px;
+  --oai-menu-modal-item-radius: 19px;
+  --oai-menu-modal-item-border-width: 3px;
+  --oai-menu-modal-item-border-color: #c9d0dc;
+  --oai-menu-modal-item-bg: #fffdf8;
+  --oai-menu-modal-icon-size: 44px;
+  --oai-menu-modal-icon-radius: 16px;
+  --oai-menu-modal-icon-font: 23px;
+  --oai-menu-modal-text-font: calc(16px * var(--app-font-scale, 1));
+  --oai-menu-modal-text-line: 1.18;
+  --oai-menu-modal-text-letter: -.035em;
+  --oai-menu-modal-close-size: 42px;
+  --oai-menu-modal-close-font: 26px;
+  --oai-menu-modal-close-border: 1.5px solid rgba(255,255,255,.72);
+  --oai-menu-modal-close-bg: rgba(255,255,255,.10);
+  --oai-menu-modal-close-color: var(--oai-modal-standard-head-text);
+  --oai-menu-modal-close-shadow: none;
+}
+
+/* V8-1-14-528: 메뉴 모달 3단계 정리.
+   커버 메뉴창과 미사 중 빠른 사용이 공유하는 시각 기준은 oai-menu-modal-* 클래스 한 곳에서 관리한다.
+   버튼 높이·간격·아이콘·글자·테두리는 oai-menu-modal 변수로 한 곳에서 조정하고,
+   미사 중 빠른 사용 4버튼의 반복 ID 규칙은 mass-quick-btn 한 곳으로 통합한다. */
+.cover-menu-modal {
+  position: fixed;
+  inset: 0;
+  z-index: 10070;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 22px;
+  box-sizing: border-box;
+}
+.cover-menu-modal.show { display: flex; }
+.cover-menu-backdrop {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  background: rgba(14,21,53,.42);
+  backdrop-filter: blur(2px);
+}
+
+.oai-menu-modal-panel {
+  position: relative !important;
+  z-index: 1 !important;
+  font-family: inherit !important;
+  width: min(370px, calc(100vw - 32px)) !important;
+  padding: 22px 18px 20px !important;
+  border-radius: 24px !important;
+  background:
+    radial-gradient(circle at 18% 18%, rgba(255,239,198,.82) 0%, rgba(255,239,198,.30) 35%, transparent 60%),
+    radial-gradient(circle at 86% 92%, rgba(214,165,48,.20) 0%, rgba(214,165,48,.10) 34%, transparent 62%),
+    linear-gradient(145deg, #FFFDF7 0%, #FFF8EA 58%, #F3E1BA 100%) !important;
+  border: 1.8px solid rgba(196,161,92,.72) !important;
+  box-shadow: 0 24px 54px rgba(58,47,34,.20), inset 0 1px 0 rgba(255,255,255,.92) !important;
+  color: var(--oai-modal-standard-ink) !important;
+  box-sizing: border-box !important;
+}
+.cover-menu-panel { min-height: 350px !important; }
+#cover #mass-quick-modal .mass-quick-panel {
+  max-height: min(90dvh, 800px) !important;
+  text-align: left !important;
+}
+#cover #mass-quick-modal .mass-quick-backdrop {
+  -webkit-backdrop-filter: none;
+  backdrop-filter: none;
+  background: rgba(31,42,68,.30);
+}
+
+.oai-menu-modal-head {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  gap: 14px !important;
+  width: 100% !important;
+  min-height: 86px !important;
+  margin: 0 0 18px !important;
+  padding: 15px 16px !important;
+  box-sizing: border-box !important;
+  border: 1.4px solid rgba(226,232,240,.62) !important;
+  border-radius: 22px !important;
+  background: var(--oai-modal-standard-head) !important;
+  box-shadow: 0 10px 22px rgba(31,41,55,.22), inset 0 1px 0 rgba(255,255,255,.18), inset 0 -1px 0 rgba(15,23,42,.16) !important;
+  text-align: left !important;
+}
+.oai-menu-modal-head-text {
+  min-width: 0 !important;
+  background: transparent !important;
+  border: 0 !important;
+  box-shadow: none !important;
+}
+.oai-menu-modal-title {
+  color: var(--oai-modal-standard-head-text) !important;
+  font-size: calc(20px * var(--app-font-scale, 1)) !important;
+  line-height: 1.18 !important;
+  font-weight: 900 !important;
+  letter-spacing: -.035em !important;
+  margin: 0 !important;
+}
+.oai-menu-modal-subtitle {
+  color: var(--oai-modal-standard-sub) !important;
+  font-size: calc(12px * var(--app-font-scale, 1)) !important;
+  line-height: 1.28 !important;
+  font-weight: 700 !important;
+  letter-spacing: -.025em !important;
+  margin: 6px 0 0 !important;
+}
+/* V8-1-14-528: 메뉴 모달 닫기 버튼의 공통 모양은 oai-menu-modal-close 한 곳에서 관리한다.
+   커버 메뉴 X와 미사 빠른 사용 X는 크기·색상 변수를 다르게 주고, 위치 차이만 개별 선택자에서 처리한다. */
+.oai-menu-modal-close {
+  width: var(--oai-menu-modal-close-size) !important;
+  height: var(--oai-menu-modal-close-size) !important;
+  min-width: var(--oai-menu-modal-close-size) !important;
+  flex: 0 0 var(--oai-menu-modal-close-size) !important;
+  border-radius: 999px !important;
+  border: var(--oai-menu-modal-close-border) !important;
+  background: var(--oai-menu-modal-close-bg) !important;
+  color: var(--oai-menu-modal-close-color) !important;
+  font-size: var(--oai-menu-modal-close-font) !important;
+  font-weight: 950 !important;
+  line-height: 1 !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  box-shadow: var(--oai-menu-modal-close-shadow) !important;
+}
+#cover #mass-quick-modal {
+  --oai-menu-modal-close-top: 10px;
+  --oai-menu-modal-close-right: 10px;
+  --oai-menu-modal-close-size: 38px;
+  --oai-menu-modal-close-font: 27px;
+  --oai-menu-modal-close-border: 1.6px solid rgba(201,208,220,.90);
+  --oai-menu-modal-close-bg: #fffdf8;
+  --oai-menu-modal-close-color: var(--oai-modal-standard-head);
+  --oai-menu-modal-close-shadow: 0 6px 14px rgba(31,41,55,.18);
+}
+#cover #mass-quick-modal .mass-quick-close {
+  position: absolute !important;
+  top: var(--oai-menu-modal-close-top) !important;
+  right: var(--oai-menu-modal-close-right) !important;
+  z-index: 4 !important;
+}
+.oai-menu-modal-actions {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: var(--oai-menu-modal-actions-gap) !important;
+  padding: var(--oai-menu-modal-actions-padding) !important;
+  border-radius: var(--oai-menu-modal-actions-radius) !important;
+  background: linear-gradient(180deg, rgba(255,255,255,.22), rgba(255,248,232,.08)) !important;
+}
+.oai-menu-modal-item {
+  min-height: var(--oai-menu-modal-item-height) !important;
+  height: var(--oai-menu-modal-item-height) !important;
+  width: 100% !important;
+  display: grid !important;
+  grid-template-columns: var(--oai-menu-modal-item-grid) !important;
+  align-items: center !important;
+  gap: var(--oai-menu-modal-item-gap) !important;
+  padding: var(--oai-menu-modal-item-padding) !important;
+  border-radius: var(--oai-menu-modal-item-radius) !important;
+  border: var(--oai-menu-modal-item-border-width) solid var(--oai-menu-modal-item-border-color) !important;
+  background: var(--oai-menu-modal-item-bg) !important;
+  background-image: none !important;
+  color: var(--oai-modal-standard-ink) !important;
+  box-shadow: 0 8px 18px rgba(74,47,34,.10), inset 0 1px 0 rgba(255,255,255,.94) !important;
+  font-family: inherit !important;
+  text-align: left !important;
+  box-sizing: border-box !important;
+  touch-action: manipulation !important;
+}
+.oai-menu-modal-item:active {
+  transform: translateY(1px) !important;
+  background: var(--oai-modal-standard-box-press) !important;
+}
+#cover #mass-quick-modal .mass-quick-btn.app-pressing {
+  transform: translateY(2px) scale(.995);
+  filter: brightness(.97);
+  transition: transform .08s, filter .08s, box-shadow .08s;
+}
+.oai-menu-modal-icon {
+  width: var(--oai-menu-modal-icon-size) !important;
+  height: var(--oai-menu-modal-icon-size) !important;
+  min-width: var(--oai-menu-modal-icon-size) !important;
+  flex: 0 0 var(--oai-menu-modal-icon-size) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  border-radius: var(--oai-menu-modal-icon-radius) !important;
+  background: rgba(255,255,255,.86) !important;
+  border: 1.2px solid rgba(201,208,220,.72) !important;
+  font-size: var(--oai-menu-modal-icon-font) !important;
+  line-height: 1 !important;
+  filter: saturate(1.06) contrast(1.03) !important;
+}
+.oai-menu-modal-text {
+  color: var(--oai-modal-standard-ink) !important;
+  font-size: var(--oai-menu-modal-text-font) !important;
+  line-height: var(--oai-menu-modal-text-line) !important;
+  font-weight: 950 !important;
+  letter-spacing: var(--oai-menu-modal-text-letter) !important;
+  text-align: left !important;
+}
+
+/* 커버 메뉴 버튼 포인트 색상은 버튼별 변수만 지정하고, 실제 border 적용은 oai-menu-modal-item 한 곳에서 처리한다. */
+#cover-menu-guide-btn { --oai-menu-modal-item-border-color: #9CC9F5; }
+#cover-menu-privacy-btn { --oai-menu-modal-item-border-color: #D7C4F2; }
+#cover-menu-qna-btn { --oai-menu-modal-item-border-color: #A9DDB7; }
+
+html:not(.ios-device).oai-screen-compact-short .oai-menu-modal-panel {
+  width: min(360px, calc(100vw - 28px)) !important;
+  max-width: min(88vw, 330px) !important;
+  padding: 16px 13px 15px !important;
+}
+html:not(.ios-device).oai-screen-compact-short .cover-menu-panel { min-height: 326px !important; }
+html:not(.ios-device).oai-screen-compact-short .oai-menu-modal-head {
+  min-height: 74px !important;
+  border-radius: 18px !important;
+  margin-bottom: 12px !important;
+  padding: 12px !important;
+  gap: 10px !important;
+}
+html:not(.ios-device).oai-screen-compact-short .oai-menu-modal-subtitle {
+  margin-top: 4px !important;
+  line-height: 1.2 !important;
+}
+html:not(.ios-device).oai-screen-compact-short .cover-menu-modal {
+  --oai-menu-modal-close-size: 32px;
+}
+html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal {
+  --oai-menu-modal-close-top: 8px;
+  --oai-menu-modal-close-right: 8px;
+  --oai-menu-modal-close-size: 36px;
+  --oai-menu-modal-close-font: 25px;
+}
+html:not(.ios-device).oai-screen-compact-short .cover-menu-modal,
+html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal {
+  --oai-menu-modal-actions-gap: 8px;
+  --oai-menu-modal-item-height: 78px;
+  --oai-menu-modal-item-padding: 12px 14px;
+  --oai-menu-modal-item-radius: 17px;
+  --oai-menu-modal-icon-size: 40px;
+  --oai-menu-modal-text-line: 1.18;
+  --oai-menu-modal-text-letter: -.03em;
+}
+html:not(.ios-device).oai-screen-compact-short #cover #mass-quick-modal {
+  --oai-menu-modal-item-grid: 50px 1fr;
+}
+
+/* V8-1-14-528: 미사 중 빠른 사용 4버튼의 공통값은 버튼 ID 4곳이 아니라 mass-quick-btn 한 곳에서 관리한다.
+   각 버튼별 차이가 생길 때만 개별 ID 변수를 추가한다. */
+#cover #mass-quick-modal .mass-quick-btn {
+  --oai-menu-modal-item-bg: #ffffff;
+  --oai-menu-modal-item-border-color: #246ca8;
+  --oai-menu-modal-item-border-width: 2px;
+}
