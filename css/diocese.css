@@ -89,11 +89,13 @@ body > header{display:none!important;visibility:hidden!important;height:0!import
 .c-nurl{font-size:11px;color:#ccc;text-align:center;padding:3px 0;}
 
 #gw-bar{position:absolute;top:10px;left:10px;display:flex;flex-direction:column;gap:5px;z-index:50;}
-.gb{padding:6px 14px;border-radius:20px;border:2px solid;font-size:calc(12px * var(--diocese-effective-font-scale,1));font-weight:700;
-  cursor:pointer;background:white;box-shadow:0 2px 8px rgba(0,0,0,0.12);white-space:nowrap;}
-.gb.on{color:white!important;}
-.gb-all{color:#555!important;border-color:#bbb!important;font-weight:500;}
-.gb-all.on{background:#555!important;color:white!important;}
+.gb{--gb-color:#555;min-height:34px;padding:0 14px;border-radius:20px;border:2px solid var(--gb-color);font-size:calc(12px * var(--diocese-effective-font-scale,1));font-weight:700;
+  cursor:pointer;background:white;color:var(--gb-color);box-shadow:0 2px 8px rgba(0,0,0,0.12);white-space:nowrap;font-family:inherit;}
+.gb[data-gw="서울관구"]{--gb-color:#1a6bb5;}
+.gb[data-gw="대구관구"]{--gb-color:#c05a00;}
+.gb[data-gw="광주관구"]{--gb-color:#7a1fa2;}
+.gb-all{--gb-color:#555;font-weight:500;border-color:#bbb;color:#555;}
+.gb.on{background:var(--gb-color);border-color:var(--gb-color);color:white;}
 #ctrl{position:absolute;bottom:14px;left:12px;display:flex;flex-direction:column;gap:4px;}
 .cb{width:28px;height:28px;background:white;border:.5px solid #ddd;border-radius:7px;
   font-size:15px;cursor:pointer;display:flex;align-items:center;justify-content:center;
