@@ -4792,10 +4792,26 @@ html:not(.ios-device) #cover{
 html:not(.ios-device) #cover-bottom-note{
   bottom:var(--oai-android-bottom-gap)!important;
 }
-html:not(.ios-device) #list-body,
-html:not(.ios-device) #nearby-body,
-html:not(.ios-device) #region-body{
+html:not(.parish-mode):not(.retreat-mode) #list-body,
+html:not(.parish-mode):not(.retreat-mode) #nearby-body,
+html:not(.parish-mode):not(.retreat-mode) #region-body{
+  padding-bottom:calc(112px + env(safe-area-inset-bottom, 0px))!important;
+  scroll-padding-bottom:calc(112px + env(safe-area-inset-bottom, 0px))!important;
+}
+html:not(.ios-device):not(.parish-mode):not(.retreat-mode) #list-body,
+html:not(.ios-device):not(.parish-mode):not(.retreat-mode) #nearby-body,
+html:not(.ios-device):not(.parish-mode):not(.retreat-mode) #region-body{
+  padding-bottom:calc(112px + var(--oai-android-bottom-gap))!important;
+  scroll-padding-bottom:calc(112px + var(--oai-android-bottom-gap))!important;
+}
+html:not(.ios-device).parish-mode #list-body,
+html:not(.ios-device).parish-mode #nearby-body,
+html:not(.ios-device).parish-mode #region-body,
+html:not(.ios-device).retreat-mode #list-body,
+html:not(.ios-device).retreat-mode #nearby-body,
+html:not(.ios-device).retreat-mode #region-body{
   padding-bottom:calc(18px + var(--oai-android-bottom-gap))!important;
+  scroll-padding-bottom:calc(18px + var(--oai-android-bottom-gap))!important;
 }
 html:not(.ios-device) .web-list,
 html:not(.ios-device) #trail-list{

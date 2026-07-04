@@ -35,7 +35,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>교구지도</title>
-<link rel="stylesheet" href="css/diocese.css?v=V8-1-14-577">
+<link rel="stylesheet" href="css/diocese.css?v=V8-1-14-575">
 </head>
 <body>
 <header>
@@ -99,7 +99,7 @@
 <text data-gw="대구관구" x="229.1" y="345.8" text-anchor="middle" dominant-baseline="middle" font-size="10" font-weight="600" font-family="Noto Sans KR,sans-serif" fill="#111" stroke="rgba(255,255,255,0.9)" stroke-width="3" paint-order="stroke" pointer-events="none">청주교구</text>
 <text data-gw="대구관구" x="333.8" y="330.1" text-anchor="middle" dominant-baseline="middle" font-size="10" font-weight="600" font-family="Noto Sans KR,sans-serif" fill="#111" stroke="rgba(255,255,255,0.9)" stroke-width="3" paint-order="stroke" pointer-events="none">안동교구</text>
 <text data-gw="대구관구" x="270.9" y="479.2" text-anchor="middle" dominant-baseline="middle" font-size="10" font-weight="600" font-family="Noto Sans KR,sans-serif" fill="#111" stroke="rgba(255,255,255,0.9)" stroke-width="3" paint-order="stroke" pointer-events="none">마산교구</text>
-<text data-gw="대구관구" x="352.2" y="489.5" text-anchor="middle" dominant-baseline="middle" font-size="10" font-weight="600" font-family="Noto Sans KR,sans-serif" fill="#111" stroke="rgba(255,255,255,0.9)" stroke-width="3" paint-order="stroke" pointer-events="none">부산교구</text>
+<text data-gw="대구관구" x="352.2" y="476.5" text-anchor="middle" dominant-baseline="middle" font-size="10" font-weight="600" font-family="Noto Sans KR,sans-serif" fill="#111" stroke="rgba(255,255,255,0.9)" stroke-width="3" paint-order="stroke" pointer-events="none">부산교구</text>
 <text data-gw="광주관구" x="159.5" y="523.2" text-anchor="middle" dominant-baseline="middle" font-size="12" font-weight="700" font-family="Noto Sans KR,sans-serif" fill="#111" stroke="rgba(255,255,255,0.9)" stroke-width="3" paint-order="stroke" pointer-events="none">광주대교구</text>
 <text data-gw="광주관구" x="189.7" y="436.0" text-anchor="middle" dominant-baseline="middle" font-size="10" font-weight="600" font-family="Noto Sans KR,sans-serif" fill="#111" stroke="rgba(255,255,255,0.9)" stroke-width="3" paint-order="stroke" pointer-events="none">전주교구</text>
 <text data-gw="광주관구" x="145.3" y="672.0" text-anchor="middle" dominant-baseline="middle" font-size="10" font-weight="600" font-family="Noto Sans KR,sans-serif" fill="#111" stroke="rgba(255,255,255,0.9)" stroke-width="3" paint-order="stroke" pointer-events="none">제주교구</text>
@@ -1959,7 +1959,7 @@ window.addEventListener('pageshow',function(){
     // 탭 click 이벤트를 다시 실행하지 않는다. click 이벤트는 지도 초기화, 카드 닫기,
     // 목록 스크롤 재적용을 동반해 복귀 순간에 흔들림처럼 보일 수 있다.
     try{ window.__OAI_DIO_PARENT_RETURNING__ = true; window.__OAI_DIO_EXTERNAL_LEAVING__ = false; }catch(e){}
-    // V8-1-14-577: 관구·교구 iframe은 부모 외부복귀 보호창 위에 별도 복귀 레이어를 얹지 않는다.
+    // V8-1-14-575: 관구·교구 iframe은 부모 외부복귀 보호창 위에 별도 복귀 레이어를 얹지 않는다.
     try{ document.documentElement.classList.remove('oai-dio-external-stabilize','oai-dio-external-return','oai-dio-returning'); }catch(e){}
     var tab=state.tab||'gwangu';
     setReturnTabSilently(tab);
@@ -2069,7 +2069,7 @@ window.addEventListener('pageshow',function(){
     var state=window.getDioceseReturnState(source||'link', extra || {});
     try{ sessionStorage.setItem('oai_diocese_last_return_state', JSON.stringify(state)); localStorage.setItem('oai_diocese_last_return_state', JSON.stringify(state)); }catch(e){}
     if(window.parent && window.parent!==window){
-      // V8-1-14-577:
+      // V8-1-14-575:
       // 관구·교구 외부 이동은 부모 app.js의 openDioceseExternal 한 곳에서 처리한다.
       // iframe은 현재 탭/스크롤/카드 상태만 만들고, 보호창·URL 정규화·저장·실제 이동은 부모 공통 소유자에게 위임한다.
       try{
