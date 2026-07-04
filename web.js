@@ -1248,9 +1248,15 @@
     }catch(_e){}
     return -1;
   }
+  function setTrailGeneralSheetMode(active){
+    try{
+      var sheet = ig$('trail-sheet');
+      if(sheet) sheet.classList.toggle('trail-general-sheet', !!active);
+    }catch(_e){}
+  }
   function removeTrailSheetActions(){
     try{ var old = ig$('trail-sh-actions'); if(old) old.remove(); }catch(_e){}
-    try{ ig$('trail-sheet')?.classList.remove('hanti-main-card'); }catch(_e){}
+    try{ ig$('trail-sheet')?.classList.remove('hanti-main-card', 'trail-general-sheet'); }catch(_e){}
   }
   function ensureHantiMainSheetActions(item){
     var foot = ig$('trail-sh-foot');
@@ -1761,10 +1767,29 @@
     url = prepareExternalUrl(url);
     if(!url) return;
 
+    if(state && state.module === 'web'){
+      try{
+        state.cat = webState.curCat || webDefaultCat();
+        state.scroll = ig$('web-list') ? (ig$('web-list').scrollTop || 0) : (state.scroll || 0);
+        state.catScroll = ig$('web-cats') ? (ig$('web-cats').scrollLeft || 0) : (state.catScroll || 0);
+        saveReturnState(state);
+      }catch(e){ console.warn("[가톨릭길동무]", e); }
+      if(typeof oaiSmoothNavigate === 'function') oaiSmoothNavigate(url, 'web-external');
+      else { try{ if(typeof markExternalReturnStabilize === 'function') markExternalReturnStabilize('web-external'); }catch(e){ console.warn("[가톨릭길동무]", e); } try{ location.href = url; }catch(e){ try{ location.assign(url); }catch(_){ } } }
+      return;
+    }
+
     if(state && state.module === 'trail'){
       try{
         state.view = trailState.view || state.view || 'map';
         state.scroll = ig$('trail-list') ? (ig$('trail-list').scrollTop || 0) : (state.scroll || 0);
+        var selectedIndex = Number(trailState && trailState.selected);
+        var selectedItem = Number.isFinite(selectedIndex) && selectedIndex >= 0 ? TRAIL_ITEMS[selectedIndex] : null;
+        var generalSheetOpen = !!(selectedItem && !isHantiTrailItem(selectedItem) && ig$('trail-sheet') && ig$('trail-sheet').classList.contains('open'));
+        if(generalSheetOpen){
+          state.selected = selectedIndex;
+          state.sheetOpen = true;
+        }
         if(trailState.map && window.kakao && kakao.maps){
           var c = trailState.map.getCenter();
           state.center = c ? {lat:c.getLat(), lng:c.getLng()} : null;
@@ -1860,6 +1885,29 @@
     if(!state || !state.module) return;
 
     if(state.module === 'web'){
+      try{
+        if(!ig$('web-view')?.classList.contains('open')) enterIntegratedView('web-view');
+        webState.curCat = state.cat || webState.curCat || webDefaultCat();
+        initWebModule();
+        applyWebCatState(webState.curCat || webDefaultCat());
+        renderWebList();
+        scheduleWebCatSync(webState.curCat || webDefaultCat());
+        var webList = ig$('web-list');
+        if(webList){
+          var wy = Number(state.scroll || 0);
+          webList.style.scrollBehavior = 'auto';
+          webList.scrollTop = wy;
+          setTimeout(function(){ try{ webList.scrollTop = wy; }catch(_e){} }, 80);
+          setTimeout(function(){ try{ webList.scrollTop = wy; }catch(_e){} }, 220);
+          webList.style.scrollBehavior = '';
+        }
+        var webCats = ig$('web-cats');
+        if(webCats && Number.isFinite(Number(state.catScroll))){
+          var cx = Number(state.catScroll || 0);
+          webCats.scrollLeft = cx;
+          setTimeout(function(){ try{ webCats.scrollLeft = cx; }catch(_e){} }, 80);
+        }
+      }catch(e){ console.warn("[가톨릭길동무]", e); }
       return;
     }
 
@@ -1879,7 +1927,14 @@
             list.style.scrollBehavior='auto';
             list.scrollTop = y;
             setTimeout(function(){ try{ list.scrollTop = y; }catch(_e){} }, 80);
+            setTimeout(function(){ try{ list.scrollTop = y; }catch(_e){} }, 220);
             list.style.scrollBehavior='';
+          }
+        }else if(state.sheetOpen && Number.isFinite(Number(state.selected))){
+          var si = Number(state.selected);
+          var selectedItem = TRAIL_ITEMS[si];
+          if(selectedItem && !isHantiTrailItem(selectedItem)){
+            setTimeout(function(){ try{ trailOpenSheet(si); }catch(_e){} }, 140);
           }
         }
       }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -2418,14 +2473,18 @@
       // V8-1-14-471: 버튼과 중복되는 '홈페이지 · 전체경로보기' 안내문구는 숨긴다.
       ig$('trail-sh-url').textContent = '';
       ensureHantiMainSheetActions(d);
+      setTrailGeneralSheetMode(false);
       bindHantiSecretTapTarget(ig$('trail-sh-name'));
       if(hantiTestModeEnabled()) ensureHantiTestPanel(); else removeHantiTestPanel();
     }else{
       removeTrailSheetActions();
+      setTrailGeneralSheetMode(true);
       removeHantiTestPanel();
       setTrailHantiNote('');
       ig$('trail-sh-url').textContent = shortUrl(d.url);
     }
+    var openLabel = document.querySelector('#trail-sh-foot .trail-sh-arr');
+    if(openLabel) openLabel.textContent = hantiSelected ? '›' : '웹사이트 열기';
     const openFn = function(){
       openExternalUrl(d.url, {
         module:'trail',

@@ -56,7 +56,7 @@
   flex-shrink: 0;
 }
 
-/* V8-1-14-557: 한티가는길은 제작 중이라 기존 카드 구조를 유지하고,
+/* V8-1-14-559: 한티가는길은 제작 중이라 기존 카드 구조를 유지하고,
    일반 순례길 카드만 이 블록에서 정리한다. */
 .trail-card.trail-general-card {
   background: #fffdf8;
@@ -187,6 +187,56 @@
 .trail-sh-url { font-size: 11px; color: #2563eb; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
 
 .trail-sh-arr { font-size: 15px; color: #94a3b8; flex-shrink: 0; }
+
+/* V8-1-14-559: 한티가는길은 제작 중이므로 기존 hanti 카드/경로 CSS를 건드리지 않고,
+   한티가 아닌 일반 순례길 지도 인포카드만 이 소유 블록에서 정리한다. */
+.trail-sheet.trail-general-sheet {
+  background: #fffdf8;
+  border-top: 1.5px solid #d9cdbb;
+  box-shadow: 0 -10px 24px rgba(15,23,42,.14);
+  padding-bottom: calc(14px + env(safe-area-inset-bottom, 0));
+}
+.trail-sheet.trail-general-sheet .trail-sh-top {
+  padding: 16px 54px 0 16px;
+}
+.trail-sheet.trail-general-sheet .trail-sh-body {
+  align-items: center;
+  padding: 12px 16px 10px;
+  cursor: pointer;
+}
+.trail-sheet.trail-general-sheet .trail-sh-name {
+  font-size: 17px;
+  line-height: 1.32;
+  letter-spacing: -.04em;
+}
+.trail-sheet.trail-general-sheet .trail-sh-sub {
+  margin-top: 3px;
+  line-height: 1.35;
+  word-break: keep-all;
+}
+.trail-sheet.trail-general-sheet .trail-sh-foot {
+  margin: 2px 14px 0;
+  padding: 12px 14px;
+  border: 2px solid #1d4ed8;
+  border-radius: 16px;
+  background: #1d4ed8;
+  color: #fff;
+  box-shadow: none;
+}
+.trail-sheet.trail-general-sheet .trail-sh-url {
+  color: rgba(255,255,255,.88);
+  font-weight: 800;
+}
+.trail-sheet.trail-general-sheet .trail-sh-arr {
+  color: #fff;
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: -.04em;
+  white-space: nowrap;
+}
+html:not(.ios-device) .trail-sheet.trail-general-sheet {
+  padding-bottom: calc(12px + var(--oai-android-bottom-gap, 10px));
+}
 
 /* V8-1-14-528: 경로따라가기 중에는 내 위치 점에 진행방향 화살표를 붙인다. */
 .trail-myloc { width: 16px; height: 16px; border-radius: 50%; background: #2255cc; border: 2.5px solid var(--v4-surface-white); box-shadow: 0 0 0 4px rgba(34,85,204,.22); }
