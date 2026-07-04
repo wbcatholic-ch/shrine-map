@@ -35,7 +35,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>교구지도</title>
-<link rel="stylesheet" href="css/diocese.css?v=V8-1-14-563">
+<link rel="stylesheet" href="css/diocese.css?v=V8-1-14-564">
 </head>
 <body>
 <header>
@@ -1146,50 +1146,79 @@ function buildListView(){
   window.dioApplySharedFont();
 })();
 
+const DIOCESE_TABS=['gwangu','list','search','province-info'];
+function getActiveDioceseTab(){
+  var t=document.querySelector('.tab.on');
+  return t ? (t.dataset.tab || 'gwangu') : 'gwangu';
+}
+function normalizeDioceseTab(tab){
+  tab=String(tab||'gwangu');
+  return DIOCESE_TABS.indexOf(tab)>=0 ? tab : 'gwangu';
+}
+function focusDioceseSearchInput(){
+  var si=document.getElementById('si');
+  if(!si) return;
+  var focusSearchInput=function(){
+    try{ si.focus({preventScroll:true}); }
+    catch(e){ try{ si.focus(); }catch(_){} }
+  };
+  focusSearchInput();
+  setTimeout(focusSearchInput,60);
+}
+function resetGwanguViewState(){
+  document.querySelectorAll('.dp').forEach(function(p){
+    const fc=p.getAttribute('data-color')||p.getAttribute('fill');
+    if(fc){p.setAttribute('fill',fc);p.setAttribute('stroke',fc);}
+    p.setAttribute('stroke-width','0.8');
+    p.style.opacity='1';p.style.filter='';
+  });
+  document.querySelectorAll('#labels text[data-gw]').forEach(function(lbl){
+    lbl.setAttribute('fill','#111');lbl.setAttribute('stroke','rgba(255,255,255,0.9)');
+  });
+  vx=55;vy=130;vw=380;vh=600;setVB();
+  document.querySelectorAll('.gb').forEach(function(b){b.classList.remove('on');b.style.background='white';});
+  var all=document.querySelector('.gb-all');
+  if(all){ all.classList.add('on'); all.style.background='#555'; }
+}
+function applyDioceseTab(tab,opts){
+  opts=opts||{};
+  tab=normalizeDioceseTab(tab);
+
+  document.querySelectorAll('.tab').forEach(function(x){
+    x.classList.toggle('on',(x.dataset.tab||'')===tab);
+  });
+
+  var map=document.getElementById('map-view');
+  var search=document.getElementById('search-view');
+  var list=document.getElementById('list-view');
+  var provinceInfo=document.getElementById('province-info-view');
+  if(map) map.classList.toggle('on',tab==='gwangu');
+  if(search) search.classList.toggle('on',tab==='search');
+  if(list) list.classList.toggle('on',tab==='list');
+  if(provinceInfo) provinceInfo.classList.toggle('on',tab==='province-info');
+
+  var gw=document.getElementById('gw-bar');
+  if(gw) gw.style.display=tab==='gwangu'?'flex':'none';
+
+  if(tab==='list'){
+    var listContent=document.getElementById('list-content');
+    if(listContent && !listContent.hasChildNodes()){buildListView();}
+  }else if(opts.storeListScroll!==false){
+    try{ if(list) sessionStorage.setItem('listScroll',list.scrollTop||0); }catch(e){}
+  }
+
+  if(tab==='gwangu' && opts.resetGwangu){ resetGwanguViewState(); }
+  if(tab==='search' && opts.focusSearch){ focusDioceseSearchInput(); }
+  if(opts.hideCard!==false && typeof hideCard==='function'){ hideCard(); }
+}
 document.querySelectorAll('.tab').forEach(function(t){
   t.addEventListener('click',function(){
-    document.querySelectorAll('.tab').forEach(function(x){x.classList.remove('on');});
-    t.classList.add('on');
-    const tab=t.dataset.tab;
-    document.getElementById('map-view').classList.toggle('on',tab==='gwangu');
-    document.getElementById('search-view').classList.toggle('on',tab==='search');
-    document.getElementById('list-view').classList.toggle('on',tab==='list');
-    var provinceInfoView=document.getElementById('province-info-view');
-    if(provinceInfoView) provinceInfoView.classList.toggle('on',tab==='province-info');
-    if(tab==='search'){
-      var si=document.getElementById('si');
-      if(si){
-        var focusSearchInput=function(){
-          try{ si.focus({preventScroll:true}); }
-          catch(e){ try{ si.focus(); }catch(_){} }
-        };
-        focusSearchInput();
-        setTimeout(focusSearchInput,60);
-      }
-    }
-    if(tab!=='list'){
-      // 사용자가 목록 탭을 떠날 때만 저장한다. 목록 탭으로 돌아올 때 자동 복원하면
-      // 외부 홈페이지 복귀 직후 브라우저가 보존한 위치를 한 번 더 밀어 흔들림이 생긴다.
-      try{ sessionStorage.setItem('listScroll',document.getElementById('list-view').scrollTop); }catch(e){}
-    }
-    document.getElementById('gw-bar').style.display=tab==='gwangu'?'flex':'none';
-    if(tab==='gwangu'){
-      document.querySelectorAll('.dp').forEach(function(p){
-        const fc=p.getAttribute('data-color')||p.getAttribute('fill');
-        if(fc){p.setAttribute('fill',fc);p.setAttribute('stroke',fc);}
-        p.setAttribute('stroke-width','0.8');
-        p.style.opacity='1';p.style.filter='';
-      });
-      document.querySelectorAll('#labels text[data-gw]').forEach(function(lbl){
-        lbl.setAttribute('fill','#111');lbl.setAttribute('stroke','rgba(255,255,255,0.9)');
-      });
-      vx=55;vy=130;vw=380;vh=600;setVB();
-      document.querySelectorAll('.gb').forEach(function(b){b.classList.remove('on');b.style.background='white';});
-      document.querySelector('.gb-all').classList.add('on');
-      document.querySelector('.gb-all').style.background='#555';
-    }
-    if(tab==='list' && !document.getElementById('list-content').hasChildNodes()){buildListView();}
-    hideCard();
+    applyDioceseTab(t.dataset.tab,{
+      focusSearch:true,
+      resetGwangu:t.dataset.tab==='gwangu',
+      hideCard:true,
+      storeListScroll:true
+    });
   });
 });
 
@@ -1808,7 +1837,7 @@ window.addEventListener('pageshow',function(){
 <script id="oai-diocese-return-state-20260501">
 (function(){
   'use strict';
-  function activeTab(){ var t=document.querySelector('.tab.on'); return t ? (t.dataset.tab || 'gwangu') : 'gwangu'; }
+  function activeTab(){ return (typeof getActiveDioceseTab==='function') ? getActiveDioceseTab() : 'gwangu'; }
   window.getDioceseReturnState = function(source, extra){
     extra = extra || {};
     var g=document.querySelector('#gw-bar .gb.on');
@@ -1869,25 +1898,13 @@ window.addEventListener('pageshow',function(){
     }catch(e){ return false; }
   };
   function setReturnTabSilently(tab){
-    tab=tab||'gwangu';
     try{
-      var current=activeTab();
-      var listContent=document.getElementById('list-content');
-      var needsListBuild=(tab==='list' && listContent && !listContent.hasChildNodes());
-      if(current!==tab){
-        document.querySelectorAll('.tab').forEach(function(x){ x.classList.toggle('on', (x.dataset.tab||'')===tab); });
-        var map=document.getElementById('map-view');
-        var search=document.getElementById('search-view');
-        var list=document.getElementById('list-view');
-        var provinceInfo=document.getElementById('province-info-view');
-        if(map) map.classList.toggle('on',tab==='gwangu');
-        if(search) search.classList.toggle('on',tab==='search');
-        if(list) list.classList.toggle('on',tab==='list');
-        if(provinceInfo) provinceInfo.classList.toggle('on',tab==='province-info');
-        var gw=document.getElementById('gw-bar');
-        if(gw) gw.style.display=tab==='gwangu'?'flex':'none';
-      }
-      if(needsListBuild){ try{ if(typeof buildListView==='function') buildListView(); }catch(e){} }
+      applyDioceseTab(tab||'gwangu',{
+        focusSearch:false,
+        resetGwangu:false,
+        hideCard:false,
+        storeListScroll:false
+      });
     }catch(e){}
   }
 
@@ -1904,7 +1921,7 @@ window.addEventListener('pageshow',function(){
     // 탭 click 이벤트를 다시 실행하지 않는다. click 이벤트는 지도 초기화, 카드 닫기,
     // 목록 스크롤 재적용을 동반해 복귀 순간에 흔들림처럼 보일 수 있다.
     try{ window.__OAI_DIO_PARENT_RETURNING__ = true; window.__OAI_DIO_EXTERNAL_LEAVING__ = false; }catch(e){}
-    // V8-1-14-563: 관구·교구 iframe은 부모 외부복귀 보호창 위에 별도 복귀 레이어를 얹지 않는다.
+    // V8-1-14-564: 관구·교구 iframe은 부모 외부복귀 보호창 위에 별도 복귀 레이어를 얹지 않는다.
     try{ document.documentElement.classList.remove('oai-dio-external-stabilize','oai-dio-external-return','oai-dio-returning'); }catch(e){}
     var tab=state.tab||'gwangu';
     setReturnTabSilently(tab);
@@ -1952,7 +1969,7 @@ window.addEventListener('pageshow',function(){
     var lv=document.getElementById('list-view'); if(lv) lv.scrollTop=0;
     var sv=document.getElementById('search-view'); if(sv) sv.scrollTop=0;
     var pv=document.getElementById('province-info-view'); if(pv) pv.scrollTop=0;
-    var btn=document.querySelector('.tab[data-tab="gwangu"]'); if(btn) btn.click();
+    applyDioceseTab('gwangu',{focusSearch:false,resetGwangu:true,hideCard:true,storeListScroll:false});
   };
   function markDioceseStandaloneExternal(){
     try{
@@ -2014,7 +2031,7 @@ window.addEventListener('pageshow',function(){
     var state=window.getDioceseReturnState(source||'link', extra || {});
     try{ sessionStorage.setItem('oai_diocese_last_return_state', JSON.stringify(state)); localStorage.setItem('oai_diocese_last_return_state', JSON.stringify(state)); }catch(e){}
     if(window.parent && window.parent!==window){
-      // V8-1-14-563:
+      // V8-1-14-564:
       // 관구·교구 외부 홈페이지는 부모 복귀 상태를 저장한 뒤 안정 보호창을 유지하고 top 이동을 사용한다.
       try{
         if(typeof window.parent.prepareExternalUrl === 'function') url = window.parent.prepareExternalUrl(url) || url;
