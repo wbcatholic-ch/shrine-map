@@ -1609,7 +1609,6 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active {
 #rs-search-btn.disabled,#rs-search-btn:disabled{background:#9fb5d2!important;color:rgba(255,255,255,.86)!important;box-shadow:none!important;cursor:default!important;}
 #rs-search-btn.ready{background:#1565c0!important;color:#fff!important;box-shadow:0 4px 12px rgba(21,101,192,.24)!important;}
 #app #sheet-route #rs-bottom{padding:0 14px 12px!important;}
-#app #sheet-route #rs-search-btn{margin-bottom:0!important;}
 
 .region-info-card { margin: 7px 12px 8px; background: var(--v4-surface-white); border-radius: 10px; overflow: hidden; box-shadow: 0 1px 7px rgba(14,21,53,.08); border: 1px solid rgba(21,101,192,.15); }
 .ric-hd { background: linear-gradient(135deg, #0e1535, #1a2456); padding: 14px 16px; display: flex; align-items: center; gap: 12px; }
@@ -4826,9 +4825,6 @@ html:not(.ios-device) #prayer-view{
 }
 html:not(.ios-device) #app #info-card{
   padding-bottom:var(--oai-android-bottom-gap)!important;
-}
-html:not(.ios-device) #app #sheet-route{
-  padding-bottom:4px!important;
 }
 html:not(.ios-device) #app #info-card .ic-body{
   padding-bottom:calc(8px + var(--oai-android-bottom-gap-tight))!important;
