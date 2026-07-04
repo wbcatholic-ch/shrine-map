@@ -1,5 +1,4 @@
 
-
 (function(){
   if(window.__APP_FAITH_GUARD__) return;
   window.__APP_FAITH_GUARD__ = true;
