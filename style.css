@@ -5548,10 +5548,10 @@ html:not(.ios-device) #app #info-card .ic-body{
   margin-bottom:0!important;
 }
 #app #sheet-route #rs-bottom{
-  padding-bottom:4px!important;
+  padding-bottom:18px!important;
 }
 html:not(.ios-device) #app #sheet-route{
-  padding-bottom:4px!important;
+  padding-bottom:8px!important;
 }
 /* V8-1-14-563: visible cover version remains available for release verification. */
 
