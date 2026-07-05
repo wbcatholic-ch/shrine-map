@@ -150,7 +150,7 @@
 .trail-loc-btn { position: absolute; right: 12px; bottom: calc(36px + env(safe-area-inset-bottom, 0)); z-index: 8; width: 56px; height: 56px; min-width: 56px; min-height: 56px; padding: 5px 4px; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border-radius: 16px; background: #ffffff; border: 2px solid rgba(21,101,192,.34); box-shadow: 0 5px 14px rgba(0,0,0,.22); font-family: inherit; font-size: 19px; font-weight: 900; line-height: 1; color: #0e1535; cursor: pointer; box-sizing: border-box; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .trail-loc-btn span:last-child { font-size: 12px; font-weight: 900; line-height: 1.05; letter-spacing: -.04em; }
 
-/* V8-1-14-575: 순례길 하단 정보카드가 열릴 때 내위치 버튼이 카드 버튼을 가리지 않도록
+/* V8-1-14-587: 순례길 하단 정보카드가 열릴 때 내위치 버튼이 카드 버튼을 가리지 않도록
    실제 카드 높이만큼 지도 위로 올린다. 카드가 닫히면 기존 위치를 그대로 쓴다. */
 #trail-panel-map.trail-sheet-is-open > .trail-loc-btn {
   bottom: calc(var(--trail-sheet-open-height, 0px) + 12px) !important;
@@ -627,6 +627,7 @@ html:not(.ios-device).oai-screen-compact-short .trail-sh-close{
 #trail-view.hanti-route-mode #trail-panel-list{
   display:none !important;
 }
+/* 한티가는길 경로보기 하단 조작 레이어: 단일 소유자 */
 .hanti-route-controls{
   position:absolute;
   left:50%;
@@ -634,40 +635,132 @@ html:not(.ios-device).oai-screen-compact-short .trail-sh-close{
   transform:translateX(-50%);
   z-index:75;
   display:flex;
-  align-items:center;
+  flex-direction:column;
+  align-items:stretch;
   justify-content:center;
-  gap:8px;
+  gap:7px;
+  width:min(356px, calc(100% - 22px));
+  max-width:calc(100% - 22px);
+  padding:8px;
+  border-radius:22px;
+  background:rgba(255,251,240,.96);
+  border:1.5px solid rgba(180,83,9,.18);
+  box-shadow:0 12px 28px rgba(15,23,42,.20), inset 0 1px 0 rgba(255,255,255,.92);
+  backdrop-filter:blur(8px);
   pointer-events:auto;
-  width:max-content;
-  max-width:calc(100% - 24px);
+}
+html:not(.ios-device) .hanti-route-controls{
+  bottom:calc(8px + var(--oai-android-bottom-gap, 0px));
+}
+.hanti-route-control-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:8px;
+  align-items:center;
 }
 .hanti-route-controls .trail-loc-btn{
   position:static !important;
   right:auto !important;
   bottom:auto !important;
   z-index:auto !important;
-  min-height:40px;
-  padding:0 14px !important;
-  border-radius:999px !important;
+  width:56px;
+  height:56px;
+  min-width:56px;
+  min-height:56px;
+  padding:5px 4px !important;
+  border-radius:16px !important;
+  font-size:19px;
+  font-weight:950;
+  flex-direction:column;
+  gap:2px;
+  border:2px solid rgba(21,101,192,.34);
+  background:#ffffff;
+  color:#0e1535;
+  box-shadow:0 5px 14px rgba(15,23,42,.13);
   white-space:nowrap;
 }
+.hanti-route-controls .trail-loc-btn span:last-child{
+  font-size:12px;
+  font-weight:900;
+  line-height:1.05;
+}
 .hanti-route-control-btn{
-  min-height:40px;
+  min-height:46px;
+  height:46px;
+  padding:0 18px;
   border:1px solid rgba(31,42,68,.18);
-  border-radius:999px;
+  border-radius:16px;
   background:rgba(255,255,255,.96);
   color:#334155;
   font-family:inherit;
-  font-size:13px;
-  font-weight:900;
-  box-shadow:0 8px 20px rgba(15,23,42,.16);
-  padding:0 16px;
+  font-size:15px;
+  font-weight:950;
+  box-shadow:0 5px 14px rgba(15,23,42,.13);
   white-space:nowrap;
 }
 .hanti-route-control-btn.primary{
+  width:100%;
+  background:#f97316;
+  border:2.5px solid #ea580c;
+  color:#ffffff;
+  box-shadow:0 8px 18px rgba(249,115,22,.24), inset 0 1px 0 rgba(255,255,255,.28);
+}
+.hanti-route-control-btn.primary:active{
+  background:#ea580c;
+  transform:translateY(1px);
+}
+.hanti-route-control-btn.reverse{
+  width:100%;
+  min-height:40px;
+  height:40px;
+  border:2px solid rgba(120,113,108,.28);
+  background:#ffffff;
+  color:#475569;
+  font-size:14px;
+  letter-spacing:-.03em;
+}
+.hanti-route-control-btn.reverse.on{
+  border-color:rgba(22,163,74,.42);
   background:#ecfdf3;
-  border-color:rgba(22,163,74,.34);
   color:#166534;
+  box-shadow:0 7px 16px rgba(22,163,74,.16), inset 0 1px 0 rgba(255,255,255,.86);
+}
+.hanti-route-control-btn.reverse:active{
+  transform:translateY(1px);
+}
+@media (max-width:360px){
+  .hanti-route-controls{
+    gap:6px;
+    padding:7px;
+    border-radius:20px;
+  }
+  .hanti-route-control-row{
+    gap:6px;
+  }
+  .hanti-route-control-btn{
+    min-height:44px;
+    height:44px;
+    font-size:12px !important;
+    padding-left:11px !important;
+    padding-right:11px !important;
+  }
+  .hanti-route-controls .trail-loc-btn{
+    width:52px;
+    height:52px;
+    min-width:52px;
+    min-height:52px;
+    font-size:12px !important;
+    padding-left:11px !important;
+    padding-right:11px !important;
+  }
+  .hanti-route-controls .trail-loc-btn span:last-child{
+    font-size:11.5px;
+  }
+  .hanti-route-control-btn.reverse{
+    min-height:38px;
+    height:38px;
+    font-size:12px !important;
+  }
 }
 .hanti-route-x{
   position:absolute;
@@ -686,18 +779,6 @@ html:not(.ios-device).oai-screen-compact-short .trail-sh-close{
   font-weight:900;
   box-shadow:0 8px 20px rgba(15,23,42,.16);
 }
-@media (max-width:360px){
-  .hanti-route-controls{
-    gap:6px;
-  }
-  .hanti-route-controls .trail-loc-btn,
-  .hanti-route-control-btn{
-    font-size:12px !important;
-    padding-left:11px !important;
-    padding-right:11px !important;
-  }
-}
-
 
 /* V8-1-14-471: 한티가는길 인포카드 버튼 명확화 */
 .trail-sh-actions.hanti-main-actions{
@@ -748,122 +829,4 @@ html:not(.ios-device) .trail-sheet.hanti-main-card{
 }
 .trail-sheet.hanti-main-card .trail-sh-action-btn{
   min-height:42px!important;
-}
-
-
-/* V8-1-14-528: 한티 경로보기 하단 조작 레이어. 배경을 넣고, 경로따라가기/내 위치는 위줄, 경로 반대는 아래줄에 둔다. */
-.hanti-route-controls{
-  bottom:calc(8px + env(safe-area-inset-bottom, 0))!important;
-  display:flex!important;
-  flex-direction:column!important;
-  align-items:stretch!important;
-  justify-content:center!important;
-  gap:7px!important;
-  width:min(356px, calc(100% - 22px))!important;
-  max-width:calc(100% - 22px)!important;
-  padding:8px!important;
-  border-radius:22px!important;
-  background:rgba(255,251,240,.96)!important;
-  border:1.5px solid rgba(180,83,9,.18)!important;
-  box-shadow:0 12px 28px rgba(15,23,42,.20), inset 0 1px 0 rgba(255,255,255,.92)!important;
-  backdrop-filter:blur(8px)!important;
-}
-html:not(.ios-device) .hanti-route-controls{
-  bottom:calc(8px + var(--oai-android-bottom-gap, 0px))!important;
-}
-.hanti-route-control-row{
-  display:grid!important;
-  grid-template-columns:minmax(0,1fr) auto!important;
-  gap:8px!important;
-  align-items:center!important;
-}
-.hanti-route-controls .trail-loc-btn{
-  position:static!important;
-  right:auto!important;
-  bottom:auto!important;
-  z-index:auto!important;
-  width:56px!important;
-  height:56px!important;
-  min-width:56px!important;
-  min-height:56px!important;
-  padding:5px 4px!important;
-  border-radius:16px!important;
-  font-size:19px!important;
-  font-weight:950!important;
-  flex-direction:column!important;
-  gap:2px!important;
-  border:2px solid rgba(21,101,192,.34)!important;
-  background:#ffffff!important;
-  color:#0e1535!important;
-  box-shadow:0 5px 14px rgba(15,23,42,.13)!important;
-}
-.hanti-route-controls .trail-loc-btn span:last-child{font-size:12px!important;font-weight:900!important;line-height:1.05!important;}
-.hanti-route-control-btn{
-  min-height:46px!important;
-  height:46px!important;
-  padding:0 18px!important;
-  border-radius:16px!important;
-  font-size:15px!important;
-  font-weight:950!important;
-  box-shadow:0 5px 14px rgba(15,23,42,.13)!important;
-}
-.hanti-route-control-btn.primary{
-  width:100%!important;
-  background:#f97316!important;
-  border:2.5px solid #ea580c!important;
-  color:#ffffff!important;
-  box-shadow:0 8px 18px rgba(249,115,22,.24), inset 0 1px 0 rgba(255,255,255,.28)!important;
-}
-.hanti-route-control-btn.primary:active{
-  background:#ea580c!important;
-  transform:translateY(1px)!important;
-}
-.hanti-route-control-btn.reverse{
-  width:100%!important;
-  min-height:40px!important;
-  height:40px!important;
-  border:2px solid rgba(120,113,108,.28)!important;
-  background:#ffffff!important;
-  color:#475569!important;
-  font-size:14px!important;
-  letter-spacing:-.03em!important;
-}
-.hanti-route-control-btn.reverse.on{
-  border-color:rgba(22,163,74,.42)!important;
-  background:#ecfdf3!important;
-  color:#166534!important;
-  box-shadow:0 7px 16px rgba(22,163,74,.16), inset 0 1px 0 rgba(255,255,255,.86)!important;
-}
-.hanti-route-control-btn.reverse:active{
-  transform:translateY(1px)!important;
-}
-@media (max-width:360px){
-  .hanti-route-controls{
-    gap:6px!important;
-    padding:7px!important;
-    border-radius:20px!important;
-  }
-  .hanti-route-control-row{
-    gap:6px!important;
-  }
-  .hanti-route-control-btn{
-    min-height:44px!important;
-    height:44px!important;
-    font-size:13px!important;
-    padding-left:12px!important;
-    padding-right:12px!important;
-  }
-  .hanti-route-controls .trail-loc-btn{
-    width:52px!important;
-    height:52px!important;
-    min-width:52px!important;
-    min-height:52px!important;
-    font-size:18px!important;
-  }
-  .hanti-route-controls .trail-loc-btn span:last-child{font-size:11.5px!important;}
-  .hanti-route-control-btn.reverse{
-    min-height:38px!important;
-    height:38px!important;
-    font-size:13px!important;
-  }
 }
