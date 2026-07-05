@@ -150,7 +150,7 @@
 .trail-loc-btn { position: absolute; right: 12px; bottom: calc(36px + env(safe-area-inset-bottom, 0)); z-index: 8; width: 56px; height: 56px; min-width: 56px; min-height: 56px; padding: 5px 4px; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border-radius: 16px; background: #ffffff; border: 2px solid rgba(21,101,192,.34); box-shadow: 0 5px 14px rgba(0,0,0,.22); font-family: inherit; font-size: 19px; font-weight: 900; line-height: 1; color: #0e1535; cursor: pointer; box-sizing: border-box; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
 .trail-loc-btn span:last-child { font-size: 12px; font-weight: 900; line-height: 1.05; letter-spacing: -.04em; }
 
-/* V8-1-14-580: 순례길 하단 정보카드가 열릴 때 내위치 버튼이 카드 버튼을 가리지 않도록
+/* V8-1-14-582: 순례길 하단 정보카드가 열릴 때 내위치 버튼이 카드 버튼을 가리지 않도록
    실제 카드 높이만큼 지도 위로 올린다. 카드가 닫히면 기존 위치를 그대로 쓴다. */
 #trail-panel-map.trail-sheet-is-open > .trail-loc-btn {
   bottom: calc(var(--trail-sheet-open-height, 0px) + 12px) !important;
