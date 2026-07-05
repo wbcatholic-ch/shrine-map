@@ -1323,7 +1323,10 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active {
   z-index: 860;
   border-top: 1px solid #e4d7c5;
   border-radius: 24px 24px 0 0;
+  height: auto;
+  min-height: 0;
   max-height: 52vh;
+  box-sizing: border-box;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   box-shadow: 0 -12px 36px rgba(0,0,0,.16);

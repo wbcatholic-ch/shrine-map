@@ -6702,6 +6702,28 @@ function _fitInfoCardButtons(){
   }catch(e){ console.warn("[가톨릭길동무]", e); }
 }
 
+function _syncInfoCardHeight(){
+  try{
+    const card=$('info-card');
+    if(!card || !card.classList.contains('open')) return;
+    const header=card.querySelector('.ic-header');
+    const body=card.querySelector('.ic-body');
+    const cs=window.getComputedStyle ? window.getComputedStyle(card) : null;
+    const padTop=cs ? (parseFloat(cs.paddingTop)||0) : 0;
+    const padBottom=cs ? (parseFloat(cs.paddingBottom)||0) : 0;
+    const borderTop=cs ? (parseFloat(cs.borderTopWidth)||0) : 0;
+    const borderBottom=cs ? (parseFloat(cs.borderBottomWidth)||0) : 0;
+    const natural=Math.ceil((header?header.offsetHeight:0)+(body?body.offsetHeight:0)+padTop+padBottom+borderTop+borderBottom);
+    const vh=window.innerHeight || document.documentElement.clientHeight || 0;
+    const limit=Math.max(260, Math.floor(vh*0.52));
+    const nextHeight=Math.min(Math.max(0,natural), limit);
+    card.style.minHeight='0px';
+    card.style.height=nextHeight+'px';
+    card.style.maxHeight=limit+'px';
+    card.style.overflowY=natural>limit ? 'auto' : 'hidden';
+  }catch(e){ console.warn("[가톨릭길동무]", e); }
+}
+
 function _showInfoCard(item, idx){
   // V8-1-14-575: 길찾기 탭/경로검색 시트가 열린 동안에는
   // 마커 클릭이나 비동기 후속 처리로 장소 정보카드가 다시 뜨지 않게 막는다.
@@ -6758,6 +6780,7 @@ function _showInfoCard(item, idx){
      if(_curInfoItem&&_curInfoItem.item===_snap){
       distEl.textContent=km+' km';
       distCol.classList.add('ready');
+      setTimeout(_syncInfoCardHeight, 0);
      }
     }
    }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -6811,15 +6834,22 @@ function _showInfoCard(item, idx){
   _renderInfoCardShrineVisit(item);
   $('info-card').classList.add('open');
   try{ _updateShrineVisitCardsButtonUI(); }catch(_e){}
-  setTimeout(_fitInfoCardButtons, 0);
-  setTimeout(_fitInfoCardButtons, 80);
+  setTimeout(function(){ _fitInfoCardButtons(); _syncInfoCardHeight(); }, 0);
+  setTimeout(function(){ _fitInfoCardButtons(); _syncInfoCardHeight(); }, 80);
+  setTimeout(_syncInfoCardHeight, 180);
 }
 
 function closeInfoCard(opts){
   opts = opts || {};
   const wasItem = _curInfoItem; // 닫기 전에 저장
   const card = $('info-card');
-  if(card) card.classList.remove('open');
+  if(card){
+    card.classList.remove('open');
+    card.style.height='';
+    card.style.minHeight='';
+    card.style.maxHeight='';
+    card.style.overflowY='';
+  }
   try{ var massNotice=document.getElementById('ic-parish-mass-notice'); if(massNotice){ massNotice.style.display='none'; massNotice.innerHTML=''; } }catch(_e){}
   try{ _updateShrineVisitCardsButtonUI(); }catch(_e){}
   _curInfoItem=null;
