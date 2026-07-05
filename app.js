@@ -6727,7 +6727,7 @@ function _showInfoCard(item, idx){
   if(!noteEl){
   noteEl=document.createElement('div');
   noteEl.id='ic-note';
-  noteEl.style.cssText='margin:6px 14px 0;padding:8px 10px;background:#fff8e1;border-left:3px solid #f39c12;border-radius:6px;font-size:12px;color:#7a4f00;line-height:1.55;display:none;';
+  noteEl.className='ic-note';
   $('ic-addr').closest('.ic-addr-row').insertAdjacentElement('afterend', noteEl);
   }
   if(item.note){noteEl.textContent=item.note;noteEl.style.display='block';}

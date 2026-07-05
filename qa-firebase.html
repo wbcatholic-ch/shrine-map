@@ -586,6 +586,14 @@
     font-size: 13px !important;
   }
 
+  /* V8-1-14-575 step8: 문의·건의 화면의 남은 inline 시각 스타일을 CSS 소유자로 이동한다. */
+  #form-error { display: none; }
+  .qa-more-spinner { margin: 0 auto 8px; }
+  .loading-box-muted { color: #94A3B8; }
+  .detail-inner { padding: 16px; }
+  .detail-badge-row { display: flex; gap: 6px; flex-wrap: wrap; align-items: center; }
+
+
 </style>
 
 <style id="oai-touch-ux-standard-20260506">
@@ -637,7 +645,7 @@
       oninput="document.getElementById('char-cnt').textContent=this.value.length"></textarea>
     <div class="char-count"><span id="char-cnt">0</span> / 500</div>
   </div>
-  <div id="form-error" class="error-msg" style="display:none;"></div>
+  <div id="form-error" class="error-msg"></div>
   <button class="btn-primary" onclick="submitPost()">접수하기</button>
   <div class="notice-txt">✓ 관리자 확인용 비공개 접수 &nbsp;·&nbsp; ✓ 개인정보 입력 금지</div>
 </div>
@@ -845,7 +853,7 @@ function renderLoadMoreControls(totalLoaded) {
            '<button type="button" class="qa-more-btn" onclick="loadMorePosts()">다시 더보기</button></div>';
   }
   if (qaLoadingMore) {
-    return '<div class="qa-more-wrap"><div class="qa-more-status"><div class="spinner" style="margin:0 auto 8px;"></div>이전 글을 불러오는 중…</div></div>';
+    return '<div class="qa-more-wrap"><div class="qa-more-status"><div class="spinner qa-more-spinner"></div>이전 글을 불러오는 중…</div></div>';
   }
   if (qaHasMorePosts) {
     return '<div class="qa-more-wrap"><button type="button" class="qa-more-btn" onclick="loadMorePosts()">더보기</button></div>';
@@ -866,7 +874,7 @@ function renderList(posts) {
     const msg = posts.length === 0
       ? '게시글이 없습니다.'
       : '현재 필터에 표시할 게시글이 없습니다.<br>더보기를 누르면 이전 글을 더 확인할 수 있습니다.';
-    container.innerHTML = '<div class="loading-box" style="color:#94A3B8;">' + msg + '</div>' + moreControls;
+    container.innerHTML = '<div class="loading-box loading-box-muted">' + msg + '</div>' + moreControls;
     updatePostListScrollState();
     return;
   }
@@ -961,9 +969,9 @@ function showDetailView(post) {
   const contentHTML = escHtml(post.content);
 
   document.getElementById('detail-view').innerHTML = `
-    <div style="padding:16px;">
+    <div class="detail-inner">
       <div class="detail-head">
-        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center;">
+        <div class="detail-badge-row">
           <span class="badge badge-${escHtml(post.category)}">${escHtml(post.category)}</span>
         </div>
         <div class="detail-title">${escHtml(post.title)}</div>
