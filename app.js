@@ -60,7 +60,7 @@ function oaiPrimeExternalDestination(url){
 try{ window.oaiPrimeExternalDestination = oaiPrimeExternalDestination; }catch(e){ console.warn('[가톨릭길동무]', e); }
 
 function oaiShowExternalEntryGuard(kind){
-  // V8-1-14-585:
+  // V8-1-14-586:
   // Android 233/239 외부 브라우저 위임 전후에 쓰는 단일 보호창. entry/return 모두 같은 DOM 하나만 사용한다.
   try{
     var body = document.body;
@@ -201,7 +201,7 @@ function markExternalReturnStabilize(kind){
     sessionStorage.removeItem('oai_external_browser_return_pending');
     sessionStorage.removeItem('oai_external_browser_hidden');
     document.documentElement.classList.add('oai-external-leaving');
-    // V8-1-14-585: 외부 이동 전 보호창은 #oai-external-entry-guard로 유지하고, 숨김 복귀 때도 같은 보호창을 이어서 사용한다.
+    // V8-1-14-586: 외부 이동 전 보호창은 #oai-external-entry-guard로 유지하고, 숨김 복귀 때도 같은 보호창을 이어서 사용한다.
   }catch(e){ console.warn("[가톨릭길동무]", e); }
 }
 try{ window.markExternalReturnStabilize = markExternalReturnStabilize; }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -278,7 +278,7 @@ function oaiReleaseStabilityVeil(){
     }
     clearTimeout(window.__oaiStabilityVeilTimer);
     if(root.classList.contains('oai-external-return-freeze') && !root.classList.contains('oai-stability-veil')){
-      // V8-1-14-585:
+      // V8-1-14-586:
       // 외부사이트 복귀 보호창은 유지하되, 마지막 제거 순간을 부드럽게 처리해 첫 화면 깜빡임을 줄인다.
       if(!root.classList.contains('oai-external-return-releasing')){
         root.classList.add('oai-external-return-releasing');
@@ -478,7 +478,7 @@ function oaiClearExternalNavigationState(opts){
   window.__OAI_BACKGROUND_RETURN_MANAGER_V356__ = true;
   window.__OAI_IDLE_RESTART_GUARD__ = true;
 
-  /* V8-1-14-585:
+  /* V8-1-14-586:
      백그라운드 복귀 판단은 PWA 한 곳에서 담당한다.
      30분 안 복귀는 화면을 다시 만들지 않고 원상태를 그대로 유지한다.
      30분 이상 복귀만 논리적 새 시작으로 보고 인트로 재생 후 cover로 정리한다. */
@@ -742,7 +742,7 @@ function oaiClearExternalNavigationState(opts){
       _bgArmed = true;
       sessionStorage.setItem(BG_KEY, String(t));
       sessionStorage.setItem(BG_TOKEN_KEY, token);
-      /* V8-1-14-585: 앱이 백그라운드 중 WebView/PWA가 재로딩되어 index.html early boot만 먼저 실행되는 경우에도
+      /* V8-1-14-586: 앱이 백그라운드 중 WebView/PWA가 재로딩되어 index.html early boot만 먼저 실행되는 경우에도
          30분 안 복귀 no-intro 판단이 흔들리지 않도록 legacy key도 같은 값으로 맞춘다. */
       sessionStorage.setItem('oai_home_backgrounded_at', String(t));
       sessionStorage.setItem('oai_home_background_token_v345', token);
@@ -774,7 +774,7 @@ function oaiClearExternalNavigationState(opts){
       clearTimeout(_longIntroReleaseTimer);
       clearTimeout(_longIntroWatchdogTimer);
 
-      /* V8-1-14-585:
+      /* V8-1-14-586:
          이 정리 함수는 30분 이상 백그라운드 복귀 인트로 전용이다.
          정상 첫 실행 인트로가 진행 중일 때 실수로 호출되어도
          oai-cover-booting / oai-cover-revealing은 건드리지 않는다. */
@@ -809,7 +809,7 @@ function oaiClearExternalNavigationState(opts){
       var until = parseInt(sessionStorage.getItem('oai_background_intro_return_until') || localStorage.getItem('oai_background_intro_return_until') || '0', 10) || 0;
       var root = document.documentElement;
       var bgIntroActive = root.classList.contains('oai-background-return-intro');
-      /* V8-1-14-585:
+      /* V8-1-14-586:
          이 함수는 "30분 이상 백그라운드 복귀 인트로 stuck 방지" 전용이다.
          이전에는 일반 첫 실행 인트로의 oai-cover-booting까지 active로 보아
          boot-safety(900ms)가 정상 인트로를 중간에 지워 십자가가 잠깐 스치는 현상이 생겼다.
@@ -904,7 +904,7 @@ function oaiClearExternalNavigationState(opts){
 
   function keepOriginalForShortReturn(reason){
     try{
-      /* V8-1-14-585:
+      /* V8-1-14-586:
          30분 안 복귀는 화면·카테고리를 다시 만들지 않는다.
          다만 Android/WebView가 visible/focus/pageshow와 visualViewport/resize를 거의 동시에 쏘면서
          성지·성당·피정의집 지도/시트/하단 버튼이 흔들릴 수 있으므로, 짧은 무표시 freeze로
@@ -975,7 +975,7 @@ function oaiClearExternalNavigationState(opts){
   setTimeout(function(){ releaseExpiredBackgroundIntro('boot-safety-late'); }, 6500);
 })();
 
-/* V8-1-14-585:
+/* V8-1-14-586:
    Fold 화면 전환 / 백그라운드 복귀 / Back 탈출을 카테고리 자동복원으로 묶던
    visible_screen_state 계열을 제거한다.
    - 화면 저장/복원으로 카테고리를 다시 여는 동작 금지
@@ -1167,7 +1167,7 @@ function oaiClearExternalNavigationState(opts){
   function finishFoldViewportSettle(reason){
     reason = reason || 'viewport';
     clearTimeout(_settleTimer);
-    /* V8-1-14-585:
+    /* V8-1-14-586:
        저장된 화면 프로필을 우선 적용하고, 지도 relayout만 Fold 전환 안정 후 한 곳에서 실행한다. */
     recalibrateFoldViewport(reason + '-immediate');
     _settleTimer = setTimeout(function(){ relayoutCurrentMaps(reason + '-stable'); }, 120);
@@ -1369,7 +1369,7 @@ function oaiStartExternalReturnStabilize(){
     root.classList.add('oai-external-return-freeze');
     root.setAttribute('data-oai-external-return-early','1');
     try{ oaiShowExternalEntryGuard('external-return'); }catch(_e){}
-    // V8-1-14-585:
+    // V8-1-14-586:
     // 외부사이트 복귀 보호창은 유지하되, stale timer가 남으면 무한 십자가가 되므로 hard timer를 한 곳에서 보장한다.
 
     var started = startNow;
@@ -1436,7 +1436,7 @@ window.addEventListener('pagehide', function(){
   try{
     if(sessionStorage.getItem('oai_external_nav_pending') === '1'){
       sessionStorage.setItem('oai_external_nav_pagehide','1');
-      /* V8-1-14-585:
+      /* V8-1-14-586:
          외부 브라우저로 나간 뒤 돌아올 때 첫 화면이 비치지 않도록 진입 보호창을 숨겨진 동안 그대로 유지한다.
          정상 복귀 시 return-freeze가 잡은 뒤 같은 DOM 보호창을 부드럽게 제거한다. */
       clearTimeout(window.__oaiExternalEntryGuardTimer);
@@ -1499,23 +1499,49 @@ function _getFaithPortalInfo(kind){
   if(kind==='missa') return Object.assign({}, info, {url:_getTodayMissaUrl()});
   return info;
 }
-var OAI_MISSA_ENTRY_GUARD_MIN_MS = 1100;
-var OAI_MISSA_ENTRY_GUARD_MAX_MS = 5200;
-var OAI_MISSA_RETURN_GUARD_MS = 1250;
+var OAI_MISSA_ENTRY_GUARD_MIN_MS = 1250;
+var OAI_MISSA_ENTRY_GUARD_MAX_MS = 5600;
+var OAI_MISSA_RETURN_GUARD_MS = 1400;
+function _getMissaPortalGuard(){
+  try{
+    var body=document.body;
+    if(!body) return null;
+    var guard=document.getElementById('oai-missa-portal-guard');
+    if(!guard){
+      guard=document.createElement('div');
+      guard.id='oai-missa-portal-guard';
+      guard.setAttribute('aria-hidden','true');
+      body.appendChild(guard);
+    }
+    if(!guard.querySelector('.oai-missa-portal-cross')){
+      guard.innerHTML='<div class="oai-missa-portal-cross" aria-hidden="true">✝</div>';
+    }
+    return guard;
+  }catch(e){ console.warn('[가톨릭길동무]', e); return null; }
+}
 function _showMissaPortalGuard(phase){
   try{
     var root=document.documentElement;
+    var guard=_getMissaPortalGuard();
     var token=String((Date.now ? Date.now() : new Date().getTime())) + '-' + Math.random().toString(36).slice(2);
     window.__oaiMissaPortalGuardToken = token;
+    window.__oaiMissaPortalGuardPhase = (phase === 'return' ? 'return' : 'enter');
     window.__oaiMissaPortalGuardShownAt = Date.now ? Date.now() : new Date().getTime();
     clearTimeout(window.__oaiMissaPortalGuardTimer);
     clearTimeout(window.__oaiMissaPortalGuardFallbackTimer);
     if(root) root.classList.add('oai-missa-portal-guarding');
-    if(typeof oaiShowExternalEntryGuard === 'function') oaiShowExternalEntryGuard(phase === 'return' ? 'missa-return' : 'missa-enter');
-    clearTimeout(window.__oaiExternalEntryGuardTimer);
+    if(guard){
+      guard.setAttribute('data-oai-phase', phase === 'return' ? 'return' : 'enter');
+      guard.classList.remove('hide');
+      guard.classList.add('show');
+      guard.style.setProperty('display','flex','important');
+      guard.style.setProperty('opacity','1','important');
+      guard.style.setProperty('visibility','visible','important');
+      void guard.offsetHeight;
+    }
     window.__oaiMissaPortalGuardFallbackTimer = setTimeout(function(){
       try{ _hideMissaPortalGuard('missa-guard-fallback', 0, token); }catch(_e){}
-    }, phase === 'return' ? (OAI_MISSA_RETURN_GUARD_MS + 700) : OAI_MISSA_ENTRY_GUARD_MAX_MS);
+    }, phase === 'return' ? (OAI_MISSA_RETURN_GUARD_MS + 900) : OAI_MISSA_ENTRY_GUARD_MAX_MS);
     return token;
   }catch(e){ console.warn('[가톨릭길동무]', e); return ''; }
 }
@@ -1531,20 +1557,28 @@ function _hideMissaPortalGuard(reason, minMs, token){
         if(token && window.__oaiMissaPortalGuardToken && token !== window.__oaiMissaPortalGuardToken) return;
         clearTimeout(window.__oaiMissaPortalGuardFallbackTimer);
         window.__oaiMissaPortalGuardToken = '';
+        window.__oaiMissaPortalGuardPhase = '';
         window.__oaiMissaPortalGuardShownAt = 0;
         document.documentElement.classList.remove('oai-missa-portal-guarding');
-        if(typeof oaiHideExternalEntryGuard === 'function') oaiHideExternalEntryGuard(reason || 'missa-guard-finish');
+        var guard=document.getElementById('oai-missa-portal-guard');
+        if(guard){
+          guard.classList.remove('show');
+          guard.classList.add('hide');
+          guard.style.display='none';
+          guard.style.opacity='0';
+          guard.style.visibility='hidden';
+        }
       }catch(_e){}
     }, wait);
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
-function _replaceFaithFrameWith(url, kind){
+function _replaceFaithFrameWith(url, kind, options){
   try{
     var old=document.getElementById('missa-frame');
     if(!old) return null;
     var targetUrl=String(url || '');
     var isMissaTarget=(kind === 'missa') || /missa\.cbck\.or\.kr\/DailyMissa\//i.test(targetUrl);
-    var guardToken=isMissaTarget ? _showMissaPortalGuard('enter') : '';
+    var guardToken=isMissaTarget ? ((options && options.guardToken) || window.__oaiMissaPortalGuardToken || _showMissaPortalGuard('enter')) : '';
     var fresh=old.cloneNode(false);
     var navArmed=false;
     try{ fresh.removeAttribute('src'); }catch(_e){}
@@ -1576,7 +1610,7 @@ function _clearFaithFrame(options){
   try{ _replaceFaithFrameWith('about:blank'); }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 function _setFaithFrameLoading(on, kind, url){
-  // V8-1-14-585: 매일미사 iframe 진입/복귀 보호창은 이 함수와 _replaceFaithFrameWith에서만 관리한다.
+  // V8-1-14-586: 매일미사 iframe 진입/복귀 보호창은 이 함수와 _replaceFaithFrameWith에서만 관리한다.
   try{
     var view=document.getElementById('missa-view');
     if(!view) return;
@@ -1592,6 +1626,7 @@ function _setFaithFrameLoading(on, kind, url){
 }
 function _clearStaleFaithFrameLoading(reason){
   try{
+    if(window.__oaiMissaPortalGuardToken && window.__oaiMissaPortalGuardPhase === 'return') return;
     if(window.__oaiMissaPortalGuardToken && !document.querySelector('#missa-view.open')) _hideMissaPortalGuard(reason || 'missa-stale-clear', 0);
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
@@ -1674,7 +1709,7 @@ function _openFaithExternalSite(info, kind){
   if(typeof oaiSmoothNavigate === 'function'){
     return oaiSmoothNavigate(url, externalKind);
   }
-  // V8-1-14-585: 성가/성경 외부사이트도 비상 fallback까지 진입·복귀 보호창 기준을 유지한다.
+  // V8-1-14-586: 성가/성경 외부사이트도 비상 fallback까지 진입·복귀 보호창 기준을 유지한다.
   try{ if(typeof markExternalReturnStabilize === 'function') markExternalReturnStabilize(externalKind); }catch(e){ console.warn('[가톨릭길동무]', e); }
   try{ if(typeof oaiShowExternalEntryGuard === 'function') oaiShowExternalEntryGuard(externalKind); }catch(e){ console.warn('[가톨릭길동무]', e); }
   var delay = 0;
@@ -1686,7 +1721,7 @@ function openFaithPortal(kind, opts){
   const info=_getFaithPortalInfo(kind);
   if(!info || kind==='prayer') return _goFaithPortal('prayer');
   if(kind==='hymn' || kind==='bible'){
-    /* V8-1-14-585: 성가·성경은 신앙 외부사이트 단일 진입 함수로 열고, 진입/복귀 보호창 기준을 유지한다. */
+    /* V8-1-14-586: 성가·성경은 신앙 외부사이트 단일 진입 함수로 열고, 진입/복귀 보호창 기준을 유지한다. */
     try{
       if(typeof _setFaithReturnTarget === 'function') _setFaithReturnTarget('massQuick');
       if(typeof _setMassQuickReturn === 'function') _setMassQuickReturn(true);
@@ -1729,12 +1764,13 @@ function openFaithPortal(kind, opts){
   }catch(e){ console.warn('[가톨릭길동무]', e); }
   view.dataset.faithCurrent=kind;
   try{ if(fromBanner) view.dataset.quickSource='massQuick'; else delete view.dataset.quickSource; }catch(_e){}
+  var missaGuardToken = (kind === 'missa') ? (window.__oaiMissaPortalGuardToken || _showMissaPortalGuard('enter')) : '';
   if(title) title.textContent=info.label;
   _renderFaithBottomNav(kind);
   view.classList.add('open');
   try{ if(typeof oaiEnterView==='function') oaiEnterView(view); }catch(e){ console.warn('[가톨릭길동무]', e); }
   if((opts && opts.forceReload) || frame.getAttribute('src')!==info.url){
-    _replaceFaithFrameWith(info.url, kind);
+    _replaceFaithFrameWith(info.url, kind, {guardToken:missaGuardToken});
   }else{
     _setFaithFrameLoading(false);
   }
@@ -2095,7 +2131,7 @@ function _updateShrineVisitSheetButtonsUI(){
 
 function _getShrineVisitActionLayerTarget(){
   try{
-    /* V8-1-14-585: 나의 성지순례 현황 버튼은 리스트 안으로 이동하지 않는다.
+    /* V8-1-14-586: 나의 성지순례 현황 버튼은 리스트 안으로 이동하지 않는다.
        지도에서 보이던 하단 위치를 전체 성지 화면의 공통 기준으로 삼기 위해
        map-wrap 내부가 아니라 app/body 고정 레이어에 둔다. */
     const host=document.getElementById('app') || document.body;
@@ -2158,7 +2194,7 @@ function _updateShrineNearbyLocationButtonUI(){
   try{
     const btn=document.getElementById('loc-btn');
     if(!btn) return;
-    /* V8-1-14-585: 성지 내위치 버튼은 성당/피정의집과 같은 지도 조작 버튼이다.
+    /* V8-1-14-586: 성지 내위치 버튼은 성당/피정의집과 같은 지도 조작 버튼이다.
        나의 성지순례 현황 표시 조건과 섞지 않고, 거리 계산 중에도 숨기지 않는다. */
     btn.classList.remove('oai-wait-nearby-list');
     btn.setAttribute('aria-hidden','false');
@@ -2198,11 +2234,11 @@ function _updateShrineVisitFloatingListButtonUI(){
   const layer=_ensureShrineVisitFloatingActionLayer();
   if(layer && btn.parentNode!==layer) layer.appendChild(btn);
   const shrineNearbyWaiting=(_mode==='shrine' && (window.__OAI_SHRINE_NEARBY_LOADING__ === true || window.__OAI_SHRINE_NEARBY_AWAITING_FRESH__ === true));
-  /* V8-1-14-585: 버튼 표시 위치는 지도 기준 하단 하나로 고정한다.
+  /* V8-1-14-586: 버튼 표시 위치는 지도 기준 하단 하나로 고정한다.
      표시 시점은 원래 합의대로 성지 내주변 거리계산 완료 뒤이며,
      시트/검색/인포카드/경로검색/스탬프북이 열리면 지도 버튼은 숨긴다. */
   const nearbyReady=(_mode==='shrine') ? (!shrineNearbyWaiting && window.__OAI_SHRINE_NEARBY_DISTANCE_DONE__===true) : true;
-  /* V8-1-14-585: 버튼 위치 기준은 지도 하단 하나로 유지하되,
+  /* V8-1-14-586: 버튼 위치 기준은 지도 하단 하나로 유지하되,
      내주변/성지찾기/지역찾기 시트가 열려 있어도 같은 화면 위치에 보이게 한다.
      키보드 focus만으로 숨기지 않고, 실제 검색 모달/인포카드/길찾기/스탬프북에서는 숨긴다. */
   const hideBySearchModal=searchOpen;
@@ -2577,7 +2613,7 @@ function _renderShrineVisitDetail(idx){
   const goodnewsUrl=_getShrineGoodnewsUrl(item);
   const telText=item.tel?_visitHtmlEsc(item.tel):'—';
   const telHref=item.tel?'tel:'+String(item.tel).replace(/[^0-9+]/g,''):'';
-    // V8-1-14-585: 상세 인포카드 색상은 style.css의 공통 클래스에서만 관리한다.
+    // V8-1-14-586: 상세 인포카드 색상은 style.css의 공통 클래스에서만 관리한다.
   const hpBtn=hpUrl?'<button type="button" class="shrine-visit-detail-action detail-home" data-shrine-detail-hp="'+_visitHtmlEsc(hpUrl)+'">홈페이지</button>':'';
   const guideBtn=guideUrl?'<button type="button" class="shrine-visit-detail-action detail-guide" data-shrine-detail-guide="'+_visitHtmlEsc(guideUrl)+'">성지 상세페이지</button>':'';
   const goodnewsBtn=goodnewsUrl?'<button type="button" class="shrine-visit-detail-action detail-goodnews" data-shrine-detail-goodnews="'+_visitHtmlEsc(goodnewsUrl)+'">굿뉴스 성지안내</button>':'';
@@ -2793,7 +2829,7 @@ function _renderShrineVisitCardsModal(){
     const cardState=isVisited?'visited':(active==='new'?'new':'unvisited');
     const countText=isVisited?('순례 '+entry.count+'회'):(active==='new'?'신규':'미방문');
     const newMarkHtml=(active==='new'&&isVisited)?'<span class="shrine-visit-card-newmark">신규</span>':'';
-    // V8-1-14-585: 카드 디자인은 style.css 단일 기준으로 관리하고, 신규 탭 방문 성지는 순례도장도 표시한다.
+    // V8-1-14-586: 카드 디자인은 style.css 단일 기준으로 관리하고, 신규 탭 방문 성지는 순례도장도 표시한다.
     const sealHtml=isVisited?'<span class="shrine-visit-card-seal" aria-hidden="true">순례</span>':'';
     return '<button type="button" class="shrine-visit-card-badge shrine-visit-card-unified '+cardState+' '+typeClass+'" data-shrine-visit-card="'+entry.idx+'"><span class="shrine-visit-card-stamp">'+_visitHtmlEsc(typeLabel)+'</span><span class="shrine-visit-card-dio">'+_visitHtmlEsc(item.diocese||'')+'</span><strong>'+_visitHtmlEsc(item.name||'')+'</strong><span class="shrine-visit-card-count">'+_visitHtmlEsc(countText)+'</span>'+newMarkHtml+sealHtml+'</button>';
   }).join('')+'</div>';
@@ -3110,7 +3146,7 @@ function _setMassQuickReturn(on){
       var stamp = String(Date.now());
       sessionStorage.setItem('oai_mass_quick_return','1');
       sessionStorage.setItem('oai_mass_quick_return_ts', stamp);
-      /* V8-1-14-585: 매일미사/성가/성경 배너 복귀 상태는 장기 보존하지 않고 세션 안에서만 유지한다. */
+      /* V8-1-14-586: 매일미사/성가/성경 배너 복귀 상태는 장기 보존하지 않고 세션 안에서만 유지한다. */
       try{ localStorage.removeItem('oai_mass_quick_return'); localStorage.removeItem('oai_mass_quick_return_ts'); }catch(_e){}
     }else{
       sessionStorage.removeItem('oai_mass_quick_return');
@@ -3468,9 +3504,11 @@ function _schedulePrayerReturnQuickMenuStable(){
   }, 90);
 }
 function _returnToMassQuickMenu(source){
-  var fromPrayer = source === 'prayer' || (source && source.fromPrayer);
+  var opts = (source && typeof source === 'object') ? source : {};
+  var fromPrayer = source === 'prayer' || !!opts.fromPrayer;
+  var keepMissaGuard = !!opts.keepMissaGuard;
   try{ var mv=document.getElementById('missa-view'); if(mv) mv.classList.remove('open'); }catch(_e){}
-  try{ if(typeof _clearFaithFrame === 'function') _clearFaithFrame(); }catch(_e){}
+  try{ if(typeof _clearFaithFrame === 'function') _clearFaithFrame({keepMissaGuard:keepMissaGuard}); }catch(_e){}
   if(fromPrayer){
     try{ _setPrayerPopupReturnSource(true); }catch(e){ console.warn('[가톨릭길동무]', e); }
     _resetCoverExitReady();
@@ -3563,6 +3601,9 @@ function _openFaithTargetFromMassQuick(kind, opts){
   kind = String(kind || 'missa');
   opts = opts || null;
   _markFaithMassQuickOpen(kind);
+  if(kind === 'missa'){
+    try{ _showMissaPortalGuard('enter'); }catch(e){ console.warn('[가톨릭길동무]', e); }
+  }
   var run=function(){
     try{
       _markFaithMassQuickOpen(kind);
@@ -3813,9 +3854,9 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || (window.OAI_APP_BUILD_VERSION || window.APP_VERSION || 'V8-1-14-585');
+    var target = btn.getAttribute('data-target-version') || (window.OAI_APP_BUILD_VERSION || window.APP_VERSION || 'V8-1-14-586');
     var current = '';
-    /* V8-1-14-585:
+    /* V8-1-14-586:
        현재 화면의 실제 빌드 기준은 index.html이 먼저 선언한 OAI_APP_BUILD_VERSION/숨김 marker를 우선한다.
        늦게 로드되거나 캐시에 남은 sw-update.js의 APP_VERSION 값이 덮어써도 커버 버튼이 잘못 "업데이트 필요"로 바뀌지 않게 한다. */
     if(window.OAI_APP_BUILD_VERSION) current = String(window.OAI_APP_BUILD_VERSION).trim();
@@ -3885,7 +3926,7 @@ window.addEventListener('load', syncCoverUpdateVersionState, true);
     try{
       var frame=document.getElementById('privacy-policy-frame');
       if(frame){
-        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-585'));
+        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-586'));
         if(frame.getAttribute('src') === 'about:blank' || !frame.getAttribute('src')) frame.setAttribute('src', src);
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -3893,7 +3934,7 @@ window.addEventListener('load', syncCoverUpdateVersionState, true);
   }
   function closePrivacyPolicyModal(){ hideModal('privacy-policy-modal'); }
   function bindGuide(){
-    /* V8-1-14-585: legacy direct guide-button binding removed; cover menu handler owns this entry. */
+    /* V8-1-14-586: legacy direct guide-button binding removed; cover menu handler owns this entry. */
     var ok=document.getElementById('guide-ok-btn');
     if(ok) ok.addEventListener('click', function(e){ e.preventDefault(); closeGuideManual(); });
     var privacyOk=document.getElementById('privacy-policy-ok-btn');
@@ -3942,7 +3983,7 @@ function closeMissa(){
     try{ if(typeof _clearCoverExitArmed==='function') _clearCoverExitArmed(); }catch(e){ console.warn('[가톨릭길동무]', e); }
     return;
   }
-  if(shouldReturnToQuickBeforeClose) _returnToMassQuickMenu();
+  if(shouldReturnToQuickBeforeClose) _returnToMassQuickMenu({keepMissaGuard:!!isDailyMissa});
   else { try{ if(typeof _clearFaithReturnTarget === 'function') _clearFaithReturnTarget(); }catch(e){ console.warn('[가톨릭길동무]', e); } if(typeof goToCover==='function') goToCover(); }
   if(isDailyMissa) _hideMissaPortalGuard('missa-return-finish', OAI_MISSA_RETURN_GUARD_MS, missaReturnGuardToken);
 }
@@ -4133,7 +4174,7 @@ function openDioceseView(opts){
   var loading=_getDioceseLoading();
   if(!view||!frame) return;
   var restore = !!(opts && opts.restore);
-  var url = (typeof oaiGetDioceseFrameUrl === 'function') ? oaiGetDioceseFrameUrl() : 'diocese.html?v=V8-1-14-585';
+  var url = (typeof oaiGetDioceseFrameUrl === 'function') ? oaiGetDioceseFrameUrl() : 'diocese.html?v=V8-1-14-586';
   var currentSrc = frame.getAttribute('src') || '';
   var needsLoad = (!currentSrc || currentSrc==='about:blank' || currentSrc.indexOf('diocese.html') < 0 || !frame._loaded);
 
@@ -4231,7 +4272,7 @@ function dioceseLoaded(){
   _setDioceseLoading(false);
 }
 function oaiGetDioceseFrameUrl(){
-  return 'diocese.html?v=V8-1-14-585';
+  return 'diocese.html?v=V8-1-14-586';
 }
 function oaiBindDioceseFrameLoad(frame, loading, restore){
   if(!frame) return;
@@ -4271,7 +4312,7 @@ try{ window.oaiPreloadDioceseFrame=oaiPreloadDioceseFrame; window.oaiScheduleDio
 if(document.readyState==='loading') document.addEventListener('DOMContentLoaded', oaiScheduleDiocesePreload, {once:true});
 else oaiScheduleDiocesePreload();
 window.addEventListener('load', function(){ setTimeout(oaiScheduleDiocesePreload, 300); }, {once:true});
-/* V8-1-14-585: 성지 외부 링크는 웹사이트 카테고리와 같은 보호창 이동 흐름으로 통일하고 옛 core return 저장 함수는 제거 */
+/* V8-1-14-586: 성지 외부 링크는 웹사이트 카테고리와 같은 보호창 이동 흐름으로 통일하고 옛 core return 저장 함수는 제거 */
 function oaiPreserveExplicitHttpUrl(url){
   url = String(url || '').trim();
   if(!url) return '';
@@ -4298,7 +4339,7 @@ function normalizeCatholicExternalUrl(url){
     var u = new URL(url);
     u.pathname = u.pathname.replace(/\/\/+/g, '/');
     var host = u.hostname.toLowerCase();
-    // V8-1-14-585:
+    // V8-1-14-586:
     // 원래 HTTP로 쓰던 교구는 HTTPS로 끌어올리지 않고 HTTP를 명시 유지한다.
     if(host === 'caincheon.or.kr' || host === 'www.caincheon.or.kr'){
       u.protocol = 'http:';
@@ -4329,14 +4370,14 @@ function _isShrineDetailGuideUrl(url){
 function _getShrineHomepageUrl(item){
   var hp = item && item.hp ? normalizeCatholicExternalUrl(item.hp) : '';
   if(!hp) return '';
-  /* V8-1-14-585: 신규 성지는 성지추가.xlsx의 '홈페이지' 열을 그대로 홈페이지 버튼에 연결한다. */
+  /* V8-1-14-586: 신규 성지는 성지추가.xlsx의 '홈페이지' 열을 그대로 홈페이지 버튼에 연결한다. */
   if(item && item.isNew) return hp;
   if(_isShrineDetailGuideUrl(hp)) return '';
   return hp;
 }
 function _getShrineGuideUrl(item){
   if(!item) return '';
-  /* V8-1-14-585: 성지추가.xlsx의 '주교회의 성지안내/성지 상세' URL을 우선 사용한다. */
+  /* V8-1-14-586: 성지추가.xlsx의 '주교회의 성지안내/성지 상세' URL을 우선 사용한다. */
   if(item.guideUrl) return normalizeCatholicExternalUrl(item.guideUrl);
   if(item.seq) return _SU + item.seq;
   var hp = item.hp ? normalizeCatholicExternalUrl(item.hp) : '';
@@ -4365,7 +4406,7 @@ function openCatholicExternalPreserveApp(url, kind){
   }catch(e){ console.warn("[가톨릭길동무]", e); }
   try{ if(typeof _resetCoverExitReady==='function') _resetCoverExitReady(); }catch(e){ console.warn("[가톨릭길동무]", e); }
   try{ if(typeof _clearCoverExitArmed==='function') _clearCoverExitArmed(); }catch(e){ console.warn("[가톨릭길동무]", e); }
-  /* V8-1-14-585: 성지·성당·피정 외부 웹사이트도 웹사이트 카테고리와 같은 보호창 이동 흐름으로 통일한다. */
+  /* V8-1-14-586: 성지·성당·피정 외부 웹사이트도 웹사이트 카테고리와 같은 보호창 이동 흐름으로 통일한다. */
   try{
     if(typeof oaiSmoothNavigate === 'function'){
       oaiSmoothNavigate(url, kind || 'external-site');
@@ -4382,7 +4423,7 @@ function openShrineExternalLikeFaithPortal(url, extra){
   url = prepareExternalUrl(url);
   if(!url) return;
   extra = extra || {};
-  /* V8-1-14-585: 성지 상세/홈페이지 외부 링크는 웹사이트 카테고리와 같은 보호창 이동 흐름을 사용한다. */
+  /* V8-1-14-586: 성지 상세/홈페이지 외부 링크는 웹사이트 카테고리와 같은 보호창 이동 흐름을 사용한다. */
   openCatholicExternalPreserveApp(url, extra.source || 'shrine-external');
 }
 function openCoreExternalUrl(url, extra){
@@ -4610,7 +4651,7 @@ document.addEventListener('visibilitychange', function(){
     _scheduleDioceseExternalRestore('visible', 80);
   }
 }, true);
-/* V8-1-14-585: route reset helper is kept without inactive focus/map-entry hooks. */
+/* V8-1-14-586: route reset helper is kept without inactive focus/map-entry hooks. */
 function clearRouteNoFocus(){
   try{
     if(_mode==='shrine'){
@@ -4628,7 +4669,7 @@ function clearRouteNoFocus(){
     var guide=document.getElementById('route-guide'); if(guide) guide.classList.remove('on');
   }catch(e){ console.warn("[가톨릭길동무]", e); }
 }
-/* V8-1-14-585: 현재 성지 외부 링크는 웹사이트 카테고리와 같은 보호창 이동 방식이므로 옛 core external return 복원 로직은 제거하고,
+/* V8-1-14-586: 현재 성지 외부 링크는 웹사이트 카테고리와 같은 보호창 이동 방식이므로 옛 core external return 복원 로직은 제거하고,
    pageshow 시 지도 DOM이 비어 있는 경우에만 기존 지도 재로딩 보호 흐름을 유지한다. */
 window.addEventListener('pageshow', function(e){
   setTimeout(()=>{
@@ -4681,7 +4722,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V8-1-14-585';
+const _PARISH_ASSET_VERSION='V8-1-14-586';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -4790,7 +4831,7 @@ function _showParishDataLoadingMessage(msg){
     if(listBody && _mode==='parish') listBody.innerHTML='<div class="empty-msg">'+(msg||'성당 정보를 불러오는 중입니다...')+'</div>';
     const nearbyBody=document.getElementById('nearby-body');
     if(nearbyBody && _mode==='parish' && _activeTab==='nearby'){
-      /* V8-1-14-585:
+      /* V8-1-14-586:
          성당 내주변은 전체 교구 데이터 로딩이 길어져도 첫 로딩 화면을 유지한다.
          여기서 다른 문구로 다시 그리면 사용자에게 같은 로딩 화면이 두 번 나타난 것처럼 보인다. */
       _ensureNearbyDistanceLoading(nearbyBody);
@@ -4871,7 +4912,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V8-1-14-585';
+const _PRAYER_ASSET_VERSION='V8-1-14-586';
 let _prayerModuleLoadPromise=null;
 function _isPrayerDataReady(){
   return !!(window.PRAYER_DATA && typeof window.PRAYER_DATA === 'object');
@@ -4946,7 +4987,7 @@ try{ window.ensurePrayerModuleLoaded=ensurePrayerModuleLoaded; }catch(e){ consol
 let _RT_RAW = [];
 let _retreatRawLoaded = false;
 let _retreatDataLoadPromise = null;
-const _RETREAT_ASSET_VERSION='V8-1-14-585';
+const _RETREAT_ASSET_VERSION='V8-1-14-586';
 
 let RETREATS = [];
 function _buildRetreatList(raw){
@@ -5358,7 +5399,7 @@ function _isRegionLoadCurrent(mode, token, body){
 const $=id=>document.getElementById(id);
 const $$=s=>document.querySelectorAll(s);
 const _GEO=navigator.geolocation;
-// V8-1-14-585: 오래 미사용 후 복귀 시 마지막 위치를 먼저 보여주고, 새 GPS가 잡히면 최신 위치로 교체한다.
+// V8-1-14-586: 오래 미사용 후 복귀 시 마지막 위치를 먼저 보여주고, 새 GPS가 잡히면 최신 위치로 교체한다.
 const _GO1={enableHighAccuracy:true,timeout:6500,maximumAge:0};
 const _GO2={enableHighAccuracy:false,timeout:1200,maximumAge:60000};
 const _GO_FAST_FRESH={enableHighAccuracy:false,timeout:2500,maximumAge:120000};
@@ -5462,7 +5503,7 @@ function _setMarkerMapIfChanged(marker, map){
   try{
     const actual = _getMarkerActualMap(marker);
     if(actual !== undefined && actual === map){ marker.__oaiMapTarget = map; return; }
-    /* V8-1-14-585: 일부 Kakao Marker는 getMap이 없어 __oaiMapTarget만 남는데,
+    /* V8-1-14-586: 일부 Kakao Marker는 getMap이 없어 __oaiMapTarget만 남는데,
        다른 경로에서 setMap(null)이 실행되면 이 값이 실제와 달라져 마커가 복원되지 않는다.
        getMap 확인이 불가능한 경우에는 안전하게 setMap을 다시 호출한다. */
     marker.setMap(map);
@@ -5504,7 +5545,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 let _myLocAt = 0;
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V8-1-14-585';
+const _SHRINE_ASSET_VERSION='V8-1-14-586';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -5892,7 +5933,7 @@ function oaiEnterView(el){
     var root=document.documentElement;
     if(root.classList.contains('oai-returning')) return;
     el.classList.remove('oai-enter-ready','oai-enter-show','oai-popup-ready','oai-popup-show','oai-prepaint-view');
-    // V8-1-14-585: 카테고리 첫 화면은 nearby-distance-loading이 담당한다.
+    // V8-1-14-586: 카테고리 첫 화면은 nearby-distance-loading이 담당한다.
     // oaiEnterView는 더 이상 #oai-category-entry-veil을 켜지 않고 stale class만 정리한다.
     if(typeof oaiHideCategoryEntryVeil==='function') oaiHideCategoryEntryVeil();
   }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -5922,7 +5963,7 @@ function oaiEnterPopup(el){
 }
 
 function oaiShowCategoryEntryVeil(mode){
-  // V8-1-14-585: 성지/성당/피정 진입은 내주변 거리계산 화면이 기준이다.
+  // V8-1-14-586: 성지/성당/피정 진입은 내주변 거리계산 화면이 기준이다.
   // 이 함수는 남은 호출 호환을 위해 stale veil state만 정리한다.
   try{ oaiHideCategoryEntryVeil(); }catch(e){ console.warn("[가톨릭길동무]", e); }
 }
@@ -5956,7 +5997,7 @@ function oaiPreopenNearbySheetForCategory(){
       sheet.classList.add('open','oai-preopen-nearby');
     }
     if(body){
-      // V8-1-14-585: 데이터 지연 후 startApp이 다시 호출되어도 같은 내주변 로딩 화면을 다시 그리지 않는다.
+      // V8-1-14-586: 데이터 지연 후 startApp이 다시 호출되어도 같은 내주변 로딩 화면을 다시 그리지 않는다.
       _ensureNearbyDistanceLoading(body);
       try{ body.scrollTop=0; }catch(_e){}
     }
@@ -6036,7 +6077,7 @@ function startApp(mode){
   try{ _cancelNearbyLoad(); }catch(e){ console.warn('[가톨릭길동무]', e); }
   _curFromRegion=false;
   _curInfoItem=null;
-  // V8-1-14-585:
+  // V8-1-14-586:
   // 성지/성당/피정 데이터 로드 대기 중 이미 내주변 로딩 sheet를 열어 둔 경우,
   // 두 번째 startApp 호출에서 closeAllTabs()로 닫았다가 다시 여는 동작을 막는다.
   const _carryNearbyPreopen = !!((mode==='shrine' || mode==='parish' || mode==='retreat') &&
@@ -6104,7 +6145,7 @@ function _resetMapState(){
   _myLat=null; _myLng=null;
   const mapEl=$('map');
   if(mapEl){
-    // V8-1-14-585:
+    // V8-1-14-586:
     // 성지/성당/피정 첫 진입에서 데이터 로딩 후 startApp이 다시 호출될 때,
     // 기존 map-loading을 비워 버리면 "로딩 십자가 → 빈 화면 → 로딩 십자가"로 보인다.
     // 이미 내주변 선진입 상태에서 지도 로딩 화면이 보이는 경우에는 비우지 않고 그대로 이어간다.
@@ -6148,7 +6189,7 @@ function goToCover(){
   try{ if(typeof _clearCoverExitArmed === 'function') _clearCoverExitArmed(); }catch(e){ console.warn('[가톨릭길동무]', e); }
   try{ if(typeof _clearHardCoverExitFlags === 'function') _clearHardCoverExitFlags('go-to-cover'); }catch(e){ console.warn('[가톨릭길동무]', e); }
   try{ if(typeof _forceNextCoverBackToast === 'function') _forceNextCoverBackToast('go-to-cover'); }catch(e){ console.warn('[가톨릭길동무]', e); }
-  // V8-1-14-585: Fold 화면 전환 뒤 커버로 돌아올 때는 현재 화면 크기를 다시 확정한다.
+  // V8-1-14-586: Fold 화면 전환 뒤 커버로 돌아올 때는 현재 화면 크기를 다시 확정한다.
   try{ if(typeof window.oaiApplyAndroidScreenClass === 'function') window.oaiApplyAndroidScreenClass('go-to-cover-force-remeasure'); }catch(e){ console.warn('[가톨릭길동무]', e); }
   try{ if(typeof window.oaiRecalibrateCoverViewport === 'function') window.oaiRecalibrateCoverViewport('go-to-cover-force'); }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
@@ -6331,7 +6372,7 @@ function openTab(name, opts){
   }else{
     try{ _setRouteTabInfoCardHidden(false); }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
-  // V8-1-14-585: 성지/성당/피정의집 시트 전환은 무거운 가로 swiper 애니메이션 없이 즉시 전환하고, 내부 좌우 스와이프 전환은 비활성화한다.
+  // V8-1-14-586: 성지/성당/피정의집 시트 전환은 무거운 가로 swiper 애니메이션 없이 즉시 전환하고, 내부 좌우 스와이프 전환은 비활성화한다.
   if(prevName) _closeSheetOnly(prevName);
   if(name!=='route') _closeRouteUiForNonRouteTab();
 
@@ -6572,7 +6613,7 @@ function _restoreNearbyMyLocationPlain(reason, opts){
 function _scheduleNearbyMyLocationPlainRestore(reason){
   try{
     if(!_map || !_myLat || !_myLng) return;
-    // V8-1-14-585: 성지·성당·피정의집 내주변 목록을 닫은 뒤에는
+    // V8-1-14-586: 성지·성당·피정의집 내주변 목록을 닫은 뒤에는
     // 정보카드/교구/bounds 보정값을 쓰지 않고 내 위치를 같은 화면 기준으로 복원한다.
     setTimeout(function(){ _restoreNearbyMyLocationPlain(reason,{setDefaultLevel:false}); }, 40);
     setTimeout(function(){ _restoreNearbyMyLocationPlain(reason + ':settled',{setDefaultLevel:false}); }, 180);
@@ -6767,7 +6808,7 @@ function _fitInfoCardButtons(){
 }
 
 function _showInfoCard(item, idx){
-  // V8-1-14-585: 길찾기 탭/경로검색 시트가 열린 동안에는
+  // V8-1-14-586: 길찾기 탭/경로검색 시트가 열린 동안에는
   // 마커 클릭이나 비동기 후속 처리로 장소 정보카드가 다시 뜨지 않게 막는다.
   // 경로 탭을 닫은 뒤 기존 선택 장소를 복원하는 흐름은 _activeTab/시트 상태가 route가 아니므로 유지된다.
   try{
@@ -7892,7 +7933,7 @@ function _focusParishPointAround(lat, lng, opts){
         _map.setLevel(targetLevel);
       }
     }
-    // V8-1-14-585: 성당의 현재 위치 기준 화면은 성지/피정과 동일하게
+    // V8-1-14-586: 성당의 현재 위치 기준 화면은 성지/피정과 동일하게
     // 실제 내 위치 좌표를 중심으로 둔다. 정보카드 보정은 실제 정보카드 포커스에서만 사용한다.
     if(opts && opts.infoCardStandard===true && typeof _setMapCenterByInfoCardStandard==='function'){
       return _setMapCenterByInfoCardStandard(pos);
@@ -8098,7 +8139,7 @@ function _showParishDioMkrs(code){
     try{kakao.maps.event.removeListener(_parishIdleListener);}catch(e){ console.warn('[가톨릭길동무]',e); }
     _parishIdleListener=null;
   }
-  /* V8-1-14-585: 성당 지도는 idle 때마다 교구 전체 마커 setMap을 반복해
+  /* V8-1-14-586: 성당 지도는 idle 때마다 교구 전체 마커 setMap을 반복해
      확대·축소 후 버벅임이 커졌다. 현재 _updateParishViewport는 실제 뷰포트 필터링을 하지
      않으므로 최초 표시 때 한 번만 실행하고 zoom/idle 반복 리스너는 붙이지 않는다. */
 }
@@ -8216,7 +8257,7 @@ function _getFreshGeoPosition(success, fail){
       else {
         done=true;
         if(fail) fail(e);
-        /* V8-1-14-585: 빠른 위치가 실패했을 때도 UI를 오래 잡아두지 않고,
+        /* V8-1-14-586: 빠른 위치가 실패했을 때도 UI를 오래 잡아두지 않고,
            정확 위치는 뒤에서 짧게 한 번 더 시도해 다음 위치 요청을 준비한다. */
         warmAccurateLocation();
       }
@@ -8459,7 +8500,7 @@ function _loadNearbyWithDist(lat,lng,items,getIdx,getColor,getLabel){
   }
 
   if(body && _isNearbyLoadCurrent(requestMode,requestToken,body)){
-    // V8-1-14-585: 자동차 거리 계산 단계에서 같은 로딩 화면을 다시 렌더링하지 않는다.
+    // V8-1-14-586: 자동차 거리 계산 단계에서 같은 로딩 화면을 다시 렌더링하지 않는다.
     _ensureNearbyDistanceLoading(body);
   }
 
@@ -8528,7 +8569,7 @@ function _loadNearbyParishes(lat,lng){
     const waitMode=_mode;
     let waitToken=0;
     try{ waitToken = AppState && AppState.nearbyLoadToken ? AppState.nearbyLoadToken : 0; }catch(_e){ waitToken = window.__oaiNearbyLoadToken || 0; }
-    /* V8-1-14-585:
+    /* V8-1-14-586:
        성당은 교구별 JS를 추가로 불러오기 때문에 로딩이 길어질 수 있다.
        기존 로딩 화면을 "성당 정보 불러오는 중"으로 다시 그렸다가, 거리 계산에서 또 다시 그리면
        같은 안내 화면이 두 번 나타나는 것처럼 보이므로 기존 로딩 DOM을 유지한다. */
@@ -8963,7 +9004,7 @@ function _enterRouteMode(){
     _closeRouteUiForNonRouteTab();
     return;
   }
-  // V8-1-14-585: 경로검색 시트가 열리면 기존 장소 정보카드는 숨겨
+  // V8-1-14-586: 경로검색 시트가 열리면 기존 장소 정보카드는 숨겨
   // 경로 입력 화면과 겹쳐 보이지 않게 한다. 지도/경로 상태는 유지한다.
   try{ _setRouteTabInfoCardHidden(true); closeInfoCard({keepMap:true}); }catch(e){ console.warn('[가톨릭길동무]', e); }
   _routeMode=true;
@@ -9081,10 +9122,14 @@ function _syncRouteWaypointBoxes(){
   if(box1) box1.style.display=(!summaryVisible && w1Visible)?'flex':'none';
   if(box2) box2.style.display=(!summaryVisible && w2Visible)?'flex':'none';
   if(box3) box3.style.display=(!summaryVisible && w3Visible)?'flex':'none';
-  const showResultAddWaypoint=!!(resultShowing && routeWaypoints.length===0);
-  if(add1) add1.style.display=((!resultShowing && !w1Visible) || showResultAddWaypoint)?'inline-flex':'none';
-  if(add2) add2.style.display=(!resultShowing && w1Visible && !w2Visible)?'inline-flex':'none';
-  if(add3) add3.style.display=(!resultShowing && w2Visible && !w3Visible)?'inline-flex':'none';
+  const nextWaypointRole=(!resultShowing ? _nextAvailableWaypointRole() : (routeWaypoints.length===0 ? 'waypoint' : null));
+  if(add1){
+    add1.style.display=nextWaypointRole?'inline-flex':'none';
+    try{ add1.dataset.nextWaypointRole=nextWaypointRole || ''; }catch(_e){}
+  }
+  if(add2) add2.style.display='none';
+  if(add3) add3.style.display='none';
+  const showResultAddWaypoint=!!(resultShowing && nextWaypointRole);
   if(tools0) tools0.style.display=(resultShowing ? (showResultAddWaypoint?'block':'none') : 'block');
   if(tools1) tools1.style.display=(!resultShowing && w1Visible)?'flex':'none';
   if(tools2) tools2.style.display=(!resultShowing && w2Visible)?'flex':'none';
@@ -9139,7 +9184,7 @@ function _updateSearchBtn(){
   const btn=$('rs-search-btn');
   if(!btn) return;
   const filled=!!(_rS&&_rS.lat&&_rS.lng&&_rE&&_rE.lat&&_rE.lng);
-  /* V8-1-14-585: 경로검색 버튼은 출발/도착창 아래에서 항상 보이고,
+  /* V8-1-14-586: 경로검색 버튼은 출발/도착창 아래에서 항상 보이고,
      출발·도착이 모두 채워진 뒤에만 활성화한다. */
   btn.style.display='flex';
   btn.disabled=!filled;
@@ -10005,7 +10050,7 @@ function _fmtTime(s){
 
   function _doMainSwipe(dx){
     if(typeof _screen === 'undefined' || _screen !== 'map') return;
-    /* V8-1-14-585: 성지·성당·피정의집 좌우 스와이프는 하단 시트 내부에서 시작한 한 손가락 터치만 처리한다.
+    /* V8-1-14-586: 성지·성당·피정의집 좌우 스와이프는 하단 시트 내부에서 시작한 한 손가락 터치만 처리한다.
        지도·정보카드·두 손가락 확대축소는 스와이퍼가 건드리지 않아 지도 번쩍임과 하단 잔상을 막는다. */
     if(document.getElementById('srch-modal')?.classList.contains('open')) return;
     const idx = (typeof _activeTab !== 'undefined' && _activeTab)
@@ -10085,7 +10130,7 @@ function _fmtTime(s){
           return;
         }
       }catch(_e){}
-      /* V8-1-14-585:
+      /* V8-1-14-586:
          30분 백그라운드 복귀 규칙은 앱이 숨겨졌다가 돌아올 때만 사용한다.
          앱이 켜진 상태에서 30분 동안 조작이 없어도 현재 화면을 커버로 강제 이동하지 않는다. */
       return;
@@ -10441,7 +10486,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   on('rs-waypoint-box', 'click', function() { openSearchModal('waypoint'); });
   on('rs-waypoint2-box', 'click', function() { openSearchModal('waypoint2'); });
   on('rs-waypoint3-box', 'click', function() { openSearchModal('waypoint3'); });
-  on('rs-add-waypoint-btn', 'click', function(e) { if(e){ e.preventDefault(); e.stopPropagation(); } _beginWaypointAddMode('waypoint'); });
+  on('rs-add-waypoint-btn', 'click', function(e) {
+    if(e){ e.preventDefault(); e.stopPropagation(); }
+    var role=(this && this.dataset && this.dataset.nextWaypointRole) || (typeof _nextAvailableWaypointRole === 'function' ? _nextAvailableWaypointRole() : '') || 'waypoint';
+    _beginWaypointAddMode(role);
+  });
   on('rs-add-waypoint2-btn', 'click', function(e) { if(e){ e.preventDefault(); e.stopPropagation(); } _beginWaypointAddMode('waypoint2'); });
   on('rs-add-waypoint3-btn', 'click', function(e) { if(e){ e.preventDefault(); e.stopPropagation(); } _beginWaypointAddMode('waypoint3'); });
   on('rs-myloc-btn', 'click', function(e) { if(e){ e.preventDefault(); e.stopPropagation(); } setMyLocAsStart(); });
@@ -10589,7 +10638,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function stop(){
     var snapshot=lock;
     if(hasResultScrollIntent()){
-      /* V8-1-14-585:
+      /* V8-1-14-586:
          검색 키보드가 열린 상태에서 성지/성당/피정 리스트를 바로 끌어올리면
          기존 viewport 복원 타이머가 첫 스크롤 위치를 다시 되돌려 버벅임을 만들었다.
          리스트 스크롤 의도가 확인된 경우에는 키보드만 닫고, 스크롤 위치 복원은 하지 않는다. */
