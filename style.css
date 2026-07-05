@@ -1545,7 +1545,7 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active {
   color: var(--ink);
   line-height: 1;
   position: absolute;
-  left: calc(50% + var(--rs-control-shift-x) - 6px);
+  left: calc(50% + var(--rs-control-shift-x) - 17px);
   top: 50%;
   transform: translate(-50%, -50%);
   z-index: 40;
