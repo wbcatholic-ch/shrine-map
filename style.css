@@ -1261,11 +1261,11 @@ html.retreat-mode #srch-modal #sm-tab-bar {
 }
 
 html:not(.parish-mode):not(.retreat-mode) #srch-modal #sm-tab-bar .sm-tab.active {
-  background: linear-gradient(135deg, var(--shrine-main), var(--shrine-main-2));
-  color: var(--v4-surface-white);
-  border-color: transparent;
-  box-shadow: none;
-  font-weight: 900;
+  background: linear-gradient(135deg, #111827, #1f2a44);
+  color: #f6d58a;
+  border-color: #d4aa6a;
+  box-shadow: inset 0 0 0 1px rgba(212,170,106,.34), 0 2px 8px rgba(0,0,0,.20);
+  font-weight: 950;
 }
 html.parish-mode #srch-modal #sm-tab-bar .sm-tab.active,
 html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active {
@@ -1565,10 +1565,11 @@ html:not(.ios-device) #app #info-card .ic-body{
   box-sizing:border-box!important;
 }
 html:is(.parish-mode,.retreat-mode):not(.ios-device) #app #info-card .ic-body{
-  padding-bottom:4px!important;
+  padding-bottom:0!important;
 }
 html:not(.ios-device) #app #info-card .ic-kakao-row{
   padding-bottom:0!important;
+  margin-bottom:0!important;
 }
 html:not(.ios-device).oai-screen-tall-phone #app #info-card #ic-tel-link,
 html:not(.ios-device).oai-screen-tall-phone #app #info-card #ic-route-btn,
@@ -4122,7 +4123,7 @@ html.oai-font-global .shrine-visit-detail-head-title{font-size:calc(18px * var(-
   justify-content:center!important;
   box-sizing:border-box!important;
   pointer-events:none!important;
-  background:#fbf8f1!important;
+  background:#eadfca!important;
 }
 .shrine-visit-action-layer.show{display:flex!important;}
 #app > .shrine-visit-action-layer,
@@ -4136,8 +4137,8 @@ body > .shrine-visit-action-layer,
   height:78px!important;
   min-height:78px!important;
   padding:7px 14px calc(var(--oai-android-bottom-gap, env(safe-area-inset-bottom, 0px)) + 3px)!important;
-  border-top:1px solid rgba(212,170,106,.22)!important;
-  box-shadow:none!important;
+  border-top:1.5px solid rgba(143,105,48,.42)!important;
+  box-shadow:0 -2px 10px rgba(63,47,20,.10)!important;
 }
 .sheet > .shrine-visit-action-layer{
   display:none!important;
@@ -4438,6 +4439,9 @@ html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-addr-row{padd
 html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-btn-row,
 html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-links,
 html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-kakao-row{gap:6px!important;padding:6px 12px 0!important;}
+html:not(.ios-device).oai-screen-compact-short:is(.parish-mode,.retreat-mode) #app #info-card .ic-body{
+  padding-bottom:0!important;
+}
 html:not(.ios-device).oai-screen-compact-short:not(.parish-mode):not(.retreat-mode) #app #info-card .ic-body{
   padding-bottom:8px!important;
 }
