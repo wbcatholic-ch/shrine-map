@@ -263,6 +263,19 @@
     animation: fadeUp .25s ease both; transition: transform .12s;
   }
   .card:active { transform: scale(.98); }
+  .qa-card-delay-0 { animation-delay: 0s; }
+  .qa-card-delay-1 { animation-delay: .04s; }
+  .qa-card-delay-2 { animation-delay: .08s; }
+  .qa-card-delay-3 { animation-delay: .12s; }
+  .qa-card-delay-4 { animation-delay: .16s; }
+  .qa-card-delay-5 { animation-delay: .20s; }
+  .qa-card-delay-6 { animation-delay: .24s; }
+  .qa-card-delay-7 { animation-delay: .28s; }
+  .qa-card-delay-8 { animation-delay: .32s; }
+  .qa-card-delay-9 { animation-delay: .36s; }
+  .qa-card-delay-10 { animation-delay: .40s; }
+  .qa-card-delay-11 { animation-delay: .44s; }
+  .qa-card-delay-12 { animation-delay: .48s; }
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(10px); }
     to   { opacity: 1; transform: translateY(0); }
@@ -881,7 +894,7 @@ function renderList(posts) {
 
   container.innerHTML = filtered.map((p, i) => {
     return `
-      <div class="card" style="animation-delay:${Math.min(i, 12)*0.04}s" onclick="openPost('${p.id}')">
+      <div class="card qa-card-delay-${Math.min(i, 12)}" onclick="openPost('${p.id}')">
         <div class="card-top">
           <span class="badge badge-${escHtml(p.category)}">${escHtml(p.category)}</span>
           <span class="card-date">${escHtml(p.date)}</span>
