@@ -6809,14 +6809,7 @@ function _showInfoCard(item, idx){
   }
 
   _renderInfoCardShrineVisit(item);
-  const infoCardEl = $('info-card');
-  if(infoCardEl){
-    infoCardEl.classList.add('open');
-    try{
-      infoCardEl.scrollTop = 0;
-      requestAnimationFrame(function(){ try{ infoCardEl.scrollTop = 0; }catch(_e){} });
-    }catch(_e){}
-  }
+  $('info-card').classList.add('open');
   try{ _updateShrineVisitCardsButtonUI(); }catch(_e){}
   setTimeout(_fitInfoCardButtons, 0);
   setTimeout(_fitInfoCardButtons, 80);
@@ -8911,13 +8904,7 @@ function _enterRouteMode(){
   try{ _setRouteTabInfoCardHidden(true); closeInfoCard({keepMap:true}); }catch(e){ console.warn('[가톨릭길동무]', e); }
   _routeMode=true;
   const rs=$('sheet-route');
-  if(rs){
-    rs.style.display='';
-    rs.removeAttribute('aria-hidden');
-    try{ rs.scrollTop = 0; }catch(_e){}
-    rs.classList.add('open');
-    requestAnimationFrame(function(){ try{ rs.scrollTop = 0; }catch(_e){} });
-  }
+  if(rs){ rs.style.display=''; rs.removeAttribute('aria-hidden'); rs.classList.add('open'); }
   _syncRouteWaypointBox();
   _ensureCurrentLocationStart();
   if(_suppressNextRouteGuide){
@@ -9452,13 +9439,6 @@ async function _calcRoute(){
   $('rs-result').style.display='block';
   $('rs-hint').style.display='none';
   _dropEmptyWaypointInputsForRouteResult();
-  try{
-    const routeSheetEl = $('sheet-route');
-    if(routeSheetEl){
-      routeSheetEl.scrollTop = 0;
-      requestAnimationFrame(function(){ try{ routeSheetEl.scrollTop = 0; }catch(_e){} });
-    }
-  }catch(_e){}
   const sBtn=$('rs-search-btn');
   if(sBtn) sBtn.style.display='none';
   if(_polyline){_polyline.setMap(null);_polyline=null;}
