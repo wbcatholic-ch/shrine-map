@@ -1590,13 +1590,10 @@ html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-route-btn,
 html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-hp,
 html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-guide,
 html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-goodnews,
-html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-kakao-nav,
-html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-tel-btn,
-html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-route-btn,
-html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-link-btn,
-html:not(.ios-device).oai-screen-compact-short #app #info-card .btn-kakao-nav{
+html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-kakao-nav{
   height:48px!important;
   min-height:48px!important;
+  border-radius:9px!important;
 }
 
 /* V8-1-14-576: route sheet top/bottom spacing owner. */
@@ -1645,8 +1642,7 @@ html:not(.ios-device).oai-screen-compact-short #app #info-card .btn-kakao-nav{
 #rs-waypoint3-box,
 #rs-waypoint-end-tools,
 #rs-waypoint2-end-tools,
-#rs-waypoint3-end-tools,
-#rs-result { display:none; }
+#rs-waypoint3-end-tools { display:none; }
 .rs-route-stack.has-waypoint-summary { grid-template-rows: 44px 5px 44px 5px 44px; }
 .rs-route-stack.has-waypoint-summary .rs-end-box { grid-row: 5 !important; }
 .rs-route-stack.has-waypoint-summary #rs-start-waypoint-tools,
@@ -1668,6 +1664,13 @@ html:not(.ios-device).oai-screen-compact-short #app #info-card .btn-kakao-nav{
 .rs-lbl.empty  { color: #6f7782; font-weight: 800; }
 .rs-myloc { background: none; border: 1px solid var(--border); border-radius: 13px; padding: 5px 10px; font-size: 11.5px; color: var(--pilgrim); cursor: pointer; font-family: inherit; white-space: nowrap; flex-shrink: 0; }
 .rs-x { width:28px; height:30px; flex:0 0 28px; border-radius:999px!important; background:transparent!important; border:1.5px solid currentColor!important; box-shadow:none!important; color:#999; font-size:24px; font-weight:900; line-height:1!important; cursor:pointer; padding:0; display:inline-flex!important; align-items:center!important; justify-content:center!important; position:relative; z-index:12; pointer-events:auto; touch-action:manipulation; }
+html:not(.ios-device).oai-screen-compact-short #sheet-route .rs-x {
+  width:34px!important;
+  height:34px!important;
+  min-width:34px!important;
+  flex-basis:34px!important;
+  line-height:1!important;
+}
 #rs-start-x,
 #rs-end-x { display:none; }
 .rs-between-tools {
@@ -1760,7 +1763,7 @@ html:not(.ios-device).oai-screen-compact-short #app #info-card .btn-kakao-nav{
   touch-action: manipulation;
 }
 .rs-add-waypoint-btn:active { opacity:.78; transform: translateX(-50%) translateY(1px); }
-.rs-result { background: var(--v4-surface-white); border-radius: 12px; padding: 10px 10px 4px; border: 1.5px solid var(--border); box-shadow: 0 2px 10px rgba(14,21,53,.08); }
+.rs-result { display:none; background: var(--v4-surface-white); border-radius: 12px; padding: 10px 10px 4px; border: 1.5px solid var(--border); box-shadow: 0 2px 10px rgba(14,21,53,.08); }
 .rs-stats { display: flex; gap: 8px; margin-bottom: 8px; }
 .rs-stat { flex: 1; background: var(--navy); border-radius: 10px; padding: 11px 8px; text-align: center; }
 .rs-stat-lbl { font-size: 11px; color: var(--gold); font-weight: 700; margin-bottom: 6px; letter-spacing: .03em; }
@@ -1769,8 +1772,8 @@ html:not(.ios-device).oai-screen-compact-short #app #info-card .btn-kakao-nav{
 .rs-note { font-size: 12px; color: #7a4f00; margin-bottom: 6px; display: none; background: #fff8e1; border-left: 3px solid #f39c12; border-radius: 6px; padding: 7px 10px; line-height: 1.6; }
 .rs-hint { display:none!important; height:0!important; min-height:0!important; margin:0!important; padding:0!important; overflow:hidden!important; font-size:0!important; line-height:0!important; }
 .route-btns { display: flex; gap: 8px; margin-top: 8px; }
-.btn-kakao-route { flex: 1; padding: 12px 6px; border-radius: 10px; border: none; background: #fee500; color: #111; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
-.btn-route-reset { flex: 1; padding: 12px 6px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--v4-surface-white); font-size: 14px; color: var(--ink); cursor: pointer; font-family: inherit; font-weight: 600; }
+.btn-kakao-route { flex: 1; min-height: 40px; padding: 12px 6px; border-radius: 10px; border: none; background: #fee500; color: #111; font-size: 14px; font-weight: 700; cursor: pointer; font-family: inherit; }
+.btn-route-reset { flex: 1; min-height: 40px; padding: 12px 6px; border-radius: 10px; border: 1.5px solid var(--border); background: var(--v4-surface-white); font-size: 14px; color: var(--ink); cursor: pointer; font-family: inherit; font-weight: 600; }
 #rs-search-btn { display:flex; width: 100%; height:48px; min-height:48px; margin-top: 9px; padding: 0 13px; background: #1565c0; color: var(--v4-surface-white); border: none; border-radius: 12px; font-size: 16px; font-weight: 900; cursor: pointer; font-family: inherit; align-items: center; justify-content: center; gap: 8px; box-sizing:border-box; box-shadow:0 4px 12px rgba(21,101,192,.24); }
 #rs-search-btn.disabled,#rs-search-btn:disabled{background:#9fb5d2!important;color:rgba(255,255,255,.86)!important;box-shadow:none!important;cursor:default!important;}
 #rs-search-btn.ready{background:#1565c0!important;color:#fff!important;box-shadow:0 4px 12px rgba(21,101,192,.24)!important;}
@@ -3016,9 +3019,9 @@ html.ios-device #app .ic-kakao-row { gap: 6px; padding: 7px 12px 0; }
 html.ios-device #app .ic-tel-btn,
 html.ios-device #app .ic-route-btn,
 html.ios-device #app .ic-link-btn,
-html.ios-device #app .btn-kakao-nav,
+html.ios-device #app .btn-kakao-nav { height: 40px; min-height: 40px; border-radius: 9px; }
 html.ios-device #app .btn-kakao-route,
-html.ios-device #app .btn-route-reset { height: 40px; min-height: 40px; border-radius: 9px; }
+html.ios-device #app .btn-route-reset { min-height: 40px; border-radius: 9px; }
 html.ios-device #app .region-item,
 html.ios-device #app .nearby-item,
 html.ios-device #app .list-item { padding: 7px 11px; gap: 8px; min-height: 62px; align-items: center; }
@@ -4421,8 +4424,10 @@ html:not(.ios-device).oai-screen-compact-short #cover .cover-refresh-main-btn{
   max-height:41px!important;
 }
 html:not(.ios-device).oai-screen-compact-short #app #info-card{
-  max-height:48vh!important;
   border-radius:20px 20px 0 0!important;
+}
+html:not(.ios-device).oai-screen-compact-short:not(.parish-mode):not(.retreat-mode) #app #info-card{
+  max-height:48vh!important;
 }
 html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-header{padding:11px 12px 5px!important;}
 html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-meta{padding:0 12px 5px!important;}
@@ -4434,15 +4439,7 @@ html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-addr-row{padd
 html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-btn-row,
 html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-links,
 html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-kakao-row{gap:6px!important;padding:6px 12px 0!important;}
-html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-tel-btn,
-html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-route-btn,
-html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-link-btn,
-html:not(.ios-device).oai-screen-compact-short #app #info-card .btn-kakao-nav{
-  height:48px!important;
-  min-height:48px!important;
-  border-radius:9px!important;
-}
-html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-body{
+html:not(.ios-device).oai-screen-compact-short:not(.parish-mode):not(.retreat-mode) #app #info-card .ic-body{
   padding-bottom:8px!important;
 }
 html:not(.ios-device).oai-screen-compact-short #app .list-item,
@@ -5159,8 +5156,7 @@ html:not(.ios-device).oai-screen-compact-short .ic-close-btn,
 html:not(.ios-device).oai-screen-compact-short .sheet-x,
 html:not(.ios-device).oai-screen-compact-short .route-sheet-x,
 html:not(.ios-device).oai-screen-compact-short .sm-x,
-html:not(.ios-device).oai-screen-compact-short .srch-x,
-html:not(.ios-device).oai-screen-compact-short .rs-x{
+html:not(.ios-device).oai-screen-compact-short .srch-x{
   width:34px!important;
   height:34px!important;
   min-width:34px!important;
