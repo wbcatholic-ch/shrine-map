@@ -1326,7 +1326,6 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active {
   height: auto;
   min-height: 0;
   max-height: 52vh;
-  box-sizing: border-box;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
   box-shadow: 0 -12px 36px rgba(0,0,0,.16);
@@ -1581,10 +1580,22 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active {
   transform:translateY(1px)!important;
 }
 html:not(.ios-device) #app #info-card{
-  padding-bottom:var(--oai-android-bottom-gap-tight, 8px)!important;
+  padding-bottom:0!important;
+}
+html:not(.ios-device) #app #info-card.open{
+  height:fit-content!important;
+  min-height:0!important;
+  max-height:min(52dvh, 430px)!important;
+  overflow-y:auto!important;
 }
 html:not(.ios-device) #app #info-card .ic-body{
-  padding-bottom:2px!important;
+  height:auto!important;
+  min-height:0!important;
+  padding-bottom:10px!important;
+  box-sizing:border-box!important;
+}
+html:not(.ios-device) #app #info-card .ic-kakao-row{
+  padding-bottom:0!important;
 }
 html:not(.ios-device).oai-screen-tall-phone #app #info-card #ic-tel-link,
 html:not(.ios-device).oai-screen-tall-phone #app #info-card #ic-route-btn,
@@ -4459,7 +4470,7 @@ html:not(.ios-device).oai-screen-compact-short #app #info-card .btn-kakao-nav{
   border-radius:9px!important;
 }
 html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-body{
-  padding-bottom:2px!important;
+  padding-bottom:8px!important;
 }
 html:not(.ios-device).oai-screen-compact-short #app .list-item,
 html:not(.ios-device).oai-screen-compact-short #app .nearby-item,
