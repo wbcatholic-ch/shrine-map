@@ -3,12 +3,12 @@
   if(window.__APP_CACHE_LIFECYCLE_GUARD__) return;
   window.__APP_CACHE_LIFECYCLE_GUARD__ = true;
 
-  var APP_VERSION = window.OAI_APP_BUILD_VERSION || 'V8-1-14-589';
+  var APP_VERSION = window.OAI_APP_BUILD_VERSION || 'V8-1-14-590';
   var SW_BUILD_VERSION = APP_VERSION;
   window.OAI_APP_BUILD_VERSION = APP_VERSION;
   window.APP_VERSION = APP_VERSION;
 
-  /* V8-1-14-589:
+  /* V8-1-14-590:
      오래 미사용 후 복귀는 app.js의 공통 복귀 지휘자만 담당한다.
      예전 sw-update의 background 자동 reload / cover reset 함수들은
      인트로와 로딩 보호창을 다시 시작시켜 복귀 품질을 낮췄으므로 제거했다.
@@ -31,7 +31,7 @@
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }, true);
 
-  /* V8-1-14-589:
+  /* V8-1-14-590:
      일반 사용자는 새로고침을 직접 하지 않으므로, 새 service worker가 적용되면
      카테고리 사용 중에는 기다렸다가 커버 화면처럼 안전한 시점에만 조용히 다시 불러온다. */
   var AUTO_UPDATE_PENDING_KEY = 'oai_auto_update_pending_version';
