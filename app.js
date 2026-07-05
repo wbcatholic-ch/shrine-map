@@ -5302,9 +5302,7 @@ const _GO_ACCURATE_FRESH={enableHighAccuracy:true,timeout:6500,maximumAge:0};
 const OAI_LAST_LOC_KEY='oai_recent_my_location_v95';
 const OAI_LOCATION_CACHE_MAX_MS=12*60*60*1000;
 const OAI_LOCATION_STALE_FALLBACK_DELAY_MS=2600;
-/* 내주변은 차 이동 후 지나온 위치가 표시되지 않도록 일반 위치 캐시보다 훨씬 짧게만 사용한다. */
-const OAI_NEARBY_LOCATION_CACHE_MAX_MS=90*1000;
-const OAI_NEARBY_LOCATION_FALLBACK_DELAY_MS=4200;
+/* 내주변 거리 계산은 저장 위치/이전 위치가 아니라 실제 현재 위치만 기준으로 삼는다. */
 const _GO_NEARBY_FRESH={enableHighAccuracy:true,timeout:8500,maximumAge:0};
 const _GO_NEARBY_FRESH_FALLBACK={enableHighAccuracy:false,timeout:3000,maximumAge:0};
 function _readRecentStoredLocation(maxAgeMs){
@@ -8293,8 +8291,6 @@ function _loadNearby(){
   _cancelNearbyLoad();
   const requestMode=_mode;
   let settled=false;
-  let firstSource='';
-  let cacheTimer=null;
 
   if(requestMode==='shrine'){
     window.__OAI_SHRINE_NEARBY_DISTANCE_DONE__=false;
@@ -8314,20 +8310,10 @@ function _loadNearby(){
       try{ _updateShrineNearbyLocationButtonUI(); }catch(_e){}
     }
   }
-  function runOnce(lat,lng,fromCache){
-    if(settled && !(firstSource==='cache' && !fromCache)) return;
+  function runWithActualLocation(lat,lng){
+    if(settled) return;
     settled=true;
-    firstSource=fromCache ? 'cache' : 'fresh';
-    if(cacheTimer){ clearTimeout(cacheTimer); cacheTimer=null; }
-    if(!fromCache){
-      try{ _setMyLoc(lat,lng); }catch(_e){ _myLat=lat; _myLng=lng; }
-    }else{
-      _myLat=lat; _myLng=lng;
-      try{
-        const saved=_readRecentStoredLocation(OAI_LOCATION_CACHE_MAX_MS);
-        if(saved && saved.lat===lat && saved.lng===lng){ _myLocAt=saved.ts; if(AppState) AppState.myLocAt=_myLocAt; }
-      }catch(_e){}
-    }
+    try{ _setMyLoc(lat,lng); }catch(_e){ _myLat=lat; _myLng=lng; }
     markReadyForDistance();
     if(requestMode==='shrine') _loadNearbyShrines(lat,lng);
     else if(requestMode==='retreat') _loadNearbyRetreats(lat,lng);
@@ -8346,49 +8332,32 @@ function _loadNearby(){
         <div style="font-size:14px;font-weight:700;color:#c0392b;margin-bottom:8px">위치 권한이 거부되어 있습니다</div>
         <div style="font-size:12px;color:#888;line-height:1.7;margin-bottom:18px">
           브라우저 주소창 왼쪽의 🔒 아이콘을 탭한 뒤<br>
-          <b>위치</b> 권한을 <b>허용</b>으로 변경하고 새로고침하세요.
+          <b>위치</b> 권한을 <b>허용</b>으로 변경하고 다시 시도하세요.
         </div>
-        <button onclick="_loadNearby()" style="background:#0e1535;color:#d4aa6a;border:none;border-radius:20px;padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">↺ 다시 시도</button>
+        <button onclick="_loadNearby()" style="background:#0e1535;color:#d4aa6a;border:none;border-radius:20px;padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">↺ 현재 위치 다시 확인</button>
       </div>`;
     } else {
       body.innerHTML=`<div style="padding:28px 20px;text-align:center;">
         <div style="font-size:36px;margin-bottom:12px">😔</div>
-        <div style="font-size:14px;font-weight:700;color:#c0392b;margin-bottom:8px">위치를 가져올 수 없습니다</div>
-        <div style="font-size:12px;color:#888;line-height:1.7;margin-bottom:18px">GPS 신호가 약하거나 네트워크 문제일 수 있습니다.<br>잠시 후 다시 시도해보세요.</div>
-        <button onclick="_loadNearby()" style="background:#0e1535;color:#d4aa6a;border:none;border-radius:20px;padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">↺ 다시 시도</button>
+        <div style="font-size:14px;font-weight:700;color:#c0392b;margin-bottom:8px">현재 위치를 확인하지 못했습니다</div>
+        <div style="font-size:12px;color:#888;line-height:1.7;margin-bottom:18px">내주변 거리는 저장된 위치가 아니라 실제 현재 위치 기준으로만 계산합니다.<br>GPS와 네트워크 상태를 확인한 뒤 다시 시도해 주세요.</div>
+        <button onclick="_loadNearby()" style="background:#0e1535;color:#d4aa6a;border:none;border-radius:20px;padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">↺ 현재 위치 다시 확인</button>
       </div>`;
     }
   }
 
-  const cached=_readRecentStoredLocation(OAI_LOCATION_CACHE_MAX_MS);
-  const nearbyCached=_readRecentStoredLocation(OAI_NEARBY_LOCATION_CACHE_MAX_MS);
-  if(nearbyCached){
-    _myLat=nearbyCached.lat; _myLng=nearbyCached.lng; _myLocAt=nearbyCached.ts;
-    try{ if(AppState) AppState.myLocAt=_myLocAt; }catch(_e){}
-  }
-
   if(!_GEO){
-    if(nearbyCached){ runOnce(nearbyCached.lat,nearbyCached.lng,true); return; }
-    if(cached){ runOnce(cached.lat,cached.lng,true); return; }
     showLocationError({code:0});
     return;
   }
 
-  /* 차로 이동한 직후에는 12시간 위치 캐시를 먼저 그리지 않는다.
-     90초 이내 위치만 임시 fallback으로 쓰고, 기본은 maximumAge:0 새 위치를 기다린다. */
-  if(nearbyCached){
-    cacheTimer=setTimeout(function(){
-      if(!settled) runOnce(nearbyCached.lat,nearbyCached.lng,true);
-    }, OAI_NEARBY_LOCATION_FALLBACK_DELAY_MS);
-  }
-
+  /* 성지/성당/피정 내주변 거리 계산은 저장 위치·이전 위치·캐시 위치로 확정하지 않는다.
+     maximumAge:0 새 위치를 받은 경우에만 거리와 목록을 계산한다. */
   _getNearbyFreshGeoPosition(function(p){
     const lat=p.coords.latitude, lng=p.coords.longitude;
-    runOnce(lat,lng,false);
+    runWithActualLocation(lat,lng);
   },function(err){
     if(settled) return;
-    if(nearbyCached){ runOnce(nearbyCached.lat,nearbyCached.lng,true); return; }
-    if(cached){ runOnce(cached.lat,cached.lng,true); return; }
     showLocationError(err || {code:0});
   });
 }
