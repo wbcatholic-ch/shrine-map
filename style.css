@@ -1330,7 +1330,7 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active {
   padding-bottom: env(safe-area-inset-bottom, 0);
   will-change: transform;
 }
-#info-card.open { display: block; }
+#info-card.open { display: block; backface-visibility: visible !important; will-change: auto !important; }
 #info-card.no-anim { transition: none; }
 
 .ic-header { display: grid; grid-template-columns: minmax(0,1fr) auto auto; align-items: start; gap: 4px 8px; padding: 16px 16px 8px; }
@@ -3071,8 +3071,7 @@ html.oai-font-global .trail-tab { font-size: calc(15px * var(--app-inner-font-sc
 /* V8-1-14-575 step6: trail route button font sizes are owned by the final non-cover font-global block below. */
 html.oai-font-global .pr-icon-dot { width: calc(36px * var(--app-inner-font-scale)); height: calc(36px * var(--app-inner-font-scale)); flex-basis: calc(36px * var(--app-inner-font-scale)); font-size: calc(17px * var(--app-inner-font-scale)); }
 html.oai-font-global .sheet-title { font-size: calc(18px * var(--app-inner-font-scale)); }
-html.oai-font-global .module-bar-sub { font-size: 11px; line-height: 1.25; }
-html.oai-font-global .module-bar-ico { font-size: 22px; width: 42px; height: 42px; min-width: 42px; }
+/* V8-1-14-575 step22: module bar sub/icon final values are owned by the non-cover font-global block below. */
 html.oai-font-global .lv-rg, html.oai-font-global .lv-det, html.oai-font-global .lv-op,
 html.oai-font-global .c-gw, html.oai-font-global .c-rg, html.oai-font-global .c-lbl,
 html.oai-font-global .dd, html.oai-font-global .sg { font-size: calc(12px * var(--app-inner-font-scale)); line-height: 1.45; }
@@ -3080,7 +3079,7 @@ html.oai-font-global .dd, html.oai-font-global .sg { font-size: calc(12px * var(
 html.oai-font-global #cover .cover-subtitle { font-size: 16px; }
 html.oai-font-global #cover .cover-name { font-size: calc(16px * var(--app-font-scale)); }
 html.oai-font-global #cover .cover-emoji { font-size: var(--cover-emoji-size, 40px); background: transparent; box-shadow: none; }
-html.oai-font-global #prayer-bar-ttl, html.oai-font-global .module-bar-title { font-size: 20px; line-height: 1.24; }
+/* V8-1-14-575 step22: module bar title final values are owned by the non-cover font-global block below. */
 
 html.oai-font-global #region-body .nearby-item,
 html.oai-font-global #region-body .region-place-cand { font-size: calc(16px * var(--app-inner-font-scale)); }
@@ -4349,10 +4348,12 @@ html:not(.ios-device).retreat-mode #app #map-wrap #loc-btn{
 .shrine-visit-cards-stats em{font-size:16.5px!important;color:#284b70!important;font-weight:900!important;font-style:normal!important;line-height:1.1!important;}
 .shrine-visit-cards-stats em{margin-left:2px!important;}
 .shrine-visit-cards-body{display:flex!important;flex-direction:column!important;gap:9px!important;flex:1 1 auto!important;min-height:0!important;height:0!important;max-height:none!important;overflow-y:auto!important;-webkit-overflow-scrolling:touch!important;padding:8px 12px var(--oai-stampbook-bottom-clearance)!important;background:#fffdf7!important;touch-action:pan-y!important;overflow-x:hidden!important;box-sizing:border-box!important;scroll-padding-bottom:var(--oai-stampbook-bottom-clearance)!important;overscroll-behavior:contain!important;}
-.shrine-visit-cards-body.stats{padding-top:0!important;}
-.shrine-visit-stats-view{display:flex;flex-direction:column;gap:12px;padding:2px 0 18px;}
+.shrine-visit-cards-body.stats{padding-top:14px!important;padding-bottom:var(--oai-stampbook-bottom-clearance)!important;}
+.shrine-visit-stats-view{display:flex;flex-direction:column;gap:14px;padding:4px 0 10px;}
 .shrine-visit-stat-total,
 .shrine-visit-stat-list{border:1.5px solid #cfd6dd;border-radius:12px;background:linear-gradient(180deg,#fff,#f7f9fb);box-shadow:0 4px 14px rgba(26,38,51,.10);padding:14px;}
+.shrine-visit-stat-total{margin-top:2px!important;}
+.shrine-visit-stat-list{padding-bottom:12px!important;}
 .shrine-visit-stat-kicker{font-size:14px;font-weight:900;color:#6d5a24;margin-bottom:8px;}
 .shrine-visit-stat-total strong{display:block;font-size:25px;line-height:1.2;color:#101828;font-weight:900;letter-spacing:-.04em;}
 .shrine-visit-stat-total span{display:inline-flex;margin-top:6px;font-size:16px;font-weight:900;color:#0e1535;}
@@ -4380,21 +4381,6 @@ html:not(.ios-device).retreat-mode #app #map-wrap #loc-btn{
 }
 .shrine-visit-cards-empty{padding:18px!important;border-radius:14px!important;background:#fff8e8!important;color:#6c4a00!important;font-size:14px!important;font-weight:800!important;text-align:center!important;}
 
-.shrine-visit-cards-body.stats{
-  padding-top:14px!important;
-  padding-bottom:var(--oai-stampbook-bottom-clearance)!important;
-}
-.shrine-visit-stats-view{
-  gap:14px!important;
-  padding-top:4px!important;
-  padding-bottom:10px!important;
-}
-.shrine-visit-stat-total{
-  margin-top:2px!important;
-}
-.shrine-visit-stat-list{
-  padding-bottom:12px!important;
-}
 .shrine-visit-stat-items{
   scroll-margin-bottom:62px!important;
 }
@@ -4860,11 +4846,6 @@ html.oai-stability-veil[data-oai-stability-reason*="external"] *{
   transform:none!important;
   will-change:auto!important;
 }
-#info-card.open{
-  backface-visibility:visible!important;
-  will-change:auto!important;
-}
-
 /* V8-1-14-563: Android/WebView 스탬프북 상단 안전여백은 변수만 여기서 정하고,
    헤더/탭/교구바 자체 스타일은 위의 스탬프북 원본 블록 한 곳에서만 관리한다. */
 html:not(.ios-device){
