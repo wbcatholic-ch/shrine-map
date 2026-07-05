@@ -1338,6 +1338,19 @@
     if(!panel) return;
     setHantiRouteMapChrome(true);
     var controls = ig$('trail-hanti-route-controls');
+    var loc = ig$('trail-loc-btn');
+    if(!loc){
+      loc = document.createElement('button');
+      loc.id = 'trail-loc-btn';
+      loc.className = 'trail-loc-btn';
+      loc.type = 'button';
+      loc.innerHTML = '<span aria-hidden="true">📍</span><span>내위치</span>';
+      loc.onclick = function(e){
+        try{ if(e){ e.preventDefault(); e.stopPropagation(); } }catch(_e){}
+        try{ if(typeof trailMyLoc === 'function') trailMyLoc(); }catch(err){ console.warn('[가톨릭길동무]', err); }
+      };
+    }
+    if(loc.parentNode && loc.parentNode !== panel) loc.parentNode.removeChild(loc);
     if(!controls){
       controls = document.createElement('div');
       controls.id = 'trail-hanti-route-controls';
@@ -1354,8 +1367,7 @@
     follow.className = 'hanti-route-control-btn primary';
     follow.textContent = trailState.hantiFollowActive ? '■ 정지' : '▶ 경로 따라가기';
     row.appendChild(follow);
-    var loc = ig$('trail-loc-btn');
-    if(loc) row.appendChild(loc);
+    row.appendChild(loc);
     var reverse = document.createElement('button');
     reverse.id = 'trail-hanti-route-reverse';
     reverse.type = 'button';
