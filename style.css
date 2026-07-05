@@ -1660,6 +1660,9 @@ html:not(.ios-device).oai-screen-compact-short #app #info-card .btn-kakao-nav{
 .rs-x { width:28px; height:30px; flex:0 0 28px; border-radius:0; background: none; border: none; box-shadow:none; color: #999; font-size: 24px; font-weight:900; line-height:1; cursor: pointer; padding: 0; display:flex; align-items:center; justify-content:center; position:relative; z-index:12; pointer-events:auto; touch-action:manipulation; }
 .rs-between-tools {
   --rs-control-shift-x: 0px;
+  --rs-add-width: 70px;
+  --rs-swap-size: 36px;
+  --rs-swap-left-align: calc((var(--rs-add-width) - var(--rs-swap-size)) / -2);
   display: block;
   width: 76px;
   min-height: 0;
@@ -1682,8 +1685,8 @@ html:not(.ios-device).oai-screen-compact-short #app #info-card .btn-kakao-nav{
 .rs-route-stack.has-waypoint2:not(.has-waypoint3) .rs-add-waypoint3-btn { display: flex; }
 .rs-route-stack.has-waypoint3 .rs-add-waypoint3-btn { display: none !important; }
 .rs-swap-btn {
-  width: 36px;
-  height: 36px;
+  width: var(--rs-swap-size);
+  height: var(--rs-swap-size);
   border-radius: 50%;
   border: 1.5px solid var(--border);
   background: var(--v4-surface-white);
@@ -1696,7 +1699,7 @@ html:not(.ios-device).oai-screen-compact-short #app #info-card .btn-kakao-nav{
   color: var(--ink);
   line-height: 1;
   position: absolute;
-  left: calc(50% + var(--rs-control-shift-x) - 17px);
+  left: calc(50% + var(--rs-control-shift-x) + var(--rs-swap-left-align));
   top: 50%;
   transform: translate(-50%, -50%);
   z-index: 40;
@@ -1717,8 +1720,8 @@ html:not(.ios-device).oai-screen-compact-short #app #info-card .btn-kakao-nav{
 }
 .rs-swap-btn:active { opacity:.82; transform: translate(-50%, -50%) translateY(1px); }
 .rs-add-waypoint-btn {
-  width: 70px;
-  min-width: 70px;
+  width: var(--rs-add-width);
+  min-width: var(--rs-add-width);
   height: 30px;
   border-radius: 8px;
   border: 1.5px solid #b45309;
