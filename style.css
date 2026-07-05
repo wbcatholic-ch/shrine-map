@@ -1377,7 +1377,7 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active {
 .ic-dist-box { font-size: 14px; font-weight: 800; color: #7a4f00; background: #fff3d0; padding: 6px 10px; border-radius: 9px; border: 1.5px solid rgba(180,110,0,.35); white-space: nowrap; text-align: center; }
 .ic-btn-row, .ic-links { display: flex; gap: 7px; padding: 10px 14px 0; align-items: stretch; }
 .ic-btn-row > *, .ic-links > * { flex: 1 1 0; min-width: 0; max-width: 100%; box-sizing: border-box; }
-.ic-body { padding: 0 0 14px; }
+.ic-body { padding: 0 0 8px; }
 
 .ic-tel-btn {
   flex: 1;
@@ -1465,6 +1465,144 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active {
   overflow: hidden;
 }
 .btn-kakao-nav:active { opacity: .85; }
+
+
+/* V8-1-14-575: info-card layout/button owner block.
+   성지·성당·피정 공통 인포카드의 버튼 행, 버튼 크기, 색상은 여기에서만 관리한다. */
+#app #info-card .ic-btn-row,
+#app #info-card .ic-links,
+#app #info-card .ic-kakao-row{
+  display:flex!important;
+  align-items:stretch!important;
+  gap:7px!important;
+  padding:7px 14px 0!important;
+}
+#app #info-card .ic-btn-row > *,
+#app #info-card .ic-links > *,
+#app #info-card .ic-kakao-row > *{
+  flex:1 1 0!important;
+  width:0!important;
+  min-width:0!important;
+  max-width:100%!important;
+  box-sizing:border-box!important;
+}
+#app #info-card #ic-tel-link,
+#app #info-card #ic-route-btn,
+#app #info-card #ic-hp,
+#app #info-card #ic-guide,
+#app #info-card #ic-goodnews,
+#app #info-card #ic-kakao-nav,
+#app #info-card .ic-tel-btn,
+#app #info-card .ic-route-btn,
+#app #info-card .ic-link-btn,
+#app #info-card .btn-kakao-nav{
+  height:46px!important;
+  min-height:46px!important;
+  border-radius:10px!important;
+  padding:0 8px!important;
+  font-size:calc(14.5px * var(--app-inner-font-scale,1))!important;
+  font-weight:900!important;
+  letter-spacing:-.035em!important;
+}
+#app #info-card #ic-tel-link,
+#app #info-card .ic-tel-btn{
+  background:#ffffff!important;
+  background-color:#ffffff!important;
+  background-image:none!important;
+  color:#1f2a44!important;
+  border:2.2px solid #1e73be!important;
+  box-shadow:0 2px 7px rgba(94,150,198,.16)!important;
+}
+#app #info-card #ic-route-btn,
+#app #info-card .ic-route-btn{
+  background:#1565c0!important;
+  background-color:#1565c0!important;
+  background-image:none!important;
+  color:#ffffff!important;
+  border:2.2px solid #0d47a1!important;
+  box-shadow:0 3px 9px rgba(21,101,192,.26)!important;
+}
+#app #info-card #ic-hp,
+#app #info-card .ic-hp-btn,
+#app #info-card #ic-guide,
+#app #info-card .ic-guide-btn,
+#app #info-card #ic-goodnews,
+#app #info-card .ic-goodnews-btn{
+  background:#1f2a44!important;
+  background-color:#1f2a44!important;
+  background-image:none!important;
+  color:#ffffff!important;
+  border:2.2px solid #132039!important;
+  box-shadow:0 3px 9px rgba(31,42,68,.22)!important;
+}
+#app #info-card #ic-kakao-nav,
+#app #info-card .btn-kakao-nav{
+  background:#FFE500!important;
+  background-color:#FFE500!important;
+  background-image:none!important;
+  color:#2f1b00!important;
+  border:2.2px solid #c9a800!important;
+  box-shadow:0 3px 9px rgba(170,140,0,.16)!important;
+}
+#app #info-card #ic-tel-link::before,
+#app #info-card .ic-tel-btn::before,
+#app #info-card #ic-route-btn::before,
+#app #info-card .ic-route-btn::before,
+#app #info-card #ic-hp::before,
+#app #info-card .ic-hp-btn::before,
+#app #info-card #ic-guide::before,
+#app #info-card .ic-guide-btn::before,
+#app #info-card #ic-goodnews::before,
+#app #info-card .ic-goodnews-btn::before,
+#app #info-card #ic-kakao-nav::before,
+#app #info-card .btn-kakao-nav::before{
+  background:transparent!important;
+  background-image:none!important;
+  box-shadow:none!important;
+}
+#app #info-card #ic-tel-link .ic-tel-icon{
+  color:#1f2a44!important;
+}
+#app #info-card #ic-tel-link:active,
+#app #info-card #ic-route-btn:active,
+#app #info-card #ic-hp:active,
+#app #info-card #ic-guide:active,
+#app #info-card #ic-goodnews:active,
+#app #info-card #ic-kakao-nav:active{
+  filter:none!important;
+  transform:translateY(1px)!important;
+}
+html:not(.ios-device) #app #info-card{
+  padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 10px)!important;
+}
+html:not(.ios-device).oai-screen-tall-phone #app #info-card #ic-tel-link,
+html:not(.ios-device).oai-screen-tall-phone #app #info-card #ic-route-btn,
+html:not(.ios-device).oai-screen-tall-phone #app #info-card #ic-hp,
+html:not(.ios-device).oai-screen-tall-phone #app #info-card #ic-guide,
+html:not(.ios-device).oai-screen-tall-phone #app #info-card #ic-goodnews,
+html:not(.ios-device).oai-screen-tall-phone #app #info-card #ic-kakao-nav,
+html:not(.ios-device).oai-screen-fold-wide #app #info-card #ic-tel-link,
+html:not(.ios-device).oai-screen-fold-wide #app #info-card #ic-route-btn,
+html:not(.ios-device).oai-screen-fold-wide #app #info-card #ic-hp,
+html:not(.ios-device).oai-screen-fold-wide #app #info-card #ic-guide,
+html:not(.ios-device).oai-screen-fold-wide #app #info-card #ic-goodnews,
+html:not(.ios-device).oai-screen-fold-wide #app #info-card #ic-kakao-nav{
+  height:45px!important;
+  min-height:45px!important;
+}
+html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-tel-link,
+html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-route-btn,
+html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-hp,
+html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-guide,
+html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-goodnews,
+html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-kakao-nav,
+html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-tel-btn,
+html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-route-btn,
+html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-link-btn,
+html:not(.ios-device).oai-screen-compact-short #app #info-card .btn-kakao-nav{
+  height:48px!important;
+  min-height:48px!important;
+}
 
 #sheet-route #rs-top { padding-right: 10px !important; }
 
@@ -4782,12 +4920,6 @@ html:not(.ios-device) #prayer-view{
   --faith-prayer-list-bottom-pad:calc(78px + var(--oai-android-bottom-gap));
   --faith-prayer-detail-bottom-pad:calc(86px + var(--oai-android-bottom-gap));
 }
-html:not(.ios-device) #app #info-card{
-  padding-bottom:var(--oai-android-bottom-gap)!important;
-}
-html:not(.ios-device) #app #info-card .ic-body{
-  padding-bottom:calc(8px + var(--oai-android-bottom-gap-tight))!important;
-}
 html:not(.ios-device) #app .guide-modal{
   padding-bottom:calc(14px + var(--oai-android-bottom-gap))!important;
 }
@@ -4932,37 +5064,6 @@ html.retreat-mode .category-source-note .source-retreat { display: inline; }
 #sheet-region .category-source-note { position: relative; z-index: 2; }
 html.oai-font-global .category-source-note { font-size: calc(11px * var(--app-inner-font-scale,1)); }
 
-#app #info-card .ic-guide-btn{background:#fff3c4!important;color:#6c4a00!important;border:1px solid #e1bd59!important;}
-
-#app #info-card .ic-btn-row,
-#app #info-card .ic-links,
-#app #info-card .ic-kakao-row{
-  display:flex!important;
-  align-items:stretch!important;
-  gap:7px!important;
-  padding:7px 14px 0!important;
-}
-#app #info-card .ic-btn-row > *,
-#app #info-card .ic-links > *,
-#app #info-card .ic-kakao-row > *{
-  flex:1 1 0!important;
-  width:0!important;
-  min-width:0!important;
-  max-width:100%!important;
-  box-sizing:border-box!important;
-}
-#app #info-card .ic-tel-btn,
-#app #info-card .ic-route-btn,
-#app #info-card .ic-link-btn,
-#app #info-card .btn-kakao-nav{
-  height:46px!important;
-  min-height:46px!important;
-  border-radius:10px!important;
-  padding:0 8px!important;
-  font-size:16px!important;
-  font-weight:900!important;
-}
-#app #info-card .ic-guide-btn{background:#fff4cc!important;color:#7c5600!important;border:1.5px solid #e6c766!important;}
 /* V8-1-14-563: 상세 버튼 색상과 로딩 십자가는 각각 원래 위치에서 관리한다.
    이 앞의 반복 로딩 십자가 override는 아래 oai-loading-cross 변수 블록으로 통합했다. */
 #app #loc-btn.oai-wait-nearby-list{
@@ -5209,54 +5310,6 @@ html.oai-external-return-freeze.oai-external-return-releasing::after{
 }
 
 
-/* V8-1-14-563: 인포카드/상세 버튼의 이전 색상·테두리 override 묶음은 삭제하고,아래 최종 공통색 기준 하나만 유지한다. */
-#app #info-card #ic-tel-link,#app #info-card #ic-route-btn,#app #info-card #ic-hp,#app #info-card #ic-guide,#app #info-card #ic-goodnews,#app #info-card #ic-kakao-nav{
-  background:linear-gradient(180deg,#fbfdff 0%,#fffaf0 100%)!important;
-  color:#213245!important;
-  border:2.5px solid #9db7cc!important;
-  box-shadow:0 3px 9px rgba(17,35,60,.10), inset 0 1px 0 rgba(255,255,255,.86)!important;
-  text-shadow:none!important;
-  font-weight:950!important;
-}
-#app #info-card #ic-tel-link .ic-tel-icon{
-  color:#213245!important;
-}
-#app #info-card #ic-tel-link:active,#app #info-card #ic-route-btn:active,#app #info-card #ic-hp:active,#app #info-card #ic-guide:active,#app #info-card #ic-goodnews:active,#app #info-card #ic-kakao-nav:active{
-  background:linear-gradient(180deg,#f1f8ff 0%,#fff3d8 100%)!important;
-  border-color:#7f9fba!important;
-  filter:none!important;
-  transform:translateY(1px)!important;
-}
-
-/* V8-1-14-563: 인포카드 버튼과 성지 상세정보 버튼의 크기 기준을 한곳에서 확정한다. */
-#app #info-card #ic-tel-link,
-#app #info-card #ic-route-btn,
-#app #info-card #ic-hp,
-#app #info-card #ic-guide,
-#app #info-card #ic-goodnews,
-#app #info-card #ic-kakao-nav,
-#app #info-card .ic-tel-btn,
-#app #info-card .ic-route-btn,
-#app #info-card .ic-link-btn,
-#app #info-card .btn-kakao-nav{
-  height:46px!important;
-  min-height:46px!important;
-  font-size:calc(14.5px * var(--app-inner-font-scale,1))!important;
-  letter-spacing:-.035em!important;
-}
-html:not(.ios-device).oai-screen-tall-phone #app #info-card #ic-tel-link,html:not(.ios-device).oai-screen-tall-phone #app #info-card #ic-route-btn,html:not(.ios-device).oai-screen-tall-phone #app #info-card #ic-hp,html:not(.ios-device).oai-screen-tall-phone #app #info-card #ic-guide,html:not(.ios-device).oai-screen-tall-phone #app #info-card #ic-goodnews,html:not(.ios-device).oai-screen-tall-phone #app #info-card #ic-kakao-nav{
-  height:45px!important;
-  min-height:45px!important;
-}
-html:not(.ios-device).oai-screen-fold-wide #app #info-card #ic-tel-link,html:not(.ios-device).oai-screen-fold-wide #app #info-card #ic-route-btn,html:not(.ios-device).oai-screen-fold-wide #app #info-card #ic-hp,html:not(.ios-device).oai-screen-fold-wide #app #info-card #ic-guide,html:not(.ios-device).oai-screen-fold-wide #app #info-card #ic-goodnews,html:not(.ios-device).oai-screen-fold-wide #app #info-card #ic-kakao-nav{
-  height:45px!important;
-  min-height:45px!important;
-}
-html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-tel-link,html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-route-btn,html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-hp,html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-guide,html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-goodnews,html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-kakao-nav,html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-tel-btn,html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-route-btn,html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-link-btn,html:not(.ios-device).oai-screen-compact-short #app #info-card .btn-kakao-nav{
-  height:48px!important;
-  min-height:48px!important;
-}
-
 /* V8-1-14-563: compact-short 탭바/지도 top 기준은 아래 변수 블록 하나로 통합한다. */
 html:not(.ios-device).oai-screen-compact-short .map-category-close,
 html:not(.ios-device).oai-screen-compact-short .ic-close-btn,
@@ -5367,13 +5420,6 @@ html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-meta .ic-dist
 html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-header .ic-type-badge{max-width:86px;}
 html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-header .ic-type-badge.shrine-pilgrim-register-badge{min-width:68px!important;max-width:none!important;}
 html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-header .ic-type-badge.shrine-pilgrim-visited{min-width:78px!important;max-width:none!important;}
-html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-btn-row,html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-links,html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-kakao-row{
-  gap:6px!important;
-}
-html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-btn-row > *,html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-links > *,html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-kakao-row > *,html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-tel-link,html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-route-btn,html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-hp,html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-guide,html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-goodnews,html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-kakao-nav{
-  height:48px!important;
-  min-height:48px!important;
-}
 html:not(.ios-device).oai-screen-compact-short #app .shrine-visit-detail-info-head{gap:7px!important;}
 html:not(.ios-device).oai-screen-compact-short #app .shrine-visit-cards-body.stats{
   padding-top:12px!important;
@@ -5477,16 +5523,6 @@ html.oai-android-tablet:not(.ios-device) .module-view.open{
 
 /* V8-1-14-563: Fold 전환 아이보리 안정막은 Android native 한 곳에서만 처리한다. PWA overlay는 제거했다. */
 
-/* V8-1-14-563: 성지 인포카드 하단 여백을 조금 되살려 마지막 버튼이 바닥에 붙어 보이지 않게 한다. */
-html:not(.ios-device) #app #info-card{
-  padding-bottom:10px!important;
-}
-#app #info-card .ic-body{
-  padding-bottom:8px!important;
-}
-html:not(.ios-device) #app #info-card .ic-body{
-  padding-bottom:8px!important;
-}
 /* V8-1-14-563: visible cover version remains available for release verification. */
 
 /* V8-1-14-563: 검색 키보드가 열린 상태에서 성지/성당/피정 리스트를 처음 스크롤할 때
@@ -5523,69 +5559,6 @@ html.oai-result-scroll-kb-dismiss .region-item.app-pressing{
   filter:none!important;
 }
 
-
-/* V8-1-14-563: 인포카드 버튼 색상 정리. 전화는 흰색, 카카오내비는 노랑, 나머지는 남색이며, 색 버튼 테두리는 배경보다 한 단계 어둡게 유지한다. */
-#app #info-card #ic-tel-link,#app #info-card .ic-tel-btn{
-  background:#ffffff!important;
-  background-color:#ffffff!important;
-  background-image:none!important;
-  color:#1f2a44!important;
-  border:2.2px solid #1e73be!important;
-  box-shadow:0 2px 7px rgba(94,150,198,.16)!important;
-}
-
-#app #info-card #ic-route-btn,#app #info-card .ic-route-btn{
-  background:#1565c0!important;
-  background-color:#1565c0!important;
-  background-image:none!important;
-  color:#ffffff!important;
-  border:2.2px solid #0d47a1!important;
-  box-shadow:0 3px 9px rgba(21,101,192,.26)!important;
-}
-
-#app #info-card #ic-hp,#app #info-card .ic-hp-btn,#app #info-card #ic-guide,#app #info-card .ic-guide-btn,#app #info-card #ic-goodnews,#app #info-card .ic-goodnews-btn{
-  background:#1f2a44!important;
-  background-color:#1f2a44!important;
-  background-image:none!important;
-  color:#ffffff!important;
-  border:2.2px solid #132039!important;
-  box-shadow:0 3px 9px rgba(31,42,68,.22)!important;
-}
-
-#app #info-card #ic-kakao-nav,#app #info-card .btn-kakao-nav{
-  background:#FFE500!important;
-  background-color:#FFE500!important;
-  background-image:none!important;
-  color:#2f1b00!important;
-  border:2.2px solid #c9a800!important;
-  box-shadow:0 3px 9px rgba(170,140,0,.16)!important;
-}
-
-#app #info-card #ic-tel-link::before,
-#app #info-card .ic-tel-btn::before,
-#app #info-card #ic-route-btn::before,
-#app #info-card .ic-route-btn::before,
-#app #info-card #ic-hp::before,
-#app #info-card .ic-hp-btn::before,
-#app #info-card #ic-guide::before,
-#app #info-card .ic-guide-btn::before,
-#app #info-card #ic-goodnews::before,
-#app #info-card .ic-goodnews-btn::before,
-#app #info-card #ic-kakao-nav::before,
-#app #info-card .btn-kakao-nav::before{
-  background:transparent!important;
-  background-image:none!important;
-  box-shadow:none!important;
-}
-
-#app #info-card #ic-tel-link .ic-tel-icon{
-  color:#1f2a44!important;
-}
-
-#app #info-card #ic-tel-link:active,#app #info-card #ic-route-btn:active,#app #info-card #ic-hp:active,#app #info-card #ic-guide:active,#app #info-card #ic-goodnews:active,#app #info-card #ic-kakao-nav:active{
-  filter:none!important;
-  transform:translateY(1px)!important;
-}
 
 
 /* V8-1-14-563: 커버 하단 여백은 실제 요소가 아닌 과거 선택자 덧씌움으로 조정하지 않는다.
