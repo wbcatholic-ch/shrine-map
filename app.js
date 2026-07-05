@@ -5302,6 +5302,11 @@ const _GO_ACCURATE_FRESH={enableHighAccuracy:true,timeout:6500,maximumAge:0};
 const OAI_LAST_LOC_KEY='oai_recent_my_location_v95';
 const OAI_LOCATION_CACHE_MAX_MS=12*60*60*1000;
 const OAI_LOCATION_STALE_FALLBACK_DELAY_MS=2600;
+/* 내주변은 차 이동 후 지나온 위치가 표시되지 않도록 일반 위치 캐시보다 훨씬 짧게만 사용한다. */
+const OAI_NEARBY_LOCATION_CACHE_MAX_MS=90*1000;
+const OAI_NEARBY_LOCATION_FALLBACK_DELAY_MS=4200;
+const _GO_NEARBY_FRESH={enableHighAccuracy:true,timeout:8500,maximumAge:0};
+const _GO_NEARBY_FRESH_FALLBACK={enableHighAccuracy:false,timeout:3000,maximumAge:0};
 function _readRecentStoredLocation(maxAgeMs){
   try{
     const raw=localStorage.getItem(OAI_LAST_LOC_KEY)||'';
@@ -5337,6 +5342,33 @@ function _refreshFreshLocationThen(apply,fail){
     _setMyLoc(lat,lng);
     if(typeof apply==='function') apply(lat,lng,false);
   }, fail || function(){});
+}
+function _getNearbyFreshGeoPosition(success, fail){
+  if(!_GEO){ if(fail) fail({code:0}); return; }
+  let done=false;
+  function ok(p){
+    if(done) return;
+    done=true;
+    if(success) success(p);
+  }
+  function bad(e1){
+    if(done) return;
+    try{
+      _GEO.getCurrentPosition(ok,function(e2){
+        if(done) return;
+        done=true;
+        if(fail) fail(e2 || e1);
+      },_GO_NEARBY_FRESH_FALLBACK);
+    }catch(e){
+      if(!done){
+        done=true;
+        if(fail) fail(e1 || e);
+      }
+    }
+  }
+  try{
+    _GEO.getCurrentPosition(ok,bad,_GO_NEARBY_FRESH);
+  }catch(e){ bad(e); }
 }
 const _EC=encodeURIComponent;
 const _NS='xmlns="http://www.w3.org/2000/svg"';
@@ -8267,7 +8299,7 @@ function _loadNearby(){
   if(requestMode==='shrine'){
     window.__OAI_SHRINE_NEARBY_DISTANCE_DONE__=false;
     window.__OAI_SHRINE_NEARBY_LOADING__=true;
-    window.__OAI_SHRINE_NEARBY_AWAITING_FRESH__=false;
+    window.__OAI_SHRINE_NEARBY_AWAITING_FRESH__=true;
   }
   try{ _updateShrineVisitCardsButtonUI(); }catch(_e){}
   try{ _updateShrineNearbyLocationButtonUI(); }catch(_e){}
@@ -8329,25 +8361,33 @@ function _loadNearby(){
   }
 
   const cached=_readRecentStoredLocation(OAI_LOCATION_CACHE_MAX_MS);
-  if(cached){
-    _myLat=cached.lat; _myLng=cached.lng; _myLocAt=cached.ts;
+  const nearbyCached=_readRecentStoredLocation(OAI_NEARBY_LOCATION_CACHE_MAX_MS);
+  if(nearbyCached){
+    _myLat=nearbyCached.lat; _myLng=nearbyCached.lng; _myLocAt=nearbyCached.ts;
     try{ if(AppState) AppState.myLocAt=_myLocAt; }catch(_e){}
   }
 
   if(!_GEO){
+    if(nearbyCached){ runOnce(nearbyCached.lat,nearbyCached.lng,true); return; }
     if(cached){ runOnce(cached.lat,cached.lng,true); return; }
     showLocationError({code:0});
     return;
   }
 
-  if(cached){
+  /* 차로 이동한 직후에는 12시간 위치 캐시를 먼저 그리지 않는다.
+     90초 이내 위치만 임시 fallback으로 쓰고, 기본은 maximumAge:0 새 위치를 기다린다. */
+  if(nearbyCached){
     cacheTimer=setTimeout(function(){
-      if(!settled) runOnce(cached.lat,cached.lng,true);
-    }, OAI_LOCATION_STALE_FALLBACK_DELAY_MS);
+      if(!settled) runOnce(nearbyCached.lat,nearbyCached.lng,true);
+    }, OAI_NEARBY_LOCATION_FALLBACK_DELAY_MS);
   }
 
-  _refreshFreshLocationThen(function(lat,lng){ runOnce(lat,lng,false); },function(err){
+  _getNearbyFreshGeoPosition(function(p){
+    const lat=p.coords.latitude, lng=p.coords.longitude;
+    runOnce(lat,lng,false);
+  },function(err){
     if(settled) return;
+    if(nearbyCached){ runOnce(nearbyCached.lat,nearbyCached.lng,true); return; }
     if(cached){ runOnce(cached.lat,cached.lng,true); return; }
     showLocationError(err || {code:0});
   });
