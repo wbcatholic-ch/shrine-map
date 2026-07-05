@@ -1484,6 +1484,14 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active {
   gap:7px!important;
   padding:7px 14px 0!important;
 }
+#app #info-card .ic-btn-row[style*="display:none"],
+#app #info-card .ic-btn-row[style*="display: none"],
+#app #info-card .ic-links[style*="display:none"],
+#app #info-card .ic-links[style*="display: none"],
+#app #info-card .ic-kakao-row[style*="display:none"],
+#app #info-card .ic-kakao-row[style*="display: none"]{
+  display:none!important;
+}
 #app #info-card .ic-btn-row > *,
 #app #info-card .ic-links > *,
 #app #info-card .ic-kakao-row > *{
@@ -1583,16 +1591,25 @@ html:not(.ios-device) #app #info-card{
   padding-bottom:0!important;
 }
 html:not(.ios-device) #app #info-card.open{
-  height:fit-content!important;
+  height:auto!important;
   min-height:0!important;
   max-height:min(52dvh, 430px)!important;
   overflow-y:auto!important;
+}
+html:is(.parish-mode,.retreat-mode):not(.ios-device) #app #info-card.open{
+  height:auto!important;
+  min-height:0!important;
+  max-height:none!important;
+  overflow-y:visible!important;
 }
 html:not(.ios-device) #app #info-card .ic-body{
   height:auto!important;
   min-height:0!important;
   padding-bottom:10px!important;
   box-sizing:border-box!important;
+}
+html:is(.parish-mode,.retreat-mode):not(.ios-device) #app #info-card .ic-body{
+  padding-bottom:4px!important;
 }
 html:not(.ios-device) #app #info-card .ic-kakao-row{
   padding-bottom:0!important;
