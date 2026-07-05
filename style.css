@@ -1578,7 +1578,10 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active {
   transform:translateY(1px)!important;
 }
 html:not(.ios-device) #app #info-card{
-  padding-bottom:calc(env(safe-area-inset-bottom, 0px) + 10px)!important;
+  padding-bottom:var(--oai-android-bottom-gap-tight, 8px)!important;
+}
+html:not(.ios-device) #app #info-card .ic-body{
+  padding-bottom:2px!important;
 }
 html:not(.ios-device).oai-screen-tall-phone #app #info-card #ic-tel-link,
 html:not(.ios-device).oai-screen-tall-phone #app #info-card #ic-route-btn,
@@ -4453,7 +4456,7 @@ html:not(.ios-device).oai-screen-compact-short #app #info-card .btn-kakao-nav{
   border-radius:9px!important;
 }
 html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-body{
-  padding-bottom:calc(2px + var(--oai-android-bottom-gap-tight, 0px))!important;
+  padding-bottom:2px!important;
 }
 html:not(.ios-device).oai-screen-compact-short #app .list-item,
 html:not(.ios-device).oai-screen-compact-short #app .nearby-item,
