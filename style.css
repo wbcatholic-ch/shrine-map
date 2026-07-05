@@ -288,45 +288,53 @@ html:not(.ios-device).oai-screen-fold-wide {
 }
 
 html.parish-mode {
-  --mode-header-bg:    linear-gradient(135deg, #374151, var(--v4-parish-gray));
-  --mode-header-solid: var(--v4-parish-gray);
-  --mode-active-bg:    var(--v4-parish-gray);
-  --mode-filter-active-bg:    var(--v4-parish-gray);
-  --mode-filter-active-color: var(--v4-surface-paper);
-  --mode-filter-active-border: #374151;
-  --mode-tab-active-bg:  linear-gradient(135deg, #374151, var(--v4-parish-gray));
-  --mode-badge-bg:    #ECEFF3;
-  --mode-badge-color: #374151;
-  --mode-dist-color:  var(--v4-parish-gray);
-  --mode-name-color:  #334155;
-  --mode-num-bg:      var(--v4-parish-gray);
-  --mode-sm-tab-inactive-bg:    #F1F5F9;
-  --mode-sm-tab-inactive-color: var(--v4-parish-gray);
+  --parish-bg: var(--cathedral-category-final, #3F4752);
+  --parish-active: var(--cathedral-category-dark, #2F3742);
+  --mode-header-bg: linear-gradient(135deg, var(--cathedral-category-dark, #2F3742), var(--cathedral-category-final, #3F4752));
+  --mode-header-solid: var(--cathedral-category-final, #3F4752);
+  --mode-active-bg: linear-gradient(135deg, var(--cathedral-category-dark, #2F3742), var(--cathedral-category-final, #3F4752));
+  --mode-filter-active-bg: linear-gradient(135deg, var(--cathedral-category-dark, #2F3742), var(--cathedral-category-final, #3F4752));
+  --mode-filter-active-color: var(--v4-surface-white);
+  --mode-filter-active-border: transparent;
+  --mode-tab-active-bg: linear-gradient(135deg, var(--cathedral-category-dark, #2F3742), var(--cathedral-category-final, #3F4752));
+  --mode-badge-bg: var(--cathedral-category-soft-final, #ECEFF3);
+  --mode-badge-color: var(--cathedral-category-final, #3F4752);
+  --mode-dist-color: var(--cathedral-category-final, #3F4752);
+  --mode-name-color: var(--v4-text-strong);
+  --mode-num-bg: var(--cathedral-category-final, #3F4752);
+  --mode-sm-tab-inactive-bg: #F1F5F9;
+  --mode-sm-tab-inactive-color: var(--cathedral-category-final, #3F4752);
   --mode-sm-tab-inactive-border: rgba(75,85,99,.28);
-  --mode-srch-modal-bg: var(--v4-parish-gray);
+  --mode-srch-modal-bg: var(--cathedral-category-final, #3F4752);
 }
 
 html.retreat-mode {
-  --mode-header-bg:    linear-gradient(135deg, var(--v4-retreat-green), #4F846C);
-  --mode-header-solid: #4F846C;
-  --mode-active-bg:    var(--retreat-active);
-  --mode-filter-bg:    rgba(255,255,255,.14);
+  --retreat-bg: var(--retreat-category-final, #3F6F5A);
+  --retreat-primary: var(--retreat-category-final, #3F6F5A);
+  --retreat-main: var(--retreat-category-final, #3F6F5A);
+  --retreat-main-2: var(--retreat-category-dark, #345C4B);
+  --retreat-dark: var(--retreat-category-dark, #345C4B);
+  --retreat-active: var(--retreat-category-final, #3F6F5A);
+  --mode-header-bg: linear-gradient(135deg, var(--retreat-category-dark, #345C4B), var(--retreat-category-final, #3F6F5A));
+  --mode-header-solid: var(--retreat-category-final, #3F6F5A);
+  --mode-active-bg: linear-gradient(135deg, var(--retreat-category-dark, #345C4B), var(--retreat-category-final, #3F6F5A));
+  --mode-filter-bg: rgba(255,255,255,.14);
   --mode-filter-color: rgba(255,255,255,.92);
   --mode-filter-border: rgba(255,255,255,.30);
-  --mode-filter-active-bg:    #4F846C;
+  --mode-filter-active-bg: linear-gradient(135deg, var(--retreat-category-dark, #345C4B), var(--retreat-category-final, #3F6F5A));
   --mode-filter-active-color: var(--v4-surface-white);
-  --mode-filter-active-border: var(--v4-retreat-green);
-  --mode-tab-active-bg:  linear-gradient(135deg, var(--v4-retreat-green), #4F846C);
+  --mode-filter-active-border: transparent;
+  --mode-tab-active-bg: linear-gradient(135deg, var(--retreat-category-dark, #345C4B), var(--retreat-category-final, #3F6F5A));
   --mode-tab-active-border: transparent;
-  --mode-badge-bg:    var(--retreat-soft);
-  --mode-badge-color: var(--v4-retreat-green);
-  --mode-dist-color:  #4F846C;
-  --mode-name-color:  var(--v4-retreat-green);
-  --mode-num-bg:      #4F846C;
-  --mode-sm-tab-inactive-bg:    #F6FBF8;
-  --mode-sm-tab-inactive-color: var(--v4-retreat-green);
-  --mode-sm-tab-inactive-border: rgba(107,143,113,.22);
-  --mode-srch-modal-bg: #4F846C;
+  --mode-badge-bg: var(--retreat-category-soft-final, #DDECE5);
+  --mode-badge-color: var(--retreat-category-final, #3F6F5A);
+  --mode-dist-color: var(--retreat-category-final, #3F6F5A);
+  --mode-name-color: var(--v4-text-strong);
+  --mode-num-bg: var(--retreat-category-final, #3F6F5A);
+  --mode-sm-tab-inactive-bg: #EEF6F1;
+  --mode-sm-tab-inactive-color: var(--retreat-category-final, #3F6F5A);
+  --mode-sm-tab-inactive-border: rgba(79,132,108,.30);
+  --mode-srch-modal-bg: var(--retreat-category-final, #3F6F5A);
 }
 
 html.ios-device {
@@ -658,14 +666,19 @@ html:not(.ios-device).oai-screen-compact-short #map-wrap.oai-shrine-filter-open 
 }
 
 #sheet-route {
-  top: auto;
-  max-height: 52vh;
+  top: auto !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  max-height: min(52vh, 430px) !important;
   border-radius: 16px 16px 0 0;
   border-top: 2px solid var(--gold2);
   box-shadow: 0 -3px 16px rgba(0,0,0,.25);
   padding-bottom: 4px;
   overflow-y: auto;
-  position: fixed;
+  position: fixed !important;
+  transform: translateY(100%) !important;
+  z-index: 900 !important;
 }
 #sheet-route.route-waypoint-scroll {
   max-height: min(42vh, 330px);
@@ -1279,9 +1292,9 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: var(--v4-surface-white);
-  color: var(--v4-text-main);
-  border: 1.5px solid #9ca3af;
+  background: var(--v4-surface-white) !important;
+  color: #374151 !important;
+  border: 1.5px solid #CBD5E1 !important;
   box-shadow: none;
 }
 
@@ -1293,16 +1306,16 @@ html:not(.parish-mode):not(.retreat-mode) #srch-modal #sm-tab-bar .sm-tab.active
   font-weight: 900;
 }
 html.parish-mode #srch-modal #sm-tab-bar .sm-tab.active {
-  background: var(--parish-active, #475569);
-  color: var(--v4-surface-white);
-  border-color: var(--parish-active, #475569);
+  background: var(--mode-tab-active-bg) !important;
+  color: var(--v4-surface-white) !important;
+  border-color: transparent !important;
   box-shadow: none;
   font-weight: 900;
 }
 html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active {
-  background: var(--retreat-active, #4F846C);
-  color: var(--v4-surface-white);
-  border-color: var(--retreat-active, #4F846C);
+  background: var(--mode-tab-active-bg) !important;
+  color: var(--v4-surface-white) !important;
+  border-color: transparent !important;
   box-shadow: none;
   font-weight: 900;
 }
@@ -3160,23 +3173,6 @@ html:not(.parish-mode):not(.retreat-mode) #tabbar .tab-btn.active{
   border-color:transparent!important;
 }
 
-html.parish-mode{
-  --parish-bg:var(--cathedral-category-final);
-  --parish-active:var(--cathedral-category-dark);
-  --mode-header-bg:linear-gradient(135deg,var(--cathedral-category-dark),var(--cathedral-category-final));
-  --mode-header-solid:var(--cathedral-category-final);
-  --mode-active-bg:linear-gradient(135deg,var(--cathedral-category-dark),var(--cathedral-category-final));
-  --mode-tab-active-bg:linear-gradient(135deg,var(--cathedral-category-dark),var(--cathedral-category-final));
-  --mode-badge-bg:var(--cathedral-category-soft-final);
-  --mode-badge-color:var(--cathedral-category-final);
-  --mode-dist-color:var(--cathedral-category-final);
-  --mode-name-color:var(--v4-text-strong);
-  --mode-num-bg:var(--cathedral-category-final);
-  --mode-srch-modal-bg:var(--cathedral-category-final);
-  --mode-filter-active-bg:linear-gradient(135deg,var(--cathedral-category-dark),var(--cathedral-category-final));
-  --mode-filter-active-color:var(--v4-surface-white);
-  --mode-filter-active-border:transparent;
-}
 html.parish-mode #tabbar .tab-btn.active,
 html.parish-mode .srch-bar,
 html.parish-mode .filter-bar,
@@ -3211,27 +3207,6 @@ html.parish-mode .ic-type-badge{
   color:var(--mode-badge-color)!important;
 }
 
-html.retreat-mode{
-  --retreat-bg:var(--retreat-category-final);
-  --retreat-primary:var(--retreat-category-final);
-  --retreat-main:var(--retreat-category-final);
-  --retreat-main-2:var(--retreat-category-dark);
-  --retreat-dark:var(--retreat-category-dark);
-  --retreat-active:var(--retreat-category-final);
-  --mode-header-bg:linear-gradient(135deg,var(--retreat-category-dark),var(--retreat-category-final));
-  --mode-header-solid:var(--retreat-category-final);
-  --mode-active-bg:linear-gradient(135deg,var(--retreat-category-dark),var(--retreat-category-final));
-  --mode-tab-active-bg:linear-gradient(135deg,var(--retreat-category-dark),var(--retreat-category-final));
-  --mode-badge-bg:var(--retreat-category-soft-final);
-  --mode-badge-color:var(--retreat-category-final);
-  --mode-dist-color:var(--retreat-category-final);
-  --mode-name-color:var(--v4-text-strong);
-  --mode-num-bg:var(--retreat-category-final);
-  --mode-srch-modal-bg:var(--retreat-category-final);
-  --mode-filter-active-bg:linear-gradient(135deg,var(--retreat-category-dark),var(--retreat-category-final));
-  --mode-filter-active-color:var(--v4-surface-white);
-  --mode-filter-active-border:transparent;
-}
 html.retreat-mode #tabbar .tab-btn.active,
 html.retreat-mode .srch-bar,
 html.retreat-mode .filter-bar,
@@ -3284,22 +3259,6 @@ html.retreat-mode #srch-modal #sm-tab-bar{
   border-bottom:1.5px solid var(--v4-line-soft)!important;
   border-top:0!important;
   box-shadow:0 1px 0 rgba(17,24,39,.04)!important;
-}
-html.parish-mode #srch-modal #sm-tab-bar .sm-tab,
-html.retreat-mode #srch-modal #sm-tab-bar .sm-tab{
-  background:var(--v4-surface-white)!important;
-  color:#374151!important;
-  border:1.5px solid #CBD5E1!important;
-}
-html.parish-mode #srch-modal #sm-tab-bar .sm-tab.active{
-  background:var(--mode-tab-active-bg)!important;
-  color:var(--v4-surface-white)!important;
-  border-color:transparent!important;
-}
-html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active{
-  background:var(--mode-tab-active-bg)!important;
-  color:var(--v4-surface-white)!important;
-  border-color:transparent!important;
 }
 
 .filter-btn.active,
@@ -5467,17 +5426,6 @@ html:not(.ios-device).oai-screen-compact-short #prayer-view{
 
 #app #sheet-route[hidden]{
   display:none!important;
-}
-html:not(.ios-device).oai-screen-compact-short #app #sheet-route,
-#app #sheet-route{
-  top:auto!important;
-  bottom:0!important;
-  left:0!important;
-  right:0!important;
-  position:fixed!important;
-  max-height:min(52vh, 430px)!important;
-  transform:translateY(100%)!important;
-  z-index:900!important;
 }
 html:not(.ios-device).oai-screen-compact-short #app #sheet-route.open,
 #app #sheet-route.open{
