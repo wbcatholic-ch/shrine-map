@@ -4477,6 +4477,10 @@ html:not(.ios-device).oai-screen-compact-short #app #info-card{
 }
 html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-header{padding:11px 12px 5px!important;}
 html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-meta{padding:0 12px 5px!important;}
+html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-meta .ic-dist-box{padding:4px 7px!important;}
+html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-header .ic-type-badge{max-width:86px;}
+html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-header .ic-type-badge.shrine-pilgrim-register-badge{min-width:68px!important;max-width:none!important;}
+html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-header .ic-type-badge.shrine-pilgrim-visited{min-width:78px!important;max-width:none!important;}
 html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-addr-row{padding:0 12px 7px!important;gap:8px!important;}
 html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-btn-row,
 html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-links,
@@ -5331,10 +5335,6 @@ html:not(.ios-device).oai-screen-compact-short #map-wrap .shrine-visit-map-filte
 }
 html:not(.ios-device).oai-screen-compact-short #app .li-side{max-width:88px!important;}
 html:not(.ios-device).oai-screen-compact-short #app .li-pilgrim-register{min-width:68px!important;padding:0 7px!important;}
-html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-meta .ic-dist-box{padding:4px 7px!important;}
-html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-header .ic-type-badge{max-width:86px;}
-html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-header .ic-type-badge.shrine-pilgrim-register-badge{min-width:68px!important;max-width:none!important;}
-html:not(.ios-device).oai-screen-compact-short #app #info-card .ic-header .ic-type-badge.shrine-pilgrim-visited{min-width:78px!important;max-width:none!important;}
 html:not(.ios-device).oai-screen-compact-short #app .shrine-visit-detail-info-head{gap:7px!important;}
 html:not(.ios-device).oai-screen-compact-short #app .shrine-visit-cards-body.stats{
   padding-top:12px!important;
