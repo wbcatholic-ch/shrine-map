@@ -2617,7 +2617,9 @@
       if(trailState.hantiFollowActive){
         trailState.hantiLastGpsLat = lat; trailState.hantiLastGpsLng = lng; trailState.hantiLastHeading = heading;
       }
-      showHantiLocationGuide(lat, lng);
+      /* Manual 내위치 버튼은 현재 위치로 지도 중심과 마커만 이동한다.
+         한티가는길의 진행 안내/오버레이는 '경로 따라가기' watchPosition 흐름에서만 표시한다. */
+      if(!trailState.hantiFollowActive) clearHantiLocationGuideOverlay();
     }
     navigator.geolocation.getCurrentPosition(show, function(e){
       alert(e && e.code===1 ? '위치 권한을 허용해 주세요.' : '위치를 가져올 수 없습니다.');
