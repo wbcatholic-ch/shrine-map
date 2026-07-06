@@ -1212,6 +1212,7 @@
         trailState.hantiLastGpsLat = lat;
         trailState.hantiLastGpsLng = lng;
         trailState.hantiLastHeading = heading;
+        trailState.hantiLastGpsAt = hantiNow();
         if(first){
           centerHantiMapOnLatLng(lat, lng, {level:4});
         }else if(shouldHantiAutoPanFollow()){
@@ -1674,7 +1675,7 @@
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
   const RETURN_KEY = 'catholic_integrated_return_v2';
-  const trailState = {inited:false, map:null, trailZoomControl:null, trailZoomControlVisible:true, markers:[], selected:-1, myOverlay:null, view:'map', pendingOpenIndex:null, restoreCenter:null, restoreLevel:null, needsHardReset:false, pendingFitBounds:false, hantiPolylines:[], hantiProgressPolylines:[], hantiRouteDirectionOverlays:[], hantiStampOverlays:[], hantiGpsTracePolyline:null, hantiGpsTracePoints:[], hantiShowGpsTrace:true, hantiVisible:false, hantiLocationOverlay:null, hantiRouteActive:false, hantiRouteViewMode:false, hantiRouteReverse:false, hantiReturnTrailIndex:-1, hantiSecretTitleReady:false, hantiActiveRouteData:null, hantiActiveRouteId:'', hantiFollowWatchId:null, hantiFollowActive:false, hantiLastRoutePointIndex:null, hantiLastProgressM:0, hantiArrivedStampIds:{}, hantiLastGpsLat:null, hantiLastGpsLng:null, hantiLastHeading:0, hantiAutoPanPaused:false, hantiAutoPanHoldUntil:0, hantiAutoPanResumeTimer:0, hantiProgrammaticMoveUntil:0, hantiMapInteractionBound:false, hantiTestUnlocked:false, hantiTestClosed:false, hantiTestTapCount:0, hantiTestTapStartedAt:0};
+  const trailState = {inited:false, map:null, trailZoomControl:null, trailZoomControlVisible:true, markers:[], selected:-1, myOverlay:null, view:'map', pendingOpenIndex:null, restoreCenter:null, restoreLevel:null, needsHardReset:false, pendingFitBounds:false, hantiPolylines:[], hantiProgressPolylines:[], hantiRouteDirectionOverlays:[], hantiStampOverlays:[], hantiGpsTracePolyline:null, hantiGpsTracePoints:[], hantiShowGpsTrace:true, hantiVisible:false, hantiLocationOverlay:null, hantiRouteActive:false, hantiRouteViewMode:false, hantiRouteReverse:false, hantiReturnTrailIndex:-1, hantiSecretTitleReady:false, hantiActiveRouteData:null, hantiActiveRouteId:'', hantiFollowWatchId:null, hantiFollowActive:false, hantiLastRoutePointIndex:null, hantiLastProgressM:0, hantiArrivedStampIds:{}, hantiLastGpsLat:null, hantiLastGpsLng:null, hantiLastGpsAt:0, hantiLastHeading:0, trailMyLocRequestId:0, hantiAutoPanPaused:false, hantiAutoPanHoldUntil:0, hantiAutoPanResumeTimer:0, hantiProgrammaticMoveUntil:0, hantiMapInteractionBound:false, hantiTestUnlocked:false, hantiTestClosed:false, hantiTestTapCount:0, hantiTestTapStartedAt:0};
   const webState = {built:false, curCat:'⭐ 즐겨찾기'};
   const WEB_FAV_KEY = 'web_favorites_v1';
   const MY_DIOCESE_KEY = 'oai_my_diocese_name';
@@ -2611,8 +2612,43 @@
   window.trailMyLoc = function(){
     if(!(window.navigator && navigator.geolocation)){ alert('위치 서비스를 지원하지 않습니다.'); return; }
     if(!(trailState.map && window.kakao && window.kakao.maps)){ initTrailModule(); return; }
-    function show(pos){
-      const lat = pos.coords.latitude, lng = pos.coords.longitude;
+
+    var reqId = (Number(trailState.trailMyLocRequestId || 0) + 1);
+    trailState.trailMyLocRequestId = reqId;
+    var accepted = false;
+    var finished = false;
+    var fallbackTimer = 0;
+    var locBtn = ig$('trail-loc-btn');
+    var oldLocHtml = locBtn ? locBtn.innerHTML : '';
+    function setBusy(on){
+      try{
+        if(!locBtn) locBtn = ig$('trail-loc-btn');
+        if(!locBtn) return;
+        locBtn.setAttribute('aria-busy', on ? 'true' : 'false');
+        if(on){ locBtn.innerHTML = '<span aria-hidden="true">📍</span><span>위치중</span>'; }
+        else if(oldLocHtml){ locBtn.innerHTML = oldLocHtml; }
+        else { locBtn.innerHTML = '<span aria-hidden="true">📍</span><span>내위치</span>'; }
+      }catch(_e){}
+    }
+    function isCurrentReq(){ return trailState && trailState.trailMyLocRequestId === reqId; }
+    function finish(){
+      if(!isCurrentReq()) return;
+      finished = true;
+      try{ if(fallbackTimer) clearTimeout(fallbackTimer); }catch(_e){}
+      setBusy(false);
+    }
+    function isAcceptableQuickFix(pos){
+      try{
+        if(!(pos && pos.coords)) return false;
+        var acc = Number(pos.coords.accuracy);
+        var age = Math.abs(hantiNow() - Number(pos.timestamp || 0));
+        return Number.isFinite(acc) && acc <= 100 && Number.isFinite(age) && age <= 7000;
+      }catch(_e){ return false; }
+    }
+    function paint(pos, source){
+      if(!isCurrentReq() || !(pos && pos.coords)) return false;
+      const lat = Number(pos.coords.latitude), lng = Number(pos.coords.longitude);
+      if(!Number.isFinite(lat) || !Number.isFinite(lng)) return false;
       const ll = new kakao.maps.LatLng(lat, lng);
       if(trailState && trailState.hantiFollowActive){
         resumeHantiAutoPanNow('my-location-button');
@@ -2627,16 +2663,54 @@
       trailState.myOverlay = new kakao.maps.CustomOverlay({content:dot, position:ll, yAnchor:.5, zIndex:100});
       trailState.myOverlay.setMap(trailState.map);
       if(trailState.hantiFollowActive){
-        trailState.hantiLastGpsLat = lat; trailState.hantiLastGpsLng = lng; trailState.hantiLastHeading = heading;
+        trailState.hantiLastGpsLat = lat;
+        trailState.hantiLastGpsLng = lng;
+        trailState.hantiLastGpsAt = hantiNow();
+        trailState.hantiLastHeading = heading;
       }
       /* Manual 내위치 버튼은 현재 위치로 지도 중심과 마커만 이동한다.
          한티가는길의 진행 안내/오버레이는 '경로 따라가기' watchPosition 흐름에서만 표시한다. */
       if(!trailState.hantiFollowActive) clearHantiLocationGuideOverlay();
+      accepted = true;
+      return true;
     }
-    navigator.geolocation.getCurrentPosition(show, function(e){
+
+    setBusy(true);
+
+    /* V8-1-14-592: 기존에는 maximumAge:60000 저정확 위치를 먼저 표시한 뒤
+       고정밀 GPS가 늦게 도착하면서 지도가 엉뚱한 곳에서 현재 위치로 다시 이동했다.
+       수동 내위치는 오래된 캐시를 먼저 쓰지 않고, 따라가기 중에는 watchPosition의
+       최신 좌표만 즉시 재사용한 뒤 신선한 GPS로 보정한다. */
+    if(trailState.hantiFollowActive &&
+       Number.isFinite(Number(trailState.hantiLastGpsLat)) &&
+       Number.isFinite(Number(trailState.hantiLastGpsLng)) &&
+       hantiNow() - Number(trailState.hantiLastGpsAt || 0) <= 10000){
+      try{
+        resumeHantiAutoPanNow('my-location-button-cached-follow');
+        accepted = true;
+      }catch(_e){}
+    }
+
+    fallbackTimer = setTimeout(function(){
+      if(!isCurrentReq() || finished || accepted) return;
+      try{
+        navigator.geolocation.getCurrentPosition(function(pos){
+          if(!isCurrentReq() || finished || accepted) return;
+          if(isAcceptableQuickFix(pos)) paint(pos, 'quick-current');
+        }, function(){}, {enableHighAccuracy:false, timeout:3000, maximumAge:0});
+      }catch(_e){}
+    }, 1700);
+
+    navigator.geolocation.getCurrentPosition(function(pos){
+      if(!isCurrentReq()) return;
+      paint(pos, 'fresh-high-accuracy');
+      finish();
+    }, function(e){
+      if(!isCurrentReq()) return;
+      if(accepted){ finish(); return; }
+      finish();
       alert(e && e.code===1 ? '위치 권한을 허용해 주세요.' : '위치를 가져올 수 없습니다.');
-    }, {enableHighAccuracy:false, timeout:5000, maximumAge:60000});
-    navigator.geolocation.getCurrentPosition(show, function(){}, {enableHighAccuracy:true, timeout:12000, maximumAge:0});
+    }, {enableHighAccuracy:true, timeout:7000, maximumAge:3000});
   };
 
   document.addEventListener('DOMContentLoaded', function(){
