@@ -526,7 +526,7 @@ html.retreat-mode #tab-list-lbl {
 .leg-row:last-child { margin-bottom: 0; }
 .leg-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
 
-/* V8-1-14-599 allcheck step4: non-cover inline visual styles moved to CSS owners. */
+/* V8-1-14-601 allcheck step4: non-cover inline visual styles moved to CSS owners. */
 #loc-btn .loc-btn-text{font-size:12px;}
 .leg-dot-shrine{background:var(--shrine);}
 .leg-dot-pilgrim{background:var(--pilgrim);}
@@ -1447,7 +1447,7 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active {
 .ic-hp-btn { background: #1b7a3e; color: var(--v4-surface-white); border: none; }
 .ic-guide-btn { background: #fff3c4; color: #6c4a00; border: 1px solid #e1bd59; }
 .ic-goodnews-btn { background: #e8f7ff; color: #075985; border: 1px solid #66bdf2; }
-/* V8-1-14-599: info-card row/child layout is owned by the scoped #app #info-card block below. */
+/* V8-1-14-601: info-card row/child layout is owned by the scoped #app #info-card block below. */
 .btn-kakao-nav {
   display: flex;
   align-items: center;
@@ -1470,7 +1470,7 @@ html.retreat-mode #srch-modal #sm-tab-bar .sm-tab.active {
 .btn-kakao-nav:active { opacity: .85; }
 
 
-/* V8-1-14-599: info-card layout/button owner block.
+/* V8-1-14-601: info-card layout/button owner block.
    성지·성당·피정 공통 인포카드의 버튼 행, 버튼 크기, 색상은 여기에서만 관리한다. */
 #app #info-card .ic-btn-row,
 #app #info-card .ic-links,
@@ -1611,7 +1611,7 @@ html.retreat-mode:not(.ios-device) #app #info-card{
 }
 html.parish-mode:not(.ios-device) #app #info-card .ic-body,
 html.retreat-mode:not(.ios-device) #app #info-card .ic-body{
-  /* V8-1-14-599: 성당·피정 정보카드는 카카오내비 아래와 화면 끝 사이에 12px 숨구멍을 둔다. */
+  /* V8-1-14-601: 성당·피정 정보카드는 카카오내비 아래와 화면 끝 사이에 12px 숨구멍을 둔다. */
   padding-bottom:12px!important;
 }
 html.parish-mode:not(.ios-device) #app #info-card .ic-kakao-row,
@@ -1646,7 +1646,7 @@ html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-kakao-nav{
   border-radius:9px!important;
 }
 
-/* V8-1-14-599: route sheet top/bottom spacing owner. */
+/* V8-1-14-601: route sheet top/bottom spacing owner. */
 #sheet-route #rs-top { padding:10px 10px 0 12px!important; flex-shrink:0; }
 #app #sheet-route #rs-bottom { padding:0 12px 10px!important; }
 #sheet-route #rs-top .rs-action-row{
@@ -1754,7 +1754,7 @@ html:not(.ios-device).oai-screen-compact-short #sheet-route .rs-x {
 .rs-waypoint-end-tools { grid-column: 2; grid-row: 3 / 6; align-self: stretch; }
 .rs-waypoint2-end-tools { grid-column: 2; grid-row: 5 / 8; align-self: stretch; }
 .rs-waypoint3-end-tools { grid-column: 2; grid-row: 7 / 10; align-self: stretch; }
-/* V8-1-14-599: +경유지는 항상 경로검색 줄 오른쪽의 단일 버튼만 사용한다.
+/* V8-1-14-601: +경유지는 항상 경로검색 줄 오른쪽의 단일 버튼만 사용한다.
    2번째/3번째 추가도 #rs-add-waypoint-btn이 다음 경유지 역할을 받아 같은 위치에서 실행한다. */
 .rs-route-stack .rs-add-waypoint2-btn,
 .rs-route-stack .rs-add-waypoint3-btn,
@@ -2010,7 +2010,7 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, var(--v4-retreat
 
 #missa-frame { flex: 1 1 auto; min-height: 0; width: 100%; border: 0; background: #fffaf2; }
 
-/* V8-1-14-599: 매일미사 iframe 전용 진입/복귀 보호창.
+/* V8-1-14-601: 매일미사 iframe 전용 진입/복귀 보호창.
    진입·복귀 보호는 유지하되 오래 붙잡지 않고, 종료 순간은 짧은 fade로 번쩍임을 줄인다. */
 #oai-missa-portal-guard{
   position:fixed!important;
@@ -3211,10 +3211,10 @@ html.oai-font-global .pr-title { font-size: var(--app-fs-title); line-height: 1.
 html.oai-font-global .pr-content-card { font-size: var(--app-fs-body); line-height: 2.05; }
 
 html.oai-font-global .trail-tab { font-size: calc(15px * var(--app-inner-font-scale)); }
-/* V8-1-14-599 step6: trail route button font sizes are owned by the final non-cover font-global block below. */
+/* V8-1-14-601 step6: trail route button font sizes are owned by the final non-cover font-global block below. */
 html.oai-font-global .pr-icon-dot { width: calc(36px * var(--app-inner-font-scale)); height: calc(36px * var(--app-inner-font-scale)); flex-basis: calc(36px * var(--app-inner-font-scale)); font-size: calc(17px * var(--app-inner-font-scale)); }
 html.oai-font-global .sheet-title { font-size: calc(18px * var(--app-inner-font-scale)); }
-/* V8-1-14-599 step22: module bar sub/icon final values are owned by the non-cover font-global block below. */
+/* V8-1-14-601 step22: module bar sub/icon final values are owned by the non-cover font-global block below. */
 html.oai-font-global .lv-rg, html.oai-font-global .lv-det, html.oai-font-global .lv-op,
 html.oai-font-global .c-gw, html.oai-font-global .c-rg, html.oai-font-global .c-lbl,
 html.oai-font-global .dd, html.oai-font-global .sg { font-size: calc(12px * var(--app-inner-font-scale)); line-height: 1.45; }
@@ -3222,11 +3222,11 @@ html.oai-font-global .dd, html.oai-font-global .sg { font-size: calc(12px * var(
 html.oai-font-global #cover .cover-subtitle { font-size: 16px; }
 html.oai-font-global #cover .cover-name { font-size: calc(16px * var(--app-font-scale)); }
 html.oai-font-global #cover .cover-emoji { font-size: var(--cover-emoji-size, 40px); background: transparent; box-shadow: none; }
-/* V8-1-14-599 step22: module bar title final values are owned by the non-cover font-global block below. */
+/* V8-1-14-601 step22: module bar title final values are owned by the non-cover font-global block below. */
 
 html.oai-font-global #region-body .nearby-item,
 html.oai-font-global #region-body .region-place-cand { font-size: calc(16px * var(--app-inner-font-scale)); }
-/* V8-1-14-599 step6: region item name/address/type/distance font sizes are owned by the final non-cover font-global block below. */
+/* V8-1-14-601 step6: region item name/address/type/distance font sizes are owned by the final non-cover font-global block below. */
 html.oai-font-global #region-body .nearby-num { font-size: calc(13px * var(--app-inner-font-scale)); }
 html.oai-font-global #region-body .region-list-hd,
 html.oai-font-global #region-body .dio-hd { font-size: calc(17px * var(--app-inner-font-scale)); line-height: 1.35; font-weight: 900; }
@@ -3512,7 +3512,7 @@ html.retreat-mode #list-body .li-dot{
   color:var(--v4-text-muted)!important;
 }
 
-/* V8-1-14-599: info-card typography moved to the owner block above. */
+/* V8-1-14-601: info-card typography moved to the owner block above. */
 
 #cover #oai-build-marker {
   display: none !important;
@@ -3868,7 +3868,7 @@ html.oai-font-global .li-pilgrim-register{font-size:calc(12px * var(--app-inner-
 .shrine-visit-map-filter button[data-shrine-visit-filter="unvisited"]{min-width:0}
 
 
-/* V8-1-14-599: info-card meta/distance layout moved to the owner block above. */
+/* V8-1-14-601: info-card meta/distance layout moved to the owner block above. */
 #info-card .ic-header .ic-type-badge.shrine-pilgrim-register-badge{max-width:none!important;min-width:72px!important;height:30px!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;padding:0 10px!important;border-radius:999px!important;background:#dff3ff!important;color:#075985!important;border:2px solid #0284c7!important;font-size:12px!important;font-weight:900!important;box-shadow:0 1px 5px rgba(2,132,199,.18)!important;cursor:pointer!important;touch-action:manipulation!important}
 #info-card .ic-header .ic-type-badge.shrine-pilgrim-register-badge:active{background:#c7e9ff!important;transform:translateY(1px)}
 
@@ -3879,7 +3879,7 @@ html.oai-font-global .shrine-visit-cards-btn{font-size:calc(12px * var(--app-inn
 .shrine-visit-cards-btn{position:absolute;right:12px;top:12px;z-index:37;display:none;height:34px;padding:0 12px;border-radius:999px;border:1px solid #d4aa6a;background:#fff3c4;color:#6c4a00;font-size:12px;font-weight:900;box-shadow:0 3px 12px rgba(0,0,0,.16);font-family:inherit;touch-action:manipulation}
 .shrine-visit-cards-btn.show{display:inline-flex;align-items:center;justify-content:center}
 .shrine-visit-cards-btn:active{transform:translateY(1px);filter:brightness(.96)}
-/* V8-1-14-599: shrine-visit stampbook modal/card body ownership moved to the full-screen owner blocks below. */
+/* V8-1-14-601: shrine-visit stampbook modal/card body ownership moved to the full-screen owner blocks below. */
 
 #info-card .ic-header .ic-type-badge.shrine-pilgrim-visited:active{transform:translateY(1px);filter:brightness(.94)}
 
@@ -5622,7 +5622,7 @@ html.oai-font-global #app #info-card .ic-parish-mass-notice-text{
 }
 
 
-/* V8-1-14-599: 길찾기 탭 활성 중에는 장소 정보카드를 강제로 숨겨
+/* V8-1-14-601: 길찾기 탭 활성 중에는 장소 정보카드를 강제로 숨겨
    경로검색 시트와 겹치지 않게 한다. */
 html.route-tab-active #info-card,
 html.route-tab-active #info-card.open{

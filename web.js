@@ -410,47 +410,6 @@
       ig$('trail-sheet')?.classList.add('open');
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
-  function restoreHantiFollowFromBackground(reason){
-    var state = getSavedHantiFollowResumeState();
-    if(!state && trailState && trailState.hantiFollowActive) state = buildHantiFollowResumeState(reason || 'runtime-restore');
-    if(!(state && state.followActive)) return false;
-    try{
-      var data = getHantiRouteDataById(state.routeId);
-      if(!data) return false;
-      if(!ig$('trail-view')?.classList.contains('open')) enterIntegratedView('trail-view');
-      trailState.view = 'map';
-      trailState.pendingFitBounds = false;
-      trailState.restoreCenter = state.center || null;
-      trailState.restoreLevel = state.level || null;
-      trailState.hantiReturnTrailIndex = Number.isFinite(Number(state.returnTrailIndex)) ? Number(state.returnTrailIndex) : getHantiMainTrailIndex();
-      trailState.hantiShowGpsTrace = state.showGpsTrace !== false;
-      trailState.hantiRouteReverse = !!state.routeReverse;
-      initTrailModule();
-      trailSetView('map');
-      setTimeout(function(){
-        try{
-          if(!(trailState && trailState.map && window.kakao && kakao.maps)) return;
-          openHantiFullRoute(data, {source:'background-resume', noFitBounds:true});
-          trailState.hantiLastRoutePointIndex = Number.isFinite(Number(state.lastRoutePointIndex)) ? Number(state.lastRoutePointIndex) : null;
-          trailState.hantiLastProgressM = Number.isFinite(Number(state.lastProgressM)) ? Number(state.lastProgressM) : 0;
-          trailState.hantiArrivedStampIds = state.arrivedStampIds || {};
-          try{ Object.keys(trailState.hantiArrivedStampIds || {}).forEach(markHantiStampOverlayArrived); }catch(_e){}
-          if(Number.isFinite(Number(trailState.hantiLastRoutePointIndex))){
-            var resumeRouteInfo = {pointIndex:Number(trailState.hantiLastRoutePointIndex), progressM:Number(trailState.hantiLastProgressM || 0), routeReverse:!!trailState.hantiRouteReverse};
-            drawHantiProgressToIndex(resumeRouteInfo);
-            updateHantiRouteDirectionArrows(resumeRouteInfo);
-          }
-          restoreMapViewFromHantiState(state);
-          closeTrailSheetOnly();
-          startHantiGpxFollow({resume:true, silent:true, backgroundResume:true});
-          saveHantiFollowResumeState('background-restored-route-screen');
-          try{ relayoutTrailMap(120, 'hanti-background-resume'); }catch(_e){}
-        }catch(e){ console.warn('[가톨릭길동무]', e); }
-      }, 140);
-      return true;
-    }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
-  }
-
   function stabilizeHantiGpsAfterBackground(reason){
     try{
       if(!(trailState && trailState.hantiFollowActive)) return false;
@@ -465,8 +424,6 @@
 
   try{
     window.oaiSaveHantiBackgroundRouteState = saveHantiFollowResumeState;
-    window.oaiShouldKeepHantiRouteOnBackgroundReturn = hasHantiFollowResumeState;
-    window.oaiRestoreHantiBackgroundRouteResume = restoreHantiFollowFromBackground;
     window.oaiClearHantiBackgroundRouteResume = clearHantiFollowResumeState;
     window.oaiStabilizeHantiGpsAfterBackground = stabilizeHantiGpsAfterBackground;
   }catch(_e){}
@@ -2029,24 +1986,6 @@
     }, 0);
   });
 
-  function scheduleHantiFollowBackgroundRestore(reason){
-    try{
-      if(!hasHantiFollowResumeState()) return;
-      setTimeout(function(){ restoreHantiFollowFromBackground(reason || 'background-visible'); }, 180);
-    }catch(e){ console.warn('[가톨릭길동무]', e); }
-  }
-  document.addEventListener('visibilitychange', function(){
-    try{
-      if(document.visibilityState === 'hidden') saveHantiFollowResumeState('visibility-hidden');
-      else scheduleHantiFollowBackgroundRestore('visibility-visible');
-    }catch(e){ console.warn('[가톨릭길동무]', e); }
-  }, {passive:true});
-  window.addEventListener('pagehide', function(){
-    try{ saveHantiFollowResumeState('pagehide'); }catch(e){ console.warn('[가톨릭길동무]', e); }
-  }, {passive:true});
-  window.addEventListener('pageshow', function(){
-    scheduleHantiFollowBackgroundRestore('pageshow');
-  }, {passive:true});
 
   function resetWebTransientState(){
     try{ sessionStorage.removeItem(RETURN_KEY); }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -2691,7 +2630,7 @@
 
     setBusy(true);
 
-    /* V8-1-14-599: 기존에는 maximumAge:60000 저정확 위치를 먼저 표시한 뒤
+    /* V8-1-14-601: 기존에는 maximumAge:60000 저정확 위치를 먼저 표시한 뒤
        고정밀 GPS가 늦게 도착하면서 지도가 엉뚱한 곳에서 현재 위치로 다시 이동했다.
        수동 내위치는 오래된 캐시를 먼저 쓰지 않고, 따라가기 중에는 watchPosition의
        최신 좌표만 즉시 재사용한 뒤 신선한 GPS로 보정한다. */
