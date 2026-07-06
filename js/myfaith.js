@@ -955,7 +955,7 @@
       sec.appendChild(toggle);
       var note=document.createElement('p');
       note.className='my-faith-data-toggle-note';
-      note.textContent='즐겨찾기·순례 스탬프·나의 신앙생활 설정을 백업하고, 앱 삭제나 기기 변경 후 다시 복원할 수 있습니다.';
+      note.textContent='앱을 삭제하거나 휴대폰을 교체할 때 사용합니다.';
       sec.appendChild(note);
       return sec;
     }
