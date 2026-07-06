@@ -710,6 +710,21 @@
     }
     return false;
   }
+  function shouldHantiFollowPanTo(lat, lng){
+    if(!trailState) return true;
+    var now = hantiNow();
+    var lastAt = Number(trailState.hantiLastPanAt || 0);
+    var lastLat = Number(trailState.hantiLastPanLat);
+    var lastLng = Number(trailState.hantiLastPanLng);
+    if(lastAt && Number.isFinite(lastLat) && Number.isFinite(lastLng)){
+      var moved = hantiDistanceMeters(lastLat, lastLng, lat, lng);
+      if(now - lastAt < 1600 && Number.isFinite(moved) && moved < 16) return false;
+    }
+    trailState.hantiLastPanAt = now;
+    trailState.hantiLastPanLat = Number(lat);
+    trailState.hantiLastPanLng = Number(lng);
+    return true;
+  }
   function bindHantiRouteMapInteractionHandlers(){
     try{
       if(!(trailState && trailState.map && window.kakao && kakao.maps) || trailState.hantiMapInteractionBound) return;
@@ -984,11 +999,18 @@
   }
   function renderHantiGpsTrace(){
     if(!(trailState && trailState.map && window.kakao && kakao.maps)) return;
-    clearHantiGpsTraceOverlay();
     if(!trailState.hantiShowGpsTrace) return;
     var pts = trailState.hantiGpsTracePoints || [];
     if(pts.length < 2) return;
     var path = pts.map(function(p){ return new kakao.maps.LatLng(Number(p.lat), Number(p.lng)); });
+    if(trailState.hantiGpsTracePolyline && typeof trailState.hantiGpsTracePolyline.setPath === 'function'){
+      try{
+        trailState.hantiGpsTracePolyline.setPath(path);
+        trailState.hantiGpsTracePolyline.setMap(trailState.map);
+        return;
+      }catch(_e){}
+    }
+    clearHantiGpsTraceOverlay();
     trailState.hantiGpsTracePolyline = new kakao.maps.Polyline({
       map: trailState.map, path:path,
       strokeWeight:3, strokeColor:'#2563EB', strokeOpacity:.78,
@@ -1001,7 +1023,7 @@
     if(!Number.isFinite(lat) || !Number.isFinite(lng)) return;
     var pts = trailState.hantiGpsTracePoints || (trailState.hantiGpsTracePoints = []);
     var last = pts.length ? pts[pts.length - 1] : null;
-    if(!last || hantiDistanceMeters(last.lat, last.lng, lat, lng) >= 3){
+    if(!last || hantiDistanceMeters(last.lat, last.lng, lat, lng) >= 10){
       pts.push({lat:lat, lng:lng, at:Date.now()});
       if(pts.length > 2000) pts.splice(0, pts.length - 2000);
       renderHantiGpsTrace();
@@ -1176,17 +1198,35 @@
       showHantiLocationGuide(lat, lng, {follow:true, routeInfo:routeInfo});
       try{
         var ll = new kakao.maps.LatLng(lat, lng);
-        if(trailState.myOverlay) trailState.myOverlay.setMap(null);
-        var dot = buildTrailMyLocationElement(heading, true);
-        trailState.myOverlay = new kakao.maps.CustomOverlay({content:dot, position:ll, yAnchor:.5, zIndex:100});
-        trailState.myOverlay.setMap(trailState.map);
+        var dot = trailState.myOverlayEl || null;
+        if(!dot || !trailState.myOverlay){
+          dot = buildTrailMyLocationElement(heading, true);
+          trailState.myOverlayEl = dot;
+          if(trailState.myOverlay) trailState.myOverlay.setMap(null);
+          trailState.myOverlay = new kakao.maps.CustomOverlay({content:dot, position:ll, yAnchor:.5, zIndex:100});
+          trailState.myOverlay.setMap(trailState.map);
+        }else{
+          try{
+            dot.style.setProperty('--hanti-bearing', (Number.isFinite(Number(heading)) ? Number(heading) : 0).toFixed(1) + 'deg');
+            dot.classList.add('follow');
+            if(typeof trailState.myOverlay.setPosition === 'function') trailState.myOverlay.setPosition(ll);
+            else { trailState.myOverlay.setMap(null); trailState.myOverlay = new kakao.maps.CustomOverlay({content:dot, position:ll, yAnchor:.5, zIndex:100}); }
+            trailState.myOverlay.setMap(trailState.map);
+          }catch(_e){
+            try{ if(trailState.myOverlay) trailState.myOverlay.setMap(null); }catch(__e){}
+            dot = buildTrailMyLocationElement(heading, true);
+            trailState.myOverlayEl = dot;
+            trailState.myOverlay = new kakao.maps.CustomOverlay({content:dot, position:ll, yAnchor:.5, zIndex:100});
+            trailState.myOverlay.setMap(trailState.map);
+          }
+        }
         trailState.hantiLastGpsLat = lat;
         trailState.hantiLastGpsLng = lng;
         trailState.hantiLastHeading = heading;
         trailState.hantiLastGpsAt = hantiNow();
         if(first){
           centerHantiMapOnLatLng(lat, lng, {level:4});
-        }else if(shouldHantiAutoPanFollow()){
+        }else if(shouldHantiAutoPanFollow() && shouldHantiFollowPanTo(lat,lng)){
           centerHantiMapOnLatLng(lat, lng, {level:4});
         }
         first = false;
@@ -1476,6 +1516,37 @@
     try{ if(trailState && trailState.hantiLocationOverlay) trailState.hantiLocationOverlay.setMap(null); }catch(_e){}
     if(trailState) trailState.hantiLocationOverlay = null;
   }
+  function shouldUpdateHantiFollowVisual(routeInfo){
+    if(!(trailState && routeInfo)) return true;
+    var now = Date.now ? Date.now() : new Date().getTime();
+    var idx = Number(routeInfo.pointIndex);
+    var lastIdx = Number(trailState.hantiLastVisualRoutePointIndex);
+    var lastAt = Number(trailState.hantiLastVisualRouteAt || 0);
+    if(!Number.isFinite(idx) || !Number.isFinite(lastIdx) || !lastAt){
+      trailState.hantiLastVisualRoutePointIndex = idx;
+      trailState.hantiLastVisualRouteAt = now;
+      return true;
+    }
+    if(Math.abs(idx - lastIdx) >= 8 || now - lastAt >= 1800){
+      trailState.hantiLastVisualRoutePointIndex = idx;
+      trailState.hantiLastVisualRouteAt = now;
+      return true;
+    }
+    return false;
+  }
+  function shouldUpdateHantiGuideOverlay(routeInfo, forceVisual){
+    if(!(trailState && routeInfo)) return true;
+    var now = Date.now ? Date.now() : new Date().getTime();
+    var idx = Number(routeInfo.pointIndex);
+    var lastIdx = Number(trailState.hantiLastGuideRoutePointIndex);
+    var lastAt = Number(trailState.hantiLastGuideOverlayAt || 0);
+    if(forceVisual || !trailState.hantiLocationOverlay || !lastAt || !Number.isFinite(idx) || !Number.isFinite(lastIdx) || Math.abs(idx-lastIdx)>=8 || now-lastAt>=1200){
+      trailState.hantiLastGuideRoutePointIndex = idx;
+      trailState.hantiLastGuideOverlayAt = now;
+      return true;
+    }
+    return false;
+  }
   function showHantiLocationGuide(lat, lng, opts){
     opts = opts || {};
     if(!(trailState && trailState.hantiVisible && trailState.map && window.kakao && kakao.maps)) return;
@@ -1496,9 +1567,10 @@
     var status = routeInfo ? hantiRouteStatusLabel(routeInfo.distanceM) : '';
     var progress = routeInfo && Number.isFinite(routeInfo.progressRate) ? Math.max(0, Math.min(100, routeInfo.progressRate * 100)) : null;
     var newlyArrived = [];
+    var updateFollowVisual = !opts.follow || shouldUpdateHantiFollowVisual(routeInfo);
     if(opts.follow){
-      appendHantiGpsTracePoint(lat, lng);
-      if(routeInfo){
+      if(updateFollowVisual) appendHantiGpsTracePoint(lat, lng);
+      if(routeInfo && updateFollowVisual){
         drawHantiProgressToIndex(routeInfo);
         updateHantiRouteDirectionArrows(routeInfo);
       }
@@ -1515,6 +1587,7 @@
       msg += ' / 자동도장 OFF';
       setTrailHantiNote(msg);
     }
+    if(!shouldUpdateHantiGuideOverlay(routeInfo, updateFollowVisual)) return;
     clearHantiLocationGuideOverlay();
     var el = document.createElement('div');
     el.className = 'hanti-location-guide' + (opts.test ? ' test' : '');
@@ -2297,30 +2370,49 @@
   function syncTrailMarkers(){
     if(!(trailState.map && window.kakao && window.kakao.maps)) return;
     if(trailState.markers.length !== TRAIL_ITEMS.length){
+      if(trailState.trailMarkerBuildInProgress) return;
       trailState.markers.forEach(function(marker){ try{ marker.setMap(null); }catch(e){ console.warn("[가톨릭길동무]", e); } });
       trailState.markers = [];
-      TRAIL_ITEMS.forEach(function(d, i){
-        const marker = new kakao.maps.Marker({
-          position:new kakao.maps.LatLng(d.lat,d.lng),
-          map:trailState.map,
-          image:trailMarkerImg(i,false),
-          zIndex:1
-        });
-        marker.__trailMapTarget=trailState.map;
-        marker.__trailImgKey='trail:'+String(i)+':0';
-        marker.__trailZIndex=1;
-        kakao.maps.event.addListener(marker, 'click', function(){ trailSelectMarker(i); trailOpenSheet(i); });
-        trailState.markers.push(marker);
-      });
+      trailState.trailMarkerBuildInProgress = true;
+      var iBuild = 0;
+      var batchBuild = 10;
+      (function buildTrailMarkerBatch(){
+        if(!(trailState.map && window.kakao && window.kakao.maps)){ trailState.trailMarkerBuildInProgress=false; return; }
+        var end = Math.min(iBuild + batchBuild, TRAIL_ITEMS.length);
+        for(; iBuild < end; iBuild++){
+          const d = TRAIL_ITEMS[iBuild];
+          const i = iBuild;
+          const marker = new kakao.maps.Marker({
+            position:new kakao.maps.LatLng(d.lat,d.lng),
+            map:trailState.map,
+            image:trailMarkerImg(i,false),
+            zIndex:1
+          });
+          marker.__trailMapTarget=trailState.map;
+          marker.__trailImgKey='trail:'+String(i)+':0';
+          marker.__trailZIndex=1;
+          kakao.maps.event.addListener(marker, 'click', function(){ trailSelectMarker(i); trailOpenSheet(i); });
+          trailState.markers.push(marker);
+        }
+        if(iBuild < TRAIL_ITEMS.length) setTimeout(function(){ requestAnimationFrame(buildTrailMarkerBatch); }, 8);
+        else trailState.trailMarkerBuildInProgress = false;
+      })();
       return;
     }
-    trailState.markers.forEach(function(marker, i){
-      trailSetMarkerMap(marker, trailState.map);
-      if(i !== trailState.selected){
-        trailSetMarkerImage(marker, trailMarkerImg(i,false), 'trail:'+String(i)+':0');
-        try{ if(marker.__trailZIndex!==1){ marker.setZIndex(1); marker.__trailZIndex=1; } }catch(e){ console.warn("[가톨릭길동무]", e); }
+    var i=0, batch=12;
+    (function applyTrailMarkerBatch(){
+      if(!(trailState.map && window.kakao && window.kakao.maps)) return;
+      var end=Math.min(i+batch, trailState.markers.length);
+      for(; i<end; i++){
+        var marker=trailState.markers[i];
+        trailSetMarkerMap(marker, trailState.map);
+        if(i !== trailState.selected){
+          trailSetMarkerImage(marker, trailMarkerImg(i,false), 'trail:'+String(i)+':0');
+          try{ if(marker.__trailZIndex!==1){ marker.setZIndex(1); marker.__trailZIndex=1; } }catch(e){ console.warn("[가톨릭길동무]", e); }
+        }
       }
-    });
+      if(i<trailState.markers.length) setTimeout(function(){ requestAnimationFrame(applyTrailMarkerBatch); }, 8);
+    })();
     if(trailState.selected >= trailState.markers.length) trailState.selected = -1;
   }
 
@@ -2630,7 +2722,7 @@
 
     setBusy(true);
 
-    /* V8-1-14-604: 기존에는 maximumAge:60000 저정확 위치를 먼저 표시한 뒤
+    /* V8-1-14-606: 기존에는 maximumAge:60000 저정확 위치를 먼저 표시한 뒤
        고정밀 GPS가 늦게 도착하면서 지도가 엉뚱한 곳에서 현재 위치로 다시 이동했다.
        수동 내위치는 오래된 캐시를 먼저 쓰지 않고, 따라가기 중에는 watchPosition의
        최신 좌표만 즉시 재사용한 뒤 신선한 GPS로 보정한다. */
