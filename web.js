@@ -451,10 +451,24 @@
     }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
   }
 
+  function stabilizeHantiGpsAfterBackground(reason){
+    try{
+      if(!(trailState && trailState.hantiFollowActive)) return false;
+      if(document.visibilityState === 'hidden') return false;
+      var last = Number(trailState.hantiLastGpsAt || 0) || 0;
+      var stale = !last || (hantiNow() - last) > 12000;
+      if(!stale && trailState.hantiFollowWatchId != null) return false;
+      startHantiGpxFollow({resume:true, silent:true, backgroundResume:true});
+      return true;
+    }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
+  }
+
   try{
     window.oaiSaveHantiBackgroundRouteState = saveHantiFollowResumeState;
     window.oaiShouldKeepHantiRouteOnBackgroundReturn = hasHantiFollowResumeState;
     window.oaiRestoreHantiBackgroundRouteResume = restoreHantiFollowFromBackground;
+    window.oaiClearHantiBackgroundRouteResume = clearHantiFollowResumeState;
+    window.oaiStabilizeHantiGpsAfterBackground = stabilizeHantiGpsAfterBackground;
   }catch(_e){}
   function syncTrailLocButtonForSheet(open){
     try{
@@ -2677,7 +2691,7 @@
 
     setBusy(true);
 
-    /* V8-1-14-598: 기존에는 maximumAge:60000 저정확 위치를 먼저 표시한 뒤
+    /* V8-1-14-599: 기존에는 maximumAge:60000 저정확 위치를 먼저 표시한 뒤
        고정밀 GPS가 늦게 도착하면서 지도가 엉뚱한 곳에서 현재 위치로 다시 이동했다.
        수동 내위치는 오래된 캐시를 먼저 쓰지 않고, 따라가기 중에는 watchPosition의
        최신 좌표만 즉시 재사용한 뒤 신선한 GPS로 보정한다. */
