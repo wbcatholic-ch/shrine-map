@@ -1,0 +1,832 @@
+
+
+.trail-body { background: var(--v4-bg-ivory); }
+
+.trail-panel { position: relative; flex: 1; min-height: 0; display: none; overflow: hidden; }
+
+.trail-panel.on { display: flex; flex-direction: column; flex: 1 1 0; min-height: 0; }
+
+#trail-map { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+#trail-list > .trail-card { flex: 0 0 auto; min-height: 118px; width: 100%; display: block; }
+
+#trail-panel-list { display: none; flex-direction: column; flex: 1; min-height: 0; overflow: hidden; }
+
+#trail-panel-list.on { display: flex !important; }
+
+#trail-panel-map { flex: 1 1 0 !important; min-height: 0 !important; overflow: hidden !important; }
+
+.trail-card {
+  background: linear-gradient(180deg, #fffdfb, #faf5ee);
+  border-radius: 18px;
+  border: 1.25px solid #c8b79f;
+  box-shadow: 0 14px 30px rgba(24,32,51,.06);
+  overflow: hidden;
+  cursor: pointer;
+  transition: transform .12s;
+  display: block;
+  width: 100%;
+}
+
+.trail-card.app-pressing { transform: translateY(6px) scale(.982); filter: brightness(.96); }
+
+.trail-r1 { display: flex; align-items: center; gap: 7px; padding: 14px 16px 0; }
+
+.trail-card.trail-my-diocese-card {
+  border-color: var(--v4-brown) !important;
+  border-width: 2px !important;
+  box-shadow: 0 8px 18px rgba(183,121,31,.12), 0 2px 8px rgba(31,42,68,.07) !important;
+}
+
+.trail-my-diocese-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  margin-left: auto;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: #FFF3D8;
+  border: 1.5px solid rgba(183,121,31,.52);
+  color: #7A4F10;
+  font-size: 12px;
+  font-weight: 950;
+  line-height: 1.15;
+  letter-spacing: -.035em;
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+
+/* V8-1-14-563: 한티가는길은 제작 중이라 기존 카드 구조를 유지하고,
+   일반 순례길 카드만 이 블록에서 정리한다. */
+.trail-card.trail-general-card {
+  background: #fffdf8;
+  border-color: #d9cdbb;
+  border-width: 1.5px;
+  box-shadow: 0 8px 18px rgba(31,42,68,.06);
+}
+.trail-general-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 13px 15px 0;
+  min-width: 0;
+}
+.trail-general-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 15px 12px;
+  min-width: 0;
+}
+.trail-general-copy {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.trail-general-card .trail-nm {
+  font-size: 17px;
+  line-height: 1.3;
+  letter-spacing: -.04em;
+}
+.trail-general-region {
+  font-size: 12px;
+  line-height: 1.35;
+  color: var(--v4-text-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.trail-general-foot {
+  border-top: 1px solid #eef1f6;
+  padding: 10px 15px;
+  background: rgba(248,250,252,.78);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+.trail-general-open {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1.5px solid #1d4ed8;
+  background: #1d4ed8;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: -.04em;
+}
+
+.trail-bdg { font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 999px; color: var(--v4-surface-white); white-space: nowrap; flex-shrink: 0; }
+
+.trail-bdg.d { background: #1d4ed8; }
+
+.trail-bdg.l { background: #2a8040; }
+
+.trail-reg { font-size: 12px; color: var(--v4-text-muted); min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+.trail-r2 { display: flex; align-items: flex-start; gap: 12px; padding: 10px 16px 14px; }
+
+.trail-ico { width: 48px; height: 48px; flex-shrink: 0; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: inset 0 1px 0 rgba(255,255,255,.75); }
+
+.trail-ico.d { background: #eaf2ff; }
+
+.trail-ico.l { background: #eaf8f4; }
+
+.trail-nm { font-size: 18px; font-weight: 800; color: var(--v4-text-strong); word-break: keep-all; line-height: 1.35; }
+
+.trail-foot { border-top: 1px solid #f0f4fa; padding: 11px 16px; background: rgba(244,238,229,.72); display: flex; align-items: center; justify-content: space-between; }
+
+.trail-url { font-size: 11px; color: #2563eb; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
+
+.trail-arr { font-size: 14px; color: #94a3b8; flex-shrink: 0; margin-left: 6px; }
+
+.trail-loc-btn { position: absolute; right: 12px; bottom: calc(36px + env(safe-area-inset-bottom, 0)); z-index: 8; width: 56px; height: 56px; min-width: 56px; min-height: 56px; padding: 5px 4px; display: inline-flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; border-radius: 16px; background: #ffffff; border: 2px solid rgba(21,101,192,.34); box-shadow: 0 5px 14px rgba(0,0,0,.22); font-family: inherit; font-size: 19px; font-weight: 900; line-height: 1; color: #0e1535; cursor: pointer; box-sizing: border-box; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.trail-loc-btn span:last-child { font-size: 12px; font-weight: 900; line-height: 1.05; letter-spacing: -.04em; }
+
+/* V8-1-14-615: 순례길 하단 정보카드가 열릴 때 내위치 버튼이 카드 버튼을 가리지 않도록
+   실제 카드 높이만큼 지도 위로 올린다. 카드가 닫히면 기존 위치를 그대로 쓴다. */
+#trail-panel-map.trail-sheet-is-open > .trail-loc-btn {
+  bottom: calc(var(--trail-sheet-open-height, 0px) + 12px) !important;
+}
+
+.trail-sheet { position: absolute; left: 0; right: 0; bottom: 0; z-index: 6; background: linear-gradient(180deg, #fffdf9, #f6efe4); border-radius: 26px 26px 0 0; border-top: 1px solid #eadfce; box-shadow: 0 -16px 32px rgba(0,0,0,.18); padding: 0 0 calc(28px + env(safe-area-inset-bottom, 0)); transform: translateY(110%); transition: transform .25s cubic-bezier(.4,0,.2,1); pointer-events: none; overflow: visible; height: auto; }
+
+.trail-sheet.open { transform: none; pointer-events: all; }
+
+.trail-sh-handle { width: 36px; height: 4px; border-radius: 2px; background: #e8ecf3; margin: 10px auto 0; }
+
+.trail-sh-close { position: absolute; top: 12px; right: 14px; width: 30px; height: 30px; border-radius: 999px; background: transparent; border: 1.5px solid currentColor; box-shadow: none; cursor: pointer; font-size: 20px; font-weight: 900; line-height: 1; color: #64748b; display: flex; align-items: center; justify-content: center; }
+
+.trail-sh-top { display: flex; align-items: center; justify-content: space-between; padding: 18px 54px 0 18px; gap: 8px; }
+
+.trail-sh-bdg { font-size: 11px; font-weight: 800; padding: 3px 8px; border-radius: 999px; color: var(--v4-surface-white); white-space: nowrap; flex-shrink: 0; }
+
+.trail-sh-bdg.d { background: #1d4ed8; }
+
+.trail-sh-bdg.l { background: #2a8040; }
+
+.trail-sh-region { font-size: 11px; color: #94a3b8; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+
+.trail-sh-body { display: flex; align-items: center; gap: 12px; padding: 12px 18px 14px; cursor: pointer; overflow: visible; }
+
+.trail-sh-ico { width: 48px; height: 48px; flex-shrink: 0; border-radius: 16px; display: flex; align-items: center; justify-content: center; font-size: 20px; box-shadow: inset 0 1px 0 rgba(255,255,255,.75); }
+
+.trail-sh-ico.d { background: #eff6ff; }
+
+.trail-sh-ico.l { background: #f0fdf4; }
+
+.trail-sh-info { flex: 1; min-width: 0; overflow: visible; }
+
+.trail-sh-name { font-size: 18px; font-weight: 800; color: var(--v4-text-strong); line-height: 1.35; word-break: keep-all; margin-bottom: 3px; white-space: normal; }
+
+.trail-sh-sub { font-size: 12px; color: var(--v4-text-muted); }
+
+.trail-sh-foot { border-top: 1px solid #f0f4fa; padding: 12px 18px; display: flex; align-items: center; justify-content: space-between; gap: 8px; background: rgba(244,238,229,.75); cursor: pointer; }
+
+.trail-sh-url { font-size: 11px; color: #2563eb; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex: 1; min-width: 0; }
+
+.trail-sh-arr { font-size: 15px; color: #94a3b8; flex-shrink: 0; }
+
+/* V8-1-14-563: 한티가는길은 제작 중이므로 기존 hanti 카드/경로 CSS를 건드리지 않고,
+   한티가 아닌 일반 순례길 지도 인포카드만 이 소유 블록에서 정리한다. */
+.trail-sheet.trail-general-sheet {
+  background: #fffdf8;
+  border-top: 1.5px solid #d9cdbb;
+  box-shadow: 0 -10px 24px rgba(15,23,42,.14);
+  padding-bottom: calc(14px + env(safe-area-inset-bottom, 0));
+}
+.trail-sheet.trail-general-sheet .trail-sh-top {
+  padding: 16px 54px 0 16px;
+}
+.trail-sheet.trail-general-sheet .trail-sh-body {
+  align-items: center;
+  padding: 12px 16px 10px;
+  cursor: pointer;
+}
+.trail-sheet.trail-general-sheet .trail-sh-name {
+  font-size: 17px;
+  line-height: 1.32;
+  letter-spacing: -.04em;
+}
+.trail-sheet.trail-general-sheet .trail-sh-sub {
+  margin-top: 3px;
+  line-height: 1.35;
+  word-break: keep-all;
+}
+.trail-sheet.trail-general-sheet .trail-sh-foot {
+  margin: 2px 14px 0;
+  padding: 12px 14px;
+  border: 2px solid #1d4ed8;
+  border-radius: 16px;
+  background: #1d4ed8;
+  color: #fff;
+  box-shadow: none;
+}
+.trail-sheet.trail-general-sheet .trail-sh-url {
+  color: rgba(255,255,255,.88);
+  font-weight: 800;
+}
+.trail-sheet.trail-general-sheet .trail-sh-arr {
+  color: #fff;
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: -.04em;
+  white-space: nowrap;
+}
+html:not(.ios-device) .trail-sheet.trail-general-sheet {
+  padding-bottom: calc(12px + var(--oai-android-bottom-gap, 10px));
+}
+
+/* V8-1-14-528: 경로따라가기 중에는 내 위치 점에 진행방향 화살표를 붙인다. */
+.trail-myloc { width: 16px; height: 16px; border-radius: 50%; background: #2255cc; border: 2.5px solid var(--v4-surface-white); box-shadow: 0 0 0 4px rgba(34,85,204,.22); }
+.trail-myloc.follow{
+  position:relative;
+  width:22px;
+  height:22px;
+  border-width:3px;
+  background:#2563eb;
+  box-shadow:0 0 0 5px rgba(37,99,235,.20), 0 3px 10px rgba(15,23,42,.22);
+  transform:rotate(var(--hanti-bearing, 0deg));
+  transform-origin:50% 50%;
+}
+.trail-myloc.follow::before{
+  content:"";
+  position:absolute;
+  left:50%;
+  top:-14px;
+  transform:translateX(-50%);
+  width:0;
+  height:0;
+  border-left:6px solid transparent;
+  border-right:6px solid transparent;
+  border-bottom:15px solid #2563eb;
+  filter:drop-shadow(0 2px 2px rgba(15,23,42,.22));
+}
+.trail-myloc.follow::after{
+  content:"";
+  position:absolute;
+  inset:5px;
+  border-radius:50%;
+  background:#ffffff;
+  opacity:.95;
+}
+
+/* V8-1-14-528: 경로 자체의 앞으로 갈 진행 방향 표시. 내 위치 방향이 아니라 GPX 남은 경로 방향이다. */
+.hanti-route-dir-arrow{
+  width:26px;
+  height:26px;
+  border-radius:999px;
+  background:rgba(255,255,255,.94);
+  border:2px solid rgba(180,83,9,.58);
+  box-shadow:0 4px 12px rgba(15,23,42,.22), 0 0 0 3px rgba(249,115,22,.13);
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  pointer-events:none;
+  transform:rotate(var(--hanti-route-bearing, 0deg));
+  transform-origin:50% 50%;
+}
+.hanti-route-dir-arrow.near{
+  width:30px;
+  height:30px;
+  border-color:rgba(234,88,12,.76);
+  box-shadow:0 5px 14px rgba(15,23,42,.24), 0 0 0 4px rgba(249,115,22,.18);
+}
+.hanti-route-dir-arrow-shape{
+  width:16px;
+  height:18px;
+  display:block;
+  background:#f97316;
+  clip-path:polygon(50% 0%, 92% 100%, 50% 78%, 8% 100%);
+  filter:drop-shadow(0 1px 1px rgba(15,23,42,.18));
+}
+.hanti-route-dir-arrow.near .hanti-route-dir-arrow-shape{
+  width:18px;
+  height:20px;
+  background:#ea580c;
+}
+
+#trail-view .trail-body { flex: 1; min-height: 0; display: flex; flex-direction: column; width: 100%; }
+
+html:not(.ios-device) .trail-loc-btn{bottom:calc(var(--oai-android-bottom-gap, 10px) + 36px)!important;}
+html:not(.ios-device) .trail-sheet{padding-bottom:calc(18px + var(--oai-android-bottom-gap, 10px))!important;}
+
+html:not(.ios-device).oai-screen-compact-short #trail-close-btn,
+html:not(.ios-device).oai-screen-compact-short .trail-sh-close{
+  width:34px!important;height:34px!important;min-width:34px!important;flex-basis:34px!important;
+}
+
+/* V8-1-14-471: 한티가는길 표시. 동명읍 내부는 여러 길 가능 구간으로 보고, 도로를 오가며 건너는 듯한 세부 GPX 대신 대표선을 안내한다. */
+.hanti-stamp-marker {
+  appearance: none;
+  border: 1.5px solid rgba(120, 72, 18, .55);
+  border-radius: 12px;
+  background: rgba(255, 250, 241, .96);
+  color: #6b3f08;
+  box-shadow: 0 3px 9px rgba(31, 42, 68, .20);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-width: 38px;
+  max-width: 152px;
+  min-height: 24px;
+  height: auto;
+  padding: 4px 7px;
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 900;
+  letter-spacing: -.04em;
+  line-height: 1.12;
+  white-space: normal;
+  cursor: pointer;
+  touch-action: manipulation;
+}
+.hanti-stamp-marker .hanti-stamp-id { font-size: 10.5px; color: #8a4f0a; flex-shrink: 0; }
+.hanti-stamp-marker .hanti-stamp-name { overflow: visible; text-overflow: clip; max-width: 110px; white-space: normal; word-break: keep-all; }
+.hanti-stamp-marker.start { background: rgba(235, 248, 239, .98); border-color: rgba(42,128,64,.70); color: #166534; }
+.hanti-stamp-marker.finish { background: rgba(255, 243, 216, .98); border-color: rgba(183,121,31,.80); color: #7A4F10; }
+.hanti-stamp-marker.exception { border-width: 2px; box-shadow: 0 3px 10px rgba(183,121,31,.26); }
+.hanti-stamp-marker:active { transform: translateY(1px); filter: brightness(.96); }
+
+.trail-sh-note {
+  margin-top: 5px;
+  color: #7A4F10;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.32;
+  word-break: keep-all;
+}
+.hanti-flex-guide {
+  pointer-events: none;
+  max-width: 172px;
+  padding: 6px 9px;
+  border-radius: 13px;
+  border: 1px solid rgba(183, 121, 31, .34);
+  background: rgba(255, 250, 241, .94);
+  box-shadow: 0 3px 10px rgba(31, 42, 68, .18);
+  color: #7A4F10;
+  font-family: inherit;
+  font-size: 10.5px;
+  font-weight: 900;
+  line-height: 1.25;
+  text-align: center;
+  word-break: keep-all;
+}
+.hanti-flex-guide strong { display: block; font-size: 11px; color: #5f3707; }
+.hanti-flex-guide span { display: block; margin-top: 2px; }
+
+/* V8-1-14-471: 한티가는길은 자동도장 전 단계로, 내 위치를 누르면 가장 가까운 스탬프 거리만 안내한다. */
+.hanti-location-guide {
+  pointer-events: none;
+  min-width: 118px;
+  max-width: 190px;
+  padding: 7px 10px;
+  border-radius: 14px;
+  border: 1px solid rgba(31, 42, 68, .18);
+  background: rgba(255, 255, 255, .96);
+  box-shadow: 0 4px 12px rgba(31, 42, 68, .22);
+  color: #1f2a44;
+  font-family: inherit;
+  font-size: 10.5px;
+  font-weight: 900;
+  line-height: 1.25;
+  text-align: center;
+  word-break: keep-all;
+}
+.hanti-location-guide strong { display:block; color:#1565c0; font-size:11px; margin-bottom:2px; }
+.hanti-location-guide span { display:block; }
+
+
+/* V8-1-14-471: 한티가는길 현장 방문 없이 확인하는 숨은 테스트 모드. URL ?hantiTest=1 또는 한티 카드 안내줄 5회 터치 때만 JS가 패널을 만들고, 패널 안의 '테스트 닫기'로 다시 숨긴다. */
+.hanti-test-panel {
+  margin-top: 8px;
+  padding: 8px;
+  border-radius: 14px;
+  border: 1px solid rgba(21, 101, 192, .24);
+  background: rgba(246, 250, 255, .96);
+  box-shadow: inset 0 0 0 1px rgba(255,255,255,.62);
+  color: #1f2a44;
+  font-family: inherit;
+}
+.hanti-test-title {
+  font-size: 11px;
+  font-weight: 900;
+  color: #1565c0;
+  line-height: 1.25;
+}
+.hanti-test-help {
+  margin-top: 3px;
+  font-size: 10.5px;
+  font-weight: 800;
+  line-height: 1.34;
+  color: #5b6474;
+  word-break: keep-all;
+}
+.hanti-test-row {
+  margin-top: 7px;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.hanti-test-row select {
+  flex: 1 1 auto;
+  min-width: 0;
+  height: 34px;
+  border-radius: 10px;
+  border: 1px solid rgba(31, 42, 68, .22);
+  background: #fff;
+  color: #1f2a44;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 0 8px;
+}
+.hanti-test-row button {
+  flex: 0 0 auto;
+  height: 34px;
+  border: 0;
+  border-radius: 10px;
+  background: #1565c0;
+  color: #fff;
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 900;
+  padding: 0 10px;
+  cursor: pointer;
+}
+.hanti-test-result {
+  margin-top: 7px;
+  padding: 7px 8px;
+  border-radius: 11px;
+  background: rgba(255,255,255,.84);
+  color: #334155;
+  font-size: 10.5px;
+  font-weight: 800;
+  line-height: 1.35;
+  word-break: keep-all;
+}
+.hanti-test-result strong,
+.hanti-test-result span { display: block; }
+.hanti-test-result strong { color: #1f2a44; margin-bottom: 2px; }
+.hanti-location-guide.test { border-color: rgba(21,101,192,.34); background: rgba(246,250,255,.97); }
+
+
+/* V8-1-14-471: 한티가는길 테스트 모드 닫기 버튼 */
+.hanti-test-head{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:10px;
+  margin-bottom:4px;
+}
+.hanti-test-close{
+  border:1px solid rgba(120,53,15,.35);
+  background:#fff7ed;
+  color:#7c2d12;
+  border-radius:999px;
+  padding:6px 10px;
+  font-size:12px;
+  font-weight:800;
+  white-space:nowrap;
+}
+.hanti-test-close:active{
+  transform:translateY(1px);
+}
+
+
+/* V8-1-14-471: 숨은 테스트 모드 안에서 한티/도원동/회사 근처 테스트 GPX 전환 */
+.hanti-test-switch{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+  margin-top:7px;
+}
+.hanti-test-switch button{
+  height:32px;
+  border:1px solid rgba(31,42,68,.18);
+  border-radius:10px;
+  background:#fff;
+  color:#334155;
+  font-family:inherit;
+  font-size:11px;
+  font-weight:900;
+}
+.hanti-test-switch button.on{
+  border-color:rgba(46,125,50,.38);
+  background:#ecfdf3;
+  color:#166534;
+}
+
+
+/* V8-1-14-471: 사용자 도원동 GPX 실보행 테스트용 따라가기 버튼 */
+.hanti-test-follow{
+  margin-top:7px;
+}
+.hanti-test-follow button{
+  width:100%;
+  min-height:34px;
+  border:1px solid rgba(46,125,50,.35);
+  border-radius:10px;
+  background:#ecfdf3;
+  color:#166534;
+  font-family:inherit;
+  font-size:12px;
+  font-weight:900;
+}
+.hanti-test-follow button:active{
+  transform:translateY(1px);
+}
+
+
+/* V8-1-14-471: 도원동 GPX 테스트 표시 방식 선택 */
+.hanti-test-visual{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:6px;
+  margin-top:7px;
+}
+.hanti-test-visual button{
+  min-height:32px;
+  border:1px solid rgba(31,42,68,.18);
+  border-radius:10px;
+  background:#fff;
+  color:#334155;
+  font-family:inherit;
+  font-size:11px;
+  font-weight:900;
+}
+.hanti-test-visual button.on{
+  border-color:rgba(37,99,235,.38);
+  background:#eff6ff;
+  color:#1d4ed8;
+}
+.hanti-stamp-marker.arrived{
+  border-color:rgba(22,163,74,.7) !important;
+  background:#dcfce7 !important;
+  color:#166534 !important;
+  box-shadow:0 8px 20px rgba(22,163,74,.25) !important;
+}
+.hanti-stamp-marker.arrived::after{
+  content:'✓';
+  position:absolute;
+  right:-6px;
+  top:-7px;
+  width:18px;
+  height:18px;
+  border-radius:999px;
+  background:#16a34a;
+  color:#fff;
+  display:grid;
+  place-items:center;
+  font-size:12px;
+  font-weight:900;
+  box-shadow:0 3px 8px rgba(22,163,74,.35);
+}
+
+/* V8-1-14-471: 한티가는길 인포카드 공개 버튼 + 전체경로보기 전용 지도 UI */
+.trail-sh-actions{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:8px;
+  padding:8px 12px 12px;
+}
+.trail-sh-action-btn{
+  min-height:38px;
+  border:1px solid rgba(31,42,68,.18);
+  border-radius:12px;
+  background:#fff;
+  color:#334155;
+  font-family:inherit;
+  font-size:13px;
+  font-weight:900;
+}
+.trail-sh-action-btn.primary{
+  background:#fff7ed;
+  border-color:rgba(180,83,9,.28);
+  color:#9a3412;
+}
+#trail-view.hanti-route-mode > .module-bar.trail,
+#trail-view.hanti-route-mode .trail-tabs{
+  display:none !important;
+}
+#trail-view.hanti-route-mode .trail-body{
+  flex:1 1 auto !important;
+  min-height:0 !important;
+}
+#trail-view.hanti-route-mode #trail-panel-map{
+  display:flex !important;
+  flex:1 1 auto !important;
+}
+#trail-view.hanti-route-mode #trail-panel-list{
+  display:none !important;
+}
+/* 한티가는길 경로보기 하단 조작 레이어: 단일 소유자 */
+.hanti-route-controls{
+  position:absolute;
+  left:50%;
+  bottom:calc(8px + env(safe-area-inset-bottom, 0));
+  transform:translateX(-50%);
+  z-index:75;
+  display:flex;
+  flex-direction:column;
+  align-items:stretch;
+  justify-content:center;
+  gap:7px;
+  width:min(356px, calc(100% - 22px));
+  max-width:calc(100% - 22px);
+  padding:8px;
+  border-radius:22px;
+  background:rgba(255,251,240,.96);
+  border:1.5px solid rgba(180,83,9,.18);
+  box-shadow:0 12px 28px rgba(15,23,42,.20), inset 0 1px 0 rgba(255,255,255,.92);
+  backdrop-filter:blur(8px);
+  pointer-events:auto;
+}
+html:not(.ios-device) .hanti-route-controls{
+  bottom:calc(8px + var(--oai-android-bottom-gap, 0px));
+}
+.hanti-route-control-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:8px;
+  align-items:center;
+}
+.hanti-route-controls .trail-loc-btn{
+  position:static !important;
+  right:auto !important;
+  bottom:auto !important;
+  z-index:auto !important;
+  width:56px;
+  height:56px;
+  min-width:56px;
+  min-height:56px;
+  padding:5px 4px !important;
+  border-radius:16px !important;
+  font-size:19px;
+  font-weight:950;
+  flex-direction:column;
+  gap:2px;
+  border:2px solid rgba(21,101,192,.34);
+  background:#ffffff;
+  color:#0e1535;
+  box-shadow:0 5px 14px rgba(15,23,42,.13);
+  white-space:nowrap;
+}
+.hanti-route-controls .trail-loc-btn span:last-child{
+  font-size:12px;
+  font-weight:900;
+  line-height:1.05;
+}
+.hanti-route-control-btn{
+  min-height:46px;
+  height:46px;
+  padding:0 18px;
+  border:1px solid rgba(31,42,68,.18);
+  border-radius:16px;
+  background:rgba(255,255,255,.96);
+  color:#334155;
+  font-family:inherit;
+  font-size:15px;
+  font-weight:950;
+  box-shadow:0 5px 14px rgba(15,23,42,.13);
+  white-space:nowrap;
+}
+.hanti-route-control-btn.primary{
+  width:100%;
+  background:#f97316;
+  border:2.5px solid #ea580c;
+  color:#ffffff;
+  box-shadow:0 8px 18px rgba(249,115,22,.24), inset 0 1px 0 rgba(255,255,255,.28);
+}
+.hanti-route-control-btn.primary:active{
+  background:#ea580c;
+  transform:translateY(1px);
+}
+.hanti-route-control-btn.reverse{
+  width:100%;
+  min-height:40px;
+  height:40px;
+  border:2px solid rgba(120,113,108,.28);
+  background:#ffffff;
+  color:#475569;
+  font-size:14px;
+  letter-spacing:-.03em;
+}
+.hanti-route-control-btn.reverse.on{
+  border-color:rgba(22,163,74,.42);
+  background:#ecfdf3;
+  color:#166534;
+  box-shadow:0 7px 16px rgba(22,163,74,.16), inset 0 1px 0 rgba(255,255,255,.86);
+}
+.hanti-route-control-btn.reverse:active{
+  transform:translateY(1px);
+}
+@media (max-width:360px){
+  .hanti-route-controls{
+    gap:6px;
+    padding:7px;
+    border-radius:20px;
+  }
+  .hanti-route-control-row{
+    gap:6px;
+  }
+  .hanti-route-control-btn{
+    min-height:44px;
+    height:44px;
+    font-size:12px !important;
+    padding-left:11px !important;
+    padding-right:11px !important;
+  }
+  .hanti-route-controls .trail-loc-btn{
+    width:52px;
+    height:52px;
+    min-width:52px;
+    min-height:52px;
+    font-size:12px !important;
+    padding-left:11px !important;
+    padding-right:11px !important;
+  }
+  .hanti-route-controls .trail-loc-btn span:last-child{
+    font-size:11.5px;
+  }
+  .hanti-route-control-btn.reverse{
+    min-height:38px;
+    height:38px;
+    font-size:12px !important;
+  }
+}
+.hanti-route-x{
+  position:absolute;
+  top:calc(12px + env(safe-area-inset-top, 0));
+  right:12px;
+  z-index:80;
+  width:38px;
+  height:38px;
+  border-radius:999px;
+  border:1px solid rgba(15,23,42,.18);
+  background:rgba(255,255,255,.96);
+  color:#334155;
+  font-family:inherit;
+  font-size:24px;
+  line-height:1;
+  font-weight:900;
+  box-shadow:0 8px 20px rgba(15,23,42,.16);
+}
+
+/* V8-1-14-471: 한티가는길 인포카드 버튼 명확화 */
+.trail-sh-actions.hanti-main-actions{
+  display:grid!important;
+  grid-template-columns:1fr 1fr!important;
+  gap:10px!important;
+  padding:10px 12px 14px!important;
+}
+.trail-sh-actions.hanti-main-actions .trail-sh-action-btn{
+  min-height:44px!important;
+  border:2.5px solid #1f73d2!important;
+  border-radius:14px!important;
+  background:#ffffff!important;
+  color:#1f73d2!important;
+  font-family:inherit!important;
+  font-size:15px!important;
+  font-weight:950!important;
+  letter-spacing:-.04em!important;
+  box-shadow:0 4px 10px rgba(31,115,210,.13), inset 0 1px 0 rgba(255,255,255,.92)!important;
+}
+.trail-sh-actions.hanti-main-actions .trail-sh-action-btn.primary{
+  background:#ffffff!important;
+  border-color:#1f73d2!important;
+  color:#1f73d2!important;
+}
+.trail-sh-actions.hanti-main-actions .trail-sh-action-btn:active{
+  background:#eef7ff!important;
+  transform:translateY(1px)!important;
+}
+
+
+/* V8-1-14-471: 한티가는길 인포카드 하단 빈 공간 제거 */
+.trail-sheet.hanti-main-card{
+  padding-bottom:calc(12px + env(safe-area-inset-bottom, 0))!important;
+}
+html:not(.ios-device) .trail-sheet.hanti-main-card{
+  padding-bottom:calc(10px + var(--oai-android-bottom-gap, 10px))!important;
+}
+.trail-sheet.hanti-main-card .trail-sh-foot{
+  display:none!important;
+}
+.trail-sheet.hanti-main-card .trail-sh-body{
+  padding-bottom:8px!important;
+}
+.trail-sheet.hanti-main-card .trail-sh-actions.hanti-main-actions{
+  padding-top:4px!important;
+  padding-bottom:8px!important;
+}
+.trail-sheet.hanti-main-card .trail-sh-action-btn{
+  min-height:42px!important;
+}
