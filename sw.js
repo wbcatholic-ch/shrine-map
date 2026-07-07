@@ -1,7 +1,7 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-613';
-const ASSET_VERSION = 'V8-1-14-613';
+const CACHE_VERSION = 'catholic-way-V8-1-14-614';
+const ASSET_VERSION = 'V8-1-14-614';
 
-/* V8-1-14-613: service worker cache strategy overview.
+/* V8-1-14-614: service worker cache strategy overview.
    - APP_SHELL: first-screen and internal helper files.
    - HTML navigation: networkFirst, then cached index fallback.
    - Versioned/static assets: cacheFirst.
@@ -33,9 +33,6 @@ const APP_SHELL = [
   withVersion('./js/prayer-ui.js'),
   withVersion('./js/cover-refresh.js'),
   withVersion('./js/app-state-guards.js'),
-  withVersion('./hanti-route-data-v1.js'),
-  withVersion('./dowon-neighborhood-test-loop-data-v1.js'),
-  withVersion('./company-neighborhood-test-route-data-v1.js'),
   withVersion('./web.js'),
   withVersion('./js/route-web-guards.js'),
   withVersion('./js/back-controller.js'),
@@ -73,7 +70,7 @@ function isVersionedAsset(request) {
   try {
     const url = new URL(request.url);
     return url.searchParams.has('v') ||
-      /parishes-[a-z-]+\.js|prayer-data\.js|prayer\.js|retreats\.js|shrines\.js|diocese\.html|privacy\.html|diocese\.css|qa-firebase\.html|app\.js|style\.css|module-common\.css|prayer\.css|web\.css|pilgrimage\.css|overlays\.css|cover-modals\.css|myfaith\.css|my-diocese\.css|hanti-route-data-v1\.js|dowon-neighborhood-test-loop-data-v1\.js|company-neighborhood-test-route-data-v1\.js|web\.js|touch-ux\.js|prayer-ui\.js|cover-refresh\.js|app-state-guards\.js|route-web-guards\.js|back-controller\.js|sw-update\.js/.test(url.pathname);
+      /parishes-[a-z-]+\.js|prayer-data\.js|prayer\.js|retreats\.js|shrines\.js|diocese\.html|privacy\.html|diocese\.css|qa-firebase\.html|app\.js|style\.css|module-common\.css|prayer\.css|web\.css|pilgrimage\.css|overlays\.css|cover-modals\.css|myfaith\.css|my-diocese\.css|web\.js|touch-ux\.js|prayer-ui\.js|cover-refresh\.js|app-state-guards\.js|route-web-guards\.js|back-controller\.js|sw-update\.js/.test(url.pathname);
   } catch (e) { return false; }
 }
 async function networkFirst(request) {

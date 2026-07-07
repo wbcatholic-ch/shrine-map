@@ -228,8 +228,9 @@
   }
 
   function getHantiRouteData(){
-    return window.CATHOLIC_HANTI_ROUTE_DATA && window.CATHOLIC_HANTI_ROUTE_DATA.id === 'hanti'
-      ? window.CATHOLIC_HANTI_ROUTE_DATA : null;
+    // V8-1-14-614: 한티가는길 내부 네비게이션을 앱에서 제거한다.
+    // 한티가는길은 순례길 목록/지도에서 일반 웹사이트 항목으로만 유지한다.
+    return null;
   }
   function getDowonTestRouteData(){
     return window.CATHOLIC_DOWON_TEST_ROUTE_DATA && window.CATHOLIC_DOWON_TEST_ROUTE_DATA.id === 'dowon_test_loop'
@@ -246,7 +247,10 @@
     var data = getActiveHantiRouteData();
     return data && data.name || '한티가는길';
   }
-  function isHantiTrailItem(d){ return !!(d && d.n === '한티가는길'); }
+  function isHantiTrailItem(d){
+    // V8-1-14-614: 한티가는길 전용 네비게이션/전체경로보기 진입 차단.
+    return false;
+  }
   function clearHantiRouteOverlays(){
     try{
       (trailState.hantiPolylines || []).forEach(function(line){ try{ line.setMap(null); }catch(_e){} });
@@ -423,9 +427,9 @@
   }
 
   try{
-    window.oaiSaveHantiBackgroundRouteState = saveHantiFollowResumeState;
-    window.oaiClearHantiBackgroundRouteResume = clearHantiFollowResumeState;
-    window.oaiStabilizeHantiGpsAfterBackground = stabilizeHantiGpsAfterBackground;
+    delete window.oaiSaveHantiBackgroundRouteState;
+    delete window.oaiClearHantiBackgroundRouteResume;
+    delete window.oaiStabilizeHantiGpsAfterBackground;
   }catch(_e){}
   function syncTrailLocButtonForSheet(open){
     try{
@@ -452,9 +456,10 @@
     try{ ig$('trail-sheet')?.classList.remove('open'); syncTrailLocButtonForSheet(false); }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
   function restoreHantiRouteIfActive(){
-    if(!isHantiRouteActive()) return;
-    if(!(trailState && trailState.map && window.kakao && kakao.maps)) return;
-    showHantiRouteOverlays();
+    // V8-1-14-614: 한티가는길 내부 네비게이션 제거. 이전 저장 상태가 남아 있어도 복원하지 않는다.
+    clearHantiFollowResumeState('hanti-navigation-removed');
+    setHantiRouteActive(false);
+    return false;
   }
   function handleTrailMapClick(){
     if(trailState && trailState.hantiVisible){
@@ -1444,7 +1449,7 @@
     }
     return true;
   }
-  try{ window._oaiTrailBackHandle = function(reason){ return closeHantiFullRouteToSheet(reason || 'back'); }; }catch(_e){}
+  try{ window._oaiTrailBackHandle = function(){ return false; }; }catch(_e){}
 
   function activateHantiTestRoute(routeId){
     var data = getHantiRouteDataById(routeId);
@@ -2453,9 +2458,7 @@
       }
       relayoutTrailMap(90, 'trail-map-open-stable');
       kakao.maps.event.addListener(trailState.map,'click', handleTrailMapClick);
-      bindHantiRouteMapInteractionHandlers();
       trailState.inited = true;
-      setTimeout(restoreHantiRouteIfActive, 120);
       if(Number.isInteger(trailState.pendingOpenIndex) && TRAIL_ITEMS[trailState.pendingOpenIndex]){
         const idx = trailState.pendingOpenIndex;
         trailState.pendingOpenIndex = null;
@@ -2640,7 +2643,6 @@
       closeTrailSheetOnly();
       initTrailModule();
       syncTrailMarkers();
-      if(isHantiRouteActive()) setTimeout(restoreHantiRouteIfActive, 120);
       relayoutTrailMap(90, 'trail-set-view-stable');
     } else {
       trailCloseSheet();
@@ -2722,7 +2724,7 @@
 
     setBusy(true);
 
-    /* V8-1-14-613: 기존에는 maximumAge:60000 저정확 위치를 먼저 표시한 뒤
+    /* V8-1-14-614: 기존에는 maximumAge:60000 저정확 위치를 먼저 표시한 뒤
        고정밀 GPS가 늦게 도착하면서 지도가 엉뚱한 곳에서 현재 위치로 다시 이동했다.
        수동 내위치는 오래된 캐시를 먼저 쓰지 않고, 따라가기 중에는 watchPosition의
        최신 좌표만 즉시 재사용한 뒤 신선한 GPS로 보정한다. */
