@@ -1,53 +1,32 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-618';
-const ASSET_VERSION = 'V8-1-14-618';
-
-/* V8-1-14-618: service worker cache strategy overview.
-   - APP_SHELL: first-screen and internal helper files.
-   - HTML navigation: networkFirst, then cached index fallback.
-   - Versioned/static assets: cacheFirst.
-   - Other same-origin GET requests: staleWhileRevalidate.
-   Strategy is documented here only; runtime behavior is unchanged. */
-function withVersion(path) {
-  return path + '?v=' + ASSET_VERSION;
-}
-const APP_SHELL = [
+const CACHE_NAME = 'pilgrimage-route-nav-v59-marker-owner-cleanup-20260709';
+const CORE_ASSETS = [
   './',
   './index.html',
-  withVersion('./diocese.html'),
-  withVersion('./privacy.html'),
-  withVersion('./qa-firebase.html'),
-  withVersion('./style.css'),
-  withVersion('./css/module-common.css'),
-  withVersion('./css/diocese.css'),
-  withVersion('./css/prayer.css'),
-  withVersion('./css/web.css'),
-  withVersion('./css/pilgrimage.css'),
-  withVersion('./css/overlays.css'),
-  withVersion('./css/cover-modals.css'),
-  withVersion('./css/myfaith.css'),
-  withVersion('./css/my-diocese.css'),
-  withVersion('./js/myfaith.js'),
-  withVersion('./app.js'),
-  withVersion('./js/cover-common.js'),
-  withVersion('./js/touch-ux.js'),
-  withVersion('./js/prayer-ui.js'),
-  withVersion('./js/cover-refresh.js'),
-  withVersion('./js/app-state-guards.js'),
-  withVersion('./web.js'),
-  withVersion('./js/route-web-guards.js'),
-  withVersion('./js/back-controller.js'),
-  withVersion('./sw-update.js'),
-  withVersion('./manifest.json'),
-  withVersion('./icon-192x192.png'),
-  withVersion('./icon-512x512.png'),
-  withVersion('./icon-512x512-maskable.png'),
-  withVersion('./intro-cross-jesus.jpg'),
+  './manifest.json',
+  './css/route-nav.css?v=20260709-v59-marker-owner-cleanup',
+  './js/route-nav.js?v=20260709-v59-marker-owner-cleanup',
+  './routes/hanti-route-data-v1.js?v=20260709-v59-marker-owner-cleanup',
+  './routes/seoul-pilgrimage-routes.js?v=20260709-v59-marker-owner-cleanup',
+  './routes/nimui-gil-routes.js?v=20260709-v59-marker-owner-cleanup',
+  './routes/test-route-data-v1.js?v=20260709-v59-marker-owner-cleanup',
+  './gpx/nimui-gil-1-1-big-cheomnye.gpx',
+  './gpx/nimui-gil-1-2-ne-gongso.gpx',
+  './gpx/nimui-gil-1-3-nine-pass-road.gpx',
+  './gpx/nimui-gil-1-4-seoji-gangbyeon.gpx',
+  './gpx/nimui-gil-1-5-seogogae.gpx',
+  './gpx/nimui-gil-1-6-kkotdaengi.gpx',
+  './gpx/nimui-gil-1-7-yangeop.gpx',
+  './gpx/nimui-gil-2-1-choi-haeseong-john-martyrdom.gpx',
+  './gpx/nimui-gil-2-2-choi-birgitta-martyrdom.gpx',
+  './icons/icon-192x192.png',
+  './icons/icon-512x512.png',
+  './icons/icon-512x512-maskable.png'
 ];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(CACHE_VERSION)
-      .then((cache) => Promise.all(APP_SHELL.map((url) => cache.add(url).catch(() => null))))
+    caches.open(CACHE_NAME)
+      .then((cache) => cache.addAll(CORE_ASSETS))
       .then(() => self.skipWaiting())
   );
 });
@@ -55,71 +34,44 @@ self.addEventListener('install', (event) => {
 self.addEventListener('activate', (event) => {
   event.waitUntil(
     caches.keys()
-      .then((keys) => Promise.all(keys.map((key) => key === CACHE_VERSION ? null : caches.delete(key))))
+      .then((keys) => Promise.all(keys.map((key) => key === CACHE_NAME ? null : caches.delete(key))))
       .then(() => self.clients.claim())
   );
 });
 
-function sameOrigin(request) {
-  try { return new URL(request.url).origin === self.location.origin; } catch (e) { return false; }
-}
-function isHtmlRequest(request) {
-  return request.mode === 'navigate' || (request.headers.get('accept') || '').includes('text/html');
-}
-function isVersionedAsset(request) {
-  try {
-    const url = new URL(request.url);
-    return url.searchParams.has('v') ||
-      /parishes-[a-z-]+\.js|prayer-data\.js|prayer\.js|retreats\.js|shrines\.js|diocese\.html|privacy\.html|diocese\.css|qa-firebase\.html|app\.js|style\.css|module-common\.css|prayer\.css|web\.css|pilgrimage\.css|overlays\.css|cover-modals\.css|myfaith\.css|my-diocese\.css|web\.js|touch-ux\.js|prayer-ui\.js|cover-refresh\.js|app-state-guards\.js|route-web-guards\.js|back-controller\.js|sw-update\.js/.test(url.pathname);
-  } catch (e) { return false; }
-}
-async function networkFirst(request) {
-  const cache = await caches.open(CACHE_VERSION);
-  try {
-    const fresh = await fetch(request, { cache: 'no-cache' });
-    if (fresh && fresh.ok) cache.put(request, fresh.clone()).catch(() => null);
-    return fresh;
-  } catch (e) {
-    const cached = await cache.match(request);
-    return cached || cache.match('./index.html');
-  }
-}
-async function cacheFirst(request) {
-  const cache = await caches.open(CACHE_VERSION);
-  const cached = await cache.match(request);
-  if (cached) return cached;
-  try {
-    const fresh = await fetch(request);
-    if (fresh && fresh.ok) cache.put(request, fresh.clone()).catch(() => null);
-    return fresh;
-  } catch (e) {
-    return new Response('Offline', { status: 503 });
-  }
-}
-async function staleWhileRevalidate(request) {
-  const cache = await caches.open(CACHE_VERSION);
-  const cached = await cache.match(request);
-  const freshPromise = fetch(request)
-    .then((fresh) => {
-      if (fresh && fresh.ok) cache.put(request, fresh.clone()).catch(() => null);
-      return fresh;
-    })
-    .catch(() => null);
-  if (cached) return cached;
-  const fresh = await freshPromise;
-  return fresh || new Response('Offline', { status: 503 });
-}
 self.addEventListener('fetch', (event) => {
   const request = event.request;
   if (request.method !== 'GET') return;
-  if (!sameOrigin(request)) return;
-  if (isHtmlRequest(request)) {
-    event.respondWith(networkFirst(request));
+
+  const requestUrl = new URL(request.url);
+  const scopeUrl = new URL(self.registration.scope);
+
+  // Kakao 지도 SDK/타일 같은 외부 요청은 서비스워커가 절대 가로채지 않는다.
+  if (requestUrl.origin !== scopeUrl.origin) return;
+
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put('./index.html', copy)).catch(() => {});
+          return response;
+        })
+        .catch(() => caches.match('./index.html'))
+    );
     return;
   }
-  if (isVersionedAsset(request)) {
-    event.respondWith(cacheFirst(request));
-    return;
-  }
-  event.respondWith(staleWhileRevalidate(request));
+
+  event.respondWith(
+    caches.match(request).then((cached) => {
+      const networkFetch = fetch(request).then((response) => {
+        if (response && response.ok) {
+          const copy = response.clone();
+          caches.open(CACHE_NAME).then((cache) => cache.put(request, copy)).catch(() => {});
+        }
+        return response;
+      });
+      return cached || networkFetch;
+    })
+  );
 });
