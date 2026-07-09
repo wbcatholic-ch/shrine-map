@@ -228,7 +228,7 @@
   }
 
   function getHantiRouteData(){
-    // V8-1-14-616: 한티가는길 내부 네비게이션을 앱에서 제거한다.
+    // V8-1-14-617: 한티가는길 내부 네비게이션을 앱에서 제거한다.
     // 한티가는길은 순례길 목록/지도에서 일반 웹사이트 항목으로만 유지한다.
     return null;
   }
@@ -248,7 +248,7 @@
     return data && data.name || '한티가는길';
   }
   function isHantiTrailItem(d){
-    // V8-1-14-616: 한티가는길 전용 네비게이션/전체경로보기 진입 차단.
+    // V8-1-14-617: 한티가는길 전용 네비게이션/전체경로보기 진입 차단.
     return false;
   }
   function clearHantiRouteOverlays(){
@@ -456,7 +456,7 @@
     try{ ig$('trail-sheet')?.classList.remove('open'); syncTrailLocButtonForSheet(false); }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
   function restoreHantiRouteIfActive(){
-    // V8-1-14-616: 한티가는길 내부 네비게이션 제거. 이전 저장 상태가 남아 있어도 복원하지 않는다.
+    // V8-1-14-617: 한티가는길 내부 네비게이션 제거. 이전 저장 상태가 남아 있어도 복원하지 않는다.
     clearHantiFollowResumeState('hanti-navigation-removed');
     setHantiRouteActive(false);
     return false;
@@ -2724,7 +2724,7 @@
 
     setBusy(true);
 
-    /* V8-1-14-616: 기존에는 maximumAge:60000 저정확 위치를 먼저 표시한 뒤
+    /* V8-1-14-617: 기존에는 maximumAge:60000 저정확 위치를 먼저 표시한 뒤
        고정밀 GPS가 늦게 도착하면서 지도가 엉뚱한 곳에서 현재 위치로 다시 이동했다.
        수동 내위치는 오래된 캐시를 먼저 쓰지 않고, 따라가기 중에는 watchPosition의
        최신 좌표만 즉시 재사용한 뒤 신선한 GPS로 보정한다. */
