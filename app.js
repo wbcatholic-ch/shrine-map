@@ -3693,7 +3693,7 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || (window.OAI_APP_BUILD_VERSION || window.APP_VERSION || 'V8-1-14-626');
+    var target = btn.getAttribute('data-target-version') || (window.OAI_APP_BUILD_VERSION || window.APP_VERSION || 'V8-1-14-627');
     var current = '';
     /* V8-1-14-621:
        현재 화면의 실제 빌드 기준은 index.html이 먼저 선언한 OAI_APP_BUILD_VERSION/숨김 marker를 우선한다.
@@ -3765,7 +3765,7 @@ window.addEventListener('load', syncCoverUpdateVersionState, true);
     try{
       var frame=document.getElementById('privacy-policy-frame');
       if(frame){
-        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-626'));
+        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-627'));
         if(frame.getAttribute('src') === 'about:blank' || !frame.getAttribute('src')) frame.setAttribute('src', src);
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -4013,7 +4013,7 @@ function openDioceseView(opts){
   var loading=_getDioceseLoading();
   if(!view||!frame) return;
   var restore = !!(opts && opts.restore);
-  var url = (typeof oaiGetDioceseFrameUrl === 'function') ? oaiGetDioceseFrameUrl() : 'diocese.html?v=V8-1-14-626';
+  var url = (typeof oaiGetDioceseFrameUrl === 'function') ? oaiGetDioceseFrameUrl() : 'diocese.html?v=V8-1-14-627';
   var currentSrc = frame.getAttribute('src') || '';
   var needsLoad = (!currentSrc || currentSrc==='about:blank' || currentSrc.indexOf('diocese.html') < 0 || !frame._loaded);
 
@@ -4111,7 +4111,7 @@ function dioceseLoaded(){
   _setDioceseLoading(false);
 }
 function oaiGetDioceseFrameUrl(){
-  return 'diocese.html?v=V8-1-14-626';
+  return 'diocese.html?v=V8-1-14-627';
 }
 function oaiBindDioceseFrameLoad(frame, loading, restore){
   if(!frame) return;
@@ -4562,7 +4562,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V8-1-14-626';
+const _PARISH_ASSET_VERSION='V8-1-14-627';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -4934,7 +4934,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V8-1-14-626';
+const _PRAYER_ASSET_VERSION='V8-1-14-627';
 let _prayerModuleLoadPromise=null;
 function _isPrayerDataReady(){
   return !!(window.PRAYER_DATA && typeof window.PRAYER_DATA === 'object');
@@ -5009,7 +5009,7 @@ try{ window.ensurePrayerModuleLoaded=ensurePrayerModuleLoaded; }catch(e){ consol
 let _RT_RAW = [];
 let _retreatRawLoaded = false;
 let _retreatDataLoadPromise = null;
-const _RETREAT_ASSET_VERSION='V8-1-14-626';
+const _RETREAT_ASSET_VERSION='V8-1-14-627';
 
 let RETREATS = [];
 function _buildRetreatList(raw){
@@ -5569,7 +5569,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 let _myLocAt = 0;
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V8-1-14-626';
+const _SHRINE_ASSET_VERSION='V8-1-14-627';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -10055,7 +10055,7 @@ function selectFromPlaceModal(lat,lng,name,addr){
   closeSearchModal();
   if(!_activeTab||_activeTab!=='route') openTab('route');
   else _enterRouteMode();
-  // V8-1-14-626: 카카오 장소검색 결과도 공통 경로지점 소유 함수에서만 설정한다.
+  // V8-1-14-627: 카카오 장소검색 결과도 공통 경로지점 소유 함수에서만 설정한다.
   _setRoutePointFromItem(role,locObj,-1);
   if(_map) _map.panTo(new _LL(lat,lng));
 }
@@ -10226,7 +10226,7 @@ function selectFromModal(idx){
   closeSearchModal();
   if(!_activeTab||_activeTab!=='route') openTab('route');
   else _enterRouteMode();
-  // V8-1-14-626: 성지·성당·피정 목록 선택도 공통 경로지점 소유 함수에서만 설정한다.
+  // V8-1-14-627: 성지·성당·피정 목록 선택도 공통 경로지점 소유 함수에서만 설정한다.
   _setRoutePointFromItem(role,s,idx);
   if(s.lat&&s.lng&&_map) _map.panTo(new _LL(s.lat,s.lng));
 }
