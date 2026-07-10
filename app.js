@@ -3693,7 +3693,7 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || (window.OAI_APP_BUILD_VERSION || window.APP_VERSION || 'V8-1-14-624');
+    var target = btn.getAttribute('data-target-version') || (window.OAI_APP_BUILD_VERSION || window.APP_VERSION || 'V8-1-14-625');
     var current = '';
     /* V8-1-14-621:
        현재 화면의 실제 빌드 기준은 index.html이 먼저 선언한 OAI_APP_BUILD_VERSION/숨김 marker를 우선한다.
@@ -3765,7 +3765,7 @@ window.addEventListener('load', syncCoverUpdateVersionState, true);
     try{
       var frame=document.getElementById('privacy-policy-frame');
       if(frame){
-        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-624'));
+        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-625'));
         if(frame.getAttribute('src') === 'about:blank' || !frame.getAttribute('src')) frame.setAttribute('src', src);
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -4013,7 +4013,7 @@ function openDioceseView(opts){
   var loading=_getDioceseLoading();
   if(!view||!frame) return;
   var restore = !!(opts && opts.restore);
-  var url = (typeof oaiGetDioceseFrameUrl === 'function') ? oaiGetDioceseFrameUrl() : 'diocese.html?v=V8-1-14-624';
+  var url = (typeof oaiGetDioceseFrameUrl === 'function') ? oaiGetDioceseFrameUrl() : 'diocese.html?v=V8-1-14-625';
   var currentSrc = frame.getAttribute('src') || '';
   var needsLoad = (!currentSrc || currentSrc==='about:blank' || currentSrc.indexOf('diocese.html') < 0 || !frame._loaded);
 
@@ -4111,7 +4111,7 @@ function dioceseLoaded(){
   _setDioceseLoading(false);
 }
 function oaiGetDioceseFrameUrl(){
-  return 'diocese.html?v=V8-1-14-624';
+  return 'diocese.html?v=V8-1-14-625';
 }
 function oaiBindDioceseFrameLoad(frame, loading, restore){
   if(!frame) return;
@@ -4562,7 +4562,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V8-1-14-624';
+const _PARISH_ASSET_VERSION='V8-1-14-625';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -4795,10 +4795,12 @@ function _clearParishNearbyResults(reason){
 function _clearParishDioLayerForNearby(){
   try{ _bumpParishDioLayerToken('nearby-clear'); }catch(_e){}
   try{ _hideAllParishDioMkrs(); }catch(_e){}
-  try{ _hideDioOverlays(); }catch(_e){}
   try{ _markers.forEach(function(m){ if(m&&m.marker) _setMarkerMapIfChanged(m.marker,null); }); }catch(_e){}
   try{ _retreatMarkers.forEach(function(o){ if(o&&o.marker) _setMarkerMapIfChanged(o.marker,null); }); }catch(_e){}
   _activeDio=null;
+  // 내주변 모드에서도 현재 위치에 해당하는 교구명 한 개는 유지한다.
+  // 교구명 표시 여부는 _syncParishDioLabels 한 곳에서만 결정한다.
+  try{ _syncParishDioLabels(); }catch(_e){}
 }
 function _shouldDeferFullCategoryMarkers(){
   try{
@@ -4932,7 +4934,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V8-1-14-624';
+const _PRAYER_ASSET_VERSION='V8-1-14-625';
 let _prayerModuleLoadPromise=null;
 function _isPrayerDataReady(){
   return !!(window.PRAYER_DATA && typeof window.PRAYER_DATA === 'object');
@@ -5007,7 +5009,7 @@ try{ window.ensurePrayerModuleLoaded=ensurePrayerModuleLoaded; }catch(e){ consol
 let _RT_RAW = [];
 let _retreatRawLoaded = false;
 let _retreatDataLoadPromise = null;
-const _RETREAT_ASSET_VERSION='V8-1-14-624';
+const _RETREAT_ASSET_VERSION='V8-1-14-625';
 
 let RETREATS = [];
 function _buildRetreatList(raw){
@@ -5567,7 +5569,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 let _myLocAt = 0;
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V8-1-14-624';
+const _SHRINE_ASSET_VERSION='V8-1-14-625';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -6314,9 +6316,9 @@ function closeSheetPanelOnly(name){
   _updateTabBtns(null);
   if(name==='nearby'){
     if(_mode==='parish'){
-      // 성당 내주변 창 닫기는 목록만 닫는다. 주변 성당 레이어와 현재 지도 시점은 그대로 유지한다.
+      // 성당 내주변 창 닫기는 목록만 닫는다. 주변 성당 마커와 현재 교구명, 지도 시점을 그대로 유지한다.
       _setParishMapLayerMode('nearby','nearby-sheet-closed');
-      try{ _hideDioOverlays(); }catch(_e){}
+      try{ _syncParishDioLabels(); }catch(_e){}
     }else{
       _scheduleNearbyMyLocationPlainRestore('nearby-close-button');
     }
@@ -7791,7 +7793,6 @@ function _showParishNearbyMarkersOnMap(items, lat, lng, phase){
     _clearParishNearbyMarkers();
     try{ _clearParishDioLayerForNearby(); }catch(e){ console.warn('[가톨릭길동무]',e); }
     _activeDio=null;
-    try{ _hideDioOverlays(); }catch(_e){}
 
     const mapItems=_nearbyMapItemsForMode(items,'parish');
     const nearestParish=items.find(function(p){ return p && p.lat && p.lng && p.lat!==0 && p.lng!==0; }) || null;
@@ -7832,6 +7833,7 @@ function _showParishNearbyMarkersOnMap(items, lat, lng, phase){
       AppState.parishMapLayerMode='nearby';
       AppState.nearbyParishAnchorItem=nearestParish || null;
     }
+    _syncParishDioLabels();
     _fitParishNearbyBounds(mapItems, lat, lng);
     _raiseMyLocationMarker();
   }catch(e){ console.warn('[가톨릭길동무]',e); }
@@ -7853,7 +7855,7 @@ function _ensureParishNearbyMarkersVisible(items, lat, lng, reason){
   arr.forEach(function(mk){ try{ _setMarkerMapIfChanged(mk,_map); }catch(_e){} });
   try{ _setMarkerMapIfChanged(_paSelMkr,_map); }catch(_e){}
   _setParishMapLayerMode('nearby','ensure-visible:'+String(reason||''));
-  try{ _hideDioOverlays(); }catch(_e){}
+  try{ _syncParishDioLabels(); }catch(_e){}
   _raiseMyLocationMarker();
   return true;
 }
@@ -8099,7 +8101,8 @@ function _buildParishDioSystem(){
       zIndex:100
     });
     _dioOverlays[code]=ov;
-    try{ _setParishDioOverlayMap(ov,!_isParishNearbyMapMode()); if(typeof ov.setZIndex==='function') ov.setZIndex(10000); }catch(e){ console.warn('[가톨릭길동무]',e); }
+    // 생성 단계에서는 지도에 붙이지 않는다. 실제 표시 대상은 _syncParishDioLabels 한 곳에서 결정한다.
+    try{ _setParishDioOverlayMap(ov,false); if(typeof ov.setZIndex==='function') ov.setZIndex(10000); }catch(e){ console.warn('[가톨릭길동무]',e); }
   });
   kakao.maps.event.addListener(_map,'zoom_changed',function(){
     const lvl2=_map.getLevel();
@@ -8128,33 +8131,30 @@ function _setParishDioOverlayMap(ov, visible){
     ov.__oaiMapVisible=next;
   }catch(e){ console.warn('[가톨릭길동무]',e); }
 }
-function _showDioOverlays(){
-  if(_isParishRouteLineActive() || _isParishNearbyMapMode()){
-    _hideDioOverlays();
-    return;
-  }
-  Object.values(_dioOverlays).forEach(function(ov){ _setParishDioOverlayMap(ov,true); });
-}
 function _hideDioOverlays(){
   Object.values(_dioOverlays).forEach(function(ov){ _setParishDioOverlayMap(ov,false); });
 }
 
 function _syncParishDioLabels(){
   if(_mode!=='parish' || !_map) return;
-  if(_isParishRouteLineActive() || _isParishNearbyMapMode()){
+  if(_isParishRouteLineActive()){
     _hideDioOverlays();
     return;
   }
   if(!_parishSysInited){ try{ _buildParishDioSystem(); }catch(e){ console.warn('[가톨릭길동무]',e); } }
+  const nearbyMode=_isParishNearbyMapMode();
+  const nearbyCode=nearbyMode && AppState ? (AppState.nearbyParishDioCode || null) : null;
   Object.entries(_dioOverlays||{}).forEach(function(pair){
     const code=pair[0], ov=pair[1];
-    try{ _setParishDioOverlayMap(ov,true); if(typeof ov.setZIndex==='function') ov.setZIndex(10000); }catch(e){ console.warn('[가톨릭길동무]',e); }
+    // 일반 교구 지도에서는 선택된 교구명만 숨기고, 내주변 지도에서는 현재 교구명 한 개만 표시한다.
+    const visible=nearbyMode ? (code===nearbyCode) : (code!==_activeDio);
+    try{ _setParishDioOverlayMap(ov,visible); if(visible && typeof ov.setZIndex==='function') ov.setZIndex(10000); }catch(e){ console.warn('[가톨릭길동무]',e); }
     const el = ov && typeof ov.getContent==='function' ? ov.getContent() : null;
     if(el && el.style){
-      el.style.display = (code===_activeDio) ? 'none' : '';
-      el.style.visibility = 'visible';
-      el.style.opacity = '1';
-      el.style.pointerEvents = 'auto';
+      el.style.display = visible ? '' : 'none';
+      el.style.visibility = visible ? 'visible' : 'hidden';
+      el.style.opacity = visible ? '1' : '0';
+      el.style.pointerEvents = visible ? 'auto' : 'none';
       el.style.zIndex = '10000';
       el.style.transform = '';
     }
@@ -8162,6 +8162,12 @@ function _syncParishDioLabels(){
 }
 
 function _activateParishDio(code){
+  // 내주변 지도에 표시된 교구명을 누르면 주변 레이어를 종료한 뒤 해당 교구 지도로 전환한다.
+  // 교구명만 보이게 하고 클릭 동작이 막히던 상태를 남기지 않는다.
+  if(_isParishNearbyMapMode()){
+    try{ _clearParishNearbyResults('dio-label:'+code); }catch(_e){}
+    _activeDio=null;
+  }
   if(_activeDio===code){
     _hideParishDioMkrs(code);
     _activeDio=null;
@@ -8254,7 +8260,7 @@ function _ensureParishMarkerZoom(){
 function _showParishDioMkrs(code){
   if(_isParishRouteLineActive() || _isParishNearbyMapMode()){
     try{ _hideParishDioMkrs(code); }catch(e){ console.warn('[가톨릭길동무]',e); }
-    if(_isParishNearbyMapMode()) try{ _hideDioOverlays(); }catch(_e){}
+    if(_isParishNearbyMapMode()) try{ _syncParishDioLabels(); }catch(_e){}
     return;
   }
   if(!code) return;
@@ -8817,6 +8823,7 @@ function _loadNearbyParishes(lat,lng){
   }
   if(AppState){ AppState.nearbyParishDioCode=code; }
   _activeDio=code;
+  try{ _syncParishDioLabels(); }catch(_e){}
   _loadNearbyWithDist(lat,lng,pool,p=>PARISHES.indexOf(p),()=>OAI_CATHEDRAL_CATEGORY_COLOR,()=>dioName);
 }
 
@@ -10047,7 +10054,7 @@ function selectFromPlaceModal(lat,lng,name,addr){
   closeSearchModal();
   if(!_activeTab||_activeTab!=='route') openTab('route');
   else _enterRouteMode();
-  // V8-1-14-624: 카카오 장소검색 결과도 공통 경로지점 소유 함수에서만 설정한다.
+  // V8-1-14-625: 카카오 장소검색 결과도 공통 경로지점 소유 함수에서만 설정한다.
   _setRoutePointFromItem(role,locObj,-1);
   if(_map) _map.panTo(new _LL(lat,lng));
 }
@@ -10218,7 +10225,7 @@ function selectFromModal(idx){
   closeSearchModal();
   if(!_activeTab||_activeTab!=='route') openTab('route');
   else _enterRouteMode();
-  // V8-1-14-624: 성지·성당·피정 목록 선택도 공통 경로지점 소유 함수에서만 설정한다.
+  // V8-1-14-625: 성지·성당·피정 목록 선택도 공통 경로지점 소유 함수에서만 설정한다.
   _setRoutePointFromItem(role,s,idx);
   if(s.lat&&s.lng&&_map) _map.panTo(new _LL(s.lat,s.lng));
 }
