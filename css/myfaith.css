@@ -45,7 +45,7 @@
   align-items:center !important;
   justify-content:center !important;
 }
-.my-faith-confirm-btn { width:100% !important; min-height:50px !important; border:1px solid var(--v4-text-strong) !important; border-radius:15px !important; background:var(--v4-text-main) !important; color:var(--v4-surface-white) !important; font-family:inherit !important; font-size:calc(16px * var(--app-font-scale,1)) !important; font-weight:900 !important; }
+.my-faith-confirm-btn { width:100% !important; min-height:50px !important; border:2.5px solid var(--v4-text-main) !important; border-radius:15px !important; background:var(--v4-text-main) !important; color:var(--v4-surface-white) !important; font-family:inherit !important; font-size:calc(16px * var(--app-font-scale,1)) !important; font-weight:900 !important; box-sizing:border-box !important; }
 .my-faith-inline-privacy-note {
   margin:2px 4px 0 !important;
   padding:10px 14px calc(env(safe-area-inset-bottom,0px) + 8px) !important;
@@ -122,9 +122,9 @@ html:not(.ios-device).oai-screen-compact-short .my-diocese-list{grid-template-co
   border-radius: 14px !important;
 }
 .my-faith-body.my-faith-home-list-body .my-faith-inline-privacy-note {
-  order: 5 !important;
+  order: 4 !important;
   margin: 0 4px !important;
-  padding: 8px 12px max(10px, env(safe-area-inset-bottom, 0px)) !important;
+  padding: 4px 12px 8px !important;
   font-size: calc(13px * var(--app-font-scale,1)) !important;
   line-height: 1.42 !important;
   flex: 0 0 auto !important;
@@ -137,7 +137,7 @@ html:not(.ios-device).oai-screen-compact-short .my-diocese-list{grid-template-co
   order: 2 !important;
 }
 .my-faith-body.my-faith-home-list-body .my-faith-data-section {
-  order: 4 !important;
+  order: 5 !important;
   display: block !important;
   flex: 0 0 auto !important;
   width: 100% !important;
@@ -162,7 +162,16 @@ html:not(.ios-device).oai-screen-compact-short .my-diocese-list{grid-template-co
   overflow: visible !important;
 }
 .my-faith-body.my-faith-home-list-body .my-faith-data-toggle-note {
-  display: none !important;
+  display: block !important;
+  margin: 6px 4px 0 !important;
+  padding: 0 12px !important;
+  color: rgba(95,85,73,.78) !important;
+  font-size: calc(13px * var(--app-font-scale,1)) !important;
+  font-weight: 760 !important;
+  line-height: 1.42 !important;
+  text-align: center !important;
+  letter-spacing: -.03em !important;
+  word-break: keep-all !important;
 }
 @media (max-height: 820px) {
   html:not(.ios-device).oai-screen-compact-short .my-faith-body.my-faith-home-list-body {
