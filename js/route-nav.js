@@ -14,120 +14,13 @@
   const MAX_TRACK_POINTS = 5000;
   const SEOUL_FALLBACK = { lat: 37.56, lng: 126.98 };
 
-  const NATIONAL_TRAIL_CATALOG = [
-    {
-      id: 'hanti',
-      title: '한티가는길',
-      diocese: '대구대교구',
-      icon: '⛰️',
-      dataGroup: '한티가는길',
-      location: '경북 칠곡 (가실성당~한티순교성지)',
-      officialUrl: 'https://hantigil.or.kr/index',
-      highlight: true,
-      myDiocese: true,
-      description: '가실성당에서 한티순교성지까지 이어지는 순례길입니다.'
-    },
-    {
-      id: 'seoul',
-      title: '천주교 서울 순례길',
-      diocese: '서울대교구',
-      icon: '✝️',
-      dataGroup: '서울순례길',
-      location: '서울시',
-      officialUrl: 'https://martyrs.or.kr/_web/mpilgrims/about.html',
-      description: '천주교 서울 순례길과 김대건 신부 치명 순교길을 별도로 선택합니다.'
-    },
-    {
-      id: 'suwon-didim',
-      title: '성지순례길 ‘디딤길’',
-      diocese: '수원교구',
-      icon: '🙏',
-      location: '경기 수원시',
-      officialUrl: 'https://www.casuwon.or.kr/holyland/pilgrimage',
-      description: '상세 GPX 코스는 아직 이 독립 PWA에 연결하지 않았습니다.'
-    },
-    {
-      id: 'wonju-nimui',
-      title: '원주교구 순례길 ‘님의 길’',
-      diocese: '원주교구',
-      icon: '🌿',
-      dataGroup: '님의 길',
-      location: '강원 원주·횡성, 충북 제천',
-      officialUrl: 'https://sunraegil.seoji.net/course/all',
-      description: '님의 길의 연결 가능한 GPX 코스를 선택합니다.'
-    },
-    {
-      id: 'gwangju',
-      title: '광주대교구 순례길',
-      diocese: '광주대교구',
-      icon: '🕊️',
-      location: '전남 나주·영광',
-      officialUrl: 'https://www.gjcatholic.or.kr/holyland/pilgrimage/noan_naju',
-      description: '상세 GPX 코스는 아직 이 독립 PWA에 연결하지 않았습니다.'
-    },
-    {
-      id: 'jeju-santo',
-      title: '천주교 제주교구 순례길 ‘거룩한 여정’',
-      diocese: '제주교구',
-      icon: '🌊',
-      dataGroup: '제주교구 순례길',
-      location: '제주',
-      officialUrl: 'http://santoviaggio.com/',
-      description: 'SANTO VIAGGIO의 빛의 길 — 김대건길을 선택할 수 있습니다.',
-      logo: 'icons/jeju-santo-viaggio-logo.png'
-    },
-    {
-      id: 'andong',
-      title: '사제와 함께하는 도보순례',
-      diocese: '안동교구',
-      icon: '👣',
-      location: '경북 문경·상주',
-      officialUrl: 'https://www.acatholic.or.kr/sub4/sub2.asp',
-      description: '상세 GPX 코스는 아직 이 독립 PWA에 연결하지 않았습니다.'
-    },
-    {
-      id: 'jeonju',
-      title: '전주교구 순례길',
-      diocese: '전주교구',
-      icon: '🌾',
-      dataGroup: '전주교구 순례길',
-      location: '전북 완주·전주',
-      officialUrl: 'https://www.jcatholic.or.kr/theme/main/pages/pilgrimage01.html',
-      description: '요안루갈다길·순교자길·치명자길을 선택할 수 있습니다.'
-    },
-    {
-      id: 'boryeong-galmaemot',
-      title: '보령 갈매못 성지순례길',
-      diocese: '보령시',
-      icon: '🌅',
-      location: '충남 보령',
-      officialUrl: 'https://www.brcn.go.kr/tour/sub02_02_02.do',
-      description: '상세 GPX 코스는 아직 이 독립 PWA에 연결하지 않았습니다.'
-    },
-    {
-      id: 'naepo',
-      title: '내포 천주교 순례길',
-      diocese: '사단법인 내포문화숲길',
-      icon: '🌲',
-      location: '충남 예산·서산',
-      officialUrl: 'https://naepotrail.org/course/catholic',
-      description: '상세 GPX 코스는 아직 이 독립 PWA에 연결하지 않았습니다.'
-    },
-    {
-      id: 'beogeunae',
-      title: '버그내순례길',
-      diocese: '당진시청',
-      icon: '🏞️',
-      location: '충남 당진',
-      officialUrl: 'https://beogeunae.dangjin.go.kr/pil1.html',
-      description: '상세 GPX 코스는 아직 이 독립 PWA에 연결하지 않았습니다.'
-    }
-  ];
+  const HANTI_ACCOMMODATION_URL = 'https://www.hantigil.or.kr/reservation/rsv_form';
+  const HANTI_HOMEPAGE_URL = 'https://hantigil.or.kr/index';
 
   const state = {
     routes: [],
     activeRoute: null,
-    activeTrailCatalogId: null,
+    activeSection: 'cover',
     routeDirection: 'forward',
     map: null,
     kakaoReady: false,
@@ -157,7 +50,9 @@
     statusSheetPointerStartY: null,
     statusSheetDragMoved: false,
     navigationModel: createEmptyNavigationModel(),
-    pendingRestore: null
+    pendingRestore: null,
+    initialLocationChoiceHandled: false,
+    initialLocationAutoMove: false
   };
 
   document.addEventListener('DOMContentLoaded', init);
@@ -165,6 +60,7 @@
   function init() {
     state.routes = Array.isArray(window.PILGRIMAGE_ROUTES) ? window.PILGRIMAGE_ROUTES.filter(Boolean) : [];
     resetInitialView();
+    initializeAppHistory();
     registerPwa();
     setupChromeOpenPanel();
     setupButtons();
@@ -175,25 +71,32 @@
   }
 
   function resetInitialView() {
-    if ($('route-list-view')) $('route-list-view').hidden = false;
+    if ($('cover-view')) $('cover-view').hidden = false;
+    if ($('guide-view')) $('guide-view').hidden = true;
+    if ($('route-list-view')) $('route-list-view').hidden = true;
     if ($('map-view')) $('map-view').hidden = true;
+    state.activeSection = 'cover';
+  }
+
+  function initializeAppHistory() {
+    if (!history?.replaceState) return;
+    try { history.replaceState({ hantiView: 'cover' }, '', location.href); } catch (_) {}
   }
 
   function setupButtons() {
-    $('national-close-btn')?.addEventListener('click', closeNationalList);
+    $('cover-navigation-btn')?.addEventListener('click', openNavigationMenu);
+    $('cover-guide-btn')?.addEventListener('click', openGuide);
+    $('guide-back-btn')?.addEventListener('click', showCover);
+    $('cover-accommodation-btn')?.addEventListener('click', () => openExternalUrl(HANTI_ACCOMMODATION_URL));
+    $('cover-homepage-btn')?.addEventListener('click', () => openExternalUrl(HANTI_HOMEPAGE_URL));
+    $('national-close-btn')?.addEventListener('click', showCover);
     $('back-to-list')?.addEventListener('click', handleBackToList);
     $('my-location-btn')?.addEventListener('click', locateOnce);
+    $('initial-location-move')?.addEventListener('click', handleInitialLocationMove);
+    $('initial-location-skip')?.addEventListener('click', handleInitialLocationSkip);
     $('follow-btn')?.addEventListener('click', handleFollowControl);
     $('direction-btn')?.addEventListener('click', toggleRouteDirection);
     $('end-follow-btn')?.addEventListener('click', confirmEndNavigation);
-  }
-
-  function closeNationalList() {
-    if (history.length > 1) {
-      history.back();
-      return;
-    }
-    try { window.close(); } catch (_) {}
   }
 
   function setupStatusSheet() {
@@ -274,88 +177,20 @@
   }
 
   function renderRouteList() {
-    if (state.activeTrailCatalogId) {
-      renderTrailDetail(state.activeTrailCatalogId);
-      return;
-    }
-    renderNationalTrailList();
-  }
-
-  function renderNationalTrailList() {
     const list = $('route-list');
-    $('route-list-view')?.classList.remove('detail-mode');
-    updateRouteListHero('전국 가톨릭 순례길', '목록을 누르면 상세 코스로 이동합니다.', true);
-    if (!list) return;
-    list.innerHTML = '';
-    NATIONAL_TRAIL_CATALOG.forEach((trail) => {
-      const card = document.createElement('article');
-      card.className = `national-trail-card${trail.highlight ? ' featured' : ''}`;
-      card.tabIndex = 0;
-      card.setAttribute('role', 'button');
-      card.setAttribute('aria-label', `${trail.title} 상세 코스 보기`);
-      card.innerHTML = `
-        <div class="national-trail-body">
-          <div class="national-trail-badges">
-            <span class="diocese-pill">${escapeHtml(trail.diocese || '')}</span>
-            ${trail.myDiocese ? '<span class="my-diocese-pill">나의 교구</span>' : ''}
-          </div>
-          <div class="national-trail-main">
-            <span class="national-trail-icon" aria-hidden="true">${escapeHtml(trail.icon || '🧭')}</span>
-            <span class="national-trail-copy">
-              <strong>${escapeHtml(trail.title)}</strong>
-              <em>📍 ${escapeHtml(trail.location || trail.diocese || '')}</em>
-            </span>
-          </div>
-        </div>
-        <div class="national-trail-foot">
-          <button type="button" class="national-website-btn" data-url="${escapeHtml(trail.officialUrl || '')}">공식 홈페이지 열기</button>
-        </div>
-      `;
-      card.addEventListener('click', (event) => {
-        if (event.target.closest('.national-website-btn')) return;
-        openTrailDetail(trail.id);
-      });
-      card.addEventListener('keydown', (event) => {
-        if (event.key !== 'Enter' && event.key !== ' ') return;
-        event.preventDefault();
-        openTrailDetail(trail.id);
-      });
-      card.querySelector('.national-website-btn')?.addEventListener('click', (event) => {
-        event.preventDefault();
-        event.stopPropagation();
-        openExternalUrl(event.currentTarget.dataset.url);
-      });
-      list.appendChild(card);
-    });
-  }
-
-  function openTrailDetail(trailId) {
-    state.activeTrailCatalogId = trailId;
-    renderRouteList();
-    $('route-list-view')?.scrollTo?.({ top: 0, behavior: 'smooth' });
-  }
-
-  function closeTrailDetail() {
-    state.activeTrailCatalogId = null;
-    renderRouteList();
-    $('route-list-view')?.scrollTo?.({ top: 0, behavior: 'smooth' });
-  }
-
-  function renderTrailDetail(trailId) {
-    const list = $('route-list');
-    const trail = NATIONAL_TRAIL_CATALOG.find((item) => item.id === trailId);
+    const route = state.routes.find((item) => item?.id === 'hanti' || item?.routeGroup === '한티가는길');
     $('route-list-view')?.classList.add('detail-mode');
     updateRouteListHero('', '', false);
     if (!list) return;
     list.innerHTML = '';
-    if (!trail) return;
-
-    const group = buildTrailDetailGroup(trail);
-    if (group) {
-      renderRouteGroupCard(list, group);
+    if (!route) {
+      const notice = document.createElement('div');
+      notice.className = 'notice-card';
+      notice.innerHTML = '<strong>한티가는길 정보를 불러오지 못했습니다.</strong><p>파일 구성을 확인한 뒤 다시 실행해 주세요.</p>';
+      list.appendChild(notice);
       return;
     }
-    renderUnavailableTrailDetail(list, trail);
+    renderRouteGroupCard(list, buildHantiRouteGroup(route));
   }
 
   function updateRouteListHero(title, description, visible = true) {
@@ -365,77 +200,55 @@
     if ($('route-list-desc')) $('route-list-desc').textContent = description;
   }
 
-
-  function buildTrailDetailGroup(trail) {
-    if (trail.id === 'hanti') {
-      const route = state.routes.find((item) => item.id === 'hanti' || item.routeGroup === '한티가는길');
-      if (!route) return null;
-      return { ...buildHantiRouteGroup(route), officialUrl: trail.officialUrl, detailLines: trail.detailLines || [] };
+  function showCover(options = {}) {
+    stopLocationWatch();
+    if ($('map-view')) $('map-view').hidden = true;
+    if ($('guide-view')) $('guide-view').hidden = true;
+    if ($('route-list-view')) $('route-list-view').hidden = true;
+    if ($('cover-view')) $('cover-view').hidden = false;
+    state.activeSection = 'cover';
+    if (!options.fromHistory && history?.replaceState) {
+      try { history.replaceState({ hantiView: 'cover' }, '', location.href); } catch (_) {}
     }
-    if (trail.id === 'seoul') {
-      const routes = state.routes.filter((route) => route?.routeGroup === '서울순례길');
-      if (!routes.length) return null;
-      return { ...buildSeoulRouteGroup(routes), officialUrl: trail.officialUrl, detailLines: trail.detailLines || [] };
-    }
-    if (trail.id === 'wonju-nimui') {
-      const routes = state.routes.filter((route) => route?.routeGroup === '님의 길');
-      if (!routes.length) return null;
-      return { ...buildNimuiRouteGroup(routes), officialUrl: trail.officialUrl, detailLines: trail.detailLines || [] };
-    }
-    if (trail.id === 'jeonju') {
-      const routes = state.routes.filter((route) => route?.region === '전주교구');
-      if (!routes.length) return null;
-      return { ...buildJeonjuRouteGroup(routes), officialUrl: trail.officialUrl, detailLines: trail.detailLines || [] };
-    }
-    if (trail.id === 'jeju-santo') {
-      const routes = state.routes.filter((route) => route?.region === '제주교구' || route?.routeGroup === '제주교구 순례길');
-      if (!routes.length) return null;
-      return { ...buildJejuRouteGroup(routes), officialUrl: trail.officialUrl, detailLines: trail.detailLines || [], logo: trail.logo };
-    }
-    return null;
   }
 
-  function renderUnavailableTrailDetail(list, trail) {
-    const card = document.createElement('section');
-    card.className = `route-card route-group-card route-detail-card${group.id ? ` ${group.id}` : ''}`;
-    card.innerHTML = `
-      <div class="route-card-main route-detail-title-row">
-        <div class="route-icon">${escapeHtml(trail.icon || '🧭')}</div>
-        <div class="route-copy">
-          <div class="route-name-row"><h3 class="route-name">${escapeHtml(trail.title)}</h3></div>
-        </div>
-        <button type="button" class="route-detail-close-btn" aria-label="상세 닫기">×</button>
-      </div>
-      <div class="trail-detail-note">${escapeHtml(trail.description || '상세 코스 데이터는 준비 중입니다.')}</div>
-      ${trail.officialUrl ? `<div class="route-detail-actions"><button type="button" class="route-detail-link" data-url="${escapeHtml(trail.officialUrl)}">공식 홈페이지 / 상세보기</button></div>` : ''}
-    `;
-    card.querySelector('[data-url]')?.addEventListener('click', (event) => openExternalUrl(event.currentTarget.dataset.url));
-    card.querySelector('.route-detail-close-btn')?.addEventListener('click', closeTrailDetail);
-    list.appendChild(card);
+  function openGuide(options = {}) {
+    if ($('cover-view')) $('cover-view').hidden = true;
+    if ($('route-list-view')) $('route-list-view').hidden = true;
+    if ($('map-view')) $('map-view').hidden = true;
+    if ($('guide-view')) $('guide-view').hidden = false;
+    state.activeSection = 'guide';
+    document.querySelector('.guide-scroll')?.scrollTo?.({ top: 0, behavior: 'auto' });
+    if (!options.fromHistory && history?.pushState) {
+      try { history.pushState({ hantiView: 'guide' }, '', location.href); } catch (_) {}
+    }
+  }
+
+  function openNavigationMenu(options = {}) {
+    renderRouteList();
+    if ($('cover-view')) $('cover-view').hidden = true;
+    if ($('guide-view')) $('guide-view').hidden = true;
+    if ($('map-view')) $('map-view').hidden = true;
+    if ($('route-list-view')) $('route-list-view').hidden = false;
+    state.activeSection = 'navigation';
+    $('route-list-view')?.scrollTo?.({ top: 0, behavior: 'auto' });
+    if (!options.fromHistory && history?.pushState) {
+      try { history.pushState({ hantiView: 'navigation' }, '', location.href); } catch (_) {}
+    }
+  }
+
+  function closeTrailDetail() {
+    showCover();
   }
 
   function buildRouteMenuItems(routes) {
-    const items = [];
-    const hantiRoute = routes.find((route) => route?.id === 'hanti' || route?.routeGroup === '한티가는길');
-    const seoulRoutes = routes.filter((route) => route?.routeGroup === '서울순례길');
-    const nimuiRoutes = routes.filter((route) => route?.routeGroup === '님의 길');
-    const jeonjuRoutes = routes.filter((route) => route?.region === '전주교구');
-    const jejuRoutes = routes.filter((route) => route?.region === '제주교구' || route?.routeGroup === '제주교구 순례길');
-    if (hantiRoute) items.push(buildHantiRouteGroup(hantiRoute));
-    if (seoulRoutes.length) items.push(buildSeoulRouteGroup(seoulRoutes));
-    if (nimuiRoutes.length) items.push(buildNimuiRouteGroup(nimuiRoutes));
-    if (jeonjuRoutes.length) items.push(buildJeonjuRouteGroup(jeonjuRoutes));
-    if (jejuRoutes.length) items.push(buildJejuRouteGroup(jejuRoutes));
-    routes.forEach((route) => {
-      if (!route || route.id === 'hanti' || route.routeGroup === '한티가는길' || route.routeGroup === '서울순례길' || route.routeGroup === '님의 길' || route.region === '전주교구' || route.region === '제주교구' || route.routeGroup === '제주교구 순례길') return;
-      items.push({ kind: 'route', route });
-    });
-    return items;
+    const route = routes.find((item) => item?.id === 'hanti' || item?.routeGroup === '한티가는길');
+    return route ? [buildHantiRouteGroup(route)] : [];
   }
 
   function buildHantiRouteGroup(route) {
     const courseOptions = Array.isArray(route.courses) ? route.courses.map((course) => ({
-      label: `${course.courseNo || ''}코스 ${course.name || ''}`.trim(),
+      label: `${course.courseNo || ''}코스 · ${course.name || ''}`.trim(),
       title: '',
       meta: [course.distanceLabel, course.durationLabel].filter(Boolean).join(' · '),
       introUrl: course.courseIntroUrl || '',
@@ -444,16 +257,16 @@
     return {
       kind: 'group',
       id: 'hanti-route-group',
-      icon: '🧭',
+      icon: '',
       title: route.name || '한티가는길',
       meta: '전체 코스 또는 1~5코스를 선택하세요.',
-      foot: `${route.courseSummaryLabel || '5개 코스'} · ${route.distanceLabel || ''}`,
+      foot: '',
       optionLayout: 'single',
       options: [
         {
-          label: '한티가는길 전체코스 보기',
+          label: '전체코스',
           title: '',
-          meta: [route.distanceLabel, route.durationLabel].filter(Boolean).join(' · '),
+          meta: `${route.distanceLabel || '45.6km'} · ${route.courseSummaryLabel || '5개 코스'}`,
           variant: 'full-route',
           route: createHantiFullRoute(route)
         },
@@ -497,41 +310,87 @@
   }
 
   function buildJeonjuRouteGroup(routes) {
-    const orderedRoutes = routes.slice().sort((a, b) => String(a.shortName || a.name).localeCompare(String(b.shortName || b.name), 'ko'));
+    const orderedRoutes = routes.slice().sort((a, b) => compareByExplicitOrder(JEONJU_ROUTE_ORDER, a, b));
+    const options = [];
+    if (orderedRoutes.length > 1) {
+      options.push({
+        label: '전주교구 순례길 전체코스 보기',
+        title: '요안루갈다길·순교자길·치명자길',
+        meta: '총 71.4km',
+        variant: 'full-route',
+        route: createJeonjuFullRoute(orderedRoutes)
+      });
+    }
+    orderedRoutes.forEach((route, index) => {
+      options.push({
+        label: `${index + 1}. ${route.shortName || route.name}`,
+        title: `${route.startName || '출발지'} ~ ${route.finishName || '도착지'}`,
+        meta: route.distanceLabel || '',
+        route
+      });
+    });
     return {
       kind: 'group',
       id: 'jeonju-pilgrimage-route-group',
       icon: '✝️',
       title: '전주교구 순례길',
-      meta: '걸을 순례길을 선택하세요.',
+      meta: '전체지도 또는 걸을 순례길을 선택하세요.',
       foot: `${orderedRoutes.length}개 순례길`,
       optionLayout: 'single',
-      options: orderedRoutes.map((route) => ({
-        label: route.shortName || route.name,
-        title: `${route.startName || '출발지'} ~ ${route.finishName || '도착지'}`,
-        meta: route.distanceLabel || '',
-        route
-      }))
+      options
     };
   }
 
+  const JEJU_ROUTE_ORDER = [
+    'jeju-light-road-kim-daegun',
+    'jeju-joy-road-hanon-cathedral',
+    'jeju-glory-road-kim-giryang',
+    'jeju-pain-road-jeong-nanju',
+    'jeju-reconciliation-road-new',
+    'jeju-grace-road-isidore'
+  ];
+  const JEONJU_ROUTE_ORDER = [
+    'jeonju-yoan-rugalda-road',
+    'jeonju-martyrs-road',
+    'jeonju-chimyeongja-road'
+  ];
+
+  function compareByExplicitOrder(order, a, b) {
+    const ai = order.indexOf(a?.id);
+    const bi = order.indexOf(b?.id);
+    if (ai !== bi) return (ai < 0 ? 999 : ai) - (bi < 0 ? 999 : bi);
+    return String(a?.shortName || a?.name || '').localeCompare(String(b?.shortName || b?.name || ''), 'ko');
+  }
+
   function buildJejuRouteGroup(routes) {
-    const orderedRoutes = routes.slice().sort((a, b) => String(a.shortName || a.name).localeCompare(String(b.shortName || b.name), 'ko'));
+    const orderedRoutes = routes.slice().sort((a, b) => compareByExplicitOrder(JEJU_ROUTE_ORDER, a, b));
+    const options = [];
+    if (orderedRoutes.length > 1) {
+      options.push({
+        label: '제주교구 순례길 전체코스 보기',
+        title: '거룩한 여정 6개 코스',
+        meta: '총 83.1km',
+        variant: 'full-route',
+        route: createJejuFullRoute(orderedRoutes)
+      });
+    }
+    orderedRoutes.forEach((route, index) => {
+      options.push({
+        label: `${index + 1}. ${route.shortName || route.name}`,
+        title: `${route.startName || '출발지'} ~ ${route.finishName || '도착지'}`,
+        meta: route.distanceLabel || '',
+        route: createJejuDisplayRoute(route)
+      });
+    });
     return {
       kind: 'group',
       id: 'jeju-pilgrimage-route-group',
       icon: '🌊',
-      logo: 'icons/jeju-santo-viaggio-logo.png',
       title: '천주교 제주교구 순례길 ‘거룩한 여정’ — SANTO VIAGGIO',
-      meta: '걸을 순례길을 선택하세요.',
+      meta: '전체지도 또는 걸을 순례길을 선택하세요.',
       foot: `${orderedRoutes.length}개 순례길`,
       optionLayout: 'single',
-      options: orderedRoutes.map((route) => ({
-        label: route.shortName || route.name,
-        title: `${route.startName || '출발지'} ~ ${route.finishName || '도착지'}`,
-        meta: route.distanceLabel || '',
-        route
-      }))
+      options
     };
   }
 
@@ -636,7 +495,15 @@
     }
 
     if (route.region === '전주교구') {
-      const ordered = (window.PILGRIMAGE_ROUTE_JEONJU || []).slice();
+      const ordered = (window.PILGRIMAGE_ROUTE_JEONJU || []).slice()
+        .sort((a, b) => compareByExplicitOrder(JEONJU_ROUTE_ORDER, a, b));
+      const index = ordered.findIndex((item) => item.id === route.id);
+      return index >= 0 ? index : 0;
+    }
+
+    if (route.region === '제주교구') {
+      const ordered = (window.PILGRIMAGE_ROUTE_JEJU || []).slice()
+        .sort((a, b) => compareByExplicitOrder(JEJU_ROUTE_ORDER, a, b));
       const index = ordered.findIndex((item) => item.id === route.id);
       return index >= 0 ? index : 0;
     }
@@ -762,18 +629,17 @@
     card.className = 'route-card route-group-card route-detail-card';
     card.innerHTML = `
       <div class="route-card-main route-detail-title-row">
-        ${group.logo ? `<div class="route-icon route-logo-icon"><img src="${escapeHtml(group.logo)}" alt=""></div>` : `<div class="route-icon">${escapeHtml(group.icon || '🧭')}</div>`}
+        <button type="button" class="route-detail-close-btn" aria-label="커버로 돌아가기">‹</button>
         <div class="route-copy">
           <div class="route-name-row">
             <h3 class="route-name">${escapeHtml(group.title || '순례길')}</h3>
           </div>
         </div>
-        <button type="button" class="route-detail-close-btn" aria-label="상세 닫기">×</button>
       </div>
       ${Array.isArray(group.detailLines) && group.detailLines.length ? `<ul class="trail-detail-lines">${group.detailLines.map((line) => `<li>${escapeHtml(line)}</li>`).join('')}</ul>` : ''}
       <div class="route-option-area"></div>
-      ${group.officialUrl ? `<div class="route-detail-actions"><button type="button" class="route-detail-link" data-url="${escapeHtml(group.officialUrl)}">공식 홈페이지 / 상세보기</button></div>` : ''}
-      <div class="route-foot route-group-foot"><span>${escapeHtml(group.foot || '')}</span></div>
+      ${group.officialUrl ? `<div class="route-detail-actions"><button type="button" class="route-detail-link" data-url="${escapeHtml(group.officialUrl)}">한티가는길 홈페이지</button></div>` : ''}
+      ${group.foot ? `<div class="route-foot route-group-foot"><span>${escapeHtml(group.foot)}</span></div>` : ''}
     `;
     const area = card.querySelector('.route-option-area');
     const renderOption = (option, parent) => {
@@ -872,9 +738,10 @@
     const courses = Array.isArray(baseRoute?.courses) ? baseRoute.courses : [];
     if (!courses.length) return { ...baseRoute, preserveSegmentBreaks: true };
 
-    // 한티가는길 전체코스는 각 코스의 마지막 스탬프와 다음 코스의 첫 스탬프
-    // 사이 좌표까지 빠짐없이 분담한다. 스탬프 사이를 단순 잘라내면 코스 끝부분이
-    // 지도에서 끊겨 보이므로, 인접 코스의 경계는 두 스탬프 인덱스의 중간으로 잡는다.
+    // 한티가는길의 코스 경계는 다음 코스 첫 지점과 정확히 일치한다.
+    // 예: 1코스는 1-1에서 시작해 2-1까지이며, 2코스는 같은 2-1에서 시작한다.
+    // 따라서 전체지도 색상도 1-4와 2-1의 중간에서 바뀌면 안 되고,
+    // 반드시 2-1 지점에서 1코스 색 → 2코스 색으로 전환되어야 한다.
     const allPoints = flattenRoutePoints({ ...baseRoute, preserveSegmentBreaks: false })
       .map((point) => ({ lat: Number(point.lat), lng: Number(point.lng) }))
       .filter((point) => isFiniteNumber(point.lat) && isFiniteNumber(point.lng));
@@ -897,7 +764,9 @@
       const nextStart = courseRanges[index + 1].startIndex;
       const safeCurrent = Number.isFinite(currentFinish) ? currentFinish : boundaries[index];
       const safeNext = Number.isFinite(nextStart) ? nextStart : safeCurrent;
-      boundaries.push(Math.max(boundaries[index], Math.round((safeCurrent + safeNext) / 2)));
+      // 공식 코스는 다음 코스의 첫 번호 지점까지 이어진다.
+      // 경계 좌표를 두 지점의 중간값으로 만들지 않고 다음 시작점 자체로 고정한다.
+      boundaries.push(Math.max(boundaries[index], safeNext));
     }
     boundaries.push(allPoints.length - 1);
 
@@ -986,6 +855,123 @@
           displayOrder: `${markerPrefix}-${rawNo}`
         };
       })
+    };
+  }
+
+  function createJejuDisplayRoute(route) {
+    if (!route || route.region !== '제주교구' || isCombinedRoute(route)) return route;
+    const orderedRoutes = (window.PILGRIMAGE_ROUTE_JEJU || []).slice()
+      .sort((a, b) => compareByExplicitOrder(JEJU_ROUTE_ORDER, a, b));
+    const routeIndex = orderedRoutes.findIndex((item) => item.id === route.id);
+    const routeNo = routeIndex >= 0 ? routeIndex + 1 : 1;
+    return {
+      ...route,
+      stamps: (route.stamps || []).map((stamp, stampIndex) => ({
+        ...stamp,
+        displayOrder: `${routeNo}-${stamp.order || stampIndex + 1}`
+      }))
+    };
+  }
+
+  function createJeonjuFullRoute(routes) {
+    const orderedRoutes = routes.slice().sort((a, b) => compareByExplicitOrder(JEONJU_ROUTE_ORDER, a, b));
+    const routeSegments = [];
+    orderedRoutes.forEach((route, routeIndex) => {
+      const displayColor = fullRouteSectionColor(routeIndex);
+      (route.routeSegments || []).forEach((segment, index) => {
+        routeSegments.push({
+          ...segment,
+          id: `jeonju-full-${route.id}-${segment.id || index}`,
+          sourceRouteId: route.id,
+          sourceRouteName: route.shortName || route.name,
+          displayColor,
+          displayWeight: 7 + ((orderedRoutes.length - routeIndex - 1) % 3),
+          points: segment.points || []
+        });
+      });
+    });
+    return {
+      id: 'jeonju-pilgrimage-full',
+      name: '전주교구 순례길 전체코스',
+      shortName: '전주교구 순례길 전체코스',
+      region: '전주교구',
+      type: 'pilgrimage_route',
+      mode: 'route_navigation',
+      lineType: 'gpx',
+      dataQuality: 'actual-gpx',
+      routeGroup: '전주교구 순례길',
+      distanceLabel: '71.4km',
+      startName: '요안루갈다길·순교자길·치명자길',
+      finishName: '전주교구 순례길',
+      preserveSegmentBreaks: true,
+      isOverviewOnly: true,
+      landmarks: dedupeMapPlaces(orderedRoutes.flatMap((route) => route.landmarks || [])),
+      features: {
+        showRouteLine: true,
+        showStampMarkers: true,
+        autoStamp: false,
+        nextStampDistance: false,
+        offRouteAlert: false,
+        nearestStampDistance: false
+      },
+      stamps: orderedRoutes.flatMap((route, routeIndex) => (route.stamps || []).map((stamp, stampIndex) => ({
+        ...stamp,
+        id: `jeonju-full-${route.id}-${stamp.id || stampIndex + 1}`,
+        displayOrder: `${routeIndex + 1}-${stamp.order || stampIndex + 1}`,
+        sourceRouteName: route.shortName || route.name
+      }))),
+      routeSegments
+    };
+  }
+
+  function createJejuFullRoute(routes) {
+    const orderedRoutes = routes.slice().sort((a, b) => compareByExplicitOrder(JEJU_ROUTE_ORDER, a, b));
+    const routeSegments = [];
+    orderedRoutes.forEach((route, routeIndex) => {
+      const displayColor = fullRouteSectionColor(routeIndex);
+      (route.routeSegments || []).forEach((segment, index) => {
+        routeSegments.push({
+          ...segment,
+          id: `jeju-full-${route.id}-${segment.id || index}`,
+          sourceRouteId: route.id,
+          sourceRouteName: route.shortName || route.name,
+          displayColor,
+          displayWeight: 7 + ((orderedRoutes.length - routeIndex - 1) % 3),
+          points: segment.points || []
+        });
+      });
+    });
+    return {
+      id: 'jeju-santo-viaggio-full',
+      name: '제주교구 순례길 전체코스',
+      shortName: '제주교구 순례길 전체코스',
+      region: '제주교구',
+      type: 'pilgrimage_route',
+      mode: 'route_navigation',
+      lineType: 'gpx',
+      dataQuality: 'actual-gpx',
+      routeGroup: '제주교구 순례길',
+      distanceLabel: '83.1km',
+      startName: '거룩한 여정 6개 코스',
+      finishName: 'SANTO VIAGGIO',
+      preserveSegmentBreaks: true,
+      isOverviewOnly: true,
+      landmarks: dedupeMapPlaces(orderedRoutes.flatMap((route) => route.landmarks || [])),
+      features: {
+        showRouteLine: true,
+        showStampMarkers: true,
+        autoStamp: false,
+        nextStampDistance: false,
+        offRouteAlert: false,
+        nearestStampDistance: false
+      },
+      stamps: orderedRoutes.flatMap((route, routeIndex) => (route.stamps || []).map((stamp, stampIndex) => ({
+        ...stamp,
+        id: `jeju-full-${route.id}-${stamp.id || stampIndex + 1}`,
+        displayOrder: `${routeIndex + 1}-${stamp.order || stampIndex + 1}`,
+        sourceRouteName: route.shortName || route.name
+      }))),
+      routeSegments
     };
   }
 
@@ -1165,6 +1151,8 @@
     rebuildNavigationModel();
     setStatusSheetMode(STATUS_SHEET_COMPACT);
 
+    if ($('cover-view')) $('cover-view').hidden = true;
+    if ($('guide-view')) $('guide-view').hidden = true;
     $('route-list-view').hidden = true;
     $('map-view').hidden = false;
     activateMapHistory();
@@ -1182,7 +1170,11 @@
           updateMyLocation(state.lastCoords, { center: state.following, following: state.following });
           updateRouteStatus(state.lastCoords);
         }
-        return requestInitialMapLocation();
+        if (state.initialLocationChoiceHandled) {
+          return state.initialLocationAutoMove ? requestInitialMapLocation() : Promise.resolve();
+        }
+        showInitialLocationBanner();
+        return Promise.resolve();
       })
       .then(() => {
         if (state.following) startFollow({ restored: true });
@@ -1196,11 +1188,17 @@
   }
 
   function handleBrowserBackRequest(event) {
-    if (!state.activeRoute) return;
-    if (event) event.preventDefault?.();
-    handleMapBackRequest({ fromBrowserBack: true });
-    if (state.activeRoute && history?.pushState) {
-      try { history.pushState({ gildongmuRouteNav: true }, '', location.href); } catch (_) {}
+    if (state.activeRoute) {
+      if (event) event.preventDefault?.();
+      handleMapBackRequest({ fromBrowserBack: true });
+      if (state.activeRoute && history?.pushState) {
+        try { history.pushState({ gildongmuRouteNav: true, hantiView: 'map' }, '', location.href); } catch (_) {}
+      }
+      return;
+    }
+    if (state.activeSection !== 'cover') {
+      if (event) event.preventDefault?.();
+      showCover({ fromHistory: true });
     }
   }
 
@@ -1245,7 +1243,7 @@
 
   function activateMapHistory() {
     if (!history?.pushState || history.state?.gildongmuRouteNav) return;
-    try { history.pushState({ gildongmuRouteNav: true }, '', location.href); } catch (_) {}
+    try { history.pushState({ gildongmuRouteNav: true, hantiView: 'map' }, '', location.href); } catch (_) {}
   }
 
   function showListWithoutPrompt() {
@@ -1259,7 +1257,9 @@
     state.routeDirection = 'forward';
     state.navigationModel = createEmptyNavigationModel();
     $('map-view').hidden = true;
+    if ($('cover-view')) $('cover-view').hidden = true;
     $('route-list-view').hidden = false;
+    state.activeSection = 'navigation';
     updateFollowButtons();
   }
 
@@ -1683,12 +1683,44 @@
     );
   }
 
+  function buildIndividualRouteEndpointStamps(route) {
+    if (!route || isCombinedRoute(route) || route.isOverviewOnly) return [];
+    const points = flattenRoutePoints(route);
+    const startPoint = points[0];
+    const finishPoint = points[points.length - 1];
+    const endpoints = [];
+    if (startPoint && isFiniteNumber(startPoint.lat) && isFiniteNumber(startPoint.lng)) {
+      endpoints.push({
+        id: `endpoint-start-${route.id || 'route'}`,
+        role: 'start',
+        name: route.startName || '출발지',
+        lat: Number(startPoint.lat),
+        lng: Number(startPoint.lng),
+        isRouteEndpoint: true
+      });
+    }
+    if (finishPoint && isFiniteNumber(finishPoint.lat) && isFiniteNumber(finishPoint.lng)) {
+      endpoints.push({
+        id: `endpoint-finish-${route.id || 'route'}`,
+        role: 'finish',
+        name: route.finishName || '도착지',
+        lat: Number(finishPoint.lat),
+        lng: Number(finishPoint.lng),
+        isRouteEndpoint: true
+      });
+    }
+    return endpoints;
+  }
+
   function renderStampMarkers(route) {
     if (!state.map || !window.kakao?.maps) return;
-    if (route?.region === '서울대교구' || route?.region === '전주교구') return;
     const KM = kakao.maps;
     const events = KM.event;
-    (route.stamps || []).forEach((stamp) => {
+    const regularStamps = (route?.region === '서울대교구' || route?.region === '전주교구')
+      ? []
+      : (route.stamps || []);
+    const stampsToRender = [...regularStamps, ...buildIndividualRouteEndpointStamps(route)];
+    stampsToRender.forEach((stamp) => {
       if (!isFiniteNumber(stamp.lat) || !isFiniteNumber(stamp.lng)) return;
       const position = new KM.LatLng(Number(stamp.lat), Number(stamp.lng));
       const markerText = stampMarkerText(stamp);
@@ -1714,8 +1746,9 @@
     state.stampMarkers.forEach((item) => {
       const marker = item.marker || item;
       const stamp = item.stamp || {};
-      const isWonjuEndpoint = state.activeRoute?.region === '원주교구'
-        && (stamp.role === 'start' || stamp.role === 'finish');
+      const isRouteEndpoint = stamp.isRouteEndpoint
+        || stamp.role === 'start'
+        || stamp.role === 'finish';
       // 번호형 지점 마커는 상세 확대에서만 표시한다. 전체 지도에서는 코스명 라벨과
       // 경로선이 우선 보이도록 하고, 원주교구의 출발/도착 표시는 계속 유지한다.
       const isHantiRoute = state.activeRoute?.id === 'hanti'
@@ -1724,17 +1757,15 @@
       // 숫자형 지점 마커는 상세 줌에서만 표시한다.
       // 전체코스를 한 화면에 보는 수준에서는 경로선과 코스명 라벨이 먼저 보이도록 숨긴다.
       // 한티가는길도 다른 순례길과 같은 상세 줌 기준을 사용해 지도 가림을 방지한다.
-      const visible = isWonjuEndpoint || level <= 5;
+      const visible = isRouteEndpoint || level <= 7;
       marker.setMap(visible ? state.map : null);
     });
   }
 
   function stampMarkerText(stamp) {
     if (!stamp) return '';
-    if (state.activeRoute?.region === '원주교구') {
-      if (stamp.role === 'start') return '출발';
-      if (stamp.role === 'finish') return '도착';
-    }
+    if (stamp.role === 'start') return '출발';
+    if (stamp.role === 'finish') return '도착';
     if (stamp.displayOrder) return String(stamp.displayOrder);
     if (typeof stamp.id === 'string' && stamp.id.includes('-')) return stamp.id;
     if (stamp.order) return String(stamp.order);
@@ -1778,8 +1809,7 @@
     if (!state.map || !window.kakao?.maps || !stamp) return;
     hideStampInfo();
     const KM = kakao.maps;
-    const orderText = stampMarkerText(stamp);
-    const title = `${orderText ? orderText + ' ' : ''}${stamp.name || '순례 지점'}`.trim();
+    const title = String(stamp.name || '순례 지점').trim();
     const content = createUnifiedMapInfoCard(title, '지점 정보 닫기');
     state.stampInfoOverlay = new KM.CustomOverlay({
       position,
@@ -1850,6 +1880,33 @@
       const coords = toCoords(position);
       handleLocationUpdate(coords, { center: true, fromWatch: false });
     }).catch(showLocationError);
+  }
+
+  function showInitialLocationBanner() {
+    const banner = $('initial-location-banner');
+    if (!banner || state.initialLocationChoiceHandled) return;
+    banner.hidden = false;
+    requestAnimationFrame(() => banner.classList.add('show'));
+  }
+
+  function hideInitialLocationBanner() {
+    const banner = $('initial-location-banner');
+    if (!banner) return;
+    banner.classList.remove('show');
+    setTimeout(() => { banner.hidden = true; }, 180);
+  }
+
+  function handleInitialLocationMove() {
+    state.initialLocationChoiceHandled = true;
+    state.initialLocationAutoMove = true;
+    hideInitialLocationBanner();
+    requestInitialMapLocation().catch(showLocationError);
+  }
+
+  function handleInitialLocationSkip() {
+    state.initialLocationChoiceHandled = true;
+    state.initialLocationAutoMove = false;
+    hideInitialLocationBanner();
   }
 
   function requestInitialMapLocation() {
