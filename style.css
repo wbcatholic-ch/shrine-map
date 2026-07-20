@@ -1699,6 +1699,12 @@ html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-kakao-nav{
 .rs-route-stack.has-waypoint3 {
   grid-template-rows: 44px 5px 44px 5px 44px 5px 44px 5px 44px;
 }
+.rs-route-stack.has-waypoint4 {
+  grid-template-rows: 44px 5px 44px 5px 44px 5px 44px 5px 44px 5px 44px;
+}
+.rs-route-stack.has-waypoint5 {
+  grid-template-rows: 44px 5px 44px 5px 44px 5px 44px 5px 44px 5px 44px 5px 44px;
+}
 .rs-start-box, .rs-waypoint-box, .rs-waypoints-summary-box, .rs-end-box {
   display: flex;
   align-items: center;
@@ -1715,30 +1721,42 @@ html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-kakao-nav{
 .rs-waypoint-box { grid-column: 1; grid-row: 3; background: #fff8e9; border-color: #f39c12; }
 .rs-waypoint2-box { grid-column: 1; grid-row: 5; background: #fff4df; border-color: #d97706; }
 .rs-waypoint3-box { grid-column: 1; grid-row: 7; background: #fff1dc; border-color: #b45309; }
+.rs-waypoint4-box { grid-column: 1; grid-row: 9; background: #ffede2; border-color: #92400e; }
+.rs-waypoint5-box { grid-column: 1; grid-row: 11; background: #fde8dc; border-color: #78350f; }
 .rs-waypoints-summary-box { grid-column: 1; grid-row: 3; background: #fff7ea; border-color: #d97706; cursor: pointer; }
 .rs-waypoints-summary-dot { background: #d97706; }
 #rs-waypoints-summary-box,
 #rs-waypoint-box,
 #rs-waypoint2-box,
 #rs-waypoint3-box,
+#rs-waypoint4-box,
+#rs-waypoint5-box,
 #rs-waypoint-end-tools,
 #rs-waypoint2-end-tools,
-#rs-waypoint3-end-tools { display:none; }
+#rs-waypoint3-end-tools,
+#rs-waypoint4-end-tools,
+#rs-waypoint5-end-tools { display:none; }
 .rs-route-stack.has-waypoint-summary { grid-template-rows: 44px 5px 44px 5px 44px; }
 .rs-route-stack.has-waypoint-summary .rs-end-box { grid-row: 5 !important; }
 .rs-route-stack.has-waypoint-summary #rs-start-waypoint-tools,
 .rs-route-stack.has-waypoint-summary .rs-waypoint-end-tools,
 .rs-route-stack.has-waypoint-summary .rs-waypoint2-end-tools,
-.rs-route-stack.has-waypoint-summary .rs-waypoint3-end-tools { display: none !important; }
+.rs-route-stack.has-waypoint-summary .rs-waypoint3-end-tools,
+.rs-route-stack.has-waypoint-summary .rs-waypoint4-end-tools,
+.rs-route-stack.has-waypoint-summary .rs-waypoint5-end-tools { display: none !important; }
 .rs-end-box   { grid-column: 1; grid-row: 3; background: #fff5f5; border-color: #c0392b; }
 .rs-route-stack.has-waypoint .rs-end-box { grid-row: 5; }
 .rs-route-stack.has-waypoint2 .rs-end-box { grid-row: 7; }
 .rs-route-stack.has-waypoint3 .rs-end-box { grid-row: 9; }
+.rs-route-stack.has-waypoint4 .rs-end-box { grid-row: 11; }
+.rs-route-stack.has-waypoint5 .rs-end-box { grid-row: 13; }
 .rs-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
 .rs-dot-start { background:#1565c0; }
 .rs-dot-waypoint1 { background:#f39c12; }
 .rs-dot-waypoint2 { background:#d97706; }
 .rs-dot-waypoint3 { background:#b45309; }
+.rs-dot-waypoint4 { background:#92400e; }
+.rs-dot-waypoint5 { background:#78350f; }
 .rs-dot-end { background:#e53935; }
 .rs-lbl { flex: 1; font-size: 15px; color: #555; font-weight: 500; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .rs-lbl.filled { color: var(--ink); font-weight: 700; }
@@ -1776,14 +1794,9 @@ html:not(.ios-device).oai-screen-compact-short #sheet-route .rs-x {
 .rs-waypoint-end-tools { grid-column: 2; grid-row: 3 / 6; align-self: stretch; }
 .rs-waypoint2-end-tools { grid-column: 2; grid-row: 5 / 8; align-self: stretch; }
 .rs-waypoint3-end-tools { grid-column: 2; grid-row: 7 / 10; align-self: stretch; }
-/* V8-1-14-621: +경유지는 항상 경로검색 줄 오른쪽의 단일 버튼만 사용한다.
-   2번째/3번째 추가도 #rs-add-waypoint-btn이 다음 경유지 역할을 받아 같은 위치에서 실행한다. */
-.rs-route-stack .rs-add-waypoint2-btn,
-.rs-route-stack .rs-add-waypoint3-btn,
-.rs-route-stack.has-waypoint:not(.has-waypoint2) .rs-add-waypoint2-btn,
-.rs-route-stack.has-waypoint2:not(.has-waypoint3) .rs-add-waypoint3-btn { display: none !important; }
-.rs-route-stack.has-waypoint2 .rs-add-waypoint2-btn,
-.rs-route-stack.has-waypoint3 .rs-add-waypoint3-btn { display: none !important; }
+.rs-waypoint4-end-tools { grid-column: 2; grid-row: 9 / 12; align-self: stretch; }
+.rs-waypoint5-end-tools { grid-column: 2; grid-row: 11 / 14; align-self: stretch; }
+/* +경유지는 경로검색 줄 오른쪽의 단일 버튼만 사용하며 최대 5곳까지 순서대로 연다. */
 .rs-swap-btn {
   width: var(--rs-swap-size);
   height: var(--rs-swap-size);
@@ -4862,7 +4875,7 @@ html.oai-cover-booting::after{
     linear-gradient(to right, #fbf8f1 0%, rgba(251,248,241,.96) 5%, rgba(251,248,241,.60) 13%, rgba(251,248,241,.16) 24%, rgba(251,248,241,0) 36%, rgba(251,248,241,0) 64%, rgba(251,248,241,.16) 76%, rgba(251,248,241,.60) 87%, rgba(251,248,241,.96) 95%, #fbf8f1 100%),
     linear-gradient(to bottom, #fbf8f1 0%, rgba(251,248,241,.90) 6%, rgba(251,248,241,.36) 17%, rgba(251,248,241,0) 30%, rgba(251,248,241,0) 70%, rgba(251,248,241,.36) 83%, rgba(251,248,241,.90) 94%, #fbf8f1 100%),
     radial-gradient(ellipse 96% 88% at 50% 48%, rgba(251,248,241,0) 50%, rgba(251,248,241,.08) 62%, rgba(251,248,241,.34) 76%, rgba(251,248,241,.76) 90%, rgba(251,248,241,1) 100%),
-    url("intro-cross-jesus.jpg?v=V8-1-14-634") !important;
+    url("intro-cross-jesus.jpg?v=V8-1-14-635") !important;
   background-position:center center, center center, center center, center center !important;
   background-size:100% 100%, 100% 100%, 100% 100%, auto 106% !important;
   background-repeat:no-repeat, no-repeat, no-repeat, no-repeat !important;
