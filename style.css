@@ -1177,7 +1177,7 @@ html.retreat-mode #nearby-body { overflow-x: hidden; }
 }
 .sm-map-select-btn:active{transform:scale(.985);}
 .sm-body { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; border-top: 2px solid rgba(255,255,255,.30); }
-#sm-body-place { border-top: 2px solid rgba(255,255,255,.30); }
+#sm-body-all, #sm-body-place { border-top: 2px solid rgba(255,255,255,.30); }
 .sm-grp {
   padding: 6px 14px 3px;
   font-size: 10px;
@@ -1263,8 +1263,8 @@ html.retreat-mode #nearby-body { overflow-x: hidden; }
 
 #sm-tab-bar {
   display: flex;
-  gap: 8px;
-  padding: 6px 10px;
+  gap: 6px;
+  padding: 6px 8px;
   height: 50px;
   min-height: 50px;
   max-height: 50px;
@@ -1281,9 +1281,9 @@ html.retreat-mode #nearby-body { overflow-x: hidden; }
   height: 38px;
   min-height: 38px;
   max-height: 38px;
-  padding: 0 12px;
+  padding: 0 7px;
   border-radius: 13px;
-  font-size: 14px;
+  font-size: 13px;
   font-weight: 800;
   font-family: inherit;
   cursor: pointer;
@@ -1305,6 +1305,11 @@ html.retreat-mode #nearby-body { overflow-x: hidden; }
   border-color: transparent;
   box-shadow: none;
   font-weight: 950;
+}
+.sm-general-place-badge{
+  color:#475569!important;
+  background:#eef2f7!important;
+  border:1px solid #d6dde7;
 }
 
 html:not(.parish-mode):not(.retreat-mode) #srch-modal #sm-tab-bar,
@@ -4875,7 +4880,7 @@ html.oai-cover-booting::after{
     linear-gradient(to right, #fbf8f1 0%, rgba(251,248,241,.96) 5%, rgba(251,248,241,.60) 13%, rgba(251,248,241,.16) 24%, rgba(251,248,241,0) 36%, rgba(251,248,241,0) 64%, rgba(251,248,241,.16) 76%, rgba(251,248,241,.60) 87%, rgba(251,248,241,.96) 95%, #fbf8f1 100%),
     linear-gradient(to bottom, #fbf8f1 0%, rgba(251,248,241,.90) 6%, rgba(251,248,241,.36) 17%, rgba(251,248,241,0) 30%, rgba(251,248,241,0) 70%, rgba(251,248,241,.36) 83%, rgba(251,248,241,.90) 94%, #fbf8f1 100%),
     radial-gradient(ellipse 96% 88% at 50% 48%, rgba(251,248,241,0) 50%, rgba(251,248,241,.08) 62%, rgba(251,248,241,.34) 76%, rgba(251,248,241,.76) 90%, rgba(251,248,241,1) 100%),
-    url("intro-cross-jesus.jpg?v=V8-1-14-635") !important;
+    url("intro-cross-jesus.jpg?v=V8-1-14-636") !important;
   background-position:center center, center center, center center, center center !important;
   background-size:100% 100%, 100% 100%, 100% 100%, auto 106% !important;
   background-repeat:no-repeat, no-repeat, no-repeat, no-repeat !important;
@@ -5570,6 +5575,7 @@ html.oai-android-tablet:not(.ios-device) .module-view.open{
 #region-body,
 #nearby-body,
 #srch-modal .sm-body,
+#sm-body-all,
 #sm-body,
 #sm-body-place{
   overflow-y:auto;
