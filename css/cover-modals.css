@@ -41,6 +41,8 @@
    버튼 높이·간격·아이콘·글자·테두리는 oai-menu-modal 변수로 한 곳에서 조정하고,
    미사 중 빠른 사용 4버튼의 반복 ID 규칙은 mass-quick-btn 한 곳으로 통합한다. */
 .cover-menu-modal {
+  --oai-menu-modal-item-border-color: #246ca8;
+  --oai-menu-modal-item-border-width: 2px;
   position: fixed;
   inset: 0;
   z-index: 10070;
@@ -219,11 +221,6 @@
   letter-spacing: var(--oai-menu-modal-text-letter) !important;
   text-align: left !important;
 }
-
-/* 커버 메뉴 버튼 포인트 색상은 버튼별 변수만 지정하고, 실제 border 적용은 oai-menu-modal-item 한 곳에서 처리한다. */
-#cover-menu-guide-btn { --oai-menu-modal-item-border-color: #9CC9F5; }
-#cover-menu-privacy-btn { --oai-menu-modal-item-border-color: #D7C4F2; }
-#cover-menu-qna-btn { --oai-menu-modal-item-border-color: #A9DDB7; }
 
 html:not(.ios-device).oai-screen-compact-short .oai-menu-modal-panel {
   width: min(360px, calc(100vw - 28px)) !important;
