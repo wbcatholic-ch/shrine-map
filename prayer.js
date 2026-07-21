@@ -421,7 +421,7 @@ function prShowExternalGuide(message, duration, options){
     guide.setAttribute('role','status');
     guide.setAttribute('aria-live','polite');
     guide.innerHTML = '<div class="pr-external-guide-card">' +
-      '<div class="pr-external-guide-cross">✝</div>' +
+      '<div class="pr-external-guide-cross" aria-hidden="true"></div>' +
       '<div class="pr-external-guide-text">' + prSafeText(message) + '</div>' +
       '</div>';
     try{ document.documentElement.classList.add('pr-external-guide-active'); }catch(_e){}

@@ -27,23 +27,7 @@
   text-align: center;
   color: var(--v4-text-main);
 }
-.pr-external-guide-cross {
-  width: 42px;
-  height: 42px;
-  margin: 0 auto 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: var(--v4-gold);
-  font-size: 36px;
-  font-weight: 900;
-  line-height: 1;
-  text-shadow: 0 2px 8px rgba(184,150,90,.20);
-  animation: prExternalCrossSpin 2.8s linear infinite !important;
-  animation-delay: 0s !important;
-  transform-origin: 50% 50%;
-  will-change: transform;
-}
+.pr-external-guide-cross { margin: 0 auto 12px; }
 .pr-external-guide-text {
   font-size: 15px;
   line-height: 1.55;
@@ -51,11 +35,6 @@
   letter-spacing: -.02em;
   word-break: keep-all;
 }
-@keyframes prExternalCrossSpin {
-  from { transform: rotate(0deg); }
-  to { transform: rotate(360deg); }
-}
-
 html.pr-external-guide-active #prayer-bar,
 html.pr-external-guide-active #prayer-tabs,
 html.pr-external-guide-active #prayer-search-bar {
@@ -72,9 +51,7 @@ html.pr-external-guide-active.oai-stability-veil::after {
 #pr-external-guide::before,
 #pr-external-guide::after,
 .pr-external-guide-card::before,
-.pr-external-guide-card::after,
-.pr-external-guide-cross::before,
-.pr-external-guide-cross::after {
+.pr-external-guide-card::after {
   content: none !important;
   display: none !important;
 }

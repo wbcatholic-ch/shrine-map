@@ -54,32 +54,7 @@
 #prayer-view.prayer-loading #prayer-loading {
   display: flex;
 }
-.prayer-loading-cross {
-  width: var(--oai-loading-cross-size, 36px);
-  height: var(--oai-loading-cross-size, 36px);
-  min-width: var(--oai-loading-cross-size, 36px);
-  min-height: var(--oai-loading-cross-size, 36px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  border: 0;
-  border-radius: 0;
-  background: transparent;
-  color: var(--oai-loading-cross-color, #d4aa6a);
-  font-size: var(--oai-loading-cross-font, 32px);
-  font-weight: 900;
-  line-height: 1;
-  opacity: 1;
-  visibility: visible;
-  transform-origin: center center;
-  animation: oaiUnifiedLoadingCrossSpin var(--oai-loading-cross-speed, 2.8s) linear infinite;
-  transition: none;
-}
-.prayer-loading-cross::before {
-  content: "✝";
-  display: block;
-  line-height: 1;
-}
+.prayer-loading-cross { margin: 0; }
 .prayer-loading-text {
   color: rgba(111,79,35,.82);
   font-size: 13px;

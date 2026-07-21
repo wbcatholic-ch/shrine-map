@@ -1944,9 +1944,8 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, var(--v4-retreat
 
 /* V8-1-14-563: 지도 로딩 화면의 배경/글자색 기준은 이 원래 위치에서만 관리한다. */
 .map-loading { display: flex; flex-direction: column; align-items: center; justify-content: center; gap:8px; background: var(--bg-unified,var(--v4-bg-cream))!important; height: 100%; min-height:100%; }
-.map-loading-icon { font-size: 36px; margin-bottom: 14px; color: var(--gold,var(--v4-gold))!important; animation: oaiUnifiedLoadingCrossSpin 2.8s linear infinite; }
+.map-loading-icon { margin-bottom: 14px; }
 .map-loading-txt { font-size: 13px; color: var(--v4-text-muted)!important; font-weight: 600; }
-@keyframes oaiLoadingCircleSpin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 
 .empty-msg { padding: 40px 20px; text-align: center; color: #aaa; font-size: 13px; line-height: 1.8; }
 #nearby-body .nearby-distance-loading {
@@ -1961,14 +1960,7 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, var(--v4-retreat
   font-weight: 800;
   line-height: 1.6;
 }
-#nearby-body .nearby-distance-spinner {
-  width: 30px;
-  height: 30px;
-  border: 3px solid rgba(31,42,68,.16);
-  border-top-color: var(--v4-header-navy);
-  border-radius: 50%;
-  animation: oaiLoadingCircleSpin 1.15s linear infinite;
-}
+#nearby-body .nearby-distance-spinner { margin-bottom: 2px; }
 #nearby-body .nearby-distance-title {
   display: block;
   color: var(--v4-text-strong);
@@ -2078,25 +2070,7 @@ html.retreat-mode .ric-hd { background: linear-gradient(135deg, var(--v4-retreat
   opacity:0!important;
   visibility:visible!important;
 }
-#oai-missa-portal-guard .oai-missa-portal-cross{
-  width:var(--oai-loading-cross-size,36px)!important;
-  height:var(--oai-loading-cross-size,36px)!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  color:var(--oai-loading-cross-color,#d4aa6a)!important;
-  font-size:var(--oai-loading-cross-font,32px)!important;
-  font-weight:900!important;
-  line-height:1!important;
-  background:transparent!important;
-  border:0!important;
-  opacity:1!important;
-  visibility:visible!important;
-  pointer-events:none!important;
-  transform-origin:center center!important;
-  animation:oaiUnifiedLoadingCrossSpin var(--oai-loading-cross-speed,2.8s) linear infinite!important;
-  transition:none!important;
-}
+/* 매일미사 보호창의 로딩 표시는 아래 공통 로딩 소유 블록에서 관리한다. */
 
 /* V8-1-14-563: 매일미사/주요기도문 하단 빠른 버튼은 이 블록을 단일 기준으로 관리한다.
    Android/compact 차이는 뒤쪽에서 같은 속성을 다시 쓰지 않고 변수만 바꾼다. */
@@ -3039,12 +3013,8 @@ html.oai-hide-main-map-layer #app { background: #ede8e0; }
 
 html.oai-stability-veil { background: var(--v4-bg-cream) !important; }
 html.oai-stability-veil *, html.oai-external-return-freeze *, html.oai-resume-freeze * { transition: none !important; animation: none !important; scroll-behavior: auto !important; }
-html.oai-stability-veil::before { content: ""; position: fixed; inset: 0; z-index: 2147483000; background: var(--v4-bg-cream); pointer-events: none; opacity: 1; animation: oaiStabilityVeilIn .08s ease-out both; }
-html.oai-stability-veil.oai-stability-veil-releasing::before { animation: oaiStabilityVeilOut .10s ease-in both; }
-html.oai-stability-veil::after { content: ""; position: fixed; left: 50%; top: 50%; width: 28px; height: 28px; margin: -14px 0 0 -14px; border-radius: 50%; border: 3px solid rgba(31,42,68,.16); border-top-color: var(--v4-header-navy); z-index: 2147483001; pointer-events: none; animation: oaiStabilitySpin .75s linear infinite; }
 @keyframes oaiStabilityVeilIn { from { opacity: 0; } to { opacity: 1; } }
 @keyframes oaiStabilityVeilOut { from { opacity: 1; } to { opacity: 0; } }
-@keyframes oaiStabilitySpin { to { transform: rotate(360deg); } }
 
 html.oai-returning * { transition: none; animation: none; scroll-behavior: auto; }
 html.oai-cover-resizing #cover, html.oai-cover-resizing #cover * { transition: none; animation: none; }
@@ -3531,6 +3501,8 @@ html.retreat-mode #list-body .li-dot{
   background:var(--mode-filter-active-bg, var(--gold,var(--v4-gold)))!important;
   color:var(--mode-filter-active-color, var(--v4-text-main))!important;
   border-color:var(--mode-filter-active-border, var(--gold2,#b8965a))!important;
+  font-weight:900!important;
+  box-shadow:0 2px 9px rgba(14,21,53,.18)!important;
 }
 
 #app .li-name,
@@ -3678,18 +3650,6 @@ html.ios-device #qna-view.open {
   #cover .my-diocese-setup-banner span { font-size: calc(15.2px * var(--app-font-scale, 1)) !important; }
 }
 
-.filter-btn.my-diocese-filter,
-.sm-fb.my-diocese-filter {
-  border-color: var(--v4-brown) !important;
-  color: #5C3B0C !important;
-  background: #FFF7E4 !important;
-}
-.filter-btn.my-diocese-filter.active,
-.sm-fb.my-diocese-filter.on {
-  background: var(--v4-brown) !important;
-  border-color: #9B641A !important;
-  color: var(--v4-surface-white) !important;
-}
 .filter-my-dio-badge {
   display: inline-flex;
   align-items: center;
@@ -4512,8 +4472,6 @@ html:not(.ios-device).retreat-mode #app #map-wrap #loc-btn{
   scroll-margin-right:14px!important;
 }
 .shrine-visit-cards-diocese .filter-btn.active{background:#d4aa6a!important;color:#0e1535!important;border-color:#d4aa6a!important;font-weight:900!important;box-shadow:0 2px 9px rgba(0,0,0,.14)!important;}
-.shrine-visit-cards-diocese .filter-btn.my-diocese-filter:not(.active){background:#ffffff!important;color:#5C3B0C!important;border-color:#d4aa6a!important;}
-.shrine-visit-cards-diocese .filter-btn.my-diocese-filter.active{background:var(--v4-brown)!important;border-color:#9B641A!important;color:var(--v4-surface-white)!important;}
 .shrine-visit-cards-stats{
   display:flex!important;
   align-items:center!important;
@@ -4824,31 +4782,6 @@ html.oai-map-search-keyboard-lock #sheet-region.open{
   background: #f5f0e8;
   margin: 10px 0 12px;
 }
-html.oai-stability-veil::after {
-  content:"✝" !important;
-  position:fixed !important;
-  left:50% !important;
-  top:50% !important;
-  width:34px !important;
-  height:34px !important;
-  margin:-17px 0 0 -17px !important;
-  display:flex !important;
-  align-items:center !important;
-  justify-content:center !important;
-  border:0 !important;
-  border-radius:0 !important;
-  background:transparent !important;
-  color:#d4aa6a !important;
-  font-size:30px !important;
-  font-weight:900 !important;
-  line-height:1 !important;
-  z-index:2147483001 !important;
-  pointer-events:none !important;
-  opacity:1 !important;
-  visibility:visible !important;
-  animation:oaiStabilitySpin 2.8s linear infinite !important;
-}
-
 /* V8-1-14-563: 사용하지 않는 이전 Google-style intro keyframes는 제거하고, oaiIntroSmoothPhoto*만 유지한다. */
 html.oai-cover-booting body{
   background:#fbf8f1 !important;
@@ -4880,7 +4813,7 @@ html.oai-cover-booting::after{
     linear-gradient(to right, #fbf8f1 0%, rgba(251,248,241,.96) 5%, rgba(251,248,241,.60) 13%, rgba(251,248,241,.16) 24%, rgba(251,248,241,0) 36%, rgba(251,248,241,0) 64%, rgba(251,248,241,.16) 76%, rgba(251,248,241,.60) 87%, rgba(251,248,241,.96) 95%, #fbf8f1 100%),
     linear-gradient(to bottom, #fbf8f1 0%, rgba(251,248,241,.90) 6%, rgba(251,248,241,.36) 17%, rgba(251,248,241,0) 30%, rgba(251,248,241,0) 70%, rgba(251,248,241,.36) 83%, rgba(251,248,241,.90) 94%, #fbf8f1 100%),
     radial-gradient(ellipse 96% 88% at 50% 48%, rgba(251,248,241,0) 50%, rgba(251,248,241,.08) 62%, rgba(251,248,241,.34) 76%, rgba(251,248,241,.76) 90%, rgba(251,248,241,1) 100%),
-    url("intro-cross-jesus.jpg?v=V8-1-14-637") !important;
+    url("intro-cross-jesus.jpg?v=V8-1-14-638") !important;
   background-position:center center, center center, center center, center center !important;
   background-size:100% 100%, 100% 100%, 100% 100%, auto 106% !important;
   background-repeat:no-repeat, no-repeat, no-repeat, no-repeat !important;
@@ -5002,10 +4935,7 @@ html:not(.ios-device) .shrine-visit-detail-body{
 /* V8-1-14-563: 나의 성지순례 현황 버튼은 검색 키보드가 떠도 리스트 위에 남아야 하므로
    kb-open / map-search-keyboard-lock에서 숨기지 않는다. 표시 여부는 JS가 현재 화면 상태로만 결정한다. */
 html.oai-refresh-no-intro.oai-cover-booting::after,
-html.oai-refresh-no-intro.oai-cover-revealing::after,
-html.oai-stability-veil[data-oai-stability-reason*="refresh"]::after,
-html.oai-stability-veil[data-oai-stability-reason*="reload"]::after,
-html.oai-stability-veil[data-oai-refresh-early-veil="1"]::after{
+html.oai-refresh-no-intro.oai-cover-revealing::after{
   content:""!important;
   display:none!important;
   opacity:0!important;
@@ -5034,12 +4964,6 @@ html.oai-resume-freeze #info-card{
   transition:none!important;
   animation:none!important;
   scroll-behavior:auto!important;
-}
-html.oai-stability-veil::before{
-  animation-duration:.08s!important;
-}
-html.oai-stability-veil.oai-stability-veil-releasing::before{
-  animation-duration:.10s!important;
 }
 html.oai-external-return-freeze *,
 html.oai-stability-veil[data-oai-stability-reason*="external"] *{
@@ -5126,20 +5050,31 @@ html.oai-font-global .category-source-note { font-size: calc(11px * var(--app-in
   transform:none!important;
 }
 
-@keyframes oaiUnifiedLoadingCrossSpin{to{transform:rotate(360deg)}}
+@keyframes oaiUnifiedLoadingRingSpin{to{transform:rotate(360deg)}}
 :root{
-  --oai-loading-cross-size:36px;
-  --oai-loading-cross-font:32px;
+  --oai-loading-box-size:60px;
+  --oai-loading-ring-size:56px;
+  --oai-loading-ring-width:3px;
+  --oai-loading-cross-font:34px;
   --oai-loading-cross-color:#d4aa6a;
-  --oai-loading-cross-speed:2.8s;
+  --oai-loading-ring-speed:1.65s;
   --oai-guard-bg:#f5f0e8;
 }
+/* 공통 전체화면 보호막: 배경과 고정 십자가는 ::before, 독립 회전 원은 ::after가 소유한다. */
 html.oai-stability-veil::before{
-  content:""!important;
+  content:"✝"!important;
   position:fixed!important;
   inset:0!important;
   z-index:2147483000!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  box-sizing:border-box!important;
   background:var(--oai-guard-bg)!important;
+  color:var(--oai-loading-cross-color)!important;
+  font-size:var(--oai-loading-cross-font)!important;
+  font-weight:900!important;
+  line-height:1!important;
   opacity:1!important;
   visibility:visible!important;
   pointer-events:none!important;
@@ -5150,32 +5085,29 @@ html.oai-stability-veil::after,
 html.oai-stability-veil[data-oai-stability-reason*="refresh"]::after,
 html.oai-stability-veil[data-oai-stability-reason*="reload"]::after,
 html.oai-stability-veil[data-oai-refresh-early-veil="1"]::after{
-  content:"✝"!important;
+  content:""!important;
   position:fixed!important;
   left:50%!important;
   top:50%!important;
-  width:var(--oai-loading-cross-size)!important;
-  height:var(--oai-loading-cross-size)!important;
-  margin:calc(var(--oai-loading-cross-size) / -2) 0 0 calc(var(--oai-loading-cross-size) / -2)!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  border:0!important;
-  border-radius:0!important;
+  z-index:2147483001!important;
+  width:var(--oai-loading-ring-size)!important;
+  height:var(--oai-loading-ring-size)!important;
+  margin:calc(var(--oai-loading-ring-size) / -2) 0 0 calc(var(--oai-loading-ring-size) / -2)!important;
+  box-sizing:border-box!important;
+  display:block!important;
+  border-radius:50%!important;
+  border:var(--oai-loading-ring-width) solid rgba(212,170,106,.20)!important;
+  border-top-color:var(--oai-loading-cross-color)!important;
+  border-right-color:rgba(212,170,106,.68)!important;
   background:transparent!important;
-  color:var(--oai-loading-cross-color)!important;
-  font-size:var(--oai-loading-cross-font)!important;
-  font-weight:900!important;
-  line-height:1!important;
   opacity:1!important;
   visibility:visible!important;
-  z-index:2147483001!important;
   pointer-events:none!important;
   transform-origin:center center!important;
-  animation:oaiUnifiedLoadingCrossSpin var(--oai-loading-cross-speed) linear infinite!important;
+  animation:oaiUnifiedLoadingRingSpin var(--oai-loading-ring-speed) linear infinite!important;
   transition:none!important;
 }
-/* V8-1-14-563: 외부사이트 진입/복귀 보호창 CSS 단일 기준. JS 흐름은 유지하고, 중복 십자가만 막는다. */
+/* 외부사이트 진입 보호창 DOM 하나만 유지한다. */
 #oai-external-entry-guard{
   position:fixed!important;
   inset:0!important;
@@ -5192,54 +5124,88 @@ html.oai-stability-veil[data-oai-refresh-early-veil="1"]::after{
   backface-visibility:hidden!important;
   contain:layout paint style!important;
 }
-#oai-external-entry-guard.show{
-  display:flex!important;
-  opacity:1!important;
-  visibility:visible!important;
-}
-#oai-external-entry-guard.hide{
-  display:flex!important;
-  opacity:0!important;
-  visibility:hidden!important;
-}
+#oai-external-entry-guard.show{display:flex!important;opacity:1!important;visibility:visible!important;}
+#oai-external-entry-guard.hide{display:flex!important;opacity:0!important;visibility:hidden!important;}
 #oai-external-entry-guard::before,
-#oai-external-entry-guard::after{
-  content:""!important;
-  display:none!important;
-  opacity:0!important;
-  visibility:hidden!important;
-  animation:none!important;
-}
+#oai-external-entry-guard::after{content:""!important;display:none!important;opacity:0!important;visibility:hidden!important;animation:none!important;}
+/* 요소형 로더 공통 소유자: 요소 자체와 십자가는 고정하고 ::before의 원만 회전한다. */
 #oai-external-entry-guard .oai-external-entry-cross,
+#oai-missa-portal-guard .oai-missa-portal-cross,
+#oai-unified-refresh-guard .oai-unified-refresh-cross,
 .map-loading-icon,
 #diocese-loading .diocese-loading-spinner,
-#nearby-body .nearby-distance-spinner{
-  width:var(--oai-loading-cross-size)!important;
-  height:var(--oai-loading-cross-size)!important;
-  min-width:var(--oai-loading-cross-size)!important;
-  min-height:var(--oai-loading-cross-size)!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
+#nearby-body .nearby-distance-spinner,
+.prayer-loading-cross,
+.pr-external-guide-cross{
+  position:relative!important;
+  width:var(--oai-loading-box-size)!important;
+  height:var(--oai-loading-box-size)!important;
+  min-width:var(--oai-loading-box-size)!important;
+  min-height:var(--oai-loading-box-size)!important;
+  display:block!important;
+  box-sizing:border-box!important;
   border:0!important;
   border-radius:0!important;
   background:transparent!important;
+  color:transparent!important;
+  font-size:0!important;
+  line-height:0!important;
+  text-shadow:none!important;
+  opacity:1!important;
+  visibility:visible!important;
+  animation:none!important;
+  transition:none!important;
+  transform:none!important;
+  overflow:visible!important;
+}
+#oai-external-entry-guard .oai-external-entry-cross::before,
+#oai-missa-portal-guard .oai-missa-portal-cross::before,
+#oai-unified-refresh-guard .oai-unified-refresh-cross::before,
+.map-loading-icon::before,
+#diocese-loading .diocese-loading-spinner::before,
+#nearby-body .nearby-distance-spinner::before,
+.prayer-loading-cross::before,
+.pr-external-guide-cross::before{
+  content:""!important;
+  position:absolute!important;
+  left:50%!important;
+  top:50%!important;
+  width:var(--oai-loading-ring-size)!important;
+  height:var(--oai-loading-ring-size)!important;
+  margin:calc(var(--oai-loading-ring-size) / -2) 0 0 calc(var(--oai-loading-ring-size) / -2)!important;
+  box-sizing:border-box!important;
+  display:block!important;
+  border-radius:50%!important;
+  border:var(--oai-loading-ring-width) solid rgba(212,170,106,.20)!important;
+  border-top-color:var(--oai-loading-cross-color)!important;
+  border-right-color:rgba(212,170,106,.68)!important;
+  background:transparent!important;
+  transform-origin:center center!important;
+  animation:oaiUnifiedLoadingRingSpin var(--oai-loading-ring-speed) linear infinite!important;
+  pointer-events:none!important;
+}
+#oai-external-entry-guard .oai-external-entry-cross::after,
+#oai-missa-portal-guard .oai-missa-portal-cross::after,
+#oai-unified-refresh-guard .oai-unified-refresh-cross::after,
+.map-loading-icon::after,
+#diocese-loading .diocese-loading-spinner::after,
+#nearby-body .nearby-distance-spinner::after,
+.prayer-loading-cross::after,
+.pr-external-guide-cross::after{
+  content:"✝"!important;
+  position:absolute!important;
+  inset:0!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
   color:var(--oai-loading-cross-color)!important;
   font-size:var(--oai-loading-cross-font)!important;
   font-weight:900!important;
   line-height:1!important;
-  opacity:1!important;
-  visibility:visible!important;
-  transform-origin:center center!important;
-  animation:oaiUnifiedLoadingCrossSpin var(--oai-loading-cross-speed) linear infinite!important;
-  transition:none!important;
-}
-.map-loading-icon::before,
-#diocese-loading .diocese-loading-spinner::before,
-#nearby-body .nearby-distance-spinner::before{
-  content:"✝"!important;
-  display:block!important;
-  line-height:1!important;
+  background:transparent!important;
+  animation:none!important;
+  transform:none!important;
+  pointer-events:none!important;
 }
 html.oai-stability-veil[data-oai-stability-reason="external-leave"],
 html.oai-stability-veil[data-oai-stability-reason="external-leave"] body,
@@ -5314,41 +5280,46 @@ html.oai-external-return-freeze #oai-external-entry-guard.hide{
 }
 
 html.oai-external-return-freeze::before{
-  content:""!important;
+  content:"✝"!important;
   position:fixed!important;
   inset:0!important;
   z-index:2147483000!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  box-sizing:border-box!important;
   background:#fbf8f1!important;
+  color:var(--oai-loading-cross-color,#d4aa6a)!important;
+  font-size:var(--oai-loading-cross-font,34px)!important;
+  font-weight:900!important;
+  line-height:1!important;
   opacity:1!important;
   visibility:visible!important;
-  display:block!important;
   animation:none!important;
   transition:none!important;
   pointer-events:none!important;
 }
 html.oai-external-return-freeze::after{
-  content:"✝"!important;
+  content:""!important;
   position:fixed!important;
   left:50%!important;
   top:50%!important;
-  width:var(--oai-loading-cross-size,36px)!important;
-  height:var(--oai-loading-cross-size,36px)!important;
-  margin:calc(var(--oai-loading-cross-size,36px) / -2) 0 0 calc(var(--oai-loading-cross-size,36px) / -2)!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  color:var(--oai-loading-cross-color,#d4aa6a)!important;
-  font-size:var(--oai-loading-cross-font,32px)!important;
-  font-weight:900!important;
-  line-height:1!important;
-  background:transparent!important;
-  border:0!important;
   z-index:2147483001!important;
+  width:var(--oai-loading-ring-size,56px)!important;
+  height:var(--oai-loading-ring-size,56px)!important;
+  margin:calc(var(--oai-loading-ring-size,56px) / -2) 0 0 calc(var(--oai-loading-ring-size,56px) / -2)!important;
+  box-sizing:border-box!important;
+  display:block!important;
+  border-radius:50%!important;
+  border:var(--oai-loading-ring-width,3px) solid rgba(212,170,106,.20)!important;
+  border-top-color:var(--oai-loading-cross-color,#d4aa6a)!important;
+  border-right-color:rgba(212,170,106,.68)!important;
+  background:transparent!important;
   opacity:1!important;
   visibility:visible!important;
   pointer-events:none!important;
   transform-origin:center center!important;
-  animation:oaiUnifiedLoadingCrossSpin var(--oai-loading-cross-speed,2.8s) linear infinite!important;
+  animation:oaiUnifiedLoadingRingSpin var(--oai-loading-ring-speed,1.65s) linear infinite!important;
   transition:none!important;
 }
 
