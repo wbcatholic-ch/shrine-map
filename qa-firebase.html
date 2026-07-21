@@ -12,7 +12,7 @@
 
 
 <script>
-/* V8-1-14-642: 문의·건의가 index.html iframe 안에서 열릴 때는 iframe 내부 헤더만 접고, 부모 qna-view 헤더/뒤로가기는 유지한다. */
+/* V8-1-14-643: 문의·건의가 index.html iframe 안에서 열릴 때는 iframe 내부 헤더만 접고, 부모 qna-view 헤더/뒤로가기는 유지한다. */
 (function(){
   try{
     var sp = new URLSearchParams(location.search || '');
@@ -44,7 +44,7 @@
     }catch(_e){}
   }
   applyOaiScreenClass();
-  /* V8-1-14-642: 보조 iframe 화면 등급도 최초 진입 때만 정하고 resize/keyboard/background에서는 다시 계산하지 않는다. */
+  /* V8-1-14-643: 보조 iframe 화면 등급도 최초 진입 때만 정하고 resize/keyboard/background에서는 다시 계산하지 않는다. */
 })();
 </script>
 
@@ -153,7 +153,7 @@
   }
   #write-btn:active { transform: scale(.97); }
 
-  /* V8-1-14-642: embedded iframe에서는 내부 헤더 중복만 제거. 부모 qna-view 헤더와 back 구조는 건드리지 않는다. */
+  /* V8-1-14-643: embedded iframe에서는 내부 헤더 중복만 제거. 부모 qna-view 헤더와 back 구조는 건드리지 않는다. */
   html.qa-embedded { --qa-top-gap: 0px; }
   html.qa-embedded #header{
     height:0 !important; min-height:0 !important; padding:0 !important;
@@ -469,7 +469,7 @@
 
 
 
-  /* V8-1-14-642: compact 문의·건의는 글자 크기를 유지하고 공간만 축소한다. */
+  /* V8-1-14-643: compact 문의·건의는 글자 크기를 유지하고 공간만 축소한다. */
   html.oai-screen-compact-short {
     --tab-h: 50px;
     --tab-btn-h: 36px;
@@ -517,11 +517,11 @@
     padding-bottom: 10px !important;
   }
 
-  /* V8-1-14-642: embedded iframe에서는 글쓰기 플로팅 버튼도 숨긴다. */
+  /* V8-1-14-643: embedded iframe에서는 글쓰기 플로팅 버튼도 숨긴다. */
   html.qa-embedded #write-btn{ display:none !important; visibility:hidden !important; pointer-events:none !important; }
 
 
-  /* V8-1-14-642: 개인정보 안내는 내용 입력칸 placeholder로 표시하고, 내용 박스 테두리는 진하게 유지한다. */
+  /* V8-1-14-643: 개인정보 안내는 내용 입력칸 placeholder로 표시하고, 내용 박스 테두리는 진하게 유지한다. */
   #write-view .qa-private-guide{ display:none !important; }
   #f-content{
     border:2px solid #C8B79D !important;
@@ -537,7 +537,7 @@
 
 
 
-  /* V8-1-14-642: 제목 입력칸 테두리를 내용 입력칸과 같은 진한 색으로 통일한다. */
+  /* V8-1-14-643: 제목 입력칸 테두리를 내용 입력칸과 같은 진한 색으로 통일한다. */
   #f-title{
     border:2px solid #C8B79D !important;
     background:#fffdf7 !important;
@@ -548,7 +548,7 @@
   }
 
 
-  /* V8-1-14-642: 문의·건의 글쓰기 안내문구와 placeholder 크기를 안정적으로 표시한다. */
+  /* V8-1-14-643: 문의·건의 글쓰기 안내문구와 placeholder 크기를 안정적으로 표시한다. */
   #write-view .field-label {
     font-size: 15px !important;
     line-height: 1.35 !important;
@@ -601,7 +601,7 @@
     font-size: 13px !important;
   }
 
-  /* V8-1-14-642 step8: 문의·건의 화면의 남은 inline 시각 스타일을 CSS 소유자로 이동한다. */
+  /* V8-1-14-643 step8: 문의·건의 화면의 남은 inline 시각 스타일을 CSS 소유자로 이동한다. */
   #form-error { display: none; }
   .qa-more-spinner { margin: 0 auto 8px; }
   .loading-box-muted { color: #94A3B8; }
@@ -1140,11 +1140,11 @@ function oaiReturnToAppCover(reason){
   try{
     var url = new URL('index.html', location.href);
     url.searchParams.set('oai_cover_return', reason || 'qna-return-cover');
-    url.searchParams.set('v', 'V8-1-14-642');
+    url.searchParams.set('v', 'V8-1-14-643');
     location.replace(url.href);
     return;
   }catch(e){
-    location.replace('index.html?oai_cover_return=' + encodeURIComponent(reason || 'qna-return-cover') + '&v=V8-1-14-642');
+    location.replace('index.html?oai_cover_return=' + encodeURIComponent(reason || 'qna-return-cover') + '&v=V8-1-14-643');
   }
 }
 function handleQaBack(){
@@ -1189,10 +1189,10 @@ if (QA_PRIVATE_MODE) {
 }
 </script>
 
-<script id="oai-cache-lifecycle-V8-1-14-642">
+<script id="oai-cache-lifecycle-V8-1-14-643">
 (function(){
   'use strict';
-  var APP_VERSION = 'V8-1-14-642';
+  var APP_VERSION = 'V8-1-14-643';
   if('serviceWorker' in navigator){
     try{ navigator.serviceWorker.register('./sw.js?v=' + encodeURIComponent(APP_VERSION)).then(function(reg){try{reg.update();}catch(e){}}).catch(function(){}); }catch(e){}
   }
@@ -1226,6 +1226,6 @@ window.OAI_PAGE_TOUCH_CONFIG = {
   ].join(',')
 };
 </script>
-<script src="js/page-touch-keyboard.js?v=V8-1-14-642"></script>
+<script src="js/page-touch-keyboard.js?v=V8-1-14-643"></script>
 </body>
 </html>
