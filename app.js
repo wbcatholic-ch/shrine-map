@@ -671,7 +671,7 @@ function oaiClearExternalNavigationState(opts){
           if(!m) return;
           if(typeof m.relayout === 'function') m.relayout();
           restoreBackgroundMainMapView(view);
-          /* V8-1-14-636:
+          /* V8-1-14-637:
              짧은 background 복귀는 기존 지도를 다시 만들지 않는다. 이미 지도 객체가 살아 있는데
              map-loading-layer만 남은 경우에는 이 시점에 준비 상태를 종료해 무한 로딩 십자가를 막는다. */
           try{ if(typeof _completeCategoryMapSurface === 'function') _completeCategoryMapSurface(); }catch(_e){}
@@ -748,7 +748,7 @@ function oaiClearExternalNavigationState(opts){
       var leaveStillOpening = !!(pending && !pageHidden && forceAt && n < forceAt);
       if(recent && (pageHidden || expected || leaveStillOpening)) return true;
 
-      /* V8-1-14-636:
+      /* V8-1-14-637:
          유효한 시작 시각 없이 external flag만 남아 있으면 일반 background 복귀를 가로막고
          oai-external-return-freeze 십자가가 끝없이 남을 수 있다. 오래된 flag는 여기서 즉시 폐기한다. */
       try{ oaiClearExternalNavigationState(); }catch(_e){}
@@ -3749,7 +3749,7 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || (window.OAI_APP_BUILD_VERSION || window.APP_VERSION || 'V8-1-14-636');
+    var target = btn.getAttribute('data-target-version') || (window.OAI_APP_BUILD_VERSION || window.APP_VERSION || 'V8-1-14-637');
     var current = '';
     /* V8-1-14-621:
        현재 화면의 실제 빌드 기준은 index.html이 먼저 선언한 OAI_APP_BUILD_VERSION/숨김 marker를 우선한다.
@@ -3821,7 +3821,7 @@ window.addEventListener('load', syncCoverUpdateVersionState, true);
     try{
       var frame=document.getElementById('privacy-policy-frame');
       if(frame){
-        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-636'));
+        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-637'));
         if(frame.getAttribute('src') === 'about:blank' || !frame.getAttribute('src')) frame.setAttribute('src', src);
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -4069,7 +4069,7 @@ function openDioceseView(opts){
   var loading=_getDioceseLoading();
   if(!view||!frame) return;
   var restore = !!(opts && opts.restore);
-  var url = (typeof oaiGetDioceseFrameUrl === 'function') ? oaiGetDioceseFrameUrl() : 'diocese.html?v=V8-1-14-636';
+  var url = (typeof oaiGetDioceseFrameUrl === 'function') ? oaiGetDioceseFrameUrl() : 'diocese.html?v=V8-1-14-637';
   var currentSrc = frame.getAttribute('src') || '';
   var needsLoad = (!currentSrc || currentSrc==='about:blank' || currentSrc.indexOf('diocese.html') < 0 || !frame._loaded);
 
@@ -4167,7 +4167,7 @@ function dioceseLoaded(){
   _setDioceseLoading(false);
 }
 function oaiGetDioceseFrameUrl(){
-  return 'diocese.html?v=V8-1-14-636';
+  return 'diocese.html?v=V8-1-14-637';
 }
 function oaiBindDioceseFrameLoad(frame, loading, restore){
   if(!frame) return;
@@ -4618,7 +4618,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V8-1-14-636';
+const _PARISH_ASSET_VERSION='V8-1-14-637';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -4860,7 +4860,7 @@ function _clearParishDioLayerForNearby(){
 }
 function _shouldDeferFullCategoryMarkers(){
   try{
-    /* V8-1-14-636:
+    /* V8-1-14-637:
        성지·피정의집은 내주변 목록과 무관하게 전국 전체 마커가 지도 레이어의 기준이다.
        첫 진입 내주변 시트가 열려 있어도 전체 마커 생성을 미루지 않는다.
        성당만 현재 위치 해당 교구 전용 레이어가 준비될 때까지 공통 전체 마커를 보류한다. */
@@ -4995,7 +4995,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V8-1-14-636';
+const _PRAYER_ASSET_VERSION='V8-1-14-637';
 let _prayerModuleLoadPromise=null;
 function _isPrayerDataReady(){
   return !!(window.PRAYER_DATA && typeof window.PRAYER_DATA === 'object');
@@ -5070,7 +5070,7 @@ try{ window.ensurePrayerModuleLoaded=ensurePrayerModuleLoaded; }catch(e){ consol
 let _RT_RAW = [];
 let _retreatRawLoaded = false;
 let _retreatDataLoadPromise = null;
-const _RETREAT_ASSET_VERSION='V8-1-14-636';
+const _RETREAT_ASSET_VERSION='V8-1-14-637';
 
 let RETREATS = [];
 function _buildRetreatList(raw){
@@ -5663,7 +5663,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 let _myLocAt = 0;
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V8-1-14-636';
+const _SHRINE_ASSET_VERSION='V8-1-14-637';
 let SHRINES = [];
 let JUKRIMGUL_IDX = -1;
 function _decodeShrineHomePage(hp){
@@ -6798,7 +6798,7 @@ function _restoreNearbyMyLocationPlain(reason, opts){
 }
 
 function _nearbyMapItemsForMode(items, mode){
-  /* V8-1-14-636:
+  /* V8-1-14-637:
      내주변 목록의 10개 제한은 목록 렌더링에만 적용한다.
      지도 마커 데이터는 성당은 해당 교구 전체, 성지·피정의집은 전국 전체를 그대로 사용한다. */
   return Array.isArray(items)?items.filter(function(p){ return p && p.lat && p.lng && p.lat!==0 && p.lng!==0; }):[];
@@ -7959,7 +7959,7 @@ function _showParishNearbyMarkersOnMap(items, lat, lng, phase){
       mk.setMap(_map);
       arr.push(mk);
     });
-    // V8-1-14-636: 첫 진입에서는 가장 가까운 성당을 자동 선택하지 않는다.
+    // V8-1-14-637: 첫 진입에서는 가장 가까운 성당을 자동 선택하지 않는다.
     // 노란 선택 마커(_paSelMkr)는 사용자가 성당 마커나 목록을 직접 선택할 때만 만든다.
     if(AppState){
       AppState.nearbyParishMarkers=arr;
@@ -7996,7 +7996,7 @@ function _ensureParishNearbyMarkersVisible(items, lat, lng, reason){
 function _showRetreatNearbyMarkersOnMap(items, lat, lng){
   if(_mode!=='retreat' || !_map || !Array.isArray(items) || !items.length || typeof _LL==='undefined') return;
   try{
-    /* V8-1-14-636:
+    /* V8-1-14-637:
        피정의집 내주변 지도는 가까운 목록 항목으로 별도 마커를 만들지 않는다.
        _buildRetreatMarkers가 소유하는 전국 전체 마커 레이어만 표시해 중복 객체와 클릭 리스너 분산을 막는다. */
     if(!_retreatMarkers.length && window.__OAI_RETREAT_MARKER_BUILDING__ !== true) _buildRetreatMarkers();
@@ -8041,7 +8041,7 @@ function _showAllShrinesOnMapWithNearbyBounds(items, lat, lng){
   if(_mode!=='shrine' || !_map) return;
   try{
     _clearShrineMarkerSel();
-    /* V8-1-14-636:
+    /* V8-1-14-637:
        성지 내주변 목록은 10개지만 지도는 SHRINES 전체 데이터가 소유한다.
        목록 캐시를 지도 마커 범위로 사용하지 않고, 현재 순례 필터에 맞는 전국 성지 마커를 모두 복원한다. */
     _markers.forEach(function(m){
@@ -8836,7 +8836,7 @@ function _loadNearbyWithDist(lat,lng,items,getIdx,getColor,getLabel){
     try{ _updateShrineNearbyLocationButtonUI(); }catch(_e){}
   }
   const POOL=items.filter(p=>p.lat&&p.lng);
-  /* V8-1-14-636:
+  /* V8-1-14-637:
      내주변 목록은 거리순 10개만 표시한다. 지도 마커 범위는 이 목록 제한과 분리하며,
      성당은 해당 교구 전체, 성지·피정의집은 전국 전체 데이터를 사용한다. */
   const prelim=POOL.map(p=>({p,d:calcDist(lat,lng,p.lat,p.lng)})).sort((a,b)=>a.d-b.d);
@@ -9809,7 +9809,7 @@ function resetRoute(opts){
   if(_polyline){_polyline.setMap(null);_polyline=null;}
   _hide($('rs-result'));
   _setRouteResultTipVisible(false);
-  // V8-1-14-636: 다시선택에서는 경로선과 결과판을 먼저 모두 닫은 뒤 경유지 UI를 한 번만 동기화한다.
+  // V8-1-14-637: 다시선택에서는 경로선과 결과판을 먼저 모두 닫은 뒤 경유지 UI를 한 번만 동기화한다.
   // _polyline이나 결과판이 남아 있는 상태에서 동기화하면 +경유지 버튼이 결과 화면용 숨김 상태로 고정된다.
   _syncRouteWaypointBoxes();
   $('rs-hint').style.display='block';
