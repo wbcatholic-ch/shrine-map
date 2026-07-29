@@ -293,7 +293,7 @@ html.parish-mode {
   --mode-header-bg: linear-gradient(135deg, var(--cathedral-category-dark, #2F3742), var(--cathedral-category-final, #3F4752));
   --mode-header-solid: var(--cathedral-category-final, #3F4752);
   --mode-active-bg: linear-gradient(135deg, var(--cathedral-category-dark, #2F3742), var(--cathedral-category-final, #3F4752));
-  /* V8-1-14-651: 성지 순례 필터의 높은 대비를 성당 교구 활성 탭 기준으로 사용한다. */
+  /* V8-1-14-652: 성지 순례 필터의 높은 대비를 성당 교구 활성 탭 기준으로 사용한다. */
   --mode-filter-active-bg: #111;
   --mode-filter-active-color: #f6d58a;
   --mode-filter-active-border: #d4aa6a;
@@ -323,7 +323,7 @@ html.retreat-mode {
   --mode-filter-bg: rgba(255,255,255,.14);
   --mode-filter-color: rgba(255,255,255,.92);
   --mode-filter-border: rgba(255,255,255,.30);
-  /* V8-1-14-651: 성지 순례 필터의 높은 대비를 피정의집 교구 활성 탭 기준으로 사용한다. */
+  /* V8-1-14-652: 성지 순례 필터의 높은 대비를 피정의집 교구 활성 탭 기준으로 사용한다. */
   --mode-filter-active-bg: #111;
   --mode-filter-active-color: #f6d58a;
   --mode-filter-active-border: #d4aa6a;
@@ -4772,7 +4772,7 @@ html.oai-cover-booting::after{
     linear-gradient(to right, #fbf8f1 0%, rgba(251,248,241,.96) 5%, rgba(251,248,241,.60) 13%, rgba(251,248,241,.16) 24%, rgba(251,248,241,0) 36%, rgba(251,248,241,0) 64%, rgba(251,248,241,.16) 76%, rgba(251,248,241,.60) 87%, rgba(251,248,241,.96) 95%, #fbf8f1 100%),
     linear-gradient(to bottom, #fbf8f1 0%, rgba(251,248,241,.90) 6%, rgba(251,248,241,.36) 17%, rgba(251,248,241,0) 30%, rgba(251,248,241,0) 70%, rgba(251,248,241,.36) 83%, rgba(251,248,241,.90) 94%, #fbf8f1 100%),
     radial-gradient(ellipse 96% 88% at 50% 48%, rgba(251,248,241,0) 50%, rgba(251,248,241,.08) 62%, rgba(251,248,241,.34) 76%, rgba(251,248,241,.76) 90%, rgba(251,248,241,1) 100%),
-    url("intro-cross-jesus.jpg?v=V8-1-14-651") !important;
+    url("intro-cross-jesus.jpg?v=V8-1-14-652") !important;
   background-position:center center, center center, center center, center center !important;
   background-size:100% 100%, 100% 100%, 100% 100%, auto 106% !important;
   background-repeat:no-repeat, no-repeat, no-repeat, no-repeat !important;
@@ -5014,26 +5014,25 @@ html.oai-font-global .category-source-note { font-size: calc(11px * var(--app-in
   --oai-loading-box-size:60px;
   --oai-loading-ring-size:56px;
   --oai-loading-ring-width:3px;
-  --oai-loading-cross-font:34px;
+  --oai-loading-cross-width:28px;
+  --oai-loading-cross-height:36px;
+  --oai-loading-cross-thickness:6px;
   --oai-loading-cross-color:#d4aa6a;
   --oai-loading-ring-speed:2.60s;
   --oai-guard-bg:#f5f0e8;
 }
 /* 공통 전체화면 보호막: 배경과 고정 십자가는 ::before, 독립 회전 원은 ::after가 소유한다. */
 html.oai-stability-veil::before{
-  content:"✝"!important;
+  content:""!important;
   position:fixed!important;
   inset:0!important;
   z-index:2147483000!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
+  display:block!important;
   box-sizing:border-box!important;
-  background:var(--oai-guard-bg)!important;
-  color:var(--oai-loading-cross-color)!important;
-  font-size:var(--oai-loading-cross-font)!important;
-  font-weight:900!important;
-  line-height:1!important;
+  background:
+    linear-gradient(var(--oai-loading-cross-color),var(--oai-loading-cross-color)) center / var(--oai-loading-cross-thickness) var(--oai-loading-cross-height) no-repeat,
+    linear-gradient(var(--oai-loading-cross-color),var(--oai-loading-cross-color)) center / var(--oai-loading-cross-width) var(--oai-loading-cross-thickness) no-repeat,
+    var(--oai-guard-bg)!important;
   opacity:1!important;
   visibility:visible!important;
   pointer-events:none!important;
@@ -5151,19 +5150,20 @@ html.oai-stability-veil[data-oai-refresh-early-veil="1"]::after{
 #nearby-body .nearby-distance-spinner::after,
 .prayer-loading-cross::after,
 .pr-external-guide-cross::after{
-  content:"✝"!important;
+  content:""!important;
   position:absolute!important;
-  inset:0!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
-  color:var(--oai-loading-cross-color)!important;
-  font-size:var(--oai-loading-cross-font)!important;
-  font-weight:900!important;
-  line-height:1!important;
-  background:transparent!important;
+  left:50%!important;
+  top:50%!important;
+  width:var(--oai-loading-cross-width)!important;
+  height:var(--oai-loading-cross-height)!important;
+  display:block!important;
+  box-sizing:border-box!important;
+  background:
+    linear-gradient(var(--oai-loading-cross-color),var(--oai-loading-cross-color)) center / var(--oai-loading-cross-thickness) var(--oai-loading-cross-height) no-repeat,
+    linear-gradient(var(--oai-loading-cross-color),var(--oai-loading-cross-color)) center / var(--oai-loading-cross-width) var(--oai-loading-cross-thickness) no-repeat!important;
   animation:none!important;
-  transform:none!important;
+  transform:translate(-50%,-50%)!important;
+  transform-origin:center center!important;
   pointer-events:none!important;
 }
 html.oai-stability-veil[data-oai-stability-reason="external-leave"],
@@ -5239,19 +5239,16 @@ html.oai-external-return-freeze #oai-external-entry-guard.hide{
 }
 
 html.oai-external-return-freeze::before{
-  content:"✝"!important;
+  content:""!important;
   position:fixed!important;
   inset:0!important;
   z-index:2147483000!important;
-  display:flex!important;
-  align-items:center!important;
-  justify-content:center!important;
+  display:block!important;
   box-sizing:border-box!important;
-  background:#fbf8f1!important;
-  color:var(--oai-loading-cross-color,#d4aa6a)!important;
-  font-size:var(--oai-loading-cross-font,34px)!important;
-  font-weight:900!important;
-  line-height:1!important;
+  background:
+    linear-gradient(var(--oai-loading-cross-color,#d4aa6a),var(--oai-loading-cross-color,#d4aa6a)) center / var(--oai-loading-cross-thickness,6px) var(--oai-loading-cross-height,36px) no-repeat,
+    linear-gradient(var(--oai-loading-cross-color,#d4aa6a),var(--oai-loading-cross-color,#d4aa6a)) center / var(--oai-loading-cross-width,28px) var(--oai-loading-cross-thickness,6px) no-repeat,
+    #fbf8f1!important;
   opacity:1!important;
   visibility:visible!important;
   animation:none!important;
@@ -5439,14 +5436,15 @@ html:not(.ios-device).oai-screen-compact-short #prayer-view{
   --faith-prayer-detail-bottom-pad:calc(76px + var(--oai-android-bottom-gap, env(safe-area-inset-bottom, 0px)));
 }
 
-/* V8-1-14-651: 성지·성당·피정의집 지도 패널의 단일 반응형 소유 블록.
-   넓은 Fold 화면은 왼쪽 패널 + 오른쪽 지도를 유지하되, 경계 조작부는 얇은 일체형 손잡이로 표시한다.
+/* V8-1-14-652: 성지·성당·피정의집 지도 패널의 단일 반응형 소유 블록.
+   넓은 Fold 화면은 왼쪽 패널 + 오른쪽 지도를 유지하되, 경계 조작부는 패널과 지도 사이에 걸치는 작은 원형 탭으로 표시한다.
    Fold 길찾기는 출발지·경유지 1~5·도착지를 한 화면에 모두 두고 결과 영역만 별도로 스크롤한다. */
 :root{
   --oai-map-side-panel-w:clamp(320px,44vw,430px);
   --oai-map-panel-divider:#cda45f;
-  --oai-map-panel-handle-bg:#17233f;
-  --oai-map-panel-handle-fg:#f3cf79;
+  --oai-map-panel-handle-bg:#fffaf0;
+  --oai-map-panel-handle-border:#c79b52;
+  --oai-map-panel-handle-fg:#17233f;
 }
 #map-panel-toggle-btn[hidden]{display:none!important;}
 #map-panel-toggle-btn{
@@ -5475,7 +5473,7 @@ html.app-active.oai-map-panel-present #map-panel-toggle-btn{display:flex;}
   line-height:1;
 }
 
-/* Fold/넓은 화면: 패널 경계와 접기 손잡이를 하나의 세로 분할선처럼 보이게 한다. */
+/* Fold/넓은 화면: 패널 경계에 작은 원형 탭을 걸쳐 두어 조작부가 지도나 패널을 길게 가리지 않게 한다. */
 html.oai-map-split-wide.oai-map-panel-present:not(.oai-map-panel-collapsed) #map-wrap{left:var(--oai-map-side-panel-w)!important;}
 html.oai-map-split-wide.oai-map-panel-collapsed #map-wrap,
 html.oai-map-split-wide:not(.oai-map-panel-present) #map-wrap{left:0!important;}
@@ -5535,35 +5533,35 @@ html.oai-map-split-wide.oai-map-panel-collapsed #app #info-card.open{transform:t
 html.oai-map-split-wide #map-panel-toggle-btn{
   top:50%;
   left:var(--oai-map-side-panel-w);
-  width:25px;
-  min-width:25px;
-  height:76px;
-  border:0;
-  border-radius:0 13px 13px 0;
-  background:linear-gradient(180deg,#1d2b4b 0%,var(--oai-map-panel-handle-bg) 100%);
+  width:40px;
+  min-width:40px;
+  height:40px;
+  border:1.5px solid var(--oai-map-panel-handle-border);
+  border-radius:50%;
+  background:var(--oai-map-panel-handle-bg);
   color:var(--oai-map-panel-handle-fg);
-  box-shadow:3px 0 10px rgba(23,35,63,.22);
-  transform:translateY(-50%);
+  box-shadow:0 4px 13px rgba(23,35,63,.20),0 0 0 3px rgba(255,250,240,.74);
+  transform:translate(-50%,-50%);
 }
-html.oai-map-split-wide #map-panel-toggle-btn::before{
-  content:"";
-  position:absolute;
-  left:0;
-  top:13px;
-  bottom:13px;
-  width:2px;
-  border-radius:2px;
-  background:rgba(243,207,121,.72);
-}
+html.oai-map-split-wide #map-panel-toggle-btn::before{content:none;display:none;}
 html.oai-map-split-wide #map-panel-toggle-btn .map-panel-toggle-icon{
-  font-size:20px;
-  transform:translateX(-1px);
-  text-shadow:0 1px 0 rgba(0,0,0,.16);
+  position:relative;
+  font-size:0;
+  transform:none;
+  text-shadow:none;
 }
-html.oai-map-split-wide.oai-map-panel-collapsed #map-panel-toggle-btn{left:0;}
-html.oai-map-split-wide.oai-map-panel-collapsed #map-panel-toggle-btn .map-panel-toggle-icon{transform:translateX(1px);}
-html.oai-map-split-wide #map-panel-toggle-btn:active{transform:translateY(-50%) scale(.97);filter:brightness(1.08);}
-html.oai-map-split-wide #map-panel-toggle-btn:focus-visible{outline:3px solid rgba(255,213,102,.55);outline-offset:2px;}
+html.oai-map-split-wide #map-panel-toggle-btn .map-panel-toggle-icon::before{
+  content:"";
+  width:9px;
+  height:9px;
+  border:solid currentColor;
+  border-width:0 2.5px 2.5px 0;
+  transform:rotate(135deg);
+}
+html.oai-map-split-wide.oai-map-panel-collapsed #map-panel-toggle-btn{left:20px;}
+html.oai-map-split-wide.oai-map-panel-collapsed #map-panel-toggle-btn .map-panel-toggle-icon::before{transform:rotate(-45deg);}
+html.oai-map-split-wide #map-panel-toggle-btn:active{transform:translate(-50%,-50%) scale(.94);filter:brightness(.98);}
+html.oai-map-split-wide #map-panel-toggle-btn:focus-visible{outline:3px solid rgba(199,155,82,.34);outline-offset:3px;}
 
 /* Fold 길찾기: 5개 경유지 입력칸은 항상 보이고, 결과 영역만 남은 높이 안에서 스크롤한다. */
 html.oai-map-split-wide #app #sheet-route{
