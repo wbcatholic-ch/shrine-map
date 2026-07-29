@@ -293,7 +293,7 @@ html.parish-mode {
   --mode-header-bg: linear-gradient(135deg, var(--cathedral-category-dark, #2F3742), var(--cathedral-category-final, #3F4752));
   --mode-header-solid: var(--cathedral-category-final, #3F4752);
   --mode-active-bg: linear-gradient(135deg, var(--cathedral-category-dark, #2F3742), var(--cathedral-category-final, #3F4752));
-  /* V8-1-14-649: 성지 순례 필터의 높은 대비를 성당 교구 활성 탭 기준으로 사용한다. */
+  /* V8-1-14-650: 성지 순례 필터의 높은 대비를 성당 교구 활성 탭 기준으로 사용한다. */
   --mode-filter-active-bg: #111;
   --mode-filter-active-color: #f6d58a;
   --mode-filter-active-border: #d4aa6a;
@@ -323,7 +323,7 @@ html.retreat-mode {
   --mode-filter-bg: rgba(255,255,255,.14);
   --mode-filter-color: rgba(255,255,255,.92);
   --mode-filter-border: rgba(255,255,255,.30);
-  /* V8-1-14-649: 성지 순례 필터의 높은 대비를 피정의집 교구 활성 탭 기준으로 사용한다. */
+  /* V8-1-14-650: 성지 순례 필터의 높은 대비를 피정의집 교구 활성 탭 기준으로 사용한다. */
   --mode-filter-active-bg: #111;
   --mode-filter-active-color: #f6d58a;
   --mode-filter-active-border: #d4aa6a;
@@ -4627,27 +4627,6 @@ html:not(.ios-device).oai-screen-fold-wide #cover .cover-refresh-main-btn{
   min-height:50px!important;
   max-height:50px!important;
 }
-html:not(.ios-device).oai-screen-fold-wide:not(.parish-mode):not(.retreat-mode) #app #info-card{
-  max-height:52vh!important;
-  border-radius:22px 22px 0 0!important;
-}
-html:not(.ios-device).oai-screen-fold-wide:is(.parish-mode,.retreat-mode) #app #info-card{
-  border-radius:22px 22px 0 0!important;
-}
-html:not(.ios-device).oai-screen-fold-wide #app #info-card .ic-tel-btn,
-html:not(.ios-device).oai-screen-fold-wide #app #info-card .ic-route-btn,
-html:not(.ios-device).oai-screen-fold-wide #app #info-card .ic-link-btn,
-html:not(.ios-device).oai-screen-fold-wide #app #info-card .btn-kakao-nav{
-  height:45px!important;
-  min-height:45px!important;
-}
-html:not(.ios-device).oai-screen-fold-wide:is(.parish-mode,.retreat-mode) #app #info-card .ic-body{
-  padding-bottom:12px!important;
-}
-html:not(.ios-device).oai-screen-fold-wide:is(.parish-mode,.retreat-mode) #app #info-card .ic-kakao-row{
-  padding-bottom:0!important;
-  margin-bottom:0!important;
-}
 
 html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-diocese{
   min-height:42px!important;
@@ -4793,7 +4772,7 @@ html.oai-cover-booting::after{
     linear-gradient(to right, #fbf8f1 0%, rgba(251,248,241,.96) 5%, rgba(251,248,241,.60) 13%, rgba(251,248,241,.16) 24%, rgba(251,248,241,0) 36%, rgba(251,248,241,0) 64%, rgba(251,248,241,.16) 76%, rgba(251,248,241,.60) 87%, rgba(251,248,241,.96) 95%, #fbf8f1 100%),
     linear-gradient(to bottom, #fbf8f1 0%, rgba(251,248,241,.90) 6%, rgba(251,248,241,.36) 17%, rgba(251,248,241,0) 30%, rgba(251,248,241,0) 70%, rgba(251,248,241,.36) 83%, rgba(251,248,241,.90) 94%, #fbf8f1 100%),
     radial-gradient(ellipse 96% 88% at 50% 48%, rgba(251,248,241,0) 50%, rgba(251,248,241,.08) 62%, rgba(251,248,241,.34) 76%, rgba(251,248,241,.76) 90%, rgba(251,248,241,1) 100%),
-    url("intro-cross-jesus.jpg?v=V8-1-14-649") !important;
+    url("intro-cross-jesus.jpg?v=V8-1-14-650") !important;
   background-position:center center, center center, center center, center center !important;
   background-size:100% 100%, 100% 100%, 100% 100%, auto 106% !important;
   background-repeat:no-repeat, no-repeat, no-repeat, no-repeat !important;
@@ -5460,14 +5439,80 @@ html:not(.ios-device).oai-screen-compact-short #prayer-view{
   --faith-prayer-detail-bottom-pad:calc(76px + var(--oai-android-bottom-gap, env(safe-area-inset-bottom, 0px)));
 }
 
-#app #sheet-route[hidden]{
-  display:none!important;
+/* V8-1-14-650: 성지·성당·피정의집 지도 패널의 단일 반응형 소유 블록.
+   넓은 Fold 화면은 왼쪽 패널 + 오른쪽 지도, 일반 휴대전화는 기존 하단 카드 구조를 사용한다.
+   패널 숨김은 표시만 바꾸며 선택 마커·경로 데이터는 삭제하지 않는다. */
+:root{--oai-map-side-panel-w:clamp(310px,46vw,420px);}
+#map-panel-toggle-btn[hidden]{display:none!important;}
+#map-panel-toggle-btn{
+  position:fixed;z-index:1120;display:none;align-items:center;justify-content:center;
+  width:48px;height:36px;min-width:48px;border-radius:999px;border:2px solid #c49b56;
+  background:rgba(255,253,249,.97);color:#1f2a44;box-shadow:0 3px 12px rgba(0,0,0,.18);
+  font:900 25px/1 'Noto Sans KR','Apple SD Gothic Neo',sans-serif;cursor:pointer;touch-action:manipulation;
 }
-#app #sheet-route.open{
-  transform:translateY(0)!important;
-  backface-visibility:visible!important;
-  will-change:auto!important;
+html.app-active.oai-map-panel-present #map-panel-toggle-btn{display:flex;}
+#map-panel-toggle-btn:active{transform:translateX(-50%) scale(.96);}
+#map-panel-toggle-btn .map-panel-toggle-icon{display:block;line-height:1;transform:translateY(-1px);}
+
+html.oai-map-split-wide.oai-map-panel-present:not(.oai-map-panel-collapsed) #map-wrap{left:var(--oai-map-side-panel-w)!important;}
+html.oai-map-split-wide.oai-map-panel-collapsed #map-wrap,
+html.oai-map-split-wide:not(.oai-map-panel-present) #map-wrap{left:0!important;}
+html.oai-map-split-wide #app #sheet-nearby,
+html.oai-map-split-wide #app #sheet-list,
+html.oai-map-split-wide #app #sheet-region,
+html.oai-map-split-wide #app #sheet-route{
+  top:var(--oai-map-top-h)!important;left:0!important;right:auto!important;bottom:0!important;
+  width:var(--oai-map-side-panel-w)!important;max-width:var(--oai-map-side-panel-w)!important;
+  height:auto!important;max-height:none!important;border-radius:0!important;border-top:0!important;
+  border-right:2px solid #d4aa6a!important;box-shadow:8px 0 22px rgba(0,0,0,.12)!important;
+  transform:translateX(-100%)!important;overflow:hidden!important;
 }
+html.oai-map-split-wide #app #sheet-route{
+  padding-bottom:max(8px,env(safe-area-inset-bottom,0px))!important;
+  overflow-y:auto!important;-webkit-overflow-scrolling:touch;
+}
+html.oai-map-split-wide #app #sheet-nearby.open,
+html.oai-map-split-wide #app #sheet-list.open,
+html.oai-map-split-wide #app #sheet-region.open,
+html.oai-map-split-wide #app #sheet-route.open{transform:translateX(0)!important;pointer-events:auto!important;}
+html.oai-map-split-wide.oai-map-panel-collapsed #app #sheet-nearby.open,
+html.oai-map-split-wide.oai-map-panel-collapsed #app #sheet-list.open,
+html.oai-map-split-wide.oai-map-panel-collapsed #app #sheet-region.open,
+html.oai-map-split-wide.oai-map-panel-collapsed #app #sheet-route.open{transform:translateX(-100%)!important;pointer-events:none!important;}
+html.oai-map-split-wide #app #info-card{
+  top:var(--oai-map-top-h)!important;bottom:0!important;left:0!important;right:auto!important;
+  width:var(--oai-map-side-panel-w)!important;max-width:var(--oai-map-side-panel-w)!important;
+  min-height:0!important;max-height:none!important;overflow-y:auto!important;
+  border-radius:0!important;border-top:0!important;border-right:2px solid #d4aa6a!important;
+  box-shadow:8px 0 22px rgba(0,0,0,.12)!important;
+  transform:translateX(-100%)!important;transition:none!important;
+}
+html.oai-map-split-wide #app #info-card.open{transform:translateX(0)!important;pointer-events:auto!important;}
+html.oai-map-split-wide.oai-map-panel-collapsed #app #info-card.open{transform:translateX(-100%)!important;pointer-events:none!important;}
+html.oai-map-split-wide #map-panel-toggle-btn{
+  top:52%;left:var(--oai-map-side-panel-w);width:36px;min-width:36px;height:62px;
+  border-radius:0 18px 18px 0;transform:translateY(-50%);
+}
+html.oai-map-split-wide.oai-map-panel-collapsed #map-panel-toggle-btn{left:0;}
+html.oai-map-split-wide #map-panel-toggle-btn:active{transform:translateY(-50%) scale(.96);}
+
+html:not(.oai-map-split-wide) #map-panel-toggle-btn{left:50%;transform:translateX(-50%);}
+html:not(.oai-map-split-wide) #map-panel-toggle-btn[data-panel-kind="nearby"],
+html:not(.oai-map-split-wide) #map-panel-toggle-btn[data-panel-kind="list"],
+html:not(.oai-map-split-wide) #map-panel-toggle-btn[data-panel-kind="region"]{display:none!important;}
+html:not(.oai-map-split-wide).oai-map-panel-collapsed #map-panel-toggle-btn{
+  top:auto!important;bottom:calc(var(--oai-android-bottom-gap,env(safe-area-inset-bottom,0px)) + 12px)!important;
+}
+html:not(.oai-map-split-wide).oai-map-panel-collapsed #app #info-card.open,
+html:not(.oai-map-split-wide).oai-map-panel-collapsed #app #sheet-route.open{
+  transform:translateY(calc(100% + 28px))!important;pointer-events:none!important;
+}
+
+#app #sheet-route[hidden]{display:none!important;}
+#app #sheet-route.open{transform:translateY(0)!important;backface-visibility:visible!important;will-change:auto!important;}
+html.oai-map-split-wide #app #sheet-route.open{transform:translateX(0)!important;}
+html.oai-map-split-wide.oai-map-panel-collapsed #app #sheet-route.open{transform:translateX(-100%)!important;}
+html:not(.oai-map-split-wide).oai-map-panel-collapsed #app #sheet-route.open{transform:translateY(calc(100% + 28px))!important;}
 
 /* V8-1-14-563: 인트로 종료(revealing) 때 십자가 사진 확대 애니메이션을 재시작하지 않는다.
    booting 단계에서만 .84→1로 커지고, revealing 단계는 최종 크기에서 opacity만 사라진다. */
