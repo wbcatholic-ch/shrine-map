@@ -125,7 +125,8 @@ html.pr-external-guide-active.oai-stability-veil::after {
 }
 #route-choice-modal .route-choice-btn.start{order:1;}
 #route-choice-modal .route-choice-btn.end{order:2;}
-#route-choice-modal .route-choice-btn.cancel{order:3;grid-column:1 / -1;}
+#route-choice-modal .route-choice-btn.waypoint{order:3;}
+#route-choice-modal .route-choice-btn.cancel{order:4;}
 #route-choice-modal .route-choice-btn.start,
 #route-choice-modal .route-choice-btn.danger{
   background:#0e1535;
@@ -136,6 +137,11 @@ html.pr-external-guide-active.oai-stability-veil::after {
   background:#1565c0;
   color:#ffffff;
   border-color:#0d47a1;
+}
+#route-choice-modal .route-choice-btn.waypoint{
+  background:#f2a516;
+  color:#211500;
+  border-color:#b86a00;
 }
 #route-choice-modal .route-choice-btn.cancel,
 #route-choice-modal .route-choice-btn.keep{

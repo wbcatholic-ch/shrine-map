@@ -3,12 +3,12 @@
   if(window.__APP_CACHE_LIFECYCLE_GUARD__) return;
   window.__APP_CACHE_LIFECYCLE_GUARD__ = true;
 
-  var APP_VERSION = window.OAI_APP_BUILD_VERSION || 'V8-1-14-656';
+  var APP_VERSION = window.OAI_APP_BUILD_VERSION || 'V8-1-14-657';
   var SW_BUILD_VERSION = APP_VERSION;
   window.OAI_APP_BUILD_VERSION = APP_VERSION;
   window.APP_VERSION = APP_VERSION;
 
-  /* V8-1-14-656:
+  /* V8-1-14-657:
      새 service worker가 설치·활성화될 때 현재 문서를 자동 새로고침하지 않는다.
      index.html과 버전 자산은 이미 현재 빌드로 로드되어 있으므로 즉시 reload할 필요가 없고,
      기존 자동 reload는 첫 진입 인트로 직후 로딩 십자가를 한 번 더 노출했다.
