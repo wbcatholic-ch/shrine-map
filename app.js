@@ -2823,10 +2823,20 @@ function _nearestShrineWithinAutoVisitRadius(lat,lng){
   if(!Array.isArray(SHRINES)||!SHRINES.length) return null;
   let best=null,bestM=Infinity;
   SHRINES.forEach(function(s,idx){
-    if(!s||!s.lat||!s.lng) return;
-    const m=calcDist(lat,lng,s.lat,s.lng)*1000;
+    if(!s) return;
     const radius=(Number(s.gpsRadiusM)>0)?Number(s.gpsRadiusM):OAI_SHRINE_AUTO_VISIT_RADIUS_M;
-    if(m<=radius && m<bestM){ bestM=m; best={item:s,idx:idx,meters:m}; }
+    let points=[];
+    if(Array.isArray(s.gpsPoints)&&s.gpsPoints.length){
+      points=s.gpsPoints.filter(function(p){ return p&&Number(p.lat)&&Number(p.lng); });
+    }
+    if(!points.length && Number(s.lat)&&Number(s.lng)) points=[{name:s.name||'',lat:Number(s.lat),lng:Number(s.lng)}];
+    points.forEach(function(p){
+      const m=calcDist(lat,lng,Number(p.lat),Number(p.lng))*1000;
+      if(m<=radius && m<bestM){
+        bestM=m;
+        best={item:s,idx:idx,meters:m,gpsPointName:p.name||''};
+      }
+    });
   });
   return best;
 }
@@ -2837,30 +2847,11 @@ function _ensureShrineAutoVisitModal(){
   modal.id='shrine-auto-visit-modal';
   modal.className='shrine-auto-visit-modal';
   modal.setAttribute('aria-hidden','true');
-  modal.innerHTML='<div class="shrine-auto-visit-backdrop" data-shrine-auto-close="1"></div><div class="shrine-auto-visit-panel" role="dialog" aria-modal="true" aria-label="GPS 순례등록"><div class="shrine-auto-visit-kicker">GPS 자동 감지</div><div id="shrine-auto-visit-title" class="shrine-auto-visit-title"></div><div id="shrine-auto-visit-name" class="shrine-auto-visit-name"></div><div id="shrine-auto-visit-dist" class="shrine-auto-visit-dist"></div><div class="shrine-auto-visit-actions"><button type="button" id="shrine-auto-visit-save" class="shrine-auto-visit-save">오늘 순례등록</button><button type="button" id="shrine-auto-visit-later" class="shrine-auto-visit-later">나중에</button></div></div>';
+  modal.innerHTML='<div class="shrine-auto-visit-backdrop"></div><div class="shrine-auto-visit-panel" role="dialog" aria-modal="true" aria-label="GPS 순례등록 완료"><div class="shrine-auto-visit-kicker">GPS 자동 순례등록</div><div id="shrine-auto-visit-title" class="shrine-auto-visit-title"></div><div class="shrine-auto-visit-actions"><button type="button" id="shrine-auto-visit-ok" class="shrine-auto-visit-save">확인</button></div></div>';
   document.body.appendChild(modal);
-  modal.querySelectorAll('[data-shrine-auto-close],#shrine-auto-visit-later').forEach(function(el){
-    el.addEventListener('click', function(e){
-      e.preventDefault(); e.stopPropagation();
-      const entry=window.__OAI_SHRINE_AUTO_VISIT_ENTRY__;
-      if(entry&&entry.item) _markAutoVisitPromptedToday(entry.item,_todayISODate(),'later');
-      _closeShrineAutoVisitModal();
-    });
-  });
-  const save=modal.querySelector('#shrine-auto-visit-save');
-  if(save) save.addEventListener('click', function(e){
+  const ok=modal.querySelector('#shrine-auto-visit-ok');
+  if(ok) ok.addEventListener('click', function(e){
     e.preventDefault(); e.stopPropagation();
-    const entry=window.__OAI_SHRINE_AUTO_VISIT_ENTRY__;
-    if(!entry||!entry.item){ _closeShrineAutoVisitModal(); return; }
-    const date=_todayISODate();
-    if(!_hasShrineVisitOnDate(entry.item,date)) _addShrineVisit(entry.item,date,'gps');
-    _markAutoVisitPromptedToday(entry.item,date,'registered');
-    if(_curInfoItem&&_curInfoItem.item===entry.item) _renderInfoCardShrineVisit(entry.item);
-    try{ if(_activeTab==='list') renderList(); }catch(_e){}
-    try{ if(_activeTab==='nearby') _loadNearby(); }catch(_e){}
-    _shrineVisitMapFilter='all';
-    _refreshShrineVisitMapState();
-    try{ _restoreAllShrineMarkersAfterVisitRegistration(entry.item, (_curInfoItem&&_curInfoItem.item===entry.item)?_curInfoItem.idx:-1); }catch(_e){}
     _closeShrineAutoVisitModal();
   });
   return modal;
@@ -2870,14 +2861,14 @@ function _openShrineAutoVisitModal(entry){
   const modal=_ensureShrineAutoVisitModal();
   window.__OAI_SHRINE_AUTO_VISIT_ENTRY__=entry;
   const title=document.getElementById('shrine-auto-visit-title');
-  const name=document.getElementById('shrine-auto-visit-name');
-  const dist=document.getElementById('shrine-auto-visit-dist');
   const placeName=entry.item.name||'성지';
-  if(title) title.textContent=placeName+'에 도착했습니다.';
-  if(name) name.textContent='';
-  if(dist) dist.textContent='현재 위치에서 약 '+Math.max(1,Math.round(entry.meters))+'m';
+  if(title) title.textContent='축하합니다. '+placeName+' 순례등록이 되었습니다.';
   modal.classList.add('show');
   modal.setAttribute('aria-hidden','false');
+  try{
+    const ok=document.getElementById('shrine-auto-visit-ok');
+    if(ok) setTimeout(function(){ try{ ok.focus(); }catch(_e){} },30);
+  }catch(_e){}
 }
 function _closeShrineAutoVisitModal(){
   const modal=document.getElementById('shrine-auto-visit-modal');
@@ -2887,6 +2878,23 @@ function _closeShrineAutoVisitModal(){
 function _isAnyVisitModalOpen(){
   return !!(document.querySelector('#shrine-visit-modal.show,#shrine-visit-cards-modal.show,#shrine-auto-visit-modal.show,#shrine-visit-detail-view.show'));
 }
+function _registerAutoShrineVisit(entry){
+  try{
+    if(!entry||!entry.item) return false;
+    const date=_todayISODate();
+    if(_hasShrineVisitOnDate(entry.item,date)) return false;
+    if(!_addShrineVisit(entry.item,date,'gps')) return false;
+    _markAutoVisitPromptedToday(entry.item,date,'registered');
+    if(_curInfoItem&&_curInfoItem.item===entry.item) _renderInfoCardShrineVisit(entry.item);
+    try{ if(_activeTab==='list') renderList(); }catch(_e){}
+    try{ if(_activeTab==='nearby') _loadNearby(); }catch(_e){}
+    _shrineVisitMapFilter='all';
+    _refreshShrineVisitMapState();
+    try{ _restoreAllShrineMarkersAfterVisitRegistration(entry.item, (_curInfoItem&&_curInfoItem.item===entry.item)?_curInfoItem.idx:-1); }catch(_e){}
+    try{ if(_isShrineVisitDetailOpen() && window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null) _renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__); }catch(_e){}
+    return true;
+  }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
+}
 function _maybePromptAutoShrineVisit(lat,lng){
   try{
     if(!lat||!lng) return;
@@ -2895,12 +2903,16 @@ function _maybePromptAutoShrineVisit(lat,lng){
     if(!entry||!entry.item) return;
     const date=_todayISODate();
     if(_hasShrineVisitOnDate(entry.item,date)) return;
-    if(_wasAutoVisitPromptedToday(entry.item,date)) return;
     window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__=true;
     setTimeout(function(){
-      if(!_isAnyVisitModalOpen()) _openShrineAutoVisitModal(entry);
-      else { window.__OAI_SHRINE_AUTO_VISIT_PENDING__=entry; window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__=false; }
-    }, 700);
+      if(_isAnyVisitModalOpen()){
+        window.__OAI_SHRINE_AUTO_VISIT_PENDING__=entry;
+        window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__=false;
+        return;
+      }
+      if(_registerAutoShrineVisit(entry)) _openShrineAutoVisitModal(entry);
+      else window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__=false;
+    },700);
   }catch(e){ console.warn('[가톨릭길동무]', e); window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__=false; }
 }
 
