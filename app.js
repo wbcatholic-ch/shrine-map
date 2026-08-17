@@ -1075,7 +1075,7 @@ function oaiClearExternalNavigationState(opts){
           decideReturn('android-native-resume', elapsed, forceCover, seq);
           var locDelay = forceCover ? 2600 : 420;
           setTimeout(function(){
-            try{ if(typeof window.oaiRefreshCurrentLocation==='function') window.oaiRefreshCurrentLocation({reason:'android-resume',cycleId:cycleId,preserveMapCenter:true,suppressAutoShrineVisit:true}); }catch(_e){}
+            try{ if(typeof window.oaiRefreshCurrentLocation==='function') window.oaiRefreshCurrentLocation({reason:'android-resume',cycleId:cycleId,preserveMapCenter:true}); }catch(_e){}
           }, locDelay);
         }finally{
           try{ if(window.GildongmuNative && typeof window.GildongmuNative.acknowledgeResumeCycle==='function') window.GildongmuNative.acknowledgeResumeCycle(cycleId); }catch(_e){}
@@ -1694,7 +1694,7 @@ function openMissa(){ openFaithPortal('missa', {forceReload:true}); }
 
 const OAI_SHRINE_VISITS_KEY = 'oai_shrine_visits_v1';
 const OAI_SHRINE_AUTO_VISIT_PROMPT_KEY = 'oai_shrine_auto_visit_prompt_v1';
-const OAI_SHRINE_AUTO_VISIT_RADIUS_M = 200;
+const OAI_SHRINE_AUTO_VISIT_RADIUS_M = 300;
 let _shrineVisitMapFilter = 'all';
 let _shrineVisitCardsTab = 'visited';
 let _shrineVisitCardsDiocese = 'all';
@@ -9046,8 +9046,8 @@ function _setMyLoc(lat,lng,opts){
   _myLocAt=Date.now ? Date.now() : new Date().getTime();
   try{ if(AppState){ AppState.myLocAt=_myLocAt; } }catch(_e){}
   _saveRecentStoredLocation(lat,lng);
-  /* 백그라운드 복귀의 위치 갱신은 좌표만 최신화한다.
-     기도문/매일미사 등 현재 화면과 무관하게 성지 자동감지가 튀어나오지 않도록 분리한다. */
+  /* 위치 갱신 후 성지 도착 여부는 확인한다.
+     자동감지는 도착 팝업만 띄우며 현재 화면/내주변 탭을 강제로 열지 않는다. */
   if(!opts.suppressAutoShrineVisit){
     try{ setTimeout(function(){ _maybePromptAutoShrineVisit(lat,lng); }, 180); }catch(_e){}
   }
