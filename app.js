@@ -2825,10 +2825,10 @@ function _nearestShrineWithinAutoVisitRadius(lat,lng){
   SHRINES.forEach(function(s,idx){
     if(!s||!s.lat||!s.lng) return;
     const m=calcDist(lat,lng,s.lat,s.lng)*1000;
-    if(m<bestM){ bestM=m; best={item:s,idx:idx,meters:m}; }
+    const radius=(Number(s.gpsRadiusM)>0)?Number(s.gpsRadiusM):OAI_SHRINE_AUTO_VISIT_RADIUS_M;
+    if(m<=radius && m<bestM){ bestM=m; best={item:s,idx:idx,meters:m}; }
   });
-  if(best && best.meters<=OAI_SHRINE_AUTO_VISIT_RADIUS_M) return best;
-  return null;
+  return best;
 }
 function _ensureShrineAutoVisitModal(){
   let modal=document.getElementById('shrine-auto-visit-modal');
