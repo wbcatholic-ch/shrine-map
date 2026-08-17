@@ -1075,7 +1075,7 @@ function oaiClearExternalNavigationState(opts){
           decideReturn('android-native-resume', elapsed, forceCover, seq);
           var locDelay = forceCover ? 2600 : 420;
           setTimeout(function(){
-            try{ if(typeof window.oaiRefreshCurrentLocation==='function') window.oaiRefreshCurrentLocation({reason:'android-resume',cycleId:cycleId,preserveMapCenter:true}); }catch(_e){}
+            try{ if(typeof window.oaiRefreshCurrentLocation==='function') window.oaiRefreshCurrentLocation({reason:'android-resume',cycleId:cycleId,preserveMapCenter:true,suppressAutoShrineVisit:true}); }catch(_e){}
           }, locDelay);
         }finally{
           try{ if(window.GildongmuNative && typeof window.GildongmuNative.acknowledgeResumeCycle==='function') window.GildongmuNative.acknowledgeResumeCycle(cycleId); }catch(_e){}
@@ -9040,13 +9040,18 @@ function _raiseMyLocationMarker(){
     if(_myMkr && typeof _myMkr.setZIndex==='function') _myMkr.setZIndex(OAI_MY_LOCATION_MARKER_ZINDEX);
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
-function _setMyLoc(lat,lng){
+function _setMyLoc(lat,lng,opts){
+  opts=opts||{};
   _myLat=lat;_myLng=lng;
   _myLocAt=Date.now ? Date.now() : new Date().getTime();
   try{ if(AppState){ AppState.myLocAt=_myLocAt; } }catch(_e){}
   _saveRecentStoredLocation(lat,lng);
-  try{ setTimeout(function(){ _maybePromptAutoShrineVisit(lat,lng); }, 180); }catch(_e){}
-  if(typeof kakao==='undefined'||!_map) return;  // 지도 미로드 시에도 위치 저장·GPS 순례등록 검사는 유지
+  /* 백그라운드 복귀의 위치 갱신은 좌표만 최신화한다.
+     기도문/매일미사 등 현재 화면과 무관하게 성지 자동감지가 튀어나오지 않도록 분리한다. */
+  if(!opts.suppressAutoShrineVisit){
+    try{ setTimeout(function(){ _maybePromptAutoShrineVisit(lat,lng); }, 180); }catch(_e){}
+  }
+  if(typeof kakao==='undefined'||!_map) return;  // 지도 미로드 시에도 현재 위치 좌표 저장은 유지
   const pos=new _LL(lat,lng);
   if(_myMkr && typeof _myMkr.setPosition==='function'){
     try{ _myMkr.setPosition(pos); _setMarkerMapIfChanged(_myMkr,_map); _raiseMyLocationMarker(); }catch(_e){}
@@ -9074,7 +9079,7 @@ function _requestLifecycleFreshLocation(opts){
     if(!stillCurrent()||!pos||!pos.coords) return;
     const lat=Number(pos.coords.latitude), lng=Number(pos.coords.longitude);
     if(!Number.isFinite(lat)||!Number.isFinite(lng)) return;
-    _setMyLoc(lat,lng);
+    _setMyLoc(lat,lng,{suppressAutoShrineVisit:!!opts.suppressAutoShrineVisit});
     try{
       if(_routeMode && _rS && _rS.isCurrentLocation){ _rS.lat=lat; _rS.lng=lng; }
     }catch(_e){}
@@ -9097,6 +9102,10 @@ function _requestLifecycleFreshLocation(opts){
         try{ _GEO.getCurrentPosition(function(p2){ if(!finished&&stillCurrent()){ finished=true; usePosition(p2); } },function(){ finished=true; },accurate); }catch(_e){ finished=true; }
       },fast);
     }catch(_e){}
+  }
+  if(opts.suppressAutoShrineVisit){
+    requestNow();
+    return;
   }
   try{
     _ensureShrineDataLoaded().then(requestNow).catch(requestNow);
