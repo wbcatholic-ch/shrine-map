@@ -3086,7 +3086,8 @@ function _renderShrineVisitModalList(item){
     const isGps=String(v&&v.method||'').toLowerCase()==='gps';
     const allowUgokTestGpsDelete=isGps && String(item&&item.seq||'')==='20190087' && String(v&&v.date||'')==='2026-08-18';
     const actionHtml=(!isGps||allowUgokTestGpsDelete)?'<button type="button" data-visit-del="'+i+'">삭제</button>':'<em class="shrine-visit-gps-lock">GPS 등록</em>';
-    return '<div class="shrine-visit-date-row'+(isGps?' gps':'')+'"><span>'+_formatVisitDate(v.date)+'</span>'+actionHtml+'</div>';
+    const tempDeleteClass=allowUgokTestGpsDelete?' oai-temp-ugok-gps-delete':'';
+    return '<div class="shrine-visit-date-row'+(isGps?' gps':'')+tempDeleteClass+'"><span>'+_formatVisitDate(v.date)+'</span>'+actionHtml+'</div>';
   }).join('');
   list.querySelectorAll('[data-visit-del]').forEach(function(btn){ btn.addEventListener('click', function(e){
     e.preventDefault(); e.stopPropagation();

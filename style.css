@@ -4671,6 +4671,7 @@ html:not(.ios-device).oai-screen-fold-wide .shrine-visit-card-grid{
   column-gap:8px!important;
 }
 .shrine-visit-date-row.gps button{display:none!important;}
+.shrine-visit-date-row.gps.oai-temp-ugok-gps-delete button{display:inline-flex!important;align-items:center!important;justify-content:center!important;}
 .shrine-visit-gps-lock{
   display:inline-flex!important;
   align-items:center!important;
