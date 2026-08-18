@@ -1777,7 +1777,10 @@ function _deleteShrineVisitAt(item,idx){
   if(!rec||!Array.isArray(rec.visits)) return false;
   if(idx<0||idx>=rec.visits.length) return false;
   var target=rec.visits[idx];
-  if(target && typeof target==='object' && String(target.method||'').toLowerCase()==='gps') return false;
+  if(target && typeof target==='object' && String(target.method||'').toLowerCase()==='gps'){
+    var allowUgokTodayGpsDelete = String(item&&item.seq||'')==='20190087' && String(target.date||'')===String(_todayISODate());
+    if(!allowUgokTodayGpsDelete) return false;
+  }
   rec.visits.splice(idx,1);
   if(rec.visits.length) data[key]=rec;
   else delete data[key];
