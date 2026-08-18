@@ -2856,12 +2856,15 @@ function _ensureShrineAutoVisitModal(){
   });
   return modal;
 }
-function _openShrineAutoVisitModal(entry){
+function _openShrineAutoVisitModal(entry,opts){
   if(!entry||!entry.item) return;
+  opts=opts||{};
   const modal=_ensureShrineAutoVisitModal();
   window.__OAI_SHRINE_AUTO_VISIT_ENTRY__=entry;
   const title=document.getElementById('shrine-auto-visit-title');
+  const kicker=modal.querySelector('.shrine-auto-visit-kicker');
   const placeName=entry.item.name||'성지';
+  if(kicker) kicker.textContent=opts.method==='manual'?'순례등록 완료':'GPS 자동 순례등록';
   if(title) title.textContent='축하합니다. '+placeName+' 순례등록이 되었습니다.';
   modal.classList.add('show');
   modal.setAttribute('aria-hidden','false');
@@ -3008,10 +3011,8 @@ function _ensureShrineVisitModal(){
     try{ _restoreAllShrineMarkersAfterVisitRegistration(item, (_curInfoItem&&_curInfoItem.item===item)?_curInfoItem.idx:-1); }catch(_e){}
     try{ if(_isShrineVisitDetailOpen() && window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null) _renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__); }catch(_e){}
     try{ if(inp) inp.value=_todayISODate(); }catch(_e){}
-    try{
-      const keep=document.getElementById('shrine-visit-modal');
-      if(keep){ keep.classList.add('show'); keep.setAttribute('aria-hidden','false'); }
-    }catch(_e){}
+    try{ _closeShrineVisitModal(); }catch(_e){}
+    try{ _openShrineAutoVisitModal({item:item},{method:'manual'}); }catch(_e){}
   });
   return modal;
 }
@@ -3053,13 +3054,18 @@ function _renderShrineVisitModalList(item){
   if(!visits.length){ list.innerHTML='<div class="shrine-visit-empty">아직 등록된 방문 날짜가 없습니다.</div>'; return; }
   list.innerHTML='<div class="shrine-visit-list-title">방문 날짜 '+visits.length+'회</div>'+visits.map(function(v,i){
     const isGps=String(v&&v.method||'').toLowerCase()==='gps';
-    return '<div class="shrine-visit-date-row'+(isGps?' gps':'')+'"><span>'+_formatVisitDate(v.date)+'</span>'+(isGps?'<em class="shrine-visit-gps-lock">GPS 등록</em>':'<button type="button" data-visit-del="'+i+'">삭제</button>')+'</div>';
+    const allowUgokTodayGpsDelete=isGps && String(item&&item.seq||'')==='20190087' && String(v&&v.date||'')===String(_todayISODate());
+    const actionHtml=(!isGps||allowUgokTodayGpsDelete)?'<button type="button" data-visit-del="'+i+'">삭제</button>':'<em class="shrine-visit-gps-lock">GPS 등록</em>';
+    return '<div class="shrine-visit-date-row'+(isGps?' gps':'')+'"><span>'+_formatVisitDate(v.date)+'</span>'+actionHtml+'</div>';
   }).join('');
   list.querySelectorAll('[data-visit-del]').forEach(function(btn){ btn.addEventListener('click', function(e){
     e.preventDefault(); e.stopPropagation();
     const idx=parseInt(btn.getAttribute('data-visit-del'),10);
     const target=_getShrineVisitDates(item)[idx];
-    if(target && String(target.method||'').toLowerCase()==='gps'){ alert('GPS로 등록된 순례 기록은 삭제할 수 없습니다.'); return; }
+    if(target && String(target.method||'').toLowerCase()==='gps'){
+      const allowUgokTodayGpsDelete=String(item&&item.seq||'')==='20190087' && String(target.date||'')===String(_todayISODate());
+      if(!allowUgokTodayGpsDelete){ alert('GPS로 등록된 순례 기록은 삭제할 수 없습니다.'); return; }
+    }
     if(confirm('이 방문 날짜를 삭제할까요?')){
       _deleteShrineVisitAt(item,idx);
       _renderShrineVisitModalList(item);
