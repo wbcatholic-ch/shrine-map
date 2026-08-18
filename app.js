@@ -2453,6 +2453,29 @@ function _ensureShrineVisitDetailView(){
       if(idx>=0&&SHRINES[idx]) _openShrineVisitModal(SHRINES[idx]);
       return;
     }
+    const visitDel=e.target&&e.target.closest&&e.target.closest('[data-shrine-detail-visit-del]');
+    if(visitDel){
+      e.preventDefault(); e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation();
+      const idx=parseInt(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__,10);
+      const visitIdx=parseInt(visitDel.getAttribute('data-shrine-detail-visit-del'),10);
+      if(idx>=0&&SHRINES[idx]){
+        const item=SHRINES[idx];
+        const target=_getShrineVisitDates(item)[visitIdx];
+        const allowUgokTodayGpsDelete=target && String(target.method||'').toLowerCase()==='gps' &&
+          String(item&&item.seq||'')==='20190087' && String(target.date||'')===String(_todayISODate());
+        if(!allowUgokTodayGpsDelete){ alert('GPS로 등록된 순례 기록은 삭제할 수 없습니다.'); return; }
+        if(confirm('이 방문 날짜를 삭제할까요?')){
+          if(_deleteShrineVisitAt(item,visitIdx)){
+            _renderShrineVisitDetail(idx);
+            if(_curInfoItem&&_curInfoItem.item===item) _renderInfoCardShrineVisit(item);
+            try{ if(_activeTab==='list') renderList(); }catch(_e){}
+            try{ if(_activeTab==='nearby') _loadNearby(); }catch(_e){}
+            _refreshShrineVisitMapState();
+          }
+        }
+      }
+      return;
+    }
     const mapBtn=e.target&&e.target.closest&&e.target.closest('[data-shrine-detail-map]');
     if(mapBtn){
       e.preventDefault(); e.stopPropagation();
@@ -2525,7 +2548,12 @@ function _renderShrineVisitDetail(idx){
   const headTitle=document.querySelector('#shrine-visit-detail-view .shrine-visit-detail-head-title');
   if(headTitle) headTitle.textContent=count?'순례한 성지':'미방문 성지';
   const recent=count?_formatVisitDate(visits[0].date):'—';
-  const dateHtml=count?visits.map(function(v){ return '<span class="shrine-visit-detail-date-chip">'+_visitHtmlEsc(_formatVisitDate(v.date))+'</span>'; }).join(''):'<span class="shrine-visit-detail-empty-date">아직 등록된 날짜가 없습니다.</span>';
+  const dateHtml=count?visits.map(function(v,i){
+    const isGps=String(v&&v.method||'').toLowerCase()==='gps';
+    const allowUgokTodayGpsDelete=isGps && String(item&&item.seq||'')==='20190087' && String(v&&v.date||'')===String(_todayISODate());
+    const delBtn=allowUgokTodayGpsDelete?'<button type="button" class="shrine-visit-detail-date-delete" data-shrine-detail-visit-del="'+i+'">삭제</button>':'';
+    return '<span class="shrine-visit-detail-date-chip">'+_visitHtmlEsc(_formatVisitDate(v.date))+delBtn+'</span>';
+  }).join(''):'<span class="shrine-visit-detail-empty-date">아직 등록된 날짜가 없습니다.</span>';
   const hpUrl=_getShrineHomepageUrl(item);
   const guideUrl=_getShrineGuideUrl(item);
   const goodnewsUrl=_getShrineGoodnewsUrl(item);
