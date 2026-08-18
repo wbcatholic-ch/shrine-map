@@ -1777,10 +1777,9 @@ function _deleteShrineVisitAt(item,idx){
   if(!rec||!Array.isArray(rec.visits)) return false;
   if(idx<0||idx>=rec.visits.length) return false;
   var target=rec.visits[idx];
-  if(target && typeof target==='object' && String(target.method||'').toLowerCase()==='gps'){
-    var allowUgokTodayGpsDelete = String(item&&item.seq||'')==='20190087' && String(target.date||'')===String(_todayISODate());
-    if(!allowUgokTodayGpsDelete) return false;
-  }
+  var allowUgokTestDelete = target && typeof target==='object' &&
+    String(item&&item.seq||'')==='20190087' && String(target.date||'')==='2026-08-18';
+  if(target && typeof target==='object' && String(target.method||'').toLowerCase()==='gps' && !allowUgokTestDelete) return false;
   rec.visits.splice(idx,1);
   if(rec.visits.length) data[key]=rec;
   else delete data[key];
@@ -2461,9 +2460,9 @@ function _ensureShrineVisitDetailView(){
       if(idx>=0&&SHRINES[idx]){
         const item=SHRINES[idx];
         const target=_getShrineVisitDates(item)[visitIdx];
-        const allowUgokTodayGpsDelete=target && String(target.method||'').toLowerCase()==='gps' &&
-          String(item&&item.seq||'')==='20190087' && String(target.date||'')===String(_todayISODate());
-        if(!allowUgokTodayGpsDelete){ alert('GPS로 등록된 순례 기록은 삭제할 수 없습니다.'); return; }
+        const allowUgokTestDelete=target &&
+          String(item&&item.seq||'')==='20190087' && String(target.date||'')==='2026-08-18';
+        if(!allowUgokTestDelete){ alert('이 기록은 삭제할 수 없습니다.'); return; }
         if(confirm('이 방문 날짜를 삭제할까요?')){
           if(_deleteShrineVisitAt(item,visitIdx)){
             _renderShrineVisitDetail(idx);
@@ -2550,8 +2549,8 @@ function _renderShrineVisitDetail(idx){
   const recent=count?_formatVisitDate(visits[0].date):'—';
   const dateHtml=count?visits.map(function(v,i){
     const isGps=String(v&&v.method||'').toLowerCase()==='gps';
-    const allowUgokTodayGpsDelete=isGps && String(item&&item.seq||'')==='20190087' && String(v&&v.date||'')===String(_todayISODate());
-    const delBtn=allowUgokTodayGpsDelete?'<button type="button" class="shrine-visit-detail-date-delete" data-shrine-detail-visit-del="'+i+'">삭제</button>':'';
+    const allowUgokTestDelete=String(item&&item.seq||'')==='20190087' && String(v&&v.date||'')==='2026-08-18';
+    const delBtn=allowUgokTestDelete?'<button type="button" class="shrine-visit-detail-date-delete" data-shrine-detail-visit-del="'+i+'">삭제</button>':'';
     return '<span class="shrine-visit-detail-date-chip">'+_visitHtmlEsc(_formatVisitDate(v.date))+delBtn+'</span>';
   }).join(''):'<span class="shrine-visit-detail-empty-date">아직 등록된 날짜가 없습니다.</span>';
   const hpUrl=_getShrineHomepageUrl(item);
@@ -3085,8 +3084,8 @@ function _renderShrineVisitModalList(item){
   if(!visits.length){ list.innerHTML='<div class="shrine-visit-empty">아직 등록된 방문 날짜가 없습니다.</div>'; return; }
   list.innerHTML='<div class="shrine-visit-list-title">방문 날짜 '+visits.length+'회</div>'+visits.map(function(v,i){
     const isGps=String(v&&v.method||'').toLowerCase()==='gps';
-    const allowUgokTodayGpsDelete=isGps && String(item&&item.seq||'')==='20190087' && String(v&&v.date||'')===String(_todayISODate());
-    const actionHtml=(!isGps||allowUgokTodayGpsDelete)?'<button type="button" data-visit-del="'+i+'">삭제</button>':'<em class="shrine-visit-gps-lock">GPS 등록</em>';
+    const allowUgokTestGpsDelete=isGps && String(item&&item.seq||'')==='20190087' && String(v&&v.date||'')==='2026-08-18';
+    const actionHtml=(!isGps||allowUgokTestGpsDelete)?'<button type="button" data-visit-del="'+i+'">삭제</button>':'<em class="shrine-visit-gps-lock">GPS 등록</em>';
     return '<div class="shrine-visit-date-row'+(isGps?' gps':'')+'"><span>'+_formatVisitDate(v.date)+'</span>'+actionHtml+'</div>';
   }).join('');
   list.querySelectorAll('[data-visit-del]').forEach(function(btn){ btn.addEventListener('click', function(e){
@@ -3094,8 +3093,8 @@ function _renderShrineVisitModalList(item){
     const idx=parseInt(btn.getAttribute('data-visit-del'),10);
     const target=_getShrineVisitDates(item)[idx];
     if(target && String(target.method||'').toLowerCase()==='gps'){
-      const allowUgokTodayGpsDelete=String(item&&item.seq||'')==='20190087' && String(target.date||'')===String(_todayISODate());
-      if(!allowUgokTodayGpsDelete){ alert('GPS로 등록된 순례 기록은 삭제할 수 없습니다.'); return; }
+      const allowUgokTestDelete=String(item&&item.seq||'')==='20190087' && String(target.date||'')==='2026-08-18';
+      if(!allowUgokTestDelete){ alert('GPS로 등록된 순례 기록은 삭제할 수 없습니다.'); return; }
     }
     if(confirm('이 방문 날짜를 삭제할까요?')){
       _deleteShrineVisitAt(item,idx);
