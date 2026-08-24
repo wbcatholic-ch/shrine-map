@@ -1,7 +1,7 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-663';
-const ASSET_VERSION = 'V8-1-14-663';
+const CACHE_VERSION = 'catholic-way-V8-1-14-664';
+const ASSET_VERSION = 'V8-1-14-664';
 
-/* V8-1-14-663: service worker cache strategy overview.
+/* V8-1-14-664: service worker cache strategy overview.
    - APP_SHELL: first-screen and internal helper files.
    - HTML navigation: networkFirst, then cached index fallback.
    - Versioned/static assets: cacheFirst.
@@ -113,6 +113,13 @@ self.addEventListener('fetch', (event) => {
   const request = event.request;
   if (request.method !== 'GET') return;
   if (!sameOrigin(request)) return;
+  try {
+    const u = new URL(request.url);
+    if (u.pathname.endsWith('/version.json')) {
+      event.respondWith(fetch(request, {cache:'no-store'}).catch(() => new Response('{"version":""}', {headers:{'Content-Type':'application/json'}})));
+      return;
+    }
+  } catch (_e) {}
   if (isHtmlRequest(request)) {
     event.respondWith(networkFirst(request));
     return;
