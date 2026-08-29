@@ -293,7 +293,7 @@ html.parish-mode {
   --mode-header-bg: linear-gradient(135deg, var(--cathedral-category-dark, #2F3742), var(--cathedral-category-final, #3F4752));
   --mode-header-solid: var(--cathedral-category-final, #3F4752);
   --mode-active-bg: linear-gradient(135deg, var(--cathedral-category-dark, #2F3742), var(--cathedral-category-final, #3F4752));
-  /* V8-1-14-664: 성지 순례 필터의 높은 대비를 성당 교구 활성 탭 기준으로 사용한다. */
+  /* V8-1-14-666: 성지 순례 필터의 높은 대비를 성당 교구 활성 탭 기준으로 사용한다. */
   --mode-filter-active-bg: #111;
   --mode-filter-active-color: #f6d58a;
   --mode-filter-active-border: #d4aa6a;
@@ -323,7 +323,7 @@ html.retreat-mode {
   --mode-filter-bg: rgba(255,255,255,.14);
   --mode-filter-color: rgba(255,255,255,.92);
   --mode-filter-border: rgba(255,255,255,.30);
-  /* V8-1-14-664: 성지 순례 필터의 높은 대비를 피정의집 교구 활성 탭 기준으로 사용한다. */
+  /* V8-1-14-666: 성지 순례 필터의 높은 대비를 피정의집 교구 활성 탭 기준으로 사용한다. */
   --mode-filter-active-bg: #111;
   --mode-filter-active-color: #f6d58a;
   --mode-filter-active-border: #d4aa6a;
@@ -4772,7 +4772,7 @@ html.oai-cover-booting::after{
     linear-gradient(to right, #fbf8f1 0%, rgba(251,248,241,.96) 5%, rgba(251,248,241,.60) 13%, rgba(251,248,241,.16) 24%, rgba(251,248,241,0) 36%, rgba(251,248,241,0) 64%, rgba(251,248,241,.16) 76%, rgba(251,248,241,.60) 87%, rgba(251,248,241,.96) 95%, #fbf8f1 100%),
     linear-gradient(to bottom, #fbf8f1 0%, rgba(251,248,241,.90) 6%, rgba(251,248,241,.36) 17%, rgba(251,248,241,0) 30%, rgba(251,248,241,0) 70%, rgba(251,248,241,.36) 83%, rgba(251,248,241,.90) 94%, #fbf8f1 100%),
     radial-gradient(ellipse 96% 88% at 50% 48%, rgba(251,248,241,0) 50%, rgba(251,248,241,.08) 62%, rgba(251,248,241,.34) 76%, rgba(251,248,241,.76) 90%, rgba(251,248,241,1) 100%),
-    url("intro-cross-jesus.jpg?v=V8-1-14-664") !important;
+    url("intro-cross-jesus.jpg?v=V8-1-14-666") !important;
   background-position:center center, center center, center center, center center !important;
   background-size:100% 100%, 100% 100%, 100% 100%, auto 106% !important;
   background-repeat:no-repeat, no-repeat, no-repeat, no-repeat !important;
@@ -5438,7 +5438,7 @@ html:not(.ios-device).oai-screen-compact-short #prayer-view{
   --faith-prayer-detail-bottom-pad:calc(76px + var(--oai-android-bottom-gap, env(safe-area-inset-bottom, 0px)));
 }
 
-/* V8-1-14-664: 성지·성당·피정의집 지도 패널의 단일 반응형 소유 블록.
+/* V8-1-14-666: 성지·성당·피정의집 지도 패널의 단일 반응형 소유 블록.
    넓은 Fold 화면은 접힌 Fold와 같은 UI 밀도의 왼쪽 패널 + 오른쪽 지도를 사용한다.
    조작부는 넓은 화면에서 세로 그립, 일반 휴대전화의 하단 카드에서 가로 그립으로 구분한다. */
 :root{
@@ -5844,4 +5844,67 @@ html.route-tab-active #info-card,
 html.route-tab-active #info-card.open{
   display: none !important;
   pointer-events: none !important;
+}
+
+/* V8-1-14-666: 순례한 성지 - 날짜/교구/유형 3축 정렬·필터 */
+.shrine-visit-cards-filters{
+  display:none!important;
+  width:100%!important;
+  min-height:58px!important;
+  padding:6px 8px!important;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr)!important;
+  gap:6px!important;
+  align-items:stretch!important;
+  background:var(--mode-header-solid)!important;
+  border-bottom:1px solid rgba(212,170,106,.68)!important;
+  box-sizing:border-box!important;
+  flex-shrink:0!important;
+}
+.shrine-visit-cards-filters.show{display:grid!important;}
+.shrine-visit-filter-field{
+  min-width:0!important;
+  display:flex!important;
+  flex-direction:column!important;
+  gap:3px!important;
+  margin:0!important;
+}
+.shrine-visit-filter-field > span{
+  display:block!important;
+  padding-left:2px!important;
+  color:rgba(255,255,255,.88)!important;
+  font-size:11px!important;
+  line-height:1!important;
+  font-weight:900!important;
+  white-space:nowrap!important;
+}
+.shrine-visit-filter-field select{
+  width:100%!important;
+  min-width:0!important;
+  height:33px!important;
+  min-height:33px!important;
+  padding:0 24px 0 7px!important;
+  border:1.5px solid rgba(212,170,106,.78)!important;
+  border-radius:8px!important;
+  background-color:#ffffff!important;
+  color:#0e1535!important;
+  font-family:inherit!important;
+  font-size:13px!important;
+  line-height:1.1!important;
+  font-weight:900!important;
+  box-shadow:0 1px 5px rgba(15,23,42,.10)!important;
+  box-sizing:border-box!important;
+}
+.shrine-visit-filter-field select:focus{
+  outline:2px solid rgba(21,101,192,.35)!important;
+  outline-offset:1px!important;
+  border-color:#1565c0!important;
+}
+@media (min-width:700px){
+  .shrine-visit-cards-filters{
+    padding-left:12px!important;
+    padding-right:12px!important;
+    gap:9px!important;
+  }
+  .shrine-visit-filter-field > span{font-size:12px!important;}
+  .shrine-visit-filter-field select{font-size:14px!important;padding-left:10px!important;}
 }
