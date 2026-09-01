@@ -675,7 +675,7 @@ function oaiClearExternalNavigationState(opts){
           if(!m) return;
           if(typeof m.relayout === 'function') m.relayout();
           restoreBackgroundMainMapView(view);
-          /* V8-1-14-667:
+          /* V8-1-14-671:
              짧은 background 복귀는 기존 지도를 다시 만들지 않는다. 이미 지도 객체가 살아 있는데
              map-loading-layer만 남은 경우에는 이 시점에 준비 상태를 종료해 무한 로딩 십자가를 막는다. */
           try{ if(typeof _completeCategoryMapSurface === 'function') _completeCategoryMapSurface(); }catch(_e){}
@@ -752,7 +752,7 @@ function oaiClearExternalNavigationState(opts){
       var leaveStillOpening = !!(pending && !pageHidden && forceAt && n < forceAt);
       if(recent && (pageHidden || expected || leaveStillOpening)) return true;
 
-      /* V8-1-14-667:
+      /* V8-1-14-671:
          유효한 시작 시각 없이 external flag만 남아 있으면 일반 background 복귀를 가로막고
          oai-external-return-freeze 십자가가 끝없이 남을 수 있다. 오래된 flag는 여기서 즉시 폐기한다. */
       try{ oaiClearExternalNavigationState(); }catch(_e){}
@@ -990,7 +990,7 @@ function oaiClearExternalNavigationState(opts){
     try{
       if(!isReturnableScreenActive()) { cancelBackgroundReturn(); return; }
       clearStaleNormalBackgroundGuards(reason || 'long-background-return');
-      /* V8-1-14-667: 30분 이상 복귀는 논리적 새 시작이므로 이전 검색어·검색결과를 먼저 비운다.
+      /* V8-1-14-671: 30분 이상 복귀는 논리적 새 시작이므로 이전 검색어·검색결과를 먼저 비운다.
          짧은 background 복귀에서는 이 함수를 호출하지 않아 검색 상태가 그대로 유지된다. */
       try{ if(typeof window.oaiResetSearchStateForFreshStart === 'function') window.oaiResetSearchStateForFreshStart('long-background-return'); }catch(_e){}
       /* V8-1-14-621: 한티가는길 내부 네비게이션 제거로 경로 복귀 상태 정리 훅을 사용하지 않는다. */
@@ -2651,7 +2651,7 @@ function _renderShrineVisitDetail(idx){
   const kakaoRow='<div class="shrine-visit-detail-action-row detail-kakao-row">'+goodnewsBtn+kakaoBtn+'</div>';
   body.innerHTML='<section class="shrine-visit-detail-hero"><div class="shrine-visit-detail-hero-head"><div class="shrine-visit-detail-kicker">순례 기록</div><button type="button" class="shrine-visit-detail-register" data-shrine-detail-register="1" aria-label="순례등록">순례등록</button></div><div class="shrine-visit-detail-count">순례 '+count+'회</div><div class="shrine-visit-detail-recent">최근 순례일 '+_visitHtmlEsc(recent)+'</div><div class="shrine-visit-detail-date-title">순례 날짜</div><div class="shrine-visit-detail-date-list">'+dateHtml+'</div></section><section class="shrine-visit-detail-info"><div class="shrine-visit-detail-info-head"><div class="shrine-visit-detail-section-title">성지 정보</div><button type="button" class="shrine-visit-detail-map-btn" data-shrine-detail-map="'+idx+'">지도에서 보기</button></div><div class="shrine-visit-detail-name">'+_visitHtmlEsc(item.name||'')+'</div><div class="shrine-visit-detail-row"><span>교구</span><strong>'+_visitHtmlEsc(item.diocese||'—')+'</strong></div><div class="shrine-visit-detail-row"><span>주소</span><strong>'+_visitHtmlEsc(item.addr||'—')+'</strong></div><div class="shrine-visit-detail-row"><span>전화</span><strong>'+telText+'</strong></div><div class="shrine-visit-detail-actions">'+primaryRow+linkRow+kakaoRow+'</div></section>';
 }
-/* V8-1-14-667: 순례 상세의 '지도에서 보기'는 카드 데이터와 지도 중심을 하나의 pending target으로 함께 적용한다. */
+/* V8-1-14-671: 순례 상세의 '지도에서 보기'는 카드 데이터와 지도 중심을 하나의 pending target으로 함께 적용한다. */
 function _isShrineMapTargetCenterLocked(){
   const now=Date.now?Date.now():new Date().getTime();
   return Number(_shrineMapTargetCenterLockUntil||0)>now;
@@ -3956,7 +3956,7 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || (window.OAI_APP_BUILD_VERSION || window.APP_VERSION || 'V8-1-14-667');
+    var target = btn.getAttribute('data-target-version') || (window.OAI_APP_BUILD_VERSION || window.APP_VERSION || 'V8-1-14-671');
     var current = '';
     /* V8-1-14-621:
        현재 화면의 실제 빌드 기준은 index.html이 먼저 선언한 OAI_APP_BUILD_VERSION/숨김 marker를 우선한다.
@@ -4028,7 +4028,7 @@ window.addEventListener('load', syncCoverUpdateVersionState, true);
     try{
       var frame=document.getElementById('privacy-policy-frame');
       if(frame){
-        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-667'));
+        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-671'));
         if(frame.getAttribute('src') === 'about:blank' || !frame.getAttribute('src')) frame.setAttribute('src', src);
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -4276,7 +4276,7 @@ function openDioceseView(opts){
   var loading=_getDioceseLoading();
   if(!view||!frame) return;
   var restore = !!(opts && opts.restore);
-  var url = (typeof oaiGetDioceseFrameUrl === 'function') ? oaiGetDioceseFrameUrl() : 'diocese.html?v=V8-1-14-667';
+  var url = (typeof oaiGetDioceseFrameUrl === 'function') ? oaiGetDioceseFrameUrl() : 'diocese.html?v=V8-1-14-671';
   var currentSrc = frame.getAttribute('src') || '';
   var needsLoad = (!currentSrc || currentSrc==='about:blank' || currentSrc.indexOf('diocese.html') < 0 || !frame._loaded);
 
@@ -4374,7 +4374,7 @@ function dioceseLoaded(){
   _setDioceseLoading(false);
 }
 function oaiGetDioceseFrameUrl(){
-  return 'diocese.html?v=V8-1-14-667';
+  return 'diocese.html?v=V8-1-14-671';
 }
 function oaiBindDioceseFrameLoad(frame, loading, restore){
   if(!frame) return;
@@ -4825,7 +4825,7 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V8-1-14-667';
+const _PARISH_ASSET_VERSION='V8-1-14-671';
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -5067,7 +5067,7 @@ function _clearParishDioLayerForNearby(){
 }
 function _shouldDeferFullCategoryMarkers(){
   try{
-    /* V8-1-14-667:
+    /* V8-1-14-671:
        성지·피정의집은 내주변 목록과 무관하게 전국 전체 마커가 지도 레이어의 기준이다.
        첫 진입 내주변 시트가 열려 있어도 전체 마커 생성을 미루지 않는다.
        성당만 현재 위치 해당 교구 전용 레이어가 준비될 때까지 공통 전체 마커를 보류한다. */
@@ -5202,7 +5202,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V8-1-14-667';
+const _PRAYER_ASSET_VERSION='V8-1-14-671';
 let _prayerModuleLoadPromise=null;
 function _isPrayerDataReady(){
   return !!(window.PRAYER_DATA && typeof window.PRAYER_DATA === 'object');
@@ -5277,7 +5277,7 @@ try{ window.ensurePrayerModuleLoaded=ensurePrayerModuleLoaded; }catch(e){ consol
 let _RT_RAW = [];
 let _retreatRawLoaded = false;
 let _retreatDataLoadPromise = null;
-const _RETREAT_ASSET_VERSION='V8-1-14-667';
+const _RETREAT_ASSET_VERSION='V8-1-14-671';
 
 let RETREATS = [];
 function _buildRetreatList(raw){
@@ -5515,6 +5515,72 @@ function _kakaoKeywordDocs(query, limit){
   }).catch(function(){
     return _kakaoKeywordDocsFromJs(query, max).then(function(jsDocs){ return (jsDocs || []).slice(0, max); });
   });
+}
+
+/* V8-1-14-671: 화면에 표시하는 실제 주소(addr)와 차량 길찾기 목적지(navAddr)를 분리한다.
+   navAddr는 카드에 노출하지 않고, 도착지/카카오내비를 실행할 때만 좌표로 변환한다. */
+const _routeAddressPointCache = Object.create(null);
+function _resolveRouteAddressPoint(item){
+  const addr=String((item&&item.navAddr)||'').trim();
+  if(!addr) return Promise.resolve(null);
+  const fixedLat=Number(item&&item.navLat), fixedLng=Number(item&&item.navLng);
+  if(Number.isFinite(fixedLat)&&Number.isFinite(fixedLng)) return Promise.resolve({lat:fixedLat,lng:fixedLng});
+  if(_routeAddressPointCache[addr]) return _routeAddressPointCache[addr];
+
+  const task=new Promise(function(resolve){
+    let settled=false;
+    function finish(point){
+      if(settled) return;
+      settled=true;
+      resolve(point&&Number.isFinite(Number(point.lat))&&Number.isFinite(Number(point.lng))
+        ? {lat:Number(point.lat),lng:Number(point.lng)} : null);
+    }
+    function keywordFallback(){
+      _kakaoKeywordDocs(addr,5).then(function(docs){
+        docs=docs||[];
+        const normalized=addr.replace(/\s+/g,'');
+        let doc=docs.find(function(d){
+          const a=String((d&&d.address_name)||'').replace(/\s+/g,'');
+          const r=String((d&&d.road_address_name)||'').replace(/\s+/g,'');
+          return a===normalized||r===normalized;
+        }) || docs[0];
+        if(doc&&doc.y&&doc.x) finish({lat:Number(doc.y),lng:Number(doc.x)});
+        else finish(null);
+      }).catch(function(){ finish(null); });
+    }
+    try{
+      if(window.kakao&&kakao.maps&&kakao.maps.services&&kakao.maps.services.Geocoder){
+        const geocoder=new kakao.maps.services.Geocoder();
+        geocoder.addressSearch(addr,function(result,status){
+          try{
+            const OK=kakao.maps.services.Status.OK;
+            if(status===OK&&result&&result[0]&&result[0].y&&result[0].x){
+              finish({lat:Number(result[0].y),lng:Number(result[0].x)});
+              return;
+            }
+          }catch(e){ console.warn('[가톨릭길동무]',e); }
+          keywordFallback();
+        });
+      }else keywordFallback();
+    }catch(e){
+      console.warn('[가톨릭길동무]',e);
+      keywordFallback();
+    }
+    setTimeout(function(){ if(!settled) keywordFallback(); },3500);
+    setTimeout(function(){ finish(null); },7000);
+  }).then(function(point){
+    if(!point) delete _routeAddressPointCache[addr];
+    return point;
+  });
+  _routeAddressPointCache[addr]=task;
+  return task;
+}
+function _resolveNavigationDestinationItem(item){
+  if(!item||!item.navAddr) return Promise.resolve(item);
+  return _resolveRouteAddressPoint(item).then(function(point){
+    if(!point) return Object.assign({},item,{__navResolved:true});
+    return Object.assign({},item,{lat:point.lat,lng:point.lng,__navResolved:true});
+  }).catch(function(){ return Object.assign({},item,{__navResolved:true}); });
 }
 const KAKAO_PLACE_SEARCH_DISPLAY_LIMIT = 30;
 const TC    = {'성지':'#c0392b','순례지':'#1565c0','순교 사적지':'#1b7a3e'};
@@ -5884,7 +5950,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 let _myLocAt = 0;
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V8-1-14-667';
+const _SHRINE_ASSET_VERSION='V8-1-14-671';
 /* 성지 좌표는 남한 본토·제주·도서 지역 전체를 포함하는 한 기준으로만 검사한다.
    실제 데이터 경계보다 여유를 두어 강원 북부와 동해 도서 좌표가 상한에서 누락되지 않게 한다. */
 const OAI_SOUTH_KOREA_COORD_BOUNDS=Object.freeze({
@@ -6542,7 +6608,7 @@ function _resetMapState(){
   }
   _mapInited=false;
 }
-/* V8-1-14-667: 실제 앱 새 시작(콜드 스타트/새 문서 로드)과 30분 이상 background 복귀에서만
+/* V8-1-14-671: 실제 앱 새 시작(콜드 스타트/새 문서 로드)과 30분 이상 background 복귀에서만
    검색 UI와 검색 결과 상태를 초기화한다. 순례기록·설정·즐겨찾기 등 영구 데이터는 건드리지 않는다. */
 function oaiResetSearchStateForFreshStart(reason){
   try{
@@ -6694,7 +6760,7 @@ function _onMapReady(){
   if(!window.__OAI_MAIN_MAP_CLICK_BOUND__){
     window.__OAI_MAIN_MAP_CLICK_BOUND__=true;
     kakao.maps.event.addListener(_map,'click',()=>{
-      // V8-1-14-667: 지도 빈 곳 클릭은 패널 표시만 접고 선택 마커와 경로선은 유지한다.
+      // V8-1-14-671: 지도 빈 곳 클릭은 패널 표시만 접고 선택 마커와 경로선은 유지한다.
       _hideMapPanelFromMapClick();
       document.activeElement?.blur();
     });
@@ -6711,7 +6777,7 @@ function _onMapReady(){
     else _syncParishDioLabels();
   }
   else if(_mode==='retreat') _buildRetreatMarkers();
-  /* V8-1-14-667: 상세에서 지정한 성지가 있으면 현재 위치 갱신은 하되 지도 중심은 선택 성지에 고정한다. */
+  /* V8-1-14-671: 상세에서 지정한 성지가 있으면 현재 위치 갱신은 하되 지도 중심은 선택 성지에 고정한다. */
   const pendingShrineTarget=(_mode==='shrine'&&_pendingShrineMapTargetIdx>=0)
     ? {idx:_pendingShrineMapTargetIdx,token:_pendingShrineMapTargetToken}
     : null;
@@ -6742,7 +6808,7 @@ let _oaiMapPanelResizeObserver=null;
 let _oaiMapPanelObservedElement=null;
 let _oaiInfoCardFocusToken=0;
 
-/* V8-1-14-667: 정보카드가 열린 동안 선택 장소의 지도 위치는 이 공통 소유자가 관리한다.
+/* V8-1-14-671: 정보카드가 열린 동안 선택 장소의 지도 위치는 이 공통 소유자가 관리한다.
    패널 등장/재배치보다 먼저 계산한 이전 지도 중심이 뒤늦게 선택 마커 중심을 덮지 않게 한다. */
 function _getVisibleInfoCardFocusItem(){
   try{
@@ -7314,7 +7380,7 @@ function _restoreNearbyMyLocationPlain(reason, opts){
 }
 
 function _nearbyMapItemsForMode(items, mode){
-  /* V8-1-14-667:
+  /* V8-1-14-671:
      내주변 목록의 10개 제한은 목록 렌더링에만 적용한다.
      지도 마커 데이터는 성당은 해당 교구 전체, 성지·피정의집은 전국 전체를 그대로 사용한다. */
   return Array.isArray(items)?items.filter(function(p){ return p && p.lat && p.lng && p.lat!==0 && p.lng!==0; }):[];
@@ -7886,7 +7952,13 @@ function _restoreMarkersForRouteDestinationSelection(){
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 function _setRoutePointFromItem(role,item,idx){
-  if(!item||!item.lat||!item.lng) return;
+  if(!item) return;
+  if(role==='end' && item.navAddr && !item.__navResolved){
+    return _resolveNavigationDestinationItem(item).then(function(navItem){
+      return _setRoutePointFromItem(role,navItem,idx);
+    });
+  }
+  if(!item.lat||!item.lng) return;
   _clearRouteVisualOnly();
   if(role==='start'){
     _restoreRouteMarkerVisual('start',_rS);
@@ -8049,8 +8121,11 @@ function _setInfoRouteWaypoint(){
 }
 function _setInfoRouteDestination(item,idx,opts){
   opts=opts||{};
-  _setRoutePointFromItem('end',item,idx);
-  if(opts.autoSearch===true && _rS && _rE) doSearchRoute();
+  const pending=_setRoutePointFromItem('end',item,idx);
+  if(opts.autoSearch===true){
+    Promise.resolve(pending).then(function(){ if(_rS&&_rE) doSearchRoute(); });
+  }
+  return pending;
 }
 function _runInfoRouteToEndWithStart(startObj,item,idx,opts){
   _routeStartMarkerExplicitCurrent=!!(startObj && startObj.showStartMarker === true);
@@ -8122,15 +8197,17 @@ function openKakaoNav(){
   if(!_curInfoItem) return;
   const {item,idx}=_curInfoItem;
   const isJuk = _mode==='shrine' && idx === JUKRIMGUL_IDX && JUKRIMGUL_IDX >= 0;
-  const navItem = isJuk ? {...item, lat:JUKRIMGUL_PARKING.lat, lng:JUKRIMGUL_PARKING.lng, name:JUKRIMGUL_PARKING.name} : item;
-  const ep=_EC(_kakaoRouteDisplayName(navItem, '도착지'));
+  const baseNavItem = isJuk ? {...item, lat:JUKRIMGUL_PARKING.lat, lng:JUKRIMGUL_PARKING.lng, name:JUKRIMGUL_PARKING.name, __navResolved:true} : item;
   function launch(spLat,spLng,spName){
-    const startName=spName||'현위치';
-    const w=spLat?`https://map.kakao.com/link/from/${_EC(startName)},${spLat},${spLng}/to/${ep},${navItem.lat},${navItem.lng}`:
-           `https://map.kakao.com/link/to/${ep},${navItem.lat},${navItem.lng}`;
-    const a=spLat?`kakaomap://route?sp=${spLat},${spLng}&ep=${navItem.lat},${navItem.lng}&by=CAR`:
-           `kakaomap://route?ep=${navItem.lat},${navItem.lng}&by=CAR`;
-    _kakaoLaunch(w,a);
+    _resolveNavigationDestinationItem(baseNavItem).then(function(navItem){
+      const ep=_EC(_kakaoRouteDisplayName(navItem, '도착지'));
+      const startName=spName||'현위치';
+      const w=spLat?`https://map.kakao.com/link/from/${_EC(startName)},${spLat},${spLng}/to/${ep},${navItem.lat},${navItem.lng}`:
+             `https://map.kakao.com/link/to/${ep},${navItem.lat},${navItem.lng}`;
+      const a=spLat?`kakaomap://route?sp=${spLat},${spLng}&ep=${navItem.lat},${navItem.lng}&by=CAR`:
+             `kakaomap://route?ep=${navItem.lat},${navItem.lng}&by=CAR`;
+      _kakaoLaunch(w,a);
+    });
   }
   if((_curFromRegion || _isRegionSearchActiveForItem(item)) && _regionLat && _regionLng){
     const placeName=_regionPlaceName||_regionName||'검색지';
@@ -8516,7 +8593,7 @@ function _showParishNearbyMarkersOnMap(items, lat, lng, phase){
       mk.setMap(_map);
       arr.push(mk);
     });
-    // V8-1-14-667: 첫 진입에서는 가장 가까운 성당을 자동 선택하지 않는다.
+    // V8-1-14-671: 첫 진입에서는 가장 가까운 성당을 자동 선택하지 않는다.
     // 노란 선택 마커(_paSelMkr)는 사용자가 성당 마커나 목록을 직접 선택할 때만 만든다.
     if(AppState){
       AppState.nearbyParishMarkers=arr;
@@ -8553,7 +8630,7 @@ function _ensureParishNearbyMarkersVisible(items, lat, lng, reason){
 function _showRetreatNearbyMarkersOnMap(items, lat, lng){
   if(_mode!=='retreat' || !_map || !Array.isArray(items) || !items.length || typeof _LL==='undefined') return;
   try{
-    /* V8-1-14-667:
+    /* V8-1-14-671:
        피정의집 내주변 지도는 가까운 목록 항목으로 별도 마커를 만들지 않는다.
        _buildRetreatMarkers가 소유하는 전국 전체 마커 레이어만 표시해 중복 객체와 클릭 리스너 분산을 막는다. */
     if(!_retreatMarkers.length && window.__OAI_RETREAT_MARKER_BUILDING__ !== true) _buildRetreatMarkers();
@@ -8598,7 +8675,7 @@ function _showAllShrinesOnMapWithNearbyBounds(items, lat, lng){
   if(_mode!=='shrine' || !_map) return;
   try{
     _clearShrineMarkerSel();
-    /* V8-1-14-667:
+    /* V8-1-14-671:
        성지 내주변 목록은 10개지만 지도는 SHRINES 전체 데이터가 소유한다.
        목록 캐시를 지도 마커 범위로 사용하지 않고, 현재 순례 필터에 맞는 전국 성지 마커를 모두 복원한다. */
     _markers.forEach(function(m){
@@ -9442,7 +9519,7 @@ function _loadNearbyWithDist(lat,lng,items,getIdx,getColor,getLabel){
     try{ _updateShrineNearbyLocationButtonUI(); }catch(_e){}
   }
   const POOL=items.filter(p=>p.lat&&p.lng);
-  /* V8-1-14-667:
+  /* V8-1-14-671:
      내주변 목록은 거리순 10개만 표시한다. 지도 마커 범위는 이 목록 제한과 분리하며,
      성당은 해당 교구 전체, 성지·피정의집은 전국 전체 데이터를 사용한다. */
   const prelim=POOL.map(p=>({p,d:calcDist(lat,lng,p.lat,p.lng)})).sort((a,b)=>a.d-b.d);
@@ -9614,7 +9691,7 @@ function renderList(){
   const groups={};
   items.forEach((s,i)=>{
     if(_mode==='shrine' && !_isSouthKoreaCoordinate(s.lat,s.lng)) return;
-    /* V8-1-14-667: 성당은 교구 탭이 선택되어 있어도 검색어가 있으면 전국 전체에서 찾는다.
+    /* V8-1-14-671: 성당은 교구 탭이 선택되어 있어도 검색어가 있으면 전국 전체에서 찾는다.
        검색어가 없을 때만 선택 교구가 목록 범위를 제한한다. */
     const matchDio = (_mode==='parish' && q) ? true : (_filterDio==='all'||s.diocese===_filterDio);
     if(!matchDio) return;
@@ -9703,7 +9780,7 @@ function setDioFilter(v,btn){
   $$('.filter-btn').forEach(b=>b.classList.remove('active'));
   btn?.classList.add('active');
   _scrollDioFilterButtonIntoView(btn);
-  /* V8-1-14-667: 성당 전국 검색 중 교구 탭을 눌러도 검색어와 결과를 유지한다.
+  /* V8-1-14-671: 성당 전국 검색 중 교구 탭을 눌러도 검색어와 결과를 유지한다.
      검색어가 없을 때의 교구별 목록·지도 이동 동작은 기존 기준을 유지한다. */
   const keepParishNationwideSearch=(_mode==='parish' && !!_listSrch);
   if(!keepParishNationwideSearch){
@@ -10096,7 +10173,7 @@ function _syncRouteWaypointBoxes(){
       index:index+1,
       has:has,
       enabled:enabled,
-      // V8-1-14-667: Fold wide에서도 빈 경유지 1~5를 강제로 펼치지 않는다.
+      // V8-1-14-671: Fold wide에서도 빈 경유지 1~5를 강제로 펼치지 않는다.
       // 처음에는 출발지·도착지만 보이고, 사용자가 추가한 경유지는 모두 동시에 유지한다.
       visible:resultShowing ? has : !!(enabled || has)
     };
@@ -10436,7 +10513,7 @@ function resetRoute(opts){
   if(_polyline){_polyline.setMap(null);_polyline=null;}
   _hide($('rs-result'));
   _setRouteResultTipVisible(false);
-  // V8-1-14-667: 다시선택에서는 경로선과 결과판을 먼저 모두 닫은 뒤 경유지 UI를 한 번만 동기화한다.
+  // V8-1-14-671: 다시선택에서는 경로선과 결과판을 먼저 모두 닫은 뒤 경유지 UI를 한 번만 동기화한다.
   // _polyline이나 결과판이 남아 있는 상태에서 동기화하면 +경유지 버튼이 결과 화면용 숨김 상태로 고정된다.
   _syncRouteWaypointBoxes();
   $('rs-hint').style.display='block';
@@ -10497,7 +10574,7 @@ function _selectRouteItem(idx){
   const items=_getCurrentItems();
   const s=items[idx];
   if(!s||!s.lat||!s.lng) return;
-  // V8-1-14-667: 사용자가 길찾기 카드를 접어 둔 상태에서 지도 마커를 선택하면
+  // V8-1-14-671: 사용자가 길찾기 카드를 접어 둔 상태에서 지도 마커를 선택하면
   // 선택 결과를 바로 확인할 수 있도록 길찾기 패널을 다시 연다.
   try{
     const routeSheet=$('sheet-route');
@@ -11846,7 +11923,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 
 
 
-/* V8-1-14-667: 최초 앱 진입에서도 지도 화면과 무관하게 최신 위치를 한 번 확인한다. */
+/* V8-1-14-671: 최초 앱 진입에서도 지도 화면과 무관하게 최신 위치를 한 번 확인한다. */
 (function(){
   try{
     if(window.__OAI_INITIAL_LOCATION_REFRESH_V663__) return;
