@@ -293,7 +293,7 @@ html.parish-mode {
   --mode-header-bg: linear-gradient(135deg, var(--cathedral-category-dark, #2F3742), var(--cathedral-category-final, #3F4752));
   --mode-header-solid: var(--cathedral-category-final, #3F4752);
   --mode-active-bg: linear-gradient(135deg, var(--cathedral-category-dark, #2F3742), var(--cathedral-category-final, #3F4752));
-  /* V8-1-14-671: 성지 순례 필터의 높은 대비를 성당 교구 활성 탭 기준으로 사용한다. */
+  /* V8-1-14-673: 성지 순례 필터의 높은 대비를 성당 교구 활성 탭 기준으로 사용한다. */
   --mode-filter-active-bg: #111;
   --mode-filter-active-color: #f6d58a;
   --mode-filter-active-border: #d4aa6a;
@@ -323,7 +323,7 @@ html.retreat-mode {
   --mode-filter-bg: rgba(255,255,255,.14);
   --mode-filter-color: rgba(255,255,255,.92);
   --mode-filter-border: rgba(255,255,255,.30);
-  /* V8-1-14-671: 성지 순례 필터의 높은 대비를 피정의집 교구 활성 탭 기준으로 사용한다. */
+  /* V8-1-14-673: 성지 순례 필터의 높은 대비를 피정의집 교구 활성 탭 기준으로 사용한다. */
   --mode-filter-active-bg: #111;
   --mode-filter-active-color: #f6d58a;
   --mode-filter-active-border: #d4aa6a;
@@ -4772,7 +4772,7 @@ html.oai-cover-booting::after{
     linear-gradient(to right, #fbf8f1 0%, rgba(251,248,241,.96) 5%, rgba(251,248,241,.60) 13%, rgba(251,248,241,.16) 24%, rgba(251,248,241,0) 36%, rgba(251,248,241,0) 64%, rgba(251,248,241,.16) 76%, rgba(251,248,241,.60) 87%, rgba(251,248,241,.96) 95%, #fbf8f1 100%),
     linear-gradient(to bottom, #fbf8f1 0%, rgba(251,248,241,.90) 6%, rgba(251,248,241,.36) 17%, rgba(251,248,241,0) 30%, rgba(251,248,241,0) 70%, rgba(251,248,241,.36) 83%, rgba(251,248,241,.90) 94%, #fbf8f1 100%),
     radial-gradient(ellipse 96% 88% at 50% 48%, rgba(251,248,241,0) 50%, rgba(251,248,241,.08) 62%, rgba(251,248,241,.34) 76%, rgba(251,248,241,.76) 90%, rgba(251,248,241,1) 100%),
-    url("intro-cross-jesus.jpg?v=V8-1-14-671") !important;
+    url("intro-cross-jesus.jpg?v=V8-1-14-673") !important;
   background-position:center center, center center, center center, center center !important;
   background-size:100% 100%, 100% 100%, 100% 100%, auto 106% !important;
   background-repeat:no-repeat, no-repeat, no-repeat, no-repeat !important;
@@ -5438,7 +5438,7 @@ html:not(.ios-device).oai-screen-compact-short #prayer-view{
   --faith-prayer-detail-bottom-pad:calc(76px + var(--oai-android-bottom-gap, env(safe-area-inset-bottom, 0px)));
 }
 
-/* V8-1-14-671: 성지·성당·피정의집 지도 패널의 단일 반응형 소유 블록.
+/* V8-1-14-673: 성지·성당·피정의집 지도 패널의 단일 반응형 소유 블록.
    넓은 Fold 화면은 접힌 Fold와 같은 UI 밀도의 왼쪽 패널 + 오른쪽 지도를 사용한다.
    조작부는 넓은 화면에서 세로 그립, 일반 휴대전화의 하단 카드에서 가로 그립으로 구분한다. */
 :root{
@@ -5846,7 +5846,7 @@ html.route-tab-active #info-card.open{
   pointer-events: none !important;
 }
 
-/* V8-1-14-671: 순례한 성지 - 날짜/교구/유형 3축 정렬·필터 */
+/* V8-1-14-673: 순례한 성지 - 날짜/교구/유형 3축 정렬·필터 */
 .shrine-visit-cards-filters{
   display:none!important;
   width:100%!important;
