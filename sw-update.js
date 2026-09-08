@@ -3,7 +3,7 @@
   if(window.__OAI_CONTROLLED_AUTO_UPDATE__) return;
   window.__OAI_CONTROLLED_AUTO_UPDATE__ = true;
 
-  var APP_VERSION = window.OAI_APP_BUILD_VERSION || 'V8-1-14-682';
+  var APP_VERSION = window.OAI_APP_BUILD_VERSION || 'V8-1-14-683';
   var CHECK_URL = './version.json';
   var RELOAD_KEY = 'oai_auto_update_reloaded_version';
   var checking = false;

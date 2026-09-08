@@ -2572,12 +2572,23 @@ html.app-active #cover-action-row { display: none; }
   line-height: 1;
   color: #B91C1C;
 }
+#cover .cover-diocese-btn {
+  gap: 2px;
+  padding-left: 4px;
+  padding-right: 4px;
+}
+#cover .cover-diocese-btn .cover-faith-cross {
+  font-size: clamp(13px, 3.5vw, var(--cover-faith-cross-font));
+}
 #cover .cover-diocese-btn .diocese-btn-label {
   display: block;
   min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  flex: 0 1 auto;
+  overflow: visible;
+  text-overflow: clip;
   white-space: nowrap;
+  font-size: clamp(11px, 3.1vw, var(--cover-action-font));
+  letter-spacing: -.055em;
 }
 html.app-active #cover-diocese-box,
 html.app-active #cover-share-box { display: none; }

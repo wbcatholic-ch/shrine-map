@@ -7167,7 +7167,7 @@ function zoomCategoryMap(delta){
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 
-/* V8-1-14-682: 지도 마커의 길찾기 동작은 '현재 길찾기 탭이 실제로 열려 있을 때'만 허용한다.
+/* V8-1-14-683: 지도 마커의 길찾기 동작은 '현재 길찾기 탭이 실제로 열려 있을 때'만 허용한다.
    뒤로가기 등으로 길찾기 UI를 벗어난 뒤 남아 있던 _routeMode/route-tab-active 상태 때문에
    일반 지도 마커가 다시 길찾기로 동작하던 문제를 막는다. */
 function _isRouteSelectionModeActive(){
