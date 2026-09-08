@@ -7154,6 +7154,8 @@ function _closeRouteUiForNonRouteTab(){
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 
+try{ window._exitRouteMode=_exitRouteMode; window._setRouteTabInfoCardHidden=_setRouteTabInfoCardHidden; }catch(e){ console.warn('[가톨릭길동무]', e); }
+
 function zoomCategoryMap(delta){
   if(!_map || typeof _map.getLevel !== 'function' || typeof _map.setLevel !== 'function') return;
   try{
@@ -7165,13 +7167,28 @@ function zoomCategoryMap(delta){
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 
+/* V8-1-14-682: 지도 마커의 길찾기 동작은 '현재 길찾기 탭이 실제로 열려 있을 때'만 허용한다.
+   뒤로가기 등으로 길찾기 UI를 벗어난 뒤 남아 있던 _routeMode/route-tab-active 상태 때문에
+   일반 지도 마커가 다시 길찾기로 동작하던 문제를 막는다. */
 function _isRouteSelectionModeActive(){
   try{
     var root = document.documentElement;
     var routeSheet = $('sheet-route');
-    return (_activeTab === 'route') || !!_routeMode ||
-      !!(root && root.classList.contains('route-tab-active')) ||
-      !!(routeSheet && routeSheet.classList.contains('open') && routeSheet.style.display !== 'none');
+    var tabIsRoute = (_activeTab === 'route');
+    var sheetIsOpen = !!(routeSheet && routeSheet.classList.contains('open') && !routeSheet.hidden && routeSheet.style.display !== 'none');
+    var active = tabIsRoute && sheetIsOpen;
+
+    if(!active && !tabIsRoute){
+      // 화면상 길찾기 탭이 아니면 남아 있는 길찾기 표시 상태를 즉시 정리한다.
+      _routeMode = false;
+      if(root) root.classList.remove('route-tab-active');
+      try{ if(typeof _hideRouteGuide === 'function') _hideRouteGuide(); }catch(_e){}
+      try{
+        var choiceModal = $('route-choice-modal');
+        if(choiceModal) choiceModal.classList.remove('open');
+      }catch(_e){}
+    }
+    return active;
   }catch(e){ console.warn('[가톨릭길동무]', e); }
   return false;
 }
