@@ -7167,7 +7167,7 @@ function zoomCategoryMap(delta){
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 
-/* V8-1-14-683: 지도 마커의 길찾기 동작은 '현재 길찾기 탭이 실제로 열려 있을 때'만 허용한다.
+/* V8-1-14-684: 지도 마커의 길찾기 동작은 '현재 길찾기 탭이 실제로 열려 있을 때'만 허용한다.
    뒤로가기 등으로 길찾기 UI를 벗어난 뒤 남아 있던 _routeMode/route-tab-active 상태 때문에
    일반 지도 마커가 다시 길찾기로 동작하던 문제를 막는다. */
 function _isRouteSelectionModeActive(){
@@ -10381,6 +10381,13 @@ function _setRouteLabel(role,name){
   el.className='rs-lbl'+(rawName?' filled':' empty');
   if(role==='start' && $('rs-start-x')) $('rs-start-x').style.display=name?'inline-flex':'none';
   if(role==='end' && $('rs-end-x')) $('rs-end-x').style.display=name?'inline-flex':'none';
+  const dragBtn=$('rs-'+role+'-drag');
+  if(dragBtn){
+    const point=_getRoutePointByRole(role);
+    const ready=!!(point&&point.lat&&point.lng);
+    dragBtn.style.display=ready?'inline-flex':'none';
+    dragBtn.disabled=!ready;
+  }
   if(_isRouteWaypointRole(role)){
     const clearBtn=$(_routeWaypointElementId('rs-waypoint',_routeWaypointIndex(role),'-x'));
     if(clearBtn) clearBtn.style.display=(_getRouteWaypointEnabledByRole(role) || rawName)?'inline-flex':'none';
@@ -10503,6 +10510,99 @@ function swapRouteWaypoint3End(){ _swapRouteWaypointWithNext(3); }
 function swapRouteWaypoint4End(){ _swapRouteWaypointWithNext(4); }
 function swapRouteWaypoint5End(){ _swapRouteWaypointWithNext(5); }
 
+// V8-1-14-684: 출발/경유/도착 지점을 손잡이로 직접 드래그해 순서를 변경한다.
+let _routeDragState=null;
+function _routeReadyRoles(){
+  const roles=[];
+  if(_routePointReady(_rS)) roles.push('start');
+  OAI_ROUTE_WAYPOINT_CONFIGS.forEach(function(cfg){
+    if(_routePointReady(_getRoutePointByRole(cfg.role))) roles.push(cfg.role);
+  });
+  if(_routePointReady(_rE)) roles.push('end');
+  return roles;
+}
+function _routeBoxByRole(role){
+  if(role==='start') return $('rs-start-box');
+  if(role==='end') return $('rs-end-box');
+  if(_isRouteWaypointRole(role)) return $(_routeWaypointElementId('rs-waypoint',_routeWaypointIndex(role),'-box'));
+  return null;
+}
+function _clearRouteDragClasses(){
+  document.querySelectorAll('.rs-drag-source,.rs-drag-over').forEach(function(el){
+    el.classList.remove('rs-drag-source','rs-drag-over');
+  });
+  document.querySelectorAll('.rs-drag-handle.is-dragging').forEach(function(el){ el.classList.remove('is-dragging'); });
+}
+function _routeDragTargetAt(clientY){
+  const roles=_routeReadyRoles();
+  let best=null, bestDist=Infinity;
+  roles.forEach(function(role){
+    const box=_routeBoxByRole(role);
+    if(!box || box.style.display==='none') return;
+    const r=box.getBoundingClientRect();
+    if(!r.height) return;
+    const d=Math.abs(clientY-(r.top+r.height/2));
+    if(d<bestDist){ bestDist=d; best=role; }
+  });
+  return best;
+}
+function _reorderRouteReadyPoints(sourceRole,targetRole){
+  if(!sourceRole || !targetRole || sourceRole===targetRole) return false;
+  const roles=_routeReadyRoles();
+  const from=roles.indexOf(sourceRole), to=roles.indexOf(targetRole);
+  if(from<0 || to<0) return false;
+  const points=roles.map(function(role){ return _getRoutePointByRole(role); });
+  const moved=points.splice(from,1)[0];
+  points.splice(to,0,moved);
+  roles.forEach(function(role,index){ _setRoutePointByRole(role,points[index]); });
+  _routeStartMarkerExplicitCurrent=!!(_rS && _rS.showStartMarker===true);
+  _syncRoutePointLabels();
+  _repaintRoutePointMarkers();
+  _updateSearchBtn();
+  _showRouteGuideText('경로 순서를 변경했습니다');
+  return true;
+}
+function _bindRouteDragHandles(){
+  document.querySelectorAll('.rs-drag-handle[data-route-drag]').forEach(function(handle){
+    if(handle.dataset.routeDragBound==='1') return;
+    handle.dataset.routeDragBound='1';
+    handle.addEventListener('click',function(e){ e.preventDefault(); e.stopPropagation(); });
+    handle.addEventListener('pointerdown',function(e){
+      const role=handle.dataset.routeDrag;
+      if(!_routePointReady(_getRoutePointByRole(role))) return;
+      e.preventDefault(); e.stopPropagation();
+      try{ handle.setPointerCapture(e.pointerId); }catch(_e){}
+      _routeDragState={pointerId:e.pointerId,sourceRole:role,targetRole:role,startY:e.clientY,dragging:false,handle:handle};
+    });
+    handle.addEventListener('pointermove',function(e){
+      const st=_routeDragState;
+      if(!st || st.pointerId!==e.pointerId || st.handle!==handle) return;
+      e.preventDefault(); e.stopPropagation();
+      if(!st.dragging && Math.abs(e.clientY-st.startY)>=5){
+        st.dragging=true;
+        handle.classList.add('is-dragging');
+        const src=_routeBoxByRole(st.sourceRole); if(src) src.classList.add('rs-drag-source');
+        try{ if(navigator.vibrate) navigator.vibrate(12); }catch(_e){}
+      }
+      if(!st.dragging) return;
+      const target=_routeDragTargetAt(e.clientY) || st.sourceRole;
+      st.targetRole=target;
+      document.querySelectorAll('.rs-drag-over').forEach(function(el){el.classList.remove('rs-drag-over');});
+      const box=_routeBoxByRole(target); if(box) box.classList.add('rs-drag-over');
+    });
+    const finish=function(e){
+      const st=_routeDragState;
+      if(!st || st.pointerId!==e.pointerId || st.handle!==handle) return;
+      e.preventDefault(); e.stopPropagation();
+      try{ handle.releasePointerCapture(e.pointerId); }catch(_e){}
+      _routeDragState=null;
+      _clearRouteDragClasses();
+      if(st.dragging) _reorderRouteReadyPoints(st.sourceRole,st.targetRole);
+    };
+    handle.addEventListener('pointerup',finish);
+    handle.addEventListener('pointercancel',finish);
+  });
+}
 
 function _setRouteResultTipVisible(visible){
   const tip=$('rs-result-tip');
@@ -11788,17 +11888,24 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   on('rs-myloc-btn', 'click', function(e) { if(e){ e.preventDefault(); e.stopPropagation(); } setMyLocAsStart(); });
   on('rs-start-x',   'click', function(e) { if(e){ e.preventDefault(); e.stopPropagation(); } clearRoute('start'); });
   on('rs-end-x',     'click', function(e) { if(e){ e.preventDefault(); e.stopPropagation(); } clearRoute('end'); });
-  on('rs-waypoint-x','click', function(e) { if(e){ e.preventDefault(); e.stopPropagation(); } clearRoute('waypoint'); });
-  on('rs-waypoint2-x','click', function(e) { if(e){ e.preventDefault(); e.stopPropagation(); } clearRoute('waypoint2'); });
-  on('rs-waypoint3-x','click', function(e) { if(e){ e.preventDefault(); e.stopPropagation(); } clearRoute('waypoint3'); });
-  on('rs-waypoint4-x','click', function(e) { if(e){ e.preventDefault(); e.stopPropagation(); } clearRoute('waypoint4'); });
-  on('rs-waypoint5-x','click', function(e) { if(e){ e.preventDefault(); e.stopPropagation(); } clearRoute('waypoint5'); });
+  function clearWaypointByX(role,e){
+    if(e){ e.preventDefault(); e.stopPropagation(); }
+    // 값이 있으면 첫 X는 값만 비우고 입력창 유지, 이미 빈 창이면 두 번째 X에서 창 자체 삭제.
+    if(_routePointReady(_getRoutePointByRole(role))) clearRoute(role,{keepWaypointBox:true});
+    else clearRoute(role);
+  }
+  on('rs-waypoint-x','click', function(e) { clearWaypointByX('waypoint',e); });
+  on('rs-waypoint2-x','click', function(e) { clearWaypointByX('waypoint2',e); });
+  on('rs-waypoint3-x','click', function(e) { clearWaypointByX('waypoint3',e); });
+  on('rs-waypoint4-x','click', function(e) { clearWaypointByX('waypoint4',e); });
+  on('rs-waypoint5-x','click', function(e) { clearWaypointByX('waypoint5',e); });
   on('rs-swap-btn',  'click', function(e) { if(e){ e.preventDefault(); e.stopPropagation(); } swapRoute(); });
   on('rs-swap-waypoint-end-btn', 'click', function(e) { if(e){ e.preventDefault(); e.stopPropagation(); } swapRouteWaypointEnd(); });
   on('rs-swap-waypoint2-end-btn', 'click', function(e) { if(e){ e.preventDefault(); e.stopPropagation(); } swapRouteWaypoint2End(); });
   on('rs-swap-waypoint3-end-btn', 'click', function(e) { if(e){ e.preventDefault(); e.stopPropagation(); } swapRouteWaypoint3End(); });
   on('rs-swap-waypoint4-end-btn', 'click', function(e) { if(e){ e.preventDefault(); e.stopPropagation(); } swapRouteWaypoint4End(); });
   on('rs-swap-waypoint5-end-btn', 'click', function(e) { if(e){ e.preventDefault(); e.stopPropagation(); } swapRouteWaypoint5End(); });
+  _bindRouteDragHandles();
   on('rs-search-btn','click', function() { doSearchRoute(); });
   on('rs-kakao-btn', 'click', function() { doKakaoRoute(); });
   on('rs-reset-btn', 'click', function() { resetRoute({ fromButton: true }); });
