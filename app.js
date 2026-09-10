@@ -6025,7 +6025,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 let _myLocAt = 0;
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V8-1-14-692';
+const _SHRINE_ASSET_VERSION='V8-1-14-693';
 /* 성지 좌표는 남한 본토·제주·도서 지역 전체를 포함하는 한 기준으로만 검사한다.
    실제 데이터 경계보다 여유를 두어 강원 북부와 동해 도서 좌표가 상한에서 누락되지 않게 한다. */
 const OAI_SOUTH_KOREA_COORD_BOUNDS=Object.freeze({
@@ -7207,7 +7207,7 @@ function zoomCategoryMap(delta){
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 
-/* V8-1-14-692: 지도 마커의 길찾기 동작은 '현재 길찾기 탭이 실제로 열려 있을 때'만 허용한다.
+/* V8-1-14-693: 지도 마커의 길찾기 동작은 '현재 길찾기 탭이 실제로 열려 있을 때'만 허용한다.
    뒤로가기 등으로 길찾기 UI를 벗어난 뒤 남아 있던 _routeMode/route-tab-active 상태 때문에
    일반 지도 마커가 다시 길찾기로 동작하던 문제를 막는다. */
 function _isRouteSelectionModeActive(){
@@ -10550,7 +10550,7 @@ function swapRouteWaypoint3End(){ _swapRouteWaypointWithNext(3); }
 function swapRouteWaypoint4End(){ _swapRouteWaypointWithNext(4); }
 function swapRouteWaypoint5End(){ _swapRouteWaypointWithNext(5); }
 
-// V8-1-14-692: 출발/경유/도착 지점을 손잡이로 직접 드래그해 순서를 변경한다.
+// V8-1-14-693: 출발/경유/도착 지점을 손잡이로 직접 드래그해 순서를 변경한다.
 let _routeDragState=null;
 function _routeReadyRoles(){
   const roles=[];

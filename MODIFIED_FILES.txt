@@ -1,3 +1,4 @@
-V8-1-14-692
-- shrines.js: GPS 허용 반경 188개 개별 적용 (업로드 엑셀 기준)
-- app/cache version: V8-1-14-692
+V8-1-14-693
+- qa-firebase.html: 접수하기 아래 메일 문의 주소 추가
+- firestore.rules: qa_posts 익명 create만 허용, 필드/길이 검증, 일반 read/update/delete 차단
+- cache/build version: V8-1-14-693
