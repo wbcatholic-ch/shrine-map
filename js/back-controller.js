@@ -318,7 +318,7 @@
         var dest = (_rE && _rE.lat) ? Object.assign({}, _rE) : null;
         try{ if(typeof window.resetRoute==='function') window.resetRoute(); }catch(e){ console.warn("[가톨릭길동무]", e); }
         try{ _routeMode = false; }catch(e){ console.warn("[가톨릭길동무]", e); }
-        // V8-1-14-684: Android 뒤로가기로 길찾기를 닫을 때 화면/내부 상태를 함께 일반 지도 모드로 복귀시킨다.
+        // V8-1-14-692: Android 뒤로가기로 길찾기를 닫을 때 화면/내부 상태를 함께 일반 지도 모드로 복귀시킨다.
         try{ if(typeof window._exitRouteMode==='function') window._exitRouteMode(); else if(typeof _exitRouteMode==='function') _exitRouteMode(); }catch(e){ console.warn("[가톨릭길동무]", e); }
         try{ if(typeof window._setRouteTabInfoCardHidden==='function') window._setRouteTabInfoCardHidden(false); else if(typeof _setRouteTabInfoCardHidden==='function') _setRouteTabInfoCardHidden(false); }catch(e){ console.warn("[가톨릭길동무]", e); }
         if(el){
