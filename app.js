@@ -4585,7 +4585,7 @@ const MYEONGRYE_PHOTOS=[
   {file:'shrines/20190078/09.png',caption:'성지 야외 풍경'},
   {file:'shrines/20190078/10.png',caption:'성지에서 바라본 풍경'}
 ];
-var _myeongryeSlideIndex=0, _myeongryeSlideTimer=0, _myeongryeManualPause=false, _myeongryeTouchStartX=null, _myeongryeBodyOverflow='';
+var _myeongryeSlideIndex=0, _myeongryeSlideTimer=0, _myeongryeManualPause=false, _myeongryeTouchStartX=null, _myeongryeViewerTouchStartX=null, _myeongryeBodyOverflow='';
 function _isMyeongryeShrine(item){ return !!(item&&String(item.seq||'')===MYEONGRYE_SHRINE_SEQ); }
 function _ensureMyeongryeMaterialsModal(){
   var modal=document.getElementById('myeongrye-materials-modal');
@@ -4593,10 +4593,14 @@ function _ensureMyeongryeMaterialsModal(){
   modal=document.createElement('div');
   modal.id='myeongrye-materials-modal'; modal.className='myeongrye-materials-modal';
   modal.setAttribute('role','dialog'); modal.setAttribute('aria-modal','true'); modal.setAttribute('aria-labelledby','myeongrye-materials-title'); modal.setAttribute('aria-hidden','true');
-  modal.innerHTML='<div class="myeongrye-materials-backdrop" data-myeongrye-close="1"></div><section class="myeongrye-materials-panel"><header class="myeongrye-materials-head"><div><div class="myeongrye-materials-kicker">성지 자료</div><h2 id="myeongrye-materials-title">명례성지</h2></div><button type="button" class="myeongrye-materials-close" data-myeongrye-close="1" aria-label="성지 자료 닫기">×</button></header><div class="myeongrye-gallery" aria-live="polite"><div class="myeongrye-slides"></div><div class="myeongrye-photo-loading" aria-hidden="true"><span></span>사진 불러오는 중</div><button type="button" class="myeongrye-slide-nav prev" data-myeongrye-prev="1" aria-label="이전 사진">‹</button><button type="button" class="myeongrye-slide-nav next" data-myeongrye-next="1" aria-label="다음 사진">›</button><div class="myeongrye-slide-meta"><strong class="myeongrye-slide-caption"></strong><span class="myeongrye-slide-count"></span></div><div class="myeongrye-auto-progress" aria-hidden="true"><span></span></div></div><div class="myeongrye-slide-dots" aria-label="사진 순서"></div><div class="myeongrye-material-links" aria-label="관련 자료"></div></section>';
+  modal.innerHTML='<div class="myeongrye-materials-backdrop" data-myeongrye-close="1"></div><section class="myeongrye-materials-panel"><header class="myeongrye-materials-head"><div><div class="myeongrye-materials-kicker">성지 자료</div><h2 id="myeongrye-materials-title">명례성지</h2></div><button type="button" class="myeongrye-materials-close" data-myeongrye-close="1" aria-label="성지 자료 닫기">×</button></header><div class="myeongrye-gallery" aria-live="polite"><div class="myeongrye-slides"></div><div class="myeongrye-photo-loading" aria-hidden="true"><span></span>사진 불러오는 중</div><button type="button" class="myeongrye-slide-nav prev" data-myeongrye-prev="1" aria-label="이전 사진">‹</button><button type="button" class="myeongrye-slide-nav next" data-myeongrye-next="1" aria-label="다음 사진">›</button><div class="myeongrye-slide-meta"><strong class="myeongrye-slide-caption"></strong><span class="myeongrye-slide-count"></span></div><div class="myeongrye-auto-progress" aria-hidden="true"><span></span></div></div><button type="button" class="myeongrye-enlarge-hint" data-myeongrye-enlarge="1" aria-label="현재 사진 크게 보기"><span aria-hidden="true">⛶</span> 사진을 누르면 크게 볼 수 있습니다</button><div class="myeongrye-slide-dots" aria-label="사진 순서"></div><div class="myeongrye-material-links" aria-label="관련 자료"></div></section><div class="myeongrye-photo-viewer" aria-hidden="true" role="dialog" aria-modal="true" aria-label="사진 크게 보기"><button type="button" class="myeongrye-viewer-close" data-myeongrye-viewer-close="1" aria-label="큰 사진 닫기">×</button><button type="button" class="myeongrye-viewer-nav prev" data-myeongrye-viewer-prev="1" aria-label="이전 큰 사진">‹</button><div class="myeongrye-viewer-stage"><img alt=""></div><button type="button" class="myeongrye-viewer-nav next" data-myeongrye-viewer-next="1" aria-label="다음 큰 사진">›</button><div class="myeongrye-viewer-meta"><strong></strong><span></span></div></div>';
   document.body.appendChild(modal);
   modal.addEventListener('click',function(e){
     if(e.target&&e.target.closest('[data-myeongrye-close]')){ e.preventDefault(); _closeMyeongryeMaterials(); return; }
+    if(e.target&&e.target.closest('[data-myeongrye-viewer-close]')){ e.preventDefault(); _closeMyeongryePhotoViewer(); return; }
+    if(e.target&&e.target.closest('[data-myeongrye-viewer-prev]')){ e.preventDefault(); _moveMyeongryeViewer(-1); return; }
+    if(e.target&&e.target.closest('[data-myeongrye-viewer-next]')){ e.preventDefault(); _moveMyeongryeViewer(1); return; }
+    if(e.target&&e.target.closest('[data-myeongrye-enlarge]')){ e.preventDefault(); _openMyeongryePhotoViewer(); return; }
     if(e.target&&e.target.closest('[data-myeongrye-prev]')){ e.preventDefault(); _moveMyeongryeSlide(-1,true); return; }
     if(e.target&&e.target.closest('[data-myeongrye-next]')){ e.preventDefault(); _moveMyeongryeSlide(1,true); }
   });
@@ -4607,6 +4611,17 @@ function _ensureMyeongryeMaterialsModal(){
     var end=e.changedTouches&&e.changedTouches[0]?e.changedTouches[0].clientX:_myeongryeTouchStartX;
     var dx=end-_myeongryeTouchStartX; _myeongryeTouchStartX=null;
     if(Math.abs(dx)>42) _moveMyeongryeSlide(dx>0?-1:1,true);
+  },{passive:true});
+  gallery.addEventListener('click',function(e){
+    if(e.target&&e.target.closest('.myeongrye-slide.active img')) _openMyeongryePhotoViewer();
+  });
+  var viewer=modal.querySelector('.myeongrye-photo-viewer');
+  viewer.addEventListener('touchstart',function(e){ _myeongryeViewerTouchStartX=e.touches&&e.touches[0]?e.touches[0].clientX:null; },{passive:true});
+  viewer.addEventListener('touchend',function(e){
+    if(_myeongryeViewerTouchStartX===null) return;
+    var end=e.changedTouches&&e.changedTouches[0]?e.changedTouches[0].clientX:_myeongryeViewerTouchStartX;
+    var dx=end-_myeongryeViewerTouchStartX; _myeongryeViewerTouchStartX=null;
+    if(Math.abs(dx)>42) _moveMyeongryeViewer(dx>0?-1:1);
   },{passive:true});
   return modal;
 }
@@ -4629,7 +4644,7 @@ function _loadMyeongryePhoto(index,done){
 }
 function _restartMyeongryeProgress(){
   var modal=document.getElementById('myeongrye-materials-modal'), bar=modal&&modal.querySelector('.myeongrye-auto-progress span');
-  if(!bar) return; bar.style.animation='none'; void bar.offsetWidth; if(!_myeongryeManualPause) bar.style.animation='myeongryeAutoProgress 5s linear forwards';
+  if(!bar) return; bar.style.animation='none'; void bar.offsetWidth; if(!_myeongryeManualPause) bar.style.animation='myeongryeAutoProgress 3.5s linear forwards';
 }
 function _startMyeongryeSlides(){
   clearTimeout(_myeongryeSlideTimer); _myeongryeSlideTimer=0; if(_myeongryeManualPause) return; _restartMyeongryeProgress();
@@ -4637,12 +4652,36 @@ function _startMyeongryeSlides(){
     var next=(_myeongryeSlideIndex+1)%MYEONGRYE_PHOTOS.length, modal=document.getElementById('myeongrye-materials-modal'), loading=modal&&modal.querySelector('.myeongrye-photo-loading');
     if(loading) loading.classList.add('show');
     _loadMyeongryePhoto(next,function(ok){ if(loading) loading.classList.remove('show'); if(ok&&!_myeongryeManualPause){ _myeongryeSlideIndex=next; _renderMyeongryeSlide(); _loadMyeongryePhoto((next+1)%MYEONGRYE_PHOTOS.length); _startMyeongryeSlides(); } });
-  },5000);
+  },3500);
 }
 function _moveMyeongryeSlide(delta,manual){
   if(manual){ _myeongryeManualPause=true; clearTimeout(_myeongryeSlideTimer); _myeongryeSlideTimer=0; _restartMyeongryeProgress(); }
   var target=(_myeongryeSlideIndex+delta+MYEONGRYE_PHOTOS.length)%MYEONGRYE_PHOTOS.length;
   _loadMyeongryePhoto(target,function(ok){ if(ok){ _myeongryeSlideIndex=target; _renderMyeongryeSlide(); _loadMyeongryePhoto((target+1)%MYEONGRYE_PHOTOS.length); } });
+}
+function _renderMyeongryePhotoViewer(){
+  var modal=document.getElementById('myeongrye-materials-modal'), viewer=modal&&modal.querySelector('.myeongrye-photo-viewer');
+  if(!viewer) return;
+  var photo=MYEONGRYE_PHOTOS[_myeongryeSlideIndex], img=viewer.querySelector('img');
+  img.src=MYEONGRYE_PHOTO_ORIGIN+'/'+photo.file; img.alt=photo.caption;
+  viewer.querySelector('.myeongrye-viewer-meta strong').textContent=photo.caption;
+  viewer.querySelector('.myeongrye-viewer-meta span').textContent=(_myeongryeSlideIndex+1)+' / '+MYEONGRYE_PHOTOS.length;
+}
+function _openMyeongryePhotoViewer(){
+  var modal=document.getElementById('myeongrye-materials-modal'), viewer=modal&&modal.querySelector('.myeongrye-photo-viewer');
+  if(!viewer) return;
+  _myeongryeManualPause=true; clearTimeout(_myeongryeSlideTimer); _myeongryeSlideTimer=0; _restartMyeongryeProgress();
+  _renderMyeongryePhotoViewer(); viewer.classList.add('open'); viewer.setAttribute('aria-hidden','false');
+  var close=viewer.querySelector('.myeongrye-viewer-close'); if(close) close.focus();
+}
+function _closeMyeongryePhotoViewer(){
+  var modal=document.getElementById('myeongrye-materials-modal'), viewer=modal&&modal.querySelector('.myeongrye-photo-viewer');
+  if(viewer){ viewer.classList.remove('open'); viewer.setAttribute('aria-hidden','true'); }
+}
+function _moveMyeongryeViewer(delta){
+  _myeongryeManualPause=true;
+  var target=(_myeongryeSlideIndex+delta+MYEONGRYE_PHOTOS.length)%MYEONGRYE_PHOTOS.length;
+  _loadMyeongryePhoto(target,function(ok){ if(ok){ _myeongryeSlideIndex=target; _renderMyeongryeSlide(); _renderMyeongryePhotoViewer(); _loadMyeongryePhoto((target+1)%MYEONGRYE_PHOTOS.length); } });
 }
 function _openMyeongryeMaterials(item){
   if(!_isMyeongryeShrine(item)) return;
@@ -4661,9 +4700,15 @@ function _openMyeongryeMaterials(item){
 }
 function _closeMyeongryeMaterials(){
   var modal=document.getElementById('myeongrye-materials-modal'); clearTimeout(_myeongryeSlideTimer); _myeongryeSlideTimer=0;
-  if(modal){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); } document.body.style.overflow=_myeongryeBodyOverflow;
+  if(modal){ _closeMyeongryePhotoViewer(); modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); } document.body.style.overflow=_myeongryeBodyOverflow;
 }
-document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ var m=document.getElementById('myeongrye-materials-modal'); if(m&&m.classList.contains('open')) _closeMyeongryeMaterials(); } });
+document.addEventListener('keydown',function(e){
+  var m=document.getElementById('myeongrye-materials-modal'), viewer=m&&m.querySelector('.myeongrye-photo-viewer');
+  if(e.key==='Escape'&&viewer&&viewer.classList.contains('open')){ _closeMyeongryePhotoViewer(); return; }
+  if(e.key==='Escape'&&m&&m.classList.contains('open')) _closeMyeongryeMaterials();
+  if(viewer&&viewer.classList.contains('open')&&e.key==='ArrowLeft') _moveMyeongryeViewer(-1);
+  if(viewer&&viewer.classList.contains('open')&&e.key==='ArrowRight') _moveMyeongryeViewer(1);
+});
 function prepareExternalUrl(url){
   url = (typeof normalizeCatholicExternalUrl === 'function')
         ? normalizeCatholicExternalUrl(url)
