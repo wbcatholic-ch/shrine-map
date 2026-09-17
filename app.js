@@ -4655,7 +4655,8 @@ const SHRINE_MATERIALS={
   '20190166':{folder:'성베네딕도회왜관수도원과구왜관성당',title:'성 베네딕도회 왜관 수도원과 구)왜관 성당',photos:[],remoteManifest:true},
   '20190139':{folder:'도앙골성지',title:'도앙골 성지',photos:[],remoteManifest:true},
   '20190141':{folder:'서짓골성지',title:'서짓골 성지',photos:[],remoteManifest:true},
-  '20190028':{folder:'정산순교성지',title:'정산 순교 성지',photos:[],remoteManifest:true}
+  '20190028':{folder:'정산순교성지',title:'정산 순교 성지',photos:[],remoteManifest:true},
+  '20190050':{folder:'죽산순교성지',title:'죽산 순교 성지',photos:[],remoteManifest:true}
 };
 var _myeongryeCurrentMaterials=null;
 function _getMyeongryePhotos(){ return _myeongryeCurrentMaterials?_myeongryeCurrentMaterials.photos:[]; }
