@@ -4035,7 +4035,10 @@ function syncCoverUpdateVersionState(){
     var box = document.getElementById('cover-update-box');
     var marker = document.getElementById('oai-build-marker');
     if(!btn || !box) return;
-    var target = btn.getAttribute('data-target-version') || (window.OAI_APP_BUILD_VERSION || window.APP_VERSION || 'V8-1-14-679');
+    /* 버튼의 HTML 속성이 이전 배포값으로 남아도 허위로 '업데이트 필요'가 뜨지 않게,
+       현재 문서가 실제로 불러온 빌드 버전을 항상 기준으로 쓴다. */
+    var target = window.OAI_APP_BUILD_VERSION || window.APP_VERSION || btn.getAttribute('data-target-version') || 'V8-1-14-679';
+    btn.setAttribute('data-target-version', target);
     var current = '';
     /* V8-1-14-621:
        현재 화면의 실제 빌드 기준은 index.html이 먼저 선언한 OAI_APP_BUILD_VERSION/숨김 marker를 우선한다.
@@ -4589,7 +4592,7 @@ const SHRINE_MATERIALS={
     {file:'07.png',caption:'성모당'}, {file:'08.jpg',caption:'안내 표지판 2'},
     {file:'09.jpg',caption:'안내표지판',portrait:true}
   ]},
-  '20190162':{folder:'Cardinal Kim Soo-hwan Love and Sharing Park',title:'김수환 추기경 사랑과 나눔 공원 (김수환 추기경 생가)',photos:[
+  '20190162':{folder:'김수환 추기경 사랑과 나눔공원',title:'김수환 추기경 사랑과 나눔 공원 (김수환 추기경 생가)',photos:[
     {file:'01.jpg'}, {file:'02.jpg'}, {file:'03.jpg'}, {file:'04.jpg'},
     {file:'05.jpg'}, {file:'06.jpg'}, {file:'07.jpg'}, {file:'08.jpg'},
     {file:'09.jpg',portrait:true}, {file:'10.jpg'}, {file:'11.jpg'}, {file:'12.jpg'}
@@ -4630,6 +4633,12 @@ const SHRINE_MATERIALS={
   '20190029':{folder:'진산성지',title:'진산 성지',photos:[
     {file:'01.jpg',portrait:true}, {file:'02.jpg'}, {file:'03.jpg'}, {file:'04.jpg'}, {file:'05.jpg'},
     {file:'06.jpg'}, {file:'07.jpg',portrait:true}, {file:'08.jpg'}, {file:'09.jpg'}
+  ]},
+  '20190033':{folder:'황새바위순교성지',title:'황새 바위 순교 성지',photos:[
+    {file:'01.jpg'}, {file:'02.jpg'}, {file:'03.jpg'}, {file:'04.jpg'},
+    {file:'05.jpg',portrait:true}, {file:'06.jpg',portrait:true}, {file:'07.jpg'}, {file:'08.jpg'},
+    {file:'09.jpg',portrait:true}, {file:'10.jpg',portrait:true}, {file:'11.jpg',portrait:true},
+    {file:'12.jpg',portrait:true}, {file:'13.jpg',portrait:true}
   ]}
 };
 var _myeongryeCurrentMaterials=null;
