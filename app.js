@@ -4585,7 +4585,7 @@ const MYEONGRYE_PHOTOS=[
   {file:'shrines/20190078/09.png',caption:'성지 야외 풍경'},
   {file:'shrines/20190078/10.png',caption:'성지에서 바라본 풍경'}
 ];
-var _myeongryeSlideIndex=0, _myeongryeSlideTimer=0, _myeongryeManualPause=false, _myeongryeTouchStartX=null, _myeongryeViewerTouchStartX=null, _myeongryeBodyOverflow='';
+var _myeongryeSlideIndex=0, _myeongryeSlideTimer=0, _myeongryeManualPause=false, _myeongryeTouchStartX=null, _myeongryeViewerTouchStartX=null, _myeongryeBodyOverflow='', _myeongryeMaterialsHistoryActive=false, _myeongryeViewerHistoryActive=false;
 function _isMyeongryeShrine(item){ return !!(item&&String(item.seq||'')===MYEONGRYE_SHRINE_SEQ); }
 function _ensureMyeongryeMaterialsModal(){
   var modal=document.getElementById('myeongrye-materials-modal');
@@ -4672,11 +4672,16 @@ function _openMyeongryePhotoViewer(){
   if(!viewer) return;
   _myeongryeManualPause=true; clearTimeout(_myeongryeSlideTimer); _myeongryeSlideTimer=0; _restartMyeongryeProgress();
   _renderMyeongryePhotoViewer(); viewer.classList.add('open'); viewer.setAttribute('aria-hidden','false');
+  if(!_myeongryeViewerHistoryActive){
+    try{ history.pushState({myeongryeGuard:true,myeongryeMaterials:true,myeongryeViewer:true},'',location.href); _myeongryeViewerHistoryActive=true; }catch(e){ console.warn('[가톨릭길동무]',e); }
+  }
   var close=viewer.querySelector('.myeongrye-viewer-close'); if(close) close.focus();
 }
-function _closeMyeongryePhotoViewer(){
+function _closeMyeongryePhotoViewer(fromHistory){
   var modal=document.getElementById('myeongrye-materials-modal'), viewer=modal&&modal.querySelector('.myeongrye-photo-viewer');
+  if(!fromHistory&&_myeongryeViewerHistoryActive){ try{ history.back(); return; }catch(e){ console.warn('[가톨릭길동무]',e); } }
   if(viewer){ viewer.classList.remove('open'); viewer.setAttribute('aria-hidden','true'); }
+  _myeongryeViewerHistoryActive=false;
 }
 function _moveMyeongryeViewer(delta){
   _myeongryeManualPause=true;
@@ -4696,12 +4701,33 @@ function _openMyeongryeMaterials(item){
   links.querySelectorAll('[data-myeongrye-url]').forEach(function(btn){ btn.addEventListener('click',function(){ openCoreExternalUrl(btn.getAttribute('data-myeongrye-url'),{source:'myeongrye-materials'}); }); });
   _myeongryeSlideIndex=0; _myeongryeManualPause=false; _renderMyeongryeSlide(); _loadMyeongryePhoto(1);
   _myeongryeBodyOverflow=document.body.style.overflow||''; document.body.style.overflow='hidden'; modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); _startMyeongryeSlides();
+  if(!_myeongryeMaterialsHistoryActive){
+    try{
+      /* 보호 단계가 먼저 뒤로가기를 받아 정보카드의 지도 상태까지 넘어가지 않게 한다. */
+      if(!(history.state&&history.state.myeongryeGuard)) history.pushState({myeongryeGuard:true},'',location.href);
+      history.pushState({myeongryeGuard:true,myeongryeMaterials:true},'',location.href);
+      _myeongryeMaterialsHistoryActive=true;
+    }catch(e){ console.warn('[가톨릭길동무]',e); }
+  }
   var closeBtn=modal.querySelector('.myeongrye-materials-close'); if(closeBtn) closeBtn.focus();
 }
-function _closeMyeongryeMaterials(){
+function _closeMyeongryeMaterials(fromHistory){
   var modal=document.getElementById('myeongrye-materials-modal'); clearTimeout(_myeongryeSlideTimer); _myeongryeSlideTimer=0;
-  if(modal){ _closeMyeongryePhotoViewer(); modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); } document.body.style.overflow=_myeongryeBodyOverflow;
+  if(!fromHistory&&_myeongryeViewerHistoryActive){ _closeMyeongryePhotoViewer(); return; }
+  if(!fromHistory&&_myeongryeMaterialsHistoryActive){ try{ history.back(); return; }catch(e){ console.warn('[가톨릭길동무]',e); } }
+  if(modal){ _closeMyeongryePhotoViewer(true); modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); } document.body.style.overflow=_myeongryeBodyOverflow;
+  _myeongryeMaterialsHistoryActive=false;
 }
+window.addEventListener('popstate',function(){
+  var modal=document.getElementById('myeongrye-materials-modal'), viewer=modal&&modal.querySelector('.myeongrye-photo-viewer');
+  if(viewer&&viewer.classList.contains('open')){ _closeMyeongryePhotoViewer(true); return; }
+  if(modal&&modal.classList.contains('open')) _closeMyeongryeMaterials(true);
+});
+document.addEventListener('backbutton',function(e){
+  var modal=document.getElementById('myeongrye-materials-modal'), viewer=modal&&modal.querySelector('.myeongrye-photo-viewer');
+  if(viewer&&viewer.classList.contains('open')){ if(e&&e.preventDefault)e.preventDefault(); _closeMyeongryePhotoViewer(); return; }
+  if(modal&&modal.classList.contains('open')){ if(e&&e.preventDefault)e.preventDefault(); _closeMyeongryeMaterials(); }
+},false);
 document.addEventListener('keydown',function(e){
   var m=document.getElementById('myeongrye-materials-modal'), viewer=m&&m.querySelector('.myeongrye-photo-viewer');
   if(e.key==='Escape'&&viewer&&viewer.classList.contains('open')){ _closeMyeongryePhotoViewer(); return; }
