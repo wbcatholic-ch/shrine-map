@@ -1,5 +1,5 @@
-V8-1-14-694
-- app.js: 명례성지(20190078)만 정보카드 링크 3개를 성지 자료 버튼으로 통합하고 사진·관련 링크 자료 화면 추가
-- style.css: 명례성지 자료 화면의 모바일 모달·원본 비율(object-fit: contain) 갤러리 스타일 추가
+V8-1-14-695
+- app.js: 명례성지 사진을 현재·다음 사진 중심으로 순차 로드하고 로드 완료 후 자동 전환하도록 개선
+- style.css: 가로 사진 16:9, 세로 사진 전체 보기, 진행 막대·순서점·간결한 관련 링크 디자인 적용
 - index.html, sw.js, sw-update.js, version.json: cache/build version 갱신
-- cache/build version: V8-1-14-694
+- cache/build version: V8-1-14-695

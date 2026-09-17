@@ -4581,7 +4581,7 @@ const MYEONGRYE_PHOTOS=[
   {file:'shrines/20190078/05.png',caption:'순교자기념성당 외관'},
   {file:'shrines/20190078/06.png',caption:'순교자기념성당 내부 전경'},
   {file:'shrines/20190078/07.png',caption:'순교자기념성당 제대'},
-  {file:'shrines/20190078/08.png',caption:'부활경당'},
+  {file:'shrines/20190078/08.png',caption:'부활경당',portrait:true},
   {file:'shrines/20190078/09.png',caption:'성지 야외 풍경'},
   {file:'shrines/20190078/10.png',caption:'성지에서 바라본 풍경'}
 ];
@@ -4593,7 +4593,7 @@ function _ensureMyeongryeMaterialsModal(){
   modal=document.createElement('div');
   modal.id='myeongrye-materials-modal'; modal.className='myeongrye-materials-modal';
   modal.setAttribute('role','dialog'); modal.setAttribute('aria-modal','true'); modal.setAttribute('aria-labelledby','myeongrye-materials-title'); modal.setAttribute('aria-hidden','true');
-  modal.innerHTML='<div class="myeongrye-materials-backdrop" data-myeongrye-close="1"></div><section class="myeongrye-materials-panel"><header class="myeongrye-materials-head"><div><div class="myeongrye-materials-kicker">성지 자료</div><h2 id="myeongrye-materials-title">명례성지</h2></div><button type="button" class="myeongrye-materials-close" data-myeongrye-close="1" aria-label="성지 자료 닫기">×</button></header><div class="myeongrye-gallery" aria-live="polite"><div class="myeongrye-slides"></div><button type="button" class="myeongrye-slide-nav prev" data-myeongrye-prev="1" aria-label="이전 사진">‹</button><button type="button" class="myeongrye-slide-nav next" data-myeongrye-next="1" aria-label="다음 사진">›</button><div class="myeongrye-slide-meta"><strong class="myeongrye-slide-caption"></strong><span class="myeongrye-slide-count"></span></div></div><div class="myeongrye-material-links" aria-label="관련 자료"></div></section>';
+  modal.innerHTML='<div class="myeongrye-materials-backdrop" data-myeongrye-close="1"></div><section class="myeongrye-materials-panel"><header class="myeongrye-materials-head"><div><div class="myeongrye-materials-kicker">성지 자료</div><h2 id="myeongrye-materials-title">명례성지</h2></div><button type="button" class="myeongrye-materials-close" data-myeongrye-close="1" aria-label="성지 자료 닫기">×</button></header><div class="myeongrye-gallery" aria-live="polite"><div class="myeongrye-slides"></div><div class="myeongrye-photo-loading" aria-hidden="true"><span></span>사진 불러오는 중</div><button type="button" class="myeongrye-slide-nav prev" data-myeongrye-prev="1" aria-label="이전 사진">‹</button><button type="button" class="myeongrye-slide-nav next" data-myeongrye-next="1" aria-label="다음 사진">›</button><div class="myeongrye-slide-meta"><strong class="myeongrye-slide-caption"></strong><span class="myeongrye-slide-count"></span></div><div class="myeongrye-auto-progress" aria-hidden="true"><span></span></div></div><div class="myeongrye-slide-dots" aria-label="사진 순서"></div><div class="myeongrye-material-links" aria-label="관련 자료"></div></section>';
   document.body.appendChild(modal);
   modal.addEventListener('click',function(e){
     if(e.target&&e.target.closest('[data-myeongrye-close]')){ e.preventDefault(); _closeMyeongryeMaterials(); return; }
@@ -4615,27 +4615,52 @@ function _renderMyeongryeSlide(){
   var slides=modal.querySelectorAll('.myeongrye-slide');
   slides.forEach(function(slide,i){ slide.classList.toggle('active',i===_myeongryeSlideIndex); slide.setAttribute('aria-hidden',i===_myeongryeSlideIndex?'false':'true'); });
   var photo=MYEONGRYE_PHOTOS[_myeongryeSlideIndex], caption=modal.querySelector('.myeongrye-slide-caption'), count=modal.querySelector('.myeongrye-slide-count');
+  modal.classList.toggle('portrait-photo',!!photo.portrait);
+  modal.querySelectorAll('.myeongrye-slide-dot').forEach(function(dot,i){ dot.classList.toggle('active',i===_myeongryeSlideIndex); });
   if(caption) caption.textContent=photo.caption; if(count) count.textContent=(_myeongryeSlideIndex+1)+' / '+MYEONGRYE_PHOTOS.length;
 }
-function _startMyeongryeSlides(){ clearInterval(_myeongryeSlideTimer); _myeongryeSlideTimer=0; if(!_myeongryeManualPause) _myeongryeSlideTimer=setInterval(function(){ _moveMyeongryeSlide(1,false); },5000); }
+function _loadMyeongryePhoto(index,done){
+  var modal=document.getElementById('myeongrye-materials-modal'), img=modal&&modal.querySelectorAll('.myeongrye-slide img')[index];
+  if(!img){ if(done) done(false); return; }
+  if(img.complete&&img.naturalWidth){ if(done) done(true); return; }
+  var finish=function(ok){ img.onload=null; img.onerror=null; if(done) done(ok); };
+  img.onload=function(){ finish(true); }; img.onerror=function(){ finish(false); };
+  if(!img.getAttribute('src')) img.src=img.getAttribute('data-src');
+}
+function _restartMyeongryeProgress(){
+  var modal=document.getElementById('myeongrye-materials-modal'), bar=modal&&modal.querySelector('.myeongrye-auto-progress span');
+  if(!bar) return; bar.style.animation='none'; void bar.offsetWidth; if(!_myeongryeManualPause) bar.style.animation='myeongryeAutoProgress 5s linear forwards';
+}
+function _startMyeongryeSlides(){
+  clearTimeout(_myeongryeSlideTimer); _myeongryeSlideTimer=0; if(_myeongryeManualPause) return; _restartMyeongryeProgress();
+  _myeongryeSlideTimer=setTimeout(function(){
+    var next=(_myeongryeSlideIndex+1)%MYEONGRYE_PHOTOS.length, modal=document.getElementById('myeongrye-materials-modal'), loading=modal&&modal.querySelector('.myeongrye-photo-loading');
+    if(loading) loading.classList.add('show');
+    _loadMyeongryePhoto(next,function(ok){ if(loading) loading.classList.remove('show'); if(ok&&!_myeongryeManualPause){ _myeongryeSlideIndex=next; _renderMyeongryeSlide(); _loadMyeongryePhoto((next+1)%MYEONGRYE_PHOTOS.length); _startMyeongryeSlides(); } });
+  },5000);
+}
 function _moveMyeongryeSlide(delta,manual){
-  if(manual){ _myeongryeManualPause=true; clearInterval(_myeongryeSlideTimer); _myeongryeSlideTimer=0; }
-  _myeongryeSlideIndex=(_myeongryeSlideIndex+delta+MYEONGRYE_PHOTOS.length)%MYEONGRYE_PHOTOS.length; _renderMyeongryeSlide();
+  if(manual){ _myeongryeManualPause=true; clearTimeout(_myeongryeSlideTimer); _myeongryeSlideTimer=0; _restartMyeongryeProgress(); }
+  var target=(_myeongryeSlideIndex+delta+MYEONGRYE_PHOTOS.length)%MYEONGRYE_PHOTOS.length;
+  _loadMyeongryePhoto(target,function(ok){ if(ok){ _myeongryeSlideIndex=target; _renderMyeongryeSlide(); _loadMyeongryePhoto((target+1)%MYEONGRYE_PHOTOS.length); } });
 }
 function _openMyeongryeMaterials(item){
   if(!_isMyeongryeShrine(item)) return;
   var modal=_ensureMyeongryeMaterialsModal(), slides=modal.querySelector('.myeongrye-slides');
-  if(slides&&!slides.children.length) slides.innerHTML=MYEONGRYE_PHOTOS.map(function(photo,i){ return '<figure class="myeongrye-slide'+(i===0?' active':'')+'" aria-hidden="'+(i===0?'false':'true')+'"><img src="'+MYEONGRYE_PHOTO_ORIGIN+'/'+photo.file+'" alt="'+_visitHtmlEsc(photo.caption)+'" loading="'+(i===0?'eager':'lazy')+'" decoding="async"><figcaption>'+_visitHtmlEsc(photo.caption)+'</figcaption></figure>'; }).join('');
+  if(slides&&!slides.children.length){
+    slides.innerHTML=MYEONGRYE_PHOTOS.map(function(photo,i){ return '<figure class="myeongrye-slide'+(i===0?' active':'')+'" aria-hidden="'+(i===0?'false':'true')+'"><img '+(i===0?'src':'data-src')+'="'+MYEONGRYE_PHOTO_ORIGIN+'/'+photo.file+'" alt="'+_visitHtmlEsc(photo.caption)+'" decoding="async"><figcaption>'+_visitHtmlEsc(photo.caption)+'</figcaption></figure>'; }).join('');
+    modal.querySelector('.myeongrye-slide-dots').innerHTML=MYEONGRYE_PHOTOS.map(function(_,i){ return '<span class="myeongrye-slide-dot'+(i===0?' active':'')+'"></span>'; }).join('');
+  }
   var links=modal.querySelector('.myeongrye-material-links');
   var linkData=[{label:'성지 공식 홈페이지',url:_getShrineHomepageUrl(item)},{label:'한국천주교주교회의 성지 자료',url:_getShrineGuideUrl(item)},{label:'가톨릭 굿뉴스 성지안내',url:_getShrineGoodnewsUrl(item)}].filter(function(link){ return !!link.url; });
   links.innerHTML=linkData.map(function(link){ return '<button type="button" class="myeongrye-material-link" data-myeongrye-url="'+_visitHtmlEsc(link.url)+'">'+_visitHtmlEsc(link.label)+'</button>'; }).join('');
   links.querySelectorAll('[data-myeongrye-url]').forEach(function(btn){ btn.addEventListener('click',function(){ openCoreExternalUrl(btn.getAttribute('data-myeongrye-url'),{source:'myeongrye-materials'}); }); });
-  _myeongryeSlideIndex=0; _myeongryeManualPause=false; _renderMyeongryeSlide();
+  _myeongryeSlideIndex=0; _myeongryeManualPause=false; _renderMyeongryeSlide(); _loadMyeongryePhoto(1);
   _myeongryeBodyOverflow=document.body.style.overflow||''; document.body.style.overflow='hidden'; modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); _startMyeongryeSlides();
   var closeBtn=modal.querySelector('.myeongrye-materials-close'); if(closeBtn) closeBtn.focus();
 }
 function _closeMyeongryeMaterials(){
-  var modal=document.getElementById('myeongrye-materials-modal'); clearInterval(_myeongryeSlideTimer); _myeongryeSlideTimer=0;
+  var modal=document.getElementById('myeongrye-materials-modal'); clearTimeout(_myeongryeSlideTimer); _myeongryeSlideTimer=0;
   if(modal){ modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); } document.body.style.overflow=_myeongryeBodyOverflow;
 }
 document.addEventListener('keydown',function(e){ if(e.key==='Escape'){ var m=document.getElementById('myeongrye-materials-modal'); if(m&&m.classList.contains('open')) _closeMyeongryeMaterials(); } });
