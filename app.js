@@ -4661,26 +4661,13 @@ const SHRINE_MATERIALS={
 var _myeongryeCurrentMaterials=null;
 function _getMyeongryePhotos(){ return _myeongryeCurrentMaterials?_myeongryeCurrentMaterials.photos:[]; }
 function _getMyeongryePhotoUrl(photo){ return SHRINE_PHOTO_ORIGIN+'/shrines/'+encodeURIComponent(_myeongryeCurrentMaterials.folder)+'/'+encodeURIComponent(photo.file); }
-function _discoverShrinePhotos(materials,done){
+function _loadShrinePhotoManifest(materials,done){
   if(!materials||!materials.remoteManifest||materials._manifestLoaded){ done(); return; }
-  var files=[],extensions=['jpg','png','jpeg'],number;
-  for(number=1;number<=30;number++) extensions.forEach(function(ext){ files.push((number<10?'0':'')+number+'.'+ext); });
-  var pending=files.length,found=[],finished=false;
-  function finish(){
-    if(finished) return; finished=true;
-    found.sort(function(a,b){ return a.file.localeCompare(b.file,undefined,{numeric:true}); });
-    materials.photos=found; materials._manifestLoaded=true; done();
-  }
-  files.forEach(function(file){
-    var img=new Image(),settled=false,timer=setTimeout(function(){ settle(false); },7000);
-    function settle(ok){
-      if(settled) return; settled=true; clearTimeout(timer);
-      if(ok) found.push({file:file,portrait:img.naturalHeight>img.naturalWidth});
-      pending--; if(!pending) finish();
-    }
-    img.onload=function(){ settle(true); }; img.onerror=function(){ settle(false); };
-    img.src=SHRINE_PHOTO_ORIGIN+'/shrines/'+encodeURIComponent(materials.folder)+'/'+encodeURIComponent(file);
-  });
+  var url=SHRINE_PHOTO_ORIGIN+'/shrines/'+encodeURIComponent(materials.folder)+'/photos.json';
+  fetch(url,{cache:'no-store'}).then(function(res){ return res.ok?res.json():null; }).then(function(data){
+    if(data&&Array.isArray(data.photos)) materials.photos=data.photos.filter(function(photo){ return photo&&photo.file; }).map(function(photo){ return {file:String(photo.file),portrait:!!photo.portrait}; });
+    materials._manifestLoaded=true; materials._manifestLoading=false; done();
+  }).catch(function(){ materials._manifestLoaded=true; materials._manifestLoading=false; done(); });
 }
 var _myeongryeSlideIndex=0, _myeongryeSlideTimer=0, _myeongryeManualPause=false, _myeongryeTouchStartX=null, _myeongryeViewerTouchStartX=null, _myeongryeBodyOverflow='';
 function _getShrineMaterials(item){
@@ -4812,11 +4799,17 @@ function _getShrineMaterialLinkLabel(url,kind){
 }
 function _openMyeongryeMaterials(item){
   var materials=_getShrineMaterials(item); if(!materials) return;
-  if(materials.remoteManifest&&!materials._manifestLoaded){ _discoverShrinePhotos(materials,function(){ _openMyeongryeMaterials(item); }); return; }
+  if(materials.remoteManifest&&!materials._manifestLoaded&&!materials._manifestLoading){
+    materials._manifestLoading=true;
+    _loadShrinePhotoManifest(materials,function(){
+      var current=document.getElementById('myeongrye-materials-modal');
+      if(current&&current.classList.contains('open')&&_myeongryeCurrentMaterials===materials) _openMyeongryeMaterials(item);
+    });
+  }
   _myeongryeCurrentMaterials=materials;
   var photos=_getMyeongryePhotos(), modal=_ensureMyeongryeMaterialsModal(), slides=modal.querySelector('.myeongrye-slides'), dots=modal.querySelector('.myeongrye-slide-dots');
   modal.classList.toggle('no-shrine-photos',!photos.length);
-  if(slides) slides.innerHTML=photos.length?photos.map(function(photo,i){ var alt=photo.caption||(materials.title+' 사진 '+(i+1)); return '<figure class="myeongrye-slide'+(i===0?' active':'')+'" aria-hidden="'+(i===0?'false':'true')+'"><img '+(i===0?'src':'data-src')+'="'+_getMyeongryePhotoUrl(photo)+'" alt="'+_visitHtmlEsc(alt)+'" decoding="async"><figcaption>'+_visitHtmlEsc(photo.caption||'')+'</figcaption></figure>'; }).join(''):'<div class="myeongrye-photo-empty"><strong>사진을 준비하고 있습니다.</strong><span>현장 사진은 순차적으로 추가됩니다.</span></div>';
+  if(slides) slides.innerHTML=photos.length?photos.map(function(photo,i){ var alt=photo.caption||(materials.title+' 사진 '+(i+1)); return '<figure class="myeongrye-slide'+(i===0?' active':'')+'" aria-hidden="'+(i===0?'false':'true')+'"><img '+(i===0?'src':'data-src')+'="'+_getMyeongryePhotoUrl(photo)+'" alt="'+_visitHtmlEsc(alt)+'" decoding="async"><figcaption>'+_visitHtmlEsc(photo.caption||'')+'</figcaption></figure>'; }).join(''):'<div class="myeongrye-photo-empty"><strong>'+(materials._manifestLoading?'사진을 불러오고 있습니다.':'사진을 준비하고 있습니다.')+'</strong><span>'+(materials._manifestLoading?'잠시만 기다려 주세요.':'현장 사진은 순차적으로 추가됩니다.')+'</span></div>';
   if(dots) dots.innerHTML=photos.map(function(_,i){ return '<span class="myeongrye-slide-dot'+(i===0?' active':'')+'"></span>'; }).join('');
   modal.querySelector('#myeongrye-materials-title').textContent=materials.title||item.name||'성지 자료';
   var links=modal.querySelector('.myeongrye-material-links');
