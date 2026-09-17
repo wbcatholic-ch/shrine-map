@@ -1,13 +1,4 @@
-V8-1-14-716
-
-app.js
-- All 188 shrines now open the unified 성지 자료 window.
-- Shrines without uploaded photos show “사진을 준비하고 있습니다. 현장 사진은 순차적으로 추가됩니다.” with the available official source links.
-- Linked R2 photo galleries for 울산 병영 순교 성지, 죽림굴, and 어농 성지.
-
-style.css
-- Added the photo-preparation notice layout and hides gallery controls when a shrine has no photos.
-- Retains the all-gallery 0.6-second fade transition.
-
-index.html, sw.js, version.json
-- Updated the app and cache version to V8-1-14-716.
+V8-1-14-717
+- style.css: 사진이 없는 성지도 사진 성지와 동일한 16:9 사진 영역 높이를 유지하고, 중앙의 사진 추가 안내문이 항상 보이도록 수정.
+- index.html, sw.js, version.json: 새 앱 코드가 기존 캐시 대신 내려오도록 build/cache version 갱신.
+- cache/build version: V8-1-14-717
