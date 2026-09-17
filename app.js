@@ -4639,13 +4639,26 @@ const SHRINE_MATERIALS={
     {file:'05.jpg',portrait:true}, {file:'06.jpg',portrait:true}, {file:'07.jpg'}, {file:'08.jpg'},
     {file:'09.jpg',portrait:true}, {file:'10.jpg',portrait:true}, {file:'11.jpg',portrait:true},
     {file:'12.jpg',portrait:true}, {file:'13.jpg',portrait:true}
+  ]},
+  '20190068':{folder:'울산병영순교성지',title:'울산 병영 순교 성지',photos:[
+    {file:'01.jpg'}, {file:'02.jpg'}, {file:'03.jpg'}, {file:'04.jpg',portrait:true}, {file:'05.jpg',portrait:true}
+  ]},
+  '20190073':{folder:'죽림굴',title:'죽림굴',photos:[
+    {file:'01.jpg',portrait:true}, {file:'02.jpg',portrait:true}, {file:'03.jpg'}, {file:'04.jpg'},
+    {file:'05.jpg'}, {file:'06.jpg'}, {file:'07.jpg',portrait:true}
+  ]},
+  '20190047':{folder:'어농성지',title:'어농 성지',photos:[
+    {file:'01.jpg'}, {file:'02.jpg'}, {file:'03.jpg',portrait:true}, {file:'04.jpg'}, {file:'05.jpg'}, {file:'06.jpg'}
   ]}
 };
 var _myeongryeCurrentMaterials=null;
 function _getMyeongryePhotos(){ return _myeongryeCurrentMaterials?_myeongryeCurrentMaterials.photos:[]; }
 function _getMyeongryePhotoUrl(photo){ return SHRINE_PHOTO_ORIGIN+'/shrines/'+encodeURIComponent(_myeongryeCurrentMaterials.folder)+'/'+encodeURIComponent(photo.file); }
 var _myeongryeSlideIndex=0, _myeongryeSlideTimer=0, _myeongryeManualPause=false, _myeongryeTouchStartX=null, _myeongryeViewerTouchStartX=null, _myeongryeBodyOverflow='';
-function _getShrineMaterials(item){ if(!item) return null; return SHRINE_MATERIALS[String(item.seq||'')]||SHRINE_MATERIALS['name:'+String(item.name||'')]||null; }
+function _getShrineMaterials(item){
+  if(!item) return null;
+  return SHRINE_MATERIALS[String(item.seq||'')]||SHRINE_MATERIALS['name:'+String(item.name||'')]||{title:item.name||'성지 자료',photos:[]};
+}
 function _isMyeongryeShrine(item){ return !!_getShrineMaterials(item); }
 function _ensureMyeongryeMaterialsModal(){
   var modal=document.getElementById('myeongrye-materials-modal');
@@ -4772,10 +4785,10 @@ function _getShrineMaterialLinkLabel(url,kind){
 function _openMyeongryeMaterials(item){
   var materials=_getShrineMaterials(item); if(!materials) return;
   _myeongryeCurrentMaterials=materials;
-  var photos=_getMyeongryePhotos(); if(!photos.length) return;
-  var modal=_ensureMyeongryeMaterialsModal(), slides=modal.querySelector('.myeongrye-slides');
-  if(slides) slides.innerHTML=photos.map(function(photo,i){ var alt=photo.caption||(materials.title+' 사진 '+(i+1)); return '<figure class="myeongrye-slide'+(i===0?' active':'')+'" aria-hidden="'+(i===0?'false':'true')+'"><img '+(i===0?'src':'data-src')+'="'+_getMyeongryePhotoUrl(photo)+'" alt="'+_visitHtmlEsc(alt)+'" decoding="async"><figcaption>'+_visitHtmlEsc(photo.caption||'')+'</figcaption></figure>'; }).join('');
-  modal.querySelector('.myeongrye-slide-dots').innerHTML=photos.map(function(_,i){ return '<span class="myeongrye-slide-dot'+(i===0?' active':'')+'"></span>'; }).join('');
+  var photos=_getMyeongryePhotos(), modal=_ensureMyeongryeMaterialsModal(), slides=modal.querySelector('.myeongrye-slides'), dots=modal.querySelector('.myeongrye-slide-dots');
+  modal.classList.toggle('no-shrine-photos',!photos.length);
+  if(slides) slides.innerHTML=photos.length?photos.map(function(photo,i){ var alt=photo.caption||(materials.title+' 사진 '+(i+1)); return '<figure class="myeongrye-slide'+(i===0?' active':'')+'" aria-hidden="'+(i===0?'false':'true')+'"><img '+(i===0?'src':'data-src')+'="'+_getMyeongryePhotoUrl(photo)+'" alt="'+_visitHtmlEsc(alt)+'" decoding="async"><figcaption>'+_visitHtmlEsc(photo.caption||'')+'</figcaption></figure>'; }).join(''):'<div class="myeongrye-photo-empty"><strong>사진을 준비하고 있습니다.</strong><span>현장 사진은 순차적으로 추가됩니다.</span></div>';
+  if(dots) dots.innerHTML=photos.map(function(_,i){ return '<span class="myeongrye-slide-dot'+(i===0?' active':'')+'"></span>'; }).join('');
   modal.querySelector('#myeongrye-materials-title').textContent=materials.title||item.name||'성지 자료';
   var links=modal.querySelector('.myeongrye-material-links');
   var linkData=[
@@ -4785,7 +4798,8 @@ function _openMyeongryeMaterials(item){
   ].filter(function(link){ return !!link.url; }).map(function(link){ return {label:_getShrineMaterialLinkLabel(link.url,link.kind),url:link.url}; });
   links.innerHTML=linkData.map(function(link){ return '<button type="button" class="myeongrye-material-link" data-myeongrye-url="'+_visitHtmlEsc(link.url)+'">'+_visitHtmlEsc(link.label)+'</button>'; }).join('');
   links.querySelectorAll('[data-myeongrye-url]').forEach(function(btn){ btn.addEventListener('click',function(){ openCoreExternalUrl(btn.getAttribute('data-myeongrye-url'),{source:'myeongrye-materials'}); }); });
-  _myeongryeSlideIndex=0; _myeongryeManualPause=false; _renderMyeongryeSlide(); _warmMyeongryeUpcomingPhotos(0);
+  _myeongryeSlideIndex=0; _myeongryeManualPause=false;
+  if(photos.length){ _renderMyeongryeSlide(); _warmMyeongryeUpcomingPhotos(0); }
   _myeongryeBodyOverflow=document.body.style.overflow||''; document.body.style.overflow='hidden'; modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); _startMyeongryeSlides();
   var closeBtn=modal.querySelector('.myeongrye-materials-close'); if(closeBtn) closeBtn.focus();
 }

@@ -1,10 +1,13 @@
-V8-1-14-715
-
-style.css
-- Applies a 0.6-second gentle fade to every shrine-photo slide, including automatically advancing photos and all future R2 photo folders.
+V8-1-14-716
 
 app.js
-- Retains the R2 photo-folder links, smooth preload behavior, update-state fix, and source-aware buttons.
+- All 188 shrines now open the unified 성지 자료 window.
+- Shrines without uploaded photos show “사진을 준비하고 있습니다. 현장 사진은 순차적으로 추가됩니다.” with the available official source links.
+- Linked R2 photo galleries for 울산 병영 순교 성지, 죽림굴, and 어농 성지.
+
+style.css
+- Added the photo-preparation notice layout and hides gallery controls when a shrine has no photos.
+- Retains the all-gallery 0.6-second fade transition.
 
 index.html, sw.js, version.json
-- Updated the app and cache version to V8-1-14-715.
+- Updated the app and cache version to V8-1-14-716.
