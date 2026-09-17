@@ -4650,13 +4650,27 @@ const SHRINE_MATERIALS={
   '20190047':{folder:'어농성지',title:'어농 성지',photos:[
     {file:'01.jpg'}, {file:'02.jpg'}, {file:'03.jpg',portrait:true}, {file:'04.jpg'}, {file:'05.jpg'}, {file:'06.jpg'}
   ]},
-  '20190161':{folder:'구룡공소',title:'구룡 공소',photos:[],remoteManifest:true},
-  '20190163':{folder:'김천황금성당',title:'김천 황금 성당',photos:[],remoteManifest:true},
-  '20190166':{folder:'성베네딕도수도원',title:'성 베네딕도회 왜관 수도원과 구)왜관 성당',photos:[],remoteManifest:true},
-  '20190139':{folder:'도앙골성지',title:'도앙골 성지',photos:[],remoteManifest:true},
-  '20190141':{folder:'서짓골성지',title:'서짓골 성지',photos:[],remoteManifest:true},
-  '20190028':{folder:'정산성지',title:'정산 순교 성지',photos:[],remoteManifest:true},
-  '20190050':{folder:'죽산순교성지',title:'죽산 순교 성지',photos:[],remoteManifest:true}
+  '20190161':{folder:'구룡공소',title:'구룡 공소',photos:[
+    {file:'01.jpg'}, {file:'02.jpg',portrait:true}, {file:'03.jpg',portrait:true}, {file:'04.jpg',portrait:true}, {file:'05.jpg',portrait:true}, {file:'06.jpg'}
+  ]},
+  '20190163':{folder:'김천황금성당',title:'김천 황금 성당',photos:[
+    {file:'01.jpg'}, {file:'02.jpg',portrait:true}, {file:'03.jpg'}, {file:'04.jpg'}, {file:'05.jpg',portrait:true}, {file:'06.jpg'}, {file:'07.jpg',portrait:true}
+  ]},
+  '20190166':{folder:'성베네딕도수도원',title:'성 베네딕도회 왜관 수도원과 구)왜관 성당',photos:[
+    {file:'01.jpg',portrait:true}, {file:'02.jpg',portrait:true}, {file:'03.jpg'}, {file:'04.jpg'}, {file:'05.jpg'}
+  ]},
+  '20190139':{folder:'도앙골성지',title:'도앙골 성지',photos:[
+    {file:'01.jpg'}, {file:'02.jpg'}, {file:'03.jpg',portrait:true}, {file:'04.jpg',portrait:true}, {file:'05.jpg'}
+  ]},
+  '20190141':{folder:'서짓골성지',title:'서짓골 성지',photos:[
+    {file:'01.jpg'}, {file:'02.jpg'}, {file:'03.jpg',portrait:true}, {file:'04.jpg',portrait:true}
+  ]},
+  '20190028':{folder:'정산성지',title:'정산 순교 성지',photos:[
+    {file:'01.jpg',portrait:true}, {file:'02.jpg'}, {file:'03.jpg'}, {file:'04.jpg'}, {file:'05.jpg',portrait:true}, {file:'06.jpg',portrait:true}, {file:'07.jpg'}
+  ]},
+  '20190050':{folder:'죽산순교성지',title:'죽산 순교 성지',photos:[
+    {file:'01.jpg'}, {file:'02.jpg'}, {file:'03.jpg'}, {file:'04.jpg'}, {file:'05.jpg'}, {file:'06.jpg'}, {file:'07.jpg',portrait:true}, {file:'08.jpg'}
+  ]}
 };
 var _myeongryeCurrentMaterials=null;
 function _getMyeongryePhotos(){ return _myeongryeCurrentMaterials?_myeongryeCurrentMaterials.photos:[]; }
@@ -4664,7 +4678,9 @@ function _getMyeongryePhotoUrl(photo){ return SHRINE_PHOTO_ORIGIN+'/shrines/'+en
 function _loadShrinePhotoManifest(materials,done){
   if(!materials||!materials.remoteManifest||materials._manifestLoaded){ done(); return; }
   var url=SHRINE_PHOTO_ORIGIN+'/shrines/'+encodeURIComponent(materials.folder)+'/photos.json';
-  fetch(url,{cache:'no-store'}).then(function(res){ return res.ok?res.json():null; }).then(function(data){
+  fetch(url,{cache:'no-store'}).then(function(res){ return res.ok?res.text():null; }).then(function(text){
+    var data=null;
+    try{ data=text?JSON.parse(text.replace(/,\s*([}\]])/g,'$1')):null; }catch(e){ data=null; }
     if(data&&Array.isArray(data.photos)) materials.photos=data.photos.filter(function(photo){ return photo&&photo.file; }).map(function(photo){ return {file:String(photo.file),portrait:!!photo.portrait}; });
     materials._manifestLoaded=true; materials._manifestLoading=false; done();
   }).catch(function(){ materials._manifestLoaded=true; materials._manifestLoading=false; done(); });
@@ -4799,13 +4815,8 @@ function _getShrineMaterialLinkLabel(url,kind){
 }
 function _openMyeongryeMaterials(item){
   var materials=_getShrineMaterials(item); if(!materials) return;
-  if(materials.remoteManifest&&!materials._manifestLoaded&&!materials._manifestLoading){
-    materials._manifestLoading=true;
-    _loadShrinePhotoManifest(materials,function(){
-      var current=document.getElementById('myeongrye-materials-modal');
-      if(current&&current.classList.contains('open')&&_myeongryeCurrentMaterials===materials) _openMyeongryeMaterials(item);
-    });
-  }
+  var shouldLoadManifest=materials.remoteManifest&&!materials._manifestLoaded&&!materials._manifestLoading;
+  if(shouldLoadManifest) materials._manifestLoading=true;
   _myeongryeCurrentMaterials=materials;
   var photos=_getMyeongryePhotos(), modal=_ensureMyeongryeMaterialsModal(), slides=modal.querySelector('.myeongrye-slides'), dots=modal.querySelector('.myeongrye-slide-dots');
   modal.classList.toggle('no-shrine-photos',!photos.length);
@@ -4824,6 +4835,12 @@ function _openMyeongryeMaterials(item){
   if(photos.length){ _renderMyeongryeSlide(); _warmMyeongryeUpcomingPhotos(0); }
   _myeongryeBodyOverflow=document.body.style.overflow||''; document.body.style.overflow='hidden'; modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); _startMyeongryeSlides();
   var closeBtn=modal.querySelector('.myeongrye-materials-close'); if(closeBtn) closeBtn.focus();
+  if(shouldLoadManifest) requestAnimationFrame(function(){
+    _loadShrinePhotoManifest(materials,function(){
+      var current=document.getElementById('myeongrye-materials-modal');
+      if(current&&current.classList.contains('open')&&_myeongryeCurrentMaterials===materials) _openMyeongryeMaterials(item);
+    });
+  });
 }
 function _closeMyeongryeMaterials(){
   var modal=document.getElementById('myeongrye-materials-modal'); clearTimeout(_myeongryeSlideTimer); _myeongryeSlideTimer=0;
