@@ -4644,7 +4644,8 @@ const SHRINE_MATERIALS={
     {file:'01.jpg'}, {file:'02.jpg'}, {file:'03.jpg'}, {file:'04.jpg',portrait:true}, {file:'05.jpg',portrait:true}
   ]},
   '20190073':{folder:'죽림굴',title:'죽림굴',photos:[
-    {file:'01.png',portrait:true}, {file:'02.png',portrait:true}
+    {file:'01.png',portrait:true}, {file:'02.png',portrait:true}, {file:'03.png'}, {file:'04.png'},
+    {file:'05.png'}, {file:'06.png'}, {file:'07.png',portrait:true}
   ]},
   '20190047':{folder:'어농성지',title:'어농 성지',photos:[
     {file:'01.jpg'}, {file:'02.jpg'}, {file:'03.jpg',portrait:true}, {file:'04.jpg'}, {file:'05.jpg'}, {file:'06.jpg'}
