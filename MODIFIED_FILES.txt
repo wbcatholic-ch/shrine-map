@@ -1,5 +1,5 @@
-V8-1-14-695
+V8-1-14-696
 - app.js: 명례성지 사진을 현재·다음 사진 중심으로 순차 로드하고 로드 완료 후 자동 전환하도록 개선
-- style.css: 가로 사진 16:9, 세로 사진 전체 보기, 진행 막대·순서점·간결한 관련 링크 디자인 적용
+- style.css: 일반 휴대전화만 컴팩트 디자인 적용, 폴드 펼친 화면·태블릿은 기존 넓은 디자인 유지
 - index.html, sw.js, sw-update.js, version.json: cache/build version 갱신
-- cache/build version: V8-1-14-695
+- cache/build version: V8-1-14-696

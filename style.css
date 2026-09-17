@@ -5959,3 +5959,19 @@ html.route-tab-active #info-card.open{
 .myeongrye-slide-dots{display:flex;align-items:center;justify-content:center;gap:5px;padding:9px 12px 7px;background:#fff}.myeongrye-slide-dot{width:6px;height:6px;border-radius:50%;background:#cbd2dc;transition:.2s}.myeongrye-slide-dot.active{width:18px;border-radius:999px;background:#9a6d16}
 .myeongrye-material-links{display:flex;flex-direction:column;gap:7px;padding:7px 12px 14px;background:#fff}.myeongrye-material-link{width:100%;min-height:44px;padding:9px 13px;border:1px solid #dce2eb;border-radius:12px;background:#fff;color:#1f2a44;font-size:13px;font-weight:900;text-align:left;cursor:pointer;box-shadow:0 2px 7px rgba(31,42,68,.07)}.myeongrye-material-link::after{content:'↗';float:right;display:inline-flex;align-items:center;justify-content:center;color:#8a641e;font-size:16px}
 @media(max-width:520px){.myeongrye-materials-modal{padding:0;align-items:flex-start}.myeongrye-materials-panel{width:100%;max-height:100dvh;border-radius:0}.myeongrye-materials-head{padding-top:max(9px,env(safe-area-inset-top));padding-bottom:9px}.myeongrye-materials-modal.portrait-photo .myeongrye-slide{height:min(61dvh,620px)}.myeongrye-material-links{padding-bottom:max(14px,env(safe-area-inset-bottom))}}
+/* 폴드 펼친 화면·태블릿은 기존의 넓고 자연스러운 카드 비율을 그대로 유지한다. */
+@media(min-width:521px){
+  .myeongrye-materials-panel{background:#fff;border-radius:18px}
+  .myeongrye-materials-head{padding:14px 16px}
+  .myeongrye-materials-head h2{margin:1px 0 0;font-size:20px}
+  .myeongrye-materials-kicker{font-size:12px;margin-bottom:0}
+  .myeongrye-materials-close{width:38px;height:38px;font-size:27px}
+  .myeongrye-gallery,.myeongrye-slides{min-height:300px}
+  .myeongrye-slide{height:min(62dvh,520px);aspect-ratio:auto}
+  .myeongrye-slide-nav{width:42px;height:48px;border-radius:10px;font-size:34px}
+  .myeongrye-slide-meta{bottom:3px;padding:28px 16px 12px;font-size:14px}
+  .myeongrye-slide-dots{display:none}
+  .myeongrye-material-links{gap:9px;padding:14px 16px 18px;background:#fff}
+  .myeongrye-material-link{min-height:48px;padding:10px 14px;border:1px solid #243553;border-radius:11px;background:#1f2a44;color:#fff;font-size:14px;box-shadow:none}
+  .myeongrye-material-link::after{color:#fff}
+}
