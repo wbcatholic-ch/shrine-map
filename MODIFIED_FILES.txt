@@ -1,4 +1,5 @@
-V8-1-14-693
-- qa-firebase.html: 접수하기 아래 메일 문의 주소 추가
-- firestore.rules: qa_posts 익명 create만 허용, 필드/길이 검증, 일반 read/update/delete 차단
-- cache/build version: V8-1-14-693
+V8-1-14-694
+- app.js: 명례성지(20190078)만 정보카드 링크 3개를 성지 자료 버튼으로 통합하고 사진·관련 링크 자료 화면 추가
+- style.css: 명례성지 자료 화면의 모바일 모달·원본 비율(object-fit: contain) 갤러리 스타일 추가
+- index.html, sw.js, sw-update.js, version.json: cache/build version 갱신
+- cache/build version: V8-1-14-694
