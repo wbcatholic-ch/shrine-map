@@ -1,5 +1,4 @@
-V8-1-14-696
-- app.js: 명례성지 사진을 현재·다음 사진 중심으로 순차 로드하고 로드 완료 후 자동 전환하도록 개선
-- style.css: 일반 휴대전화만 컴팩트 디자인 적용, 폴드 펼친 화면·태블릿은 기존 넓은 디자인 유지
-- index.html, sw.js, sw-update.js, version.json: cache/build version 갱신
-- cache/build version: V8-1-14-696
+V8-1-14-706
+- app.js: R2의 명례성지(20190078)·언양성당(20190071) 사진 폴더를 각각 연결하고, 두 성지만 '성지 자료' 화면으로 연다.
+- index.html, sw.js, version.json: 새 앱 코드가 기존 캐시 대신 내려오도록 build/cache version 갱신.
+- cache/build version: V8-1-14-706
