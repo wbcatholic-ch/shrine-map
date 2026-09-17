@@ -4649,11 +4649,25 @@ const SHRINE_MATERIALS={
   ]},
   '20190047':{folder:'어농성지',title:'어농 성지',photos:[
     {file:'01.jpg'}, {file:'02.jpg'}, {file:'03.jpg',portrait:true}, {file:'04.jpg'}, {file:'05.jpg'}, {file:'06.jpg'}
-  ]}
+  ]},
+  '20190161':{folder:'구룡공소',title:'구룡 공소',photos:[],remoteManifest:true},
+  '20190163':{folder:'김천황금성당',title:'김천 황금 성당',photos:[],remoteManifest:true},
+  '20190166':{folder:'성베네딕도회왜관수도원과구왜관성당',title:'성 베네딕도회 왜관 수도원과 구)왜관 성당',photos:[],remoteManifest:true},
+  '20190139':{folder:'도앙골성지',title:'도앙골 성지',photos:[],remoteManifest:true},
+  '20190141':{folder:'서짓골성지',title:'서짓골 성지',photos:[],remoteManifest:true},
+  '20190028':{folder:'정산순교성지',title:'정산 순교 성지',photos:[],remoteManifest:true}
 };
 var _myeongryeCurrentMaterials=null;
 function _getMyeongryePhotos(){ return _myeongryeCurrentMaterials?_myeongryeCurrentMaterials.photos:[]; }
 function _getMyeongryePhotoUrl(photo){ return SHRINE_PHOTO_ORIGIN+'/shrines/'+encodeURIComponent(_myeongryeCurrentMaterials.folder)+'/'+encodeURIComponent(photo.file); }
+function _loadShrinePhotoManifest(materials,done){
+  if(!materials||!materials.remoteManifest||materials._manifestLoaded){ done(); return; }
+  var url=SHRINE_PHOTO_ORIGIN+'/shrines/'+encodeURIComponent(materials.folder)+'/photos.json';
+  fetch(url,{cache:'no-store'}).then(function(res){ return res.ok?res.json():null; }).then(function(data){
+    if(data&&Array.isArray(data.photos)) materials.photos=data.photos.filter(function(photo){ return photo&&photo.file; }).map(function(photo){ return {file:String(photo.file),portrait:!!photo.portrait}; });
+    materials._manifestLoaded=true; done();
+  }).catch(function(){ materials._manifestLoaded=true; done(); });
+}
 var _myeongryeSlideIndex=0, _myeongryeSlideTimer=0, _myeongryeManualPause=false, _myeongryeTouchStartX=null, _myeongryeViewerTouchStartX=null, _myeongryeBodyOverflow='';
 function _getShrineMaterials(item){
   if(!item) return null;
@@ -4784,6 +4798,7 @@ function _getShrineMaterialLinkLabel(url,kind){
 }
 function _openMyeongryeMaterials(item){
   var materials=_getShrineMaterials(item); if(!materials) return;
+  if(materials.remoteManifest&&!materials._manifestLoaded){ _loadShrinePhotoManifest(materials,function(){ _openMyeongryeMaterials(item); }); return; }
   _myeongryeCurrentMaterials=materials;
   var photos=_getMyeongryePhotos(), modal=_ensureMyeongryeMaterialsModal(), slides=modal.querySelector('.myeongrye-slides'), dots=modal.querySelector('.myeongrye-slide-dots');
   modal.classList.toggle('no-shrine-photos',!photos.length);
