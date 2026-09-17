@@ -4607,8 +4607,29 @@ const SHRINE_MATERIALS={
     {file:'01.jpg'}, {file:'02.jpg'}, {file:'03.jpg'}, {file:'04.jpg'}, {file:'05.jpg'},
     {file:'06.jpg'}, {file:'07.jpg'}, {file:'08.jpg'}, {file:'09.jpg'}
   ]},
-  'name:강경 김대건 신부 유숙지 (구순오의 집)':{folder:'강경 김대건 신부 유숙지 (구순오의 집)',title:'강경 김대건 신부 유숙지 (구순오의 집)',photos:[
+  'name:강경 김대건 신부 유숙지 (구순오의 집)':{folder:'강경 김대건 신부 유숙지(구순오의 집)',title:'강경 김대건 신부 유숙지 (구순오의 집)',photos:[
     {file:'01.jpg'}, {file:'02.jpg',portrait:true}, {file:'03.jpg'}, {file:'04.jpg'}, {file:'05.jpg'}
+  ]},
+  '20190062':{folder:'복자성당',title:'복자 성당',photos:[
+    {file:'01.jpg',portrait:true}, {file:'02.jpg'}, {file:'03.jpg',portrait:true}, {file:'04.jpg'},
+    {file:'05.jpg'}, {file:'06.jpg'}, {file:'07.jpg',portrait:true}, {file:'08.jpg',portrait:true}, {file:'09.jpg'}
+  ]},
+  '20190019':{folder:'다락골성지',title:'다락골 성지',photos:[
+    {file:'01.jpg'}, {file:'02.jpg'}, {file:'03.jpg'}, {file:'04.jpg'}, {file:'05.jpg'},
+    {file:'06.jpg'}, {file:'07.jpg'}, {file:'08.jpg'}, {file:'09.jpg'}, {file:'10.jpg'},
+    {file:'11.jpg'}, {file:'12.jpg'}, {file:'13.jpg'}, {file:'14.jpg'}, {file:'15.jpg'},
+    {file:'16.jpg'}, {file:'17.jpg',portrait:true}, {file:'18.jpg'}, {file:'19.jpg'}, {file:'20.jpg'}
+  ]},
+  '20190140':{folder:'삽티성지',title:'삽티 성지',photos:[
+    {file:'01.jpg'}, {file:'02.jpg'}, {file:'03.jpg'}, {file:'04.jpg'}, {file:'05.jpg',portrait:true}, {file:'06.jpg'}, {file:'07.jpg'}
+  ]},
+  '20190024':{folder:'수리치골성모성지',title:'수리치골 성모 성지',photos:[
+    {file:'01.jpg'}, {file:'02.jpg'}, {file:'03.jpg'}, {file:'04.jpg'}, {file:'05.jpg'},
+    {file:'06.jpg',portrait:true}, {file:'07.jpg',portrait:true}, {file:'08.jpg'}, {file:'09.jpg'}, {file:'10.jpg'}
+  ]},
+  '20190029':{folder:'진산성지',title:'진산 성지',photos:[
+    {file:'01.jpg',portrait:true}, {file:'02.jpg'}, {file:'03.jpg'}, {file:'04.jpg'}, {file:'05.jpg'},
+    {file:'06.jpg'}, {file:'07.jpg',portrait:true}, {file:'08.jpg'}, {file:'09.jpg'}
   ]}
 };
 var _myeongryeCurrentMaterials=null;
@@ -4689,9 +4710,9 @@ function _startMyeongryeSlides(){
   clearTimeout(_myeongryeSlideTimer); _myeongryeSlideTimer=0; if(_myeongryeManualPause||!photos.length) return; _restartMyeongryeProgress();
   _myeongryeSlideTimer=setTimeout(function(){
     var currentPhotos=_getMyeongryePhotos(); if(!currentPhotos.length) return;
-    var next=(_myeongryeSlideIndex+1)%currentPhotos.length, modal=document.getElementById('myeongrye-materials-modal'), loading=modal&&modal.querySelector('.myeongrye-photo-loading');
-    if(loading) loading.classList.add('show');
-    _loadMyeongryePhoto(next,function(ok){ if(loading) loading.classList.remove('show'); if(ok&&!_myeongryeManualPause){ _myeongryeSlideIndex=next; _renderMyeongryeSlide(); _warmMyeongryeUpcomingPhotos(next); _startMyeongryeSlides(); } });
+    var next=(_myeongryeSlideIndex+1)%currentPhotos.length;
+    /* 다음 사진이 준비될 때까지 현재 사진을 유지한다. 자동 넘김 중 로딩 표시·빈 화면은 만들지 않는다. */
+    _loadMyeongryePhoto(next,function(ok){ if(ok&&!_myeongryeManualPause){ _myeongryeSlideIndex=next; _renderMyeongryeSlide(); _warmMyeongryeUpcomingPhotos(next); _startMyeongryeSlides(); } });
   },3500);
 }
 function _moveMyeongryeSlide(delta,manual){
@@ -4727,6 +4748,18 @@ function _moveMyeongryeViewer(delta){
   var target=(_myeongryeSlideIndex+delta+photos.length)%photos.length;
   _loadMyeongryePhoto(target,function(ok){ if(ok){ _myeongryeSlideIndex=target; _renderMyeongryeSlide(); _renderMyeongryePhotoViewer(); _warmMyeongryeUpcomingPhotos(target); } });
 }
+function _getShrineMaterialLinkLabel(url,kind){
+  var host=''; try{ host=new URL(url).hostname.toLowerCase(); }catch(e){}
+  if(kind==='home') return '성지 공식 홈페이지';
+  if(host.indexOf('cbck.or.kr')>=0) return '한국천주교주교회의 성지 자료';
+  if(host.indexOf('djcatholic.or.kr')>=0) return '대전교구 성지 자료';
+  if(host.indexOf('martyr.co.kr')>=0) return '전주교구 성지 자료';
+  if(host.indexOf('cdcj.or.kr')>=0) return '청주교구 성지 자료';
+  if(host.indexOf('daegu-archdiocese.or.kr')>=0) return '대구대교구 성지 자료';
+  if(host.indexOf('cathms.kr')>=0) return '마산교구 성지 자료';
+  if(host.indexOf('seoji.net')>=0) return '성지 공식 홈페이지';
+  return kind==='goodnews'?'가톨릭 굿뉴스 성지안내':'성지 안내 자료';
+}
 function _openMyeongryeMaterials(item){
   var materials=_getShrineMaterials(item); if(!materials) return;
   _myeongryeCurrentMaterials=materials;
@@ -4736,7 +4769,11 @@ function _openMyeongryeMaterials(item){
   modal.querySelector('.myeongrye-slide-dots').innerHTML=photos.map(function(_,i){ return '<span class="myeongrye-slide-dot'+(i===0?' active':'')+'"></span>'; }).join('');
   modal.querySelector('#myeongrye-materials-title').textContent=materials.title||item.name||'성지 자료';
   var links=modal.querySelector('.myeongrye-material-links');
-  var linkData=[{label:'성지 공식 홈페이지',url:_getShrineHomepageUrl(item)},{label:'한국천주교주교회의 성지 자료',url:_getShrineGuideUrl(item)},{label:'가톨릭 굿뉴스 성지안내',url:_getShrineGoodnewsUrl(item)}].filter(function(link){ return !!link.url; });
+  var linkData=[
+    {kind:'home',url:_getShrineHomepageUrl(item)},
+    {kind:'guide',url:_getShrineGuideUrl(item)},
+    {kind:'goodnews',url:_getShrineGoodnewsUrl(item)}
+  ].filter(function(link){ return !!link.url; }).map(function(link){ return {label:_getShrineMaterialLinkLabel(link.url,link.kind),url:link.url}; });
   links.innerHTML=linkData.map(function(link){ return '<button type="button" class="myeongrye-material-link" data-myeongrye-url="'+_visitHtmlEsc(link.url)+'">'+_visitHtmlEsc(link.label)+'</button>'; }).join('');
   links.querySelectorAll('[data-myeongrye-url]').forEach(function(btn){ btn.addEventListener('click',function(){ openCoreExternalUrl(btn.getAttribute('data-myeongrye-url'),{source:'myeongrye-materials'}); }); });
   _myeongryeSlideIndex=0; _myeongryeManualPause=false; _renderMyeongryeSlide(); _warmMyeongryeUpcomingPhotos(0);

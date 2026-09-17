@@ -5974,7 +5974,7 @@ html.route-tab-active #info-card.open{
   .myeongrye-slide{height:auto;max-height:520px;aspect-ratio:16/9}
   .myeongrye-slide-nav{width:42px;height:48px;border-radius:10px;font-size:34px}
   .myeongrye-slide-meta{bottom:3px;padding:28px 16px 12px;font-size:14px}
-  .myeongrye-slide-dots{display:none}
+  .myeongrye-slide-dots{display:flex}
   .myeongrye-material-links{gap:10px;padding:14px 20px max(20px,env(safe-area-inset-bottom));background:#fff}
   .myeongrye-material-link{min-height:56px;padding:13px 17px;border:1px solid #304c73;border-radius:12px;background:linear-gradient(135deg,#29486f,#1f3557);color:#fff;font-size:17px;box-shadow:0 4px 12px rgba(31,53,87,.18)}
   .myeongrye-material-link::after{color:#f1c45a}

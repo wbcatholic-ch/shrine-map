@@ -1,5 +1,11 @@
-V8-1-14-710
-- app.js: 명례·언양·김수환 추기경 사랑과 나눔 공원·진목정 성지의 사진 자료 화면에서 사진 설명은 표시하지 않고 순서만 표시한다.
-- style.css: 사진 제목이 없는 성지의 자료 화면·큰 사진 화면에서 빈 설명 영역을 숨긴다.
-- index.html, sw.js, version.json: 새 앱 코드가 기존 캐시 대신 내려오도록 build/cache version 갱신.
-- cache/build version: V8-1-14-708
+V8-1-14-712
+
+style.css
+- Show the photo-position dots below the gallery on all screen widths, including Fold/tablet wide screens.
+
+app.js
+- Retains V8-1-14-711 photo folder connections, smooth automatic slide replacement, and source-aware material button labels.
+- Keeps the current Ganggyeong Cathedral photo order until 09.jpg is present in R2.
+
+index.html, sw.js, version.json
+- Updated app and cache version to V8-1-14-712.
