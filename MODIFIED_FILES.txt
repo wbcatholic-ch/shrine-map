@@ -1,5 +1,10 @@
-V8-1-14-710
-- app.js: 명례·언양·김수환 추기경 사랑과 나눔 공원·진목정 성지의 사진 자료 화면에서 사진 설명은 표시하지 않고 순서만 표시한다.
-- style.css: 사진 제목이 없는 성지의 자료 화면·큰 사진 화면에서 빈 설명 영역을 숨긴다.
-- index.html, sw.js, version.json: 새 앱 코드가 기존 캐시 대신 내려오도록 build/cache version 갱신.
-- cache/build version: V8-1-14-708
+V8-1-14-715
+
+style.css
+- Applies a 0.6-second gentle fade to every shrine-photo slide, including automatically advancing photos and all future R2 photo folders.
+
+app.js
+- Retains the R2 photo-folder links, smooth preload behavior, update-state fix, and source-aware buttons.
+
+index.html, sw.js, version.json
+- Updated the app and cache version to V8-1-14-715.
