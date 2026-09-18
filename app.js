@@ -4670,20 +4670,46 @@ const SHRINE_MATERIALS={
   ]},
   '20190050':{folder:'죽산순교성지',title:'죽산 순교 성지',photos:[
     {file:'01.jpg'}, {file:'02.jpg'}, {file:'03.jpg'}, {file:'04.jpg'}, {file:'05.jpg'}, {file:'06.jpg'}, {file:'07.jpg',portrait:true}, {file:'08.jpg'}
+  ]},
+  '20190080':{folder:'복자 박대식 빅토리노 묘',title:'복자 박대식 빅토리노 묘',photos:[
+    {file:'01.jpg'}, {file:'02.jpg'}, {file:'03.jpg'}, {file:'04.jpg'}, {file:'05.jpg'}, {file:'06.jpg',portrait:true}, {file:'07.jpg'}
+  ]},
+  '20190170':{folder:'대산 성당 (복자 구한선 타대오 성지)',title:'대산 성당 (복자 구한선 타대오 성지)',photos:[
+    {file:'01.jpg',portrait:true}, {file:'02.jpg'}, {file:'03.jpg'}, {file:'04.jpg',portrait:true}, {file:'05.jpg'}, {file:'06.jpg',portrait:true}, {file:'07.jpg'}, {file:'08.jpg'}, {file:'09.jpg'}, {file:'10.jpg'}
+  ]},
+  'name:순교자 서응권 요한과 아내 파평 윤씨 안나 묘':{folder:'순교자 서응권 요한과 아내 파평 윤씨 안나 묘',title:'순교자 서응권 요한과 아내 파평 윤씨 안나 묘',photos:[
+    {file:'01.jpg'}, {file:'02.jpg',portrait:true}, {file:'03.jpg'}, {file:'04.jpg'}, {file:'05.jpg'}
+  ]},
+  '20190083':{folder:'복자 정찬문 안토니오 묘',title:'복자 정찬문 안토니오 묘',photos:[
+    {file:'01.jpg',portrait:true}, {file:'02.jpg'}, {file:'03.jpg',portrait:true}, {file:'04.jpg'}, {file:'05.jpg'}, {file:'06.jpg',portrait:true}, {file:'07.jpg'}, {file:'08.jpg'}, {file:'09.jpg',portrait:true}
+  ]},
+  '20190069':{folder:'살티 공소 (김영제와 김 아가타 묘)',title:'살티 공소 (김영제와 김 아가타 묘)',photos:[
+    {file:'01.jpg'}, {file:'02.jpg',portrait:true}, {file:'03.jpg',portrait:true}, {file:'04.jpg'}, {file:'05.jpg',portrait:true}, {file:'06.jpg'}, {file:'07.jpg'}, {file:'08.jpg'}, {file:'09.jpg'}, {file:'10.jpg',portrait:true}
   ]}
 };
+/* 기존에 연결한 성지는 즉시 표시하되, R2의 photos.json이 갱신되면 같은 공통 갤러리에 자동 반영한다. */
+Object.keys(SHRINE_MATERIALS).forEach(function(key){ SHRINE_MATERIALS[key].remoteManifest=true; });
 var _myeongryeCurrentMaterials=null;
 function _getMyeongryePhotos(){ return _myeongryeCurrentMaterials?_myeongryeCurrentMaterials.photos:[]; }
 function _getMyeongryePhotoUrl(photo){ return SHRINE_PHOTO_ORIGIN+'/shrines/'+encodeURIComponent(_myeongryeCurrentMaterials.folder)+'/'+encodeURIComponent(photo.file); }
+function _getShrinePhotoFolderCandidates(materials){
+  var raw=String((materials&&materials.folder)||(materials&&materials.title)||'').trim(), compact=raw.replace(/\s+/g,'');
+  return [raw,compact].filter(function(value,index,list){ return !!value&&list.indexOf(value)===index; });
+}
 function _loadShrinePhotoManifest(materials,done){
   if(!materials||!materials.remoteManifest||materials._manifestLoaded){ done(); return; }
-  var url=SHRINE_PHOTO_ORIGIN+'/shrines/'+encodeURIComponent(materials.folder)+'/photos.json';
-  fetch(url,{cache:'no-store'}).then(function(res){ return res.ok?res.text():null; }).then(function(text){
-    var data=null;
-    try{ data=text?JSON.parse(text.replace(/,\s*([}\]])/g,'$1')):null; }catch(e){ data=null; }
-    if(data&&Array.isArray(data.photos)) materials.photos=data.photos.filter(function(photo){ return photo&&photo.file; }).map(function(photo){ return {file:String(photo.file),portrait:!!photo.portrait}; });
-    materials._manifestLoaded=true; materials._manifestLoading=false; done();
-  }).catch(function(){ materials._manifestLoaded=true; materials._manifestLoading=false; done(); });
+  var folders=_getShrinePhotoFolderCandidates(materials), attempt=function(index){
+    if(index>=folders.length){ materials._manifestLoaded=true; materials._manifestLoading=false; done(); return; }
+    var folder=folders[index], url=SHRINE_PHOTO_ORIGIN+'/shrines/'+encodeURIComponent(folder)+'/photos.json';
+    fetch(url,{cache:'no-store'}).then(function(res){ return res.ok?res.text():null; }).then(function(text){
+      var data=null;
+      try{ data=text?JSON.parse(text.replace(/,\s*([}\]])/g,'$1')):null; }catch(e){ data=null; }
+      var photos=data&&Array.isArray(data.photos)?data.photos.filter(function(photo){ return photo&&photo.file; }).map(function(photo){ return {file:String(photo.file),portrait:!!photo.portrait}; }):[];
+      if(photos.length){ materials.folder=folder; materials.photos=photos; materials._manifestLoaded=true; materials._manifestLoading=false; done(); return; }
+      attempt(index+1);
+    }).catch(function(){ attempt(index+1); });
+  };
+  attempt(0);
 }
 var _myeongryeSlideIndex=0, _myeongryeSlideTimer=0, _myeongryeManualPause=false, _myeongryeTouchStartX=null, _myeongryeBodyOverflow='';
 var _myeongryeViewerZoom={scale:1,x:0,y:0,startX:0,startY:0,startPanX:0,startPanY:0,pinchDistance:0,pinchScale:1,gesture:false,lastTap:0};
@@ -4707,7 +4733,7 @@ function _setMyeongryeViewerZoom(scale){
 }
 function _getShrineMaterials(item){
   if(!item) return null;
-  return SHRINE_MATERIALS[String(item.seq||'')]||SHRINE_MATERIALS['name:'+String(item.name||'')]||{title:item.name||'성지 자료',photos:[]};
+  return SHRINE_MATERIALS[String(item.seq||'')]||SHRINE_MATERIALS['name:'+String(item.name||'')]||{title:item.name||'성지 자료',folder:item.name||'',photos:[],remoteManifest:true};
 }
 function _isMyeongryeShrine(item){ return !!_getShrineMaterials(item); }
 function _ensureMyeongryeMaterialsModal(){
