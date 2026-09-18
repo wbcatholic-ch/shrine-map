@@ -4685,6 +4685,21 @@ const SHRINE_MATERIALS={
   ]},
   '20190069':{folder:'살티 공소 (김영제와 김 아가타 묘)',title:'살티 공소 (김영제와 김 아가타 묘)',photos:[
     {file:'01.jpg'}, {file:'02.jpg',portrait:true}, {file:'03.jpg',portrait:true}, {file:'04.jpg'}, {file:'05.jpg',portrait:true}, {file:'06.jpg'}, {file:'07.jpg'}, {file:'08.jpg'}, {file:'09.jpg'}, {file:'10.jpg',portrait:true}
+  ]},
+  '20190041':{folder:'단내 성가정 성지',title:'단내 성가정 성지',photos:[
+    {file:'01.jpg'}, {file:'02.jpg'}, {file:'03.jpg'}, {file:'04.jpg'}, {file:'05.jpg'}, {file:'06.jpg'}
+  ]},
+  '20190046':{folder:'양근 성지',title:'양근 성지',photos:[
+    {file:'01.jpg',portrait:true}, {file:'02.jpg',portrait:true}, {file:'03.jpg',portrait:true}, {file:'04.jpg',portrait:true}, {file:'05.jpg',portrait:true}, {file:'06.jpg',portrait:true}, {file:'07.jpg'}, {file:'08.jpg'}, {file:'09.jpg',portrait:true}
+  ]},
+  '20190084':{folder:'마원 성지 (복자 박상근 마티아 묘)',title:'마원 성지 (복자 박상근 마티아 묘)',photos:[
+    {file:'01.jpg',portrait:true}, {file:'02.jpg'}, {file:'03.jpg'}, {file:'04.jpg'}, {file:'05.jpg'}, {file:'06.jpg'}, {file:'07.jpg'}, {file:'08.jpg'}, {file:'09.jpg'}
+  ]},
+  '20190172':{folder:'상주 옥 터 (남성동 성당)',title:'상주 옥 터 (남성동 성당)',photos:[
+    {file:'01.jpg'}, {file:'02.jpg'}, {file:'03.jpg'}, {file:'04.jpg',portrait:true}, {file:'05.jpg',portrait:true}, {file:'06.jpg'}, {file:'07.jpg'}
+  ]},
+  '20190085':{folder:'신앙 고백비 (옥산 성당)',title:'신앙 고백비 (옥산 성당)',photos:[
+    {file:'01.jpg',portrait:true}, {file:'02.jpg'}, {file:'03.jpg',portrait:true}, {file:'04.jpg',portrait:true}, {file:'05.jpg'}, {file:'06.jpg',portrait:true}
   ]}
 };
 /* 기존에 연결한 성지는 즉시 표시하되, R2의 photos.json이 갱신되면 같은 공통 갤러리에 자동 반영한다. */
