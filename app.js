@@ -4700,6 +4700,21 @@ const SHRINE_MATERIALS={
   ]},
   '20190085':{folder:'신앙 고백비 (옥산 성당)',title:'신앙 고백비 (옥산 성당)',photos:[
     {file:'01.jpg',portrait:true}, {file:'02.jpg'}, {file:'03.jpg',portrait:true}, {file:'04.jpg',portrait:true}, {file:'05.jpg'}, {file:'06.jpg',portrait:true}
+  ]},
+  '20190086':{folder:'여우목 성지',title:'여우목 성지',photos:[
+    {file:'01.jpg'}, {file:'02.jpg'}, {file:'03.jpg'}, {file:'04.jpg'}, {file:'05.jpg'}, {file:'06.jpg',portrait:true}, {file:'07.jpg',portrait:true}, {file:'08.jpg'}, {file:'09.jpg'}, {file:'10.jpg'}
+  ]},
+  '20190087':{folder:'우곡 성지',title:'우곡 성지',photos:[
+    {file:'01.jpg'}, {file:'02.jpg'}, {file:'03.jpg'}, {file:'04.jpg'}, {file:'05.jpg'}, {file:'06.jpg',portrait:true}, {file:'07.jpg'}, {file:'08.jpg'}, {file:'09.jpg'}, {file:'10.jpg',portrait:true}, {file:'11.jpg',portrait:true}
+  ]},
+  '20190088':{folder:'진안리 성지',title:'진안리 성지',photos:[
+    {file:'01.jpg',portrait:true}, {file:'02.jpg'}, {file:'03.jpg'}, {file:'04.jpg',portrait:true}
+  ]},
+  '20190089':{folder:'홍유한 고택지 (휴천동 성당)',title:'홍유한 고택지 (휴천동 성당)',photos:[
+    {file:'01.jpg'}, {file:'02.jpg'}, {file:'03.jpg'}, {file:'04.jpg',portrait:true}, {file:'05.jpg',portrait:true}, {file:'06.jpg'}
+  ]},
+  '20190053':{folder:'배론 성지',title:'배론 성지',photos:[
+    {file:'01.jpg'}, {file:'02.jpg'}, {file:'03.jpg',portrait:true}, {file:'04.jpg',portrait:true}, {file:'05.jpg',portrait:true}, {file:'06.jpg'}, {file:'07.jpg'}, {file:'08.jpg'}, {file:'09.jpg',portrait:true}, {file:'10.jpg',portrait:true}, {file:'11.jpg',portrait:true}
   ]}
 };
 /* 기존에 연결한 성지는 즉시 표시하되, R2의 photos.json이 갱신되면 같은 공통 갤러리에 자동 반영한다. */
