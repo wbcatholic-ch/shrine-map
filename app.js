@@ -4693,7 +4693,7 @@ const SHRINE_MATERIALS={
     {file:'01.jpg',portrait:true}, {file:'02.jpg',portrait:true}, {file:'03.jpg',portrait:true}, {file:'04.jpg',portrait:true}, {file:'05.jpg',portrait:true}, {file:'06.jpg',portrait:true}, {file:'07.jpg'}, {file:'08.jpg'}, {file:'09.jpg',portrait:true}
   ]},
   '20190084':{folder:'마원 성지 (복자 박상근 마티아 묘)',title:'마원 성지 (복자 박상근 마티아 묘)',photos:[
-    {file:'01.jpg',portrait:true}, {file:'02.jpg'}, {file:'03.jpg'}, {file:'04.jpg'}, {file:'05.jpg'}, {file:'06.jpg'}, {file:'07.jpg'}, {file:'08.jpg'}, {file:'09.jpg'}
+    {file:'01.jpg',portrait:true}, {file:'03.jpg'}, {file:'04.jpg'}, {file:'05.jpg'}, {file:'06.jpg'}, {file:'08.jpg'}, {file:'09.jpg'}
   ]},
   '20190172':{folder:'상주 옥 터 (남성동 성당)',title:'상주 옥 터 (남성동 성당)',photos:[
     {file:'01.jpg'}, {file:'02.jpg'}, {file:'03.jpg'}, {file:'04.jpg',portrait:true}, {file:'05.jpg',portrait:true}, {file:'06.jpg'}, {file:'07.jpg'}
