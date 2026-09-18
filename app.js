@@ -4675,7 +4675,7 @@ const SHRINE_MATERIALS={
     {file:'01.jpg'}, {file:'02.jpg'}, {file:'03.jpg'}, {file:'04.jpg'}, {file:'05.jpg'}, {file:'06.jpg',portrait:true}, {file:'07.jpg'}
   ]},
   '20190170':{folder:'대산 성당 (복자 구한선 타대오 성지)',title:'대산 성당 (복자 구한선 타대오 성지)',photos:[
-    {file:'01.jpg',portrait:true}, {file:'02.jpg'}, {file:'03.jpg'}, {file:'04.jpg',portrait:true}, {file:'05.jpg'}, {file:'06.jpg',portrait:true}, {file:'07.jpg'}, {file:'08.jpg'}, {file:'09.jpg'}, {file:'10.jpg'}
+    {file:'01.jpg',portrait:true}, {file:'02.jpg'}, {file:'03.jpg'}, {file:'04.jpg',portrait:true}, {file:'05.jpg'}, {file:'06.jpg',portrait:true}, {file:'07.jpg'}, {file:'08.jpg'}, {file:'09.jpg'}, {file:'10.png'}
   ]},
   'name:순교자 서응권 요한과 아내 파평 윤씨 안나 묘':{folder:'순교자 서응권 요한과 아내 파평 윤씨 안나 묘',title:'순교자 서응권 요한과 아내 파평 윤씨 안나 묘',photos:[
     {file:'01.jpg'}, {file:'02.jpg',portrait:true}, {file:'03.jpg'}, {file:'04.jpg'}, {file:'05.jpg'}
