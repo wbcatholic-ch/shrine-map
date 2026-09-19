@@ -4741,7 +4741,7 @@ function _loadShrinePhotoManifest(materials,done){
   };
   attempt(0);
 }
-var _myeongryeSlideIndex=0, _myeongryeRenderedSlideIndex=-1, _myeongryeSlideTimer=0, _myeongryeManualPause=false, _myeongryeTouchStartX=null, _myeongryeBodyOverflow='';
+var _myeongryeSlideIndex=0, _myeongryeRenderedSlideIndex=-1, _myeongryeSlideTimer=0, _myeongryeManualPause=false, _myeongryeTouchStartX=null, _myeongryeBodyOverflow='', _myeongryeWasOpenBeforeBackground=false, _myeongryeResumeTimer=0;
 var _myeongryeViewerZoom={scale:1,x:0,y:0,startX:0,startY:0,startPanX:0,startPanY:0,pinchDistance:0,pinchScale:1,gesture:false,lastTap:0};
 function _myeongryeTouchDistance(touches){
   var dx=touches[0].clientX-touches[1].clientX, dy=touches[0].clientY-touches[1].clientY;
@@ -4836,11 +4836,9 @@ function _renderMyeongryeSlide(instant){
   if(instant||previousIndex<0||previousIndex===nextIndex||!previousSlide){
     slides.forEach(function(slide,i){ slide.classList.toggle('active',i===nextIndex); slide.classList.remove('entering','leaving'); });
   }else{
-    /* Android WebView에서도 시작 프레임을 반드시 그린 뒤, 두 장을 겹쳐 전환한다. */
-    nextSlide.classList.remove('active','leaving');
-    nextSlide.classList.add('entering');
-    previousSlide.classList.remove('entering','leaving');
-    previousSlide.classList.add('active');
+    /* 시작 프레임을 먼저 그린 뒤 두 장을 겹쳐 전환해 Android WebView의 프레임 생략을 막는다. */
+    nextSlide.classList.remove('active','leaving'); nextSlide.classList.add('entering');
+    previousSlide.classList.remove('entering','leaving'); previousSlide.classList.add('active');
     void nextSlide.offsetWidth;
     requestAnimationFrame(function(){
       if(_myeongryeRenderedSlideIndex!==nextIndex||!nextSlide.isConnected) return;
@@ -4961,9 +4959,36 @@ function _openMyeongryeMaterials(item){
 }
 function _closeMyeongryeMaterials(){
   var modal=document.getElementById('myeongrye-materials-modal'); clearTimeout(_myeongryeSlideTimer); _myeongryeSlideTimer=0;
-  _myeongryeRenderedSlideIndex=-1;
+  clearTimeout(_myeongryeResumeTimer); _myeongryeResumeTimer=0; _myeongryeWasOpenBeforeBackground=false; _myeongryeRenderedSlideIndex=-1;
   if(modal){ _closeMyeongryePhotoViewer(); modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); } document.body.style.overflow=_myeongryeBodyOverflow;
 }
+
+/* 자료창·큰 사진창도 앱의 백그라운드 복귀 수명주기에 함께 참여한다. */
+function _pauseMyeongryeForBackground(){
+  var modal=document.getElementById('myeongrye-materials-modal');
+  _myeongryeWasOpenBeforeBackground=!!(modal&&modal.classList.contains('open'));
+  if(!_myeongryeWasOpenBeforeBackground) return;
+  clearTimeout(_myeongryeSlideTimer); _myeongryeSlideTimer=0;
+  clearTimeout(_myeongryeResumeTimer); _myeongryeResumeTimer=0;
+}
+function _resumeMyeongryeAfterBackground(){
+  clearTimeout(_myeongryeResumeTimer);
+  if(!_myeongryeWasOpenBeforeBackground||document.visibilityState!=='visible') return;
+  _myeongryeResumeTimer=setTimeout(function(){
+    var modal=document.getElementById('myeongrye-materials-modal');
+    if(!modal||!modal.classList.contains('open')||document.visibilityState!=='visible') return;
+    _loadMyeongryePhoto(_myeongryeSlideIndex,function(ok){
+      if(!ok||!modal.classList.contains('open')) return;
+      _renderMyeongryeSlide(true); _warmMyeongryeUpcomingPhotos(_myeongryeSlideIndex);
+      if(!_myeongryeManualPause) _startMyeongryeSlides();
+    });
+  },120);
+}
+document.addEventListener('visibilitychange',function(){
+  if(document.visibilityState==='hidden') _pauseMyeongryeForBackground();
+  else _resumeMyeongryeAfterBackground();
+},true);
+window.addEventListener('pageshow',function(){ _resumeMyeongryeAfterBackground(); },true);
 function _oaiMyeongryeBackHandle(){
   var modal=document.getElementById('myeongrye-materials-modal'), viewer=modal&&modal.querySelector('.myeongrye-photo-viewer');
   if(viewer&&viewer.classList.contains('open')){ _closeMyeongryePhotoViewer(); return true; }
