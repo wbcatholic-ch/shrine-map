@@ -5338,7 +5338,9 @@ const _PARISH_DIOCESE_ASSETS={
 };
 const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
-const _PARISH_ASSET_VERSION='V8-1-14-679';
+/* 성당 데이터 파일도 앱 본문과 같은 빌드 번호로 요청한다.
+   이전 고정 번호가 남아 있으면 새 앱을 설치해도 구 교구 목록이 캐시에 남을 수 있다. */
+const _PARISH_ASSET_VERSION=(window.OAI_APP_BUILD_VERSION || 'V8-1-14-738');
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -10350,6 +10352,19 @@ function renderList(){
 function onListSearch(v){
   _listSrch=v.trim();
   $('list-srch-x').style.display=v?'block':'none';
+  /* 전국 성당 검색은 현재 선택한 교구와 무관하다. 입력 직후 아직 불러오지 않은
+     교구가 있으면 '결과 없음'을 먼저 표시하지 말고, 전체 목록을 준비한 뒤 같은
+     검색어로 다시 그린다. */
+  if(_mode==='parish' && _listSrch && !_areAllParishDiocesesReady()){
+    _showParishDataLoadingMessage('전국 성당 정보를 불러오는 중입니다...');
+    _ensureAllParishDiocesesLoaded({silent:true}).then(function(){
+      if(_mode==='parish' && _listSrch) renderList();
+    }).catch(function(err){
+      console.warn('[가톨릭길동무] 전국 성당 검색 데이터 로드 실패', err);
+      if(_mode==='parish') renderList();
+    });
+    return;
+  }
   renderList();
   setTimeout(()=>_scrollSheetTop('list'),0);
 }
