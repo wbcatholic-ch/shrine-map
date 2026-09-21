@@ -4737,7 +4737,19 @@ const SHRINE_MATERIALS={
   '20190067':{folder:'김범우 순교자 성지',title:'김범우 순교자 성지',photos:_numberedShrinePhotos(9)},
   '20190070':{folder:'수영 장대 순교 성지',title:'수영 장대 순교 성지',photos:_numberedShrinePhotos(7)},
   '20190072':{folder:'오륜대 순교자 성지',title:'오륜대 순교자 성지',photos:_numberedShrinePhotos(11)},
-  '20190074':{folder:'조씨 형제 순교자 묘',title:'조씨 형제 순교자 묘',photos:_numberedShrinePhotos(10)}
+  '20190074':{folder:'조씨 형제 순교자 묘',title:'조씨 형제 순교자 묘',photos:_numberedShrinePhotos(10)},
+  /* 2026-09-21 R2 추가 확인분 */
+  '20190168':{folder:'멍에목 성지',title:'멍에목 성지',photos:_numberedShrinePhotos(9)},
+  '20190114':{folder:'경기 감영 터',title:'경기 감영 터',photos:_numberedShrinePhotos(3)},
+  '20190003':{folder:'광희문 성지',title:'광희문 성지',photos:_numberedShrinePhotos(12)},
+  '20190001':{folder:'명동 대성당(명동 주교좌 성지 성당)',title:'명동 대성당(명동 주교좌 성지 성당)',photos:_numberedShrinePhotos(10)},
+  '20190122':{folder:'종로 성당',title:'종로 성당',photos:_numberedShrinePhotos(8)},
+  '20190106':{folder:'대정 성지 (정난주 마리아 묘)',title:'대정 성지 (정난주 마리아 묘)',photos:_numberedShrinePhotos(6)},
+  '20190108':{folder:'새미 은총의 동산',title:'새미 은총의 동산',photos:_numberedShrinePhotos(8)},
+  '20190021':{folder:'산막골 성지',folders:['산막골성지','산막골 성지 · 작은재 성지'],title:'산막골 성지 · 작은재 성지',photos:_numberedShrinePhotos(7)},
+  'name:안대동 성당지':{folder:'안대동 성당지',title:'안대동 성당지',photos:_numberedShrinePhotos(7)},
+  '20190028':{folder:'지석리 성지',title:'지석리 성지',photos:_numberedShrinePhotos(7)},
+  '20190100':{folder:'천호 성지',title:'천호 성지',photos:_numberedShrinePhotos(11)}
   ,'name:되재 성당지':{folder:'되재 성당지',folders:['되재성당지','도재 성당지','도재성당지'],title:'되재 성당지',photos:[
     {file:'01.jpg'}, {file:'02.jpg'}, {file:'03.jpg'}, {file:'04.jpg'}, {file:'05.jpg'}, {file:'06.jpg'},
     {file:'07.jpg',portrait:true}, {file:'08.jpg'}, {file:'09.jpg',portrait:true}, {file:'10.jpg',portrait:true}, {file:'11.jpg',portrait:true}
