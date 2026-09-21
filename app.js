@@ -4722,6 +4722,10 @@ const SHRINE_MATERIALS={
   '20190056':{folder:'마재 성가정 성지',folders:['마재성가정성지','마재성지'],title:'마재 성가정 성지',photos:[]},
   '20190176':{folder:'김제 순교 성지',folders:['김제순교성지'],title:'김제 순교 성지',photos:[]},
   '20190094':{folder:'나바위 성지',folders:['나바위성지'],title:'나바위 성지',photos:[]}
+  ,'name:되재 성당지':{folder:'되재 성당지',folders:['되재성당지','도재 성당지','도재성당지'],title:'되재 성당지',photos:[
+    {file:'01.jpg'}, {file:'02.jpg'}, {file:'03.jpg'}, {file:'04.jpg'}, {file:'05.jpg'}, {file:'06.jpg'},
+    {file:'07.jpg',portrait:true}, {file:'08.jpg'}, {file:'09.jpg',portrait:true}, {file:'10.jpg',portrait:true}, {file:'11.jpg',portrait:true}
+  ]}
 };
 /* 기존에 연결한 성지는 즉시 표시하되, R2의 photos.json이 갱신되면 같은 공통 갤러리에 자동 반영한다. */
 Object.keys(SHRINE_MATERIALS).forEach(function(key){ SHRINE_MATERIALS[key].remoteManifest=true; });
