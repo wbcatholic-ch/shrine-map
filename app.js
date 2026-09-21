@@ -4746,17 +4746,50 @@ function _getShrinePhotoFolderCandidates(materials){
   },[]);
 }
 function _loadShrinePhotoManifest(materials,done){
+  done=typeof done==='function'?done:function(){};
   if(!materials||!materials.remoteManifest||materials._manifestLoaded){ done(); return; }
+  /* 첫 요청이 일시적으로 실패한 뒤에도 빈 상태가 고정되지 않도록, 같은 자료창을
+     다시 열면 잠시 후 재시도한다. 동시에 열린 요청은 하나로 합친다. */
+  if(materials._manifestLoading){
+    (materials._manifestCallbacks||(materials._manifestCallbacks=[])).push(done);
+    return;
+  }
+  if(materials._manifestRetryAfter && Date.now()<materials._manifestRetryAfter){ done(); return; }
+  materials._manifestLoading=true;
+  materials._manifestCallbacks=[done];
+  var finish=function(loaded){
+    var callbacks=materials._manifestCallbacks||[];
+    materials._manifestCallbacks=[];
+    materials._manifestLoading=false;
+    materials._manifestLoaded=!!loaded;
+    /* R2 업로드 직후·일시적인 통신 실패는 다음 열기에서 다시 확인한다. */
+    if(!loaded) materials._manifestRetryAfter=Date.now()+2500;
+    else delete materials._manifestRetryAfter;
+    callbacks.forEach(function(callback){ try{ callback(); }catch(e){} });
+  };
   var folders=_getShrinePhotoFolderCandidates(materials), attempt=function(index){
-    if(index>=folders.length){ materials._manifestLoaded=true; materials._manifestLoading=false; done(); return; }
-    var folder=folders[index], url=SHRINE_PHOTO_ORIGIN+'/shrines/'+encodeURIComponent(folder)+'/photos.json';
-    fetch(url,{cache:'no-store'}).then(function(res){ return res.ok?res.text():null; }).then(function(text){
+    if(index>=folders.length){ finish(false); return; }
+    var folder=folders[index], baseUrl=SHRINE_PHOTO_ORIGIN+'/shrines/'+encodeURIComponent(folder)+'/photos.json';
+    /* cache:'no-store'는 일부 모바일 WebView에서 교차 출처 요청을 불안정하게 만들 수 있다.
+       대신 URL에 시간표시를 더한 일반 GET으로 최신 파일을 받는다. */
+    var url=baseUrl+'?v='+Date.now(), controller=typeof AbortController!=='undefined'?new AbortController():null;
+    var timeout=controller?setTimeout(function(){ try{ controller.abort(); }catch(e){} },7000):0;
+    var clear=function(){ if(timeout) clearTimeout(timeout); };
+    fetch(url,controller?{signal:controller.signal}:undefined).then(function(res){
+      clear();
+      return res.ok?res.text():null;
+    }).then(function(text){
       var data=null;
       try{ data=text?JSON.parse(text.replace(/,\s*([}\]])/g,'$1')):null; }catch(e){ data=null; }
       var photos=data&&Array.isArray(data.photos)?data.photos.filter(function(photo){ return photo&&photo.file; }).map(function(photo){ return {file:String(photo.file),portrait:!!photo.portrait}; }):[];
-      if(photos.length){ materials.folder=folder; materials.photos=photos; materials._manifestLoaded=true; materials._manifestLoading=false; done(); return; }
+      if(photos.length){
+        materials.folder=folder;
+        materials.photos=photos;
+        finish(true);
+        return;
+      }
       attempt(index+1);
-    }).catch(function(){ attempt(index+1); });
+    }).catch(function(){ clear(); attempt(index+1); });
   };
   attempt(0);
 }
