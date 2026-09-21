@@ -4780,12 +4780,14 @@ function _probeShrineNumberedPhotos(materials,folders,done){
   done=typeof done==='function'?done:function(){};
   var tryFolder=function(folderIndex){
     if(folderIndex>=folders.length){ done([],null); return; }
-    var folder=folders[folderIndex], found=[], next=1, active=0, finished=0, total=30;
+    var folder=folders[folderIndex], foundByNumber={}, next=1, active=0, finished=0, total=30;
     var settle=function(number,ok){
       active--; finished++;
-      if(ok) found.push({file:String(number).padStart(2,'0')+'.jpg'});
+      /* 동시에 확인해도 R2 응답 도착 순서가 사진 순서가 되지 않도록 번호별로 저장한다. */
+      if(ok) foundByNumber[number]={file:String(number).padStart(2,'0')+'.jpg'};
       if(next<=total) launch();
       else if(!active&&finished>=total){
+        var found=Object.keys(foundByNumber).map(Number).sort(function(a,b){ return a-b; }).map(function(number){ return foundByNumber[number]; });
         if(found.length) done(found,folder);
         else tryFolder(folderIndex+1);
       }
@@ -4988,18 +4990,24 @@ function _loadMyeongryePhoto(index,done){
   img.onload=function(){ decoded(); }; img.onerror=function(){ finish(false); };
   if(!img.getAttribute('src')) img.src=img.getAttribute('data-src');
 }
-/* 현재 장면은 바로 보여 주고, 바로 뒤 두 장만 조용히 미리 준비한다. 앱 시작 때 전부 받지 않는다. */
+/* 현재 장면은 바로 보여 주고, 바로 뒤 세 장을 조용히 미리 준비한다.
+   자동 전환 전에 다음 사진이 이미 준비되어 있어야 전환이 늦지 않는다. */
 function _warmMyeongryeUpcomingPhotos(fromIndex){
   var photos=_getMyeongryePhotos(); if(!photos.length) return;
-  _loadMyeongryePhoto((fromIndex+1)%photos.length);
-  if(photos.length>2) _loadMyeongryePhoto((fromIndex+2)%photos.length);
+  for(var offset=1;offset<=3;offset++){
+    var target=fromIndex+offset;
+    if(target>=photos.length) break;
+    _loadMyeongryePhoto(target);
+  }
 }
 function _startMyeongryeSlides(){
   var photos=_getMyeongryePhotos();
   clearTimeout(_myeongryeSlideTimer); _myeongryeSlideTimer=0; if(_myeongryeManualPause||!photos.length) return;
   _myeongryeSlideTimer=setTimeout(function(){
     var currentPhotos=_getMyeongryePhotos(); if(!currentPhotos.length) return;
-    var next=(_myeongryeSlideIndex+1)%currentPhotos.length;
+    /* 마지막 사진은 그대로 둔다. 자동 재생이 1번 사진으로 되돌아가며 순서가 섞여 보이지 않게 한다. */
+    var next=_myeongryeSlideIndex+1;
+    if(next>=currentPhotos.length){ _myeongryeSlideTimer=0; return; }
     /* 다음 사진이 준비될 때까지 현재 사진을 유지한다. 자동 넘김 중 로딩 표시·빈 화면은 만들지 않는다. */
     _loadMyeongryePhoto(next,function(ok){ if(ok&&!_myeongryeManualPause){ _myeongryeSlideIndex=next; _renderMyeongryeSlide(); _warmMyeongryeUpcomingPhotos(next); _startMyeongryeSlides(); } });
   },2500);
@@ -5007,7 +5015,9 @@ function _startMyeongryeSlides(){
 function _moveMyeongryeSlide(delta,manual){
   var photos=_getMyeongryePhotos(); if(!photos.length) return;
   if(manual){ _myeongryeManualPause=true; clearTimeout(_myeongryeSlideTimer); _myeongryeSlideTimer=0; }
-  var target=(_myeongryeSlideIndex+delta+photos.length)%photos.length;
+  /* 수동 이동도 끝에서 반대쪽 끝으로 순환하지 않는다. */
+  var target=_myeongryeSlideIndex+delta;
+  if(target<0||target>=photos.length) return;
   _loadMyeongryePhoto(target,function(ok){ if(ok){ _myeongryeSlideIndex=target; _renderMyeongryeSlide(); _warmMyeongryeUpcomingPhotos(target); } });
 }
 function _renderMyeongryePhotoViewer(){
@@ -5035,7 +5045,8 @@ function _closeMyeongryePhotoViewer(){
 function _moveMyeongryeViewer(delta){
   var photos=_getMyeongryePhotos(); if(!photos.length) return;
   _myeongryeManualPause=true;
-  var target=(_myeongryeSlideIndex+delta+photos.length)%photos.length;
+  var target=_myeongryeSlideIndex+delta;
+  if(target<0||target>=photos.length) return;
   _loadMyeongryePhoto(target,function(ok){ if(ok){ _myeongryeSlideIndex=target; _renderMyeongryeSlide(); _renderMyeongryePhotoViewer(); _warmMyeongryeUpcomingPhotos(target); } });
 }
 function _getShrineMaterialLinkLabel(url,kind){
@@ -5059,7 +5070,7 @@ function _openMyeongryeMaterials(item){
   modal.classList.toggle('no-shrine-photos',!photos.length);
   /* 사진이 아직 없는 성지는 R2 확인 중에도 ‘불러오는 중’으로 남기지 않는다.
      사진이 발견되면 즉시 다시 그려 사진 갤러리로 바뀌고, 없으면 준비 안내가 유지된다. */
-  if(slides) slides.innerHTML=photos.length?photos.map(function(photo,i){ var alt=photo.caption||(materials.title+' 사진 '+(i+1)); return '<figure class="myeongrye-slide'+(i===0?' active':'')+'" aria-hidden="'+(i===0?'false':'true')+'"><img '+(i===0?'src':'data-src')+'="'+_getMyeongryePhotoUrl(photo)+'" alt="'+_visitHtmlEsc(alt)+'" decoding="async"><figcaption>'+_visitHtmlEsc(photo.caption||'')+'</figcaption></figure>'; }).join(''):'<div class="myeongrye-photo-empty"><strong>사진을 준비하고 있습니다.</strong></div>';
+  if(slides) slides.innerHTML=photos.length?photos.map(function(photo,i){ var alt=photo.caption||(materials.title+' 사진 '+(i+1)), eager=i<4; return '<figure class="myeongrye-slide'+(i===0?' active':'')+'" aria-hidden="'+(i===0?'false':'true')+'"><img '+(eager?'src':'data-src')+'="'+_getMyeongryePhotoUrl(photo)+'" alt="'+_visitHtmlEsc(alt)+'" decoding="async" '+(i===0?'fetchpriority="high"':'')+'><figcaption>'+_visitHtmlEsc(photo.caption||'')+'</figcaption></figure>'; }).join(''):'<div class="myeongrye-photo-empty"><strong>사진을 준비하고 있습니다.</strong></div>';
   if(dots) dots.innerHTML=photos.map(function(_,i){ return '<span class="myeongrye-slide-dot'+(i===0?' active':'')+'"></span>'; }).join('');
   modal.querySelector('#myeongrye-materials-title').textContent=materials.title||item.name||'성지 자료';
   var links=modal.querySelector('.myeongrye-material-links');
