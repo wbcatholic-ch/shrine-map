@@ -4982,10 +4982,8 @@ function _getShrineMaterialLinkLabel(url,kind){
 }
 function _openMyeongryeMaterials(item){
   var materials=_getShrineMaterials(item); if(!materials) return;
-  var shouldLoadManifest=materials.remoteManifest&&!materials._manifestLoaded&&!materials._manifestLoading;
-  /* _loadShrinePhotoManifest가 요청 시작·동시 요청 제어를 모두 맡는다.
-     여기서 미리 loading 값을 켜면 그 함수가 이미 진행 중으로 오인해
-     첫 R2 요청 자체가 시작되지 않는다. */
+  /* R2 사진목록은 자료창을 여는 즉시 시작한다. requestAnimationFrame에 맡기지 않아
+     일부 Android WebView에서 첫 요청이 생략되는 일을 없앤다. */
   _myeongryeCurrentMaterials=materials;
   var photos=_getMyeongryePhotos(), modal=_ensureMyeongryeMaterialsModal(), slides=modal.querySelector('.myeongrye-slides'), dots=modal.querySelector('.myeongrye-slide-dots');
   modal.classList.toggle('no-shrine-photos',!photos.length);
@@ -5006,12 +5004,12 @@ function _openMyeongryeMaterials(item){
   if(photos.length){ _renderMyeongryeSlide(true); _warmMyeongryeUpcomingPhotos(0); }
   _myeongryeBodyOverflow=document.body.style.overflow||''; document.body.style.overflow='hidden'; modal.classList.add('open'); modal.setAttribute('aria-hidden','false'); _startMyeongryeSlides();
   var closeBtn=modal.querySelector('.myeongrye-materials-close'); if(closeBtn) closeBtn.focus();
-  if(shouldLoadManifest) requestAnimationFrame(function(){
+  if(materials.remoteManifest&&!materials._manifestLoaded){
     _loadShrinePhotoManifest(materials,function(){
       var current=document.getElementById('myeongrye-materials-modal');
       if(current&&current.classList.contains('open')&&_myeongryeCurrentMaterials===materials) _openMyeongryeMaterials(item);
     });
-  });
+  }
 }
 function _closeMyeongryeMaterials(){
   var modal=document.getElementById('myeongrye-materials-modal'); clearTimeout(_myeongryeSlideTimer); _myeongryeSlideTimer=0;
