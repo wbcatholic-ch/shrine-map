@@ -4745,6 +4745,42 @@ function _getShrinePhotoFolderCandidates(materials){
     return candidates;
   },[]);
 }
+/* photos.json 요청이 Android WebView에서 실패해도, 사용자가 통일한 01.jpg 형식의
+   사진은 CORS 영향을 받지 않는 이미지 확인으로 바로 표시한다. */
+function _probeShrineNumberedPhotos(materials,folders,done){
+  folders=Array.isArray(folders)?folders:[];
+  done=typeof done==='function'?done:function(){};
+  var tryFolder=function(folderIndex){
+    if(folderIndex>=folders.length){ done([],null); return; }
+    var folder=folders[folderIndex], found=[], next=1, active=0, finished=0, total=30;
+    var settle=function(number,ok){
+      active--; finished++;
+      if(ok) found.push({file:String(number).padStart(2,'0')+'.jpg'});
+      if(next<=total) launch();
+      else if(!active&&finished>=total){
+        if(found.length) done(found,folder);
+        else tryFolder(folderIndex+1);
+      }
+    };
+    var launch=function(){
+      while(active<6&&next<=total){
+        (function(number){
+          active++;
+          var image=new Image(), settled=false, timer=setTimeout(function(){ finish(false); },5500);
+          var finish=function(ok){
+            if(settled) return;
+            settled=true; clearTimeout(timer); settle(number,ok);
+          };
+          image.onload=function(){ finish(true); };
+          image.onerror=function(){ finish(false); };
+          image.src=SHRINE_PHOTO_ORIGIN+'/shrines/'+encodeURIComponent(folder)+'/'+String(number).padStart(2,'0')+'.jpg';
+        })(next++);
+      }
+    };
+    launch();
+  };
+  tryFolder(0);
+}
 function _loadShrinePhotoManifest(materials,done){
   done=typeof done==='function'?done:function(){};
   if(!materials||!materials.remoteManifest||materials._manifestLoaded){ done(); return; }
@@ -4768,7 +4804,13 @@ function _loadShrinePhotoManifest(materials,done){
     callbacks.forEach(function(callback){ try{ callback(); }catch(e){} });
   };
   var folders=_getShrinePhotoFolderCandidates(materials), attempt=function(index){
-    if(index>=folders.length){ finish(false); return; }
+    if(index>=folders.length){
+      _probeShrineNumberedPhotos(materials,folders,function(photos,folder){
+        if(photos.length){ materials.folder=folder; materials.photos=photos; finish(true); }
+        else finish(false);
+      });
+      return;
+    }
     var folder=folders[index], baseUrl=SHRINE_PHOTO_ORIGIN+'/shrines/'+encodeURIComponent(folder)+'/photos.json';
     /* cache:'no-store'는 일부 모바일 WebView에서 교차 출처 요청을 불안정하게 만들 수 있다.
        대신 URL에 시간표시를 더한 일반 GET으로 최신 파일을 받는다. */
