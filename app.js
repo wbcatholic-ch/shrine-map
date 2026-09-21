@@ -4983,7 +4983,9 @@ function _getShrineMaterialLinkLabel(url,kind){
 function _openMyeongryeMaterials(item){
   var materials=_getShrineMaterials(item); if(!materials) return;
   var shouldLoadManifest=materials.remoteManifest&&!materials._manifestLoaded&&!materials._manifestLoading;
-  if(shouldLoadManifest) materials._manifestLoading=true;
+  /* _loadShrinePhotoManifest가 요청 시작·동시 요청 제어를 모두 맡는다.
+     여기서 미리 loading 값을 켜면 그 함수가 이미 진행 중으로 오인해
+     첫 R2 요청 자체가 시작되지 않는다. */
   _myeongryeCurrentMaterials=materials;
   var photos=_getMyeongryePhotos(), modal=_ensureMyeongryeMaterialsModal(), slides=modal.querySelector('.myeongrye-slides'), dots=modal.querySelector('.myeongrye-slide-dots');
   modal.classList.toggle('no-shrine-photos',!photos.length);
