@@ -4577,6 +4577,9 @@ function _getShrineGoodnewsUrl(item){
 const SHRINE_PHOTO_ORIGIN='https://pub-e8a7be3bff22491a8bc525ac379528da.r2.dev';
 /* 사진 설명은 자료 화면에 표시하지 않는다. 기존 순서·대체 텍스트 데이터는 유지한다. */
 const SHOW_SHRINE_PHOTO_CAPTIONS=false;
+function _numberedShrinePhotos(count){
+  return Array.from({length:Math.max(0,Number(count)||0)},function(_,index){ return {file:String(index+1).padStart(2,'0')+'.jpg'}; });
+}
 const SHRINE_MATERIALS={
   '20190078':{folder:'명례성지',title:'명례성지',photos:[
     {file:'01.jpg',caption:'성지 입구'}, {file:'02.jpg',caption:'성모승천성당 외관'},
@@ -4721,7 +4724,20 @@ const SHRINE_MATERIALS={
   '20190054':{folder:'용소막 성당',folders:['용소막성당'],title:'용소막 성당',photos:[]},
   '20190056':{folder:'마재 성가정 성지',folders:['마재성가정성지','마재성지'],title:'마재 성가정 성지',photos:[]},
   '20190176':{folder:'김제 순교 성지',folders:['김제순교성지'],title:'김제 순교 성지',photos:[]},
-  '20190094':{folder:'나바위 성지',folders:['나바위성지'],title:'나바위 성지',photos:[]}
+  '20190094':{folder:'나바위 성지',folders:['나바위성지'],title:'나바위 성지',photos:[]},
+  /* 2026-09-21 R2 확인 완료분: 목록 요청 실패와 관계없이 즉시 사진을 표시한다. */
+  'name:수류 성당':{folder:'수류 성당',title:'수류 성당',photos:_numberedShrinePhotos(11)},
+  '20190098':{folder:'여산 순교 성지',title:'여산 순교 성지',photos:_numberedShrinePhotos(11)},
+  '20190101':{folder:'초남이 성지',title:'초남이 성지',photos:_numberedShrinePhotos(17)},
+  '20190105':{folder:'관덕정 순교 터',title:'관덕정 순교 터',photos:_numberedShrinePhotos(7)},
+  '20190107':{folder:'김기량 순교 기념관',title:'김기량 순교 기념관',photos:_numberedShrinePhotos(8)},
+  '20190109':{folder:'용수 성지 (성 김대건 신부 제주 표착 기념 성당)',title:'용수 성지 (성 김대건 신부 제주 표착 기념 성당)',photos:_numberedShrinePhotos(8)},
+  '20190111':{folder:'황사평 성지',title:'황사평 성지',photos:_numberedShrinePhotos(10)},
+  '20190077':{folder:'연풍 순교 성지',title:'연풍 순교 성지',photos:_numberedShrinePhotos(9)},
+  '20190067':{folder:'김범우 순교자 성지',title:'김범우 순교자 성지',photos:_numberedShrinePhotos(9)},
+  '20190070':{folder:'수영 장대 순교 성지',title:'수영 장대 순교 성지',photos:_numberedShrinePhotos(7)},
+  '20190072':{folder:'오륜대 순교자 성지',title:'오륜대 순교자 성지',photos:_numberedShrinePhotos(11)},
+  '20190074':{folder:'조씨 형제 순교자 묘',title:'조씨 형제 순교자 묘',photos:_numberedShrinePhotos(10)}
   ,'name:되재 성당지':{folder:'되재 성당지',folders:['되재성당지','도재 성당지','도재성당지'],title:'되재 성당지',photos:[
     {file:'01.jpg'}, {file:'02.jpg'}, {file:'03.jpg'}, {file:'04.jpg'}, {file:'05.jpg'}, {file:'06.jpg'},
     {file:'07.jpg',portrait:true}, {file:'08.jpg'}, {file:'09.jpg',portrait:true}, {file:'10.jpg',portrait:true}, {file:'11.jpg',portrait:true}
