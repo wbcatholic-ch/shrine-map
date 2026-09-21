@@ -4715,7 +4715,13 @@ const SHRINE_MATERIALS={
   ]},
   '20190053':{folder:'배론 성지',title:'배론 성지',photos:[
     {file:'01.jpg'}, {file:'02.jpg'}, {file:'03.jpg',portrait:true}, {file:'04.jpg',portrait:true}, {file:'05.jpg',portrait:true}, {file:'06.jpg'}, {file:'07.jpg'}, {file:'08.jpg'}, {file:'09.jpg',portrait:true}, {file:'10.jpg',portrait:true}, {file:'11.jpg',portrait:true}
-  ]}
+  ]},
+  /* R2 폴더명을 공백 유무·기존 표기와 무관하게 찾도록 별칭을 함께 둔다. */
+  '20190052':{folder:'성 남종삼 요한·남상교 아우구스티노 유택지 (묘재)',folders:['성 남종삼 요한·남상교 아우구스티노 유택지(묘재)','남종삼 요한·남상교 아우구스티노 유택지(묘재)','남종삼 요한과 남상교 아우구스티노 유택지 (묘재)'],title:'성 남종삼 요한·남상교 아우구스티노 유택지 (묘재)',photos:[]},
+  '20190054':{folder:'용소막 성당',folders:['용소막성당'],title:'용소막 성당',photos:[]},
+  '20190056':{folder:'마재 성가정 성지',folders:['마재성가정성지','마재성지'],title:'마재 성가정 성지',photos:[]},
+  '20190176':{folder:'김제 순교 성지',folders:['김제순교성지'],title:'김제 순교 성지',photos:[]},
+  '20190094':{folder:'나바위 성지',folders:['나바위성지'],title:'나바위 성지',photos:[]}
 };
 /* 기존에 연결한 성지는 즉시 표시하되, R2의 photos.json이 갱신되면 같은 공통 갤러리에 자동 반영한다. */
 Object.keys(SHRINE_MATERIALS).forEach(function(key){ SHRINE_MATERIALS[key].remoteManifest=true; });
@@ -4723,8 +4729,17 @@ var _myeongryeCurrentMaterials=null;
 function _getMyeongryePhotos(){ return _myeongryeCurrentMaterials?_myeongryeCurrentMaterials.photos:[]; }
 function _getMyeongryePhotoUrl(photo){ return SHRINE_PHOTO_ORIGIN+'/shrines/'+encodeURIComponent(_myeongryeCurrentMaterials.folder)+'/'+encodeURIComponent(photo.file); }
 function _getShrinePhotoFolderCandidates(materials){
-  var raw=String((materials&&materials.folder)||(materials&&materials.title)||'').trim(), compact=raw.replace(/\s+/g,'');
-  return [raw,compact].filter(function(value,index,list){ return !!value&&list.indexOf(value)===index; });
+  var raws=[];
+  if(materials){
+    raws.push(materials.folder,materials.title);
+    if(Array.isArray(materials.folders)) raws=raws.concat(materials.folders);
+  }
+  return raws.reduce(function(candidates,raw){
+    raw=String(raw||'').trim();
+    var compact=raw.replace(/\s+/g,'');
+    [raw,compact].forEach(function(value){ if(value&&candidates.indexOf(value)===-1) candidates.push(value); });
+    return candidates;
+  },[]);
 }
 function _loadShrinePhotoManifest(materials,done){
   if(!materials||!materials.remoteManifest||materials._manifestLoaded){ done(); return; }
@@ -4935,7 +4950,9 @@ function _openMyeongryeMaterials(item){
   _myeongryeCurrentMaterials=materials;
   var photos=_getMyeongryePhotos(), modal=_ensureMyeongryeMaterialsModal(), slides=modal.querySelector('.myeongrye-slides'), dots=modal.querySelector('.myeongrye-slide-dots');
   modal.classList.toggle('no-shrine-photos',!photos.length);
-  if(slides) slides.innerHTML=photos.length?photos.map(function(photo,i){ var alt=photo.caption||(materials.title+' 사진 '+(i+1)); return '<figure class="myeongrye-slide'+(i===0?' active':'')+'" aria-hidden="'+(i===0?'false':'true')+'"><img '+(i===0?'src':'data-src')+'="'+_getMyeongryePhotoUrl(photo)+'" alt="'+_visitHtmlEsc(alt)+'" decoding="async"><figcaption>'+_visitHtmlEsc(photo.caption||'')+'</figcaption></figure>'; }).join(''):'<div class="myeongrye-photo-empty"><strong>'+(materials._manifestLoading?'사진을 불러오고 있습니다.':'사진을 준비하고 있습니다.')+'</strong><span>'+(materials._manifestLoading?'잠시만 기다려 주세요.':'현장 사진은 순차적으로 추가됩니다.')+'</span></div>';
+  /* 사진이 아직 없는 성지는 R2 확인 중에도 ‘불러오는 중’으로 남기지 않는다.
+     사진이 발견되면 즉시 다시 그려 사진 갤러리로 바뀌고, 없으면 준비 안내가 유지된다. */
+  if(slides) slides.innerHTML=photos.length?photos.map(function(photo,i){ var alt=photo.caption||(materials.title+' 사진 '+(i+1)); return '<figure class="myeongrye-slide'+(i===0?' active':'')+'" aria-hidden="'+(i===0?'false':'true')+'"><img '+(i===0?'src':'data-src')+'="'+_getMyeongryePhotoUrl(photo)+'" alt="'+_visitHtmlEsc(alt)+'" decoding="async"><figcaption>'+_visitHtmlEsc(photo.caption||'')+'</figcaption></figure>'; }).join(''):'<div class="myeongrye-photo-empty"><strong>사진을 준비하고 있습니다.</strong></div>';
   if(dots) dots.innerHTML=photos.map(function(_,i){ return '<span class="myeongrye-slide-dot'+(i===0?' active':'')+'"></span>'; }).join('');
   modal.querySelector('#myeongrye-materials-title').textContent=materials.title||item.name||'성지 자료';
   var links=modal.querySelector('.myeongrye-material-links');
