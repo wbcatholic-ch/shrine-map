@@ -3311,7 +3311,7 @@ function _renderInfoCardShrineVisit(item){
 const OAI_PARISH_VISITS_KEY='oai_parish_visits_v1';
 const OAI_PARISH_AUTO_VISIT_ENABLED_KEY='oai_parish_auto_visit_enabled_v1';
 let _parishVisitTab='visited',_parishVisitDio='all',_parishVisitSort='recent';
-function _isMyParishAutoVisitEnabled(){try{return localStorage.getItem(OAI_PARISH_AUTO_VISIT_ENABLED_KEY)==='1';}catch(_e){return false;}}
+function _isMyParishAutoVisitEnabled(){try{return localStorage.getItem(OAI_PARISH_AUTO_VISIT_ENABLED_KEY)!=='0';}catch(_e){return true;}}
 function _setParishAutoVisitEnabled(enabled){try{localStorage.setItem(OAI_PARISH_AUTO_VISIT_ENABLED_KEY,enabled?'1':'0');}catch(_e){}}
 function _configuredMyParish(){
   const dio=typeof _getMyDioceseName==='function'?_getMyDioceseName():'';
@@ -3327,9 +3327,9 @@ function _syncParishAutoVisitSetting(){
   if(!box){
     box=document.createElement('section');box.id='oai-parish-auto-visit-setting';box.className='oai-parish-auto-visit-setting';
     box.innerHTML='<h3>나의 본당 방문 기록</h3><p>나의 본당 근처에서 앱을 열 때, 하루 한 번 자동으로 방문 기록을 남길지 선택합니다.</p><label class="oai-parish-auto-visit-row"><strong>나의 본당 자동 방문 기록</strong><input id="oai-parish-auto-visit-toggle" type="checkbox" role="switch" aria-label="나의 본당 자동 방문 기록"></label>';
-    host.appendChild(box);
+    host.insertBefore(box,host.firstChild);
     const toggle=box.querySelector('input');toggle.addEventListener('change',function(){_setParishAutoVisitEnabled(!!toggle.checked);});
-  }else if(box.parentNode!==host)host.appendChild(box);
+  }else if(box.parentNode!==host)host.insertBefore(box,host.firstChild);
   const toggle=box.querySelector('input');if(toggle)toggle.checked=_isMyParishAutoVisitEnabled();
 }
 function _bindParishAutoVisitSetting(){
