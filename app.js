@@ -3311,7 +3311,7 @@ function _renderInfoCardShrineVisit(item){
 const OAI_PARISH_VISITS_KEY='oai_parish_visits_v1';
 const OAI_PARISH_AUTO_VISIT_ENABLED_KEY='oai_parish_auto_visit_enabled_v1';
 let _parishVisitTab='visited',_parishVisitDio='all',_parishVisitSort='recent';
-function _isMyParishAutoVisitEnabled(){try{return localStorage.getItem(OAI_PARISH_AUTO_VISIT_ENABLED_KEY)!=='0';}catch(_e){return true;}}
+function _isMyParishAutoVisitEnabled(){try{return localStorage.getItem(OAI_PARISH_AUTO_VISIT_ENABLED_KEY)==='1';}catch(_e){return false;}}
 function _setParishAutoVisitEnabled(enabled){try{localStorage.setItem(OAI_PARISH_AUTO_VISIT_ENABLED_KEY,enabled?'1':'0');}catch(_e){}}
 function _configuredMyParish(){
   const dio=typeof _getMyDioceseName==='function'?_getMyDioceseName():'';
