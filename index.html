@@ -2,7 +2,7 @@
 <html lang="ko" class="oai-font-global">
 <head>
 <script>
-  window.OAI_APP_BUILD_VERSION = 'V8-1-14-770';
+  window.OAI_APP_BUILD_VERSION = 'V8-1-14-771';
   window.APP_VERSION = window.OAI_APP_BUILD_VERSION;
 </script>
 
@@ -981,8 +981,22 @@ window.APP_CONFIG = {
 .oai-parish-auto-visit-row input{width:46px;height:27px;margin:0;accent-color:#1b6cc6;cursor:pointer;}
 .parish-visit-book .shrine-visit-cards-tabs{grid-template-columns:repeat(3,minmax(0,1fr))!important;}
 .parish-visit-book .shrine-visit-load-more{display:block;width:calc(100% - 28px);margin:18px 14px 28px;padding:14px;border:1px solid #245a89;border-radius:12px;background:#fff;color:#1d527f;font-size:16px;font-weight:800;}
-/* 성당찾기와 동일한 밝은 Android 선택창을 사용한다. */
-.parish-visit-book select,.parish-visit-book select option{color-scheme:light!important;}
+/* 기기 기본 검은 선택창 대신, 폴드 큰 화면에서도 같은 흰색 선택창을 사용한다. */
+.parish-visit-book .oai-parish-picker-button{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:48px;padding:0 16px;border:2px solid #d2b679;border-radius:13px;background:#fff;color:#18223a;font:800 17px/1 inherit;text-align:left;box-sizing:border-box;box-shadow:0 2px 4px rgba(26,42,72,.08);}
+.parish-visit-book .oai-parish-picker-button span{font-size:21px;font-weight:700;line-height:1;transform:translateY(-2px);}
+.parish-visit-book .oai-parish-picker-button:disabled{background:#f7f7f5;color:#70747c;border-color:#d6d5d0;box-shadow:none;}
+.oai-parish-visit-picker{display:none;position:fixed;inset:0;z-index:100000;}
+.oai-parish-visit-picker.show{display:block;}
+.oai-parish-picker-backdrop{position:absolute;inset:0;background:rgba(10,20,42,.42);}
+.oai-parish-picker-panel{position:absolute;top:50%;left:50%;width:min(640px,calc(100vw - 42px));max-height:min(76vh,760px);overflow:hidden;transform:translate(-50%,-50%);border-radius:22px;background:#fff;box-shadow:0 22px 58px rgba(0,0,0,.32);color:#15213a;}
+.oai-parish-picker-panel header{display:flex;align-items:center;justify-content:space-between;min-height:68px;padding:0 18px 0 23px;border-bottom:1px solid #e4e6ea;background:#fff;}
+.oai-parish-picker-panel header strong{font-size:22px;letter-spacing:-.04em;}
+.oai-parish-picker-panel header button{width:42px;height:42px;border:0;border-radius:50%;background:#f1f3f6;color:#26334b;font-size:31px;line-height:1;}
+.oai-parish-picker-list{max-height:calc(min(76vh,760px) - 68px);overflow:auto;background:#fff;}
+.oai-parish-picker-list button{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:62px;padding:0 24px;border:0;border-bottom:1px solid #e5e7eb;background:#fff;color:#1d2433;font:700 20px/1.2 inherit;text-align:left;}
+.oai-parish-picker-list button.selected{background:#eef6ff;color:#1267ad;font-weight:900;}
+.oai-parish-picker-list button b{font-size:23px;}
+@media (min-width:700px){.parish-visit-book .oai-parish-picker-button{min-height:62px;font-size:22px;border-radius:15px;}.oai-parish-picker-panel{width:min(700px,calc(100vw - 80px));}.oai-parish-picker-panel header{min-height:78px;padding-left:28px;}.oai-parish-picker-panel header strong{font-size:25px;}.oai-parish-picker-list{max-height:calc(min(76vh,760px) - 78px);}.oai-parish-picker-list button{min-height:74px;padding:0 30px;font-size:23px;}}
 </style>
 </head>
 <body>
