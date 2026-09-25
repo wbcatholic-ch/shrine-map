@@ -2288,11 +2288,9 @@ function _updateShrineVisitFloatingListButtonUI(){
   const mapOpen=(_screen==='map' && !sheetOpen);
   const layer=_ensureShrineVisitFloatingActionLayer();
   if(layer && btn.parentNode!==layer) layer.appendChild(btn);
-  const shrineNearbyWaiting=(_mode==='shrine' && (window.__OAI_SHRINE_NEARBY_LOADING__ === true || window.__OAI_SHRINE_NEARBY_AWAITING_FRESH__ === true));
-  /* V8-1-14-621: 버튼 표시 위치는 지도 기준 하단 하나로 고정한다.
-     표시 시점은 원래 합의대로 성지 내주변 거리계산 완료 뒤이며,
-     시트/검색/인포카드/경로검색/스탬프북이 열리면 지도 버튼은 숨긴다. */
-  const nearbyReady=(_mode==='shrine') ? (!shrineNearbyWaiting && window.__OAI_SHRINE_NEARBY_DISTANCE_DONE__===true) : true;
+  /* V8-1-14-755: 성당 방문 버튼과 같은 타이밍으로,
+     성지 내주변 거리 계산이 끝나기 전에도 바로 표시한다. */
+  const nearbyReady=true;
   /* V8-1-14-621: 버튼 위치 기준은 지도 하단 하나로 유지하되,
      내주변/성지찾기/지역찾기 시트가 열려 있어도 같은 화면 위치에 보이게 한다.
      키보드 focus만으로 숨기지 않고, 실제 검색 모달/인포카드/길찾기/스탬프북에서는 숨긴다. */
