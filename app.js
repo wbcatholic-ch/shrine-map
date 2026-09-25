@@ -3432,10 +3432,15 @@ function _openParishVisitDetail(p){
 }
 function _closeParishVisitDetail(opts){
   opts=opts||{};
-  if(!opts.fromPopstate&&window.__OAI_PV_DETAIL_HISTORY__){window.__OAI_PV_DETAIL_HISTORY__=false;try{history.back();return;}catch(_e){}}
+  /* 상세의 X와 휴대전화 뒤로가기는 항상 목록으로 돌아간다.
+     history.back()을 호출하면 Android WebView가 커버 화면까지 함께 처리할 수 있어
+     현재 history 항목을 목록 상태로 바꾼 뒤, 화면 전환은 직접 수행한다. */
   const v=document.getElementById('parish-visit-detail');if(v){v.classList.remove('show');v.setAttribute('aria-hidden','true');}
   window.__OAI_PV_DETAIL_HISTORY__=false;
-  if(window.__OAI_PV_DETAIL_FROM_BOOK__&&!opts.noResume){const book=_ensureParishVisitBook();_renderParishVisitBook();book.classList.add('show');book.setAttribute('aria-hidden','false');}
+  if(window.__OAI_PV_DETAIL_FROM_BOOK__&&!opts.noResume){
+    const book=_ensureParishVisitBook();_renderParishVisitBook();book.classList.add('show');book.setAttribute('aria-hidden','false');
+    if(!opts.fromPopstate){try{history.replaceState({oaiParishVisitBook:true},'',location.href);window.__OAI_PARISH_VISIT_HISTORY__=true;}catch(_e){}}
+  }
   window.__OAI_PV_DETAIL_FROM_BOOK__=false;_updateParishVisitButton();
 }
 function _ensureParishVisitEditor(){let m=document.getElementById('parish-visit-editor');if(m)return m;m=document.createElement('div');m.id='parish-visit-editor';m.className='shrine-visit-modal';m.innerHTML='<div class="shrine-visit-backdrop" data-pve-close="1"></div><div class="shrine-visit-panel"><div class="shrine-visit-head"><div><div class="shrine-visit-kicker">방문한 성당</div><div id="pve-title" class="shrine-visit-title"></div></div><button type="button" class="shrine-visit-x" data-pve-close="1">×</button></div><label class="shrine-visit-label">방문 날짜<input id="pve-date" type="date"></label><div class="shrine-visit-actions"><button id="pve-save" type="button" class="shrine-visit-save">등록</button><button type="button" class="shrine-visit-cancel" data-pve-close="1">취소</button></div><div id="pve-list" class="shrine-visit-list"></div></div>';document.body.appendChild(m);m.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('[data-pve-close]')){_closeParishVisitEditor();return;}const d=e.target.closest&&e.target.closest('[data-pve-del]');if(d&&window.__OAI_PV_ITEM__){_deleteParishVisit(window.__OAI_PV_ITEM__,parseInt(d.getAttribute('data-pve-del'),10));_renderParishVisitEditor();_renderParishVisitBook();_renderInfoCardParishVisit(window.__OAI_PV_ITEM__);}});m.querySelector('#pve-save').addEventListener('click',function(){const p=window.__OAI_PV_ITEM__,date=document.getElementById('pve-date').value;if(p&&_addParishVisit(p,date,'manual')){_renderParishVisitEditor();_renderParishVisitBook();_renderInfoCardParishVisit(p);}});return m;}
