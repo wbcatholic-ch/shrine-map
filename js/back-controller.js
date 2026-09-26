@@ -270,6 +270,29 @@
     /* 명례성지 자료/확대 사진은 아래 정보카드보다 먼저 한 단계씩 닫는다. */
     try{ if(typeof window._oaiMyeongryeBackHandle==='function' && window._oaiMyeongryeBackHandle()) return true; }catch(e){ console.warn('[가톨릭길동무]',e); }
 
+    /* 성당 방문은 이 공통 제어기만 뒤로가기를 처리한다.
+       방문등록 → 인포카드, 상세 → 방문 목록, 방문 목록 → 지도 순서다. */
+    el = $b('parish-visit-editor');
+    if(el && el.classList && el.classList.contains('show')){
+      if(typeof window._closeParishVisitEditor === 'function') window._closeParishVisitEditor({fromBackController:true});
+      else el.classList.remove('show');
+      return true;
+    }
+
+    el = $b('parish-visit-detail');
+    if(el && el.classList && el.classList.contains('show')){
+      if(typeof window._closeParishVisitDetail === 'function') window._closeParishVisitDetail({fromBackController:true});
+      else { el.classList.remove('show'); el.setAttribute('aria-hidden','true'); }
+      return true;
+    }
+
+    el = $b('parish-visit-book');
+    if(el && el.classList && el.classList.contains('show')){
+      if(typeof window._closeParishVisitBook === 'function') window._closeParishVisitBook({fromBackController:true});
+      else { el.classList.remove('show'); el.setAttribute('aria-hidden','true'); }
+      return true;
+    }
+
     el = $b('shrine-visit-modal');
     if(el && el.classList && el.classList.contains('show')){
       if(typeof window._closeShrineVisitModal === 'function') window._closeShrineVisitModal({fromBackController:true});
