@@ -3453,7 +3453,7 @@ function _closeParishVisitEditor(opts){
 function _renderInfoCardParishVisit(p){const b=document.getElementById('ic-type');if(!b||_mode!=='parish')return;const n=_parishVisitCount(p);b.textContent=n?'방문 '+n+'회':'방문등록';b.classList.add('shrine-pilgrim-register-badge');b.setAttribute('role','button');b.onclick=function(e){if(e){e.preventDefault();e.stopPropagation()}_openParishVisitEditor(p)};}
 function _maybeAutoParishVisit(lat,lng){
   if(_mode!=='parish'||!lat||!lng)return;let best=null,bestM=Infinity;
-  (PARISHES||[]).forEach(function(p){if(!p||p.diocese==='군종교구'||!p.lat||!p.lng)return;const m=calcDist(lat,lng,p.lat,p.lng)*1000;if(m<=100&&m<bestM){best=p;bestM=m;}});
+  (PARISHES||[]).forEach(function(p){if(!p||p.diocese==='군종교구'||!p.lat||!p.lng)return;const m=calcDist(lat,lng,p.lat,p.lng)*1000;if(m<=150&&m<bestM){best=p;bestM=m;}});
   if(!best)return;const myParish=_configuredMyParish();if(_isSameParish(best,myParish)&&!_isMyParishAutoVisitEnabled())return;
   if(_parishVisits(best).some(function(v){return v.date===_todayISODate();})||!_addParishVisit(best,_todayISODate(),'gps'))return;
   let m=document.getElementById('parish-auto-visit-notice');if(!m){m=document.createElement('div');m.id='parish-auto-visit-notice';m.className='shrine-auto-visit-modal';m.innerHTML='<div class="shrine-auto-visit-backdrop"></div><div class="shrine-auto-visit-panel" role="dialog" aria-modal="true"><div class="shrine-auto-visit-kicker">GPS 자동 방문등록</div><div id="parish-auto-visit-title" class="shrine-auto-visit-title"></div><div class="shrine-auto-visit-actions"><button type="button" class="shrine-auto-visit-save">확인</button></div></div>';document.body.appendChild(m);m.querySelector('button').addEventListener('click',function(){m.classList.remove('show');});}
