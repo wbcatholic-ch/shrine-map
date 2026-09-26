@@ -2,7 +2,7 @@
 <html lang="ko" class="oai-font-global">
 <head>
 <script>
-  window.OAI_APP_BUILD_VERSION = 'V8-1-14-778';
+  window.OAI_APP_BUILD_VERSION = 'V8-1-14-779';
   window.APP_VERSION = window.OAI_APP_BUILD_VERSION;
 </script>
 
@@ -860,12 +860,26 @@ html.oai-internal-no-return-effect #cover > * {
       requestAnimationFrame(fn);
     }else{ fn(); }
   }
-  /* V8-1-14-693: resize/orientation/visualViewport listener와 전역 재측정 hook은 두지 않는다. */
-  // 첫 진입 십자가 인트로는 유지하고, 커버 높이는 저장된 기준만 사용한다.
+  /* 화면 등급(class)은 보존하고, 실제 보이는 높이만 커버에 반영한다.
+     저장된 이전 높이가 브라우저 하단 영역 변화보다 클 때 하단 안내문이 화면 밖으로
+     나가는 문제를 막는다. 키보드가 열린 상태에서는 높이를 바꾸지 않는다. */
+  window.oaiRefreshCoverViewportHeight = function(){
+    try{
+      var vv = window.visualViewport;
+      var visibleH = Math.round((vv && vv.height) || window.innerHeight || document.documentElement.clientHeight || 0);
+      var innerH = Math.round(window.innerHeight || 0);
+      if(!(visibleH > 300 && visibleH < 2000)) return false;
+      if(vv && innerH && visibleH / innerH < 0.78) return false;
+      root.style.setProperty('--cover-vh', (visibleH * 0.01) + 'px');
+      root.setAttribute('data-oai-vh', String(visibleH));
+      return true;
+    }catch(_e){ return false; }
+  };
+  /* 화면 등급은 저장값을 유지한다. 첫 페인트 이후에는 커버 높이만 실제 표시 영역에 맞춘다. */
   if(!isInternalNoEffectReturn){
-    if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ afterStableFirstPaint(releaseBooting); }, {once:true});
-    else afterStableFirstPaint(releaseBooting);
-    window.addEventListener('load', function(){ afterStableFirstPaint(releaseBooting); }, {once:true});
+    if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ afterStableFirstPaint(function(){ window.oaiRefreshCoverViewportHeight(); releaseBooting(); }); }, {once:true});
+    else afterStableFirstPaint(function(){ window.oaiRefreshCoverViewportHeight(); releaseBooting(); });
+    window.addEventListener('load', function(){ afterStableFirstPaint(function(){ window.oaiRefreshCoverViewportHeight(); releaseBooting(); }); }, {once:true});
   }
 })();
 </script>

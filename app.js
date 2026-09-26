@@ -7616,6 +7616,14 @@ function goToCover(){
     _coverEl.style.pointerEvents='';
     _coverEl.scrollTop=0;
   }
+  /* 화면 등급은 그대로 두고, 돌아온 시점의 실제 표시 높이만 다시 반영한다.
+     하단 안내문이 브라우저 하단 밖으로 밀리지 않게 한다. */
+  try{
+    if(typeof window.oaiRefreshCoverViewportHeight === 'function'){
+      window.oaiRefreshCoverViewportHeight();
+      requestAnimationFrame(function(){ try{ window.oaiRefreshCoverViewportHeight(); }catch(_e){} });
+    }
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
   try{ if(typeof _resetCoverExitReady === 'function') _resetCoverExitReady(); }catch(e){ console.warn('[가톨릭길동무]', e); }
   try{ if(typeof _clearCoverExitArmed === 'function') _clearCoverExitArmed(); }catch(e){ console.warn('[가톨릭길동무]', e); }
   try{ if(typeof _clearHardCoverExitFlags === 'function') _clearHardCoverExitFlags('go-to-cover'); }catch(e){ console.warn('[가톨릭길동무]', e); }
