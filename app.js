@@ -3345,7 +3345,7 @@ function _ensureParishAutoVisitSettingsDialog(){
   let dialog=book.querySelector('#oai-parish-auto-visit-dialog');
   if(!dialog){
     dialog=document.createElement('div');dialog.id='oai-parish-auto-visit-dialog';dialog.className='oai-parish-auto-visit-dialog';dialog.setAttribute('aria-hidden','true');
-    dialog.innerHTML='<div class="oai-parish-auto-visit-dialog-backdrop" data-pv-settings-close="1"></div><section class="oai-parish-auto-visit-dialog-panel" role="dialog" aria-modal="true" aria-label="나의 본당 자동 방문 기록 설정"><div class="oai-parish-auto-visit-dialog-head"><strong>방문 기록 설정</strong><button type="button" data-pv-settings-close="1" aria-label="닫기">×</button></div><div class="oai-parish-auto-visit-dialog-body"><strong>나의 본당 자동 방문</strong><p>150m 안에서 앱을 열면 자동 기록합니다.</p><label class="oai-parish-auto-visit-switch"><input type="checkbox" role="switch" aria-label="나의 본당 자동 방문 기록"><span aria-hidden="true"></span></label></div><button type="button" class="oai-parish-auto-visit-dialog-confirm" data-pv-settings-close="1">확인</button></section>';
+    dialog.innerHTML='<div class="oai-parish-auto-visit-dialog-backdrop" data-pv-settings-close="1"></div><section class="oai-parish-auto-visit-dialog-panel" role="dialog" aria-modal="true" aria-label="나의 본당 자동 방문 기록 설정"><div class="oai-parish-auto-visit-dialog-head"><strong>방문 기록 설정</strong><button type="button" data-pv-settings-close="1" aria-label="닫기">×</button></div><div class="oai-parish-auto-visit-dialog-body"><strong>나의 본당 첫 방문 자동 기록</strong><p>처음 한 번만 자동 기록하고, 매주 다니는 본당은 반복해서 기록하지 않습니다.</p><label class="oai-parish-auto-visit-switch"><input type="checkbox" role="switch" aria-label="나의 본당 첫 방문 자동 기록"><span aria-hidden="true"></span></label></div><button type="button" class="oai-parish-auto-visit-dialog-confirm" data-pv-settings-close="1">확인</button></section>';
     book.appendChild(dialog);
     const input=dialog.querySelector('input');if(input)input.addEventListener('change',function(){_setParishAutoVisitEnabled(!!input.checked);});
   }
@@ -3457,8 +3457,9 @@ function _renderInfoCardParishVisit(p){const b=document.getElementById('ic-type'
 function _maybeAutoParishVisit(lat,lng){
   if(_mode!=='parish'||!lat||!lng)return;let best=null,bestM=Infinity;
   (PARISHES||[]).forEach(function(p){if(!p||p.diocese==='군종교구'||!p.lat||!p.lng)return;const m=calcDist(lat,lng,p.lat,p.lng)*1000;if(m<=150&&m<bestM){best=p;bestM=m;}});
-  if(!best)return;const myParish=_configuredMyParish();if(_isSameParish(best,myParish)&&!_isMyParishAutoVisitEnabled())return;
-  if(_parishVisits(best).some(function(v){return v.date===_todayISODate();})||!_addParishVisit(best,_todayISODate(),'gps'))return;
+  if(!best)return;const myParish=_configuredMyParish(),isMyParish=_isSameParish(best,myParish),previousVisits=_parishVisits(best);
+  if(isMyParish){if(!_isMyParishAutoVisitEnabled()||previousVisits.length)return;}else if(previousVisits.some(function(v){return v.date===_todayISODate();}))return;
+  if(!_addParishVisit(best,_todayISODate(),'gps'))return;
   let m=document.getElementById('parish-auto-visit-notice');if(!m){m=document.createElement('div');m.id='parish-auto-visit-notice';m.className='shrine-auto-visit-modal';m.innerHTML='<div class="shrine-auto-visit-backdrop"></div><div class="shrine-auto-visit-panel" role="dialog" aria-modal="true"><div class="shrine-auto-visit-kicker">GPS 자동 방문등록</div><div id="parish-auto-visit-title" class="shrine-auto-visit-title"></div><div class="shrine-auto-visit-actions"><button type="button" class="shrine-auto-visit-save">확인</button></div></div>';document.body.appendChild(m);m.querySelector('button').addEventListener('click',function(){m.classList.remove('show');});}
   document.getElementById('parish-auto-visit-title').textContent='축하합니다. '+best.name+' 방문이 등록되었습니다.';m.classList.add('show');if(_curInfoItem&&_curInfoItem.item===best)_renderInfoCardParishVisit(best);
 }
