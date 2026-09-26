@@ -2,7 +2,7 @@
 <html lang="ko" class="oai-font-global">
 <head>
 <script>
-  window.OAI_APP_BUILD_VERSION = 'V8-1-14-774';
+  window.OAI_APP_BUILD_VERSION = 'V8-1-14-776';
   window.APP_VERSION = window.OAI_APP_BUILD_VERSION;
 </script>
 
@@ -997,6 +997,21 @@ window.APP_CONFIG = {
 .oai-parish-picker-list button.selected{background:#eef6ff;color:#1267ad;font-weight:900;}
 .oai-parish-picker-list button b{font-size:32px;line-height:1;}
 @media (min-width:700px){.parish-visit-book .oai-parish-picker-button{min-height:62px;font-size:22px;border-radius:15px;}.oai-parish-picker-panel{width:min(720px,calc(100vw - 80px));max-height:min(82vh,860px);}.oai-parish-picker-panel header{min-height:88px;padding:0 28px 0 32px;}.oai-parish-picker-panel header strong{font-size:30px;}.oai-parish-picker-panel header button{width:52px;height:52px;font-size:38px;}.oai-parish-picker-list{max-height:calc(min(82vh,860px) - 88px);}.oai-parish-picker-list button{min-height:84px;padding:0 34px;font-size:27px;}.oai-parish-picker-list button b{font-size:32px;}}
+/* 작은 휴대폰 커버: 화면 비율에 맞춰 줄이고, 큰 화면에서 과도하게 커지지 않게 한다. */
+@media (max-width:540px){
+  #cover{height:100svh!important;min-height:100svh!important;overflow-y:auto!important;overflow-x:hidden!important;box-sizing:border-box!important;}
+  #cover-main-block{box-sizing:border-box!important;padding:clamp(58px,9svh,82px) 14px clamp(10px,1.6svh,16px)!important;}
+  #cover .cover-header{margin:0 0 clamp(9px,1.5svh,14px)!important;}
+  #cover .cover-subtitle{font-size:clamp(15px,4vw,18px)!important;line-height:1.2!important;}
+  #cover .cover-title{margin:clamp(4px,.8svh,7px) 0 0!important;font-size:clamp(29px,8vw,36px)!important;line-height:1.1!important;}
+  #cover .cover-grid{grid-auto-rows:clamp(84px,13svh,108px)!important;gap:clamp(7px,1.2svh,10px)!important;}
+  #cover .cover-card,#cover .cover-card-wide{height:auto!important;min-height:0!important;padding:clamp(7px,1.1svh,10px) 7px!important;}
+  #cover .cover-icon-wrap{margin-bottom:clamp(3px,.7svh,6px)!important;}
+  #cover .cover-emoji{font-size:clamp(28px,8vw,38px)!important;line-height:1!important;}
+  #cover .cover-name{font-size:clamp(15px,4vw,18px)!important;line-height:1.18!important;}
+  #cover #cover-action-row{margin-top:clamp(8px,1.4svh,12px)!important;gap:6px!important;}
+  #cover #cover-action-row button{min-height:clamp(40px,6svh,50px)!important;padding:6px 4px!important;font-size:clamp(12px,3.5vw,15px)!important;line-height:1.1!important;}
+}
 </style>
 </head>
 <body>
