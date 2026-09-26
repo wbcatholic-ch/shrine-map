@@ -3416,11 +3416,19 @@ function _closeParishVisitBook(opts){
   const m=document.getElementById('parish-visit-book');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}
   window.__OAI_PARISH_VISIT_HISTORY__=false;_updateParishVisitButton();
 }
-window.addEventListener('popstate',function(){
-  if(document.getElementById('parish-visit-editor')?.classList.contains('show')) _closeParishVisitEditor({fromPopstate:true});
-  else if(_parishVisitBookOpen()) _closeParishVisitBook({fromPopstate:true});
-  else if(document.getElementById('parish-visit-detail')?.classList.contains('show')) _closeParishVisitDetail({fromPopstate:true});
-});
+/* 성지 스탬프북과 같은 우선순위로 성당 방문 화면을 한 단계씩 닫는다.
+   이 처리 뒤에 공통 뒤로가기 제어기가 다시 커버로 보내지 않도록 capture 단계에서 끝낸다. */
+window.addEventListener('popstate',function(e){
+  let handled=false;
+  if(document.getElementById('parish-visit-editor')?.classList.contains('show')){
+    _closeParishVisitEditor({fromPopstate:true});handled=true;
+  }else if(document.getElementById('parish-visit-detail')?.classList.contains('show')){
+    _closeParishVisitDetail({fromPopstate:true});handled=true;
+  }else if(_parishVisitBookOpen()){
+    _closeParishVisitBook({fromPopstate:true});handled=true;
+  }
+  if(handled&&e){e.stopImmediatePropagation();e.stopPropagation();}
+},true);
 function _ensureParishVisitDetail(){
   let v=document.getElementById('parish-visit-detail');if(v)return v;
   v=document.createElement('div');v.id='parish-visit-detail';v.className='shrine-visit-detail-view parish-visit-detail';v.setAttribute('aria-hidden','true');
