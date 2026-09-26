@@ -2083,14 +2083,11 @@ function _renderShrineVisitFilterControls(active){
   wrap.classList.toggle('show', show);
   wrap.setAttribute('aria-hidden', show?'false':'true');
   if(!show){ wrap.innerHTML=''; return; }
-  const dioOptions=_getShrineVisitDioceseEntries().map(function(pair){
-    const value=pair&&pair[0]||'all';
-    const label=_getShrineVisitFullDioceseLabel(value,pair&&pair[1]);
-    return '<option value="'+_visitHtmlEsc(value)+'"'+(String(value)===String(_shrineVisitCardsDiocese||'all')?' selected':'')+'>'+_visitHtmlEsc(label)+'</option>';
-  }).join('');
-  wrap.innerHTML='<label class="shrine-visit-filter-field"><span>날짜별</span><select data-shrine-visit-date-sort aria-label="날짜별 정렬"><option value="recent"'+(_shrineVisitCardsDateSort==='recent'?' selected':'')+'>최근순</option><option value="oldest"'+(_shrineVisitCardsDateSort==='oldest'?' selected':'')+'>오래된순</option></select></label>'
-    +'<label class="shrine-visit-filter-field"><span>교구별</span><select data-shrine-visit-diocese-select aria-label="교구별 선택">'+dioOptions+'</select></label>'
-    +'<label class="shrine-visit-filter-field"><span>유형별</span><select data-shrine-visit-type aria-label="성지 유형별 선택"><option value="all"'+(_shrineVisitCardsType==='all'?' selected':'')+'>전체</option><option value="shrine"'+(_shrineVisitCardsType==='shrine'?' selected':'')+'>성지</option><option value="martyr"'+(_shrineVisitCardsType==='martyr'?' selected':'')+'>순교사적지</option><option value="pilgrim"'+(_shrineVisitCardsType==='pilgrim'?' selected':'')+'>순례지</option></select></label>';
+  const dioEntry=_getShrineVisitDioceseEntries().filter(function(pair){return String(pair&&pair[0]||'all')===String(_shrineVisitCardsDiocese||'all');})[0];
+  const dioLabel=_getShrineVisitFullDioceseLabel(_shrineVisitCardsDiocese||'all',dioEntry&&dioEntry[1]);
+  wrap.innerHTML='<label class="shrine-visit-filter-field"><span>날짜별</span>'+_oaiVisitPickerButton('shrine-date',_shrineVisitCardsDateSort==='oldest'?'오래된순':'최근순','날짜별 정렬')+'</label>'
+    +'<label class="shrine-visit-filter-field"><span>교구별</span>'+_oaiVisitPickerButton('shrine-dio',dioLabel,'교구별 선택')+'</label>'
+    +'<label class="shrine-visit-filter-field"><span>유형별</span>'+_oaiVisitPickerButton('shrine-type',_shrineVisitTypeFilterLabel(_shrineVisitCardsType),'유형별 선택')+'</label>';
 }
 function _renderShrineVisitDioceseTabs(visitedCount,totalCount){
   const wrap=document.getElementById('shrine-visit-cards-diocese');
@@ -2134,6 +2131,50 @@ function _shrineVisitTypeClass(item){
 function _shrineVisitTypeLabel(item){
   const t=String(item&&item.type||'');
   return t||'성지';
+}
+
+/* 성지·성당 모두 OS 기본 select 대신 같은 선택창을 사용한다.
+   기기/폴드 상태에 따라 검은 드롭다운으로 달라지는 문제를 없앤다. */
+function _oaiVisitPickerButton(kind,label,aria,disabled){
+  return '<button type="button" class="oai-visit-picker-button" data-oai-visit-picker="'+_visitHtmlEsc(kind)+'" aria-label="'+_visitHtmlEsc(aria||label)+'"'+(disabled?' disabled':'')+'><span>'+_visitHtmlEsc(label)+'</span><b aria-hidden="true">⌄</b></button>';
+}
+function _oaiVisitPickerOptions(kind){
+  if(kind==='shrine-date')return [['recent','최근순'],['oldest','오래된순']];
+  if(kind==='shrine-dio')return _getShrineVisitDioceseEntries().map(function(pair){return [pair&&pair[0]||'all',_getShrineVisitFullDioceseLabel(pair&&pair[0]||'all',pair&&pair[1])];});
+  if(kind==='shrine-type')return [['all','전체 유형'],['shrine','성지'],['martyr','순교사적지'],['pilgrim','순례지']];
+  if(kind==='parish-sort')return [['recent','최근순'],['oldest','오래된순']];
+  if(kind==='parish-dio')return [['all','전체']].concat(_parishDios().map(function(d){return [d,d];}));
+  return [];
+}
+function _oaiVisitPickerSelected(kind){
+  if(kind==='shrine-date')return _shrineVisitCardsDateSort;
+  if(kind==='shrine-dio')return _shrineVisitCardsDiocese||'all';
+  if(kind==='shrine-type')return _shrineVisitCardsType||'all';
+  if(kind==='parish-sort')return _parishVisitSort;
+  if(kind==='parish-dio')return _parishVisitDio||'all';
+  return '';
+}
+function _closeOaiVisitPicker(){const dialog=document.getElementById('oai-visit-picker-dialog');if(dialog){dialog.classList.remove('show');dialog.setAttribute('aria-hidden','true');}}
+function _applyOaiVisitPicker(kind,value){
+  if(kind==='shrine-date')_shrineVisitCardsDateSort=value==='oldest'?'oldest':'recent';
+  else if(kind==='shrine-dio')_shrineVisitCardsDiocese=value||'all';
+  else if(kind==='shrine-type')_shrineVisitCardsType=(value==='shrine'||value==='martyr'||value==='pilgrim')?value:'all';
+  else if(kind==='parish-sort')_parishVisitSort=value==='oldest'?'oldest':'recent';
+  else if(kind==='parish-dio'){_parishVisitDio=value||'all';_parishUnvisitedLimit=80;}
+  _closeOaiVisitPicker();
+  if(kind.indexOf('shrine-')===0){_renderShrineVisitCardsModal();setTimeout(_resetShrineVisitCardsTopStable,0);}
+  else _renderParishVisitBook();
+}
+function _openOaiVisitPicker(kind){
+  const options=_oaiVisitPickerOptions(kind),selected=String(_oaiVisitPickerSelected(kind));if(!options.length)return;
+  let dialog=document.getElementById('oai-visit-picker-dialog');
+  if(!dialog){
+    dialog=document.createElement('div');dialog.id='oai-visit-picker-dialog';dialog.className='oai-visit-picker-dialog';dialog.setAttribute('aria-hidden','true');document.body.appendChild(dialog);
+    dialog.addEventListener('click',function(e){const target=e.target&&e.target.closest&&e.target.closest('[data-oai-visit-picker-close],[data-oai-visit-picker-value]');if(!target)return;if(target.hasAttribute('data-oai-visit-picker-close')){_closeOaiVisitPicker();return;}const active=dialog.getAttribute('data-picker-kind')||'';_applyOaiVisitPicker(active,target.getAttribute('data-oai-visit-picker-value')||'');});
+  }
+  dialog.setAttribute('data-picker-kind',kind);
+  dialog.innerHTML='<div class="oai-visit-picker-backdrop" data-oai-visit-picker-close="1"></div><section class="oai-visit-picker-panel" role="dialog" aria-modal="true" aria-label="선택"><div class="oai-visit-picker-list">'+options.map(function(option){const value=String(option[0]),isSelected=value===selected;return '<button type="button" data-oai-visit-picker-value="'+_visitHtmlEsc(value)+'"'+(isSelected?' class="selected"':'')+'><span>'+_visitHtmlEsc(option[1])+'</span><b aria-hidden="true">'+(isSelected?'◉':'○')+'</b></button>';}).join('')+'</div></section>';
+  dialog.classList.add('show');dialog.setAttribute('aria-hidden','false');
 }
 
 function _ensureShrineVisitCardsButton(){
@@ -2355,6 +2396,8 @@ function _ensureShrineVisitCardsModal(){
     el.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); _closeShrineVisitCardsModal(); });
   });
   modal.addEventListener('click', function(e){
+    const picker=e.target&&e.target.closest&&e.target.closest('[data-oai-visit-picker]');
+    if(picker){e.preventDefault();e.stopPropagation();_openOaiVisitPicker(picker.getAttribute('data-oai-visit-picker')||'');return;}
     const tab=e.target&&e.target.closest&&e.target.closest('[data-shrine-visit-cards-tab]');
     if(tab){
       e.preventDefault(); e.stopPropagation(); if(e.stopImmediatePropagation) e.stopImmediatePropagation();
@@ -3337,9 +3380,8 @@ function _parishUnvisitedEntries(){const saved=_loadParishVisits();return (PARIS
 function _parishDios(){const s={};(PARISHES||[]).forEach(function(p){if(p&&p.diocese&&p.diocese!=='군종교구')s[p.diocese]=1;});const ordered=(typeof _DIOS!=='undefined'?_DIOS:[]).slice(1).map(function(x){return x[0]}).filter(function(d){return !!s[d]});const extra=Object.keys(s).filter(function(d){return ordered.indexOf(d)<0}).sort(function(a,b){return a.localeCompare(b,'ko')});return ordered.concat(extra);}
 /* 성당 방문 스탬프는 해당 성당이 지도에서 쓰는 교구 마커 색을 따른다. */
 function _parishVisitMarkerColor(p){const code=typeof _parishDioCodeOf==='function'?_parishDioCodeOf(p):'';const cfg=typeof _DIO_CFG!=='undefined'&&_DIO_CFG[code];return cfg&&cfg.c?cfg.c:'#1A5276';}
-function _parishVisitSelect(kind,options,selected,disabled){return '<select data-pv-select="'+_visitHtmlEsc(kind)+'"'+(disabled?' disabled':'')+'>'+options.map(function(o){return '<option value="'+_visitHtmlEsc(o[0])+'"'+(String(o[0])===String(selected)?' selected':'')+'>'+_visitHtmlEsc(o[1])+'</option>';}).join('')+'</select>';}
-function _parishVisitPickerButton(kind,label,disabled){if(kind==='sort')return _parishVisitSelect('sort',[['recent','최근순'],['oldest','오래된순']],_parishVisitSort,disabled);return _parishVisitSelect('',[[label,label]],label,disabled);}
-function _parishVisitDioceseField(){return '<label class="shrine-visit-filter-field oai-parish-dio-filter"><span>교구별</span>'+_parishVisitSelect('dio',[['all','전체']].concat(_parishDios().map(function(d){return [d,d]})),_parishVisitDio)+'</label>';}
+function _parishVisitPickerButton(kind,label,disabled){return kind==='sort'?_oaiVisitPickerButton('parish-sort',_parishVisitSort==='oldest'?'오래된순':'최근순','날짜별 정렬',disabled):_oaiVisitPickerButton('',label,'',true);}
+function _parishVisitDioceseField(){const label=_parishVisitDio==='all'?'전체':_parishVisitDio;return '<label class="shrine-visit-filter-field oai-parish-dio-filter"><span>교구별</span>'+_oaiVisitPickerButton('parish-dio',label,'교구별 선택')+'</label>';}
 function _parishVisitSettingsMini(){return '<button type="button" class="oai-parish-settings-mini" data-pv-settings="1" aria-label="나의 본당 자동 방문 기록 설정"><small>설정</small><b aria-hidden="true">⚙</b></button>';}
 function _ensureParishAutoVisitSettingsDialog(){
   const book=document.getElementById('parish-visit-book');if(!book)return null;
@@ -3382,7 +3424,7 @@ function _updateParishVisitButton(){const layer=_ensureParishVisitButton();if(!l
 function _ensureParishVisitBook(){
   let m=document.getElementById('parish-visit-book');if(m)return m;m=document.createElement('div');m.id='parish-visit-book';m.className='shrine-visit-cards-modal parish-visit-book';m.setAttribute('aria-hidden','true');
   m.innerHTML='<div class="shrine-visit-cards-backdrop" data-pv-close="1"></div><div class="shrine-visit-cards-panel" role="dialog" aria-modal="true" aria-label="성당 방문 기록"><div class="module-bar shrine-visit-cards-head"><div class="module-bar-main"><div class="module-bar-ico">✝</div><div class="module-bar-txt"><div class="module-bar-title">성당 방문 스탬프북</div><div class="module-bar-sub">나의 성당 방문 기록</div></div></div><button class="module-close" type="button" data-pv-close="1" aria-label="닫기">×</button></div><div class="shrine-visit-cards-tabs"><button type="button" data-pv-tab="visited">방문한 성당</button><button type="button" data-pv-tab="unvisited">미방문 성당</button><button type="button" data-pv-tab="stats">통계</button></div><div id="pv-filters" class="shrine-visit-cards-filters"></div><div id="pv-summary" class="shrine-visit-cards-stats"></div><div id="pv-body" class="shrine-visit-cards-body"></div></div>';
-  document.body.appendChild(m);m.addEventListener('click',function(e){const t=e.target.closest&&e.target.closest('[data-pv-close],[data-pv-tab],[data-pv-card],[data-pv-more],[data-pv-picker],[data-pv-picker-close],[data-pv-picker-value],[data-pv-settings],[data-pv-settings-close]');if(!t)return;if(t.hasAttribute('data-pv-settings-close')){_closeParishAutoVisitSettings();return;}if(t.hasAttribute('data-pv-settings')){_openParishAutoVisitSettings();return;}if(t.hasAttribute('data-pv-picker-close')){_closeParishVisitPicker();return;}if(t.hasAttribute('data-pv-picker')){_openParishVisitPicker(t.getAttribute('data-pv-picker'));return;}if(t.hasAttribute('data-pv-picker-value')){const kind=t.getAttribute('data-pv-picker-kind'),value=t.getAttribute('data-pv-picker-value');if(kind==='sort')_parishVisitSort=value==='oldest'?'oldest':'recent';else{_parishVisitDio=value||'all';_parishUnvisitedLimit=80;}_closeParishVisitPicker();_renderParishVisitBook();return;}if(t.hasAttribute('data-pv-close')){_closeParishVisitBook();return;}if(t.hasAttribute('data-pv-tab')){const tab=t.getAttribute('data-pv-tab');_parishVisitTab=tab==='stats'?'stats':tab==='unvisited'?'unvisited':'visited';_parishUnvisitedLimit=80;_renderParishVisitBook();return;}if(t.hasAttribute('data-pv-more')){_parishUnvisitedLimit+=80;_renderParishVisitBook();return;}const p=PARISHES[parseInt(t.getAttribute('data-pv-card'),10)];if(p)_openParishVisitDetail(p);});return m;
+  document.body.appendChild(m);m.addEventListener('click',function(e){const t=e.target.closest&&e.target.closest('[data-pv-close],[data-pv-tab],[data-pv-card],[data-pv-more],[data-oai-visit-picker],[data-pv-picker],[data-pv-picker-close],[data-pv-picker-value],[data-pv-settings],[data-pv-settings-close]');if(!t)return;if(t.hasAttribute('data-pv-settings-close')){_closeParishAutoVisitSettings();return;}if(t.hasAttribute('data-pv-settings')){_openParishAutoVisitSettings();return;}if(t.hasAttribute('data-oai-visit-picker')){_openOaiVisitPicker(t.getAttribute('data-oai-visit-picker')||'');return;}if(t.hasAttribute('data-pv-picker-close')){_closeParishVisitPicker();return;}if(t.hasAttribute('data-pv-picker')){_openParishVisitPicker(t.getAttribute('data-pv-picker'));return;}if(t.hasAttribute('data-pv-picker-value')){const kind=t.getAttribute('data-pv-picker-kind'),value=t.getAttribute('data-pv-picker-value');if(kind==='sort')_parishVisitSort=value==='oldest'?'oldest':'recent';else{_parishVisitDio=value||'all';_parishUnvisitedLimit=80;}_closeParishVisitPicker();_renderParishVisitBook();return;}if(t.hasAttribute('data-pv-close')){_closeParishVisitBook();return;}if(t.hasAttribute('data-pv-tab')){const tab=t.getAttribute('data-pv-tab');_parishVisitTab=tab==='stats'?'stats':tab==='unvisited'?'unvisited':'visited';_parishUnvisitedLimit=80;_renderParishVisitBook();return;}if(t.hasAttribute('data-pv-more')){_parishUnvisitedLimit+=80;_renderParishVisitBook();return;}const p=PARISHES[parseInt(t.getAttribute('data-pv-card'),10)];if(p)_openParishVisitDetail(p);});return m;
 }
 function _renderParishVisitBook(){
  const m=document.getElementById('parish-visit-book'),f=document.getElementById('pv-filters'),s=document.getElementById('pv-summary'),b=document.getElementById('pv-body');if(!m||!b)return;_closeParishVisitPicker();const all=_parishEntries(),total=(PARISHES||[]).filter(function(p){return p&&p.diocese!=='군종교구'}).length;
