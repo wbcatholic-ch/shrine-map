@@ -2,7 +2,7 @@
 <html lang="ko" class="oai-font-global">
 <head>
 <script>
-  window.OAI_APP_BUILD_VERSION = 'V8-1-14-784';
+  window.OAI_APP_BUILD_VERSION = 'V8-1-14-785';
   window.APP_VERSION = window.OAI_APP_BUILD_VERSION;
 </script>
 
@@ -368,7 +368,10 @@ html.oai-internal-no-return-effect #cover > * {
   function oaiIsRefreshCalibration(){
     try{
       var stableReloadReason = sessionStorage.getItem('oai_stable_auto_reload_reason') || '';
-      return /force-remeasure/i.test(String(stableReloadReason || ''));
+      var nav = performance && performance.getEntriesByType ? performance.getEntriesByType('navigation')[0] : null;
+      var isReload = !!(nav && nav.type === 'reload');
+      if(!isReload && performance && performance.navigation) isReload = performance.navigation.type === 1;
+      return isReload || /force-remeasure/i.test(String(stableReloadReason || ''));
     }catch(_e){ return false; }
   }
   function oaiViewportRaw(){
@@ -499,11 +502,6 @@ html.oai-internal-no-return-effect #cover > * {
     /* V8-1-14-693: 화면 등급은 boot / refresh / 저장값 없음 때만 새로 측정한다.
        background, focus, pageshow, resize, visualViewport, goToCover에서는 새 class를 계산하지 않는다. */
     if(hasClass && !boot && !refresh){
-      return;
-    }
-
-    if(refresh && stored && !/force-remeasure/.test(String(reason || ''))){
-      oaiApplyViewportProfile(stored);
       return;
     }
 
@@ -863,23 +861,13 @@ html.oai-internal-no-return-effect #cover > * {
   /* 화면 등급(class)은 보존하고, 실제 보이는 높이만 커버에 반영한다.
      저장된 이전 높이가 브라우저 하단 영역 변화보다 클 때 하단 안내문이 화면 밖으로
      나가는 문제를 막는다. 키보드가 열린 상태에서는 높이를 바꾸지 않는다. */
-  window.oaiRefreshCoverViewportHeight = function(){
-    try{
-      var vv = window.visualViewport;
-      var visibleH = Math.round((vv && vv.height) || window.innerHeight || document.documentElement.clientHeight || 0);
-      var innerH = Math.round(window.innerHeight || 0);
-      if(!(visibleH > 300 && visibleH < 2000)) return false;
-      if(vv && innerH && visibleH / innerH < 0.78) return false;
-      root.style.setProperty('--cover-vh', (visibleH * 0.01) + 'px');
-      root.setAttribute('data-oai-vh', String(visibleH));
-      return true;
-    }catch(_e){ return false; }
-  };
-  /* 화면 등급은 저장값을 유지한다. 첫 페인트 이후에는 커버 높이만 실제 표시 영역에 맞춘다. */
+  /* 새 설치/새 화면 상태는 최초 측정값을 저장하고, 일반 재실행은 저장값을 쓴다.
+     사용자가 새로고침한 경우에만 위의 refresh 분기로 현재 화면 값을 다시 저장한다.
+     백그라운드 복귀·커버 이동 중에는 화면 높이를 다시 건드리지 않는다. */
   if(!isInternalNoEffectReturn){
-    if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ afterStableFirstPaint(function(){ window.oaiRefreshCoverViewportHeight(); releaseBooting(); }); }, {once:true});
-    else afterStableFirstPaint(function(){ window.oaiRefreshCoverViewportHeight(); releaseBooting(); });
-    window.addEventListener('load', function(){ afterStableFirstPaint(function(){ window.oaiRefreshCoverViewportHeight(); releaseBooting(); }); }, {once:true});
+    if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ afterStableFirstPaint(releaseBooting); }, {once:true});
+    else afterStableFirstPaint(releaseBooting);
+    window.addEventListener('load', function(){ afterStableFirstPaint(releaseBooting); }, {once:true});
   }
 })();
 </script>
@@ -968,7 +956,7 @@ window.APP_CONFIG = {
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style id="oai-initial-bg">html,body{margin:0;width:100%;height:100%;min-height:100%;background:#f5f0e8;overflow:hidden;color-scheme:light;}#cover{background:#f5f0e8;min-height:100%;}#app{background:#f8f6f2;display:none;}</style>
-<link rel="stylesheet" href="style.css?v=V8-1-14-784">
+<link rel="stylesheet" href="style.css?v=V8-1-14-785">
 <link rel="stylesheet" href="css/module-common.css?v=V8-1-14-693">
 <link rel="stylesheet" href="css/prayer.css?v=V8-1-14-693">
 <link rel="stylesheet" href="css/web.css?v=V8-1-14-693">
@@ -1268,7 +1256,7 @@ window.APP_CONFIG = {
 </div>
 
 <script src="js/myfaith.js?v=V8-1-14-693"></script>
-<script src="app.js?v=V8-1-14-784"></script>
+<script src="app.js?v=V8-1-14-785"></script>
 <script src="js/cover-common.js?v=V8-1-14-693"></script>
 <div id="oai-category-entry-veil" aria-hidden="true"></div>
 <div id="app"><div id="tabbar"><button id="tab-btn-nearby" class="tab-btn" data-tab="nearby"><span class="tab-icon">📍</span><span id="tab-nearby-lbl">내주변</span></button><button id="tab-btn-list" class="tab-btn" data-tab="list"><span class="tab-icon">📋</span><span id="tab-list-lbl">목록</span></button><button id="tab-btn-region" class="tab-btn" data-tab="region"><span class="tab-icon">🔍</span>지역검색
@@ -1394,7 +1382,7 @@ window.APP_CONFIG = {
 <script src="js/route-web-guards.js?v=V8-1-14-693"></script>
 
 
-<script src="js/back-controller.js?v=V8-1-14-784"></script>
+<script src="js/back-controller.js?v=V8-1-14-785"></script>
 <script>
 /* V8-1-12: 문의·건의에서 커버로 복귀한 직후, back-controller가 로드된 뒤 커버 뒤로가기 상태를 한 번 더 재등록한다. */
 (function(){

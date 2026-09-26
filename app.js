@@ -1015,6 +1015,10 @@ function oaiClearExternalNavigationState(opts){
       removeLongReturnVeil(0, true);
       clearBackgroundReturnIntroStuck(reason || 'short-return-no-op', true);
       scheduleShortReturnMapStabilize(reason || 'short-background-return');
+      try{ window.dispatchEvent(new CustomEvent('oai-short-background-return',{detail:{reason:reason||'short-background-return'}})); }catch(_e){}
+      /* 네이티브 앱은 resume 이벤트에서 위치를 다시 확인한다. 브라우저/PWA 복귀도
+         성당 GPS 자동 방문 기록이 같은 기준으로 동작하도록 한 번만 위치를 갱신한다. */
+      if(!isNativeAndroid()) setTimeout(function(){ try{ if(typeof window.oaiRefreshCurrentLocation==='function') window.oaiRefreshCurrentLocation({reason:'short-background-return',preserveMapCenter:true}); }catch(_e){} },420);
       try{
         /* V8-1-14-621: 한티가는길 내부 네비게이션 제거로 GPX follow 안정화 훅을 실행하지 않는다. */
       }catch(_e){}
@@ -3458,6 +3462,7 @@ function _maybeAutoParishVisit(lat,lng){
   document.getElementById('parish-auto-visit-title').textContent='축하합니다. '+best.name+' 방문이 등록되었습니다.';m.classList.add('show');if(_curInfoItem&&_curInfoItem.item===best)_renderInfoCardParishVisit(best);
 }
 try{setInterval(function(){_updateParishVisitButton();},400);}catch(_e){}
+try{window.addEventListener('oai-short-background-return',function(){setTimeout(function(){_updateParishVisitButton();},120);},{passive:true});}catch(_e){}
 
 function _setMassQuickReturn(on){
   try{
@@ -7585,14 +7590,10 @@ function goToCover(){
     _coverEl.style.pointerEvents='';
     _coverEl.scrollTop=0;
   }
-  /* 화면 등급은 그대로 두고, 돌아온 시점의 실제 표시 높이만 다시 반영한다.
-     하단 안내문이 브라우저 하단 밖으로 밀리지 않게 한다. */
-  try{
-    if(typeof window.oaiRefreshCoverViewportHeight === 'function'){
-      window.oaiRefreshCoverViewportHeight();
-      requestAnimationFrame(function(){ try{ window.oaiRefreshCoverViewportHeight(); }catch(_e){} });
-    }
-  }catch(e){ console.warn('[가톨릭길동무]', e); }
+  /* 장기 백그라운드 복귀로 커버에 돌아오면 성당 방문 화면의 보조 레이어도 함께 닫는다. */
+  try{ if(typeof _closeParishVisitEditor==='function') _closeParishVisitEditor({fromCover:true}); }catch(_e){}
+  try{ if(typeof _closeParishVisitDetail==='function') _closeParishVisitDetail({noResume:true,fromCover:true}); }catch(_e){}
+  try{ if(typeof _closeParishVisitBook==='function') _closeParishVisitBook({fromCover:true}); }catch(_e){}
   try{ if(typeof _resetCoverExitReady === 'function') _resetCoverExitReady(); }catch(e){ console.warn('[가톨릭길동무]', e); }
   try{ if(typeof _clearCoverExitArmed === 'function') _clearCoverExitArmed(); }catch(e){ console.warn('[가톨릭길동무]', e); }
   try{ if(typeof _clearHardCoverExitFlags === 'function') _clearHardCoverExitFlags('go-to-cover'); }catch(e){ console.warn('[가톨릭길동무]', e); }
