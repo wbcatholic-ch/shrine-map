@@ -2,7 +2,7 @@
 <html lang="ko" class="oai-font-global">
 <head>
 <script>
-  window.OAI_APP_BUILD_VERSION = 'V8-1-14-771';
+  window.OAI_APP_BUILD_VERSION = 'V8-1-14-772';
   window.APP_VERSION = window.OAI_APP_BUILD_VERSION;
 </script>
 
@@ -964,14 +964,14 @@ window.APP_CONFIG = {
 <link rel="stylesheet" href="css/myfaith.css?v=V8-1-14-693">
 <link rel="stylesheet" href="css/my-diocese.css?v=V8-1-14-693">
 <style id="oai-parish-visit-style">
-/* 성지 스탬프와 정확히 같은 도장·카드 배치를 쓰고, 글자와 색만 성당용으로 바꾼다. */
+/* 성지 카드와 같은 위치의 성당용 이중 도장. 바깥·안쪽 원 모두 교구색으로 통일한다. */
 .parish-visit-book .shrine-visit-card-badge{border-color:var(--parish-dio-color,#1a5276)!important;}
 .parish-visit-book .shrine-visit-card-badge.type-parish::after{background:var(--parish-dio-color,#1a5276)!important;border-color:var(--parish-dio-color,#1a5276)!important;}
-.parish-visit-book .shrine-visit-card-stamp,
-.parish-visit-book .shrine-visit-card-seal,
-.parish-visit-book .shrine-visit-card-seal::before,
-.parish-visit-book .shrine-visit-card-seal::after{color:var(--parish-dio-color,#1a5276)!important;border-color:var(--parish-dio-color,#1a5276)!important;}
+.parish-visit-book .shrine-visit-card-stamp{color:var(--parish-dio-color,#1a5276)!important;border-color:var(--parish-dio-color,#1a5276)!important;}
 .parish-visit-book .shrine-visit-card-badge{position:relative!important;}
+.parish-visit-book .parish-visit-card-seal{position:absolute!important;right:18px!important;bottom:17px!important;display:flex!important;align-items:center!important;justify-content:center!important;width:42px!important;height:42px!important;box-sizing:border-box!important;border:2px solid var(--parish-dio-color,#1a5276)!important;border-radius:50%!important;background:#fff!important;color:var(--parish-dio-color,#1a5276)!important;font-size:13px!important;font-weight:900!important;line-height:1!important;letter-spacing:-1px!important;transform:rotate(-8deg)!important;z-index:1!important;}
+.parish-visit-book .parish-visit-card-seal::before{content:""!important;position:absolute!important;inset:4px!important;border:1px dashed var(--parish-dio-color,#1a5276)!important;border-radius:50%!important;pointer-events:none!important;}
+.parish-visit-book .parish-visit-card-seal i{position:relative!important;z-index:1!important;font:inherit!important;font-style:normal!important;}
 /* 나의 신앙생활 안 성당 자동 방문 기록 설정 */
 .oai-parish-auto-visit-setting{margin:18px 0 4px;padding:16px 17px;border:1px solid #d9d2c5;border-radius:16px;background:#fffaf0;box-shadow:0 3px 10px rgba(31,48,77,.07);}
 .oai-parish-auto-visit-setting h3{margin:0 0 6px;color:#15284a;font-size:17px;line-height:1.35;}
@@ -988,15 +988,15 @@ window.APP_CONFIG = {
 .oai-parish-visit-picker{display:none;position:fixed;inset:0;z-index:100000;}
 .oai-parish-visit-picker.show{display:block;}
 .oai-parish-picker-backdrop{position:absolute;inset:0;background:rgba(10,20,42,.42);}
-.oai-parish-picker-panel{position:absolute;top:50%;left:50%;width:min(640px,calc(100vw - 42px));max-height:min(76vh,760px);overflow:hidden;transform:translate(-50%,-50%);border-radius:22px;background:#fff;box-shadow:0 22px 58px rgba(0,0,0,.32);color:#15213a;}
-.oai-parish-picker-panel header{display:flex;align-items:center;justify-content:space-between;min-height:68px;padding:0 18px 0 23px;border-bottom:1px solid #e4e6ea;background:#fff;}
-.oai-parish-picker-panel header strong{font-size:22px;letter-spacing:-.04em;}
-.oai-parish-picker-panel header button{width:42px;height:42px;border:0;border-radius:50%;background:#f1f3f6;color:#26334b;font-size:31px;line-height:1;}
-.oai-parish-picker-list{max-height:calc(min(76vh,760px) - 68px);overflow:auto;background:#fff;}
-.oai-parish-picker-list button{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:62px;padding:0 24px;border:0;border-bottom:1px solid #e5e7eb;background:#fff;color:#1d2433;font:700 20px/1.2 inherit;text-align:left;}
+.oai-parish-picker-panel{position:absolute;top:50%;left:50%;width:min(640px,calc(100vw - 42px));max-height:min(80vh,800px);overflow:hidden;transform:translate(-50%,-50%);border-radius:22px;background:#fff;box-shadow:0 22px 58px rgba(0,0,0,.32);color:#15213a;}
+.oai-parish-picker-panel header{display:flex;align-items:center;justify-content:space-between;min-height:76px;padding:0 20px 0 25px;border-bottom:1px solid #e4e6ea;background:#fff;}
+.oai-parish-picker-panel header strong{font-size:26px;font-weight:900;letter-spacing:-.045em;}
+.oai-parish-picker-panel header button{width:46px;height:46px;border:0;border-radius:50%;background:#f1f3f6;color:#26334b;font-size:34px;line-height:1;}
+.oai-parish-picker-list{max-height:calc(min(80vh,800px) - 76px);overflow:auto;background:#fff;}
+.oai-parish-picker-list button{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:72px;padding:0 26px;border:0;border-bottom:1px solid #e0e4e9;background:#fff;color:#101827;font:800 23px/1.25 inherit;text-align:left;letter-spacing:-.035em;}
 .oai-parish-picker-list button.selected{background:#eef6ff;color:#1267ad;font-weight:900;}
-.oai-parish-picker-list button b{font-size:23px;}
-@media (min-width:700px){.parish-visit-book .oai-parish-picker-button{min-height:62px;font-size:22px;border-radius:15px;}.oai-parish-picker-panel{width:min(700px,calc(100vw - 80px));}.oai-parish-picker-panel header{min-height:78px;padding-left:28px;}.oai-parish-picker-panel header strong{font-size:25px;}.oai-parish-picker-list{max-height:calc(min(76vh,760px) - 78px);}.oai-parish-picker-list button{min-height:74px;padding:0 30px;font-size:23px;}}
+.oai-parish-picker-list button b{font-size:28px;line-height:1;}
+@media (min-width:700px){.parish-visit-book .oai-parish-picker-button{min-height:62px;font-size:22px;border-radius:15px;}.oai-parish-picker-panel{width:min(720px,calc(100vw - 80px));max-height:min(82vh,860px);}.oai-parish-picker-panel header{min-height:88px;padding:0 28px 0 32px;}.oai-parish-picker-panel header strong{font-size:30px;}.oai-parish-picker-panel header button{width:52px;height:52px;font-size:38px;}.oai-parish-picker-list{max-height:calc(min(82vh,860px) - 88px);}.oai-parish-picker-list button{min-height:84px;padding:0 34px;font-size:27px;}.oai-parish-picker-list button b{font-size:32px;}}
 </style>
 </head>
 <body>
