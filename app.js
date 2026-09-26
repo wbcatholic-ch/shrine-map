@@ -3337,8 +3337,9 @@ function _parishUnvisitedEntries(){const saved=_loadParishVisits();return (PARIS
 function _parishDios(){const s={};(PARISHES||[]).forEach(function(p){if(p&&p.diocese&&p.diocese!=='군종교구')s[p.diocese]=1;});const ordered=(typeof _DIOS!=='undefined'?_DIOS:[]).slice(1).map(function(x){return x[0]}).filter(function(d){return !!s[d]});const extra=Object.keys(s).filter(function(d){return ordered.indexOf(d)<0}).sort(function(a,b){return a.localeCompare(b,'ko')});return ordered.concat(extra);}
 /* 성당 방문 스탬프는 해당 성당이 지도에서 쓰는 교구 마커 색을 따른다. */
 function _parishVisitMarkerColor(p){const code=typeof _parishDioCodeOf==='function'?_parishDioCodeOf(p):'';const cfg=typeof _DIO_CFG!=='undefined'&&_DIO_CFG[code];return cfg&&cfg.c?cfg.c:'#1A5276';}
-function _parishVisitPickerButton(kind,label,disabled){return '<button type="button" class="oai-parish-picker-button"'+(disabled?' disabled':' data-pv-picker="'+kind+'"')+'>'+_visitHtmlEsc(label)+'<span aria-hidden="true">⌄</span></button>';}
-function _parishVisitDioceseField(){return '<div class="shrine-visit-filter-field oai-parish-dio-filter"><span>교구별</span>'+_parishVisitPickerButton('dio',_parishVisitDio==='all'?'전체':_parishVisitDio)+'</div>';}
+function _parishVisitSelect(kind,options,selected,disabled){return '<select data-pv-select="'+_visitHtmlEsc(kind)+'"'+(disabled?' disabled':'')+'>'+options.map(function(o){return '<option value="'+_visitHtmlEsc(o[0])+'"'+(String(o[0])===String(selected)?' selected':'')+'>'+_visitHtmlEsc(o[1])+'</option>';}).join('')+'</select>';}
+function _parishVisitPickerButton(kind,label,disabled){if(kind==='sort')return _parishVisitSelect('sort',[['recent','최근순'],['oldest','오래된순']],_parishVisitSort,disabled);return _parishVisitSelect('',[[label,label]],label,disabled);}
+function _parishVisitDioceseField(){return '<label class="shrine-visit-filter-field oai-parish-dio-filter"><span>교구별</span>'+_parishVisitSelect('dio',[['all','전체']].concat(_parishDios().map(function(d){return [d,d]})),_parishVisitDio)+'</label>';}
 function _parishVisitSettingsMini(){return '<button type="button" class="oai-parish-settings-mini" data-pv-settings="1" aria-label="나의 본당 자동 방문 기록 설정"><small>설정</small><b aria-hidden="true">⚙</b></button>';}
 function _ensureParishAutoVisitSettingsDialog(){
   const book=document.getElementById('parish-visit-book');if(!book)return null;
@@ -3464,6 +3465,7 @@ function _maybeAutoParishVisit(lat,lng){
   document.getElementById('parish-auto-visit-title').textContent='축하합니다. '+best.name+' 방문이 등록되었습니다.';m.classList.add('show');if(_curInfoItem&&_curInfoItem.item===best)_renderInfoCardParishVisit(best);
 }
 try{setInterval(function(){_updateParishVisitButton();},400);}catch(_e){}
+try{document.addEventListener('change',function(e){const t=e.target;if(!t||!t.matches||!t.matches('#parish-visit-book [data-pv-select]'))return;const kind=t.getAttribute('data-pv-select'),value=t.value;if(kind==='sort')_parishVisitSort=value==='oldest'?'oldest':'recent';else if(kind==='dio'){_parishVisitDio=value||'all';_parishUnvisitedLimit=80;}_renderParishVisitBook();});}catch(_e){}
 try{window.addEventListener('oai-short-background-return',function(){setTimeout(function(){_updateParishVisitButton();},120);},{passive:true});}catch(_e){}
 
 function _setMassQuickReturn(on){
