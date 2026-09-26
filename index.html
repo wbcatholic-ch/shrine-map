@@ -2,7 +2,7 @@
 <html lang="ko" class="oai-font-global">
 <head>
 <script>
-  window.OAI_APP_BUILD_VERSION = 'V8-1-14-779';
+  window.OAI_APP_BUILD_VERSION = 'V8-1-14-780';
   window.APP_VERSION = window.OAI_APP_BUILD_VERSION;
 </script>
 
@@ -968,7 +968,7 @@ window.APP_CONFIG = {
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style id="oai-initial-bg">html,body{margin:0;width:100%;height:100%;min-height:100%;background:#f5f0e8;overflow:hidden;color-scheme:light;}#cover{background:#f5f0e8;min-height:100%;}#app{background:#f8f6f2;display:none;}</style>
-<link rel="stylesheet" href="style.css?v=V8-1-14-710">
+<link rel="stylesheet" href="style.css?v=V8-1-14-780">
 <link rel="stylesheet" href="css/module-common.css?v=V8-1-14-693">
 <link rel="stylesheet" href="css/prayer.css?v=V8-1-14-693">
 <link rel="stylesheet" href="css/web.css?v=V8-1-14-693">
@@ -977,41 +977,6 @@ window.APP_CONFIG = {
 <link rel="stylesheet" href="css/cover-modals.css?v=V8-1-14-693">
 <link rel="stylesheet" href="css/myfaith.css?v=V8-1-14-693">
 <link rel="stylesheet" href="css/my-diocese.css?v=V8-1-14-693">
-<style id="oai-parish-visit-style">
-/* 성지 카드와 같은 위치의 성당용 이중 도장. 바깥·안쪽 원 모두 교구색으로 통일한다. */
-.parish-visit-book .shrine-visit-card-badge{border-color:var(--parish-dio-color,#1a5276)!important;}
-.parish-visit-book .shrine-visit-card-badge.type-parish::after{background:var(--parish-dio-color,#1a5276)!important;border-color:var(--parish-dio-color,#1a5276)!important;}
-.parish-visit-book .shrine-visit-card-stamp{color:var(--parish-dio-color,#1a5276)!important;border-color:var(--parish-dio-color,#1a5276)!important;}
-.parish-visit-book .shrine-visit-card-badge{position:relative!important;}
-.parish-visit-book .parish-visit-card-seal{position:absolute!important;right:18px!important;bottom:17px!important;display:flex!important;align-items:center!important;justify-content:center!important;width:42px!important;height:42px!important;box-sizing:border-box!important;border:2px solid var(--parish-dio-color,#1a5276)!important;border-radius:50%!important;background:#fff!important;color:var(--parish-dio-color,#1a5276)!important;font-size:13px!important;font-weight:900!important;line-height:1!important;letter-spacing:-1px!important;transform:rotate(-8deg)!important;z-index:1!important;}
-.parish-visit-book .parish-visit-card-seal::before{content:""!important;position:absolute!important;inset:4px!important;border:1px dashed var(--parish-dio-color,#1a5276)!important;border-radius:50%!important;pointer-events:none!important;}
-.parish-visit-book .parish-visit-card-seal i{position:relative!important;z-index:1!important;font:inherit!important;font-style:normal!important;}
-/* 나의 신앙생활 안 성당 자동 방문 기록 설정 */
-.oai-parish-auto-visit-setting{margin:18px 0 4px;padding:16px 17px;border:1px solid #d9d2c5;border-radius:16px;background:#fffaf0;box-shadow:0 3px 10px rgba(31,48,77,.07);}
-.oai-parish-auto-visit-setting h3{margin:0 0 6px;color:#15284a;font-size:17px;line-height:1.35;}
-.oai-parish-auto-visit-setting p{margin:0;color:#687386;font-size:13px;line-height:1.55;}
-.oai-parish-auto-visit-row{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:13px;padding-top:12px;border-top:1px solid #e8e0d3;cursor:pointer;}
-.oai-parish-auto-visit-row strong{color:#1b2d4d;font-size:15px;}
-.oai-parish-auto-visit-row input{width:46px;height:27px;margin:0;accent-color:#1b6cc6;cursor:pointer;}
-.parish-visit-book .shrine-visit-cards-tabs{grid-template-columns:repeat(3,minmax(0,1fr))!important;}
-.parish-visit-book .shrine-visit-load-more{display:block;width:calc(100% - 28px);margin:18px 14px 28px;padding:14px;border:1px solid #245a89;border-radius:12px;background:#fff;color:#1d527f;font-size:16px;font-weight:800;}
-/* 기기 기본 검은 선택창 대신, 폴드 큰 화면에서도 같은 흰색 선택창을 사용한다. */
-.parish-visit-book .oai-parish-picker-button{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:48px;padding:0 16px;border:2px solid #d2b679;border-radius:13px;background:#fff;color:#18223a;font:800 17px/1 inherit;text-align:left;box-sizing:border-box;box-shadow:0 2px 4px rgba(26,42,72,.08);}
-.parish-visit-book .oai-parish-picker-button span{font-size:21px;font-weight:700;line-height:1;transform:translateY(-2px);}
-.parish-visit-book .oai-parish-picker-button:disabled{background:#f7f7f5;color:#70747c;border-color:#d6d5d0;box-shadow:none;}
-.oai-parish-visit-picker{display:none;position:fixed;inset:0;z-index:100000;}
-.oai-parish-visit-picker.show{display:block;}
-.oai-parish-picker-backdrop{position:absolute;inset:0;background:rgba(10,20,42,.42);}
-.oai-parish-picker-panel{position:absolute;top:50%;left:50%;width:min(640px,calc(100vw - 42px));max-height:min(80vh,800px);overflow:hidden;transform:translate(-50%,-50%);border-radius:22px;background:#fff;box-shadow:0 22px 58px rgba(0,0,0,.32);color:#15213a;}
-.oai-parish-picker-panel header{display:flex;align-items:center;justify-content:space-between;min-height:82px;padding:0 22px 0 27px;border-bottom:1px solid #e4e6ea;background:#fff;}
-.oai-parish-picker-panel header strong{font-size:30px;font-weight:900;letter-spacing:-.05em;}
-.oai-parish-picker-panel header button{width:50px;height:50px;border:0;border-radius:50%;background:#f1f3f6;color:#26334b;font-size:38px;line-height:1;}
-.oai-parish-picker-list{max-height:calc(min(80vh,800px) - 82px);overflow:auto;background:#fff;}
-.oai-parish-picker-list button{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:82px;padding:0 28px;border:0;border-bottom:1px solid #e0e4e9;background:#fff;color:#101827;font:800 27px/1.25 inherit;text-align:left;letter-spacing:-.045em;}
-.oai-parish-picker-list button.selected{background:#eef6ff;color:#1267ad;font-weight:900;}
-.oai-parish-picker-list button b{font-size:32px;line-height:1;}
-@media (min-width:700px){.parish-visit-book .oai-parish-picker-button{min-height:62px;font-size:22px;border-radius:15px;}.oai-parish-picker-panel{width:min(720px,calc(100vw - 80px));max-height:min(82vh,860px);}.oai-parish-picker-panel header{min-height:88px;padding:0 28px 0 32px;}.oai-parish-picker-panel header strong{font-size:30px;}.oai-parish-picker-panel header button{width:52px;height:52px;font-size:38px;}.oai-parish-picker-list{max-height:calc(min(82vh,860px) - 88px);}.oai-parish-picker-list button{min-height:84px;padding:0 34px;font-size:27px;}.oai-parish-picker-list button b{font-size:32px;}}
-</style>
 </head>
 <body>
 <div id="missa-view" role="dialog" aria-modal="true" aria-label="매일미사">
@@ -1303,7 +1268,7 @@ window.APP_CONFIG = {
 </div>
 
 <script src="js/myfaith.js?v=V8-1-14-693"></script>
-<script src="app.js?v=V8-1-14-764"></script>
+<script src="app.js?v=V8-1-14-780"></script>
 <script src="js/cover-common.js?v=V8-1-14-693"></script>
 <div id="oai-category-entry-veil" aria-hidden="true"></div>
 <div id="app"><div id="tabbar"><button id="tab-btn-nearby" class="tab-btn" data-tab="nearby"><span class="tab-icon">📍</span><span id="tab-nearby-lbl">내주변</span></button><button id="tab-btn-list" class="tab-btn" data-tab="list"><span class="tab-icon">📋</span><span id="tab-list-lbl">목록</span></button><button id="tab-btn-region" class="tab-btn" data-tab="region"><span class="tab-icon">🔍</span>지역검색
@@ -1429,7 +1394,7 @@ window.APP_CONFIG = {
 <script src="js/route-web-guards.js?v=V8-1-14-693"></script>
 
 
-<script src="js/back-controller.js?v=V8-1-14-710"></script>
+<script src="js/back-controller.js?v=V8-1-14-780"></script>
 <script>
 /* V8-1-12: 문의·건의에서 커버로 복귀한 직후, back-controller가 로드된 뒤 커버 뒤로가기 상태를 한 번 더 재등록한다. */
 (function(){

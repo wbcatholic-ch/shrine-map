@@ -3383,19 +3383,16 @@ function _renderParishVisitBook(){
  const m=document.getElementById('parish-visit-book'),f=document.getElementById('pv-filters'),s=document.getElementById('pv-summary'),b=document.getElementById('pv-body');if(!m||!b)return;_closeParishVisitPicker();const all=_parishEntries(),total=(PARISHES||[]).filter(function(p){return p&&p.diocese!=='군종교구'}).length;
  m.querySelectorAll('[data-pv-tab]').forEach(function(x){x.classList.toggle('active',x.getAttribute('data-pv-tab')===_parishVisitTab)});
  if(_parishVisitTab==='stats'){f.classList.add('show');s.classList.add('stats-tab-hidden');f.innerHTML='<label class="shrine-visit-filter-field"><span>통계 기준</span>'+_parishVisitPickerButton('','교구별',true)+'</label><label class="shrine-visit-filter-field"><span>교구별</span>'+_parishVisitPickerButton('dio',_parishVisitDio==='all'?'전체':_parishVisitDio)+'</label>';const rows=_parishDios().map(function(d){const t=(PARISHES||[]).filter(function(p){return p&&p.diocese===d}).length,v=all.filter(function(x){return x.p.diocese===d}).length;return {d:d,t:t,v:v}}).filter(function(r){return r.t}).sort(function(a,b){return b.v/b.t-a.v/a.t||b.v-a.v});const scoped=_parishVisitDio==='all'?rows:rows.filter(function(r){return r.d===_parishVisitDio});const scopeTotal=scoped.reduce(function(n,r){return n+r.t;},0),scopeVisited=scoped.reduce(function(n,r){return n+r.v;},0),scopeName=_parishVisitDio==='all'?'전체':_parishVisitDio;b.innerHTML='<div class="shrine-visit-stats-view"><section class="shrine-visit-stat-total"><div class="shrine-visit-stat-kicker">'+_visitHtmlEsc(scopeName)+' 성당 방문 현황</div><strong>'+scopeVisited+'곳 방문 / '+scopeTotal+'곳</strong><span>'+(scopeTotal?Math.round(scopeVisited/scopeTotal*100):0)+'% 방문</span></section><section class="shrine-visit-stat-list"><div class="shrine-visit-stat-kicker">'+(_parishVisitDio==='all'?'교구별 성당 방문 현황':_visitHtmlEsc(scopeName)+' 성당 방문 현황')+'</div>'+scoped.map(function(r){return '<div class="shrine-visit-stat-row"><span class="shrine-visit-stat-name">'+_visitHtmlEsc(r.d)+'</span><strong>'+r.v+' / '+r.t+'</strong><em>'+Math.round(r.v/r.t*100)+'%</em></div>'}).join('')+'</section></div>';return;}
- if(_parishVisitTab==='unvisited'){f.classList.add('show');s.classList.remove('stats-tab-hidden');f.innerHTML='<label class="shrine-visit-filter-field"><span>정렬</span>'+_parishVisitPickerButton('','가나다순',true)+'</label><label class="shrine-visit-filter-field"><span>교구별</span>'+_parishVisitPickerButton('dio',_parishVisitDio==='all'?'전체':_parishVisitDio)+'</label>';const scopeTotal=_parishVisitDio==='all'?total:(PARISHES||[]).filter(function(p){return p&&p.diocese===_parishVisitDio}).length;const unseen=_parishUnvisitedEntries().filter(function(x){return _parishVisitDio==='all'||x.p.diocese===_parishVisitDio});s.innerHTML='<strong>'+unseen.length+'곳 미방문</strong><span>/ '+scopeTotal+'곳</span><b>ㅣ</b><span>'+(scopeTotal?Math.round(unseen.length/scopeTotal*100):0)+'% 미방문</span>';const shown=unseen.slice(0,_parishUnvisitedLimit);b.innerHTML='<div class="shrine-visit-card-grid">'+shown.map(function(x){const color=_parishVisitMarkerColor(x.p);return '<button type="button" class="shrine-visit-card-badge shrine-visit-card-unified unvisited type-parish" data-pv-card="'+x.i+'" style="--parish-dio-color:'+_visitHtmlEsc(color)+'"><span class="shrine-visit-card-stamp">성당</span><span class="shrine-visit-card-dio">'+_visitHtmlEsc(x.p.diocese||'')+'</span><strong>'+_visitHtmlEsc(x.p.name||'')+'</strong><span class="shrine-visit-card-count">미방문</span></button>'}).join('')+'</div>'+(unseen.length>shown.length?'<button type="button" class="shrine-visit-load-more" data-pv-more>더 보기 ('+(unseen.length-shown.length)+'곳)</button>':'');return;}
+ if(_parishVisitTab==='unvisited'){f.classList.add('show');s.classList.remove('stats-tab-hidden');f.innerHTML='<label class="shrine-visit-filter-field"><span>정렬</span>'+_parishVisitPickerButton('','가나다순',true)+'</label><label class="shrine-visit-filter-field"><span>교구별</span>'+_parishVisitPickerButton('dio',_parishVisitDio==='all'?'전체':_parishVisitDio)+'</label>';const scopeTotal=_parishVisitDio==='all'?total:(PARISHES||[]).filter(function(p){return p&&p.diocese===_parishVisitDio}).length;const unseen=_parishUnvisitedEntries().filter(function(x){return _parishVisitDio==='all'||x.p.diocese===_parishVisitDio});s.innerHTML='<strong>'+unseen.length+'곳 미방문</strong><span>/ '+scopeTotal+'곳</span><b>ㅣ</b><span>'+(scopeTotal?Math.round(unseen.length/scopeTotal*100):0)+'% 미방문</span>';const shown=unseen.slice(0,_parishUnvisitedLimit);b.innerHTML='<div class="shrine-visit-card-grid">'+shown.map(function(x){const color=_parishVisitMarkerColor(x.p);return '<button type="button" class="shrine-visit-card-badge shrine-visit-card-unified unvisited type-parish" data-pv-card="'+x.i+'" style="--visit-card-accent:'+_visitHtmlEsc(color)+'"><span class="shrine-visit-card-stamp">성당</span><span class="shrine-visit-card-dio">'+_visitHtmlEsc(x.p.diocese||'')+'</span><strong>'+_visitHtmlEsc(x.p.name||'')+'</strong><span class="shrine-visit-card-count">미방문</span></button>'}).join('')+'</div>'+(unseen.length>shown.length?'<button type="button" class="shrine-visit-load-more" data-pv-more>더 보기 ('+(unseen.length-shown.length)+'곳)</button>':'');return;}
  f.classList.add('show');s.classList.remove('stats-tab-hidden');f.innerHTML='<label class="shrine-visit-filter-field"><span>날짜별</span>'+_parishVisitPickerButton('sort',_parishVisitSort==='oldest'?'오래된순':'최근순')+'</label><label class="shrine-visit-filter-field"><span>교구별</span>'+_parishVisitPickerButton('dio',_parishVisitDio==='all'?'전체':_parishVisitDio)+'</label>';
  let a=all.filter(function(x){return _parishVisitDio==='all'||x.p.diocese===_parishVisitDio});const scopeTotal=_parishVisitDio==='all'?total:(PARISHES||[]).filter(function(p){return p&&p.diocese===_parishVisitDio}).length;if(_parishVisitSort==='oldest')a.sort(function(x,y){return _compareShrineVisitsOldest(x.v[0],y.v[0])});s.innerHTML='<strong>'+a.length+'곳 방문</strong><span>/ '+scopeTotal+'곳</span><b>ㅣ</b><span>'+(scopeTotal?Math.round(a.length/scopeTotal*100):0)+'% 방문</span>';
- b.innerHTML=a.length?'<div class="shrine-visit-card-grid">'+a.map(function(x){const color=_parishVisitMarkerColor(x.p);return '<button type="button" class="shrine-visit-card-badge shrine-visit-card-unified visited type-parish" data-pv-card="'+x.i+'" style="--parish-dio-color:'+_visitHtmlEsc(color)+'"><span class="shrine-visit-card-stamp">성당</span><span class="shrine-visit-card-dio">'+_visitHtmlEsc(x.p.diocese||'')+'</span><strong>'+_visitHtmlEsc(x.p.name||'')+'</strong><span class="shrine-visit-card-count">방문 '+x.n+'회</span><span class="parish-visit-card-seal" aria-hidden="true"><i>방문</i></span></button>'}).join('')+'</div>':'<div class="shrine-visit-cards-empty">아직 방문 등록한 성당이 없습니다.</div>';
+ b.innerHTML=a.length?'<div class="shrine-visit-card-grid">'+a.map(function(x){const color=_parishVisitMarkerColor(x.p);return '<button type="button" class="shrine-visit-card-badge shrine-visit-card-unified visited type-parish" data-pv-card="'+x.i+'" style="--visit-card-accent:'+_visitHtmlEsc(color)+'"><span class="shrine-visit-card-stamp">성당</span><span class="shrine-visit-card-dio">'+_visitHtmlEsc(x.p.diocese||'')+'</span><strong>'+_visitHtmlEsc(x.p.name||'')+'</strong><span class="shrine-visit-card-count">방문 '+x.n+'회</span><span class="parish-visit-card-seal" aria-hidden="true"><i>방문</i></span></button>'}).join('')+'</div>':'<div class="shrine-visit-cards-empty">아직 방문 등록한 성당이 없습니다.</div>';
 }
 function _openParishVisitBook(){
   if(_mode!=='parish')return;
   _closeParishVisitPicker();
   _parishVisitTab='visited';_parishVisitDio='all';_parishVisitSort='recent';
   const m=_ensureParishVisitBook();m.classList.add('show');m.setAttribute('aria-hidden','false');
-  if(!window.__OAI_PARISH_VISIT_HISTORY__){
-    try{history.pushState({oaiParishVisitBook:true},'',location.href);window.__OAI_PARISH_VISIT_HISTORY__=true;}catch(_e){}
-  }
   const body=document.getElementById('pv-body');if(body)body.innerHTML='<div class="shrine-visit-cards-empty">전국 성당 정보를 불러오는 중입니다.</div>';
   _updateParishVisitButton();
   /* 지도는 선택 교구만 가볍게 읽지만, 방문 기록은 전국 교구 전체를 기준으로 보여준다. */
@@ -3406,29 +3403,11 @@ function _openParishVisitBook(){
     if(body&&_parishVisitBookOpen())body.innerHTML='<div class="shrine-visit-cards-empty">성당 정보를 불러오지 못했습니다. 잠시 후 다시 열어 주세요.</div>';
   });
 }
-function _closeParishVisitBook(opts){
-  opts=opts||{};
+function _closeParishVisitBook(){
   _closeParishVisitPicker();
-  if(!opts.fromPopstate&&window.__OAI_PARISH_VISIT_HISTORY__){
-    window.__OAI_PARISH_VISIT_HISTORY__=false;
-    try{history.back();return;}catch(_e){}
-  }
   const m=document.getElementById('parish-visit-book');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}
-  window.__OAI_PARISH_VISIT_HISTORY__=false;_updateParishVisitButton();
+  _updateParishVisitButton();
 }
-/* 성지 스탬프북과 같은 우선순위로 성당 방문 화면을 한 단계씩 닫는다.
-   이 처리 뒤에 공통 뒤로가기 제어기가 다시 커버로 보내지 않도록 capture 단계에서 끝낸다. */
-window.addEventListener('popstate',function(e){
-  let handled=false;
-  if(document.getElementById('parish-visit-editor')?.classList.contains('show')){
-    _closeParishVisitEditor({fromPopstate:true});handled=true;
-  }else if(document.getElementById('parish-visit-detail')?.classList.contains('show')){
-    _closeParishVisitDetail({fromPopstate:true});handled=true;
-  }else if(_parishVisitBookOpen()){
-    _closeParishVisitBook({fromPopstate:true});handled=true;
-  }
-  if(handled&&e){e.stopImmediatePropagation();e.stopPropagation();}
-},true);
 function _ensureParishVisitDetail(){
   let v=document.getElementById('parish-visit-detail');if(v)return v;
   v=document.createElement('div');v.id='parish-visit-detail';v.className='shrine-visit-detail-view parish-visit-detail';v.setAttribute('aria-hidden','true');
@@ -3451,32 +3430,24 @@ function _openParishVisitDetail(p){
   _closeParishVisitPicker();
   const book=document.getElementById('parish-visit-book');if(book){book.classList.remove('show');book.setAttribute('aria-hidden','true');}
   const v=_ensureParishVisitDetail();window.__OAI_PV_DETAIL_ITEM__=p;window.__OAI_PV_DETAIL_FROM_BOOK__=true;_renderParishVisitDetail();v.classList.add('show');v.setAttribute('aria-hidden','false');
-  try{history.pushState({oaiParishVisitDetail:true},'',location.href);window.__OAI_PV_DETAIL_HISTORY__=true;}catch(_e){}
 }
 function _closeParishVisitDetail(opts){
   opts=opts||{};
-  /* 상세의 X와 휴대전화 뒤로가기는 항상 목록으로 돌아간다.
-     history.back()을 호출하면 Android WebView가 커버 화면까지 함께 처리할 수 있어
-     현재 history 항목을 목록 상태로 바꾼 뒤, 화면 전환은 직접 수행한다. */
+  /* 상세의 X와 뒤로가기는 방문 목록으로 돌아간다. */
   const v=document.getElementById('parish-visit-detail');if(v){v.classList.remove('show');v.setAttribute('aria-hidden','true');}
-  window.__OAI_PV_DETAIL_HISTORY__=false;
   if(window.__OAI_PV_DETAIL_FROM_BOOK__&&!opts.noResume){
     const book=_ensureParishVisitBook();_renderParishVisitBook();book.classList.add('show');book.setAttribute('aria-hidden','false');
-    if(!opts.fromPopstate){try{history.replaceState({oaiParishVisitBook:true},'',location.href);window.__OAI_PARISH_VISIT_HISTORY__=true;}catch(_e){}}
   }
   window.__OAI_PV_DETAIL_FROM_BOOK__=false;_updateParishVisitButton();
 }
 function _ensureParishVisitEditor(){let m=document.getElementById('parish-visit-editor');if(m)return m;m=document.createElement('div');m.id='parish-visit-editor';m.className='shrine-visit-modal';m.innerHTML='<div class="shrine-visit-backdrop" data-pve-close="1"></div><div class="shrine-visit-panel"><div class="shrine-visit-head"><div><div class="shrine-visit-kicker">방문한 성당</div><div id="pve-title" class="shrine-visit-title"></div></div><button type="button" class="shrine-visit-x" data-pve-close="1">×</button></div><label class="shrine-visit-label">방문 날짜<input id="pve-date" type="date"></label><div class="shrine-visit-actions"><button id="pve-save" type="button" class="shrine-visit-save">등록</button><button type="button" class="shrine-visit-cancel" data-pve-close="1">취소</button></div><div id="pve-list" class="shrine-visit-list"></div></div>';document.body.appendChild(m);m.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('[data-pve-close]')){_closeParishVisitEditor();return;}const d=e.target.closest&&e.target.closest('[data-pve-del]');if(d&&window.__OAI_PV_ITEM__){_deleteParishVisit(window.__OAI_PV_ITEM__,parseInt(d.getAttribute('data-pve-del'),10));_renderParishVisitEditor();_renderParishVisitBook();_renderInfoCardParishVisit(window.__OAI_PV_ITEM__);}});m.querySelector('#pve-save').addEventListener('click',function(){const p=window.__OAI_PV_ITEM__,date=document.getElementById('pve-date').value;if(p&&_addParishVisit(p,date,'manual')){_renderParishVisitEditor();_renderParishVisitBook();_renderInfoCardParishVisit(p);}});return m;}
 function _renderParishVisitEditor(){const p=window.__OAI_PV_ITEM__,l=document.getElementById('pve-list');if(!p||!l)return;const a=_parishVisits(p);l.innerHTML=a.length?'<div class="shrine-visit-list-title">방문 날짜 '+a.length+'회</div>'+a.map(function(v,i){return '<div class="shrine-visit-date-row'+(v.method==='gps'?' gps':'')+'"><span>'+_formatVisitDate(v.date)+'</span>'+(v.method==='gps'?'<em class="shrine-visit-gps-lock">GPS 등록</em>':'<button type="button" data-pve-del="'+i+'">삭제</button>')+'</div>'}).join(''):'<div class="shrine-visit-empty">아직 등록된 방문 날짜가 없습니다.</div>';}
-function _openParishVisitEditor(p){const m=_ensureParishVisitEditor();window.__OAI_PV_ITEM__=p;document.getElementById('pve-title').textContent=p.name||'';document.getElementById('pve-date').value=_todayISODate();_renderParishVisitEditor();m.classList.add('show');if(!window.__OAI_PV_EDITOR_HISTORY__){try{history.pushState({oaiParishVisitEditor:true},'',location.href);window.__OAI_PV_EDITOR_HISTORY__=true;}catch(_e){}}_updateParishVisitButton();}
+function _openParishVisitEditor(p){const m=_ensureParishVisitEditor();window.__OAI_PV_ITEM__=p;document.getElementById('pve-title').textContent=p.name||'';document.getElementById('pve-date').value=_todayISODate();_renderParishVisitEditor();m.classList.add('show');_updateParishVisitButton();}
 function _closeParishVisitEditor(opts){
   opts=opts||{};
-  /* 방문등록은 지도 인포카드 위에 열린 보조 창이다.
-     X와 휴대전화 뒤로가기는 브라우저 이력을 더 이동하지 않고 이 창만 닫아,
-     바로 아래의 해당 성당 인포카드를 그대로 보이게 한다. */
+  /* 방문등록은 지도 인포카드 위 보조 창이므로 닫으면 인포카드가 남는다. */
   const m=document.getElementById('parish-visit-editor');if(m)m.classList.remove('show');
-  if(!opts.fromPopstate&&window.__OAI_PV_EDITOR_HISTORY__){try{history.replaceState({oaiParishVisitEditorClosed:true},'',location.href);}catch(_e){}}
-  window.__OAI_PV_EDITOR_HISTORY__=false;_updateParishVisitButton();
+  _updateParishVisitButton();
 }
 function _renderInfoCardParishVisit(p){const b=document.getElementById('ic-type');if(!b||_mode!=='parish')return;const n=_parishVisitCount(p);b.textContent=n?'방문 '+n+'회':'방문등록';b.classList.add('shrine-pilgrim-register-badge');b.setAttribute('role','button');b.onclick=function(e){if(e){e.preventDefault();e.stopPropagation()}_openParishVisitEditor(p)};}
 function _maybeAutoParishVisit(lat,lng){
