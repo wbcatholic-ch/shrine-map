@@ -270,6 +270,22 @@
     /* 명례성지 자료/확대 사진은 아래 정보카드보다 먼저 한 단계씩 닫는다. */
     try{ if(typeof window._oaiMyeongryeBackHandle==='function' && window._oaiMyeongryeBackHandle()) return true; }catch(e){ console.warn('[가톨릭길동무]',e); }
 
+    /* 성당·성지 공통 선택창은 목록 화면을 닫기 전에 먼저 닫는다. */
+    el = $b('oai-visit-picker-dialog');
+    if(el && el.classList && el.classList.contains('show')){
+      if(typeof window._closeOaiVisitPicker === 'function') window._closeOaiVisitPicker();
+      else { el.classList.remove('show'); el.setAttribute('aria-hidden','true'); }
+      return true;
+    }
+
+    /* 성당 방문 기록 설정창도 한 단계로 닫는다. */
+    el = $b('oai-parish-auto-visit-dialog');
+    if(el && el.classList && el.classList.contains('show')){
+      if(typeof window._closeParishAutoVisitSettings === 'function') window._closeParishAutoVisitSettings();
+      else { el.classList.remove('show'); el.setAttribute('aria-hidden','true'); }
+      return true;
+    }
+
     /* 성당 방문은 이 공통 제어기만 뒤로가기를 처리한다.
        방문등록 → 인포카드, 상세 → 방문 목록, 방문 목록 → 지도 순서다. */
     el = $b('parish-visit-editor');
