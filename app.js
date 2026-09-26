@@ -3424,7 +3424,8 @@ function _renderParishVisitDetail(){
   const dates=visits.length?visits.map(function(v){return '<span class="shrine-visit-detail-date-chip">'+_visitHtmlEsc(_formatVisitDate(v.date))+'</span>';}).join(''):'<span class="shrine-visit-detail-empty-date">아직 등록된 방문 날짜가 없습니다.</span>';
   const tel=p.tel?'<a class="shrine-visit-detail-action detail-tel" href="tel:'+_visitHtmlEsc(String(p.tel).replace(/[^0-9+]/g,''))+'">📞 '+_visitHtmlEsc(p.tel)+'</a>':'';
   const hp=p.hp?'<a class="shrine-visit-detail-action detail-home" href="'+_visitHtmlEsc(p.hp)+'" target="_blank" rel="noopener">홈페이지</a>':'';
-  b.innerHTML='<section class="shrine-visit-detail-hero"><div class="shrine-visit-detail-hero-head"><div class="shrine-visit-detail-kicker">성당 방문 기록</div><button type="button" class="shrine-visit-detail-register" data-pvd-register="1">방문등록</button></div><div class="shrine-visit-detail-count">방문 '+n+'회</div><div class="shrine-visit-detail-recent">최근 방문일 '+_visitHtmlEsc(recent)+'</div><div class="shrine-visit-detail-date-title">방문 날짜</div><div class="shrine-visit-detail-date-list">'+dates+'</div></section><section class="shrine-visit-detail-info"><div class="shrine-visit-detail-info-head"><div class="shrine-visit-detail-section-title">성당 정보</div><button type="button" class="shrine-visit-detail-map-btn" data-pvd-map="1">지도에서 보기</button></div><div class="shrine-visit-detail-name">'+_visitHtmlEsc(p.name||'')+'</div><div class="shrine-visit-detail-row"><span>교구</span><strong>'+_visitHtmlEsc(p.diocese||'—')+'</strong></div><div class="shrine-visit-detail-row"><span>주소</span><strong>'+_visitHtmlEsc(p.addr||'—')+'</strong></div><div class="shrine-visit-detail-actions">'+tel+hp+'</div></section>';
+  const guide=p.url?'<a class="shrine-visit-detail-action detail-guide" href="'+_visitHtmlEsc(p.url)+'" target="_blank" rel="noopener">교구 성당 안내</a>':'';
+  b.innerHTML='<section class="shrine-visit-detail-hero"><div class="shrine-visit-detail-hero-head"><div class="shrine-visit-detail-kicker">성당 방문 기록</div><button type="button" class="shrine-visit-detail-register" data-pvd-register="1">방문등록</button></div><div class="shrine-visit-detail-count">방문 '+n+'회</div><div class="shrine-visit-detail-recent">최근 방문일 '+_visitHtmlEsc(recent)+'</div><div class="shrine-visit-detail-date-title">방문 날짜</div><div class="shrine-visit-detail-date-list">'+dates+'</div></section><section class="shrine-visit-detail-info"><div class="shrine-visit-detail-info-head"><div class="shrine-visit-detail-section-title">성당 정보</div><button type="button" class="shrine-visit-detail-map-btn" data-pvd-map="1">지도에서 보기</button></div><div class="shrine-visit-detail-name">'+_visitHtmlEsc(p.name||'')+'</div><div class="shrine-visit-detail-row"><span>교구</span><strong>'+_visitHtmlEsc(p.diocese||'—')+'</strong></div><div class="shrine-visit-detail-row"><span>주소</span><strong>'+_visitHtmlEsc(p.addr||'—')+'</strong></div><div class="shrine-visit-detail-actions">'+tel+hp+guide+'</div></section>';
 }
 function _openParishVisitDetail(p){
   _closeParishVisitPicker();
@@ -8603,7 +8604,7 @@ function _showInfoCard(item, idx){
     if(guideUrl){ guide.onclick=()=>openCoreExternalUrl(guideUrl,{infoIdx:idx, source:'shrine-detail'}); guide.textContent='성지 상세페이지'; _show(guide); guideShown=true;}
     else _hide(guide);
   } else {
-    if(item.url){ guide.onclick=()=>openCoreExternalUrl(item.url,{infoIdx:idx}); guide.textContent=(_mode==='retreat'?'피정의 집 상세페이지':'성당 상세페이지'); _show(guide); guideShown=true;}
+    if(item.url){ guide.onclick=()=>openCoreExternalUrl(item.url,{infoIdx:idx}); guide.textContent=(_mode==='retreat'?'피정의 집 상세페이지':'교구 성당 안내'); _show(guide); guideShown=true;}
     else _hide(guide);
   }
   const linksRow=$('ic-links-row');
