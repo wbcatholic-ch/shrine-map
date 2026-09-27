@@ -1733,7 +1733,7 @@
   function wfSave(){ try{ localStorage.setItem(WEB_FAV_KEY, JSON.stringify(webFavs)); }catch(e){ console.warn("[가톨릭길동무]", e); } }
   function wfHas(url){ return webFavs.includes(url); }
   function webDefaultCat(){
-    return webFavs && webFavs.length ? '⭐ 즐겨찾기' : '교구';
+    return (myShortcutSites().length || (webFavs && webFavs.length)) ? '⭐ 즐겨찾기' : '교구';
   }
   function wfToggle(url){
     const hadFavs = !!(webFavs && webFavs.length);
@@ -1755,6 +1755,23 @@
   function shortUrl(url){ return String(url||'').replace(/^https?:\/\//,'').replace(/\/$/,''); }
   function getMyDioceseName(){
     try{ return (localStorage.getItem(MY_DIOCESE_KEY) || '').trim(); }catch(e){ return ''; }
+  }
+  function getMyParish(){
+    try{ return typeof _configuredMyParish==='function' ? _configuredMyParish() : null; }catch(e){ return null; }
+  }
+  /* 설정값을 다시 입력시키지 않고, 이미 등록한 교구·본당의 공식 링크만 맨 위에 보여 준다. */
+  function myShortcutSites(){
+    const dioName=getMyDioceseName();
+    if(!dioName) return [];
+    const out=[];
+    const parish=getMyParish();
+    if(parish && parish.hp) out.push({myShortcut:true,ico:'⛪',name:parish.name+' 홈페이지',url:parish.hp,desc:'내 본당 공식 홈페이지'});
+    if(parish && parish.url && parish.url!==parish.hp) out.push({myShortcut:true,ico:'📍',name:parish.name+' 안내',url:parish.url,desc:'내 본당 안내 페이지'});
+    const dioHome=WEB_SITES.find(function(s){return s.cat==='교구' && s.name===dioName;});
+    if(dioHome) out.push({myShortcut:true,ico:'⛪',name:dioName+' 홈페이지',url:dioHome.url,desc:'내 교구 공식 홈페이지'});
+    const priest=WEB_SITES.find(function(s){return s.cat==='사제찾기' && String(s.op||'')===dioName;});
+    if(priest) out.push({myShortcut:true,ico:'✝',name:dioName+' 사제찾기',url:priest.url,desc:'내 교구 사제 찾기'});
+    return out;
   }
   function normalizeDioceseName(name){
     return String(name || '')
@@ -2087,7 +2104,7 @@
   function webOrderedCats(){
     const cats = [];
     const priority = ['교구', '사제찾기', '중앙기구'];
-    if(webFavs && webFavs.length) cats.push('⭐ 즐겨찾기');
+    if(myShortcutSites().length || (webFavs && webFavs.length)) cats.push('⭐ 즐겨찾기');
     priority.forEach(function(cat){
       if(!cats.includes(cat) && WEB_SITES.some(function(s){ return s.cat === cat; })) cats.push(cat);
     });
@@ -2098,7 +2115,7 @@
   function rebuildWebCats(){
     const wrap = ig$('web-cats');
     if(!wrap) return;
-    if(!(webFavs && webFavs.length) && webState.curCat === '⭐ 즐겨찾기') webState.curCat = '교구';
+    if(!(myShortcutSites().length || (webFavs && webFavs.length)) && webState.curCat === '⭐ 즐겨찾기') webState.curCat = '교구';
     webState.built = false;
     wrap.innerHTML = '';
     initWebModule();
@@ -2106,6 +2123,14 @@
 
   function initWebModule(){
     if(webState.built){
+      const needsFavTab=!!(myShortcutSites().length || (webFavs && webFavs.length));
+      const hasFavTab=!!ig$('web-cat_⭐ 즐겨찾기');
+      if(needsFavTab!==hasFavTab){
+        webState.built=false;
+        const oldWrap=ig$('web-cats'); if(oldWrap) oldWrap.innerHTML='';
+        initWebModule();
+        return;
+      }
       scheduleWebCatSync(webState.curCat||webDefaultCat());
       renderWebList();
       return;
@@ -2121,7 +2146,7 @@
       btn.dataset.webCat = c;
       btn.dataset.catColor = c; // CSS 선택자용
       btn.setAttribute('aria-pressed', c===webState.curCat ? 'true' : 'false');
-      const count = c==='⭐ 즐겨찾기' ? WEB_SITES.filter(s => wfHas(s.url)).length : WEB_SITES.filter(s => s.cat===c).length;
+      const count = c==='⭐ 즐겨찾기' ? myShortcutSites().length + WEB_SITES.filter(s => wfHas(s.url)).length : WEB_SITES.filter(s => s.cat===c).length;
       btn.innerHTML = esc(webCatLabel(c)) + (c==='⭐ 즐겨찾기' ? '' : '<span class="cnt">' + count + '</span>');
       btn.addEventListener('click', function(){ setWebCat(c); });
       wrap.appendChild(btn);
@@ -2188,22 +2213,30 @@
     const empty = ig$('web-empty');
     if(!wrap || !empty) return;
     applyWebCatState(webState.curCat || webDefaultCat());
-    Array.from(wrap.querySelectorAll('.web-card')).forEach(el => el.remove());
-    const filtered = sortWebItemsForMyDiocese(webState.curCat==='⭐ 즐겨찾기' ? WEB_SITES.filter(s => wfHas(s.url)) : WEB_SITES.filter(s => s.cat===webState.curCat));
+    Array.from(wrap.querySelectorAll('.web-card,.web-personal-section')).forEach(el => el.remove());
+    const personal=webState.curCat==='⭐ 즐겨찾기' ? myShortcutSites() : [];
+    const filtered = sortWebItemsForMyDiocese(webState.curCat==='⭐ 즐겨찾기' ? WEB_SITES.filter(function(s){return wfHas(s.url) && !personal.some(function(p){return p.url===s.url;});}) : WEB_SITES.filter(s => s.cat===webState.curCat));
     const countEl = ig$('web-count');
-    if(countEl) countEl.textContent = filtered.length + '개';
-    empty.classList.toggle('show', filtered.length===0);
+    if(countEl) countEl.textContent = (personal.length + filtered.length) + '개';
+    empty.classList.toggle('show', personal.length + filtered.length===0);
     const showProvHd = (webState.curCat === '교구');
     let lastProv = null;
-    filtered.forEach(s => {
+    if(personal.length){
+      const head=document.createElement('div');
+      head.className='web-personal-section';
+      head.textContent='나의 교구·본당 바로가기';
+      wrap.appendChild(head);
+    }
+    personal.concat(filtered).forEach(s => {
+      const isPersonal=!!s.myShortcut;
       const color = ((s.cat==='교구' || s.cat==='사제찾기') && s.prov)
         ? (WEB_PROV_COLORS[s.prov] || WEB_CAT_COLORS[s.cat] || '#555')
-        : (WEB_CAT_COLORS[s.cat] || '#555');
+        : (isPersonal ? '#8A6A2F' : (WEB_CAT_COLORS[s.cat] || '#555'));
       const bg = WEB_CAT_BG[s.cat] || '#f8f8f8';
       const isDioceseCard = (s.cat === '교구');
       const isPriestCard = (s.cat === '사제찾기');
       const isMyWebCard = isMyDioceseWebItem(s, getMyDioceseName());
-      const cardClass = 'web-card' + (s.cat==='사제찾기' ? ' web-priest-card' : '') + (isMyWebCard ? ' web-my-diocese-card' : '');
+      const cardClass = 'web-card' + (s.cat==='사제찾기' ? ' web-priest-card' : '') + (isMyWebCard ? ' web-my-diocese-card' : '') + (isPersonal ? ' web-my-shortcut-card' : '');
       const card = document.createElement('div');
       card.className = cardClass;
       if(isDioceseCard){
@@ -2212,8 +2245,8 @@
       if(isPriestCard){
         card.setAttribute('aria-label', s.name + ' 새창 열기');
       }
-      const badgeText = ((s.cat==='교구' || s.cat==='사제찾기') && s.prov) ? esc(s.prov) : esc(s.cat);
-      const topRight = (s.cat==='교구' || s.cat==='사제찾기') ? (isMyWebCard ? myDioceseBadgeHtml() : '') : esc(s.op);
+      const badgeText = isPersonal ? '내 설정' : (((s.cat==='교구' || s.cat==='사제찾기') && s.prov) ? esc(s.prov) : esc(s.cat));
+      const topRight = isPersonal ? '<span class="web-my-diocese-badge">바로가기</span>' : ((s.cat==='교구' || s.cat==='사제찾기') ? (isMyWebCard ? myDioceseBadgeHtml() : '') : esc(s.op));
       const cardName = webCardNameHtml(s);
       const cardDesc = s.cat==='교구' ? '교구 공식 홈페이지' : esc(s.desc);
       const icoStyle = s.cat==='사제찾기' ? 'color:' + color + ';font-weight:900;font-family:Georgia,serif' : '';
