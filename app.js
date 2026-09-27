@@ -13051,7 +13051,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   if(window.__OAI_UNIFIED_SETTINGS_V812__) return;
   window.__OAI_UNIFIED_SETTINGS_V812__=true;
   function modal(){ return document.getElementById('oai-settings-modal'); }
-  function configuredParish(){ try{return typeof _configuredMyParish==='function'?_configuredMyParish():null;}catch(_e){return null;} }
+  function configuredParish(){
+    try{
+      const current=typeof _configuredMyParish==='function'?_configuredMyParish():null;
+      if(current&&current.name) return current;
+      const saved=JSON.parse(localStorage.getItem('oai_my_parish')||'null');
+      if(saved&&saved.name) return saved;
+      const name=localStorage.getItem('oai_my_parish_name')||'';
+      const diocese=localStorage.getItem('oai_my_diocese_name')||'';
+      return name?{name:name,diocese:diocese}:null;
+    }catch(_e){return null;}
+  }
   function refresh(){
     const m=modal(); if(!m) return;
     const parish=configuredParish(), summary=document.getElementById('oai-settings-parish-summary'), input=document.getElementById('oai-settings-auto-visit');
@@ -13104,7 +13114,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   window.isOaiParishSetupOpen=function(){const m=setupModal();return !!(m&&m.classList.contains('show'));};
   window.closeOaiParishSetup=closeParishSetup;
   document.addEventListener('click',function(e){
-    const target=e.target&&e.target.closest?e.target.closest('[data-oai-settings-close],[data-oai-settings-edit],[data-oai-settings-guide],[data-oai-settings-refresh],[data-oai-parish-setup-close],[data-oai-parish-setup-cancel],[data-oai-parish-setup-save],[data-oai-setup-dio],[data-oai-setup-back],[data-oai-setup-parish],#cover-diocese-btn'):null;
+    const target=e.target&&e.target.closest?e.target.closest('[data-oai-settings-close],[data-oai-settings-edit],[data-oai-parish-setup-close],[data-oai-parish-setup-cancel],[data-oai-parish-setup-save],[data-oai-setup-dio],[data-oai-setup-back],[data-oai-setup-parish],#cover-diocese-btn'):null;
     if(!target) return;
     if(target.id==='cover-diocese-btn' && target.dataset.oaiNativeSettings==='1') return;
     if(target.id==='cover-diocese-btn'){
@@ -13112,8 +13122,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     if(target.hasAttribute('data-oai-settings-close')){e.preventDefault();close();return;}
     if(target.hasAttribute('data-oai-settings-edit')){e.preventDefault();openParishChooser();return;}
-    if(target.hasAttribute('data-oai-settings-guide')){e.preventDefault();close();try{if(window.openGuideManual)window.openGuideManual();}catch(_e){}return;}
-    if(target.hasAttribute('data-oai-settings-refresh')){e.preventDefault();close();try{if(typeof refreshAppFilesOnly==='function')refreshAppFilesOnly();}catch(_e){}return;}
     if(target.hasAttribute('data-oai-parish-setup-close')||target.hasAttribute('data-oai-parish-setup-cancel')){e.preventDefault();closeParishSetup();return;}
     if(target.hasAttribute('data-oai-parish-setup-save')){e.preventDefault();saveParishSetup();return;}
     if(target.hasAttribute('data-oai-setup-back')){e.preventDefault();parishSetup.dio='';parishSetup.parish=null;parishSetup.query='';renderParishSetup();return;}
