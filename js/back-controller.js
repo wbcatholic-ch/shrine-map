@@ -57,6 +57,9 @@
   }
   function hasOpenAppSurface(){
     try{
+      /* 설정과 본당 선택창도 앱 내부 화면이다. 이 둘을 제외하면 커버에서 바로 앱 종료 처리로 넘어간다. */
+      if(typeof window.isOaiParishSetupOpen === 'function' && window.isOaiParishSetupOpen()) return true;
+      if(typeof window.isOaiSettingsOpen === 'function' && window.isOaiSettingsOpen()) return true;
       var ids = ['diocese-view','missa-view','prayer-view','qna-view'];
       for(var i=0;i<ids.length;i++){
         var el = $b(ids[i]);
@@ -74,6 +77,8 @@
 
   function hasVisibleAppLayer(){
     try{
+      if(typeof window.isOaiParishSetupOpen === 'function' && window.isOaiParishSetupOpen()) return true;
+      if(typeof window.isOaiSettingsOpen === 'function' && window.isOaiSettingsOpen()) return true;
       var ids = ['diocese-view','missa-view','prayer-view','qna-view'];
       for(var i=0;i<ids.length;i++){
         var el = $b(ids[i]);
@@ -289,14 +294,6 @@
       if(typeof window.closeOaiSettings==='function') window.closeOaiSettings();
       return true;
     }}catch(e){ console.warn('[가톨릭길동무]',e); }
-
-    /* 이전 성당 방문 기록 설정창도 한 단계로 닫는다. */
-    el = $b('oai-parish-auto-visit-dialog');
-    if(el && el.classList && el.classList.contains('show')){
-      if(typeof window._closeParishAutoVisitSettings === 'function') window._closeParishAutoVisitSettings();
-      else { el.classList.remove('show'); el.setAttribute('aria-hidden','true'); }
-      return true;
-    }
 
     /* 성당 방문은 이 공통 제어기만 뒤로가기를 처리한다.
        방문등록 → 인포카드, 상세 → 방문 목록, 방문 목록 → 지도 순서다. */

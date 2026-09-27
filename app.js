@@ -3383,26 +3383,9 @@ function _parishVisitMarkerColor(p){const code=typeof _parishDioCodeOf==='functi
 function _parishVisitPickerButton(kind,label,disabled){return kind==='sort'?_oaiVisitPickerButton('parish-sort',_parishVisitSort==='oldest'?'오래된순':'최근순','날짜별 정렬',disabled):_oaiVisitPickerButton('',label,'',true);}
 function _parishVisitDioceseField(){const label=_parishVisitDio==='all'?'전체':_parishVisitDio;return '<label class="shrine-visit-filter-field oai-parish-dio-filter"><span>교구별</span>'+_oaiVisitPickerButton('parish-dio',label,'교구별 선택')+'</label>';}
 function _parishVisitSettingsMini(){return '<button type="button" class="oai-parish-settings-mini" data-pv-settings="1" aria-label="나의 본당 자동 방문 기록 설정"><small>설정</small><b aria-hidden="true">⚙</b></button>';}
-function _ensureParishAutoVisitSettingsDialog(){
-  const book=document.getElementById('parish-visit-book');if(!book)return null;
-  let dialog=book.querySelector('#oai-parish-auto-visit-dialog');
-  if(!dialog){
-    dialog=document.createElement('div');dialog.id='oai-parish-auto-visit-dialog';dialog.className='oai-parish-auto-visit-dialog';dialog.setAttribute('aria-hidden','true');
-    dialog.innerHTML='<div class="oai-parish-auto-visit-dialog-backdrop" data-pv-settings-close="1"></div><section class="oai-parish-auto-visit-dialog-panel" role="dialog" aria-modal="true" aria-label="나의 본당 자동 방문 기록 설정"><div class="oai-parish-auto-visit-dialog-head"><strong>방문 기록 설정</strong><button type="button" data-pv-settings-close="1" aria-label="닫기">×</button></div><div class="oai-parish-auto-visit-dialog-body"><strong id="oai-parish-auto-visit-title">나의 본당 자동 방문 기록</strong><p id="oai-parish-auto-visit-description"></p><label class="oai-parish-auto-visit-switch"><input type="checkbox" role="switch" aria-label="나의 본당 자동 방문 기록"><span aria-hidden="true"></span></label></div><button type="button" class="oai-parish-auto-visit-dialog-confirm" data-pv-settings-close="1">확인</button></section>';
-    book.appendChild(dialog);
-    const input=dialog.querySelector('input');if(input)input.addEventListener('change',function(){_setParishAutoVisitEnabled(!!input.checked);});
-  }
-  const myParish=_configuredMyParish(),input=dialog.querySelector('input'),title=dialog.querySelector('#oai-parish-auto-visit-title'),description=dialog.querySelector('#oai-parish-auto-visit-description');
-  if(myParish){if(title)title.textContent=myParish.name+' 자동 방문 기록';if(description)description.textContent='매주 다니는 '+myParish.name+'은 첫 방문만 자동 기록합니다.';if(input){input.disabled=false;input.checked=_isMyParishAutoVisitEnabled();input.setAttribute('aria-label',myParish.name+' 자동 방문 기록');}}
-  else{if(title)title.textContent='나의 본당 첫 방문 자동 기록';if(description)description.textContent='설정에서 본당을 먼저 선택해 주세요.';if(input){input.disabled=true;input.checked=false;}}
-  return dialog;
-}
 function _openParishAutoVisitSettings(){
-  /* 설정은 한 곳에서만 연다. 성당 스탬프북의 톱니는 별도 팝업을 만들지 않는다. */
-  if(typeof window.openOaiSettings==='function'){ window.openOaiSettings({fromParishBook:true}); return; }
-  const dialog=_ensureParishAutoVisitSettingsDialog();if(!dialog)return;_closeOaiVisitPicker();dialog.classList.add('show');dialog.setAttribute('aria-hidden','false');
+  if(typeof window.openOaiSettings==='function') window.openOaiSettings({fromParishBook:true});
 }
-function _closeParishAutoVisitSettings(){const dialog=document.getElementById('oai-parish-auto-visit-dialog');if(dialog){dialog.classList.remove('show');dialog.setAttribute('aria-hidden','true');}}
 function _ensureParishVisitButton(){
   let layer=document.getElementById('parish-visit-action-layer');
   if(!layer){layer=document.createElement('div');layer.id='parish-visit-action-layer';layer.setAttribute('aria-hidden','true');layer.innerHTML='<button id="parish-visit-floating-list-btn" type="button" class="shrine-visit-floating-list-btn" aria-label="내가 방문한 성당 열기">내가 방문한 성당</button>';}
@@ -3417,7 +3400,7 @@ function _updateParishVisitButton(){const layer=_ensureParishVisitButton();if(!l
 function _ensureParishVisitBook(){
   let m=document.getElementById('parish-visit-book');if(m)return m;m=document.createElement('div');m.id='parish-visit-book';m.className='shrine-visit-cards-modal parish-visit-book';m.setAttribute('aria-hidden','true');
   m.innerHTML='<div class="shrine-visit-cards-backdrop" data-pv-close="1"></div><div class="shrine-visit-cards-panel" role="dialog" aria-modal="true" aria-label="성당 방문 기록"><div class="module-bar shrine-visit-cards-head"><div class="module-bar-main"><div class="module-bar-ico">✝</div><div class="module-bar-txt"><div class="module-bar-title">성당 방문 스탬프북</div><div class="module-bar-sub">나의 성당 방문 기록</div></div></div><button class="module-close" type="button" data-pv-close="1" aria-label="닫기">×</button></div><div class="shrine-visit-cards-tabs"><button type="button" data-pv-tab="visited">방문한 성당</button><button type="button" data-pv-tab="unvisited">미방문 성당</button><button type="button" data-pv-tab="stats">통계</button></div><div id="pv-filters" class="shrine-visit-cards-filters"></div><div id="pv-summary" class="shrine-visit-cards-stats"></div><div id="pv-body" class="shrine-visit-cards-body"></div></div>';
-  document.body.appendChild(m);m.addEventListener('click',function(e){const t=e.target.closest&&e.target.closest('[data-pv-close],[data-pv-tab],[data-pv-card],[data-pv-more],[data-oai-visit-picker],[data-pv-settings],[data-pv-settings-close]');if(!t)return;if(t.hasAttribute('data-pv-settings-close')){_closeParishAutoVisitSettings();return;}if(t.hasAttribute('data-pv-settings')){_openParishAutoVisitSettings();return;}if(t.hasAttribute('data-oai-visit-picker')){_openOaiVisitPicker(t.getAttribute('data-oai-visit-picker')||'');return;}if(t.hasAttribute('data-pv-close')){_closeParishVisitBook();return;}if(t.hasAttribute('data-pv-tab')){const tab=t.getAttribute('data-pv-tab');_parishVisitTab=tab==='stats'?'stats':tab==='unvisited'?'unvisited':'visited';_parishUnvisitedLimit=80;_renderParishVisitBook();return;}if(t.hasAttribute('data-pv-more')){_parishUnvisitedLimit+=80;_renderParishVisitBook();return;}const p=PARISHES[parseInt(t.getAttribute('data-pv-card'),10)];if(p)_openParishVisitDetail(p);});return m;
+  document.body.appendChild(m);m.addEventListener('click',function(e){const t=e.target.closest&&e.target.closest('[data-pv-close],[data-pv-tab],[data-pv-card],[data-pv-more],[data-oai-visit-picker],[data-pv-settings]');if(!t)return;if(t.hasAttribute('data-pv-settings')){_openParishAutoVisitSettings();return;}if(t.hasAttribute('data-oai-visit-picker')){_openOaiVisitPicker(t.getAttribute('data-oai-visit-picker')||'');return;}if(t.hasAttribute('data-pv-close')){_closeParishVisitBook();return;}if(t.hasAttribute('data-pv-tab')){const tab=t.getAttribute('data-pv-tab');_parishVisitTab=tab==='stats'?'stats':tab==='unvisited'?'unvisited':'visited';_parishUnvisitedLimit=80;_renderParishVisitBook();return;}if(t.hasAttribute('data-pv-more')){_parishUnvisitedLimit+=80;_renderParishVisitBook();return;}const p=PARISHES[parseInt(t.getAttribute('data-pv-card'),10)];if(p)_openParishVisitDetail(p);});return m;
 }
 function _renderParishVisitBook(){
  const m=document.getElementById('parish-visit-book'),f=document.getElementById('pv-filters'),s=document.getElementById('pv-summary'),b=document.getElementById('pv-body');if(!m||!b)return;_closeOaiVisitPicker();const all=_parishEntries(),total=(PARISHES||[]).filter(function(p){return p&&p.diocese!=='군종교구'}).length;
@@ -3445,7 +3428,6 @@ function _openParishVisitBook(){
 }
 function _closeParishVisitBook(){
   _closeOaiVisitPicker();
-  _closeParishAutoVisitSettings();
   const m=document.getElementById('parish-visit-book');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}
   _updateParishVisitButton();
 }
@@ -4059,7 +4041,7 @@ window.addEventListener('focus', function(){
 if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(_tryResumeMassQuickSoon, 80); }, {once:true});
 else setTimeout(_tryResumeMassQuickSoon, 80);
 window.addEventListener('load', function(){ setTimeout(_tryResumeMassQuickSoon, 80); }, {once:true});
-try{ window.openFaithPortal=openFaithPortal; window._shouldMassQuickReturn=_shouldMassQuickReturn; window._shouldPrayerQuickReturn=_shouldPrayerQuickReturn; window._setPrayerQuickReturn=_setPrayerQuickReturn; window._clearMassQuickReturnForReload=_clearMassQuickReturnForReload; window._clearPrayerQuickReturn=_clearPrayerQuickReturn; window._returnToMassQuickMenu=_returnToMassQuickMenu; window._closePrayerAndReturn=_closePrayerAndReturn; window._resetCoverExitReady=_resetCoverExitReady; window._clearCoverExitArmed=_clearCoverExitArmed; window._clearHardCoverExitFlags=_clearHardCoverExitFlags; window._isCoverScreenVisible=_isCoverScreenVisible; window._isAppScreenActive=_isAppScreenActive; window._hasOpenAppSurface=_hasOpenAppSurface; window._ensureCoverBackTrap=_ensureCoverBackTrap; window._ensureAppBackTrap=_ensureAppBackTrap; window._resetAppBackTrap=_resetAppBackTrap; window._pushCoverOverlayBackTrap=_pushCoverOverlayBackTrap; window._hideMassQuickMenuOnly=_hideMassQuickMenuOnly; window._setPrayerPopupReturnSource=_setPrayerPopupReturnSource; window._isPrayerPopupReturnSource=_isPrayerPopupReturnSource; window._forceCoverAfterPrayerQuickPopup=_forceCoverAfterPrayerQuickPopup; window._resetCoverBackTrap=_resetCoverBackTrap; window._consumePrayerCoverNeedsFirstToast=_consumePrayerCoverNeedsFirstToast; window.openMassQuickMenu=openMassQuickMenu; window.closeMassQuickMenu=closeMassQuickMenu; window._openFaithTargetFromMassQuick=_openFaithTargetFromMassQuick; window._openFaithPortalFromMassQuick=_openFaithPortalFromMassQuick; window._setFaithReturnTarget=_setFaithReturnTarget; window._clearFaithReturnTarget=_clearFaithReturnTarget; window._shouldFaithReturnToMassQuick=_shouldFaithReturnToMassQuick; window._closeOaiVisitPicker=_closeOaiVisitPicker; window._closeParishAutoVisitSettings=_closeParishAutoVisitSettings; }catch(e){ console.warn('[가톨릭길동무]', e); }
+try{ window.openFaithPortal=openFaithPortal; window._shouldMassQuickReturn=_shouldMassQuickReturn; window._shouldPrayerQuickReturn=_shouldPrayerQuickReturn; window._setPrayerQuickReturn=_setPrayerQuickReturn; window._clearMassQuickReturnForReload=_clearMassQuickReturnForReload; window._clearPrayerQuickReturn=_clearPrayerQuickReturn; window._returnToMassQuickMenu=_returnToMassQuickMenu; window._closePrayerAndReturn=_closePrayerAndReturn; window._resetCoverExitReady=_resetCoverExitReady; window._clearCoverExitArmed=_clearCoverExitArmed; window._clearHardCoverExitFlags=_clearHardCoverExitFlags; window._isCoverScreenVisible=_isCoverScreenVisible; window._isAppScreenActive=_isAppScreenActive; window._hasOpenAppSurface=_hasOpenAppSurface; window._ensureCoverBackTrap=_ensureCoverBackTrap; window._resetAppBackTrap=_resetAppBackTrap; window._pushCoverOverlayBackTrap=_pushCoverOverlayBackTrap; window._hideMassQuickMenuOnly=_hideMassQuickMenuOnly; window._setPrayerPopupReturnSource=_setPrayerPopupReturnSource; window._isPrayerPopupReturnSource=_isPrayerPopupReturnSource; window._forceCoverAfterPrayerQuickPopup=_forceCoverAfterPrayerQuickPopup; window._resetCoverBackTrap=_resetCoverBackTrap; window._consumePrayerCoverNeedsFirstToast=_consumePrayerCoverNeedsFirstToast; window.openMassQuickMenu=openMassQuickMenu; window.closeMassQuickMenu=closeMassQuickMenu; window._openFaithTargetFromMassQuick=_openFaithTargetFromMassQuick; window._openFaithPortalFromMassQuick=_openFaithPortalFromMassQuick; window._setFaithReturnTarget=_setFaithReturnTarget; window._clearFaithReturnTarget=_clearFaithReturnTarget; window._shouldFaithReturnToMassQuick=_shouldFaithReturnToMassQuick; window._closeOaiVisitPicker=_closeOaiVisitPicker; }catch(e){ console.warn('[가톨릭길동무]', e); }
 
 function _performUnifiedRefreshReload(delayAfterPaint){
   var delay = Math.max(0, typeof delayAfterPaint === 'number' ? delayAfterPaint : 260);
@@ -12731,9 +12713,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     });
   })();
 
-  if (window.bindMyFaithLifePanel) window.bindMyFaithLifePanel(on);
-
-
   on('tab-btn-nearby', 'click', function() { toggleTab('nearby'); });
   on('tab-btn-list',   'click', function() { toggleTab('list'); });
   on('tab-btn-region', 'click', function() { toggleTab('region'); });
@@ -13051,6 +13030,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   if(window.__OAI_UNIFIED_SETTINGS_V812__) return;
   window.__OAI_UNIFIED_SETTINGS_V812__=true;
   function modal(){ return document.getElementById('oai-settings-modal'); }
+  function enforceCoverSettingsLabel(){
+    const button=document.getElementById('cover-diocese-btn');
+    const label=button&&button.querySelector('.diocese-btn-label');
+    if(button) button.setAttribute('aria-label','설정 열기');
+    if(label) label.textContent='설정';
+  }
   function configuredParish(){
     try{
       const current=typeof _configuredMyParish==='function'?_configuredMyParish():null;
@@ -13070,6 +13055,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function open(opts){
     const m=modal(); if(!m) return;
+    enforceCoverSettingsLabel();
     refresh();
     m.classList.add('show');m.setAttribute('aria-hidden','false');
     m.dataset.fromParishBook=opts&&opts.fromParishBook?'1':'';
@@ -13113,6 +13099,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   window.isOaiSettingsOpen=function(){const m=modal();return !!(m&&m.classList.contains('show'));};
   window.isOaiParishSetupOpen=function(){const m=setupModal();return !!(m&&m.classList.contains('show'));};
   window.closeOaiParishSetup=closeParishSetup;
+  enforceCoverSettingsLabel();
   document.addEventListener('click',function(e){
     const target=e.target&&e.target.closest?e.target.closest('[data-oai-settings-close],[data-oai-settings-edit],[data-oai-parish-setup-close],[data-oai-parish-setup-cancel],[data-oai-parish-setup-save],[data-oai-setup-dio],[data-oai-setup-back],[data-oai-setup-parish],#cover-diocese-btn'):null;
     if(!target) return;

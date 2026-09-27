@@ -1797,7 +1797,7 @@
     const parish=getMyParish();
     if(!parish) requestMyParishData(dioName);
     if(parish && parish.hp) out.push({myShortcut:true,ico:'⛪',name:parish.name+' 홈페이지',url:parish.hp,desc:'내 본당 공식 홈페이지'});
-    if(parish && parish.url && parish.url!==parish.hp) out.push({myShortcut:true,ico:'📍',name:parish.name+' 안내',url:parish.url,desc:'내 본당 안내 페이지'});
+    if(parish && parish.url && parish.url!==parish.hp) out.push({myShortcut:true,ico:'📍',name:dioName+' 성당 안내',url:parish.url,desc:parish.name+' 정보가 있는 교구 홈페이지'});
     const dioHome=WEB_SITES.find(function(s){return s.cat==='교구' && s.name===dioName;});
     if(dioHome) out.push({myShortcut:true,ico:'⛪',name:dioName+' 홈페이지',url:dioHome.url,desc:'내 교구 공식 홈페이지'});
     const priest=WEB_SITES.find(function(s){return s.cat==='사제찾기' && String(s.op||'')===dioName;});
