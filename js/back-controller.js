@@ -278,6 +278,12 @@
       return true;
     }
 
+    /* 교구·본당 선택은 설정 화면보다 먼저 닫는다. */
+    try{ if(typeof window.isOaiParishSetupOpen==='function' && window.isOaiParishSetupOpen()){
+      if(typeof window.closeOaiParishSetup==='function') window.closeOaiParishSetup();
+      return true;
+    }}catch(e){ console.warn('[가톨릭길동무]',e); }
+
     /* 통합 설정 화면도 한 단계로 닫는다. */
     try{ if(typeof window.isOaiSettingsOpen==='function' && window.isOaiSettingsOpen()){
       if(typeof window.closeOaiSettings==='function') window.closeOaiSettings();

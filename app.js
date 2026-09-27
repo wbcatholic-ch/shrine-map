@@ -13065,31 +13065,64 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     m.dataset.fromParishBook=opts&&opts.fromParishBook?'1':'';
   }
   function close(){const m=modal();if(!m)return;m.classList.remove('show');m.setAttribute('aria-hidden','true');m.dataset.fromParishBook='';}
-  function openExistingParishChooser(){
-    /* 기존 선택기를 재사용해야 이미 저장된 교구·본당 데이터와 충돌하지 않는다. */
-    close();
-    const b=document.getElementById('cover-diocese-btn');
-    if(!b) return;
-    b.dataset.oaiNativeSettings='1';
-    try{ b.click(); }finally{ setTimeout(function(){try{delete b.dataset.oaiNativeSettings;}catch(_e){}},0); }
+  const parishSetup={dio:'',parish:null,query:''};
+  function setupModal(){return document.getElementById('oai-parish-setup-modal');}
+  function closeParishSetup(){const m=setupModal();if(!m)return;m.classList.remove('show');m.setAttribute('aria-hidden','true');}
+  function renderParishSetup(){
+    const body=document.getElementById('oai-parish-setup-body'), sub=document.getElementById('oai-parish-setup-subtitle'), save=document.querySelector('[data-oai-parish-setup-save]');if(!body)return;
+    if(save)save.disabled=!parishSetup.parish;
+    if(!parishSetup.dio){
+      if(sub)sub.textContent='교구를 선택해 주세요.';
+      const dios=(typeof _DIOS!=='undefined'?_DIOS:[]).filter(function(x){return x&&x[0]!=='all';});
+      body.innerHTML='<div class="oai-parish-choice-list">'+dios.map(function(x){return '<button type="button" data-oai-setup-dio="'+_visitHtmlEsc(x[0])+'">'+_visitHtmlEsc(x[0])+'<b>›</b></button>';}).join('')+'</div>';
+      return;
+    }
+    if(sub)sub.textContent=parishSetup.dio+'에서 자주 가는 본당을 선택해 주세요.';
+    const list=(PARISHES||[]).filter(function(p){return p&&p.diocese===parishSetup.dio;}).filter(function(p){return !parishSetup.query||String(p.name||'').indexOf(parishSetup.query)>=0;}).sort(function(a,b){return String(a.name||'').localeCompare(String(b.name||''),'ko');});
+    body.innerHTML='<button type="button" class="oai-parish-back" data-oai-setup-back="1">‹ 교구 다시 선택</button><label class="oai-parish-search"><span>⌕</span><input id="oai-parish-setup-search" type="search" placeholder="본당 이름 검색" value="'+_visitHtmlEsc(parishSetup.query)+'" autocomplete="off"></label><div class="oai-parish-choice-list">'+list.map(function(p,i){const selected=parishSetup.parish&&_isSameParish(parishSetup.parish,p);return '<button type="button" class="'+(selected?'selected':'')+'" data-oai-setup-parish="'+i+'">'+_visitHtmlEsc(p.name)+'<small>'+_visitHtmlEsc(p.addr||'')+'</small>'+(selected?'<b>✓</b>':'')+'</button>';}).join('')+'</div>';
+    body.__oaiParishList=list;
+  }
+  function openParishChooser(keepChoice){
+    const m=setupModal();if(!m)return;
+    if(!keepChoice){const current=configuredParish();parishSetup.dio=(current&&current.diocese)||(typeof _getMyDioceseName==='function'?_getMyDioceseName():'');parishSetup.parish=current||null;parishSetup.query='';}
+    m.classList.add('show');m.setAttribute('aria-hidden','false');
+    if(parishSetup.dio && typeof _ensureParishDioceseDataLoaded==='function'){
+      const code=typeof _PARISH_DIO_CODE_MAP!=='undefined'?_PARISH_DIO_CODE_MAP[parishSetup.dio]:'';
+      if(code){document.getElementById('oai-parish-setup-body').innerHTML='<div class="oai-parish-loading">본당 목록을 불러오는 중입니다.</div>';_ensureParishDioceseDataLoaded(code).then(renderParishSetup).catch(renderParishSetup);return;}
+    }
+    renderParishSetup();
+  }
+  function saveParishSetup(){
+    const p=parishSetup.parish;if(!p)return;
+    try{localStorage.setItem('oai_my_diocese_name',p.diocese||parishSetup.dio);localStorage.setItem('oai_my_parish_name',p.name||'');localStorage.setItem('oai_my_parish',JSON.stringify({diocese:p.diocese||parishSetup.dio,name:p.name||''}));}catch(_e){}
+    closeParishSetup();refresh();
+    try{window.dispatchEvent(new CustomEvent('oai-my-parish-changed'));}catch(_e){}
   }
   window.openOaiSettings=open;
   window.closeOaiSettings=close;
   window.isOaiSettingsOpen=function(){const m=modal();return !!(m&&m.classList.contains('show'));};
+  window.isOaiParishSetupOpen=function(){const m=setupModal();return !!(m&&m.classList.contains('show'));};
+  window.closeOaiParishSetup=closeParishSetup;
   document.addEventListener('click',function(e){
-    const target=e.target&&e.target.closest?e.target.closest('[data-oai-settings-close],[data-oai-settings-edit],[data-oai-settings-guide],[data-oai-settings-refresh],#cover-diocese-btn'):null;
+    const target=e.target&&e.target.closest?e.target.closest('[data-oai-settings-close],[data-oai-settings-edit],[data-oai-settings-guide],[data-oai-settings-refresh],[data-oai-parish-setup-close],[data-oai-parish-setup-cancel],[data-oai-parish-setup-save],[data-oai-setup-dio],[data-oai-setup-back],[data-oai-setup-parish],#cover-diocese-btn'):null;
     if(!target) return;
     if(target.id==='cover-diocese-btn' && target.dataset.oaiNativeSettings==='1') return;
     if(target.id==='cover-diocese-btn'){
       e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();open({fromCover:true});return;
     }
     if(target.hasAttribute('data-oai-settings-close')){e.preventDefault();close();return;}
-    if(target.hasAttribute('data-oai-settings-edit')){e.preventDefault();openExistingParishChooser();return;}
+    if(target.hasAttribute('data-oai-settings-edit')){e.preventDefault();openParishChooser();return;}
     if(target.hasAttribute('data-oai-settings-guide')){e.preventDefault();close();try{if(window.openGuideManual)window.openGuideManual();}catch(_e){}return;}
     if(target.hasAttribute('data-oai-settings-refresh')){e.preventDefault();close();try{if(typeof refreshAppFilesOnly==='function')refreshAppFilesOnly();}catch(_e){}return;}
+    if(target.hasAttribute('data-oai-parish-setup-close')||target.hasAttribute('data-oai-parish-setup-cancel')){e.preventDefault();closeParishSetup();return;}
+    if(target.hasAttribute('data-oai-parish-setup-save')){e.preventDefault();saveParishSetup();return;}
+    if(target.hasAttribute('data-oai-setup-back')){e.preventDefault();parishSetup.dio='';parishSetup.parish=null;parishSetup.query='';renderParishSetup();return;}
+    if(target.hasAttribute('data-oai-setup-dio')){e.preventDefault();parishSetup.dio=target.getAttribute('data-oai-setup-dio')||'';parishSetup.parish=null;parishSetup.query='';openParishChooser(true);return;}
+    if(target.hasAttribute('data-oai-setup-parish')){e.preventDefault();const body=document.getElementById('oai-parish-setup-body'),list=body&&body.__oaiParishList||[],p=list[parseInt(target.getAttribute('data-oai-setup-parish'),10)];if(p){parishSetup.parish=p;renderParishSetup();}return;}
   },true);
   document.addEventListener('change',function(e){
     if(e.target&&e.target.id==='oai-settings-auto-visit'&&!e.target.disabled){_setParishAutoVisitEnabled(!!e.target.checked);}
   },true);
+  document.addEventListener('input',function(e){if(e.target&&e.target.id==='oai-parish-setup-search'){parishSetup.query=String(e.target.value||'').trim();renderParishSetup();}},true);
   document.addEventListener('keydown',function(e){if(e.key==='Escape'&&window.isOaiSettingsOpen())close();});
 })();

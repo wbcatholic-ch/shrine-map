@@ -1759,12 +1759,43 @@
   function getMyParish(){
     try{ return typeof _configuredMyParish==='function' ? _configuredMyParish() : null; }catch(e){ return null; }
   }
+  function storedMyParishName(){
+    const keys=['oai_my_parish_name','oai_my_parish','my_parish_name','my_parish','oai_my_church_name','oai_my_church'];
+    try{
+      for(let i=0;i<keys.length;i++){
+        const value=localStorage.getItem(keys[i]); if(!value) continue;
+        try{ const item=JSON.parse(value); const name=item && (item.name||item.parish||item.parishName||item.church||item.churchName); if(name) return String(name).trim(); }catch(_e){}
+        if(String(value).trim()) return String(value).trim();
+      }
+      for(let i=0;i<localStorage.length;i++){
+        const key=String(localStorage.key(i)||'');
+        if(!/(?:my.*(?:parish|church|faith)|(?:parish|church).*(?:my|setting)|본당)/i.test(key)) continue;
+        const value=localStorage.getItem(key); if(!value) continue;
+        try{ const item=JSON.parse(value); const name=item && (item.name||item.parish||item.parishName||item.church||item.churchName); if(name) return String(name).trim(); }catch(_e){}
+      }
+    }catch(e){}
+    return '';
+  }
+  let myParishLoadRequested=false;
+  function requestMyParishData(dioName){
+    if(myParishLoadRequested || !storedMyParishName()) return;
+    try{
+      const code=(typeof _PARISH_DIO_CODE_MAP!=='undefined' && _PARISH_DIO_CODE_MAP[dioName]) || '';
+      if(!code || typeof _ensureParishDioceseDataLoaded!=='function') return;
+      myParishLoadRequested=true;
+      _ensureParishDioceseDataLoaded(code).then(function(){
+        myParishLoadRequested=false;
+        if(webState.built){ renderWebList(); }
+      }).catch(function(){ myParishLoadRequested=false; });
+    }catch(e){ myParishLoadRequested=false; }
+  }
   /* 설정값을 다시 입력시키지 않고, 이미 등록한 교구·본당의 공식 링크만 맨 위에 보여 준다. */
   function myShortcutSites(){
     const dioName=getMyDioceseName();
     if(!dioName) return [];
     const out=[];
     const parish=getMyParish();
+    if(!parish) requestMyParishData(dioName);
     if(parish && parish.hp) out.push({myShortcut:true,ico:'⛪',name:parish.name+' 홈페이지',url:parish.hp,desc:'내 본당 공식 홈페이지'});
     if(parish && parish.url && parish.url!==parish.hp) out.push({myShortcut:true,ico:'📍',name:parish.name+' 안내',url:parish.url,desc:'내 본당 안내 페이지'});
     const dioHome=WEB_SITES.find(function(s){return s.cat==='교구' && s.name===dioName;});
@@ -2236,7 +2267,7 @@
       const isDioceseCard = (s.cat === '교구');
       const isPriestCard = (s.cat === '사제찾기');
       const isMyWebCard = isMyDioceseWebItem(s, getMyDioceseName());
-      const cardClass = 'web-card' + (s.cat==='사제찾기' ? ' web-priest-card' : '') + (isMyWebCard ? ' web-my-diocese-card' : '') + (isPersonal ? ' web-my-shortcut-card' : '');
+      const cardClass = 'web-card' + (s.cat==='사제찾기' ? ' web-priest-card' : '') + ((isMyWebCard || isPersonal) ? ' web-my-diocese-card' : '') + (isPersonal ? ' web-my-shortcut-card' : '');
       const card = document.createElement('div');
       card.className = cardClass;
       if(isDioceseCard){

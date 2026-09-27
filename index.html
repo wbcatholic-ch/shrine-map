@@ -2,7 +2,7 @@
 <html lang="ko" class="oai-font-global">
 <head>
 <script>
-  window.OAI_APP_BUILD_VERSION = 'V8-1-14-813';
+  window.OAI_APP_BUILD_VERSION = 'V8-1-14-814';
   window.APP_VERSION = window.OAI_APP_BUILD_VERSION;
 </script>
 
@@ -956,7 +956,7 @@ window.APP_CONFIG = {
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style id="oai-initial-bg">html,body{margin:0;width:100%;height:100%;min-height:100%;background:#f5f0e8;overflow:hidden;color-scheme:light;}#cover{background:#f5f0e8;min-height:100%;}#app{background:#f8f6f2;display:none;}</style>
-<link rel="stylesheet" href="style.css?v=V8-1-14-813">
+<link rel="stylesheet" href="style.css?v=V8-1-14-814">
 <link rel="stylesheet" href="css/module-common.css?v=V8-1-14-693">
 <link rel="stylesheet" href="css/prayer.css?v=V8-1-14-693">
 <link rel="stylesheet" href="css/web.css?v=V8-1-14-693">
@@ -1223,7 +1223,7 @@ window.APP_CONFIG = {
 </div>
 
 <script src="js/myfaith.js?v=V8-1-14-693"></script>
-<script src="app.js?v=V8-1-14-813"></script>
+<script src="app.js?v=V8-1-14-814"></script>
 <script src="js/cover-common.js?v=V8-1-14-693"></script>
 <div id="oai-category-entry-veil" aria-hidden="true"></div>
 <div id="app"><div id="tabbar"><button id="tab-btn-nearby" class="tab-btn" data-tab="nearby"><span class="tab-icon">📍</span><span id="tab-nearby-lbl">내주변</span></button><button id="tab-btn-list" class="tab-btn" data-tab="list"><span class="tab-icon">📋</span><span id="tab-list-lbl">목록</span></button><button id="tab-btn-region" class="tab-btn" data-tab="region"><span class="tab-icon">🔍</span>지역검색
@@ -1274,8 +1274,14 @@ window.APP_CONFIG = {
     </div>
   </section>
 </div>
-
-
+<div id="oai-parish-setup-modal" class="oai-parish-setup-modal" aria-hidden="true">
+  <div class="oai-settings-backdrop" data-oai-parish-setup-close="1"></div>
+  <section class="oai-parish-setup-panel" role="dialog" aria-modal="true" aria-labelledby="oai-parish-setup-title">
+    <header class="oai-settings-head"><div><h2 id="oai-parish-setup-title">내 교구·본당</h2><p id="oai-parish-setup-subtitle">교구를 선택해 주세요.</p></div><button type="button" data-oai-parish-setup-close="1" aria-label="교구·본당 설정 닫기">×</button></header>
+    <div id="oai-parish-setup-body" class="oai-parish-setup-body"></div>
+    <footer class="oai-parish-setup-actions"><button type="button" data-oai-parish-setup-cancel="1">취소</button><button type="button" data-oai-parish-setup-save="1" disabled>확인</button></footer>
+  </section>
+</div>
 <div id="web-view" role="dialog" aria-modal="true" aria-label="가톨릭 웹사이트" class="module-view">
   <div class="module-bar web">
     <div class="module-bar-main">
@@ -1336,7 +1342,7 @@ window.APP_CONFIG = {
     </div>
   </div>
 </div>
-<script src="web.js?v=V8-1-14-813"></script>
+<script src="web.js?v=V8-1-14-814"></script>
 
 <div id="qna-view" role="dialog" aria-modal="true" aria-label="문의·건의" class="module-view">
   <div class="module-bar qna">
@@ -1360,7 +1366,7 @@ window.APP_CONFIG = {
 <script src="js/route-web-guards.js?v=V8-1-14-693"></script>
 
 
-<script src="js/back-controller.js?v=V8-1-14-813"></script>
+<script src="js/back-controller.js?v=V8-1-14-814"></script>
 <script>
 /* V8-1-12: 문의·건의에서 커버로 복귀한 직후, back-controller가 로드된 뒤 커버 뒤로가기 상태를 한 번 더 재등록한다. */
 (function(){
