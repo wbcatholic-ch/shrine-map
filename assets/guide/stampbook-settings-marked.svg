@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 690 1536" role="img" aria-label="스탬프북 설정 아이콘 위치 표시">
+  <image href="stampbook.jpg" x="0" y="0" width="690" height="1536"/>
+  <circle cx="633" cy="300" r="38" fill="#e34b3c" stroke="#fff" stroke-width="8"/>
+  <text x="633" y="313" text-anchor="middle" font-family="Arial, sans-serif" font-size="35" font-weight="800" fill="#fff">1</text>
+</svg>

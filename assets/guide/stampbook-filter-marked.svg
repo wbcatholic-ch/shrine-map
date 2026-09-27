@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 690 1536" role="img" aria-label="스탬프북 날짜별 필터 위치 표시">
+  <image href="stampbook.jpg" x="0" y="0" width="690" height="1536"/>
+  <circle cx="137" cy="304" r="36" fill="#e34b3c" stroke="#fff" stroke-width="8"/>
+  <text x="137" y="317" text-anchor="middle" font-family="Arial, sans-serif" font-size="35" font-weight="800" fill="#fff">1</text>
+</svg>

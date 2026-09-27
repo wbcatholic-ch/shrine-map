@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 690 1536" role="img" aria-label="나의 신앙생활 버튼 위치 표시">
+  <image href="cover.jpg" x="0" y="0" width="690" height="1536"/>
+  <circle cx="139" cy="1457" r="37" fill="#e34b3c" stroke="#fff" stroke-width="8"/>
+  <text x="139" y="1470" text-anchor="middle" font-family="Arial, sans-serif" font-size="36" font-weight="800" fill="#fff">1</text>
+</svg>

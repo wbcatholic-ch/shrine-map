@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 690 1536" role="img" aria-label="매일미사와 주요기도문 버튼 위치 표시">
+  <image href="cover.jpg" x="0" y="0" width="690" height="1536"/>
+  <circle cx="345" cy="443" r="42" fill="#e34b3c" stroke="#fff" stroke-width="9"/>
+  <text x="345" y="458" text-anchor="middle" font-family="Arial, sans-serif" font-size="42" font-weight="800" fill="#fff">1</text>
+</svg>
