@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="690" height="360" viewBox="0 0 690 360">
+  <rect width="690" height="360" fill="#f6f5f0"/>
+  <rect x="0" y="0" width="690" height="72" fill="#101a3d"/>
+  <text x="38" y="45" fill="#fff" font-size="28" font-weight="700" font-family="Noto Sans KR, sans-serif">주요 기도문</text>
+  <text x="639" y="47" fill="#fff" font-size="42" text-anchor="middle" font-family="sans-serif">×</text>
+  <rect x="28" y="92" width="150" height="43" rx="21" fill="#1f70b7"/>
+  <text x="103" y="120" fill="#fff" font-size="18" font-weight="700" text-anchor="middle" font-family="Noto Sans KR, sans-serif">주요기도문</text>
+  <rect x="191" y="92" width="130" height="43" rx="21" fill="#fff" stroke="#d0d8e4" stroke-width="2"/>
+  <text x="256" y="120" fill="#263752" font-size="18" font-weight="700" text-anchor="middle" font-family="Noto Sans KR, sans-serif">즐겨찾기</text>
+  <circle cx="256" cy="114" r="43" fill="none" stroke="#e24b3f" stroke-width="6"/>
+  <rect x="30" y="159" width="630" height="61" rx="12" fill="#fff" stroke="#dce2eb" stroke-width="2"/>
+  <text x="58" y="198" fill="#1a2a4a" font-size="25" font-weight="700" font-family="Noto Sans KR, sans-serif">주님의 기도</text>
+  <rect x="30" y="233" width="630" height="61" rx="12" fill="#fff" stroke="#dce2eb" stroke-width="2"/>
+  <text x="58" y="272" fill="#1a2a4a" font-size="25" font-weight="700" font-family="Noto Sans KR, sans-serif">성모송</text>
+  <text x="345" y="337" fill="#66748a" font-size="19" text-anchor="middle" font-family="Noto Sans KR, sans-serif">즐겨찾기에서 저장한 기도문을 바로 엽니다.</text>
+</svg>

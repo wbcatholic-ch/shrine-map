@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="690" height="360" viewBox="0 0 690 360">
+  <rect width="690" height="360" fill="#f6f5f0"/>
+  <rect x="0" y="0" width="690" height="72" fill="#101a3d"/>
+  <text x="38" y="45" fill="#fff" font-size="28" font-weight="700" font-family="Noto Sans KR, sans-serif">주요 기도문</text>
+  <text x="639" y="47" fill="#fff" font-size="42" text-anchor="middle" font-family="sans-serif">×</text>
+  <rect x="30" y="93" width="630" height="48" rx="12" fill="#fff" stroke="#d7dde8" stroke-width="2"/>
+  <text x="54" y="125" fill="#78849a" font-size="20" font-family="Noto Sans KR, sans-serif">기도문 검색</text>
+  <rect x="30" y="159" width="630" height="154" rx="16" fill="#fff" stroke="#dce2eb" stroke-width="2"/>
+  <rect x="30" y="159" width="630" height="58" rx="16" fill="#eef5ff"/>
+  <text x="58" y="198" fill="#1a2a4a" font-size="27" font-weight="700" font-family="Noto Sans KR, sans-serif">주님의 기도</text>
+  <text x="58" y="258" fill="#33435c" font-size="24" font-family="Noto Sans KR, sans-serif">하늘에 계신 우리 아버지</text>
+  <path d="M607 180 l9 19 21 2 -16 14 5 21 -19 -11 -19 11 5 -21 -16 -14 21 -2z" fill="#f2b541" stroke="#bd8420" stroke-width="2"/>
+  <circle cx="607" cy="208" r="48" fill="none" stroke="#e24b3f" stroke-width="6"/>
+  <rect x="32" y="324" width="626" height="17" rx="8" fill="#dce4ee"/>
+</svg>
