@@ -3394,10 +3394,14 @@ function _ensureParishAutoVisitSettingsDialog(){
   }
   const myParish=_configuredMyParish(),input=dialog.querySelector('input'),title=dialog.querySelector('#oai-parish-auto-visit-title'),description=dialog.querySelector('#oai-parish-auto-visit-description');
   if(myParish){if(title)title.textContent=myParish.name+' 자동 방문 기록';if(description)description.textContent='매주 다니는 '+myParish.name+'은 첫 방문만 자동 기록합니다.';if(input){input.disabled=false;input.checked=_isMyParishAutoVisitEnabled();input.setAttribute('aria-label',myParish.name+' 자동 방문 기록');}}
-  else{if(title)title.textContent='나의 본당 자동 방문 기록';if(description)description.textContent='나의 신앙생활에서 본당을 먼저 설정해 주세요.';if(input){input.disabled=true;input.checked=false;}}
+  else{if(title)title.textContent='나의 본당 첫 방문 자동 기록';if(description)description.textContent='설정에서 본당을 먼저 선택해 주세요.';if(input){input.disabled=true;input.checked=false;}}
   return dialog;
 }
-function _openParishAutoVisitSettings(){const dialog=_ensureParishAutoVisitSettingsDialog();if(!dialog)return;_closeOaiVisitPicker();dialog.classList.add('show');dialog.setAttribute('aria-hidden','false');}
+function _openParishAutoVisitSettings(){
+  /* 설정은 한 곳에서만 연다. 성당 스탬프북의 톱니는 별도 팝업을 만들지 않는다. */
+  if(typeof window.openOaiSettings==='function'){ window.openOaiSettings({fromParishBook:true}); return; }
+  const dialog=_ensureParishAutoVisitSettingsDialog();if(!dialog)return;_closeOaiVisitPicker();dialog.classList.add('show');dialog.setAttribute('aria-hidden','false');
+}
 function _closeParishAutoVisitSettings(){const dialog=document.getElementById('oai-parish-auto-visit-dialog');if(dialog){dialog.classList.remove('show');dialog.setAttribute('aria-hidden','true');}}
 function _ensureParishVisitButton(){
   let layer=document.getElementById('parish-visit-action-layer');
@@ -13039,4 +13043,53 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     if(document.readyState==='loading') document.addEventListener('DOMContentLoaded',run,{once:true}); else run();
   }catch(_e){}
+})();
+
+/* V8-1-14-812: 설정은 첫 화면과 성당 스탬프북에서 같은 화면으로 연다.
+   기존 교구·본당 선택 화면은 데이터 호환을 위해 그대로 사용하고, 진입점만 하나로 모은다. */
+(function installOaiUnifiedSettings(){
+  if(window.__OAI_UNIFIED_SETTINGS_V812__) return;
+  window.__OAI_UNIFIED_SETTINGS_V812__=true;
+  function modal(){ return document.getElementById('oai-settings-modal'); }
+  function configuredParish(){ try{return typeof _configuredMyParish==='function'?_configuredMyParish():null;}catch(_e){return null;} }
+  function refresh(){
+    const m=modal(); if(!m) return;
+    const parish=configuredParish(), summary=document.getElementById('oai-settings-parish-summary'), input=document.getElementById('oai-settings-auto-visit');
+    if(summary) summary.textContent=parish ? ((parish.diocese||'')+' · '+(parish.name||'')) : '교구와 본당을 설정해 주세요';
+    if(input){ input.disabled=!parish; input.checked=parish ? _isMyParishAutoVisitEnabled() : false; }
+  }
+  function open(opts){
+    const m=modal(); if(!m) return;
+    refresh();
+    m.classList.add('show');m.setAttribute('aria-hidden','false');
+    m.dataset.fromParishBook=opts&&opts.fromParishBook?'1':'';
+  }
+  function close(){const m=modal();if(!m)return;m.classList.remove('show');m.setAttribute('aria-hidden','true');m.dataset.fromParishBook='';}
+  function openExistingParishChooser(){
+    /* 기존 선택기를 재사용해야 이미 저장된 교구·본당 데이터와 충돌하지 않는다. */
+    close();
+    const b=document.getElementById('cover-diocese-btn');
+    if(!b) return;
+    b.dataset.oaiNativeSettings='1';
+    try{ b.click(); }finally{ setTimeout(function(){try{delete b.dataset.oaiNativeSettings;}catch(_e){}},0); }
+  }
+  window.openOaiSettings=open;
+  window.closeOaiSettings=close;
+  window.isOaiSettingsOpen=function(){const m=modal();return !!(m&&m.classList.contains('show'));};
+  document.addEventListener('click',function(e){
+    const target=e.target&&e.target.closest?e.target.closest('[data-oai-settings-close],[data-oai-settings-edit],[data-oai-settings-guide],[data-oai-settings-refresh],#cover-diocese-btn'):null;
+    if(!target) return;
+    if(target.id==='cover-diocese-btn' && target.dataset.oaiNativeSettings==='1') return;
+    if(target.id==='cover-diocese-btn'){
+      e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();open({fromCover:true});return;
+    }
+    if(target.hasAttribute('data-oai-settings-close')){e.preventDefault();close();return;}
+    if(target.hasAttribute('data-oai-settings-edit')){e.preventDefault();openExistingParishChooser();return;}
+    if(target.hasAttribute('data-oai-settings-guide')){e.preventDefault();close();try{if(window.openGuideManual)window.openGuideManual();}catch(_e){}return;}
+    if(target.hasAttribute('data-oai-settings-refresh')){e.preventDefault();close();try{if(typeof refreshAppFilesOnly==='function')refreshAppFilesOnly();}catch(_e){}return;}
+  },true);
+  document.addEventListener('change',function(e){
+    if(e.target&&e.target.id==='oai-settings-auto-visit'&&!e.target.disabled){_setParishAutoVisitEnabled(!!e.target.checked);}
+  },true);
+  document.addEventListener('keydown',function(e){if(e.key==='Escape'&&window.isOaiSettingsOpen())close();});
 })();

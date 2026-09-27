@@ -278,7 +278,13 @@
       return true;
     }
 
-    /* 성당 방문 기록 설정창도 한 단계로 닫는다. */
+    /* 통합 설정 화면도 한 단계로 닫는다. */
+    try{ if(typeof window.isOaiSettingsOpen==='function' && window.isOaiSettingsOpen()){
+      if(typeof window.closeOaiSettings==='function') window.closeOaiSettings();
+      return true;
+    }}catch(e){ console.warn('[가톨릭길동무]',e); }
+
+    /* 이전 성당 방문 기록 설정창도 한 단계로 닫는다. */
     el = $b('oai-parish-auto-visit-dialog');
     if(el && el.classList && el.classList.contains('show')){
       if(typeof window._closeParishAutoVisitSettings === 'function') window._closeParishAutoVisitSettings();
