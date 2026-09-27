@@ -2,7 +2,7 @@
 <html lang="ko" class="oai-font-global">
 <head>
 <script>
-  window.OAI_APP_BUILD_VERSION = 'V8-1-14-797';
+  window.OAI_APP_BUILD_VERSION = 'V8-1-14-798';
   window.APP_VERSION = window.OAI_APP_BUILD_VERSION;
 </script>
 
@@ -956,7 +956,7 @@ window.APP_CONFIG = {
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style id="oai-initial-bg">html,body{margin:0;width:100%;height:100%;min-height:100%;background:#f5f0e8;overflow:hidden;color-scheme:light;}#cover{background:#f5f0e8;min-height:100%;}#app{background:#f8f6f2;display:none;}</style>
-<link rel="stylesheet" href="style.css?v=V8-1-14-797">
+<link rel="stylesheet" href="style.css?v=V8-1-14-798">
 <link rel="stylesheet" href="css/module-common.css?v=V8-1-14-693">
 <link rel="stylesheet" href="css/prayer.css?v=V8-1-14-693">
 <link rel="stylesheet" href="css/web.css?v=V8-1-14-693">
@@ -1139,50 +1139,43 @@ window.APP_CONFIG = {
       <div class="guide-badge">가톨릭길동무</div>
       <h2 id="guide-manual-title">앱 사용법</h2>
     </div>
-    <p class="guide-lead">처음에는 아래 순서대로 한 번만 설정하면, 필요한 기능을 바로 찾을 수 있습니다.</p>
+    <p class="guide-lead">필요한 항목을 눌러 보세요. 처음 쓰는 분도 실제 화면을 보며 따라 할 수 있게 만들었습니다.</p>
     <div class="guide-card-list">
-      <section class="guide-card guide-card-main">
-        <div class="guide-card-head">
-          <div class="guide-icon">1</div>
-          <h3>먼저, 나의 신앙생활을 설정하세요</h3>
-        </div>
-        <p>첫 화면 아래의 <b>나의 신앙생활</b>을 눌러 나의 교구와 본당을 선택하세요. 본당 홈페이지·교구 안내를 더 빠르게 열 수 있고, 본당 첫 방문 자동 기록도 이 설정을 기준으로 합니다.</p>
+      <section class="guide-section guide-section-start">
+        <div class="guide-section-title"><span>01</span><div><strong>처음 시작하기</strong><small>교구와 본당을 먼저 설정하세요</small></div></div>
+        <img class="guide-shot guide-shot-cover" src="assets/guide/cover.jpg?v=V8-1-14-798" alt="가톨릭길동무 첫 화면 예시" loading="lazy">
+        <ol class="guide-steps"><li><b>나의 신앙생활</b>을 누릅니다.</li><li>나의 교구와 자주 다니는 <b>본당</b>을 선택합니다.</li><li>이후 본당 홈페이지·교구 안내와 본당 자동 방문 기능이 이 설정을 기준으로 동작합니다.</li></ol>
       </section>
-      <section class="guide-card">
-        <div class="guide-card-head"><div class="guide-icon">2</div><h3>성당·성지·피정의 집 찾기</h3></div>
-        <p>첫 화면에서 원하는 항목을 누른 뒤, 위쪽의 <b>내주변</b>·<b>찾기</b>·<b>지역검색</b>을 사용하세요. 장소를 누르면 주소, 전화, 홈페이지, 길찾기와 교구 안내를 볼 수 있습니다.</p>
+
+      <section class="guide-section">
+        <div class="guide-section-title"><span>02</span><div><strong>성당·성지·피정의 집 찾기</strong><small>지도에서 장소를 찾고 필요한 안내를 엽니다</small></div></div>
+        <div class="guide-tip"><b>내주변</b>은 현재 위치 근처 장소를, <b>찾기</b>는 이름·주소 검색을, <b>지역검색</b>은 지역별 목록을 보여줍니다.</div>
+        <ol class="guide-steps"><li>첫 화면에서 성당·성지·피정의 집 가운데 원하는 항목을 누릅니다.</li><li>마커 또는 목록의 장소를 누르면 정보카드가 열립니다.</li><li>전화·홈페이지·교구 안내·경로검색·카카오내비를 바로 이용할 수 있습니다.</li></ol>
       </section>
-      <section class="guide-card">
-        <div class="guide-card-head"><div class="guide-icon">3</div><h3>방문 기록 남기기</h3></div>
-        <p>성당 또는 성지 정보카드의 <b>방문등록</b>을 눌러 날짜를 선택하면 됩니다. 성당은 앱을 열어 위치를 확인했을 때 150m 안에 있으면 GPS로도 기록할 수 있습니다. 위치 권한이 꺼져 있으면 자동 기록은 되지 않습니다.</p>
+
+      <section class="guide-section guide-section-gps">
+        <div class="guide-section-title"><span>03</span><div><strong>GPS 방문등록</strong><small>실제 위치를 확인한 뒤 자동으로 기록됩니다</small></div></div>
+        <img class="guide-shot" src="assets/guide/parish-card.jpg?v=V8-1-14-798" alt="성당 정보카드와 방문등록 버튼 예시" loading="lazy">
+        <div class="guide-notice"><b>자동 등록이 되는 조건</b><ul><li>앱이 열려 있고 위치 권한을 허용한 상태여야 합니다.</li><li>GPS 또는 네트워크로 현재 위치가 확인되어야 합니다.</li><li><b>성당은 성당 화면에서 150m 이내</b>일 때 자동 등록을 시도합니다.</li><li>성지는 성지마다 설정된 방문 반경 안에 들어오면 자동 등록됩니다.</li></ul></div>
+        <p class="guide-paragraph">GPS는 실내·지하·건물 사이에서 오차가 커질 수 있습니다. 자동 등록이 되지 않으면 정보카드의 <b>방문등록</b>을 눌러 날짜를 직접 남기면 됩니다.</p>
+        <div class="guide-two-note"><div><b>성지</b><span>같은 성지는 하루에 한 번만 GPS 순례등록됩니다.</span></div><div><b>성당</b><span>일반 성당은 같은 날짜에 중복 등록되지 않습니다.</span></div></div>
       </section>
-      <section class="guide-card">
-        <div class="guide-card-head"><div class="guide-icon">4</div><h3>스탬프북 확인하기</h3></div>
-        <p>성당 지도에서는 <b>내가 방문한 성당</b>, 성지 지도에서는 <b>나의 성지순례 현황</b>을 누르세요. 방문·미방문 목록과 통계를 보고, 날짜·교구·유형을 눌러 원하는 기록만 골라 볼 수 있습니다.</p>
+
+      <section class="guide-section">
+        <div class="guide-section-title"><span>04</span><div><strong>스탬프북과 방문 기록</strong><small>방문한 곳·미방문 곳·통계를 한눈에 봅니다</small></div></div>
+        <img class="guide-shot" src="assets/guide/stampbook.jpg?v=V8-1-14-798" alt="성당 방문 스탬프북 예시" loading="lazy">
+        <ol class="guide-steps"><li>성당 지도에서는 <b>내가 방문한 성당</b>, 성지 지도에서는 <b>나의 성지순례 현황</b>을 누릅니다.</li><li><b>방문·미방문·통계</b> 탭에서 기록을 확인합니다.</li><li>날짜·교구·유형 버튼을 누르면 원하는 기록만 골라 볼 수 있습니다.</li><li>도장을 누르면 해당 성당 또는 성지의 상세 기록과 방문 날짜를 확인할 수 있습니다.</li></ol>
       </section>
-      <section class="guide-card">
-        <div class="guide-card-head"><div class="guide-icon">5</div><h3>매주 가는 본당 기록</h3></div>
-        <p>스탬프북의 <b>설정</b>에서 나의 본당 첫 방문 자동 기록을 켜거나 끌 수 있습니다. 켜면 나의 신앙생활에 설정한 본당은 첫 방문만 자동 기록해, 매주 같은 기록이 쌓이지 않게 합니다.</p>
+
+      <section class="guide-section guide-section-home">
+        <div class="guide-section-title"><span>05</span><div><strong>매주 가는 나의 본당</strong><small>같은 본당 기록이 계속 쌓이지 않게 합니다</small></div></div>
+        <img class="guide-shot" src="assets/guide/home-parish.jpg?v=V8-1-14-798" alt="나의 본당 자동 방문 기록 설정 예시" loading="lazy">
+        <ol class="guide-steps"><li>성당 스탬프북 오른쪽의 <b>설정</b>을 누릅니다.</li><li>나의 신앙생활에서 설정한 본당 이름이 표시됩니다.</li><li>자동 기록을 켜면 그 본당은 <b>첫 방문만</b> 자동 기록합니다. 매주 미사에 가도 같은 기록이 반복해서 쌓이지 않습니다.</li><li>자동 기록을 원하지 않으면 스위치를 끄면 됩니다.</li></ol>
       </section>
-      <section class="guide-card">
-        <div class="guide-card-head"><div class="guide-icon">6</div><h3>길찾기와 카카오내비</h3></div>
-        <p>장소 정보카드에서 <b>경로검색</b>을 누르면 길을 확인할 수 있습니다. 경유지가 필요하면 추가한 뒤, <b>카카오내비</b>로 이어서 안내를 받을 수 있습니다.</p>
-      </section>
-      <section class="guide-card">
-        <div class="guide-card-head"><div class="guide-icon">7</div><h3>미사·기도·성가·성경</h3></div>
-        <p>첫 화면 맨 위의 큰 십자가를 누르면 매일미사, 주요기도문, 가톨릭성가, 성경을 바로 열 수 있습니다. 읽다가 앱으로 돌아오면 이전 흐름을 이어서 사용할 수 있습니다.</p>
-      </section>
-      <section class="guide-card">
-        <div class="guide-card-head"><div class="guide-icon">8</div><h3>순례길·가톨릭 웹사이트·교구 안내</h3></div>
-        <p>첫 화면의 각 버튼에서 전국 순례길, 가톨릭 주요 웹사이트, 관구·교구 정보를 확인할 수 있습니다. 외부 사이트를 연 경우 휴대폰 뒤로가기로 앱에 돌아오세요.</p>
-      </section>
-      <section class="guide-card">
-        <div class="guide-card-head"><div class="guide-icon">9</div><h3>내 정보 백업·복원</h3></div>
-        <p>나의 신앙생활에서 백업 코드를 만들어 두면, 기기를 바꾸거나 앱을 다시 설치했을 때 설정과 기록을 되살릴 수 있습니다.</p>
-      </section>
-      <section class="guide-card">
-        <div class="guide-card-head"><div class="guide-icon">?</div><h3>화면이 이상할 때</h3></div>
-        <p>첫 화면 아래 <b>새로고침</b>을 짧게 누르세요. 업데이트가 계속 보이지 않거나 화면 문제가 반복되면 버튼을 길게 눌러 앱 파일을 새로 받아오세요.</p>
+
+      <section class="guide-section">
+        <div class="guide-section-title"><span>06</span><div><strong>그 밖의 기능</strong><small>신앙생활과 앱 관리에 필요한 메뉴입니다</small></div></div>
+        <div class="guide-feature-grid"><div><b>✝ 매일미사·기도·성가·성경</b><span>첫 화면의 큰 십자가에서 바로 엽니다.</span></div><div><b>🧭 길찾기·카카오내비</b><span>장소 정보카드에서 경로를 찾고 내비로 이어갑니다.</span></div><div><b>💾 백업·복원</b><span>나의 신앙생활에서 백업 코드를 만들어 보관합니다.</span></div><div><b>🔄 새로고침</b><span>화면이 이상하면 짧게, 업데이트가 안 보이면 길게 누릅니다.</span></div></div>
       </section>
     </div>
     <button id="guide-ok-btn" type="button" class="guide-primary guide-ok">확인</button>
@@ -1236,7 +1229,7 @@ window.APP_CONFIG = {
 </div>
 
 <script src="js/myfaith.js?v=V8-1-14-693"></script>
-<script src="app.js?v=V8-1-14-797"></script>
+<script src="app.js?v=V8-1-14-798"></script>
 <script src="js/cover-common.js?v=V8-1-14-693"></script>
 <div id="oai-category-entry-veil" aria-hidden="true"></div>
 <div id="app"><div id="tabbar"><button id="tab-btn-nearby" class="tab-btn" data-tab="nearby"><span class="tab-icon">📍</span><span id="tab-nearby-lbl">내주변</span></button><button id="tab-btn-list" class="tab-btn" data-tab="list"><span class="tab-icon">📋</span><span id="tab-list-lbl">목록</span></button><button id="tab-btn-region" class="tab-btn" data-tab="region"><span class="tab-icon">🔍</span>지역검색
@@ -1362,7 +1355,7 @@ window.APP_CONFIG = {
 <script src="js/route-web-guards.js?v=V8-1-14-693"></script>
 
 
-<script src="js/back-controller.js?v=V8-1-14-797"></script>
+<script src="js/back-controller.js?v=V8-1-14-798"></script>
 <script>
 /* V8-1-12: 문의·건의에서 커버로 복귀한 직후, back-controller가 로드된 뒤 커버 뒤로가기 상태를 한 번 더 재등록한다. */
 (function(){

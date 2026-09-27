@@ -1,5 +1,5 @@
-const CACHE_VERSION = 'catholic-way-V8-1-14-797';
-const ASSET_VERSION = 'V8-1-14-797';
+const CACHE_VERSION = 'catholic-way-V8-1-14-798';
+const ASSET_VERSION = 'V8-1-14-798';
 
 /* V8-1-14-693: service worker cache strategy overview.
    - APP_SHELL: first-screen and internal helper files.
@@ -42,6 +42,10 @@ const APP_SHELL = [
   withVersion('./icon-512x512.png'),
   withVersion('./icon-512x512-maskable.png'),
   withVersion('./intro-cross-jesus.jpg'),
+  withVersion('./assets/guide/cover.jpg'),
+  withVersion('./assets/guide/parish-card.jpg'),
+  withVersion('./assets/guide/stampbook.jpg'),
+  withVersion('./assets/guide/home-parish.jpg'),
 ];
 
 self.addEventListener('install', (event) => {
