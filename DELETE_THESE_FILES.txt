@@ -1,0 +1,8 @@
+이번 업데이트에서 삭제할 예전 파일입니다.
+
+css/my-diocese.css
+css/myfaith.css
+js/myfaith.js
+
+위 3개 파일은 현재 index.html에서 사용하지 않는 예전 교구·본당 설정 모듈입니다.
+업데이트 파일을 올린 뒤 저장소에서도 삭제해 주세요.
