@@ -13070,8 +13070,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     closeParishSetup();return true;
   }
   function renderParishSetup(){
-    const body=document.getElementById('oai-parish-setup-body'), title=document.getElementById('oai-parish-setup-title'), sub=document.getElementById('oai-parish-setup-subtitle'), save=document.querySelector('[data-oai-parish-setup-save]'), m=setupModal();if(!body)return;
-    if(save)save.disabled=!parishSetup.parish;
+    const body=document.getElementById('oai-parish-setup-body'), title=document.getElementById('oai-parish-setup-title'), sub=document.getElementById('oai-parish-setup-subtitle'), m=setupModal();if(!body)return;
     if(parishSetup.view==='home'){
       if(m)m.classList.add('oai-parish-setup-home');
       if(title)title.textContent='내 교구·본당';
@@ -13088,7 +13087,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       return;
     }
     if(title)title.textContent='본당 선택';
-    if(sub)sub.textContent=parishSetup.dio+'에서 자주 가는 본당을 선택해 주세요.';
+    if(sub)sub.textContent='본당을 누르면 바로 설정됩니다.';
     const list=(PARISHES||[]).filter(function(p){return p&&p.diocese===parishSetup.dio;}).filter(function(p){return !parishSetup.query||String(p.name||'').indexOf(parishSetup.query)>=0;}).sort(function(a,b){return String(a.name||'').localeCompare(String(b.name||''),'ko');});
     body.innerHTML='<button type="button" class="oai-parish-back" data-oai-setup-back="1">‹ 교구 다시 선택</button><label class="oai-parish-search"><span>⌕</span><input id="oai-parish-setup-search" type="search" placeholder="본당 이름 검색" value="'+_visitHtmlEsc(parishSetup.query)+'" autocomplete="off"></label><div class="oai-parish-choice-list">'+list.map(function(p,i){const selected=parishSetup.parish&&_isSameParish(parishSetup.parish,p);return '<button type="button" class="'+(selected?'selected':'')+'" data-oai-setup-parish="'+i+'">'+_visitHtmlEsc(p.name)+'<small>'+_visitHtmlEsc(p.addr||'')+'</small>'+(selected?'<b>✓</b>':'')+'</button>';}).join('')+'</div>';
     body.__oaiParishList=list;
@@ -13126,11 +13125,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(target.hasAttribute('data-oai-settings-close')){e.preventDefault();close();return;}
     if(target.hasAttribute('data-oai-settings-edit')){e.preventDefault();openParishChooser();return;}
     if(target.hasAttribute('data-oai-parish-setup-close')||target.hasAttribute('data-oai-parish-setup-cancel')){e.preventDefault();closeParishSetup();return;}
-    if(target.hasAttribute('data-oai-parish-setup-save')){e.preventDefault();saveParishSetup();return;}
     if(target.hasAttribute('data-oai-setup-open')){e.preventDefault();const next=target.getAttribute('data-oai-setup-open');if(next==='diocese'){parishSetup.view='diocese';renderParishSetup();return;}if(next==='parish'){if(!parishSetup.dio){parishSetup.view='diocese';renderParishSetup();return;}parishSetup.view='parish';openParishChooser(true);return;}}
     if(target.hasAttribute('data-oai-setup-back')){e.preventDefault();parishSetup.view='home';parishSetup.query='';renderParishSetup();return;}
     if(target.hasAttribute('data-oai-setup-dio')){e.preventDefault();parishSetup.dio=target.getAttribute('data-oai-setup-dio')||'';parishSetup.parish=null;parishSetup.query='';parishSetup.view='parish';openParishChooser(true);return;}
-    if(target.hasAttribute('data-oai-setup-parish')){e.preventDefault();const body=document.getElementById('oai-parish-setup-body'),list=body&&body.__oaiParishList||[],p=list[parseInt(target.getAttribute('data-oai-setup-parish'),10)];if(p){parishSetup.parish=p;renderParishSetup();}return;}
+    if(target.hasAttribute('data-oai-setup-parish')){e.preventDefault();const body=document.getElementById('oai-parish-setup-body'),list=body&&body.__oaiParishList||[],p=list[parseInt(target.getAttribute('data-oai-setup-parish'),10)];if(p){parishSetup.parish=p;saveParishSetup();}return;}
   },true);
   document.addEventListener('change',function(e){
     if(e.target&&e.target.id==='oai-settings-auto-visit'&&!e.target.disabled){_setParishAutoVisitEnabled(!!e.target.checked);}
