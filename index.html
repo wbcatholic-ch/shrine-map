@@ -1263,7 +1263,7 @@ window.APP_CONFIG = {
   <section class="oai-records-panel" role="dialog" aria-modal="true" aria-labelledby="oai-records-title">
     <header class="oai-settings-head"><div><h2 id="oai-records-title">내 기록 보관</h2><p>새 휴대폰에도 이어서 사용할 기록</p></div><button type="button" data-oai-records-close="1" aria-label="내 기록 보관 닫기">×</button></header>
     <div class="oai-records-body">
-      <p class="oai-records-intro">이 휴대폰에 저장된 기록입니다.</p>
+      <p class="oai-records-intro">Google Drive에 연결하면 새 휴대폰에서도 기록을 이어서 사용할 수 있습니다.</p>
       <div class="oai-records-list">
         <div><span>성당 방문</span><b id="oai-records-parish-count">0곳</b></div>
         <div><span>성지 순례</span><b id="oai-records-shrine-count">0곳</b></div>
@@ -1271,7 +1271,11 @@ window.APP_CONFIG = {
         <div><span>가톨릭 웹사이트 즐겨찾기</span><b id="oai-records-web-count">0개</b></div>
         <div><span>나의 교구·본당</span><b id="oai-records-parish-name">설정 안 됨</b></div>
       </div>
-      <div class="oai-records-actions"><button type="button" class="oai-records-primary" data-oai-backup-copy="1">백업 코드 복사</button><button type="button" class="oai-records-secondary" data-oai-restore-open="1">백업 코드 복원</button></div>
+      <div class="oai-records-actions">
+        <button type="button" class="oai-records-primary" id="oai-google-drive-connect" data-oai-google-connect="1">Google Drive 연결</button>
+        <button type="button" class="oai-records-secondary" data-oai-google-restore="1">Google Drive에서 불러오기</button>
+      </div>
+      <div class="oai-records-actions oai-records-manual-actions"><button type="button" class="oai-records-secondary" data-oai-backup-copy="1">백업 코드 복사</button><button type="button" class="oai-records-secondary" data-oai-restore-open="1">백업 코드 복원</button></div>
       <p id="oai-records-message" class="oai-records-message" aria-live="polite"></p>
     </div>
   </section>

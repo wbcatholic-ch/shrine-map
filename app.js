@@ -13071,11 +13071,47 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     setText('oai-records-web-count',arrayCount('web_favorites_v1')+'개');
     setText('oai-records-parish-name',parish?((parish.diocese||'')+' · '+(parish.name||'')):'설정 안 됨');
   }
-  function openRecords(){const m=recordsModal();if(!m)return;refreshRecords();m.classList.add('show');m.setAttribute('aria-hidden','false');}
+  function openRecords(){const m=recordsModal();if(!m)return;refreshRecords();refreshGoogleDriveButton();m.classList.add('show');m.setAttribute('aria-hidden','false');}
   function closeRecords(){const m=recordsModal();if(!m)return;m.classList.remove('show');m.setAttribute('aria-hidden','true');}
   function restoreModal(){return document.getElementById('oai-record-restore-modal');}
   function restoreMessage(text){const el=document.getElementById('oai-record-restore-message');if(el)el.textContent=text||'';}
   function recordMessage(text){const el=document.getElementById('oai-records-message');if(el)el.textContent=text||'';}
+  const OAI_GOOGLE_DRIVE_CONNECTED_KEY='oai_google_drive_connected_v1';
+  let googleDriveBackupTimer=0;
+  function nativeDrive(){try{return window.GildongmuNative||null;}catch(_e){return null;}}
+  function isGoogleDriveConnected(){return localStorage.getItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY)==='1';}
+  function refreshGoogleDriveButton(){const button=document.getElementById('oai-google-drive-connect');if(!button)return;button.textContent=isGoogleDriveConnected()?'Google Drive 연결됨':'Google Drive 연결';}
+  function connectGoogleDrive(){
+    const bridge=nativeDrive();
+    if(!bridge||typeof bridge.connectGoogleDrive!=='function'){recordMessage('Google Drive 자동백업은 앱에서 사용할 수 있습니다.');return;}
+    recordMessage('Google 계정을 확인하고 있습니다.');
+    bridge.connectGoogleDrive();
+  }
+  function loadGoogleDriveBackup(){
+    const bridge=nativeDrive();
+    if(!bridge||typeof bridge.loadGoogleDriveBackup!=='function'){recordMessage('Google Drive 자동백업은 앱에서 사용할 수 있습니다.');return;}
+    recordMessage('Google Drive의 기록을 확인하고 있습니다.');
+    bridge.loadGoogleDriveBackup();
+  }
+  function queueGoogleDriveBackup(){
+    if(!isGoogleDriveConnected())return;
+    const bridge=nativeDrive();if(!bridge||typeof bridge.saveGoogleDriveBackup!=='function')return;
+    try{if(googleDriveBackupTimer)clearTimeout(googleDriveBackupTimer);}catch(_e){}
+    googleDriveBackupTimer=setTimeout(function(){
+      googleDriveBackupTimer=0;
+      try{bridge.saveGoogleDriveBackup(JSON.stringify(backupSnapshot()));}catch(_e){}
+    },900);
+  }
+  window.oaiGoogleDriveStatus=function(status,message){
+    if(status==='connected')localStorage.setItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY,'1');
+    if(status==='disconnected')localStorage.removeItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY);
+    refreshGoogleDriveButton();recordMessage(message||'');
+    if(status==='connected')queueGoogleDriveBackup();
+  };
+  window.oaiGoogleDriveBackupReceived=function(encoded){
+    try{const text=decodeURIComponent(escape(atob(String(encoded||''))));const parsed=JSON.parse(text);if(!parsed||parsed.format!=='catholic-gildongmu-backup'||!parsed.data)throw new Error();applyBackup(parsed.data);refresh();recordMessage('Google Drive의 기록을 불러왔습니다.');}catch(_e){recordMessage('Google Drive 기록을 불러오지 못했습니다.');}
+  };
+  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')queueGoogleDriveBackup();});
   function openRestore(){const m=restoreModal();if(!m)return;restoreMessage('');const input=document.getElementById('oai-record-restore-code');if(input)input.value='';m.classList.add('show');m.setAttribute('aria-hidden','false');setTimeout(function(){try{input&&input.focus();}catch(_e){}},50);}
   function closeRestore(){const m=restoreModal();if(!m)return;m.classList.remove('show');m.setAttribute('aria-hidden','true');}
   function localValue(key,fallback){try{const value=JSON.parse(localStorage.getItem(key)||'');return value==null?fallback:value;}catch(_e){return fallback;}}
@@ -13106,6 +13142,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(typeof data.parishAutoVisit==='boolean')_setParishAutoVisitEnabled(data.parishAutoVisit);
     if(data.prayerFontSize)localStorage.setItem('prayer_font_size',String(data.prayerFontSize));
     try{window.dispatchEvent(new CustomEvent('oai-my-parish-changed'));}catch(_e){}
+    queueGoogleDriveBackup();
   }
   function copyBackup(){
     const code=encodeBackup(backupSnapshot());
@@ -13175,7 +13212,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   window.goBackOaiParishSetup=stepBackParishSetup;
   enforceCoverSettingsLabel();
   document.addEventListener('click',function(e){
-    const target=e.target&&e.target.closest?e.target.closest('[data-oai-settings-close],[data-oai-settings-edit],[data-oai-records-open],[data-oai-records-close],[data-oai-backup-copy],[data-oai-restore-open],[data-oai-restore-close],[data-oai-restore-apply],[data-oai-parish-setup-close],[data-oai-setup-open],[data-oai-setup-dio],[data-oai-setup-back],[data-oai-setup-parish],#cover-diocese-btn'):null;
+    const target=e.target&&e.target.closest?e.target.closest('[data-oai-settings-close],[data-oai-settings-edit],[data-oai-records-open],[data-oai-records-close],[data-oai-google-connect],[data-oai-google-restore],[data-oai-backup-copy],[data-oai-restore-open],[data-oai-restore-close],[data-oai-restore-apply],[data-oai-parish-setup-close],[data-oai-setup-open],[data-oai-setup-dio],[data-oai-setup-back],[data-oai-setup-parish],#cover-diocese-btn'):null;
     if(!target) return;
     if(target.id==='cover-diocese-btn' && target.dataset.oaiNativeSettings==='1') return;
     if(target.id==='cover-diocese-btn'){
@@ -13185,6 +13222,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(target.hasAttribute('data-oai-settings-edit')){e.preventDefault();openParishChooser();return;}
     if(target.hasAttribute('data-oai-records-open')){e.preventDefault();openRecords();return;}
     if(target.hasAttribute('data-oai-records-close')){e.preventDefault();closeRecords();return;}
+    if(target.hasAttribute('data-oai-google-connect')){e.preventDefault();connectGoogleDrive();return;}
+    if(target.hasAttribute('data-oai-google-restore')){e.preventDefault();loadGoogleDriveBackup();return;}
     if(target.hasAttribute('data-oai-backup-copy')){e.preventDefault();copyBackup();return;}
     if(target.hasAttribute('data-oai-restore-open')){e.preventDefault();openRestore();return;}
     if(target.hasAttribute('data-oai-restore-close')){e.preventDefault();closeRestore();return;}
