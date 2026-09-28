@@ -5923,24 +5923,23 @@ html.route-tab-active #info-card.open{
 .oai-settings-modal.show{display:block;}
 .oai-settings-backdrop{position:absolute;inset:0;background:rgba(10,20,42,.52);}
 .oai-settings-panel{position:absolute;top:max(12px,env(safe-area-inset-top));bottom:max(12px,env(safe-area-inset-bottom));left:50%;width:min(520px,calc(100vw - 32px));max-height:none;margin:0;transform:translateX(-50%);overflow:auto;border:2px solid #b9a36f;border-radius:24px;background:#f0ece2;box-shadow:0 24px 60px rgba(0,0,0,.36);}
-.oai-settings-head{display:flex;align-items:flex-start;justify-content:space-between;padding:24px 23px 18px;border-bottom:2px solid #c7b17c;background:#fffdf9;}
+.oai-settings-head{display:flex;align-items:center;justify-content:space-between;padding:20px 23px 18px;border-bottom:2px solid #c7b17c;background:#fffdf9;}
 .oai-settings-head h2{margin:0;color:#15203b;font-size:28px;line-height:1.15;font-weight:900;letter-spacing:-.045em;}
-.oai-settings-head p{margin:5px 0 0;color:#667085;font-size:14px;line-height:1.35;font-weight:700;}
+.oai-settings-head p{margin:3px 0 0;color:#667085;font-size:13px;line-height:1.35;font-weight:750;}
 .oai-settings-head button{display:flex;align-items:center;justify-content:center;flex:0 0 auto;width:42px;height:42px;margin:0 -1px 0 12px;padding:0;border:2px solid #253550;border-radius:50%;background:#fff;color:#18233f;font-family:Arial,sans-serif;font-size:30px!important;font-weight:700;line-height:1!important;cursor:pointer;}
-.oai-settings-body{padding:18px 16px 24px;}
-.oai-settings-group{margin:0 0 18px;border:2px solid #b9a36f;border-radius:17px;overflow:hidden;background:#fff;box-shadow:0 3px 10px rgba(27,39,61,.10);}
+.oai-settings-body{padding:16px;}
+.oai-settings-group{margin:0 0 14px;border:2px solid #b9a36f;border-radius:17px;overflow:hidden;background:#fff;box-shadow:0 3px 10px rgba(27,39,61,.10);}
 .oai-settings-group h3{margin:0;padding:13px 16px 10px;background:#e8ddc4;color:#5f4a20;font-size:14px;line-height:1;font-weight:900;letter-spacing:-.02em;}
-.oai-settings-row{display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;min-height:74px;padding:15px 16px;border:0;border-top:1px solid #d5cbb9;background:#fff;color:#17213a;text-align:left;font-family:inherit;}
+.oai-settings-row{display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;min-height:84px;padding:15px 16px;border:0;border-top:1px solid #d5cbb9;background:#fff;color:#17213a;text-align:left;font-family:inherit;}
 .oai-settings-group h3+.oai-settings-row{border-top:0;}
 .oai-settings-row span{min-width:0;display:block;}
 .oai-settings-row b{display:block;font-size:17px;line-height:1.25;font-weight:900;letter-spacing:-.035em;}
 .oai-settings-row small{display:block;margin-top:5px;color:#687386;font-size:13px;line-height:1.45;font-weight:650;letter-spacing:-.02em;word-break:keep-all;}
-.oai-settings-summary-row{min-height:78px;}.oai-settings-summary-row small{margin:0 0 4px;color:#687386;font-weight:800;}.oai-settings-summary-row b{color:#17213a;}.oai-settings-edit-row{cursor:pointer;}.oai-settings-edit-row:focus-visible{outline:3px solid rgba(31,105,177,.35);outline-offset:-3px;}.oai-settings-change{flex:0 0 auto;min-width:58px;height:36px;padding:0 11px;border:1.5px solid #216aa8;border-radius:10px;background:#fff;color:#145b98;font-family:inherit;font-size:14px;font-weight:900;pointer-events:none;}
-.oai-settings-web-hint{margin:10px 3px 0;color:#5d6d82;font-size:13px;line-height:1.55;font-weight:700;letter-spacing:-.025em;word-break:keep-all;}.oai-settings-web-hint b{color:#1c609d;font-size:inherit;font-weight:900;}
+.oai-settings-edit-row{cursor:pointer;}.oai-settings-edit-row:focus-visible{outline:3px solid rgba(31,105,177,.35);outline-offset:-3px;}.oai-settings-arrow{flex:0 0 auto;color:#296ca5;font:400 31px/1 sans-serif;}
 .oai-settings-link{cursor:pointer;}
 .oai-settings-link:active{background:#f7f9fc;}
 .oai-settings-link i{flex:0 0 auto;color:#657086;font:400 29px/1 sans-serif;}
-.oai-settings-switch-row{align-items:flex-start;}
+.oai-settings-switch-row{align-items:center;}
 .oai-settings-switch{position:relative;flex:0 0 auto;width:52px;height:32px;margin-top:3px;cursor:pointer;}
 .oai-settings-switch input{position:absolute;opacity:0;}
 .oai-settings-switch i{display:block;width:100%;height:100%;border-radius:999px;background:#b8c0cb;transition:.18s;}
