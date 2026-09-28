@@ -285,7 +285,8 @@
 
     /* 교구·본당 선택은 설정 화면보다 먼저 닫는다. */
     try{ if(typeof window.isOaiParishSetupOpen==='function' && window.isOaiParishSetupOpen()){
-      if(typeof window.closeOaiParishSetup==='function') window.closeOaiParishSetup();
+      if(typeof window.goBackOaiParishSetup==='function') window.goBackOaiParishSetup();
+      else if(typeof window.closeOaiParishSetup==='function') window.closeOaiParishSetup();
       return true;
     }}catch(e){ console.warn('[가톨릭길동무]',e); }
 

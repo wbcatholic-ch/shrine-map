@@ -6027,7 +6027,7 @@ html.route-tab-active #info-card.open{
 .oai-settings-row span{min-width:0;display:block;}
 .oai-settings-row b{display:block;font-size:17px;line-height:1.25;font-weight:900;letter-spacing:-.035em;}
 .oai-settings-row small{display:block;margin-top:5px;color:#687386;font-size:13px;line-height:1.45;font-weight:650;letter-spacing:-.02em;word-break:keep-all;}
-.oai-settings-summary-row{min-height:78px;}.oai-settings-summary-row small{margin:0 0 4px;color:#687386;font-weight:800;}.oai-settings-summary-row b{color:#17213a;}.oai-settings-change{flex:0 0 auto;min-width:58px;height:36px;padding:0 11px;border:1.5px solid #216aa8;border-radius:10px;background:#fff;color:#145b98;font-family:inherit;font-size:14px;font-weight:900;}
+.oai-settings-summary-row{min-height:78px;}.oai-settings-summary-row small{margin:0 0 4px;color:#687386;font-weight:800;}.oai-settings-summary-row b{color:#17213a;}.oai-settings-edit-row{cursor:pointer;}.oai-settings-edit-row:focus-visible{outline:3px solid rgba(31,105,177,.35);outline-offset:-3px;}.oai-settings-change{flex:0 0 auto;min-width:58px;height:36px;padding:0 11px;border:1.5px solid #216aa8;border-radius:10px;background:#fff;color:#145b98;font-family:inherit;font-size:14px;font-weight:900;pointer-events:none;}
 .oai-settings-link{cursor:pointer;}
 .oai-settings-link:active{background:#f7f9fc;}
 .oai-settings-link i{flex:0 0 auto;color:#657086;font:400 29px/1 sans-serif;}
