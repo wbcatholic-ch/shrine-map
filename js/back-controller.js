@@ -155,10 +155,6 @@
     try{
       var rd = $b('oai-refresh-content-dialog');
       if(rd && rd.parentNode){ rd.parentNode.removeChild(rd); return; }
-      if(typeof window.closeMyFaithLifeModal === 'function' && typeof window.isMyFaithLifeModalOpen === 'function' && window.isMyFaithLifeModalOpen()){
-        window.closeMyFaithLifeModal();
-        return;
-      }
       if(typeof window.closeCoverMenuPopup === 'function' && typeof window.isCoverMenuPopupOpen === 'function' && window.isCoverMenuPopupOpen()){
         window.closeCoverMenuPopup();
         return;
@@ -198,13 +194,6 @@
         diocese.classList.remove('open');
         callGTC();
       }
-      return true;
-    }
-
-    var myFaith = $b('my-diocese-modal');
-    if(myFaith && myFaith.classList && myFaith.classList.contains('open')){
-      if(typeof window.closeMyFaithLifeModal === 'function') window.closeMyFaithLifeModal();
-      else { myFaith.classList.remove('open','show'); callGTC(); }
       return true;
     }
 

@@ -31,8 +31,6 @@
       var st = window.getComputedStyle ? window.getComputedStyle(cover) : null;
       if(st && (st.display === 'none' || st.visibility === 'hidden')) return false;
       if(document.documentElement && document.documentElement.classList && document.documentElement.classList.contains('app-active')) return false;
-      var myFaith = el('my-diocese-modal');
-      if(myFaith && myFaith.classList && myFaith.classList.contains('show')) return false;
       var menu = el('cover-menu-modal');
       if(menu && menu.classList && menu.classList.contains('show')) return false;
       return true;
