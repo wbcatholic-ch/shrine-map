@@ -3358,9 +3358,17 @@ function _renderInfoCardShrineVisit(item){
 const OAI_PARISH_VISITS_KEY='oai_parish_visits_v1';
 const OAI_PARISH_AUTO_VISIT_ENABLED_KEY='oai_parish_auto_visit_enabled_v1';
 let _parishVisitTab='visited',_parishVisitDio='all',_parishVisitSort='recent',_parishUnvisitedLimit=80;
+const _OAI_SETTINGS_MY_PARISH_KEY='oai_settings_my_parish_v1';
 function _isMyParishAutoVisitEnabled(){try{return localStorage.getItem(OAI_PARISH_AUTO_VISIT_ENABLED_KEY)!=='0';}catch(_e){return true;}}
 function _setParishAutoVisitEnabled(enabled){try{localStorage.setItem(OAI_PARISH_AUTO_VISIT_ENABLED_KEY,enabled?'1':'0');}catch(_e){}}
 function _configuredMyParish(){
+  /* 설정 화면에서 고른 본당은 이전 '나의 신앙생활' 값보다 항상 우선한다. */
+  try{
+    const selected=JSON.parse(localStorage.getItem(_OAI_SETTINGS_MY_PARISH_KEY)||'null');
+    if(selected&&selected.name){
+      return (PARISHES||[]).find(function(p){return p&&p.name===selected.name&&(!selected.diocese||p.diocese===selected.diocese);})||{name:selected.name,diocese:selected.diocese||''};
+    }
+  }catch(_e){}
   const dio=typeof _getMyDioceseName==='function'?_getMyDioceseName():'';
   const keys=['oai_my_parish_name','oai_my_parish','my_parish_name','my_parish','oai_my_church_name','oai_my_church'];let values=[];
   try{keys.forEach(function(k){const v=localStorage.getItem(k);if(v)values.push(String(v).trim());});for(let i=0;i<localStorage.length;i++){const k=String(localStorage.key(i)||'');if(/(?:my.*(?:parish|church|faith)|(?:parish|church).*(?:my|setting)|본당)/i.test(k)){const v=localStorage.getItem(k);if(v)values.push(String(v).trim());}}}catch(_e){}
@@ -12430,9 +12438,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function shareGildongmuApp(e) {
     try{ if(e){ e.preventDefault(); e.stopPropagation(); } }catch(_e){}
-    var shareUrl = 'https://play.google.com/store/apps/details?id=kr.catholic.gildonmu';
+    var shareUrl = 'https://catholicgildongmu.co.kr/install.html';
     var shareTitle = '가톨릭길동무';
-    var shareText = '가톨릭길동무 앱을 추천합니다.\n\n전국 성당, 성지, 피정의집, 순례길 정보를 한눈에 볼 수 있는 가톨릭 생활 앱입니다.\n\nGoogle Play에서 설치하기:\n' + shareUrl;
+    var shareText = '가톨릭길동무 앱을 추천합니다.\n\n전국 성당, 성지, 피정의집, 순례길 정보를 한눈에 볼 수 있는 가톨릭 생활 앱입니다.\n\n설치하기:\n' + shareUrl;
     try{
       if(window.GildongmuNative && typeof window.GildongmuNative.shareApp === 'function'){
         window.GildongmuNative.shareApp(shareText);
@@ -13063,6 +13071,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function close(){const m=modal();if(!m)return;m.classList.remove('show');m.setAttribute('aria-hidden','true');m.dataset.fromParishBook='';}
   const parishSetup={dio:'',parish:null,query:'',view:'home'};
   function setupModal(){return document.getElementById('oai-parish-setup-modal');}
+  function removeLegacyParishSetupActions(){const m=setupModal();if(m)m.querySelectorAll('.oai-parish-setup-actions').forEach(function(el){el.remove();});}
   function closeParishSetup(){const m=setupModal();if(!m)return;m.classList.remove('show','oai-parish-setup-home');m.setAttribute('aria-hidden','true');}
   function stepBackParishSetup(){
     const m=setupModal();if(!m||!m.classList.contains('show'))return false;
@@ -13071,6 +13080,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function renderParishSetup(){
     const body=document.getElementById('oai-parish-setup-body'), title=document.getElementById('oai-parish-setup-title'), sub=document.getElementById('oai-parish-setup-subtitle'), m=setupModal();if(!body)return;
+    removeLegacyParishSetupActions();
     if(parishSetup.view==='home'){
       if(m)m.classList.add('oai-parish-setup-home');
       if(title)title.textContent='내 교구·본당';
@@ -13094,6 +13104,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function openParishChooser(keepChoice){
     const m=setupModal();if(!m)return;
+    removeLegacyParishSetupActions();
     if(!keepChoice){const current=configuredParish();parishSetup.dio=(current&&current.diocese)||(typeof _getMyDioceseName==='function'?_getMyDioceseName():'');parishSetup.parish=current||null;parishSetup.query='';parishSetup.view='home';}
     m.classList.add('show');m.setAttribute('aria-hidden','false');
     if(parishSetup.view==='parish' && parishSetup.dio && typeof _ensureParishDioceseDataLoaded==='function'){
@@ -13104,7 +13115,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function saveParishSetup(){
     const p=parishSetup.parish;if(!p)return;
-    try{localStorage.setItem('oai_my_diocese_name',p.diocese||parishSetup.dio);localStorage.setItem('oai_my_parish_name',p.name||'');localStorage.setItem('oai_my_parish',JSON.stringify({diocese:p.diocese||parishSetup.dio,name:p.name||''}));}catch(_e){}
+    try{const selected={diocese:p.diocese||parishSetup.dio,name:p.name||''};localStorage.setItem(_OAI_SETTINGS_MY_PARISH_KEY,JSON.stringify(selected));localStorage.setItem('oai_my_diocese_name',selected.diocese);localStorage.setItem('oai_my_parish_name',selected.name);localStorage.setItem('oai_my_parish',JSON.stringify(selected));}catch(_e){}
     closeParishSetup();refresh();
     try{window.dispatchEvent(new CustomEvent('oai-my-parish-changed'));}catch(_e){}
   }

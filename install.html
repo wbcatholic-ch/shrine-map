@@ -1,0 +1,41 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+  <meta name="theme-color" content="#101a3d">
+  <title>가톨릭길동무 설치하기</title>
+  <style>
+    :root{color-scheme:light;font-family:Arial,"Noto Sans KR",sans-serif;color:#17213a;background:#f8f3e8}
+    *{box-sizing:border-box}body{min-height:100dvh;margin:0;display:grid;place-items:center;padding:24px;background:linear-gradient(180deg,#101a3d 0 33%,#f8f3e8 33%)}
+    main{width:min(460px,100%);overflow:hidden;border-radius:24px;background:#fffdf8;box-shadow:0 20px 56px rgba(8,15,37,.28)}
+    header{padding:35px 28px 30px;background:#101a3d;color:#fff;text-align:center;border-bottom:3px solid #cbae6b}header .mark{display:grid;place-items:center;width:62px;height:62px;margin:0 auto 15px;border-radius:18px;border:1px solid rgba(255,255,255,.32);background:#24315a;font-size:37px;font-weight:900}h1{margin:0;font-size:29px;letter-spacing:-.055em}header p{margin:9px 0 0;color:#cbd2e5;font-size:15px;font-weight:700}
+    section{padding:31px 28px 30px;text-align:center}h2{margin:0 0 10px;font-size:24px;letter-spacing:-.05em}section p{margin:0;color:#5d687b;font-size:16px;font-weight:650;line-height:1.65;word-break:keep-all}.install{display:flex;align-items:center;justify-content:center;gap:10px;width:100%;min-height:62px;margin:27px 0 13px;border:0;border-radius:15px;background:#1769b2;color:#fff;font:900 19px/1 Arial,"Noto Sans KR",sans-serif;letter-spacing:-.035em;text-decoration:none;box-shadow:0 6px 14px rgba(20,94,164,.24)}.install:active{transform:translateY(1px);background:#125994}.play{display:inline-block;color:#56657a;font-size:14px;font-weight:750;text-decoration:underline;text-underline-offset:3px}.notice{margin-top:25px!important;padding:14px 15px;border-radius:12px;background:#f1f5f9;color:#657087!important;font-size:13px!important;line-height:1.55!important}.android-only{display:none}
+    @media (max-width:380px){body{padding:14px}header{padding:28px 22px 25px}section{padding:26px 22px}h1{font-size:26px}h2{font-size:22px}}
+  </style>
+</head>
+<body>
+  <main>
+    <header><div class="mark" aria-hidden="true">✝</div><h1>가톨릭길동무</h1><p>신앙의 모든 여정을 함께합니다</p></header>
+    <section>
+      <h2>Google Play에서 설치하세요</h2>
+      <p>버튼을 누르면 Google Play 스토어 앱으로 이동합니다.</p>
+      <a id="play-install" class="install" href="https://play.google.com/store/apps/details?id=kr.catholic.gildonmu">▶&nbsp; Google Play에서 설치</a>
+      <a id="play-web" class="play" href="https://play.google.com/store/apps/details?id=kr.catholic.gildonmu">Play 스토어가 열리지 않나요?</a>
+      <p class="notice">카카오 안의 로그인 화면이 아니라 휴대폰의 Play 스토어 앱에서 설치할 수 있도록 연결합니다.</p>
+    </section>
+  </main>
+  <script>
+    (function(){
+      var packageName='kr.catholic.gildonmu';
+      var playUrl='https://play.google.com/store/apps/details?id='+packageName;
+      var button=document.getElementById('play-install');
+      if(!/Android/i.test(navigator.userAgent)){button.href=playUrl;return;}
+      button.addEventListener('click',function(event){
+        event.preventDefault();
+        location.href='intent://details?id='+packageName+'#Intent;scheme=market;package=com.android.vending;S.browser_fallback_url='+encodeURIComponent(playUrl)+';end';
+      });
+    })();
+  </script>
+</body>
+</html>
