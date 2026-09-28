@@ -58,6 +58,7 @@
   function hasOpenAppSurface(){
     try{
       /* 설정과 본당 선택창도 앱 내부 화면이다. 이 둘을 제외하면 커버에서 바로 앱 종료 처리로 넘어간다. */
+      if(typeof window.isOaiRestoreOpen === 'function' && window.isOaiRestoreOpen()) return true;
       if(typeof window.isOaiRecordsOpen === 'function' && window.isOaiRecordsOpen()) return true;
       if(typeof window.isOaiParishSetupOpen === 'function' && window.isOaiParishSetupOpen()) return true;
       if(typeof window.isOaiSettingsOpen === 'function' && window.isOaiSettingsOpen()) return true;
@@ -78,6 +79,7 @@
 
   function hasVisibleAppLayer(){
     try{
+      if(typeof window.isOaiRestoreOpen === 'function' && window.isOaiRestoreOpen()) return true;
       if(typeof window.isOaiRecordsOpen === 'function' && window.isOaiRecordsOpen()) return true;
       if(typeof window.isOaiParishSetupOpen === 'function' && window.isOaiParishSetupOpen()) return true;
       if(typeof window.isOaiSettingsOpen === 'function' && window.isOaiSettingsOpen()) return true;
@@ -275,6 +277,10 @@
     }
 
     /* 내 기록 보관은 설정 위에 열리는 한 단계 화면이다. */
+    try{ if(typeof window.isOaiRestoreOpen==='function' && window.isOaiRestoreOpen()){
+      if(typeof window.closeOaiRestore==='function') window.closeOaiRestore();
+      return true;
+    }}catch(e){ console.warn('[가톨릭길동무]',e); }
     try{ if(typeof window.isOaiRecordsOpen==='function' && window.isOaiRecordsOpen()){
       if(typeof window.closeOaiRecords==='function') window.closeOaiRecords();
       return true;

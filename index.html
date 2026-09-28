@@ -2,7 +2,7 @@
 <html lang="ko" class="oai-font-global">
 <head>
 <script>
-  window.OAI_APP_BUILD_VERSION = 'V8-1-14-828';
+  window.OAI_APP_BUILD_VERSION = 'V8-1-14-829';
   window.APP_VERSION = window.OAI_APP_BUILD_VERSION;
 </script>
 
@@ -956,7 +956,7 @@ window.APP_CONFIG = {
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
 
 <style id="oai-initial-bg">html,body{margin:0;width:100%;height:100%;min-height:100%;background:#f5f0e8;overflow:hidden;color-scheme:light;}#cover{background:#f5f0e8;min-height:100%;}#app{background:#f8f6f2;display:none;}</style>
-<link rel="stylesheet" href="style.css?v=V8-1-14-828">
+<link rel="stylesheet" href="style.css?v=V8-1-14-829">
 <link rel="stylesheet" href="css/module-common.css?v=V8-1-14-825">
 <link rel="stylesheet" href="css/prayer.css?v=V8-1-14-825">
 <link rel="stylesheet" href="css/web.css?v=V8-1-14-825">
@@ -1112,7 +1112,7 @@ window.APP_CONFIG = {
           <button id="cover-share-btn" class="cover-share-main-btn" type="button" aria-label="앱 공유하기">앱 공유하기</button>
         </div>
         <div id="cover-update-box">
-          <button id="cover-update-btn" class="cover-refresh-main-btn" type="button" data-target-version="V8-1-14-828" aria-label="짧게 누르면 새로고침, 더 길게 누르면 앱 캐시 초기화">새로고침</button>
+          <button id="cover-update-btn" class="cover-refresh-main-btn" type="button" data-target-version="V8-1-14-829" aria-label="짧게 누르면 새로고침, 더 길게 누르면 앱 캐시 초기화">새로고침</button>
           <div id="cover-update-hint" aria-live="polite">아래 버전과 다릅니다. 눌러서 최신 파일을 다시 받아 주세요.</div>
         </div>
       </div>
@@ -1216,7 +1216,7 @@ window.APP_CONFIG = {
   </div>
 </div>
 
-<script src="app.js?v=V8-1-14-828"></script>
+<script src="app.js?v=V8-1-14-829"></script>
 <script src="js/cover-common.js?v=V8-1-14-825"></script>
 <div id="oai-category-entry-veil" aria-hidden="true"></div>
 <div id="app"><div id="tabbar"><button id="tab-btn-nearby" class="tab-btn" data-tab="nearby"><span class="tab-icon">📍</span><span id="tab-nearby-lbl">내주변</span></button><button id="tab-btn-list" class="tab-btn" data-tab="list"><span class="tab-icon">📋</span><span id="tab-list-lbl">목록</span></button><button id="tab-btn-region" class="tab-btn" data-tab="region"><span class="tab-icon">🔍</span>지역검색
@@ -1271,7 +1271,16 @@ window.APP_CONFIG = {
         <div><span>가톨릭 웹사이트 즐겨찾기</span><b id="oai-records-web-count">0개</b></div>
         <div><span>나의 교구·본당</span><b id="oai-records-parish-name">설정 안 됨</b></div>
       </div>
+      <div class="oai-records-actions"><button type="button" class="oai-records-primary" data-oai-backup-copy="1">백업 코드 복사</button><button type="button" class="oai-records-secondary" data-oai-restore-open="1">백업 코드 복원</button></div>
+      <p id="oai-records-message" class="oai-records-message" aria-live="polite"></p>
     </div>
+  </section>
+</div>
+<div id="oai-record-restore-modal" class="oai-record-restore-modal" aria-hidden="true">
+  <div class="oai-settings-backdrop" data-oai-restore-close="1"></div>
+  <section class="oai-record-restore-panel" role="dialog" aria-modal="true" aria-labelledby="oai-record-restore-title">
+    <header class="oai-settings-head"><div><h2 id="oai-record-restore-title">백업 코드 복원</h2><p>기존 휴대폰에서 복사한 코드를 붙여넣으세요.</p></div><button type="button" data-oai-restore-close="1" aria-label="백업 코드 복원 닫기">×</button></header>
+    <div class="oai-record-restore-body"><label for="oai-record-restore-code">백업 코드</label><textarea id="oai-record-restore-code" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="여기에 백업 코드를 붙여넣으세요."></textarea><p>이 휴대폰의 기존 기록은 지우지 않고 함께 보관합니다.</p><button type="button" class="oai-records-primary" data-oai-restore-apply="1">기록 불러오기</button><em id="oai-record-restore-message" aria-live="polite"></em></div>
   </section>
 </div>
 <div id="web-view" role="dialog" aria-modal="true" aria-label="가톨릭 웹사이트" class="module-view">
@@ -1358,7 +1367,7 @@ window.APP_CONFIG = {
 <script src="js/route-web-guards.js?v=V8-1-14-825"></script>
 
 
-<script src="js/back-controller.js?v=V8-1-14-828"></script>
+<script src="js/back-controller.js?v=V8-1-14-829"></script>
 <script>
 /* V8-1-12: 문의·건의에서 커버로 복귀한 직후, back-controller가 로드된 뒤 커버 뒤로가기 상태를 한 번 더 재등록한다. */
 (function(){
