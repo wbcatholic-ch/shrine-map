@@ -13099,14 +13099,22 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     try{if(googleDriveBackupTimer)clearTimeout(googleDriveBackupTimer);}catch(_e){}
     googleDriveBackupTimer=setTimeout(function(){
       googleDriveBackupTimer=0;
-      try{bridge.saveGoogleDriveBackup(JSON.stringify(backupSnapshot()));}catch(_e){}
+      saveGoogleDriveBackupNow(false);
     },900);
+  }
+  function saveGoogleDriveBackupNow(showMessage){
+    if(!isGoogleDriveConnected())return;
+    const bridge=nativeDrive();if(!bridge||typeof bridge.saveGoogleDriveBackup!=='function')return;
+    if(showMessage)recordMessage('Google Drive에 기록을 저장하고 있습니다.');
+    try{bridge.saveGoogleDriveBackup(JSON.stringify(backupSnapshot()));}catch(_e){if(showMessage)recordMessage('Google Drive에 기록을 저장하지 못했습니다.');}
   }
   window.oaiGoogleDriveStatus=function(status,message){
     if(status==='connected')localStorage.setItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY,'1');
     if(status==='disconnected')localStorage.removeItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY);
     refreshGoogleDriveButton();recordMessage(message||'');
-    if(status==='connected')queueGoogleDriveBackup();
+    // 계정 연결 직후 바로 첫 백업을 만듭니다. 앱을 백그라운드로 보내야만
+    // 저장되는 방식은 새 기기 복원에 충분히 믿을 수 없기 때문입니다.
+    if(status==='connected')saveGoogleDriveBackupNow(true);
   };
   window.oaiGoogleDriveBackupReceived=function(encoded){
     try{const text=decodeURIComponent(escape(atob(String(encoded||''))));const parsed=JSON.parse(text);if(!parsed||parsed.format!=='catholic-gildongmu-backup'||!parsed.data)throw new Error();applyBackup(parsed.data);refresh();recordMessage('Google Drive의 기록을 불러왔습니다.');}catch(_e){recordMessage('Google Drive 기록을 불러오지 못했습니다.');}
