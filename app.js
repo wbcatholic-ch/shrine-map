@@ -12491,12 +12491,20 @@ function oaiBlurIfAutoFocusedInput(id){
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   },0);
 }
+let _returnToSettingsAfterFrequentSearch=false;
 function closeSearchModal(){
   _smSearchSeq++;
   clearTimeout(_smPlaceDebounce);
   _blurAll && _blurAll();
-  $('srch-modal').classList.remove('open');
+  const modal=$('srch-modal');
+  if(modal){ modal.classList.remove('open','frequent-register-open'); }
   _syncMapPanelUI('close-search-modal');
+  if(_returnToSettingsAfterFrequentSearch){
+    _returnToSettingsAfterFrequentSearch=false;
+    setTimeout(function(){
+      try{ if(typeof window.openOaiSettings==='function') window.openOaiSettings({fromFrequentPlace:true}); }catch(_e){}
+    },80);
+  }
 }
 
 function setSmDio(v,btn){
@@ -13832,19 +13840,36 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 })();
 
 
-/* V8-1-14-845: 설정에서 자주 가는 장소 등록/삭제 */
+/* V8-1-14-848: 설정에서 자주 가는 장소 등록/삭제 - 설정을 닫고 검색 화면으로 확실히 전환한 뒤 다시 설정으로 복귀 */
 (function installOaiFrequentPlaceSettings(){
-  if(window.__OAI_FREQUENT_SETTINGS_V845__) return;
-  window.__OAI_FREQUENT_SETTINGS_V845__=true;
+  if(window.__OAI_FREQUENT_SETTINGS_V848__) return;
+  window.__OAI_FREQUENT_SETTINGS_V848__=true;
+  function startFrequentPlaceSearch(){
+    if(_loadRouteFavorites().length>=OAI_ROUTE_FAVORITES_MAX){
+      alert('자주 가는 장소는 최대 '+OAI_ROUTE_FAVORITES_MAX+'개까지 등록할 수 있습니다.');
+      return;
+    }
+    _returnToSettingsAfterFrequentSearch=true;
+    try{ if(typeof window.closeOaiSettings==='function') window.closeOaiSettings(); }catch(_e){}
+    setTimeout(function(){
+      try{ openSearchModal('frequent-register'); }
+      catch(err){
+        console.warn('[가톨릭길동무] 자주 가는 장소 검색 열기 실패',err);
+        _returnToSettingsAfterFrequentSearch=false;
+        try{ if(typeof window.openOaiSettings==='function') window.openOaiSettings({fromFrequentPlace:true}); }catch(_e){}
+        alert('장소 검색 화면을 열지 못했습니다. 앱을 새로고침한 뒤 다시 시도해 주세요.');
+      }
+    },90);
+  }
   document.addEventListener('click',function(e){
     const t=e.target&&e.target.closest?e.target.closest('[data-oai-frequent-add],[data-oai-frequent-remove]'):null;
     if(!t) return;
     e.preventDefault();e.stopPropagation();
-    if(t.hasAttribute('data-oai-frequent-remove')){_removeRouteFrequentPlace(parseInt(t.getAttribute('data-oai-frequent-remove'),10));return;}
-    if(t.hasAttribute('data-oai-frequent-add')){
-      if(_loadRouteFavorites().length>=OAI_ROUTE_FAVORITES_MAX){alert('자주 가는 장소는 최대 '+OAI_ROUTE_FAVORITES_MAX+'개까지 등록할 수 있습니다.');return;}
-      openSearchModal('frequent-register');
+    if(t.hasAttribute('data-oai-frequent-remove')){
+      _removeRouteFrequentPlace(parseInt(t.getAttribute('data-oai-frequent-remove'),10));
+      return;
     }
+    if(t.hasAttribute('data-oai-frequent-add')) startFrequentPlaceSearch();
   },true);
   document.addEventListener('DOMContentLoaded',function(){try{_renderRouteFrequentSettings();}catch(_e){}},{once:true});
-})();
+})();;
