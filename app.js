@@ -13081,10 +13081,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   let googleDriveInitialSyncPending=false;
   function nativeDrive(){try{return window.GildongmuNative||null;}catch(_e){return null;}}
   function isGoogleDriveConnected(){return localStorage.getItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY)==='1';}
-  function refreshGoogleDriveButton(){const button=document.getElementById('oai-google-drive-connect');if(!button)return;button.textContent=isGoogleDriveConnected()?'Google Drive 연결됨':'Google Drive 연결';}
+  function formatGoogleDriveSavedAt(){
+    try{const raw=localStorage.getItem('oai_google_drive_saved_at_v1');if(!raw)return '';const date=new Date(raw);if(isNaN(date.getTime()))return '';return (date.getMonth()+1)+'/'+date.getDate()+' '+String(date.getHours()).padStart(2,'0')+':'+String(date.getMinutes()).padStart(2,'0');}catch(_e){return '';}
+  }
+  function refreshGoogleDriveButton(){const button=document.getElementById('oai-google-drive-connect');if(!button)return;button.textContent=isGoogleDriveConnected()?'Google Drive에 저장':'Google Drive 연결';}
   function connectGoogleDrive(){
     const bridge=nativeDrive();
     if(!bridge||typeof bridge.connectGoogleDrive!=='function'){recordMessage('Google Drive 자동백업은 앱에서 사용할 수 있습니다.');return;}
+    if(isGoogleDriveConnected()){saveGoogleDriveBackupNow(true);return;}
     recordMessage('Google 계정을 확인하고 있습니다.');
     bridge.connectGoogleDrive();
   }
@@ -13138,6 +13142,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   window.oaiGoogleDriveStatus=function(status,message){
     if(status==='connected')localStorage.setItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY,'1');
     if(status==='disconnected')localStorage.removeItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY);
+    if(status==='saved'){
+      try{localStorage.setItem('oai_google_drive_saved_at_v1',new Date().toISOString());}catch(_e){}
+      refreshGoogleDriveButton();
+      recordMessage('Google Drive에 저장했습니다. 마지막 저장: '+formatGoogleDriveSavedAt());
+      return;
+    }
     refreshGoogleDriveButton();recordMessage(message||'');
     // 새 휴대폰의 빈 기록이 기존 Drive 백업을 덮어쓰면 안 됩니다.
     // 따라서 연결 직후에는 먼저 Drive에 저장된 기록을 확인합니다.
