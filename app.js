@@ -12436,7 +12436,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function shareGildongmuApp(e) {
     try{ if(e){ e.preventDefault(); e.stopPropagation(); } }catch(_e){}
-    var shareUrl = 'https://catholicgildongmu.co.kr/install.html?v=V8-1-14-834';
+    var shareUrl = 'https://catholicgildongmu.co.kr/install.html?v=V8-1-14-835';
     var shareTitle = '가톨릭길동무';
     var shareText = '가톨릭길동무 앱을 추천합니다.\n\n전국 성당, 성지, 피정의집, 순례길 정보를 한눈에 볼 수 있는 가톨릭 생활 앱입니다.\n\n설치하기:\n' + shareUrl;
     try{
