@@ -2314,7 +2314,9 @@ html.oai-cover-revealing #cover > * {
   contain: layout paint;
   max-width: min(500px, calc(100vw - 20px));
   margin: 0 auto;
-  padding: 0 10px 0;
+  /* 하단 안내문 두 줄은 작은 화면에서도 반드시 보여야 한다.
+     카드 영역이 먼저 줄어들고, 안내문을 화면 밖으로 밀어내지 않는다. */
+  padding: 0 10px max(62px, calc(var(--cover-note-reserve) + var(--cover-bottom-safe)));
   display: flex;
   flex-direction: column;
   align-items: stretch;

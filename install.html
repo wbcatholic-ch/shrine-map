@@ -14,22 +14,22 @@
     <header><div class="mark" aria-hidden="true">✝</div><h1>가톨릭길동무</h1><p>신앙의 모든 여정을 함께합니다</p></header>
     <section>
       <h2>Google Play에서 설치하세요</h2>
-      <p>버튼을 누르면 휴대폰의 Play 스토어 앱으로 이동합니다.</p>
-      <a id="play-install" class="install" href="https://play.google.com/store/apps/details?id=kr.catholic.gildonmu">▶&nbsp; Google Play에서 설치</a>
-      <a id="play-web" class="play" href="https://play.google.com/store/apps/details?id=kr.catholic.gildonmu">Play 스토어가 열리지 않나요?</a>
-      <p class="notice">카카오 안의 로그인 화면이 아니라 휴대폰의 Play 스토어 앱에서 설치할 수 있도록 연결합니다.</p>
+      <p>버튼을 누르면 휴대폰에 로그인된 Play 스토어 앱으로 이동합니다.</p>
+      <a id="play-install" class="install" href="market://details?id=kr.catholic.gildonmu">▶&nbsp; Play 스토어 앱에서 설치</a>
+      <a id="play-web" class="play" href="https://play.google.com/store/apps/details?id=kr.catholic.gildonmu">Play 스토어 앱이 열리지 않나요?</a>
+      <p class="notice">카카오톡 안에서 Google 로그인을 다시 하지 않도록, 휴대폰의 Play 스토어 앱을 엽니다.</p>
     </section>
   </main>
   <script>
     (function(){
       var packageName='kr.catholic.gildonmu';
       var playUrl='https://play.google.com/store/apps/details?id='+packageName;
+      var marketUrl='market://details?id='+packageName;
       var button=document.getElementById('play-install');
       if(!/Android/i.test(navigator.userAgent)){button.href=playUrl;return;}
-      button.addEventListener('click',function(event){
-        event.preventDefault();
-        location.href='intent://details?id='+packageName+'#Intent;scheme=market;package=com.android.vending;S.browser_fallback_url='+encodeURIComponent(playUrl)+';end';
-      });
+      // 카카오톡 내부 브라우저가 intent:// 이동을 차단하므로, 사용자가 직접 누른
+      // market:// 링크로 Play 스토어 앱을 엽니다. 실패 시 아래 웹 링크를 사용합니다.
+      button.href=marketUrl;
     })();
   </script>
 </body>
