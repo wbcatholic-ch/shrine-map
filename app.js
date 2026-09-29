@@ -6459,7 +6459,44 @@ function _ensureKakaoServicesReady(){
   });
   return _oaiKakaoServicesReadyPromise;
 }
+/* V8-1-14-862: 일반 주택/지번 주소 검색 보강.
+   사용자가 "진천동251-10"처럼 띄어쓰기 없이 입력해도 "진천동 251-10" 변형을 함께 검색한다. */
+function _kakaoAddressQueryVariants(query){
+  var q=String(query||'').trim().replace(/\s+/g,' ');
+  if(!q) return [];
+  var out=[q];
+  var spaced=q
+    .replace(/([가-힣]+(?:동|읍|면|리))\s*(\d)/g,'$1 $2')
+    .replace(/(로|길)\s*(\d)/g,'$1 $2');
+  if(spaced!==q) out.push(spaced);
+  var compact=q.replace(/\s+/g,'');
+  var compactSpaced=compact
+    .replace(/([가-힣]+(?:동|읍|면|리))(\d)/g,'$1 $2')
+    .replace(/(로|길)(\d)/g,'$1 $2');
+  if(compactSpaced && out.indexOf(compactSpaced)<0) out.push(compactSpaced);
+  return out.slice(0,3);
+}
+function _mapAddressResults(result, fallback){
+  return (result||[]).map(function(r){
+    var road=(r.road_address&&r.road_address.address_name)||'';
+    var jibun=(r.address&&r.address.address_name)||r.address_name||'';
+    var label=road||jibun||String(fallback||'').trim();
+    return {
+      id:'address:'+String(r.x||'')+','+String(r.y||''),
+      place_name:label,
+      address_name:jibun||road,
+      road_address_name:road,
+      x:r.x,
+      y:r.y,
+      category_group_code:'',
+      category_name:'주소',
+      __oaiAddress:true
+    };
+  }).filter(function(d){return d.x&&d.y;});
+}
 function _kakaoAddressDocsFromJs(query, max){
+  var variants=_kakaoAddressQueryVariants(query);
+  if(!variants.length) return Promise.resolve([]);
   return _ensureKakaoServicesReady().then(function(ok){
     if(!ok) return [];
     return new Promise(function(resolve){
@@ -6468,43 +6505,38 @@ function _kakaoAddressDocsFromJs(query, max){
           resolve([]); return;
         }
         var geocoder=new kakao.maps.services.Geocoder();
-        var settled=false;
-        function done(list){ if(settled) return; settled=true; resolve((list||[]).slice(0,max||10)); }
-        geocoder.addressSearch(String(query||'').trim(), function(result,status){
+        var groups=[], pending=variants.length, settled=false;
+        function finishOne(){
+          pending--;
+          if(pending<=0 && !settled){ settled=true; resolve(_dedupeKakaoDocs(groups,max||10)); }
+        }
+        variants.forEach(function(v){
           try{
-            var OK=kakao.maps.services.Status.OK;
-            if(status!==OK || !result || !result.length){ done([]); return; }
-            var docs=result.map(function(r){
-              var road=(r.road_address&&r.road_address.address_name)||'';
-              var jibun=(r.address&&r.address.address_name)||r.address_name||'';
-              var label=road||jibun||String(query||'').trim();
-              return {
-                id:'address:'+String(r.x||'')+','+String(r.y||''),
-                place_name:label,
-                address_name:jibun||road,
-                road_address_name:road,
-                x:r.x,
-                y:r.y,
-                category_group_code:'',
-                category_name:'주소',
-                __oaiAddress:true
-              };
-            }).filter(function(d){return d.x&&d.y;});
-            done(docs);
-          }catch(_e){ done([]); }
+            geocoder.addressSearch(v,function(result,status){
+              try{
+                var OK=kakao.maps.services.Status.OK;
+                if(status===OK&&result&&result.length) groups.push(_mapAddressResults(result,v));
+              }catch(_e){}
+              finishOne();
+            });
+          }catch(_e){ finishOne(); }
         });
-        setTimeout(function(){done([]);},4500);
+        setTimeout(function(){if(!settled){settled=true;resolve(_dedupeKakaoDocs(groups,max||10));}},5000);
       }catch(_e){ resolve([]); }
     });
   }).catch(function(){ return []; });
 }
+function _kakaoKeywordDocsForVariants(query,max){
+  var variants=_kakaoAddressQueryVariants(query);
+  return Promise.all(variants.map(function(v){return _kakaoKeywordDocs(v,max).catch(function(){return [];});}))
+    .then(function(groups){return _dedupeKakaoDocs(groups,max);});
+}
 function _kakaoPlaceAndAddressDocs(query, limit){
   var max=Math.max(1,parseInt(limit||10,10)||10);
   return Promise.all([
-    _kakaoKeywordDocs(query,max).catch(function(){return [];}),
+    _kakaoKeywordDocsForVariants(query,max).catch(function(){return [];}),
     _kakaoAddressDocsFromJs(query,Math.min(10,max)).catch(function(){return [];})
   ]).then(function(groups){
-    /* 주소 결과를 먼저 두면 사용자가 주소를 그대로 입력했을 때 바로 찾기 쉽다. */
     return _dedupeKakaoDocs([groups[1]||[],groups[0]||[]],max);
   });
 }
@@ -12473,6 +12505,9 @@ function _renderAllRouteResults(body,records){
     return `<div class="sm-item sm-route-result" data-sm-scope="all" data-sm-index="${index}"><div class="sm-role" style="background:${c}">${_routeRoleShort(_smRole)}</div><div class="sm-info"><div class="sm-name">${_placeText(item.name)}</div><div class="sm-sub">${_placeText(sub)}</div></div><span class="sm-badge" style="color:${record.color};background:${record.color}18">${_placeText(record.badge)}</span></div>`;
   }).join('');
 }
+function _withSearchTimeout(promise,ms,fallback){
+  return Promise.race([Promise.resolve(promise),new Promise(function(resolve){setTimeout(function(){resolve(fallback);},ms||3500);})]);
+}
 function _searchAllRoutePlaces(q){
   const query=String(q||'').trim();
   const body=$('sm-body-all');
@@ -12481,8 +12516,8 @@ function _searchAllRoutePlaces(q){
   const seq=++_smSearchSeq;
   body.innerHTML='<div class="sm-place-loading">🔍 전체 장소 검색 중...</div>';
   Promise.allSettled([
-    _ensureCatholicRouteSearchData().then(function(){ return _collectCatholicRouteResults(query,false); }),
-    _kakaoPlaceAndAddressDocs(query,KAKAO_PLACE_SEARCH_DISPLAY_LIMIT)
+    _withSearchTimeout(_ensureCatholicRouteSearchData().then(function(){ return _collectCatholicRouteResults(query,false); }),3000,[]),
+    _withSearchTimeout(_kakaoPlaceAndAddressDocs(query,KAKAO_PLACE_SEARCH_DISPLAY_LIMIT),6000,[])
   ]).then(function(results){
     if(seq!==_smSearchSeq||_smTab!=='all') return;
     const catholic=results[0].status==='fulfilled'?results[0].value:[];
