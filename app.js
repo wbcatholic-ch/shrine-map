@@ -13293,7 +13293,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(m)m.classList.add('oai-parish-setup-home');
       if(title)title.textContent='내 교구·본당';
       if(sub)sub.textContent='변경할 항목을 눌러 주세요.';
-      body.innerHTML='<div class="oai-parish-setting-menu"><button type="button" data-oai-setup-open="diocese"><span><small>나의 교구</small><b>'+_visitHtmlEsc(parishSetup.dio||'교구를 선택해 주세요')+'</b></span><i aria-hidden="true">›</i></button><button type="button" data-oai-setup-open="parish"><span><small>나의 본당 (선택)</small><b>'+_visitHtmlEsc((parishSetup.parish&&parishSetup.parish.name)||'설정하지 않음')+'</b></span><i aria-hidden="true">›</i></button></div>';
+      body.innerHTML='<div class="oai-parish-setting-menu"><button type="button" data-oai-setup-open="diocese"><span><small>나의 교구</small><b>'+_visitHtmlEsc(parishSetup.dio||'교구를 선택해 주세요')+'</b></span><i aria-hidden="true">›</i></button><button type="button" data-oai-setup-open="parish"><span><small>나의 본당 (선택)</small><b>'+_visitHtmlEsc((parishSetup.parish&&parishSetup.parish.name)||'설정하지 않음')+'</b></span><i aria-hidden="true">›</i></button></div>'+(initialOnboarding?'<button type="button" class="oai-parish-skip" data-oai-setup-skip="1">나중에 설정하기</button>':'');
       return;
     }
     if(m)m.classList.remove('oai-parish-setup-home');
@@ -13325,7 +13325,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     try{const selected={diocese:p.diocese||parishSetup.dio,name:p.name||''};localStorage.setItem(OAI_SETTINGS_MY_PARISH_KEY,JSON.stringify(selected));localStorage.setItem('oai_my_diocese_name',selected.diocese);localStorage.setItem('oai_my_parish_name',selected.name);localStorage.setItem('oai_my_parish',JSON.stringify(selected));}catch(_e){}
     closeParishSetup();refresh();
     try{window.dispatchEvent(new CustomEvent('oai-my-parish-changed'));}catch(_e){}
-    if(initialOnboarding)openOnboardingBackup();
+    if(initialOnboarding)openInitialDriveOnboarding();
   }
   function saveDioceseSetup(diocese){
     if(!diocese)return;
@@ -13342,18 +13342,16 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     parishSetup.parish=null;
     refresh();
     try{window.dispatchEvent(new CustomEvent('oai-my-parish-changed'));}catch(_e){}
-    if(initialOnboarding){initialOnboarding=false;const m=setupModal();if(m){m.classList.remove('show','oai-parish-setup-home');m.setAttribute('aria-hidden','true');}return;}
+    if(initialOnboarding){parishSetup.view='home';renderParishSetup();return;}
     parishSetup.view='home';renderParishSetup();
   }
   function skipInitialParishSetup(){
     if(!initialOnboarding)return;
-    const m=setupModal();
-    if(m){m.classList.remove('show','oai-parish-setup-home');m.setAttribute('aria-hidden','true');}
-    initialOnboarding=false;
+    openInitialDriveOnboarding();
   }
   function onboardingModal(){return document.getElementById('oai-onboarding-backup-modal');}
   function onboardingMessage(text){const el=document.getElementById('oai-onboarding-backup-message');if(el)el.textContent=text||'';}
-  function closeOnboardingBackup(){const m=onboardingModal();if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}initialOnboarding=false;try{localStorage.setItem(OAI_ONBOARDING_DONE_KEY,'1');}catch(_e){}}
+  function closeOnboardingBackup(){const m=onboardingModal();if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}initialOnboarding=false;try{localStorage.setItem(OAI_ONBOARDING_DONE_KEY,'1');localStorage.setItem(OAI_GOOGLE_PROMPT_DATE_KEY,todayKey());}catch(_e){}}
   function renderOnboardingBackup(risk){
     const body=document.getElementById('oai-onboarding-backup-body');if(!body)return;
     if(risk){body.innerHTML='<p class="oai-onboarding-warning">자동 보관을 켜지 않으면 휴대폰을 바꾸거나 앱을 다시 설치할 때 방문 기록과 즐겨찾기를 잃을 수 있습니다.</p><button type="button" class="oai-records-primary" data-oai-onboarding-connect="1">내 Google Drive에 자동 보관 켜기</button><button type="button" class="oai-onboarding-text-button" data-oai-onboarding-finish="1">그래도 나중에 설정하기</button>';return;}
@@ -13361,6 +13359,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function openOnboardingBackup(){
     const m=onboardingModal();if(!m)return;renderOnboardingBackup(false);m.classList.add('show');m.setAttribute('aria-hidden','false');
+  }
+  function openInitialDriveOnboarding(){
+    const setup=setupModal();
+    if(setup){setup.classList.remove('show','oai-parish-setup-home');setup.setAttribute('aria-hidden','true');}
+    initialOnboarding=false;
+    if(isGoogleDriveAutoBackupEnabled())return;
+    setOnboardingHeader('내 기록을 안전하게 보관하세요.','새 휴대폰에서도 기록을 이어서 사용할 수 있습니다.');
+    openOnboardingBackup();
   }
   function startInitialOnboarding(){
     if(configuredDiocese())return;
