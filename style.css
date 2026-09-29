@@ -6268,3 +6268,7 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 .oai-pilgrimage-item.is-next{border:3px solid #9b6900!important;background:#fffaf0!important;box-shadow:0 0 0 2px rgba(155,105,0,.15),0 4px 12px rgba(95,65,0,.12)!important;}
 .oai-pilgrimage-item.is-next .oai-pilgrimage-main b{color:#7c5300;}
 .oai-pilgrimage-point-search{background:#176fc0!important;border-color:#176fc0!important;color:#fff!important;font-size:calc(18px * var(--app-font-scale,1))!important;font-weight:950!important;}
+
+/* V8-1-14-884: 순서 변경은 약 1초 길게 눌러 활성화 */
+.rs-drag-handle,.oai-pilgrimage-drag{ -webkit-touch-callout:none; }
+.rs-drag-handle.is-dragging,.oai-pilgrimage-drag.is-dragging{ transition:transform .12s ease,box-shadow .12s ease,background .12s ease; }

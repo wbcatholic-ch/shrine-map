@@ -9048,7 +9048,12 @@ function _getRoutePointByRole(role){
   const cfg=_getRouteWaypointConfig(role);
   return cfg ? window[cfg.pointKey] : null;
 }
+function _stampRouteVisualRole(point, role){
+  if(point && !point.__routeVisualRole) point.__routeVisualRole=role;
+  return point;
+}
 function _setRoutePointByRole(role, obj){
+  obj=_stampRouteVisualRole(obj,role);
   if(role==='start'){ _rS=obj; return; }
   if(role==='end'){ _rE=obj; return; }
   const cfg=_getRouteWaypointConfig(role);
@@ -9144,7 +9149,7 @@ function _setRoutePointFromItem(role,item,idx){
     _restoreRouteMarkerVisual('start',_rS);
     _routeRegionStart=null;
     _routeStartMarkerExplicitCurrent=false;
-    _rS={idx:idx,name:item.name,lat:item.lat,lng:item.lng};
+    _rS=_stampRouteVisualRole({idx:idx,name:item.name,lat:item.lat,lng:item.lng},'start');
     _setRouteLabel('start',item.name);
     if(_mode==='shrine'&&_shouldShowRouteStartMarker()&&idx>=0&&_markers[idx]){ _markers[idx].marker.setImage(_mkrImgRoute('#ff0000','출')); _setRouteMarkerZ(idx,'start'); }
     _refreshRouteTmpMarkers();
@@ -9163,7 +9168,7 @@ function _setRoutePointFromItem(role,item,idx){
     if(_rS&&_rE){ _hideRouteGuide(); _updateSearchBtn(); }
   }else{
     _restoreRouteMarkerVisual('end',_rE);
-    _rE={idx:idx,name:item.name,lat:item.lat,lng:item.lng};
+    _rE=_stampRouteVisualRole({idx:idx,name:item.name,lat:item.lat,lng:item.lng},'end');
     if(_mode==='shrine'&&idx>=0&&_markers[idx]){ _markers[idx].marker.setImage(_mkrImgRoute(_typeColor(item.type),'도')); _setRouteMarkerZ(idx,'end'); }
     _setRouteLabel('end',item.name);
     _refreshRouteTmpMarkers();
@@ -11308,7 +11313,7 @@ function _ensureCurrentLocationStart(){
   if(_rS&&_rS.lat&&_rS.lng) return;
   if(_routeRegionStart&&_routeRegionStart.lat&&_routeRegionStart.lng){
     _routeStartMarkerExplicitCurrent=false;
-    _rS={idx:-1,name:_routeRegionStart.name||'📍 검색지',lat:_routeRegionStart.lat,lng:_routeRegionStart.lng,isRegionStart:true};
+    _rS=_stampRouteVisualRole({idx:-1,name:_routeRegionStart.name||'📍 검색지',lat:_routeRegionStart.lat,lng:_routeRegionStart.lng,isRegionStart:true},'start');
     _setRouteLabel('start',_rS.name);
     _refreshRouteTmpMarkers();
     _updateSearchBtn();
@@ -11319,7 +11324,7 @@ function _ensureCurrentLocationStart(){
     else { _myLat=lat; _myLng=lng; }
     if(!_rS || (_rS && _rS.isImplicitCurrentLocation)){
       _routeStartMarkerExplicitCurrent=false;
-      _rS={idx:-1,name:'현재 위치',lat:lat,lng:lng,isImplicitCurrentLocation:true};
+      _rS=_stampRouteVisualRole({idx:-1,name:'현재 위치',lat:lat,lng:lng,isImplicitCurrentLocation:true},'start');
       _setRouteLabel('start','');
       _refreshRouteTmpMarkers();
       _updateSearchBtn();
@@ -11372,7 +11377,7 @@ function setMyLocAsStart(){
     _clearRouteTmpMarkers();
     if(_mode==='shrine'&&_rS&&_rS.idx>=0&&_markers[_rS.idx]) _markers[_rS.idx].marker.setImage(_mkrImg(_shrineMarkerColor(_markers[_rS.idx].shrine),false));
     _routeStartMarkerExplicitCurrent=true;
-    _rS={idx:-1,name:'현재 위치',lat:lat,lng:lng,isImplicitCurrentLocation:false,showStartMarker:true};
+    _rS=_stampRouteVisualRole({idx:-1,name:'현재 위치',lat:lat,lng:lng,isImplicitCurrentLocation:false,showStartMarker:true},'start');
     _setRouteLabel('start','현위치');
     _refreshRouteTmpMarkers();
     if(_rE) _updateSearchBtn();
@@ -11759,7 +11764,7 @@ function _setCurrentLocationForRouteRole(role){
     if(!fromCache) _setMyLoc(lat,lng); else {_myLat=lat;_myLng=lng;}
     if(role==='start'){
       _routeRegionStart=null; _routeStartMarkerExplicitCurrent=true;
-      _rS={idx:-1,name:'현재 위치',lat:Number(lat),lng:Number(lng),isImplicitCurrentLocation:false,showStartMarker:true};
+      _rS=_stampRouteVisualRole({idx:-1,name:'현재 위치',lat:Number(lat),lng:Number(lng),isImplicitCurrentLocation:false,showStartMarker:true},'start');
       _setRouteLabel('start','현위치'); _refreshRouteTmpMarkers(); _updateSearchBtn();
     }else{
       _setRoutePointFromItem('end',{name:'현재 위치',addr:'',lat:Number(lat),lng:Number(lng)},-1);
@@ -11861,6 +11866,43 @@ function doSearchRoute(){ document.activeElement&&document.activeElement.blur();
 function _routePointName(point){
   return point && point.name ? point.name : '';
 }
+function _routeVisualPalette(role){
+  const map={
+    start:{bg:'#f0f5ff',border:'#1565c0',dot:'#1565c0',quickBorder:'#87a8d8',quickColor:'#1559a0',quickBg:'#f8fbff'},
+    waypoint:{bg:'#fff8e9',border:'#f39c12',dot:'#f39c12'},
+    waypoint2:{bg:'#fff4df',border:'#d97706',dot:'#d97706'},
+    waypoint3:{bg:'#fff1dc',border:'#b45309',dot:'#b45309'},
+    waypoint4:{bg:'#ffede2',border:'#92400e',dot:'#92400e'},
+    waypoint5:{bg:'#fde8dc',border:'#78350f',dot:'#78350f'},
+    end:{bg:'#fff5f5',border:'#c0392b',dot:'#e53935',quickBorder:'#d9a09b',quickColor:'#a53028',quickBg:'#fffafa'}
+  };
+  return map[role]||map.start;
+}
+function _applyRoutePointVisual(role){
+  const box=_routeBoxByRole(role);
+  if(!box) return;
+  const point=_getRoutePointByRole(role);
+  const visualRole=(point&&point.__routeVisualRole)||role;
+  const pal=_routeVisualPalette(visualRole);
+  box.style.backgroundColor=pal.bg;
+  box.style.borderColor=pal.border;
+  box.dataset.routeVisualRole=visualRole;
+  const dot=box.querySelector('.rs-dot');
+  if(dot) dot.style.backgroundColor=pal.dot;
+  const quick=box.querySelector('.rs-quick-select');
+  if(quick){
+    const qpal=(pal.quickBorder?pal:_routeVisualPalette(role));
+    quick.style.borderColor=qpal.quickBorder||pal.border;
+    quick.style.color=qpal.quickColor||pal.border;
+    quick.style.backgroundColor=qpal.quickBg||'#fff';
+  }
+}
+function _syncRoutePointVisuals(){
+  _applyRoutePointVisual('start');
+  OAI_ROUTE_WAYPOINT_CONFIGS.forEach(function(cfg){ _applyRoutePointVisual(cfg.role); });
+  _applyRoutePointVisual('end');
+}
+
 function _syncRoutePointLabels(){
   _setRouteLabel('start', _routePointName(_rS));
   OAI_ROUTE_WAYPOINT_CONFIGS.forEach(function(cfg){
@@ -11868,6 +11910,7 @@ function _syncRoutePointLabels(){
   });
   _setRouteLabel('end', _routePointName(_rE));
   _syncRouteWaypointBox();
+  _syncRoutePointVisuals();
 }
 function _repaintRoutePointMarkers(){
   try{
@@ -11994,35 +12037,43 @@ function _reorderRouteReadyPoints(sourceRole,targetRole){
   return true;
 }
 function _bindRouteDragHandles(){
+  const HOLD_MS=1000;
+  const CANCEL_MOVE_PX=10;
   document.querySelectorAll('.rs-drag-handle[data-route-drag]').forEach(function(handle){
     if(handle.dataset.routeDragBound==='1') return;
     handle.dataset.routeDragBound='1';
     handle.addEventListener('click',function(e){ e.preventDefault(); e.stopPropagation(); });
+    handle.addEventListener('contextmenu',function(e){ e.preventDefault(); e.stopPropagation(); });
 
-    function _routeDragHaptic(){
-      try{
-        if(window.Android && typeof window.Android.vibrate==='function'){ window.Android.vibrate(12); return; }
-      }catch(_e){}
-      try{ if(navigator.vibrate) navigator.vibrate(14); }catch(_e){}
+    function _routeDragHaptic(ms){
+      try{ if(window.Android && typeof window.Android.vibrate==='function'){ window.Android.vibrate(ms||18); return; } }catch(_e){}
+      try{ if(navigator.vibrate) navigator.vibrate(ms||18); }catch(_e){}
     }
-    function beginDrag(pointerId, clientY){
+    function clearPending(st){ if(st&&st.holdTimer){ clearTimeout(st.holdTimer); st.holdTimer=0; } }
+    function armDrag(pointerId, clientY){
       const role=handle.dataset.routeDrag;
       if(!_routePointReady(_getRoutePointByRole(role))) return false;
-      _routeDragState={pointerId:pointerId,sourceRole:role,targetRole:role,startY:clientY,dragging:false,handle:handle};
-      handle.classList.add('is-dragging');
-      const src=_routeBoxByRole(role); if(src) src.classList.add('rs-drag-source');
-      _routeDragHaptic();
+      const st={pointerId:pointerId,sourceRole:role,targetRole:role,startY:clientY,lastY:clientY,active:false,handle:handle,holdTimer:0};
+      st.holdTimer=setTimeout(function(){
+        if(_routeDragState!==st) return;
+        st.holdTimer=0; st.active=true;
+        handle.classList.add('is-dragging');
+        const src=_routeBoxByRole(role); if(src) src.classList.add('rs-drag-source');
+        _routeDragHaptic(24);
+      },HOLD_MS);
+      _routeDragState=st;
       return true;
     }
     function moveDrag(pointerId, clientY){
       const st=_routeDragState;
       if(!st || st.pointerId!==pointerId || st.handle!==handle) return false;
-      if(!st.dragging && Math.abs(clientY-st.startY)>=4){
-        st.dragging=true;
+      st.lastY=clientY;
+      if(!st.active){
+        if(Math.abs(clientY-st.startY)>CANCEL_MOVE_PX){ clearPending(st); _routeDragState=null; }
+        return true;
       }
-      if(!st.dragging) return true;
       const target=_routeDragTargetAt(clientY) || st.sourceRole;
-      st.targetRole=target;
+      if(target!==st.targetRole){ st.targetRole=target; _routeDragHaptic(10); }
       document.querySelectorAll('.rs-drag-over').forEach(function(el){el.classList.remove('rs-drag-over');});
       const box=_routeBoxByRole(target); if(box) box.classList.add('rs-drag-over');
       return true;
@@ -12030,21 +12081,25 @@ function _bindRouteDragHandles(){
     function finishDrag(pointerId){
       const st=_routeDragState;
       if(!st || st.pointerId!==pointerId || st.handle!==handle) return false;
-      _routeDragState=null;
+      clearPending(st); _routeDragState=null;
       _clearRouteDragClasses();
-      if(st.dragging) _reorderRouteReadyPoints(st.sourceRole,st.targetRole);
+      if(st.active && st.sourceRole!==st.targetRole){
+        const changed=_reorderRouteReadyPoints(st.sourceRole,st.targetRole);
+        if(changed){ _routeDragHaptic(32); _syncRoutePointVisuals(); }
+      }
       return true;
     }
 
     handle.addEventListener('pointerdown',function(e){
-      if(e.pointerType==='touch') return; // touch is handled below for Android WebView reliability
-      if(!beginDrag('p'+e.pointerId,e.clientY)) return;
-      e.preventDefault(); e.stopPropagation();
+      if(e.pointerType==='touch') return;
+      if(!armDrag('p'+e.pointerId,e.clientY)) return;
+      e.stopPropagation();
       try{ handle.setPointerCapture(e.pointerId); }catch(_e){}
     });
     handle.addEventListener('pointermove',function(e){
       if(e.pointerType==='touch') return;
-      if(moveDrag('p'+e.pointerId,e.clientY)){ e.preventDefault(); e.stopPropagation(); }
+      const st=_routeDragState;
+      if(moveDrag('p'+e.pointerId,e.clientY) && st && st.active){ e.preventDefault(); e.stopPropagation(); }
     });
     const pointerFinish=function(e){
       if(e.pointerType==='touch') return;
@@ -12057,8 +12112,8 @@ function _bindRouteDragHandles(){
 
     handle.addEventListener('touchstart',function(e){
       const t=e.changedTouches && e.changedTouches[0]; if(!t) return;
-      if(!beginDrag('t'+t.identifier,t.clientY)) return;
-      e.preventDefault(); e.stopPropagation();
+      if(!armDrag('t'+t.identifier,t.clientY)) return;
+      e.stopPropagation();
     },{passive:false});
     handle.addEventListener('touchmove',function(e){
       const st=_routeDragState; if(!st || st.handle!==handle || String(st.pointerId).charAt(0)!=='t') return;
@@ -12066,18 +12121,17 @@ function _bindRouteDragHandles(){
       for(let i=0;i<e.changedTouches.length;i++) if('t'+e.changedTouches[i].identifier===st.pointerId){t=e.changedTouches[i];break;}
       if(!t && e.touches && e.touches.length) t=e.touches[0];
       if(!t) return;
-      if(moveDrag(st.pointerId,t.clientY)){ e.preventDefault(); e.stopPropagation(); }
+      const wasActive=st.active;
+      if(moveDrag(st.pointerId,t.clientY) && (wasActive || (_routeDragState&&_routeDragState.active))){ e.preventDefault(); e.stopPropagation(); }
     },{passive:false});
     const touchFinish=function(e){
       const st=_routeDragState; if(!st || st.handle!==handle || String(st.pointerId).charAt(0)!=='t') return;
-      let id=st.pointerId;
-      if(finishDrag(id)){ e.preventDefault(); e.stopPropagation(); }
+      if(finishDrag(st.pointerId)){ e.preventDefault(); e.stopPropagation(); }
     };
     handle.addEventListener('touchend',touchFinish,{passive:false});
     handle.addEventListener('touchcancel',touchFinish,{passive:false});
   });
 }
-
 
 function _setRouteResultTipVisible(visible){
   const tip=$('rs-result-tip');
@@ -14303,7 +14357,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 })();;
 
 
-/* V8-1-14-866: 숨김 개발자 모드 - 계획 UI 단순화, 저장/따라가기 통합 액션 */
+/* V8-1-14-884: 숨김 개발자 모드 - 드래그 1초 길게 누르기 */
 (function installOaiPilgrimagePlannerDev(){
   if(window.__OAI_PILGRIMAGE_PLANNER_DEV_V866__) return;
   window.__OAI_PILGRIMAGE_PLANNER_DEV_V866__=true;
@@ -14458,17 +14512,45 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 
   function reorder(from,to){const list=loadPlan();if(from<0||to<0||from>=list.length||to>=list.length)return false;if(from===to)return false;const moved=list.splice(from,1)[0];list.splice(to,0,moved);savePlan(list,true);renderDetail();if(currentCourseId)updateCurrentCourseProgress();setTimeout(()=>{const card=document.querySelector('#oai-pilgrimage-plan-list [data-plan-index="'+to+'"]');if(card){card.classList.add('is-drop-confirmed');setTimeout(()=>card.classList.remove('is-drop-confirmed'),650);}},30);return true;}
   let drag=null;
+  const OAI_PLAN_DRAG_HOLD_MS=1000;
+  const OAI_PLAN_DRAG_CANCEL_MOVE_PX=10;
   function vibrate(ms){try{if(window.Android&&typeof Android.vibrate==='function')Android.vibrate(ms||18);else if(navigator.vibrate)navigator.vibrate(ms||18);}catch(_e){}}
   function dragCards(){return [...document.querySelectorAll('#oai-pilgrimage-plan-list .oai-pilgrimage-item')];}
   function targetFromY(y){const cards=dragCards();if(!cards.length)return 0;let to=0;for(let i=0;i<cards.length;i++){const r=cards[i].getBoundingClientRect();if(y>=r.top+r.height/2)to=i;else break;}return Math.max(0,Math.min(cards.length-1,to));}
   function clearDragVisuals(){document.querySelectorAll('#oai-pilgrimage-plan-list .oai-pilgrimage-item').forEach(c=>{c.classList.remove('is-drag-source','is-drop-target');c.style.removeProperty('--drag-y');});document.querySelectorAll('.oai-pilgrimage-drag.is-dragging').forEach(x=>x.classList.remove('is-dragging'));}
-  function startDrag(e,h){const i=parseInt(h.getAttribute('data-plan-drag'),10);if(!Number.isFinite(i))return;const card=h.closest('.oai-pilgrimage-item');drag={index:i,target:i,pointerId:e.pointerId,startY:e.clientY,lastY:e.clientY,card:card};h.classList.add('is-dragging');if(card)card.classList.add('is-drag-source');vibrate(24);try{h.setPointerCapture&&h.setPointerCapture(e.pointerId);}catch(_e){}e.preventDefault();e.stopPropagation();}
-  function moveDrag(e){if(!drag||e.pointerId!==drag.pointerId)return;drag.lastY=e.clientY;const dy=e.clientY-drag.startY;if(drag.card)drag.card.style.setProperty('--drag-y',dy+'px');const to=targetFromY(e.clientY);if(to!==drag.target){drag.target=to;vibrate(10);}dragCards().forEach((c,i)=>c.classList.toggle('is-drop-target',i===drag.target&&i!==drag.index));e.preventDefault();}
-  function endDrag(e){if(!drag)return;const from=drag.index,to=Number.isFinite(drag.target)?drag.target:targetFromY(e.clientY);clearDragVisuals();drag=null;const changed=reorder(from,to);if(changed)vibrate(32);else{const card=document.querySelector('#oai-pilgrimage-plan-list [data-plan-index="'+from+'"]');if(card){card.classList.add('is-drop-same');setTimeout(()=>card.classList.remove('is-drop-same'),420);}}}
-  document.addEventListener('pointerdown',e=>{const h=e.target&&e.target.closest&&e.target.closest('[data-plan-drag]');if(h)startDrag(e,h);},true);
+  function cancelPlanDrag(){if(drag&&drag.holdTimer){clearTimeout(drag.holdTimer);}clearDragVisuals();drag=null;}
+  function armPlanDrag(e,h){
+    const i=parseInt(h.getAttribute('data-plan-drag'),10);if(!Number.isFinite(i))return;
+    const card=h.closest('.oai-pilgrimage-item');
+    const st={index:i,target:i,pointerId:e.pointerId,startY:e.clientY,lastY:e.clientY,card:card,handle:h,active:false,holdTimer:0};
+    st.holdTimer=setTimeout(()=>{
+      if(drag!==st)return;
+      st.holdTimer=0;st.active=true;
+      h.classList.add('is-dragging');if(card)card.classList.add('is-drag-source');vibrate(24);
+      try{h.setPointerCapture&&h.setPointerCapture(st.pointerId);}catch(_e){}
+    },OAI_PLAN_DRAG_HOLD_MS);
+    drag=st;e.stopPropagation();
+  }
+  function moveDrag(e){
+    if(!drag||e.pointerId!==drag.pointerId)return;
+    drag.lastY=e.clientY;
+    if(!drag.active){if(Math.abs(e.clientY-drag.startY)>OAI_PLAN_DRAG_CANCEL_MOVE_PX)cancelPlanDrag();return;}
+    const dy=e.clientY-drag.startY;if(drag.card)drag.card.style.setProperty('--drag-y',dy+'px');
+    const to=targetFromY(e.clientY);if(to!==drag.target){drag.target=to;vibrate(10);}dragCards().forEach((c,i)=>c.classList.toggle('is-drop-target',i===drag.target&&i!==drag.index));e.preventDefault();e.stopPropagation();
+  }
+  function endDrag(e){
+    if(!drag||e.pointerId!==drag.pointerId)return;
+    const st=drag;if(st.holdTimer)clearTimeout(st.holdTimer);
+    if(!st.active){drag=null;clearDragVisuals();return;}
+    const from=st.index,to=Number.isFinite(st.target)?st.target:targetFromY(e.clientY);clearDragVisuals();drag=null;
+    const changed=reorder(from,to);if(changed)vibrate(32);else{const card=document.querySelector('#oai-pilgrimage-plan-list [data-plan-index="'+from+'"]');if(card){card.classList.add('is-drop-same');setTimeout(()=>card.classList.remove('is-drop-same'),420);}}
+    e.preventDefault();e.stopPropagation();
+  }
+  document.addEventListener('pointerdown',e=>{const h=e.target&&e.target.closest&&e.target.closest('[data-plan-drag]');if(h)armPlanDrag(e,h);},true);
   document.addEventListener('pointermove',e=>{if(drag)moveDrag(e);},true);
   document.addEventListener('pointerup',e=>{if(drag)endDrag(e);},true);
-  document.addEventListener('pointercancel',()=>{clearDragVisuals();drag=null;},true);
+  document.addEventListener('pointercancel',()=>{cancelPlanDrag();},true);
+  document.addEventListener('contextmenu',e=>{const h=e.target&&e.target.closest&&e.target.closest('[data-plan-drag]');if(h){e.preventDefault();e.stopPropagation();}},true);
 
   document.addEventListener('click',function(e){const t=e.target&&e.target.closest?e.target.closest('#oai-settings-version-tap,[data-oai-pilgrimage-open],[data-oai-pilgrimage-close],[data-oai-pilgrimage-new],[data-course-open],[data-course-delete],[data-oai-pilgrimage-back-list],[data-oai-pilgrimage-back-detail],[data-oai-pilgrimage-add],[data-oai-pilgrimage-point],[data-oai-pilgrimage-point-close],[data-oai-pilgrimage-point-current],[data-pilgrimage-frequent],[data-oai-pilgrimage-point-search],[data-oai-pilgrimage-save-cancel],[data-oai-pilgrimage-save-confirm],[data-oai-pilgrimage-rename],[data-oai-pilgrimage-save],[data-oai-pilgrimage-follow],[data-oai-pilgrimage-follow-route],[data-oai-pilgrimage-follow-done],[data-oai-pilgrimage-follow-recalc],[data-oai-pilgrimage-follow-undo],[data-oai-pilgrimage-reset],[data-plan-done],[data-plan-remove]'):null;if(!t)return;
     if(t.id==='oai-settings-version-tap'){e.preventDefault();clearTimeout(versionTapTimer);versionTapCount++;versionTapTimer=setTimeout(()=>versionTapCount=0,1800);if(versionTapCount>=5){versionTapCount=0;setDev(true);alert('개발자 모드가 활성화되었습니다.');const g=document.getElementById('oai-developer-group');if(g)g.scrollIntoView({behavior:'smooth',block:'center'});}return;}
