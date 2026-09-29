@@ -3163,6 +3163,7 @@ function _registerAutoShrineVisit(entry){
     const date=_todayISODate();
     if(_hasShrineVisitOnDate(entry.item,date)) return false;
     if(!_addShrineVisit(entry.item,date,'gps')) return false;
+    try{ if(typeof window._oaiMarkPilgrimagePlanVisitedByShrine==='function') window._oaiMarkPilgrimagePlanVisitedByShrine(entry.item); }catch(_e){}
     _markAutoVisitPromptedToday(entry.item,date,'registered');
     if(_curInfoItem&&_curInfoItem.item===entry.item) _renderInfoCardShrineVisit(entry.item);
     try{ if(_activeTab==='list') renderList(); }catch(_e){}
@@ -14402,6 +14403,29 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function openFollow(){if(!loadPlan().length){alert('순례 장소를 먼저 등록해 주세요.');return;}if(!currentCourseId){pendingAfterSave='follow';openSaveModal(false);return;}updateCurrentCourseProgress();setView('follow');const t=targetInfo();const n=document.getElementById('oai-pilgrimage-follow-next'),a=document.getElementById('oai-pilgrimage-follow-addr'),doneBtn=document.querySelector('[data-oai-pilgrimage-follow-done]'),actions=document.querySelector('.oai-pilgrimage-follow-actions');updateFollowHeader();if(n)n.textContent=t?t.item.name:'순례 완료';if(a)a.textContent=t?(t.item.addr||''):'';if(doneBtn){doneBtn.style.display=t&&t.index>=0?'':'none';}if(actions)actions.classList.toggle('single',!(t&&t.index>=0));calcFollowDistance();}
   function refreshFollow(){const t=targetInfo(),n=document.getElementById('oai-pilgrimage-follow-next'),a=document.getElementById('oai-pilgrimage-follow-addr'),doneBtn=document.querySelector('[data-oai-pilgrimage-follow-done]'),actions=document.querySelector('.oai-pilgrimage-follow-actions');updateFollowHeader();if(n)n.textContent=t?t.item.name:'순례 완료';if(a)a.textContent=t?(t.item.addr||''):'';if(doneBtn)doneBtn.style.display=t&&t.index>=0?'':'none';if(actions)actions.classList.toggle('single',!(t&&t.index>=0));calcFollowDistance();}
+  function _normPilgrimageName(v){return String(v||'').replace(/\s+/g,'').replace(/[()（）·ㆍ\-_,.]/g,'').toLowerCase();}
+  window._oaiMarkPilgrimagePlanVisitedByShrine=function(shrine){
+    try{
+      if(!shrine) return false;
+      const list=loadPlan(); if(!list.length) return false;
+      const sn=_normPilgrimageName(shrine.name), slat=Number(shrine.lat), slng=Number(shrine.lng);
+      let changed=false;
+      list.forEach(function(item){
+        if(!item||item.done) return;
+        const sameName=sn && _normPilgrimageName(item.name)===sn;
+        const ilat=Number(item.lat), ilng=Number(item.lng);
+        const near=Number.isFinite(slat)&&Number.isFinite(slng)&&Number.isFinite(ilat)&&Number.isFinite(ilng)&&calcDist(slat,slng,ilat,ilng)<=0.15;
+        if(sameName||near){ item.done=true; changed=true; }
+      });
+      if(!changed) return false;
+      savePlan(list,true);
+      if(currentCourseId) updateCurrentCourseProgress();
+      if(plannerView==='follow') refreshFollow(); else if(plannerView==='detail') renderDetail();
+      try{vibrate(28);}catch(_e){}
+      return true;
+    }catch(e){console.warn('[가톨릭길동무] 순례계획 GPS 완료 연동 실패',e);return false;}
+  };
+
   window._oaiPilgrimageBackHandle=function(){
     try{return plannerBackOrClose();}
     catch(e){ console.warn('[가톨릭길동무] 순례계획 뒤로가기 처리 실패',e); return false; }
