@@ -13047,9 +13047,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function todayKey(){try{return new Date().toLocaleDateString('en-CA',{timeZone:'Asia/Seoul'});}catch(_e){return new Date().toISOString().slice(0,10);}}
   function refresh(){
     const m=modal(); if(!m) return;
-    const parish=configuredParish(), diocese=configuredDiocese(), dioceseSummary=document.getElementById('oai-settings-diocese-summary'), summary=document.getElementById('oai-settings-parish-summary'), input=document.getElementById('oai-settings-auto-visit');
+    const parish=configuredParish(), diocese=configuredDiocese(), dioceseSummary=document.getElementById('oai-settings-diocese-summary'), summary=document.getElementById('oai-settings-parish-summary'), combinedRow=document.getElementById('oai-settings-diocese-parish-row'), dioceseRow=document.getElementById('oai-settings-diocese-row'), parishRow=document.getElementById('oai-settings-parish-row'), combinedSummary=document.getElementById('oai-settings-diocese-parish-summary'), input=document.getElementById('oai-settings-auto-visit');
     if(dioceseSummary) dioceseSummary.textContent=diocese||'나의 교구 설정';
     if(summary) summary.textContent=parish ? (parish.name||'나의 본당 설정') : '나의 본당 설정';
+    const hasDioceseAndParish=!!(diocese&&parish&&parish.name);
+    if(combinedRow) combinedRow.hidden=!hasDioceseAndParish;
+    if(dioceseRow) dioceseRow.hidden=hasDioceseAndParish;
+    if(parishRow) parishRow.hidden=hasDioceseAndParish;
+    if(combinedSummary&&hasDioceseAndParish) combinedSummary.textContent=diocese+' · '+parish.name;
     if(input){ input.disabled=!parish; input.checked=parish ? _isMyParishAutoVisitEnabled() : false; }
     refreshGoogleDriveButton();
   }
