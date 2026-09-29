@@ -1,6 +1,12 @@
-V8-1-14-844
-- index.html: 길찾기 출발/도착의 별표와 현위치 단독 버튼을 제거하고 '빠른선택' 버튼 추가. 모든 위아래 교환 화살표 제거. 드래그 손잡이를 입력 박스 밖 오른쪽 영역으로 이동. 설정에 자주 가는 장소 관리 UI와 빠른선택 팝업 추가.
-- app.js: 자주 가는 장소를 설정에서 최대 5개 등록/삭제하도록 변경. 현재 위치 등록 및 장소 검색 등록 지원. 출발/도착 빠른선택에서 현재 위치와 등록 장소 선택 지원. 검색 등록 모드 및 빠른선택 로직 추가. 기존 별표 저장 방식 제거 경로 정리.
-- style.css: 빠른선택 버튼, 박스 밖 드래그 손잡이, 빠른선택 팝업, 설정의 자주 가는 장소 UI 스타일 추가.
-- assets/guide/settings-overview.jpg: 설정 안내 이미지에 자주 가는 장소 항목 반영.
-- sw.js, version.json: V8-1-14-844 캐시/빌드 버전 갱신.
+V8-1-14-854
+- index.html
+- style.css
+- app.js
+- sw.js
+- version.json
+
+Changes:
+- Settings always opens scrolled to the top.
+- Hidden developer mode appears after tapping the version label 5 times.
+- Developer pilgrimage planner: add/search places, reorder by drag handle, mark visited, remove/reset, route to next stop.
+- Pilgrimage plan is included in Google Drive backup data.
