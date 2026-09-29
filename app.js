@@ -11594,7 +11594,7 @@ function _renderRouteFrequentSettings(){
   if(count) count.textContent=list.length+' / '+OAI_ROUTE_FAVORITES_MAX;
   if(!list.length){ body.innerHTML='<div class="oai-settings-frequent-empty"><span aria-hidden="true">⌖</span><div><b>등록된 장소가 없습니다</b><small>아래 버튼에서 장소를 검색해 등록하세요.</small></div></div>'; return; }
   body.innerHTML=list.map(function(f,i){
-    return '<div class="oai-settings-frequent-item"><em>'+(i+1)+'</em><span><b>'+_placeText(f.name)+'</b><small>'+_placeText(f.addr||'등록된 장소')+'</small></span><button type="button" data-oai-frequent-remove="'+i+'" aria-label="'+_placeText(f.name)+' 삭제">×</button></div>';
+    return '<div class="oai-settings-frequent-item"><em>'+(i+1)+'</em><span><b>'+_placeText(f.name)+'</b><small>'+_placeText(f.addr||'등록된 장소')+'</small></span><div class="oai-settings-frequent-item-actions"><button type="button" class="edit" data-oai-frequent-edit="'+i+'" aria-label="'+_placeText(f.name)+' 이름 수정">수정</button><button type="button" class="remove" data-oai-frequent-remove="'+i+'" aria-label="'+_placeText(f.name)+' 삭제">×</button></div></div>';
   }).join('');
 }
 function _registerFrequentCurrentLocation(){
@@ -11615,47 +11615,67 @@ function _registerFrequentCurrentLocation(){
   });
 }
 let _pendingFrequentNicknamePlace=null;
-let _returnToSettingsAfterFrequentNickname=false;
-function _restoreSettingsAfterFrequentNickname(){
-  if(!_returnToSettingsAfterFrequentNickname) return;
-  _returnToSettingsAfterFrequentNickname=false;
-  const returnToCover=!!_frequentSearchReturnToCover;
-  _frequentSearchReturnToCover=false;
+let _frequentNicknameMode='add';
+let _frequentNicknameEditIndex=-1;
+let _frequentNicknameReturnToCover=false;
+function _openFrequentSettingsAfterNickname(){
+  const returnToCover=!!_frequentNicknameReturnToCover;
+  _frequentNicknameReturnToCover=false;
   setTimeout(function(){
     try{
-      if(typeof window.openOaiSettings==='function') window.openOaiSettings({fromFrequentPlace:true,returnToCover:returnToCover});
+      if(typeof window.openOaiSettings==='function'){
+        window.openOaiSettings({fromFrequentPlace:true,returnToCover:returnToCover});
+        setTimeout(function(){
+          try{
+            const group=document.querySelector('.oai-settings-frequent-group');
+            if(group&&typeof group.scrollIntoView==='function') group.scrollIntoView({block:'center',behavior:'smooth'});
+          }catch(_e){}
+        },80);
+      }
     }catch(_e){}
-  },80);
+  },60);
 }
 function _closeFrequentNicknameDialog(options){
   const modal=$('oai-frequent-nickname-modal');
   if(modal){ modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); }
+  const wasAdd=_frequentNicknameMode==='add';
   _pendingFrequentNicknamePlace=null;
-  if(!options||options.restoreSettings!==false) _restoreSettingsAfterFrequentNickname();
+  _frequentNicknameMode='add';
+  _frequentNicknameEditIndex=-1;
+  if(wasAdd && (!options||options.restoreSettings!==false)) _openFrequentSettingsAfterNickname();
 }
-function _openFrequentNicknameDialog(item){
+function _openFrequentNicknameDialog(item,options){
   if(!item) return false;
+  options=options||{};
+  const isEdit=options.mode==='edit';
   const addr=String(item.addr||item.road_address_name||item.address_name||'').trim();
   const originalName=String(item.name||item.place_name||'장소').trim()||'장소';
   _pendingFrequentNicknamePlace={name:originalName,addr:addr,lat:Number(item.lat),lng:Number(item.lng),sourceMode:String(item.sourceMode||_mode||'')};
-  /* 검색 결과를 고른 뒤 설정 화면을 먼저 복원하면 닉네임 창이 설정 뒤로 숨는 문제가 생긴다.
-     검색 → 닉네임 입력 → 저장/취소 → 설정 복귀 순서로만 진행한다. */
-  _returnToSettingsAfterFrequentNickname=!!_returnToSettingsAfterFrequentSearch;
-  _returnToSettingsAfterFrequentSearch=false;
-  closeSearchModal();
+  _frequentNicknameMode=isEdit?'edit':'add';
+  _frequentNicknameEditIndex=isEdit?Number(options.index):-1;
+  if(!isEdit){
+    /* 검색에서 돌아올 위치를 먼저 보관한 뒤 검색 모달을 닫는다. */
+    _frequentNicknameReturnToCover=!!_frequentSearchReturnToCover;
+    _frequentSearchReturnToCover=false;
+    _returnToSettingsAfterFrequentSearch=false;
+    closeSearchModal();
+  }
   setTimeout(function(){
-    const modal=$('oai-frequent-nickname-modal'), input=$('oai-frequent-nickname-input'), address=$('oai-frequent-nickname-address');
+    const modal=$('oai-frequent-nickname-modal'), input=$('oai-frequent-nickname-input'), address=$('oai-frequent-nickname-address'), title=$('oai-frequent-nickname-title');
     if(!modal||!input){
       _pendingFrequentNicknamePlace=null;
-      _restoreSettingsAfterFrequentNickname();
+      if(!isEdit) _openFrequentSettingsAfterNickname();
       return;
     }
+    if(title) title.textContent=isEdit?'장소 이름 수정':'장소 이름';
     if(address) address.textContent=addr||originalName;
-    input.value=originalName;
+    /* 새 등록은 검색한 장소명이 자동 입력되지 않도록 빈칸으로 시작한다. */
+    input.value=isEdit?originalName:'';
+    input.placeholder=isEdit?'새 이름 입력':'예: 집, 사무실';
     modal.classList.add('show');
     modal.setAttribute('aria-hidden','false');
-    setTimeout(function(){try{input.focus({preventScroll:true});input.select();}catch(_e){try{input.focus();input.select();}catch(__e){}}},80);
-  },100);
+    setTimeout(function(){try{input.focus({preventScroll:true});if(isEdit)input.select();}catch(_e){try{input.focus();if(isEdit)input.select();}catch(__e){}}},80);
+  },80);
   return true;
 }
 function _saveFrequentNicknameDialog(){
@@ -11663,20 +11683,49 @@ function _saveFrequentNicknameDialog(){
   if(!point||!input) return false;
   const nickname=String(input.value||'').trim();
   if(!nickname){ input.focus(); return false; }
+  if(_frequentNicknameMode==='edit'){
+    const list=_loadRouteFavorites();
+    const index=_frequentNicknameEditIndex;
+    if(index<0||index>=list.length) return false;
+    list[index].name=nickname;
+    list[index].savedAt=Date.now();
+    _saveRouteFavorites(list);
+    _renderRouteFrequentSettings();
+    _renderRouteFrequentPlaces();
+    _renderRouteQuickList();
+    _updateAllRouteFavoriteButtons();
+    const modal=$('oai-frequent-nickname-modal');
+    if(modal){modal.classList.remove('show');modal.setAttribute('aria-hidden','true');}
+    _pendingFrequentNicknamePlace=null;
+    _frequentNicknameMode='add';
+    _frequentNicknameEditIndex=-1;
+    _showRouteGuideText('장소 이름을 '+nickname+'(으)로 변경했습니다');
+    return true;
+  }
   const ok=_addRouteFrequentPlace({name:nickname,addr:point.addr,lat:point.lat,lng:point.lng,sourceMode:point.sourceMode});
   if(ok){
     const modal=$('oai-frequent-nickname-modal');
     if(modal){ modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); }
     _pendingFrequentNicknamePlace=null;
+    _frequentNicknameMode='add';
+    _frequentNicknameEditIndex=-1;
     _renderRouteFrequentSettings();
+    _renderRouteFrequentPlaces();
+    _renderRouteQuickList();
     _showRouteGuideText(nickname+'을(를) 자주 가는 장소에 등록했습니다');
-    _restoreSettingsAfterFrequentNickname();
+    /* 등록이 끝나면 반드시 설정의 자주 가는 장소 화면으로 복귀한다. */
+    _openFrequentSettingsAfterNickname();
   }
   return ok;
 }
+function _editRouteFrequentPlace(index){
+  const list=_loadRouteFavorites();
+  if(index<0||index>=list.length) return false;
+  return _openFrequentNicknameDialog(list[index],{mode:'edit',index:index});
+}
 function _registerFrequentFromSearch(item){
   if(!item) return false;
-  return _openFrequentNicknameDialog(item);
+  return _openFrequentNicknameDialog(item,{mode:'add'});
 }
 let _routeQuickRole='start';
 function _renderRouteQuickList(){
@@ -14214,11 +14263,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     else launchSearch();
   }
   document.addEventListener('click',function(e){
-    const t=e.target&&e.target.closest?e.target.closest('[data-oai-frequent-add],[data-oai-frequent-remove]'):null;
+    const t=e.target&&e.target.closest?e.target.closest('[data-oai-frequent-add],[data-oai-frequent-edit],[data-oai-frequent-remove]'):null;
     if(!t) return;
     e.preventDefault();e.stopPropagation();
     if(t.hasAttribute('data-oai-frequent-remove')){
       _removeRouteFrequentPlace(parseInt(t.getAttribute('data-oai-frequent-remove'),10));
+      return;
+    }
+    if(t.hasAttribute('data-oai-frequent-edit')){
+      _editRouteFrequentPlace(parseInt(t.getAttribute('data-oai-frequent-edit'),10));
       return;
     }
     if(t.hasAttribute('data-oai-frequent-add')) startFrequentPlaceSearch();
@@ -14341,6 +14394,22 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function openFollow(){if(!loadPlan().length){alert('순례 장소를 먼저 등록해 주세요.');return;}if(!currentCourseId){pendingAfterSave='follow';openSaveModal(false);return;}updateCurrentCourseProgress();setView('follow');const t=targetInfo();const n=document.getElementById('oai-pilgrimage-follow-next'),a=document.getElementById('oai-pilgrimage-follow-addr'),doneBtn=document.querySelector('[data-oai-pilgrimage-follow-done]'),actions=document.querySelector('.oai-pilgrimage-follow-actions');updateFollowHeader();if(n)n.textContent=t?t.item.name:'순례 완료';if(a)a.textContent=t?(t.item.addr||''):'';if(doneBtn){doneBtn.style.display=t&&t.index>=0?'':'none';}if(actions)actions.classList.toggle('single',!(t&&t.index>=0));calcFollowDistance();}
   function refreshFollow(){const t=targetInfo(),n=document.getElementById('oai-pilgrimage-follow-next'),a=document.getElementById('oai-pilgrimage-follow-addr'),doneBtn=document.querySelector('[data-oai-pilgrimage-follow-done]'),actions=document.querySelector('.oai-pilgrimage-follow-actions');updateFollowHeader();if(n)n.textContent=t?t.item.name:'순례 완료';if(a)a.textContent=t?(t.item.addr||''):'';if(doneBtn)doneBtn.style.display=t&&t.index>=0?'':'none';if(actions)actions.classList.toggle('single',!(t&&t.index>=0));calcFollowDistance();}
+  window._oaiPilgrimageBackHandle=function(){
+    try{
+      const pm=pointModal();
+      if(pm&&pm.classList.contains('show')){ closePointPicker(); return true; }
+      const sm=saveModal();
+      if(sm&&sm.classList.contains('show')){ closeSaveModal(); return true; }
+      const plannerEl=planner();
+      if(!plannerEl||!plannerEl.classList.contains('show')) return false;
+      const follow=document.getElementById('oai-pilgrimage-follow-view');
+      const detail=document.getElementById('oai-pilgrimage-detail-view');
+      if(follow&&!follow.hidden){ setView('detail'); renderDetail(); return true; }
+      if(detail&&!detail.hidden){ setView('list'); renderCourseList(); return true; }
+      closePlanner(); return true;
+    }catch(e){ console.warn('[가톨릭길동무] 순례계획 뒤로가기 처리 실패',e); return false; }
+  };
+
   window._oaiReturnToPilgrimageFollow=function(){
     openPlanner({returnFromSearch:true});
     setView('follow');

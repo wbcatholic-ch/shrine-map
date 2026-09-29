@@ -20,7 +20,7 @@
     try{ var m=document.getElementById('oai-build-marker'); if(m&&m.textContent) values.push(String(m.textContent).trim()); }catch(_e){}
     var best='';
     values.forEach(function(v){ if(v && (!best || compareVersions(v,best)>0)) best=v; });
-    return best || 'V8-1-14-872';
+    return best || 'V8-1-14-875';
   }
   var APP_VERSION = currentDocumentVersion();
   var CHECK_URL = './version.json';
