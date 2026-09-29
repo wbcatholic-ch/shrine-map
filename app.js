@@ -548,6 +548,12 @@ function oaiClearExternalNavigationState(opts){
   var _resumeFreezeTimer = 0;
   var _bgMapStabilizeTimer = 0;
   var _bgMapStableView = null;
+  /* V8-1-14-863: 새 문서(앱 완전 종료 후 재실행)의 첫 native resume를
+     이전 백그라운드 복귀로 오인하지 않도록 현재 문서의 실제 hidden 이력을 함께 본다.
+     별도 패치 레이어를 추가하지 않고 기존 복귀 관리자에서 단일 판단한다. */
+  var _documentStartedAt = Date.now ? Date.now() : new Date().getTime();
+  var _nativeDocumentHasBeenHidden = false;
+  var _nativeInitialResumeConsumed = false;
 
   function now(){ return Date.now ? Date.now() : new Date().getTime(); }
   function isNativeAndroid(){
@@ -1091,6 +1097,28 @@ function oaiClearExternalNavigationState(opts){
       }
       _handledNativeCycles[cycleId]=1;
       window.__OAI_NATIVE_LIFECYCLE_ACTIVE__=true;
+
+      /* 앱 완전 종료 후 새 문서가 뜬 직후 Android가 전달하는 첫 resume에는
+         이전 Activity의 elapsed/forceCover 값이 남아 있을 수 있다. 현재 문서가 실제로
+         hidden 된 적이 없고 background stamp도 없다면 이것은 '복귀'가 아니라 첫 foreground다.
+         이 이벤트가 설정 화면을 몇 초 뒤 커버로 튕기게 하던 원인이었다. */
+      var isFreshDocumentResume = !_nativeInitialResumeConsumed && !_nativeDocumentHasBeenHidden &&
+        !hasRuntimeBackgroundStamp() && (now() - _documentStartedAt) < 30000;
+      _nativeInitialResumeConsumed = true;
+      if(isFreshDocumentResume){
+        clearTimeout(_returnTimer);
+        ++_decisionSeq;
+        clearBgStamp();
+        clearStaleNormalBackgroundGuards('native-fresh-document-foreground');
+        removeLongReturnVeil(0);
+        clearBackgroundReturnIntroStuck('native-fresh-document-foreground');
+        setTimeout(function(){
+          try{ if(typeof window.oaiRefreshCurrentLocation==='function') window.oaiRefreshCurrentLocation({reason:'android-fresh-start',cycleId:cycleId,preserveMapCenter:true}); }catch(_e){}
+        },260);
+        try{ if(window.GildongmuNative && typeof window.GildongmuNative.acknowledgeResumeCycle==='function') window.GildongmuNative.acknowledgeResumeCycle(cycleId); }catch(_e){}
+        return;
+      }
+
       clearTimeout(_returnTimer);
       var seq = ++_decisionSeq;
       setTimeout(function(){
@@ -1109,7 +1137,12 @@ function oaiClearExternalNavigationState(opts){
 
   document.addEventListener('visibilitychange', function(){
     if(isNativeAndroid()){
-      if(document.visibilityState === 'visible') releaseExpiredBackgroundIntro('visibility-visible-native');
+      if(document.visibilityState === 'hidden'){
+        _nativeDocumentHasBeenHidden = true;
+        markBackgrounded('visibility-hidden-native');
+      }else{
+        releaseExpiredBackgroundIntro('visibility-visible-native');
+      }
       return;
     }
     if(document.visibilityState === 'hidden') markBackgrounded('visibility-hidden');
@@ -1117,7 +1150,13 @@ function oaiClearExternalNavigationState(opts){
   }, {passive:true});
 
   window.addEventListener('pagehide', function(){
-    if(isNativeAndroid()) return;
+    if(isNativeAndroid()){
+      if(document.visibilityState === 'hidden' && !_bgArmed){
+        _nativeDocumentHasBeenHidden = true;
+        markBackgrounded('pagehide-hidden-native');
+      }
+      return;
+    }
     if(document.visibilityState === 'hidden' && !_bgArmed) markBackgrounded('pagehide-hidden');
   }, {passive:true});
   window.addEventListener('pageshow', function(){
@@ -13520,6 +13559,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function open(opts){
     const m=modal(); if(!m) return;
+    /* V8-1-14-863: 설정 진입은 명시적인 사용자 foreground 동작이다.
+       새 문서 첫 resume의 오래된 native 복귀값과 충돌하지 않도록 시각만 기록한다. */
+    try{ window.__OAI_LAST_FOREGROUND_UI_ACTION_AT__=Date.now(); }catch(_e){}
     enforceCoverSettingsLabel();
     refresh();
     m.classList.add('show');m.setAttribute('aria-hidden','false');
