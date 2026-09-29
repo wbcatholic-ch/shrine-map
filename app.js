@@ -6412,42 +6412,91 @@ function _kakaoKeywordDocs(query, limit){
   });
 }
 
-/* V8-1-14-858: 길찾기/자주 가는 장소 검색에서 도로명·지번 주소도 직접 검색한다. */
-function _kakaoAddressDocsFromJs(query, max){
-  return new Promise(function(resolve){
+/* V8-1-14-860: 커버/설정에서 바로 주소 검색할 때도 Kakao services SDK를 먼저 준비한다.
+   이전에는 지도 화면을 한 번 열기 전에는 Geocoder가 아직 로드되지 않아 일반 주택 주소 검색이 비는 경우가 있었다. */
+let _oaiKakaoServicesReadyPromise=null;
+function _ensureKakaoServicesReady(){
+  try{
+    if(window.kakao&&kakao.maps&&kakao.maps.services&&kakao.maps.services.Geocoder) return Promise.resolve(true);
+  }catch(_e){}
+  if(_oaiKakaoServicesReadyPromise) return _oaiKakaoServicesReadyPromise;
+  _oaiKakaoServicesReadyPromise=new Promise(function(resolve){
+    let settled=false;
+    function finish(ok){ if(settled)return; settled=true; if(!ok)_oaiKakaoServicesReadyPromise=null; resolve(!!ok); }
+    function readyAfterLoad(){
+      try{
+        if(window.kakao&&kakao.maps&&typeof kakao.maps.load==='function'){
+          kakao.maps.load(function(){
+            try{ finish(!!(kakao.maps.services&&kakao.maps.services.Geocoder)); }catch(_e){ finish(false); }
+          });
+          return;
+        }
+      }catch(_e){}
+      finish(false);
+    }
     try{
-      if(!(window.kakao && kakao.maps && kakao.maps.services && kakao.maps.services.Geocoder)){
-        resolve([]); return;
+      const existing=document.getElementById('oai-kakao-map-sdk');
+      if(existing){
+        let tries=0;
+        const timer=setInterval(function(){
+          tries++;
+          try{
+            if(window.kakao&&kakao.maps){ clearInterval(timer); readyAfterLoad(); return; }
+          }catch(_e){}
+          if(tries>=50){ clearInterval(timer); finish(false); }
+        },100);
+        return;
       }
-      var geocoder=new kakao.maps.services.Geocoder();
-      var settled=false;
-      function done(list){ if(settled) return; settled=true; resolve((list||[]).slice(0,max||10)); }
-      geocoder.addressSearch(String(query||'').trim(), function(result,status){
-        try{
-          var OK=kakao.maps.services.Status.OK;
-          if(status!==OK || !result || !result.length){ done([]); return; }
-          var docs=result.map(function(r){
-            var road=(r.road_address&&r.road_address.address_name)||'';
-            var jibun=(r.address&&r.address.address_name)||r.address_name||'';
-            var label=road||jibun||String(query||'').trim();
-            return {
-              id:'address:'+String(r.x||'')+','+String(r.y||''),
-              place_name:label,
-              address_name:jibun||road,
-              road_address_name:road,
-              x:r.x,
-              y:r.y,
-              category_group_code:'',
-              category_name:'주소',
-              __oaiAddress:true
-            };
-          }).filter(function(d){return d.x&&d.y;});
-          done(docs);
-        }catch(_e){ done([]); }
-      });
-      setTimeout(function(){done([]);},3500);
-    }catch(_e){ resolve([]); }
+      if(!JSKEY){ finish(false); return; }
+      const sc=document.createElement('script');
+      sc.id='oai-kakao-map-sdk';
+      sc.src=`https://dapi.kakao.com/v2/maps/sdk.js?appkey=${JSKEY}&autoload=false&libraries=services`;
+      sc.onload=readyAfterLoad;
+      sc.onerror=function(){ finish(false); };
+      document.head.appendChild(sc);
+      setTimeout(function(){ finish(false); },7000);
+    }catch(_e){ finish(false); }
   });
+  return _oaiKakaoServicesReadyPromise;
+}
+function _kakaoAddressDocsFromJs(query, max){
+  return _ensureKakaoServicesReady().then(function(ok){
+    if(!ok) return [];
+    return new Promise(function(resolve){
+      try{
+        if(!(window.kakao && kakao.maps && kakao.maps.services && kakao.maps.services.Geocoder)){
+          resolve([]); return;
+        }
+        var geocoder=new kakao.maps.services.Geocoder();
+        var settled=false;
+        function done(list){ if(settled) return; settled=true; resolve((list||[]).slice(0,max||10)); }
+        geocoder.addressSearch(String(query||'').trim(), function(result,status){
+          try{
+            var OK=kakao.maps.services.Status.OK;
+            if(status!==OK || !result || !result.length){ done([]); return; }
+            var docs=result.map(function(r){
+              var road=(r.road_address&&r.road_address.address_name)||'';
+              var jibun=(r.address&&r.address.address_name)||r.address_name||'';
+              var label=road||jibun||String(query||'').trim();
+              return {
+                id:'address:'+String(r.x||'')+','+String(r.y||''),
+                place_name:label,
+                address_name:jibun||road,
+                road_address_name:road,
+                x:r.x,
+                y:r.y,
+                category_group_code:'',
+                category_name:'주소',
+                __oaiAddress:true
+              };
+            }).filter(function(d){return d.x&&d.y;});
+            done(docs);
+          }catch(_e){ done([]); }
+        });
+        setTimeout(function(){done([]);},4500);
+      }catch(_e){ resolve([]); }
+    });
+  }).catch(function(){ return []; });
 }
 function _kakaoPlaceAndAddressDocs(query, limit){
   var max=Math.max(1,parseInt(limit||10,10)||10);
