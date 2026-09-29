@@ -13078,6 +13078,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function recordMessage(text){const el=document.getElementById('oai-records-message');if(el)el.textContent=text||'';}
   const OAI_GOOGLE_DRIVE_CONNECTED_KEY='oai_google_drive_connected_v1';
   let googleDriveBackupTimer=0;
+  let googleDriveInitialSyncPending=false;
   function nativeDrive(){try{return window.GildongmuNative||null;}catch(_e){return null;}}
   function isGoogleDriveConnected(){return localStorage.getItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY)==='1';}
   function refreshGoogleDriveButton(){const button=document.getElementById('oai-google-drive-connect');if(!button)return;button.textContent=isGoogleDriveConnected()?'Google Drive 연결됨':'Google Drive 연결';}
@@ -13093,6 +13094,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     recordMessage('Google Drive의 기록을 확인하고 있습니다.');
     bridge.loadGoogleDriveBackup();
   }
+  function hasBackupContent(){
+    const data=backupSnapshot().data;
+    const countVisits=function(value){return Object.keys(value&&typeof value==='object'?value:{}).some(function(key){const item=value[key];return item&&Array.isArray(item.visits)&&item.visits.length>0;});};
+    return countVisits(data.shrineVisits)||countVisits(data.parishVisits)||
+      (Array.isArray(data.prayerFavorites)&&data.prayerFavorites.length>0)||
+      (Array.isArray(data.webFavorites)&&data.webFavorites.length>0)||
+      !!(data.myParish&&data.myParish.name);
+  }
   function queueGoogleDriveBackup(){
     if(!isGoogleDriveConnected())return;
     const bridge=nativeDrive();if(!bridge||typeof bridge.saveGoogleDriveBackup!=='function')return;
@@ -13102,6 +13111,24 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       saveGoogleDriveBackupNow(false);
     },900);
   }
+  // 방문·즐겨찾기·내 본당처럼 백업 대상이 바뀌면, 앱을 닫지 않아도
+  // 약 1초 뒤 Drive에 저장합니다. 관련 없는 화면 설정은 백업하지 않습니다.
+  (function watchBackupStorage(){
+    const keys={};
+    [OAI_SHRINE_VISITS_KEY,OAI_PARISH_VISITS_KEY,OAI_PARISH_AUTO_VISIT_ENABLED_KEY,
+      OAI_SETTINGS_MY_PARISH_KEY,'oai_my_parish','oai_my_diocese_name','oai_my_parish_name',
+      'pr_favorites','web_favorites_v1','prayer_font_size'].forEach(function(key){keys[key]=true;});
+    try{
+      if(window.__oaiGoogleDriveStorageWatch)return;
+      window.__oaiGoogleDriveStorageWatch=true;
+      const setItem=Storage.prototype.setItem;
+      Storage.prototype.setItem=function(key,value){
+        const result=setItem.call(this,key,value);
+        if(this===window.localStorage&&keys[String(key)])queueGoogleDriveBackup();
+        return result;
+      };
+    }catch(_e){}
+  })();
   function saveGoogleDriveBackupNow(showMessage){
     if(!isGoogleDriveConnected())return;
     const bridge=nativeDrive();if(!bridge||typeof bridge.saveGoogleDriveBackup!=='function')return;
@@ -13112,15 +13139,40 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(status==='connected')localStorage.setItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY,'1');
     if(status==='disconnected')localStorage.removeItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY);
     refreshGoogleDriveButton();recordMessage(message||'');
-    // 계정 연결 직후 바로 첫 백업을 만듭니다. 앱을 백그라운드로 보내야만
-    // 저장되는 방식은 새 기기 복원에 충분히 믿을 수 없기 때문입니다.
-    if(status==='connected')saveGoogleDriveBackupNow(true);
+    // 새 휴대폰의 빈 기록이 기존 Drive 백업을 덮어쓰면 안 됩니다.
+    // 따라서 연결 직후에는 먼저 Drive에 저장된 기록을 확인합니다.
+    if(status==='connected'){
+      // 이전 Android 버전은 Drive에 파일이 없을 때도 connected를 보냅니다.
+      // 이미 한 번 확인한 뒤의 connected는 '저장된 기록 없음'으로 처리해
+      // 확인 요청이 반복되지 않게 합니다.
+      if(googleDriveInitialSyncPending){
+        googleDriveInitialSyncPending=false;
+        if(hasBackupContent()){
+          recordMessage('저장된 기록이 없어 이 휴대폰의 기록을 처음 보관합니다.');
+          saveGoogleDriveBackupNow(true);
+        }else recordMessage('Google Drive에 저장된 기록이 없습니다. 방문 기록을 만든 뒤 자동으로 보관합니다.');
+        return;
+      }
+      googleDriveInitialSyncPending=true;
+      recordMessage('Google Drive의 기존 기록을 확인하고 있습니다.');
+      const bridge=nativeDrive();
+      if(bridge&&typeof bridge.loadGoogleDriveBackup==='function')bridge.loadGoogleDriveBackup();
+      return;
+    }
+    if(status==='empty'){
+      const isFirstCheck=googleDriveInitialSyncPending;
+      googleDriveInitialSyncPending=false;
+      if(isFirstCheck&&hasBackupContent()){
+        recordMessage('저장된 기록이 없어 이 휴대폰의 기록을 처음 보관합니다.');
+        saveGoogleDriveBackupNow(true);
+      }else recordMessage('Google Drive에 저장된 기록이 없습니다. 방문 기록을 만든 뒤 자동으로 보관합니다.');
+    }
   };
   window.oaiGoogleDriveBackupReceived=function(encoded){
-    try{const text=decodeURIComponent(escape(atob(String(encoded||''))));const parsed=JSON.parse(text);if(!parsed||parsed.format!=='catholic-gildongmu-backup'||!parsed.data)throw new Error();applyBackup(parsed.data);refresh();recordMessage('Google Drive의 기록을 불러왔습니다.');}catch(_e){recordMessage('Google Drive 기록을 불러오지 못했습니다.');}
+    try{const text=decodeURIComponent(escape(atob(String(encoded||''))));const parsed=JSON.parse(text);if(!parsed||parsed.format!=='catholic-gildongmu-backup'||!parsed.data)throw new Error();googleDriveInitialSyncPending=false;applyBackup(parsed.data);refresh();refreshRecords();recordMessage('Google Drive의 기록을 불러왔습니다.');}catch(_e){googleDriveInitialSyncPending=false;recordMessage('Google Drive 기록을 불러오지 못했습니다.');}
   };
   document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')queueGoogleDriveBackup();});
-  function openRestore(){const m=restoreModal();if(!m)return;restoreMessage('');const input=document.getElementById('oai-record-restore-code');if(input)input.value='';m.classList.add('show');m.setAttribute('aria-hidden','false');setTimeout(function(){try{input&&input.focus();}catch(_e){}},50);}
+  function openRestore(){const m=restoreModal();if(!m)return;restoreMessage('');const input=document.getElementById('oai-record-restore-code');if(input)input.value='';m.classList.add('show');m.setAttribute('aria-hidden','false');}
   function closeRestore(){const m=restoreModal();if(!m)return;m.classList.remove('show');m.setAttribute('aria-hidden','true');}
   function localValue(key,fallback){try{const value=JSON.parse(localStorage.getItem(key)||'');return value==null?fallback:value;}catch(_e){return fallback;}}
   function backupSnapshot(){
