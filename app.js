@@ -8726,8 +8726,8 @@ function oaiClearMapInfoSelection(reason){
 try{ window.oaiClearMapInfoSelection=oaiClearMapInfoSelection; }catch(e){ console.warn('[가톨릭길동무]', e); }
 
 function openInAppRoute(){
-  // 정보카드 경로검색의 예외 fallback이다. 자동 조회는 지도 선택창의
-  // '도착지로 설정' 버튼(_handleRouteChoiceEnd)에서만 허용한다.
+  // 정보카드 경로검색의 예외 fallback이다.
+  // 도착지를 지정해도 실제 경로 계산은 '경로 검색' 버튼을 눌렀을 때만 실행한다.
   _setInfoRouteEnd({autoSearch:false});
 }
 
@@ -9033,8 +9033,9 @@ function _handleRouteChoiceEnd(){
     if(role) clearRoute(role, { keepWaypointBox: _isRouteWaypointRole(role) });
     return;
   }
-  // 지도 정보카드에서 사용자가 '도착지로 설정'을 직접 누른 경우에만 자동 조회한다.
-  _setInfoRouteEnd({autoSearch:true});
+  // 도착지만 먼저 지정해도 출발지는 기존처럼 현재 위치로 자동 채울 수 있다.
+  // 다만 실제 경로 계산은 사용자가 '경로 검색' 버튼을 눌렀을 때만 실행한다.
+  _setInfoRouteEnd({autoSearch:false});
 }
 function _handleRouteChoiceWaypoint(){
   if(_routeChoiceMode==='cancel') return;
