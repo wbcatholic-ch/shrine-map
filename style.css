@@ -5933,6 +5933,7 @@ html.route-tab-active #info-card.open{
 .oai-settings-group{margin:0 0 14px;border:2px solid #b9a36f;border-radius:17px;overflow:hidden;background:#fff;box-shadow:0 3px 10px rgba(27,39,61,.10);}
 .oai-settings-group h3{margin:0;padding:13px 16px 10px;background:#e8ddc4;color:#5f4a20;font-size:14px;line-height:1;font-weight:900;letter-spacing:-.02em;}
 .oai-settings-row{display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;min-height:84px;padding:15px 16px;border:0;border-top:1px solid #d5cbb9;background:#fff;color:#17213a;text-align:left;font-family:inherit;}
+.oai-settings-row[hidden]{display:none!important;}
 .oai-settings-group h3+.oai-settings-row{border-top:0;}
 .oai-settings-row span{min-width:0;display:block;}
 .oai-settings-row b{display:block;font-size:17px;line-height:1.25;font-weight:900;letter-spacing:-.035em;}
