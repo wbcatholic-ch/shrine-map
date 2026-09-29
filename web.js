@@ -2330,7 +2330,7 @@
     window.__trailKakaoQueue = [cb];
     const sc = document.createElement('script');
     const key = (typeof JSKEY!=='undefined' && JSKEY) ? JSKEY : '';
-    sc.src = 'https://dapi.kakao.com/v2/maps/sdk.js?appkey=' + key + '&autoload=false';
+    sc.src = 'https://dapi.kakao.com/v2/maps/sdk.js?appkey=' + key + '&autoload=false&libraries=services';
     sc.onload = function(){
       kakao.maps.load(function(){
         const q = window.__trailKakaoQueue || [];

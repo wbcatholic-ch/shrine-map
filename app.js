@@ -6498,22 +6498,34 @@ function _ensureKakaoServicesReady(){
   });
   return _oaiKakaoServicesReadyPromise;
 }
-/* V8-1-14-862: 일반 주택/지번 주소 검색 보강.
-   사용자가 "진천동251-10"처럼 띄어쓰기 없이 입력해도 "진천동 251-10" 변형을 함께 검색한다. */
+/* V8-1-14-865: 도로명/지번 주소 검색어 정규화.
+   - "진천동251-10" 같은 지번은 "진천동 251-10"도 함께 검색한다.
+   - "진천로8길"처럼 숫자가 포함된 도로명은 절대 "진천로 8길"로 쪼개지 않는다.
+   - 전체 주소가 실패할 때 시·도 표기를 줄인 주소와 도로명/지번 핵심 주소도 함께 시도한다. */
 function _kakaoAddressQueryVariants(query){
   var q=String(query||'').trim().replace(/\s+/g,' ');
   if(!q) return [];
-  var out=[q];
-  var spaced=q
-    .replace(/([가-힣]+(?:동|읍|면|리))\s*(\d)/g,'$1 $2')
-    .replace(/(로|길)\s*(\d)/g,'$1 $2');
-  if(spaced!==q) out.push(spaced);
-  var compact=q.replace(/\s+/g,'');
-  var compactSpaced=compact
-    .replace(/([가-힣]+(?:동|읍|면|리))(\d)/g,'$1 $2')
-    .replace(/(로|길)(\d)/g,'$1 $2');
-  if(compactSpaced && out.indexOf(compactSpaced)<0) out.push(compactSpaced);
-  return out.slice(0,3);
+  var out=[];
+  function add(v){v=String(v||'').trim().replace(/\s+/g,' ');if(v&&out.indexOf(v)<0)out.push(v);}
+  add(q);
+  add(q.replace(/\s*\([^)]*\)\s*/g,' '));
+  // 지번 주소만 보정한다. 도로명(예: 진천로8길)은 숫자가 도로명 일부일 수 있어 분리하지 않는다.
+  add(q.replace(/([가-힣]+(?:동|읍|면|리))\s*(\d{1,5}(?:-\d{1,5})?)(?=$|\s)/g,'$1 $2'));
+  // 시·도 전체 명칭을 짧게 한 변형. Kakao가 짧은 지역명에서 더 잘 찾는 경우가 있다.
+  add(q.replace(/^서울특별시\s+/,'서울 ').replace(/^부산광역시\s+/,'부산 ').replace(/^대구광역시\s+/,'대구 ').replace(/^인천광역시\s+/,'인천 ').replace(/^광주광역시\s+/,'광주 ').replace(/^대전광역시\s+/,'대전 ').replace(/^울산광역시\s+/,'울산 ').replace(/^세종특별자치시\s+/,'세종 '));
+  // 도로명 주소 핵심부: 시/도 표기가 없어도 검색할 수 있도록 구/군부터와 도로명부터 변형을 추가한다.
+  var road=q.match(/((?:[가-힣]+(?:구|군)\s+)?[가-힣0-9·.-]+(?:로|길)\s*\d+(?:-\d+)?)/);
+  if(road&&road[1]){
+    add(road[1]);
+    var roadOnly=road[1].replace(/^[가-힣]+(?:구|군)\s+/,'');
+    add(roadOnly);
+  }
+  // 지번 주소 핵심부도 추가한다.
+  var jibun=q.match(/((?:[가-힣]+(?:구|군)\s+)?[가-힣]+(?:동|읍|면|리)\s*\d+(?:-\d+)?)/);
+  if(jibun&&jibun[1]){
+    add(jibun[1].replace(/([가-힣]+(?:동|읍|면|리))\s*(\d)/,'$1 $2'));
+  }
+  return out.slice(0,8);
 }
 function _mapAddressResults(result, fallback){
   return (result||[]).map(function(r){
@@ -6532,6 +6544,16 @@ function _mapAddressResults(result, fallback){
       __oaiAddress:true
     };
   }).filter(function(d){return d.x&&d.y;});
+}
+function _kakaoAddressDocsFromRest(query,max){
+  var variants=_kakaoAddressQueryVariants(query);
+  if(!variants.length) return Promise.resolve([]);
+  return Promise.all(variants.map(function(v){
+    return _kakaoRestFetch('address',{query:v})
+      .then(function(r){if(!r.ok)throw new Error(String(r.status));return r.json();})
+      .then(function(data){return _mapAddressResults((data&&data.documents)||[],v);})
+      .catch(function(){return [];});
+  })).then(function(groups){return _dedupeKakaoDocs(groups,max||10);});
 }
 function _kakaoAddressDocsFromJs(query, max){
   var variants=_kakaoAddressQueryVariants(query);
@@ -6574,9 +6596,11 @@ function _kakaoPlaceAndAddressDocs(query, limit){
   var max=Math.max(1,parseInt(limit||10,10)||10);
   return Promise.all([
     _kakaoKeywordDocsForVariants(query,max).catch(function(){return [];}),
+    _kakaoAddressDocsFromRest(query,Math.min(10,max)).catch(function(){return [];}),
     _kakaoAddressDocsFromJs(query,Math.min(10,max)).catch(function(){return [];})
   ]).then(function(groups){
-    return _dedupeKakaoDocs([groups[1]||[],groups[0]||[]],max);
+    // 주소 결과를 먼저 합친 뒤 일반 장소 결과를 붙인다. REST 프록시가 address endpoint를 지원하지 않아도 JS Geocoder가 그대로 폴백한다.
+    return _dedupeKakaoDocs([groups[1]||[],groups[2]||[],groups[0]||[]],max);
   });
 }
 
@@ -12511,7 +12535,9 @@ function _renderCatholicRouteResults(body,records,scope){
 function _generalRouteRecord(doc,query){
   const item={name:doc.place_name||'',addr:doc.road_address_name||doc.address_name||'',diocese:''};
   const isAddress=!!doc.__oaiAddress;
-  return {source:'place',sourcePriority:1,kind:isAddress?'address':'place',kindPriority:3,doc:doc,item:item,name:item.name,score:_placeSearchScore(item,query),badge:isAddress?'주소':'일반 장소',color:isAddress?'#8a5a16':'#64748b'};
+  // Geocoder가 돌려준 주소는 검색어 표기와 도로명/지번 표기가 서로 달라도 유효한 결과이므로 점수 필터에서 제외하지 않는다.
+  const score=isAddress?5:_placeSearchScore(item,query);
+  return {source:'place',sourcePriority:1,kind:isAddress?'address':'place',kindPriority:3,doc:doc,item:item,name:item.name,score:score,badge:isAddress?'주소':'일반 장소',color:isAddress?'#8a5a16':'#64748b'};
 }
 function _routeSearchCoreName(value){
   return _normalizePlaceSearchText(value).replace(/^천주교/,'').replace(/(주교좌)?(대)?성당$/,'').replace(/본당$/,'').replace(/피정의집$/,'').replace(/성지$/,'');
