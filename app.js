@@ -737,7 +737,22 @@ function oaiClearExternalNavigationState(opts){
       return !!(cover && !document.documentElement.classList.contains('app-active') && cover.style.display !== 'none');
     }catch(_e){ return false; }
   }
-  function isReturnableScreenActive(){ return isAppScreenActive() || isCoverScreenVisible(); }
+  function isOverlayScreenVisible(){
+    try{
+      var ids=['oai-settings-modal','oai-parish-setup-modal','oai-records-modal','oai-onboarding-modal','oai-record-restore-modal','srch-modal'];
+      for(var i=0;i<ids.length;i++){
+        var el=document.getElementById(ids[i]);
+        if(!el) continue;
+        if(el.classList && el.classList.contains('show')) return true;
+        if(ids[i]==='srch-modal'){
+          var st=window.getComputedStyle?window.getComputedStyle(el):null;
+          if(st && st.display!=='none' && st.visibility!=='hidden') return true;
+        }
+      }
+    }catch(_e){}
+    return false;
+  }
+  function isReturnableScreenActive(){ return isAppScreenActive() || isCoverScreenVisible() || isOverlayScreenVisible(); }
   function isExternalReturnContext(){
     try{
       var pending = sessionStorage.getItem('oai_external_nav_pending') === '1';
@@ -13858,8 +13873,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 
 /* V8-1-14-850: 커버 설정에서도 장소등록 검색이 보이도록 커버를 임시로 숨기고, 검색 종료 뒤 설정과 커버 복귀 상태를 복원 */
 (function installOaiFrequentPlaceSettings(){
-  if(window.__OAI_FREQUENT_SETTINGS_V850__) return;
-  window.__OAI_FREQUENT_SETTINGS_V850__=true;
+  if(window.__OAI_FREQUENT_SETTINGS_V851__) return;
+  window.__OAI_FREQUENT_SETTINGS_V851__=true;
   function coverIsVisible(){
     try{
       const cover=document.getElementById('cover');
@@ -13872,9 +13887,19 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       alert('자주 가는 장소는 최대 '+OAI_ROUTE_FAVORITES_MAX+'개까지 등록할 수 있습니다.');
       return;
     }
+    /* V8-1-14-851: 설정이 커버에서 열린 경우 closeOaiSettings()가 예약한 goToCover()와
+       장소검색 진입이 서로 경합해 클릭할 때마다 검색/커버가 번갈아 보이던 문제를 제거한다.
+       검색 전환 중에는 설정 모달만 직접 숨기고, 원래 진입 위치는 별도로 기억한다. */
+    const settingsModal=document.getElementById('oai-settings-modal');
+    const cameFromCover=!!(settingsModal && settingsModal.dataset.returnToCover==='1') || coverIsVisible();
     _returnToSettingsAfterFrequentSearch=true;
-    _frequentSearchReturnToCover=coverIsVisible();
-    try{ if(typeof window.closeOaiSettings==='function') window.closeOaiSettings(); }catch(_e){}
+    _frequentSearchReturnToCover=cameFromCover;
+    if(settingsModal){
+      settingsModal.classList.remove('show');
+      settingsModal.setAttribute('aria-hidden','true');
+      settingsModal.dataset.fromParishBook='';
+      settingsModal.dataset.returnToCover='';
+    }
     const launchSearch=function(){
       setTimeout(function(){
         try{ openSearchModal('frequent-register'); }
@@ -13886,9 +13911,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           try{ if(typeof window.openOaiSettings==='function') window.openOaiSettings({fromFrequentPlace:true,returnToCover:returnToCover}); }catch(_e){}
           alert('장소 검색 화면을 열지 못했습니다. 앱을 새로고침한 뒤 다시 시도해 주세요.');
         }
-      },90);
+      },60);
     };
-    if(_frequentSearchReturnToCover && typeof hideCoverAndRun==='function') hideCoverAndRun(launchSearch);
+    if(cameFromCover && typeof hideCoverAndRun==='function') hideCoverAndRun(launchSearch);
     else launchSearch();
   }
   document.addEventListener('click',function(e){
