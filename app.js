@@ -11636,6 +11636,11 @@ function _openFrequentSettingsAfterNickname(){
     }catch(_e){}
   },60);
 }
+function isOaiFrequentNicknameOpen(){
+  const modal=$('oai-frequent-nickname-modal');
+  return !!(modal&&modal.classList&&modal.classList.contains('show'));
+}
+try{ window.isOaiFrequentNicknameOpen=isOaiFrequentNicknameOpen; }catch(_e){}
 function _closeFrequentNicknameDialog(options){
   const modal=$('oai-frequent-nickname-modal');
   if(modal){ modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); }
@@ -11645,6 +11650,7 @@ function _closeFrequentNicknameDialog(options){
   _frequentNicknameEditIndex=-1;
   if(wasAdd && (!options||options.restoreSettings!==false)) _openFrequentSettingsAfterNickname();
 }
+try{ window.closeOaiFrequentNickname=function(){ return _closeFrequentNicknameDialog(); }; }catch(_e){}
 function _openFrequentNicknameDialog(item,options){
   if(!item) return false;
   options=options||{};
