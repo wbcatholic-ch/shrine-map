@@ -62,6 +62,8 @@
       if(typeof window.isOaiRecordsOpen === 'function' && window.isOaiRecordsOpen()) return true;
       if(typeof window.isOaiParishSetupOpen === 'function' && window.isOaiParishSetupOpen()) return true;
       if(typeof window.isOaiSettingsOpen === 'function' && window.isOaiSettingsOpen()) return true;
+      if(typeof window.isOaiPilgrimagePlannerOpen === 'function' && window.isOaiPilgrimagePlannerOpen()) return true;
+      var pp = $b('oai-pilgrimage-point-modal'); if(pp && pp.classList && pp.classList.contains('show')) return true;
       var ids = ['diocese-view','missa-view','prayer-view','qna-view'];
       for(var i=0;i<ids.length;i++){
         var el = $b(ids[i]);
@@ -83,6 +85,8 @@
       if(typeof window.isOaiRecordsOpen === 'function' && window.isOaiRecordsOpen()) return true;
       if(typeof window.isOaiParishSetupOpen === 'function' && window.isOaiParishSetupOpen()) return true;
       if(typeof window.isOaiSettingsOpen === 'function' && window.isOaiSettingsOpen()) return true;
+      if(typeof window.isOaiPilgrimagePlannerOpen === 'function' && window.isOaiPilgrimagePlannerOpen()) return true;
+      var pp = $b('oai-pilgrimage-point-modal'); if(pp && pp.classList && pp.classList.contains('show')) return true;
       var ids = ['diocese-view','missa-view','prayer-view','qna-view'];
       for(var i=0;i<ids.length;i++){
         var el = $b(ids[i]);
