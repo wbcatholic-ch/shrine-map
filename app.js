@@ -1984,7 +1984,7 @@ function _fitShrineVisitMapFilterBounds(){
     let count=0, single=null;
     SHRINES.forEach(function(s){
       if(!s||!s.lat||!s.lng) return;
-      const baseOk=(_filterDio==='all'||s.diocese===_filterDio)&&
+      const baseOk=(!_listSrch||_filterDio==='all'||s.diocese===_filterDio)&&
         (!_listSrch||_itemSearchBlob(s).includes(_listSrch)||_itemSearchNorm(s).includes(String(_listSrch).replace(/\s+/g,'')));
       if(!baseOk) return;
       const useForBounds=_isVisitedShrine(s);
@@ -9643,7 +9643,7 @@ function _restoreMapMarkers(opts){
   _markers.forEach(m=>{
   if(!m) return;
   const s=m.shrine;
-  const ok=(_filterDio==='all'||s.diocese===_filterDio)&&
+  const ok=(!_listSrch||_filterDio==='all'||s.diocese===_filterDio)&&
       (!_listSrch||_itemSearchBlob(s).includes(_listSrch)||_itemSearchNorm(s).includes(String(_listSrch).replace(/\s+/g,'')))&&
       _isShrineVisibleByVisitFilter(s);
   if(ok){
@@ -10399,7 +10399,7 @@ function _clearRetreatMarkers(){
 function _restoreRetreatMarkers(){
   _retreatMarkers.forEach(o=>{
     const s=o.item;
-    const ok=(_filterDio==='all'||s.diocese===_filterDio)&&(!_listSrch||_itemSearchBlob(s).includes(_listSrch)||_itemSearchNorm(s).includes(String(_listSrch).replace(/\s+/g,'')));
+    const ok=(!_listSrch||_filterDio==='all'||s.diocese===_filterDio)&&(!_listSrch||_itemSearchBlob(s).includes(_listSrch)||_itemSearchNorm(s).includes(String(_listSrch).replace(/\s+/g,'')));
     _setMarkerMapIfChanged(o.marker, ok?_map:null);
   });
 }
@@ -10913,9 +10913,9 @@ function renderList(){
   const groups={};
   items.forEach((s,i)=>{
     if(_mode==='shrine' && !_isSouthKoreaCoordinate(s.lat,s.lng)) return;
-    /* V8-1-14-679: 성당은 교구 탭이 선택되어 있어도 검색어가 있으면 전국 전체에서 찾는다.
-       검색어가 없을 때만 선택 교구가 목록 범위를 제한한다. */
-    const matchDio = (_mode==='parish' && q) ? true : (_filterDio==='all'||s.diocese===_filterDio);
+    /* 검색어가 있으면 성지·성당·피정의집 모두 선택 교구와 무관하게 전국에서 찾는다.
+       교구 탭은 검색어가 없을 때만 목록 범위를 제한한다. */
+    const matchDio = q ? true : (_filterDio==='all'||s.diocese===_filterDio);
     if(!matchDio) return;
     const score=q?_placeSearchScore(s,q):0;
     if(!Number.isFinite(score)) return;
@@ -10924,8 +10924,7 @@ function renderList(){
   });
   if(Object.keys(groups).length===0){
     if(_mode==='parish' && !PARISHES.length) body.innerHTML='<div class="empty-msg">교구를 선택해 주세요.</div>';
-    else if(q && _filterDio!=='all' && _mode!=='parish') body.innerHTML='<div class="empty-msg">선택한 교구 안에 검색 결과가 없습니다</div>';
-    else body.innerHTML='<div class="empty-msg">검색 결과가 없습니다</div>';
+    else body.innerHTML='<div class="empty-msg">전국 검색 결과가 없습니다</div>';
     return;
   }
   if(q){
@@ -11015,10 +11014,10 @@ function setDioFilter(v,btn){
   $$('.filter-btn').forEach(b=>b.classList.remove('active'));
   btn?.classList.add('active');
   _scrollDioFilterButtonIntoView(btn);
-  /* V8-1-14-679: 성당 전국 검색 중 교구 탭을 눌러도 검색어와 결과를 유지한다.
-     검색어가 없을 때의 교구별 목록·지도 이동 동작은 기존 기준을 유지한다. */
-  const keepParishNationwideSearch=(_mode==='parish' && !!_listSrch);
-  if(!keepParishNationwideSearch){
+  /* 전국 검색 중에는 성지·성당·피정의집 모두 교구 탭을 눌러도 검색어와 결과를 유지한다.
+     검색어가 없을 때만 교구 탭이 목록 범위를 바꾼다. */
+  const keepNationwideSearch=!!_listSrch;
+  if(!keepNationwideSearch){
     _listSrch='';
     const inp=$('list-srch-inp');
     if(inp){inp.value='';$('list-srch-x').style.display='none';}
