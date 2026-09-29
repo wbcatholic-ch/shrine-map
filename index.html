@@ -2,7 +2,7 @@
 <html lang="ko" class="oai-font-global">
 <head>
 <script>
-  window.OAI_APP_BUILD_VERSION = 'V8-1-14-869';
+  window.OAI_APP_BUILD_VERSION = 'V8-1-14-872';
   window.APP_VERSION = window.OAI_APP_BUILD_VERSION;
 </script>
 
@@ -1041,7 +1041,7 @@ window.APP_CONFIG = {
   <div id="prayer-faith-nav" class="faith-bottom-nav" aria-label="매일미사·기도문·성경·성가 바로가기"></div>
 </div>
 <div id="cover">
-<div id="oai-build-marker" aria-label="수정 단계 표시" style="position:absolute;left:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 6px);z-index:120;display:none;align-items:center;justify-content:center;min-width:46px;height:20px;padding:0 8px;border-radius:999px;background:rgba(31,42,68,.72);color:#fff;font-size:10px;font-weight:800;line-height:1;pointer-events:none;opacity:0;visibility:hidden;">V8-1-14-869</div>
+<div id="oai-build-marker" aria-label="수정 단계 표시" style="position:absolute;left:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 6px);z-index:120;display:none;align-items:center;justify-content:center;min-width:46px;height:20px;padding:0 8px;border-radius:999px;background:rgba(31,42,68,.72);color:#fff;font-size:10px;font-weight:800;line-height:1;pointer-events:none;opacity:0;visibility:hidden;">V8-1-14-872</div>
     <div id="cover-font-controls" class="pr-font-ctrl" aria-label="글자 크기 조절">
       <button type="button" id="cover-sm-btn" class="pr-font-btn pr-sm">가</button>
       <div class="pr-font-divider"></div>
@@ -1112,7 +1112,7 @@ window.APP_CONFIG = {
           <button id="cover-share-btn" class="cover-share-main-btn" type="button" aria-label="앱 공유하기">앱 공유하기</button>
         </div>
         <div id="cover-update-box">
-          <button id="cover-update-btn" class="cover-refresh-main-btn" type="button" data-target-version="V8-1-14-869" aria-label="짧게 누르면 새로고침, 더 길게 누르면 앱 캐시 초기화">새로고침</button>
+          <button id="cover-update-btn" class="cover-refresh-main-btn" type="button" data-target-version="V8-1-14-872" aria-label="짧게 누르면 새로고침, 더 길게 누르면 앱 캐시 초기화">새로고침</button>
           <div id="cover-update-hint" aria-live="polite">아래 버전과 다릅니다. 눌러서 최신 파일을 다시 받아 주세요.</div>
         </div>
       </div>
@@ -1219,7 +1219,7 @@ window.APP_CONFIG = {
   </div>
 </div>
 
-<script src="app.js?v=V8-1-14-869"></script>
+<script src="app.js?v=V8-1-14-872"></script>
 <script src="js/cover-common.js?v=V8-1-14-825"></script>
 <div id="oai-category-entry-veil" aria-hidden="true"></div>
 <div id="app"><div id="tabbar"><button id="tab-btn-nearby" class="tab-btn" data-tab="nearby"><span class="tab-icon">📍</span><span id="tab-nearby-lbl">내주변</span></button><button id="tab-btn-list" class="tab-btn" data-tab="list"><span class="tab-icon">📋</span><span id="tab-list-lbl">목록</span></button><button id="tab-btn-region" class="tab-btn" data-tab="region"><span class="tab-icon">🔍</span>지역검색
@@ -1271,12 +1271,14 @@ window.APP_CONFIG = {
         <button type="button" class="oai-pilgrimage-back" data-oai-pilgrimage-back-list="1">‹ 계획 목록</button>
         <div class="oai-pilgrimage-course-title-row"><div><small>계획 이름</small><strong id="oai-pilgrimage-course-title">새 순례계획</strong></div><button type="button" data-oai-pilgrimage-rename="1">이름 변경</button></div>
         <div class="oai-pilgrimage-endpoints">
-          <button type="button" class="oai-pilgrimage-endpoint start" data-oai-pilgrimage-point="start"><span><small>출발지</small><b id="oai-pilgrimage-start-name">출발지 설정</b><em id="oai-pilgrimage-start-addr">자주 가는 장소 또는 주소 검색</em></span><i>›</i></button>
-          <button type="button" class="oai-pilgrimage-endpoint end" data-oai-pilgrimage-point="end"><span><small>도착지</small><b id="oai-pilgrimage-end-name">도착지 설정</b><em id="oai-pilgrimage-end-addr">자주 가는 장소 또는 주소 검색</em></span><i>›</i></button>
+          <button type="button" class="oai-pilgrimage-endpoint start" data-oai-pilgrimage-point="start"><span><small>출발지</small><b id="oai-pilgrimage-start-name">출발지 설정</b><em id="oai-pilgrimage-start-addr">현재 위치 · 자주 가는 장소 · 주소 검색</em></span><i>›</i></button>
         </div>
         <div class="oai-pilgrimage-place-head"><strong>순례 장소 <span id="oai-pilgrimage-plan-count">0곳</span></strong><span id="oai-pilgrimage-plan-next">장소를 등록해 주세요.</span></div>
-        <button type="button" class="oai-pilgrimage-add" data-oai-pilgrimage-add="1">＋ 순례 장소 추가</button>
         <div id="oai-pilgrimage-plan-list" class="oai-pilgrimage-plan-list"></div>
+        <div class="oai-pilgrimage-endpoints oai-pilgrimage-endpoints-after-list">
+          <button type="button" class="oai-pilgrimage-endpoint end" data-oai-pilgrimage-point="end"><span><small>도착지</small><b id="oai-pilgrimage-end-name">도착지 설정</b><em id="oai-pilgrimage-end-addr">현재 위치 · 자주 가는 장소 · 주소 검색</em></span><i>›</i></button>
+        </div>
+        <button type="button" class="oai-pilgrimage-add" data-oai-pilgrimage-add="1">＋ 순례 장소 추가</button>
         <div class="oai-pilgrimage-detail-actions">
           <button type="button" class="oai-pilgrimage-save" data-oai-pilgrimage-save="1">계획 저장</button>
           <button type="button" class="oai-pilgrimage-follow" data-oai-pilgrimage-follow="1">따라가기</button>
@@ -1312,7 +1314,7 @@ window.APP_CONFIG = {
   <div class="oai-pilgrimage-save-backdrop" data-oai-pilgrimage-point-close="1"></div>
   <section class="oai-pilgrimage-point-dialog" role="dialog" aria-modal="true" aria-labelledby="oai-pilgrimage-point-title">
     <h3 id="oai-pilgrimage-point-title">출발지 선택</h3>
-    <p>자주 가는 장소를 선택하거나 주소·장소를 검색하세요.</p>
+    <p>현재 위치, 자주 가는 장소를 선택하거나 주소·장소를 검색하세요.</p>
     <div id="oai-pilgrimage-point-current-wrap"><button type="button" class="oai-pilgrimage-point-current" data-oai-pilgrimage-point-current="1">📍 현재 위치</button></div>
     <div id="oai-pilgrimage-point-frequent" class="oai-pilgrimage-point-frequent"></div>
     <button type="button" class="oai-pilgrimage-point-search" data-oai-pilgrimage-point-search="1">⌕ 주소·장소 검색</button>
@@ -1434,7 +1436,7 @@ window.APP_CONFIG = {
     </div>
   </div>
 </div>
-<script src="web.js?v=V8-1-14-869"></script>
+<script src="web.js?v=V8-1-14-872"></script>
 
 <div id="qna-view" role="dialog" aria-modal="true" aria-label="문의·건의" class="module-view">
   <div class="module-bar qna">
@@ -1486,7 +1488,7 @@ window.APP_CONFIG = {
   setTimeout(function(){ rearmQnaCoverReturn('700'); },700);
 })();
 </script>
-<script src="sw-update.js?v=V8-1-14-869"></script>
+<script src="sw-update.js?v=V8-1-14-872"></script>
 
 </body>
 </html>
