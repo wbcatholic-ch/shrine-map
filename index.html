@@ -2,7 +2,7 @@
 <html lang="ko" class="oai-font-global">
 <head>
 <script>
-  window.OAI_APP_BUILD_VERSION = 'V8-1-14-867';
+  window.OAI_APP_BUILD_VERSION = 'V8-1-14-868';
   window.APP_VERSION = window.OAI_APP_BUILD_VERSION;
 </script>
 
@@ -1041,7 +1041,7 @@ window.APP_CONFIG = {
   <div id="prayer-faith-nav" class="faith-bottom-nav" aria-label="매일미사·기도문·성경·성가 바로가기"></div>
 </div>
 <div id="cover">
-<div id="oai-build-marker" aria-label="수정 단계 표시" style="position:absolute;left:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 6px);z-index:120;display:none;align-items:center;justify-content:center;min-width:46px;height:20px;padding:0 8px;border-radius:999px;background:rgba(31,42,68,.72);color:#fff;font-size:10px;font-weight:800;line-height:1;pointer-events:none;opacity:0;visibility:hidden;">V8-1-14-867</div>
+<div id="oai-build-marker" aria-label="수정 단계 표시" style="position:absolute;left:8px;bottom:calc(env(safe-area-inset-bottom,0px) + 6px);z-index:120;display:none;align-items:center;justify-content:center;min-width:46px;height:20px;padding:0 8px;border-radius:999px;background:rgba(31,42,68,.72);color:#fff;font-size:10px;font-weight:800;line-height:1;pointer-events:none;opacity:0;visibility:hidden;">V8-1-14-868</div>
     <div id="cover-font-controls" class="pr-font-ctrl" aria-label="글자 크기 조절">
       <button type="button" id="cover-sm-btn" class="pr-font-btn pr-sm">가</button>
       <div class="pr-font-divider"></div>
@@ -1112,7 +1112,7 @@ window.APP_CONFIG = {
           <button id="cover-share-btn" class="cover-share-main-btn" type="button" aria-label="앱 공유하기">앱 공유하기</button>
         </div>
         <div id="cover-update-box">
-          <button id="cover-update-btn" class="cover-refresh-main-btn" type="button" data-target-version="V8-1-14-867" aria-label="짧게 누르면 새로고침, 더 길게 누르면 앱 캐시 초기화">새로고침</button>
+          <button id="cover-update-btn" class="cover-refresh-main-btn" type="button" data-target-version="V8-1-14-868" aria-label="짧게 누르면 새로고침, 더 길게 누르면 앱 캐시 초기화">새로고침</button>
           <div id="cover-update-hint" aria-live="polite">아래 버전과 다릅니다. 눌러서 최신 파일을 다시 받아 주세요.</div>
         </div>
       </div>
@@ -1219,7 +1219,7 @@ window.APP_CONFIG = {
   </div>
 </div>
 
-<script src="app.js?v=V8-1-14-867"></script>
+<script src="app.js?v=V8-1-14-868"></script>
 <script src="js/cover-common.js?v=V8-1-14-825"></script>
 <div id="oai-category-entry-veil" aria-hidden="true"></div>
 <div id="app"><div id="tabbar"><button id="tab-btn-nearby" class="tab-btn" data-tab="nearby"><span class="tab-icon">📍</span><span id="tab-nearby-lbl">내주변</span></button><button id="tab-btn-list" class="tab-btn" data-tab="list"><span class="tab-icon">📋</span><span id="tab-list-lbl">목록</span></button><button id="tab-btn-region" class="tab-btn" data-tab="region"><span class="tab-icon">🔍</span>지역검색
@@ -1263,7 +1263,6 @@ window.APP_CONFIG = {
     <header class="oai-settings-head"><div><h2 id="oai-pilgrimage-planner-title">성지순례 계획</h2><p id="oai-pilgrimage-planner-subtitle">개발자 모드 · 저장한 계획</p></div><button type="button" data-oai-pilgrimage-close="1" aria-label="순례계획 닫기">×</button></header>
     <div class="oai-pilgrimage-planner-body">
       <section id="oai-pilgrimage-list-view" class="oai-pilgrimage-view">
-        <div class="oai-pilgrimage-list-intro"><b>성지순례 계획 리스트</b><p>미리 만든 순례 코스를 선택해 수정하거나 실제 순례에서 따라갈 수 있습니다.</p></div>
         <button type="button" class="oai-pilgrimage-new" data-oai-pilgrimage-new="1">＋ 새 순례계획 만들기</button>
         <div id="oai-pilgrimage-course-list" class="oai-pilgrimage-course-list"></div>
       </section>
@@ -1295,10 +1294,16 @@ window.APP_CONFIG = {
           <div class="oai-pilgrimage-follow-road"><div><small>현재 위치에서 자동차</small><b id="oai-pilgrimage-follow-km">계산 중…</b></div><div><small>예상 시간</small><b id="oai-pilgrimage-follow-time">-</b></div></div>
           <p id="oai-pilgrimage-follow-note">현재 위치를 확인하고 있습니다.</p>
         </section>
+        <section class="oai-pilgrimage-follow-progress">
+          <div class="oai-pilgrimage-follow-progress-head"><strong>순례 진행</strong><span id="oai-pilgrimage-follow-progress-count">0 / 0</span></div>
+          <div id="oai-pilgrimage-follow-progress-list" class="oai-pilgrimage-follow-progress-list"></div>
+          <button type="button" class="oai-pilgrimage-follow-undo" data-oai-pilgrimage-follow-undo="1" hidden>마지막 완료 취소</button>
+        </section>
         <div class="oai-pilgrimage-follow-actions">
           <button type="button" class="primary" data-oai-pilgrimage-follow-route="1">길찾기</button>
           <button type="button" class="done" data-oai-pilgrimage-follow-done="1">순례 완료</button>
         </div>
+        <button type="button" class="oai-pilgrimage-follow-recalc" data-oai-pilgrimage-follow-recalc="1">거리 다시 계산</button>
       </section>
     </div>
   </section>
@@ -1419,7 +1424,7 @@ window.APP_CONFIG = {
     </div>
   </div>
 </div>
-<script src="web.js?v=V8-1-14-867"></script>
+<script src="web.js?v=V8-1-14-868"></script>
 
 <div id="qna-view" role="dialog" aria-modal="true" aria-label="문의·건의" class="module-view">
   <div class="module-bar qna">
@@ -1471,7 +1476,7 @@ window.APP_CONFIG = {
   setTimeout(function(){ rearmQnaCoverReturn('700'); },700);
 })();
 </script>
-<script src="sw-update.js?v=V8-1-14-867"></script>
+<script src="sw-update.js?v=V8-1-14-868"></script>
 
 </body>
 </html>
