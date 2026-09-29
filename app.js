@@ -9044,6 +9044,18 @@ function _closeInfoRouteChoice(){
   _prepareRouteChoiceSetUI();
   _syncMapPanelUI('close-route-choice');
 }
+function _openRouteMarkerChoice(item,idx){
+  if(!item) return;
+  const dlg=$('route-choice-modal');
+  if(!dlg){ _setRoutePointFromItem(_routeHasVisibleStart()?'end':'start',item,idx); return; }
+  _prepareRouteChoiceSetUI();
+  _routeChoicePendingInfo={item:item,idx:idx,fromRegion:false};
+  const name=$('route-choice-name');
+  if(name) name.textContent=item.name||'장소';
+  dlg.classList.add('open');
+  _syncMapPanelUI('open-route-marker-choice');
+  try{ document.activeElement&&document.activeElement.blur(); }catch(e){ console.warn('[가톨릭길동무]', e); }
+}
 try{ window._closeInfoRouteChoice=_closeInfoRouteChoice; window._openRoutePointCancelChoice=_openRoutePointCancelChoice; }catch(e){ console.warn('[가톨릭길동무]', e); }
 function _setInfoRouteStart(){
   const info=_getRouteChoicePendingInfo();
@@ -10294,6 +10306,7 @@ function _setMyLoc(lat,lng,opts){
   _myLocAt=Date.now ? Date.now() : new Date().getTime();
   try{ if(AppState){ AppState.myLocAt=_myLocAt; } }catch(_e){}
   _saveRecentStoredLocation(lat,lng);
+  try{ setTimeout(_renderRouteItinerary,0); }catch(_e){}
   /* 위치 갱신 후 성지 도착 여부는 확인한다.
      자동감지는 도착 팝업만 띄우며 현재 화면/내주변 탭을 강제로 열지 않는다. */
   if(!opts.suppressAutoShrineVisit){
@@ -11246,6 +11259,153 @@ function _syncRouteWaypointBox(){
   });
   _syncRouteWaypointBoxes();
 }
+/* V8-1-14-812: 자주 가는 장소(최대 5개)와 전체 순례 일정 */
+const OAI_ROUTE_FAVORITES_KEY='oai_route_frequent_places_v1';
+const OAI_ROUTE_FAVORITES_MAX=5;
+const OAI_ROUTE_ITINERARY_ARRIVAL_KM=0.5;
+let _routeItinerarySignature='';
+let _routeItineraryReachedIndex=-1;
+
+function _routeFavoriteRoleId(role){
+  if(role==='start'||role==='end') return 'rs-'+role+'-fav';
+  if(_isRouteWaypointRole(role)) return _routeWaypointElementId('rs-waypoint',_routeWaypointIndex(role),'-fav');
+  return '';
+}
+function _loadRouteFavorites(){
+  try{
+    const raw=JSON.parse(localStorage.getItem(OAI_ROUTE_FAVORITES_KEY)||'[]');
+    if(!Array.isArray(raw)) return [];
+    return raw.filter(function(x){return x&&x.name&&Number.isFinite(Number(x.lat))&&Number.isFinite(Number(x.lng));}).slice(0,OAI_ROUTE_FAVORITES_MAX).map(function(x){
+      return {name:String(x.name||'').trim(),addr:String(x.addr||''),lat:Number(x.lat),lng:Number(x.lng),sourceMode:String(x.sourceMode||''),savedAt:Number(x.savedAt||0)};
+    });
+  }catch(_e){ return []; }
+}
+function _saveRouteFavorites(list){
+  try{ localStorage.setItem(OAI_ROUTE_FAVORITES_KEY,JSON.stringify((list||[]).slice(0,OAI_ROUTE_FAVORITES_MAX))); }catch(_e){}
+}
+function _routeFavoriteSame(a,b){
+  if(!a||!b) return false;
+  const dist=Math.abs(Number(a.lat)-Number(b.lat))+Math.abs(Number(a.lng)-Number(b.lng));
+  return dist<0.00002 || (String(a.name||'').trim()===String(b.name||'').trim() && dist<0.001);
+}
+function _updateRouteFavoriteButton(role){
+  const id=_routeFavoriteRoleId(role), btn=id?$(id):null, point=_getRoutePointByRole(role);
+  if(!btn) return;
+  const ready=_routePointReady(point) && !(point&&point.isImplicitCurrentLocation);
+  btn.style.display=ready?'inline-flex':'none';
+  btn.disabled=!ready;
+  const saved=ready && _loadRouteFavorites().some(function(f){return _routeFavoriteSame(f,point);});
+  btn.classList.toggle('is-saved',!!saved);
+  btn.textContent=saved?'★':'☆';
+  btn.setAttribute('aria-label',saved?'자주 가는 장소에서 삭제':'자주 가는 장소로 저장');
+  btn.setAttribute('title',saved?'자주 가는 장소에서 삭제':'자주 가는 장소 저장');
+}
+function _updateAllRouteFavoriteButtons(){
+  _updateRouteFavoriteButton('start');
+  OAI_ROUTE_WAYPOINT_CONFIGS.forEach(function(cfg){_updateRouteFavoriteButton(cfg.role);});
+  _updateRouteFavoriteButton('end');
+}
+function _toggleRouteFavorite(role){
+  const point=_getRoutePointByRole(role);
+  if(!_routePointReady(point) || point.isImplicitCurrentLocation) return;
+  let list=_loadRouteFavorites();
+  const at=list.findIndex(function(f){return _routeFavoriteSame(f,point);});
+  if(at>=0){
+    list.splice(at,1);
+    _saveRouteFavorites(list);
+    _showRouteGuideText('자주 가는 장소에서 삭제했습니다');
+  }else{
+    if(list.length>=OAI_ROUTE_FAVORITES_MAX){
+      alert('자주 가는 장소는 최대 '+OAI_ROUTE_FAVORITES_MAX+'개까지 저장할 수 있습니다.');
+      return;
+    }
+    list.push({name:String(point.name||'장소'),addr:String(point.addr||''),lat:Number(point.lat),lng:Number(point.lng),sourceMode:String(_mode||''),savedAt:Date.now()});
+    _saveRouteFavorites(list);
+    _showRouteGuideText('자주 가는 장소에 저장했습니다');
+  }
+  _updateAllRouteFavoriteButtons();
+  _renderRouteFrequentPlaces();
+}
+function _renderRouteFrequentPlaces(){
+  const wrap=$('sm-frequent-places'), body=$('sm-frequent-list');
+  if(!wrap||!body) return;
+  const list=_loadRouteFavorites();
+  wrap.style.display='block';
+  if(!list.length){ body.innerHTML='<span class="sm-frequent-empty">☆ 출발·경유·도착지의 별표를 눌러 저장하세요</span>'; return; }
+  body.innerHTML=list.map(function(f,i){
+    return '<div class="sm-frequent-chip"><button type="button" class="sm-frequent-use" data-route-frequent-use="'+i+'" title="'+_placeText(f.name)+'">'+_placeText(f.name)+'</button><button type="button" class="sm-frequent-remove" data-route-frequent-remove="'+i+'" aria-label="'+_placeText(f.name)+' 삭제">×</button></div>';
+  }).join('');
+}
+function _useRouteFrequentPlace(index){
+  const list=_loadRouteFavorites(), f=list[index];
+  if(!f) return;
+  const role=_smRole;
+  closeSearchModal();
+  if(!_activeTab||_activeTab!=='route') openTab('route'); else _enterRouteMode();
+  _setRoutePointFromItem(role,{name:f.name,addr:f.addr||'',lat:f.lat,lng:f.lng},-1);
+  if(_map) _map.panTo(new _LL(f.lat,f.lng));
+}
+function _removeRouteFrequentPlace(index){
+  const list=_loadRouteFavorites();
+  if(index<0||index>=list.length) return;
+  list.splice(index,1); _saveRouteFavorites(list);
+  _renderRouteFrequentPlaces(); _updateAllRouteFavoriteButtons();
+}
+function _routeItineraryEntries(){
+  const out=[];
+  if(_routePointReady(_rS)) out.push({role:'start',point:_rS});
+  OAI_ROUTE_WAYPOINT_CONFIGS.forEach(function(cfg){const p=_getRoutePointByRole(cfg.role);if(_routePointReady(p)) out.push({role:cfg.role,point:p});});
+  if(_routePointReady(_rE)) out.push({role:'end',point:_rE});
+  return out;
+}
+function _routeItineraryKey(entries){
+  return (entries||[]).map(function(e){
+    const p=e.point||{};
+    if(e.role==='start' && (p.isImplicitCurrentLocation||p.showStartMarker||p.name==='현재 위치'||p.name==='현위치')) return 'CURRENT_START';
+    return [Number(p.lat).toFixed(5),Number(p.lng).toFixed(5),String(p.name||'')].join(',');
+  }).join('|');
+}
+function _routeItineraryCurrentIndex(entries){
+  if(!entries.length||!Number.isFinite(Number(_myLat))||!Number.isFinite(Number(_myLng))) return -1;
+  let best=-1,bestKm=Infinity;
+  entries.forEach(function(e,i){
+    const km=calcDist(Number(_myLat),Number(_myLng),Number(e.point.lat),Number(e.point.lng));
+    if(Number.isFinite(km)&&km<bestKm){bestKm=km;best=i;}
+  });
+  return bestKm<=OAI_ROUTE_ITINERARY_ARRIVAL_KM?best:-1;
+}
+function _renderRouteItinerary(){
+  const panel=$('route-itinerary'), summary=$('route-itinerary-summary'), list=$('route-itinerary-list'), sheet=$('sheet-route');
+  if(!panel||!summary||!list) return;
+  const entries=_routeItineraryEntries();
+  if(entries.length<2){
+    panel.hidden=true; if(sheet) sheet.classList.remove('has-itinerary');
+    _routeItinerarySignature=''; _routeItineraryReachedIndex=-1; return;
+  }
+  const sig=_routeItineraryKey(entries);
+  if(sig!==_routeItinerarySignature){ _routeItinerarySignature=sig; _routeItineraryReachedIndex=-1; }
+  const currentIndex=_routeItineraryCurrentIndex(entries);
+  if(currentIndex>=0) _routeItineraryReachedIndex=Math.max(_routeItineraryReachedIndex,currentIndex);
+  let nextIndex=-1;
+  if(currentIndex>=0 && currentIndex<entries.length-1) nextIndex=currentIndex+1;
+  else{
+    for(let i=Math.max(0,_routeItineraryReachedIndex+1);i<entries.length;i++){ nextIndex=i; break; }
+    if(nextIndex===0 && entries[0].point && (entries[0].point.isImplicitCurrentLocation||entries[0].point.name==='현재 위치'||entries[0].point.name==='현위치')) nextIndex=entries.length>1?1:-1;
+  }
+  const currentText=currentIndex>=0 ? (entries[currentIndex].point.name||'현재 위치') : '현재 위치';
+  const nextText=nextIndex>=0 ? (entries[nextIndex].point.name||'다음 장소') : '일정 완료';
+  summary.innerHTML='<div class="route-itinerary-focus"><span class="label">지금 위치</span><strong>'+_placeText(currentText)+'</strong></div><div class="route-itinerary-focus next"><span class="label">다음 갈 곳</span><strong>'+_placeText(nextText)+'</strong></div>';
+  list.innerHTML=entries.map(function(e,i){
+    let cls='', status='예정';
+    if(i===currentIndex){cls=' is-current';status='현재';}
+    else if(i===nextIndex){cls=' is-next';status='다음';}
+    else if(i<=_routeItineraryReachedIndex){cls=' is-pilgrimed';status='순례';}
+    else if(i===0){status='출발';}
+    return '<div class="route-itinerary-item'+cls+'"><span class="route-itinerary-num">'+(i+1)+'</span><span class="route-itinerary-name">'+_placeText(e.point.name||('장소 '+(i+1)))+'</span><span class="route-itinerary-status">'+status+'</span></div>';
+  }).join('');
+  panel.hidden=false; if(sheet) sheet.classList.add('has-itinerary');
+}
+
 function _setRouteLabel(role,name){
   const el=$(`rs-${role}-lbl`);
   if(!el) return;
@@ -11267,6 +11427,8 @@ function _setRouteLabel(role,name){
     if(clearBtn) clearBtn.style.display=(_getRouteWaypointEnabledByRole(role) || rawName)?'inline-flex':'none';
     _setRouteWaypointEnabledByRole(role, !!(_getRouteWaypointEnabledByRole(role) || rawName));
   }
+  _updateRouteFavoriteButton(role);
+  _renderRouteItinerary();
   _updateSearchBtn();
 }
 
@@ -11690,24 +11852,9 @@ function _selectRouteItem(idx){
     _openRoutePointCancelChoice('end');
     return;
   }
-  const hasStart=_routeHasVisibleStart();
-  const hasEnd=!!(_rE&&_rE.lat&&_rE.lng);
-  if(!hasStart){
-    _setRoutePointFromItem('start',s,idx);
-    if(!_activeTab||_activeTab!=='route') openTab('route');
-    if(hasEnd) _updateSearchBtn();
-    return;
-  }
-  const pendingWaypointRole = _pendingRouteWaypointRole();
-  if(pendingWaypointRole){
-    _setRoutePointFromItem(pendingWaypointRole,s,idx);
-  }else if(!hasEnd){
-    _setRoutePointFromItem('end',s,idx);
-  }else{
-    _showRouteGuideText('경유지를 추가하려면 + 경유지를 먼저 누르세요');
-    return;
-  }
-  if(!_activeTab||_activeTab!=='route') openTab('route');
+  // V8-1-14-842: 길찾기 모드에서는 마커를 눌렀을 때 자동으로 출발/도착을 정하지 않는다.
+  // 사용자가 출발지·경유지·도착지 중 원하는 역할을 직접 선택한다.
+  _openRouteMarkerChoice(s,idx);
 }
 
 function _hideParishMarkersForRouteDisplay(){
@@ -12211,6 +12358,7 @@ function openSearchModal(role){
     smInput.setAttribute('aria-label',smPh);
     smInput.value='';
   }
+  _renderRouteFrequentPlaces();
   _setSmPrompt('all');
   const searchModal=$('srch-modal');
   if(searchModal){
@@ -12777,6 +12925,29 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   on('rs-swap-waypoint4-end-btn', 'click', function(e) { if(e){ e.preventDefault(); e.stopPropagation(); } swapRouteWaypoint4End(); });
   on('rs-swap-waypoint5-end-btn', 'click', function(e) { if(e){ e.preventDefault(); e.stopPropagation(); } swapRouteWaypoint5End(); });
   _bindRouteDragHandles();
+  document.querySelectorAll('.rs-fav-save[data-route-fav]').forEach(function(btn){
+    if(btn.dataset.routeFavBound==='1') return;
+    btn.dataset.routeFavBound='1';
+    btn.addEventListener('click',function(e){ e.preventDefault(); e.stopPropagation(); _toggleRouteFavorite(btn.dataset.routeFav); });
+  });
+  on('route-itinerary-toggle','click',function(e){
+    if(e){e.preventDefault();e.stopPropagation();}
+    const panel=$('route-itinerary'); if(!panel) return;
+    const collapsed=panel.classList.toggle('collapsed');
+    this.textContent=collapsed?'펼치기':'접기'; this.setAttribute('aria-expanded',collapsed?'false':'true');
+  });
+  const frequentBody=$('sm-frequent-list');
+  if(frequentBody && frequentBody.dataset.routeFrequentBound!=='1'){
+    frequentBody.dataset.routeFrequentBound='1';
+    frequentBody.addEventListener('click',function(e){
+      const remove=e.target.closest('[data-route-frequent-remove]');
+      if(remove){e.preventDefault();e.stopPropagation();_removeRouteFrequentPlace(parseInt(remove.dataset.routeFrequentRemove,10));return;}
+      const use=e.target.closest('[data-route-frequent-use]');
+      if(use){e.preventDefault();e.stopPropagation();_useRouteFrequentPlace(parseInt(use.dataset.routeFrequentUse,10));}
+    });
+  }
+  _updateAllRouteFavoriteButtons();
+  _renderRouteItinerary();
   on('rs-search-btn','click', function() { doSearchRoute(); });
   on('rs-kakao-btn', 'click', function() { doKakaoRoute(); });
   on('rs-reset-btn', 'click', function() { resetRoute({ fromButton: true }); });
@@ -13139,6 +13310,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     return countVisits(data.shrineVisits)||countVisits(data.parishVisits)||
       (Array.isArray(data.prayerFavorites)&&data.prayerFavorites.length>0)||
       (Array.isArray(data.webFavorites)&&data.webFavorites.length>0)||
+      (Array.isArray(data.routeFavorites)&&data.routeFavorites.length>0)||
       !!(data.myParish&&data.myParish.name);
   }
   function queueGoogleDriveBackup(){
@@ -13156,7 +13328,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const keys={};
     [OAI_SHRINE_VISITS_KEY,OAI_PARISH_VISITS_KEY,OAI_PARISH_AUTO_VISIT_ENABLED_KEY,
       OAI_SETTINGS_MY_PARISH_KEY,'oai_my_parish','oai_my_diocese_name','oai_my_parish_name',
-      'pr_favorites','web_favorites_v1','prayer_font_size'].forEach(function(key){keys[key]=true;});
+      'pr_favorites','web_favorites_v1',OAI_ROUTE_FAVORITES_KEY,'prayer_font_size'].forEach(function(key){keys[key]=true;});
     try{
       if(window.__oaiGoogleDriveStorageWatch)return;
       window.__oaiGoogleDriveStorageWatch=true;
@@ -13248,7 +13420,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const parish=configuredParish();
     return {format:'catholic-gildongmu-backup',version:1,createdAt:new Date().toISOString(),data:{
       shrineVisits:localValue(OAI_SHRINE_VISITS_KEY,{}),parishVisits:localValue(OAI_PARISH_VISITS_KEY,{}),
-      prayerFavorites:localValue('pr_favorites',[]),webFavorites:localValue('web_favorites_v1',[]),
+      prayerFavorites:localValue('pr_favorites',[]),webFavorites:localValue('web_favorites_v1',[]),routeFavorites:localValue(OAI_ROUTE_FAVORITES_KEY,[]),
       myDiocese:configuredDiocese(),myParish:parish?{diocese:parish.diocese||'',name:parish.name||''}:null,
       parishAutoVisit:_isMyParishAutoVisitEnabled(),prayerFontSize:localStorage.getItem('prayer_font_size')||''
     }};
@@ -13267,6 +13439,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     _saveParishVisits(mergeVisitMaps(_loadParishVisits(),data.parishVisits));
     localStorage.setItem('pr_favorites',JSON.stringify(mergeLists(localValue('pr_favorites',[]),data.prayerFavorites)));
     localStorage.setItem('web_favorites_v1',JSON.stringify(mergeLists(localValue('web_favorites_v1',[]),data.webFavorites)));
+    localStorage.setItem(OAI_ROUTE_FAVORITES_KEY,JSON.stringify(mergeLists(localValue(OAI_ROUTE_FAVORITES_KEY,[]),data.routeFavorites).slice(0,OAI_ROUTE_FAVORITES_MAX)));
+    try{_updateAllRouteFavoriteButtons();_renderRouteFrequentPlaces();}catch(_e){}
     if(data.myDiocese)localStorage.setItem('oai_my_diocese_name',String(data.myDiocese));
     if(data.myParish&&data.myParish.name){const parish={diocese:String(data.myParish.diocese||data.myDiocese||''),name:String(data.myParish.name||'')};localStorage.setItem(OAI_SETTINGS_MY_PARISH_KEY,JSON.stringify(parish));localStorage.setItem('oai_my_parish',JSON.stringify(parish));localStorage.setItem('oai_my_diocese_name',parish.diocese);localStorage.setItem('oai_my_parish_name',parish.name);}
     if(typeof data.parishAutoVisit==='boolean')_setParishAutoVisitEnabled(data.parishAutoVisit);
