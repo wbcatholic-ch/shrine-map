@@ -1,12 +1,6 @@
-V8-1-14-854
-- index.html
-- style.css
-- app.js
-- sw.js
-- version.json
-
-Changes:
-- Settings always opens scrolled to the top.
-- Hidden developer mode appears after tapping the version label 5 times.
-- Developer pilgrimage planner: add/search places, reorder by drag handle, mark visited, remove/reset, route to next stop.
-- Pilgrimage plan is included in Google Drive backup data.
+app.js
+style.css
+index.html
+sw.js
+sw-update.js
+version.json
