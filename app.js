@@ -12436,7 +12436,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function shareGildongmuApp(e) {
     try{ if(e){ e.preventDefault(); e.stopPropagation(); } }catch(_e){}
-    var shareUrl = 'https://catholicgildongmu.co.kr/install.html?v=V8-1-14-833';
+    var shareUrl = 'https://catholicgildongmu.co.kr/install.html?v=V8-1-14-834';
     var shareTitle = '가톨릭길동무';
     var shareText = '가톨릭길동무 앱을 추천합니다.\n\n전국 성당, 성지, 피정의집, 순례길 정보를 한눈에 볼 수 있는 가톨릭 생활 앱입니다.\n\n설치하기:\n' + shareUrl;
     try{
@@ -13070,9 +13070,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function recordMessage(text){const el=document.getElementById('oai-records-message');if(el)el.textContent=text||'';}
   const OAI_GOOGLE_DRIVE_CONNECTED_KEY='oai_google_drive_connected_v1';
   const OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY='oai_google_drive_auto_backup_v1';
+  const OAI_ONBOARDING_DONE_KEY='oai_onboarding_done_v1';
   let googleDriveBackupTimer=0;
   let googleDriveInitialSyncPending=false;
   let googleDriveAutoConnectPending=false;
+  let initialOnboarding=false;
   function nativeDrive(){try{return window.GildongmuNative||null;}catch(_e){return null;}}
   function isGoogleDriveConnected(){return localStorage.getItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY)==='1';}
   function isGoogleDriveAutoBackupEnabled(){
@@ -13094,7 +13096,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }else{
       input.checked=false;
       if(description)description.textContent='켜면 Google 계정을 연결하고 기록을 자동으로 보관합니다.';
-      if(saved)saved.textContent='개인 Google Drive에만 보관되며, 앱 운영자에게는 전달되지 않습니다.';
+      if(saved)saved.textContent='가톨릭길동무 운영자는 개인 기록을 보관하지 않습니다.';
     }
   }
   function setGoogleDriveAutoBackup(enabled){
@@ -13162,8 +13164,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     try{bridge.saveGoogleDriveBackup(JSON.stringify(backupSnapshot()));}catch(_e){if(showMessage)recordMessage('Google Drive에 기록을 저장하지 못했습니다.');}
   }
   window.oaiGoogleDriveStatus=function(status,message){
-    if(status==='connected'){localStorage.setItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY,'1');localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'1');googleDriveAutoConnectPending=false;}
-    if(status==='disconnected'){localStorage.removeItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY);if(googleDriveAutoConnectPending)localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'0');googleDriveAutoConnectPending=false;}
+    if(status==='connected'){localStorage.setItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY,'1');localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'1');googleDriveAutoConnectPending=false;if(initialOnboarding)closeOnboardingBackup();}
+    if(status==='disconnected'){localStorage.removeItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY);if(googleDriveAutoConnectPending)localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'0');googleDriveAutoConnectPending=false;if(initialOnboarding)onboardingMessage(message||'Google 계정을 연결하지 못했습니다. 다시 선택해 주세요.');}
     if(status==='saved'){
       try{localStorage.setItem('oai_google_drive_saved_at_v1',new Date().toISOString());}catch(_e){}
       refreshGoogleDriveButton();
@@ -13247,10 +13249,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   const parishSetup={dio:'',parish:null,query:'',view:'home'};
   function setupModal(){return document.getElementById('oai-parish-setup-modal');}
-  function closeParishSetup(){const m=setupModal();if(!m)return;m.classList.remove('show','oai-parish-setup-home');m.setAttribute('aria-hidden','true');}
+  function closeParishSetup(){const m=setupModal();if(!m)return;if(initialOnboarding&&!configuredParish())return;m.classList.remove('show','oai-parish-setup-home');m.setAttribute('aria-hidden','true');}
   function stepBackParishSetup(){
     const m=setupModal();if(!m||!m.classList.contains('show'))return false;
     if(parishSetup.view!=='home'){parishSetup.view='home';parishSetup.query='';renderParishSetup();return true;}
+    if(initialOnboarding&&!configuredParish())return true;
     closeParishSetup();return true;
   }
   function renderParishSetup(){
@@ -13291,6 +13294,28 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     try{const selected={diocese:p.diocese||parishSetup.dio,name:p.name||''};localStorage.setItem(OAI_SETTINGS_MY_PARISH_KEY,JSON.stringify(selected));localStorage.setItem('oai_my_diocese_name',selected.diocese);localStorage.setItem('oai_my_parish_name',selected.name);localStorage.setItem('oai_my_parish',JSON.stringify(selected));}catch(_e){}
     closeParishSetup();refresh();
     try{window.dispatchEvent(new CustomEvent('oai-my-parish-changed'));}catch(_e){}
+    if(initialOnboarding)openOnboardingBackup();
+  }
+  function onboardingModal(){return document.getElementById('oai-onboarding-backup-modal');}
+  function onboardingMessage(text){const el=document.getElementById('oai-onboarding-backup-message');if(el)el.textContent=text||'';}
+  function closeOnboardingBackup(){const m=onboardingModal();if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}initialOnboarding=false;try{localStorage.setItem(OAI_ONBOARDING_DONE_KEY,'1');}catch(_e){}}
+  function renderOnboardingBackup(risk){
+    const body=document.getElementById('oai-onboarding-backup-body');if(!body)return;
+    if(risk){body.innerHTML='<p class="oai-onboarding-warning">자동 보관을 켜지 않으면 휴대폰을 바꾸거나 앱을 다시 설치할 때 방문 기록과 즐겨찾기를 잃을 수 있습니다.</p><button type="button" class="oai-records-primary" data-oai-onboarding-connect="1">내 Google Drive에 자동 보관 켜기</button><button type="button" class="oai-onboarding-text-button" data-oai-onboarding-finish="1">그래도 나중에 설정하기</button>';return;}
+    body.innerHTML='<p class="oai-onboarding-intro">방문 기록, 즐겨찾기, 교구·본당 설정을 내 Google Drive에 자동으로 보관합니다.</p><p class="oai-onboarding-privacy">가톨릭길동무 운영자는 개인 기록을 보관하지 않습니다.</p><button type="button" class="oai-records-primary" data-oai-onboarding-connect="1">내 Google Drive에 자동 보관 켜기</button><button type="button" class="oai-onboarding-text-button" data-oai-onboarding-later="1">나중에 설정하기</button><em id="oai-onboarding-backup-message" aria-live="polite"></em>';
+  }
+  function openOnboardingBackup(){
+    const m=onboardingModal();if(!m)return;renderOnboardingBackup(false);m.classList.add('show');m.setAttribute('aria-hidden','false');
+  }
+  function startInitialOnboarding(){
+    if(configuredParish())return;
+    initialOnboarding=true;
+    openParishChooser();
+    parishSetup.view='diocese';
+    renderParishSetup();
+    const title=document.getElementById('oai-parish-setup-title'),sub=document.getElementById('oai-parish-setup-subtitle');
+    if(title)title.textContent='교구·본당 설정';
+    if(sub)sub.textContent='처음 한 번만 설정해 주세요.';
   }
   window.openOaiSettings=open;
   window.closeOaiSettings=close;
@@ -13304,7 +13329,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   window.goBackOaiParishSetup=stepBackParishSetup;
   enforceCoverSettingsLabel();
   document.addEventListener('click',function(e){
-    const target=e.target&&e.target.closest?e.target.closest('[data-oai-settings-close],[data-oai-settings-edit],[data-oai-records-open],[data-oai-records-close],[data-oai-google-connect],[data-oai-google-restore],[data-oai-backup-copy],[data-oai-restore-open],[data-oai-restore-close],[data-oai-restore-apply],[data-oai-parish-setup-close],[data-oai-setup-open],[data-oai-setup-dio],[data-oai-setup-back],[data-oai-setup-parish],#cover-diocese-btn'):null;
+    const target=e.target&&e.target.closest?e.target.closest('[data-oai-settings-close],[data-oai-settings-edit],[data-oai-records-open],[data-oai-records-close],[data-oai-google-connect],[data-oai-google-restore],[data-oai-backup-copy],[data-oai-restore-open],[data-oai-restore-close],[data-oai-restore-apply],[data-oai-parish-setup-close],[data-oai-setup-open],[data-oai-setup-dio],[data-oai-setup-back],[data-oai-setup-parish],[data-oai-onboarding-connect],[data-oai-onboarding-later],[data-oai-onboarding-finish],#cover-diocese-btn'):null;
     if(!target) return;
     if(target.id==='cover-diocese-btn' && target.dataset.oaiNativeSettings==='1') return;
     if(target.id==='cover-diocese-btn'){
@@ -13320,6 +13345,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(target.hasAttribute('data-oai-restore-open')){e.preventDefault();openRestore();return;}
     if(target.hasAttribute('data-oai-restore-close')){e.preventDefault();closeRestore();return;}
     if(target.hasAttribute('data-oai-restore-apply')){e.preventDefault();applyRestore();return;}
+    if(target.hasAttribute('data-oai-onboarding-connect')){e.preventDefault();onboardingMessage('Google 계정을 선택해 주세요.');setGoogleDriveAutoBackup(true);return;}
+    if(target.hasAttribute('data-oai-onboarding-later')){e.preventDefault();renderOnboardingBackup(true);return;}
+    if(target.hasAttribute('data-oai-onboarding-finish')){e.preventDefault();closeOnboardingBackup();return;}
     if(target.hasAttribute('data-oai-parish-setup-close')){e.preventDefault();closeParishSetup();return;}
     if(target.hasAttribute('data-oai-setup-open')){e.preventDefault();const next=target.getAttribute('data-oai-setup-open');if(next==='diocese'){parishSetup.view='diocese';renderParishSetup();return;}if(next==='parish'){if(!parishSetup.dio){parishSetup.view='diocese';renderParishSetup();return;}parishSetup.view='parish';openParishChooser(true);return;}}
     if(target.hasAttribute('data-oai-setup-back')){e.preventDefault();parishSetup.view='home';parishSetup.query='';renderParishSetup();return;}
@@ -13343,4 +13371,5 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     else if(e.key==='Escape'&&window.isOaiSettingsOpen())close();
   });
   document.addEventListener('change',function(e){if(e.target&&e.target.matches&&e.target.matches('[data-oai-google-auto]'))setGoogleDriveAutoBackup(!!e.target.checked);});
+  setTimeout(startInitialOnboarding,650);
 })();
