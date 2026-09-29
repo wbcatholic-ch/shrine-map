@@ -3,7 +3,26 @@
   if(window.__OAI_CONTROLLED_AUTO_UPDATE__) return;
   window.__OAI_CONTROLLED_AUTO_UPDATE__ = true;
 
-  var APP_VERSION = window.OAI_APP_BUILD_VERSION || 'V8-1-14-696';
+  function versionParts(v){
+    var m=String(v||'').match(/V?(\d+)-(\d+)-(\d+)-(\d+)/i);
+    return m ? [Number(m[1]),Number(m[2]),Number(m[3]),Number(m[4])] : null;
+  }
+  function compareVersions(a,b){
+    var aa=versionParts(a), bb=versionParts(b);
+    if(!aa || !bb) return String(a||'').localeCompare(String(b||''));
+    for(var i=0;i<4;i++){ if(aa[i]!==bb[i]) return aa[i]-bb[i]; }
+    return 0;
+  }
+  function currentDocumentVersion(){
+    var values=[];
+    try{ if(window.OAI_APP_BUILD_VERSION) values.push(String(window.OAI_APP_BUILD_VERSION)); }catch(_e){}
+    try{ var b=document.getElementById('cover-update-btn'); if(b&&b.getAttribute('data-target-version')) values.push(b.getAttribute('data-target-version')); }catch(_e){}
+    try{ var m=document.getElementById('oai-build-marker'); if(m&&m.textContent) values.push(String(m.textContent).trim()); }catch(_e){}
+    var best='';
+    values.forEach(function(v){ if(v && (!best || compareVersions(v,best)>0)) best=v; });
+    return best || 'V8-1-14-867';
+  }
+  var APP_VERSION = currentDocumentVersion();
   var CHECK_URL = './version.json';
   var RELOAD_KEY = 'oai_auto_update_reloaded_version';
   var checking = false;
@@ -73,7 +92,7 @@
     if(checking || document.visibilityState==='hidden') return Promise.resolve(false);
     checking=true;
     return fetchRemoteVersion().then(function(remote){
-      if(!remote || remote===APP_VERSION) return false;
+      if(!remote || compareVersions(remote,APP_VERSION)<=0) return false;
       try{
         if(sessionStorage.getItem(RELOAD_KEY)===remote) return false;
       }catch(_e){}
