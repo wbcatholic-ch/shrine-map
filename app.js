@@ -6412,6 +6412,54 @@ function _kakaoKeywordDocs(query, limit){
   });
 }
 
+/* V8-1-14-858: 길찾기/자주 가는 장소 검색에서 도로명·지번 주소도 직접 검색한다. */
+function _kakaoAddressDocsFromJs(query, max){
+  return new Promise(function(resolve){
+    try{
+      if(!(window.kakao && kakao.maps && kakao.maps.services && kakao.maps.services.Geocoder)){
+        resolve([]); return;
+      }
+      var geocoder=new kakao.maps.services.Geocoder();
+      var settled=false;
+      function done(list){ if(settled) return; settled=true; resolve((list||[]).slice(0,max||10)); }
+      geocoder.addressSearch(String(query||'').trim(), function(result,status){
+        try{
+          var OK=kakao.maps.services.Status.OK;
+          if(status!==OK || !result || !result.length){ done([]); return; }
+          var docs=result.map(function(r){
+            var road=(r.road_address&&r.road_address.address_name)||'';
+            var jibun=(r.address&&r.address.address_name)||r.address_name||'';
+            var label=road||jibun||String(query||'').trim();
+            return {
+              id:'address:'+String(r.x||'')+','+String(r.y||''),
+              place_name:label,
+              address_name:jibun||road,
+              road_address_name:road,
+              x:r.x,
+              y:r.y,
+              category_group_code:'',
+              category_name:'주소',
+              __oaiAddress:true
+            };
+          }).filter(function(d){return d.x&&d.y;});
+          done(docs);
+        }catch(_e){ done([]); }
+      });
+      setTimeout(function(){done([]);},3500);
+    }catch(_e){ resolve([]); }
+  });
+}
+function _kakaoPlaceAndAddressDocs(query, limit){
+  var max=Math.max(1,parseInt(limit||10,10)||10);
+  return Promise.all([
+    _kakaoKeywordDocs(query,max).catch(function(){return [];}),
+    _kakaoAddressDocsFromJs(query,Math.min(10,max)).catch(function(){return [];})
+  ]).then(function(groups){
+    /* 주소 결과를 먼저 두면 사용자가 주소를 그대로 입력했을 때 바로 찾기 쉽다. */
+    return _dedupeKakaoDocs([groups[1]||[],groups[0]||[]],max);
+  });
+}
+
 /* V8-1-14-679: 화면에 표시하는 실제 주소(addr)와 차량 길찾기 목적지(navAddr)를 분리한다.
    navAddr는 카드에 노출하지 않고, 도착지/카카오내비를 실행할 때만 좌표로 변환한다. */
 const _routeAddressPointCache = Object.create(null);
@@ -12253,7 +12301,7 @@ function _setSmBodyVisible(tab){
 function _setSmPrompt(tab){
   const body=tab==='all'?$('sm-body-all'):(tab==='cat'?$('sm-body'):$('sm-body-place'));
   if(!body) return;
-  const msg=tab==='all'?'성지·성당·피정의 집·일반 장소를 검색하세요':(tab==='cat'?'성지·성당·피정의 집을 검색하세요':'일반 장소명을 입력하세요');
+  const msg=tab==='all'?'성지·성당·피정의 집·일반 장소·주소를 검색하세요':(tab==='cat'?'성지·성당·피정의 집을 검색하세요':'장소명 또는 주소를 입력하세요');
   body.innerHTML='<div class="sm-place-loading">'+msg+'</div>';
 }
 function smSwitchTab(tab){
@@ -12336,7 +12384,8 @@ function _renderCatholicRouteResults(body,records,scope){
 }
 function _generalRouteRecord(doc,query){
   const item={name:doc.place_name||'',addr:doc.road_address_name||doc.address_name||'',diocese:''};
-  return {source:'place',sourcePriority:1,kind:'place',kindPriority:3,doc:doc,item:item,name:item.name,score:_placeSearchScore(item,query),badge:'일반 장소',color:'#64748b'};
+  const isAddress=!!doc.__oaiAddress;
+  return {source:'place',sourcePriority:1,kind:isAddress?'address':'place',kindPriority:3,doc:doc,item:item,name:item.name,score:_placeSearchScore(item,query),badge:isAddress?'주소':'일반 장소',color:isAddress?'#8a5a16':'#64748b'};
 }
 function _routeSearchCoreName(value){
   return _normalizePlaceSearchText(value).replace(/^천주교/,'').replace(/(주교좌)?(대)?성당$/,'').replace(/본당$/,'').replace(/피정의집$/,'').replace(/성지$/,'');
@@ -12362,7 +12411,7 @@ function _renderAllRouteResults(body,records){
     if(record.source==='place'){
       const doc=record.doc||{};
       const icon=doc.category_group_code==='MT1'?'🏪':doc.category_group_code==='SC4'?'🏫':doc.category_group_code==='HP8'?'🏥':doc.category_group_code==='PM9'?'💊':doc.category_group_code==='OL7'?'⛽':'📍';
-      return `<div class="sm-place-item sm-route-result" data-sm-scope="all" data-sm-index="${index}"><div class="sm-place-icon">${icon}</div><div class="sm-place-info"><div class="sm-place-name">${_placeText(record.name)}</div><div class="sm-place-addr">${_placeText(record.item.addr)}</div></div><span class="sm-badge sm-general-place-badge">일반 장소</span></div>`;
+      return `<div class="sm-place-item sm-route-result" data-sm-scope="all" data-sm-index="${index}"><div class="sm-place-icon">${icon}</div><div class="sm-place-info"><div class="sm-place-name">${_placeText(record.name)}</div><div class="sm-place-addr">${_placeText(record.item.addr)}</div></div><span class="sm-badge sm-general-place-badge">${_placeText(record.badge||'일반 장소')}</span></div>`;
     }
     const item=record.item;
     const sub=[item.diocese,item.addr].filter(Boolean).join(' · ');
@@ -12378,7 +12427,7 @@ function _searchAllRoutePlaces(q){
   body.innerHTML='<div class="sm-place-loading">🔍 전체 장소 검색 중...</div>';
   Promise.allSettled([
     _ensureCatholicRouteSearchData().then(function(){ return _collectCatholicRouteResults(query,false); }),
-    _kakaoKeywordDocs(query,KAKAO_PLACE_SEARCH_DISPLAY_LIMIT)
+    _kakaoPlaceAndAddressDocs(query,KAKAO_PLACE_SEARCH_DISPLAY_LIMIT)
   ]).then(function(results){
     if(seq!==_smSearchSeq||_smTab!=='all') return;
     const catholic=results[0].status==='fulfilled'?results[0].value:[];
@@ -12398,11 +12447,11 @@ function _searchKakaoPlace(q){
   if(!query){ _setSmPrompt('place'); return; }
   const seq=++_smSearchSeq;
   body.innerHTML='<div class="sm-place-loading">🔍 검색 중...</div>';
-  _kakaoKeywordDocs(query,KAKAO_PLACE_SEARCH_DISPLAY_LIMIT).then(function(docs){
+  _kakaoPlaceAndAddressDocs(query,KAKAO_PLACE_SEARCH_DISPLAY_LIMIT).then(function(docs){
     if(seq!==_smSearchSeq||_smTab!=='place') return;
     if(!docs.length){ body.innerHTML='<div class="sm-place-loading">검색 결과가 없습니다</div>'; return; }
     body.innerHTML=docs.map(function(d,index){
-      const icon=d.category_group_code==='MT1'?'🏪':d.category_group_code==='SC4'?'🏫':d.category_group_code==='HP8'?'🏥':d.category_group_code==='PM9'?'💊':d.category_group_code==='OL7'?'⛽':'📍';
+      const icon=d.__oaiAddress?'🏠':(d.category_group_code==='MT1'?'🏪':d.category_group_code==='SC4'?'🏫':d.category_group_code==='HP8'?'🏥':d.category_group_code==='PM9'?'💊':d.category_group_code==='OL7'?'⛽':'📍');
       return `<div class="sm-place-item" data-place-index="${index}"><div class="sm-place-icon">${icon}</div><div class="sm-place-info"><div class="sm-place-name">${_placeText(d.place_name)}</div><div class="sm-place-addr">${_placeText(d.road_address_name||d.address_name||'')}</div></div></div>`;
     }).join('');
     body.__oaiPlaceDocs=docs;
@@ -12482,7 +12531,7 @@ function openSearchModal(role){
   $('sm-title').textContent=_routeSearchTitle(role,'장소');
   const smInput=$('sm-inp');
   if(smInput){
-    const smPh='성지·성당·피정·일반 장소 검색';
+    const smPh='성지·성당·피정·장소·주소 검색';
     smInput.placeholder=smPh;
     smInput.setAttribute('aria-label',smPh);
     smInput.value='';
