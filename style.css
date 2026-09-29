@@ -6281,3 +6281,19 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 
 /* V8-1-14-890: 순례계획 카드 액션은 삭제 위, 순례 아래로 통일 */
 .oai-pilgrimage-side .oai-pilgrimage-remove-link{display:flex!important;min-width:58px!important;width:100%!important;height:36px!important;padding:0 10px!important;border-radius:11px!important;background:#fff7f6!important;font-size:12.5px!important;}
+
+
+/* V8-1-14-891: 순례계획 카드 작업은 0.7초 길게 눌러 표시하고, 평소 화면은 단순하게 유지 */
+.oai-pilgrimage-course-card{display:block!important;}
+.oai-pilgrimage-course-actions{display:none!important;}
+.oai-pilgrimage-course-open{width:100%;min-height:78px;touch-action:pan-y;}
+.oai-pilgrimage-item{grid-template-columns:42px minmax(0,1fr)!important;touch-action:pan-y;}
+.oai-pilgrimage-side{display:none!important;}
+.oai-pilgrimage-action-menu{position:fixed;inset:0;z-index:2147483600;display:none;align-items:flex-end;justify-content:center;padding:18px 14px calc(env(safe-area-inset-bottom,0px) + 18px);}
+.oai-pilgrimage-action-menu.show{display:flex;}
+.oai-pilgrimage-action-backdrop{position:absolute;inset:0;border:0;background:rgba(18,27,45,.46);}
+.oai-pilgrimage-action-sheet{position:relative;z-index:1;width:min(92vw,520px);padding:18px;border:1.5px solid #c8b47e;border-radius:22px;background:#fff;box-shadow:0 18px 42px rgba(18,27,45,.24);}
+.oai-pilgrimage-action-sheet>strong{display:block;margin:0 2px 13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#17213a;font-size:calc(18px * var(--app-font-scale,1));font-weight:950;}
+.oai-pilgrimage-action-sheet>div{display:grid;gap:9px;}
+.oai-pilgrimage-action-sheet button[data-oai-action]{min-height:52px;border:1.5px solid #b9cfe2;border-radius:14px;background:#f4f9fd;color:#246b9d;font:900 calc(15px * var(--app-font-scale,1))/1.1 inherit;}
+.oai-pilgrimage-action-sheet button[data-oai-action].danger{border-color:#e3c0bc;background:#fff6f5;color:#a84b42;}
