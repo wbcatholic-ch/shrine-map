@@ -11683,10 +11683,19 @@ function _bindRouteDragHandles(){
     handle.dataset.routeDragBound='1';
     handle.addEventListener('click',function(e){ e.preventDefault(); e.stopPropagation(); });
 
+    function _routeDragHaptic(){
+      try{
+        if(window.Android && typeof window.Android.vibrate==='function'){ window.Android.vibrate(12); return; }
+      }catch(_e){}
+      try{ if(navigator.vibrate) navigator.vibrate(14); }catch(_e){}
+    }
     function beginDrag(pointerId, clientY){
       const role=handle.dataset.routeDrag;
       if(!_routePointReady(_getRoutePointByRole(role))) return false;
       _routeDragState={pointerId:pointerId,sourceRole:role,targetRole:role,startY:clientY,dragging:false,handle:handle};
+      handle.classList.add('is-dragging');
+      const src=_routeBoxByRole(role); if(src) src.classList.add('rs-drag-source');
+      _routeDragHaptic();
       return true;
     }
     function moveDrag(pointerId, clientY){
@@ -11694,9 +11703,6 @@ function _bindRouteDragHandles(){
       if(!st || st.pointerId!==pointerId || st.handle!==handle) return false;
       if(!st.dragging && Math.abs(clientY-st.startY)>=4){
         st.dragging=true;
-        handle.classList.add('is-dragging');
-        const src=_routeBoxByRole(st.sourceRole); if(src) src.classList.add('rs-drag-source');
-        try{ if(navigator.vibrate) navigator.vibrate(12); }catch(_e){}
       }
       if(!st.dragging) return true;
       const target=_routeDragTargetAt(clientY) || st.sourceRole;
