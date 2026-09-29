@@ -11462,35 +11462,8 @@ function _routeItineraryCurrentIndex(entries){
   return bestKm<=OAI_ROUTE_ITINERARY_ARRIVAL_KM?best:-1;
 }
 function _renderRouteItinerary(){
-  const panel=$('route-itinerary'), summary=$('route-itinerary-summary'), list=$('route-itinerary-list'), sheet=$('sheet-route');
-  if(!panel||!summary||!list) return;
-  const entries=_routeItineraryEntries();
-  if(entries.length<2){
-    panel.hidden=true; if(sheet) sheet.classList.remove('has-itinerary');
-    _routeItinerarySignature=''; _routeItineraryReachedIndex=-1; return;
-  }
-  const sig=_routeItineraryKey(entries);
-  if(sig!==_routeItinerarySignature){ _routeItinerarySignature=sig; _routeItineraryReachedIndex=-1; }
-  const currentIndex=_routeItineraryCurrentIndex(entries);
-  if(currentIndex>=0) _routeItineraryReachedIndex=Math.max(_routeItineraryReachedIndex,currentIndex);
-  let nextIndex=-1;
-  if(currentIndex>=0 && currentIndex<entries.length-1) nextIndex=currentIndex+1;
-  else{
-    for(let i=Math.max(0,_routeItineraryReachedIndex+1);i<entries.length;i++){ nextIndex=i; break; }
-    if(nextIndex===0 && entries[0].point && (entries[0].point.isImplicitCurrentLocation||entries[0].point.name==='현재 위치'||entries[0].point.name==='현위치')) nextIndex=entries.length>1?1:-1;
-  }
-  const currentText=currentIndex>=0 ? (entries[currentIndex].point.name||'현재 위치') : '현재 위치';
-  const nextText=nextIndex>=0 ? (entries[nextIndex].point.name||'다음 장소') : '일정 완료';
-  summary.innerHTML='<div class="route-itinerary-focus"><span class="label">지금 위치</span><strong>'+_placeText(currentText)+'</strong></div><div class="route-itinerary-focus next"><span class="label">다음 갈 곳</span><strong>'+_placeText(nextText)+'</strong></div>';
-  list.innerHTML=entries.map(function(e,i){
-    let cls='', status='예정';
-    if(i===currentIndex){cls=' is-current';status='현재';}
-    else if(i===nextIndex){cls=' is-next';status='다음';}
-    else if(i<=_routeItineraryReachedIndex){cls=' is-pilgrimed';status='순례';}
-    else if(i===0){status='출발';}
-    return '<div class="route-itinerary-item'+cls+'"><span class="route-itinerary-num">'+(i+1)+'</span><span class="route-itinerary-name">'+_placeText(e.point.name||('장소 '+(i+1)))+'</span><span class="route-itinerary-status">'+status+'</span></div>';
-  }).join('');
-  panel.hidden=false; if(sheet) sheet.classList.add('has-itinerary');
+  const sheet=$('sheet-route');
+  if(sheet) sheet.classList.remove('has-itinerary');
 }
 
 function _setRouteLabel(role,name){
@@ -11690,42 +11663,80 @@ function _bindRouteDragHandles(){
     if(handle.dataset.routeDragBound==='1') return;
     handle.dataset.routeDragBound='1';
     handle.addEventListener('click',function(e){ e.preventDefault(); e.stopPropagation(); });
-    handle.addEventListener('pointerdown',function(e){
+
+    function beginDrag(pointerId, clientY){
       const role=handle.dataset.routeDrag;
-      if(!_routePointReady(_getRoutePointByRole(role))) return;
-      e.preventDefault(); e.stopPropagation();
-      try{ handle.setPointerCapture(e.pointerId); }catch(_e){}
-      _routeDragState={pointerId:e.pointerId,sourceRole:role,targetRole:role,startY:e.clientY,dragging:false,handle:handle};
-    });
-    handle.addEventListener('pointermove',function(e){
+      if(!_routePointReady(_getRoutePointByRole(role))) return false;
+      _routeDragState={pointerId:pointerId,sourceRole:role,targetRole:role,startY:clientY,dragging:false,handle:handle};
+      return true;
+    }
+    function moveDrag(pointerId, clientY){
       const st=_routeDragState;
-      if(!st || st.pointerId!==e.pointerId || st.handle!==handle) return;
-      e.preventDefault(); e.stopPropagation();
-      if(!st.dragging && Math.abs(e.clientY-st.startY)>=5){
+      if(!st || st.pointerId!==pointerId || st.handle!==handle) return false;
+      if(!st.dragging && Math.abs(clientY-st.startY)>=4){
         st.dragging=true;
         handle.classList.add('is-dragging');
         const src=_routeBoxByRole(st.sourceRole); if(src) src.classList.add('rs-drag-source');
         try{ if(navigator.vibrate) navigator.vibrate(12); }catch(_e){}
       }
-      if(!st.dragging) return;
-      const target=_routeDragTargetAt(e.clientY) || st.sourceRole;
+      if(!st.dragging) return true;
+      const target=_routeDragTargetAt(clientY) || st.sourceRole;
       st.targetRole=target;
       document.querySelectorAll('.rs-drag-over').forEach(function(el){el.classList.remove('rs-drag-over');});
       const box=_routeBoxByRole(target); if(box) box.classList.add('rs-drag-over');
-    });
-    const finish=function(e){
+      return true;
+    }
+    function finishDrag(pointerId){
       const st=_routeDragState;
-      if(!st || st.pointerId!==e.pointerId || st.handle!==handle) return;
-      e.preventDefault(); e.stopPropagation();
-      try{ handle.releasePointerCapture(e.pointerId); }catch(_e){}
+      if(!st || st.pointerId!==pointerId || st.handle!==handle) return false;
       _routeDragState=null;
       _clearRouteDragClasses();
       if(st.dragging) _reorderRouteReadyPoints(st.sourceRole,st.targetRole);
+      return true;
+    }
+
+    handle.addEventListener('pointerdown',function(e){
+      if(e.pointerType==='touch') return; // touch is handled below for Android WebView reliability
+      if(!beginDrag('p'+e.pointerId,e.clientY)) return;
+      e.preventDefault(); e.stopPropagation();
+      try{ handle.setPointerCapture(e.pointerId); }catch(_e){}
+    });
+    handle.addEventListener('pointermove',function(e){
+      if(e.pointerType==='touch') return;
+      if(moveDrag('p'+e.pointerId,e.clientY)){ e.preventDefault(); e.stopPropagation(); }
+    });
+    const pointerFinish=function(e){
+      if(e.pointerType==='touch') return;
+      const ok=finishDrag('p'+e.pointerId);
+      if(ok){ e.preventDefault(); e.stopPropagation(); }
+      try{ handle.releasePointerCapture(e.pointerId); }catch(_e){}
     };
-    handle.addEventListener('pointerup',finish);
-    handle.addEventListener('pointercancel',finish);
+    handle.addEventListener('pointerup',pointerFinish);
+    handle.addEventListener('pointercancel',pointerFinish);
+
+    handle.addEventListener('touchstart',function(e){
+      const t=e.changedTouches && e.changedTouches[0]; if(!t) return;
+      if(!beginDrag('t'+t.identifier,t.clientY)) return;
+      e.preventDefault(); e.stopPropagation();
+    },{passive:false});
+    handle.addEventListener('touchmove',function(e){
+      const st=_routeDragState; if(!st || st.handle!==handle || String(st.pointerId).charAt(0)!=='t') return;
+      let t=null;
+      for(let i=0;i<e.changedTouches.length;i++) if('t'+e.changedTouches[i].identifier===st.pointerId){t=e.changedTouches[i];break;}
+      if(!t && e.touches && e.touches.length) t=e.touches[0];
+      if(!t) return;
+      if(moveDrag(st.pointerId,t.clientY)){ e.preventDefault(); e.stopPropagation(); }
+    },{passive:false});
+    const touchFinish=function(e){
+      const st=_routeDragState; if(!st || st.handle!==handle || String(st.pointerId).charAt(0)!=='t') return;
+      let id=st.pointerId;
+      if(finishDrag(id)){ e.preventDefault(); e.stopPropagation(); }
+    };
+    handle.addEventListener('touchend',touchFinish,{passive:false});
+    handle.addEventListener('touchcancel',touchFinish,{passive:false});
   });
 }
+
 
 function _setRouteResultTipVisible(visible){
   const tip=$('rs-result-tip');
@@ -13036,12 +13047,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const settings=e.target.closest('[data-route-quick-settings]'); if(settings){e.preventDefault();e.stopPropagation();_closeRouteQuick();if(typeof window.openOaiSettings==='function')window.openOaiSettings({fromRouteQuick:true});}
     });
   }
-  on('route-itinerary-toggle','click',function(e){
-    if(e){e.preventDefault();e.stopPropagation();}
-    const panel=$('route-itinerary'); if(!panel) return;
-    const collapsed=panel.classList.toggle('collapsed');
-    this.textContent=collapsed?'펼치기':'접기'; this.setAttribute('aria-expanded',collapsed?'false':'true');
-  });
   const frequentBody=$('sm-frequent-list');
   if(frequentBody && frequentBody.dataset.routeFrequentBound!=='1'){
     frequentBody.dataset.routeFrequentBound='1';
@@ -13840,7 +13845,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 })();
 
 
-/* V8-1-14-848: 설정에서 자주 가는 장소 등록/삭제 - 설정을 닫고 검색 화면으로 확실히 전환한 뒤 다시 설정으로 복귀 */
+/* V8-1-14-849: 설정에서 자주 가는 장소 등록/삭제 - 설정을 닫고 검색 화면으로 확실히 전환한 뒤 다시 설정으로 복귀 */
 (function installOaiFrequentPlaceSettings(){
   if(window.__OAI_FREQUENT_SETTINGS_V848__) return;
   window.__OAI_FREQUENT_SETTINGS_V848__=true;
