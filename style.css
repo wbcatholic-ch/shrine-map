@@ -6049,3 +6049,77 @@ html.ios-device #app #sheet-route.has-itinerary{max-height:min(64vh,540px)!impor
 html.oai-map-split-wide #sheet-route .route-itinerary{margin-top:8px;}
 html.oai-map-split-wide #sheet-route .route-itinerary-list{max-height:150px;}
 html.oai-map-split-wide #sheet-route.has-itinerary{max-height:none!important;overflow:hidden!important;}
+
+/* V8-1-14-844: 길찾기 빠른선택 + 박스 밖 드래그 손잡이 */
+.rs-quick-select{
+  flex:0 0 auto; min-width:68px; height:30px; padding:0 9px;
+  border:1.5px solid #9aa9bd; border-radius:15px; background:#fff;
+  color:#34445e; font-family:inherit; font-size:11.5px; font-weight:900;
+  line-height:1; white-space:nowrap; cursor:pointer; touch-action:manipulation;
+}
+.rs-start-box .rs-quick-select{border-color:#87a8d8;color:#1559a0;background:#f8fbff;}
+.rs-end-box .rs-quick-select{border-color:#d9a09b;color:#a53028;background:#fffafa;}
+.rs-quick-select:active{transform:scale(.97);}
+.rs-drag-slot{
+  grid-column:2; display:flex; align-items:center; justify-content:center;
+  width:72px; min-width:72px; height:44px; position:relative; z-index:20;
+}
+.rs-start-drag-slot{grid-row:1;}
+.rs-waypoint1-drag-slot{grid-row:3;}
+.rs-waypoint2-drag-slot{grid-row:5;}
+.rs-waypoint3-drag-slot{grid-row:7;}
+.rs-waypoint4-drag-slot{grid-row:9;}
+.rs-waypoint5-drag-slot{grid-row:11;}
+.rs-end-drag-slot{grid-row:3;}
+.rs-route-stack.has-waypoint .rs-end-drag-slot{grid-row:5;}
+.rs-route-stack.has-waypoint2 .rs-end-drag-slot{grid-row:7;}
+.rs-route-stack.has-waypoint3 .rs-end-drag-slot{grid-row:9;}
+.rs-route-stack.has-waypoint4 .rs-end-drag-slot{grid-row:11;}
+.rs-route-stack.has-waypoint5 .rs-end-drag-slot{grid-row:13;}
+.rs-route-stack.has-waypoint-summary .rs-end-drag-slot{grid-row:5!important;}
+.rs-drag-slot .rs-drag-handle{
+  display:none; width:52px; min-width:52px; height:36px; flex:0 0 52px;
+  border:1.5px solid #c6ccd5; border-radius:12px; background:#fff;
+  color:#596779; font-size:20px; letter-spacing:-4px; box-shadow:0 1px 4px rgba(31,42,68,.08);
+}
+.rs-drag-slot .rs-drag-handle:not([disabled]){display:flex;}
+.rs-drag-slot .rs-drag-handle.is-dragging{border-color:#4f79ad;background:#f3f7fd;}
+@media(max-width:430px){
+  .rs-quick-select{min-width:64px;padding:0 7px;font-size:11px;}
+  .rs-drag-slot .rs-drag-handle{width:50px;min-width:50px;flex-basis:50px;}
+}
+
+.route-quick-modal{display:none;position:fixed;inset:0;z-index:100260;align-items:flex-end;justify-content:center;font-family:inherit;}
+.route-quick-modal.show{display:flex;}
+.route-quick-backdrop{position:absolute;inset:0;background:rgba(13,24,45,.52);}
+.route-quick-panel{position:relative;z-index:1;width:min(560px,calc(100% - 24px));margin:0 12px max(12px,env(safe-area-inset-bottom,0px));padding:16px;border:1px solid #d8dce4;border-radius:22px;background:#fff;box-shadow:0 16px 42px rgba(20,33,58,.28);}
+.route-quick-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:13px;}
+.route-quick-head strong{display:block;color:#17213a;font-size:21px;font-weight:900;letter-spacing:-.04em;}
+.route-quick-head small{display:block;margin-top:4px;color:#667085;font-size:12.5px;font-weight:700;line-height:1.4;}
+.route-quick-head>button{width:38px;height:38px;flex:0 0 38px;border:1.5px solid #667085;border-radius:50%;background:#fff;color:#23304b;font-size:25px;font-weight:900;line-height:1;}
+.route-quick-list{display:flex;flex-direction:column;gap:8px;}
+.route-quick-item{display:flex;align-items:center;gap:10px;width:100%;min-height:54px;padding:10px 12px;border:1.5px solid #d7dce5;border-radius:14px;background:#fbfcfe;color:#17213a;text-align:left;font-family:inherit;cursor:pointer;}
+.route-quick-item.current{border-color:#8db0df;background:#f3f8ff;}
+.route-quick-item .icon{font-size:20px;}
+.route-quick-item span:not(.icon){min-width:0;display:flex;flex-direction:column;gap:2px;}
+.route-quick-item b{font-size:15px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.route-quick-item small{color:#718096;font-size:11.5px;font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.route-quick-empty{padding:11px 12px;border:1px dashed #cbd3df;border-radius:12px;background:#fafbfc;color:#697386;font-size:12px;font-weight:750;line-height:1.45;}
+.route-quick-settings{width:100%;height:45px;margin-top:12px;border:1.5px solid #b5a06e;border-radius:13px;background:#fffaf0;color:#6a5222;font-family:inherit;font-size:13px;font-weight:900;cursor:pointer;}
+
+/* 설정 > 자주 가는 장소 */
+.oai-settings-frequent-info{padding:14px 16px 12px;background:#fffdf8;border-bottom:1px solid #d5cbb9;}
+.oai-settings-frequent-info>b{display:block;color:#72581e;font-size:15px;font-weight:900;}
+.oai-settings-frequent-info p{margin:6px 0 0;color:#5e6879;font-size:12.5px;font-weight:700;line-height:1.55;word-break:keep-all;}
+.oai-settings-frequent-list{display:flex;flex-direction:column;background:#fff;}
+.oai-settings-frequent-empty{padding:14px 16px;color:#7b8492;font-size:12.5px;font-weight:750;line-height:1.45;}
+.oai-settings-frequent-item{display:flex;align-items:center;gap:10px;min-height:58px;padding:10px 12px 10px 16px;border-top:1px solid #ece5d8;}
+.oai-settings-frequent-item:first-child{border-top:0;}
+.oai-settings-frequent-item>span{min-width:0;flex:1;}
+.oai-settings-frequent-item b{display:block;color:#17213a;font-size:14px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.oai-settings-frequent-item small{display:block;margin-top:3px;color:#788292;font-size:11.5px;font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.oai-settings-frequent-item button{width:34px;height:34px;flex:0 0 34px;border:1.5px solid #c8a39f;border-radius:50%;background:#fff;color:#a63b31;font-size:20px;font-weight:900;line-height:1;}
+.oai-settings-frequent-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 14px 14px;border-top:1px solid #d5cbb9;background:#fbf8f1;}
+.oai-settings-frequent-actions button{min-height:44px;padding:8px;border:1.5px solid #b7a16f;border-radius:12px;background:#fff;color:#5f4a20;font-family:inherit;font-size:12.5px;font-weight:900;line-height:1.25;}
+@media(max-width:380px){.oai-settings-frequent-actions{grid-template-columns:1fr;}}
+#rs-start-waypoint-tools.rs-drag-slot{grid-column:2!important;grid-row:1!important;align-self:stretch!important;}
