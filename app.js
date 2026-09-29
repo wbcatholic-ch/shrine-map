@@ -11614,14 +11614,47 @@ function _registerFrequentCurrentLocation(){
     if(!used) alert('위치 정보를 가져올 수 없습니다.');
   });
 }
-function _registerFrequentFromSearch(item){
+let _pendingFrequentNicknamePlace=null;
+function _closeFrequentNicknameDialog(){
+  const modal=$('oai-frequent-nickname-modal');
+  if(modal){ modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); }
+  _pendingFrequentNicknamePlace=null;
+}
+function _openFrequentNicknameDialog(item){
   if(!item) return false;
-  const ok=_addRouteFrequentPlace({name:item.name||'장소',addr:item.addr||item.road_address_name||item.address_name||'',lat:Number(item.lat),lng:Number(item.lng),sourceMode:_mode||''});
+  const addr=String(item.addr||item.road_address_name||item.address_name||'').trim();
+  const originalName=String(item.name||item.place_name||'장소').trim()||'장소';
+  _pendingFrequentNicknamePlace={name:originalName,addr:addr,lat:Number(item.lat),lng:Number(item.lng),sourceMode:String(item.sourceMode||_mode||'')};
+  closeSearchModal();
+  setTimeout(function(){
+    const modal=$('oai-frequent-nickname-modal'), input=$('oai-frequent-nickname-input'), address=$('oai-frequent-nickname-address');
+    if(!modal||!input) return;
+    if(address) address.textContent=addr||originalName;
+    input.value=originalName;
+    modal.classList.add('show');
+    modal.setAttribute('aria-hidden','false');
+    setTimeout(function(){try{input.focus({preventScroll:true});input.select();}catch(_e){try{input.focus();input.select();}catch(__e){}}},80);
+  },140);
+  return true;
+}
+function _saveFrequentNicknameDialog(){
+  const point=_pendingFrequentNicknamePlace, input=$('oai-frequent-nickname-input');
+  if(!point||!input) return false;
+  const nickname=String(input.value||'').trim();
+  if(!nickname){ input.focus(); return false; }
+  const ok=_addRouteFrequentPlace({name:nickname,addr:point.addr,lat:point.lat,lng:point.lng,sourceMode:point.sourceMode});
   if(ok){
-    closeSearchModal();
+    const modal=$('oai-frequent-nickname-modal');
+    if(modal){ modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); }
+    _pendingFrequentNicknamePlace=null;
     _renderRouteFrequentSettings();
+    _showRouteGuideText(nickname+'을(를) 자주 가는 장소에 등록했습니다');
   }
   return ok;
+}
+function _registerFrequentFromSearch(item){
+  if(!item) return false;
+  return _openFrequentNicknameDialog(item);
 }
 let _routeQuickRole='start';
 function _renderRouteQuickList(){
@@ -14167,6 +14200,19 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       return;
     }
     if(t.hasAttribute('data-oai-frequent-add')) startFrequentPlaceSearch();
+  },true);
+  document.addEventListener('click',function(e){
+    const t=e.target&&e.target.closest?e.target.closest('[data-oai-frequent-nickname-cancel],[data-oai-frequent-nickname-save]'):null;
+    if(!t) return;
+    e.preventDefault();e.stopPropagation();
+    if(t.hasAttribute('data-oai-frequent-nickname-cancel')){_closeFrequentNicknameDialog();return;}
+    if(t.hasAttribute('data-oai-frequent-nickname-save')){_saveFrequentNicknameDialog();return;}
+  },true);
+  document.addEventListener('keydown',function(e){
+    const modal=$('oai-frequent-nickname-modal');
+    if(!modal||!modal.classList.contains('show')) return;
+    if(e.key==='Escape'){e.preventDefault();_closeFrequentNicknameDialog();return;}
+    if(e.key==='Enter'&&e.target&&e.target.id==='oai-frequent-nickname-input'){e.preventDefault();_saveFrequentNicknameDialog();}
   },true);
   document.addEventListener('DOMContentLoaded',function(){try{_renderRouteFrequentSettings();}catch(_e){}},{once:true});
 })();;
