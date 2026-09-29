@@ -12503,6 +12503,7 @@ function oaiBlurIfAutoFocusedInput(id){
   },0);
 }
 let _returnToSettingsAfterFrequentSearch=false;
+let _frequentSearchReturnToCover=false;
 function closeSearchModal(){
   _smSearchSeq++;
   clearTimeout(_smPlaceDebounce);
@@ -12512,8 +12513,10 @@ function closeSearchModal(){
   _syncMapPanelUI('close-search-modal');
   if(_returnToSettingsAfterFrequentSearch){
     _returnToSettingsAfterFrequentSearch=false;
+    const returnToCover=!!_frequentSearchReturnToCover;
+    _frequentSearchReturnToCover=false;
     setTimeout(function(){
-      try{ if(typeof window.openOaiSettings==='function') window.openOaiSettings({fromFrequentPlace:true}); }catch(_e){}
+      try{ if(typeof window.openOaiSettings==='function') window.openOaiSettings({fromFrequentPlace:true,returnToCover:returnToCover}); }catch(_e){}
     },80);
   }
 }
@@ -13347,8 +13350,16 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     refresh();
     m.classList.add('show');m.setAttribute('aria-hidden','false');
     m.dataset.fromParishBook=opts&&opts.fromParishBook?'1':'';
+    m.dataset.returnToCover=opts&&opts.returnToCover?'1':'';
   }
-  function close(){const m=modal();if(!m)return;m.classList.remove('show');m.setAttribute('aria-hidden','true');m.dataset.fromParishBook='';}
+  function close(){
+    const m=modal();if(!m)return;
+    const returnToCover=m.dataset.returnToCover==='1';
+    m.classList.remove('show');m.setAttribute('aria-hidden','true');m.dataset.fromParishBook='';m.dataset.returnToCover='';
+    if(returnToCover){
+      setTimeout(function(){try{if(typeof goToCover==='function')goToCover();}catch(_e){}},0);
+    }
+  }
   function recordsModal(){return document.getElementById('oai-records-modal');}
   function visitPlaceCount(loader){
     try{const records=loader()||{};return Object.keys(records).filter(function(key){const value=records[key];return Array.isArray(value)?value.length>0:!!(value&&Array.isArray(value.visits)&&value.visits.length);}).length;}catch(_e){return 0;}
@@ -13845,26 +13856,40 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 })();
 
 
-/* V8-1-14-849: 설정에서 자주 가는 장소 등록/삭제 - 설정을 닫고 검색 화면으로 확실히 전환한 뒤 다시 설정으로 복귀 */
+/* V8-1-14-850: 커버 설정에서도 장소등록 검색이 보이도록 커버를 임시로 숨기고, 검색 종료 뒤 설정과 커버 복귀 상태를 복원 */
 (function installOaiFrequentPlaceSettings(){
-  if(window.__OAI_FREQUENT_SETTINGS_V848__) return;
-  window.__OAI_FREQUENT_SETTINGS_V848__=true;
+  if(window.__OAI_FREQUENT_SETTINGS_V850__) return;
+  window.__OAI_FREQUENT_SETTINGS_V850__=true;
+  function coverIsVisible(){
+    try{
+      const cover=document.getElementById('cover');
+      if(!cover) return false;
+      return !document.documentElement.classList.contains('app-active') && getComputedStyle(cover).display!=='none';
+    }catch(_e){ return false; }
+  }
   function startFrequentPlaceSearch(){
     if(_loadRouteFavorites().length>=OAI_ROUTE_FAVORITES_MAX){
       alert('자주 가는 장소는 최대 '+OAI_ROUTE_FAVORITES_MAX+'개까지 등록할 수 있습니다.');
       return;
     }
     _returnToSettingsAfterFrequentSearch=true;
+    _frequentSearchReturnToCover=coverIsVisible();
     try{ if(typeof window.closeOaiSettings==='function') window.closeOaiSettings(); }catch(_e){}
-    setTimeout(function(){
-      try{ openSearchModal('frequent-register'); }
-      catch(err){
-        console.warn('[가톨릭길동무] 자주 가는 장소 검색 열기 실패',err);
-        _returnToSettingsAfterFrequentSearch=false;
-        try{ if(typeof window.openOaiSettings==='function') window.openOaiSettings({fromFrequentPlace:true}); }catch(_e){}
-        alert('장소 검색 화면을 열지 못했습니다. 앱을 새로고침한 뒤 다시 시도해 주세요.');
-      }
-    },90);
+    const launchSearch=function(){
+      setTimeout(function(){
+        try{ openSearchModal('frequent-register'); }
+        catch(err){
+          console.warn('[가톨릭길동무] 자주 가는 장소 검색 열기 실패',err);
+          _returnToSettingsAfterFrequentSearch=false;
+          const returnToCover=!!_frequentSearchReturnToCover;
+          _frequentSearchReturnToCover=false;
+          try{ if(typeof window.openOaiSettings==='function') window.openOaiSettings({fromFrequentPlace:true,returnToCover:returnToCover}); }catch(_e){}
+          alert('장소 검색 화면을 열지 못했습니다. 앱을 새로고침한 뒤 다시 시도해 주세요.');
+        }
+      },90);
+    };
+    if(_frequentSearchReturnToCover && typeof hideCoverAndRun==='function') hideCoverAndRun(launchSearch);
+    else launchSearch();
   }
   document.addEventListener('click',function(e){
     const t=e.target&&e.target.closest?e.target.closest('[data-oai-frequent-add],[data-oai-frequent-remove]'):null;
