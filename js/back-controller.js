@@ -62,6 +62,7 @@
       if(typeof window.isOaiRecordsOpen === 'function' && window.isOaiRecordsOpen()) return true;
       if(typeof window.isOaiParishSetupOpen === 'function' && window.isOaiParishSetupOpen()) return true;
       if(typeof window.isOaiSettingsOpen === 'function' && window.isOaiSettingsOpen()) return true;
+      if(typeof window.isOaiFrequentNicknameOpen === 'function' && window.isOaiFrequentNicknameOpen()) return true;
       if(typeof window.isOaiPilgrimagePlannerOpen === 'function' && window.isOaiPilgrimagePlannerOpen()) return true;
       var pp = $b('oai-pilgrimage-point-modal'); if(pp && pp.classList && pp.classList.contains('show')) return true;
       var ids = ['diocese-view','missa-view','prayer-view','qna-view'];
@@ -85,6 +86,7 @@
       if(typeof window.isOaiRecordsOpen === 'function' && window.isOaiRecordsOpen()) return true;
       if(typeof window.isOaiParishSetupOpen === 'function' && window.isOaiParishSetupOpen()) return true;
       if(typeof window.isOaiSettingsOpen === 'function' && window.isOaiSettingsOpen()) return true;
+      if(typeof window.isOaiFrequentNicknameOpen === 'function' && window.isOaiFrequentNicknameOpen()) return true;
       if(typeof window.isOaiPilgrimagePlannerOpen === 'function' && window.isOaiPilgrimagePlannerOpen()) return true;
       var pp = $b('oai-pilgrimage-point-modal'); if(pp && pp.classList && pp.classList.contains('show')) return true;
       var ids = ['diocese-view','missa-view','prayer-view','qna-view'];
@@ -268,6 +270,13 @@
 
   function closeLayer(){
     var el;
+
+    /* 자주 가는 장소 닉네임 입력창은 설정/순례계획보다 위에 뜨는 최상위 팝업이다. */
+    try{ if(typeof window.isOaiFrequentNicknameOpen==='function' && window.isOaiFrequentNicknameOpen()){
+      if(typeof window.closeOaiFrequentNickname==='function') window.closeOaiFrequentNickname();
+      else { var fnm=$b('oai-frequent-nickname-modal'); if(fnm){ fnm.classList.remove('show'); fnm.setAttribute('aria-hidden','true'); } }
+      return true;
+    }}catch(e){ console.warn('[가톨릭길동무]',e); }
 
     /* 성지순례 계획의 선택창/하위 화면은 순례계획 안에서 한 단계씩 뒤로 간다. */
     try{ if(typeof window._oaiPilgrimageBackHandle==='function' && window._oaiPilgrimageBackHandle()) return true; }catch(e){ console.warn('[가톨릭길동무]',e); }
