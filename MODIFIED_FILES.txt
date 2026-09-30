@@ -1,8 +1,5 @@
-V8-1-14-910
-변경 파일:
-- index.html
-- app.js
-- style.css
-- sw.js
-- sw-update.js
-- version.json
+V8-1-14-911
+- index.html: 길찾기 안내 문구 자연스럽게 수정
+- app.js: 기존 HTML 순례계획 버튼에도 클릭 동작 연결, 길찾기에서 순례계획 상세 화면으로 전환
+- style.css: 길찾기 결과 시트 스크롤 및 하단 안전 여백으로 버튼 잘림 방지
+- sw.js / sw-update.js / version.json: 버전 갱신
