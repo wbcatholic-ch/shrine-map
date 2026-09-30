@@ -6454,3 +6454,28 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 #oai-pilgrimage-detail-view.is-new-plan .oai-pilgrimage-detail-actions{grid-template-columns:1fr!important;}
 #oai-pilgrimage-detail-view.is-new-plan .oai-pilgrimage-save{width:100%!important;}
 #oai-pilgrimage-detail-view.is-saved-plan .oai-pilgrimage-total-card{display:grid!important;}
+
+
+/* V8-1-14-908: 새 계획 첫 화면과 출발/도착지 카드 구분 */
+.oai-pilgrimage-detail-view.is-empty-plan .oai-pilgrimage-add{display:none!important;}
+
+/* 출발지는 파란 계열, 도착지는 초록 계열로 카드 자체도 구분 */
+.oai-pilgrimage-endpoint.start{
+  border-color:#9fc7e8!important;
+  border-left:5px solid #1f78bd!important;
+  background:#eef6ff!important;
+}
+.oai-pilgrimage-endpoint.start small,
+.oai-pilgrimage-endpoint.start i{color:#1f78bd!important;}
+.oai-pilgrimage-endpoint.start b{color:#17395d!important;}
+.oai-pilgrimage-endpoint.start em{color:#607b97!important;}
+
+.oai-pilgrimage-endpoint.end{
+  border-color:#9fcfb6!important;
+  border-left:5px solid #2f8a5c!important;
+  background:#eef9f2!important;
+}
+.oai-pilgrimage-endpoint.end small,
+.oai-pilgrimage-endpoint.end i{color:#2f8a5c!important;}
+.oai-pilgrimage-endpoint.end b{color:#1e4d36!important;}
+.oai-pilgrimage-endpoint.end em{color:#607f6d!important;}

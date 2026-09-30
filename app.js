@@ -14443,6 +14443,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     const addBtn=document.querySelector('.oai-pilgrimage-detail-view .oai-pilgrimage-add');
     if(addBtn)addBtn.hidden=!list.length;
+    const detailRoot=document.getElementById('oai-pilgrimage-detail-view');
+    if(detailRoot)detailRoot.classList.toggle('is-empty-plan',!list.length);
     const saveBtn=document.querySelector('[data-oai-pilgrimage-save]'),followBtn=document.querySelector('[data-oai-pilgrimage-follow]');
     const totalCard=document.querySelector('.oai-pilgrimage-detail-view .oai-pilgrimage-total-card');
     const actions=document.querySelector('.oai-pilgrimage-detail-view .oai-pilgrimage-detail-actions');
