@@ -14896,7 +14896,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       setTimeout(restoreMap,120);setTimeout(restoreMap,420);setTimeout(restoreMap,900);
     }catch(e){window.__oaiPilgrimageRouteReturn=false;console.warn('[가톨릭길동무] 순례계획 길찾기 전환 실패',e);if(typeof window._oaiReturnToPilgrimageFollow==='function')window._oaiReturnToPilgrimageFollow();}};if(typeof hideCoverAndRun==='function')hideCoverAndRun(run);else run();}
 
-  const OAI_ACTION_HOLD_MS=700;
+  const OAI_ACTION_HOLD_MS=700, OAI_ACTION_HOLD_CANCEL_MOVE_PX=20;
   let actionHold=null, actionSuppressClickUntil=0, actionContext=null;
   function ensureActionMenu(){
     let m=document.getElementById('oai-pilgrimage-action-menu');
@@ -14925,7 +14925,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     st.timer=setTimeout(()=>{if(actionHold!==st)return;st.timer=0;st.fired=true;actionSuppressClickUntil=Date.now()+900;openActionMenu(ctx);},OAI_ACTION_HOLD_MS);
     actionHold=st;
   }
-  function moveActionHold(e){if(!actionHold||e.pointerId!==actionHold.pointerId)return;if(Math.abs(e.clientX-actionHold.startX)>10||Math.abs(e.clientY-actionHold.startY)>10)cancelActionHold();}
+  function moveActionHold(e){if(!actionHold||e.pointerId!==actionHold.pointerId)return;if(Math.abs(e.clientX-actionHold.startX)>OAI_ACTION_HOLD_CANCEL_MOVE_PX||Math.abs(e.clientY-actionHold.startY)>OAI_ACTION_HOLD_CANCEL_MOVE_PX)cancelActionHold();}
   function endActionHold(e){if(!actionHold||e.pointerId!==actionHold.pointerId)return;const fired=actionHold.fired;cancelActionHold();if(fired){e.preventDefault();e.stopPropagation();}}
   document.addEventListener('pointerdown',e=>{
     const course=e.target&&e.target.closest&&e.target.closest('[data-course-hold]');
