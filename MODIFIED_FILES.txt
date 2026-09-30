@@ -1,16 +1,7 @@
-V8-1-14-919
-
-수정 파일
-- index.html
-- app.js
-- style.css
-- sw.js
-- sw-update.js
-- version.json
-
-주요 변경
-- '따라가기'를 '순례하기'로 변경
-- 순례하기 목록의 각 순례지에 현재 GPS 기준 자동차 거리·예상시간 표시
-- GPS 확인 실패 시 각 항목에 'GPS 확인 필요' 표시
-- 거리 다시 계산 시 각 순례지 거리·시간도 함께 다시 계산
-- 저장된 계획/순례지 길게 누르기 메뉴를 진한 남색 계열로 통일해 가독성 강화
+V8-1-14-920 changed files:
+index.html
+app.js
+style.css
+sw.js
+sw-update.js
+version.json
