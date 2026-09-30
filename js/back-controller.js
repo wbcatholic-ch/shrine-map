@@ -71,7 +71,7 @@
         if(el && el.classList && el.classList.contains('open')) return true;
       }
       if(document.querySelector('.module-view.open')) return true;
-      if(document.querySelector('#myeongrye-materials-modal.open,#info-card.open,#sheet-route.open,#route-choice-modal.open,#srch-modal.open,.sheet.open,.trail-sheet.open,#shrine-visit-modal.show,#shrine-auto-visit-modal.show,#shrine-visit-detail-view.show,#shrine-visit-cards-modal.show')) return true;
+      if(document.querySelector('#myeongrye-materials-modal.open,#info-card.open,#sheet-route.open,#route-choice-modal.open,#oai-pilgrimage-marker-choice-modal.open,#srch-modal.open,.sheet.open,.trail-sheet.open,#shrine-visit-modal.show,#shrine-auto-visit-modal.show,#shrine-visit-detail-view.show,#shrine-visit-cards-modal.show')) return true;
       try{ if(typeof _activeTab !== 'undefined' && _activeTab) return true; }catch(_e){}
       try{ if(typeof _routeMode !== 'undefined' && (_routeMode || _rS || _rE)) return true; }catch(_e){}
       var app = $b('app');
@@ -95,7 +95,7 @@
         if(el && el.classList && el.classList.contains('open')) return true;
       }
       if(document.querySelector('.module-view.open')) return true;
-      if(document.querySelector('#myeongrye-materials-modal.open,#info-card.open,#sheet-route.open,#route-choice-modal.open,#srch-modal.open,.sheet.open,.trail-sheet.open,#shrine-visit-modal.show,#shrine-auto-visit-modal.show,#shrine-visit-detail-view.show,#shrine-visit-cards-modal.show')) return true;
+      if(document.querySelector('#myeongrye-materials-modal.open,#info-card.open,#sheet-route.open,#route-choice-modal.open,#oai-pilgrimage-marker-choice-modal.open,#srch-modal.open,.sheet.open,.trail-sheet.open,#shrine-visit-modal.show,#shrine-auto-visit-modal.show,#shrine-visit-detail-view.show,#shrine-visit-cards-modal.show')) return true;
       if(isGuideModalOpen()) return true;
     }catch(e){ console.warn('[가톨릭길동무]', e); }
     return false;
@@ -368,6 +368,13 @@
 
     el = $b('exit-dlg');
     if(el && el.classList.contains('open')){ el.classList.remove('open'); return true; }
+
+    el = $b('oai-pilgrimage-marker-choice-modal');
+    if(el && el.classList.contains('open')){
+      if(typeof window._oaiPilgrimageBackHandle==='function' && window._oaiPilgrimageBackHandle()) return true;
+      else el.classList.remove('open');
+      return true;
+    }
 
     el = $b('route-choice-modal');
     if(el && el.classList.contains('open')){
