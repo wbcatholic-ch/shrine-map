@@ -6469,3 +6469,15 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 #sheet-route.route-result-showing .route-btns{margin-bottom:0;}
 #sheet-route.route-result-showing .rs-drag-slot{display:none!important;}
 
+
+
+/* V8-1-14-928: 순례계획 카드 가독성/테두리 보강 */
+#oai-pilgrimage-detail-view .oai-pilgrimage-item{
+  border:2px solid #c1b183;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-main b,
+#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint b{
+  font-size:calc(16.5px * var(--app-font-scale,1));
+  font-weight:950;
+  line-height:1.22;
+}
