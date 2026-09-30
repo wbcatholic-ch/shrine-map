@@ -393,6 +393,10 @@
     el = $b('sheet-route');
     try{
       if((el && el.classList.contains('open')) || _routeMode || _rS || _rE){
+        if(window.__OAI_PILGRIMAGE_ROUTE_EDIT__ && typeof window.closeRouteSheetByX==='function'){
+          window.closeRouteSheetByX();
+          return true;
+        }
         var dest = (_rE && _rE.lat) ? Object.assign({}, _rE) : null;
         try{ if(typeof window.resetRoute==='function') window.resetRoute(); }catch(e){ console.warn("[가톨릭길동무]", e); }
         try{ _routeMode = false; }catch(e){ console.warn("[가톨릭길동무]", e); }
