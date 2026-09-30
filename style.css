@@ -6407,13 +6407,17 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 .oai-pilgrimage-total-card small{display:block;color:#263a58;font-size:calc(11.5px * var(--app-font-scale,1));font-weight:900;line-height:1.2;}
 .oai-pilgrimage-total-card b{display:block;margin-top:5px;color:#1565c0;font-size:calc(20px * var(--app-font-scale,1));font-weight:950;line-height:1.15;white-space:nowrap;}
 .oai-pilgrimage-total-card p{grid-column:1/-1;margin:0 2px;color:#586a7d;font-size:calc(11.5px * var(--app-font-scale,1));font-weight:750;line-height:1.45;word-break:keep-all;}
+.oai-pilgrimage-course-map{grid-column:1/-1;width:100%;min-height:48px;margin-top:2px;border:1.5px solid #174f86;border-radius:13px;background:#fff;color:#174f86;font-family:inherit;font-size:calc(14px * var(--app-font-scale,1));font-weight:950;box-shadow:0 2px 6px rgba(23,79,134,.08);}
+.oai-pilgrimage-course-map:active{background:#edf4fb;transform:scale(.99);}
+.oai-pilgrimage-detail-actions .oai-pilgrimage-save:disabled{background:#c9c3b4!important;color:#f7f5ef!important;box-shadow:none!important;opacity:.72;cursor:default;}
+.oai-pilgrimage-detail-actions .oai-pilgrimage-save.is-dirty{background:#8a6b27!important;color:#fff!important;opacity:1;}
 #oai-pilgrimage-detail-view .oai-pilgrimage-detail-actions.is-integrated-pilgrimage{grid-template-columns:1fr;}
 #oai-pilgrimage-detail-view .oai-pilgrimage-follow{display:none!important;}
 #oai-pilgrimage-detail-view .oai-pilgrimage-reset{margin-top:2px;}
 
 /* 출발/도착 선택창의 지도 선택 */
-.oai-pilgrimage-point-map{width:100%;min-height:50px;margin-top:9px;border:2px solid #15365f;border-radius:14px;background:#fff;color:#15365f;font-family:inherit;font-size:calc(16px * var(--app-font-scale,1));font-weight:950;}
-.oai-pilgrimage-point-map:active{background:#edf4fb;transform:scale(.99);}
+.oai-pilgrimage-point-map{width:100%;min-height:50px;margin-top:9px;border:1.5px solid #174f86;border-radius:14px;background:#174f86;color:#fff;font-family:inherit;font-size:calc(16px * var(--app-font-scale,1));font-weight:950;box-shadow:0 3px 8px rgba(23,79,134,.16);}
+.oai-pilgrimage-point-map:active{background:#123f6b;transform:scale(.99);}
 
 /* 설정: 포인트 색상 하나로 통일 */
 .oai-settings-group{border-color:#b59a58;background:#fff;box-shadow:0 3px 10px rgba(21,40,70,.11);}
