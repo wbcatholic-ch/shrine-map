@@ -14536,11 +14536,26 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function undoLastDone(){const list=loadPlan();let i=-1;for(let n=list.length-1;n>=0;n--){if(list[n].done){i=n;break;}}if(i<0)return;list[i].done=false;savePlan(list,true);updateCurrentCourseProgress();refreshFollow();try{vibrate(18);}catch(_e){}}
   function routeTarget(){const t=targetInfo();if(!t)return;const item=t.item,m=planner();window.__oaiPilgrimageRouteReturn=true;if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}const run=()=>{try{
       try{document.documentElement.classList.add('app-active');}catch(_e){}
-      const cover=document.getElementById('cover');if(cover){cover.style.display='none';cover.setAttribute('aria-hidden','true');}
-      const mapWrap=document.getElementById('map-wrap')||document.getElementById('map-container')||document.getElementById('map');if(mapWrap&&mapWrap.style)mapWrap.style.display='';
+      try{if(typeof oaiSetMainMapLayerHidden==='function')oaiSetMainMapLayerHidden(false);else document.documentElement.classList.remove('oai-hide-main-map-layer');}catch(_e){}
+      try{_screen='map';}catch(_e){}
+      const cover=document.getElementById('cover');if(cover){cover.style.display='none';cover.style.opacity='0';cover.setAttribute('aria-hidden','true');}
+      const mapWrap=document.getElementById('map-wrap'),mapEl=document.getElementById('map');
+      if(mapWrap&&mapWrap.style){mapWrap.style.display='';mapWrap.style.visibility='visible';mapWrap.style.pointerEvents='';}
+      if(mapEl&&mapEl.style){mapEl.style.display='';mapEl.style.visibility='visible';}
+      const mapSurfaceReady=!!(_map&&mapEl&&mapEl.children&&mapEl.children.length);
+      if(!mapSurfaceReady){try{window._noAutoNearby=true;if(typeof _loadMap==='function')_loadMap();}catch(_e){}}
       if(!_activeTab||_activeTab!=='route')openTab('route');else _enterRouteMode();
       _setRoutePointFromItem('end',item,-1);
-      setTimeout(()=>{try{if(_map&&typeof _map.relayout==='function')_map.relayout();if(_map)_map.panTo(new _LL(item.lat,item.lng));_syncMapPanelUI&&_syncMapPanelUI('pilgrimage-route');}catch(_e){}},80);
+      const restoreMap=()=>{try{
+        if(typeof oaiSetMainMapLayerHidden==='function')oaiSetMainMapLayerHidden(false);
+        if(mapWrap){mapWrap.style.display='';mapWrap.style.visibility='visible';}
+        if(mapEl){mapEl.style.display='';mapEl.style.visibility='visible';}
+        if(_map&&typeof _map.relayout==='function')_map.relayout();
+        if(_map&&typeof _LL!=='undefined')_map.panTo(new _LL(item.lat,item.lng));
+        if(typeof _syncMapPanelUI==='function')_syncMapPanelUI('pilgrimage-route');
+      }catch(_e){}};
+      requestAnimationFrame(()=>requestAnimationFrame(restoreMap));
+      setTimeout(restoreMap,120);setTimeout(restoreMap,420);setTimeout(restoreMap,900);
     }catch(e){window.__oaiPilgrimageRouteReturn=false;console.warn('[가톨릭길동무] 순례계획 길찾기 전환 실패',e);if(typeof window._oaiReturnToPilgrimageFollow==='function')window._oaiReturnToPilgrimageFollow();}};if(typeof hideCoverAndRun==='function')hideCoverAndRun(run);else run();}
 
   const OAI_ACTION_HOLD_MS=700;
