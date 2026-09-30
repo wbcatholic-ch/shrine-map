@@ -1,7 +1,15 @@
-V8-1-14-922 changed files:
-index.html
-app.js
-style.css
-sw.js
-sw-update.js
-version.json
+V8-1-14-923
+
+기능 수정
+- 순례하기의 각 순례지 거리/시간을 출발지부터 해당 순례지까지의 누적 자동차 거리/시간으로 변경
+- 지도에서 찾기 마커를 기존 성지 유형 색상으로 표시, 순례계획에 포함된 장소는 파란색으로 표시
+- 지도에서 찾기에서 Android/브라우저 뒤로가기 및 지도 X를 누르면 순례하기 화면으로 복귀
+- 순례계획이 있는 상태에서 지도에서 찾기를 열면 마지막 순례지를 중심으로 지도 표시
+
+버전 갱신
+- index.html
+- app.js
+- style.css
+- sw.js
+- sw-update.js
+- version.json
