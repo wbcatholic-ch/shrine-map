@@ -1,6 +1,5 @@
 index.html
 style.css
-app.js
 sw.js
 sw-update.js
 version.json
