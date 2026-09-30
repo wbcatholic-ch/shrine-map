@@ -14680,6 +14680,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   let pilgrimageMapPickMarkers=[];
   let pilgrimageMapPickIdleHandler=null;
   let pilgrimageMapPickBuildSeq=0;
+  const OAI_PILGRIMAGE_MAP_PICK_VIEW_LEVEL=6;
+  const OAI_PILGRIMAGE_PLAN_MARKER_COLOR='#ec4899';
+  const OAI_PILGRIMAGE_FOCUS_MARKER_COLOR='#f4c430';
   function clearPilgrimageMapPickMarkers(){
     pilgrimageMapPickBuildSeq++;
     if(pilgrimageMapPickIdleHandler&&window.kakao&&kakao.maps&&kakao.maps.event&&_map){
@@ -14690,12 +14693,34 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     pilgrimageMapPickMarkers=[];
   }
   window.__oaiClearPilgrimageMapPickMarkers=clearPilgrimageMapPickMarkers;
+  function _pilgrimageMapPickIsSamePoint(a,b){
+    const pa=normalizePoint(a),pb=normalizePoint(b);
+    if(!pa||!pb)return false;
+    return Math.abs(Number(pa.lat)-Number(pb.lat))+Math.abs(Number(pa.lng)-Number(pb.lng))<.00002;
+  }
+  function _pilgrimageMapPickFocusInfo(){
+    const list=loadPlan(),meta=loadMeta();
+    if(list.length){
+      const point=normalizePoint(list[list.length-1]);
+      if(point)return {point:point,label:'마지막 순례지',guide:'마지막 순례지',description:'노랑 마커가 마지막 순례지입니다.',selected:true};
+    }
+    if(meta&&meta.end){
+      const point=normalizePoint(meta.end);
+      if(point)return {point:point,label:'도착지',guide:'도착지',description:'노랑 마커가 도착지입니다.',selected:false};
+    }
+    if(meta&&meta.start){
+      const point=normalizePoint(meta.start);
+      if(point)return {point:point,label:'출발지',guide:'출발지',description:'노랑 마커가 출발지입니다.',selected:false};
+    }
+    return null;
+  }
   function _pilgrimageMapPickIsAlreadyAdded(item){
     const q=normalizePoint(item);if(!q)return false;
     return loadPlan().some(x=>Math.abs(Number(x.lat)-q.lat)+Math.abs(Number(x.lng)-q.lng)<.00002);
   }
-  function _pilgrimageMapPickMarkerImage(item,selected){
-    if(selected){try{return _mkrImg('#1565c0',false);}catch(_e){return null;}}
+  function _pilgrimageMapPickMarkerImage(item,selected,focused){
+    if(focused){try{return _mkrImg(OAI_PILGRIMAGE_FOCUS_MARKER_COLOR,false);}catch(_e){return null;}}
+    if(selected){try{return _mkrImg(OAI_PILGRIMAGE_PLAN_MARKER_COLOR,false);}catch(_e){return null;}}
     const isParish=Array.isArray(PARISHES)&&PARISHES.indexOf(item)>=0;
     const isShrine=Array.isArray(SHRINES)&&SHRINES.indexOf(item)>=0;
     let c='#c0392b';
@@ -14719,25 +14744,38 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       try{return bounds.contain(new _LL(Number(p.lat),Number(p.lng)));}catch(_e){return true;}
     };
     const selected=loadPlan();
-    const selectedKey=(p)=>selected.some(x=>Math.abs(Number(x.lat)-Number(p.lat))+Math.abs(Number(x.lng)-Number(p.lng))<.00002);
+    const focusInfo=_pilgrimageMapPickFocusInfo();
+    const focusPoint=focusInfo&&focusInfo.point?focusInfo.point:null;
+    const selectedKey=(p)=>selected.some(x=>_pilgrimageMapPickIsSamePoint(x,p));
+    const focusKey=(p)=>!!(focusPoint&&_pilgrimageMapPickIsSamePoint(focusPoint,p));
     const items=[];
     // 성지는 전국 화면에서도 표시한다. (약 188곳)
     (Array.isArray(SHRINES)?SHRINES:[]).forEach(x=>{if(inside(x))items.push(x);});
     // 성당은 전국 화면에서 수천 개가 겹치므로 확대했을 때 현재 화면 안의 성당만 표시한다.
     if(level<=6){(Array.isArray(PARISHES)?PARISHES:[]).forEach(x=>{if(inside(x))items.push(x);});}
-    // 이미 계획에 등록된 장소는 현재 화면 밖이어도 최대 30곳까지 파란 마커로 보여 준다.
-    selected.slice(0,30).forEach(x=>{if(!items.some(y=>Math.abs(Number(y.lat)-Number(x.lat))+Math.abs(Number(y.lng)-Number(x.lng))<.00002))items.push(x);});
+    // 이미 계획에 등록된 장소는 현재 화면 밖이어도 최대 30곳까지 분홍 마커로 보여 준다.
+    selected.slice(0,30).forEach(x=>{if(!items.some(y=>_pilgrimageMapPickIsSamePoint(y,x)))items.push(x);});
+    // 지도 기준점(마지막 순례지/도착지/출발지)은 화면 밖이어도 노랑 마커로 항상 보이게 한다.
+    if(focusPoint&&!items.some(y=>_pilgrimageMapPickIsSamePoint(y,focusPoint)))items.push(focusPoint);
     let i=0; const BATCH=70;
     (function batch(){
       if(seq!==pilgrimageMapPickBuildSeq||!window.__OAI_PILGRIMAGE_PLACE_PICK__)return;
       const end=Math.min(i+BATCH,items.length);
       for(;i<end;i++){
-        const item=items[i],isSelected=selectedKey(item),img=_pilgrimageMapPickMarkerImage(item,isSelected);
+        const item=items[i],isSelected=selectedKey(item),isFocused=focusKey(item),img=_pilgrimageMapPickMarkerImage(item,isSelected,isFocused);
         try{
           const opt={position:new _LL(Number(item.lat),Number(item.lng)),title:String(item.name||'')};
           if(img)opt.image=img;
-          const mk=new _MM(opt);mk.setMap(_map);pilgrimageMapPickMarkers.push(mk);
+          const mk=new _MM(opt);
+          if(isFocused&&typeof mk.setZIndex==='function')mk.setZIndex(1250);
+          else if(isSelected&&typeof mk.setZIndex==='function')mk.setZIndex(1210);
+          mk.setMap(_map);pilgrimageMapPickMarkers.push(mk);
           kakao.maps.event.addListener(mk,'click',function(){
+            if(isFocused){
+              try{if(typeof _showRouteGuideText==='function')_showRouteGuideText((focusInfo&&focusInfo.guide?focusInfo.guide:'현재 기준점')+' · '+String(item.name||'')+' · 성지 마커를 눌러 추가하세요');}catch(_e){}
+              try{vibrate(12);}catch(_e){}
+              return;
+            }
             if(isSelected){
               try{if(typeof _showRouteGuideText==='function')_showRouteGuideText('이미 순례계획에 등록된 장소입니다');}catch(_e){}
               try{vibrate(12);}catch(_e){}
@@ -14751,7 +14789,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     })();
     try{
       if(typeof _showRouteGuideText==='function'){
-        _showRouteGuideText(level<=6?'빨강 성지 · 초록 성당 · 파랑 등록됨':'성지 마커를 누르세요 · 확대하면 성당도 표시됩니다');
+        if(focusInfo&&focusPoint&&focusPoint.name){
+          const prefix=(focusInfo.guide||'현재 기준점')+' · '+String(focusPoint.name||'');
+          _showRouteGuideText(level<=6?prefix+' · 분홍 순례계획 · 확대하면 성당도 표시됩니다':prefix+' · 성지 마커를 누르세요 · 확대하면 성당도 표시됩니다');
+        }else{
+          _showRouteGuideText(level<=6?'빨강 성지 · 초록 성당 · 분홍 순례계획':'성지 마커를 누르세요 · 확대하면 성당도 표시됩니다');
+        }
       }
     }catch(_e){}
   }
@@ -14816,13 +14859,18 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const afterReady=()=>{
         try{
           if(_map&&typeof _map.relayout==='function')_map.relayout();
-          // 기존 순례계획이 있으면 마지막 순례지를 중심으로, 빈 계획이면 현재 위치 주변을 먼저 보여 준다.
-          const planForCenter=loadPlan();
-          const lastPlace=planForCenter.length?planForCenter[planForCenter.length-1]:null;
-          if(_map&&lastPlace&&_validGpsPair(lastPlace.lat,lastPlace.lng)&&typeof _map.setCenter==='function'){
-            try{_map.setCenter(new _LL(Number(lastPlace.lat),Number(lastPlace.lng)));if(typeof _map.setLevel==='function')_map.setLevel(6);}catch(_e){}
+          const focusInfo=_pilgrimageMapPickFocusInfo();
+          const focusPoint=focusInfo&&focusInfo.point?focusInfo.point:null;
+          if(_map&&focusPoint&&_validGpsPair(focusPoint.lat,focusPoint.lng)&&typeof _map.setCenter==='function'){
+            try{
+              _map.setCenter(new _LL(Number(focusPoint.lat),Number(focusPoint.lng)));
+              if(typeof _map.setLevel==='function')_map.setLevel(OAI_PILGRIMAGE_MAP_PICK_VIEW_LEVEL);
+            }catch(_e){}
           }else if(_map&&_validGpsPair(_myLat,_myLng)&&typeof _map.setCenter==='function'){
-            try{_map.setCenter(new _LL(Number(_myLat),Number(_myLng)));if(typeof _map.getLevel==='function'&&_map.getLevel()>7)_map.setLevel(7);}catch(_e){}
+            try{
+              _map.setCenter(new _LL(Number(_myLat),Number(_myLng)));
+              if(typeof _map.setLevel==='function')_map.setLevel(OAI_PILGRIMAGE_MAP_PICK_VIEW_LEVEL);
+            }catch(_e){}
           }
           if(typeof _syncMapPanelUI==='function')_syncMapPanelUI('pilgrimage-place-map-pick');
           _preparePilgrimageMapPickMarkers();
