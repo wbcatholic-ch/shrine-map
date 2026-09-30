@@ -14385,6 +14385,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   const COURSES_KEY='oai_pilgrimage_courses_v1';
   let versionTapCount=0, versionTapTimer=0, plannerReturnToCover=false;
   let plannerView='list', currentCourseId='', pointRole='start', pendingPlanDeleteIndex=-1;
+  let pilgrimageTotalCalcSeq=0;
 
   function esc(v){return _placeText(String(v==null?'':v));}
   function isDev(){try{return localStorage.getItem(DEV_KEY)==='1';}catch(_e){return false;}}
@@ -14427,7 +14428,20 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function courseSummary(c){const s=c.start?c.start.name:'출발지 미설정',e=c.end?c.end.name:'도착지 미설정';return esc(s)+' → 순례 '+c.places.length+'곳 → '+esc(e);}
   function renderCourseList(){const body=document.getElementById('oai-pilgrimage-course-list');if(!body)return;const a=loadCourses();if(!a.length){body.innerHTML='<div class="oai-pilgrimage-saved-empty">저장한 순례계획이 없습니다.<br><b>새 순례계획 만들기</b>로 첫 코스를 만들어 보세요.</div>';return;}body.innerHTML=a.map(c=>'<article class="oai-pilgrimage-course-card"><button type="button" class="oai-pilgrimage-course-open" data-course-open="'+esc(c.id)+'" data-course-hold="'+esc(c.id)+'"><span><b>'+esc(c.name)+'</b><small>'+courseSummary(c)+'</small></span><i>›</i></button></article>').join('');}
   function nextIndex(list){return list.findIndex(x=>!x.done);}
-  function renderDetail(){const list=loadPlan(),m=loadMeta(),next=nextIndex(list);const title=document.getElementById('oai-pilgrimage-course-title');if(title)title.textContent=m.name;const count=document.getElementById('oai-pilgrimage-plan-count');if(count)count.textContent=list.length+'곳';const summary=document.getElementById('oai-pilgrimage-plan-next');if(summary)summary.textContent=!list.length?'장소를 등록해 순례 일정을 만들어 보세요.':next<0?'등록한 모든 순례 장소를 완료했습니다.':'다음: '+list[next].name;[['start',m.start],['end',m.end]].forEach(([r,p])=>{const n=document.getElementById('oai-pilgrimage-'+r+'-name'),a=document.getElementById('oai-pilgrimage-'+r+'-addr');if(n)n.textContent=p?p.name:(r==='start'?'출발지 설정':'도착지 설정');if(a)a.textContent=p?(p.addr||'등록된 장소'):'현재 위치 · 자주 가는 장소 · 주소 검색';});const body=document.getElementById('oai-pilgrimage-plan-list');if(!body)return;if(!list.length){body.innerHTML='<div class="oai-pilgrimage-empty">아직 등록된 순례 장소가 없습니다.<br><b>순례 장소 등록</b>에서 추가하세요.</div>';return;}body.innerHTML=list.map((item,i)=>{const cls='oai-pilgrimage-item'+(item.done?' is-done':'')+(i===next?' is-next':'');return '<div class="'+cls+'" data-plan-index="'+i+'" data-plan-hold="'+i+'"><button type="button" class="oai-pilgrimage-drag" data-plan-drag="'+i+'" aria-label="'+esc(item.name)+' 순서 이동">⋮</button><div class="oai-pilgrimage-main"><b>'+esc(item.name)+'</b><small>'+esc(item.addr||'등록된 장소')+'</small></div></div>';}).join('');}
+  function renderDetail(){
+    const list=loadPlan(),m=loadMeta(),next=nextIndex(list);
+    const title=document.getElementById('oai-pilgrimage-course-title');if(title)title.textContent=m.name;
+    const count=document.getElementById('oai-pilgrimage-plan-count');if(count)count.textContent=list.length+'곳';
+    const summary=document.getElementById('oai-pilgrimage-plan-next');if(summary)summary.textContent=!list.length?'장소를 등록해 순례 일정을 만들어 보세요.':next<0?'등록한 모든 순례 장소를 완료했습니다.':'다음: '+list[next].name;
+    [['start',m.start],['end',m.end]].forEach(([r,p])=>{const n=document.getElementById('oai-pilgrimage-'+r+'-name'),a=document.getElementById('oai-pilgrimage-'+r+'-addr');if(n)n.textContent=p?p.name:(r==='start'?'출발지 설정':'도착지 설정');if(a)a.textContent=p?(p.addr||'등록된 장소'):'현재 위치 · 자주 가는 장소 · 주소 검색';});
+    const body=document.getElementById('oai-pilgrimage-plan-list');
+    if(body){
+      if(!list.length) body.innerHTML='<div class="oai-pilgrimage-empty">아직 등록된 순례 장소가 없습니다.<br><b>순례 장소 등록</b>에서 추가하세요.</div>';
+      else body.innerHTML=list.map((item,i)=>{const cls='oai-pilgrimage-item'+(item.done?' is-done':'')+(i===next?' is-next':'');return '<div class="'+cls+'" data-plan-index="'+i+'" data-plan-hold="'+i+'"><button type="button" class="oai-pilgrimage-drag" data-plan-drag="'+i+'" aria-label="'+esc(item.name)+' 순서 이동">⋮</button><div class="oai-pilgrimage-main"><b>'+esc(item.name)+'</b><small>'+esc(item.addr||'등록된 장소')+'</small></div></div>';}).join('');
+    }
+    calcPilgrimageTotalRoute();
+  }
+
 
   function newPlan(){clearDraft();setView('detail');renderDetail();}
   function openCourse(id){const c=loadCourses().find(x=>x.id===id);if(!c)return;applyCourse(c);setView('detail');renderDetail();}
@@ -14467,6 +14481,48 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function addPlace(item){const q=normalizePoint(item);if(!q)return;const list=loadPlan();if(list.some(x=>Math.abs(x.lat-q.lat)+Math.abs(x.lng-q.lng)<.00002)){alert('이미 순례 계획에 등록된 장소입니다.');return;}list.push(Object.assign({},q,{done:false}));savePlan(list,true);closeSearchModal();renderDetail();}
   window._registerPilgrimagePlanPlace=addPlace;
   function startPlaceSearch(){const m=planner();if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}_returnToPilgrimagePlannerAfterSearch=true;plannerView='detail';const launch=()=>setTimeout(()=>{try{openSearchModal('pilgrimage-register');}catch(e){console.warn(e);_returnToPilgrimagePlannerAfterSearch=false;openPlanner({returnFromSearch:true});}},40);if(coverVisible()&&typeof hideCoverAndRun==='function')hideCoverAndRun(launch);else launch();}
+
+  async function calcPilgrimageTotalRoute(){
+    const seq=++pilgrimageTotalCalcSeq;
+    const kmEl=document.getElementById('oai-pilgrimage-total-km');
+    const timeEl=document.getElementById('oai-pilgrimage-total-time');
+    const noteEl=document.getElementById('oai-pilgrimage-total-note');
+    if(!kmEl||!timeEl||!noteEl) return;
+    const list=loadPlan(),meta=loadMeta();
+    if(!meta.start||!meta.end||!list.length){
+      kmEl.textContent='-';timeEl.textContent='-';
+      noteEl.textContent=!list.length?'순례 장소를 추가하면 총 이동 거리를 계산합니다.':'출발지와 도착지를 설정하면 총 이동 거리를 계산합니다.';
+      return;
+    }
+    kmEl.textContent='계산 중…';timeEl.textContent='-';noteEl.textContent='전체 자동차 경로를 계산하고 있습니다.';
+    let start=meta.start;
+    if(start.dynamicCurrent){
+      start=await new Promise(resolve=>currentPosition((lat,lng)=>resolve(Object.assign({},start,{lat,lng})),()=>resolve(null)));
+      if(seq!==pilgrimageTotalCalcSeq) return;
+      if(!start){kmEl.textContent='위치 확인 필요';timeEl.textContent='-';noteEl.textContent='현재 위치를 확인한 뒤 다시 계산합니다.';return;}
+    }
+    const points=[start].concat(list).concat([meta.end]);
+    const legs=[];
+    for(let i=0;i<points.length-1;i++){
+      const a=points[i],b=points[i+1];
+      legs.push((async()=>{
+        try{
+          const val=await _navFetch(a.lng+','+a.lat,b.lng+','+b.lat);
+          if(val&&Number.isFinite(Number(val.km))&&Number.isFinite(Number(val.dur))) return {km:Number(val.km),dur:Number(val.dur),estimated:false};
+        }catch(_e){}
+        const d=calcDist(a.lat,a.lng,b.lat,b.lng)*1.4;
+        return {km:d,dur:d/70*3600,estimated:true};
+      })());
+    }
+    const result=await Promise.all(legs);
+    if(seq!==pilgrimageTotalCalcSeq) return;
+    const totalKm=result.reduce((s,x)=>s+(Number(x.km)||0),0);
+    const totalDur=result.reduce((s,x)=>s+(Number(x.dur)||0),0);
+    const estimated=result.some(x=>x.estimated);
+    kmEl.textContent=totalKm.toFixed(1)+' km';
+    timeEl.textContent=typeof _fmtTime==='function'?_fmtTime(totalDur):Math.round(totalDur/60)+'분';
+    noteEl.textContent=estimated?'일부 구간은 도로 경로를 불러오지 못해 추정값이 포함됩니다.':'출발지 → 순례지 → 도착지 전체 자동차 기준입니다.';
+  }
 
   function targetInfo(){const list=loadPlan(),i=nextIndex(list);if(i>=0)return {item:list[i],index:i,final:false};const e=loadMeta().end;if(e)return {item:e,index:-1,final:true};return null;}
   function fmtRoad(distance,duration){return {km:(Number(distance)/1000).toFixed(1)+' km',time:typeof _fmtTime==='function'?_fmtTime(Number(duration)):Math.round(Number(duration)/60)+'분'};}
