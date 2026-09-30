@@ -12405,12 +12405,38 @@ function _hideCategoryMarkersForRouteDisplay(){
   else if(_mode==='retreat') _hideRetreatMarkersForRouteDisplay();
 }
 
+function _ensureRoutePilgrimagePlanButton(){
+  try{
+    const result=document.querySelector('#rs-result .rs-result') || document.getElementById('rs-result');
+    if(!result) return null;
+    let btn=document.getElementById('rs-pilgrimage-plan-btn');
+    if(!btn){
+      btn=document.createElement('button');
+      btn.id='rs-pilgrimage-plan-btn';
+      btn.className='btn-route-pilgrimage';
+      btn.type='button';
+      btn.innerHTML='<span aria-hidden="true">✝</span> 성지순례 계획으로 만들기';
+      const routeBtns=result.querySelector('.route-btns');
+      if(routeBtns) result.insertBefore(btn,routeBtns);
+      else result.appendChild(btn);
+      btn.addEventListener('click',function(){
+        try{ if(typeof window.openOaiPilgrimagePlanner==='function') window.openOaiPilgrimagePlanner(); }
+        catch(e){ console.warn('[가톨릭길동무] 길찾기→순례계획 이동 실패',e); }
+      });
+    }
+    btn.hidden=false;
+    btn.style.display='flex';
+    return btn;
+  }catch(e){ console.warn('[가톨릭길동무] 순례계획 버튼 표시 실패',e); return null; }
+}
+
 async function _calcRoute(){
   if(!_rS||!_rE) return;
   _hideRouteGuide();
   $('rs-km').textContent='…';
   $('rs-time').textContent='…';
   $('rs-result').style.display='block';
+  _ensureRoutePilgrimagePlanButton();
   _setRouteResultTipVisible(true);
   $('rs-hint').style.display='none';
   _dropEmptyWaypointInputsForRouteResult();
@@ -13492,6 +13518,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   _updateAllRouteFavoriteButtons();
   _renderRouteItinerary();
   on('rs-search-btn','click', function() { doSearchRoute(); });
+  on('rs-pilgrimage-plan-btn','click', function() {
+    try{
+      if(typeof window.openOaiPilgrimagePlanner==='function') window.openOaiPilgrimagePlanner();
+    }catch(e){ console.warn('[가톨릭길동무] 길찾기→순례계획 이동 실패', e); }
+  });
   on('rs-kakao-btn', 'click', function() { doKakaoRoute(); });
   on('rs-reset-btn', 'click', function() { resetRoute({ fromButton: true }); });
 

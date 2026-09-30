@@ -6456,7 +6456,7 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 #oai-pilgrimage-detail-view.is-saved-plan .oai-pilgrimage-total-card{display:grid!important;}
 
 
-/* V8-1-14-908: 새 계획 첫 화면과 출발/도착지 카드 구분 */
+/* V8-1-14-910: 새 계획 첫 화면과 출발/도착지 카드 구분 */
 .oai-pilgrimage-detail-view.is-empty-plan .oai-pilgrimage-add{display:none!important;}
 
 /* 출발지는 파란 계열, 도착지는 초록 계열로 카드 자체도 구분 */
@@ -6479,3 +6479,23 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 .oai-pilgrimage-endpoint.end i{color:#2f8a5c!important;}
 .oai-pilgrimage-endpoint.end b{color:#1e4d36!important;}
 .oai-pilgrimage-endpoint.end em{color:#607f6d!important;}
+
+
+/* V8-1-14-910: 길찾기 결과에서 성지순례 계획으로 이어지는 전용 버튼 */
+.btn-route-pilgrimage{
+  width:100%;min-height:46px;margin:8px 0 0;padding:0 14px;
+  border:1.5px solid #c9a54f;border-radius:11px;
+  background:#10233f;color:#fff;box-shadow:0 3px 10px rgba(16,35,63,.16);
+  font-family:inherit;font-size:14px;font-weight:900;letter-spacing:-.025em;
+  display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;
+}
+.btn-route-pilgrimage span{color:#e7c563;font-size:16px;line-height:1;}
+.btn-route-pilgrimage:active{transform:translateY(1px);opacity:.88;}
+
+/* V8-1-14-910: 새 순례계획 첫 화면에서는 하단 추가 버튼을 DOM 단계부터 숨김 */
+#oai-pilgrimage-detail-view.is-empty-plan > .oai-pilgrimage-add,
+#oai-pilgrimage-detail-view .oai-pilgrimage-add[hidden]{display:none!important;}
+
+/* V8-1-14-910: 길찾기 결과의 순례계획 전환 버튼은 결과가 보일 때 확실히 노출 */
+#rs-result[style*="block"] .btn-route-pilgrimage,
+#rs-result .btn-route-pilgrimage{display:flex!important;visibility:visible!important;opacity:1!important;}
