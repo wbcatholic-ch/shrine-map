@@ -6330,7 +6330,7 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 /* V8-1-14-897: 순례계획 헤더는 스크롤해도 상단 고정 */
 .oai-pilgrimage-planner-panel{overscroll-behavior:contain;}
 
-/* 성지순례 계획 · 길찾기 · 설정 최종 스타일 (V8-1-14-921)
+/* 성지순례 계획 · 길찾기 · 설정 최종 스타일 (V8-1-14-922)
    순례 관련 스타일은 이 구간에서 통합 관리합니다. */
 
 /* 저장 목록 */

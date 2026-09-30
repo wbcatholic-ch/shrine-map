@@ -1,12 +1,7 @@
-V8-1-14-921 modified files
-- index.html
-- app.js
-- style.css
-- sw.js
-- sw-update.js
-- version.json
-
-Changes:
-- Long-press action sheet: white background, dark text, stronger border.
-- Long press works on title/text area by disabling text selection/callout and allowing slight finger movement.
-- Pilgrimage route group (start/shrines/end/add buttons) uses a darker container background/border so it is clearly separated from the distance/time card.
+V8-1-14-922 changed files:
+index.html
+app.js
+style.css
+sw.js
+sw-update.js
+version.json
