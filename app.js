@@ -14447,15 +14447,30 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const totalCard=document.querySelector('.oai-pilgrimage-detail-view .oai-pilgrimage-total-card');
     const actions=document.querySelector('.oai-pilgrimage-detail-view .oai-pilgrimage-detail-actions');
     const isSaved=!!currentCourseId;
-    if(saveBtn){saveBtn.disabled=!list.length;saveBtn.setAttribute('aria-disabled',!list.length?'true':'false');}
-    if(followBtn){followBtn.hidden=!isSaved;followBtn.disabled=!list.length;followBtn.setAttribute('aria-disabled',!list.length?'true':'false');}
-    if(totalCard)totalCard.hidden=!isSaved;
+    const detailView=document.getElementById('oai-pilgrimage-detail-view');
+    if(detailView){detailView.classList.toggle('is-new-plan',!isSaved);detailView.classList.toggle('is-saved-plan',isSaved);detailView.dataset.planSaved=isSaved?'1':'0';}
+    if(saveBtn){saveBtn.disabled=!list.length;saveBtn.setAttribute('aria-disabled',!list.length?'true':'false');saveBtn.textContent=isSaved?'계획 저장':'계획 저장';}
+    if(followBtn){
+      followBtn.hidden=!isSaved;
+      followBtn.disabled=!list.length;
+      followBtn.setAttribute('aria-disabled',!list.length?'true':'false');
+      followBtn.style.display=isSaved?'':'none';
+    }
+    if(totalCard){
+      totalCard.hidden=!isSaved;
+      totalCard.style.display=isSaved?'':'none';
+    }
     if(actions)actions.classList.toggle('is-unsaved',!isSaved);
     if(isSaved)calcPilgrimageTotalRoute();
+    else{
+      const km=document.getElementById('oai-pilgrimage-total-km'),tm=document.getElementById('oai-pilgrimage-total-time');
+      if(km)km.textContent='-';
+      if(tm)tm.textContent='-';
+    }
   }
 
 
-  function newPlan(){clearDraft();setView('detail');renderDetail();}
+  function newPlan(){currentCourseId='';clearDraft();setView('detail');renderDetail();}
   function openCourse(id){const c=loadCourses().find(x=>x.id===id);if(!c)return;applyCourse(c);setView('detail');renderDetail();}
   let pendingCourseDeleteId='';
   function deleteCourse(id){

@@ -6333,7 +6333,7 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 /* V8-1-14-897: 순례계획 헤더는 스크롤해도 상단 고정 */
 .oai-pilgrimage-planner-panel{overscroll-behavior:contain;}
 
-/* V8-1-14-906: 순례계획 전체 자동차 거리·예상시간 요약 */
+/* V8-1-14-907: 순례계획 전체 자동차 거리·예상시간 요약 */
 .oai-pilgrimage-total-card{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:10px 0 2px;padding:12px;border:1.5px solid #b9d2e5;border-radius:15px;background:#f5f9fd;box-shadow:0 2px 6px rgba(23,111,192,.06)}
 .oai-pilgrimage-total-card>div{min-width:0;padding:10px 12px;border:1px solid #d6e4ef;border-radius:12px;background:#fff}
 .oai-pilgrimage-total-card small{display:block;color:#6e7a8c;font-size:calc(11.5px * var(--app-font-scale,1));font-weight:850;line-height:1.2}
@@ -6341,7 +6341,7 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 .oai-pilgrimage-total-card p{grid-column:1/-1;margin:1px 2px 0;color:#6f7886;font-size:calc(11.5px * var(--app-font-scale,1));font-weight:750;line-height:1.45;word-break:keep-all}
 
 
-/* V8-1-14-906: 순례계획 편집 화면 간격·총거리 카드·장소추가 버튼 정리 */
+/* V8-1-14-907: 순례계획 편집 화면 간격·총거리 카드·장소추가 버튼 정리 */
 .oai-pilgrimage-detail-view .oai-pilgrimage-endpoints{margin-bottom:5px!important;}
 .oai-pilgrimage-detail-view .oai-pilgrimage-plan-list{gap:5px!important;margin-bottom:5px!important;}
 .oai-pilgrimage-detail-view .oai-pilgrimage-endpoints-after-list{margin-bottom:5px!important;}
@@ -6373,10 +6373,10 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 .oai-pilgrimage-detail-actions{margin-top:8px!important;}
 .oai-pilgrimage-reset{margin-top:6px!important;}
 
-/* V8-1-14-906: 저장 목록 요약은 출발/도착을 제외한 순례지 이름만 한 줄로 표시 */
+/* V8-1-14-907: 저장 목록 요약은 출발/도착을 제외한 순례지 이름만 한 줄로 표시 */
 .oai-pilgrimage-course-open small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap!important;max-width:100%;}
 
-/* V8-1-14-906: 순례계획 편집 화면의 세로 여백을 하단 박스 간격 기준으로 통일 */
+/* V8-1-14-907: 순례계획 편집 화면의 세로 여백을 하단 박스 간격 기준으로 통일 */
 .oai-pilgrimage-detail-view .oai-pilgrimage-endpoints{
   margin:0 0 7px!important;
 }
@@ -6401,7 +6401,7 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 }
 
 
-/* V8-1-14-906: 첫 순례계획 진입 시 무엇을 눌러야 하는지 즉시 보이도록 첫 행동을 하나로 강조 */
+/* V8-1-14-907: 첫 순례계획 진입 시 무엇을 눌러야 하는지 즉시 보이도록 첫 행동을 하나로 강조 */
 .oai-pilgrimage-empty-action{
   display:flex!important;
   flex-direction:column;
@@ -6441,8 +6441,16 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 .oai-pilgrimage-add[hidden]{display:none!important;}
 
 
-/* V8-1-14-906: 새 계획은 먼저 저장에 집중하고, 저장 후에만 총 거리와 따라가기를 표시 */
+/* V8-1-14-907: 새 계획은 먼저 저장에 집중하고, 저장 후에만 총 거리와 따라가기를 표시 */
 .oai-pilgrimage-total-card[hidden],
 .oai-pilgrimage-follow[hidden]{display:none!important;}
 .oai-pilgrimage-detail-actions.is-unsaved{grid-template-columns:1fr!important;}
 .oai-pilgrimage-detail-actions.is-unsaved .oai-pilgrimage-save{width:100%;}
+
+
+/* V8-1-14-907: 새 순례계획은 저장 전에는 거리/시간과 따라가기를 절대 노출하지 않는다 */
+#oai-pilgrimage-detail-view.is-new-plan .oai-pilgrimage-total-card,
+#oai-pilgrimage-detail-view.is-new-plan .oai-pilgrimage-follow{display:none!important;}
+#oai-pilgrimage-detail-view.is-new-plan .oai-pilgrimage-detail-actions{grid-template-columns:1fr!important;}
+#oai-pilgrimage-detail-view.is-new-plan .oai-pilgrimage-save{width:100%!important;}
+#oai-pilgrimage-detail-view.is-saved-plan .oai-pilgrimage-total-card{display:grid!important;}
