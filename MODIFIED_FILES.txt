@@ -1,12 +1,6 @@
-V8-1-14-896
-- index.html
-- app.js
-- style.css
-- sw.js
-- sw-update.js
-- version.json
-
-변경 내용
-- 성지순례 계획 헤더를 가톨릭 주요 웹사이트 등과 동일한 공통 module-bar 표준 디자인으로 변경
-- 좌측 아이콘 + 제목 + 설명 + 우측 금색 원형 X 구조로 통일
-- 화면 단계별 보조 설명을 정식 기능 문구로 변경
+index.html
+style.css
+app.js
+sw.js
+sw-update.js
+version.json
