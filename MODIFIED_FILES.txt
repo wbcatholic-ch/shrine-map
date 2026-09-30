@@ -1,12 +1,7 @@
-V8-1-14-913
-- index.html
-- app.js
-- style.css
-- sw.js
-- sw-update.js
-- version.json
-
-Changes:
-- Stronger navy/green colors for pilgrimage start/end cards.
-- Added "지도에서 설정하기" for start/end selection.
-- Darker accent headers for Settings groups.
+V8-1-14-914 변경 파일
+index.html
+app.js
+style.css
+sw.js
+sw-update.js
+version.json
