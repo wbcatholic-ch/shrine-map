@@ -14444,8 +14444,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const addBtn=document.querySelector('.oai-pilgrimage-detail-view .oai-pilgrimage-add');
     if(addBtn)addBtn.hidden=!list.length;
     const saveBtn=document.querySelector('[data-oai-pilgrimage-save]'),followBtn=document.querySelector('[data-oai-pilgrimage-follow]');
-    [saveBtn,followBtn].forEach(btn=>{if(btn){btn.disabled=!list.length;btn.setAttribute('aria-disabled',!list.length?'true':'false');}});
-    calcPilgrimageTotalRoute();
+    const totalCard=document.querySelector('.oai-pilgrimage-detail-view .oai-pilgrimage-total-card');
+    const actions=document.querySelector('.oai-pilgrimage-detail-view .oai-pilgrimage-detail-actions');
+    const isSaved=!!currentCourseId;
+    if(saveBtn){saveBtn.disabled=!list.length;saveBtn.setAttribute('aria-disabled',!list.length?'true':'false');}
+    if(followBtn){followBtn.hidden=!isSaved;followBtn.disabled=!list.length;followBtn.setAttribute('aria-disabled',!list.length?'true':'false');}
+    if(totalCard)totalCard.hidden=!isSaved;
+    if(actions)actions.classList.toggle('is-unsaved',!isSaved);
+    if(isSaved)calcPilgrimageTotalRoute();
   }
 
 
