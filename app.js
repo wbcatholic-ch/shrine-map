@@ -7893,7 +7893,29 @@ function _onMapReady(){
   }
   if(!window.__OAI_MAIN_MAP_CLICK_BOUND__){
     window.__OAI_MAIN_MAP_CLICK_BOUND__=true;
-    kakao.maps.event.addListener(_map,'click',()=>{
+    kakao.maps.event.addListener(_map,'click',(mouseEvent)=>{
+      // 순례계획의 출발지/도착지를 지도에서 직접 고르는 중이면 이 클릭을 우선 처리한다.
+      if(typeof window.__OAI_PILGRIMAGE_MAP_PICK__==='function' && mouseEvent && mouseEvent.latLng){
+        const lat=mouseEvent.latLng.getLat(), lng=mouseEvent.latLng.getLng();
+        const finish=(addr)=>{
+          const cb=window.__OAI_PILGRIMAGE_MAP_PICK__;
+          window.__OAI_PILGRIMAGE_MAP_PICK__=null;
+          try{ if(typeof _showRouteGuideText==='function') _showRouteGuideText(''); }catch(_e){}
+          try{ cb({lat:lat,lng:lng,addr:addr||''}); }catch(e){ console.warn('[가톨릭길동무] 순례계획 지도 선택 실패',e); }
+        };
+        try{
+          if(kakao.maps.services&&kakao.maps.services.Geocoder){
+            const geocoder=new kakao.maps.services.Geocoder();
+            geocoder.coord2Address(lng,lat,function(result,status){
+              if(status===kakao.maps.services.Status.OK && result && result[0]){
+                const r=result[0], road=r.road_address&&r.road_address.address_name, jibun=r.address&&r.address.address_name;
+                finish(road||jibun||'');
+              }else finish('');
+            });
+          }else finish('');
+        }catch(_e){ finish(''); }
+        return;
+      }
       // V8-1-14-679: 지도 빈 곳 클릭은 패널 표시만 접고 선택 마커와 경로선은 유지한다.
       _hideMapPanelFromMapClick();
       document.activeElement?.blur();
@@ -14598,6 +14620,36 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function chooseFrequent(i){const a=_loadRouteFavorites(),f=a[i];if(f)setPoint(pointRole,f);}
   function chooseCurrent(){const role=pointRole==='end'?'end':'start';const done=(lat,lng)=>setPoint(role,{name:'현재 위치',addr:role==='start'?'순례 시작 시 현재 위치 사용':'선택 시점의 현재 위치 사용',lat:Number(lat),lng:Number(lng),dynamicCurrent:role==='start'});if(Number.isFinite(Number(_myLat))&&Number.isFinite(Number(_myLng)))done(_myLat,_myLng);else if(typeof _refreshFreshLocationThen==='function')_refreshFreshLocationThen(done,()=>alert('현재 위치를 가져올 수 없습니다.'));else alert('현재 위치를 가져올 수 없습니다.');}
   function searchPoint(){const r=pointRole;closePointPicker();const m=planner();if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}_returnToPilgrimagePlannerAfterSearch=true;plannerView='detail';const launch=()=>setTimeout(()=>{try{openSearchModal(r==='start'?'pilgrimage-start':'pilgrimage-end');}catch(e){console.warn(e);_returnToPilgrimagePlannerAfterSearch=false;openPlanner({returnFromSearch:true});}},40);if(coverVisible()&&typeof hideCoverAndRun==='function')hideCoverAndRun(launch);else launch();}
+  function pickPointFromMap(){
+    const role=pointRole==='end'?'end':'start';
+    closePointPicker();
+    const modal=planner();
+    if(modal){modal.classList.remove('show');modal.setAttribute('aria-hidden','true');}
+    window.__OAI_PILGRIMAGE_MAP_PICK__=function(p){
+      if(!p||!isFinite(p.lat)||!isFinite(p.lng))return;
+      const label=role==='start'?'지도 선택 출발지':'지도 선택 도착지';
+      setPoint(role,{name:p.addr||label,addr:p.addr||('위도 '+Number(p.lat).toFixed(5)+' · 경도 '+Number(p.lng).toFixed(5)),lat:Number(p.lat),lng:Number(p.lng)});
+      openPlanner({returnFromSearch:true});
+      setView('detail');
+      renderDetail();
+    };
+    const run=()=>{try{
+      try{document.documentElement.classList.add('app-active');}catch(_e){}
+      try{if(typeof oaiSetMainMapLayerHidden==='function')oaiSetMainMapLayerHidden(false);else document.documentElement.classList.remove('oai-hide-main-map-layer');}catch(_e){}
+      try{_screen='map';}catch(_e){}
+      const cover=document.getElementById('cover');if(cover){cover.style.display='none';cover.style.opacity='0';cover.setAttribute('aria-hidden','true');}
+      const mapWrap=document.getElementById('map-wrap'),mapEl=document.getElementById('map');
+      if(mapWrap&&mapWrap.style){mapWrap.style.display='';mapWrap.style.visibility='visible';mapWrap.style.pointerEvents='';}
+      if(mapEl&&mapEl.style){mapEl.style.display='';mapEl.style.visibility='visible';}
+      try{document.querySelectorAll('.sheet.open').forEach(x=>x.classList.remove('open'));}catch(_e){}
+      const ready=!!(_map&&mapEl&&mapEl.children&&mapEl.children.length);
+      if(!ready){try{window._noAutoNearby=true;if(typeof _loadMap==='function')_loadMap();}catch(_e){}}
+      const guide=role==='start'?'지도에서 출발 위치를 눌러주세요':'지도에서 도착 위치를 눌러주세요';
+      const relayout=()=>{try{if(_map&&typeof _map.relayout==='function')_map.relayout();if(typeof _showRouteGuideText==='function')_showRouteGuideText(guide);if(typeof _syncMapPanelUI==='function')_syncMapPanelUI('pilgrimage-map-pick');}catch(_e){}};
+      requestAnimationFrame(()=>requestAnimationFrame(relayout));setTimeout(relayout,150);setTimeout(relayout,500);
+    }catch(e){console.warn('[가톨릭길동무] 순례계획 지도 선택 진입 실패',e);window.__OAI_PILGRIMAGE_MAP_PICK__=null;openPlanner({returnFromSearch:true});setView('detail');renderDetail();}};
+    if(typeof hideCoverAndRun==='function')hideCoverAndRun(run);else run();
+  }
 
   function addPlace(item){const q=normalizePoint(item);if(!q)return;const list=loadPlan();if(list.some(x=>Math.abs(x.lat-q.lat)+Math.abs(x.lng-q.lng)<.00002)){alert('이미 순례 계획에 등록된 장소입니다.');return;}list.push(Object.assign({},q,{done:false}));savePlan(list,true);closeSearchModal();renderDetail();}
   window._registerPilgrimagePlanPlace=addPlace;
@@ -14841,13 +14893,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const i=pendingPlanDeleteIndex,list=loadPlan();if(i<0||i>=list.length){closePlanDelete();return;}list.splice(i,1);closePlanDelete();savePlan(list);if(currentCourseId)updateCurrentCourseProgress();
   }
 
-  document.addEventListener('click',function(e){const t=e.target&&e.target.closest?e.target.closest('#oai-settings-version-tap,[data-oai-pilgrimage-open],[data-oai-pilgrimage-close],[data-oai-pilgrimage-new],[data-course-open],[data-course-rename],[data-course-delete],[data-oai-pilgrimage-back-list],[data-oai-pilgrimage-back-detail],[data-oai-pilgrimage-add],[data-oai-pilgrimage-point],[data-oai-pilgrimage-point-close],[data-oai-pilgrimage-point-current],[data-pilgrimage-frequent],[data-oai-pilgrimage-point-search],[data-oai-pilgrimage-save-cancel],[data-oai-pilgrimage-save-confirm],[data-oai-pilgrimage-rename],[data-oai-pilgrimage-save],[data-oai-pilgrimage-follow],[data-oai-pilgrimage-follow-route],[data-oai-pilgrimage-follow-done],[data-oai-pilgrimage-follow-recalc],[data-oai-pilgrimage-follow-undo],[data-oai-pilgrimage-reset],[data-plan-done],[data-plan-remove],[data-oai-pilgrimage-delete-cancel],[data-oai-pilgrimage-delete-confirm]'):null;if(!t)return;
+  document.addEventListener('click',function(e){const t=e.target&&e.target.closest?e.target.closest('#oai-settings-version-tap,[data-oai-pilgrimage-open],[data-oai-pilgrimage-close],[data-oai-pilgrimage-new],[data-course-open],[data-course-rename],[data-course-delete],[data-oai-pilgrimage-back-list],[data-oai-pilgrimage-back-detail],[data-oai-pilgrimage-add],[data-oai-pilgrimage-point],[data-oai-pilgrimage-point-close],[data-oai-pilgrimage-point-current],[data-pilgrimage-frequent],[data-oai-pilgrimage-point-search],[data-oai-pilgrimage-point-map],[data-oai-pilgrimage-save-cancel],[data-oai-pilgrimage-save-confirm],[data-oai-pilgrimage-rename],[data-oai-pilgrimage-save],[data-oai-pilgrimage-follow],[data-oai-pilgrimage-follow-route],[data-oai-pilgrimage-follow-done],[data-oai-pilgrimage-follow-recalc],[data-oai-pilgrimage-follow-undo],[data-oai-pilgrimage-reset],[data-plan-done],[data-plan-remove],[data-oai-pilgrimage-delete-cancel],[data-oai-pilgrimage-delete-confirm]'):null;if(!t)return;
     if(t.id==='oai-settings-version-tap'){e.preventDefault();clearTimeout(versionTapTimer);versionTapCount++;versionTapTimer=setTimeout(()=>versionTapCount=0,1800);if(versionTapCount>=5){versionTapCount=0;setDev(true);alert('개발자 모드가 활성화되었습니다.');const g=document.getElementById('oai-developer-group');if(g)g.scrollIntoView({behavior:'smooth',block:'center'});}return;}
     if(t.hasAttribute('data-oai-pilgrimage-open')){e.preventDefault();openPlanner();return;} if(t.hasAttribute('data-oai-pilgrimage-close')){e.preventDefault();plannerBackOrClose();return;}
     if(t.hasAttribute('data-oai-pilgrimage-new')){e.preventDefault();newPlan();return;} if(t.hasAttribute('data-course-open')){e.preventDefault();if(Date.now()<actionSuppressClickUntil)return;openCourse(t.getAttribute('data-course-open'));return;} if(t.hasAttribute('data-course-rename')){e.preventDefault();openCourseRenameModal(t.getAttribute('data-course-rename'));return;} if(t.hasAttribute('data-course-delete')){e.preventDefault();deleteCourse(t.getAttribute('data-course-delete'));return;}
     if(t.hasAttribute('data-oai-pilgrimage-back-list')){e.preventDefault();setView('list');renderCourseList();return;} if(t.hasAttribute('data-oai-pilgrimage-back-detail')){e.preventDefault();setView('detail');renderDetail();return;}
     if(t.hasAttribute('data-oai-pilgrimage-add')){e.preventDefault();startPlaceSearch();return;} if(t.hasAttribute('data-oai-pilgrimage-point')){e.preventDefault();openPointPicker(t.getAttribute('data-oai-pilgrimage-point'));return;}
-    if(t.hasAttribute('data-oai-pilgrimage-point-close')){e.preventDefault();closePointPicker();return;} if(t.hasAttribute('data-oai-pilgrimage-point-current')){e.preventDefault();chooseCurrent();return;} if(t.hasAttribute('data-pilgrimage-frequent')){e.preventDefault();chooseFrequent(parseInt(t.getAttribute('data-pilgrimage-frequent'),10));return;} if(t.hasAttribute('data-oai-pilgrimage-point-search')){e.preventDefault();searchPoint();return;}
+    if(t.hasAttribute('data-oai-pilgrimage-point-close')){e.preventDefault();closePointPicker();return;} if(t.hasAttribute('data-oai-pilgrimage-point-current')){e.preventDefault();chooseCurrent();return;} if(t.hasAttribute('data-pilgrimage-frequent')){e.preventDefault();chooseFrequent(parseInt(t.getAttribute('data-pilgrimage-frequent'),10));return;} if(t.hasAttribute('data-oai-pilgrimage-point-search')){e.preventDefault();searchPoint();return;} if(t.hasAttribute('data-oai-pilgrimage-point-map')){e.preventDefault();pickPointFromMap();return;}
     if(t.hasAttribute('data-oai-pilgrimage-save-cancel')){e.preventDefault();closeSaveModal();return;} if(t.hasAttribute('data-oai-pilgrimage-save-confirm')){e.preventDefault();confirmSave();return;} if(t.hasAttribute('data-oai-pilgrimage-rename')){e.preventDefault();openSaveModal(true);return;}
     if(t.hasAttribute('data-oai-pilgrimage-save')){e.preventDefault();e.stopPropagation();saveCurrent();return;} if(t.hasAttribute('data-oai-pilgrimage-follow')){e.preventDefault();e.stopPropagation();openFollow();return;}
     if(t.hasAttribute('data-oai-pilgrimage-follow-route')){e.preventDefault();routeTarget();return;} if(t.hasAttribute('data-oai-pilgrimage-follow-done')){e.preventDefault();followDone();return;} if(t.hasAttribute('data-oai-pilgrimage-follow-recalc')){e.preventDefault();calcFollowDistance();return;} if(t.hasAttribute('data-oai-pilgrimage-follow-undo')){e.preventDefault();undoLastDone();return;}

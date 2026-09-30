@@ -1,5 +1,12 @@
-V8-1-14-912
-- 길찾기 결과에서 드래그 손잡이 숨김
-- 결과 패널 하단 여백 축소
-- 길찾기 경유지 중 등록된 성지/성당을 순례계획으로 실제 전달
-- 출발지/도착지 함께 전달
+V8-1-14-913
+- index.html
+- app.js
+- style.css
+- sw.js
+- sw-update.js
+- version.json
+
+Changes:
+- Stronger navy/green colors for pilgrimage start/end cards.
+- Added "지도에서 설정하기" for start/end selection.
+- Darker accent headers for Settings groups.
