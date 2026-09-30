@@ -6333,9 +6333,42 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 /* V8-1-14-897: 순례계획 헤더는 스크롤해도 상단 고정 */
 .oai-pilgrimage-planner-panel{overscroll-behavior:contain;}
 
-/* V8-1-14-898: 순례계획 전체 자동차 거리·예상시간 요약 */
+/* V8-1-14-899: 순례계획 전체 자동차 거리·예상시간 요약 */
 .oai-pilgrimage-total-card{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:10px 0 2px;padding:12px;border:1.5px solid #b9d2e5;border-radius:15px;background:#f5f9fd;box-shadow:0 2px 6px rgba(23,111,192,.06)}
 .oai-pilgrimage-total-card>div{min-width:0;padding:10px 12px;border:1px solid #d6e4ef;border-radius:12px;background:#fff}
 .oai-pilgrimage-total-card small{display:block;color:#6e7a8c;font-size:calc(11.5px * var(--app-font-scale,1));font-weight:850;line-height:1.2}
 .oai-pilgrimage-total-card b{display:block;margin-top:5px;color:#17679f;font-size:calc(20px * var(--app-font-scale,1));font-weight:950;line-height:1.15;white-space:nowrap}
 .oai-pilgrimage-total-card p{grid-column:1/-1;margin:1px 2px 0;color:#6f7886;font-size:calc(11.5px * var(--app-font-scale,1));font-weight:750;line-height:1.45;word-break:keep-all}
+
+
+/* V8-1-14-899: 순례계획 편집 화면 간격·총거리 카드·장소추가 버튼 정리 */
+.oai-pilgrimage-detail-view .oai-pilgrimage-endpoints{margin-bottom:5px!important;}
+.oai-pilgrimage-detail-view .oai-pilgrimage-plan-list{gap:5px!important;margin-bottom:5px!important;}
+.oai-pilgrimage-detail-view .oai-pilgrimage-endpoints-after-list{margin-bottom:5px!important;}
+.oai-pilgrimage-add{
+  margin:5px 0 7px!important;
+  min-height:56px!important;
+  border:1.5px solid #9b741e!important;
+  background:#f5e4af!important;
+  color:#604514!important;
+  box-shadow:0 3px 8px rgba(139,103,31,.12)!important;
+  font-size:calc(17px * var(--app-font-scale,1))!important;
+}
+.oai-pilgrimage-add:active{background:#ecd486!important;transform:scale(.99);}
+.oai-pilgrimage-total-card{
+  margin:0 0 7px!important;
+  gap:7px!important;
+  padding:10px!important;
+  border:1.5px solid #8fb9dc!important;
+  background:#eef6fc!important;
+}
+.oai-pilgrimage-total-card>div{
+  padding:9px 11px!important;
+  border:1px solid #b8d2e8!important;
+  background:#fff!important;
+}
+.oai-pilgrimage-total-card small{color:#263a58!important;font-weight:900!important;}
+.oai-pilgrimage-total-card b{color:#1565c0!important;font-weight:950!important;}
+.oai-pilgrimage-total-card p{margin-top:0!important;color:#586a7d!important;}
+.oai-pilgrimage-detail-actions{margin-top:8px!important;}
+.oai-pilgrimage-reset{margin-top:6px!important;}
