@@ -14438,9 +14438,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     [['start',m.start],['end',m.end]].forEach(([r,p])=>{const n=document.getElementById('oai-pilgrimage-'+r+'-name'),a=document.getElementById('oai-pilgrimage-'+r+'-addr');if(n)n.textContent=p?p.name:(r==='start'?'출발지 설정':'도착지 설정');if(a)a.textContent=p?(p.addr||'등록된 장소'):'현재 위치 · 자주 가는 장소 · 주소 검색';});
     const body=document.getElementById('oai-pilgrimage-plan-list');
     if(body){
-      if(!list.length) body.innerHTML='<div class="oai-pilgrimage-empty">아직 등록된 순례 장소가 없습니다.<br><b>순례 장소 등록</b>에서 추가하세요.</div>';
+      if(!list.length) body.innerHTML='<button type="button" class="oai-pilgrimage-empty oai-pilgrimage-empty-action" data-oai-pilgrimage-add="1"><b>＋ 먼저 순례 장소를 추가하세요</b><small>여기를 눌러 성지·성당을 검색합니다.</small></button>';
       else body.innerHTML=list.map((item,i)=>{const cls='oai-pilgrimage-item'+(item.done?' is-done':'')+(i===next?' is-next':'');return '<div class="'+cls+'" data-plan-index="'+i+'" data-plan-hold="'+i+'"><button type="button" class="oai-pilgrimage-drag" data-plan-drag="'+i+'" aria-label="'+esc(item.name)+' 순서 이동">⋮</button><div class="oai-pilgrimage-main"><b>'+esc(item.name)+'</b><small>'+esc(item.addr||'등록된 장소')+'</small></div></div>';}).join('');
     }
+    const addBtn=document.querySelector('.oai-pilgrimage-detail-view .oai-pilgrimage-add');
+    if(addBtn)addBtn.hidden=!list.length;
+    const saveBtn=document.querySelector('[data-oai-pilgrimage-save]'),followBtn=document.querySelector('[data-oai-pilgrimage-follow]');
+    [saveBtn,followBtn].forEach(btn=>{if(btn){btn.disabled=!list.length;btn.setAttribute('aria-disabled',!list.length?'true':'false');}});
     calcPilgrimageTotalRoute();
   }
 
