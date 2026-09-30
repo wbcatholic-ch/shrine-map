@@ -6456,7 +6456,7 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 #oai-pilgrimage-detail-view.is-saved-plan .oai-pilgrimage-total-card{display:grid!important;}
 
 
-/* V8-1-14-914: 새 계획 첫 화면과 출발/도착지 카드 구분 */
+/* V8-1-14-915: 새 계획 첫 화면과 출발/도착지 카드 구분 */
 .oai-pilgrimage-detail-view.is-empty-plan .oai-pilgrimage-add{display:none!important;}
 
 /* 출발지는 파란 계열, 도착지는 초록 계열로 카드 자체도 구분 */
@@ -6481,7 +6481,7 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 .oai-pilgrimage-endpoint.end em{color:#607f6d!important;}
 
 
-/* V8-1-14-914: 길찾기 결과에서 성지순례 계획으로 이어지는 전용 버튼 */
+/* V8-1-14-915: 길찾기 결과에서 성지순례 계획으로 이어지는 전용 버튼 */
 .btn-route-pilgrimage{
   width:100%;min-height:46px;margin:8px 0 0;padding:0 14px;
   border:1.5px solid #c9a54f;border-radius:11px;
@@ -6492,15 +6492,15 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 .btn-route-pilgrimage span{color:#e7c563;font-size:16px;line-height:1;}
 .btn-route-pilgrimage:active{transform:translateY(1px);opacity:.88;}
 
-/* V8-1-14-914: 새 순례계획 첫 화면에서는 하단 추가 버튼을 DOM 단계부터 숨김 */
+/* V8-1-14-915: 새 순례계획 첫 화면에서는 하단 추가 버튼을 DOM 단계부터 숨김 */
 #oai-pilgrimage-detail-view.is-empty-plan > .oai-pilgrimage-add,
 #oai-pilgrimage-detail-view .oai-pilgrimage-add[hidden]{display:none!important;}
 
-/* V8-1-14-914: 길찾기 결과의 순례계획 전환 버튼은 결과가 보일 때 확실히 노출 */
+/* V8-1-14-915: 길찾기 결과의 순례계획 전환 버튼은 결과가 보일 때 확실히 노출 */
 #rs-result[style*="block"] .btn-route-pilgrimage,
 #rs-result .btn-route-pilgrimage{display:flex!important;visibility:visible!important;opacity:1!important;}
 
-/* V8-1-14-914: 길찾기 결과가 길어져도 하단 버튼이 잘리지 않도록 결과 시트를 스크롤 가능하게 유지 */
+/* V8-1-14-915: 길찾기 결과가 길어져도 하단 버튼이 잘리지 않도록 결과 시트를 스크롤 가능하게 유지 */
 #sheet-route.route-result-showing{
   max-height:min(70vh,680px)!important;
   overflow-y:auto!important;
@@ -6513,7 +6513,7 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
   padding-bottom:max(16px,calc(env(safe-area-inset-bottom,0px) + 8px))!important;
 }
 
-/* V8-1-14-914: 길찾기 결과 화면은 결과 확인 상태이므로 순서 이동 손잡이를 숨긴다. */
+/* V8-1-14-915: 길찾기 결과 화면은 결과 확인 상태이므로 순서 이동 손잡이를 숨긴다. */
 #sheet-route.route-result-showing .rs-drag-slot{
   display:none!important;
 }
@@ -6532,7 +6532,7 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 }
 
 
-/* V8-1-14-914: 순례계획·설정의 포인트 색을 더 선명하게 정리 */
+/* V8-1-14-915: 순례계획·설정의 포인트 색을 더 선명하게 정리 */
 .oai-pilgrimage-endpoint.start{
   border:2px solid #10233f!important;
   border-left:7px solid #0a63b8!important;
@@ -6565,7 +6565,7 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 .oai-settings-group h3{background:#18345b!important;color:#fff!important;border-bottom:1px solid #0f2747!important;}
 .oai-settings-group:nth-of-type(even) h3{background:#234b73!important;}
 
-/* V8-1-14-914: 순례계획/설정/따라가기 색상 체계 통일 — 진한 포인트 + 흰 카드 */
+/* V8-1-14-915: 순례계획/설정/따라가기 색상 체계 통일 — 진한 포인트 + 흰 카드 */
 /* 출발/도착은 주변 순례지 카드와 이질감이 없도록 흰 카드로 통일하고, 강한 역할색만 사용 */
 .oai-pilgrimage-endpoint.start,
 .oai-pilgrimage-endpoint.end{

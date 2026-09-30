@@ -14556,7 +14556,19 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       else body.innerHTML=list.map((item,i)=>{const cls='oai-pilgrimage-item'+(item.done?' is-done':'')+(i===next?' is-next':'');return '<div class="'+cls+'" data-plan-index="'+i+'" data-plan-hold="'+i+'"><button type="button" class="oai-pilgrimage-drag" data-plan-drag="'+i+'" aria-label="'+esc(item.name)+' 순서 이동">⋮</button><div class="oai-pilgrimage-main"><b>'+esc(item.name)+'</b><small>'+esc(item.addr||'등록된 장소')+'</small></div></div>';}).join('');
     }
     const addBtn=document.querySelector('.oai-pilgrimage-detail-view .oai-pilgrimage-add');
-    if(addBtn)addBtn.hidden=!list.length;
+    if(addBtn){
+      const showAdd=list.length>0;
+      addBtn.hidden=!showAdd;
+      if(showAdd){
+        addBtn.removeAttribute('hidden');
+        addBtn.style.display='block';
+        addBtn.setAttribute('aria-hidden','false');
+      }else{
+        addBtn.setAttribute('hidden','');
+        addBtn.style.display='none';
+        addBtn.setAttribute('aria-hidden','true');
+      }
+    }
     const detailRoot=document.getElementById('oai-pilgrimage-detail-view');
     if(detailRoot)detailRoot.classList.toggle('is-empty-plan',!list.length);
     const saveBtn=document.querySelector('[data-oai-pilgrimage-save]'),followBtn=document.querySelector('[data-oai-pilgrimage-follow]');
