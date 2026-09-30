@@ -57,7 +57,8 @@ html.pr-external-guide-active.oai-stability-veil::after {
 }
 
 /* V8-1-14-471: route choice modal CSS is managed in this single consolidated block. */
-#route-choice-modal{
+#route-choice-modal,
+#oai-pilgrimage-marker-choice-modal{
   position:fixed;
   inset:0;
   z-index:14000;
@@ -67,7 +68,8 @@ html.pr-external-guide-active.oai-stability-veil::after {
   padding:20px 18px calc(env(safe-area-inset-bottom, 0px) + 6px);
   box-sizing:border-box;
 }
-#route-choice-modal.open{display:flex;}
+#route-choice-modal.open,
+#oai-pilgrimage-marker-choice-modal.open{display:flex;}
 .route-choice-backdrop{
   position:absolute;
   inset:0;
@@ -108,7 +110,8 @@ html.pr-external-guide-active.oai-stability-veil::after {
   grid-template-columns:1fr 1fr;
   gap:10px;
 }
-#route-choice-modal .route-choice-btn{
+#route-choice-modal .route-choice-btn,
+#oai-pilgrimage-marker-choice-modal .route-choice-btn{
   width:100%;
   min-height:62px;
   padding:0 16px;
@@ -123,39 +126,59 @@ html.pr-external-guide-active.oai-stability-veil::after {
   touch-action:manipulation;
   box-shadow:none;
 }
-#route-choice-modal .route-choice-btn.start{order:1;}
-#route-choice-modal .route-choice-btn.end{order:2;}
-#route-choice-modal .route-choice-btn.waypoint{order:3;}
-#route-choice-modal .route-choice-btn.cancel{order:4;}
 #route-choice-modal .route-choice-btn.start,
+#oai-pilgrimage-marker-choice-modal .route-choice-btn.start,
+#oai-pilgrimage-marker-choice-modal .route-choice-btn.start{order:1;}
+#route-choice-modal .route-choice-btn.end,
+#oai-pilgrimage-marker-choice-modal .route-choice-btn.end{order:2;}
+#route-choice-modal .route-choice-btn.waypoint,
+#oai-pilgrimage-marker-choice-modal .route-choice-btn.waypoint{order:3;}
+#route-choice-modal .route-choice-btn.cancel,
+#oai-pilgrimage-marker-choice-modal .route-choice-btn.cancel,
+#oai-pilgrimage-marker-choice-modal .route-choice-btn.cancel{order:4;}
+#route-choice-modal .route-choice-btn.start,
+#oai-pilgrimage-marker-choice-modal .route-choice-btn.start,
 #route-choice-modal .route-choice-btn.danger{
   background:#0e1535;
   color:#ffffff;
   border-color:#050816;
 }
-#route-choice-modal .route-choice-btn.end{
+#route-choice-modal .route-choice-btn.end,
+#oai-pilgrimage-marker-choice-modal .route-choice-btn.end{
   background:#1565c0;
   color:#ffffff;
   border-color:#0d47a1;
 }
-#route-choice-modal .route-choice-btn.waypoint{
+#route-choice-modal .route-choice-btn.waypoint,
+#oai-pilgrimage-marker-choice-modal .route-choice-btn.waypoint{
   background:#f2a516;
   color:#211500;
   border-color:#b86a00;
 }
 #route-choice-modal .route-choice-btn.cancel,
+#oai-pilgrimage-marker-choice-modal .route-choice-btn.cancel,
 #route-choice-modal .route-choice-btn.keep{
   background:#16803c;
   color:#ffffff;
   border-color:#0b5d2a;
 }
-#route-choice-modal .route-choice-btn:active{
+#route-choice-modal .route-choice-btn:active,
+#oai-pilgrimage-marker-choice-modal .route-choice-btn:active{
   transform:translateY(1px);
   filter:brightness(.94);
 }
+#route-choice-modal .route-choice-btn:disabled,
+#oai-pilgrimage-marker-choice-modal .route-choice-btn:disabled,
+#oai-pilgrimage-marker-choice-modal .route-choice-btn.is-disabled{
+  opacity:.48;
+  filter:none;
+  cursor:default;
+  pointer-events:none;
+}
 @media(max-width:520px){
   .route-choice-panel{width:calc(100vw - 36px);padding:18px 14px 16px;}
-  #route-choice-modal .route-choice-btn{min-height:60px;font-size:15.5px;}
+  #route-choice-modal .route-choice-btn,
+#oai-pilgrimage-marker-choice-modal .route-choice-btn{min-height:60px;font-size:15.5px;}
 }
 html:not(.ios-device) .guide-modal{padding-bottom:calc(14px + var(--oai-android-bottom-gap, 10px))!important;}
 html:not(.ios-device) .modal-panel,
