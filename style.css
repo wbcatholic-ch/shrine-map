@@ -6333,7 +6333,7 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 /* V8-1-14-897: 순례계획 헤더는 스크롤해도 상단 고정 */
 .oai-pilgrimage-planner-panel{overscroll-behavior:contain;}
 
-/* 성지순례 계획 · 길찾기 · 설정 최종 스타일 (V8-1-14-917)
+/* 성지순례 계획 · 길찾기 · 설정 최종 스타일 (V8-1-14-918)
    이 구간은 이전 임시 패치들을 통합한 단일 정의입니다. */
 
 /* 저장 목록 */
@@ -6346,8 +6346,7 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 #oai-pilgrimage-detail-view .oai-pilgrimage-endpoints,
 #oai-pilgrimage-detail-view .oai-pilgrimage-plan-list,
 #oai-pilgrimage-detail-view .oai-pilgrimage-endpoints-after-list,
-#oai-pilgrimage-detail-view .oai-pilgrimage-add,
-#oai-pilgrimage-detail-view .oai-pilgrimage-map-add,
+#oai-pilgrimage-detail-view .oai-pilgrimage-add-row,
 #oai-pilgrimage-detail-view .oai-pilgrimage-total-card,
 #oai-pilgrimage-detail-view .oai-pilgrimage-detail-actions{
   margin-top:0;margin-bottom:var(--oai-plan-gap);
@@ -6389,23 +6388,29 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 .oai-pilgrimage-empty-action small{display:block;margin-top:7px;color:#4d6479;font-size:calc(12.5px * var(--app-font-scale,1));font-weight:800;line-height:1.4;}
 .oai-pilgrimage-empty-action:active{transform:scale(.99);background:#e4f1ff;}
 
-/* 순례지 추가: 0곳일 때 숨기고, 1곳 이상일 때만 JS가 hidden을 해제 */
+/* 순례지 추가 / 지도에서 찾기: 한 줄의 같은 크기 버튼 */
+#oai-pilgrimage-detail-view .oai-pilgrimage-add-row{
+  display:flex;align-items:stretch;gap:7px;width:100%;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-add,
+#oai-pilgrimage-detail-view .oai-pilgrimage-map-add{
+  flex:1 1 0;width:auto;min-width:0;min-height:48px;margin:0;padding:9px 10px;
+  border-radius:15px;font-family:inherit;font-size:calc(16px * var(--app-font-scale,1));
+  font-weight:900;line-height:1.2;white-space:nowrap;
+}
 #oai-pilgrimage-detail-view .oai-pilgrimage-add{
-  display:block;width:100%;min-height:48px;padding:9px 14px;
-  border:1.5px solid #9b741e;border-radius:15px;background:#f5e4af;color:#604514;
-  box-shadow:0 3px 8px rgba(139,103,31,.12);font-size:calc(17px * var(--app-font-scale,1));font-weight:900;
+  border:1.5px solid #9b741e;background:#f5e4af;color:#604514;
+  box-shadow:0 3px 8px rgba(139,103,31,.12);
 }
 #oai-pilgrimage-detail-view .oai-pilgrimage-add:active{background:#ecd486;transform:scale(.99);}
-#oai-pilgrimage-detail-view .oai-pilgrimage-add[hidden],
-#oai-pilgrimage-detail-view.is-empty-plan > .oai-pilgrimage-add{display:none!important;}
-
-/* 지도에서 찾기 */
+#oai-pilgrimage-detail-view .oai-pilgrimage-add[hidden]{display:none!important;}
 #oai-pilgrimage-detail-view .oai-pilgrimage-map-add{
-  display:block;width:100%;min-height:46px;padding:9px 14px;
-  border:1.5px solid #153f70;border-radius:15px;background:#fff;color:#153f70;
-  font:900 15px/1.2 inherit;box-shadow:0 2px 5px rgba(22,63,112,.06);
+  display:block;border:1.5px solid #174f86;background:#eef5fc;color:#174f86;
+  box-shadow:0 3px 8px rgba(23,79,134,.10);
 }
-#oai-pilgrimage-detail-view .oai-pilgrimage-map-add:active{background:#edf4fb;transform:scale(.99);}
+#oai-pilgrimage-detail-view .oai-pilgrimage-map-add span{margin-right:3px;}
+#oai-pilgrimage-detail-view .oai-pilgrimage-map-add:active{background:#dcecf9;transform:scale(.99);}
+#oai-pilgrimage-detail-view.is-empty-plan .oai-pilgrimage-map-add{width:100%;}
 
 /* 저장 전에는 거리/시간과 따라가기 숨김 */
 #oai-pilgrimage-detail-view.is-new-plan .oai-pilgrimage-total-card,
