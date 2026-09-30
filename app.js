@@ -12405,15 +12405,53 @@ function _hideCategoryMarkersForRouteDisplay(){
   else if(_mode==='retreat') _hideRetreatMarkersForRouteDisplay();
 }
 
+function _routePointForPilgrimage(point){
+  if(!point || !Number.isFinite(Number(point.lat)) || !Number.isFinite(Number(point.lng))) return null;
+  const rawName=String(point.name||'장소').trim()||'장소';
+  const norm=typeof _normalizePlaceSearchText==='function'?_normalizePlaceSearchText(rawName):rawName.replace(/\s+/g,'').toLowerCase();
+  function matchFrom(pool,kind){
+    if(!Array.isArray(pool)) return null;
+    let best=null,bestScore=Infinity;
+    for(const item of pool){
+      if(!item || !Number.isFinite(Number(item.lat)) || !Number.isFinite(Number(item.lng))) continue;
+      const d=Math.abs(Number(item.lat)-Number(point.lat))+Math.abs(Number(item.lng)-Number(point.lng));
+      const itemName=String(item.name||'').trim();
+      const itemNorm=typeof _normalizePlaceSearchText==='function'?_normalizePlaceSearchText(itemName):itemName.replace(/\s+/g,'').toLowerCase();
+      const sameName=!!norm && !!itemNorm && (norm===itemNorm || norm.includes(itemNorm) || itemNorm.includes(norm));
+      if((sameName && d<0.004) || d<0.00018){
+        const score=d+(sameName?0:0.01);
+        if(score<bestScore){bestScore=score;best=item;}
+      }
+    }
+    if(!best) return null;
+    return {name:String(best.name||rawName),addr:String(best.addr||best.address||best.road_address_name||''),lat:Number(best.lat),lng:Number(best.lng),sourceType:kind};
+  }
+  return matchFrom(typeof SHRINES!=='undefined'?SHRINES:[],'shrine') || matchFrom(typeof PARISHES!=='undefined'?PARISHES:[],'parish');
+}
+function _buildPilgrimageDraftFromRoute(){
+  const start=_routePointReady(_rS)?{name:String(_rS.name||'출발지'),addr:String(_rS.addr||''),lat:Number(_rS.lat),lng:Number(_rS.lng),dynamicCurrent:!!(_rS.isImplicitCurrentLocation||_rS.showStartMarker||_rS.name==='현재 위치'||_rS.name==='현위치')}:null;
+  const end=_routePointReady(_rE)?{name:String(_rE.name||'도착지'),addr:String(_rE.addr||''),lat:Number(_rE.lat),lng:Number(_rE.lng)}:null;
+  const places=[],unknown=[];
+  OAI_ROUTE_WAYPOINT_CONFIGS.forEach(function(cfg){
+    const p=_getRoutePointByRole(cfg.role);
+    if(!_routePointReady(p)) return;
+    const matched=_routePointForPilgrimage(p);
+    if(matched) places.push(matched);
+    else unknown.push({name:String(p.name||'장소'),addr:String(p.addr||''),lat:Number(p.lat),lng:Number(p.lng)});
+  });
+  return {start:start,end:end,places:places,unknown:unknown,createdAt:Date.now()};
+}
 function _openPilgrimagePlannerFromRoute(){
   try{
+    const draft=_buildPilgrimageDraftFromRoute();
+    if(typeof window.importOaiPilgrimageRouteDraft==='function') window.importOaiPilgrimageRouteDraft(draft);
     const sheet=$('sheet-route');
     if(sheet){
       sheet.classList.remove('open','from-right','from-left','exit-left','exit-right');
       sheet.style.display='none';
     }
     if(typeof window.openOaiPilgrimagePlanner==='function'){
-      window.openOaiPilgrimagePlanner({fromRoute:true});
+      window.openOaiPilgrimagePlanner({fromRoute:true,routeDraft:draft});
       return true;
     }
   }catch(e){ console.warn('[가톨릭길동무] 길찾기→순례계획 이동 실패',e); }
@@ -14468,6 +14506,16 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     closePlanner();return true;
   }
   window.openOaiPilgrimagePlanner=openPlanner; window.closeOaiPilgrimagePlanner=closePlanner; window.isOaiPilgrimagePlannerOpen=()=>{const m=planner();return !!(m&&m.classList.contains('show'));};
+  window.importOaiPilgrimageRouteDraft=function(draft){
+    draft=draft||{};
+    currentCourseId='';
+    const places=(Array.isArray(draft.places)?draft.places:[]).map(normalizePlace).filter(Boolean).map(x=>Object.assign({},x,{done:false}));
+    savePlan(places,true);
+    saveMeta({name:'새 순례계획',start:normalizePoint(draft.start),end:normalizePoint(draft.end)},true);
+    plannerView='detail';
+    try{localStorage.setItem('oai_pilgrimage_route_unknown_v1',JSON.stringify(Array.isArray(draft.unknown)?draft.unknown:[]));}catch(_e){}
+    return {places:places.length,unknown:Array.isArray(draft.unknown)?draft.unknown.length:0};
+  };
 
   function pilgrimagePlaceNames(places){return (Array.isArray(places)?places:[]).map(x=>String(x&&x.name||'').trim()).filter(Boolean);}
   function autoCourseNameFromPlaces(places){const names=pilgrimagePlaceNames(places);return names.length?names.join(' → '):'새 순례계획';}
