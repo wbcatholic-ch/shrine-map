@@ -1,8 +1,1 @@
-V8-1-14-915
-수정 파일:
-index.html
-app.js
-style.css
-sw.js
-sw-update.js
-version.json
+V8-1-14-916 changed files: index.html, app.js, style.css, sw.js, sw-update.js, version.json
