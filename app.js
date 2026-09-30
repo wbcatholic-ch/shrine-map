@@ -12004,18 +12004,33 @@ function _routeBoxByRole(role){
 function _clearRouteDragClasses(){
   document.querySelectorAll('.rs-drag-source,.rs-drag-over').forEach(function(el){
     el.classList.remove('rs-drag-source','rs-drag-over');
+    el.style.removeProperty('--rs-drag-y');
   });
   document.querySelectorAll('.rs-drag-handle.is-dragging').forEach(function(el){ el.classList.remove('is-dragging'); });
 }
-function _routeDragTargetAt(clientY){
-  const roles=_routeReadyRoles();
-  let best=null, bestDist=Infinity;
-  roles.forEach(function(role){
+function _routeDragCenters(){
+  const centers={};
+  _routeReadyRoles().forEach(function(role){
     const box=_routeBoxByRole(role);
     if(!box || box.style.display==='none') return;
     const r=box.getBoundingClientRect();
-    if(!r.height) return;
-    const d=Math.abs(clientY-(r.top+r.height/2));
+    if(r.height) centers[role]=r.top+r.height/2;
+  });
+  return centers;
+}
+function _routeDragTargetAt(clientY,centers){
+  const roles=_routeReadyRoles();
+  let best=null, bestDist=Infinity;
+  roles.forEach(function(role){
+    let cy=centers && Number.isFinite(centers[role]) ? centers[role] : null;
+    if(cy===null){
+      const box=_routeBoxByRole(role);
+      if(!box || box.style.display==='none') return;
+      const r=box.getBoundingClientRect();
+      if(!r.height) return;
+      cy=r.top+r.height/2;
+    }
+    const d=Math.abs(clientY-cy);
     if(d<bestDist){ bestDist=d; best=role; }
   });
   return best;
@@ -12053,10 +12068,11 @@ function _bindRouteDragHandles(){
     function armDrag(pointerId, clientY){
       const role=handle.dataset.routeDrag;
       if(!_routePointReady(_getRoutePointByRole(role))) return false;
-      const st={pointerId:pointerId,sourceRole:role,targetRole:role,startY:clientY,lastY:clientY,active:false,handle:handle,holdTimer:0};
+      const st={pointerId:pointerId,sourceRole:role,targetRole:role,startY:clientY,lastY:clientY,active:false,handle:handle,holdTimer:0,centers:null};
       st.holdTimer=setTimeout(function(){
         if(_routeDragState!==st) return;
         st.holdTimer=0; st.active=true;
+        st.centers=_routeDragCenters();
         handle.classList.add('is-dragging');
         const src=_routeBoxByRole(role); if(src) src.classList.add('rs-drag-source');
         _routeDragHaptic(24);
@@ -12072,10 +12088,12 @@ function _bindRouteDragHandles(){
         if(Math.abs(clientY-st.startY)>CANCEL_MOVE_PX){ clearPending(st); _routeDragState=null; }
         return true;
       }
-      const target=_routeDragTargetAt(clientY) || st.sourceRole;
+      const src=_routeBoxByRole(st.sourceRole);
+      if(src) src.style.setProperty('--rs-drag-y',(clientY-st.startY)+'px');
+      const target=_routeDragTargetAt(clientY,st.centers) || st.sourceRole;
       if(target!==st.targetRole){ st.targetRole=target; _routeDragHaptic(10); }
       document.querySelectorAll('.rs-drag-over').forEach(function(el){el.classList.remove('rs-drag-over');});
-      const box=_routeBoxByRole(target); if(box) box.classList.add('rs-drag-over');
+      const box=_routeBoxByRole(target); if(box && target!==st.sourceRole) box.classList.add('rs-drag-over');
       return true;
     }
     function finishDrag(pointerId){
