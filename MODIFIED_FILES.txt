@@ -1,1 +1,4 @@
-V8-1-14-916 changed files: index.html, app.js, style.css, sw.js, sw-update.js, version.json
+V8-1-14-917
+- style.css: 순례계획/설정/따라가기/길찾기 임시 중복 패치 제거 후 단일 최종 스타일로 통합
+- 잘못 들어간 literal \n CSS 조각 제거
+- 버전 캐시 갱신

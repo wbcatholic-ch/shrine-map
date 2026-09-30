@@ -6333,315 +6333,150 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 /* V8-1-14-897: 순례계획 헤더는 스크롤해도 상단 고정 */
 .oai-pilgrimage-planner-panel{overscroll-behavior:contain;}
 
-/* V8-1-14-907: 순례계획 전체 자동차 거리·예상시간 요약 */
-.oai-pilgrimage-total-card{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:10px 0 2px;padding:12px;border:1.5px solid #b9d2e5;border-radius:15px;background:#f5f9fd;box-shadow:0 2px 6px rgba(23,111,192,.06)}
-.oai-pilgrimage-total-card>div{min-width:0;padding:10px 12px;border:1px solid #d6e4ef;border-radius:12px;background:#fff}
-.oai-pilgrimage-total-card small{display:block;color:#6e7a8c;font-size:calc(11.5px * var(--app-font-scale,1));font-weight:850;line-height:1.2}
-.oai-pilgrimage-total-card b{display:block;margin-top:5px;color:#17679f;font-size:calc(20px * var(--app-font-scale,1));font-weight:950;line-height:1.15;white-space:nowrap}
-.oai-pilgrimage-total-card p{grid-column:1/-1;margin:1px 2px 0;color:#6f7886;font-size:calc(11.5px * var(--app-font-scale,1));font-weight:750;line-height:1.45;word-break:keep-all}
+/* 성지순례 계획 · 길찾기 · 설정 최종 스타일 (V8-1-14-917)
+   이 구간은 이전 임시 패치들을 통합한 단일 정의입니다. */
 
-
-/* V8-1-14-907: 순례계획 편집 화면 간격·총거리 카드·장소추가 버튼 정리 */
-.oai-pilgrimage-detail-view .oai-pilgrimage-endpoints{margin-bottom:5px!important;}
-.oai-pilgrimage-detail-view .oai-pilgrimage-plan-list{gap:5px!important;margin-bottom:5px!important;}
-.oai-pilgrimage-detail-view .oai-pilgrimage-endpoints-after-list{margin-bottom:5px!important;}
-.oai-pilgrimage-add{
-  margin:5px 0 7px!important;
-  min-height:56px!important;
-  border:1.5px solid #9b741e!important;
-  background:#f5e4af!important;
-  color:#604514!important;
-  box-shadow:0 3px 8px rgba(139,103,31,.12)!important;
-  font-size:calc(17px * var(--app-font-scale,1))!important;
-}
-.oai-pilgrimage-add:active{background:#ecd486!important;transform:scale(.99);}
-.oai-pilgrimage-total-card{
-  margin:0 0 7px!important;
-  gap:7px!important;
-  padding:10px!important;
-  border:1.5px solid #8fb9dc!important;
-  background:#eef6fc!important;
-}
-.oai-pilgrimage-total-card>div{
-  padding:9px 11px!important;
-  border:1px solid #b8d2e8!important;
-  background:#fff!important;
-}
-.oai-pilgrimage-total-card small{color:#263a58!important;font-weight:900!important;}
-.oai-pilgrimage-total-card b{color:#1565c0!important;font-weight:950!important;}
-.oai-pilgrimage-total-card p{margin-top:0!important;color:#586a7d!important;}
-.oai-pilgrimage-detail-actions{margin-top:8px!important;}
-.oai-pilgrimage-reset{margin-top:6px!important;}
-
-/* V8-1-14-907: 저장 목록 요약은 출발/도착을 제외한 순례지 이름만 한 줄로 표시 */
-.oai-pilgrimage-course-open small{overflow:hidden;text-overflow:ellipsis;white-space:nowrap!important;max-width:100%;}
-
-/* V8-1-14-907: 순례계획 편집 화면의 세로 여백을 하단 박스 간격 기준으로 통일 */
-.oai-pilgrimage-detail-view .oai-pilgrimage-endpoints{
-  margin:0 0 7px!important;
-}
-.oai-pilgrimage-detail-view .oai-pilgrimage-plan-list{
-  gap:7px!important;
-  margin:0 0 7px!important;
-}
-.oai-pilgrimage-detail-view .oai-pilgrimage-endpoints-after-list{
-  margin:0 0 7px!important;
-}
-.oai-pilgrimage-detail-view .oai-pilgrimage-add{
-  margin:0 0 7px!important;
-}
-.oai-pilgrimage-detail-view .oai-pilgrimage-total-card{
-  margin:0 0 7px!important;
-}
-.oai-pilgrimage-detail-view .oai-pilgrimage-detail-actions{
-  margin:0!important;
-}
-.oai-pilgrimage-detail-view .oai-pilgrimage-reset{
-  margin-top:7px!important;
+/* 저장 목록 */
+.oai-pilgrimage-course-open small{
+  max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
 }
 
+/* 편집 화면: 동일 간격, 주소가 숨겨지면 카드도 작아짐 */
+#oai-pilgrimage-detail-view{--oai-plan-gap:7px;}
+#oai-pilgrimage-detail-view .oai-pilgrimage-endpoints,
+#oai-pilgrimage-detail-view .oai-pilgrimage-plan-list,
+#oai-pilgrimage-detail-view .oai-pilgrimage-endpoints-after-list,
+#oai-pilgrimage-detail-view .oai-pilgrimage-add,
+#oai-pilgrimage-detail-view .oai-pilgrimage-map-add,
+#oai-pilgrimage-detail-view .oai-pilgrimage-total-card,
+#oai-pilgrimage-detail-view .oai-pilgrimage-detail-actions{
+  margin-top:0;margin-bottom:var(--oai-plan-gap);
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-plan-list{gap:var(--oai-plan-gap);}
+#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint{
+  min-height:66px;padding:10px 14px;background:#fff;
+  box-shadow:0 3px 10px rgba(16,35,63,.10);
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint em[hidden]{display:none!important;}
+#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint b{margin-top:2px;}
+#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint.start{
+  border:2px solid #174f86;border-left:7px solid #0b68c7;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint.start small,
+#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint.start i{color:#0b68c7;}
+#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint.start b{color:#10233f;}
+#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint.start em{color:#657286;}
+#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint.end{
+  border:2px solid #a8342f;border-left:7px solid #d23b35;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint.end small,
+#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint.end i{color:#c92f2a;}
+#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint.end b{color:#10233f;}
+#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint.end em{color:#657286;}
 
-/* V8-1-14-907: 첫 순례계획 진입 시 무엇을 눌러야 하는지 즉시 보이도록 첫 행동을 하나로 강조 */
+#oai-pilgrimage-detail-view .oai-pilgrimage-item{min-height:62px;padding:7px 10px;}
+#oai-pilgrimage-detail-view .oai-pilgrimage-drag{height:46px;}
+#oai-pilgrimage-detail-view .oai-pilgrimage-main b{font-size:17px;line-height:1.25;}
+
+/* 첫 화면의 한 가지 주 행동 */
 .oai-pilgrimage-empty-action{
-  display:flex!important;
-  flex-direction:column;
-  align-items:center;
-  justify-content:center;
-  width:100%;
-  min-height:128px;
-  padding:22px 18px!important;
-  border:2px solid #176fc0!important;
-  border-radius:16px!important;
-  background:#eef6ff!important;
-  color:#154f7f!important;
-  box-shadow:0 3px 10px rgba(23,111,192,.10)!important;
-  cursor:pointer;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  width:100%;min-height:128px;padding:22px 18px;
+  border:2px solid #176fc0;border-radius:16px;background:#fff;color:#154f7f;
+  box-shadow:0 3px 10px rgba(23,111,192,.10);cursor:pointer;
 }
-.oai-pilgrimage-empty-action b{
-  display:block;
-  color:#155f9f;
-  font-size:calc(17px * var(--app-font-scale,1));
-  font-weight:950;
-  line-height:1.3;
-}
-.oai-pilgrimage-empty-action small{
-  display:block;
-  margin-top:7px;
-  color:#65758a;
-  font-size:calc(12.5px * var(--app-font-scale,1));
-  font-weight:800;
-  line-height:1.4;
-}
-.oai-pilgrimage-empty-action:active{transform:scale(.99);background:#e4f1ff!important;}
-.oai-pilgrimage-detail-actions button:disabled{
-  opacity:.42;
-  box-shadow:none!important;
-  cursor:default;
-}
-.oai-pilgrimage-add[hidden]{display:none!important;}
+.oai-pilgrimage-empty-action b{display:block;color:#155f9f;font-size:calc(17px * var(--app-font-scale,1));font-weight:950;line-height:1.3;}
+.oai-pilgrimage-empty-action small{display:block;margin-top:7px;color:#4d6479;font-size:calc(12.5px * var(--app-font-scale,1));font-weight:800;line-height:1.4;}
+.oai-pilgrimage-empty-action:active{transform:scale(.99);background:#e4f1ff;}
 
+/* 순례지 추가: 0곳일 때 숨기고, 1곳 이상일 때만 JS가 hidden을 해제 */
+#oai-pilgrimage-detail-view .oai-pilgrimage-add{
+  display:block;width:100%;min-height:48px;padding:9px 14px;
+  border:1.5px solid #9b741e;border-radius:15px;background:#f5e4af;color:#604514;
+  box-shadow:0 3px 8px rgba(139,103,31,.12);font-size:calc(17px * var(--app-font-scale,1));font-weight:900;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-add:active{background:#ecd486;transform:scale(.99);}
+#oai-pilgrimage-detail-view .oai-pilgrimage-add[hidden],
+#oai-pilgrimage-detail-view.is-empty-plan > .oai-pilgrimage-add{display:none!important;}
 
-/* V8-1-14-907: 새 계획은 먼저 저장에 집중하고, 저장 후에만 총 거리와 따라가기를 표시 */
+/* 지도에서 찾기 */
+#oai-pilgrimage-detail-view .oai-pilgrimage-map-add{
+  display:block;width:100%;min-height:46px;padding:9px 14px;
+  border:1.5px solid #153f70;border-radius:15px;background:#fff;color:#153f70;
+  font:900 15px/1.2 inherit;box-shadow:0 2px 5px rgba(22,63,112,.06);
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-map-add:active{background:#edf4fb;transform:scale(.99);}
+
+/* 저장 전에는 거리/시간과 따라가기 숨김 */
+#oai-pilgrimage-detail-view.is-new-plan .oai-pilgrimage-total-card,
+#oai-pilgrimage-detail-view.is-new-plan .oai-pilgrimage-follow,
 .oai-pilgrimage-total-card[hidden],
 .oai-pilgrimage-follow[hidden]{display:none!important;}
-.oai-pilgrimage-detail-actions.is-unsaved{grid-template-columns:1fr!important;}
+#oai-pilgrimage-detail-view.is-new-plan .oai-pilgrimage-detail-actions,
+.oai-pilgrimage-detail-actions.is-unsaved{grid-template-columns:1fr;}
+#oai-pilgrimage-detail-view.is-new-plan .oai-pilgrimage-save,
 .oai-pilgrimage-detail-actions.is-unsaved .oai-pilgrimage-save{width:100%;}
+.oai-pilgrimage-detail-actions button:disabled{opacity:.42;box-shadow:none;cursor:default;}
 
-
-/* V8-1-14-907: 새 순례계획은 저장 전에는 거리/시간과 따라가기를 절대 노출하지 않는다 */
-#oai-pilgrimage-detail-view.is-new-plan .oai-pilgrimage-total-card,
-#oai-pilgrimage-detail-view.is-new-plan .oai-pilgrimage-follow{display:none!important;}
-#oai-pilgrimage-detail-view.is-new-plan .oai-pilgrimage-detail-actions{grid-template-columns:1fr!important;}
-#oai-pilgrimage-detail-view.is-new-plan .oai-pilgrimage-save{width:100%!important;}
-#oai-pilgrimage-detail-view.is-saved-plan .oai-pilgrimage-total-card{display:grid!important;}
-
-
-/* V8-1-14-916: 새 계획 첫 화면과 출발/도착지 카드 구분 */
-.oai-pilgrimage-detail-view.is-empty-plan .oai-pilgrimage-add{display:none!important;}
-
-/* 출발지는 파란 계열, 도착지는 초록 계열로 카드 자체도 구분 */
-.oai-pilgrimage-endpoint.start{
-  border-color:#9fc7e8!important;
-  border-left:5px solid #1f78bd!important;
-  background:#eef6ff!important;
+/* 총 거리 */
+.oai-pilgrimage-total-card{
+  display:grid;grid-template-columns:1fr 1fr;gap:7px;padding:10px;
+  border:1.5px solid #8fb9dc;border-radius:15px;background:#eef6fc;
+  box-shadow:0 2px 6px rgba(23,111,192,.06);
 }
-.oai-pilgrimage-endpoint.start small,
-.oai-pilgrimage-endpoint.start i{color:#1f78bd!important;}
-.oai-pilgrimage-endpoint.start b{color:#17395d!important;}
-.oai-pilgrimage-endpoint.start em{color:#607b97!important;}
+.oai-pilgrimage-total-card>div{min-width:0;padding:9px 11px;border:1px solid #b8d2e8;border-radius:12px;background:#fff;}
+.oai-pilgrimage-total-card small{display:block;color:#263a58;font-size:calc(11.5px * var(--app-font-scale,1));font-weight:900;line-height:1.2;}
+.oai-pilgrimage-total-card b{display:block;margin-top:5px;color:#1565c0;font-size:calc(20px * var(--app-font-scale,1));font-weight:950;line-height:1.15;white-space:nowrap;}
+.oai-pilgrimage-total-card p{grid-column:1/-1;margin:0 2px;color:#586a7d;font-size:calc(11.5px * var(--app-font-scale,1));font-weight:750;line-height:1.45;word-break:keep-all;}
+#oai-pilgrimage-detail-view .oai-pilgrimage-reset{margin-top:2px;}
 
-.oai-pilgrimage-endpoint.end{
-  border-color:#9fcfb6!important;
-  border-left:5px solid #2f8a5c!important;
-  background:#eef9f2!important;
-}
-.oai-pilgrimage-endpoint.end small,
-.oai-pilgrimage-endpoint.end i{color:#2f8a5c!important;}
-.oai-pilgrimage-endpoint.end b{color:#1e4d36!important;}
-.oai-pilgrimage-endpoint.end em{color:#607f6d!important;}
-
-
-/* V8-1-14-916: 길찾기 결과에서 성지순례 계획으로 이어지는 전용 버튼 */
-.btn-route-pilgrimage{
-  width:100%;min-height:46px;margin:8px 0 0;padding:0 14px;
-  border:1.5px solid #c9a54f;border-radius:11px;
-  background:#10233f;color:#fff;box-shadow:0 3px 10px rgba(16,35,63,.16);
-  font-family:inherit;font-size:14px;font-weight:900;letter-spacing:-.025em;
-  display:flex;align-items:center;justify-content:center;gap:7px;cursor:pointer;
-}
-.btn-route-pilgrimage span{color:#e7c563;font-size:16px;line-height:1;}
-.btn-route-pilgrimage:active{transform:translateY(1px);opacity:.88;}
-
-/* V8-1-14-916: 새 순례계획 첫 화면에서는 하단 추가 버튼을 DOM 단계부터 숨김 */
-#oai-pilgrimage-detail-view.is-empty-plan > .oai-pilgrimage-add,
-#oai-pilgrimage-detail-view .oai-pilgrimage-add[hidden]{display:none!important;}
-
-/* V8-1-14-916: 길찾기 결과의 순례계획 전환 버튼은 결과가 보일 때 확실히 노출 */
-#rs-result[style*="block"] .btn-route-pilgrimage,
-#rs-result .btn-route-pilgrimage{display:flex!important;visibility:visible!important;opacity:1!important;}
-
-/* V8-1-14-916: 길찾기 결과가 길어져도 하단 버튼이 잘리지 않도록 결과 시트를 스크롤 가능하게 유지 */
-#sheet-route.route-result-showing{
-  max-height:min(70vh,680px)!important;
-  overflow-y:auto!important;
-  overflow-x:hidden!important;
-  -webkit-overflow-scrolling:touch;
-  overscroll-behavior:contain;
-  padding-bottom:max(12px,env(safe-area-inset-bottom,0px))!important;
-}
-#sheet-route.route-result-showing #rs-bottom{
-  padding-bottom:max(16px,calc(env(safe-area-inset-bottom,0px) + 8px))!important;
-}
-
-/* V8-1-14-916: 길찾기 결과 화면은 결과 확인 상태이므로 순서 이동 손잡이를 숨긴다. */
-#sheet-route.route-result-showing .rs-drag-slot{
-  display:none!important;
-}
-/* 결과 패널은 내용 높이에 맞추고 공백을 최소화한다. */
-#app #sheet-route.route-result-showing.open{
-  min-height:0!important;
-  height:auto!important;
-  max-height:min(72vh,680px)!important;
-  padding-bottom:0!important;
-}
-#sheet-route.route-result-showing #rs-bottom{
-  padding-bottom:max(6px,env(safe-area-inset-bottom,0px))!important;
-}
-#sheet-route.route-result-showing .route-btns{
-  margin-bottom:0!important;
-}
-
-
-/* V8-1-14-916: 순례계획·설정의 포인트 색을 더 선명하게 정리 */
-.oai-pilgrimage-endpoint.start{
-  border:2px solid #10233f!important;
-  border-left:7px solid #0a63b8!important;
-  background:#152846!important;
-  box-shadow:0 4px 12px rgba(16,35,63,.18)!important;
-}
-.oai-pilgrimage-endpoint.start small{color:#7ec8ff!important;}
-.oai-pilgrimage-endpoint.start b{color:#fff!important;}
-.oai-pilgrimage-endpoint.start em{color:#d9e6f5!important;}
-.oai-pilgrimage-endpoint.start i{color:#fff!important;}
-.oai-pilgrimage-endpoint.end{
-  border:2px solid #0f6a4b!important;
-  border-left:7px solid #078b5b!important;
-  background:#176847!important;
-  box-shadow:0 4px 12px rgba(15,106,75,.16)!important;
-}
-.oai-pilgrimage-endpoint.end small{color:#9ef0ca!important;}
-.oai-pilgrimage-endpoint.end b{color:#fff!important;}
-.oai-pilgrimage-endpoint.end em{color:#d9f1e6!important;}
-.oai-pilgrimage-endpoint.end i{color:#fff!important;}
-.oai-pilgrimage-empty-action{background:#fff!important;border-color:#176fc0!important;box-shadow:0 3px 10px rgba(23,111,192,.10)!important;}
-.oai-pilgrimage-empty-action b{color:#0f5f9f!important;}
-.oai-pilgrimage-empty-action small{color:#4d6479!important;}
+/* 출발/도착 선택창의 지도 선택 */
 .oai-pilgrimage-point-map{
   width:100%;min-height:50px;margin-top:9px;border:2px solid #15365f;border-radius:14px;
   background:#fff;color:#15365f;font-family:inherit;font-size:calc(16px * var(--app-font-scale,1));font-weight:950;
 }
 .oai-pilgrimage-point-map:active{background:#edf4fb;transform:scale(.99);}
-.oai-settings-group{border-color:#8a7443!important;box-shadow:0 3px 10px rgba(21,40,70,.11)!important;}
-.oai-settings-group h3{background:#18345b!important;color:#fff!important;border-bottom:1px solid #0f2747!important;}
-.oai-settings-group:nth-of-type(even) h3{background:#234b73!important;}
 
-/* V8-1-14-916: 순례계획/설정/따라가기 색상 체계 통일 — 진한 포인트 + 흰 카드 */
-/* 출발/도착은 주변 순례지 카드와 이질감이 없도록 흰 카드로 통일하고, 강한 역할색만 사용 */
-.oai-pilgrimage-endpoint.start,
-.oai-pilgrimage-endpoint.end{
-  background:#fff!important;
-  box-shadow:0 3px 10px rgba(16,35,63,.10)!important;
-}
-.oai-pilgrimage-endpoint.start{
-  border:2px solid #174f86!important;
-  border-left:7px solid #0b68c7!important;
-}
-.oai-pilgrimage-endpoint.start small,
-.oai-pilgrimage-endpoint.start i{color:#0b68c7!important;}
-.oai-pilgrimage-endpoint.start b{color:#10233f!important;}
-.oai-pilgrimage-endpoint.start em{color:#657286!important;}
-.oai-pilgrimage-endpoint.end{
-  border:2px solid #a8342f!important;
-  border-left:7px solid #d23b35!important;
-}
-.oai-pilgrimage-endpoint.end small,
-.oai-pilgrimage-endpoint.end i{color:#c92f2a!important;}
-.oai-pilgrimage-endpoint.end b{color:#10233f!important;}
-.oai-pilgrimage-endpoint.end em{color:#657286!important;}
-
-/* 설정: 모든 섹션 제목 색을 한 가지 진한 남색으로 통일 */
-.oai-settings-group{border-color:#b59a58!important;background:#fff!important;}
+/* 설정: 포인트 색상 하나로 통일 */
+.oai-settings-group{border-color:#b59a58;background:#fff;box-shadow:0 3px 10px rgba(21,40,70,.11);}
 .oai-settings-group h3,
 .oai-settings-group:nth-of-type(even) h3{
-  background:#17365f!important;
-  color:#fff!important;
-  border-bottom:3px solid #b48a2f!important;
+  background:#17365f;color:#fff;border-bottom:3px solid #b48a2f;
 }
 .oai-settings-group h3::before{
-  content:"";
-  display:inline-block;
-  width:5px;height:16px;margin-right:8px;
-  border-radius:5px;background:#e0b84f;
-  vertical-align:-2px;
+  content:"";display:inline-block;width:5px;height:16px;margin-right:8px;
+  border-radius:5px;background:#e0b84f;vertical-align:-2px;
 }
 
-/* 따라가기: 파스텔을 줄이고 순례계획과 같은 남색·파랑·금색 계열로 정리 */
-.oai-pilgrimage-follow-hero{
-  border:2px solid #17365f!important;
-  background:#fff!important;
-  box-shadow:0 5px 16px rgba(16,35,63,.12)!important;
+/* 따라가기 */
+.oai-pilgrimage-follow-hero{border:2px solid #17365f;background:#fff;box-shadow:0 5px 16px rgba(16,35,63,.12);}
+.oai-pilgrimage-follow-hero>small{background:#17365f;color:#fff;}
+.oai-pilgrimage-follow-hero>strong{color:#10233f;}
+.oai-pilgrimage-follow-road>div{background:#17365f;border:1.5px solid #17365f;box-shadow:none;}
+.oai-pilgrimage-follow-road small{color:#dce5f0;}
+.oai-pilgrimage-follow-road b{color:#fff;}
+.oai-pilgrimage-follow-progress{border:1.5px solid #c4ad72;background:#fff;}
+.oai-pilgrimage-follow-progress-head span{color:#9a741d;}
+.oai-pilgrimage-follow-progress-item.next{color:#0b68c7;}
+.oai-pilgrimage-follow-progress-item.next .mark{background:#0b68c7;color:#fff;}
+.oai-pilgrimage-follow-progress-item.done .mark{background:#17365f;color:#fff;}
+.oai-pilgrimage-follow-actions .primary{background:#0b68c7;color:#fff;border:0;}
+.oai-pilgrimage-follow-actions .done{background:#9b7420;color:#fff;border:0;}
+.oai-pilgrimage-follow-recalc{border:2px solid #17365f;background:#fff;color:#17365f;}
+
+/* 길찾기 결과 → 순례계획 */
+.btn-route-pilgrimage{
+  display:flex;width:100%;min-height:46px;margin:8px 0 0;padding:0 14px;
+  border:1.5px solid #c9a54f;border-radius:11px;background:#10233f;color:#fff;
+  box-shadow:0 3px 10px rgba(16,35,63,.16);font-family:inherit;font-size:14px;font-weight:900;
+  letter-spacing:-.025em;align-items:center;justify-content:center;gap:7px;cursor:pointer;
 }
-.oai-pilgrimage-follow-hero>small{
-  background:#17365f!important;
-  color:#fff!important;
-}
-.oai-pilgrimage-follow-hero>strong{color:#10233f!important;}
-.oai-pilgrimage-follow-road>div{
-  background:#17365f!important;
-  border:1.5px solid #17365f!important;
-  box-shadow:none!important;
-}
-.oai-pilgrimage-follow-road small{color:#dce5f0!important;}
-.oai-pilgrimage-follow-road b{color:#fff!important;}
-.oai-pilgrimage-follow-progress{
-  border:1.5px solid #c4ad72!important;
-  background:#fff!important;
-}
-.oai-pilgrimage-follow-progress-head span{color:#9a741d!important;}
-.oai-pilgrimage-follow-progress-item.next{color:#0b68c7!important;}
-.oai-pilgrimage-follow-progress-item.next .mark{
-  background:#0b68c7!important;color:#fff!important;
-}
-.oai-pilgrimage-follow-progress-item.done .mark{
-  background:#17365f!important;color:#fff!important;
-}
-.oai-pilgrimage-follow-actions .primary{
-  background:#0b68c7!important;color:#fff!important;border:0!important;
-}
-.oai-pilgrimage-follow-actions .done{
-  background:#9b7420!important;color:#fff!important;border:0!important;
-}
-.oai-pilgrimage-follow-recalc{
-  border:2px solid #17365f!important;background:#fff!important;color:#17365f!important;
-}
-\n\n/* V8-1-14-916: 순례계획 카드 밀도/여백 통일 + 지도에서 찾기 */\n#oai-pilgrimage-detail-view{--oai-plan-gap:7px;}\n#oai-pilgrimage-detail-view .oai-pilgrimage-endpoints,\n#oai-pilgrimage-detail-view .oai-pilgrimage-plan-list,\n#oai-pilgrimage-detail-view .oai-pilgrimage-endpoints-after-list,\n#oai-pilgrimage-detail-view .oai-pilgrimage-add,\n#oai-pilgrimage-detail-view .oai-pilgrimage-map-add,\n#oai-pilgrimage-detail-view .oai-pilgrimage-total-card,\n#oai-pilgrimage-detail-view .oai-pilgrimage-detail-actions{margin-top:0!important;margin-bottom:var(--oai-plan-gap)!important;}\n#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint{min-height:66px!important;padding:10px 14px!important;}\n#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint em[hidden]{display:none!important;}\n#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint b{margin-top:2px!important;}\n#oai-pilgrimage-detail-view .oai-pilgrimage-item{min-height:62px!important;padding:7px 10px!important;}\n#oai-pilgrimage-detail-view .oai-pilgrimage-drag{height:46px!important;}\n#oai-pilgrimage-detail-view .oai-pilgrimage-main b{font-size:17px!important;line-height:1.25!important;}\n#oai-pilgrimage-detail-view .oai-pilgrimage-add{display:block;width:100%;min-height:48px!important;margin-top:0!important;}\n#oai-pilgrimage-detail-view .oai-pilgrimage-add[hidden],\n#oai-pilgrimage-detail-view.is-empty-plan > .oai-pilgrimage-add{display:none!important;}\n.oai-pilgrimage-map-add{display:block;width:100%;min-height:46px;padding:9px 14px;border:1.5px solid #153f70;border-radius:15px;background:#fff;color:#153f70;font:900 15px/1.2 inherit;box-shadow:0 2px 5px rgba(22,63,112,.06);}\n.oai-pilgrimage-map-add:active{background:#edf4fb;transform:scale(.99);}\n#oai-pilgrimage-detail-view .oai-pilgrimage-reset{margin-top:2px!important;}\n
+.btn-route-pilgrimage span{color:#e7c563;font-size:16px;line-height:1;}
+.btn-route-pilgrimage:active{transform:translateY(1px);opacity:.88;}
+#rs-result .btn-route-pilgrimage{visibility:visible;opacity:1;}
+#sheet-route.route-result-showing{max-height:min(72vh,680px);overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-bottom:max(6px,env(safe-area-inset-bottom,0px));}
+#app #sheet-route.route-result-showing.open{min-height:0;height:auto;max-height:min(72vh,680px);padding-bottom:0;}
+#sheet-route.route-result-showing #rs-bottom{padding-bottom:max(6px,env(safe-area-inset-bottom,0px));}
+#sheet-route.route-result-showing .route-btns{margin-bottom:0;}
+#sheet-route.route-result-showing .rs-drag-slot{display:none!important;}
+
