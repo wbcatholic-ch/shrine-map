@@ -3542,7 +3542,7 @@ function _maybeAutoParishVisit(lat,lng){
   if(isMyParish){if(!_isMyParishAutoVisitEnabled()||previousVisits.length)return;}else if(previousVisits.some(function(v){return v.date===_todayISODate();}))return;
   if(!_addParishVisit(best,_todayISODate(),'gps'))return;
 
-  // V8-1-14-987:
+  // V8-1-14-988:
   // 같은 GPS 위치가 '성지 + 성당 + 활성 순례코스'에 동시에 해당하더라도
   // 방문기록은 각각 정상 등록하되 축하 안내는 성지를 우선한다.
   // 따라서 현재 위치가 성지 자동등록 반경 안이면 성당용 축하 팝업은 띄우지 않는다.
@@ -12608,8 +12608,13 @@ function _buildPilgrimageDraftFromRoute(){
     const p=_getRoutePointByRole(cfg.role);
     if(!_routePointReady(p)) return;
     const matched=_routePointForPilgrimage(p);
-    if(matched) places.push(matched);
-    else unknown.push({name:String(p.name||'장소'),addr:String(p.addr||''),lat:Number(p.lat),lng:Number(p.lng)});
+    if(matched){
+      places.push(matched);
+    }else{
+      const custom={name:String(p.name||'장소'),addr:String(p.addr||''),lat:Number(p.lat),lng:Number(p.lng),sourceType:'custom'};
+      places.push(custom);
+      unknown.push(custom);
+    }
   });
   return {start:start,end:end,places:places,unknown:unknown,createdAt:Date.now()};
 }
@@ -15182,6 +15187,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     saveMeta({name:meta.name||'새 순례계획',start:normalizePoint(draft.start),end:normalizePoint(draft.end)},true);
     plannerView='detail';
     try{localStorage.setItem('oai_pilgrimage_route_unknown_v1',JSON.stringify(Array.isArray(draft.unknown)?draft.unknown:[]));}catch(_e){}
+    try{if(currentCourseId)updateCurrentCourseProgress();}catch(_e){}
     renderDetail();
     return {places:places.length,unknown:Array.isArray(draft.unknown)?draft.unknown.length:0};
   };
@@ -15546,7 +15552,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const r=window._oaiPilgrimageEndpointGpsCheck(Number(lat),Number(lng),{silent:false});
       try{_maybePromptAutoShrineVisit(Number(lat),Number(lng));}catch(_e){}
       try{_maybeAutoParishVisit(Number(lat),Number(lng));}catch(_e){}
-      try{calcDetailItemMetrics();}catch(_e){}
+      try{calcDetailItemMetrics({lat:Number(lat),lng:Number(lng)});}catch(_e){}
+      try{calcPilgrimageTotalRoute({lat:Number(lat),lng:Number(lng)});}catch(_e){}
       if(btn){btn.classList.remove('is-checking');btn.disabled=false;}
       if(note&&!r.registered)note.textContent='현재 위치 확인 완료 · 순례지 GPS 등록과 출발·도착 성지/성당 등록을 확인했습니다. 내 본당은 제외됩니다.';
     };
@@ -15853,7 +15860,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   window._oaiReturnFromPilgrimageCourseMap=returnFromPilgrimageCourseMap;
 
-  async function calcPilgrimageTotalRoute(){
+  async function calcPilgrimageTotalRoute(startOverride){
     const seq=++pilgrimageTotalCalcSeq;
     const kmEl=document.getElementById('oai-pilgrimage-total-km');
     const timeEl=document.getElementById('oai-pilgrimage-total-time');
@@ -15866,8 +15873,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       return;
     }
     kmEl.textContent='계산 중…';timeEl.textContent='-';noteEl.textContent='전체 자동차 경로를 계산하고 있습니다.';
-    let start=meta.start;
-    if(start.dynamicCurrent){
+    let start=(startOverride&&_validGpsPair(startOverride.lat,startOverride.lng))
+      ? {name:'현재 위치',lat:Number(startOverride.lat),lng:Number(startOverride.lng),dynamicCurrent:true}
+      : meta.start;
+    if(start.dynamicCurrent && !(startOverride&&_validGpsPair(startOverride.lat,startOverride.lng))){
       start=await new Promise(resolve=>currentPosition((lat,lng)=>resolve(Object.assign({},start,{lat,lng})),()=>resolve(null)));
       if(seq!==pilgrimageTotalCalcSeq) return;
       if(!start){kmEl.textContent='위치 확인 필요';timeEl.textContent='-';noteEl.textContent='현재 위치를 확인한 뒤 다시 계산합니다.';return;}
@@ -15896,7 +15905,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
 
   function _validGpsPair(lat,lng){return Number.isFinite(Number(lat))&&Number.isFinite(Number(lng))&&Math.abs(Number(lat))<=90&&Math.abs(Number(lng))<=180;}
-  function calcDetailItemMetrics(){
+  function calcDetailItemMetrics(startOverride){
     const seq=++detailMetricSeq,list=loadPlan(),meta=loadMeta(),view=document.getElementById('oai-pilgrimage-detail-view');
     const setMetric=(i,text)=>{const el=document.querySelector('[data-plan-metric="'+i+'"]');if(el)el.textContent=text;};
     if(view){view.classList.remove('gps-ready');view.querySelectorAll('.oai-pilgrimage-item.is-next').forEach(el=>el.classList.remove('is-next'));}
@@ -15931,6 +15940,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       }
     };
 
+    const override=(startOverride&&_validGpsPair(startOverride.lat,startOverride.lng))?{lat:Number(startOverride.lat),lng:Number(startOverride.lng)}:null;
+    if(override){run(override);return;}
     const start=meta&&meta.start;
     if(start&&start.dynamicCurrent){
       currentPosition((lat,lng)=>run({lat,lng}),()=>{
