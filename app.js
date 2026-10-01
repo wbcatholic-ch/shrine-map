@@ -3542,7 +3542,7 @@ function _maybeAutoParishVisit(lat,lng){
   if(isMyParish){if(!_isMyParishAutoVisitEnabled()||previousVisits.length)return;}else if(previousVisits.some(function(v){return v.date===_todayISODate();}))return;
   if(!_addParishVisit(best,_todayISODate(),'gps'))return;
 
-  // V8-1-14-984:
+  // V8-1-14-986:
   // 같은 GPS 위치가 '성지 + 성당 + 활성 순례코스'에 동시에 해당하더라도
   // 방문기록은 각각 정상 등록하되 축하 안내는 성지를 우선한다.
   // 따라서 현재 위치가 성지 자동등록 반경 안이면 성당용 축하 팝업은 띄우지 않는다.
@@ -11970,12 +11970,27 @@ function _setRouteLabel(role,name){
   _updateSearchBtn();
 }
 
+function _isPilgrimageMapEditReturnMode(){
+  return !!(window.__OAI_PILGRIMAGE_ROUTE_EDIT__ && window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__!==true);
+}
 function _updateSearchBtn(){
   const btn=$('rs-search-btn');
   if(!btn) return;
+
+  if(_isPilgrimageMapEditReturnMode()){
+    btn.style.display='flex';
+    btn.disabled=false;
+    btn.innerHTML='↩ 순례하기로 돌아가기';
+    btn.classList.add('ready','pilgrimage-return');
+    btn.classList.remove('disabled');
+    btn.setAttribute('aria-disabled','false');
+    return;
+  }
+
+  btn.innerHTML='🔍 경로 검색';
+  btn.classList.remove('pilgrimage-return');
   const filled=!!(_rS&&_rS.lat&&_rS.lng&&_rE&&_rE.lat&&_rE.lng);
-  /* V8-1-14-621: 경로검색 버튼은 출발/도착창 아래에서 항상 보이고,
-     출발·도착이 모두 채워진 뒤에만 활성화한다. */
+  /* 일반 길찾기에서는 출발·도착이 모두 채워진 뒤에만 활성화한다. */
   btn.style.display='flex';
   btn.disabled=!filled;
   btn.classList.toggle('ready', filled);
@@ -13776,7 +13791,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   _updateAllRouteFavoriteButtons();
   _renderRouteItinerary();
-  on('rs-search-btn','click', function() { doSearchRoute(); });
+  on('rs-search-btn','click', function() {
+    if(_isPilgrimageMapEditReturnMode()){
+      _finishPilgrimageRouteEdit();
+      return;
+    }
+    doSearchRoute();
+  });
   on('rs-kakao-btn', 'click', function() { doKakaoRoute(); });
   on('rs-reset-btn', 'click', function() { resetRoute({ fromButton: true }); });
 
@@ -15398,6 +15419,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     applyCourse(c);
     try{localStorage.setItem(ACTIVE_FOLLOW_KEY,JSON.stringify({courseId:c.id,startedAt:now}));}catch(_e){}
     try{renderCourseList();}catch(_e){}
+    // 완료 목록의 '다시 순례하기'에서 시작했다면
+    // 버튼만 '순례 종료'로 바꾸고 목록에 머무르지 말고
+    // 해당 코스의 현재 순례하기 상세 화면으로 바로 이동한다.
+    if(plannerView==='list'){
+      setView('detail');
+      renderDetail();
+      return;
+    }
     if(plannerView==='detail'){
       setView('detail');
       renderDetail();
@@ -15559,6 +15588,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(meta.end&&_validGpsPair(meta.end.lat,meta.end.lng)) _setRoutePointFromItem('end',meta.end,_pilgrimageRouteShrineIndex(meta.end));
         _syncRouteWaypointBoxes();
         _refreshRoutePilgrimageButtonMode();
+        _updateSearchBtn();
         try{_refreshRouteTmpMarkers();}catch(_e){}
         setTimeout(function(){try{if(window.__OAI_PILGRIMAGE_ROUTE_EDIT__)_refreshRouteTmpMarkers();}catch(_e){}},360);
         setTimeout(function(){try{if(window.__OAI_PILGRIMAGE_ROUTE_EDIT__)_refreshRouteTmpMarkers();}catch(_e){}},980);
