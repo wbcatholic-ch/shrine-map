@@ -7322,3 +7322,12 @@ html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll.route-scroll-ha
 .oai-pilgrimage-current-check.is-checking{opacity:.68;pointer-events:none;}
 .oai-pilgrimage-current-check-note{grid-column:1/-1;display:block;margin:0 2px!important;color:#6d7888!important;font-size:calc(10.8px * var(--app-font-scale,1))!important;font-weight:750!important;line-height:1.4!important;}
 @media(max-width:390px){.oai-pilgrimage-total-actions{grid-template-columns:1fr;}.oai-pilgrimage-current-check-note{font-size:10.5px!important;}}
+
+/* V8-1-14-945: 순례하기 큰 카드 외곽선 보강
+   출발지/순례지/도착지를 감싸는 큰 박스와 거리/시간 큰 박스만 조금 더 선명하게 표시 */
+#oai-pilgrimage-detail-view .oai-pilgrimage-route-box{
+  border:1.6px solid #aeb9c6!important;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-total-card{
+  border:1.6px solid #aeb9c6!important;
+}
