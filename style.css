@@ -7821,7 +7821,7 @@ html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll.route-scroll-ha
 }
 
 
-/* V8-1-14-959: 다음 순례 빈 박스 제거 + 강조색 강화 */
+/* V8-1-14-960: 다음 순례 빈 박스 제거 + 강조색 강화 */
 #oai-pilgrimage-detail-view .oai-pilgrimage-waypoint-chip.is-next{
   display:none!important;
 }
@@ -7843,7 +7843,7 @@ html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll.route-scroll-ha
 }
 
 
-/* V8-1-14-959: 순례하기 화면의 코스 완료 요약 박스 완전 제거 */
+/* V8-1-14-960: 순례하기 화면의 코스 완료 요약 박스 완전 제거 */
 #oai-pilgrimage-detail-view #oai-pilgrimage-course-complete-banner,
 #oai-pilgrimage-course-complete-banner{
   display:none!important;
