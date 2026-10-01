@@ -3559,7 +3559,7 @@ function _maybeAutoParishVisit(lat,lng){
   if(isMyParish){if(!_isMyParishAutoVisitEnabled()||previousVisits.length)return;}else if(previousVisits.some(function(v){return v.date===_todayISODate();}))return;
   if(!_addParishVisit(best,_todayISODate(),'gps'))return;
 
-  // V8-1-14-1002:
+  // V8-1-14-1003:
   // 같은 GPS 위치가 '성지 + 성당 + 활성 순례코스'에 동시에 해당하더라도
   // 방문기록은 각각 정상 등록하되 축하 안내는 성지를 우선한다.
   // 따라서 현재 위치가 성지 자동등록 반경 안이면 성당용 축하 팝업은 띄우지 않는다.
@@ -8242,7 +8242,7 @@ function closeRouteSheetByX(){
   var returnToPilgrimage = window.__oaiPilgrimageRouteReturn === true;
   var returnToPilgrimageEdit = !!window.__OAI_PILGRIMAGE_ROUTE_EDIT__;
   window.__oaiPilgrimageRouteReturn = false;
-  try{document.documentElement.classList.remove('oai-pilgrimage-route-direct');}catch(_e){}
+  try{document.documentElement.classList.remove('oai-pilgrimage-route-direct','oai-pilgrimage-route-context');}catch(_e){}
   window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__=false;
   _applyPilgrimageCourseViewReadOnlyState();
   if(returnToPilgrimageEdit) window.__OAI_PILGRIMAGE_ROUTE_EDIT__=null;
@@ -8772,6 +8772,74 @@ function _centerCurrentLocationPlain(lat,lng,level){
     _map.setCenter(new _LL(lat,lng));
     return true;
   }catch(e){ console.warn('[가톨릭길동무]', e); }
+  return false;
+}
+function _setPilgrimageMapCenterForBottomCard(point,level,opts){
+  if(!_map||!point||!point.lat||!point.lng||typeof _LL==='undefined')return false;
+  opts=opts||{};
+  try{
+    if(level&&typeof _map.setLevel==='function')_map.setLevel(level);
+    const pos=new _LL(Number(point.lat),Number(point.lng));
+
+    if(_isMapSplitWideLayout()){
+      _map.setCenter(pos);
+      return true;
+    }
+
+    if(typeof _map.relayout==='function')_map.relayout();
+
+    const mapEl=$('map-wrap')||$('map');
+    const sheet=$('sheet-route');
+    const mapRect=mapEl&&mapEl.getBoundingClientRect?mapEl.getBoundingClientRect():null;
+    const sheetRect=sheet&&sheet.classList.contains('open')&&sheet.getBoundingClientRect
+      ? sheet.getBoundingClientRect()
+      : null;
+
+    const mapH=Math.max(1,Math.round((mapRect&&mapRect.height)||(mapEl&&mapEl.clientHeight)||window.innerHeight||700));
+    let overlap=0;
+    if(mapRect&&sheetRect){
+      overlap=Math.max(0,Math.min(mapRect.bottom,sheetRect.bottom)-Math.max(mapRect.top,sheetRect.top));
+    }else if(sheet){
+      overlap=Math.max(0,Math.round(sheet.offsetHeight||0));
+    }
+
+    const visibleH=Math.max(120,mapH-overlap);
+    const targetY=Math.max(70,Math.round(visibleH/2));
+    const centerY=Math.round(mapH/2);
+    const proj=_map.getProjection&&_map.getProjection();
+
+    if(proj&&proj.containerPointFromCoords&&proj.coordsFromContainerPoint){
+      const p=proj.containerPointFromCoords(pos);
+      if(p){
+        const pointObj=(window.kakao&&kakao.maps&&kakao.maps.Point)
+          ? new kakao.maps.Point(p.x,p.y+(centerY-targetY))
+          : {x:p.x,y:p.y+(centerY-targetY)};
+        const newCenter=proj.coordsFromContainerPoint(pointObj);
+        if(newCenter)_map.setCenter(newCenter);
+        else _map.setCenter(pos);
+      }else{
+        _map.setCenter(pos);
+      }
+    }else{
+      _map.setCenter(pos);
+    }
+
+    if(opts.repeat!==false){
+      const lat=Number(point.lat),lng=Number(point.lng),lv=level;
+      [120,320].forEach(function(delay){
+        setTimeout(function(){
+          try{
+            if(!_map)return;
+            _setPilgrimageMapCenterForBottomCard({lat:lat,lng:lng},lv,{repeat:false});
+          }catch(_e){}
+        },delay);
+      });
+    }
+    return true;
+  }catch(e){
+    console.warn('[가톨릭길동무] 순례 지도 중심 보정 실패',e);
+    try{_map.setCenter(new _LL(Number(point.lat),Number(point.lng)));}catch(_e){}
+  }
   return false;
 }
 
@@ -12751,6 +12819,7 @@ function _finishPilgrimageRouteEdit(){
     }
     if(typeof window.applyOaiPilgrimageRouteEdit==='function') window.applyOaiPilgrimageRouteEdit(draft);
     window.__OAI_PILGRIMAGE_ROUTE_EDIT__=null;
+    try{document.documentElement.classList.remove('oai-pilgrimage-route-context');}catch(_e){}
     const sheet=$('sheet-route');
     if(sheet){sheet.classList.remove('open','from-right','from-left','exit-left','exit-right');sheet.style.display='none';}
     try{resetRoute();}catch(_e){}
@@ -15951,6 +16020,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function _openUnifiedPilgrimageMapAdd(entryRole,options){
     options=options||{};
     const readOnly=options.readOnly===true;
+    try{document.documentElement.classList.add('oai-pilgrimage-route-context');}catch(_e){}
     closePointPicker();
     const modal=planner();
     if(modal){modal.classList.remove('show');modal.setAttribute('aria-hidden','true');}
@@ -15993,9 +16063,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           setTimeout(function(){try{if(window.__OAI_PILGRIMAGE_ROUTE_EDIT__)_refreshRouteTmpMarkers();}catch(_e){}},980);
         }
         const initial=_pilgrimageMapInitialPoint(entryRole);
-        if(_map&&initial&&_validGpsPair(initial.lat,initial.lng)){_map.setCenter(new _LL(Number(initial.lat),Number(initial.lng)));if(typeof _map.setLevel==='function')_map.setLevel(OAI_PILGRIMAGE_MAP_PICK_VIEW_LEVEL);}
         if(_map&&typeof _map.relayout==='function')_map.relayout();
         if(typeof _syncMapPanelUI==='function')_syncMapPanelUI('pilgrimage-route-edit');
+        if(_map&&initial&&_validGpsPair(initial.lat,initial.lng)){
+          _setPilgrimageMapCenterForBottomCard(
+            {lat:Number(initial.lat),lng:Number(initial.lng)},
+            OAI_PILGRIMAGE_MAP_PICK_VIEW_LEVEL,
+            {repeat:true}
+          );
+        }
       }catch(err){console.warn('[가톨릭길동무] 순례계획 길찾기 편집 준비 실패',err);}},120);
     }catch(e){window.__OAI_PILGRIMAGE_ROUTE_EDIT__=null;window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__=false;console.warn('[가톨릭길동무] 순례 지도 진입 실패',e);openPlanner({returnFromSearch:true});setView('detail');renderDetail();}};
     if(typeof hideCoverAndRun==='function')hideCoverAndRun(run);else run();
@@ -16187,6 +16263,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     window.__OAI_PILGRIMAGE_COURSE_VIEW__=false;
     window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__=false;
     window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__=false;
+    try{document.documentElement.classList.remove('oai-pilgrimage-route-context');}catch(_e){}
     _applyPilgrimageCourseViewReadOnlyState();
   }
   function _pilgrimageCoursePoints(){
@@ -16542,7 +16619,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   if(!t)return;
   const item=t.item,m=planner();
   window.__oaiPilgrimageRouteReturn=true;
-  try{document.documentElement.classList.add('oai-pilgrimage-route-direct');}catch(_e){}
+  try{document.documentElement.classList.add('oai-pilgrimage-route-direct','oai-pilgrimage-route-context');}catch(_e){}
   if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}
 
   const runWithLocation=function(lat,lng){
@@ -16584,13 +16661,20 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(mapEl){mapEl.style.display='';mapEl.style.visibility='visible';}
         if(_map&&typeof _map.relayout==='function')_map.relayout();
         if(typeof _syncMapPanelUI==='function')_syncMapPanelUI('pilgrimage-route');
+        if(_map&&_validGpsPair(exactTarget.lat,exactTarget.lng)){
+          _setPilgrimageMapCenterForBottomCard(
+            {lat:Number(exactTarget.lat),lng:Number(exactTarget.lng)},
+            null,
+            {repeat:false}
+          );
+        }
       }catch(_e){}};
       requestAnimationFrame(()=>requestAnimationFrame(restoreMap));
       setTimeout(restoreMap,120);setTimeout(restoreMap,420);setTimeout(restoreMap,900);
       setTimeout(function(){try{_schedulePilgrimageRouteResult('다음 순례지 길찾기');}catch(_e){}},160);
     }catch(e){
       window.__oaiPilgrimageRouteReturn=false;
-      try{document.documentElement.classList.remove('oai-pilgrimage-route-direct');}catch(_e){}
+      try{document.documentElement.classList.remove('oai-pilgrimage-route-direct','oai-pilgrimage-route-context');}catch(_e){}
       console.warn('[가톨릭길동무] 다음 순례지 길찾기 전환 실패',e);
       try{openPlanner({returnFromSearch:true});setView('detail');renderDetail();}catch(_e){}
     }};
@@ -16601,7 +16685,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     function(lat,lng){runWithLocation(lat,lng);},
     function(){
       window.__oaiPilgrimageRouteReturn=false;
-      try{document.documentElement.classList.remove('oai-pilgrimage-route-direct');}catch(_e){}
+      try{document.documentElement.classList.remove('oai-pilgrimage-route-direct','oai-pilgrimage-route-context');}catch(_e){}
       alert('현재 위치를 가져올 수 없습니다. 위치 권한과 GPS를 확인한 뒤 다시 시도해 주세요.');
       try{openPlanner({returnFromSearch:true});setView('detail');renderDetail();}catch(_e){}
     }
