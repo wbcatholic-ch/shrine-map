@@ -3542,7 +3542,7 @@ function _maybeAutoParishVisit(lat,lng){
   if(isMyParish){if(!_isMyParishAutoVisitEnabled()||previousVisits.length)return;}else if(previousVisits.some(function(v){return v.date===_todayISODate();}))return;
   if(!_addParishVisit(best,_todayISODate(),'gps'))return;
 
-  // V8-1-14-981:
+  // V8-1-14-982:
   // 같은 GPS 위치가 '성지 + 성당 + 활성 순례코스'에 동시에 해당하더라도
   // 방문기록은 각각 정상 등록하되 축하 안내는 성지를 우선한다.
   // 따라서 현재 위치가 성지 자동등록 반경 안이면 성당용 축하 팝업은 띄우지 않는다.
@@ -8236,8 +8236,8 @@ function closeRouteSheetByX(){
     try{ _exitRouteMode(); }catch(e){ console.warn('[가톨릭길동무]', e); }
     if(returnToPilgrimageEdit && typeof window._oaiReturnToPilgrimageDetail === 'function'){
       setTimeout(function(){ try{ window._oaiReturnToPilgrimageDetail(); }catch(e){ console.warn('[가톨릭길동무]', e); } }, 40);
-    }else if(returnToPilgrimage && typeof window._oaiReturnToPilgrimageFollow === 'function'){
-      setTimeout(function(){ try{ window._oaiReturnToPilgrimageFollow(); }catch(e){ console.warn('[가톨릭길동무]', e); } }, 40);
+    }else if(returnToPilgrimage && typeof window._oaiReturnToPilgrimageDetail === 'function'){
+      setTimeout(function(){ try{ window._oaiReturnToPilgrimageDetail(); }catch(e){ console.warn('[가톨릭길동무]', e); } }, 40);
     }
   }, OAI_ROUTE_VISUAL_DELAY_MS);
 }
@@ -12586,12 +12586,20 @@ function _refreshRoutePilgrimageButtonMode(){
   try{
     const btn=document.getElementById('rs-pilgrimage-plan-btn');
     if(!btn) return;
-    if(window.__oaiPilgrimageRouteReturn===true && !_isPilgrimageRouteEditMode()){
+    if(_isPilgrimageRouteEditMode()){
+      btn.innerHTML='<span aria-hidden="true">✝</span> 순례계획 수정하기';
+      btn.hidden=false;
+      btn.style.display='flex';
+      return;
+    }
+    if(window.__oaiPilgrimageRouteReturn===true){
       btn.hidden=true;
       btn.style.display='none';
       return;
     }
-    btn.innerHTML=_isPilgrimageRouteEditMode()?'<span aria-hidden="true">✝</span> 순례계획 수정하기':'<span aria-hidden="true">✝</span> 성지순례 계획으로 만들기';
+    btn.innerHTML='<span aria-hidden="true">✝</span> 성지순례 계획으로 만들기';
+    btn.hidden=false;
+    btn.style.display='flex';
   }catch(_e){}
 }
 function _finishPilgrimageRouteEdit(){
