@@ -9229,6 +9229,7 @@ function _setRoutePointFromItem(role,item,idx){
     if(_mode==='shrine'&&idx>=0&&_markers[idx]){ _markers[idx].marker.setImage(_mkrImgRoute(_routeWaypointColor(role),_routeWaypointMarkerText(role))); _setRouteMarkerZ(idx,role); }
     _setRouteLabel(role,item.name);
     _syncRouteWaypointBox();
+    _scrollRouteWaypointEditorToBottom();
     _refreshRouteTmpMarkers();
     if(_rS&&_rE){ _hideRouteGuide(); _updateSearchBtn(); }
   }else{
@@ -11549,10 +11550,21 @@ function _ensureRouteWaypointBox(role){
   _refreshRouteTmpMarkers();
   if(!_getRoutePointByRole(role)) _showRouteGuideText('지도에서 경유지'+_routeWaypointIndex(role)+' 마커를 선택하거나 경유지 박스를 눌러 검색하세요');
 }
+function _scrollRouteWaypointEditorToBottom(){
+  try{
+    const sheet=$('sheet-route'), top=$('rs-top');
+    if(!sheet||!top||!sheet.classList.contains('route-waypoint-scroll')) return;
+    const run=function(){ try{ top.scrollTop=Math.max(0,top.scrollHeight-top.clientHeight); }catch(_e){} };
+    requestAnimationFrame(run);
+    setTimeout(run,40);
+    setTimeout(run,140);
+  }catch(_e){}
+}
 function _beginWaypointAddMode(role){
   role = role || _nextAvailableWaypointRole();
   if(!role){ _showRouteGuideText('경유지는 최대 '+OAI_MAX_ROUTE_WAYPOINTS+'곳까지 추가할 수 있습니다.'); return; }
   _ensureRouteWaypointBox(role);
+  _scrollRouteWaypointEditorToBottom();
   if(_polyline) _clearRouteResultOnly();
   else _restoreRouteSelectionMarkersAfterReset();
   _refreshRouteTmpMarkers();
@@ -14848,12 +14860,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         const initial=_pilgrimageMapInitialPoint(entryRole);
         if(_map&&initial&&_validGpsPair(initial.lat,initial.lng)&&typeof _map.setCenter==='function'){
           _map.setCenter(new _LL(Number(initial.lat),Number(initial.lng)));
-          if(typeof _map.setLevel==='function')_map.setLevel(OAI_PILGRIMAGE_MAP_PICK_VIEW_LEVEL);
+          if(typeof _map.setLevel==='function')_map.setLevel(OAI_PILGRIMAGE_ENDPOINT_MAP_LEVEL);
         }else if(_map&&_validGpsPair(_myLat,_myLng)&&typeof _map.setCenter==='function'){
           _map.setCenter(new _LL(Number(_myLat),Number(_myLng)));
-          if(typeof _map.setLevel==='function')_map.setLevel(OAI_PILGRIMAGE_MAP_PICK_VIEW_LEVEL);
+          if(typeof _map.setLevel==='function')_map.setLevel(OAI_PILGRIMAGE_ENDPOINT_MAP_LEVEL);
         }else if(typeof currentPosition==='function'){
-          currentPosition(function(lat,lng){try{if(window.__OAI_PILGRIMAGE_PLACE_PICK__&&_map&&typeof _map.setCenter==='function'){_map.setCenter(new _LL(Number(lat),Number(lng)));if(typeof _map.setLevel==='function')_map.setLevel(OAI_PILGRIMAGE_MAP_PICK_VIEW_LEVEL);}}catch(_e){}},function(){});
+          currentPosition(function(lat,lng){try{if(window.__OAI_PILGRIMAGE_PLACE_PICK__&&_map&&typeof _map.setCenter==='function'){_map.setCenter(new _LL(Number(lat),Number(lng)));if(typeof _map.setLevel==='function')_map.setLevel(OAI_PILGRIMAGE_ENDPOINT_MAP_LEVEL);}}catch(_e){}},function(){});
         }
         if(typeof _syncMapPanelUI==='function')_syncMapPanelUI('pilgrimage-map-add');
         _preparePilgrimageMapPickMarkers();
@@ -14874,6 +14886,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   let pilgrimageMapPickIdleHandler=null;
   let pilgrimageMapPickBuildSeq=0;
   const OAI_PILGRIMAGE_MAP_PICK_VIEW_LEVEL=9;
+  const OAI_PILGRIMAGE_ENDPOINT_MAP_LEVEL=6;
   const OAI_PILGRIMAGE_PLAN_MARKER_COLOR='#ec4899';
   const OAI_PILGRIMAGE_FOCUS_MARKER_COLOR='#f4c430';
   function clearPilgrimageMapPickMarkers(){

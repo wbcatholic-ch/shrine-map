@@ -6624,7 +6624,7 @@ html:not(.oai-map-split-wide) #sheet-route.route-result-showing #rs-bottom{
 }
 
 
-/* V8-1-14-933: 4번째 경유지부터 즉시 높이 고정, 목록 스크롤 확실화, 하단 여백 최소화 */
+/* V8-1-14-934: 4번째 경유지부터 즉시 높이 고정, 목록 스크롤 확실화, 하단 여백 최소화 */
 html:not(.oai-map-split-wide) #app #sheet-route.route-waypoint-scroll.open{
   height:auto!important;
   max-height:min(43dvh,370px)!important;
@@ -6668,5 +6668,55 @@ html:not(.oai-map-split-wide) #sheet-route.route-result-showing #rs-bottom{
   padding-bottom:2px!important;
 }
 #sheet-route.route-result-showing .route-btns{
+  margin-bottom:0!important;
+}
+
+/* V8-1-14-934: 경유지 4곳부터 입력부 전체(경로 검색/+경유지 포함)를 함께 스크롤하고, 하단 빈 여백 제거 */
+html:not(.oai-map-split-wide) #app #sheet-route.route-waypoint-scroll.open{
+  height:auto!important;
+  max-height:min(43dvh,370px)!important;
+  overflow:hidden!important;
+  padding-bottom:0!important;
+}
+html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll #rs-top{
+  height:248px!important;
+  max-height:248px!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+  overscroll-behavior-y:contain!important;
+  touch-action:pan-y!important;
+  scroll-padding-bottom:10px!important;
+  padding-top:10px!important;
+  padding-bottom:6px!important;
+}
+html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll .rs-route-stack{
+  height:auto!important;
+  max-height:none!important;
+  min-height:max-content!important;
+  overflow:visible!important;
+  padding-right:2px!important;
+}
+html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll #rs-top .rs-action-row{
+  position:relative!important;
+  flex:none!important;
+  margin-top:7px!important;
+  margin-bottom:2px!important;
+}
+/* 입력 중에는 숨겨진 결과 영역이 높이/패딩을 차지하지 않게 한다. */
+#app #sheet-route:not(.route-result-showing) #rs-bottom{
+  display:none!important;
+  height:0!important;
+  min-height:0!important;
+  padding:0!important;
+  margin:0!important;
+  overflow:hidden!important;
+}
+#app #sheet-route{padding-bottom:0!important;}
+/* 결과 화면의 하단은 실제 안전영역만 남긴다. */
+html:not(.oai-map-split-wide) #sheet-route.route-result-showing #rs-bottom{
+  padding-bottom:max(2px,env(safe-area-inset-bottom,0px))!important;
+  scroll-padding-bottom:max(2px,env(safe-area-inset-bottom,0px))!important;
   margin-bottom:0!important;
 }
