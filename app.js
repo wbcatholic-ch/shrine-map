@@ -3542,7 +3542,7 @@ function _maybeAutoParishVisit(lat,lng){
   if(isMyParish){if(!_isMyParishAutoVisitEnabled()||previousVisits.length)return;}else if(previousVisits.some(function(v){return v.date===_todayISODate();}))return;
   if(!_addParishVisit(best,_todayISODate(),'gps'))return;
 
-  // V8-1-14-982:
+  // V8-1-14-983:
   // 같은 GPS 위치가 '성지 + 성당 + 활성 순례코스'에 동시에 해당하더라도
   // 방문기록은 각각 정상 등록하되 축하 안내는 성지를 우선한다.
   // 따라서 현재 위치가 성지 자동등록 반경 안이면 성당용 축하 팝업은 띄우지 않는다.
@@ -8225,6 +8225,7 @@ function closeRouteSheetByX(){
   var returnToPilgrimageEdit = !!window.__OAI_PILGRIMAGE_ROUTE_EDIT__;
   window.__oaiPilgrimageRouteReturn = false;
   try{document.documentElement.classList.remove('oai-pilgrimage-route-direct');}catch(_e){}
+  window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__=false;
   if(returnToPilgrimageEdit) window.__OAI_PILGRIMAGE_ROUTE_EDIT__=null;
   _blurAll && _blurAll();
   _closeSheetOnly('route');
@@ -12586,6 +12587,11 @@ function _refreshRoutePilgrimageButtonMode(){
   try{
     const btn=document.getElementById('rs-pilgrimage-plan-btn');
     if(!btn) return;
+    if(window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__===true){
+      btn.hidden=true;
+      btn.style.display='none';
+      return;
+    }
     if(_isPilgrimageRouteEditMode()){
       btn.innerHTML='<span aria-hidden="true">✝</span> 순례계획 수정하기';
       btn.hidden=false;
@@ -12643,6 +12649,10 @@ function _openPilgrimagePlannerFromRoute(){
 function _ensureRoutePilgrimagePlanButton(){
   try{
     const existing=document.getElementById('rs-pilgrimage-plan-btn');
+    if(window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__===true){
+      if(existing){existing.hidden=true;existing.style.display='none';}
+      return existing||null;
+    }
     if(window.__oaiPilgrimageRouteReturn===true && !_isPilgrimageRouteEditMode()){
       if(existing){existing.hidden=true;existing.style.display='none';}
       return existing||null;
@@ -15745,6 +15755,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     pilgrimageCourseMapMarkers.forEach(m=>{try{m.setMap(null);}catch(_e){}});
     pilgrimageCourseMapMarkers=[];
     window.__OAI_PILGRIMAGE_COURSE_VIEW__=false;
+    window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__=false;
   }
   function _pilgrimageCoursePoints(){
     const meta=loadMeta(),list=loadPlan(),out=[];
@@ -15756,10 +15767,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   async function openPilgrimageCourseMap(){
     const pts=_pilgrimageCoursePoints();
     if(!pts.length){alert('지도에 표시할 순례 코스가 없습니다.');return;}
-    /* V8-1-14-940: 순례코스 보기는 별도 지도 레이어를 만들지 않고 길찾기 화면을 그대로 재사용한다.
-       이렇게 하면 출발/도착/경1~경10 번호 마커, 경로선, 거리·시간, 카카오내비, 다시선택 UI가 길찾기와 완전히 동일해진다. */
+    /* 순례코스 보기는 길찾기 화면을 재사용하되 '보기 전용'으로 연다.
+       따라서 지도에서 추가와 달리 '순례계획 수정하기' 버튼은 표시하지 않는다. */
     try{
-      window.__OAI_PILGRIMAGE_COURSE_VIEW__=false;
+      window.__OAI_PILGRIMAGE_COURSE_VIEW__=true;
+      window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__=true;
       _openUnifiedPilgrimageMapAdd('plan');
       const autoSearch=function(){
         try{
@@ -15772,6 +15784,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       };
       setTimeout(autoSearch,420);
     }catch(e){
+      window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__=false;
       console.warn('[가톨릭길동무] 순례 코스 지도 표시 실패',e);
       try{openPlanner({returnFromSearch:true});setView('detail');renderDetail();}catch(_e){}
     }
