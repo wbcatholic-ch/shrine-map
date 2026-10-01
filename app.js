@@ -3559,7 +3559,7 @@ function _maybeAutoParishVisit(lat,lng){
   if(isMyParish){if(!_isMyParishAutoVisitEnabled()||previousVisits.length)return;}else if(previousVisits.some(function(v){return v.date===_todayISODate();}))return;
   if(!_addParishVisit(best,_todayISODate(),'gps'))return;
 
-  // V8-1-14-996:
+  // V8-1-14-997:
   // 같은 GPS 위치가 '성지 + 성당 + 활성 순례코스'에 동시에 해당하더라도
   // 방문기록은 각각 정상 등록하되 축하 안내는 성지를 우선한다.
   // 따라서 현재 위치가 성지 자동등록 반경 안이면 성당용 축하 팝업은 띄우지 않는다.
@@ -14982,7 +14982,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     return {courseId:s.courseId,startedAt:s.startedAt,course:c,remainingMs:Math.max(0,ACTIVE_FOLLOW_MAX_MS-(now-s.startedAt))};
   }
   function _activateFollowCourse(id){
-    let a=loadCourses(),i=a.findIndex(function(x){return x.id===String(id||'');});
+    const requestedId=String(id||'');
+    const existing=_activeFollowState();
+    if(existing&&existing.courseId&&String(existing.courseId)!==requestedId)return null;
+    let a=loadCourses(),i=a.findIndex(function(x){return x.id===requestedId;});
     if(i<0)return null;
     const now=Date.now(),c=Object.assign({},a[i],{lastStartedAt:now,updatedAt:now});
     a[i]=c;
@@ -15643,9 +15646,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         const cls='oai-pilgrimage-item'+(done?' is-done':'');
         const metric=done?'순례 완료':'GPS 확인 중…';
         const statusHtml=done?'<span class="oai-pilgrimage-waypoint-chip is-done">✓ 순례완료</span>':'';
+        const nextLabel=(!isCompletionView&&i===next)?'<span class="oai-pilgrimage-next-label" aria-label="다음 순례지"><b>다음</b><b>순례지</b></span>':'';
         const holdAttr=isCompletionView?'':' data-plan-hold="'+i+'"';
         const dragHtml=isCompletionView?'<span class="oai-pilgrimage-drag" aria-hidden="true">⋮</span>':'<button type="button" class="oai-pilgrimage-drag" data-plan-drag="'+i+'" aria-label="'+esc(item.name)+' 순서 이동">⋮</button>';
-        return '<div class="'+cls+'" data-plan-index="'+i+'"'+holdAttr+'>'+dragHtml+'<span class="oai-pilgrimage-order" aria-label="순례 '+(i+1)+'번">'+(i+1)+'</span><div class="oai-pilgrimage-main"><div class="oai-pilgrimage-main-head"><span class="oai-pilgrimage-place-title"><b>'+esc(item.name)+'</b></span>'+statusHtml+'</div><small class="oai-pilgrimage-item-metric" data-plan-metric="'+i+'">'+metric+'</small></div></div>';
+        return '<div class="'+cls+'" data-plan-index="'+i+'"'+holdAttr+'>'+dragHtml+'<span class="oai-pilgrimage-order" aria-label="순례 '+(i+1)+'번">'+(i+1)+'</span><div class="oai-pilgrimage-main"><div class="oai-pilgrimage-main-head"><span class="oai-pilgrimage-place-title"><b>'+esc(item.name)+'</b></span>'+statusHtml+'</div><small class="oai-pilgrimage-item-metric" data-plan-metric="'+i+'">'+metric+'</small></div>'+nextLabel+'</div>';
       }).join('');
     }
     const addBtn=document.querySelector('.oai-pilgrimage-detail-view .oai-pilgrimage-add');
@@ -15743,9 +15747,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     renderDetail();
   }
   function repeatCourse(id){
+    const targetId=String(id||'');
     const active=_activeFollowState();
-    if(active&&active.courseId===String(id||'')){stopActiveFollow(id);return;}
-    let a=loadCourses(),i=a.findIndex(x=>x.id===id);if(i<0)return;
+    if(active&&active.courseId===targetId){stopActiveFollow(targetId);return;}
+    if(active&&active.courseId&&active.courseId!==targetId){openFollowSwitchConfirm(targetId,'repeat');return;}
+    let a=loadCourses(),i=a.findIndex(x=>String(x.id)===targetId);if(i<0)return;
     const original=JSON.parse(JSON.stringify(a[i]));
     _writeRepeatEditGuard(original);
     const now=Date.now(),c=Object.assign({},a[i]);
@@ -16332,12 +16338,48 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     renderFollowProgress();
   }
   let pendingFollowStopCourseId='';
+  let pendingFollowStartCourseId='';
+  let pendingFollowStartMode='';
   function followStopModal(){return document.getElementById('oai-pilgrimage-follow-stop-modal');}
+  function _resetFollowStopDialogText(){
+    const title=document.getElementById('oai-pilgrimage-follow-stop-title');
+    const msg=document.getElementById('oai-pilgrimage-follow-stop-message');
+    const confirm=document.querySelector('[data-oai-pilgrimage-follow-stop-confirm]');
+    if(title)title.textContent='순례 종료';
+    if(msg)msg.textContent='진행 중인 순례를 종료할까요?';
+    if(confirm)confirm.textContent='종료';
+  }
   function openFollowStopConfirm(id){
     const active=_activeFollowState();
     if(!active||!active.courseId)return false;
     if(id&&String(id)!==String(active.courseId))return false;
     pendingFollowStopCourseId=String(active.courseId);
+    pendingFollowStartCourseId='';
+    pendingFollowStartMode='';
+    _resetFollowStopDialogText();
+    const m=followStopModal();
+    if(!m)return false;
+    m.classList.add('show');
+    m.setAttribute('aria-hidden','false');
+    return true;
+  }
+  function openFollowSwitchConfirm(targetId,mode){
+    const active=_activeFollowState();
+    const tid=String(targetId||'');
+    if(!active||!active.courseId||!tid||String(active.courseId)===tid)return false;
+    const courses=loadCourses();
+    const from=courses.find(function(c){return String(c.id)===String(active.courseId);});
+    const to=courses.find(function(c){return String(c.id)===tid;});
+    if(!to)return false;
+    pendingFollowStopCourseId=String(active.courseId);
+    pendingFollowStartCourseId=tid;
+    pendingFollowStartMode=String(mode||'start');
+    const title=document.getElementById('oai-pilgrimage-follow-stop-title');
+    const msg=document.getElementById('oai-pilgrimage-follow-stop-message');
+    const confirm=document.querySelector('[data-oai-pilgrimage-follow-stop-confirm]');
+    if(title)title.textContent='다른 순례 시작';
+    if(msg)msg.innerHTML='현재 <b>「'+esc(from&&from.name||'진행 중인 순례')+'」</b> 코스가 진행 중입니다.<br>이 순례를 종료하고 <b>「'+esc(to.name||'새 순례')+'」</b> 코스를 시작할까요?';
+    if(confirm)confirm.textContent=(pendingFollowStartMode==='repeat')?'종료 후 다시 순례':'종료 후 시작';
     const m=followStopModal();
     if(!m)return false;
     m.classList.add('show');
@@ -16348,14 +16390,33 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const m=followStopModal();
     if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}
     pendingFollowStopCourseId='';
+    pendingFollowStartCourseId='';
+    pendingFollowStartMode='';
+    _resetFollowStopDialogText();
   }
   function confirmFollowStop(){
     const id=pendingFollowStopCourseId;
-    closeFollowStopConfirm();
+    const nextId=pendingFollowStartCourseId;
+    const nextMode=pendingFollowStartMode;
     const active=_activeFollowState();
-    if(!active||!active.courseId||!id||String(active.courseId)!==String(id))return false;
+    if(!active||!active.courseId||!id||String(active.courseId)!==String(id)){closeFollowStopConfirm();return false;}
     _clearActiveFollow(active.courseId);
+    pendingFollowStopCourseId='';
+    pendingFollowStartCourseId='';
+    pendingFollowStartMode='';
+    const m=followStopModal();
+    if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}
+    _resetFollowStopDialogText();
     pilgrimageDetailMode='plan';
+
+    if(nextId){
+      setTimeout(function(){
+        if(nextMode==='repeat')repeatCourse(nextId);
+        else startFollowFromCourse(nextId);
+      },30);
+      return true;
+    }
+
     if(plannerView==='follow'){setView('detail');renderDetail();}else{renderDetail();renderCourseList();}
     return true;
   }
@@ -16363,10 +16424,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     return openFollowStopConfirm(id);
   }
   function startFollowFromCourse(id){
+    const targetId=String(id||'');
     const active=_activeFollowState();
-    if(active&&active.courseId===String(id||'')){stopActiveFollow(id);return;}
+    if(active&&active.courseId===targetId){stopActiveFollow(targetId);return;}
+    if(active&&active.courseId&&active.courseId!==targetId){openFollowSwitchConfirm(targetId,'start');return;}
     pilgrimageDetailMode='plan';
-    const c=_activateFollowCourse(id);if(!c)return;
+    const c=_activateFollowCourse(targetId);if(!c)return;
     applyCourse(c);
     renderCourseList();
     if(plannerView==='detail')renderDetail();
@@ -16375,6 +16438,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!currentCourseId)return;
     const active=_activeFollowState();
     if(active&&active.courseId===currentCourseId){stopActiveFollow(currentCourseId);return;}
+    if(active&&active.courseId&&active.courseId!==currentCourseId){
+      openFollowSwitchConfirm(currentCourseId,pilgrimageDetailMode==='complete'?'repeat':'start');
+      return;
+    }
     if(pilgrimageDetailMode==='complete'){repeatCourse(currentCourseId);return;}
     pilgrimageDetailMode='plan';
     const c=_activateFollowCourse(currentCourseId);
