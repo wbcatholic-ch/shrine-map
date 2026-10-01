@@ -7386,3 +7386,129 @@ html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll.route-scroll-ha
   border-color:#17365f;
   color:#fff;
 }
+
+
+/* V8-1-14-949: 순례완료 표시 강화 */
+.oai-pilgrimage-course-card.is-completed .oai-pilgrimage-course-open::after{
+  color:rgba(190,20,28,.30)!important;
+  text-shadow:0 1px 0 rgba(255,255,255,.22),0 0 2px rgba(255,255,255,.10)!important;
+  font-size:clamp(40px,9.2vw,58px)!important;
+  top:10px!important;
+}
+.oai-pilgrimage-course-complete{
+  border-top-color:#e7c995;
+  background:linear-gradient(180deg,#fffaf1 0%,#fff5e4 100%);
+}
+.oai-pilgrimage-course-stamp{
+  border-color:#96570f;
+  color:#7e4307;
+  background:#fff0d8;
+  box-shadow:inset 0 -1px 0 rgba(150,87,15,.08);
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-course-complete-banner{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:8px;
+  margin-top:10px;
+  padding:11px 12px;
+  border:2px solid #cc5551;
+  border-radius:14px;
+  background:linear-gradient(180deg,#fff4f3 0%,#ffeaea 100%);
+  box-shadow:0 1px 0 rgba(204,85,81,.08);
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-course-complete-banner-title{
+  flex:none;
+  color:#b72824;
+  font-size:calc(13.5px * var(--app-font-scale,1));
+  font-weight:980;
+  letter-spacing:-.01em;
+  line-height:1.15;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-course-complete-banner-meta{
+  display:flex;
+  align-items:center;
+  justify-content:flex-end;
+  gap:6px;
+  flex-wrap:wrap;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-course-complete-banner .oai-pilgrimage-course-date-btn,
+#oai-pilgrimage-detail-view .oai-pilgrimage-course-complete-banner .oai-pilgrimage-course-count-btn{
+  min-height:28px;
+  padding:0 9px;
+  border:1.5px solid #e0c0be;
+  border-radius:999px;
+  background:#fff;
+  color:#7f3030;
+  font-size:12px;
+  font-weight:950;
+  text-decoration:none;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-course-complete-banner .oai-pilgrimage-course-count-btn{
+  color:#9a5b14;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-course-complete-banner .oai-pilgrimage-course-gps-lock{
+  min-height:28px;
+  padding:0 8px;
+  border:1.5px solid #e3cfab;
+  border-radius:999px;
+  background:#fff7ea;
+}
+@media(max-width:390px){
+  #oai-pilgrimage-detail-view .oai-pilgrimage-course-complete-banner{
+    align-items:flex-start;
+    flex-direction:column;
+  }
+  #oai-pilgrimage-detail-view .oai-pilgrimage-course-complete-banner-meta{
+    justify-content:flex-start;
+  }
+}
+
+
+/* V8-1-14-950: 순례계획 화면 상단 레이아웃 정리 */
+#oai-pilgrimage-list-view{
+  display:flex;
+  flex-direction:column;
+  gap:12px;
+}
+.oai-pilgrimage-course-filters{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  gap:10px!important;
+  margin:0!important;
+  padding:0 0 12px!important;
+  border-bottom:1px solid #d8d0bf;
+}
+.oai-pilgrimage-course-filters select{
+  height:46px!important;
+  padding:0 10px!important;
+  border:1.5px solid #bcc8d5!important;
+  border-radius:14px!important;
+  background:#fff!important;
+  color:#17213a!important;
+  font-size:calc(15px * var(--app-font-scale,1))!important;
+  font-weight:900!important;
+  text-align-last:center;
+}
+.oai-pilgrimage-new{
+  width:100%!important;
+  min-height:58px!important;
+  margin:0!important;
+  padding:0 16px!important;
+  border-radius:16px!important;
+  background:#176fc0!important;
+  color:#fff!important;
+  font:900 calc(18px * var(--app-font-scale,1))/1.15 inherit!important;
+  box-shadow:0 3px 8px rgba(23,111,192,.16)!important;
+}
+.oai-pilgrimage-course-list{
+  display:flex;
+  flex-direction:column;
+  gap:10px;
+}
+@media(max-width:390px){
+  #oai-pilgrimage-list-view{gap:10px;}
+  .oai-pilgrimage-course-filters{gap:7px!important;padding-bottom:10px!important;}
+  .oai-pilgrimage-course-filters select{height:44px!important;padding:0 6px!important;font-size:calc(13px * var(--app-font-scale,1))!important;}
+  .oai-pilgrimage-new{min-height:54px!important;font-size:calc(16px * var(--app-font-scale,1))!important;}
+  .oai-pilgrimage-course-list{gap:8px;}
+}
