@@ -3542,7 +3542,7 @@ function _maybeAutoParishVisit(lat,lng){
   if(isMyParish){if(!_isMyParishAutoVisitEnabled()||previousVisits.length)return;}else if(previousVisits.some(function(v){return v.date===_todayISODate();}))return;
   if(!_addParishVisit(best,_todayISODate(),'gps'))return;
 
-  // V8-1-14-968:
+  // V8-1-14-969:
   // 같은 GPS 위치가 '성지 + 성당 + 활성 순례코스'에 동시에 해당하더라도
   // 방문기록은 각각 정상 등록하되 축하 안내는 성지를 우선한다.
   // 따라서 현재 위치가 성지 자동등록 반경 안이면 성당용 축하 팝업은 띄우지 않는다.
@@ -14766,7 +14766,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(now-s.startedAt>=ACTIVE_FOLLOW_MAX_MS){_clearActiveFollow(s.courseId);return null;}
     const c=loadCourses().find(function(x){return x.id===s.courseId;});
     if(!c){_clearActiveFollow(s.courseId);return null;}
-    if(_courseAllPlacesDone(c.places)){_clearActiveFollow(s.courseId);return null;}
+    if(_courseAllPlacesDone(c.places)&&normalizePoint(c.end)){_clearActiveFollow(s.courseId);return null;}
     return {courseId:s.courseId,startedAt:s.startedAt,course:c,remainingMs:Math.max(0,ACTIVE_FOLLOW_MAX_MS-(now-s.startedAt))};
   }
   function _activateFollowCourse(id){
@@ -14791,6 +14791,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function _courseCompletionList(c){
     const places=(c&&Array.isArray(c.places))?c.places:[];
+    if(!c||!normalizePoint(c.end)) return [];
     return (Array.isArray(c&&c.completions)?c.completions:[]).map(function(x){
       if(!x)return null;
       const at=Number(x.completedAt)||0,count=Number(x.placeCount)||places.length;
@@ -14884,7 +14885,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function updateCurrentCourseProgress(){
     if(!currentCourseId)return;
     let a=loadCourses(),i=a.findIndex(c=>c.id===currentCourseId);if(i<0)return;
-    const prev=a[i],d=draftSnapshot(),wasDone=_courseAllPlacesDone(prev.places),isDone=_courseAllPlacesDone(d.places),now=Date.now();
+    const prev=a[i],d=draftSnapshot(),hasDestination=!!normalizePoint(d.end),wasDone=_courseAllPlacesDone(prev.places)&&!!normalizePoint(prev.end),isDone=_courseAllPlacesDone(d.places)&&hasDestination,now=Date.now();
     const next=Object.assign({},prev,d,{updatedAt:now});
     const prevCompletions=_courseCompletionList(prev);
     if(isDone&&((!wasDone&&prev.completionArmed!==false)||!prevCompletions.length)){
@@ -14963,7 +14964,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         }
       });
       if(!changed)return false;
-      const now=Date.now(),wasDone=_courseAllPlacesDone(prev.places),isDone=_courseAllPlacesDone(places);
+      const now=Date.now(),wasDone=_courseAllPlacesDone(prev.places)&&!!normalizePoint(prev.end),isDone=_courseAllPlacesDone(places)&&!!normalizePoint(prev.end);
       const next=Object.assign({},prev,{places:places,updatedAt:now});
       const completions=_courseCompletionList(prev).slice();
       if(isDone){
@@ -15122,6 +15123,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function saveCompletionDate(){
     const c=currentCompletionCourse(),input=document.getElementById('oai-pilgrimage-completion-date-input');
     if(!c||!input) return;
+    if(!normalizePoint(c.end)){alert('도착지를 먼저 설정해 주세요.');return;}
     const ts=_courseDateValueToTs(input.value);
     if(!ts){try{input.focus();}catch(_e){} return;}
     const a=loadCourses(),i=a.findIndex(function(x){return x.id===c.id;});
@@ -15236,7 +15238,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       saveBtn.disabled=!enabled;
       saveBtn.setAttribute('aria-disabled',enabled?'false':'true');
       saveBtn.classList.toggle('is-dirty',enabled);
-      saveBtn.textContent='계획 저장';
+      saveBtn.textContent='저장';
     }
     if(currentCheckBtn){
       currentCheckBtn.hidden=isCompletionView;
@@ -15801,30 +15803,35 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function calcFollowItemMetrics(){
     const seq=++followMetricSeq,list=loadPlan(),view=document.getElementById('oai-pilgrimage-follow-view');
     const setMetric=(i,text)=>{const el=document.querySelector('[data-follow-metric="'+i+'"]');if(el)el.textContent=text;};
-    list.forEach((item,i)=>setMetric(i,item.done?'순례 완료':'GPS 확인 중…'));
+    list.forEach((item,i)=>setMetric(i,item.done?'순례 완료':'누적거리 계산 중…'));
     if(view)view.classList.remove('gps-ready');
     if(!list.length)return;
     currentPosition(async(lat,lng)=>{
       if(seq!==followMetricSeq)return;
       if(view)view.classList.add('gps-ready');
-      const jobs=list.map((item,i)=>({item,i})).filter(x=>!x.item.done);
-      let cursor=0;
-      async function worker(){
-        while(cursor<jobs.length){
-          const job=jobs[cursor++],item=job.item,i=job.i;
-          let km=0,dur=0,estimated=false;
-          try{
-            const val=await _navFetch(lng+','+lat,item.lng+','+item.lat);
-            if(val&&Number.isFinite(Number(val.km))&&Number.isFinite(Number(val.dur))&&Number(val.km)<1000){km=Number(val.km);dur=Number(val.dur);}else throw new Error('no route');
-          }catch(_e){
-            km=calcDist(lat,lng,item.lat,item.lng)*1.4;dur=km/70*3600;estimated=true;
-          }
-          if(seq!==followMetricSeq)return;
-          setMetric(i,(estimated?'약 ':'')+km.toFixed(1)+' km · '+(typeof _fmtTime==='function'?_fmtTime(dur):Math.round(dur/60)+'분'));
+      let prev={lat:Number(lat),lng:Number(lng)},cumKm=0,cumDur=0,anyEstimated=false;
+      for(let i=0;i<list.length;i++){
+        const item=list[i];
+        if(item.done) continue;
+        if(!_validGpsPair(item.lat,item.lng)){setMetric(i,'위치 정보 확인 필요');continue;}
+        let km=0,dur=0,estimated=false;
+        try{
+          const val=await _navFetch(Number(prev.lng)+','+Number(prev.lat),Number(item.lng)+','+Number(item.lat));
+          if(val&&Number.isFinite(Number(val.km))&&Number.isFinite(Number(val.dur))&&Number(val.km)<1000){km=Number(val.km);dur=Number(val.dur);}
+          else throw new Error('no route');
+        }catch(_e){
+          km=calcDist(Number(prev.lat),Number(prev.lng),Number(item.lat),Number(item.lng))*1.4;
+          dur=km/70*3600;
+          estimated=true;
         }
+        if(seq!==followMetricSeq)return;
+        if(!Number.isFinite(km)||km<0||km>1000){setMetric(i,'거리 확인 필요');prev={lat:Number(item.lat),lng:Number(item.lng)};continue;}
+        cumKm+=km;
+        cumDur+=dur;
+        anyEstimated=anyEstimated||estimated;
+        setMetric(i,(anyEstimated?'약 ':'')+'누적 '+cumKm.toFixed(1)+' km · '+(typeof _fmtTime==='function'?_fmtTime(cumDur):Math.round(cumDur/60)+'분'));
+        prev={lat:Number(item.lat),lng:Number(item.lng)};
       }
-      const n=Math.min(3,jobs.length);
-      await Promise.all(Array.from({length:n},()=>worker()));
     },()=>{
       if(seq!==followMetricSeq)return;
       if(view)view.classList.remove('gps-ready');
