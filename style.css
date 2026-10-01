@@ -7358,3 +7358,31 @@ html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll.route-scroll-ha
     font-size:calc(22px * var(--app-font-scale,1))!important;
   }
 }
+
+
+/* V8-1-14-948: 순례하기 목록 순례번호 표시 */
+#oai-pilgrimage-detail-view .oai-pilgrimage-item{
+  display:flex!important;
+  align-items:center!important;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-order{
+  flex:0 0 auto;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  width:28px;
+  height:28px;
+  margin:0 10px 0 2px;
+  border-radius:50%;
+  background:#f4ead0;
+  border:1.5px solid #b99035;
+  color:#7a5510;
+  font-size:calc(13px * var(--app-font-scale,1));
+  font-weight:950;
+  line-height:1;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-item.is-done .oai-pilgrimage-order{
+  background:#17365f;
+  border-color:#17365f;
+  color:#fff;
+}
