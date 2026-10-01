@@ -6720,3 +6720,45 @@ html:not(.oai-map-split-wide) #sheet-route.route-result-showing #rs-bottom{
   scroll-padding-bottom:max(2px,env(safe-area-inset-bottom,0px))!important;
   margin-bottom:0!important;
 }
+
+/* V8-1-14-935: 길찾기 시트 하단 여백을 일반 성지 인포카드와 같은 수준으로 통일 */
+html:not(.oai-map-split-wide) #app #sheet-route.open{
+  height:fit-content!important;
+  min-height:0!important;
+  padding-bottom:0!important;
+}
+/* 입력 중(경로 결과 전): 내용 바로 아래에서 카드가 끝나도록 */
+html:not(.oai-map-split-wide) #app #sheet-route:not(.route-result-showing) #rs-top{
+  margin-bottom:0!important;
+}
+html:not(.oai-map-split-wide) #app #sheet-route:not(.route-result-showing):not(.route-waypoint-scroll) #rs-top{
+  padding-bottom:10px!important;
+}
+/* 4개 이상 경유지 스크롤 모드도 불필요한 바닥 여백 없이 동일하게 */
+html:not(.oai-map-split-wide) #app #sheet-route.route-waypoint-scroll.open{
+  height:fit-content!important;
+  min-height:0!important;
+  padding-bottom:0!important;
+}
+html:not(.oai-map-split-wide) #app #sheet-route.route-waypoint-scroll #rs-top{
+  margin-bottom:0!important;
+  padding-bottom:10px!important;
+}
+/* 경로검색 완료 후: 3번 성지 인포카드처럼 마지막 버튼 아래 10px만 남긴다. */
+html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing.open{
+  height:fit-content!important;
+  min-height:0!important;
+  padding-bottom:0!important;
+}
+html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing #rs-bottom{
+  padding:0 12px 10px!important;
+  scroll-padding-bottom:10px!important;
+  margin-bottom:0!important;
+}
+html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .rs-result{
+  margin-bottom:0!important;
+  padding-bottom:4px!important;
+}
+html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns{
+  margin-bottom:0!important;
+}
