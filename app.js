@@ -9139,8 +9139,11 @@ function _routeWaypointSlotOccupied(role){
   return !!(_getRouteWaypointEnabledByRole(role) || (point&&point.lat&&point.lng));
 }
 function _nextAvailableWaypointRole(){
+  /* V8-1-14-938: 취소 후 입력창만 남아 있는 빈 경유지는 다시 사용 가능한 슬롯이다.
+     enabled 여부가 아니라 실제 좌표가 들어 있는지를 기준으로 1→10 순서의 첫 빈칸을 선택한다. */
   for(const cfg of OAI_ROUTE_WAYPOINT_CONFIGS){
-    if(!_routeWaypointSlotOccupied(cfg.role)) return cfg.role;
+    const point=_getRoutePointByRole(cfg.role);
+    if(!(point&&point.lat&&point.lng)) return cfg.role;
   }
   return null;
 }
