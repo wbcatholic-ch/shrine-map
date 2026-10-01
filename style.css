@@ -7735,3 +7735,87 @@ html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll.route-scroll-ha
     min-width:58px!important;
   }
 }
+
+
+/* V8-1-14-955: 순례계획/순례하기 마감 조정 */
+#oai-pilgrimage-list-view{
+  gap:6px!important;
+}
+#oai-pilgrimage-list-view .oai-pilgrimage-new{
+  margin:0 0 6px!important;
+  min-height:48px!important;
+}
+#oai-pilgrimage-list-view .oai-pilgrimage-course-list{
+  margin-top:0!important;
+  gap:8px!important;
+}
+@media(max-width:390px){
+  #oai-pilgrimage-list-view{
+    gap:5px!important;
+  }
+  #oai-pilgrimage-list-view .oai-pilgrimage-new{
+    margin:0 0 5px!important;
+    min-height:46px!important;
+  }
+}
+
+#oai-pilgrimage-detail-view .oai-pilgrimage-course-complete-banner[hidden]{
+  display:none!important;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-main-head{
+  grid-template-columns:minmax(0,1fr) auto!important;
+  align-items:center!important;
+  column-gap:8px!important;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-waypoint-chip{
+  flex:0 0 auto;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  border-radius:999px;
+  line-height:1;
+  white-space:nowrap;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-waypoint-chip.is-next{
+  width:46px!important;
+  min-width:46px!important;
+  height:24px!important;
+  padding:0!important;
+  border:1.6px solid #bf7a00!important;
+  background:#f6dca0!important;
+  box-shadow:inset 0 -1px 0 rgba(142,93,8,.14)!important;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-waypoint-chip.is-done{
+  min-width:auto!important;
+  height:26px!important;
+  padding:0 10px!important;
+  border:1.5px solid #a87312!important;
+  background:#fff0d2!important;
+  color:#85520a!important;
+  font-size:calc(11.5px * var(--app-font-scale,1))!important;
+  font-weight:950!important;
+  box-shadow:inset 0 -1px 0 rgba(168,115,18,.10)!important;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-item.is-next{
+  background:#fff5df!important;
+  border-bottom:1px solid #ddb96d!important;
+  box-shadow:inset 3px 0 0 #d08600!important;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-item.is-next .oai-pilgrimage-main b{
+  color:#6f4706!important;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-item.is-next .oai-pilgrimage-item-metric{
+  color:#946112!important;
+}
+@media(max-width:390px){
+  #oai-pilgrimage-detail-view .oai-pilgrimage-waypoint-chip.is-next{
+    width:42px!important;
+    min-width:42px!important;
+    height:22px!important;
+  }
+  #oai-pilgrimage-detail-view .oai-pilgrimage-waypoint-chip.is-done{
+    height:24px!important;
+    padding:0 9px!important;
+    font-size:calc(10.8px * var(--app-font-scale,1))!important;
+  }
+}
