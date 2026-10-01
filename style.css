@@ -1682,7 +1682,7 @@ html:not(.ios-device).oai-screen-compact-short #app #info-card #ic-kakao-nav{
 
 /* V8-1-14-621: route sheet top/bottom spacing owner. */
 #sheet-route #rs-top { padding:10px 10px 0 12px!important; flex-shrink:0; }
-#app #sheet-route #rs-bottom { padding:0 12px 10px!important; }
+#app #sheet-route #rs-bottom { padding:0 12px calc(30px + var(--oai-android-bottom-gap, env(safe-area-inset-bottom, 0px)))!important; scroll-padding-bottom:calc(30px + var(--oai-android-bottom-gap, env(safe-area-inset-bottom, 0px)))!important; }
 #sheet-route #rs-top .rs-action-row{
   display:grid;
   grid-template-columns:minmax(0, 1fr) 72px;
@@ -1933,8 +1933,11 @@ html:not(.ios-device).oai-screen-compact-short #sheet-route .rs-x {
 #rs-search-btn.disabled,#rs-search-btn:disabled{background:#9fb5d2!important;color:rgba(255,255,255,.86)!important;box-shadow:none!important;cursor:default!important;}
 #rs-search-btn.ready{background:#1565c0!important;color:#fff!important;box-shadow:0 4px 12px rgba(21,101,192,.24)!important;}
 #sheet-route.route-result-showing {
-  max-height: min(54vh, 430px) !important;
-  overflow: visible !important;
+  max-height: min(62dvh, 520px) !important;
+  overflow-y: auto !important;
+  overflow-x: visible !important;
+  -webkit-overflow-scrolling: touch;
+  overscroll-behavior: contain;
 }
 #sheet-route:not(.route-waypoint-scroll) {
   overflow: visible !important;
@@ -6463,9 +6466,9 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 .btn-route-pilgrimage span{color:#e7c563;font-size:16px;line-height:1;}
 .btn-route-pilgrimage:active{transform:translateY(1px);opacity:.88;}
 #rs-result .btn-route-pilgrimage{visibility:visible;opacity:1;}
-#sheet-route.route-result-showing{max-height:min(72vh,680px);overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-bottom:max(6px,env(safe-area-inset-bottom,0px));}
-#app #sheet-route.route-result-showing.open{min-height:0;height:auto;max-height:min(72vh,680px);padding-bottom:0;}
-#sheet-route.route-result-showing #rs-bottom{padding-bottom:max(6px,env(safe-area-inset-bottom,0px));}
+#sheet-route.route-result-showing{max-height:min(72dvh,680px);overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-bottom:calc(28px + var(--oai-android-bottom-gap, env(safe-area-inset-bottom,0px)));scroll-padding-bottom:calc(28px + var(--oai-android-bottom-gap, env(safe-area-inset-bottom,0px)));}
+#app #sheet-route.route-result-showing.open{min-height:0;height:auto;max-height:min(72dvh,680px);padding-bottom:0;}
+#sheet-route.route-result-showing #rs-bottom{padding-bottom:calc(28px + var(--oai-android-bottom-gap, env(safe-area-inset-bottom,0px)))!important;}
 #sheet-route.route-result-showing .route-btns{margin-bottom:0;}
 #sheet-route.route-result-showing .rs-drag-slot{display:none!important;}
 
@@ -6480,4 +6483,28 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
   font-size:calc(16.5px * var(--app-font-scale,1));
   font-weight:950;
   line-height:1.22;
+}
+
+/* V8-1-14-930: 경유지 4곳부터 길찾기 카드 높이를 고정하고 경로 목록만 스크롤 */
+html:not(.oai-map-split-wide) #app #sheet-route.route-waypoint-scroll.open{
+  max-height:min(58dvh,520px)!important;
+  overflow:hidden!important;
+}
+html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll #rs-top{
+  overflow:hidden!important;
+  display:flex!important;
+  flex-direction:column!important;
+  min-height:0!important;
+}
+html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll .rs-route-stack{
+  max-height:min(43dvh,390px)!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  scroll-padding-block:8px;
+  padding-right:2px;
+}
+html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll #rs-top .rs-action-row{
+  flex:none!important;
 }

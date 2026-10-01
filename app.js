@@ -9535,7 +9535,7 @@ function _refreshRouteTmpMarkers(){
   _clearRouteTmpMarkers();
   _refreshExistingRoutePointMarkerImages();
   const routeResultShowing = !!_polyline;
-  const needStart = !!(_rS && !_rS.isRegionStart && (routeResultShowing || _shouldShowRouteStartMarker()));
+  const needStart = !!(_rS && !_rS.isRegionStart && (routeResultShowing || _shouldShowRouteStartMarker()) && (_mode!=='shrine' || _rS.idx<0 || !_markers[_rS.idx] || routeResultShowing));
   const needEnd = !!(_rE && (_mode!=='shrine' || _rE.idx<0 || !_markers[_rE.idx]));
   if(needStart){
     _startTmpMkr = new _MM({
@@ -11453,7 +11453,7 @@ function _syncRouteWaypointBoxes(){
     };
   });
   const summaryVisible=!!(!foldWide && resultShowing && routeWaypoints.length);
-  const shouldScrollForMultiWaypoint=!!(!foldWide && !resultShowing && slotStates.some(function(slot){ return slot.index>=2 && slot.visible; }));
+  const shouldScrollForMultiWaypoint=!!(!foldWide && !resultShowing && routeWaypoints.length>=4);
   const summaryBox=$('rs-waypoints-summary-box');
   const summaryLbl=$('rs-waypoints-summary-lbl');
   if(stack){
@@ -14714,6 +14714,16 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function chooseFrequent(i){const a=_loadRouteFavorites(),f=a[i];if(f)setPoint(pointRole,f);}
   function chooseCurrent(){const role=pointRole==='end'?'end':'start';const done=(lat,lng)=>setPoint(role,{name:'현재 위치',addr:role==='start'?'순례 시작 시 현재 위치 사용':'선택 시점의 현재 위치 사용',lat:Number(lat),lng:Number(lng),dynamicCurrent:role==='start'});if(Number.isFinite(Number(_myLat))&&Number.isFinite(Number(_myLng)))done(_myLat,_myLng);else if(typeof _refreshFreshLocationThen==='function')_refreshFreshLocationThen(done,()=>alert('현재 위치를 가져올 수 없습니다.'));else alert('현재 위치를 가져올 수 없습니다.');}
   function searchPoint(){const r=pointRole;closePointPicker();const m=planner();if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}_returnToPilgrimagePlannerAfterSearch=true;plannerView='detail';const launch=()=>setTimeout(()=>{try{openSearchModal(r==='start'?'pilgrimage-start':'pilgrimage-end');}catch(e){console.warn(e);_returnToPilgrimagePlannerAfterSearch=false;openPlanner({returnFromSearch:true});}},40);if(coverVisible()&&typeof hideCoverAndRun==='function')hideCoverAndRun(launch);else launch();}
+  function _pilgrimageRouteShrineIndex(item){
+    const q=normalizePoint(item);if(!q||!Array.isArray(SHRINES))return -1;
+    let best=-1,bestD=Infinity;
+    for(let i=0;i<SHRINES.length;i++){
+      const s=SHRINES[i];if(!s||!_validGpsPair(s.lat,s.lng))continue;
+      const d=Math.abs(Number(s.lat)-q.lat)+Math.abs(Number(s.lng)-q.lng);
+      if(d<bestD&&d<0.00035){best=i;bestD=d;}
+    }
+    return best;
+  }
   function _pilgrimageMapInitialPoint(entryRole){
     const meta=loadMeta(),list=loadPlan();
     if(entryRole==='start') return normalizePoint(meta.start);
@@ -14740,11 +14750,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       try{resetRoute({fresh:true});}catch(_e){}
       if(!_activeTab||_activeTab!=='route')openTab('route');else _enterRouteMode();
       setTimeout(function(){try{
-        if(meta.start&&_validGpsPair(meta.start.lat,meta.start.lng)) _setRoutePointFromItem('start',meta.start,-1);
-        plan.slice(0,OAI_MAX_ROUTE_WAYPOINTS).forEach(function(item,i){const cfg=OAI_ROUTE_WAYPOINT_CONFIGS[i];if(cfg)_setRoutePointFromItem(cfg.role,item,-1);});
-        if(meta.end&&_validGpsPair(meta.end.lat,meta.end.lng)) _setRoutePointFromItem('end',meta.end,-1);
+        if(meta.start&&_validGpsPair(meta.start.lat,meta.start.lng)) _setRoutePointFromItem('start',meta.start,_pilgrimageRouteShrineIndex(meta.start));
+        plan.slice(0,OAI_MAX_ROUTE_WAYPOINTS).forEach(function(item,i){const cfg=OAI_ROUTE_WAYPOINT_CONFIGS[i];if(cfg)_setRoutePointFromItem(cfg.role,item,_pilgrimageRouteShrineIndex(item));});
+        if(meta.end&&_validGpsPair(meta.end.lat,meta.end.lng)) _setRoutePointFromItem('end',meta.end,_pilgrimageRouteShrineIndex(meta.end));
         _syncRouteWaypointBoxes();
         _refreshRoutePilgrimageButtonMode();
+        try{_refreshRouteTmpMarkers();}catch(_e){}
+        setTimeout(function(){try{if(window.__OAI_PILGRIMAGE_ROUTE_EDIT__)_refreshRouteTmpMarkers();}catch(_e){}},360);
+        setTimeout(function(){try{if(window.__OAI_PILGRIMAGE_ROUTE_EDIT__)_refreshRouteTmpMarkers();}catch(_e){}},980);
         const initial=_pilgrimageMapInitialPoint(entryRole);
         if(_map&&initial&&_validGpsPair(initial.lat,initial.lng)){_map.setCenter(new _LL(Number(initial.lat),Number(initial.lng)));if(typeof _map.setLevel==='function')_map.setLevel(OAI_PILGRIMAGE_MAP_PICK_VIEW_LEVEL);}
         if(_map&&typeof _map.relayout==='function')_map.relayout();
