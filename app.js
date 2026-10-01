@@ -15030,6 +15030,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const meta=loadMeta(),date=_todayISODate(),seen={},names=[];
     [meta.start,meta.end].forEach(function(point){
       const hit=_pilgrimageFindRegisteredEndpoint(point);if(!hit||!hit.item)return;
+      // 출발/도착 지점이 '내 본당'이면 순례용 GPS 방문등록에서 제외한다.
+      // 대부분 내 본당에서 모여 출발하거나 해산하므로 코스 순례기록에 자동 방문으로 남기지 않는다.
+      if(hit.type==='parish'){
+        try{const myParish=_configuredMyParish();if(myParish&&_isSameParish(hit.item,myParish))return;}catch(_e){}
+      }
       const key=hit.type+'|'+String(hit.item.diocese||'')+'|'+String(hit.item.name||'');if(seen[key])return;seen[key]=1;
       let meters=Infinity;
       if(hit.type==='shrine'&&Array.isArray(hit.item.gpsPoints)&&hit.item.gpsPoints.length){
@@ -15051,7 +15056,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     if(!opts.silent){
       const note=document.getElementById('oai-pilgrimage-current-check-note');
-      if(note)note.textContent=names.length?('GPS 등록 완료: '+names.join(', ')):('현재 위치 확인 완료 · 출발/도착 GPS 등록 대상이 없거나 이미 오늘 등록되었습니다.');
+      if(note)note.textContent=names.length?('GPS 등록 완료: '+names.join(', ')):('현재 위치 확인 완료 · 출발/도착 GPS 등록 대상이 없거나 이미 오늘 등록되었습니다. 내 본당은 제외됩니다.');
     }
     return {registered:names.length,names:names};
   };
@@ -15066,7 +15071,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       try{_maybeAutoParishVisit(Number(lat),Number(lng));}catch(_e){}
       try{calcDetailItemMetrics();}catch(_e){}
       if(btn){btn.classList.remove('is-checking');btn.disabled=false;}
-      if(note&&!r.registered)note.textContent='현재 위치 확인 완료 · 순례지 GPS 등록과 출발·도착 성지/성당 등록을 확인했습니다.';
+      if(note&&!r.registered)note.textContent='현재 위치 확인 완료 · 순례지 GPS 등록과 출발·도착 성지/성당 등록을 확인했습니다. 내 본당은 제외됩니다.';
     };
     const fail=function(){if(btn){btn.classList.remove('is-checking');btn.disabled=false;}if(note)note.textContent='현재 위치를 확인하지 못했습니다. 위치 권한과 GPS를 확인해 주세요.';};
     try{
