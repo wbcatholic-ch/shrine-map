@@ -7821,7 +7821,7 @@ html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll.route-scroll-ha
 }
 
 
-/* V8-1-14-960: 다음 순례 빈 박스 제거 + 강조색 강화 */
+/* V8-1-14-961: 다음 순례 빈 박스 제거 + 강조색 강화 */
 #oai-pilgrimage-detail-view .oai-pilgrimage-waypoint-chip.is-next{
   display:none!important;
 }
@@ -7843,8 +7843,40 @@ html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll.route-scroll-ha
 }
 
 
-/* V8-1-14-960: 순례하기 화면의 코스 완료 요약 박스 완전 제거 */
+/* V8-1-14-961: 순례하기 화면의 코스 완료 요약 박스 완전 제거 */
 #oai-pilgrimage-detail-view #oai-pilgrimage-course-complete-banner,
 #oai-pilgrimage-course-complete-banner{
   display:none!important;
+}
+
+
+/* V8-1-14-961: 순례계획 필터 틀고정 + 정렬 선택 */
+#oai-pilgrimage-list-view .oai-pilgrimage-course-filters{
+  position:sticky!important;
+  top:0!important;
+  z-index:12!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  gap:7px!important;
+  margin:0!important;
+  padding:6px 0 9px!important;
+  background:#f4f0e7!important;
+  box-shadow:0 1px 0 #d8d0bf!important;
+}
+#oai-pilgrimage-list-view .oai-pilgrimage-course-filters select{
+  height:44px!important;
+  padding:0 6px!important;
+  font-size:calc(13.5px * var(--app-font-scale,1))!important;
+  text-align-last:center!important;
+}
+@media(max-width:390px){
+  #oai-pilgrimage-list-view .oai-pilgrimage-course-filters{
+    grid-template-columns:repeat(4,minmax(0,1fr))!important;
+    gap:5px!important;
+    padding:5px 0 8px!important;
+  }
+  #oai-pilgrimage-list-view .oai-pilgrimage-course-filters select{
+    height:42px!important;
+    padding:0 3px!important;
+    font-size:calc(11.5px * var(--app-font-scale,1))!important;
+  }
 }

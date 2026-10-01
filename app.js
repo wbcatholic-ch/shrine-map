@@ -14620,7 +14620,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   let versionTapCount=0, versionTapTimer=0, plannerReturnToCover=false;
   let plannerView='list', currentCourseId='', pointRole='start', pendingPlanDeleteIndex=-1;
   let pilgrimageTotalCalcSeq=0, detailMetricSeq=0, followMetricSeq=0;
-  let pilgrimageCourseFilterState={year:'all',month:'all',status:'all'};
+  let pilgrimageCourseFilterState={year:'all',month:'all',status:'all',sort:'default'};
   let completionHistoryCourseId='', completionHistoryEditIndex=-1;
 
   function esc(v){return _placeText(String(v==null?'':v));}
@@ -14695,7 +14695,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const yearSel=document.getElementById('oai-pilgrimage-filter-year');
     const monthSel=document.getElementById('oai-pilgrimage-filter-month');
     const statusSel=document.getElementById('oai-pilgrimage-filter-status');
-    if(!yearSel||!monthSel||!statusSel) return;
+    const sortSel=document.getElementById('oai-pilgrimage-filter-sort');
+    if(!yearSel||!monthSel||!statusSel||!sortSel) return;
     const years=[];
     (Array.isArray(courses)?courses:[]).forEach(function(c){
       _courseCompletionList(c).forEach(function(entry){
@@ -14707,12 +14708,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     yearSel.innerHTML='<option value="all">년</option>'+years.map(function(y){return '<option value="'+y+'">'+y+'년</option>';}).join('');
     monthSel.innerHTML='<option value="all">월</option>'+Array.from({length:12},function(_,i){const v=String(i+1).padStart(2,'0');return '<option value="'+v+'">'+(i+1)+'월</option>';}).join('');
     statusSel.innerHTML='<option value="all">전체</option><option value="complete">순례완료</option><option value="incomplete">미완료</option>';
+    sortSel.innerHTML='<option value="default">정렬</option><option value="updated">최근수정</option><option value="completed">최근순례</option><option value="name">이름순</option>';
     if(!['all'].concat(years.map(String)).includes(String(pilgrimageCourseFilterState.year||'all'))) pilgrimageCourseFilterState.year='all';
     if(!['all'].concat(Array.from({length:12},function(_,i){return String(i+1).padStart(2,'0');})).includes(String(pilgrimageCourseFilterState.month||'all'))) pilgrimageCourseFilterState.month='all';
     if(!['all','complete','incomplete'].includes(String(pilgrimageCourseFilterState.status||'all'))) pilgrimageCourseFilterState.status='all';
+    if(!['default','updated','completed','name'].includes(String(pilgrimageCourseFilterState.sort||'default'))) pilgrimageCourseFilterState.sort='default';
     yearSel.value=String(pilgrimageCourseFilterState.year||'all');
     monthSel.value=String(pilgrimageCourseFilterState.month||'all');
     statusSel.value=String(pilgrimageCourseFilterState.status||'all');
+    sortSel.value=String(pilgrimageCourseFilterState.sort||'default');
   }
   function _courseMatchesFilters(c,filters){
     const f=filters||pilgrimageCourseFilterState||{};
@@ -14721,6 +14725,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(f.status==='complete') return has&&_courseCompletionMatches(c,f.year,f.month);
     if(f.year!=='all'||f.month!=='all') return has&&_courseCompletionMatches(c,f.year,f.month);
     return true;
+  }
+  function _sortPilgrimageCourses(list,mode){
+    const a=(Array.isArray(list)?list:[]).slice();
+    const m=String(mode||'default');
+    if(m==='updated') return a.sort(function(x,y){return Number(y.updatedAt||0)-Number(x.updatedAt||0);});
+    if(m==='completed') return a.sort(function(x,y){return Number(y.lastCompletedAt||0)-Number(x.lastCompletedAt||0)||Number(y.updatedAt||0)-Number(x.updatedAt||0);});
+    if(m==='name') return a.sort(function(x,y){return String(x.name||'').localeCompare(String(y.name||''),'ko');});
+    return a;
   }
 
   function updateCurrentCourseProgress(){
@@ -14816,7 +14828,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const a=loadCourses();
     _renderCourseFilters(a);
     if(!a.length){body.innerHTML='<div class="oai-pilgrimage-saved-empty">저장한 순례계획이 없습니다.<br><b>새 순례계획 만들기</b>로 첫 코스를 만들어 보세요.</div>';return;}
-    const filtered=a.filter(function(c){return _courseMatchesFilters(c,pilgrimageCourseFilterState);});
+    const filtered=_sortPilgrimageCourses(a.filter(function(c){return _courseMatchesFilters(c,pilgrimageCourseFilterState);}),pilgrimageCourseFilterState.sort);
     if(!filtered.length){body.innerHTML='<div class="oai-pilgrimage-saved-empty">조건에 맞는 순례계획이 없습니다.<br><b>년도·월·완료 여부</b> 조건을 바꿔 보세요.</div>';return;}
     body.innerHTML=filtered.map(function(c){const hasDone=_courseCompletionList(c).length>0;return '<article class="oai-pilgrimage-course-card'+(hasDone?' is-completed':'')+'"><button type="button" class="oai-pilgrimage-course-open" data-course-open="'+esc(c.id)+'" data-course-hold="'+esc(c.id)+'"><span><b>'+esc(c.name)+'</b><small>'+courseSummary(c)+'</small></span><i>›</i></button>'+_courseCompletionMetaHtml(c)+'</article>';}).join('');
   }
@@ -15724,11 +15736,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   document.addEventListener('change',function(e){
     const t=e.target;
     if(!t) return;
-    if(t.id==='oai-pilgrimage-filter-year'||t.id==='oai-pilgrimage-filter-month'||t.id==='oai-pilgrimage-filter-status'){
+    if(t.id==='oai-pilgrimage-filter-year'||t.id==='oai-pilgrimage-filter-month'||t.id==='oai-pilgrimage-filter-status'||t.id==='oai-pilgrimage-filter-sort'){
       pilgrimageCourseFilterState={
         year:String(document.getElementById('oai-pilgrimage-filter-year')&&document.getElementById('oai-pilgrimage-filter-year').value||'all'),
         month:String(document.getElementById('oai-pilgrimage-filter-month')&&document.getElementById('oai-pilgrimage-filter-month').value||'all'),
-        status:String(document.getElementById('oai-pilgrimage-filter-status')&&document.getElementById('oai-pilgrimage-filter-status').value||'all')
+        status:String(document.getElementById('oai-pilgrimage-filter-status')&&document.getElementById('oai-pilgrimage-filter-status').value||'all'),
+        sort:String(document.getElementById('oai-pilgrimage-filter-sort')&&document.getElementById('oai-pilgrimage-filter-sort').value||'default')
       };
       renderCourseList();
     }
