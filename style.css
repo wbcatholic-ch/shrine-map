@@ -7331,3 +7331,30 @@ html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll.route-scroll-ha
 #oai-pilgrimage-detail-view .oai-pilgrimage-total-card{
   border:1.6px solid #aeb9c6!important;
 }
+
+
+/* V8-1-14-947: 순례계획 목록 상단 순서/가독성 조정
+   년·월·전체를 최상단에 두고, 그 아래 순례계획 세우기 버튼을 배치 */
+#oai-pilgrimage-list-view .oai-pilgrimage-course-filters{
+  margin:4px 0 10px!important;
+}
+#oai-pilgrimage-list-view .oai-pilgrimage-course-filters select{
+  height:50px!important;
+  font-size:calc(16px * var(--app-font-scale,1))!important;
+  font-weight:950!important;
+}
+#oai-pilgrimage-list-view .oai-pilgrimage-new{
+  min-height:66px!important;
+  margin:0 0 14px!important;
+  font-size:calc(24px * var(--app-font-scale,1))!important;
+  font-weight:950!important;
+}
+@media(max-width:390px){
+  #oai-pilgrimage-list-view .oai-pilgrimage-course-filters select{
+    padding:0 5px!important;
+    font-size:calc(15px * var(--app-font-scale,1))!important;
+  }
+  #oai-pilgrimage-list-view .oai-pilgrimage-new{
+    font-size:calc(22px * var(--app-font-scale,1))!important;
+  }
+}
