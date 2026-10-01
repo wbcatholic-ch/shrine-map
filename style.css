@@ -6508,3 +6508,56 @@ html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll .rs-route-stack
 html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll #rs-top .rs-action-row{
   flex:none!important;
 }
+
+
+/* V8-1-14-931: 길찾기 결과는 스크롤 없이 하단 버튼까지 모두 보이고, 닫기 X를 출발지 옆으로 이동 */
+html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing.open{
+  height:auto!important;
+  max-height:calc(100dvh - 150px)!important;
+  overflow:visible!important;
+  padding-bottom:0!important;
+}
+html:not(.oai-map-split-wide) #sheet-route.route-result-showing{
+  overflow:visible!important;
+  -webkit-overflow-scrolling:auto!important;
+  overscroll-behavior:auto!important;
+}
+html:not(.oai-map-split-wide) #sheet-route.route-result-showing #rs-top{
+  padding-top:10px!important;
+}
+html:not(.oai-map-split-wide) #sheet-route.route-result-showing .route-sheet-x{
+  top:17px!important;
+  right:13px!important;
+}
+html:not(.oai-map-split-wide) #sheet-route.route-result-showing .rs-route-stack{
+  padding-right:0!important;
+}
+html:not(.oai-map-split-wide) #sheet-route.route-result-showing #rs-bottom{
+  padding-bottom:calc(18px + var(--oai-android-bottom-gap, env(safe-area-inset-bottom,0px)))!important;
+}
+
+/* 경유지 4곳부터는 3곳일 때의 카드 높이를 유지하고 경로 입력 목록만 내부 스크롤 */
+html:not(.oai-map-split-wide) #app #sheet-route.route-waypoint-scroll.open{
+  height:auto!important;
+  max-height:none!important;
+  overflow:visible!important;
+}
+html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll #rs-top{
+  overflow:hidden!important;
+  display:flex!important;
+  flex-direction:column!important;
+  min-height:0!important;
+}
+html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll .rs-route-stack{
+  height:240px!important;
+  max-height:240px!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+  scroll-padding-block:8px;
+  padding-right:2px;
+}
+html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll #rs-top .rs-action-row{
+  flex:none!important;
+}
