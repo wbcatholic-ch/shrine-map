@@ -7048,3 +7048,40 @@ html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll.route-scroll-ha
   color:#7b8794;
   font-size:calc(10.5px * var(--app-font-scale,1));
 }
+
+
+/* V8-1-14-942: 순례계획 목록 필터 + 완료 히스토리 + 완료 워터마크 */
+.oai-pilgrimage-course-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:2px 0 12px;}
+.oai-pilgrimage-course-filters label{display:flex;min-width:0;flex-direction:column;gap:4px;}
+.oai-pilgrimage-course-filters span{padding-left:2px;color:#6b7482;font-size:11.5px;font-weight:850;line-height:1;}
+.oai-pilgrimage-course-filters select{width:100%;min-width:0;height:42px;padding:0 12px;border:1.5px solid #c8d3df;border-radius:12px;background:#fff;color:#17213a;font-family:inherit;font-size:13px;font-weight:850;outline:none;}
+.oai-pilgrimage-course-filters select:focus{border-color:#176fc0;box-shadow:0 0 0 3px rgba(23,111,192,.12);}
+.oai-pilgrimage-course-card{display:block;position:relative;}
+.oai-pilgrimage-course-open{position:relative;overflow:hidden;}
+.oai-pilgrimage-course-card.is-completed .oai-pilgrimage-course-open::after{content:"순례";position:absolute;right:16px;top:12px;color:rgba(210,34,34,.13);font-size:clamp(34px,8.5vw,52px);font-weight:980;line-height:1;letter-spacing:-.06em;transform:rotate(-10deg);pointer-events:none;}
+.oai-pilgrimage-course-date-btn,.oai-pilgrimage-course-count-btn{flex:none;border:0;background:transparent;color:#6d7480;font-family:inherit;font-size:11.5px;font-weight:900;line-height:1.2;white-space:nowrap;}
+.oai-pilgrimage-course-date-btn{text-decoration:underline;text-underline-offset:2px;}
+.oai-pilgrimage-course-count-btn{padding:0;color:#8b5b17;}
+.oai-pilgrimage-course-date-btn:active,.oai-pilgrimage-course-count-btn:active{transform:scale(.98);opacity:.88;}
+.oai-pilgrimage-completion-dialog{width:min(92vw,460px);}
+.oai-pilgrimage-completion-edit-box{margin-top:10px;padding:12px;border:1px solid #e4d7bc;border-radius:14px;background:#fffaf0;}
+.oai-pilgrimage-completion-edit-state{margin-bottom:8px;color:#7a6228;font-size:12px;font-weight:850;line-height:1.4;}
+.oai-pilgrimage-completion-dialog input[type="date"]{width:100%;}
+.oai-pilgrimage-completion-edit-actions{display:grid;grid-template-columns:1fr 1.1fr;gap:8px;margin-top:10px;}
+.oai-pilgrimage-completion-edit-actions button{height:44px;border:1px solid #d3c4a5;border-radius:12px;background:#fff;color:#63553a;font:850 13px/1 inherit;}
+.oai-pilgrimage-completion-edit-actions .primary{border-color:#176fc0;background:#176fc0;color:#fff;}
+.oai-pilgrimage-completion-list{display:flex;flex-direction:column;gap:8px;max-height:min(42vh,320px);margin-top:12px;overflow:auto;}
+.oai-pilgrimage-completion-item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:8px;align-items:center;padding:10px 12px;border:1px solid #e6dcc9;border-radius:13px;background:#fff;}
+.oai-pilgrimage-completion-item.is-editing{border-color:#176fc0;box-shadow:0 0 0 2px rgba(23,111,192,.10);}
+.oai-pilgrimage-completion-item-main{display:flex;min-width:0;flex-direction:column;align-items:flex-start;gap:4px;}
+.oai-pilgrimage-completion-item-date{padding:0;border:0;background:transparent;color:#17213a;font-family:inherit;font-size:15px;font-weight:950;line-height:1.2;text-align:left;text-decoration:underline;text-underline-offset:3px;}
+.oai-pilgrimage-completion-item-date:active{transform:scale(.98);opacity:.88;}
+.oai-pilgrimage-completion-item-meta{color:#7a8594;font-size:12px;font-weight:800;line-height:1.25;}
+.oai-pilgrimage-completion-item-delete{min-width:54px;height:36px;padding:0 10px;border:1px solid #e0cbc8;border-radius:10px;background:#fff7f6;color:#aa4a40;font:850 12px/1 inherit;}
+.oai-pilgrimage-completion-empty{padding:14px;border:1px dashed #d0c19d;border-radius:13px;background:#faf8f3;color:#7d8794;text-align:center;font-size:12.5px;font-weight:800;line-height:1.5;}
+.oai-pilgrimage-completion-close-row{grid-template-columns:1fr!important;}
+@media(max-width:390px){
+  .oai-pilgrimage-course-filters{grid-template-columns:1fr;gap:6px;}
+  .oai-pilgrimage-course-date-btn,.oai-pilgrimage-course-count-btn{font-size:11px;}
+  .oai-pilgrimage-course-card.is-completed .oai-pilgrimage-course-open::after{right:12px;top:16px;font-size:40px;}
+}
