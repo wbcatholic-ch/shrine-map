@@ -14927,21 +14927,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const body=document.getElementById('oai-pilgrimage-plan-list');
     if(body){
       if(!list.length) body.innerHTML='<button type="button" class="oai-pilgrimage-empty oai-pilgrimage-empty-action" data-oai-pilgrimage-add="1"><b>＋ 먼저 순례 장소를 추가하세요</b><small>여기를 눌러 성지·성당을 검색합니다.</small></button>';
-      else body.innerHTML=list.map((item,i)=>{const isNext=(next>=0&&i===next&&!item.done);const cls='oai-pilgrimage-item'+(item.done?' is-done':'')+(isNext?' is-next':'');const metric=item.done?'순례 완료':(isNext?'다음 순례지':'GPS 확인 중…');let statusHtml='';if(item.done){statusHtml='<span class="oai-pilgrimage-waypoint-chip is-done">✓ 순례완료</span>';}else if(isNext){statusHtml='<span class="oai-pilgrimage-waypoint-chip is-next" aria-hidden="true"></span>';}return '<div class="'+cls+'" data-plan-index="'+i+'" data-plan-hold="'+i+'"><button type="button" class="oai-pilgrimage-drag" data-plan-drag="'+i+'" aria-label="'+esc(item.name)+' 순서 이동">⋮</button><span class="oai-pilgrimage-order" aria-label="순례 '+(i+1)+'번">'+(i+1)+'</span><div class="oai-pilgrimage-main"><div class="oai-pilgrimage-main-head"><b>'+esc(item.name)+'</b>'+statusHtml+'</div><small class="oai-pilgrimage-item-metric" data-plan-metric="'+i+'">'+metric+'</small></div></div>';}).join('');
+      else body.innerHTML=list.map((item,i)=>{const isNext=(next>=0&&i===next&&!item.done);const cls='oai-pilgrimage-item'+(item.done?' is-done':'')+(isNext?' is-next':'');const metric=item.done?'순례 완료':(isNext?'다음 순례지':'GPS 확인 중…');const statusHtml=item.done?'<span class="oai-pilgrimage-waypoint-chip is-done">✓ 순례완료</span>':'';return '<div class="'+cls+'" data-plan-index="'+i+'" data-plan-hold="'+i+'"><button type="button" class="oai-pilgrimage-drag" data-plan-drag="'+i+'" aria-label="'+esc(item.name)+' 순서 이동">⋮</button><span class="oai-pilgrimage-order" aria-label="순례 '+(i+1)+'번">'+(i+1)+'</span><div class="oai-pilgrimage-main"><div class="oai-pilgrimage-main-head"><b>'+esc(item.name)+'</b>'+statusHtml+'</div><small class="oai-pilgrimage-item-metric" data-plan-metric="'+i+'">'+metric+'</small></div></div>';}).join('');
     }
     const banner=document.getElementById('oai-pilgrimage-course-complete-banner');
-    const currentCourse=currentCourseId?loadCourses().find(function(x){return x.id===currentCourseId;})||null:null;
     if(banner){
-      const completions=currentCourse?_courseCompletionList(currentCourse):[];
-      if(completions.length){
-        const last=Number(currentCourse.lastCompletedAt)||Number(completions[0]&&completions[0].completedAt)||0;
-        const countDone=Math.max(1,completions.length);
-        banner.hidden=false;
-        banner.innerHTML='<strong class="oai-pilgrimage-course-complete-banner-title">✓ 순례완료 코스</strong><div class="oai-pilgrimage-course-complete-banner-meta"><button type="button" class="oai-pilgrimage-course-date-btn" data-course-history="'+esc(currentCourse.id)+'">'+esc(_courseCompletionDate(last))+'</button>'+(countDone>1?'<button type="button" class="oai-pilgrimage-course-count-btn" data-course-history="'+esc(currentCourse.id)+'">'+countDone+'회 기록</button>':'')+(_courseHasGpsLockedCompletion(currentCourse)?'<span class="oai-pilgrimage-course-gps-lock">🔒 GPS 기록</span>':'')+'</div>';
-      }else{
-        banner.hidden=true;
-        banner.innerHTML='';
-      }
+      banner.hidden=true;
+      banner.innerHTML='';
     }
     const addBtn=document.querySelector('.oai-pilgrimage-detail-view .oai-pilgrimage-add');
     if(addBtn){

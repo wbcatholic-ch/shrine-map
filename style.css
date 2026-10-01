@@ -7819,3 +7819,25 @@ html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll.route-scroll-ha
     font-size:calc(10.8px * var(--app-font-scale,1))!important;
   }
 }
+
+
+/* V8-1-14-957: 다음 순례 빈 박스 제거 + 강조색 강화 */
+#oai-pilgrimage-detail-view .oai-pilgrimage-waypoint-chip.is-next{
+  display:none!important;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-item.is-next{
+  background:#f4dfad!important;
+  border-bottom:1px solid #d3a84d!important;
+  box-shadow:inset 4px 0 0 #c97c00!important;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-item.is-next .oai-pilgrimage-main b{
+  color:#5f3d05!important;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-item.is-next .oai-pilgrimage-item-metric{
+  color:#7f5510!important;
+  font-weight:900!important;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-item.is-next .oai-pilgrimage-order{
+  background:#cf8200!important;
+  border-color:#b56e00!important;
+}
