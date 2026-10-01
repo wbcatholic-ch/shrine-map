@@ -15645,7 +15645,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(act==='rename')openCourseRenameModal(ctx.id);else if(act==='delete-course')deleteCourse(ctx.id);
     }else{
       const list=loadPlan(),i=ctx.index;if(i<0||i>=list.length)return;
-      if(act==='visit'){list[i].done=!list[i].done;list[i].doneMethod=list[i].done?'manual':'';savePlan(list);}
+      if(act==='visit'){
+        list[i].done=!list[i].done;
+        list[i].doneMethod=list[i].done?'manual':'';
+        savePlan(list,true);
+        updateCurrentCourseProgress();
+        renderDetail();
+      }
       else if(act==='delete-place')openPlanDelete(i);
     }
   },true);
