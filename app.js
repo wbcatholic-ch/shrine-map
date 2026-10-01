@@ -3542,7 +3542,7 @@ function _maybeAutoParishVisit(lat,lng){
   if(isMyParish){if(!_isMyParishAutoVisitEnabled()||previousVisits.length)return;}else if(previousVisits.some(function(v){return v.date===_todayISODate();}))return;
   if(!_addParishVisit(best,_todayISODate(),'gps'))return;
 
-  // V8-1-14-986:
+  // V8-1-14-987:
   // 같은 GPS 위치가 '성지 + 성당 + 활성 순례코스'에 동시에 해당하더라도
   // 방문기록은 각각 정상 등록하되 축하 안내는 성지를 우선한다.
   // 따라서 현재 위치가 성지 자동등록 반경 안이면 성당용 축하 팝업은 띄우지 않는다.
@@ -8226,6 +8226,7 @@ function closeRouteSheetByX(){
   window.__oaiPilgrimageRouteReturn = false;
   try{document.documentElement.classList.remove('oai-pilgrimage-route-direct');}catch(_e){}
   window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__=false;
+  _applyPilgrimageCourseViewReadOnlyState();
   if(returnToPilgrimageEdit) window.__OAI_PILGRIMAGE_ROUTE_EDIT__=null;
   _blurAll && _blurAll();
   _closeSheetOnly('route');
@@ -9324,10 +9325,12 @@ function _openRoutePointCancelChoice(role){
   try{ document.activeElement&&document.activeElement.blur(); }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 function _handleRouteChoiceStart(){
+  if(_isPilgrimageCourseViewReadOnly()) return;
   if(_routeChoiceMode==='cancel'){ _closeInfoRouteChoice(); return; }
   _setInfoRouteStart();
 }
 function _handleRouteChoiceEnd(){
+  if(_isPilgrimageCourseViewReadOnly()) return;
   if(_routeChoiceMode==='cancel'){
     const role=_routeCancelRole;
     _closeInfoRouteChoice();
@@ -9339,10 +9342,12 @@ function _handleRouteChoiceEnd(){
   _setInfoRouteEnd({autoSearch:false});
 }
 function _handleRouteChoiceWaypoint(){
+  if(_isPilgrimageCourseViewReadOnly()) return;
   if(_routeChoiceMode==='cancel') return;
   _setInfoRouteWaypoint();
 }
 function _openInfoRouteChoice(){
+  if(_isPilgrimageCourseViewReadOnly()) return;
   if(!_curInfoItem) return;
   const dlg=$('route-choice-modal');
   if(!dlg){ openInAppRoute(); return; }
@@ -9365,6 +9370,7 @@ function _closeInfoRouteChoice(){
   _syncMapPanelUI('close-route-choice');
 }
 function _openRouteMarkerChoice(item,idx){
+  if(_isPilgrimageCourseViewReadOnly()) return;
   if(!item) return;
   const dlg=$('route-choice-modal');
   if(!dlg){ _setRoutePointFromItem(_routeHasVisibleStart()?'end':'start',item,idx); return; }
@@ -11889,6 +11895,7 @@ function _renderRouteQuickList(){
   body.innerHTML=html;
 }
 function _openRouteQuick(role){
+  if(_isPilgrimageCourseViewReadOnly()) return;
   if(role!=='start'&&role!=='end') return;
   _routeQuickRole=role;
   const m=$('route-quick-modal'); if(!m) return;
@@ -11970,6 +11977,17 @@ function _setRouteLabel(role,name){
   _updateSearchBtn();
 }
 
+function _isPilgrimageCourseViewReadOnly(){
+  return window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__===true;
+}
+function _applyPilgrimageCourseViewReadOnlyState(){
+  const on=_isPilgrimageCourseViewReadOnly();
+  try{document.documentElement.classList.toggle('oai-pilgrimage-course-view-readonly',on);}catch(_e){}
+  try{
+    const sheet=document.getElementById('sheet-route');
+    if(sheet)sheet.classList.toggle('oai-course-view-readonly',on);
+  }catch(_e){}
+}
 function _isPilgrimageMapEditReturnMode(){
   return !!(window.__OAI_PILGRIMAGE_ROUTE_EDIT__ && window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__!==true);
 }
@@ -12341,6 +12359,7 @@ function _clearRouteResultOnly(){
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 function clearRoute(role, opts){
+  if(_isPilgrimageCourseViewReadOnly()) return;
   opts = opts || {};
   const keepWaypointBox = !!(opts.keepWaypointBox && _isRouteWaypointRole(role));
   if(role==='start'&&_rS){
@@ -13792,6 +13811,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   _updateAllRouteFavoriteButtons();
   _renderRouteItinerary();
   on('rs-search-btn','click', function() {
+    if(_isPilgrimageCourseViewReadOnly()) return;
     if(_isPilgrimageMapEditReturnMode()){
       _finishPilgrimageRouteEdit();
       return;
@@ -13799,7 +13819,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     doSearchRoute();
   });
   on('rs-kakao-btn', 'click', function() { doKakaoRoute(); });
-  on('rs-reset-btn', 'click', function() { resetRoute({ fromButton: true }); });
+  on('rs-reset-btn', 'click', function() {
+    if(_isPilgrimageCourseViewReadOnly()) return;
+    resetRoute({ fromButton: true });
+  });
 
   on('ic-close-btn', 'click', function(e) { if(e){ e.preventDefault(); e.stopPropagation(); } closeInfoCard({keepMap:true}); });
   on('ic-route-btn', 'click', function() { _openInfoRouteChoice(); });
@@ -15786,6 +15809,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     pilgrimageCourseMapMarkers=[];
     window.__OAI_PILGRIMAGE_COURSE_VIEW__=false;
     window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__=false;
+    _applyPilgrimageCourseViewReadOnlyState();
   }
   function _pilgrimageCoursePoints(){
     const meta=loadMeta(),list=loadPlan(),out=[];
@@ -15802,12 +15826,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     try{
       window.__OAI_PILGRIMAGE_COURSE_VIEW__=true;
       window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__=true;
+      _applyPilgrimageCourseViewReadOnlyState();
       _openUnifiedPilgrimageMapAdd('plan');
       const autoSearch=function(){
         try{
           if(!window.__OAI_PILGRIMAGE_ROUTE_EDIT__)return;
           if(_rS&&_rE){
             _refreshRoutePilgrimageButtonMode();
+            _applyPilgrimageCourseViewReadOnlyState();
             _calcRoute();
           }
         }catch(e){console.warn('[가톨릭길동무] 순례코스 자동 경로검색 실패',e);}
