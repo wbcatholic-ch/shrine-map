@@ -6523,7 +6523,21 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-waypoint-scroll.open{
   overflow:hidden!important;
   box-sizing:border-box!important;
 }
-html:not(.oai-map-split-wide) #app #sheet-route.route-waypoint-scroll #rs-top{box-sizing:border-box!important;height:304px!important;max-height:304px!important;min-height:304px!important;margin-top:46px!important;margin-bottom:0!important;padding:0 0 8px!important;overflow-y:auto!important;overflow-x:hidden!important;-webkit-overflow-scrolling:touch!important;overscroll-behavior-y:contain!important;touch-action:pan-y!important;scroll-padding-bottom:8px!important;}
+html:not(.oai-map-split-wide) #app #sheet-route.route-waypoint-scroll #rs-top{
+  box-sizing:border-box!important;
+  height:304px!important;
+  max-height:304px!important;
+  min-height:304px!important;
+  margin-top:0!important;
+  margin-bottom:0!important;
+  padding:10px 10px 8px 12px!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+  overscroll-behavior-y:contain!important;
+  touch-action:pan-y!important;
+  scroll-padding-bottom:8px!important;
+}
 html:not(.oai-map-split-wide) #app #sheet-route.route-waypoint-scroll #rs-top .rs-action-row{position:relative!important;flex:none!important;margin:7px 0 0!important;}
 #app #sheet-route:not(.route-result-showing) #rs-bottom{display:none!important;height:0!important;min-height:0!important;padding:0!important;margin:0!important;overflow:hidden!important;}
 html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing.open{
@@ -6545,7 +6559,7 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .rs-result{
 html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns{margin-bottom:0!important;}
 
 #sheet-route .route-scroll-up-hint{display:none;position:absolute;top:13px;left:50%;transform:translateX(-50%);z-index:7;min-width:104px;height:28px;padding:0 12px;box-sizing:border-box;align-items:center;justify-content:center;border:1px solid rgba(159,128,69,.36);border-radius:999px;background:rgba(255,253,247,.94);color:#7a6337;font-size:12px;font-weight:850;line-height:1;letter-spacing:-.02em;pointer-events:none;box-shadow:0 1px 4px rgba(73,56,29,.08);}
-html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll.route-scroll-has-up-content .route-scroll-up-hint{display:flex;}
+html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll.route-scroll-has-up-content .route-scroll-up-hint{display:none!important;}
 
 /* V8-1-14-940: 순례 완료 기록 · 스탬프 · 다시 순례 */
 .oai-pilgrimage-course-card{
@@ -7545,7 +7559,7 @@ html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll.route-scroll-ha
 }
 
 
-/* V8-1-14-1008: 다음 순례 빈 박스 제거 + 강조색 강화 */
+/* V8-1-14-1009: 다음 순례 빈 박스 제거 + 강조색 강화 */
 #oai-pilgrimage-detail-view .oai-pilgrimage-waypoint-chip.is-next{
   display:none!important;
 }
@@ -7567,14 +7581,14 @@ html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll.route-scroll-ha
 }
 
 
-/* V8-1-14-1008: 순례하기 화면의 코스 완료 요약 박스 완전 제거 */
+/* V8-1-14-1009: 순례하기 화면의 코스 완료 요약 박스 완전 제거 */
 #oai-pilgrimage-detail-view #oai-pilgrimage-course-complete-banner,
 #oai-pilgrimage-course-complete-banner{
   display:none!important;
 }
 
 
-/* V8-1-14-1008: 순례계획 필터 틀고정 + 정렬 선택 */
+/* V8-1-14-1009: 순례계획 필터 틀고정 + 정렬 선택 */
 #oai-pilgrimage-list-view .oai-pilgrimage-course-filters{
   position:sticky!important;
   top:0!important;
@@ -7606,7 +7620,7 @@ html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll.route-scroll-ha
 }
 
 
-/* V8-1-14-1008: 성지순례 - 순례계획 / 순례완료 탭 분리 */
+/* V8-1-14-1009: 성지순례 - 순례계획 / 순례완료 탭 분리 */
 #oai-pilgrimage-list-view .oai-pilgrimage-list-sticky{position:sticky!important;top:0!important;z-index:14!important;margin:0 0 8px!important;padding:5px 0 8px!important;background:#f4f0e7!important;box-shadow:0 1px 0 #d8d0bf!important;}
 #oai-pilgrimage-list-view .oai-pilgrimage-course-tabs{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important;margin:0 0 7px!important;}
 #oai-pilgrimage-list-view .oai-pilgrimage-course-tabs button{min-height:44px!important;padding:0 10px!important;border:1.5px solid #bcc8d5!important;border-radius:13px!important;background:#fff!important;color:#536273!important;font-family:inherit!important;font-size:calc(15px * var(--app-font-scale,1))!important;font-weight:950!important;cursor:pointer!important;}
@@ -7622,7 +7636,7 @@ html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll.route-scroll-ha
 @media(max-width:390px){#oai-pilgrimage-list-view .oai-pilgrimage-list-sticky{padding:4px 0 7px!important;margin-bottom:7px!important;}#oai-pilgrimage-list-view .oai-pilgrimage-course-tabs{gap:6px!important;margin-bottom:6px!important;}#oai-pilgrimage-list-view .oai-pilgrimage-course-tabs button{min-height:42px!important;font-size:calc(14px * var(--app-font-scale,1))!important;}#oai-pilgrimage-list-view .oai-pilgrimage-course-filters{gap:5px!important;}#oai-pilgrimage-list-view .oai-pilgrimage-course-filters select{height:40px!important;padding:0 4px!important;font-size:calc(11.5px * var(--app-font-scale,1))!important;}#oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-sort-filter{width:min(46%,155px)!important;}}
 
 
-/* V8-1-14-1008: 성지순례 완료 우선 + 계획 툴바 + 따라가기 */
+/* V8-1-14-1009: 성지순례 완료 우선 + 계획 툴바 + 따라가기 */
 #oai-pilgrimage-list-view .oai-pilgrimage-list-toolbar{
   display:flex!important;
   align-items:center!important;
@@ -7717,7 +7731,7 @@ html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll.route-scroll-ha
 }
 
 
-/* V8-1-14-1008: 성지순례 목록/다시 따라가기 정리 */
+/* V8-1-14-1009: 성지순례 목록/다시 따라가기 정리 */
 .oai-pilgrimage-course-card.is-completed .oai-pilgrimage-course-open::after{
   content:none!important;
   display:none!important;
@@ -7801,7 +7815,7 @@ html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll.route-scroll-ha
 }
 
 
-/* V8-1-14-1008: 다음 순례 노란 강조 제거 */
+/* V8-1-14-1009: 다음 순례 노란 강조 제거 */
 #oai-pilgrimage-detail-view .oai-pilgrimage-item.is-next,
 #oai-pilgrimage-detail-view.gps-ready .oai-pilgrimage-item.is-next{
   background:#fff!important;
@@ -7862,7 +7876,7 @@ html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll.route-scroll-ha
 }
 
 
-/* V8-1-14-1008: 순례완료 / 순례하기 상세 정리 */
+/* V8-1-14-1009: 순례완료 / 순례하기 상세 정리 */
 #oai-pilgrimage-detail-view.is-completion-view .oai-pilgrimage-add-row{
   display:none!important;
 }
@@ -7914,7 +7928,7 @@ html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll.route-scroll-ha
 }
 
 
-/* V8-1-14-1008: 순례하기 버튼/거리 재계산/번호 표시 최종 정리 */
+/* V8-1-14-1009: 순례하기 버튼/거리 재계산/번호 표시 최종 정리 */
 #oai-pilgrimage-detail-view .oai-pilgrimage-detail-actions{
   margin:10px 0 7px!important;
 }
@@ -7961,7 +7975,7 @@ html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll.route-scroll-ha
 }
 
 
-/* V8-1-14-1008: 저장/순례하기 한 줄 + 따라가기 화면 정리 */
+/* V8-1-14-1009: 저장/순례하기 한 줄 + 따라가기 화면 정리 */
 #oai-pilgrimage-detail-view:not(.is-completion-view) .oai-pilgrimage-detail-actions{
   display:grid!important;
   grid-template-columns:1fr 1fr!important;
@@ -7984,7 +7998,7 @@ html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll.route-scroll-ha
 }
 
 
-/* V8-1-14-1008: 성지순례 목록 상단/순례하기 버튼 정렬 통일 */
+/* V8-1-14-1009: 성지순례 목록 상단/순례하기 버튼 정렬 통일 */
 
 /* 순례계획 탭 아래 툴바를 위 2개 탭과 같은 1:1 폭으로 맞춤 */
 #oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-list-toolbar{
@@ -8106,7 +8120,7 @@ html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll.route-scroll-ha
 }
 
 
-/* V8-1-14-1008: 순례 시작/종료 버튼 문구와 상태색 통일 */
+/* V8-1-14-1009: 순례 시작/종료 버튼 문구와 상태색 통일 */
 .oai-pilgrimage-course-follow-btn.is-active,
 .oai-pilgrimage-course-repeat.is-active,
 #oai-pilgrimage-detail-view .oai-pilgrimage-follow.is-stop{
@@ -8132,7 +8146,7 @@ html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll.route-scroll-ha
 }
 
 
-/* V8-1-14-1008: 순례완료 목록의 진행 중 코스 종료 버튼 표시 보강 */
+/* V8-1-14-1009: 순례완료 목록의 진행 중 코스 종료 버튼 표시 보강 */
 #oai-pilgrimage-list-view[data-course-tab="complete"] .oai-pilgrimage-course-repeat.is-active{
   border-color:#c3443e!important;
   background:#fff0ef!important;
@@ -8196,7 +8210,7 @@ html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll.route-scroll-ha
 #sheet-route #rs-search-btn.pilgrimage-return{background:#17365f!important;border-color:#17365f!important;color:#fff!important;font-weight:950!important;}
 #sheet-route #rs-search-btn.pilgrimage-return:active{background:#102a4b!important;transform:scale(.99)!important;}
 
-/* V8-1-14-1008: 순례 진행 중 매일미사/기도문 우측 상단 복귀 버튼 */
+/* V8-1-14-1009: 순례 진행 중 매일미사/기도문 우측 상단 복귀 버튼 */
 .faith-pilgrimage-return[hidden]{display:none!important;}
 .faith-pilgrimage-return{
   flex:0 0 auto;
@@ -8251,7 +8265,7 @@ html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll.route-scroll-ha
 }
 
 
-/* V8-1-14-1008: 순례코스 보기 / 큰 화면 박스 정렬 / 버튼 높이 최종 보정 */
+/* V8-1-14-1009: 순례코스 보기 / 큰 화면 박스 정렬 / 버튼 높이 최종 보정 */
 
 /* 큰 화면에서도 순례 상세 주요 박스의 좌우 기준선을 정확히 통일 */
 #oai-pilgrimage-detail-view .oai-pilgrimage-route-box,
@@ -8290,7 +8304,7 @@ html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll.route-scroll-ha
 
 
 
-/* V8-1-14-1008: 다음 순례지 명시 + 단일 진행 코스 전환 확인 */
+/* V8-1-14-1009: 다음 순례지 명시 + 단일 진행 코스 전환 확인 */
 
 /* 다른 코스 시작 확인창은 일반 순례 종료창과 동일한 앱 내부 모달 사용 */
 #oai-pilgrimage-follow-stop-message b{
@@ -8308,7 +8322,7 @@ html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll.route-scroll-ha
 
 
 
-/* V8-1-14-1008: 순례지 행 레이아웃 최종 통일
+/* V8-1-14-1009: 순례지 행 레이아웃 최종 통일
    진행 중 / 완료 화면 모두 같은 기본 구조를 사용하고,
    다음 순례지 라벨만 해당 행 오른쪽에 독립적으로 표시한다. */
 
@@ -8501,7 +8515,7 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-shee
   top:22px!important;
 }
 
-/* V8-1-14-1008: 순례 길찾기 UI 통합 규칙
+/* V8-1-14-1009: 순례 길찾기 UI 통합 규칙
    입력창 가로 위치/폭은 일반 성지·성당·피정 길찾기와 동일한
    공통 #sheet-route 규칙만 사용한다.
    순례 전용 규칙은 표시/숨김과 결과 구조만 담당한다. */
@@ -8627,7 +8641,7 @@ html.oai-map-split-wide #sheet-route #rs-bottom{
 }
 
 
-/* V8-1-14-1008: 지도 하단 카드 끝여백 최종 공통 기준
+/* V8-1-14-1009: 지도 하단 카드 끝여백 최종 공통 기준
    1번 성당/성지/피정 정보카드의 12px 하단 숨구멍을 기준으로
    모든 휴대폰 길찾기 카드의 맨 아래 여백을 동일하게 맞춘다.
    대상: 일반 길찾기, 지도에서 추가, 순례코스 보기, 다음 순례지 길찾기. */
@@ -8639,3 +8653,9 @@ html:not(.oai-map-split-wide) #app #sheet-route.open #rs-bottom{
   margin-bottom:0!important;
   scroll-padding-bottom:0!important;
 }
+
+
+/* V8-1-14-1009: 경유지 다중 입력 화면도 일반 길찾기와 같은 시작점 사용
+   route-waypoint-scroll 상태에서도 첫 입력칸은 공통 기준:
+   위 10px / 오른쪽 10px / 왼쪽 12px.
+   지도에서 추가만 따로 밀어내는 여백 규칙은 사용하지 않는다. */
