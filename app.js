@@ -3542,7 +3542,7 @@ function _maybeAutoParishVisit(lat,lng){
   if(isMyParish){if(!_isMyParishAutoVisitEnabled()||previousVisits.length)return;}else if(previousVisits.some(function(v){return v.date===_todayISODate();}))return;
   if(!_addParishVisit(best,_todayISODate(),'gps'))return;
 
-  // V8-1-14-971:
+  // V8-1-14-972:
   // 같은 GPS 위치가 '성지 + 성당 + 활성 순례코스'에 동시에 해당하더라도
   // 방문기록은 각각 정상 등록하되 축하 안내는 성지를 우선한다.
   // 따라서 현재 위치가 성지 자동등록 반경 안이면 성당용 축하 팝업은 띄우지 않는다.
@@ -15063,6 +15063,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function _courseCompletionMetaHtml(c,isFollowing){
     const completions=_courseCompletionList(c);
     if(!completions.length&&!c.lastCompletedAt)return '';
+    if(typeof isFollowing!=='boolean'){
+      const active=_activeFollowState();
+      isFollowing=!!(active&&active.courseId===String(c&&c.id||''));
+    }
     const last=Number(c.lastCompletedAt)||Number(completions[0]&&completions[0].completedAt)||0;
     const count=Math.max(1,completions.length);
     const repeatLabel=isFollowing?'■ 순례 종료':'▶ 다시 순례하기';
@@ -15297,6 +15301,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     pilgrimageDetailMode='plan';
     applyCourse(c);
     try{localStorage.setItem(ACTIVE_FOLLOW_KEY,JSON.stringify({courseId:c.id,startedAt:now}));}catch(_e){}
+    try{renderCourseList();}catch(_e){}
     setView('follow');openFollow(true);
   }
   let pendingCourseDeleteId='';
