@@ -3559,7 +3559,7 @@ function _maybeAutoParishVisit(lat,lng){
   if(isMyParish){if(!_isMyParishAutoVisitEnabled()||previousVisits.length)return;}else if(previousVisits.some(function(v){return v.date===_todayISODate();}))return;
   if(!_addParishVisit(best,_todayISODate(),'gps'))return;
 
-  // V8-1-14-995:
+  // V8-1-14-996:
   // 같은 GPS 위치가 '성지 + 성당 + 활성 순례코스'에 동시에 해당하더라도
   // 방문기록은 각각 정상 등록하되 축하 안내는 성지를 우선한다.
   // 따라서 현재 위치가 성지 자동등록 반경 안이면 성당용 축하 팝업은 띄우지 않는다.
@@ -11535,7 +11535,11 @@ function _syncRouteWaypointBoxes(){
       visible:resultShowing ? has : !!(enabled || has)
     };
   });
-  const summaryVisible=!!(!foldWide && resultShowing && routeWaypoints.length);
+  const pilgrimageCompactResult=!!(resultShowing && (
+    _isPilgrimageCourseViewReadOnly() ||
+    window.__oaiPilgrimageRouteReturn===true
+  ));
+  const summaryVisible=!!(resultShowing && routeWaypoints.length && (!foldWide || pilgrimageCompactResult));
   // 경유지 4번째 칸이 '생기는 순간'부터 카드 높이를 고정한다.
   // 실제 좌표가 채워진 경유지 수(routeWaypoints)가 아니라 화면에 펼쳐진/활성화된 슬롯 수로 판단해야
   // 빈 4번째 경유지를 추가했을 때도 즉시 내부 스크롤 모드가 된다.
@@ -12003,19 +12007,40 @@ function _schedulePilgrimageRouteResult(label){
   const run=function(){
     if(done)return;
     try{
+      if(_isPilgrimageCourseViewReadOnly() && window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__!==true)return;
       if(!(_rS&&_rS.lat&&_rS.lng&&_rE&&_rE.lat&&_rE.lng))return;
       done=true;
       const sheet=$('sheet-route'),bottom=$('rs-bottom'),result=$('rs-result');
-      if(sheet){sheet.classList.add('route-result-showing');sheet.classList.remove('route-waypoint-scroll');}
+      if(sheet){
+        sheet.classList.add('route-result-showing');
+        sheet.classList.remove('route-waypoint-scroll');
+      }
       if(bottom){bottom.style.display='block';bottom.style.height='auto';}
       if(result)result.style.display='block';
+
       _refreshRoutePilgrimageButtonMode();
       _applyPilgrimageCourseViewReadOnlyState();
       _calcRoute();
-      setTimeout(function(){try{_syncRouteWaypointBoxes();if(sheet)sheet.scrollTop=sheet.scrollHeight;}catch(_e){}},120);
-    }catch(e){console.warn('[가톨릭길동무] '+String(label||'순례 길찾기')+' 결과 표시 실패',e);}
+
+      [40,180,520].forEach(function(delay){
+        setTimeout(function(){
+          try{
+            _syncRouteWaypointBoxes();
+            if(sheet){
+              sheet.classList.add('route-result-showing');
+              sheet.classList.remove('route-waypoint-scroll');
+              sheet.scrollTop=0;
+            }
+            if(bottom){bottom.style.display='block';bottom.style.height='auto';}
+            if(result)result.style.display='block';
+          }catch(_e){}
+        },delay);
+      });
+    }catch(e){
+      console.warn('[가톨릭길동무] '+String(label||'순례 길찾기')+' 결과 표시 실패',e);
+    }
   };
-  [180,360,650,1050,1600].forEach(function(delay){setTimeout(run,delay);});
+  [220,420,700,1100,1700,2400].forEach(function(delay){setTimeout(run,delay);});
   return run;
 }
 function _applyPilgrimageCourseViewReadOnlyState(){
@@ -15891,6 +15916,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(modal){modal.classList.remove('show');modal.setAttribute('aria-hidden','true');}
     plannerView='detail';
     const meta=loadMeta(),plan=loadPlan();
+    window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__=false;
     window.__OAI_PILGRIMAGE_ROUTE_EDIT__={entryRole:String(entryRole||'plan'),extraPlaces:plan.slice(OAI_MAX_ROUTE_WAYPOINTS).map(function(x){return Object.assign({},x);})};
     const run=()=>{try{
       try{document.documentElement.classList.add('app-active');}catch(_e){}
@@ -15907,6 +15933,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(meta.start&&_validGpsPair(meta.start.lat,meta.start.lng)) _setRoutePointFromItem('start',meta.start,_pilgrimageRouteShrineIndex(meta.start));
         plan.slice(0,OAI_MAX_ROUTE_WAYPOINTS).forEach(function(item,i){const cfg=OAI_ROUTE_WAYPOINT_CONFIGS[i];if(cfg)_setRoutePointFromItem(cfg.role,item,_pilgrimageRouteShrineIndex(item));});
         if(meta.end&&_validGpsPair(meta.end.lat,meta.end.lng)) _setRoutePointFromItem('end',meta.end,_pilgrimageRouteShrineIndex(meta.end));
+        window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__=true;
         _syncRouteWaypointBoxes();
         _refreshRoutePilgrimageButtonMode();
         _updateSearchBtn();
@@ -16107,6 +16134,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     pilgrimageCourseMapMarkers=[];
     window.__OAI_PILGRIMAGE_COURSE_VIEW__=false;
     window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__=false;
+    window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__=false;
     _applyPilgrimageCourseViewReadOnlyState();
   }
   function _pilgrimageCoursePoints(){
