@@ -3542,7 +3542,7 @@ function _maybeAutoParishVisit(lat,lng){
   if(isMyParish){if(!_isMyParishAutoVisitEnabled()||previousVisits.length)return;}else if(previousVisits.some(function(v){return v.date===_todayISODate();}))return;
   if(!_addParishVisit(best,_todayISODate(),'gps'))return;
 
-  // V8-1-14-972:
+  // V8-1-14-973:
   // 같은 GPS 위치가 '성지 + 성당 + 활성 순례코스'에 동시에 해당하더라도
   // 방문기록은 각각 정상 등록하되 축하 안내는 성지를 우선한다.
   // 따라서 현재 위치가 성지 자동등록 반경 안이면 성당용 축하 팝업은 띄우지 않는다.
@@ -14645,6 +14645,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   let versionTapCount=0, versionTapTimer=0, plannerReturnToCover=false;
   let plannerView='list', currentCourseId='', pointRole='start', pendingPlanDeleteIndex=-1;
   let pilgrimageDetailMode='plan';
+  let pilgrimageSuppressRouteFork=0;
   let pilgrimageTotalCalcSeq=0, detailMetricSeq=0, followMetricSeq=0;
   let pilgrimageCourseFilterState={year:'all',month:'all',sort:'completed'};
   let pilgrimageCourseTab='complete';
@@ -14659,18 +14660,38 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function normalizePoint(p){if(!p||!p.name)return null;let lat=Number(p.lat),lng=Number(p.lng);if(!Number.isFinite(lat)||!Number.isFinite(lng))return null;if(Math.abs(lat)>90&&Math.abs(lng)<=90){const t=lat;lat=lng;lng=t;}if(Math.abs(lat)>90||Math.abs(lng)>180)return null;return {name:String(p.name),addr:String(p.addr||p.road_address_name||p.address_name||''),lat:lat,lng:lng,dynamicCurrent:!!p.dynamicCurrent};}
   function normalizePlace(p){const q=normalizePoint(p);return q?Object.assign(q,{done:!!p.done,doneMethod:String(p&&p.doneMethod||'')}):null;}
   function loadPlan(){try{const a=JSON.parse(localStorage.getItem(PLAN_KEY)||'[]');return Array.isArray(a)?a.map(normalizePlace).filter(Boolean):[];}catch(_e){return [];}}
-  function savePlan(list,noRender){try{localStorage.setItem(PLAN_KEY,JSON.stringify(list||[]));}catch(_e){}try{_forkRepeatedCourseIfRouteChanged();}catch(_e){}if(!noRender)renderDetail();}
+  function savePlan(list,noRender){try{localStorage.setItem(PLAN_KEY,JSON.stringify(list||[]));}catch(_e){}if(!pilgrimageSuppressRouteFork){try{_forkRepeatedCourseIfRouteChanged();}catch(_e){}}if(!noRender)renderDetail();}
   function loadMeta(){try{const x=JSON.parse(localStorage.getItem(DRAFT_META_KEY)||'{}')||{};return {name:String(x.name||'새 순례계획'),start:normalizePoint(x.start),end:normalizePoint(x.end)};}catch(_e){return {name:'새 순례계획',start:null,end:null};}}
-  function saveMeta(meta,noRender){try{localStorage.setItem(DRAFT_META_KEY,JSON.stringify(meta||{}));}catch(_e){}try{_forkRepeatedCourseIfRouteChanged();}catch(_e){}if(!noRender)renderDetail();}
-  function clearDraft(){savePlan([],true);saveMeta({name:'새 순례계획',start:null,end:null},true);currentCourseId='';}
+  function saveMeta(meta,noRender){try{localStorage.setItem(DRAFT_META_KEY,JSON.stringify(meta||{}));}catch(_e){}if(!pilgrimageSuppressRouteFork){try{_forkRepeatedCourseIfRouteChanged();}catch(_e){}}if(!noRender)renderDetail();}
+  function clearDraft(){
+    pilgrimageSuppressRouteFork++;
+    try{savePlan([],true);saveMeta({name:'새 순례계획',start:null,end:null},true);}
+    finally{pilgrimageSuppressRouteFork=Math.max(0,pilgrimageSuppressRouteFork-1);}
+    currentCourseId='';
+  }
   function normalizeCourse(c){
     if(!c||!c.id||!c.name)return null;
     const places=(Array.isArray(c.places)?c.places:[]).map(normalizePlace).filter(Boolean);
     const out={id:String(c.id),name:String(c.name),updatedAt:Number(c.updatedAt)||0,start:normalizePoint(c.start),end:normalizePoint(c.end),places:places,completions:Array.isArray(c.completions)?c.completions:[],lastCompletedAt:Number(c.lastCompletedAt)||0,lastStartedAt:Number(c.lastStartedAt)||0,completionArmed:(typeof c.completionArmed==='boolean'?c.completionArmed:!(Array.isArray(c.completions)&&c.completions.length))};
     return _courseRefreshCompletionState(out);
   }
-  function loadCourses(){try{const a=JSON.parse(localStorage.getItem(COURSES_KEY)||'[]');return Array.isArray(a)?a.map(normalizeCourse).filter(Boolean):[];}catch(_e){return [];}}
-  function saveCourses(a){try{localStorage.setItem(COURSES_KEY,JSON.stringify(a||[]));}catch(_e){}renderCourseList();try{if(typeof window.scheduleOaiAutoBackup==='function')window.scheduleOaiAutoBackup();}catch(_e){}}
+  function loadCourses(){
+    try{
+      const a=JSON.parse(localStorage.getItem(COURSES_KEY)||'[]');
+      const normalized=Array.isArray(a)?a.map(normalizeCourse).filter(Boolean):[];
+      const clean=_dedupeExactPlanCourses(normalized);
+      if(clean.length!==normalized.length){
+        try{localStorage.setItem(COURSES_KEY,JSON.stringify(clean));}catch(_e){}
+      }
+      return clean;
+    }catch(_e){return [];}
+  }
+  function saveCourses(a){
+    const clean=_dedupeExactPlanCourses(a||[]);
+    try{localStorage.setItem(COURSES_KEY,JSON.stringify(clean));}catch(_e){}
+    renderCourseList();
+    try{if(typeof window.scheduleOaiAutoBackup==='function')window.scheduleOaiAutoBackup();}catch(_e){}
+  }
   function draftSnapshot(){const m=loadMeta();return {name:m.name,start:m.start,end:m.end,places:loadPlan()};}
   function _routePointSignature(p){
     const q=normalizePoint(p);if(!q)return null;
@@ -14684,6 +14705,36 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       places:(Array.isArray(data.places)?data.places:[]).map(_routePointSignature)
     });
   }
+  function _dedupeExactPlanCourses(courses){
+    const list=(Array.isArray(courses)?courses:[]).slice();
+    const activeRaw=_readActiveFollowRaw();
+    const bySig=new Map(),keep=new Set(),duplicates=new Set();
+
+    list.forEach(function(c,idx){
+      if(!c)return;
+      // 완료 기록이 있는 코스는 과거 기록이므로 자동 삭제/병합하지 않는다.
+      const hasCompletion=Array.isArray(c.completions)&&c.completions.length>0;
+      if(hasCompletion){keep.add(idx);return;}
+      const sig=_routeStructureSignature(c);
+      if(!sig){keep.add(idx);return;}
+      if(!bySig.has(sig)){bySig.set(sig,idx);keep.add(idx);return;}
+
+      const prevIdx=bySig.get(sig),prev=list[prevIdx];
+      const curActive=!!(activeRaw&&activeRaw.courseId===String(c.id));
+      const prevActive=!!(activeRaw&&prev&&activeRaw.courseId===String(prev.id));
+      const curNewer=Number(c.updatedAt||0)>Number(prev&&prev.updatedAt||0);
+
+      if(curActive||(!prevActive&&curNewer)){
+        duplicates.add(prevIdx);keep.delete(prevIdx);
+        bySig.set(sig,idx);keep.add(idx);
+      }else{
+        duplicates.add(idx);
+      }
+    });
+
+    return list.filter(function(_c,idx){return !duplicates.has(idx);});
+  }
+
   function _readRepeatEditGuard(){
     try{const g=JSON.parse(localStorage.getItem(REPEAT_EDIT_GUARD_KEY)||'null');return g&&g.courseId&&g.original?g:null;}catch(_e){return null;}
   }
@@ -14706,6 +14757,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function _forkRepeatedCourseIfRouteChanged(){
     try{
+      if(pilgrimageSuppressRouteFork)return false;
       const g=_readRepeatEditGuard();
       if(!g||!currentCourseId||g.courseId!==String(currentCourseId))return false;
       const d=draftSnapshot();
@@ -14745,7 +14797,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       return true;
     }catch(e){console.warn('[가톨릭길동무] 다시 따라가기 코스 분리 실패',e);return false;}
   }
-  function applyCourse(c){if(!c)return;currentCourseId=c.id||'';savePlan((c.places||[]).map(x=>Object.assign({},x)),true);saveMeta({name:c.name||'새 순례계획',start:c.start||null,end:c.end||null},true);}
+  function applyCourse(c){
+    if(!c)return;
+    currentCourseId=c.id||'';
+    pilgrimageSuppressRouteFork++;
+    try{
+      savePlan((c.places||[]).map(x=>Object.assign({},x)),true);
+      saveMeta({name:c.name||'새 순례계획',start:c.start||null,end:c.end||null},true);
+    }finally{
+      pilgrimageSuppressRouteFork=Math.max(0,pilgrimageSuppressRouteFork-1);
+    }
+  }
   function _courseAllPlacesDone(places){return Array.isArray(places)&&places.length>0&&places.every(x=>!!(x&&x.done));}
   function _readActiveFollowRaw(){
     try{
