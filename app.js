@@ -3542,7 +3542,7 @@ function _maybeAutoParishVisit(lat,lng){
   if(isMyParish){if(!_isMyParishAutoVisitEnabled()||previousVisits.length)return;}else if(previousVisits.some(function(v){return v.date===_todayISODate();}))return;
   if(!_addParishVisit(best,_todayISODate(),'gps'))return;
 
-  // V8-1-14-973:
+  // V8-1-14-975:
   // 같은 GPS 위치가 '성지 + 성당 + 활성 순례코스'에 동시에 해당하더라도
   // 방문기록은 각각 정상 등록하되 축하 안내는 성지를 우선한다.
   // 따라서 현재 위치가 성지 자동등록 반경 안이면 성당용 축하 팝업은 띄우지 않는다.
@@ -15265,7 +15265,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         const statusHtml=done?'<span class="oai-pilgrimage-waypoint-chip is-done">✓ 순례완료</span>':'';
         const holdAttr=isCompletionView?'':' data-plan-hold="'+i+'"';
         const dragHtml=isCompletionView?'<span class="oai-pilgrimage-drag" aria-hidden="true">⋮</span>':'<button type="button" class="oai-pilgrimage-drag" data-plan-drag="'+i+'" aria-label="'+esc(item.name)+' 순서 이동">⋮</button>';
-        return '<div class="'+cls+'" data-plan-index="'+i+'"'+holdAttr+'>'+dragHtml+'<span class="oai-pilgrimage-order" aria-label="순례 '+(i+1)+'번">'+(i+1)+'</span><div class="oai-pilgrimage-main"><div class="oai-pilgrimage-main-head"><b>'+esc(item.name)+'</b>'+statusHtml+'</div><small class="oai-pilgrimage-item-metric" data-plan-metric="'+i+'">'+metric+'</small></div></div>';
+        return '<div class="'+cls+'" data-plan-index="'+i+'"'+holdAttr+'>'+dragHtml+'<span class="oai-pilgrimage-order" aria-label="순례 '+(i+1)+'번">'+(i+1)+'</span><div class="oai-pilgrimage-main"><div class="oai-pilgrimage-main-head"><span class="oai-pilgrimage-place-title"><span class="oai-pilgrimage-place-dot" aria-hidden="true"></span><b>'+esc(item.name)+'</b></span>'+statusHtml+'</div><small class="oai-pilgrimage-item-metric" data-plan-metric="'+i+'">'+metric+'</small></div></div>';
       }).join('');
     }
     const addBtn=document.querySelector('.oai-pilgrimage-detail-view .oai-pilgrimage-add');
@@ -15346,8 +15346,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function newPlan(){pilgrimageDetailMode='plan';currentCourseId='';clearDraft();setView('detail');renderDetail();}
   function openCourse(id){
     const c=loadCourses().find(x=>x.id===id);if(!c)return;
-    pilgrimageDetailMode=pilgrimageCourseTab==='complete'?'complete':'plan';
-    applyCourse(c);
+    const active=_activeFollowState();
+    const isCurrentActive=!!(active&&active.courseId===String(id||''));
+    // 진행 중인 코스는 어느 탭에서 열더라도 '과거 완료기록'보다
+    // 이번 순례의 현재 진행상태를 우선해서 보여준다.
+    pilgrimageDetailMode=isCurrentActive?'plan':(pilgrimageCourseTab==='complete'?'complete':'plan');
+    applyCourse(isCurrentActive?active.course:c);
     setView('detail');
     renderDetail();
   }
