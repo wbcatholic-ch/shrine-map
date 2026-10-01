@@ -3559,7 +3559,7 @@ function _maybeAutoParishVisit(lat,lng){
   if(isMyParish){if(!_isMyParishAutoVisitEnabled()||previousVisits.length)return;}else if(previousVisits.some(function(v){return v.date===_todayISODate();}))return;
   if(!_addParishVisit(best,_todayISODate(),'gps'))return;
 
-  // V8-1-14-1006:
+  // V8-1-14-1007:
   // 같은 GPS 위치가 '성지 + 성당 + 활성 순례코스'에 동시에 해당하더라도
   // 방문기록은 각각 정상 등록하되 축하 안내는 성지를 우선한다.
   // 따라서 현재 위치가 성지 자동등록 반경 안이면 성당용 축하 팝업은 띄우지 않는다.
@@ -8242,7 +8242,7 @@ function closeRouteSheetByX(){
   var returnToPilgrimage = window.__oaiPilgrimageRouteReturn === true;
   var returnToPilgrimageEdit = !!window.__OAI_PILGRIMAGE_ROUTE_EDIT__;
   window.__oaiPilgrimageRouteReturn = false;
-  try{document.documentElement.classList.remove('oai-pilgrimage-route-direct','oai-pilgrimage-route-context');}catch(_e){}
+  try{document.documentElement.classList.remove('oai-pilgrimage-route-direct');}catch(_e){}
   window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__=false;
   _applyPilgrimageCourseViewReadOnlyState();
   if(returnToPilgrimageEdit) window.__OAI_PILGRIMAGE_ROUTE_EDIT__=null;
@@ -12819,7 +12819,7 @@ function _finishPilgrimageRouteEdit(){
     }
     if(typeof window.applyOaiPilgrimageRouteEdit==='function') window.applyOaiPilgrimageRouteEdit(draft);
     window.__OAI_PILGRIMAGE_ROUTE_EDIT__=null;
-    try{document.documentElement.classList.remove('oai-pilgrimage-route-context');}catch(_e){}
+    
     const sheet=$('sheet-route');
     if(sheet){sheet.classList.remove('open','from-right','from-left','exit-left','exit-right');sheet.style.display='none';}
     try{resetRoute();}catch(_e){}
@@ -16020,7 +16020,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function _openUnifiedPilgrimageMapAdd(entryRole,options){
     options=options||{};
     const readOnly=options.readOnly===true;
-    try{document.documentElement.classList.add('oai-pilgrimage-route-context');}catch(_e){}
+    
     closePointPicker();
     const modal=planner();
     if(modal){modal.classList.remove('show');modal.setAttribute('aria-hidden','true');}
@@ -16263,7 +16263,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     window.__OAI_PILGRIMAGE_COURSE_VIEW__=false;
     window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__=false;
     window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__=false;
-    try{document.documentElement.classList.remove('oai-pilgrimage-route-context');}catch(_e){}
+    
     _applyPilgrimageCourseViewReadOnlyState();
   }
   function _pilgrimageCoursePoints(){
@@ -16619,7 +16619,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   if(!t)return;
   const item=t.item,m=planner();
   window.__oaiPilgrimageRouteReturn=true;
-  try{document.documentElement.classList.add('oai-pilgrimage-route-direct','oai-pilgrimage-route-context');}catch(_e){}
+  try{document.documentElement.classList.add('oai-pilgrimage-route-direct');}catch(_e){}
   if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}
 
   const runWithLocation=function(lat,lng){
@@ -16674,7 +16674,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       setTimeout(function(){try{_schedulePilgrimageRouteResult('다음 순례지 길찾기');}catch(_e){}},160);
     }catch(e){
       window.__oaiPilgrimageRouteReturn=false;
-      try{document.documentElement.classList.remove('oai-pilgrimage-route-direct','oai-pilgrimage-route-context');}catch(_e){}
+      try{document.documentElement.classList.remove('oai-pilgrimage-route-direct');}catch(_e){}
       console.warn('[가톨릭길동무] 다음 순례지 길찾기 전환 실패',e);
       try{openPlanner({returnFromSearch:true});setView('detail');renderDetail();}catch(_e){}
     }};
@@ -16685,7 +16685,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     function(lat,lng){runWithLocation(lat,lng);},
     function(){
       window.__oaiPilgrimageRouteReturn=false;
-      try{document.documentElement.classList.remove('oai-pilgrimage-route-direct','oai-pilgrimage-route-context');}catch(_e){}
+      try{document.documentElement.classList.remove('oai-pilgrimage-route-direct');}catch(_e){}
       alert('현재 위치를 가져올 수 없습니다. 위치 권한과 GPS를 확인한 뒤 다시 시도해 주세요.');
       try{openPlanner({returnFromSearch:true});setView('detail');renderDetail();}catch(_e){}
     }
