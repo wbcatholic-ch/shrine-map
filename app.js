@@ -3542,7 +3542,7 @@ function _maybeAutoParishVisit(lat,lng){
   if(isMyParish){if(!_isMyParishAutoVisitEnabled()||previousVisits.length)return;}else if(previousVisits.some(function(v){return v.date===_todayISODate();}))return;
   if(!_addParishVisit(best,_todayISODate(),'gps'))return;
 
-  // V8-1-14-969:
+  // V8-1-14-970:
   // 같은 GPS 위치가 '성지 + 성당 + 활성 순례코스'에 동시에 해당하더라도
   // 방문기록은 각각 정상 등록하되 축하 안내는 성지를 우선한다.
   // 따라서 현재 위치가 성지 자동등록 반경 안이면 성당용 축하 팝업은 띄우지 않는다.
@@ -15077,7 +15077,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const activeFollow=_activeFollowState();
     body.innerHTML=filtered.map(function(c){
       const hasDone=_courseCompletionList(c).length>0,isFollowing=!!(activeFollow&&activeFollow.courseId===c.id);
-      const followHtml=pilgrimageCourseTab==='plan'?'<div class="oai-pilgrimage-course-plan-actions">'+(isFollowing?'<span class="oai-pilgrimage-following-badge">진행 중</span>':'<span></span>')+'<button type="button" class="oai-pilgrimage-course-follow-btn'+(isFollowing?' is-active':'')+'" data-course-follow="'+esc(c.id)+'">'+'▶ 순례하기'+'</button></div>':'';
+      const followHtml=pilgrimageCourseTab==='plan'?'<div class="oai-pilgrimage-course-plan-actions">'+(isFollowing?'<span class="oai-pilgrimage-following-badge">진행 중</span>':'<span></span>')+'<button type="button" class="oai-pilgrimage-course-follow-btn'+(isFollowing?' is-active':'')+'" data-course-follow="'+esc(c.id)+'">'+'순례하기'+'</button></div>':'';
       return '<article class="oai-pilgrimage-course-card'+(hasDone?' is-completed':'')+(isFollowing?' is-following':'')+'"><button type="button" class="oai-pilgrimage-course-open" data-course-open="'+esc(c.id)+'" data-course-hold="'+esc(c.id)+'"><span><b>'+esc(c.name)+'</b><small>'+courseSummary(c)+'</small></span><i>›</i></button>'+followHtml+_courseCompletionMetaHtml(c)+'</article>';
     }).join('');
   }
