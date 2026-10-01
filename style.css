@@ -6762,3 +6762,35 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .rs-result{
 html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns{
   margin-bottom:0!important;
 }
+
+
+/* V8-1-14-936: 4번째 경유지부터는 3개 경유지 상태의 카드 높이를 유지하고 내부만 스크롤 */
+html:not(.oai-map-split-wide) #app #sheet-route.route-waypoint-scroll.open{
+  height:fit-content!important;
+  min-height:0!important;
+  padding-bottom:0!important;
+}
+/* X/상단 손잡이 영역은 스크롤 밖에 고정. 목록이 그 밑에서만 스크롤되도록 한다. */
+html:not(.oai-map-split-wide) #app #sheet-route.route-waypoint-scroll #rs-top{
+  box-sizing:border-box!important;
+  height:304px!important;
+  max-height:304px!important;
+  min-height:304px!important;
+  margin-top:46px!important;
+  margin-bottom:0!important;
+  padding-top:0!important;
+  padding-bottom:8px!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+  overscroll-behavior-y:contain!important;
+  touch-action:pan-y!important;
+  scroll-padding-top:0!important;
+  scroll-padding-bottom:8px!important;
+}
+html:not(.oai-map-split-wide) #app #sheet-route.route-waypoint-scroll #rs-top .rs-action-row{
+  position:relative!important;
+  flex:none!important;
+  margin-top:7px!important;
+  margin-bottom:0!important;
+}

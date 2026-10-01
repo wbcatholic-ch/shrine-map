@@ -11554,10 +11554,15 @@ function _scrollRouteWaypointEditorToBottom(){
   try{
     const sheet=$('sheet-route'), top=$('rs-top');
     if(!sheet||!top||!sheet.classList.contains('route-waypoint-scroll')) return;
-    const run=function(){ try{ top.scrollTop=Math.max(0,top.scrollHeight-top.clientHeight); }catch(_e){} };
-    requestAnimationFrame(run);
-    setTimeout(run,40);
-    setTimeout(run,140);
+    const run=function(smooth){
+      try{
+        const y=Math.max(0,top.scrollHeight-top.clientHeight);
+        if(typeof top.scrollTo==='function') top.scrollTo({top:y,behavior:smooth?'smooth':'auto'});
+        else top.scrollTop=y;
+      }catch(_e){}
+    };
+    requestAnimationFrame(function(){run(false);});
+    setTimeout(function(){run(true);},90);
   }catch(_e){}
 }
 function _beginWaypointAddMode(role){
