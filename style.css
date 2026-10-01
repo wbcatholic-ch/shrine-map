@@ -7512,3 +7512,84 @@ html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll.route-scroll-ha
   .oai-pilgrimage-new{min-height:54px!important;font-size:calc(16px * var(--app-font-scale,1))!important;}
   .oai-pilgrimage-course-list{gap:8px;}
 }
+
+
+/* V8-1-14-951: 순례하기 목록에 우측 순례 배지 추가 + 번호/텍스트 정렬 통일 */
+#oai-pilgrimage-detail-view .oai-pilgrimage-item{
+  display:grid!important;
+  grid-template-columns:28px 34px minmax(0,1fr)!important;
+  align-items:center!important;
+  column-gap:10px!important;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-drag{
+  grid-column:1;
+  justify-self:center;
+  width:24px!important;
+  min-width:24px!important;
+  margin:0!important;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-order{
+  grid-column:2;
+  justify-self:center;
+  width:30px;
+  height:30px;
+  margin:0!important;
+  font-variant-numeric:tabular-nums;
+  font-feature-settings:"tnum" 1;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-main{
+  grid-column:3;
+  min-width:0;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-main-head{
+  display:flex;
+  align-items:center;
+  gap:8px;
+  min-width:0;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-main-head b{
+  flex:1 1 auto;
+  min-width:0;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-waypoint-chip{
+  flex:0 0 auto;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  min-width:42px;
+  height:24px;
+  padding:0 9px;
+  border-radius:999px;
+  border:1.5px solid #d54c46;
+  background:#fff1f0;
+  color:#c53933;
+  font-size:calc(11px * var(--app-font-scale,1));
+  font-weight:950;
+  line-height:1;
+  letter-spacing:-.01em;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-item.is-done .oai-pilgrimage-waypoint-chip{
+  border-color:#b57a17;
+  background:#fff7e8;
+  color:#86540c;
+}
+@media(max-width:390px){
+  #oai-pilgrimage-detail-view .oai-pilgrimage-item{
+    grid-template-columns:26px 32px minmax(0,1fr)!important;
+    column-gap:8px!important;
+  }
+  #oai-pilgrimage-detail-view .oai-pilgrimage-order{
+    width:28px;
+    height:28px;
+    font-size:calc(12.5px * var(--app-font-scale,1));
+  }
+  #oai-pilgrimage-detail-view .oai-pilgrimage-waypoint-chip{
+    min-width:38px;
+    height:22px;
+    padding:0 8px;
+    font-size:calc(10.5px * var(--app-font-scale,1));
+  }
+}
