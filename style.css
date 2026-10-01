@@ -6561,3 +6561,64 @@ html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll .rs-route-stack
 html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll #rs-top .rs-action-row{
   flex:none!important;
 }
+
+/* V8-1-14-932: 경유지 최대 10곳 + 4곳부터 카드 높이 고정/목록만 스크롤 + 하단 여백 축소 */
+.rs-route-stack.has-waypoint6{grid-template-rows:44px 5px 44px 5px 44px 5px 44px 5px 44px 5px 44px 5px 44px 5px 44px;}
+.rs-route-stack.has-waypoint7{grid-template-rows:44px 5px 44px 5px 44px 5px 44px 5px 44px 5px 44px 5px 44px 5px 44px 5px 44px;}
+.rs-route-stack.has-waypoint8{grid-template-rows:44px 5px 44px 5px 44px 5px 44px 5px 44px 5px 44px 5px 44px 5px 44px 5px 44px 5px 44px;}
+.rs-route-stack.has-waypoint9{grid-template-rows:44px 5px 44px 5px 44px 5px 44px 5px 44px 5px 44px 5px 44px 5px 44px 5px 44px 5px 44px 5px 44px;}
+.rs-route-stack.has-waypoint10{grid-template-rows:44px 5px 44px 5px 44px 5px 44px 5px 44px 5px 44px 5px 44px 5px 44px 5px 44px 5px 44px 5px 44px 5px 44px;}
+.rs-waypoint6-box{grid-column:1;grid-row:13;background:#f9e5d8;border-color:#6b3f16;}
+.rs-waypoint7-box{grid-column:1;grid-row:15;background:#f7e1d3;border-color:#5b3213;}
+.rs-waypoint8-box{grid-column:1;grid-row:17;background:#f5ddcf;border-color:#4b2a12;}
+.rs-waypoint9-box{grid-column:1;grid-row:19;background:#f2dacb;border-color:#3f2410;}
+.rs-waypoint10-box{grid-column:1;grid-row:21;background:#efd6c7;border-color:#341e0e;}
+#rs-waypoint6-box,#rs-waypoint7-box,#rs-waypoint8-box,#rs-waypoint9-box,#rs-waypoint10-box,
+#rs-waypoint6-end-tools,#rs-waypoint7-end-tools,#rs-waypoint8-end-tools,#rs-waypoint9-end-tools,#rs-waypoint10-end-tools{display:none;}
+.rs-route-stack.has-waypoint-summary .rs-waypoint6-end-tools,
+.rs-route-stack.has-waypoint-summary .rs-waypoint7-end-tools,
+.rs-route-stack.has-waypoint-summary .rs-waypoint8-end-tools,
+.rs-route-stack.has-waypoint-summary .rs-waypoint9-end-tools,
+.rs-route-stack.has-waypoint-summary .rs-waypoint10-end-tools{display:none!important;}
+.rs-route-stack.has-waypoint6 .rs-end-box{grid-row:15;}
+.rs-route-stack.has-waypoint7 .rs-end-box{grid-row:17;}
+.rs-route-stack.has-waypoint8 .rs-end-box{grid-row:19;}
+.rs-route-stack.has-waypoint9 .rs-end-box{grid-row:21;}
+.rs-route-stack.has-waypoint10 .rs-end-box{grid-row:23;}
+.rs-dot-waypoint6{background:#6b3f16}.rs-dot-waypoint7{background:#5b3213}.rs-dot-waypoint8{background:#4b2a12}.rs-dot-waypoint9{background:#3f2410}.rs-dot-waypoint10{background:#341e0e}
+.rs-waypoint6-end-tools{grid-column:2;grid-row:13/16;align-self:stretch;}
+.rs-waypoint7-end-tools{grid-column:2;grid-row:15/18;align-self:stretch;}
+.rs-waypoint8-end-tools{grid-column:2;grid-row:17/20;align-self:stretch;}
+.rs-waypoint9-end-tools{grid-column:2;grid-row:19/22;align-self:stretch;}
+.rs-waypoint10-end-tools{grid-column:2;grid-row:21/24;align-self:stretch;}
+
+/* 경유지 4곳 이상: 3곳 때와 비슷한 높이에서 더 이상 위로 커지지 않고 목록만 스크롤 */
+html:not(.oai-map-split-wide) #app #sheet-route.route-waypoint-scroll.open{
+  height:auto!important;
+  max-height:min(50dvh,430px)!important;
+  overflow:hidden!important;
+  padding-bottom:0!important;
+}
+html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll #rs-top{
+  min-height:0!important;
+  overflow:hidden!important;
+  padding-bottom:8px!important;
+}
+html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll .rs-route-stack{
+  height:240px!important;
+  max-height:240px!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch;
+  overscroll-behavior:contain;
+}
+html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll #rs-top .rs-action-row{margin-top:7px!important;}
+
+/* 길찾기 카드 공통 하단 여백 축소 */
+#app #sheet-route #rs-bottom{
+  padding-bottom:calc(8px + var(--oai-android-bottom-gap, env(safe-area-inset-bottom,0px)))!important;
+  scroll-padding-bottom:calc(8px + var(--oai-android-bottom-gap, env(safe-area-inset-bottom,0px)))!important;
+}
+html:not(.oai-map-split-wide) #sheet-route.route-result-showing #rs-bottom{
+  padding-bottom:calc(8px + var(--oai-android-bottom-gap, env(safe-area-inset-bottom,0px)))!important;
+}

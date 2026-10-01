@@ -7174,8 +7174,8 @@ function _ensureShrineDataLoaded(){
 }
 try{ window._setShrineRawData = _setShrineRawData; }catch(e){ console.warn('[가톨릭길동무]', e); }
 _initShrineDataFromGlobal();
-const OAI_MAX_ROUTE_WAYPOINTS = 5;
-const OAI_ROUTE_WAYPOINT_COLORS = ['#f39c12','#d97706','#b45309','#92400e','#78350f'];
+const OAI_MAX_ROUTE_WAYPOINTS = 10;
+const OAI_ROUTE_WAYPOINT_COLORS = ['#f39c12','#d97706','#b45309','#92400e','#78350f','#6b3f16','#5b3213','#4b2a12','#3f2410','#341e0e'];
 const OAI_ROUTE_WAYPOINT_CONFIGS = Array.from({length:OAI_MAX_ROUTE_WAYPOINTS}, function(_unused,zeroIndex){
   const index=zeroIndex+1;
   const suffix=index===1 ? '' : String(index);
@@ -7204,6 +7204,11 @@ const AppState = {
   way3TmpMkr:       null,   // 경유지3 임시 마커
   way4TmpMkr:       null,   // 경유지4 임시 마커
   way5TmpMkr:       null,   // 경유지5 임시 마커
+  way6TmpMkr:       null,
+  way7TmpMkr:       null,
+  way8TmpMkr:       null,
+  way9TmpMkr:       null,
+  way10TmpMkr:      null,
   paSelMkr:         null,   // parish/retreat 선택 마커
   selIdx:           -1,     // 현재 선택된 shrine 마커 인덱스
   polyline:         null,   // 경로 폴리라인
@@ -7241,6 +7246,16 @@ const AppState = {
   routeWaypoint4Enabled: false, // 경유지4 박스 표시 여부
   rW5:              null,  // 경유지5 {lat, lng, name, idx}
   routeWaypoint5Enabled: false, // 경유지5 박스 표시 여부
+  rW6:              null,
+  routeWaypoint6Enabled: false,
+  rW7:              null,
+  routeWaypoint7Enabled: false,
+  rW8:              null,
+  routeWaypoint8Enabled: false,
+  rW9:              null,
+  routeWaypoint9Enabled: false,
+  rW10:             null,
+  routeWaypoint10Enabled: false,
   rE:               null,  // 도착지
   routeRegionStart: null,  // 지역검색에서 길찾기 시작 시 출발지 보존
   routeStartMarkerExplicitCurrent: false, // 길찾기 탭의 '현위치' 버튼을 눌렀을 때만 출발지 임시 마커 표시
@@ -7288,6 +7303,11 @@ const AppState = {
     ['_way3TmpMkr',       'way3TmpMkr'],
     ['_way4TmpMkr',       'way4TmpMkr'],
     ['_way5TmpMkr',       'way5TmpMkr'],
+    ['_way6TmpMkr',       'way6TmpMkr'],
+    ['_way7TmpMkr',       'way7TmpMkr'],
+    ['_way8TmpMkr',       'way8TmpMkr'],
+    ['_way9TmpMkr',       'way9TmpMkr'],
+    ['_way10TmpMkr',      'way10TmpMkr'],
     ['_paSelMkr',         'paSelMkr'],
     ['_selIdx',           'selIdx'],
     ['_polyline',         'polyline'],
@@ -7317,6 +7337,16 @@ const AppState = {
     ['_routeWaypoint4Enabled','routeWaypoint4Enabled'],
     ['_rW5',              'rW5'],
     ['_routeWaypoint5Enabled','routeWaypoint5Enabled'],
+    ['_rW6',              'rW6'],
+    ['_routeWaypoint6Enabled','routeWaypoint6Enabled'],
+    ['_rW7',              'rW7'],
+    ['_routeWaypoint7Enabled','routeWaypoint7Enabled'],
+    ['_rW8',              'rW8'],
+    ['_routeWaypoint8Enabled','routeWaypoint8Enabled'],
+    ['_rW9',              'rW9'],
+    ['_routeWaypoint9Enabled','routeWaypoint9Enabled'],
+    ['_rW10',             'rW10'],
+    ['_routeWaypoint10Enabled','routeWaypoint10Enabled'],
     ['_rE',               'rE'],
     ['_routeRegionStart', 'routeRegionStart'],
     ['_routeStartMarkerExplicitCurrent', 'routeStartMarkerExplicitCurrent'],
@@ -11500,7 +11530,7 @@ function _syncRouteWaypointBoxes(){
   if(add){
     add.style.display=nextWaypointRole?'inline-flex':'none';
     add.dataset.nextWaypointRole=nextWaypointRole || '';
-    add.setAttribute('aria-label', nextWaypointRole ? ('경유지'+_routeWaypointIndex(nextWaypointRole)+' 추가') : '경유지 최대 5곳');
+    add.setAttribute('aria-label', nextWaypointRole ? ('경유지'+_routeWaypointIndex(nextWaypointRole)+' 추가') : '경유지 최대 10곳');
   }
   const tools0=$('rs-start-waypoint-tools');
   const swap0=$('rs-swap-btn');
@@ -13590,6 +13620,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   on('rs-waypoint3-box', 'click', function() { openSearchModal('waypoint3'); });
   on('rs-waypoint4-box', 'click', function() { openSearchModal('waypoint4'); });
   on('rs-waypoint5-box', 'click', function() { openSearchModal('waypoint5'); });
+  on('rs-waypoint6-box', 'click', function() { openSearchModal('waypoint6'); });
+  on('rs-waypoint7-box', 'click', function() { openSearchModal('waypoint7'); });
+  on('rs-waypoint8-box', 'click', function() { openSearchModal('waypoint8'); });
+  on('rs-waypoint9-box', 'click', function() { openSearchModal('waypoint9'); });
+  on('rs-waypoint10-box', 'click', function() { openSearchModal('waypoint10'); });
   on('rs-add-waypoint-btn', 'click', function(e) {
     if(e){ e.preventDefault(); e.stopPropagation(); }
     var role=(this && this.dataset && this.dataset.nextWaypointRole) || (typeof _nextAvailableWaypointRole === 'function' ? _nextAvailableWaypointRole() : '') || 'waypoint';
@@ -13609,6 +13644,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   on('rs-waypoint3-x','click', function(e) { clearWaypointByX('waypoint3',e); });
   on('rs-waypoint4-x','click', function(e) { clearWaypointByX('waypoint4',e); });
   on('rs-waypoint5-x','click', function(e) { clearWaypointByX('waypoint5',e); });
+  on('rs-waypoint6-x','click', function(e) { clearWaypointByX('waypoint6',e); });
+  on('rs-waypoint7-x','click', function(e) { clearWaypointByX('waypoint7',e); });
+  on('rs-waypoint8-x','click', function(e) { clearWaypointByX('waypoint8',e); });
+  on('rs-waypoint9-x','click', function(e) { clearWaypointByX('waypoint9',e); });
+  on('rs-waypoint10-x','click', function(e) { clearWaypointByX('waypoint10',e); });
   on('rs-swap-btn',  'click', function(e) { if(e){ e.preventDefault(); e.stopPropagation(); } swapRoute(); });
   on('rs-swap-waypoint-end-btn', 'click', function(e) { if(e){ e.preventDefault(); e.stopPropagation(); } swapRouteWaypointEnd(); });
   on('rs-swap-waypoint2-end-btn', 'click', function(e) { if(e){ e.preventDefault(); e.stopPropagation(); } swapRouteWaypoint2End(); });
