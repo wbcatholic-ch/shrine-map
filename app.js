@@ -9139,7 +9139,7 @@ function _routeWaypointSlotOccupied(role){
   return !!(_getRouteWaypointEnabledByRole(role) || (point&&point.lat&&point.lng));
 }
 function _nextAvailableWaypointRole(){
-  /* V8-1-14-938: 취소 후 입력창만 남아 있는 빈 경유지는 다시 사용 가능한 슬롯이다.
+  /* V8-1-14-939: 취소 후 입력창만 남아 있는 빈 경유지는 다시 사용 가능한 슬롯이다.
      enabled 여부가 아니라 실제 좌표가 들어 있는지를 기준으로 1→10 순서의 첫 빈칸을 선택한다. */
   for(const cfg of OAI_ROUTE_WAYPOINT_CONFIGS){
     const point=_getRoutePointByRole(cfg.role);
@@ -15046,57 +15046,25 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   async function openPilgrimageCourseMap(){
     const pts=_pilgrimageCoursePoints();
     if(!pts.length){alert('지도에 표시할 순례 코스가 없습니다.');return;}
-    const modal=planner();if(modal){modal.classList.remove('show');modal.setAttribute('aria-hidden','true');}
-    window.__OAI_PILGRIMAGE_COURSE_VIEW__=true;
-    const seq=++pilgrimageCourseMapSeq;
-    const run=async()=>{try{
-      try{document.documentElement.classList.add('app-active');}catch(_e){}
-      try{if(typeof oaiSetMainMapLayerHidden==='function')oaiSetMainMapLayerHidden(false);else document.documentElement.classList.remove('oai-hide-main-map-layer');}catch(_e){}
-      try{_screen='map';}catch(_e){}
-      const cover=document.getElementById('cover');if(cover){cover.style.display='none';cover.style.opacity='0';cover.setAttribute('aria-hidden','true');}
-      const mapWrap=document.getElementById('map-wrap'),mapEl=document.getElementById('map');
-      if(mapWrap&&mapWrap.style){mapWrap.style.display='';mapWrap.style.visibility='visible';mapWrap.style.pointerEvents='';}
-      if(mapEl&&mapEl.style){mapEl.style.display='';mapEl.style.visibility='visible';}
-      try{if(typeof _hideRouteGuide==='function')_hideRouteGuide();}catch(_e){}
-      try{if(typeof _clearShrineMarkers==='function')_clearShrineMarkers();}catch(_e){}
-      try{if(typeof _clearParishNearbyMarkers==='function')_clearParishNearbyMarkers();}catch(_e){}
-      try{if(typeof _hideAllParishDioMkrs==='function')_hideAllParishDioMkrs();}catch(_e){}
-      try{(_retreatMarkers||[]).forEach(o=>{if(o&&o.marker)_setMarkerMapIfChanged(o.marker,null);});}catch(_e){}
-      try{document.querySelectorAll('.sheet.open').forEach(x=>x.classList.remove('open'));}catch(_e){}
-      const ready=!!(_map&&mapEl&&mapEl.children&&mapEl.children.length);
-      if(!ready){try{window._noAutoNearby=true;if(typeof _loadMap==='function')_loadMap();}catch(_e){}}
-      await new Promise(r=>setTimeout(r,ready?40:320));
-      if(seq!==pilgrimageCourseMapSeq||!window.__OAI_PILGRIMAGE_COURSE_VIEW__||!_map)return;
-      try{if(typeof _map.relayout==='function')_map.relayout();}catch(_e){}
-      clearPilgrimageCourseMap();window.__OAI_PILGRIMAGE_COURSE_VIEW__=true;pilgrimageCourseMapSeq=seq;
-      const bounds=new _LB();
-      pts.forEach((pt,i)=>{
-        const pos=new _LL(Number(pt.lat),Number(pt.lng));bounds.extend(pos);
-        let img=null;
-        if(pt.role==='start')img=_mkrImgRoute('#ff0000','출');
-        else if(pt.role==='end')img=_mkrImgRoute('#005bff','도');
-        else img=_mkrImg(OAI_PILGRIMAGE_PLAN_MARKER_COLOR,false);
-        try{const mk=new _MM({position:pos,title:String(pt.name||''),image:img});mk.setMap(_map);if(typeof mk.setZIndex==='function')mk.setZIndex(pt.role==='waypoint'?1210:1260);pilgrimageCourseMapMarkers.push(mk);}catch(_e){}
-      });
-      let path=[];
-      if(pts.length>1){
-        for(let i=0;i<pts.length-1;i++){
-          if(seq!==pilgrimageCourseMapSeq||!window.__OAI_PILGRIMAGE_COURSE_VIEW__)return;
-          const a=pts[i],b=pts[i+1];
-          try{
-            const res=await _kakaoDirectionsFetch(`${a.lng},${a.lat}`,`${b.lng},${b.lat}`,9000);
-            if(!res.ok)throw new Error(String(res.status));
-            const data=await res.json(),route=data&&data.routes&&data.routes[0];
-            if(!route||route.result_code!==0)throw new Error('no route');
-            for(const sec of route.sections||[])for(const road of sec.roads||[]){const vx=road.vertexes||[];for(let n=0;n<vx.length-1;n+=2)path.push(new _LL(vx[n+1],vx[n]));}
-          }catch(_e){path.push(new _LL(Number(a.lat),Number(a.lng)),new _LL(Number(b.lat),Number(b.lng)));}
-        }
-      }
-      if(path.length>1&&seq===pilgrimageCourseMapSeq&&window.__OAI_PILGRIMAGE_COURSE_VIEW__){pilgrimageCourseMapPolyline=new _PL({path:path,strokeWeight:6,strokeColor:'#1a73e8',strokeOpacity:.9,strokeStyle:'solid'});pilgrimageCourseMapPolyline.setMap(_map);}
-      try{_map.setBounds(bounds,48,48,110,48);}catch(_e){try{_map.setBounds(bounds);}catch(_ee){}}
-      if(typeof _syncMapPanelUI==='function')_syncMapPanelUI('pilgrimage-course-map');
-    }catch(e){console.warn('[가톨릭길동무] 순례 코스 지도 표시 실패',e);clearPilgrimageCourseMap();openPlanner({returnFromSearch:true});setView('detail');renderDetail();}};
-    if(typeof hideCoverAndRun==='function')hideCoverAndRun(run);else run();
+    /* V8-1-14-939: 순례코스 보기는 별도 지도 레이어를 만들지 않고 길찾기 화면을 그대로 재사용한다.
+       이렇게 하면 출발/도착/경1~경10 번호 마커, 경로선, 거리·시간, 카카오내비, 다시선택 UI가 길찾기와 완전히 동일해진다. */
+    try{
+      window.__OAI_PILGRIMAGE_COURSE_VIEW__=false;
+      _openUnifiedPilgrimageMapAdd('plan');
+      const autoSearch=function(){
+        try{
+          if(!window.__OAI_PILGRIMAGE_ROUTE_EDIT__)return;
+          if(_rS&&_rE){
+            _refreshRoutePilgrimageButtonMode();
+            _calcRoute();
+          }
+        }catch(e){console.warn('[가톨릭길동무] 순례코스 자동 경로검색 실패',e);}
+      };
+      setTimeout(autoSearch,420);
+    }catch(e){
+      console.warn('[가톨릭길동무] 순례 코스 지도 표시 실패',e);
+      try{openPlanner({returnFromSearch:true});setView('detail');renderDetail();}catch(_e){}
+    }
   }
   function returnFromPilgrimageCourseMap(){
     if(!window.__OAI_PILGRIMAGE_COURSE_VIEW__)return false;
