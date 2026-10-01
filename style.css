@@ -6794,3 +6794,31 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-waypoint-scroll #rs-top .r
   margin-top:7px!important;
   margin-bottom:0!important;
 }
+
+
+/* V8-1-14-937: 4개 이상 경유지 편집에서 위쪽 항목이 가려진 경우에만 상단 스크롤 힌트를 표시 */
+#sheet-route .route-scroll-up-hint{
+  display:none;
+  position:absolute;
+  top:13px;
+  left:50%;
+  transform:translateX(-50%);
+  z-index:7;
+  min-width:104px;
+  height:28px;
+  padding:0 12px;
+  box-sizing:border-box;
+  align-items:center;
+  justify-content:center;
+  border:1px solid rgba(159,128,69,.36);
+  border-radius:999px;
+  background:rgba(255,253,247,.94);
+  color:#7a6337;
+  font-size:12px;
+  font-weight:850;
+  line-height:1;
+  letter-spacing:-.02em;
+  pointer-events:none;
+  box-shadow:0 1px 4px rgba(73,56,29,.08);
+}
+html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll.route-scroll-has-up-content .route-scroll-up-hint{display:flex;}

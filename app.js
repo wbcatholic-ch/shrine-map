@@ -11501,6 +11501,8 @@ function _syncRouteWaypointBoxes(){
   if(sheet){
     sheet.classList.toggle('route-waypoint-scroll', shouldScrollForMultiWaypoint);
     sheet.classList.toggle('route-result-showing', resultShowing);
+    _bindRouteScrollUpHint();
+    requestAnimationFrame(_syncRouteScrollUpHint);
   }
   if(summaryBox){
     summaryBox.style.display=summaryVisible?'flex':'none';
@@ -11550,6 +11552,23 @@ function _ensureRouteWaypointBox(role){
   _refreshRouteTmpMarkers();
   if(!_getRoutePointByRole(role)) _showRouteGuideText('지도에서 경유지'+_routeWaypointIndex(role)+' 마커를 선택하거나 경유지 박스를 눌러 검색하세요');
 }
+function _syncRouteScrollUpHint(){
+  try{
+    const sheet=$('sheet-route'),top=$('rs-top'),hint=$('route-scroll-up-hint');
+    if(!sheet||!top||!hint)return;
+    const show=sheet.classList.contains('route-waypoint-scroll')&&top.scrollTop>10;
+    sheet.classList.toggle('route-scroll-has-up-content',show);
+    hint.setAttribute('aria-hidden',show?'false':'true');
+  }catch(_e){}
+}
+function _bindRouteScrollUpHint(){
+  try{
+    const top=$('rs-top');
+    if(!top||top.__oaiRouteScrollHintBound)return;
+    top.__oaiRouteScrollHintBound=true;
+    top.addEventListener('scroll',_syncRouteScrollUpHint,{passive:true});
+  }catch(_e){}
+}
 function _scrollRouteWaypointEditorToBottom(){
   try{
     const sheet=$('sheet-route'), top=$('rs-top');
@@ -11559,6 +11578,7 @@ function _scrollRouteWaypointEditorToBottom(){
         const y=Math.max(0,top.scrollHeight-top.clientHeight);
         if(typeof top.scrollTo==='function') top.scrollTo({top:y,behavior:smooth?'smooth':'auto'});
         else top.scrollTop=y;
+        setTimeout(_syncRouteScrollUpHint,smooth?140:20);
       }catch(_e){}
     };
     requestAnimationFrame(function(){run(false);});
