@@ -14929,11 +14929,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(!list.length) body.innerHTML='<button type="button" class="oai-pilgrimage-empty oai-pilgrimage-empty-action" data-oai-pilgrimage-add="1"><b>＋ 먼저 순례 장소를 추가하세요</b><small>여기를 눌러 성지·성당을 검색합니다.</small></button>';
       else body.innerHTML=list.map((item,i)=>{const isNext=(next>=0&&i===next&&!item.done);const cls='oai-pilgrimage-item'+(item.done?' is-done':'')+(isNext?' is-next':'');const metric=item.done?'순례 완료':(isNext?'다음 순례지':'GPS 확인 중…');const statusHtml=item.done?'<span class="oai-pilgrimage-waypoint-chip is-done">✓ 순례완료</span>':'';return '<div class="'+cls+'" data-plan-index="'+i+'" data-plan-hold="'+i+'"><button type="button" class="oai-pilgrimage-drag" data-plan-drag="'+i+'" aria-label="'+esc(item.name)+' 순서 이동">⋮</button><span class="oai-pilgrimage-order" aria-label="순례 '+(i+1)+'번">'+(i+1)+'</span><div class="oai-pilgrimage-main"><div class="oai-pilgrimage-main-head"><b>'+esc(item.name)+'</b>'+statusHtml+'</div><small class="oai-pilgrimage-item-metric" data-plan-metric="'+i+'">'+metric+'</small></div></div>';}).join('');
     }
-    const banner=document.getElementById('oai-pilgrimage-course-complete-banner');
-    if(banner){
-      banner.hidden=true;
-      banner.innerHTML='';
-    }
     const addBtn=document.querySelector('.oai-pilgrimage-detail-view .oai-pilgrimage-add');
     if(addBtn){
       const showAdd=list.length>0;
