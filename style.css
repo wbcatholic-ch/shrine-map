@@ -6622,3 +6622,51 @@ html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll #rs-top .rs-act
 html:not(.oai-map-split-wide) #sheet-route.route-result-showing #rs-bottom{
   padding-bottom:calc(8px + var(--oai-android-bottom-gap, env(safe-area-inset-bottom,0px)))!important;
 }
+
+
+/* V8-1-14-933: 4번째 경유지부터 즉시 높이 고정, 목록 스크롤 확실화, 하단 여백 최소화 */
+html:not(.oai-map-split-wide) #app #sheet-route.route-waypoint-scroll.open{
+  height:auto!important;
+  max-height:min(43dvh,370px)!important;
+  overflow:hidden!important;
+  padding-bottom:0!important;
+}
+html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll #rs-top{
+  min-height:0!important;
+  overflow:hidden!important;
+  padding-top:10px!important;
+  padding-bottom:6px!important;
+}
+html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll .rs-route-stack{
+  height:196px!important;
+  max-height:196px!important;
+  min-height:0!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  -webkit-overflow-scrolling:touch!important;
+  overscroll-behavior-y:contain!important;
+  touch-action:pan-y!important;
+  scroll-behavior:auto!important;
+  scrollbar-gutter:stable;
+  padding-right:2px!important;
+}
+html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll .rs-route-stack > *{
+  touch-action:pan-y;
+}
+html:not(.oai-map-split-wide) #sheet-route.route-waypoint-scroll #rs-top .rs-action-row{
+  flex:none!important;
+  margin-top:6px!important;
+}
+
+/* 결과 화면은 내용 전체가 보이되 아래 빈 공간은 안전영역만 남긴다. */
+#app #sheet-route #rs-bottom,
+html:not(.oai-map-split-wide) #sheet-route.route-result-showing #rs-bottom{
+  padding-bottom:env(safe-area-inset-bottom,0px)!important;
+  scroll-padding-bottom:env(safe-area-inset-bottom,0px)!important;
+}
+#sheet-route.route-result-showing .rs-result{
+  padding-bottom:2px!important;
+}
+#sheet-route.route-result-showing .route-btns{
+  margin-bottom:0!important;
+}

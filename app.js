@@ -11483,7 +11483,11 @@ function _syncRouteWaypointBoxes(){
     };
   });
   const summaryVisible=!!(!foldWide && resultShowing && routeWaypoints.length);
-  const shouldScrollForMultiWaypoint=!!(!foldWide && !resultShowing && routeWaypoints.length>=4);
+  // 경유지 4번째 칸이 '생기는 순간'부터 카드 높이를 고정한다.
+  // 실제 좌표가 채워진 경유지 수(routeWaypoints)가 아니라 화면에 펼쳐진/활성화된 슬롯 수로 판단해야
+  // 빈 4번째 경유지를 추가했을 때도 즉시 내부 스크롤 모드가 된다.
+  const visibleWaypointSlotCount=slotStates.filter(function(slot){ return slot.visible; }).length;
+  const shouldScrollForMultiWaypoint=!!(!foldWide && !resultShowing && visibleWaypointSlotCount>=4);
   const summaryBox=$('rs-waypoints-summary-box');
   const summaryLbl=$('rs-waypoints-summary-lbl');
   if(stack){
