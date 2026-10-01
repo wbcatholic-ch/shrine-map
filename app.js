@@ -3559,7 +3559,7 @@ function _maybeAutoParishVisit(lat,lng){
   if(isMyParish){if(!_isMyParishAutoVisitEnabled()||previousVisits.length)return;}else if(previousVisits.some(function(v){return v.date===_todayISODate();}))return;
   if(!_addParishVisit(best,_todayISODate(),'gps'))return;
 
-  // V8-1-14-999:
+  // V8-1-14-1000:
   // 같은 GPS 위치가 '성지 + 성당 + 활성 순례코스'에 동시에 해당하더라도
   // 방문기록은 각각 정상 등록하되 축하 안내는 성지를 우선한다.
   // 따라서 현재 위치가 성지 자동등록 반경 안이면 성당용 축하 팝업은 띄우지 않는다.
@@ -12070,6 +12070,53 @@ function _applyPilgrimageCourseViewReadOnlyState(){
     if(sheet)sheet.classList.toggle('oai-course-view-readonly',on);
   }catch(_e){}
 }
+function _forcePilgrimageCourseViewSummary(){
+  if(!_isPilgrimageCourseViewReadOnly())return;
+  try{
+    const waypoints=_getRouteWaypoints();
+    const stack=$('rs-route-stack');
+    const sheet=$('sheet-route');
+    const summaryBox=$('rs-waypoints-summary-box');
+    const summaryLbl=$('rs-waypoints-summary-lbl');
+    const result=$('rs-result');
+    const bottom=$('rs-bottom');
+
+    if(stack){
+      OAI_ROUTE_WAYPOINT_CONFIGS.forEach(function(cfg,index){
+        stack.classList.remove(index===0?'has-waypoint':'has-waypoint'+(index+1));
+      });
+      stack.classList.add('has-waypoint-summary','route-result-showing');
+    }
+
+    OAI_ROUTE_WAYPOINT_CONFIGS.forEach(function(cfg){
+      const idx=_routeWaypointIndex(cfg.role);
+      const box=$(_routeWaypointElementId('rs-waypoint',idx,'-box'));
+      const tools=$(_routeWaypointElementId('rs-waypoint',idx,'-end-tools'));
+      if(box)box.style.display='none';
+      if(tools)tools.style.display='none';
+    });
+
+    if(summaryBox){
+      const summaryText=waypoints.length
+        ? '경유지 '+waypoints.length+'곳 · '+waypoints.map(function(p,i){return (i+1)+'. '+String(p&&p.name||('경유지'+(i+1)));}).join(' → ')
+        : '경유지 없음';
+      summaryBox.style.display='flex';
+      if(summaryLbl)summaryLbl.textContent=summaryText;
+      summaryBox.setAttribute('title',summaryText);
+    }
+
+    if(sheet){
+      sheet.classList.add('route-result-showing');
+      sheet.classList.remove('route-waypoint-scroll');
+      sheet.scrollTop=0;
+    }
+    if(bottom){bottom.style.display='block';bottom.style.height='auto';}
+    if(result)result.style.display='block';
+
+    const add=$('rs-add-waypoint-btn');if(add)add.style.display='none';
+    const search=$('rs-search-btn');if(search)search.style.display='none';
+  }catch(e){console.warn('[가톨릭길동무] 순례코스 보기 요약 표시 실패',e);}
+}
 function _isPilgrimageMapEditReturnMode(){
   return !!(window.__OAI_PILGRIMAGE_ROUTE_EDIT__ && window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__!==true);
 }
@@ -12738,6 +12785,7 @@ function _finishPilgrimageRouteEdit(){
     }
     if(typeof window.applyOaiPilgrimageRouteEdit==='function') window.applyOaiPilgrimageRouteEdit(draft);
     window.__OAI_PILGRIMAGE_ROUTE_EDIT__=null;
+    try{document.documentElement.classList.remove('oai-pilgrimage-map-edit');}catch(_e){}
     const sheet=$('sheet-route');
     if(sheet){sheet.classList.remove('open','from-right','from-left','exit-left','exit-right');sheet.style.display='none';}
     try{resetRoute();}catch(_e){}
@@ -15943,6 +15991,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const meta=loadMeta(),plan=loadPlan();
     window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__=false;
     window.__OAI_PILGRIMAGE_ROUTE_EDIT__={entryRole:String(entryRole||'plan'),extraPlaces:plan.slice(OAI_MAX_ROUTE_WAYPOINTS).map(function(x){return Object.assign({},x);})};
+    try{
+      document.documentElement.classList.toggle('oai-pilgrimage-map-edit',window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__!==true);
+    }catch(_e){}
     const run=()=>{try{
       try{document.documentElement.classList.add('app-active');}catch(_e){}
       try{if(typeof oaiSetMainMapLayerHidden==='function')oaiSetMainMapLayerHidden(false);else document.documentElement.classList.remove('oai-hide-main-map-layer');}catch(_e){}
@@ -15962,6 +16013,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         _syncRouteWaypointBoxes();
         _refreshRoutePilgrimageButtonMode();
         _updateSearchBtn();
+        if(_isPilgrimageCourseViewReadOnly()){
+          _forcePilgrimageCourseViewSummary();
+          setTimeout(function(){
+            try{
+              _forcePilgrimageCourseViewSummary();
+              _schedulePilgrimageRouteResult('순례코스 보기');
+            }catch(_e){}
+          },40);
+        }
         try{_refreshRouteTmpMarkers();}catch(_e){}
         setTimeout(function(){try{if(window.__OAI_PILGRIMAGE_ROUTE_EDIT__)_refreshRouteTmpMarkers();}catch(_e){}},360);
         setTimeout(function(){try{if(window.__OAI_PILGRIMAGE_ROUTE_EDIT__)_refreshRouteTmpMarkers();}catch(_e){}},980);
@@ -16160,6 +16220,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     window.__OAI_PILGRIMAGE_COURSE_VIEW__=false;
     window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__=false;
     window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__=false;
+    try{document.documentElement.classList.remove('oai-pilgrimage-map-edit');}catch(_e){}
     _applyPilgrimageCourseViewReadOnlyState();
   }
   function _pilgrimageCoursePoints(){
@@ -16179,7 +16240,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__=true;
       _applyPilgrimageCourseViewReadOnlyState();
       _openUnifiedPilgrimageMapAdd('plan');
-      _schedulePilgrimageRouteResult('순례코스 보기');
+      /* 경로 지점이 모두 채워진 뒤 요약/결과 모드로 전환한다. */
     }catch(e){
       window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__=false;
       console.warn('[가톨릭길동무] 순례 코스 지도 표시 실패',e);
