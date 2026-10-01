@@ -3542,7 +3542,7 @@ function _maybeAutoParishVisit(lat,lng){
   if(isMyParish){if(!_isMyParishAutoVisitEnabled()||previousVisits.length)return;}else if(previousVisits.some(function(v){return v.date===_todayISODate();}))return;
   if(!_addParishVisit(best,_todayISODate(),'gps'))return;
 
-  // V8-1-14-988:
+  // V8-1-14-990:
   // 같은 GPS 위치가 '성지 + 성당 + 활성 순례코스'에 동시에 해당하더라도
   // 방문기록은 각각 정상 등록하되 축하 안내는 성지를 우선한다.
   // 따라서 현재 위치가 성지 자동등록 반경 안이면 성당용 축하 팝업은 띄우지 않는다.
@@ -15372,7 +15372,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       detailRoot.classList.toggle('is-empty-plan',!list.length);
       detailRoot.classList.toggle('is-completion-view',isCompletionView);
     }
-    const saveBtn=document.querySelector('[data-oai-pilgrimage-save]'),followBtn=document.querySelector('[data-oai-pilgrimage-follow]'),currentCheckBtn=document.querySelector('[data-oai-pilgrimage-current-check]');
+    const saveBtn=document.querySelector('[data-oai-pilgrimage-save]'),followBtn=document.querySelector('[data-oai-pilgrimage-follow]'),nextRouteBtn=document.querySelector('[data-oai-pilgrimage-next-route]'),currentCheckBtn=document.querySelector('[data-oai-pilgrimage-current-check]');
     const totalCard=document.querySelector('.oai-pilgrimage-detail-view .oai-pilgrimage-total-card');
     const actions=document.querySelector('.oai-pilgrimage-detail-view .oai-pilgrimage-detail-actions');
     const isSaved=!!currentCourseId;
@@ -15388,6 +15388,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       saveBtn.setAttribute('aria-disabled',enabled?'false':'true');
       saveBtn.classList.toggle('is-dirty',enabled);
       saveBtn.textContent='저장';
+    }
+    if(nextRouteBtn){
+      nextRouteBtn.hidden=isCompletionView;
+      nextRouteBtn.style.display=isCompletionView?'none':'';
+      nextRouteBtn.setAttribute('aria-hidden',isCompletionView?'true':'false');
+      nextRouteBtn.disabled=isCompletionView;
     }
     if(currentCheckBtn){
       currentCheckBtn.hidden=isCompletionView;
@@ -16305,7 +16311,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(t.hasAttribute('data-oai-pilgrimage-follow-stop-cancel')){e.preventDefault();e.stopPropagation();closeFollowStopConfirm();return;}
     if(t.hasAttribute('data-oai-pilgrimage-follow-stop-confirm')){e.preventDefault();e.stopPropagation();confirmFollowStop();return;}
     if(t.hasAttribute('data-oai-pilgrimage-follow-route')){e.preventDefault();routeTarget();return;} if(t.hasAttribute('data-oai-pilgrimage-follow-done')){e.preventDefault();followDone();return;} if(t.hasAttribute('data-oai-pilgrimage-follow-recalc')){e.preventDefault();calcFollowDistance();calcFollowItemMetrics();return;} if(t.hasAttribute('data-oai-pilgrimage-follow-undo')){e.preventDefault();undoLastDone();return;}
-    if(t.hasAttribute('data-oai-pilgrimage-course-map')){e.preventDefault();openPilgrimageCourseMap();return;} if(t.hasAttribute('data-oai-pilgrimage-next-route')){e.preventDefault();e.stopPropagation();routeTarget();return;} if(t.hasAttribute('data-oai-pilgrimage-current-check')){e.preventDefault();checkPilgrimageCurrentLocation();return;}
+    if(t.hasAttribute('data-oai-pilgrimage-course-map')){e.preventDefault();openPilgrimageCourseMap();return;} if(t.hasAttribute('data-oai-pilgrimage-next-route')){e.preventDefault();e.stopPropagation();if(pilgrimageDetailMode!=='complete')routeTarget();return;} if(t.hasAttribute('data-oai-pilgrimage-current-check')){e.preventDefault();checkPilgrimageCurrentLocation();return;}
     if(t.hasAttribute('data-oai-pilgrimage-delete-cancel')){e.preventDefault();closePlanDelete();return;} if(t.hasAttribute('data-oai-pilgrimage-delete-confirm')){e.preventDefault();confirmPlanDelete();return;}
     if(t.hasAttribute('data-oai-pilgrimage-marker-choice-close')){e.preventDefault();closePilgrimageMarkerChoice();return;} if(t.hasAttribute('data-oai-pilgrimage-marker-choice')){e.preventDefault();finishPilgrimageMapChoice(t.getAttribute('data-oai-pilgrimage-marker-choice'));return;}
     if(t.hasAttribute('data-oai-pilgrimage-reset')){e.preventDefault();if((loadPlan().length||loadMeta().start||loadMeta().end)&&confirm('현재 계획의 출발지·순례 장소·도착지를 모두 비울까요?')){clearDraft();renderDetail();}return;}
