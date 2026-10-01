@@ -393,7 +393,7 @@
     el = $b('sheet-route');
     try{
       if((el && el.classList.contains('open')) || _routeMode || _rS || _rE){
-        if(window.__OAI_PILGRIMAGE_ROUTE_EDIT__ && typeof window.closeRouteSheetByX==='function'){
+        if((window.__oaiPilgrimageRouteReturn===true || window.__OAI_PILGRIMAGE_ROUTE_EDIT__) && typeof window.closeRouteSheetByX==='function'){
           window.closeRouteSheetByX();
           return true;
         }
