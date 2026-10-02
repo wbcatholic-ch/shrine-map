@@ -1,17 +1,7 @@
-V8-1-14-1028
+V8-1-14-1029
 
-순례 시작 확인창 버튼 클릭 오류 수정
+길찾기 빠른 선택 모달의 스크롤 마크 제거
 
-원인
-- 순례 시작 확인창의 버튼 처리 if 문은 있었음
-- 하지만 공통 click 이벤트의 closest() 대상 목록에
-  data-oai-pilgrimage-follow-start-confirm / cancel 이 빠져 있었음
-- 따라서 버튼을 눌러도 이벤트 대상 t가 null이 되어 아무 동작도 하지 않았음
-
-수정
-- 공통 click delegation selector에 아래 두 항목 추가
-  · [data-oai-pilgrimage-follow-start-cancel]
-  · [data-oai-pilgrimage-follow-start-confirm]
-- '순례 시작' 버튼 -> confirmFollowStart() 실행
-- '취소' 버튼/배경 -> closeFollowStartConfirm() 실행
-- 1027의 시작 후 상세화면 이동 로직 유지
+- route-quick-modal이 열려 있는 동안 공통 스크롤 마크를 표시하지 않음
+- 모달을 열고 닫을 때 즉시 마크 상태 재계산
+- 모달 뒤의 길찾기/검색 화면 마크가 주소 위를 가리는 문제 수정

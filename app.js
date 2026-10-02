@@ -11753,6 +11753,8 @@ const OAI_SCROLL_AFFORDANCE_SELECTOR=[
 function _oaiScrollAffordanceVisible(el){
   try{
     if(!el||!el.isConnected)return false;
+    const routeQuick=$('route-quick-modal');
+    if(routeQuick && routeQuick.classList.contains('show'))return false;
     const r=el.getBoundingClientRect();
     if(r.width<120||r.height<90)return false;
     if(r.bottom<=0||r.top>=window.innerHeight||r.right<=0||r.left>=window.innerWidth)return false;
@@ -12188,8 +12190,13 @@ function _openRouteQuick(role){
   const title=$('route-quick-title'); if(title) title.textContent=(role==='start'?'출발지':'도착지')+' 빠른 선택';
   _renderRouteQuickList();
   m.classList.add('show'); m.setAttribute('aria-hidden','false');
+  try{_oaiScheduleScrollAffordanceRefresh();}catch(_e){}
 }
-function _closeRouteQuick(){const m=$('route-quick-modal');if(!m)return;m.classList.remove('show');m.setAttribute('aria-hidden','true');}
+function _closeRouteQuick(){
+  const m=$('route-quick-modal');if(!m)return;
+  m.classList.remove('show');m.setAttribute('aria-hidden','true');
+  try{_oaiScheduleScrollAffordanceRefresh();}catch(_e){}
+}
 function _setCurrentLocationForRouteRole(role){
   function apply(lat,lng,fromCache){
     if(!fromCache) _setMyLoc(lat,lng); else {_myLat=lat;_myLng=lng;}
