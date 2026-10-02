@@ -8772,3 +8772,34 @@ html:not(.oai-map-split-wide) #app #sheet-route.open #rs-bottom{
   margin-right:auto!important;
   box-sizing:border-box!important;
 }
+
+
+/* V8-1-14-1019: 길찾기/지도에서 추가 카드 중앙 정렬
+   오른쪽 native scrollbar가 내부 유효 폭을 줄여 카드가 살짝 왼쪽으로 보이던 현상 정리.
+   스크롤 기능은 유지하고 native scrollbar만 숨긴다.
+   공통 52x5px 스크롤 안내가 스크롤 가능 여부를 대신 표시한다. */
+html:not(.oai-map-split-wide) #app #sheet-route,
+html:not(.oai-map-split-wide) #app #sheet-route #rs-top,
+html:not(.oai-map-split-wide) #app #sheet-route #rs-bottom{
+  box-sizing:border-box!important;
+  scrollbar-width:none!important;
+  -ms-overflow-style:none!important;
+}
+html:not(.oai-map-split-wide) #app #sheet-route::-webkit-scrollbar,
+html:not(.oai-map-split-wide) #app #sheet-route #rs-top::-webkit-scrollbar,
+html:not(.oai-map-split-wide) #app #sheet-route #rs-bottom::-webkit-scrollbar{
+  width:0!important;
+  height:0!important;
+  display:none!important;
+}
+
+/* 다중 경유지 입력영역의 가로 기준은 공통 route padding만 사용 */
+html:not(.oai-map-split-wide) #app #sheet-route.route-waypoint-scroll #rs-top{
+  width:100%!important;
+}
+html:not(.oai-map-split-wide) #app #sheet-route.route-waypoint-scroll #rs-top .rs-route-stack,
+html:not(.oai-map-split-wide) #app #sheet-route.route-waypoint-scroll #rs-top .rs-action-row{
+  width:100%!important;
+  max-width:100%!important;
+  box-sizing:border-box!important;
+}

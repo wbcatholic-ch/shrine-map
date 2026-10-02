@@ -1,15 +1,16 @@
-V8-1-14-1018
+V8-1-14-1019
 
-1. 성당 GPS 자동 방문 반경
-- 150m -> 100m
-- 성당 자동 방문등록 / 활성 순례 성당 도달 / 순례 출발·도착 성당 등록 모두 같은 상수 사용
+1. 지도에서 추가 / 길찾기 카드가 왼쪽으로 치우쳐 보이는 현상
+- 원인: #rs-top / #sheet-route의 오른쪽 native scrollbar가 내부 유효 폭을 차지함
+- 스크롤 기능은 유지
+- native scrollbar만 숨김
+- 공통 52x5px 스크롤 안내는 유지
+- 다중 경유지 rs-top / rs-route-stack / action-row 폭을 100% border-box 기준으로 고정
+- 기존 좌우 padding 12px / 10px은 변경하지 않음
 
-2. 성지순례 화면 중앙 정렬
-- 순례완료/순례계획/순례하기의 오른쪽 native scrollbar 숨김
-- 커스텀 52x5px 스크롤 안내는 유지
-- planner body를 100% + border-box + auto margin으로 명시
-
-3. 기존 피드백 유지
-- 미사/기도문 순례복귀는 active follow일 때만 표시
-- 독립 floating layer 유지
-- 공통 스크롤 관리자 / 설정 sticky 헤더 유지
+2. 기존 피드백 유지
+- 순례 planner native scrollbar 숨김
+- 성당 GPS 100m
+- 설정 헤더 sticky
+- 미사/기도문 순례복귀 floating layer
+- 공통 스크롤 관리자
