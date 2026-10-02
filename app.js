@@ -16040,11 +16040,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     setView('detail');
     renderDetail();
   }
-  function repeatCourse(id){
+  function repeatCourse(id,confirmed){
     const targetId=String(id||'');
     const active=_activeFollowState();
     if(active&&active.courseId===targetId){stopActiveFollow(targetId);return;}
     if(active&&active.courseId&&active.courseId!==targetId){openFollowSwitchConfirm(targetId,'repeat');return;}
+    if(!confirmed){openFollowStartConfirm(targetId,'repeat');return;}
     let a=loadCourses(),i=a.findIndex(x=>String(x.id)===targetId);if(i<0)return;
     const original=JSON.parse(JSON.stringify(a[i]));
     _writeRepeatEditGuard(original);
@@ -16674,6 +16675,58 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(c)c.textContent=(meta.name||'순례계획')+' · '+done+'/'+list.length;
     renderFollowProgress();
   }
+  let pendingFollowConfirmCourseId='';
+  let pendingFollowConfirmMode='';
+  function followStartModal(){return document.getElementById('oai-pilgrimage-follow-start-modal');}
+  function openFollowStartConfirm(id,mode){
+    const targetId=String(id||'');
+    const course=loadCourses().find(function(c){return String(c.id)===targetId;});
+    if(!course)return false;
+
+    pendingFollowConfirmCourseId=targetId;
+    pendingFollowConfirmMode=String(mode||'start');
+
+    const title=document.getElementById('oai-pilgrimage-follow-start-title');
+    const msg=document.getElementById('oai-pilgrimage-follow-start-message');
+    const confirm=document.querySelector('[data-oai-pilgrimage-follow-start-confirm]');
+    const isRepeat=pendingFollowConfirmMode.indexOf('repeat')===0;
+
+    if(title)title.textContent=isRepeat?'이 순례를 다시 시작할까요?':'이 순례를 시작할까요?';
+    if(msg)msg.textContent='순례를 시작하면 GPS로 방문한 순례지를 기록합니다.';
+    if(confirm)confirm.textContent=isRepeat?'다시 순례 시작':'순례 시작';
+
+    const m=followStartModal();
+    if(!m)return false;
+    m.classList.add('show');
+    m.setAttribute('aria-hidden','false');
+    return true;
+  }
+  function closeFollowStartConfirm(){
+    const m=followStartModal();
+    if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}
+    pendingFollowConfirmCourseId='';
+    pendingFollowConfirmMode='';
+  }
+  function confirmFollowStart(){
+    const id=pendingFollowConfirmCourseId;
+    const mode=pendingFollowConfirmMode;
+    if(!id){closeFollowStartConfirm();return false;}
+    closeFollowStartConfirm();
+
+    if(mode==='repeat'||mode==='repeat-detail'){
+      repeatCourse(id,true);
+      return true;
+    }
+    if(mode==='follow'){
+      const c=_activateFollowCourse(id);
+      if(c)applyCourse(c);
+      openFollow(true);
+      return true;
+    }
+    startFollowFromCourse(id,true);
+    return true;
+  }
+
   let pendingFollowStopCourseId='';
   let pendingFollowStartCourseId='';
   let pendingFollowStartMode='';
@@ -16748,8 +16801,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 
     if(nextId){
       setTimeout(function(){
-        if(nextMode==='repeat')repeatCourse(nextId);
-        else startFollowFromCourse(nextId);
+        if(nextMode==='repeat')repeatCourse(nextId,true);
+        else startFollowFromCourse(nextId,true);
       },30);
       return true;
     }
@@ -16760,11 +16813,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function stopActiveFollow(id){
     return openFollowStopConfirm(id);
   }
-  function startFollowFromCourse(id){
+  function startFollowFromCourse(id,confirmed){
     const targetId=String(id||'');
     const active=_activeFollowState();
     if(active&&active.courseId===targetId){stopActiveFollow(targetId);return;}
     if(active&&active.courseId&&active.courseId!==targetId){openFollowSwitchConfirm(targetId,'start');return;}
+    if(!confirmed){openFollowStartConfirm(targetId,'start');return;}
     pilgrimageDetailMode='plan';
     const c=_activateFollowCourse(targetId);if(!c)return;
     applyCourse(c);
@@ -16779,14 +16833,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       openFollowSwitchConfirm(currentCourseId,pilgrimageDetailMode==='complete'?'repeat':'start');
       return;
     }
-    if(pilgrimageDetailMode==='complete'){repeatCourse(currentCourseId);return;}
-    pilgrimageDetailMode='plan';
-    const c=_activateFollowCourse(currentCourseId);
-    if(c)applyCourse(c);
-    renderDetail();
-    renderCourseList();
+    if(pilgrimageDetailMode==='complete'){openFollowStartConfirm(currentCourseId,'repeat-detail');return;}
+    openFollowStartConfirm(currentCourseId,'start-detail');
   }
-  function openFollow(alreadyActivated){pilgrimageDetailMode='plan';if(!loadPlan().length){alert('순례 장소를 먼저 등록해 주세요.');return;}if(!currentCourseId){pendingAfterSave='follow';openSaveModal(false);return;}if(!alreadyActivated){const c=_activateFollowCourse(currentCourseId);if(c)applyCourse(c);}updateCurrentCourseProgress();setView('follow');const t=targetInfo();const n=document.getElementById('oai-pilgrimage-follow-next'),a=document.getElementById('oai-pilgrimage-follow-addr'),doneBtn=document.querySelector('[data-oai-pilgrimage-follow-done]'),actions=document.querySelector('.oai-pilgrimage-follow-actions');updateFollowHeader();if(n)n.textContent=t?t.item.name:'순례 완료';if(a)a.textContent=t?(t.item.addr||''):'';if(doneBtn){doneBtn.style.display=t&&t.index>=0?'':'none';}if(actions)actions.classList.toggle('single',!(t&&t.index>=0));calcFollowDistance();calcFollowItemMetrics();}
+  function openFollow(alreadyActivated){pilgrimageDetailMode='plan';if(!loadPlan().length){alert('순례 장소를 먼저 등록해 주세요.');return;}if(!currentCourseId){pendingAfterSave='follow';openSaveModal(false);return;}if(!alreadyActivated){const active=_activeFollowState();if(active&&active.courseId&&active.courseId!==String(currentCourseId)){openFollowSwitchConfirm(currentCourseId,'start');return;}if(!active){openFollowStartConfirm(currentCourseId,'follow');return;}const c=_activateFollowCourse(currentCourseId);if(c)applyCourse(c);}updateCurrentCourseProgress();setView('follow');const t=targetInfo();const n=document.getElementById('oai-pilgrimage-follow-next'),a=document.getElementById('oai-pilgrimage-follow-addr'),doneBtn=document.querySelector('[data-oai-pilgrimage-follow-done]'),actions=document.querySelector('.oai-pilgrimage-follow-actions');updateFollowHeader();if(n)n.textContent=t?t.item.name:'순례 완료';if(a)a.textContent=t?(t.item.addr||''):'';if(doneBtn){doneBtn.style.display=t&&t.index>=0?'':'none';}if(actions)actions.classList.toggle('single',!(t&&t.index>=0));calcFollowDistance();calcFollowItemMetrics();}
   function refreshFollow(){const t=targetInfo(),n=document.getElementById('oai-pilgrimage-follow-next'),a=document.getElementById('oai-pilgrimage-follow-addr'),doneBtn=document.querySelector('[data-oai-pilgrimage-follow-done]'),actions=document.querySelector('.oai-pilgrimage-follow-actions');updateFollowHeader();if(n)n.textContent=t?t.item.name:'순례 완료';if(a)a.textContent=t?(t.item.addr||''):'';if(doneBtn)doneBtn.style.display=t&&t.index>=0?'':'none';if(actions)actions.classList.toggle('single',!(t&&t.index>=0));calcFollowDistance();calcFollowItemMetrics();}
   function _normPilgrimageName(v){return String(v||'').replace(/\s+/g,'').replace(/[()（）·ㆍ\-_,.]/g,'').toLowerCase();}
   window._oaiMarkPilgrimagePlanVisitedByShrine=function(shrine){
@@ -17028,6 +17078,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(t.hasAttribute('data-oai-pilgrimage-point-close')){e.preventDefault();closePointPicker();return;} if(t.hasAttribute('data-oai-pilgrimage-point-current')){e.preventDefault();chooseCurrent();return;} if(t.hasAttribute('data-pilgrimage-frequent')){e.preventDefault();chooseFrequent(parseInt(t.getAttribute('data-pilgrimage-frequent'),10));return;} if(t.hasAttribute('data-oai-pilgrimage-point-search')){e.preventDefault();searchPoint();return;} if(t.hasAttribute('data-oai-pilgrimage-point-map')){e.preventDefault();pickPointFromMap();return;}
     if(t.hasAttribute('data-oai-pilgrimage-save-cancel')){e.preventDefault();closeSaveModal();return;} if(t.hasAttribute('data-oai-pilgrimage-save-confirm')){e.preventDefault();confirmSave();return;} if(t.hasAttribute('data-oai-pilgrimage-rename')){e.preventDefault();openSaveModal(true);return;}
     if(t.hasAttribute('data-oai-pilgrimage-save')){e.preventDefault();e.stopPropagation();saveCurrent();return;} if(t.hasAttribute('data-oai-pilgrimage-follow')){e.preventDefault();e.stopPropagation();toggleFollowFromDetail();return;}
+    if(t.hasAttribute('data-oai-pilgrimage-follow-start-cancel')){e.preventDefault();e.stopPropagation();closeFollowStartConfirm();return;}
+    if(t.hasAttribute('data-oai-pilgrimage-follow-start-confirm')){e.preventDefault();e.stopPropagation();confirmFollowStart();return;}
     if(t.hasAttribute('data-oai-pilgrimage-follow-stop')){e.preventDefault();e.stopPropagation();stopActiveFollow(currentCourseId);return;}
     if(t.hasAttribute('data-oai-pilgrimage-follow-stop-cancel')){e.preventDefault();e.stopPropagation();closeFollowStopConfirm();return;}
     if(t.hasAttribute('data-oai-pilgrimage-follow-stop-confirm')){e.preventDefault();e.stopPropagation();confirmFollowStop();return;}
