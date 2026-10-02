@@ -8747,3 +8747,28 @@ html:not(.oai-map-split-wide) #app #sheet-route.open #rs-bottom{
     font-size:calc(13px * var(--app-font-scale,1));
   }
 }
+
+
+/* V8-1-14-1018: 성지순례 화면 중앙 정렬
+   오른쪽 native scrollbar가 컨텐츠 폭을 줄여 전체가 왼쪽으로 치우쳐 보이던 현상을 제거.
+   공통 52x5px 스크롤 안내가 있으므로 native scrollbar는 숨긴다. */
+.oai-pilgrimage-planner-panel{
+  width:100%!important;
+  box-sizing:border-box!important;
+  overflow-y:auto!important;
+  overflow-x:hidden!important;
+  scrollbar-width:none!important;
+  -ms-overflow-style:none!important;
+}
+.oai-pilgrimage-planner-panel::-webkit-scrollbar{
+  width:0!important;
+  height:0!important;
+  display:none!important;
+}
+.oai-pilgrimage-planner-body{
+  width:100%!important;
+  max-width:100%!important;
+  margin-left:auto!important;
+  margin-right:auto!important;
+  box-sizing:border-box!important;
+}

@@ -1,20 +1,15 @@
-V8-1-14-1017
+V8-1-14-1018
 
-정리 우선 버전
+1. 성당 GPS 자동 방문 반경
+- 150m -> 100m
+- 성당 자동 방문등록 / 활성 순례 성당 도달 / 순례 출발·도착 성당 등록 모두 같은 상수 사용
 
-변경 파일
-- app.js
-- style.css
-- index.html
-- js/back-controller.js
-- diocese.html
-- sw.js
-- version.json
-- CODE_AUDIT_1017.md
+2. 성지순례 화면 중앙 정렬
+- 순례완료/순례계획/순례하기의 오른쪽 native scrollbar 숨김
+- 커스텀 52x5px 스크롤 안내는 유지
+- planner body를 100% + border-box + auto margin으로 명시
 
-핵심
-- 최근 스크롤 패치 중복 제거
-- route / 순례 / 설정 / 기도문 / 목록의 스크롤 표시를 공통 manager로 통합
-- 관구·교구 iframe에도 동일 스크롤 표시 적용
-- 뒤로가기 열린 화면 판정 중복 함수 통합
-- 과거 주석 버전 일괄 치환 중단
+3. 기존 피드백 유지
+- 미사/기도문 순례복귀는 active follow일 때만 표시
+- 독립 floating layer 유지
+- 공통 스크롤 관리자 / 설정 sticky 헤더 유지
