@@ -1,16 +1,15 @@
-V8-1-14-1019
+V8-1-14-1021
 
-1. 지도에서 추가 / 길찾기 카드가 왼쪽으로 치우쳐 보이는 현상
-- 원인: #rs-top / #sheet-route의 오른쪽 native scrollbar가 내부 유효 폭을 차지함
-- 스크롤 기능은 유지
-- native scrollbar만 숨김
-- 공통 52x5px 스크롤 안내는 유지
-- 다중 경유지 rs-top / rs-route-stack / action-row 폭을 100% border-box 기준으로 고정
-- 기존 좌우 padding 12px / 10px은 변경하지 않음
+핸들이 없는 길찾기 결과 화면 X 위치 통일
 
-2. 기존 피드백 유지
-- 순례 planner native scrollbar 숨김
-- 성당 GPS 100m
-- 설정 헤더 sticky
-- 미사/기도문 순례복귀 floating layer
-- 공통 스크롤 관리자
+대상
+1. 순례코스 보기
+2. 다음 순례지 길찾기
+3. 일반 성지/성당/피정 길찾기 결과
+
+수정
+- 결과 화면에서는 기존 #rs-top 상단 46px 예약공간 제거
+- 결과 화면 #rs-top padding-top:10px
+- X 버튼 top:17px
+- 출발칸 44px 높이와 X 30px 높이를 기준으로 같은 첫 행의 수직 중앙에 배치
+- 지도에서 추가(편집 화면)는 기존 핸들/X 상단 예약공간 유지

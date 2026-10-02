@@ -6525,17 +6525,18 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-waypoint-scroll.open{
 }
 html:not(.oai-map-split-wide) #app #sheet-route.route-waypoint-scroll #rs-top{
   box-sizing:border-box!important;
-  height:304px!important;
-  max-height:304px!important;
-  min-height:304px!important;
-  margin-top:0!important;
+  height:258px!important;
+  max-height:258px!important;
+  min-height:258px!important;
+  margin-top:46px!important;
   margin-bottom:0!important;
-  padding:46px 10px 8px 12px!important;
+  padding:10px 10px 8px 12px!important;
   overflow-y:auto!important;
   overflow-x:hidden!important;
   -webkit-overflow-scrolling:touch!important;
   overscroll-behavior-y:contain!important;
   touch-action:pan-y!important;
+  scroll-padding-top:8px!important;
   scroll-padding-bottom:8px!important;
 }
 html:not(.oai-map-split-wide) #app #sheet-route.route-waypoint-scroll #rs-top .rs-action-row{position:relative!important;flex:none!important;margin:7px 0 0!important;}
@@ -8661,10 +8662,10 @@ html:not(.oai-map-split-wide) #app #sheet-route.open #rs-bottom{
   width:52px;
   height:5px;
   border-radius:999px;
-  background:rgba(67,76,91,.66);
-  box-shadow:0 1px 6px rgba(31,42,68,.18);
+  background:rgba(55,64,80,.76);
+  box-shadow:0 1px 7px rgba(31,42,68,.24);
   pointer-events:none;
-  z-index:20550;
+  z-index:100500;
   transform:translateX(-50%);
 }
 .oai-scroll-affordance[hidden]{
@@ -8802,4 +8803,26 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-waypoint-scroll #rs-top .r
   width:100%!important;
   max-width:100%!important;
   box-sizing:border-box!important;
+}
+
+
+/* V8-1-14-1021: 핸들이 없는 길찾기 결과 화면의 X 위치 통일
+   대상:
+   1) 순례코스 보기
+   2) 다음 순례지 길찾기
+   3) 일반 성지/성당/피정 길찾기 결과
+   이 세 화면은 드래그 핸들이 없으므로 기존 46px 상단 예약공간이 필요 없다. */
+html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing #rs-top{
+  padding-top:10px!important;
+}
+
+/* 출발칸 높이 44px / X 높이 30px 기준으로 같은 행의 수직 중앙에 맞춤 */
+html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-sheet-x{
+  top:17px!important;
+}
+
+/* 기존 순례코스 보기의 별도 top:20px 규칙보다 우선하도록 명시 */
+html:not(.oai-map-split-wide).oai-pilgrimage-course-view-readonly #app #sheet-route.route-result-showing .route-sheet-x,
+html:not(.oai-map-split-wide).oai-pilgrimage-route-direct #app #sheet-route.route-result-showing .route-sheet-x{
+  top:17px!important;
 }

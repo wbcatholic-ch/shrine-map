@@ -11770,7 +11770,13 @@ function _oaiPositionScrollAffordance(el,pair,showTop,showBottom){
     const vw=Math.max(document.documentElement.clientWidth||0,window.innerWidth||0);
     const center=Math.max(34,Math.min(vw-34,rect.left+rect.width/2));
     const topInset=_oaiStickyTopInset(el,rect);
-    const topY=Math.max(6,Math.min(window.innerHeight-12,rect.top+topInset+8));
+    const routeWaypointTop=!!(
+      el.id==='rs-top' &&
+      $('sheet-route') &&
+      $('sheet-route').classList.contains('route-waypoint-scroll')
+    );
+    const rawTopY=routeWaypointTop ? (rect.top-15) : (rect.top+topInset+8);
+    const topY=Math.max(6,Math.min(window.innerHeight-12,rawTopY));
     const bottomY=Math.max(6,Math.min(window.innerHeight-12,rect.bottom-13));
     pair.top.style.left=center+'px';
     pair.top.style.top=topY+'px';
@@ -14445,6 +14451,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           panel.scrollTop=0;
           _oaiBindScrollAffordance(panel);
           _oaiSyncScrollAffordance(panel);
+          setTimeout(function(){_oaiSyncScrollAffordance(panel);},80);
+          setTimeout(function(){_oaiSyncScrollAffordance(panel);},220);
         });
       }
       if(typeof window.oaiRefreshDeveloperModeEntry==='function')window.oaiRefreshDeveloperModeEntry();
