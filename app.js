@@ -11582,6 +11582,36 @@ function setMyLocAsStart(){
 function _routeWaypointElementId(prefix, index, suffix){
   return prefix + (index===1 ? '' : index) + suffix;
 }
+
+function _syncRouteDragSlotRows(){
+  try{
+    const pairs=[
+      ['rs-start-box','rs-start-waypoint-tools'],
+      ['rs-waypoint-box','rs-waypoint-end-tools'],
+      ['rs-waypoint2-box','rs-waypoint2-end-tools'],
+      ['rs-waypoint3-box','rs-waypoint3-end-tools'],
+      ['rs-waypoint4-box','rs-waypoint4-end-tools'],
+      ['rs-waypoint5-box','rs-waypoint5-end-tools'],
+      ['rs-waypoint6-box','rs-waypoint6-end-tools'],
+      ['rs-waypoint7-box','rs-waypoint7-end-tools'],
+      ['rs-waypoint8-box','rs-waypoint8-end-tools'],
+      ['rs-waypoint9-box','rs-waypoint9-end-tools'],
+      ['rs-waypoint10-box','rs-waypoint10-end-tools'],
+      ['rs-end-box','rs-end-drag-slot']
+    ];
+    pairs.forEach(function(pair){
+      const box=$(pair[0]), tools=$(pair[1]);
+      if(!box||!tools)return;
+      const row=getComputedStyle(box).gridRowStart;
+      if(row && row!=='auto'){
+        tools.style.gridColumn='2';
+        tools.style.gridRowStart=row;
+        tools.style.gridRowEnd='auto';
+      }
+    });
+  }catch(_e){}
+}
+
 function _syncRouteWaypointBoxes(){
   const stack=$('rs-top') ? $('rs-top').querySelector('.rs-route-stack') : document.querySelector('.rs-route-stack');
   const sheet=$('sheet-route');
@@ -11679,6 +11709,7 @@ function _syncRouteWaypointBoxes(){
   const swap0=$('rs-swap-btn');
   if(tools0) tools0.style.display=routeUiResultMode?'none':'flex';
   if(swap0) swap0.style.display='none';
+  _syncRouteDragSlotRows();
 }
 
 function _ensureRouteWaypointBox(role){
@@ -12589,7 +12620,11 @@ function _bindRouteDragHandles(){
       _clearRouteDragClasses();
       if(st.active && st.sourceRole!==st.targetRole){
         const changed=_reorderRouteReadyPoints(st.sourceRole,st.targetRole);
-        if(changed){ _routeDragHaptic(32); _syncRoutePointVisuals(); }
+        if(changed){
+          _routeDragHaptic(32);
+          _syncRoutePointVisuals();
+          _syncRouteDragSlotRows();
+        }
       }
       return true;
     }

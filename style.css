@@ -6499,8 +6499,7 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 .rs-waypoint8-box{grid-column:1;grid-row:17;background:#f5ddcf;border-color:#4b2a12;}
 .rs-waypoint9-box{grid-column:1;grid-row:19;background:#f2dacb;border-color:#3f2410;}
 .rs-waypoint10-box{grid-column:1;grid-row:21;background:#efd6c7;border-color:#341e0e;}
-#rs-waypoint6-box,#rs-waypoint7-box,#rs-waypoint8-box,#rs-waypoint9-box,#rs-waypoint10-box,
-#rs-waypoint6-end-tools,#rs-waypoint7-end-tools,#rs-waypoint8-end-tools,#rs-waypoint9-end-tools,#rs-waypoint10-end-tools{display:none;}
+#rs-waypoint6-box,#rs-waypoint7-box,#rs-waypoint8-box,#rs-waypoint9-box,#rs-waypoint10-box{display:none;}
 .rs-route-stack.has-waypoint-summary .rs-waypoint6-drag-slot,
 .rs-route-stack.has-waypoint-summary .rs-waypoint7-drag-slot,
 .rs-route-stack.has-waypoint-summary .rs-waypoint8-drag-slot,
@@ -8715,16 +8714,14 @@ html:not(.oai-map-split-wide).oai-pilgrimage-route-direct #app #sheet-route.rout
 }
 
 
-/* V8-1-14-1023: 경유지 6~10 드래그 핸들 grid row 오류 수정
-   HTML 실제 class(.rs-waypointN-drag-slot)와 CSS selector를 일치시킨다. */
-.rs-waypoint6-drag-slot{grid-row:13!important;}
-.rs-waypoint7-drag-slot{grid-row:15!important;}
-.rs-waypoint8-drag-slot{grid-row:17!important;}
-.rs-waypoint9-drag-slot{grid-row:19!important;}
-.rs-waypoint10-drag-slot{grid-row:21!important;}
 
-.rs-route-stack.has-waypoint6 .rs-end-drag-slot{grid-row:15!important;}
-.rs-route-stack.has-waypoint7 .rs-end-drag-slot{grid-row:17!important;}
-.rs-route-stack.has-waypoint8 .rs-end-drag-slot{grid-row:19!important;}
-.rs-route-stack.has-waypoint9 .rs-end-drag-slot{grid-row:21!important;}
-.rs-route-stack.has-waypoint10 .rs-end-drag-slot{grid-row:23!important;}
+
+/* V8-1-14-1025: 드래그 핸들 정렬 최종 기준
+   실제 row 번호는 JS가 대응 박스의 computed grid row를 읽어 동기화한다. */
+#sheet-route .rs-drag-slot{
+  grid-column:2!important;
+  align-self:stretch!important;
+  height:44px!important;
+  min-height:44px!important;
+  box-sizing:border-box!important;
+}
