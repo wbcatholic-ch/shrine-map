@@ -3559,7 +3559,7 @@ function _maybeAutoParishVisit(lat,lng){
   if(isMyParish){if(!_isMyParishAutoVisitEnabled()||previousVisits.length)return;}else if(previousVisits.some(function(v){return v.date===_todayISODate();}))return;
   if(!_addParishVisit(best,_todayISODate(),'gps'))return;
 
-  // V8-1-14-1013:
+  // V8-1-14-1014:
   // 같은 GPS 위치가 '성지 + 성당 + 활성 순례코스'에 동시에 해당하더라도
   // 방문기록은 각각 정상 등록하되 축하 안내는 성지를 우선한다.
   // 따라서 현재 위치가 성지 자동등록 반경 안이면 성당용 축하 팝업은 띄우지 않는다.
@@ -16120,6 +16120,26 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(meta.end&&_validGpsPair(meta.end.lat,meta.end.lng)) _setRoutePointFromItem('end',meta.end,_pilgrimageRouteShrineIndex(meta.end));
         window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__=true;
         _syncRouteWaypointBoxes();
+
+        /* 지도에서 추가는 이전 내부 스크롤 위치를 이어받지 않는다.
+           첫 진입은 항상 상단부터 보여 X/핸들 아래 예약공간이 보이게 한다. */
+        if(!readOnly){
+          const routeTop=$('rs-top');
+          const resetRouteTop=function(){
+            try{
+              if(routeTop){
+                routeTop.scrollTop=0;
+                if(typeof routeTop.scrollTo==='function')routeTop.scrollTo({top:0,behavior:'auto'});
+              }
+              _syncRouteScrollHints();
+            }catch(_e){}
+          };
+          resetRouteTop();
+          requestAnimationFrame(resetRouteTop);
+          setTimeout(resetRouteTop,80);
+          setTimeout(resetRouteTop,220);
+        }
+
         _refreshRoutePilgrimageButtonMode();
         _updateSearchBtn();
         if(readOnly){
