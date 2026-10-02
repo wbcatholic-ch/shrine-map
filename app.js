@@ -3559,7 +3559,7 @@ function _maybeAutoParishVisit(lat,lng){
   if(isMyParish){if(!_isMyParishAutoVisitEnabled()||previousVisits.length)return;}else if(previousVisits.some(function(v){return v.date===_todayISODate();}))return;
   if(!_addParishVisit(best,_todayISODate(),'gps'))return;
 
-  // V8-1-14-1014:
+  // V8-1-14-1015:
   // 같은 GPS 위치가 '성지 + 성당 + 활성 순례코스'에 동시에 해당하더라도
   // 방문기록은 각각 정상 등록하되 축하 안내는 성지를 우선한다.
   // 따라서 현재 위치가 성지 자동등록 반경 안이면 성당용 축하 팝업은 띄우지 않는다.
@@ -11711,6 +11711,87 @@ function _syncRouteScrollHints(){
     down.setAttribute('aria-hidden',showDown?'false':'true');
   }catch(_e){}
 }
+
+const OAI_SCROLL_AFFORDANCE_SELECTOR=[
+  '#sheet-route.route-waypoint-scroll #rs-top',
+  '#sheet-route.route-result-showing',
+  '.oai-pilgrimage-planner-panel',
+  '.oai-settings-panel',
+  '.sheet-body',
+  '#srch-modal .sm-body',
+  '#route-choice-modal .route-choice-body',
+  '#oai-pilgrimage-point-modal .oai-pilgrimage-point-body',
+  '#oai-records-modal .oai-records-body',
+  '#oai-record-restore-modal .oai-record-restore-body'
+].join(',');
+
+function _oaiScrollAffordanceHost(el){
+  if(!el)return null;
+  if(el.matches&&el.matches('#sheet-route.route-waypoint-scroll #rs-top'))return $('sheet-route');
+  if(el.id==='sheet-route')return el;
+  if(el.classList&&el.classList.contains('oai-pilgrimage-planner-panel'))return planner&&planner();
+  if(el.classList&&el.classList.contains('oai-settings-panel'))return el;
+  return el;
+}
+function _oaiEnsureScrollAffordance(el){
+  try{
+    const host=_oaiScrollAffordanceHost(el);
+    if(!host)return null;
+    let top=host.querySelector(':scope > .oai-scroll-affordance.is-top');
+    let bottom=host.querySelector(':scope > .oai-scroll-affordance.is-bottom');
+    if(!top){
+      top=document.createElement('div');
+      top.className='oai-scroll-affordance is-top';
+      top.setAttribute('aria-hidden','true');
+      host.appendChild(top);
+    }
+    if(!bottom){
+      bottom=document.createElement('div');
+      bottom.className='oai-scroll-affordance is-bottom';
+      bottom.setAttribute('aria-hidden','true');
+      host.appendChild(bottom);
+    }
+    return {host:host,top:top,bottom:bottom};
+  }catch(_e){return null;}
+}
+function _oaiSyncScrollAffordance(el){
+  try{
+    if(!el||!el.isConnected)return;
+    const parts=_oaiEnsureScrollAffordance(el);
+    if(!parts)return;
+    const max=Math.max(0,el.scrollHeight-el.clientHeight);
+    const y=Math.max(0,el.scrollTop);
+    const canScroll=max>8;
+    const showTop=canScroll&&y>10;
+    const showBottom=canScroll&&y<max-10;
+    parts.host.classList.toggle('oai-scroll-has-top',showTop);
+    parts.host.classList.toggle('oai-scroll-has-bottom',showBottom);
+    parts.top.setAttribute('aria-hidden',showTop?'false':'true');
+    parts.bottom.setAttribute('aria-hidden',showBottom?'false':'true');
+  }catch(_e){}
+}
+function _oaiBindScrollAffordance(el){
+  if(!el||el.__oaiScrollAffordanceBound)return;
+  el.__oaiScrollAffordanceBound=true;
+  el.addEventListener('scroll',function(){_oaiSyncScrollAffordance(el);},{passive:true});
+  requestAnimationFrame(function(){_oaiSyncScrollAffordance(el);});
+}
+function _oaiRefreshScrollAffordances(root){
+  try{
+    const scope=root&&root.querySelectorAll?root:document;
+    if(scope.matches&&scope.matches(OAI_SCROLL_AFFORDANCE_SELECTOR))_oaiBindScrollAffordance(scope);
+    scope.querySelectorAll(OAI_SCROLL_AFFORDANCE_SELECTOR).forEach(_oaiBindScrollAffordance);
+  }catch(_e){}
+}
+try{
+  window.addEventListener('resize',function(){_oaiRefreshScrollAffordances(document);},{passive:true});
+  if(typeof MutationObserver!=='undefined'){
+    const obs=new MutationObserver(function(){setTimeout(function(){_oaiRefreshScrollAffordances(document);},20);});
+    obs.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style','hidden']});
+  }
+  setTimeout(function(){_oaiRefreshScrollAffordances(document);},80);
+}catch(_e){}
+
 function _syncRouteScrollUpHint(){ _syncRouteScrollHints(); }
 function _bindRouteScrollUpHint(){
   try{
@@ -14311,7 +14392,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     m.dataset.returnToCover=opts&&opts.returnToCover?'1':'';
     try{
       const panel=m.querySelector('.oai-settings-panel');
-      if(panel){panel.scrollTop=0;requestAnimationFrame(function(){panel.scrollTop=0;});}
+      if(panel){
+        panel.scrollTop=0;
+        requestAnimationFrame(function(){
+          panel.scrollTop=0;
+          _oaiBindScrollAffordance(panel);
+          _oaiSyncScrollAffordance(panel);
+        });
+      }
       if(typeof window.oaiRefreshDeveloperModeEntry==='function')window.oaiRefreshDeveloperModeEntry();
     }catch(_e){}
   }
@@ -15524,7 +15612,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(sub)sub.textContent=v==='list'?'순례계획과 완료 기록을 관리하세요':v==='follow'?'현재 위치 기준 거리와 순례 진행 상태를 확인하세요':(pilgrimageDetailMode==='complete'?'완료한 순례코스를 확인하세요':'순례 경로와 현재 위치를 확인하세요');
     const panel=planner()&&planner().querySelector('.oai-pilgrimage-planner-panel');if(panel)panel.scrollTop=0;
     _bindPilgrimageScrollHints();
-    requestAnimationFrame(function(){setTimeout(_syncPilgrimageScrollHints,20);});
+    requestAnimationFrame(function(){
+      setTimeout(function(){
+        _syncPilgrimageScrollHints();
+        _oaiRefreshScrollAffordances(planner());
+      },20);
+    });
   }
   function openPlanner(opts){
     const m=planner();if(!m)return;
@@ -16138,6 +16231,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           requestAnimationFrame(resetRouteTop);
           setTimeout(resetRouteTop,80);
           setTimeout(resetRouteTop,220);
+          setTimeout(resetRouteTop,420);
         }
 
         _refreshRoutePilgrimageButtonMode();
