@@ -1768,7 +1768,6 @@ function openFaithPortal(kind, opts){
 }
 function openMissa(){
   openFaithPortal('missa', {forceReload:true});
-  setTimeout(function(){try{if(typeof window._oaiRefreshFaithPilgrimageReturnButtons==='function')window._oaiRefreshFaithPilgrimageReturnButtons();}catch(_e){}},80);
 }
 
 const OAI_SHRINE_VISITS_KEY = 'oai_shrine_visits_v1';
@@ -4478,7 +4477,6 @@ function openPrayerBook(opts){
     if(opts && opts.fromMassQuick && typeof _resetAppBackTrap==='function') _resetAppBackTrap('prayer-quick-open');
   }catch(e){ console.warn('[가톨릭길동무]', e); }
   _renderFaithBottomNav('prayer');
-  try{if(typeof window._oaiRefreshFaithPilgrimageReturnButtons==='function')window._oaiRefreshFaithPilgrimageReturnButtons();}catch(_e){}
   var restore = !!(opts && opts.restore);
   if(!restore && typeof oaiEnterView==='function') oaiEnterView(view);
   var setupDelay = (opts && opts.instant) ? 0 : 50;
@@ -13826,14 +13824,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   ['list-srch-inp', 'region-inp', 'sm-inp', 'prayer-search-inp'].forEach(prepareSearchKeyboardInput);
 
   on('missa-close', 'click', function() { closeMissa(); });
-  on('missa-pilgrimage-return', 'click', function(e) {
-    if(e){e.preventDefault();e.stopPropagation();}
-    try{if(typeof window._oaiReturnToActivePilgrimage==='function')window._oaiReturnToActivePilgrimage({fromFaith:true});}catch(_e){}
-  });
-  on('prayer-pilgrimage-return', 'click', function(e) {
-    if(e){e.preventDefault();e.stopPropagation();}
-    try{if(typeof window._oaiReturnToActivePilgrimage==='function')window._oaiReturnToActivePilgrimage({fromFaith:true});}catch(_e){}
-  });
 
   on('exit-cancel-btn', 'click', function() { closeExitDlg(); });
   on('exit-ok-btn',     'click', function() { doExit(); });
@@ -15233,7 +15223,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const cur=_readActiveFollowRaw();
       if(!courseId||!cur||cur.courseId===String(courseId)) localStorage.removeItem(ACTIVE_FOLLOW_KEY);
     }catch(_e){}
-    try{setTimeout(function(){if(typeof window._oaiRefreshFaithPilgrimageReturnButtons==='function')window._oaiRefreshFaithPilgrimageReturnButtons();},0);}catch(_e){}
   }
   function _activeFollowState(){
     const s=_readActiveFollowRaw();
@@ -15255,7 +15244,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     a[i]=c;
     try{localStorage.setItem(ACTIVE_FOLLOW_KEY,JSON.stringify({courseId:c.id,startedAt:now}));}catch(_e){}
     saveCourses(a);
-    try{setTimeout(function(){if(typeof window._oaiRefreshFaithPilgrimageReturnButtons==='function')window._oaiRefreshFaithPilgrimageReturnButtons();},0);}catch(_e){}
     return c;
   }
   function _isActiveFollowCourse(id){
@@ -15514,27 +15502,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function _readPilgrimageBackgroundContext(){
     try{return String(sessionStorage.getItem(OAI_PILGRIMAGE_BG_CONTEXT_KEY)||'');}catch(_e){return '';}
   }
-  function _refreshFaithPilgrimageReturnButtons(){
-    const active=!!_activeFollowState();
-    [
-      {button:'missa-pilgrimage-return',layer:'missa-pilgrimage-layer'},
-      {button:'prayer-pilgrimage-return',layer:'prayer-pilgrimage-layer'}
-    ].forEach(function(item){
-      const btn=document.getElementById(item.button);
-      const layer=document.getElementById(item.layer);
-      if(layer){
-        layer.hidden=!active;
-        layer.style.display=active?'block':'none';
-        layer.setAttribute('aria-hidden',active?'false':'true');
-      }
-      if(btn){
-        btn.hidden=!active;
-        btn.style.display=active?'inline-flex':'none';
-        btn.setAttribute('aria-hidden',active?'false':'true');
-      }
-    });
-  }
-  window._oaiRefreshFaithPilgrimageReturnButtons=_refreshFaithPilgrimageReturnButtons;
   window._oaiHasActivePilgrimage=function(){return !!_activeFollowState();};
 
   function _closeFaithForPilgrimageReturn(){
@@ -15580,7 +15547,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(m){m.classList.add('show');m.setAttribute('aria-hidden','false');}
       setView('detail');
       renderDetail();
-      _refreshFaithPilgrimageReturnButtons();
       return true;
     }catch(e){
       console.warn('[가톨릭길동무] 진행 중 순례 복귀 실패',e);
@@ -15594,7 +15560,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(!active)return false;
       const context=_readPilgrimageBackgroundContext();
       if(context==='missa'||context==='prayer'){
-        _refreshFaithPilgrimageReturnButtons();
         return true;
       }
       if(context==='pilgrimage'){
@@ -15611,7 +15576,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(document.visibilityState==='hidden'){
       _rememberPilgrimageBackgroundContext();
     }else{
-      setTimeout(_refreshFaithPilgrimageReturnButtons,80);
     }
   },{passive:true});
 

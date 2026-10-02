@@ -8208,61 +8208,6 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 #sheet-route #rs-search-btn.pilgrimage-return{background:#17365f!important;border-color:#17365f!important;color:#fff!important;font-weight:950!important;}
 #sheet-route #rs-search-btn.pilgrimage-return:active{background:#102a4b!important;transform:scale(.99)!important;}
 
-/* V8-1-14-1016: 순례 진행 중 매일미사/기도문 우측 상단 복귀 버튼 */
-.faith-pilgrimage-return[hidden]{display:none!important;}
-.faith-pilgrimage-return{
-  flex:0 0 auto;
-  display:none;
-  align-items:center;
-  justify-content:center;
-  min-height:34px;
-  max-width:112px;
-  padding:0 10px;
-  border:1.5px solid #c9a54f;
-  border-radius:999px;
-  background:#17365f;
-  color:#fff;
-  font-family:inherit;
-  font-size:calc(12px * var(--app-font-scale,1));
-  font-weight:950;
-  line-height:1;
-  white-space:nowrap;
-  box-shadow:0 2px 7px rgba(16,35,63,.16);
-  cursor:pointer;
-}
-.faith-pilgrimage-return:active{transform:scale(.97);background:#102a4b;}
-
-#missa-pilgrimage-return{
-  order:2;
-  margin-left:auto;
-  margin-right:0;
-}
-#missa-close{margin-left:0!important;}
-
-#prayer-pilgrimage-return{
-  order:2;
-  margin-left:0;
-  margin-right:2px;
-}
-#prayer-bar #goodnews-prayer-btn{order:1;}
-#prayer-bar #prayer-close{order:3;}
-
-@media(max-width:420px){
-  .faith-pilgrimage-return{
-    max-width:92px;
-    min-height:32px;
-    padding:0 8px;
-    font-size:calc(11px * var(--app-font-scale,1));
-  }
-  #prayer-bar #goodnews-prayer-btn{
-    max-width:72px!important;
-    padding-left:5px!important;
-    padding-right:5px!important;
-    font-size:10.5px!important;
-  }
-}
-
-
 /* V8-1-14-1016: 순례코스 보기 / 큰 화면 박스 정렬 / 버튼 높이 최종 보정 */
 
 /* 큰 화면에서도 순례 상세 주요 박스의 좌우 기준선을 정확히 통일 */
@@ -8691,64 +8636,6 @@ html:not(.oai-map-split-wide) #app #sheet-route.open #rs-bottom{
   background:#fffdf9!important;
   box-shadow:0 2px 8px rgba(31,42,68,.08);
 }
-
-/* V8-1-14-1016: 미사/기도문 진행중 순례 복귀 버튼
-   헤더에서 완전히 분리된 독립 floating layer로 표시 */
-.faith-pilgrimage-layer{
-  display:none;
-  position:fixed;
-  top:calc(env(safe-area-inset-top, 0px) + 74px);
-  right:14px;
-  z-index:20280;
-  pointer-events:none;
-}
-.faith-pilgrimage-layer[hidden]{
-  display:none!important;
-}
-.faith-pilgrimage-layer:not([hidden]){
-  display:block;
-}
-.faith-pilgrimage-layer .faith-pilgrimage-return{
-  pointer-events:auto;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  min-width:122px;
-  max-width:none;
-  min-height:42px;
-  padding:0 16px;
-  margin:0!important;
-  border:1.8px solid #c9a54f;
-  border-radius:999px;
-  background:#17365f;
-  color:#fff;
-  font-size:calc(14px * var(--app-font-scale,1));
-  font-weight:950;
-  line-height:1;
-  white-space:nowrap;
-  box-shadow:0 4px 13px rgba(16,35,63,.24);
-}
-
-/* 기존 헤더용 order/margin 규칙은 더 이상 위치를 결정하지 않는다 */
-#missa-pilgrimage-return,
-#prayer-pilgrimage-return{
-  order:initial!important;
-  margin:0!important;
-}
-
-@media(max-width:420px){
-  .faith-pilgrimage-layer{
-    top:calc(env(safe-area-inset-top, 0px) + 70px);
-    right:12px;
-  }
-  .faith-pilgrimage-layer .faith-pilgrimage-return{
-    min-width:116px;
-    min-height:40px;
-    padding:0 14px;
-    font-size:calc(13px * var(--app-font-scale,1));
-  }
-}
-
 
 /* V8-1-14-1018: 성지순례 화면 중앙 정렬
    오른쪽 native scrollbar가 컨텐츠 폭을 줄여 전체가 왼쪽으로 치우쳐 보이던 현상을 제거.
