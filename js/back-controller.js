@@ -55,51 +55,39 @@
       return true;
     }catch(e){ return false; }
   }
-  function hasOpenAppSurface(){
+  /* CLEANUP-1017: 열린 앱 레이어 판정은 한 함수만 관리한다. */
+  function hasKnownOpenLayer(includeAppState){
     try{
-      /* 설정과 본당 선택창도 앱 내부 화면이다. 이 둘을 제외하면 커버에서 바로 앱 종료 처리로 넘어간다. */
       if(typeof window.isOaiRestoreOpen === 'function' && window.isOaiRestoreOpen()) return true;
       if(typeof window.isOaiRecordsOpen === 'function' && window.isOaiRecordsOpen()) return true;
       if(typeof window.isOaiParishSetupOpen === 'function' && window.isOaiParishSetupOpen()) return true;
       if(typeof window.isOaiSettingsOpen === 'function' && window.isOaiSettingsOpen()) return true;
       if(typeof window.isOaiFrequentNicknameOpen === 'function' && window.isOaiFrequentNicknameOpen()) return true;
       if(typeof window.isOaiPilgrimagePlannerOpen === 'function' && window.isOaiPilgrimagePlannerOpen()) return true;
-      var pp = $b('oai-pilgrimage-point-modal'); if(pp && pp.classList && pp.classList.contains('show')) return true;
-      var ids = ['diocese-view','missa-view','prayer-view','qna-view'];
-      for(var i=0;i<ids.length;i++){
-        var el = $b(ids[i]);
-        if(el && el.classList && el.classList.contains('open')) return true;
-      }
-      if(document.querySelector('.module-view.open')) return true;
-      if(document.querySelector('#myeongrye-materials-modal.open,#info-card.open,#sheet-route.open,#route-choice-modal.open,#oai-pilgrimage-marker-choice-modal.open,#srch-modal.open,.sheet.open,.trail-sheet.open,#shrine-visit-modal.show,#shrine-auto-visit-modal.show,#shrine-visit-detail-view.show,#shrine-visit-cards-modal.show')) return true;
-      try{ if(typeof _activeTab !== 'undefined' && _activeTab) return true; }catch(_e){}
-      try{ if(typeof _routeMode !== 'undefined' && (_routeMode || _rS || _rE)) return true; }catch(_e){}
-      var app = $b('app');
-      if(app && document.documentElement.classList.contains('app-active')) return true;
-    }catch(e){ console.warn('[가톨릭길동무]', e); }
-    return false;
-  }
+      var pp=$b('oai-pilgrimage-point-modal');
+      if(pp&&pp.classList&&pp.classList.contains('show')) return true;
 
-  function hasVisibleAppLayer(){
-    try{
-      if(typeof window.isOaiRestoreOpen === 'function' && window.isOaiRestoreOpen()) return true;
-      if(typeof window.isOaiRecordsOpen === 'function' && window.isOaiRecordsOpen()) return true;
-      if(typeof window.isOaiParishSetupOpen === 'function' && window.isOaiParishSetupOpen()) return true;
-      if(typeof window.isOaiSettingsOpen === 'function' && window.isOaiSettingsOpen()) return true;
-      if(typeof window.isOaiFrequentNicknameOpen === 'function' && window.isOaiFrequentNicknameOpen()) return true;
-      if(typeof window.isOaiPilgrimagePlannerOpen === 'function' && window.isOaiPilgrimagePlannerOpen()) return true;
-      var pp = $b('oai-pilgrimage-point-modal'); if(pp && pp.classList && pp.classList.contains('show')) return true;
-      var ids = ['diocese-view','missa-view','prayer-view','qna-view'];
+      var ids=['diocese-view','missa-view','prayer-view','qna-view'];
       for(var i=0;i<ids.length;i++){
-        var el = $b(ids[i]);
-        if(el && el.classList && el.classList.contains('open')) return true;
+        var el=$b(ids[i]);
+        if(el&&el.classList&&el.classList.contains('open')) return true;
       }
+
       if(document.querySelector('.module-view.open')) return true;
       if(document.querySelector('#myeongrye-materials-modal.open,#info-card.open,#sheet-route.open,#route-choice-modal.open,#oai-pilgrimage-marker-choice-modal.open,#srch-modal.open,.sheet.open,.trail-sheet.open,#shrine-visit-modal.show,#shrine-auto-visit-modal.show,#shrine-visit-detail-view.show,#shrine-visit-cards-modal.show')) return true;
-      if(isGuideModalOpen()) return true;
+      if(typeof isGuideModalOpen==='function' && isGuideModalOpen()) return true;
+
+      if(includeAppState){
+        try{ if(typeof _activeTab !== 'undefined' && _activeTab) return true; }catch(_e){}
+        try{ if(typeof _routeMode !== 'undefined' && (_routeMode || _rS || _rE)) return true; }catch(_e){}
+        var app=$b('app');
+        if(app&&document.documentElement.classList.contains('app-active')) return true;
+      }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
     return false;
   }
+  function hasOpenAppSurface(){ return hasKnownOpenLayer(true); }
+  function hasVisibleAppLayer(){ return hasKnownOpenLayer(false); }
 
   function isCoverOnlyVisible(){
     try{ return coverVisible() && !hasVisibleAppLayer(); }catch(e){ return false; }
