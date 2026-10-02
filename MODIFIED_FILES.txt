@@ -1,25 +1,20 @@
-V8-1-14-1016
+V8-1-14-1017
 
-미사/기도문 진행중 순례 복귀 버튼 위치 정리
+정리 우선 버전
 
-1. 표시 조건
-- 진행 중인 순례가 있을 때만 보임
-- active follow가 없으면 버튼과 floating layer 모두 완전히 숨김
+변경 파일
+- app.js
+- style.css
+- index.html
+- js/back-controller.js
+- diocese.html
+- sw.js
+- version.json
+- CODE_AUDIT_1017.md
 
-2. 위치
-- 미사/기도문 헤더 안에서 버튼 제거
-- 별도의 독립 floating layer로 이동
-- 화면 우측 상단과 중앙 사이 지점에 고정
-- 헤더/굿뉴스 버튼/X 배치에 영향 없음
-
-3. 크기
-- 기존보다 조금 크게:
-  · min-width 122px
-  · min-height 42px
-  · font 14px
-  · 좌우 padding 16px
-- 작은 화면에서도 116x40px 이상 유지
-
-4. 기존 기능
-- 누르면 진행 중인 순례하기 화면으로 복귀
-- 미사/기도문 예외 복귀 규칙은 그대로 유지
+핵심
+- 최근 스크롤 패치 중복 제거
+- route / 순례 / 설정 / 기도문 / 목록의 스크롤 표시를 공통 manager로 통합
+- 관구·교구 iframe에도 동일 스크롤 표시 적용
+- 뒤로가기 열린 화면 판정 중복 함수 통합
+- 과거 주석 버전 일괄 치환 중단

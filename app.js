@@ -11689,121 +11689,167 @@ function _ensureRouteWaypointBox(role){
   _refreshRouteTmpMarkers();
   if(!_getRoutePointByRole(role)) _showRouteGuideText('지도에서 경유지'+_routeWaypointIndex(role)+' 마커를 선택하거나 경유지 박스를 눌러 검색하세요');
 }
-function _syncRouteScrollHints(){
-  try{
-    const sheet=$('sheet-route'),top=$('rs-top');
-    const up=$('route-scroll-up-hint'),down=$('route-scroll-down-hint');
-    if(!sheet||!top||!up||!down)return;
-
-    let target=null;
-    if(sheet.classList.contains('route-waypoint-scroll')) target=top;
-    else if(sheet.classList.contains('route-result-showing')) target=sheet;
-
-    const max=target?Math.max(0,target.scrollHeight-target.clientHeight):0;
-    const y=target?Math.max(0,target.scrollTop):0;
-    const canScroll=max>8;
-    const showUp=canScroll&&y>10;
-    const showDown=canScroll&&y<max-10;
-
-    sheet.classList.toggle('route-scroll-has-up-content',showUp);
-    sheet.classList.toggle('route-scroll-has-down-content',showDown);
-    up.setAttribute('aria-hidden',showUp?'false':'true');
-    down.setAttribute('aria-hidden',showDown?'false':'true');
-  }catch(_e){}
-}
-
+/* CLEANUP-1017: 앱 공통 세로 스크롤 안내 관리자
+   - 화면별 개별 화살표/페이드/observer를 사용하지 않는다.
+   - 현재 프로젝트의 주요 overflow-y 영역을 한 곳에서 관리한다.
+   - 위/아래 모두 같은 52x5px 고정 overlay 막대를 사용한다. */
 const OAI_SCROLL_AFFORDANCE_SELECTOR=[
   '#sheet-route.route-waypoint-scroll #rs-top',
   '#sheet-route.route-result-showing',
+  'html.oai-map-split-wide #sheet-route',
+  'html.oai-map-split-wide #sheet-route #rs-bottom',
   '.oai-pilgrimage-planner-panel',
   '.oai-settings-panel',
   '.sheet-body',
-  '#srch-modal .sm-body',
-  '#route-choice-modal .route-choice-body',
-  '#oai-pilgrimage-point-modal .oai-pilgrimage-point-body',
-  '#oai-records-modal .oai-records-body',
-  '#oai-record-restore-modal .oai-record-restore-body'
+  '.sm-body',
+  '#list-body',
+  '#region-body',
+  '#nearby-body',
+  '#sm-body-all',
+  '#sm-body',
+  '#sm-body-place',
+  '#info-card',
+  '#missa-external-panel',
+  '.guide-card-list',
+  '.ios-safari-scroll',
+  '#web-view .web-list',
+  '#trail-view #trail-list',
+  '.shrine-visit-cards-body',
+  '#prayer-list-view',
+  '#prayer-detail-body',
+  '[data-oai-scroll-affordance]'
 ].join(',');
 
-function _oaiScrollAffordanceHost(el){
-  if(!el)return null;
-  if(el.matches&&el.matches('#sheet-route.route-waypoint-scroll #rs-top'))return $('sheet-route');
-  if(el.id==='sheet-route')return el;
-  if(el.classList&&el.classList.contains('oai-pilgrimage-planner-panel'))return planner&&planner();
-  if(el.classList&&el.classList.contains('oai-settings-panel'))return el;
-  return el;
+function _oaiScrollAffordanceVisible(el){
+  try{
+    if(!el||!el.isConnected)return false;
+    const r=el.getBoundingClientRect();
+    if(r.width<120||r.height<90)return false;
+    if(r.bottom<=0||r.top>=window.innerHeight||r.right<=0||r.left>=window.innerWidth)return false;
+    const cs=getComputedStyle(el);
+    if(cs.display==='none'||cs.visibility==='hidden'||Number(cs.opacity)===0)return false;
+    return true;
+  }catch(_e){return false;}
 }
 function _oaiEnsureScrollAffordance(el){
   try{
-    const host=_oaiScrollAffordanceHost(el);
-    if(!host)return null;
-    let top=host.querySelector(':scope > .oai-scroll-affordance.is-top');
-    let bottom=host.querySelector(':scope > .oai-scroll-affordance.is-bottom');
-    if(!top){
-      top=document.createElement('div');
-      top.className='oai-scroll-affordance is-top';
-      top.setAttribute('aria-hidden','true');
-      host.appendChild(top);
-    }
-    if(!bottom){
-      bottom=document.createElement('div');
-      bottom.className='oai-scroll-affordance is-bottom';
-      bottom.setAttribute('aria-hidden','true');
-      host.appendChild(bottom);
-    }
-    return {host:host,top:top,bottom:bottom};
+    if(!el)return null;
+    let pair=el.__oaiScrollAffordancePair;
+    if(pair&&pair.top&&pair.bottom&&pair.top.isConnected&&pair.bottom.isConnected)return pair;
+    const top=document.createElement('div');
+    const bottom=document.createElement('div');
+    top.className='oai-scroll-affordance is-top';
+    bottom.className='oai-scroll-affordance is-bottom';
+    top.setAttribute('aria-hidden','true');
+    bottom.setAttribute('aria-hidden','true');
+    document.body.appendChild(top);
+    document.body.appendChild(bottom);
+    pair={top:top,bottom:bottom};
+    el.__oaiScrollAffordancePair=pair;
+    return pair;
   }catch(_e){return null;}
+}
+function _oaiStickyTopInset(el,rect){
+  try{
+    let inset=0;
+    const kids=Array.prototype.slice.call(el.children||[],0,8);
+    kids.forEach(function(child){
+      const cs=getComputedStyle(child);
+      if(cs.position!=='sticky')return;
+      const cr=child.getBoundingClientRect();
+      if(cr.bottom<=rect.top||cr.top>rect.top+8)return;
+      inset=Math.max(inset,Math.min(96,cr.bottom-rect.top));
+    });
+    return inset;
+  }catch(_e){return 0;}
+}
+function _oaiPositionScrollAffordance(el,pair,showTop,showBottom){
+  try{
+    const rect=el.getBoundingClientRect();
+    const vw=Math.max(document.documentElement.clientWidth||0,window.innerWidth||0);
+    const center=Math.max(34,Math.min(vw-34,rect.left+rect.width/2));
+    const topInset=_oaiStickyTopInset(el,rect);
+    const topY=Math.max(6,Math.min(window.innerHeight-12,rect.top+topInset+8));
+    const bottomY=Math.max(6,Math.min(window.innerHeight-12,rect.bottom-13));
+    pair.top.style.left=center+'px';
+    pair.top.style.top=topY+'px';
+    pair.bottom.style.left=center+'px';
+    pair.bottom.style.top=bottomY+'px';
+    pair.top.hidden=!showTop;
+    pair.bottom.hidden=!showBottom;
+    pair.top.setAttribute('aria-hidden',showTop?'false':'true');
+    pair.bottom.setAttribute('aria-hidden',showBottom?'false':'true');
+  }catch(_e){}
 }
 function _oaiSyncScrollAffordance(el){
   try{
-    if(!el||!el.isConnected)return;
-    const parts=_oaiEnsureScrollAffordance(el);
-    if(!parts)return;
-    const max=Math.max(0,el.scrollHeight-el.clientHeight);
-    const y=Math.max(0,el.scrollTop);
-    const canScroll=max>8;
+    if(!el)return;
+    const pair=_oaiEnsureScrollAffordance(el);
+    if(!pair)return;
+    const visible=_oaiScrollAffordanceVisible(el);
+    const max=visible?Math.max(0,el.scrollHeight-el.clientHeight):0;
+    const y=visible?Math.max(0,el.scrollTop):0;
+    const canScroll=visible&&max>12;
     const showTop=canScroll&&y>10;
     const showBottom=canScroll&&y<max-10;
-    parts.host.classList.toggle('oai-scroll-has-top',showTop);
-    parts.host.classList.toggle('oai-scroll-has-bottom',showBottom);
-    parts.top.setAttribute('aria-hidden',showTop?'false':'true');
-    parts.bottom.setAttribute('aria-hidden',showBottom?'false':'true');
+    _oaiPositionScrollAffordance(el,pair,showTop,showBottom);
   }catch(_e){}
 }
 function _oaiBindScrollAffordance(el){
-  if(!el||el.__oaiScrollAffordanceBound)return;
-  el.__oaiScrollAffordanceBound=true;
-  el.addEventListener('scroll',function(){_oaiSyncScrollAffordance(el);},{passive:true});
+  if(!el)return;
+  if(!el.__oaiScrollAffordanceBound){
+    el.__oaiScrollAffordanceBound=true;
+    el.addEventListener('scroll',function(){_oaiSyncScrollAffordance(el);},{passive:true});
+  }
   requestAnimationFrame(function(){_oaiSyncScrollAffordance(el);});
+}
+function _oaiCollectScrollAffordances(root){
+  const out=[];
+  try{
+    const scope=root&&root.querySelectorAll?root:document;
+    if(scope.matches&&scope.matches(OAI_SCROLL_AFFORDANCE_SELECTOR))out.push(scope);
+    scope.querySelectorAll(OAI_SCROLL_AFFORDANCE_SELECTOR).forEach(function(el){out.push(el);});
+  }catch(_e){}
+  return out;
 }
 function _oaiRefreshScrollAffordances(root){
   try{
-    const scope=root&&root.querySelectorAll?root:document;
-    if(scope.matches&&scope.matches(OAI_SCROLL_AFFORDANCE_SELECTOR))_oaiBindScrollAffordance(scope);
-    scope.querySelectorAll(OAI_SCROLL_AFFORDANCE_SELECTOR).forEach(_oaiBindScrollAffordance);
+    _oaiCollectScrollAffordances(root).forEach(_oaiBindScrollAffordance);
+  }catch(_e){}
+}
+let _oaiScrollRefreshTimer=0;
+function _oaiScheduleScrollAffordanceRefresh(){
+  try{
+    clearTimeout(_oaiScrollRefreshTimer);
+    _oaiScrollRefreshTimer=setTimeout(function(){_oaiRefreshScrollAffordances(document);},35);
   }catch(_e){}
 }
 try{
-  window.addEventListener('resize',function(){_oaiRefreshScrollAffordances(document);},{passive:true});
+  window.addEventListener('resize',_oaiScheduleScrollAffordanceRefresh,{passive:true});
+  window.addEventListener('orientationchange',_oaiScheduleScrollAffordanceRefresh,{passive:true});
+  document.addEventListener('click',function(){setTimeout(_oaiScheduleScrollAffordanceRefresh,80);},true);
+  document.addEventListener('transitionend',_oaiScheduleScrollAffordanceRefresh,true);
   if(typeof MutationObserver!=='undefined'){
-    const obs=new MutationObserver(function(){setTimeout(function(){_oaiRefreshScrollAffordances(document);},20);});
+    const obs=new MutationObserver(_oaiScheduleScrollAffordanceRefresh);
     obs.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style','hidden']});
   }
-  setTimeout(function(){_oaiRefreshScrollAffordances(document);},80);
+  setTimeout(function(){_oaiRefreshScrollAffordances(document);},100);
 }catch(_e){}
 
+/* 기존 호출부 호환용 wrapper. 시각 상태는 공통 manager 한 곳이 소유한다. */
+function _syncRouteScrollHints(){
+  try{
+    const sheet=$('sheet-route'),top=$('rs-top');
+    if(sheet&&sheet.classList.contains('route-waypoint-scroll')&&top)_oaiSyncScrollAffordance(top);
+    if(sheet&&sheet.classList.contains('route-result-showing'))_oaiSyncScrollAffordance(sheet);
+  }catch(_e){}
+}
 function _syncRouteScrollUpHint(){ _syncRouteScrollHints(); }
 function _bindRouteScrollUpHint(){
   try{
-    const top=$('rs-top'),sheet=$('sheet-route');
-    if(top&&!top.__oaiRouteScrollHintBound){
-      top.__oaiRouteScrollHintBound=true;
-      top.addEventListener('scroll',_syncRouteScrollHints,{passive:true});
-    }
-    if(sheet&&!sheet.__oaiRouteScrollHintBound){
-      sheet.__oaiRouteScrollHintBound=true;
-      sheet.addEventListener('scroll',_syncRouteScrollHints,{passive:true});
-    }
+    const sheet=$('sheet-route'),top=$('rs-top');
+    if(top)_oaiBindScrollAffordance(top);
+    if(sheet)_oaiBindScrollAffordance(sheet);
   }catch(_e){}
 }
 function _scrollRouteWaypointEditorToBottom(){
@@ -15561,54 +15607,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   },{passive:true});
 
   function planner(){return document.getElementById('oai-pilgrimage-planner-modal');}
-  function _ensurePilgrimageScrollHints(){
-    const m=planner();if(!m)return null;
-    let up=m.querySelector('.oai-pilgrimage-scroll-hint.is-up');
-    let down=m.querySelector('.oai-pilgrimage-scroll-hint.is-down');
-    if(!up){
-      up=document.createElement('div');
-      up.className='oai-pilgrimage-scroll-hint is-up';
-      up.setAttribute('aria-hidden','true');
-      up.textContent='⌃';
-      m.appendChild(up);
-    }
-    if(!down){
-      down=document.createElement('div');
-      down.className='oai-pilgrimage-scroll-hint is-down';
-      down.setAttribute('aria-hidden','true');
-      down.textContent='⌄';
-      m.appendChild(down);
-    }
-    return {up:up,down:down};
-  }
+  /* CLEANUP-1017: 순례 planner도 공통 스크롤 관리자 사용 */
   function _syncPilgrimageScrollHints(){
     try{
       const m=planner(),panel=m&&m.querySelector('.oai-pilgrimage-planner-panel');
-      const hints=_ensurePilgrimageScrollHints();
-      if(!m||!panel||!hints)return;
-      const max=Math.max(0,panel.scrollHeight-panel.clientHeight);
-      const y=Math.max(0,panel.scrollTop);
-      const canScroll=max>8;
-      const showUp=canScroll&&y>12;
-      const showDown=canScroll&&y<max-12;
-      m.classList.toggle('oai-pilgrimage-has-up',showUp);
-      m.classList.toggle('oai-pilgrimage-has-down',showDown);
-      hints.up.setAttribute('aria-hidden',showUp?'false':'true');
-      hints.down.setAttribute('aria-hidden',showDown?'false':'true');
+      if(panel)_oaiSyncScrollAffordance(panel);
     }catch(_e){}
   }
   function _bindPilgrimageScrollHints(){
     try{
       const m=planner(),panel=m&&m.querySelector('.oai-pilgrimage-planner-panel');
-      if(!panel||panel.__oaiScrollHintBound)return;
-      panel.__oaiScrollHintBound=true;
-      panel.addEventListener('scroll',_syncPilgrimageScrollHints,{passive:true});
-      window.addEventListener('resize',function(){setTimeout(_syncPilgrimageScrollHints,50);},{passive:true});
-      if(typeof MutationObserver!=='undefined'){
-        const obs=new MutationObserver(function(){setTimeout(_syncPilgrimageScrollHints,20);});
-        obs.observe(panel,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','class','style']});
-        panel.__oaiScrollHintObserver=obs;
-      }
+      if(panel)_oaiBindScrollAffordance(panel);
     }catch(_e){}
   }
 

@@ -6558,52 +6558,6 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing #rs-bottom{
 html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .rs-result{margin-bottom:0!important;padding-bottom:4px!important;}
 html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns{margin-bottom:0!important;}
 
-#sheet-route .route-scroll-edge-hint{
-  display:none;
-  position:absolute;
-  left:50%;
-  transform:translateX(-50%);
-  z-index:80;
-  width:34px;
-  height:22px;
-  align-items:center;
-  justify-content:center;
-  border:1px solid rgba(127,101,55,.28);
-  border-radius:999px;
-  background:rgba(255,253,247,.92);
-  color:#7a6337;
-  font-size:18px;
-  font-weight:950;
-  line-height:1;
-  pointer-events:none;
-  box-shadow:0 2px 8px rgba(73,56,29,.10);
-  backdrop-filter:blur(2px);
-}
-#sheet-route .route-scroll-edge-up{top:10px;}
-#sheet-route .route-scroll-edge-down{bottom:10px;}
-html:not(.oai-map-split-wide) #sheet-route.route-scroll-has-up-content .route-scroll-edge-up{display:flex;}
-html:not(.oai-map-split-wide) #sheet-route.route-scroll-has-down-content .route-scroll-edge-down{display:flex;}
-
-/* 가장자리 페이드: 실제 레이아웃/여백에는 영향 없음 */
-html:not(.oai-map-split-wide) #sheet-route.route-scroll-has-up-content::before,
-html:not(.oai-map-split-wide) #sheet-route.route-scroll-has-down-content::after{
-  content:"";
-  position:absolute;
-  left:0;
-  right:0;
-  z-index:70;
-  height:30px;
-  pointer-events:none;
-}
-html:not(.oai-map-split-wide) #sheet-route.route-scroll-has-up-content::before{
-  top:0;
-  background:linear-gradient(to bottom,rgba(248,244,235,.98),rgba(248,244,235,0));
-}
-html:not(.oai-map-split-wide) #sheet-route.route-scroll-has-down-content::after{
-  bottom:0;
-  background:linear-gradient(to top,rgba(248,244,235,.98),rgba(248,244,235,0));
-}
-
 /* V8-1-14-940: 순례 완료 기록 · 스탬프 · 다시 순례 */
 .oai-pilgrimage-course-card{
   border:1.5px solid #d0c19d;
@@ -8698,158 +8652,35 @@ html:not(.oai-map-split-wide) #app #sheet-route.open #rs-bottom{
 }
 
 
-/* V8-1-14-1016: 경유지 다중 입력 화면도 일반 길찾기와 같은 시작점 사용
-   route-waypoint-scroll 상태에서도 첫 입력칸은 공통 기준:
-   위 10px / 오른쪽 10px / 왼쪽 12px.
-   지도에서 추가만 따로 밀어내는 여백 규칙은 사용하지 않는다. */
-
-
-/* V8-1-14-1016: 다중 경유지 화면 상단 숨구멍 복원
-   #rs-top 자체의 시작점/패딩은 그대로 유지하고,
-   첫 입력 묶음(.rs-route-stack) 위에만 12px 여백을 둔다.
-   따라서 가로 시작점은 일반 길찾기와 동일하게 유지된다. */
-
-
-
-/* V8-1-14-1016: 긴 내용 스크롤 안내
-   위치/높이/패딩을 바꾸지 않고 시각 신호만 겹쳐 표시한다. */
-.oai-pilgrimage-planner-modal .oai-pilgrimage-scroll-hint{
-  display:none;
-  position:absolute;
-  left:50%;
-  transform:translateX(-50%);
-  z-index:180;
-  width:34px;
-  height:22px;
-  align-items:center;
-  justify-content:center;
-  border:1px solid rgba(127,101,55,.28);
-  border-radius:999px;
-  background:rgba(255,253,247,.92);
-  color:#7a6337;
-  font-size:18px;
-  font-weight:950;
-  line-height:1;
-  pointer-events:none;
-  box-shadow:0 2px 8px rgba(73,56,29,.10);
-  backdrop-filter:blur(2px);
-}
-.oai-pilgrimage-planner-modal .oai-pilgrimage-scroll-hint.is-up{top:76px;}
-.oai-pilgrimage-planner-modal .oai-pilgrimage-scroll-hint.is-down{bottom:14px;}
-.oai-pilgrimage-planner-modal.oai-pilgrimage-has-up .oai-pilgrimage-scroll-hint.is-up{display:flex;}
-.oai-pilgrimage-planner-modal.oai-pilgrimage-has-down .oai-pilgrimage-scroll-hint.is-down{display:flex;}
-
-.oai-pilgrimage-planner-modal.oai-pilgrimage-has-up::before,
-.oai-pilgrimage-planner-modal.oai-pilgrimage-has-down::after{
-  content:"";
-  position:absolute;
+/* CLEANUP-1017: 공통 스크롤 안내 + 설정 헤더
+   위/아래 동일 52x5px 막대. 화면별 화살표/페이드/그림자 패치는 제거했다. */
+.oai-scroll-affordance{
+  position:fixed;
   left:0;
-  right:0;
-  z-index:170;
-  height:34px;
+  top:0;
+  width:52px;
+  height:5px;
+  border-radius:999px;
+  background:rgba(67,76,91,.66);
+  box-shadow:0 1px 6px rgba(31,42,68,.18);
   pointer-events:none;
+  z-index:20550;
+  transform:translateX(-50%);
 }
-.oai-pilgrimage-planner-modal.oai-pilgrimage-has-up::before{
-  top:62px;
-  background:linear-gradient(to bottom,rgba(242,238,229,.96),rgba(242,238,229,0));
-}
-.oai-pilgrimage-planner-modal.oai-pilgrimage-has-down::after{
-  bottom:0;
-  background:linear-gradient(to top,rgba(242,238,229,.96),rgba(242,238,229,0));
-}
-
-
-/* V8-1-14-1016: 스크롤 안내 디자인 정리
-   둥근 ⌃/⌄ 캡슐은 사용하지 않고 가장자리 페이드만 표시한다. */
-#sheet-route .route-scroll-edge-hint,
-.oai-pilgrimage-planner-modal .oai-pilgrimage-scroll-hint{
+.oai-scroll-affordance[hidden]{
   display:none!important;
 }
 
-/* 지도/길찾기 내부 스크롤 */
-html:not(.oai-map-split-wide) #sheet-route.route-scroll-has-up-content::before,
-html:not(.oai-map-split-wide) #sheet-route.route-scroll-has-down-content::after{
-  content:""!important;
-  position:absolute!important;
-  left:12px!important;
-  right:12px!important;
-  z-index:70!important;
-  height:18px!important;
-  pointer-events:none!important;
-  border:0!important;
-}
-html:not(.oai-map-split-wide) #sheet-route.route-scroll-has-up-content::before{
-  top:0!important;
-  background:linear-gradient(to bottom,rgba(248,244,235,.80),rgba(248,244,235,0))!important;
-}
-html:not(.oai-map-split-wide) #sheet-route.route-scroll-has-down-content::after{
-  bottom:0!important;
-  background:linear-gradient(to top,rgba(248,244,235,.80),rgba(248,244,235,0))!important;
-}
-
-/* 순례계획/순례완료/순례하기 긴 화면 */
-.oai-pilgrimage-planner-modal.oai-pilgrimage-has-up::before,
-.oai-pilgrimage-planner-modal.oai-pilgrimage-has-down::after{
-  content:""!important;
-  position:absolute!important;
-  left:14px!important;
-  right:14px!important;
-  z-index:170!important;
-  height:20px!important;
-  pointer-events:none!important;
-  border:0!important;
-}
-.oai-pilgrimage-planner-modal.oai-pilgrimage-has-up::before{
-  top:62px!important;
-  background:linear-gradient(to bottom,rgba(242,238,229,.82),rgba(242,238,229,0))!important;
-}
-.oai-pilgrimage-planner-modal.oai-pilgrimage-has-down::after{
-  bottom:0!important;
-  background:linear-gradient(to top,rgba(242,238,229,.82),rgba(242,238,229,0))!important;
-}
-
-
-/* V8-1-14-1016: 순례 화면 스크롤 표시 재설계
-   큰 흰색/회색 띠를 없애고 헤더 그림자 + 작은 하단 바만 사용 */
-
-/* 기존 planner 전체 폭 페이드 제거 */
-.oai-pilgrimage-planner-modal.oai-pilgrimage-has-up::before,
-.oai-pilgrimage-planner-modal.oai-pilgrimage-has-down::after{
-  content:none!important;
-  display:none!important;
-}
-
-/* 위에 지나온 내용이 있으면 고정 헤더 아래에만 아주 약한 그림자 */
-.oai-pilgrimage-planner-modal.oai-pilgrimage-has-up .oai-pilgrimage-head.module-bar{
-  box-shadow:0 8px 14px -12px rgba(23,33,58,.72)!important;
-}
-
-/* 아래 내용이 더 있으면 화면 하단 중앙에 짧은 얇은 바 */
-.oai-pilgrimage-planner-modal.oai-pilgrimage-has-down .oai-pilgrimage-planner-panel::after{
-  content:""!important;
-  position:fixed!important;
-  left:50%!important;
-  bottom:8px!important;
-  transform:translateX(-50%)!important;
-  width:34px!important;
-  height:4px!important;
-  border-radius:999px!important;
-  background:rgba(82,91,106,.48)!important;
-  box-shadow:0 1px 5px rgba(31,42,68,.12)!important;
-  pointer-events:none!important;
-  z-index:175!important;
-}
-
-/* 아래 끝에 도달하면 바가 없어짐 */
-.oai-pilgrimage-planner-modal:not(.oai-pilgrimage-has-down) .oai-pilgrimage-planner-panel::after{
-  content:none!important;
-}
-
-
-/* V8-1-14-1016: 설정 헤더 고정 */
+/* 설정은 header 고정, panel만 스크롤 */
 .oai-settings-panel{
   overflow-y:auto!important;
   overflow-x:hidden!important;
+  scrollbar-width:none;
+}
+.oai-settings-panel::-webkit-scrollbar{
+  width:0;
+  height:0;
+  display:none;
 }
 .oai-settings-head{
   position:sticky!important;
@@ -8859,76 +8690,6 @@ html:not(.oai-map-split-wide) #sheet-route.route-scroll-has-down-content::after{
   background:#fffdf9!important;
   box-shadow:0 2px 8px rgba(31,42,68,.08);
 }
-
-/* 순례목록 아래 스크롤 신호: 조금 더 넓고 조금 더 진하게 */
-.oai-pilgrimage-planner-modal.oai-pilgrimage-has-down .oai-pilgrimage-planner-panel::after{
-  width:52px!important;
-  height:5px!important;
-  bottom:8px!important;
-  background:rgba(67,76,91,.66)!important;
-  box-shadow:0 1px 6px rgba(31,42,68,.18)!important;
-}
-
-
-/* V8-1-14-1016: 공통 스크롤 안내
-   위/아래 동일한 52x5px 반투명 막대.
-   레이아웃을 밀지 않고 host 위에 overlay로 표시. */
-.oai-scroll-affordance{
-  display:none;
-  position:absolute;
-  left:50%;
-  transform:translateX(-50%);
-  width:52px;
-  height:5px;
-  border-radius:999px;
-  background:rgba(67,76,91,.66);
-  box-shadow:0 1px 6px rgba(31,42,68,.18);
-  pointer-events:none;
-  z-index:190;
-}
-.oai-scroll-affordance.is-top{top:8px;}
-.oai-scroll-affordance.is-bottom{bottom:8px;}
-.oai-scroll-has-top > .oai-scroll-affordance.is-top{display:block;}
-.oai-scroll-has-bottom > .oai-scroll-affordance.is-bottom{display:block;}
-
-/* position 기준이 없는 주요 host에만 기준점 부여 */
-#sheet-route,
-.oai-pilgrimage-planner-modal,
-.oai-settings-panel,
-.sheet-body,
-#srch-modal .sm-body,
-#route-choice-modal .route-choice-body,
-#oai-pilgrimage-point-modal .oai-pilgrimage-point-body,
-#oai-records-modal .oai-records-body,
-#oai-record-restore-modal .oai-record-restore-body{
-  position:relative;
-}
-
-/* 기존 개별 스크롤 시각표시 비활성화 */
-#sheet-route .route-scroll-edge-hint,
-.oai-pilgrimage-planner-modal .oai-pilgrimage-scroll-hint{
-  display:none!important;
-}
-html:not(.oai-map-split-wide) #sheet-route.route-scroll-has-up-content::before,
-html:not(.oai-map-split-wide) #sheet-route.route-scroll-has-down-content::after,
-.oai-pilgrimage-planner-modal.oai-pilgrimage-has-up::before,
-.oai-pilgrimage-planner-modal.oai-pilgrimage-has-down::after,
-.oai-pilgrimage-planner-modal.oai-pilgrimage-has-down .oai-pilgrimage-planner-panel::after{
-  content:none!important;
-  display:none!important;
-}
-.oai-pilgrimage-planner-modal.oai-pilgrimage-has-up .oai-pilgrimage-head.module-bar{
-  box-shadow:none!important;
-}
-
-/* 설정 헤더 고정 유지 */
-.oai-settings-head{
-  position:sticky!important;
-  top:0!important;
-  z-index:30!important;
-  background:#fffdf9!important;
-}
-
 
 /* V8-1-14-1016: 미사/기도문 진행중 순례 복귀 버튼
    헤더에서 완전히 분리된 독립 floating layer로 표시 */

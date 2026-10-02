@@ -2107,6 +2107,56 @@ window.addEventListener('pageshow',function(){
 </script>
 
 <script>
+/* CLEANUP-1017: 관구·교구 iframe 내부 스크롤 안내 */
+(function(){
+  'use strict';
+  var SELECTOR='#search-view,#list-view,#province-info-view,.c-dtlist';
+  function visible(el){
+    if(!el)return false;
+    var r=el.getBoundingClientRect();
+    var cs=getComputedStyle(el);
+    return r.width>120&&r.height>80&&r.bottom>0&&r.top<innerHeight&&cs.display!=='none'&&cs.visibility!=='hidden';
+  }
+  function ensure(el){
+    if(el.__oaiDioScrollPair)return el.__oaiDioScrollPair;
+    var a=document.createElement('div'),b=document.createElement('div');
+    a.className='oai-dio-scroll-mark';b.className='oai-dio-scroll-mark';
+    document.body.appendChild(a);document.body.appendChild(b);
+    el.__oaiDioScrollPair={top:a,bottom:b};
+    return el.__oaiDioScrollPair;
+  }
+  function sync(el){
+    var p=ensure(el),r=el.getBoundingClientRect();
+    var max=Math.max(0,el.scrollHeight-el.clientHeight),y=Math.max(0,el.scrollTop);
+    var can=visible(el)&&max>12, cx=Math.max(34,Math.min(innerWidth-34,r.left+r.width/2));
+    var showTop=can&&y>10,showBottom=can&&y<max-10;
+    p.top.hidden=!showTop;p.bottom.hidden=!showBottom;
+    p.top.style.left=cx+'px';p.top.style.top=(r.top+8)+'px';
+    p.bottom.style.left=cx+'px';p.bottom.style.top=(r.bottom-13)+'px';
+  }
+  function bind(el){
+    if(!el||el.__oaiDioScrollBound)return;
+    el.__oaiDioScrollBound=true;
+    el.addEventListener('scroll',function(){sync(el);},{passive:true});
+    requestAnimationFrame(function(){sync(el);});
+  }
+  function refresh(){document.querySelectorAll(SELECTOR).forEach(bind);}
+  addEventListener('resize',refresh,{passive:true});
+  document.addEventListener('click',function(){setTimeout(refresh,50);},true);
+  if(typeof MutationObserver!=='undefined')new MutationObserver(function(){setTimeout(refresh,30);}).observe(document.body,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style']});
+  setTimeout(refresh,80);
+})();
+</script>
+<style>
+.oai-dio-scroll-mark{
+  position:fixed;left:0;top:0;width:52px;height:5px;border-radius:999px;
+  background:rgba(67,76,91,.66);box-shadow:0 1px 6px rgba(31,42,68,.18);
+  transform:translateX(-50%);pointer-events:none;z-index:9999;
+}
+.oai-dio-scroll-mark[hidden]{display:none!important}
+</style>
+
+<script>
 window.OAI_PAGE_TOUCH_CONFIG = {
   flag: '__oaiTouchUxKeyboard20260506',
   actionDelayMs: 55,
@@ -2123,7 +2173,7 @@ window.OAI_PAGE_TOUCH_CONFIG = {
   ].join(',')
 };
 </script>
-<script src="js/page-touch-keyboard.js?v=V8-1-14-676"></script>
+<script src="js/page-touch-keyboard.js?v=V8-1-14-1017"></script>
 
 
 </body>
