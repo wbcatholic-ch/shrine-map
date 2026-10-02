@@ -1,24 +1,17 @@
-V8-1-14-1027
+V8-1-14-1028
 
-순례 시작 확인 후 화면 전환 오류 수정
+순례 시작 확인창 버튼 클릭 오류 수정
 
 원인
-- 1026에서 확인창을 추가하면서 startFollowFromCourse()가
-  코스 활성화 후 renderCourseList()만 실행하고
-  목록 화면에서는 setView('detail')을 하지 않았음
-- 그래서 '순례 시작'을 눌러도 활성 상태만 바뀌고 화면이 그대로였음
+- 순례 시작 확인창의 버튼 처리 if 문은 있었음
+- 하지만 공통 click 이벤트의 closest() 대상 목록에
+  data-oai-pilgrimage-follow-start-confirm / cancel 이 빠져 있었음
+- 따라서 버튼을 눌러도 이벤트 대상 t가 null이 되어 아무 동작도 하지 않았음
 
 수정
-- 확인 후 코스 활성화
-- applyCourse()
-- 목록 갱신
-- 반드시 setView('detail')
-- renderDetail()
-- 저장 직후 follow 흐름도 별도 follow 화면이 아니라 현재 순례 상세 화면으로 통일
-
-유지
-- 시작 확인창 디자인/문구
-- 다른 순례 진행 중일 때 기존 '종료 후 시작' 확인
-- 1025 드래그 핸들 구조 수정
-- 미사/기도문 순례 버튼 제거
-- 성당 GPS 100m
+- 공통 click delegation selector에 아래 두 항목 추가
+  · [data-oai-pilgrimage-follow-start-cancel]
+  · [data-oai-pilgrimage-follow-start-confirm]
+- '순례 시작' 버튼 -> confirmFollowStart() 실행
+- '취소' 버튼/배경 -> closeFollowStartConfirm() 실행
+- 1027의 시작 후 상세화면 이동 로직 유지
