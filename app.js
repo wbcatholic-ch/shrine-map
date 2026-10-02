@@ -3559,7 +3559,7 @@ function _maybeAutoParishVisit(lat,lng){
   if(isMyParish){if(!_isMyParishAutoVisitEnabled()||previousVisits.length)return;}else if(previousVisits.some(function(v){return v.date===_todayISODate();}))return;
   if(!_addParishVisit(best,_todayISODate(),'gps'))return;
 
-  // V8-1-14-1015:
+  // V8-1-14-1016:
   // 같은 GPS 위치가 '성지 + 성당 + 활성 순례코스'에 동시에 해당하더라도
   // 방문기록은 각각 정상 등록하되 축하 안내는 성지를 우선한다.
   // 따라서 현재 위치가 성지 자동등록 반경 안이면 성당용 축하 팝업은 띄우지 않는다.
@@ -15461,12 +15461,22 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function _refreshFaithPilgrimageReturnButtons(){
     const active=!!_activeFollowState();
-    ['missa-pilgrimage-return','prayer-pilgrimage-return'].forEach(function(id){
-      const btn=document.getElementById(id);
-      if(!btn)return;
-      btn.hidden=!active;
-      btn.style.display=active?'inline-flex':'none';
-      btn.setAttribute('aria-hidden',active?'false':'true');
+    [
+      {button:'missa-pilgrimage-return',layer:'missa-pilgrimage-layer'},
+      {button:'prayer-pilgrimage-return',layer:'prayer-pilgrimage-layer'}
+    ].forEach(function(item){
+      const btn=document.getElementById(item.button);
+      const layer=document.getElementById(item.layer);
+      if(layer){
+        layer.hidden=!active;
+        layer.style.display=active?'block':'none';
+        layer.setAttribute('aria-hidden',active?'false':'true');
+      }
+      if(btn){
+        btn.hidden=!active;
+        btn.style.display=active?'inline-flex':'none';
+        btn.setAttribute('aria-hidden',active?'false':'true');
+      }
     });
   }
   window._oaiRefreshFaithPilgrimageReturnButtons=_refreshFaithPilgrimageReturnButtons;
