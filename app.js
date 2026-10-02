@@ -16719,8 +16719,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     if(mode==='follow'){
       const c=_activateFollowCourse(id);
-      if(c)applyCourse(c);
-      openFollow(true);
+      if(!c)return false;
+      applyCourse(c);
+      pilgrimageDetailMode='plan';
+      renderCourseList();
+      setView('detail');
+      renderDetail();
       return true;
     }
     startFollowFromCourse(id,true);
@@ -16819,11 +16823,16 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(active&&active.courseId===targetId){stopActiveFollow(targetId);return;}
     if(active&&active.courseId&&active.courseId!==targetId){openFollowSwitchConfirm(targetId,'start');return;}
     if(!confirmed){openFollowStartConfirm(targetId,'start');return;}
+
     pilgrimageDetailMode='plan';
     const c=_activateFollowCourse(targetId);if(!c)return;
     applyCourse(c);
     renderCourseList();
-    if(plannerView==='detail')renderDetail();
+
+    /* 확인창에서 '순례 시작'을 누른 뒤에는
+       목록에 머물지 않고 반드시 현재 활성 순례 상세로 이동한다. */
+    setView('detail');
+    renderDetail();
   }
   function toggleFollowFromDetail(){
     if(!currentCourseId)return;
