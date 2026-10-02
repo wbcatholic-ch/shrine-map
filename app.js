@@ -3559,7 +3559,7 @@ function _maybeAutoParishVisit(lat,lng){
   if(isMyParish){if(!_isMyParishAutoVisitEnabled()||previousVisits.length)return;}else if(previousVisits.some(function(v){return v.date===_todayISODate();}))return;
   if(!_addParishVisit(best,_todayISODate(),'gps'))return;
 
-  // V8-1-14-1010:
+  // V8-1-14-1011:
   // 같은 GPS 위치가 '성지 + 성당 + 활성 순례코스'에 동시에 해당하더라도
   // 방문기록은 각각 정상 등록하되 축하 안내는 성지를 우선한다.
   // 따라서 현재 위치가 성지 자동등록 반경 안이면 성당용 축하 팝업은 띄우지 않는다.
@@ -11689,21 +11689,40 @@ function _ensureRouteWaypointBox(role){
   _refreshRouteTmpMarkers();
   if(!_getRoutePointByRole(role)) _showRouteGuideText('지도에서 경유지'+_routeWaypointIndex(role)+' 마커를 선택하거나 경유지 박스를 눌러 검색하세요');
 }
-function _syncRouteScrollUpHint(){
+function _syncRouteScrollHints(){
   try{
-    const sheet=$('sheet-route'),top=$('rs-top'),hint=$('route-scroll-up-hint');
-    if(!sheet||!top||!hint)return;
-    const show=sheet.classList.contains('route-waypoint-scroll')&&top.scrollTop>10;
-    sheet.classList.toggle('route-scroll-has-up-content',show);
-    hint.setAttribute('aria-hidden',show?'false':'true');
+    const sheet=$('sheet-route'),top=$('rs-top');
+    const up=$('route-scroll-up-hint'),down=$('route-scroll-down-hint');
+    if(!sheet||!top||!up||!down)return;
+
+    let target=null;
+    if(sheet.classList.contains('route-waypoint-scroll')) target=top;
+    else if(sheet.classList.contains('route-result-showing')) target=sheet;
+
+    const max=target?Math.max(0,target.scrollHeight-target.clientHeight):0;
+    const y=target?Math.max(0,target.scrollTop):0;
+    const canScroll=max>8;
+    const showUp=canScroll&&y>10;
+    const showDown=canScroll&&y<max-10;
+
+    sheet.classList.toggle('route-scroll-has-up-content',showUp);
+    sheet.classList.toggle('route-scroll-has-down-content',showDown);
+    up.setAttribute('aria-hidden',showUp?'false':'true');
+    down.setAttribute('aria-hidden',showDown?'false':'true');
   }catch(_e){}
 }
+function _syncRouteScrollUpHint(){ _syncRouteScrollHints(); }
 function _bindRouteScrollUpHint(){
   try{
-    const top=$('rs-top');
-    if(!top||top.__oaiRouteScrollHintBound)return;
-    top.__oaiRouteScrollHintBound=true;
-    top.addEventListener('scroll',_syncRouteScrollUpHint,{passive:true});
+    const top=$('rs-top'),sheet=$('sheet-route');
+    if(top&&!top.__oaiRouteScrollHintBound){
+      top.__oaiRouteScrollHintBound=true;
+      top.addEventListener('scroll',_syncRouteScrollHints,{passive:true});
+    }
+    if(sheet&&!sheet.__oaiRouteScrollHintBound){
+      sheet.__oaiRouteScrollHintBound=true;
+      sheet.addEventListener('scroll',_syncRouteScrollHints,{passive:true});
+    }
   }catch(_e){}
 }
 function _scrollRouteWaypointEditorToBottom(){
@@ -11733,6 +11752,7 @@ function _beginWaypointAddMode(role){
   _showRouteGuideText('지도에서 경유지'+_routeWaypointIndex(role)+'를 선택하거나 경유지 박스를 눌러 검색하세요');
 }
 function _syncRouteWaypointBox(){
+  setTimeout(_syncRouteScrollHints,30);
   OAI_ROUTE_WAYPOINT_CONFIGS.forEach(function(cfg){
     const point=_getRoutePointByRole(cfg.role);
     window[cfg.enabledKey]=!!(window[cfg.enabledKey] || (point&&point.lat&&point.lng));
@@ -15443,6 +15463,57 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   },{passive:true});
 
   function planner(){return document.getElementById('oai-pilgrimage-planner-modal');}
+  function _ensurePilgrimageScrollHints(){
+    const m=planner();if(!m)return null;
+    let up=m.querySelector('.oai-pilgrimage-scroll-hint.is-up');
+    let down=m.querySelector('.oai-pilgrimage-scroll-hint.is-down');
+    if(!up){
+      up=document.createElement('div');
+      up.className='oai-pilgrimage-scroll-hint is-up';
+      up.setAttribute('aria-hidden','true');
+      up.textContent='⌃';
+      m.appendChild(up);
+    }
+    if(!down){
+      down=document.createElement('div');
+      down.className='oai-pilgrimage-scroll-hint is-down';
+      down.setAttribute('aria-hidden','true');
+      down.textContent='⌄';
+      m.appendChild(down);
+    }
+    return {up:up,down:down};
+  }
+  function _syncPilgrimageScrollHints(){
+    try{
+      const m=planner(),panel=m&&m.querySelector('.oai-pilgrimage-planner-panel');
+      const hints=_ensurePilgrimageScrollHints();
+      if(!m||!panel||!hints)return;
+      const max=Math.max(0,panel.scrollHeight-panel.clientHeight);
+      const y=Math.max(0,panel.scrollTop);
+      const canScroll=max>8;
+      const showUp=canScroll&&y>12;
+      const showDown=canScroll&&y<max-12;
+      m.classList.toggle('oai-pilgrimage-has-up',showUp);
+      m.classList.toggle('oai-pilgrimage-has-down',showDown);
+      hints.up.setAttribute('aria-hidden',showUp?'false':'true');
+      hints.down.setAttribute('aria-hidden',showDown?'false':'true');
+    }catch(_e){}
+  }
+  function _bindPilgrimageScrollHints(){
+    try{
+      const m=planner(),panel=m&&m.querySelector('.oai-pilgrimage-planner-panel');
+      if(!panel||panel.__oaiScrollHintBound)return;
+      panel.__oaiScrollHintBound=true;
+      panel.addEventListener('scroll',_syncPilgrimageScrollHints,{passive:true});
+      window.addEventListener('resize',function(){setTimeout(_syncPilgrimageScrollHints,50);},{passive:true});
+      if(typeof MutationObserver!=='undefined'){
+        const obs=new MutationObserver(function(){setTimeout(_syncPilgrimageScrollHints,20);});
+        obs.observe(panel,{childList:true,subtree:true,attributes:true,attributeFilter:['hidden','class','style']});
+        panel.__oaiScrollHintObserver=obs;
+      }
+    }catch(_e){}
+  }
+
   function coverVisible(){try{const c=document.getElementById('cover');return !!(c&&getComputedStyle(c).display!=='none'&&!document.documentElement.classList.contains('app-active'));}catch(_e){return false;}}
   function settingsReturnToCover(){const m=document.getElementById('oai-settings-modal');return !!(m&&m.dataset.returnToCover==='1');}
   function setView(v){
@@ -15452,6 +15523,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(title)title.textContent=v==='list'?'성지순례':v==='follow'?'따라가기':(pilgrimageDetailMode==='complete'?'순례완료':'순례하기');
     if(sub)sub.textContent=v==='list'?'순례계획과 완료 기록을 관리하세요':v==='follow'?'현재 위치 기준 거리와 순례 진행 상태를 확인하세요':(pilgrimageDetailMode==='complete'?'완료한 순례코스를 확인하세요':'순례 경로와 현재 위치를 확인하세요');
     const panel=planner()&&planner().querySelector('.oai-pilgrimage-planner-panel');if(panel)panel.scrollTop=0;
+    _bindPilgrimageScrollHints();
+    requestAnimationFrame(function(){setTimeout(_syncPilgrimageScrollHints,20);});
   }
   function openPlanner(opts){
     const m=planner();if(!m)return;
