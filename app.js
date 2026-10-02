@@ -11778,15 +11778,7 @@ function _oaiPositionScrollAffordance(el,pair,showTop,showBottom){
     const rawTopY=routeWaypointTop ? (rect.top-15) : (rect.top+topInset+8);
     const topY=Math.max(6,Math.min(window.innerHeight-12,rawTopY));
     const bottomY=Math.max(6,Math.min(window.innerHeight-12,rect.bottom-13));
-
-    /* 다중 경유지 편집 화면에는 실제 시트 핸들이 중앙에 있다.
-       위 스크롤 마크까지 중앙에 두면 이중 핸들처럼 보이므로,
-       위 마크만 X 왼쪽의 상단 예약영역으로 이동한다. */
-    const topCenter=routeWaypointTop
-      ? Math.max(38,Math.min(vw-38,rect.right-86))
-      : center;
-
-    pair.top.style.left=topCenter+'px';
+    pair.top.style.left=center+'px';
     pair.top.style.top=topY+'px';
     pair.bottom.style.left=center+'px';
     pair.bottom.style.top=bottomY+'px';

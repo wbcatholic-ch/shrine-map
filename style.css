@@ -6501,14 +6501,14 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 .rs-waypoint10-box{grid-column:1;grid-row:21;background:#efd6c7;border-color:#341e0e;}
 #rs-waypoint6-box,#rs-waypoint7-box,#rs-waypoint8-box,#rs-waypoint9-box,#rs-waypoint10-box,
 #rs-waypoint6-end-tools,#rs-waypoint7-end-tools,#rs-waypoint8-end-tools,#rs-waypoint9-end-tools,#rs-waypoint10-end-tools{display:none;}
-.rs-route-stack.has-waypoint-summary .rs-waypoint6-end-tools,
-.rs-route-stack.has-waypoint-summary .rs-waypoint7-end-tools,
-.rs-route-stack.has-waypoint-summary .rs-waypoint8-end-tools,
-.rs-route-stack.has-waypoint-summary .rs-waypoint9-end-tools,
-.rs-route-stack.has-waypoint-summary .rs-waypoint10-end-tools{display:none!important;}
+.rs-route-stack.has-waypoint-summary .rs-waypoint6-drag-slot,
+.rs-route-stack.has-waypoint-summary .rs-waypoint7-drag-slot,
+.rs-route-stack.has-waypoint-summary .rs-waypoint8-drag-slot,
+.rs-route-stack.has-waypoint-summary .rs-waypoint9-drag-slot,
+.rs-route-stack.has-waypoint-summary .rs-waypoint10-drag-slot{display:none!important;}
 .rs-route-stack.has-waypoint6 .rs-end-box{grid-row:15;}.rs-route-stack.has-waypoint7 .rs-end-box{grid-row:17;}.rs-route-stack.has-waypoint8 .rs-end-box{grid-row:19;}.rs-route-stack.has-waypoint9 .rs-end-box{grid-row:21;}.rs-route-stack.has-waypoint10 .rs-end-box{grid-row:23;}
 .rs-dot-waypoint6{background:#6b3f16}.rs-dot-waypoint7{background:#5b3213}.rs-dot-waypoint8{background:#4b2a12}.rs-dot-waypoint9{background:#3f2410}.rs-dot-waypoint10{background:#341e0e}
-.rs-waypoint6-end-tools{grid-column:2;grid-row:13/16;align-self:stretch;}.rs-waypoint7-end-tools{grid-column:2;grid-row:15/18;align-self:stretch;}.rs-waypoint8-end-tools{grid-column:2;grid-row:17/20;align-self:stretch;}.rs-waypoint9-end-tools{grid-column:2;grid-row:19/22;align-self:stretch;}.rs-waypoint10-end-tools{grid-column:2;grid-row:21/24;align-self:stretch;}
+
 
 html:not(.oai-map-split-wide) #app #sheet-route.open{
   height:fit-content!important;
@@ -8826,3 +8826,18 @@ html:not(.oai-map-split-wide).oai-pilgrimage-course-view-readonly #app #sheet-ro
 html:not(.oai-map-split-wide).oai-pilgrimage-route-direct #app #sheet-route.route-result-showing .route-sheet-x{
   top:17px!important;
 }
+
+
+/* V8-1-14-1023: 경유지 6~10 드래그 핸들 grid row 오류 수정
+   HTML 실제 class(.rs-waypointN-drag-slot)와 CSS selector를 일치시킨다. */
+.rs-waypoint6-drag-slot{grid-row:13!important;}
+.rs-waypoint7-drag-slot{grid-row:15!important;}
+.rs-waypoint8-drag-slot{grid-row:17!important;}
+.rs-waypoint9-drag-slot{grid-row:19!important;}
+.rs-waypoint10-drag-slot{grid-row:21!important;}
+
+.rs-route-stack.has-waypoint6 .rs-end-drag-slot{grid-row:15!important;}
+.rs-route-stack.has-waypoint7 .rs-end-drag-slot{grid-row:17!important;}
+.rs-route-stack.has-waypoint8 .rs-end-drag-slot{grid-row:19!important;}
+.rs-route-stack.has-waypoint9 .rs-end-drag-slot{grid-row:21!important;}
+.rs-route-stack.has-waypoint10 .rs-end-drag-slot{grid-row:23!important;}
