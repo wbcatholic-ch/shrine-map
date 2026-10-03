@@ -9241,3 +9241,20 @@ html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-total-card >
   .oai-pilgrimage-manual-date-row span{font-size:calc(13px * var(--app-font-scale,1))!important;}
   .oai-pilgrimage-manual-date-row input[type="date"]{height:42px!important;font-size:calc(14px * var(--app-font-scale,1))!important;}
 }
+
+
+/* V8-1-14-1054: 다녀온 순례 등록은 '순례하기' 기능이 없는 완료기록 작성 모드 */
+#oai-pilgrimage-detail-view.is-manual-complete-create .oai-pilgrimage-detail-actions{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr)!important;
+}
+#oai-pilgrimage-detail-view.is-manual-complete-create .oai-pilgrimage-follow{
+  display:none!important;
+}
+#oai-pilgrimage-detail-view.is-manual-complete-create .oai-pilgrimage-save{
+  display:block!important;
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  grid-column:1/-1!important;
+}

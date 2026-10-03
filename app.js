@@ -16279,7 +16279,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const actions=document.querySelector('.oai-pilgrimage-detail-view .oai-pilgrimage-detail-actions');
     const isSaved=!!currentCourseId;
     const detailView=document.getElementById('oai-pilgrimage-detail-view');
-    if(detailView){detailView.classList.toggle('is-new-plan',!isSaved);detailView.classList.toggle('is-saved-plan',isSaved);detailView.dataset.planSaved=isSaved?'1':'0';detailView.dataset.detailMode=pilgrimageDetailMode;}
+    if(detailView){
+      detailView.classList.toggle('is-new-plan',!isSaved);
+      detailView.classList.toggle('is-saved-plan',isSaved);
+      detailView.classList.toggle('is-manual-complete-create',isManualCreate);
+      detailView.dataset.planSaved=isSaved?'1':'0';
+      detailView.dataset.detailMode=pilgrimageDetailMode;
+    }
     const active=_activeFollowState(),isActive=!!(active&&currentCourseId&&active.courseId===currentCourseId);
     if(detailRoot)detailRoot.classList.toggle('is-active-follow',isActive);
     if(saveBtn){
@@ -16307,7 +16313,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(followBtn){
       const showFollow=!isManualCreate&&!!isSaved&&!!list.length;
       followBtn.hidden=!showFollow;
-      followBtn.style.display=showFollow?'block':'none';
+      followBtn.style.setProperty('display',showFollow?'block':'none','important');
       followBtn.disabled=!showFollow;
       followBtn.setAttribute('aria-hidden',showFollow?'false':'true');
       followBtn.classList.toggle('is-stop',isActive);
