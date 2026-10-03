@@ -10124,6 +10124,15 @@ function _selectParishMarker(p){
     _ensureParishMarkerZoom();
   }
   _paSelMkr=new _MM({position:new _LL(p.lat,p.lng),image:_mkrImg('#FFE500',true),zIndex:200});
+  try{
+    kakao.maps.event.addListener(_paSelMkr,'click',function(){
+      const idx=_findCurrentParishIndex(p);
+      if(idx<0)return;
+      if(window._oaiTryPilgrimageMapPlacePick&&window._oaiTryPilgrimageMapPlacePick(p))return;
+      if(_isRouteSelectionModeActive())_selectRouteItem(idx);
+      else selectItem(idx,{});
+    });
+  }catch(_e){}
   _paSelMkr.setMap(_map);
   _raiseMyLocationMarker();
   return dioCode;
@@ -10623,6 +10632,15 @@ function _selectRetreatMarker(p){
   if(_paSelMkr){try{_paSelMkr.setMap(null);}catch(e){ console.warn("[가톨릭길동무]", e); } _paSelMkr=null;}
   if(!_map||!p.lat||!p.lng) return;
   _paSelMkr=new _MM({position:new _LL(p.lat,p.lng),image:_mkrImgRetreat('#FFE500',true),zIndex:180});
+  try{
+    kakao.maps.event.addListener(_paSelMkr,'click',function(){
+      const idx=Array.isArray(RETREATS)?RETREATS.indexOf(p):-1;
+      if(idx<0)return;
+      if(window._oaiTryPilgrimageMapPlacePick&&window._oaiTryPilgrimageMapPlacePick(p))return;
+      if(_isRouteSelectionModeActive())_selectRouteItem(idx);
+      else selectItem(idx,{});
+    });
+  }catch(_e){}
   _paSelMkr.setMap(_map);
   _raiseMyLocationMarker();
 }
@@ -11984,6 +12002,63 @@ try{
     obs.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style','hidden']});
   }
   setTimeout(function(){_oaiRefreshScrollAffordances(document);},100);
+}catch(_e){}
+
+
+/* V8-1-14-1061: 앱의 모든 날짜 입력에 연도 이전/다음 버튼을 공통 제공 */
+function _oaiDateShiftYear(input,delta){
+  try{
+    if(!input)return;
+    const raw=String(input.value||'').trim();
+    let d=raw?new Date(raw+'T12:00:00'):new Date();
+    if(Number.isNaN(d.getTime()))d=new Date();
+    const month=d.getMonth(),day=d.getDate(),targetYear=d.getFullYear()+Number(delta||0);
+    const lastDay=new Date(targetYear,month+1,0).getDate();
+    d=new Date(targetYear,month,Math.min(day,lastDay),12,0,0,0);
+    const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0');
+    input.value=y+'-'+m+'-'+dd;
+    input.dispatchEvent(new Event('input',{bubbles:true}));
+    input.dispatchEvent(new Event('change',{bubbles:true}));
+  }catch(_e){}
+}
+function _oaiEnhanceDateInput(input){
+  try{
+    if(!input||input.type!=='date'||input.dataset.oaiYearNav==='1')return;
+    input.dataset.oaiYearNav='1';
+    const parent=input.parentNode;
+    if(!parent)return;
+    const wrap=document.createElement('span');
+    wrap.className='oai-date-year-nav';
+    const prev=document.createElement('button');
+    prev.type='button';prev.className='oai-date-year-prev';prev.textContent='◀년';prev.setAttribute('aria-label','이전 년도');
+    const next=document.createElement('button');
+    next.type='button';next.className='oai-date-year-next';next.textContent='년▶';next.setAttribute('aria-label','다음 년도');
+    parent.insertBefore(wrap,input);
+    wrap.appendChild(prev);wrap.appendChild(input);wrap.appendChild(next);
+    prev.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();_oaiDateShiftYear(input,-1);});
+    next.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();_oaiDateShiftYear(input,1);});
+  }catch(_e){}
+}
+function _oaiEnhanceAllDateInputs(root){
+  try{
+    const scope=root&&root.querySelectorAll?root:document;
+    if(scope.matches&&scope.matches('input[type="date"]'))_oaiEnhanceDateInput(scope);
+    scope.querySelectorAll('input[type="date"]').forEach(_oaiEnhanceDateInput);
+  }catch(_e){}
+}
+try{
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',function(){_oaiEnhanceAllDateInputs(document);},{once:true});
+  else setTimeout(function(){_oaiEnhanceAllDateInputs(document);},0);
+  if(typeof MutationObserver!=='undefined'){
+    const dateObs=new MutationObserver(function(muts){
+      muts.forEach(function(m){
+        (m.addedNodes||[]).forEach(function(n){
+          if(n&&n.nodeType===1)_oaiEnhanceAllDateInputs(n);
+        });
+      });
+    });
+    dateObs.observe(document.documentElement,{childList:true,subtree:true});
+  }
 }catch(_e){}
 
 /* 기존 호출부 호환용 wrapper. 시각 상태는 공통 manager 한 곳이 소유한다. */

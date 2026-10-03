@@ -9448,3 +9448,60 @@ html.oai-pilgrimage-route-direct #sheet-route #rs-pilgrimage-return-btn{
     right:30px!important;
   }
 }
+
+
+/* V8-1-14-1061: 모든 날짜등록 - 연도 이전/다음 */
+.oai-date-year-nav{
+  display:grid!important;
+  grid-template-columns:auto minmax(0,1fr) auto!important;
+  gap:6px!important;
+  align-items:center!important;
+  width:100%!important;
+  min-width:0!important;
+  box-sizing:border-box!important;
+}
+.oai-date-year-nav > input[type="date"]{
+  width:100%!important;
+  min-width:0!important;
+}
+.oai-date-year-prev,
+.oai-date-year-next{
+  min-width:46px!important;
+  height:42px!important;
+  padding:0 7px!important;
+  border:1px solid #b9c3cf!important;
+  border-radius:10px!important;
+  background:#fff!important;
+  color:#243149!important;
+  font-family:inherit!important;
+  font-size:13px!important;
+  font-weight:900!important;
+  line-height:1!important;
+  white-space:nowrap!important;
+  box-sizing:border-box!important;
+}
+.oai-date-year-prev:active,
+.oai-date-year-next:active{
+  transform:scale(.98)!important;
+  background:#eef3f8!important;
+}
+.shrine-visit-label .oai-date-year-nav{
+  margin-top:7px!important;
+}
+.shrine-visit-label .oai-date-year-nav > input[type="date"]{
+  margin-top:0!important;
+}
+.oai-pilgrimage-manual-date-row .oai-date-year-nav,
+.oai-pilgrimage-completion-edit-box .oai-date-year-nav{
+  width:100%!important;
+}
+@media(max-width:390px){
+  .oai-date-year-nav{gap:4px!important;}
+  .oai-date-year-prev,
+  .oai-date-year-next{
+    min-width:42px!important;
+    height:40px!important;
+    padding:0 5px!important;
+    font-size:12px!important;
+  }
+}
