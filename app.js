@@ -15509,7 +15509,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const listView=document.getElementById('oai-pilgrimage-list-view');
     if(listView) listView.setAttribute('data-course-tab',pilgrimageCourseTab);
     const fixedFilters=document.querySelector('#oai-pilgrimage-list-view .oai-pilgrimage-complete-fixed-filters');
-    if(fixedFilters) fixedFilters.hidden=false;
+    if(fixedFilters) fixedFilters.hidden=pilgrimageCourseTab!=='complete';
+    const planSort=document.getElementById('oai-pilgrimage-plan-sort-proxy');
+    if(planSort)planSort.value=pilgrimageCourseFilterState.sort==='name'?'name':'updated';
     document.querySelectorAll('[data-oai-pilgrimage-course-tab]').forEach(function(btn){
       const active=btn.getAttribute('data-oai-pilgrimage-course-tab')===pilgrimageCourseTab;
       btn.classList.toggle('is-active',active);
@@ -17446,11 +17448,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   document.addEventListener('change',function(e){
     const t=e.target;
     if(!t) return;
-    if(t.id==='oai-pilgrimage-filter-year'||t.id==='oai-pilgrimage-filter-month'||t.id==='oai-pilgrimage-filter-sort'){
+    if(t.id==='oai-pilgrimage-filter-year'||t.id==='oai-pilgrimage-filter-month'||t.id==='oai-pilgrimage-filter-sort'||t.id==='oai-pilgrimage-plan-sort-proxy'){
+      const planSort=document.getElementById('oai-pilgrimage-plan-sort-proxy');
       pilgrimageCourseFilterState={
         year:String(document.getElementById('oai-pilgrimage-filter-year')&&document.getElementById('oai-pilgrimage-filter-year').value||'all'),
         month:String(document.getElementById('oai-pilgrimage-filter-month')&&document.getElementById('oai-pilgrimage-filter-month').value||'all'),
-        sort:String(document.getElementById('oai-pilgrimage-filter-sort')&&document.getElementById('oai-pilgrimage-filter-sort').value||(pilgrimageCourseTab==='complete'?'completed':'updated'))
+        sort:String(t.id==='oai-pilgrimage-plan-sort-proxy'?(planSort&&planSort.value||'updated'):(document.getElementById('oai-pilgrimage-filter-sort')&&document.getElementById('oai-pilgrimage-filter-sort').value||(pilgrimageCourseTab==='complete'?'completed':'updated')))
       };
       renderCourseList();
     }

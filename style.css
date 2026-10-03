@@ -9139,3 +9139,60 @@ html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-total-card >
   width:0!important;
   height:0!important;
 }
+
+
+/* V8-1-14-1050: 순례계획 상단 레이아웃 원복 */
+#oai-pilgrimage-list-view[data-course-tab="complete"] .oai-pilgrimage-complete-fixed-filters{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.15fr)!important;
+}
+#oai-pilgrimage-list-view[data-course-tab="complete"] .oai-pilgrimage-list-toolbar{display:none!important;}
+
+#oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-complete-fixed-filters{display:none!important;}
+#oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-list-toolbar{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+  gap:10px!important;
+  width:100%!important;
+  margin:0!important;
+  align-items:stretch!important;
+}
+#oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-list-toolbar .oai-pilgrimage-new,
+#oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-plan-sort-filter select{
+  width:100%!important;
+  height:46px!important;
+  min-height:46px!important;
+  margin:0!important;
+  border-radius:14px!important;
+  box-sizing:border-box!important;
+  font-family:inherit!important;
+  font-size:calc(14px * var(--app-font-scale,1))!important;
+  font-weight:950!important;
+}
+#oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-list-toolbar .oai-pilgrimage-new{
+  padding:0 10px!important;
+  border:1.5px solid #b58a33!important;
+  background:#fff9eb!important;
+  color:#7a5715!important;
+}
+#oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-plan-sort-filter{
+  display:block!important;
+  min-width:0!important;
+  margin:0!important;
+}
+#oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-plan-sort-filter select{
+  padding:0 10px!important;
+  border:1.5px solid #bcc8d5!important;
+  background:#fff!important;
+  color:#17213a!important;
+  text-align-last:center!important;
+}
+@media(max-width:390px){
+  #oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-list-toolbar{gap:8px!important;}
+  #oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-list-toolbar .oai-pilgrimage-new,
+  #oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-plan-sort-filter select{
+    height:44px!important;
+    min-height:44px!important;
+    font-size:calc(13px * var(--app-font-scale,1))!important;
+  }
+}
