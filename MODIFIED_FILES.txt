@@ -1,15 +1,12 @@
-V8-1-14-1033
+V8-1-14-1035
 
-순례 시작/종료 확인창 시스템 뒤로가기 수정
+순례코스 일반 공개 후속 정리
 
-문제
-- 순례 시작 확인창이 열려 있어도 _oaiPilgrimageBackHandle()이
-  해당 modal을 먼저 닫지 않고 plannerBackOrClose()까지 내려가고 있었음
-- back-controller의 열린 레이어 판정에도 최근 순례 확인 modal이 빠져 있었음
-
-수정
-- 순례 시작 확인창 show 상태 -> 뒤로가기 시 확인창만 닫음
-- 순례 종료/다른 순례 시작 확인창도 동일 처리
-- 확인창을 닫아도 순례 상세/목록 화면은 그대로 유지
-- back-controller의 known layer 목록에 최근 순례 modal/route quick 추가
-- app.js에 start/stop confirm open/close 공통 export 추가
+- 설정의 개발자 모드 '성지순례 계획' 중복 진입 제거
+- 설정 버전 영역의 숨김 개발자 활성화 UX 제거
+- 커버 순례코스 버튼을 전용 public opener에 직접 연결
+- 커버 진입 출처를 명시적으로 기록해 뒤로가기 복귀 경로 안정화
+- 커버 진입 순례코스 종료 시 설정 화면이 끼어들지 않도록 직접 커버 복귀
+- plannerBackOrClose에서도 순례 시작 확인창을 최우선 처리
+- 앱 사용법에 커버 실제 위치 문구 보강
+- 공개 기능 최종 뒤로가기 흐름 감사 문서 추가
