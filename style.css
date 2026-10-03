@@ -9125,3 +9125,22 @@ html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-total-card >
   background:#f4f0e7!important;
   isolation:isolate!important;
 }
+
+
+/* V8-1-14-1045: 순례완료 고정영역 미세 이동/스크롤 마크 보정
+   JS는 헤더 높이 + planner body 상단 padding을 합산한다.
+   따라서 처음 보이는 위치와 sticky 고정 위치가 동일해 스크롤 시작 시 8~10px 움직이지 않는다. */
+#oai-pilgrimage-planner-modal{
+  --oai-pilgrimage-list-sticky-top:136px;
+}
+#oai-pilgrimage-list-view .oai-pilgrimage-list-sticky{
+  top:var(--oai-pilgrimage-list-sticky-top,136px)!important;
+  transform:none!important;
+  transition:none!important;
+  will-change:auto!important;
+}
+@media(max-width:390px){
+  #oai-pilgrimage-planner-modal{
+    --oai-pilgrimage-list-sticky-top:134px;
+  }
+}

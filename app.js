@@ -11841,7 +11841,18 @@ function _oaiPositionScrollAffordance(el,pair,showTop,showBottom){
       $('sheet-route') &&
       $('sheet-route').classList.contains('route-waypoint-scroll')
     );
-    const rawTopY=routeWaypointTop ? (rect.top-15) : (rect.top+topInset+8);
+    let rawTopY=routeWaypointTop ? (rect.top-15) : (rect.top+topInset+8);
+    try{
+      const pilgrimagePlanner=el.classList&&el.classList.contains('oai-pilgrimage-planner-panel');
+      const pilgrimageList=document.getElementById('oai-pilgrimage-list-view');
+      if(pilgrimagePlanner&&pilgrimageList&&!pilgrimageList.hidden){
+        const sticky=pilgrimageList.querySelector('.oai-pilgrimage-list-sticky');
+        if(sticky){
+          const sr=sticky.getBoundingClientRect();
+          if(sr.height>0)rawTopY=Math.max(rawTopY,sr.bottom+8);
+        }
+      }
+    }catch(_e){}
     const topY=Math.max(6,Math.min(window.innerHeight-12,rawTopY));
     const bottomY=Math.max(6,Math.min(window.innerHeight-12,rect.bottom-13));
     pair.top.style.left=center+'px';
@@ -15739,9 +15750,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const m=planner();
       if(!m)return;
       const head=m.querySelector('.oai-pilgrimage-head');
+      const body=m.querySelector('.oai-pilgrimage-planner-body');
       if(!head)return;
       const h=Math.max(0,Math.ceil(head.getBoundingClientRect().height||head.offsetHeight||0));
-      if(h>0)m.style.setProperty('--oai-pilgrimage-list-sticky-top',h+'px');
+      let bodyPadTop=0;
+      try{if(body)bodyPadTop=Math.max(0,parseFloat(getComputedStyle(body).paddingTop)||0);}catch(_e){}
+      const top=Math.ceil(h+bodyPadTop);
+      if(top>0)m.style.setProperty('--oai-pilgrimage-list-sticky-top',top+'px');
     }catch(_e){}
   }
   function _schedulePilgrimageStickyOffsetSync(){
