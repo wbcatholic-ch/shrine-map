@@ -11922,7 +11922,26 @@ function _oaiSyncScrollAffordance(el){
     const y=visible?Math.max(0,el.scrollTop):0;
     const canScroll=visible&&max>12;
     const showTop=canScroll&&y>10;
-    const showBottom=canScroll&&y<max-10;
+    let showBottom=canScroll&&y<max-10;
+
+    /* 순례 상세는 실제 콘텐츠가 모두 보이면 하단 padding 때문에 생긴
+       가짜 스크롤 여유로 아래 마크를 띄우지 않는다. */
+    if(showBottom&&el.classList&&el.classList.contains('oai-pilgrimage-planner-panel')){
+      const detail=document.getElementById('oai-pilgrimage-detail-view');
+      if(detail&&!detail.hidden&&getComputedStyle(detail).display!=='none'){
+        const visibleChildren=Array.prototype.slice.call(detail.children||[]).filter(function(child){
+          try{
+            const cs=getComputedStyle(child),cr=child.getBoundingClientRect();
+            return cs.display!=='none'&&cs.visibility!=='hidden'&&cr.height>0&&cr.width>0;
+          }catch(_e){return false;}
+        });
+        const last=visibleChildren.length?visibleChildren[visibleChildren.length-1]:null;
+        if(last){
+          const er=el.getBoundingClientRect(),lr=last.getBoundingClientRect();
+          if(lr.bottom<=er.bottom-6)showBottom=false;
+        }
+      }
+    }
     _oaiPositionScrollAffordance(el,pair,showTop,showBottom);
   }catch(_e){}
 }
@@ -16336,8 +16355,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       currentCheckBtn.setAttribute('aria-hidden',hideCurrentCheck?'true':'false');
     }
     if(followBtn){
-      const showFollow=!isManualCreate&&!!list.length;
-      const enableFollow=showFollow&&!!isSaved;
+      const showFollow=!isManualCreate;
+      const enableFollow=showFollow&&!!isSaved&&!!list.length;
       followBtn.hidden=!showFollow;
       followBtn.style.setProperty('display',showFollow?'block':'none','important');
       followBtn.disabled=!enableFollow;

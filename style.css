@@ -9367,3 +9367,12 @@ html.oai-pilgrimage-route-direct #sheet-route #rs-pilgrimage-return-btn{
     min-width:20px!important;
   }
 }
+
+
+/* V8-1-14-1058: 새 순례계획은 빈 상태에서도 저장/순례하기 자리를 유지 */
+#oai-pilgrimage-detail-view:not(.is-manual-complete-create) .oai-pilgrimage-detail-actions{
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+}
+#oai-pilgrimage-detail-view:not(.is-manual-complete-create) .oai-pilgrimage-follow[disabled]{
+  display:block!important;
+}
