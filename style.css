@@ -5930,13 +5930,13 @@ html.route-tab-active #info-card.open{
 .oai-settings-modal{--oai-dialog-top:max(24px,calc(env(safe-area-inset-top,0px) + 12px));--oai-dialog-bottom:max(20px,calc(env(safe-area-inset-bottom,0px) + 12px));display:none;position:fixed;inset:0;z-index:100120;color:#17213a;font-family:inherit;}
 .oai-settings-modal.show{display:block;}
 .oai-settings-backdrop{position:absolute;inset:0;background:rgba(10,20,42,.52);}
-.oai-settings-panel{position:absolute;inset:0;width:100%;max-height:none;margin:0;transform:none;overflow:auto;border:0;border-radius:0;background:#f0ece2;box-shadow:none;}
-.oai-settings-head{display:flex;align-items:center;justify-content:space-between;padding:max(20px,calc(env(safe-area-inset-top,0px) + 12px)) 23px 18px;border-bottom:2px solid #c7b17c;background:#fffdf9;}
+.oai-settings-panel{position:absolute;inset:0;width:100%;max-height:none;margin:0;transform:none;overflow-y:auto!important;overflow-x:hidden!important;border:0;border-radius:0;background:#f0ece2;box-shadow:none;scrollbar-width:none;-ms-overflow-style:none;}
+.oai-settings-head{display:flex;align-items:center;justify-content:space-between;padding:max(20px,calc(env(safe-area-inset-top,0px) + 12px)) 23px 18px;border-bottom:2px solid #c7b17c;background:#fffdf9;position:sticky!important;top:0!important;z-index:30!important;flex:0 0 auto!important;box-shadow:0 2px 8px rgba(31,42,68,.08);}
 .oai-settings-head h2{margin:0;color:#15203b;font-size:25px;line-height:1.15;font-weight:900;letter-spacing:-.045em;}
 .oai-settings-head p{margin:3px 0 0;color:#667085;font-size:12px;line-height:1.35;font-weight:750;}
 .oai-settings-head button{display:flex;align-items:center;justify-content:center;flex:0 0 auto;width:42px;height:42px;margin:0 -1px 0 12px;padding:0;border:2px solid #253550;border-radius:50%;background:#fff;color:#18233f;font-family:Arial,sans-serif;font-size:30px!important;font-weight:700;line-height:1!important;cursor:pointer;}
 .oai-settings-body{padding:16px 16px max(24px,calc(env(safe-area-inset-bottom,0px) + 16px));}
-.oai-settings-group{margin:0 0 14px;border:2px solid #b9a36f;border-radius:17px;overflow:hidden;background:#fff;box-shadow:0 3px 10px rgba(27,39,61,.10);}
+.oai-settings-group{margin:0 0 14px;border:2px solid #b59a58;border-radius:17px;overflow:hidden;background:#fff;box-shadow:0 3px 10px rgba(21,40,70,.11);}
 .oai-settings-group h3{margin:0;padding:12px 16px 10px;background:#e8ddc4;color:#5f4a20;font-size:15px;line-height:1.05;font-weight:900;letter-spacing:-.02em;}
 .oai-settings-row{display:flex;align-items:center;justify-content:space-between;gap:14px;width:100%;min-height:84px;padding:15px 16px;border:0;border-top:1px solid #d5cbb9;background:#fff;color:#17213a;text-align:left;font-family:inherit;}
 .oai-settings-row[hidden]{display:none!important;}
@@ -6082,21 +6082,7 @@ html.route-tab-active #info-card.open{
 .route-quick-empty{padding:11px 12px;border:1px dashed #cbd3df;border-radius:12px;background:#fafbfc;color:#697386;font-size:12px;font-weight:750;line-height:1.45;}
 .route-quick-settings{width:100%;height:45px;margin-top:12px;border:1.5px solid #b5a06e;border-radius:13px;background:#fffaf0;color:#6a5222;font-family:inherit;font-size:13px;font-weight:900;cursor:pointer;}
 
-/* 설정 > 자주 가는 장소 */
-.oai-settings-frequent-info{padding:14px 16px 12px;background:#fffdf8;border-bottom:1px solid #d5cbb9;}
-.oai-settings-frequent-info>b{display:block;color:#72581e;font-size:15px;font-weight:900;}
-.oai-settings-frequent-info p{margin:6px 0 0;color:#5e6879;font-size:12.5px;font-weight:700;line-height:1.55;word-break:keep-all;}
-.oai-settings-frequent-list{display:flex;flex-direction:column;background:#fff;}
-.oai-settings-frequent-empty{padding:14px 16px;color:#7b8492;font-size:12.5px;font-weight:750;line-height:1.45;}
-.oai-settings-frequent-item{display:flex;align-items:center;gap:10px;min-height:58px;padding:10px 12px 10px 16px;border-top:1px solid #ece5d8;}
-.oai-settings-frequent-item:first-child{border-top:0;}
-.oai-settings-frequent-item>span{min-width:0;flex:1;}
-.oai-settings-frequent-item b{display:block;color:#17213a;font-size:14px;font-weight:900;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.oai-settings-frequent-item small{display:block;margin-top:3px;color:#788292;font-size:11.5px;font-weight:650;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.oai-settings-frequent-item button{width:34px;height:34px;flex:0 0 34px;border:1.5px solid #c8a39f;border-radius:50%;background:#fff;color:#a63b31;font-size:20px;font-weight:900;line-height:1;}
-.oai-settings-frequent-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;padding:12px 14px 14px;border-top:1px solid #d5cbb9;background:#fbf8f1;}
-.oai-settings-frequent-actions button{min-height:44px;padding:8px;border:1.5px solid #b7a16f;border-radius:12px;background:#fff;color:#5f4a20;font-family:inherit;font-size:12.5px;font-weight:900;line-height:1.25;}
-@media(max-width:380px){.oai-settings-frequent-actions{grid-template-columns:1fr;}}
+/* 설정 > 자주 가는 장소: V8-1-14-845 단일 디자인 사용 */
 #rs-start-waypoint-tools.rs-drag-slot{grid-column:2!important;grid-row:1!important;align-self:stretch!important;}
 
 
@@ -6426,7 +6412,6 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 .oai-pilgrimage-point-map:active{background:#123f6b;transform:scale(.99);}
 
 /* 설정: 포인트 색상 하나로 통일 */
-.oai-settings-group{border-color:#b59a58;background:#fff;box-shadow:0 3px 10px rgba(21,40,70,.11);}
 .oai-settings-group h3,
 .oai-settings-group:nth-of-type(even) h3{
   background:#17365f;color:#fff;border-bottom:3px solid #b48a2f;
@@ -6994,7 +6979,7 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 }
 #oai-pilgrimage-detail-view .oai-pilgrimage-course-map{
   min-height:44px!important;
-  margin-top:9px!important;
+  margin:0!important;
   border:1px solid #aac7df!important;
   border-radius:11px!important;
   background:#fff!important;
@@ -8447,11 +8432,6 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 
 
 
-/* 설정은 기존 전체화면 레이아웃을 그대로 사용하고 스크롤바만 숨긴다. */
-.oai-settings-panel{overflow-x:hidden!important;scrollbar-width:none;}
-.oai-settings-panel::-webkit-scrollbar{width:0;height:0;display:none;}
-
-
 /* 일반 길찾기 결과 화면: X 위치만 조정 */
 html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-sheet-x{
   top:22px!important;
@@ -8616,25 +8596,8 @@ html:not(.oai-map-split-wide) #app #sheet-route.open #rs-bottom{
   display:none!important;
 }
 
-/* 설정은 header 고정, panel만 스크롤 */
-.oai-settings-panel{
-  overflow-y:auto!important;
-  overflow-x:hidden!important;
-  scrollbar-width:none;
-}
-.oai-settings-panel::-webkit-scrollbar{
-  width:0;
-  height:0;
-  display:none;
-}
-.oai-settings-head{
-  position:sticky!important;
-  top:0!important;
-  z-index:30!important;
-  flex:0 0 auto!important;
-  background:#fffdf9!important;
-  box-shadow:0 2px 8px rgba(31,42,68,.08);
-}
+/* 설정 패널: 스크롤 정책은 기본 .oai-settings-panel에서 단일 관리 */
+.oai-settings-panel::-webkit-scrollbar{width:0;height:0;display:none;}
 
 /* V8-1-14-1018: 성지순례 화면 중앙 정렬
    오른쪽 native scrollbar가 컨텐츠 폭을 줄여 전체가 왼쪽으로 치우쳐 보이던 현상을 제거.
@@ -8766,9 +8729,24 @@ html:not(.oai-map-split-wide).oai-pilgrimage-route-direct #app #sheet-route.rout
 }
 
 
-/* V8-1-14-1030: Fold 큰 화면 순례하기 하단 2열 기준선 통일
-   1fr의 min-content 영향으로 좌/우 박스 폭이 미세하게 달라지는 것을 막고
-   추가 버튼 / 저장·종료 / 거리재계산·코스보기 / 거리·시간의 중앙 기준선을 맞춘다. */
+/* V8-1-14-1031: 순례하기 하단 버튼 / Fold 2열 최종 기준
+   과거 개별 margin/height 패치를 없애고 이 구간에서 한 번만 관리한다. */
+#oai-pilgrimage-detail-view .oai-pilgrimage-total-actions{
+  align-items:stretch!important;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-total-actions > .oai-pilgrimage-current-check,
+#oai-pilgrimage-detail-view .oai-pilgrimage-total-actions > .oai-pilgrimage-course-map{
+  width:100%!important;
+  min-width:0!important;
+  max-width:none!important;
+  height:44px!important;
+  min-height:44px!important;
+  max-height:44px!important;
+  margin:0!important;
+  align-self:stretch!important;
+  box-sizing:border-box!important;
+}
+
 html.oai-map-split-wide #oai-pilgrimage-detail-view{
   --oai-pilgrimage-wide-col-gap:8px;
 }

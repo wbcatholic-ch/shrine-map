@@ -1,16 +1,17 @@
-V8-1-14-1030
+V8-1-14-1031
 
-Fold 큰 화면 순례하기 하단 박스 중앙 기준선 정렬
+설정 UI / 순례하기 하단 UI 정리
 
-대상
-- 순례 장소 추가 / 지도에서 추가
-- 저장 / 순례 종료
-- 총 이동 거리 / 예상 시간
-- 내 위치에서 다시 거리 계산 / 순례코스 보기
+설정
+- settings panel 스크롤 rule 3중 -> 1개
+- settings header 기본/sticky -> 1개
+- settings group 후행 색상 patch -> 기본 rule에 통합
+- 자주 가는 장소 V844 구형 디자인 삭제, V845만 유지
+- webkit scrollbar 동일 rule 중복 제거
+- 설정 관련 전체 파일 audit: CODE_AUDIT_1031.md
 
-수정
-- 큰 화면에서 모든 2열 구조를 minmax(0,1fr) + minmax(0,1fr)로 강제
-- 각 자식 요소 min-width:0 적용
-- 긴 문구의 min-content 때문에 한쪽 열이 더 넓어지는 현상 제거
-- 좌우 50:50 기준과 중앙 분할선을 동일하게 맞춤
-- 휴대폰 화면은 변경하지 않음
+순례하기
+- 순례코스 보기의 과거 margin-top:9px 제거
+- '내 위치에서 다시 거리 계산' / '순례코스 보기' 높이 44px, margin 0으로 동일
+- Fold에서 두 버튼의 top/bottom 기준선 동일
+- 1030 Fold patch 제거 후 1031 단일 rule로 재작성
