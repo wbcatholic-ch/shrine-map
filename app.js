@@ -16645,6 +16645,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       ? null
       : {entryRole:String(entryRole||'plan'),extraPlaces:plan.slice(OAI_MAX_ROUTE_WAYPOINTS).map(function(x){return Object.assign({},x);})};
     const run=()=>{try{
+      try{
+        /* 순례계획의 '지도에서 추가'는 직전에 사용한 성당/피정 모드를 물려받지 않는다.
+           항상 성지 지도를 기준으로 연다. */
+        _mode='shrine';
+        _filterDio='all';
+        _listSrch='';
+        _curFromRegion=false;
+        document.documentElement.classList.remove('parish-mode','retreat-mode');
+      }catch(_e){}
       try{document.documentElement.classList.add('app-active');}catch(_e){}
       try{if(typeof oaiSetMainMapLayerHidden==='function')oaiSetMainMapLayerHidden(false);else document.documentElement.classList.remove('oai-hide-main-map-layer');}catch(_e){}
       try{_screen='map';}catch(_e){}
@@ -16655,7 +16664,16 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(!_map&&typeof _loadMap==='function'){window._noAutoNearby=true;_loadMap();}
       try{resetRoute({fresh:true});}catch(_e){}
       if(!_activeTab||_activeTab!=='route')openTab('route');else _enterRouteMode();
+      try{
+        if(typeof _clearParishNearbyMarkers==='function')_clearParishNearbyMarkers();
+        if(typeof _hideAllParishDioMkrs==='function')_hideAllParishDioMkrs();
+        try{(_retreatMarkers||[]).forEach(function(o){if(o&&o.marker)_setMarkerMapIfChanged(o.marker,null);});}catch(_e){}
+        if((!_markers||_markers.length!==SHRINES.length)&&typeof _buildShrineMarkers==='function')_buildShrineMarkers();
+        if(typeof _restoreAllCategoryMarkersForSelection==='function')_restoreAllCategoryMarkersForSelection();
+      }catch(_e){}
       setTimeout(function(){try{
+        _mode='shrine';
+        document.documentElement.classList.remove('parish-mode','retreat-mode');
         if(meta.start&&_validGpsPair(meta.start.lat,meta.start.lng)) _setRoutePointFromItem('start',meta.start,_pilgrimageRouteShrineIndex(meta.start));
         plan.slice(0,OAI_MAX_ROUTE_WAYPOINTS).forEach(function(item,i){const cfg=OAI_ROUTE_WAYPOINT_CONFIGS[i];if(cfg)_setRoutePointFromItem(cfg.role,item,_pilgrimageRouteShrineIndex(item));});
         if(meta.end&&_validGpsPair(meta.end.lat,meta.end.lng)) _setRoutePointFromItem('end',meta.end,_pilgrimageRouteShrineIndex(meta.end));
