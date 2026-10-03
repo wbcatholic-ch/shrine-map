@@ -16285,8 +16285,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         const statusHtml=done?'<span class="oai-pilgrimage-waypoint-chip is-done">✓ 순례완료</span>':'';
         const nextLabel=(!isCompletionView&&i===next)?'<span class="oai-pilgrimage-next-label" aria-label="다음 순례지"><b>다음</b><b>순례지</b></span>':'';
         const holdAttr=isCompletionView?'':' data-plan-hold="'+i+'"';
-        const dragHtml=isCompletionView?'<span class="oai-pilgrimage-drag" aria-hidden="true">⋮</span>':'<button type="button" class="oai-pilgrimage-drag" data-plan-drag="'+i+'" aria-label="'+esc(item.name)+' 순서 이동">⋮</button>';
-        return '<div class="'+cls+'" data-plan-index="'+i+'"'+holdAttr+'>'+dragHtml+'<span class="oai-pilgrimage-order" aria-label="순례 '+(i+1)+'번">'+(i+1)+'</span><div class="oai-pilgrimage-main"><div class="oai-pilgrimage-main-head"><span class="oai-pilgrimage-place-title"><b>'+esc(item.name)+'</b></span>'+statusHtml+'</div><small class="oai-pilgrimage-item-metric" data-plan-metric="'+i+'">'+metric+'</small></div>'+nextLabel+'</div>';
+        const dragHtml=isCompletionView?'':'<button type="button" class="oai-pilgrimage-drag" data-plan-drag="'+i+'" aria-label="'+esc(item.name)+' 순서 이동">⋮</button>';
+        return '<div class="'+cls+'" data-plan-index="'+i+'"'+holdAttr+'><span class="oai-pilgrimage-order" aria-label="순례 '+(i+1)+'번">'+(i+1)+'</span><div class="oai-pilgrimage-main"><div class="oai-pilgrimage-main-head"><span class="oai-pilgrimage-place-title"><b>'+esc(item.name)+'</b></span>'+statusHtml+'</div><small class="oai-pilgrimage-item-metric" data-plan-metric="'+i+'">'+metric+'</small></div>'+nextLabel+dragHtml+'</div>';
       }).join('');
     }
     const addBtn=document.querySelector('.oai-pilgrimage-detail-view .oai-pilgrimage-add');

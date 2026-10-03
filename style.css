@@ -9376,3 +9376,75 @@ html.oai-pilgrimage-route-direct #sheet-route #rs-pilgrimage-return-btn{
 #oai-pilgrimage-detail-view:not(.is-manual-complete-create) .oai-pilgrimage-follow[disabled]{
   display:block!important;
 }
+
+
+/* V8-1-14-1059: 순례지 핸들은 항상 행의 맨 오른쪽 / 완료화면에는 미표시 */
+#oai-pilgrimage-detail-view .oai-pilgrimage-item{
+  position:relative!important;
+  grid-template-columns:36px minmax(0,1fr)!important;
+  column-gap:12px!important;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-order{
+  grid-column:1!important;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-main{
+  grid-column:2!important;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-drag{
+  position:absolute!important;
+  right:2px!important;
+  top:50%!important;
+  transform:translateY(-50%)!important;
+  z-index:7!important;
+  width:24px!important;
+  min-width:24px!important;
+  height:40px!important;
+  display:flex!important;
+  align-items:center!important;
+  justify-content:center!important;
+  margin:0!important;
+  padding:0!important;
+}
+
+/* 일반/진행 화면은 핸들 공간을 항상 오른쪽에 확보 */
+#oai-pilgrimage-detail-view:not(.is-completion-view) .oai-pilgrimage-item{
+  padding-right:34px!important;
+}
+
+/* 다음 순례지 라벨이 있는 행은 라벨 + 핸들이 둘 다 들어가도록 오른쪽 공간 확대 */
+#oai-pilgrimage-detail-view:not(.is-completion-view) .oai-pilgrimage-item.is-next{
+  padding-right:92px!important;
+}
+#oai-pilgrimage-detail-view:not(.is-completion-view) .oai-pilgrimage-item.is-next .oai-pilgrimage-next-label{
+  right:34px!important;
+}
+
+/* 순례완료는 핸들 마크와 공간 자체를 사용하지 않음 */
+#oai-pilgrimage-detail-view.is-completion-view .oai-pilgrimage-drag{
+  display:none!important;
+}
+#oai-pilgrimage-detail-view.is-completion-view .oai-pilgrimage-item{
+  grid-template-columns:36px minmax(0,1fr)!important;
+  padding-right:2px!important;
+}
+
+@media(max-width:390px){
+  #oai-pilgrimage-detail-view .oai-pilgrimage-item{
+    grid-template-columns:34px minmax(0,1fr)!important;
+    column-gap:9px!important;
+  }
+  #oai-pilgrimage-detail-view .oai-pilgrimage-drag{
+    right:1px!important;
+    width:22px!important;
+    min-width:22px!important;
+  }
+  #oai-pilgrimage-detail-view:not(.is-completion-view) .oai-pilgrimage-item{
+    padding-right:31px!important;
+  }
+  #oai-pilgrimage-detail-view:not(.is-completion-view) .oai-pilgrimage-item.is-next{
+    padding-right:82px!important;
+  }
+  #oai-pilgrimage-detail-view:not(.is-completion-view) .oai-pilgrimage-item.is-next .oai-pilgrimage-next-label{
+    right:30px!important;
+  }
+}
