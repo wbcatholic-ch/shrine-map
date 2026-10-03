@@ -9196,3 +9196,48 @@ html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-total-card >
     font-size:calc(13px * var(--app-font-scale,1))!important;
   }
 }
+
+
+/* V8-1-14-1051: 다녀온 순례 등록 화면에 날짜 직접 입력 */
+.oai-pilgrimage-manual-date-row{
+  margin:10px 0 12px!important;
+  padding:12px 14px!important;
+  border:1.5px solid #c9b16f!important;
+  border-radius:14px!important;
+  background:#fff9e8!important;
+  box-sizing:border-box!important;
+}
+.oai-pilgrimage-manual-date-row[hidden]{display:none!important;}
+.oai-pilgrimage-manual-date-row label{
+  display:grid!important;
+  grid-template-columns:auto minmax(0,1fr)!important;
+  align-items:center!important;
+  gap:12px!important;
+  width:100%!important;
+}
+.oai-pilgrimage-manual-date-row span{
+  color:#7a5715!important;
+  font-size:calc(14px * var(--app-font-scale,1))!important;
+  font-weight:950!important;
+  white-space:nowrap!important;
+}
+.oai-pilgrimage-manual-date-row input[type="date"]{
+  width:100%!important;
+  min-width:0!important;
+  height:44px!important;
+  padding:0 12px!important;
+  border:1.5px solid #c4b27d!important;
+  border-radius:11px!important;
+  background:#fff!important;
+  color:#17213a!important;
+  font-family:inherit!important;
+  font-size:calc(15px * var(--app-font-scale,1))!important;
+  font-weight:850!important;
+  box-sizing:border-box!important;
+}
+@media(max-width:390px){
+  .oai-pilgrimage-manual-date-row{padding:10px 12px!important;}
+  .oai-pilgrimage-manual-date-row label{gap:8px!important;}
+  .oai-pilgrimage-manual-date-row span{font-size:calc(13px * var(--app-font-scale,1))!important;}
+  .oai-pilgrimage-manual-date-row input[type="date"]{height:42px!important;font-size:calc(14px * var(--app-font-scale,1))!important;}
+}
