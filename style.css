@@ -8205,9 +8205,31 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 }
 #oai-pilgrimage-detail-view .oai-pilgrimage-detail-actions{width:100%!important;max-width:100%!important;gap:8px!important;align-items:stretch!important;}
 
-/* 지도에서 추가는 경로검색 대신 순례하기로 복귀 */
-#sheet-route #rs-search-btn.pilgrimage-return{background:#17365f!important;border-color:#17365f!important;color:#fff!important;font-weight:950!important;}
-#sheet-route #rs-search-btn.pilgrimage-return:active{background:#102a4b!important;transform:scale(.99)!important;}
+/* V8-1-14-1055: 지도에서 추가는 경로검색을 유지하고 별도 복귀 버튼 사용 */
+#sheet-route .rs-pilgrimage-return-btn{
+  display:none;
+  width:100%;
+  min-height:46px;
+  margin:8px 0 0;
+  padding:0 14px;
+  align-items:center;
+  justify-content:center;
+  border:1.5px solid #17365f;
+  border-radius:12px;
+  background:#17365f;
+  color:#fff;
+  font-family:inherit;
+  font-size:calc(14px * var(--app-font-scale,1));
+  font-weight:950;
+  box-sizing:border-box;
+}
+#sheet-route .rs-pilgrimage-return-btn:active{
+  background:#102a4b;
+  transform:scale(.99);
+}
+#sheet-route #rs-result .rs-pilgrimage-return-btn{
+  margin-top:10px;
+}
 
 /* V8-1-14-1016: 순례코스 보기 / 큰 화면 박스 정렬 / 버튼 높이 최종 보정 */
 
@@ -9257,4 +9279,24 @@ html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-total-card >
   min-width:0!important;
   max-width:none!important;
   grid-column:1/-1!important;
+}
+
+
+/* V8-1-14-1055: 순례 지도에서 추가 / 일반 길찾기 결과 버튼 순서 */
+html.oai-pilgrimage-course-view-readonly #sheet-route #rs-pilgrimage-return-btn,
+html.oai-pilgrimage-route-direct #sheet-route #rs-pilgrimage-return-btn{
+  display:none!important;
+}
+
+/* 일반 길찾기: 순례코스로 만들기는 결과의 맨 마지막 버튼 */
+#sheet-route #rs-result .btn-route-pilgrimage{
+  margin-top:10px!important;
+  margin-bottom:0!important;
+}
+
+/* 지도에서 추가: 경로검색 결과는 일반 길찾기와 같은 결과 박스를 모두 사용 */
+#sheet-route #rs-result .rs-stats,
+#sheet-route #rs-result .rs-note,
+#sheet-route #rs-result .route-btns{
+  visibility:visible;
 }
