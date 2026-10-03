@@ -15206,8 +15206,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function closeOnboardingBackup(){const m=onboardingModal();if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');m.dataset.oaiMode='';}initialOnboarding=false;try{localStorage.setItem(OAI_ONBOARDING_DONE_KEY,'1');localStorage.setItem(OAI_GOOGLE_PROMPT_DATE_KEY,todayKey());}catch(_e){}}
   function renderOnboardingBackup(risk){
     const body=document.getElementById('oai-onboarding-backup-body');if(!body)return;
-    if(risk){body.innerHTML='<p class="oai-onboarding-warning">자동 보관을 켜지 않으면 휴대폰을 바꾸거나 앱을 다시 설치할 때 방문 기록과 즐겨찾기를 잃을 수 있습니다.</p><button type="button" class="oai-records-primary" data-oai-onboarding-connect="1">내 Google Drive에 자동 보관 켜기</button><button type="button" class="oai-onboarding-text-button" data-oai-onboarding-finish="1">그래도 나중에 설정하기</button>';return;}
-    body.innerHTML='<p class="oai-onboarding-intro">방문 기록, 즐겨찾기, 교구·본당 설정을 내 Google Drive에 자동으로 보관합니다.</p><p class="oai-onboarding-privacy">가톨릭길동무 운영자는 개인 기록을 보관하지 않습니다.</p><button type="button" class="oai-records-primary" data-oai-onboarding-connect="1">내 Google Drive에 자동 보관 켜기</button><button type="button" class="oai-onboarding-text-button" data-oai-onboarding-later="1">나중에 설정하기</button><em id="oai-onboarding-backup-message" aria-live="polite"></em>';
+    if(risk){body.innerHTML='<p class="oai-onboarding-warning">Google Drive를 연결하지 않으면 휴대폰을 바꾸거나 앱을 다시 설치할 때 방문·순례 기록과 즐겨찾기를 잃을 수 있습니다.</p><button type="button" class="oai-records-primary" data-oai-onboarding-connect="1">내 Google Drive에 자동 보관 켜기</button><button type="button" class="oai-onboarding-text-button" data-oai-onboarding-finish="1">그래도 나중에 설정하기</button>';return;}
+    body.innerHTML='<p class="oai-onboarding-intro">Google 계정을 연결하면 <b>기존 백업이 있는지 먼저 확인</b>하고, 없으면 앞으로 생기는 방문·순례 기록과 즐겨찾기를 자동으로 보관합니다.</p><p class="oai-onboarding-privacy">처음 설치한 경우 저장된 기록이 없어도 괜찮습니다. 가톨릭길동무 운영자는 개인 기록을 보관하지 않습니다.</p><button type="button" class="oai-records-primary" data-oai-onboarding-connect="1">Google Drive 연결하고 자동 보관</button><button type="button" class="oai-onboarding-text-button" data-oai-onboarding-later="1">나중에 설정하기</button><em id="oai-onboarding-backup-message" aria-live="polite"></em>';
   }
   function openOnboardingBackup(){
     const m=onboardingModal();if(!m)return;m.dataset.oaiMode='backup';renderOnboardingBackup(false);m.classList.add('show');m.setAttribute('aria-hidden','false');
@@ -15217,7 +15217,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(setup){setup.classList.remove('show','oai-parish-setup-home');setup.setAttribute('aria-hidden','true');}
     initialOnboarding=false;
     if(isGoogleDriveAutoBackupEnabled()){try{localStorage.setItem(OAI_ONBOARDING_DONE_KEY,'1');}catch(_e){}return;}
-    setOnboardingHeader('순례기록과 즐겨찾기를 안전하게 보관하세요.','새 휴대폰에서도 그대로 이어서 사용할 수 있습니다.');
+    setOnboardingHeader('Google Drive에 연결할까요?','기존 기록이 있으면 확인하고, 없으면 앞으로 생기는 기록을 자동 보관합니다.');
     openOnboardingBackup();
   }
   function openInitialRestoreOnboarding(){
