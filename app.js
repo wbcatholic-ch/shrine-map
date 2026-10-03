@@ -11841,18 +11841,7 @@ function _oaiPositionScrollAffordance(el,pair,showTop,showBottom){
       $('sheet-route') &&
       $('sheet-route').classList.contains('route-waypoint-scroll')
     );
-    let rawTopY=routeWaypointTop ? (rect.top-15) : (rect.top+topInset+8);
-    try{
-      const pilgrimagePlanner=el.classList&&el.classList.contains('oai-pilgrimage-planner-panel');
-      const pilgrimageList=document.getElementById('oai-pilgrimage-list-view');
-      if(pilgrimagePlanner&&pilgrimageList&&!pilgrimageList.hidden){
-        const sticky=pilgrimageList.querySelector('.oai-pilgrimage-list-sticky');
-        if(sticky){
-          const sr=sticky.getBoundingClientRect();
-          if(sr.height>0)rawTopY=Math.max(rawTopY,sr.bottom+8);
-        }
-      }
-    }catch(_e){}
+    const rawTopY=routeWaypointTop ? (rect.top-15) : (rect.top+topInset+8);
     const topY=Math.max(6,Math.min(window.innerHeight-12,rawTopY));
     const bottomY=Math.max(6,Math.min(window.innerHeight-12,rect.bottom-13));
     pair.top.style.left=center+'px';
@@ -15750,13 +15739,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const m=planner();
       if(!m)return;
       const head=m.querySelector('.oai-pilgrimage-head');
-      const body=m.querySelector('.oai-pilgrimage-planner-body');
       if(!head)return;
       const h=Math.max(0,Math.ceil(head.getBoundingClientRect().height||head.offsetHeight||0));
-      let bodyPadTop=0;
-      try{if(body)bodyPadTop=Math.max(0,parseFloat(getComputedStyle(body).paddingTop)||0);}catch(_e){}
-      const top=Math.ceil(h+bodyPadTop);
-      if(top>0)m.style.setProperty('--oai-pilgrimage-list-sticky-top',top+'px');
+      if(h>0)m.style.setProperty('--oai-pilgrimage-list-sticky-top',h+'px');
     }catch(_e){}
   }
   function _schedulePilgrimageStickyOffsetSync(){
@@ -15778,6 +15763,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function settingsReturnToCover(){const m=document.getElementById('oai-settings-modal');return !!(m&&m.dataset.returnToCover==='1');}
   function setView(v){
     plannerView=v;
+    const plannerModal=planner();
+    if(plannerModal)plannerModal.classList.toggle('oai-pilgrimage-list-mode',v==='list');
     ['list','detail','follow'].forEach(n=>{const e=document.getElementById('oai-pilgrimage-'+n+'-view');if(e)e.hidden=n!==v;});
     const title=document.getElementById('oai-pilgrimage-planner-title'),sub=document.getElementById('oai-pilgrimage-planner-subtitle');
     if(title)title.textContent=v==='list'?'순례코스':v==='follow'?'따라가기':(pilgrimageDetailMode==='complete'?'순례완료':'순례하기');

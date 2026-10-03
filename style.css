@@ -9144,3 +9144,24 @@ html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-total-card >
     --oai-pilgrimage-list-sticky-top:134px;
   }
 }
+
+
+/* V8-1-14-1046: 순례완료 고정영역 상단 틈 제거 + 상부 스크롤마크 공통 위치 복원 */
+#oai-pilgrimage-planner-modal.oai-pilgrimage-list-mode .oai-pilgrimage-planner-body{
+  padding-top:0!important;
+}
+#oai-pilgrimage-list-view .oai-pilgrimage-list-sticky{
+  top:var(--oai-pilgrimage-list-sticky-top,126px)!important;
+  margin-top:0!important;
+}
+#oai-pilgrimage-list-view .oai-pilgrimage-list-sticky::before{
+  content:"";
+  position:absolute;
+  left:0;
+  right:0;
+  top:-1px;
+  height:7px;
+  background:#f4f0e7;
+  pointer-events:none;
+  z-index:-1;
+}
