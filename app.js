@@ -14843,6 +14843,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   let googleDriveAutoConnectPending=false;
   let initialOnboarding=false;
   let restoreReminderFromInitialFlow=false;
+  let initialDriveFirstFlow=false;
   try{
     if(!localStorage.getItem(OAI_RESTORE_PROMPT_ELIGIBLE_KEY)&&!localStorage.getItem(OAI_RESTORE_CHECKED_KEY)&&!localStorage.getItem(OAI_ONBOARDING_DONE_KEY)&&!configuredDiocese()&&!hasBackupContent()){
       localStorage.setItem(OAI_RESTORE_PROMPT_ELIGIBLE_KEY,'1');
@@ -15031,7 +15032,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(status==='connected'){
       localStorage.setItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY,'1');localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'1');googleDriveAutoConnectPending=false;
       const onboarding=onboardingModal();
-      if(onboarding&&onboarding.classList.contains('show')){
+      if(initialDriveFirstFlow&&initialOnboarding){
+        if(onboarding){
+          onboarding.dataset.oaiMode='drive-check';
+          setOnboardingHeader('Google Drive를 확인하고 있습니다.','기존 순례·방문 기록과 즐겨찾기가 있는지 확인합니다.');
+          const body=document.getElementById('oai-onboarding-backup-body');
+          if(body)body.innerHTML='<p class="oai-onboarding-intro">잠시만 기다려 주세요.</p><em id="oai-onboarding-backup-message" aria-live="polite">저장된 기록을 확인하고 있습니다…</em>';
+          onboarding.classList.add('show');onboarding.setAttribute('aria-hidden','false');
+        }
+      }else if(onboarding&&onboarding.classList.contains('show')){
         const wasRestore=onboarding.dataset.oaiMode==='restore';
         const continueInitial=onboarding.dataset.oaiContinueInitial==='1';
         onboarding.classList.remove('show');onboarding.setAttribute('aria-hidden','true');onboarding.dataset.oaiMode='';onboarding.dataset.oaiContinueInitial='';
@@ -15064,6 +15073,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       }
       googleDriveInitialSyncPending=true;
       recordMessage('Google Drive의 기존 기록을 확인하고 있습니다.');
+      if(initialDriveFirstFlow)onboardingMessage('저장된 기록을 확인하고 있습니다…');
       const bridge=nativeDrive();
       if(bridge&&typeof bridge.loadGoogleDriveBackup==='function')bridge.loadGoogleDriveBackup();
       return;
@@ -15072,6 +15082,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const isFirstCheck=googleDriveInitialSyncPending;
       googleDriveInitialSyncPending=false;
       if(isFirstCheck&&shouldPromptRestore())markRestoreChecked();
+      if(initialDriveFirstFlow&&initialOnboarding){
+        recordMessage('Google Drive에 기존 기록이 없습니다. 새 기록부터 자동으로 보관합니다.');
+        setTimeout(openInitialParishSetupAfterDrive,180);
+        return;
+      }
       if(isFirstCheck&&hasBackupContent()){
         recordMessage('저장된 기록이 없어 이 휴대폰의 기록을 처음 보관합니다.');
         saveGoogleDriveBackupNow(true);
@@ -15079,7 +15094,21 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
   };
   window.oaiGoogleDriveBackupReceived=function(encoded){
-    try{const text=decodeURIComponent(escape(atob(String(encoded||''))));const parsed=JSON.parse(text);if(!parsed||parsed.format!=='catholic-gildongmu-backup'||!parsed.data)throw new Error();googleDriveInitialSyncPending=false;applyBackup(parsed.data);markRestoreChecked();refresh();refreshRecords();recordMessage('Google Drive에서 순례기록과 즐겨찾기를 불러왔습니다.');}catch(_e){googleDriveInitialSyncPending=false;recordMessage('Google Drive 기록을 불러오지 못했습니다.');}
+    try{
+      const text=decodeURIComponent(escape(atob(String(encoded||''))));
+      const parsed=JSON.parse(text);
+      if(!parsed||parsed.format!=='catholic-gildongmu-backup'||!parsed.data)throw new Error();
+      googleDriveInitialSyncPending=false;
+      applyBackup(parsed.data);
+      markRestoreChecked();
+      refresh();refreshRecords();
+      recordMessage('Google Drive에서 순례기록과 즐겨찾기를 불러왔습니다.');
+      if(initialDriveFirstFlow&&initialOnboarding){showInitialDriveImportComplete();return;}
+    }catch(_e){
+      googleDriveInitialSyncPending=false;
+      recordMessage('Google Drive 기록을 불러오지 못했습니다.');
+      if(initialDriveFirstFlow&&initialOnboarding)setTimeout(openInitialParishSetupAfterDrive,180);
+    }
   };
   document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')queueGoogleDriveBackup();else if(document.visibilityState==='visible')setTimeout(maybePromptRestoreDaily,500);});
   function openRestore(){const m=restoreModal();if(!m)return;restoreMessage('');const input=document.getElementById('oai-record-restore-code');if(input)input.value='';m.classList.add('show');m.setAttribute('aria-hidden','false');}
@@ -15177,7 +15206,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     try{const selected={diocese:p.diocese||parishSetup.dio,name:p.name||''};localStorage.setItem(OAI_SETTINGS_MY_PARISH_KEY,JSON.stringify(selected));localStorage.setItem('oai_my_diocese_name',selected.diocese);localStorage.setItem('oai_my_parish_name',selected.name);localStorage.setItem('oai_my_parish',JSON.stringify(selected));}catch(_e){}
     closeParishSetup();refresh();
     try{window.dispatchEvent(new CustomEvent('oai-my-parish-changed'));}catch(_e){}
-    if(initialOnboarding)openInitialRestoreOnboarding();
+    if(initialOnboarding)finishInitialOnboarding();
   }
   function saveDioceseSetup(diocese){
     if(!diocese)return;
@@ -15194,20 +15223,54 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     parishSetup.parish=null;
     refresh();
     try{window.dispatchEvent(new CustomEvent('oai-my-parish-changed'));}catch(_e){}
-    if(initialOnboarding){parishSetup.view='home';renderParishSetup();return;}
+    if(initialOnboarding){
+      parishSetup.view='parish';
+      parishSetup.query='';
+      openParishChooser(true);
+      return;
+    }
     parishSetup.view='home';renderParishSetup();
   }
   function skipInitialParishSetup(){
     if(!initialOnboarding)return;
-    openInitialRestoreOnboarding();
+    finishInitialOnboarding();
   }
   function onboardingModal(){return document.getElementById('oai-onboarding-backup-modal');}
   function onboardingMessage(text){const el=document.getElementById('oai-onboarding-backup-message');if(el)el.textContent=text||'';}
-  function closeOnboardingBackup(){const m=onboardingModal();if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');m.dataset.oaiMode='';}initialOnboarding=false;try{localStorage.setItem(OAI_ONBOARDING_DONE_KEY,'1');localStorage.setItem(OAI_GOOGLE_PROMPT_DATE_KEY,todayKey());}catch(_e){}}
+  function finishInitialOnboarding(){
+    const m=onboardingModal();
+    if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');m.dataset.oaiMode='';m.dataset.oaiContinueInitial='';}
+    initialOnboarding=false;
+    initialDriveFirstFlow=false;
+    try{localStorage.setItem(OAI_ONBOARDING_DONE_KEY,'1');localStorage.setItem(OAI_GOOGLE_PROMPT_DATE_KEY,todayKey());}catch(_e){}
+  }
+  function closeOnboardingBackup(){finishInitialOnboarding();}
+  function openInitialParishSetupAfterDrive(){
+    const m=onboardingModal();
+    if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');m.dataset.oaiMode='';}
+    initialOnboarding=true;
+    initialDriveFirstFlow=false;
+    openParishChooser();
+    parishSetup.view='diocese';
+    renderParishSetup();
+    const title=document.getElementById('oai-parish-setup-title'),sub=document.getElementById('oai-parish-setup-subtitle');
+    if(title)title.textContent='나의 교구·본당 설정';
+    if(sub)sub.textContent='교구를 먼저 선택한 뒤 본당을 설정해 주세요.';
+  }
+  function showInitialDriveImportComplete(){
+    const m=onboardingModal(),body=document.getElementById('oai-onboarding-backup-body');
+    if(!m||!body)return;
+    initialOnboarding=true;
+    initialDriveFirstFlow=true;
+    m.dataset.oaiMode='drive-import-done';
+    setOnboardingHeader('기존 기록을 가져왔습니다.','순례·방문 기록과 즐겨찾기를 이 휴대폰에 적용했습니다.');
+    body.innerHTML='<p class="oai-onboarding-intro"><b>데이터 가져오기가 완료되었습니다.</b></p><p class="oai-onboarding-privacy">Google Drive 자동 보관도 켜져 있어 앞으로 바뀌는 기록을 계속 보관합니다.</p><button type="button" class="oai-records-primary" data-oai-onboarding-import-done="1">확인</button>';
+    m.classList.add('show');m.setAttribute('aria-hidden','false');
+  }
   function renderOnboardingBackup(risk){
     const body=document.getElementById('oai-onboarding-backup-body');if(!body)return;
-    if(risk){body.innerHTML='<p class="oai-onboarding-warning">Google Drive를 연결하지 않으면 휴대폰을 바꾸거나 앱을 다시 설치할 때 방문·순례 기록과 즐겨찾기를 잃을 수 있습니다.</p><button type="button" class="oai-records-primary" data-oai-onboarding-connect="1">내 Google Drive에 자동 보관 켜기</button><button type="button" class="oai-onboarding-text-button" data-oai-onboarding-finish="1">그래도 나중에 설정하기</button>';return;}
-    body.innerHTML='<p class="oai-onboarding-intro">Google 계정을 연결하면 <b>기존 백업이 있는지 먼저 확인</b>하고, 없으면 앞으로 생기는 방문·순례 기록과 즐겨찾기를 자동으로 보관합니다.</p><p class="oai-onboarding-privacy">처음 설치한 경우 저장된 기록이 없어도 괜찮습니다. 가톨릭길동무 운영자는 개인 기록을 보관하지 않습니다.</p><button type="button" class="oai-records-primary" data-oai-onboarding-connect="1">Google Drive 연결하고 자동 보관</button><button type="button" class="oai-onboarding-text-button" data-oai-onboarding-later="1">나중에 설정하기</button><em id="oai-onboarding-backup-message" aria-live="polite"></em>';
+    if(risk){body.innerHTML='<p class="oai-onboarding-warning">Google Drive를 연결하지 않으면 휴대폰을 바꾸거나 앱을 다시 설치할 때 방문·순례 기록과 즐겨찾기를 잃을 수 있습니다.</p><button type="button" class="oai-records-primary" data-oai-onboarding-connect="1">Google Drive 연결하기</button><button type="button" class="oai-onboarding-text-button" data-oai-onboarding-finish="1">그래도 나중에 설정하기</button>';return;}
+    body.innerHTML='<p class="oai-onboarding-intro">Google Drive를 연결하면 <b>기존 기록이 있는지 먼저 확인</b>합니다.</p><p class="oai-onboarding-privacy">기존 기록이 있으면 자동으로 가져오고, 없으면 새 기록부터 자동 보관합니다. 가톨릭길동무 운영자는 개인 기록을 보관하지 않습니다.</p><button type="button" class="oai-records-primary" data-oai-onboarding-connect="1">Google Drive 연결하기</button><button type="button" class="oai-onboarding-text-button" data-oai-onboarding-later="1">나중에 연결하기</button><em id="oai-onboarding-backup-message" aria-live="polite"></em>';
   }
   function openOnboardingBackup(){
     const m=onboardingModal();if(!m)return;m.dataset.oaiMode='backup';renderOnboardingBackup(false);m.classList.add('show');m.setAttribute('aria-hidden','false');
@@ -15215,9 +15278,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function openInitialDriveOnboarding(){
     const setup=setupModal();
     if(setup){setup.classList.remove('show','oai-parish-setup-home');setup.setAttribute('aria-hidden','true');}
-    initialOnboarding=false;
-    if(isGoogleDriveAutoBackupEnabled()){try{localStorage.setItem(OAI_ONBOARDING_DONE_KEY,'1');}catch(_e){}return;}
-    setOnboardingHeader('Google Drive에 연결할까요?','기존 기록이 있으면 확인하고, 없으면 앞으로 생기는 기록을 자동 보관합니다.');
+    initialOnboarding=true;
+    initialDriveFirstFlow=true;
+    if(isGoogleDriveAutoBackupEnabled()){
+      googleDriveInitialSyncPending=true;
+      const bridge=nativeDrive();
+      if(bridge&&typeof bridge.loadGoogleDriveBackup==='function'){bridge.loadGoogleDriveBackup();return;}
+      openInitialParishSetupAfterDrive();return;
+    }
+    setOnboardingHeader('Google Drive에 연결할까요?','연결하면 기존 기록이 있는지 먼저 확인하고, 이후 기록은 자동으로 보관합니다.');
     openOnboardingBackup();
   }
   function openInitialRestoreOnboarding(){
@@ -15255,9 +15324,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     openInitialRestoreOnboarding();
   }
   function startInitialOnboarding(){
-    if(configuredDiocese()){maybePromptRestoreDaily();return;}
-    try{const today=todayKey();if(localStorage.getItem(OAI_DIOCESE_PROMPT_DATE_KEY)===today){maybePromptRestoreDaily();return;}localStorage.setItem(OAI_DIOCESE_PROMPT_DATE_KEY,today);}catch(_e){}
-    openInitialDiocesePrompt();
+    try{
+      if(localStorage.getItem(OAI_ONBOARDING_DONE_KEY)==='1'){maybePromptRestoreDaily();return;}
+    }catch(_e){}
+    openInitialDriveOnboarding();
   }
   window.openOaiSettings=open;
   window.closeOaiSettings=close;
@@ -15271,7 +15341,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   window.goBackOaiParishSetup=stepBackParishSetup;
   enforceCoverSettingsLabel();
   document.addEventListener('click',function(e){
-    const target=e.target&&e.target.closest?e.target.closest('[data-oai-settings-close],[data-oai-settings-edit],[data-oai-settings-diocese],[data-oai-settings-parish],[data-oai-records-open],[data-oai-records-close],[data-oai-google-connect],[data-oai-google-restore],[data-oai-backup-copy],[data-oai-restore-open],[data-oai-restore-close],[data-oai-restore-apply],[data-oai-parish-setup-close],[data-oai-setup-open],[data-oai-setup-dio],[data-oai-setup-back],[data-oai-setup-parish],[data-oai-setup-skip],[data-oai-onboarding-connect],[data-oai-onboarding-later],[data-oai-onboarding-finish],[data-oai-restore-reminder-now],[data-oai-restore-reminder-later],[data-oai-diocese-prompt-now],[data-oai-diocese-prompt-later],#cover-diocese-btn'):null;
+    const target=e.target&&e.target.closest?e.target.closest('[data-oai-settings-close],[data-oai-settings-edit],[data-oai-settings-diocese],[data-oai-settings-parish],[data-oai-records-open],[data-oai-records-close],[data-oai-google-connect],[data-oai-google-restore],[data-oai-backup-copy],[data-oai-restore-open],[data-oai-restore-close],[data-oai-restore-apply],[data-oai-parish-setup-close],[data-oai-setup-open],[data-oai-setup-dio],[data-oai-setup-back],[data-oai-setup-parish],[data-oai-setup-skip],[data-oai-onboarding-connect],[data-oai-onboarding-later],[data-oai-onboarding-finish],[data-oai-onboarding-import-done],[data-oai-restore-reminder-now],[data-oai-restore-reminder-later],[data-oai-diocese-prompt-now],[data-oai-diocese-prompt-later],#cover-diocese-btn'):null;
     if(!target) return;
     if(target.id==='cover-diocese-btn' && target.dataset.oaiNativeSettings==='1') return;
     if(target.id==='cover-diocese-btn'){
@@ -15289,9 +15359,23 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(target.hasAttribute('data-oai-restore-open')){e.preventDefault();openRestore();return;}
     if(target.hasAttribute('data-oai-restore-close')){e.preventDefault();closeRestore();return;}
     if(target.hasAttribute('data-oai-restore-apply')){e.preventDefault();applyRestore();return;}
-    if(target.hasAttribute('data-oai-onboarding-connect')){e.preventDefault();onboardingMessage('Google 계정을 선택해 주세요.');setGoogleDriveAutoBackup(true);return;}
+    if(target.hasAttribute('data-oai-onboarding-connect')){
+      e.preventDefault();
+      if(initialOnboarding)initialDriveFirstFlow=true;
+      if(isGoogleDriveConnected()){
+        localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'1');
+        googleDriveInitialSyncPending=true;
+        onboardingMessage('Google Drive의 기존 기록을 확인합니다.');
+        loadGoogleDriveBackup();
+      }else{
+        onboardingMessage('Google 계정을 선택해 주세요.');
+        setGoogleDriveAutoBackup(true);
+      }
+      return;
+    }
     if(target.hasAttribute('data-oai-onboarding-later')){e.preventDefault();renderOnboardingBackup(true);return;}
-    if(target.hasAttribute('data-oai-onboarding-finish')){e.preventDefault();closeOnboardingBackup();return;}
+    if(target.hasAttribute('data-oai-onboarding-finish')){e.preventDefault();if(initialOnboarding)openInitialParishSetupAfterDrive();else closeOnboardingBackup();return;}
+    if(target.hasAttribute('data-oai-onboarding-import-done')){e.preventDefault();finishInitialOnboarding();return;}
     if(target.hasAttribute('data-oai-restore-reminder-now')){e.preventDefault();startRestoreFromReminder();return;}
     if(target.hasAttribute('data-oai-restore-reminder-later')){e.preventDefault();closeRestoreReminder(false);return;}
     if(target.hasAttribute('data-oai-diocese-prompt-now')){e.preventDefault();beginInitialDioceseSetup();return;}
