@@ -9113,3 +9113,29 @@ html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-total-card >
 #oai-pilgrimage-detail-view[data-detail-mode="plan"].is-new-plan .oai-pilgrimage-detail-actions [data-oai-pilgrimage-save]{
   white-space:nowrap;
 }
+
+
+/* V8-1-14-1049: 웹사이트 첫 카드 위 여백 축소 */
+#web-view .web-list{
+  padding-top:7px!important;
+}
+#web-list .web-personal-section{
+  margin-top:5px!important;
+  margin-bottom:7px!important;
+}
+
+
+/* V8-1-14-1049: 설정/교구·본당 선택에서도 보이도록 공통 마크를 앱 modal 위로 복구 */
+.oai-scroll-affordance{
+  z-index:100500!important;
+}
+
+.oai-parish-setup-body{
+  scrollbar-width:none!important;
+  -ms-overflow-style:none!important;
+}
+.oai-parish-setup-body::-webkit-scrollbar{
+  display:none!important;
+  width:0!important;
+  height:0!important;
+}

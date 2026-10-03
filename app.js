@@ -11765,6 +11765,7 @@ const OAI_SCROLL_AFFORDANCE_SELECTOR=[
   'html.oai-map-split-wide #sheet-route #rs-bottom',
   '.oai-pilgrimage-planner-panel',
   '.oai-settings-panel',
+  '.oai-parish-setup-body',
   '.sheet-body',
   '.sm-body',
   '#list-body',
@@ -11858,6 +11859,19 @@ function _oaiPositionScrollAffordance(el,pair,showTop,showBottom){
       }
     }
 
+    /* 순례코스 목록의 상부 마크는 틀고정된 탭+년/월/정렬 위가 아니라
+       고정영역이 끝난 바로 아래에 표시한다. */
+    if(el.classList&&el.classList.contains('oai-pilgrimage-planner-panel')){
+      const listView=document.getElementById('oai-pilgrimage-list-view');
+      if(listView&&!listView.hidden){
+        const sticky=listView.querySelector('.oai-pilgrimage-list-sticky');
+        if(sticky){
+          const sr=sticky.getBoundingClientRect();
+          if(sr.height>0)rawTopY=Math.max(rawTopY,sr.bottom+7);
+        }
+      }
+    }
+
     let rawBottomY=rect.bottom-13;
     /* 기도문 리스트/상세의 실제 하단은 fixed 빠른메뉴 위쪽이다. */
     if(el.id==='prayer-list-view'||el.id==='prayer-detail-body'){
@@ -11865,6 +11879,16 @@ function _oaiPositionScrollAffordance(el,pair,showTop,showBottom){
       if(faithNav&&getComputedStyle(faithNav).display!=='none'){
         const nr=faithNav.getBoundingClientRect();
         if(nr.height>0)rawBottomY=Math.min(rawBottomY,nr.top-10);
+      }
+    }
+
+    /* 성지/성당 찾기 목록·지역검색의 실제 하단은 '나의 성지순례 현황'
+       (성당 모드에서는 방문 성당 버튼) 고정바 위쪽이다. */
+    if(el.id==='list-body'||el.id==='region-body'||el.id==='nearby-body'){
+      const visitLayer=document.getElementById('shrine-visit-action-layer')||document.getElementById('parish-visit-action-layer');
+      if(visitLayer&&visitLayer.classList.contains('show')&&getComputedStyle(visitLayer).display!=='none'){
+        const vr=visitLayer.getBoundingClientRect();
+        if(vr.height>0)rawBottomY=Math.min(rawBottomY,vr.top-9);
       }
     }
 
