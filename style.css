@@ -8827,42 +8827,118 @@ html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-total-card >
 }
 
 
-/* V8-1-14-1038: 계획 카드에서 지난 순례 수동 등록을 바로 찾을 수 있게 공개 */
-.oai-pilgrimage-course-plan-actions.has-manual-record{
-  display:grid!important;
-  grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
-  gap:8px!important;
+/* V8-1-14-1039: 순례완료 수동 저장 확인 + 최종 저장 방식 */
+#oai-pilgrimage-manual-complete-confirm-modal{
+  z-index:2147483642!important;
 }
-.oai-pilgrimage-course-plan-actions.has-manual-record .oai-pilgrimage-course-follow-btn{
-  width:100%!important;
-  min-width:0!important;
-  margin-left:0!important;
+#oai-pilgrimage-manual-complete-confirm-modal .oai-pilgrimage-manual-complete-confirm-dialog{
+  width:min(88vw,420px)!important;
+  box-sizing:border-box!important;
 }
-.oai-pilgrimage-course-manual-complete{
+#oai-pilgrimage-manual-complete-confirm-message{
+  line-height:1.55!important;
+  word-break:keep-all!important;
+}
+#oai-pilgrimage-completion-modal .oai-pilgrimage-completion-close-row{
+  display:block!important;
+}
+#oai-pilgrimage-completion-modal .oai-pilgrimage-completion-close-row [data-oai-pilgrimage-completion-commit]{
   width:100%!important;
-  min-width:0!important;
-  min-height:38px!important;
-  padding:0 10px!important;
-  border:1.5px solid #aa8a42!important;
-  border-radius:11px!important;
-  background:#fffdf8!important;
-  color:#765d23!important;
-  font-family:inherit!important;
-  font-size:calc(12px * var(--app-font-scale,1))!important;
+  min-height:52px!important;
+  font-size:calc(16px * var(--app-font-scale,1))!important;
   font-weight:950!important;
-  white-space:nowrap!important;
-  box-shadow:none!important;
 }
-.oai-pilgrimage-course-manual-complete:active{
-  background:#f7efd9!important;
-  transform:scale(.98)!important;
+
+
+/* V8-1-14-1041: 순례완료에서 다녀온 순례코스 수동 등록 */
+#oai-pilgrimage-list-view .oai-pilgrimage-list-sticky{
+  position:sticky!important;
+  top:0!important;
+  z-index:40!important;
+  background:#f4f0e7!important;
+}
+/* 순례완료의 년/월/최근순례까지 sticky 영역 안에서 함께 고정 */
+#oai-pilgrimage-list-view[data-course-tab="complete"] .oai-pilgrimage-course-filters{
+  position:static!important;
+}
+.oai-pilgrimage-manual-register-btn{
+  display:block;
+  width:100%;
+  min-height:46px;
+  margin:0 0 10px;
+  padding:0 14px;
+  border:1.5px solid #aa8a42;
+  border-radius:13px;
+  background:#fffdf8;
+  color:#765d23;
+  font-family:inherit;
+  font-size:calc(14px * var(--app-font-scale,1));
+  font-weight:950;
+  box-sizing:border-box;
+}
+.oai-pilgrimage-manual-register-btn[hidden]{display:none!important;}
+.oai-pilgrimage-manual-register-btn:active{background:#f7efd9;transform:scale(.99);}
+#oai-pilgrimage-manual-course-modal{z-index:2147483641!important;}
+.oai-pilgrimage-manual-course-dialog{
+  width:min(90vw,440px)!important;
+  max-height:min(78dvh,680px)!important;
+  overflow:hidden!important;
+  display:flex!important;
+  flex-direction:column!important;
+}
+.oai-pilgrimage-manual-course-list{
+  display:flex;
+  flex-direction:column;
+  gap:8px;
+  max-height:48dvh;
+  overflow-y:auto;
+  margin:8px 0 14px;
+  padding:1px;
+}
+.oai-pilgrimage-manual-course-item{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:3px 10px;
+  align-items:center;
+  width:100%;
+  min-height:68px;
+  padding:11px 12px;
+  border:1.5px solid #d5c9ae;
+  border-radius:13px;
+  background:#fff;
+  color:#17213a;
+  text-align:left;
+  font-family:inherit;
+}
+.oai-pilgrimage-manual-course-item b{
+  grid-column:1;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  font-size:calc(14px * var(--app-font-scale,1));
+  font-weight:950;
+}
+.oai-pilgrimage-manual-course-item small{
+  grid-column:1;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  white-space:nowrap;
+  color:#7a8390;
+  font-size:calc(11.5px * var(--app-font-scale,1));
+  font-weight:750;
+}
+.oai-pilgrimage-manual-course-item i{
+  grid-column:2;
+  grid-row:1/3;
+  align-self:center;
+  color:#2674aa;
+  font-size:25px;
+  font-style:normal;
 }
 @media(max-width:390px){
-  .oai-pilgrimage-course-manual-complete,
-  .oai-pilgrimage-course-plan-actions.has-manual-record .oai-pilgrimage-course-follow-btn{
-    min-height:36px!important;
-    font-size:calc(11.5px * var(--app-font-scale,1))!important;
-    padding-left:6px!important;
-    padding-right:6px!important;
+  .oai-pilgrimage-manual-register-btn{
+    min-height:44px;
+    margin-bottom:8px;
+    font-size:calc(13px * var(--app-font-scale,1));
   }
 }
