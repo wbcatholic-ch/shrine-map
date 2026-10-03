@@ -16289,7 +16289,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       saveBtn.disabled=!enabled;
       saveBtn.setAttribute('aria-disabled',enabled?'false':'true');
       saveBtn.classList.toggle('is-dirty',enabled);
-      saveBtn.textContent=isManualCreate?'다녀온 순례 저장':'저장';
+      saveBtn.textContent=isManualCreate?'순례완료로 저장':'저장';
     }
     if(nextRouteBtn){
       const hideNextRoute=isCompletionView||isManualCreate;
@@ -16398,7 +16398,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     modal.classList.add('show');modal.setAttribute('aria-hidden','false');
   }
   function saveModal(){return document.getElementById('oai-pilgrimage-save-modal');}
-  function openSaveModal(renameOnly){const m=saveModal(),input=document.getElementById('oai-pilgrimage-save-name'),title=document.getElementById('oai-pilgrimage-save-title');if(!m||!input)return;input.dataset.renameOnly=renameOnly?'1':'0';delete input.dataset.renameCourseId;const meta=loadMeta(),autoName=autoCourseNameFromPlaces(loadPlan());input.value=(!meta.name||meta.name==='새 순례계획')?autoName:meta.name;if(title)title.textContent=pilgrimageManualCreateMode?'다녀온 순례코스 이름':'순례계획 이름';const desc=m.querySelector('p');if(desc)desc.textContent=pilgrimageManualCreateMode?'코스 이름을 확인한 뒤 저장하세요.':'나중에 다시 찾기 쉬운 이름을 입력하세요.';m.classList.add('show');m.setAttribute('aria-hidden','false');setTimeout(()=>{try{input.focus();input.select();}catch(_e){}},50);}
+  function openSaveModal(renameOnly){const m=saveModal(),input=document.getElementById('oai-pilgrimage-save-name'),title=document.getElementById('oai-pilgrimage-save-title');if(!m||!input)return;input.dataset.renameOnly=renameOnly?'1':'0';delete input.dataset.renameCourseId;const meta=loadMeta(),autoName=autoCourseNameFromPlaces(loadPlan());input.value=(!meta.name||meta.name==='새 순례계획')?autoName:meta.name;if(title)title.textContent=pilgrimageManualCreateMode?'다녀온 순례코스 이름':'순례계획 이름';const desc=m.querySelector('p');if(desc)desc.textContent=pilgrimageManualCreateMode?'코스 이름을 확인하면 순례완료에 저장됩니다.':'나중에 다시 찾기 쉬운 이름을 입력하세요.';m.classList.add('show');m.setAttribute('aria-hidden','false');setTimeout(()=>{try{input.focus();input.select();}catch(_e){}},50);}
   function openCourseRenameModal(id){const c=loadCourses().find(x=>x.id===id),m=saveModal(),input=document.getElementById('oai-pilgrimage-save-name'),title=document.getElementById('oai-pilgrimage-save-title');if(!c||!m||!input)return;input.dataset.renameOnly='0';input.dataset.renameCourseId=id;input.value=c.name||'새 순례계획';if(title)title.textContent='순례계획 이름 변경';m.classList.add('show');m.setAttribute('aria-hidden','false');setTimeout(()=>{try{input.focus();input.select();}catch(_e){}},50);}
   function closeSaveModal(){const m=saveModal(),input=document.getElementById('oai-pilgrimage-save-name'),title=document.getElementById('oai-pilgrimage-save-title');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}if(input){delete input.dataset.renameCourseId;}if(title)title.textContent='순례계획 이름';}
   let pendingAfterSave='';
@@ -16419,6 +16419,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         return;
       }
       const d=draftSnapshot(),now=Date.now();
+      if(!normalizePoint(d.end)){
+        closeSaveModal();
+        alert('순례완료로 저장하려면 도착지를 먼저 등록해 주세요.');
+        return;
+      }
+      d.places=(Array.isArray(d.places)?d.places:[]).map(function(p){
+        return Object.assign({},p,{done:true,doneMethod:'manual'});
+      });
       const manualCourse=Object.assign({
         id:'course_'+now+'_'+Math.random().toString(36).slice(2,7),
         name:name,
@@ -16427,13 +16435,18 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         completionArmed:false,
         completions:[{
           completedAt:completedAt,
-          placeCount:Array.isArray(d.places)?d.places.length:0,
+          placeCount:d.places.length,
           method:'manual',
           locked:false
         }],
         lastCompletedAt:completedAt
       },d,{name:name});
       _courseRefreshCompletionState(manualCourse);
+      if(!_courseCompletionList(manualCourse).length){
+        closeSaveModal();
+        alert('순례완료 기록을 만들지 못했습니다. 출발지·도착지와 날짜를 확인해 주세요.');
+        return;
+      }
       const courses=loadCourses();
       courses.unshift(manualCourse);
       saveCourses(courses);
@@ -16454,6 +16467,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function saveCurrent(){
     if(!loadPlan().length){alert(pilgrimageManualCreateMode?'다녀온 성지·성당을 먼저 등록해 주세요.':'순례 장소를 먼저 등록해 주세요.');return;}
     if(pilgrimageManualCreateMode){
+      const meta=loadMeta();
+      if(!normalizePoint(meta.end)){
+        alert('순례완료로 저장하려면 도착지를 먼저 등록해 주세요.');
+        return;
+      }
       const dateInput=document.getElementById('oai-pilgrimage-manual-date');
       const completedAt=dateInput?_courseDateValueToTs(dateInput.value):0;
       if(!completedAt){
