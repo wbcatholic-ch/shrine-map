@@ -9505,3 +9505,15 @@ html.oai-pilgrimage-route-direct #sheet-route #rs-pilgrimage-return-btn{
     font-size:12px!important;
   }
 }
+
+
+/* V8-1-14-1062: 도착지가 등록 성지/성당일 때 route-only 순례 가능 */
+.oai-pilgrimage-course-follow-btn.is-disabled,
+.oai-pilgrimage-course-follow-btn:disabled{
+  background:#e2e0da!important;
+  border-color:#d6d2c8!important;
+  color:#aaa69d!important;
+  box-shadow:none!important;
+  opacity:1!important;
+  cursor:not-allowed!important;
+}
