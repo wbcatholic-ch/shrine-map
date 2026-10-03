@@ -16336,11 +16336,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       currentCheckBtn.setAttribute('aria-hidden',hideCurrentCheck?'true':'false');
     }
     if(followBtn){
-      const showFollow=!isManualCreate&&!!isSaved&&!!list.length;
+      const showFollow=!isManualCreate&&!!list.length;
+      const enableFollow=showFollow&&!!isSaved;
       followBtn.hidden=!showFollow;
       followBtn.style.setProperty('display',showFollow?'block':'none','important');
-      followBtn.disabled=!showFollow;
+      followBtn.disabled=!enableFollow;
       followBtn.setAttribute('aria-hidden',showFollow?'false':'true');
+      followBtn.setAttribute('aria-disabled',enableFollow?'false':'true');
+      followBtn.classList.toggle('is-disabled-before-save',showFollow&&!enableFollow);
       followBtn.classList.toggle('is-stop',isActive);
       followBtn.textContent=isActive?'■ 순례 종료':(isCompletionView?'▶ 다시 순례하기':'▶ 순례하기');
     }

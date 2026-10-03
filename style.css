@@ -9300,3 +9300,70 @@ html.oai-pilgrimage-route-direct #sheet-route #rs-pilgrimage-return-btn{
 #sheet-route #rs-result .route-btns{
   visibility:visible;
 }
+
+
+/* V8-1-14-1057: 순례계획 상단 비율 / 저장 전 순례하기 / 순례지 핸들 위치 */
+
+/* 순례계획: 왼쪽 최근수정은 작게, 오른쪽 순례계획 세우기는 길게 */
+#oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-list-toolbar{
+  grid-template-columns:minmax(0,.72fr) minmax(0,1.45fr)!important;
+  gap:10px!important;
+}
+#oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-plan-sort-filter{
+  grid-column:1!important;
+  min-width:0!important;
+}
+#oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-new{
+  grid-column:2!important;
+  min-width:0!important;
+}
+
+/* 새 순례계획은 저장 전에도 '순례하기' 자리를 유지하되 비활성화 */
+#oai-pilgrimage-detail-view .oai-pilgrimage-follow.is-disabled-before-save,
+#oai-pilgrimage-detail-view .oai-pilgrimage-follow:disabled{
+  background:#e2e0da!important;
+  border-color:#d6d2c8!important;
+  color:#aaa69d!important;
+  box-shadow:none!important;
+  opacity:1!important;
+  cursor:not-allowed!important;
+  pointer-events:none!important;
+}
+
+/* 순례지 순서이동 핸들(⋮)을 왼쪽에서 오른쪽으로 이동 */
+#oai-pilgrimage-detail-view .oai-pilgrimage-item{
+  grid-template-columns:36px minmax(0,1fr) 24px!important;
+  column-gap:12px!important;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-order{
+  grid-column:1!important;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-main{
+  grid-column:2!important;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-drag{
+  grid-column:3!important;
+  justify-self:end!important;
+  width:22px!important;
+  min-width:22px!important;
+}
+
+/* 다음 순례지 라벨은 기존 오른쪽 영역을 그대로 사용하고 핸들은 그 왼쪽에 유지 */
+#oai-pilgrimage-detail-view:not(.is-completion-view) .oai-pilgrimage-item.is-next{
+  padding-right:70px!important;
+}
+
+@media(max-width:390px){
+  #oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-list-toolbar{
+    grid-template-columns:minmax(0,.70fr) minmax(0,1.50fr)!important;
+    gap:8px!important;
+  }
+  #oai-pilgrimage-detail-view .oai-pilgrimage-item{
+    grid-template-columns:34px minmax(0,1fr) 22px!important;
+    column-gap:9px!important;
+  }
+  #oai-pilgrimage-detail-view .oai-pilgrimage-drag{
+    width:20px!important;
+    min-width:20px!important;
+  }
+}
