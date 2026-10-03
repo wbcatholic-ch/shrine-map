@@ -11885,7 +11885,15 @@ function _oaiPositionScrollAffordance(el,pair,showTop,showBottom){
     /* 성지/성당 찾기 목록·지역검색의 실제 하단은 '나의 성지순례 현황'
        (성당 모드에서는 방문 성당 버튼) 고정바 위쪽이다. */
     if(el.id==='list-body'||el.id==='region-body'||el.id==='nearby-body'){
-      const visitLayer=document.getElementById('shrine-visit-action-layer')||document.getElementById('parish-visit-action-layer');
+      let visitLayer=null;
+      if(_mode==='parish')visitLayer=document.getElementById('parish-visit-action-layer');
+      else if(_mode==='shrine')visitLayer=document.getElementById('shrine-visit-action-layer');
+      if(!visitLayer){
+        const shrineLayer=document.getElementById('shrine-visit-action-layer');
+        const parishLayer=document.getElementById('parish-visit-action-layer');
+        if(parishLayer&&parishLayer.classList.contains('show'))visitLayer=parishLayer;
+        else if(shrineLayer&&shrineLayer.classList.contains('show'))visitLayer=shrineLayer;
+      }
       if(visitLayer&&visitLayer.classList.contains('show')&&getComputedStyle(visitLayer).display!=='none'){
         const vr=visitLayer.getBoundingClientRect();
         if(vr.height>0)rawBottomY=Math.min(rawBottomY,vr.top-9);
