@@ -16913,6 +16913,18 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 
   window._oaiPilgrimageBackHandle=function(){
     try{
+      const startConfirm=followStartModal();
+      if(startConfirm&&startConfirm.classList.contains('show')){
+        closeFollowStartConfirm();
+        return true;
+      }
+
+      const stopConfirm=followStopModal();
+      if(stopConfirm&&stopConfirm.classList.contains('show')){
+        closeFollowStopConfirm();
+        return true;
+      }
+
       if(window.__OAI_PILGRIMAGE_COURSE_VIEW__&&returnFromPilgrimageCourseMap())return true;
       const markerChoice=pilgrimageMarkerChoiceModal();
       if(markerChoice&&markerChoice.classList.contains('open')){closePilgrimageMarkerChoice();return true;}
@@ -16923,6 +16935,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     catch(e){ console.warn('[가톨릭길동무] 순례계획 뒤로가기 처리 실패',e); return false; }
   };
+
+  window.isOaiPilgrimageFollowStartConfirmOpen=function(){
+    const m=followStartModal();
+    return !!(m&&m.classList.contains('show'));
+  };
+  window.closeOaiPilgrimageFollowStartConfirm=closeFollowStartConfirm;
+  window.isOaiPilgrimageFollowStopConfirmOpen=function(){
+    const m=followStopModal();
+    return !!(m&&m.classList.contains('show'));
+  };
+  window.closeOaiPilgrimageFollowStopConfirm=closeFollowStopConfirm;
 
   window._oaiReturnToPilgrimageFollow=function(){
     openPlanner({returnFromSearch:true});

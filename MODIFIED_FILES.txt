@@ -1,10 +1,15 @@
-V8-1-14-1032
+V8-1-14-1033
 
-백그라운드 복귀 전체 정밀정리
-- 30분 미만 현재 화면 유지
-- 30분 이상 미사 유지, 기도문 즐겨찾기, 활성 순례 상세 예외
-- pagehide context 저장 추가
-- overlay 목록 최신화
-- Google Drive 안내 defer
-- GPS 축하 UI defer
-- BACKGROUND_RETURN_AUDIT_1032.md 포함
+순례 시작/종료 확인창 시스템 뒤로가기 수정
+
+문제
+- 순례 시작 확인창이 열려 있어도 _oaiPilgrimageBackHandle()이
+  해당 modal을 먼저 닫지 않고 plannerBackOrClose()까지 내려가고 있었음
+- back-controller의 열린 레이어 판정에도 최근 순례 확인 modal이 빠져 있었음
+
+수정
+- 순례 시작 확인창 show 상태 -> 뒤로가기 시 확인창만 닫음
+- 순례 종료/다른 순례 시작 확인창도 동일 처리
+- 확인창을 닫아도 순례 상세/목록 화면은 그대로 유지
+- back-controller의 known layer 목록에 최근 순례 modal/route quick 추가
+- app.js에 start/stop confirm open/close 공통 export 추가
