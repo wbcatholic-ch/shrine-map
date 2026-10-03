@@ -9165,3 +9165,9 @@ html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-total-card >
   pointer-events:none;
   z-index:-1;
 }
+
+
+/* V8-1-14-1047: 공통 스크롤 마크는 고정 헤더/하단 메뉴 위에 표시 */
+.oai-scroll-affordance{
+  z-index:20150;
+}

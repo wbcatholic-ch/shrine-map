@@ -11790,6 +11790,12 @@ function _oaiScrollAffordanceVisible(el){
     if(!el||!el.isConnected)return false;
     const routeQuick=$('route-quick-modal');
     if(routeQuick && routeQuick.classList.contains('show'))return false;
+
+    /* 기도문 상세가 리스트 위를 덮을 때 뒤쪽 리스트의 스크롤 마크는 즉시 숨긴다. */
+    const prayerDetail=document.getElementById('prayer-detail');
+    if(el.id==='prayer-list-view'&&prayerDetail&&prayerDetail.classList.contains('show'))return false;
+    if(el.id==='prayer-detail-body'&&(!prayerDetail||!prayerDetail.classList.contains('show')))return false;
+
     const r=el.getBoundingClientRect();
     if(r.width<120||r.height<90)return false;
     if(r.bottom<=0||r.top>=window.innerHeight||r.right<=0||r.left>=window.innerWidth)return false;
@@ -11825,7 +11831,7 @@ function _oaiStickyTopInset(el,rect){
       if(cs.position!=='sticky')return;
       const cr=child.getBoundingClientRect();
       if(cr.bottom<=rect.top||cr.top>rect.top+8)return;
-      inset=Math.max(inset,Math.min(96,cr.bottom-rect.top));
+      inset=Math.max(inset,Math.min(Math.max(0,rect.height-12),cr.bottom-rect.top));
     });
     return inset;
   }catch(_e){return 0;}
@@ -11841,9 +11847,29 @@ function _oaiPositionScrollAffordance(el,pair,showTop,showBottom){
       $('sheet-route') &&
       $('sheet-route').classList.contains('route-waypoint-scroll')
     );
-    const rawTopY=routeWaypointTop ? (rect.top-15) : (rect.top+topInset+8);
+    let rawTopY=routeWaypointTop ? (rect.top-15) : (rect.top+topInset+8);
+
+    /* 설정은 패널 안 sticky header 높이가 크므로 header 바로 아래를 상단 마크 기준으로 사용한다. */
+    if(el.classList&&el.classList.contains('oai-settings-panel')){
+      const settingsHead=el.querySelector('.oai-settings-head');
+      if(settingsHead){
+        const hr=settingsHead.getBoundingClientRect();
+        if(hr.height>0)rawTopY=Math.max(rawTopY,hr.bottom+7);
+      }
+    }
+
+    let rawBottomY=rect.bottom-13;
+    /* 기도문 리스트/상세의 실제 하단은 fixed 빠른메뉴 위쪽이다. */
+    if(el.id==='prayer-list-view'||el.id==='prayer-detail-body'){
+      const faithNav=document.getElementById('prayer-faith-nav');
+      if(faithNav&&getComputedStyle(faithNav).display!=='none'){
+        const nr=faithNav.getBoundingClientRect();
+        if(nr.height>0)rawBottomY=Math.min(rawBottomY,nr.top-10);
+      }
+    }
+
     const topY=Math.max(6,Math.min(window.innerHeight-12,rawTopY));
-    const bottomY=Math.max(6,Math.min(window.innerHeight-12,rect.bottom-13));
+    const bottomY=Math.max(6,Math.min(window.innerHeight-12,rawBottomY));
     pair.top.style.left=center+'px';
     pair.top.style.top=topY+'px';
     pair.bottom.style.left=center+'px';
