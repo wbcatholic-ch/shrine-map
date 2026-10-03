@@ -74,7 +74,7 @@
       }
 
       if(document.querySelector('.module-view.open')) return true;
-      if(document.querySelector('#myeongrye-materials-modal.open,#info-card.open,#sheet-route.open,#route-choice-modal.open,#oai-pilgrimage-marker-choice-modal.open,#srch-modal.open,.sheet.open,.trail-sheet.open,#shrine-visit-modal.show,#shrine-auto-visit-modal.show,#shrine-visit-detail-view.show,#shrine-visit-cards-modal.show')) return true;
+      if(document.querySelector('#myeongrye-materials-modal.open,#info-card.open,#sheet-route.open,#route-choice-modal.open,#route-quick-modal.show,#oai-pilgrimage-marker-choice-modal.open,#oai-pilgrimage-follow-start-modal.show,#oai-pilgrimage-follow-stop-modal.show,#oai-pilgrimage-save-modal.show,#oai-pilgrimage-delete-modal.show,#oai-pilgrimage-completion-modal.show,#srch-modal.open,.sheet.open,.trail-sheet.open,#shrine-visit-modal.show,#shrine-auto-visit-modal.show,#shrine-visit-detail-view.show,#shrine-visit-cards-modal.show')) return true;
       if(typeof isGuideModalOpen==='function' && isGuideModalOpen()) return true;
 
       if(includeAppState){
@@ -268,6 +268,17 @@
 
     /* 성지순례 계획의 선택창/하위 화면은 순례계획 안에서 한 단계씩 뒤로 간다. */
     try{ if(typeof window._oaiPilgrimageBackHandle==='function' && window._oaiPilgrimageBackHandle()) return true; }catch(e){ console.warn('[가톨릭길동무]',e); }
+
+    /* 순례 시작/종료 확인창은 순례 상세보다 먼저 한 단계로 닫는다. */
+    try{ if(typeof window.isOaiPilgrimageFollowStartConfirmOpen==='function' && window.isOaiPilgrimageFollowStartConfirmOpen()){
+      if(typeof window.closeOaiPilgrimageFollowStartConfirm==='function')window.closeOaiPilgrimageFollowStartConfirm();
+      return true;
+    }}catch(e){ console.warn('[가톨릭길동무]',e); }
+
+    try{ if(typeof window.isOaiPilgrimageFollowStopConfirmOpen==='function' && window.isOaiPilgrimageFollowStopConfirmOpen()){
+      if(typeof window.closeOaiPilgrimageFollowStopConfirm==='function')window.closeOaiPilgrimageFollowStopConfirm();
+      return true;
+    }}catch(e){ console.warn('[가톨릭길동무]',e); }
 
     /* 명례성지 자료/확대 사진은 아래 정보카드보다 먼저 한 단계씩 닫는다. */
     try{ if(typeof window._oaiMyeongryeBackHandle==='function' && window._oaiMyeongryeBackHandle()) return true; }catch(e){ console.warn('[가톨릭길동무]',e); }
