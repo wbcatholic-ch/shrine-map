@@ -9035,3 +9035,79 @@ html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-total-card >
     font-size:calc(11.5px * var(--app-font-scale,1))!important;
   }
 }
+
+
+/* V8-1-14-1043: 년 · 월 · 최근순례 한 줄 + 그 줄까지 틀고정 */
+#oai-pilgrimage-list-view .oai-pilgrimage-list-sticky{
+  position:sticky!important;
+  top:0!important;
+  z-index:40!important;
+  margin:0 0 8px!important;
+  padding:5px 0 8px!important;
+  background:#f4f0e7!important;
+  box-shadow:0 1px 0 #d8d0bf!important;
+}
+#oai-pilgrimage-list-view .oai-pilgrimage-complete-fixed-filters{
+  display:grid!important;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1.15fr)!important;
+  gap:7px!important;
+  width:100%!important;
+}
+#oai-pilgrimage-list-view .oai-pilgrimage-complete-fixed-filters label{
+  display:block!important;
+  width:100%!important;
+  min-width:0!important;
+}
+#oai-pilgrimage-list-view .oai-pilgrimage-complete-fixed-filters select{
+  width:100%!important;
+  min-width:0!important;
+  height:42px!important;
+  margin:0!important;
+  padding:0 6px!important;
+  border:1.5px solid #bcc8d5!important;
+  border-radius:14px!important;
+  background:#fff!important;
+  color:#17213a!important;
+  font-size:calc(13px * var(--app-font-scale,1))!important;
+  font-weight:900!important;
+  text-align-last:center!important;
+}
+
+/* 계획 탭에서는 같은 고정행에서 년/월만 숨기고 정렬만 우측에 유지 */
+#oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-complete-fixed-filters{
+  display:flex!important;
+  justify-content:flex-end!important;
+}
+#oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-complete-fixed-filters .oai-pilgrimage-complete-only{
+  display:none!important;
+}
+#oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-complete-sort-fixed{
+  width:min(42%,170px)!important;
+}
+
+/* 최근순례 select는 더 이상 별도 toolbar에 있지 않음 */
+#oai-pilgrimage-list-view[data-course-tab="complete"] .oai-pilgrimage-list-toolbar{
+  display:none!important;
+}
+#oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-list-toolbar{
+  display:block!important;
+  margin:0 0 8px!important;
+}
+#oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-new{
+  display:block!important;
+  width:100%!important;
+}
+
+@media(max-width:390px){
+  #oai-pilgrimage-list-view .oai-pilgrimage-complete-fixed-filters{
+    gap:5px!important;
+  }
+  #oai-pilgrimage-list-view .oai-pilgrimage-complete-fixed-filters select{
+    height:40px!important;
+    padding:0 3px!important;
+    font-size:calc(11.5px * var(--app-font-scale,1))!important;
+  }
+  #oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-complete-sort-fixed{
+    width:min(46%,155px)!important;
+  }
+}

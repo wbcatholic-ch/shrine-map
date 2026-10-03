@@ -15459,7 +15459,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const listView=document.getElementById('oai-pilgrimage-list-view');
     if(listView) listView.setAttribute('data-course-tab',pilgrimageCourseTab);
     const fixedFilters=document.querySelector('#oai-pilgrimage-list-view .oai-pilgrimage-complete-fixed-filters');
-    if(fixedFilters) fixedFilters.hidden=pilgrimageCourseTab!=='complete';
+    if(fixedFilters) fixedFilters.hidden=false;
     document.querySelectorAll('[data-oai-pilgrimage-course-tab]').forEach(function(btn){
       const active=btn.getAttribute('data-oai-pilgrimage-course-tab')===pilgrimageCourseTab;
       btn.classList.toggle('is-active',active);
