@@ -8764,3 +8764,28 @@ html:not(.oai-map-split-wide).oai-pilgrimage-route-direct #app #sheet-route.rout
   background:#17365f!important;
   color:#fff!important;
 }
+
+
+/* V8-1-14-1030: Fold 큰 화면 순례하기 하단 2열 기준선 통일
+   1fr의 min-content 영향으로 좌/우 박스 폭이 미세하게 달라지는 것을 막고
+   추가 버튼 / 저장·종료 / 거리재계산·코스보기 / 거리·시간의 중앙 기준선을 맞춘다. */
+html.oai-map-split-wide #oai-pilgrimage-detail-view{
+  --oai-pilgrimage-wide-col-gap:8px;
+}
+html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-add-row,
+html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-detail-actions,
+html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-total-actions{
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+  column-gap:var(--oai-pilgrimage-wide-col-gap)!important;
+}
+html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-total-card{
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
+}
+html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-add-row > *,
+html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-detail-actions > *,
+html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-total-actions > *,
+html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-total-card > div{
+  min-width:0!important;
+  max-width:none!important;
+  box-sizing:border-box!important;
+}
