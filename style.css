@@ -9111,3 +9111,17 @@ html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-total-card >
     width:min(46%,155px)!important;
   }
 }
+
+
+/* V8-1-14-1044: 순례코스 이중 sticky 충돌 수정
+   상단 module-bar가 이미 top:0 고정이므로,
+   탭 + 년/월/최근순례 고정영역은 실제 헤더 높이 바로 아래에 붙인다. */
+#oai-pilgrimage-planner-modal{
+  --oai-pilgrimage-list-sticky-top:126px;
+}
+#oai-pilgrimage-list-view .oai-pilgrimage-list-sticky{
+  top:var(--oai-pilgrimage-list-sticky-top,126px)!important;
+  z-index:110!important;
+  background:#f4f0e7!important;
+  isolation:isolate!important;
+}

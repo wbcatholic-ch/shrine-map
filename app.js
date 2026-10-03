@@ -15734,6 +15734,31 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }catch(_e){}
   }
 
+  function _syncPilgrimageStickyOffset(){
+    try{
+      const m=planner();
+      if(!m)return;
+      const head=m.querySelector('.oai-pilgrimage-head');
+      if(!head)return;
+      const h=Math.max(0,Math.ceil(head.getBoundingClientRect().height||head.offsetHeight||0));
+      if(h>0)m.style.setProperty('--oai-pilgrimage-list-sticky-top',h+'px');
+    }catch(_e){}
+  }
+  function _schedulePilgrimageStickyOffsetSync(){
+    try{
+      requestAnimationFrame(function(){
+        _syncPilgrimageStickyOffset();
+        setTimeout(_syncPilgrimageStickyOffset,40);
+        setTimeout(_syncPilgrimageStickyOffset,180);
+      });
+    }catch(_e){}
+  }
+  try{
+    window.addEventListener('resize',_schedulePilgrimageStickyOffsetSync,{passive:true});
+    window.addEventListener('orientationchange',function(){setTimeout(_schedulePilgrimageStickyOffsetSync,80);},{passive:true});
+    if(window.visualViewport)window.visualViewport.addEventListener('resize',_schedulePilgrimageStickyOffsetSync,{passive:true});
+  }catch(_e){}
+
   function coverVisible(){try{const c=document.getElementById('cover');return !!(c&&getComputedStyle(c).display!=='none'&&!document.documentElement.classList.contains('app-active'));}catch(_e){return false;}}
   function settingsReturnToCover(){const m=document.getElementById('oai-settings-modal');return !!(m&&m.dataset.returnToCover==='1');}
   function setView(v){
@@ -15744,8 +15769,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(sub)sub.textContent=v==='list'?'성지·성당 순례계획과 완료 기록을 관리하세요':v==='follow'?'현재 위치 기준 거리와 순례 진행 상태를 확인하세요':(pilgrimageDetailMode==='complete'?'완료한 순례코스를 확인하세요':'순례 경로와 현재 위치를 확인하세요');
     const panel=planner()&&planner().querySelector('.oai-pilgrimage-planner-panel');if(panel)panel.scrollTop=0;
     _bindPilgrimageScrollHints();
+    _schedulePilgrimageStickyOffsetSync();
     requestAnimationFrame(function(){
       setTimeout(function(){
+        _syncPilgrimageStickyOffset();
         _syncPilgrimageScrollHints();
         _oaiRefreshScrollAffordances(planner());
       },20);
@@ -15763,6 +15790,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     if(settings){settings.classList.remove('show');settings.setAttribute('aria-hidden','true');}
     m.classList.add('show');m.setAttribute('aria-hidden','false');
+    _schedulePilgrimageStickyOffsetSync();
 
     if(fromRoute){
       setView('detail');renderDetail();return;
