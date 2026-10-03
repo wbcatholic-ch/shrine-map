@@ -12005,38 +12005,148 @@ try{
 }catch(_e){}
 
 
-/* V8-1-14-1061: 앱의 모든 날짜 입력에 연도 이전/다음 버튼을 공통 제공 */
-function _oaiDateShiftYear(input,delta){
-  try{
-    if(!input)return;
-    const raw=String(input.value||'').trim();
-    let d=raw?new Date(raw+'T12:00:00'):new Date();
-    if(Number.isNaN(d.getTime()))d=new Date();
-    const month=d.getMonth(),day=d.getDate(),targetYear=d.getFullYear()+Number(delta||0);
-    const lastDay=new Date(targetYear,month+1,0).getDate();
-    d=new Date(targetYear,month,Math.min(day,lastDay),12,0,0,0);
-    const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),dd=String(d.getDate()).padStart(2,'0');
-    input.value=y+'-'+m+'-'+dd;
-    input.dispatchEvent(new Event('input',{bubbles:true}));
-    input.dispatchEvent(new Event('change',{bubbles:true}));
-  }catch(_e){}
+
+/* V8-1-14-1063: 앱 공통 날짜선택기
+   - 연도 이동은 날짜선택기 내부에서만 제공
+   - 기존 input 주변의 연도버튼은 사용하지 않음 */
+let _oaiDatePickerInput=null;
+let _oaiDatePickerCursor=null;
+
+function _oaiDateYmd(d){
+  const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,'0'),day=String(d.getDate()).padStart(2,'0');
+  return y+'-'+m+'-'+day;
+}
+function _oaiDateFromValue(v){
+  const s=String(v||'').trim();
+  if(/^\d{4}-\d{2}-\d{2}$/.test(s)){
+    const p=s.split('-').map(Number),d=new Date(p[0],p[1]-1,p[2],12,0,0,0);
+    if(Number.isFinite(d.getTime()))return d;
+  }
+  return new Date();
+}
+function _oaiEnsureDatePicker(){
+  let modal=document.getElementById('oai-common-date-picker');
+  if(modal)return modal;
+  modal=document.createElement('div');
+  modal.id='oai-common-date-picker';
+  modal.className='oai-common-date-picker';
+  modal.setAttribute('aria-hidden','true');
+  modal.innerHTML=
+    '<button type="button" class="oai-common-date-backdrop" data-oai-date-close aria-label="닫기"></button>'+
+    '<section class="oai-common-date-card" role="dialog" aria-modal="true" aria-label="날짜 선택">'+
+      '<div class="oai-common-date-year-row">'+
+        '<button type="button" data-oai-date-year="-1" aria-label="이전 년도">◀년</button>'+
+        '<strong id="oai-common-date-year-label"></strong>'+
+        '<button type="button" data-oai-date-year="1" aria-label="다음 년도">년▶</button>'+
+      '</div>'+
+      '<div class="oai-common-date-month-row">'+
+        '<button type="button" data-oai-date-month="-1" aria-label="이전 달">‹</button>'+
+        '<strong id="oai-common-date-month-label"></strong>'+
+        '<button type="button" data-oai-date-month="1" aria-label="다음 달">›</button>'+
+      '</div>'+
+      '<div class="oai-common-date-week"><span>일</span><span>월</span><span>화</span><span>수</span><span>목</span><span>금</span><span>토</span></div>'+
+      '<div id="oai-common-date-grid" class="oai-common-date-grid"></div>'+
+      '<div class="oai-common-date-actions">'+
+        '<button type="button" data-oai-date-clear>삭제</button>'+
+        '<button type="button" data-oai-date-today>오늘</button>'+
+        '<button type="button" data-oai-date-cancel>취소</button>'+
+      '</div>'+
+    '</section>';
+  document.body.appendChild(modal);
+
+  modal.addEventListener('click',function(e){
+    const t=e.target;
+    if(t.closest('[data-oai-date-close]')||t.closest('[data-oai-date-cancel]')){
+      _oaiCloseDatePicker(false);return;
+    }
+    const yb=t.closest('[data-oai-date-year]');
+    if(yb&&_oaiDatePickerCursor){
+      const delta=parseInt(yb.getAttribute('data-oai-date-year'),10)||0;
+      const m=_oaiDatePickerCursor.getMonth(),day=_oaiDatePickerCursor.getDate();
+      const y=_oaiDatePickerCursor.getFullYear()+delta;
+      const last=new Date(y,m+1,0).getDate();
+      _oaiDatePickerCursor=new Date(y,m,Math.min(day,last),12,0,0,0);
+      _oaiRenderDatePicker();return;
+    }
+    const mb=t.closest('[data-oai-date-month]');
+    if(mb&&_oaiDatePickerCursor){
+      const delta=parseInt(mb.getAttribute('data-oai-date-month'),10)||0;
+      const d=new Date(_oaiDatePickerCursor.getTime());
+      d.setDate(1); d.setMonth(d.getMonth()+delta);
+      _oaiDatePickerCursor=d;
+      _oaiRenderDatePicker();return;
+    }
+    const db=t.closest('[data-oai-date-day]');
+    if(db&&_oaiDatePickerInput){
+      const v=db.getAttribute('data-oai-date-day');
+      _oaiDatePickerInput.value=v;
+      _oaiDatePickerInput.dispatchEvent(new Event('input',{bubbles:true}));
+      _oaiDatePickerInput.dispatchEvent(new Event('change',{bubbles:true}));
+      _oaiCloseDatePicker(true);return;
+    }
+    if(t.closest('[data-oai-date-today]')&&_oaiDatePickerInput){
+      const d=new Date();
+      _oaiDatePickerInput.value=_oaiDateYmd(d);
+      _oaiDatePickerInput.dispatchEvent(new Event('input',{bubbles:true}));
+      _oaiDatePickerInput.dispatchEvent(new Event('change',{bubbles:true}));
+      _oaiCloseDatePicker(true);return;
+    }
+    if(t.closest('[data-oai-date-clear]')&&_oaiDatePickerInput){
+      _oaiDatePickerInput.value='';
+      _oaiDatePickerInput.dispatchEvent(new Event('input',{bubbles:true}));
+      _oaiDatePickerInput.dispatchEvent(new Event('change',{bubbles:true}));
+      _oaiCloseDatePicker(true);return;
+    }
+  });
+  return modal;
+}
+function _oaiRenderDatePicker(){
+  const modal=_oaiEnsureDatePicker();
+  if(!_oaiDatePickerCursor)return;
+  const y=_oaiDatePickerCursor.getFullYear(),m=_oaiDatePickerCursor.getMonth();
+  const yl=modal.querySelector('#oai-common-date-year-label');
+  const ml=modal.querySelector('#oai-common-date-month-label');
+  const grid=modal.querySelector('#oai-common-date-grid');
+  if(yl)yl.textContent=y+'년';
+  if(ml)ml.textContent=(m+1)+'월';
+  if(!grid)return;
+  const first=new Date(y,m,1),firstDow=first.getDay(),lastDay=new Date(y,m+1,0).getDate();
+  const selected=_oaiDatePickerInput?_oaiDatePickerInput.value:'';
+  const today=_oaiDateYmd(new Date());
+  let out='';
+  for(let i=0;i<firstDow;i++)out+='<span class="is-empty"></span>';
+  for(let day=1;day<=lastDay;day++){
+    const v=y+'-'+String(m+1).padStart(2,'0')+'-'+String(day).padStart(2,'0');
+    out+='<button type="button" data-oai-date-day="'+v+'" class="'+(v===selected?'is-selected ':'')+(v===today?'is-today':'')+'">'+day+'</button>';
+  }
+  grid.innerHTML=out;
+}
+function _oaiOpenDatePicker(input){
+  if(!input)return;
+  _oaiDatePickerInput=input;
+  _oaiDatePickerCursor=_oaiDateFromValue(input.value);
+  const modal=_oaiEnsureDatePicker();
+  _oaiRenderDatePicker();
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden','false');
+  try{document.activeElement&&document.activeElement.blur();}catch(_e){}
+}
+function _oaiCloseDatePicker(){
+  const modal=document.getElementById('oai-common-date-picker');
+  if(modal){modal.classList.remove('show');modal.setAttribute('aria-hidden','true');}
+  _oaiDatePickerInput=null;
+  _oaiDatePickerCursor=null;
 }
 function _oaiEnhanceDateInput(input){
   try{
-    if(!input||input.type!=='date'||input.dataset.oaiYearNav==='1')return;
-    input.dataset.oaiYearNav='1';
-    const parent=input.parentNode;
-    if(!parent)return;
-    const wrap=document.createElement('span');
-    wrap.className='oai-date-year-nav';
-    const prev=document.createElement('button');
-    prev.type='button';prev.className='oai-date-year-prev';prev.textContent='◀년';prev.setAttribute('aria-label','이전 년도');
-    const next=document.createElement('button');
-    next.type='button';next.className='oai-date-year-next';next.textContent='년▶';next.setAttribute('aria-label','다음 년도');
-    parent.insertBefore(wrap,input);
-    wrap.appendChild(prev);wrap.appendChild(input);wrap.appendChild(next);
-    prev.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();_oaiDateShiftYear(input,-1);});
-    next.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();_oaiDateShiftYear(input,1);});
+    if(!input||String(input.type).toLowerCase()!=='date'||input.dataset.oaiDatePicker==='1')return;
+    input.dataset.oaiDatePicker='1';
+    input.readOnly=true;
+    input.setAttribute('inputmode','none');
+    input.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();_oaiOpenDatePicker(input);});
+    input.addEventListener('keydown',function(e){
+      if(e.key==='Enter'||e.key===' '){e.preventDefault();_oaiOpenDatePicker(input);}
+    });
   }catch(_e){}
 }
 function _oaiEnhanceAllDateInputs(root){
@@ -12051,11 +12161,7 @@ try{
   else setTimeout(function(){_oaiEnhanceAllDateInputs(document);},0);
   if(typeof MutationObserver!=='undefined'){
     const dateObs=new MutationObserver(function(muts){
-      muts.forEach(function(m){
-        (m.addedNodes||[]).forEach(function(n){
-          if(n&&n.nodeType===1)_oaiEnhanceAllDateInputs(n);
-        });
-      });
+      muts.forEach(function(m){(m.addedNodes||[]).forEach(function(n){if(n&&n.nodeType===1)_oaiEnhanceAllDateInputs(n);});});
     });
     dateObs.observe(document.documentElement,{childList:true,subtree:true});
   }
