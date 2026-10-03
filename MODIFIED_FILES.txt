@@ -1,17 +1,10 @@
-V8-1-14-1031
+V8-1-14-1032
 
-설정 UI / 순례하기 하단 UI 정리
-
-설정
-- settings panel 스크롤 rule 3중 -> 1개
-- settings header 기본/sticky -> 1개
-- settings group 후행 색상 patch -> 기본 rule에 통합
-- 자주 가는 장소 V844 구형 디자인 삭제, V845만 유지
-- webkit scrollbar 동일 rule 중복 제거
-- 설정 관련 전체 파일 audit: CODE_AUDIT_1031.md
-
-순례하기
-- 순례코스 보기의 과거 margin-top:9px 제거
-- '내 위치에서 다시 거리 계산' / '순례코스 보기' 높이 44px, margin 0으로 동일
-- Fold에서 두 버튼의 top/bottom 기준선 동일
-- 1030 Fold patch 제거 후 1031 단일 rule로 재작성
+백그라운드 복귀 전체 정밀정리
+- 30분 미만 현재 화면 유지
+- 30분 이상 미사 유지, 기도문 즐겨찾기, 활성 순례 상세 예외
+- pagehide context 저장 추가
+- overlay 목록 최신화
+- Google Drive 안내 defer
+- GPS 축하 UI defer
+- BACKGROUND_RETURN_AUDIT_1032.md 포함

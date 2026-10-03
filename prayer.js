@@ -184,6 +184,9 @@ function prEnsureTabsVisible(){
   prApplyTabColors();
 }
 window.prEnsureTabsVisible = prEnsureTabsVisible;
+window.prOpenFavoritesForBackgroundReturn = function(){
+  try{prLoadPrefs();prUpdateVisibleCats();const target=(PR_CATS.includes('favorites')&&prVisibleFavoriteCount()>0)?'favorites':prDefaultCat();prSwitchCat(target);const detail=prG('prayer-detail');if(detail)detail.classList.remove('show');const listView=prG('prayer-list-view');if(listView){listView.style.scrollBehavior='auto';listView.scrollTop=0;listView.style.scrollBehavior='';}return target;}catch(e){console.warn('[가톨릭길동무] 기도문 장기복귀 즐겨찾기 전환 실패',e);return '';}
+};
 function prSwitchCat(cat){
   prEnsureCurrentCat();
   if(!PR_CATS.includes(cat)) cat = prDefaultCat();
