@@ -1,0 +1,30 @@
+# OS generated files
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# Editor / temporary files
+*.tmp
+*.temp
+*.bak
+*.old
+*.orig
+*~
+*.swp
+*.swo
+
+# Logs
+*.log
+
+# Local development files
+.env
+.env.*
+!.env.example
+
+# Local audit / work notes
+CODE_AUDIT_*.md
+BACKGROUND_RETURN_AUDIT_*.md
+PILGRIMAGE_PUBLIC_RELEASE_AUDIT_*.md
+MODIFIED_FILES.txt
+R2_CORS_SETUP.md
+R2_PHOTO_UPLOAD_GUIDE.md
