@@ -17991,9 +17991,33 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function movePlanPlaceholder(st,y){
     if(!st||!st.placeholder||!st.parent)return st?st.index:0;
     const others=[...st.parent.querySelectorAll('.oai-pilgrimage-item')].filter(c=>c!==st.card);
+    others.forEach(c=>c.classList.remove('is-drag-neighbor'));
+    const beforeTops=new Map();
+    others.forEach(c=>{try{beforeTops.set(c,c.getBoundingClientRect().top);}catch(_e){}});
     let before=null;
     for(const c of others){const r=c.getBoundingClientRect();if(y<r.top+r.height/2){before=c;break;}}
+    const oldNext=st.placeholder.nextElementSibling,oldPrev=st.placeholder.previousElementSibling;
     if(before)st.parent.insertBefore(st.placeholder,before);else st.parent.appendChild(st.placeholder);
+    const movedPlaceholder=(oldNext!==st.placeholder.nextElementSibling)||(oldPrev!==st.placeholder.previousElementSibling);
+    if(movedPlaceholder){
+      others.forEach(c=>{
+        const oldTop=beforeTops.get(c);if(!Number.isFinite(oldTop))return;
+        let newTop=oldTop;try{newTop=c.getBoundingClientRect().top;}catch(_e){}
+        const delta=oldTop-newTop;
+        if(Math.abs(delta)>1){
+          c.classList.add('is-drag-neighbor');
+          try{if(c._oaiPlanShiftAnim)c._oaiPlanShiftAnim.cancel();}catch(_e){}
+          try{
+            c._oaiPlanShiftAnim=c.animate(
+              [{transform:'translateY('+delta+'px)'},{transform:'translateY(0px)'}],
+              {duration:210,easing:'cubic-bezier(.2,.72,.24,1)'}
+            );
+            c._oaiPlanShiftAnim.onfinish=()=>{c._oaiPlanShiftAnim=null;};
+            c._oaiPlanShiftAnim.oncancel=()=>{c._oaiPlanShiftAnim=null;};
+          }catch(_e){}
+        }
+      });
+    }
     const flow=[...st.parent.children].filter(el=>el===st.placeholder||(el.classList&&el.classList.contains('oai-pilgrimage-item')&&el!==st.card));
     const idx=flow.indexOf(st.placeholder);
     st.target=Math.max(0,Math.min(dragCards().length-1,idx<0?st.index:idx));
@@ -18011,10 +18035,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       st.card.classList.remove('is-drag-source','is-drag-floating');
       ['--drag-y','--drag-shift-y','--drag-float-top','--drag-float-left','--drag-float-width','--drag-float-height'].forEach(k=>st.card.style.removeProperty(k));
     }
+    document.querySelectorAll('#oai-pilgrimage-plan-list .oai-pilgrimage-item').forEach(c=>{try{if(c._oaiPlanShiftAnim)c._oaiPlanShiftAnim.cancel();}catch(_e){}c._oaiPlanShiftAnim=null;c.classList.remove('is-drag-neighbor');});
     document.querySelectorAll('.oai-pilgrimage-drag.is-dragging').forEach(x=>x.classList.remove('is-dragging'));
   }
   function clearDragVisuals(){
-    document.querySelectorAll('#oai-pilgrimage-plan-list .oai-pilgrimage-item').forEach(c=>{c.classList.remove('is-drag-source','is-drop-target','is-drag-shift','is-drag-floating');c.style.removeProperty('--drag-y');c.style.removeProperty('--drag-shift-y');c.style.removeProperty('--drag-float-top');c.style.removeProperty('--drag-float-left');c.style.removeProperty('--drag-float-width');c.style.removeProperty('--drag-float-height');});
+    document.querySelectorAll('#oai-pilgrimage-plan-list .oai-pilgrimage-item').forEach(c=>{try{if(c._oaiPlanShiftAnim)c._oaiPlanShiftAnim.cancel();}catch(_e){}c._oaiPlanShiftAnim=null;c.classList.remove('is-drag-source','is-drop-target','is-drag-shift','is-drag-floating','is-drag-neighbor');c.style.removeProperty('--drag-y');c.style.removeProperty('--drag-shift-y');c.style.removeProperty('--drag-float-top');c.style.removeProperty('--drag-float-left');c.style.removeProperty('--drag-float-width');c.style.removeProperty('--drag-float-height');});
     document.querySelectorAll('#oai-pilgrimage-plan-list .oai-pilgrimage-drag-placeholder').forEach(x=>x.remove());
     document.querySelectorAll('.oai-pilgrimage-drag.is-dragging').forEach(x=>x.classList.remove('is-dragging'));
   }
