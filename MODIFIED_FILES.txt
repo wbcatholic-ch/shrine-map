@@ -1,5 +1,7 @@
-V8-1-14-1071
-style.css
+V8-1-14-1072
+app.js
+js/cover-common.js
+js/back-controller.js
 index.html
 sw.js
 version.json

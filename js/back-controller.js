@@ -97,8 +97,7 @@
     try{
       try{ if(window.oaiReturnConductorBusy && window.oaiReturnConductorBusy(['cover-back','passive'])) return false; }catch(_e){}
       if(!isCoverOnlyVisible()) return false;
-      if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady();
-      if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed();
+      if(typeof window._resetCoverExitState === 'function') window._resetCoverExitState();
       if(typeof window._clearHardCoverExitFlags === 'function') window._clearHardCoverExitFlags(reason || 'cover-return-stabilize');
       if(typeof window._forceNextCoverBackToast === 'function') window._forceNextCoverBackToast(reason || 'cover-return-stabilize');
       armCoverBackTrap(reason || 'cover-return-stabilize', {force:true});
@@ -128,8 +127,7 @@
       if(until && now() < until){
         window.__OAI_SUPPRESS_COVER_BACK_TOAST_UNTIL__ = 0;
         window.__OAI_SUPPRESS_COVER_BACK_TOAST_REASON__ = '';
-        if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady();
-        if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed();
+        if(typeof window._resetCoverExitState === 'function') window._resetCoverExitState();
         armCoverBackTrap('suppressed-cover-popstate');
         return true;
       }
@@ -167,8 +165,7 @@
         });
       }
       if(typeof window.resetGuideManualScroll === 'function') window.resetGuideManualScroll();
-      if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady();
-      if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed();
+      if(typeof window._resetCoverExitState === 'function') window._resetCoverExitState();
       if(typeof window._clearHardCoverExitFlags === 'function') window._clearHardCoverExitFlags('guide-modal-close');
       if(typeof window._forceNextCoverBackToast === 'function') window._forceNextCoverBackToast('guide-modal-close');
       if(typeof window._resetCoverBackTrap === 'function') window._resetCoverBackTrap('guide-modal-close');
@@ -475,8 +472,7 @@
       if(typeof window._oaiPrayerRunPendingQuickPopup === 'function') window._oaiPrayerRunPendingQuickPopup();
       try{
         if(coverVisible() && !appActive()){
-          if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady();
-          if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed();
+          if(typeof window._resetCoverExitState === 'function') window._resetCoverExitState();
           armCoverBackTrap('restore-cover-after-module');
         }
       }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -526,8 +522,7 @@
 
     if(isGuideModalOpen()){
       closeGuideModals();
-      try{ if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady(); }catch(e){ console.warn('[가톨릭길동무]', e); }
-      try{ if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed(); }catch(e){ console.warn('[가톨릭길동무]', e); }
+      try{ if(typeof window._resetCoverExitState === 'function') window._resetCoverExitState(); }catch(e){ console.warn('[가톨릭길동무]', e); }
       try{ if(typeof window._resetCoverBackTrap === 'function') window._resetCoverBackTrap('guide-modal-close'); else armCoverBackTrap('guide-modal-close'); }catch(e){ console.warn("[가톨릭길동무]", e); }
       return;
     }
@@ -562,8 +557,7 @@
     if(closeRefreshDialog()){ try{ armCoverBackTrap('refresh-dialog-hardware', {force:true}); }catch(e){} return; }
     if(isGuideModalOpen()){
       closeGuideModals();
-      try{ if(typeof window._resetCoverExitReady === 'function') window._resetCoverExitReady(); }catch(e){}
-      try{ if(typeof window._clearCoverExitArmed === 'function') window._clearCoverExitArmed(); }catch(e){}
+      try{ if(typeof window._resetCoverExitState === 'function') window._resetCoverExitState(); }catch(e){}
       try{ if(typeof window._resetCoverBackTrap === 'function') window._resetCoverBackTrap('guide-modal-hardware'); else armCoverBackTrap('guide-modal-hardware'); }catch(e){}
       return;
     }
