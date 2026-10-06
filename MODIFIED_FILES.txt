@@ -1,8 +1,6 @@
-V8-1-14-1069
+V8-1-14-1070
 index.html
 app.js
-style.css
-js/back-controller.js
 sw.js
 version.json
 MODIFIED_FILES.txt

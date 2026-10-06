@@ -14923,7 +14923,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const keys={};
     [OAI_SHRINE_VISITS_KEY,OAI_PARISH_VISITS_KEY,OAI_PARISH_AUTO_VISIT_ENABLED_KEY,
       OAI_SETTINGS_MY_PARISH_KEY,'oai_my_parish','oai_my_diocese_name','oai_my_parish_name',
-      'pr_favorites','web_favorites_v1',OAI_ROUTE_FAVORITES_KEY,'oai_pilgrimage_plan_v1','oai_pilgrimage_draft_meta_v2','oai_pilgrimage_courses_v1','prayer_font_size'].forEach(function(key){keys[key]=true;});
+      'pr_favorites','web_favorites_v1',OAI_ROUTE_FAVORITES_KEY,'oai_pilgrimage_plan_v1','oai_pilgrimage_draft_meta_v2','oai_pilgrimage_courses_v1','prayer_font_size','oai_pilgrimage_public_feature_seen_v1'].forEach(function(key){keys[key]=true;});
     try{
       if(window.__oaiGoogleDriveStorageWatch)return;
       window.__oaiGoogleDriveStorageWatch=true;
@@ -15121,7 +15121,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       shrineVisits:localValue(OAI_SHRINE_VISITS_KEY,{}),parishVisits:localValue(OAI_PARISH_VISITS_KEY,{}),
       prayerFavorites:localValue('pr_favorites',[]),webFavorites:localValue('web_favorites_v1',[]),routeFavorites:localValue(OAI_ROUTE_FAVORITES_KEY,[]),pilgrimagePlan:localValue('oai_pilgrimage_plan_v1',[]),pilgrimageDraftMeta:localValue('oai_pilgrimage_draft_meta_v2',{}),pilgrimageCourses:localValue('oai_pilgrimage_courses_v1',[]),
       myDiocese:configuredDiocese(),myParish:parish?{diocese:parish.diocese||'',name:parish.name||''}:null,
-      parishAutoVisit:_isMyParishAutoVisitEnabled(),prayerFontSize:localStorage.getItem('prayer_font_size')||''
+      parishAutoVisit:_isMyParishAutoVisitEnabled(),prayerFontSize:localStorage.getItem('prayer_font_size')||'',
+      noticeFlags:{pilgrimagePublicFeatureSeen:localStorage.getItem('oai_pilgrimage_public_feature_seen_v1')==='1'}
     }};
   }
   function encodeBackup(snapshot){return 'CGM1.'+btoa(unescape(encodeURIComponent(JSON.stringify(snapshot))));}
@@ -15147,6 +15148,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(data.myParish&&data.myParish.name){const parish={diocese:String(data.myParish.diocese||data.myDiocese||''),name:String(data.myParish.name||'')};localStorage.setItem(OAI_SETTINGS_MY_PARISH_KEY,JSON.stringify(parish));localStorage.setItem('oai_my_parish',JSON.stringify(parish));localStorage.setItem('oai_my_diocese_name',parish.diocese);localStorage.setItem('oai_my_parish_name',parish.name);}
     if(typeof data.parishAutoVisit==='boolean')_setParishAutoVisitEnabled(data.parishAutoVisit);
     if(data.prayerFontSize)localStorage.setItem('prayer_font_size',String(data.prayerFontSize));
+    if(data.noticeFlags&&data.noticeFlags.pilgrimagePublicFeatureSeen===true){
+      localStorage.setItem('oai_pilgrimage_public_feature_seen_v1','1');
+      try{if(typeof window.closeOaiPilgrimageFeatureNotice==='function')window.closeOaiPilgrimageFeatureNotice();}catch(_e){}
+    }
     try{window.dispatchEvent(new CustomEvent('oai-my-parish-changed'));}catch(_e){}
     queueGoogleDriveBackup();
   }
