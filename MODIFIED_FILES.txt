@@ -1,6 +1,0 @@
-V8-1-14-1073
-app.js
-index.html
-sw.js
-version.json
-MODIFIED_FILES.txt
