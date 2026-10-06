@@ -2897,7 +2897,7 @@ html.app-active #pwa-install-btn { display: none; }
 .guide-steps{display:flex;flex-direction:column;gap:8px;margin:0;padding:0;list-style:none;counter-reset:guide-step;}.guide-steps li{position:relative;padding-left:29px;color:#424c5c;font-size:calc(14px * var(--app-font-scale));font-weight:650;line-height:1.58;word-break:keep-all;counter-increment:guide-step;}.guide-steps li:before{content:counter(guide-step);position:absolute;left:0;top:2px;display:flex;align-items:center;justify-content:center;width:20px;height:20px;border-radius:50%;background:#e8f1fb;color:#185b9d;font-size:11px;font-weight:900;}.guide-steps b,.guide-paragraph b{color:#173f73;font-weight:900;}
 .guide-tip{margin:0 0 12px;padding:11px 12px;border-left:4px solid #1d75bd;border-radius:0 10px 10px 0;background:#eef6ff;color:#435267;font-size:calc(13.5px * var(--app-font-scale));font-weight:650;line-height:1.55;word-break:keep-all;}.guide-notice{margin:0 0 11px;padding:12px;border-radius:12px;background:#e9f6ff;border:1px solid #b8ddef;color:#28445e;}.guide-notice>b{display:block;margin-bottom:6px;color:#075b92;font-size:calc(14px * var(--app-font-scale));font-weight:900;}.guide-notice ul{margin:0;padding-left:18px;}.guide-notice li{margin:4px 0;font-size:calc(13px * var(--app-font-scale));font-weight:650;line-height:1.52;word-break:keep-all;}.guide-paragraph{margin:0 0 11px;color:#465469;font-size:calc(13.5px * var(--app-font-scale));font-weight:650;line-height:1.58;word-break:keep-all;}.guide-two-note{display:grid;grid-template-columns:1fr 1fr;gap:8px;}.guide-two-note>div{padding:10px;border-radius:11px;background:#fff;border:1px solid #d8e4ed;}.guide-two-note b{display:block;margin-bottom:3px;color:#176396;font-size:calc(13px * var(--app-font-scale));font-weight:900;}.guide-two-note span{display:block;color:#58697b;font-size:calc(12px * var(--app-font-scale));font-weight:650;line-height:1.45;word-break:keep-all;}
 .guide-feature-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;}.guide-feature-grid>div{padding:11px;border:1px solid #e1e6ec;border-radius:12px;background:#fff;}.guide-feature-grid b{display:block;color:#243c62;font-size:calc(13px * var(--app-font-scale));font-weight:900;line-height:1.4;word-break:keep-all;}.guide-feature-grid span{display:block;margin-top:4px;color:#687386;font-size:calc(11.5px * var(--app-font-scale));font-weight:650;line-height:1.45;word-break:keep-all;}
-@media (min-width:700px){.guide-manual-panel{width:min(680px,92vw)!important;}.guide-section{padding:18px;}.guide-shot{max-height:275px;}.guide-section-title strong{font-size:18px;}.guide-steps li{font-size:14.5px;}.guide-notice li,.guide-paragraph{font-size:13.5px;}}
+@media (min-width:700px){html.oai-screen-tablet .guide-manual-panel{width:min(680px,92vw)!important;}html.oai-screen-tablet .guide-section{padding:18px;}html.oai-screen-tablet .guide-shot{max-height:275px;}html.oai-screen-tablet .guide-section-title strong{font-size:18px;}html.oai-screen-tablet .guide-steps li{font-size:14.5px;}html.oai-screen-tablet .guide-notice li,html.oai-screen-tablet .guide-paragraph{font-size:13.5px;}}
 @media (max-width:360px){.guide-two-note,.guide-feature-grid{grid-template-columns:1fr;}.guide-section{padding:14px 12px;}}
 
 .guide-manual-panel .guide-manual-hero,
@@ -3360,8 +3360,8 @@ html.oai-font-global #region-body .dio-hd { font-size: calc(17px * var(--app-inn
   .ios-safari-step img { max-height: 120px; }
 }
 @media (min-width: 600px) {
-  #sm-tab-bar { height: 60px; min-height: 60px; max-height: 60px; }
-  #sm-tab-bar .sm-tab { font-size: 16px; }
+  html.oai-screen-tablet #sm-tab-bar { height: 60px; min-height: 60px; max-height: 60px; }
+  html.oai-screen-tablet #sm-tab-bar .sm-tab { font-size: 16px; }
 }
 
 .sr-only { position: absolute; width: 1px !important; height: 1px !important; padding: 0 !important; margin: -1px !important; overflow: hidden !important; clip: rect(0,0,0,0) !important; white-space: nowrap; border: 0 !important; }
@@ -4611,9 +4611,21 @@ html:not(.ios-device).oai-screen-fold-wide #cover-share-btn,
 html:not(.ios-device).oai-screen-fold-wide #cover .cover-diocese-btn,
 html:not(.ios-device).oai-screen-fold-wide #cover .cover-share-main-btn,
 html:not(.ios-device).oai-screen-fold-wide #cover .cover-refresh-main-btn{
-  height:50px!important;
-  min-height:50px!important;
-  max-height:50px!important;
+  height:var(--cover-action-h)!important;
+  min-height:var(--cover-action-h)!important;
+  max-height:var(--cover-action-h)!important;
+}
+/* V8-1-14-1075: Fold 펼친 화면은 가로 공간만 넓게 쓰고, 글자·아이콘·세로 리듬은 휴대폰과 같은 범위를 유지한다. */
+html:not(.ios-device).oai-screen-fold-wide:not(.oai-screen-tablet) #cover .cover-title{
+  font-size:clamp(32px,8.9vw,34px)!important;
+}
+html:not(.ios-device).oai-screen-fold-wide:not(.oai-screen-tablet) #cover .cover-icon-wrap{
+  width:clamp(44px,12.6vw,49px)!important;
+  min-width:clamp(44px,12.6vw,49px)!important;
+  height:clamp(44px,12.6vw,49px)!important;
+}
+html:not(.ios-device).oai-screen-fold-wide:not(.oai-screen-tablet) #cover .cover-diocese-btn .cover-faith-cross{
+  font-size:18px!important;
 }
 
 html:not(.ios-device).oai-screen-compact-short .shrine-visit-cards-diocese{
@@ -5899,13 +5911,13 @@ html.route-tab-active #info-card.open{
   border-color:#1565c0!important;
 }
 @media (min-width:700px){
-  .shrine-visit-cards-filters{
+  html.oai-screen-tablet .shrine-visit-cards-filters{
     padding-left:12px!important;
     padding-right:12px!important;
     gap:9px!important;
   }
-  .shrine-visit-filter-field > span{font-size:12px!important;}
-  .shrine-visit-filter-field select{font-size:14px!important;padding-left:10px!important;}
+  html.oai-screen-tablet .shrine-visit-filter-field > span{font-size:12px!important;}
+  html.oai-screen-tablet .shrine-visit-filter-field select{font-size:14px!important;padding-left:10px!important;}
 }
 /* 명례성지 자료 화면: 사진은 원본 비율을 유지하며 세로 사진도 자르지 않는다. */
 .myeongrye-materials-modal{position:fixed;inset:0;z-index:2147482500;display:none;align-items:stretch;justify-content:stretch;padding:0;box-sizing:border-box}
@@ -5989,7 +6001,7 @@ html.route-tab-active #info-card.open{
 .oai-settings-switch i{display:block;width:100%;height:100%;border-radius:999px;background:#b8c0cb;transition:.18s;}
 .oai-settings-switch i:after{content:"";position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.22);transition:.18s;}
 .oai-settings-switch input:checked+i{background:#176cc2;}.oai-settings-switch input:checked+i:after{transform:translateX(20px);}.oai-settings-switch input:disabled+i{opacity:.45;}
-@media (min-width:700px){.oai-settings-head h2{font-size:27px;}.oai-settings-row{min-height:80px;}.oai-settings-row b{font-size:18px;}.oai-settings-row small{font-size:14px;}}
+@media (min-width:700px){html.oai-screen-tablet .oai-settings-head h2{font-size:27px;}html.oai-screen-tablet .oai-settings-row{min-height:80px;}html.oai-screen-tablet .oai-settings-row b{font-size:18px;}html.oai-screen-tablet .oai-settings-row small{font-size:14px;}}
 /* 설정한 교구·본당은 가톨릭 웹사이트 즐겨찾기 첫머리에만 고정한다. */
 #web-list .web-personal-section{margin:16px 14px 9px;padding:10px 12px;border-radius:11px;background:#e7f1fb;color:#174f82;font-size:14px;font-weight:900;letter-spacing:-.025em;}
 #web-list .web-my-shortcut-card{border:2px solid #1766a7;background:linear-gradient(135deg,#f7fbff 0%,#e6f2fc 100%);box-shadow:0 5px 14px rgba(23,82,135,.16);}
@@ -6004,7 +6016,7 @@ html.route-tab-active #info-card.open{
 .oai-records-list{overflow:hidden;border:2px solid #b9a36f;border-radius:17px;background:#fff;box-shadow:0 3px 10px rgba(27,39,61,.10);}.oai-records-list div{display:flex;align-items:center;justify-content:space-between;gap:14px;min-height:57px;padding:12px 16px;border-bottom:1px solid #ded8cb;color:#17213a;}.oai-records-list div:last-child{border-bottom:0;}.oai-records-list span{font-size:15px;font-weight:800;letter-spacing:-.03em;}.oai-records-list b{max-width:58%;color:#1a5f98;font-size:16px;line-height:1.25;font-weight:900;letter-spacing:-.035em;text-align:right;word-break:keep-all;}
 .oai-records-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:10px;}.oai-records-primary,.oai-records-secondary{min-height:48px;padding:0 12px;border-radius:13px;font-family:inherit;font-size:15px;font-weight:900;letter-spacing:-.03em;cursor:pointer;}.oai-records-primary{border:0;background:#1e6fb6;color:#fff;}.oai-records-secondary{border:2px solid #1e6fb6;background:#fff;color:#1d5d96;}.oai-records-restore-guide{margin-top:0;padding:16px;border:2px solid #d2c291;border-radius:18px;background:#fffdf7;}.oai-records-restore-guide strong{display:block;color:#574723;font-size:17px;line-height:1.25;font-weight:900;letter-spacing:-.035em;}.oai-records-restore-guide p{margin:6px 0 12px;color:#6a6b68;font-size:13px;line-height:1.42;font-weight:750;letter-spacing:-.025em;}.oai-records-restore-guide .oai-records-secondary{width:100%;min-height:48px;border-color:#967943;color:#765d2a;}.oai-records-manual-guide{margin-top:12px;border-top:1px solid #d8d3c9;padding-top:12px;}.oai-records-manual-guide summary{color:#5b6876;font-size:13px;font-weight:850;cursor:pointer;}.oai-records-manual-guide p{margin:8px 0 0;color:#707b89;font-size:12px;line-height:1.4;font-weight:700;}.oai-records-message{min-height:18px;margin:10px 2px 0;color:#1e6b48;font-size:13px;line-height:1.35;font-weight:800;}
 .oai-record-restore-modal{display:none;position:fixed;inset:0;z-index:100150;color:#17213a;font-family:inherit;}.oai-record-restore-modal.show{display:block;}.oai-record-restore-panel{position:absolute;inset:0;width:100%;transform:none;overflow:hidden;border:0;border-radius:0;background:#f0ece2;box-shadow:none;display:flex;flex-direction:column;}.oai-record-restore-body{min-height:0;overflow:auto;padding:16px 16px max(24px,calc(env(safe-area-inset-bottom,0px) + 16px));}.oai-record-restore-body label{display:block;margin:0 0 7px;color:#38445a;font-size:14px;font-weight:900;}.oai-record-restore-body textarea{display:block;width:100%;height:126px;resize:vertical;box-sizing:border-box;padding:12px;border:2px solid #c7d2df;border-radius:13px;background:#fff;color:#17213a;font:700 14px/1.45 ui-monospace,SFMono-Regular,Consolas,monospace;word-break:break-all;}.oai-record-restore-body textarea:focus{outline:3px solid rgba(30,111,182,.22);border-color:#1e6fb6;}.oai-record-restore-body p{margin:10px 1px 14px;color:#667085;font-size:13px;line-height:1.45;font-weight:700;}.oai-record-restore-body .oai-records-primary{width:100%;}.oai-record-restore-body em{display:block;min-height:18px;margin:10px 2px 0;color:#b3442c;font-size:13px;font-style:normal;font-weight:800;}
-@media (min-width:700px){.oai-records-list div{min-height:62px;}.oai-records-list span{font-size:16px;}.oai-records-list b{font-size:17px;}}
+@media (min-width:700px){html.oai-screen-tablet .oai-records-list div{min-height:62px;}html.oai-screen-tablet .oai-records-list span{font-size:16px;}html.oai-screen-tablet .oai-records-list b{font-size:17px;}}
 .oai-parish-setup-panel{position:absolute;inset:0;width:100%;max-height:none;margin:0;transform:none;overflow:hidden;border-radius:0;background:#fbfaf6;box-shadow:none;display:flex;flex-direction:column;}
 .oai-parish-setting-menu{overflow:hidden;margin:4px 0;border:2px solid #b9a36f;border-radius:16px;background:#fff;}.oai-parish-setting-menu button{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:76px;padding:14px 16px;border:0;border-bottom:1px solid #d8cfbd;background:#fff;color:#17213a;font-family:inherit;text-align:left;cursor:pointer;}.oai-parish-setting-menu button:last-child{border-bottom:0;}.oai-parish-setting-menu small{display:block;margin-bottom:5px;color:#687386;font-size:13px;font-weight:800;}.oai-parish-setting-menu b{display:block;font-size:18px;font-weight:900;letter-spacing:-.035em;}.oai-parish-setting-menu i{color:#296ca5;font:400 28px/1 sans-serif;}
 .oai-parish-setup-body{min-height:0;overflow:auto;padding:12px 16px max(24px,calc(env(safe-area-inset-bottom,0px) + 16px));background:#fbfaf6;}.oai-parish-choice-list{overflow:hidden;border:1px solid #ded8cb;border-radius:15px;background:#fff;}.oai-parish-choice-list button{position:relative;display:block;width:100%;min-height:60px;padding:14px 45px 14px 16px;border:0;border-bottom:1px solid #eeeae2;background:#fff;color:#17213a;font-family:inherit;font-size:17px;font-weight:850;letter-spacing:-.035em;text-align:left;cursor:pointer;}.oai-parish-choice-list button[hidden]{display:none!important;}.oai-parish-choice-list button:last-child{border-bottom:0;}.oai-parish-choice-list button b{position:absolute;right:17px;top:50%;transform:translateY(-50%);font-size:24px;color:#6b7485;}.oai-parish-choice-list button small{display:block;margin-top:4px;color:#70798a;font-size:12px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}.oai-parish-choice-list button.selected{background:#edf6ff;color:#1267ad;}.oai-parish-choice-list button.selected b{color:#1267ad;}
@@ -6017,8 +6029,8 @@ html.route-tab-active #info-card.open{
 .shrine-visit-filter-field .oai-visit-picker-button{display:flex!important;align-items:center!important;justify-content:space-between!important;width:100%!important;min-width:0!important;height:33px!important;min-height:33px!important;padding:0 8px!important;border:1.5px solid rgba(212,170,106,.78)!important;border-radius:8px!important;background:#fff!important;color:#0e1535!important;font-family:inherit!important;font-size:13px!important;font-weight:900!important;line-height:1.1!important;text-align:left!important;box-shadow:0 1px 5px rgba(15,23,42,.10)!important;box-sizing:border-box!important;}
 .shrine-visit-filter-field .oai-visit-picker-button b{font-size:18px!important;font-weight:900!important;line-height:1!important;transform:translateY(-2px)!important;}.shrine-visit-filter-field .oai-visit-picker-button:focus{outline:2px solid rgba(21,101,192,.35)!important;outline-offset:1px!important;border-color:#1565c0!important;}.shrine-visit-filter-field .oai-visit-picker-button:disabled{background:#f4f5f7!important;color:#7a8392!important;}
 .oai-visit-picker-dialog{display:none;position:fixed;inset:0;z-index:2147483000;}.oai-visit-picker-dialog.show{display:block;}.oai-visit-picker-backdrop{position:absolute;inset:0;background:rgba(10,20,42,.48);}.oai-visit-picker-panel{position:absolute;top:50%;left:50%;width:min(600px,calc(100vw - 48px));max-height:min(78dvh,920px);transform:translate(-50%,-50%);overflow:hidden;background:#fff;border-radius:0;box-shadow:0 18px 48px rgba(0,0,0,.32);color:#171717;}.oai-visit-picker-list{max-height:min(78dvh,920px);overflow:auto;background:#fff;overscroll-behavior:contain;}.oai-visit-picker-list button{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:74px;padding:0 24px;border:0;border-bottom:1px solid #dedede;background:#fff;color:#191919;font-family:inherit;font-size:25px;font-weight:700;line-height:1.2;text-align:left;letter-spacing:-.04em;}.oai-visit-picker-list button.selected{color:#078c86;font-weight:900;}.oai-visit-picker-list button b{font-size:34px;line-height:1;font-weight:400;}
-@media (min-width:700px){.shrine-visit-filter-field .oai-visit-picker-button{height:40px!important;min-height:40px!important;padding-left:10px!important;font-size:14px!important;}.oai-visit-picker-panel{width:min(600px,calc(100vw - 80px));max-height:min(76dvh,880px);}.oai-visit-picker-list{max-height:min(76dvh,880px);}.oai-visit-picker-list button{min-height:76px;padding:0 26px;font-size:25px;}.oai-visit-picker-list button b{font-size:34px;}}
-@media (min-width:700px){.parish-visit-book .oai-parish-picker-button{min-height:62px;font-size:22px;border-radius:15px;}.oai-parish-picker-panel{width:min(720px,calc(100vw - 80px));max-height:min(82vh,860px);}.oai-parish-picker-panel header{min-height:88px;padding:0 28px 0 32px;}.oai-parish-picker-panel header button{width:52px;height:52px;font-size:38px;}.oai-parish-picker-list{max-height:calc(min(82vh,860px) - 88px);}.oai-parish-picker-list button{min-height:84px;padding:0 34px;font-size:27px;}.oai-parish-picker-list button b{font-size:32px;}}
+@media (min-width:700px){html.oai-screen-tablet .shrine-visit-filter-field .oai-visit-picker-button{height:40px!important;min-height:40px!important;padding-left:10px!important;font-size:14px!important;}html.oai-screen-tablet .oai-visit-picker-panel{width:min(600px,calc(100vw - 80px));max-height:min(76dvh,880px);}html.oai-screen-tablet .oai-visit-picker-list{max-height:min(76dvh,880px);}html.oai-screen-tablet .oai-visit-picker-list button{min-height:76px;padding:0 26px;font-size:25px;}html.oai-screen-tablet .oai-visit-picker-list button b{font-size:34px;}}
+@media (min-width:700px){html.oai-screen-tablet .parish-visit-book .oai-parish-picker-button{min-height:62px;font-size:22px;border-radius:15px;}html.oai-screen-tablet .oai-parish-picker-panel{width:min(720px,calc(100vw - 80px));max-height:min(82vh,860px);}html.oai-screen-tablet .oai-parish-picker-panel header{min-height:88px;padding:0 28px 0 32px;}html.oai-screen-tablet .oai-parish-picker-panel header button{width:52px;height:52px;font-size:38px;}html.oai-screen-tablet .oai-parish-picker-list{max-height:calc(min(82vh,860px) - 88px);}html.oai-screen-tablet .oai-parish-picker-list button{min-height:84px;padding:0 34px;font-size:27px;}html.oai-screen-tablet .oai-parish-picker-list button b{font-size:32px;}}
 
 /* V8-1-14-812: 길찾기 자주 가는 장소(최대 5개) + 전체 순례 일정 */
 .rs-fav-save{
