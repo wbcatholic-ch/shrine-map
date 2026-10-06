@@ -1,0 +1,16 @@
+assets/guide/cover-home-marked.jpg
+assets/guide/map-register-marked.jpg
+assets/guide/stampbook-settings-marked.jpg
+assets/guide/stampbook-filter-marked.jpg
+assets/guide/stampbook-register-marked.jpg
+assets/guide/daily-mass-screen.jpg
+assets/guide/map-register-crop.jpg
+assets/guide/prayer-favorite-list.jpg
+assets/guide/stampbook-register-crop.jpg
+assets/guide/prayer-favorite-star.jpg
+assets/guide/prayer-favorites-marked.svg
+assets/guide/prayer-star-marked.svg
+assets/guide/cover-faith-marked.svg
+assets/guide/stampbook-settings-marked.svg
+assets/guide/stampbook-filter-marked.svg
+assets/guide/cover-home-marked.svg
