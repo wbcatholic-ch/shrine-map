@@ -8303,6 +8303,7 @@ function closeSheetPanelOnly(name){
 function closeRouteSheetByX(){
   var returnToPilgrimage = window.__oaiPilgrimageRouteReturn === true;
   var returnToPilgrimageEdit = !!window.__OAI_PILGRIMAGE_ROUTE_EDIT__;
+  var returnToPilgrimageCourse = window.__OAI_PILGRIMAGE_COURSE_VIEW__ === true;
   window.__oaiPilgrimageRouteReturn = false;
   try{document.documentElement.classList.remove('oai-pilgrimage-route-direct');}catch(_e){}
   window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__=false;
@@ -8316,7 +8317,9 @@ function closeRouteSheetByX(){
     try{ resetRoute(); }catch(e){ console.warn('[가톨릭길동무]', e); }
     _routeMode=false;
     try{ _exitRouteMode(); }catch(e){ console.warn('[가톨릭길동무]', e); }
-    if(returnToPilgrimageEdit && typeof window._oaiReturnToPilgrimageDetail === 'function'){
+    if(returnToPilgrimageCourse && typeof window._oaiReturnFromPilgrimageCourseMap === 'function'){
+      setTimeout(function(){ try{ window._oaiReturnFromPilgrimageCourseMap(); }catch(e){ console.warn('[가톨릭길동무]', e); } }, 40);
+    }else if(returnToPilgrimageEdit && typeof window._oaiReturnToPilgrimageDetail === 'function'){
       setTimeout(function(){ try{ window._oaiReturnToPilgrimageDetail(); }catch(e){ console.warn('[가톨릭길동무]', e); } }, 40);
     }else if(returnToPilgrimage && typeof window._oaiReturnToPilgrimageDetail === 'function'){
       setTimeout(function(){ try{ window._oaiReturnToPilgrimageDetail(); }catch(e){ console.warn('[가톨릭길동무]', e); } }, 40);
@@ -9473,12 +9476,10 @@ function _openRoutePointCancelChoice(role){
   try{ document.activeElement&&document.activeElement.blur(); }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 function _handleRouteChoiceStart(){
-  if(_isPilgrimageCourseViewReadOnly()) return;
   if(_routeChoiceMode==='cancel'){ _closeInfoRouteChoice(); return; }
   _setInfoRouteStart();
 }
 function _handleRouteChoiceEnd(){
-  if(_isPilgrimageCourseViewReadOnly()) return;
   if(_routeChoiceMode==='cancel'){
     const role=_routeCancelRole;
     _closeInfoRouteChoice();
@@ -9490,12 +9491,11 @@ function _handleRouteChoiceEnd(){
   _setInfoRouteEnd({autoSearch:false});
 }
 function _handleRouteChoiceWaypoint(){
-  if(_isPilgrimageCourseViewReadOnly()) return;
   if(_routeChoiceMode==='cancel') return;
   _setInfoRouteWaypoint();
 }
 function _openInfoRouteChoice(){
-  if(_isPilgrimageCourseViewReadOnly()||window.__oaiPilgrimageRouteReturn===true) return;
+  if(window.__oaiPilgrimageRouteReturn===true) return;
   if(!_curInfoItem) return;
   const dlg=$('route-choice-modal');
   if(!dlg){ openInAppRoute(); return; }
@@ -9518,7 +9518,7 @@ function _closeInfoRouteChoice(){
   _syncMapPanelUI('close-route-choice');
 }
 function _openRouteMarkerChoice(item,idx){
-  if(_isPilgrimageCourseViewReadOnly()||window.__oaiPilgrimageRouteReturn===true) return;
+  if(window.__oaiPilgrimageRouteReturn===true) return;
   if(!item) return;
   const dlg=$('route-choice-modal');
   if(!dlg){ _setRoutePointFromItem(_routeHasVisibleStart()?'end':'start',item,idx); return; }
@@ -11713,22 +11713,14 @@ function _syncRouteWaypointBoxes(){
       visible:resultShowing ? has : !!(enabled || has)
     };
   });
+  /* V8-1-14-1076: 순례코스 보기도 일반 길찾기와 같은 입력/결과 구조를 사용한다.
+     작은 화면의 결과에서는 경유지 요약, 큰 화면에서는 개별 경유지 칸을 유지한다. */
   const courseViewReady=!!(
     _isPilgrimageCourseViewReadOnly() &&
     window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__===true
   );
-  const pilgrimageCompactResult=!!(resultShowing && (
-    _isPilgrimageCourseViewReadOnly() ||
-    window.__oaiPilgrimageRouteReturn===true
-  ));
-  /* 순례코스 보기는 편집 화면이 아니므로 좌표 입력이 끝나는 즉시
-     경유지 개별 박스 대신 경유지 요약 박스를 사용한다.
-     일반 길찾기/지도에서 추가의 편집 UI는 건드리지 않는다. */
-  const summaryVisible=!!(
-    courseViewReady ||
-    (resultShowing && routeWaypoints.length && (!foldWide || pilgrimageCompactResult))
-  );
-  const routeUiResultMode=!!(resultShowing || courseViewReady);
+  const summaryVisible=!!(resultShowing && routeWaypoints.length && !foldWide);
+  const routeUiResultMode=!!resultShowing;
   // 경유지 4번째 칸이 '생기는 순간'부터 카드 높이를 고정한다.
   // 실제 좌표가 채워진 경유지 수(routeWaypoints)가 아니라 화면에 펼쳐진/활성화된 슬롯 수로 판단해야
   // 빈 4번째 경유지를 추가했을 때도 즉시 내부 스크롤 모드가 된다.
@@ -11744,7 +11736,7 @@ function _syncRouteWaypointBoxes(){
     stack.classList.toggle('route-result-showing', routeUiResultMode);
   }
   if(sheet){
-    sheet.classList.toggle('route-waypoint-scroll', shouldScrollForMultiWaypoint && !courseViewReady);
+    sheet.classList.toggle('route-waypoint-scroll', shouldScrollForMultiWaypoint);
     sheet.classList.toggle('route-result-showing', routeUiResultMode);
     _bindRouteScrollUpHint();
     requestAnimationFrame(_syncRouteScrollUpHint);
@@ -12505,7 +12497,7 @@ function _renderRouteQuickList(){
   body.innerHTML=html;
 }
 function _openRouteQuick(role){
-  if(_isPilgrimageCourseViewReadOnly()||window.__oaiPilgrimageRouteReturn===true) return;
+  if(window.__oaiPilgrimageRouteReturn===true) return;
   if(role!=='start'&&role!=='end') return;
   _routeQuickRole=role;
   const m=$('route-quick-modal'); if(!m) return;
@@ -12657,10 +12649,18 @@ function _schedulePilgrimageRouteResult(label){
 }
 function _applyPilgrimageCourseViewReadOnlyState(){
   const on=_isPilgrimageCourseViewReadOnly();
-  try{document.documentElement.classList.toggle('oai-pilgrimage-course-view-readonly',on);}catch(_e){}
+  /* V8-1-14-1076: 순례코스 보기는 더 이상 별도 읽기전용 UI를 쓰지 않는다.
+     일반 길찾기와 같은 기능/디자인을 사용하되, 저장된 순례코스 자체는 이 화면에서 변경하지 않는다. */
+  try{
+    document.documentElement.classList.remove('oai-pilgrimage-course-view-readonly');
+    document.documentElement.classList.toggle('oai-pilgrimage-course-route-view',on);
+  }catch(_e){}
   try{
     const sheet=document.getElementById('sheet-route');
-    if(sheet)sheet.classList.toggle('oai-course-view-readonly',on);
+    if(sheet){
+      sheet.classList.remove('oai-course-view-readonly');
+      sheet.classList.toggle('oai-course-route-view',on);
+    }
   }catch(_e){}
 }
 function _isPilgrimageMapEditReturnMode(){
@@ -12671,22 +12671,30 @@ function _syncPilgrimageRouteReturnButton(){
     const btn=$('rs-pilgrimage-return-btn');
     if(!btn)return;
     const editMode=_isPilgrimageMapEditReturnMode();
-    if(!editMode){
+    const courseView=_isPilgrimageCourseViewReadOnly();
+    if(!editMode&&!courseView){
       btn.hidden=true;
       btn.style.display='none';
       return;
     }
     const result=$('rs-result');
     const resultShowing=!!(result&&result.style.display!=='none');
-    if(resultShowing){
+    if(courseView){
+      btn.textContent='↩ 순례코스보기로 돌아가기';
       const resultBox=document.querySelector('#rs-result .rs-result')||result;
       if(resultBox&&btn.parentNode!==resultBox)resultBox.appendChild(btn);
     }else{
-      const top=$('rs-top');
-      const actionRow=top&&top.querySelector('.rs-action-row');
-      if(actionRow&&actionRow.parentNode){
-        if(btn.parentNode!==actionRow.parentNode||btn.previousElementSibling!==actionRow){
-          actionRow.insertAdjacentElement('afterend',btn);
+      btn.textContent='↩ 순례계획 수정하기';
+      if(resultShowing){
+        const resultBox=document.querySelector('#rs-result .rs-result')||result;
+        if(resultBox&&btn.parentNode!==resultBox)resultBox.appendChild(btn);
+      }else{
+        const top=$('rs-top');
+        const actionRow=top&&top.querySelector('.rs-action-row');
+        if(actionRow&&actionRow.parentNode){
+          if(btn.parentNode!==actionRow.parentNode||btn.previousElementSibling!==actionRow){
+            actionRow.insertAdjacentElement('afterend',btn);
+          }
         }
       }
     }
@@ -12866,20 +12874,73 @@ function _routeBoxByRole(role){
   if(_isRouteWaypointRole(role)) return $(_routeWaypointElementId('rs-waypoint',_routeWaypointIndex(role),'-box'));
   return null;
 }
+function _routeDragToolsByRole(role){
+  if(role==='start') return $('rs-start-waypoint-tools');
+  if(role==='end') return $('rs-end-drag-slot');
+  if(_isRouteWaypointRole(role)) return $(_routeWaypointElementId('rs-waypoint',_routeWaypointIndex(role),'-end-tools'));
+  return null;
+}
 function _clearRouteDragClasses(){
-  document.querySelectorAll('.rs-drag-source,.rs-drag-over').forEach(function(el){
-    el.classList.remove('rs-drag-source','rs-drag-over');
+  document.querySelectorAll('.rs-drag-source,.rs-drag-over,.rs-drag-shift').forEach(function(el){
+    el.classList.remove('rs-drag-source','rs-drag-over','rs-drag-shift');
     el.style.removeProperty('--rs-drag-y');
+    el.style.removeProperty('--rs-drag-shift-y');
+  });
+  document.querySelectorAll('.rs-drag-slot').forEach(function(el){
+    el.classList.remove('rs-drag-shift');
+    el.style.removeProperty('--rs-drag-shift-y');
   });
   document.querySelectorAll('.rs-drag-handle.is-dragging').forEach(function(el){ el.classList.remove('is-dragging'); });
 }
-function _routeDragCenters(){
-  const centers={};
+function _applyRouteDragPreview(st){
+  if(!st||!st.active)return;
+  const roles=_routeReadyRoles();
+  const from=roles.indexOf(st.sourceRole),to=roles.indexOf(st.targetRole);
+  document.querySelectorAll('.rs-drag-shift').forEach(function(el){
+    el.classList.remove('rs-drag-shift');
+    el.style.removeProperty('--rs-drag-shift-y');
+  });
+  if(from<0||to<0||from===to)return;
+  const centers=st.centers||_routeDragCenters(st.rects);
+  const rects=st.rects||_routeDragRects();
+  function shift(role,dy){
+    const box=_routeBoxByRole(role),tools=_routeDragToolsByRole(role);
+    [box,tools].forEach(function(el){
+      if(!el)return;
+      el.classList.add('rs-drag-shift');
+      el.style.setProperty('--rs-drag-shift-y',dy+'px');
+    });
+  }
+  if(from<to){
+    for(let i=from+1;i<=to;i++){
+      const role=roles[i],prev=roles[i-1];
+      if(rects[role]&&rects[prev])shift(role,rects[prev].top-rects[role].top);
+      else if(Number.isFinite(centers[role])&&Number.isFinite(centers[prev]))shift(role,centers[prev]-centers[role]);
+    }
+  }else{
+    for(let i=to;i<from;i++){
+      const role=roles[i],next=roles[i+1];
+      if(rects[role]&&rects[next])shift(role,rects[next].top-rects[role].top);
+      else if(Number.isFinite(centers[role])&&Number.isFinite(centers[next]))shift(role,centers[next]-centers[role]);
+    }
+  }
+}
+function _routeDragRects(){
+  const rects={};
   _routeReadyRoles().forEach(function(role){
     const box=_routeBoxByRole(role);
     if(!box || box.style.display==='none') return;
     const r=box.getBoundingClientRect();
-    if(r.height) centers[role]=r.top+r.height/2;
+    if(r.height) rects[role]={top:r.top,height:r.height,center:r.top+r.height/2};
+  });
+  return rects;
+}
+function _routeDragCenters(rects){
+  const centers={};
+  const source=rects||_routeDragRects();
+  Object.keys(source).forEach(function(role){
+    const r=source[role];
+    if(r&&Number.isFinite(r.center)) centers[role]=r.center;
   });
   return centers;
 }
@@ -12933,11 +12994,13 @@ function _bindRouteDragHandles(){
     function armDrag(pointerId, clientY){
       const role=handle.dataset.routeDrag;
       if(!_routePointReady(_getRoutePointByRole(role))) return false;
-      const st={pointerId:pointerId,sourceRole:role,targetRole:role,startY:clientY,lastY:clientY,active:false,handle:handle,holdTimer:0,centers:null};
+      const st={pointerId:pointerId,sourceRole:role,targetRole:role,startY:clientY,lastY:clientY,active:false,handle:handle,holdTimer:0,centers:null,rects:null,sourceBaseCenter:null};
       st.holdTimer=setTimeout(function(){
         if(_routeDragState!==st) return;
         st.holdTimer=0; st.active=true;
-        st.centers=_routeDragCenters();
+        st.rects=_routeDragRects();
+        st.centers=_routeDragCenters(st.rects);
+        st.sourceBaseCenter=st.rects[role]&&Number.isFinite(st.rects[role].center)?st.rects[role].center:clientY;
         handle.classList.add('is-dragging');
         const src=_routeBoxByRole(role); if(src) src.classList.add('rs-drag-source');
         _routeDragHaptic(24);
@@ -12955,8 +13018,10 @@ function _bindRouteDragHandles(){
       }
       const src=_routeBoxByRole(st.sourceRole);
       if(src) src.style.setProperty('--rs-drag-y',(clientY-st.startY)+'px');
-      const target=_routeDragTargetAt(clientY,st.centers) || st.sourceRole;
+      const dragCenter=(Number.isFinite(st.sourceBaseCenter)?st.sourceBaseCenter:st.startY)+(clientY-st.startY);
+      const target=_routeDragTargetAt(dragCenter,st.centers) || st.sourceRole;
       if(target!==st.targetRole){ st.targetRole=target; _routeDragHaptic(10); }
+      _applyRouteDragPreview(st);
       document.querySelectorAll('.rs-drag-over').forEach(function(el){el.classList.remove('rs-drag-over');});
       const box=_routeBoxByRole(target); if(box && target!==st.sourceRole) box.classList.add('rs-drag-over');
       return true;
@@ -13058,7 +13123,7 @@ function _clearRouteResultOnly(){
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 function clearRoute(role, opts){
-  if(_isPilgrimageCourseViewReadOnly()||window.__oaiPilgrimageRouteReturn===true) return;
+  if(window.__oaiPilgrimageRouteReturn===true) return;
   opts = opts || {};
   const keepWaypointBox = !!(opts.keepWaypointBox && _isRouteWaypointRole(role));
   if(role==='start'&&_rS){
@@ -14455,19 +14520,27 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     doRegionSearch();
   });
 
-  on('rs-start-box', 'click', function() { if(_returnRouteResultToInputWindow()) return; openSearchModal('start'); });
-  on('rs-end-box',   'click', function() { if(_returnRouteResultToInputWindow()) return; openSearchModal('end'); });
+  function openRouteRoleFromBox(role){
+    const hadResult=_returnRouteResultToInputWindow();
+    if(hadResult){
+      requestAnimationFrame(function(){ openSearchModal(role); });
+      return;
+    }
+    openSearchModal(role);
+  }
+  on('rs-start-box', 'click', function() { openRouteRoleFromBox('start'); });
+  on('rs-end-box',   'click', function() { openRouteRoleFromBox('end'); });
   on('rs-waypoints-summary-box', 'click', function(e) { if(e){ e.preventDefault(); e.stopPropagation(); } _returnRouteResultToInputWindow(); });
-  on('rs-waypoint-box', 'click', function() { openSearchModal('waypoint'); });
-  on('rs-waypoint2-box', 'click', function() { openSearchModal('waypoint2'); });
-  on('rs-waypoint3-box', 'click', function() { openSearchModal('waypoint3'); });
-  on('rs-waypoint4-box', 'click', function() { openSearchModal('waypoint4'); });
-  on('rs-waypoint5-box', 'click', function() { openSearchModal('waypoint5'); });
-  on('rs-waypoint6-box', 'click', function() { openSearchModal('waypoint6'); });
-  on('rs-waypoint7-box', 'click', function() { openSearchModal('waypoint7'); });
-  on('rs-waypoint8-box', 'click', function() { openSearchModal('waypoint8'); });
-  on('rs-waypoint9-box', 'click', function() { openSearchModal('waypoint9'); });
-  on('rs-waypoint10-box', 'click', function() { openSearchModal('waypoint10'); });
+  on('rs-waypoint-box', 'click', function() { openRouteRoleFromBox('waypoint'); });
+  on('rs-waypoint2-box', 'click', function() { openRouteRoleFromBox('waypoint2'); });
+  on('rs-waypoint3-box', 'click', function() { openRouteRoleFromBox('waypoint3'); });
+  on('rs-waypoint4-box', 'click', function() { openRouteRoleFromBox('waypoint4'); });
+  on('rs-waypoint5-box', 'click', function() { openRouteRoleFromBox('waypoint5'); });
+  on('rs-waypoint6-box', 'click', function() { openRouteRoleFromBox('waypoint6'); });
+  on('rs-waypoint7-box', 'click', function() { openRouteRoleFromBox('waypoint7'); });
+  on('rs-waypoint8-box', 'click', function() { openRouteRoleFromBox('waypoint8'); });
+  on('rs-waypoint9-box', 'click', function() { openRouteRoleFromBox('waypoint9'); });
+  on('rs-waypoint10-box', 'click', function() { openRouteRoleFromBox('waypoint10'); });
   on('rs-add-waypoint-btn', 'click', function(e) {
     if(e){ e.preventDefault(); e.stopPropagation(); }
     var role=(this && this.dataset && this.dataset.nextWaypointRole) || (typeof _nextAvailableWaypointRole === 'function' ? _nextAvailableWaypointRole() : '') || 'waypoint';
@@ -14524,16 +14597,18 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   _updateAllRouteFavoriteButtons();
   _renderRouteItinerary();
   on('rs-search-btn','click', function() {
-    if(_isPilgrimageCourseViewReadOnly()) return;
     doSearchRoute();
   });
   on('rs-pilgrimage-return-btn','click', function() {
+    if(_isPilgrimageCourseViewReadOnly()){
+      if(typeof window._oaiReturnFromPilgrimageCourseMap==='function') window._oaiReturnFromPilgrimageCourseMap();
+      return;
+    }
     if(!_isPilgrimageMapEditReturnMode()) return;
     _finishPilgrimageRouteEdit();
   });
   on('rs-kakao-btn', 'click', function() { doKakaoRoute(); });
   on('rs-reset-btn', 'click', function() {
-    if(_isPilgrimageCourseViewReadOnly()) return;
     resetRoute({ fromButton: true });
   });
 
@@ -17859,16 +17934,62 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   const OAI_PLAN_DRAG_CANCEL_MOVE_PX=10;
   function vibrate(ms){try{if(window.Android&&typeof Android.vibrate==='function')Android.vibrate(ms||18);else if(navigator.vibrate)navigator.vibrate(ms||18);}catch(_e){}}
   function dragCards(){return [...document.querySelectorAll('#oai-pilgrimage-plan-list .oai-pilgrimage-item')];}
-  function targetFromY(y){const cards=dragCards();if(!cards.length)return 0;let to=0;for(let i=0;i<cards.length;i++){const r=cards[i].getBoundingClientRect();if(y>=r.top+r.height/2)to=i;else break;}return Math.max(0,Math.min(cards.length-1,to));}
-  function clearDragVisuals(){document.querySelectorAll('#oai-pilgrimage-plan-list .oai-pilgrimage-item').forEach(c=>{c.classList.remove('is-drag-source','is-drop-target');c.style.removeProperty('--drag-y');});document.querySelectorAll('.oai-pilgrimage-drag.is-dragging').forEach(x=>x.classList.remove('is-dragging'));}
-  function cancelPlanDrag(){if(drag&&drag.holdTimer){clearTimeout(drag.holdTimer);}clearDragVisuals();drag=null;}
+  function clearPlanDropMarks(){document.querySelectorAll('#oai-pilgrimage-plan-list .oai-pilgrimage-item.is-drop-target').forEach(c=>c.classList.remove('is-drop-target'));}
+  function createPlanDragPlaceholder(st){
+    if(!st||!st.card||!st.card.parentNode)return false;
+    const r=st.card.getBoundingClientRect();
+    const ph=document.createElement('div');
+    ph.className='oai-pilgrimage-drag-placeholder';
+    ph.setAttribute('aria-hidden','true');
+    ph.style.height=Math.max(1,r.height)+'px';
+    st.placeholder=ph;st.parent=st.card.parentNode;st.sourceRect={top:r.top,left:r.left,width:r.width,height:r.height};
+    st.card.insertAdjacentElement('afterend',ph);
+    st.card.classList.add('is-drag-floating');
+    st.card.style.setProperty('--drag-float-top',r.top+'px');
+    st.card.style.setProperty('--drag-float-left',r.left+'px');
+    st.card.style.setProperty('--drag-float-width',r.width+'px');
+    st.card.style.setProperty('--drag-float-height',r.height+'px');
+    return true;
+  }
+  function movePlanPlaceholder(st,y){
+    if(!st||!st.placeholder||!st.parent)return st?st.index:0;
+    const others=[...st.parent.querySelectorAll('.oai-pilgrimage-item')].filter(c=>c!==st.card);
+    let before=null;
+    for(const c of others){const r=c.getBoundingClientRect();if(y<r.top+r.height/2){before=c;break;}}
+    if(before)st.parent.insertBefore(st.placeholder,before);else st.parent.appendChild(st.placeholder);
+    const flow=[...st.parent.children].filter(el=>el===st.placeholder||(el.classList&&el.classList.contains('oai-pilgrimage-item')&&el!==st.card));
+    const idx=flow.indexOf(st.placeholder);
+    st.target=Math.max(0,Math.min(dragCards().length-1,idx<0?st.index:idx));
+    clearPlanDropMarks();
+    const next=st.placeholder.nextElementSibling;
+    const prev=st.placeholder.previousElementSibling;
+    const mark=(next&&next!==st.card&&next.classList&&next.classList.contains('oai-pilgrimage-item'))?next:((prev&&prev!==st.card&&prev.classList&&prev.classList.contains('oai-pilgrimage-item'))?prev:null);
+    if(mark)mark.classList.add('is-drop-target');
+    return st.target;
+  }
+  function cleanupPlanDrag(st){
+    clearPlanDropMarks();
+    if(st&&st.placeholder&&st.placeholder.parentNode)st.placeholder.remove();
+    if(st&&st.card){
+      st.card.classList.remove('is-drag-source','is-drag-floating');
+      ['--drag-y','--drag-shift-y','--drag-float-top','--drag-float-left','--drag-float-width','--drag-float-height'].forEach(k=>st.card.style.removeProperty(k));
+    }
+    document.querySelectorAll('.oai-pilgrimage-drag.is-dragging').forEach(x=>x.classList.remove('is-dragging'));
+  }
+  function clearDragVisuals(){
+    document.querySelectorAll('#oai-pilgrimage-plan-list .oai-pilgrimage-item').forEach(c=>{c.classList.remove('is-drag-source','is-drop-target','is-drag-shift','is-drag-floating');c.style.removeProperty('--drag-y');c.style.removeProperty('--drag-shift-y');c.style.removeProperty('--drag-float-top');c.style.removeProperty('--drag-float-left');c.style.removeProperty('--drag-float-width');c.style.removeProperty('--drag-float-height');});
+    document.querySelectorAll('#oai-pilgrimage-plan-list .oai-pilgrimage-drag-placeholder').forEach(x=>x.remove());
+    document.querySelectorAll('.oai-pilgrimage-drag.is-dragging').forEach(x=>x.classList.remove('is-dragging'));
+  }
+  function cancelPlanDrag(){if(drag&&drag.holdTimer){clearTimeout(drag.holdTimer);}cleanupPlanDrag(drag);drag=null;}
   function armPlanDrag(e,h){
     const i=parseInt(h.getAttribute('data-plan-drag'),10);if(!Number.isFinite(i))return;
     const card=h.closest('.oai-pilgrimage-item');
-    const st={index:i,target:i,pointerId:e.pointerId,startY:e.clientY,lastY:e.clientY,card:card,handle:h,active:false,holdTimer:0};
+    const st={index:i,target:i,pointerId:e.pointerId,startY:e.clientY,lastY:e.clientY,card:card,handle:h,active:false,holdTimer:0,placeholder:null,parent:null,sourceRect:null};
     st.holdTimer=setTimeout(()=>{
       if(drag!==st)return;
       st.holdTimer=0;st.active=true;
+      if(!createPlanDragPlaceholder(st)){drag=null;return;}
       h.classList.add('is-dragging');if(card)card.classList.add('is-drag-source');vibrate(24);
       try{h.setPointerCapture&&h.setPointerCapture(st.pointerId);}catch(_e){}
     },OAI_PLAN_DRAG_HOLD_MS);
@@ -17878,14 +17999,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!drag||e.pointerId!==drag.pointerId)return;
     drag.lastY=e.clientY;
     if(!drag.active){if(Math.abs(e.clientY-drag.startY)>OAI_PLAN_DRAG_CANCEL_MOVE_PX)cancelPlanDrag();return;}
-    const dy=e.clientY-drag.startY;if(drag.card)drag.card.style.setProperty('--drag-y',dy+'px');
-    const to=targetFromY(e.clientY);if(to!==drag.target){drag.target=to;vibrate(10);}dragCards().forEach((c,i)=>c.classList.toggle('is-drop-target',i===drag.target&&i!==drag.index));e.preventDefault();e.stopPropagation();
+    const dy=e.clientY-drag.startY;
+    if(drag.card&&drag.sourceRect)drag.card.style.setProperty('--drag-float-top',(drag.sourceRect.top+dy)+'px');
+    const oldTarget=drag.target;const to=movePlanPlaceholder(drag,e.clientY);if(to!==oldTarget)vibrate(10);
+    e.preventDefault();e.stopPropagation();
   }
   function endDrag(e){
     if(!drag||e.pointerId!==drag.pointerId)return;
     const st=drag;if(st.holdTimer)clearTimeout(st.holdTimer);
     if(!st.active){drag=null;clearDragVisuals();return;}
-    const from=st.index,to=Number.isFinite(st.target)?st.target:targetFromY(e.clientY);clearDragVisuals();drag=null;
+    const from=st.index,to=Number.isFinite(st.target)?st.target:st.index;
+    cleanupPlanDrag(st);drag=null;
     const changed=reorder(from,to);if(changed)vibrate(32);else{const card=document.querySelector('#oai-pilgrimage-plan-list [data-plan-index="'+from+'"]');if(card){card.classList.add('is-drop-same');setTimeout(()=>card.classList.remove('is-drop-same'),420);}}
     e.preventDefault();e.stopPropagation();
   }

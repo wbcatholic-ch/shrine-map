@@ -9377,3 +9377,48 @@ html.oai-pilgrimage-course-route-view #sheet-route #rs-pilgrimage-return-btn{
   width:100%!important;
   margin-top:10px!important;
 }
+
+/* V8-1-14-1079: 순례계획/길찾기 드래그 실시간 재정렬 프리뷰
+   순례계획은 실제 빈 자리를 DOM placeholder가 이동시켜 주변 항목이 즉시 재배치된다. */
+#oai-pilgrimage-plan-list .oai-pilgrimage-drag-placeholder{
+  position:relative;
+  box-sizing:border-box;
+  width:100%;
+  min-height:58px;
+  border:2px dashed #2b86d1;
+  border-radius:12px;
+  background:rgba(234,245,255,.78);
+  box-shadow:inset 0 0 0 3px rgba(43,134,209,.08);
+}
+#oai-pilgrimage-plan-list .oai-pilgrimage-drag-placeholder::after{
+  content:'이 위치로 이동';
+  position:absolute;
+  left:50%;top:50%;
+  transform:translate(-50%,-50%);
+  padding:4px 10px;
+  border-radius:999px;
+  background:#176fc0;
+  color:#fff;
+  font-size:11px;
+  font-weight:900;
+  white-space:nowrap;
+}
+#oai-pilgrimage-plan-list .oai-pilgrimage-item.is-drag-floating{
+  position:fixed!important;
+  left:var(--drag-float-left)!important;
+  top:var(--drag-float-top)!important;
+  width:var(--drag-float-width)!important;
+  height:var(--drag-float-height)!important;
+  margin:0!important;
+  z-index:2147482000!important;
+  transform:scale(1.035)!important;
+  pointer-events:none!important;
+  box-sizing:border-box!important;
+  transition:box-shadow .12s,background .12s,border-color .12s!important;
+}
+#sheet-route .rs-start-box.rs-drag-shift,
+#sheet-route .rs-waypoint-box.rs-drag-shift,
+#sheet-route .rs-end-box.rs-drag-shift,
+#sheet-route .rs-drag-slot.rs-drag-shift{
+  transition:transform .10s cubic-bezier(.2,.75,.25,1)!important;
+}
