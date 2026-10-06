@@ -1939,8 +1939,8 @@ html:not(.ios-device).oai-screen-compact-short #sheet-route .rs-x {
   max-height: min(62dvh, 520px) !important;
   overflow-y: auto !important;
   overflow-x: visible !important;
-  -webkit-overflow-scrolling: touch;
-  overscroll-behavior: contain;
+  
+  
 }
 #sheet-route:not(.route-waypoint-scroll) {
   overflow: visible !important;
@@ -6219,10 +6219,10 @@ html.oai-font-global .oai-onboarding-body em{font-size:calc(14px * var(--app-fon
 .oai-pilgrimage-head .module-bar-title{margin:0!important;}
 .oai-pilgrimage-head .module-bar-sub{margin:0!important;}
 .oai-pilgrimage-head .module-close{margin-left:12px;}
-.oai-pilgrimage-planner-modal{display:none;position:fixed;inset:0;z-index:10035;background:#f2eee5;}.oai-pilgrimage-planner-modal.show{display:block;}.oai-pilgrimage-planner-panel{position:absolute;inset:0;overflow:auto;background:#f2eee5;}.oai-pilgrimage-planner-body{padding:16px 16px max(28px,calc(env(safe-area-inset-bottom,0px) + 18px));}
+.oai-pilgrimage-planner-modal{display:none;position:fixed;inset:0;z-index:10035;background:#f2eee5;}.oai-pilgrimage-planner-modal.show{display:block;}.oai-pilgrimage-planner-panel{position:absolute;inset:0;overflow:auto;background:#f2eee5;}
 .oai-pilgrimage-add{width:100%;min-height:54px;margin:13px 0;padding:10px 14px;border:1.5px solid #9d8249;border-radius:15px;background:#fff;color:#60491d;font:900 16px/1.2 inherit;box-shadow:0 2px 5px rgba(70,55,25,.05);}
 .oai-pilgrimage-plan-list{display:flex;flex-direction:column;gap:9px;}.oai-pilgrimage-empty{padding:30px 16px;border:1.5px dashed #c8bfae;border-radius:16px;background:#faf8f3;color:#7a8390;text-align:center;font-size:14px;font-weight:750;line-height:1.55;}
-.oai-pilgrimage-item{display:grid;grid-template-columns:42px minmax(0,1fr) auto;align-items:center;gap:8px;min-height:78px;padding:10px 10px;border:1.5px solid #d5c9ae;border-radius:15px;background:#fff;box-shadow:0 2px 7px rgba(31,42,68,.05);}.oai-pilgrimage-item.is-done{background:#f1f7f1;border-color:#9cc09f;}.oai-pilgrimage-item.is-next{border-color:#d49a25;box-shadow:0 0 0 2px rgba(230,169,48,.12);}.oai-pilgrimage-drag{display:flex;align-items:center;justify-content:center;width:40px;height:54px;border:0;border-radius:12px;background:#f0f3f7;color:#65748a;font-size:25px;font-weight:900;touch-action:none;user-select:none;-webkit-user-select:none;}.oai-pilgrimage-main{min-width:0;}.oai-pilgrimage-main b{display:block;color:#17213a;font-size:17px;font-weight:900;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}.oai-pilgrimage-main small{display:block;margin-top:4px;color:#788292;font-size:12.5px;font-weight:650;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}.oai-pilgrimage-main-actions{display:flex;align-items:center;gap:10px;margin-top:7px}.oai-pilgrimage-badge{display:none!important}.oai-pilgrimage-remove-link{display:inline-flex!important;align-items:center;justify-content:center;min-width:52px!important;height:30px!important;padding:0 11px!important;border:1px solid #e1bbb7!important;border-radius:999px!important;background:#fff7f6!important;color:#994a43!important;font:850 11.5px/1 inherit!important;text-decoration:none!important;opacity:1}.oai-pilgrimage-remove-link:active{background:#fce9e7!important;transform:scale(.97)}.oai-pilgrimage-side{display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:7px;}.oai-pilgrimage-side button{min-width:58px;height:36px;padding:0 10px;border:1px solid #d6d9df;border-radius:11px;background:#fff;color:#4c5b70;font:850 12.5px/1 inherit;}.oai-pilgrimage-side .visit{border-color:#8fb69b;color:#267040;}
+.oai-pilgrimage-item{display:grid;align-items:center;gap:8px;min-height:78px;padding:10px 10px;border:1.5px solid #d5c9ae;border-radius:15px;background:#fff;box-shadow:0 2px 7px rgba(31,42,68,.05);}.oai-pilgrimage-item.is-done{background:#f1f7f1;border-color:#9cc09f;}.oai-pilgrimage-item.is-next{border-color:#d49a25;box-shadow:0 0 0 2px rgba(230,169,48,.12);}.oai-pilgrimage-drag{display:flex;align-items:center;justify-content:center;width:40px;height:54px;border:0;border-radius:12px;background:#f0f3f7;color:#65748a;font-size:25px;font-weight:900;touch-action:none;user-select:none;-webkit-user-select:none;}.oai-pilgrimage-main{min-width:0;}.oai-pilgrimage-main b{display:block;color:#17213a;font-size:17px;font-weight:900;line-height:1.3;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}.oai-pilgrimage-main small{display:block;margin-top:4px;color:#788292;font-size:12.5px;font-weight:650;line-height:1.35;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}.oai-pilgrimage-main-actions{display:flex;align-items:center;gap:10px;margin-top:7px}.oai-pilgrimage-badge{display:none!important}.oai-pilgrimage-remove-link{display:inline-flex!important;align-items:center;justify-content:center;min-width:52px!important;height:30px!important;padding:0 11px!important;border:1px solid #e1bbb7!important;border-radius:999px!important;background:#fff7f6!important;color:#994a43!important;font:850 11.5px/1 inherit!important;text-decoration:none!important;opacity:1}.oai-pilgrimage-remove-link:active{background:#fce9e7!important;transform:scale(.97)}.oai-pilgrimage-side{flex-direction:column;align-items:stretch;justify-content:center;gap:7px;}.oai-pilgrimage-side button{min-width:58px;height:36px;padding:0 10px;border:1px solid #d6d9df;border-radius:11px;background:#fff;color:#4c5b70;font:850 12.5px/1 inherit;}.oai-pilgrimage-side .visit{border-color:#8fb69b;color:#267040;}
 html.oai-font-global .oai-settings-version-tap{font-size:calc(12.5px * var(--app-font-scale,1))!important;}html.oai-font-global .oai-developer-entry b{font-size:calc(17px * var(--app-font-scale,1))!important;}html.oai-font-global .oai-developer-entry small{font-size:calc(12.5px * var(--app-font-scale,1))!important;}html.oai-font-global .oai-pilgrimage-main b{font-size:calc(17px * var(--app-font-scale,1))!important;}html.oai-font-global .oai-pilgrimage-main small{font-size:calc(12.5px * var(--app-font-scale,1))!important;}
 
 
@@ -6283,14 +6283,14 @@ html.oai-font-global .oai-pilgrimage-save,html.oai-font-global .oai-pilgrimage-s
 
 
 /* V8-1-14-861: 성지순례 계획 목록 / 상세 / 따라가기 + 드래그 피드백 */
-.oai-pilgrimage-view[hidden]{display:none!important}.oai-pilgrimage-list-intro{padding:18px;border:1.5px solid #cab77b;border-radius:18px;background:linear-gradient(135deg,#fffdf8,#f5edda);box-shadow:0 3px 10px rgba(71,56,24,.06)}.oai-pilgrimage-list-intro b{display:block;color:#17213a;font-size:20px;font-weight:950}.oai-pilgrimage-list-intro p{margin:7px 0 0;color:#687386;font-size:14px;font-weight:750;line-height:1.55;word-break:keep-all}.oai-pilgrimage-new{width:100%;min-height:60px;margin:13px 0;border:0;border-radius:15px;background:#176fc0;color:#fff;font:900 calc(22px * var(--app-font-scale,1))/1.2 inherit;box-shadow:0 3px 8px rgba(23,111,192,.18)}.oai-pilgrimage-course-list{display:flex;flex-direction:column;gap:6px}.oai-pilgrimage-course-card{display:grid;grid-template-columns:minmax(0,1fr) 76px;gap:8px}.oai-pilgrimage-course-actions{display:grid;grid-template-rows:1fr 1fr;gap:7px}.oai-pilgrimage-course-rename{border:1px solid #b9cfe2;border-radius:14px;background:#f4f9fd;color:#246b9d;font:850 11.5px/1.15 inherit;white-space:nowrap}.oai-pilgrimage-course-open{display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0;padding:15px 14px;border:1.5px solid #d0c19d;border-radius:15px;background:#fff;text-align:left}.oai-pilgrimage-course-open span{min-width:0}.oai-pilgrimage-course-open b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#17213a;font-size:17px;font-weight:950}.oai-pilgrimage-course-open small{display:block;margin-top:5px;color:#7a8390;font-size:12.5px;font-weight:750;line-height:1.45;white-space:normal}.oai-pilgrimage-course-open i{flex:none;color:#2674aa;font-size:28px;font-style:normal}.oai-pilgrimage-course-delete{border:1px solid #e1c9c6;border-radius:14px;background:#fff7f6;color:#a84b42;font:850 12px/1 inherit}.oai-pilgrimage-back{margin:0 0 12px;padding:7px 2px;border:0;background:transparent;color:#47627c;font:900 14px/1 inherit}.oai-pilgrimage-course-title-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;padding:14px 15px;border:1.5px solid #d5c7a5;border-radius:16px;background:#fff}.oai-pilgrimage-course-title-row div{min-width:0}.oai-pilgrimage-course-title-row small{display:block;color:#8b784b;font-size:12px;font-weight:850}.oai-pilgrimage-course-title-row strong{display:block;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#17213a;font-size:19px;font-weight:950}.oai-pilgrimage-course-title-row button{flex:none;min-height:38px;padding:0 12px;border:1px solid #cabd9f;border-radius:11px;background:#fff;color:#67583b;font:850 12px/1 inherit}.oai-pilgrimage-endpoints{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:12px}.oai-pilgrimage-endpoints-after-list{margin-top:12px;margin-bottom:0}.oai-pilgrimage-endpoint{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:76px;padding:12px 14px;border:1.5px solid #d5dce5;border-radius:15px;background:#fff;text-align:left}.oai-pilgrimage-endpoint.start,.oai-pilgrimage-endpoint.end{border-left:5px solid #2674aa}.oai-pilgrimage-endpoint span{min-width:0}.oai-pilgrimage-endpoint small{display:block;color:#778295;font-size:11.5px;font-weight:850}.oai-pilgrimage-endpoint b{display:block;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#17213a;font-size:16.5px;font-weight:950}.oai-pilgrimage-endpoint em{display:block;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#88919f;font-size:12px;font-style:normal;font-weight:700}.oai-pilgrimage-endpoint i{flex:none;color:#2674aa;font-size:28px;font-style:normal}.oai-pilgrimage-place-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:5px 2px 9px}.oai-pilgrimage-place-head strong{color:#17213a;font-size:15px;font-weight:950}.oai-pilgrimage-place-head strong span{color:#176fc0}.oai-pilgrimage-place-head>span{max-width:58%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#778295;font-size:12px;font-weight:750}.oai-pilgrimage-detail-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}.oai-pilgrimage-detail-actions button{min-height:54px;border-radius:15px;font-family:inherit;font-size:calc(15px * var(--app-font-scale,1));font-weight:900;line-height:1.2}.oai-pilgrimage-detail-actions .oai-pilgrimage-save{margin:0;border:0;background:#8a6b27;color:#fff}.oai-pilgrimage-follow{border:0;background:#176fc0;color:#fff}.oai-pilgrimage-detail-actions button:active,.oai-pilgrimage-follow-actions button:active{transform:scale(.98)}.oai-pilgrimage-detail-actions .is-action-confirm{background:#28754a!important}.oai-pilgrimage-reset{display:block;width:auto;min-height:34px;margin:10px auto 0;padding:0 14px;border:0;background:transparent;color:#8a7d6b;text-decoration:underline;font-family:inherit;font-size:calc(12px * var(--app-font-scale,1));font-weight:800}.oai-pilgrimage-drag.is-dragging{transform:scale(1.20);background:#176fc0;color:#fff;box-shadow:0 5px 16px rgba(23,111,192,.36)}
+.oai-pilgrimage-view[hidden]{display:none!important}.oai-pilgrimage-list-intro{padding:18px;border:1.5px solid #cab77b;border-radius:18px;background:linear-gradient(135deg,#fffdf8,#f5edda);box-shadow:0 3px 10px rgba(71,56,24,.06)}.oai-pilgrimage-list-intro b{display:block;color:#17213a;font-size:20px;font-weight:950}.oai-pilgrimage-list-intro p{margin:7px 0 0;color:#687386;font-size:14px;font-weight:750;line-height:1.55;word-break:keep-all}.oai-pilgrimage-new{border:0;}.oai-pilgrimage-course-card{grid-template-columns:minmax(0,1fr) 76px;gap:8px}.oai-pilgrimage-course-actions{grid-template-rows:1fr 1fr;gap:7px}.oai-pilgrimage-course-rename{border:1px solid #b9cfe2;border-radius:14px;background:#f4f9fd;color:#246b9d;font:850 11.5px/1.15 inherit;white-space:nowrap}.oai-pilgrimage-course-open{display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0;padding:15px 14px;border:1.5px solid #d0c19d;border-radius:15px;background:#fff;text-align:left}.oai-pilgrimage-course-open span{min-width:0}.oai-pilgrimage-course-open b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#17213a;font-size:17px;font-weight:950}.oai-pilgrimage-course-open small{display:block;margin-top:5px;color:#7a8390;font-size:12.5px;font-weight:750;line-height:1.45;}.oai-pilgrimage-course-open i{flex:none;color:#2674aa;font-size:28px;font-style:normal}.oai-pilgrimage-course-delete{border:1px solid #e1c9c6;border-radius:14px;background:#fff7f6;color:#a84b42;font:850 12px/1 inherit}.oai-pilgrimage-back{margin:0 0 12px;padding:7px 2px;border:0;background:transparent;color:#47627c;font:900 14px/1 inherit}.oai-pilgrimage-course-title-row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px;padding:14px 15px;border:1.5px solid #d5c7a5;border-radius:16px;background:#fff}.oai-pilgrimage-course-title-row div{min-width:0}.oai-pilgrimage-course-title-row small{display:block;color:#8b784b;font-size:12px;font-weight:850}.oai-pilgrimage-course-title-row strong{display:block;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#17213a;font-size:19px;font-weight:950}.oai-pilgrimage-course-title-row button{flex:none;min-height:38px;padding:0 12px;border:1px solid #cabd9f;border-radius:11px;background:#fff;color:#67583b;font:850 12px/1 inherit}.oai-pilgrimage-endpoints{display:grid;grid-template-columns:1fr;gap:8px;margin-bottom:12px}.oai-pilgrimage-endpoints-after-list{margin-top:12px;margin-bottom:0}.oai-pilgrimage-endpoint{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;min-height:76px;padding:12px 14px;border:1.5px solid #d5dce5;border-radius:15px;background:#fff;text-align:left}.oai-pilgrimage-endpoint.start,.oai-pilgrimage-endpoint.end{border-left:5px solid #2674aa}.oai-pilgrimage-endpoint span{min-width:0}.oai-pilgrimage-endpoint small{display:block;color:#778295;font-size:11.5px;font-weight:850}.oai-pilgrimage-endpoint b{display:block;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#17213a;font-size:16.5px;font-weight:950}.oai-pilgrimage-endpoint em{display:block;margin-top:3px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#88919f;font-size:12px;font-style:normal;font-weight:700}.oai-pilgrimage-endpoint i{flex:none;color:#2674aa;font-size:28px;font-style:normal}.oai-pilgrimage-place-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:5px 2px 9px}.oai-pilgrimage-place-head strong{color:#17213a;font-size:15px;font-weight:950}.oai-pilgrimage-place-head strong span{color:#176fc0}.oai-pilgrimage-place-head>span{max-width:58%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#778295;font-size:12px;font-weight:750}.oai-pilgrimage-detail-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:14px}.oai-pilgrimage-detail-actions button{min-height:54px;border-radius:15px;font-family:inherit;font-size:calc(15px * var(--app-font-scale,1));font-weight:900;line-height:1.2}.oai-pilgrimage-detail-actions .oai-pilgrimage-save{margin:0;border:0;background:#8a6b27;color:#fff}.oai-pilgrimage-follow{border:0;background:#176fc0;color:#fff}.oai-pilgrimage-detail-actions button:active,.oai-pilgrimage-follow-actions button:active{transform:scale(.98)}.oai-pilgrimage-detail-actions .is-action-confirm{background:#28754a!important}.oai-pilgrimage-reset{display:block;width:auto;min-height:34px;margin:10px auto 0;padding:0 14px;border:0;background:transparent;color:#8a7d6b;text-decoration:underline;font-family:inherit;font-size:calc(12px * var(--app-font-scale,1));font-weight:800}.oai-pilgrimage-drag.is-dragging{transform:scale(1.20);background:#176fc0;color:#fff;box-shadow:0 5px 16px rgba(23,111,192,.36)}
 .oai-pilgrimage-item.is-drag-source{position:relative;z-index:12;transform:translateY(var(--drag-y,0px)) scale(1.035);border:2.5px solid #176fc0!important;background:#f4f9ff!important;box-shadow:0 12px 26px rgba(23,111,192,.28)!important;opacity:.97;transition:box-shadow .12s,background .12s,border-color .12s;will-change:transform}.oai-pilgrimage-item.is-drag-source .oai-pilgrimage-main b{color:#0f5fa8}.oai-pilgrimage-item.is-drop-target{border:2.5px dashed #2b86d1!important;background:#eaf5ff!important;box-shadow:inset 0 0 0 3px rgba(43,134,209,.10)!important}.oai-pilgrimage-item.is-drop-target::before{content:'여기로 이동';position:absolute;right:9px;top:-11px;padding:3px 8px;border-radius:999px;background:#176fc0;color:#fff;font-size:10px;font-weight:900;z-index:14}.oai-pilgrimage-item{position:relative;transition:background .15s,border-color .15s,box-shadow .15s,transform .15s}.oai-pilgrimage-item.is-drop-confirmed{animation:oaiPlanDropConfirm .62s ease}.oai-pilgrimage-item.is-drop-same{animation:oaiPlanDropSame .4s ease}@keyframes oaiPlanDropConfirm{0%{transform:scale(1);box-shadow:0 0 0 0 rgba(38,133,81,0)}35%{transform:scale(1.035);box-shadow:0 0 0 5px rgba(38,133,81,.22);border-color:#268551}100%{transform:scale(1);box-shadow:0 2px 7px rgba(31,42,68,.05)}}@keyframes oaiPlanDropSame{0%,100%{transform:translateX(0)}30%{transform:translateX(-4px)}60%{transform:translateX(4px)}}.oai-pilgrimage-plan-next.is-save-confirm{color:#267141!important;font-weight:950!important}
-.oai-pilgrimage-point-modal{display:none;position:fixed;inset:0;z-index:10130}.oai-pilgrimage-point-modal.show{display:block}.oai-pilgrimage-point-dialog{position:absolute;left:50%;top:50%;width:min(88vw,440px);max-height:min(82vh,700px);overflow:auto;transform:translate(-50%,-50%);padding:24px 20px 20px;border:2px solid #8d7a56;border-radius:20px;background:#fff;box-shadow:0 18px 50px rgba(0,0,0,.30)}.oai-pilgrimage-point-x{position:absolute;top:14px;right:14px;display:flex;align-items:center;justify-content:center;width:38px;height:38px;padding:0;border:2px solid #263a58;border-radius:50%;background:#fff;color:#263a58;font-size:0;line-height:1}.oai-pilgrimage-point-x::before,.oai-pilgrimage-point-x::after{content:"";position:absolute;left:50%;top:50%;width:21px;height:3px;border-radius:3px;background:#263a58;transform-origin:center}.oai-pilgrimage-point-x::before{transform:translate(-50%,-50%) rotate(45deg)}.oai-pilgrimage-point-x::after{transform:translate(-50%,-50%) rotate(-45deg)}.oai-pilgrimage-point-dialog h3{margin:0 48px 0 0;color:#17213a;font-size:26px;font-weight:950;line-height:1.25}.oai-pilgrimage-point-dialog>p{margin:12px 0 16px;color:#5f6979;font-size:16px;font-weight:750;line-height:1.55;word-break:keep-all}.oai-pilgrimage-point-current,.oai-pilgrimage-point-search{width:100%;min-height:56px;margin-top:10px;border:2px solid #b8a47b;border-radius:14px;background:#fff;color:#263a58;font:900 18px/1.2 inherit}.oai-pilgrimage-point-current{display:grid;grid-template-columns:auto auto;align-items:center;justify-content:center;column-gap:8px;padding-inline:24px;border-color:#9ebfe0;background:#f3f8fd;color:#155f9e;font-size:18px;text-align:center}.oai-pilgrimage-point-current>span:last-child{line-height:1.2}.oai-pilgrimage-current-emoji{font-size:22px;line-height:1}.oai-pilgrimage-point-search{border-color:#176fc0;background:#176fc0;color:#fff;font-size:19px}.oai-pilgrimage-point-label{display:block;margin:17px 2px 8px;color:#5f4f31;font-size:16px;font-weight:900}.oai-pilgrimage-point-frequent{display:flex;flex-direction:column;gap:8px}.oai-pilgrimage-point-frequent>button{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:14px 14px;border:2px solid #c6b58f;border-radius:13px;background:#fff;text-align:left}.oai-pilgrimage-point-frequent span{min-width:0}.oai-pilgrimage-point-frequent b{display:block;color:#17213a;font-size:17px;font-weight:900;line-height:1.3}.oai-pilgrimage-point-frequent small{display:block;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#737d8d;font-size:14px;font-weight:700}.oai-pilgrimage-point-frequent i{color:#2674aa;font-size:26px;font-style:normal}.oai-pilgrimage-point-empty{padding:14px;border:1px dashed #d8d0c2;border-radius:11px;color:#7e8795;text-align:center;font-size:14px;font-weight:700}
-.oai-pilgrimage-follow-hero{padding:18px 18px 16px;border:2px solid #176fc0;border-radius:20px;background:#fff;box-shadow:0 5px 16px rgba(23,111,192,.10)}.oai-pilgrimage-follow-hero>small{display:inline-block;padding:5px 9px;border-radius:999px;background:#eef6ff;color:#176fc0;font-size:calc(11.5px * var(--app-font-scale,1));font-weight:900}.oai-pilgrimage-follow-hero>span{display:block;margin-top:15px;color:#667389;font-size:calc(12px * var(--app-font-scale,1));font-weight:850}.oai-pilgrimage-follow-hero>strong{display:block;margin-top:3px;color:#10213f;font-size:calc(24px * var(--app-font-scale,1));font-weight:950;line-height:1.2;word-break:keep-all}.oai-pilgrimage-follow-hero>em{display:block;margin-top:6px;color:#778295;font-size:calc(12.5px * var(--app-font-scale,1));font-style:normal;font-weight:750}.oai-pilgrimage-follow-road{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:17px}.oai-pilgrimage-follow-road>div{padding:13px 12px;border-radius:14px;background:#f5f9ff;border:1.5px solid #c9ddf2}.oai-pilgrimage-follow-road small{display:block;color:#647084;font-size:calc(11px * var(--app-font-scale,1));font-weight:800}.oai-pilgrimage-follow-road b{display:block;margin-top:4px;color:#0d5fa8;font-size:calc(21px * var(--app-font-scale,1));font-weight:950}.oai-pilgrimage-follow-hero>p{margin:10px 0 0;color:#6c7685;font-size:calc(11.5px * var(--app-font-scale,1));font-weight:750}.oai-pilgrimage-follow-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:12px}.oai-pilgrimage-follow-actions button{min-height:54px;border-radius:15px;font-family:inherit;font-size:calc(15px * var(--app-font-scale,1));font-weight:900;line-height:1.2}.oai-pilgrimage-follow-actions .primary{border:0;background:#176fc0;color:#fff}.oai-pilgrimage-follow-actions .done{border:1.5px solid #82b696;color:#257141;background:#f4faf5}
+.oai-pilgrimage-point-modal{display:none;position:fixed;inset:0;z-index:10130}.oai-pilgrimage-point-modal.show{display:block}.oai-pilgrimage-point-dialog{position:absolute;left:50%;top:50%;width:min(88vw,440px);max-height:min(82vh,700px);overflow:auto;transform:translate(-50%,-50%);padding:24px 20px 20px;border:2px solid #8d7a56;border-radius:20px;background:#fff;box-shadow:0 18px 50px rgba(0,0,0,.30)}.oai-pilgrimage-point-x{position:absolute;top:14px;right:14px;display:flex;align-items:center;justify-content:center;width:38px;height:38px;padding:0;border:2px solid #263a58;border-radius:50%;background:#fff;color:#263a58;font-size:0;line-height:1}.oai-pilgrimage-point-x::before,.oai-pilgrimage-point-x::after{content:"";position:absolute;left:50%;top:50%;width:21px;height:3px;border-radius:3px;background:#263a58;transform-origin:center}.oai-pilgrimage-point-x::before{transform:translate(-50%,-50%) rotate(45deg)}.oai-pilgrimage-point-x::after{transform:translate(-50%,-50%) rotate(-45deg)}.oai-pilgrimage-point-dialog h3{margin:0 48px 0 0;color:#17213a;font-size:26px;font-weight:950;line-height:1.25}.oai-pilgrimage-point-dialog>p{margin:12px 0 16px;color:#5f6979;font-size:16px;font-weight:750;line-height:1.55;word-break:keep-all}.oai-pilgrimage-point-current,.oai-pilgrimage-point-search{width:100%;min-height:56px;margin-top:10px;border:2px solid #b8a47b;border-radius:14px;background:#fff;color:#263a58;font:900 18px/1.2 inherit}.oai-pilgrimage-point-current{display:grid;grid-template-columns:auto auto;align-items:center;justify-content:center;column-gap:8px;padding-inline:24px;border-color:#9ebfe0;background:#f3f8fd;color:#155f9e;font-size:18px;text-align:center}.oai-pilgrimage-point-current>span:last-child{line-height:1.2}.oai-pilgrimage-current-emoji{font-size:22px;line-height:1}.oai-pilgrimage-point-label{display:block;margin:17px 2px 8px;color:#5f4f31;font-size:16px;font-weight:900}.oai-pilgrimage-point-frequent{display:flex;flex-direction:column;gap:8px}.oai-pilgrimage-point-frequent>button{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;padding:14px 14px;border:2px solid #c6b58f;border-radius:13px;background:#fff;text-align:left}.oai-pilgrimage-point-frequent span{min-width:0}.oai-pilgrimage-point-frequent b{display:block;color:#17213a;font-size:17px;font-weight:900;line-height:1.3}.oai-pilgrimage-point-frequent small{display:block;margin-top:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#737d8d;font-size:14px;font-weight:700}.oai-pilgrimage-point-frequent i{color:#2674aa;font-size:26px;font-style:normal}.oai-pilgrimage-point-empty{padding:14px;border:1px dashed #d8d0c2;border-radius:11px;color:#7e8795;text-align:center;font-size:14px;font-weight:700}
+.oai-pilgrimage-follow-hero{padding:18px 18px 16px;border-radius:20px;}.oai-pilgrimage-follow-hero>small{display:inline-block;padding:5px 9px;border-radius:999px;font-size:calc(11.5px * var(--app-font-scale,1));font-weight:900}.oai-pilgrimage-follow-hero>span{display:block;margin-top:15px;color:#667389;font-size:calc(12px * var(--app-font-scale,1));font-weight:850}.oai-pilgrimage-follow-hero>strong{display:block;margin-top:3px;font-size:calc(24px * var(--app-font-scale,1));font-weight:950;line-height:1.2;word-break:keep-all}.oai-pilgrimage-follow-hero>em{display:block;margin-top:6px;color:#778295;font-size:calc(12.5px * var(--app-font-scale,1));font-style:normal;font-weight:750}.oai-pilgrimage-follow-road{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:17px}.oai-pilgrimage-follow-road>div{padding:13px 12px;border-radius:14px;}.oai-pilgrimage-follow-road small{display:block;font-size:calc(11px * var(--app-font-scale,1));font-weight:800}.oai-pilgrimage-follow-road b{display:block;margin-top:4px;font-size:calc(21px * var(--app-font-scale,1));font-weight:950}.oai-pilgrimage-follow-hero>p{margin:10px 0 0;color:#6c7685;font-size:calc(11.5px * var(--app-font-scale,1));font-weight:750}.oai-pilgrimage-follow-actions{display:grid;gap:9px;margin-top:12px}.oai-pilgrimage-follow-actions button{min-height:54px;border-radius:15px;font-family:inherit;font-size:calc(15px * var(--app-font-scale,1));font-weight:900;line-height:1.2}
 html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilgrimage-course-open b,html.oai-font-global .oai-pilgrimage-course-title-row strong,html.oai-font-global .oai-pilgrimage-endpoint b{font-size:calc(17px * var(--app-font-scale,1))!important}
 
 /* V8-1-14-868: 순례 따라가기 진행상태 복원 + 단순화 */
-.oai-pilgrimage-follow-progress{margin-top:12px;padding:14px 15px;border:1.5px solid #d8dce3;border-radius:16px;background:#fff}.oai-pilgrimage-follow-progress-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}.oai-pilgrimage-follow-progress-head strong{color:#17213a;font-size:calc(14px * var(--app-font-scale,1));font-weight:950}.oai-pilgrimage-follow-progress-head span{color:#8b7743;font-size:calc(13px * var(--app-font-scale,1));font-weight:900}.oai-pilgrimage-follow-progress-list{display:flex;flex-direction:column}.oai-pilgrimage-follow-progress-item{display:flex;align-items:center;gap:9px;min-height:40px;border-top:1px solid #e6e8ec;color:#7d8794}.oai-pilgrimage-follow-progress-item:first-child{border-top:0}.oai-pilgrimage-follow-progress-item .mark{display:flex;align-items:center;justify-content:center;flex:0 0 27px;width:27px;height:27px;border-radius:50%;background:#eef1f5;color:#66758a;font-size:11px;font-weight:950}.oai-pilgrimage-follow-progress-item b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:calc(13px * var(--app-font-scale,1));font-weight:850}.oai-pilgrimage-follow-progress-item.done{color:#9299a1;text-decoration:line-through}.oai-pilgrimage-follow-progress-item.done .mark{background:#e1f3e7;color:#2c7b51;text-decoration:none}.oai-pilgrimage-follow-progress-item.next{color:#176fc0}.oai-pilgrimage-follow-progress-item.next .mark{width:auto;min-width:35px;padding:0 7px;border-radius:999px;background:#eaf4ff;color:#176fc0}.oai-pilgrimage-follow-undo{display:block;width:auto;min-height:34px;margin:7px 0 0 auto;padding:0 2px;border:0;background:transparent;color:#66758a;text-decoration:underline;font-family:inherit;font-size:calc(11.5px * var(--app-font-scale,1));font-weight:800}.oai-pilgrimage-follow-recalc{width:100%;min-height:48px;margin-top:9px;border:1.5px solid #ccd2da;border-radius:14px;background:#fff;color:#516072;font-family:inherit;font-size:calc(13px * var(--app-font-scale,1));font-weight:850}.oai-pilgrimage-follow-actions{grid-template-columns:1fr 1fr}.oai-pilgrimage-follow-actions.single{grid-template-columns:1fr}.oai-pilgrimage-new{margin-top:0}.oai-pilgrimage-course-list{margin-top:10px}
+.oai-pilgrimage-follow-progress{margin-top:12px;padding:14px 15px;border-radius:16px;}.oai-pilgrimage-follow-progress-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px}.oai-pilgrimage-follow-progress-head strong{color:#17213a;font-size:calc(14px * var(--app-font-scale,1));font-weight:950}.oai-pilgrimage-follow-progress-head span{font-size:calc(13px * var(--app-font-scale,1));font-weight:900}.oai-pilgrimage-follow-progress-list{display:flex;flex-direction:column}.oai-pilgrimage-follow-progress-item{display:flex;gap:9px;border-top:1px solid #e6e8ec;color:#7d8794}.oai-pilgrimage-follow-progress-item:first-child{border-top:0}.oai-pilgrimage-follow-progress-item .mark{display:flex;align-items:center;justify-content:center;flex:0 0 27px;width:27px;height:27px;border-radius:50%;background:#eef1f5;color:#66758a;font-size:11px;font-weight:950}.oai-pilgrimage-follow-progress-item b{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:calc(13px * var(--app-font-scale,1));font-weight:850}.oai-pilgrimage-follow-progress-item.done{color:#9299a1;text-decoration:line-through}.oai-pilgrimage-follow-progress-item.done .mark{text-decoration:none}.oai-pilgrimage-follow-progress-item.next .mark{width:auto;min-width:35px;padding:0 7px;border-radius:999px;}.oai-pilgrimage-follow-undo{display:block;width:auto;min-height:34px;margin:7px 0 0 auto;padding:0 2px;border:0;background:transparent;color:#66758a;text-decoration:underline;font-family:inherit;font-size:calc(11.5px * var(--app-font-scale,1));font-weight:800}.oai-pilgrimage-follow-recalc{width:100%;min-height:48px;margin-top:9px;border-radius:14px;font-family:inherit;font-size:calc(13px * var(--app-font-scale,1));font-weight:850}.oai-pilgrimage-follow-actions{grid-template-columns:1fr 1fr}.oai-pilgrimage-follow-actions.single{grid-template-columns:1fr}.oai-pilgrimage-new{margin-top:0}.oai-pilgrimage-course-list{margin-top:10px}
 
 /* V8-1-14-870: 자주 가는 장소 등록 시 닉네임 */
 .oai-frequent-nickname-address{display:block;margin:-3px 0 12px;padding:9px 11px;border-radius:10px;background:#f6f3ec;color:#70798a;font-size:calc(12.5px * var(--app-font-scale,1));font-weight:700;line-height:1.45;word-break:keep-all;}
@@ -6358,44 +6358,33 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 
 /* 순례하기: 경로 편집 영역을 하나의 박스로 묶고 GPS 상태를 같은 화면에 표시 */
 #oai-pilgrimage-detail-view{--oai-plan-gap:7px;}
-#oai-pilgrimage-detail-view .oai-pilgrimage-route-box{
-  padding:10px;border:2px solid #6f8198;border-radius:17px;background:#e5ebf2;
-  box-shadow:0 4px 12px rgba(16,35,63,.11);
-}
-#oai-pilgrimage-detail-view .oai-pilgrimage-endpoints,
-#oai-pilgrimage-detail-view .oai-pilgrimage-plan-list,
-#oai-pilgrimage-detail-view .oai-pilgrimage-endpoints-after-list,
-#oai-pilgrimage-detail-view .oai-pilgrimage-add-row{margin:0 0 var(--oai-plan-gap);}
+
+
 #oai-pilgrimage-detail-view .oai-pilgrimage-add-row{margin-bottom:0;}
 #oai-pilgrimage-detail-view .oai-pilgrimage-plan-list{gap:var(--oai-plan-gap);}
-#oai-pilgrimage-detail-view .oai-pilgrimage-total-card{margin:10px 0 7px;}
-#oai-pilgrimage-detail-view .oai-pilgrimage-detail-actions{margin:0 0 7px;}
-#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint{
-  min-height:62px;padding:8px 12px;background:#fff;box-shadow:none;
-}
+
+
+
 #oai-pilgrimage-detail-view .oai-pilgrimage-endpoint em[hidden]{display:none!important;}
-#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint b{margin-top:2px;}
-#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint.start{border:2px solid #174f86;border-left:7px solid #0b68c7;}
+
+#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint.start{border:2px solid #174f86;}
 #oai-pilgrimage-detail-view .oai-pilgrimage-endpoint.start small,
 #oai-pilgrimage-detail-view .oai-pilgrimage-endpoint.start i{color:#0b68c7;}
 #oai-pilgrimage-detail-view .oai-pilgrimage-endpoint.start b{color:#10233f;}
-#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint.end{border:2px solid #a8342f;border-left:7px solid #d23b35;}
+#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint.end{border:2px solid #a8342f;}
 #oai-pilgrimage-detail-view .oai-pilgrimage-endpoint.end small,
 #oai-pilgrimage-detail-view .oai-pilgrimage-endpoint.end i{color:#c92f2a;}
 #oai-pilgrimage-detail-view .oai-pilgrimage-endpoint.end b{color:#10233f;}
-#oai-pilgrimage-detail-view .oai-pilgrimage-item{min-height:58px;padding:6px 9px;}
-#oai-pilgrimage-detail-view .oai-pilgrimage-drag{height:44px;}
-#oai-pilgrimage-detail-view .oai-pilgrimage-main{display:flex;min-width:0;flex-direction:column;justify-content:center;gap:3px;}
-#oai-pilgrimage-detail-view .oai-pilgrimage-main b{font-size:17px;line-height:1.22;}
+
+
+
+
 #oai-pilgrimage-detail-view .oai-pilgrimage-item-metric{
-  display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#66758a;
-  font-size:calc(11.5px * var(--app-font-scale,1));font-weight:800;line-height:1.2;
+  
+  line-height:1.2;
 }
 #oai-pilgrimage-detail-view .oai-pilgrimage-item.is-done .oai-pilgrimage-item-metric{color:#818a95;}
-#oai-pilgrimage-detail-view.gps-ready .oai-pilgrimage-item.is-next{
-  border:2.5px solid #9b6900!important;background:#fffaf0!important;
-  box-shadow:0 0 0 2px rgba(155,105,0,.12)!important;
-}
+
 #oai-pilgrimage-detail-view.gps-ready .oai-pilgrimage-item.is-next .oai-pilgrimage-main b{color:#7c5300;}
 
 /* 첫 장소 등록 */
@@ -6407,15 +6396,15 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 .oai-pilgrimage-empty-action small{display:block;margin-top:6px;color:#4d6479;font-size:calc(12.5px * var(--app-font-scale,1));font-weight:800;line-height:1.4;}
 
 /* 순례 장소 추가 / 지도에서 찾기 */
-#oai-pilgrimage-detail-view .oai-pilgrimage-add-row{display:flex;align-items:stretch;gap:7px;width:100%;}
+#oai-pilgrimage-detail-view .oai-pilgrimage-add-row{align-items:stretch;width:100%;}
 #oai-pilgrimage-detail-view .oai-pilgrimage-add,
 #oai-pilgrimage-detail-view .oai-pilgrimage-map-add{
-  flex:1 1 0;width:auto;min-width:0;min-height:46px;margin:0;padding:8px 9px;border-radius:13px;
-  font-family:inherit;font-size:calc(15px * var(--app-font-scale,1));font-weight:900;line-height:1.2;white-space:nowrap;
+  flex:1 1 0;width:auto;min-width:0;margin:0;padding:8px 9px;
+  font-family:inherit;font-weight:900;line-height:1.2;white-space:nowrap;
 }
-#oai-pilgrimage-detail-view .oai-pilgrimage-add{border:1.5px solid #9b741e;background:#f0d27a;color:#4f3708;}
+#oai-pilgrimage-detail-view .oai-pilgrimage-add{background:#f0d27a;}
 #oai-pilgrimage-detail-view .oai-pilgrimage-add[hidden]{display:none!important;}
-#oai-pilgrimage-detail-view .oai-pilgrimage-map-add{display:block;border:1.5px solid #174f86;background:#174f86;color:#fff;}
+#oai-pilgrimage-detail-view .oai-pilgrimage-map-add{display:block;background:#174f86;}
 #oai-pilgrimage-detail-view.is-empty-plan .oai-pilgrimage-map-add{width:100%;}
 
 /* 총 이동 거리 / 시간 */
@@ -6432,7 +6421,7 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 .oai-pilgrimage-detail-actions .oai-pilgrimage-save:disabled{background:#c9c3b4!important;color:#f7f5ef!important;box-shadow:none!important;opacity:.72;cursor:default;}
 .oai-pilgrimage-detail-actions .oai-pilgrimage-save.is-dirty{background:#8a6b27!important;color:#fff!important;opacity:1;}
 #oai-pilgrimage-detail-view .oai-pilgrimage-detail-actions.is-integrated-pilgrimage{grid-template-columns:1fr;}
-#oai-pilgrimage-detail-view .oai-pilgrimage-follow{display:none!important;}
+
 #oai-pilgrimage-detail-view .oai-pilgrimage-reset{margin-top:2px;}
 
 /* 출발/도착 선택창의 지도 선택 */
@@ -6482,7 +6471,7 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 .btn-route-pilgrimage span{color:#e7c563;font-size:16px;line-height:1;}
 .btn-route-pilgrimage:active{transform:translateY(1px);opacity:.88;}
 #rs-result .btn-route-pilgrimage{visibility:visible;opacity:1;}
-#sheet-route.route-result-showing{max-height:min(72dvh,680px);overflow-y:auto;overflow-x:hidden;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
+#sheet-route.route-result-showing{-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
 #app #sheet-route.route-result-showing.open{min-height:0;height:auto;max-height:min(72dvh,680px);}
 #sheet-route.route-result-showing #rs-bottom{padding-bottom:0!important;}
 #sheet-route.route-result-showing .route-btns{margin-bottom:0;}
@@ -6491,9 +6480,7 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 
 
 /* V8-1-14-928: 순례계획 카드 가독성/테두리 보강 */
-#oai-pilgrimage-detail-view .oai-pilgrimage-item{
-  border:2px solid #c1b183;
-}
+
 #oai-pilgrimage-detail-view .oai-pilgrimage-main b,
 #oai-pilgrimage-detail-view .oai-pilgrimage-endpoint b{
   font-size:calc(16.5px * var(--app-font-scale,1));
@@ -6525,7 +6512,7 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 html:not(.oai-map-split-wide) #app #sheet-route.open{
   height:fit-content!important;
   min-height:0!important;
-  padding-bottom:var(--oai-route-end-gap)!important;
+  
   box-sizing:border-box!important;
 }
 html:not(.oai-map-split-wide) #app #sheet-route.route-waypoint-scroll.open{
@@ -6585,12 +6572,12 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 }
 .oai-pilgrimage-course-complete{
   display:flex;
-  align-items:center;
+  
   gap:7px;
   min-height:38px;
   padding:7px 10px 9px;
   border-top:1px solid #eee5d4;
-  background:#fffaf0;
+  
 }
 .oai-pilgrimage-course-stamp{
   flex:none;
@@ -6601,8 +6588,8 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
   padding:0 9px;
   border:1.5px solid #a46f25;
   border-radius:999px;
-  color:#8b5b17;
-  background:#fff6dd;
+  
+  
   font-size:11.5px;
   font-weight:950;
   line-height:1;
@@ -6775,22 +6762,20 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
   border-radius:13px;
   font-size:calc(14px * var(--app-font-scale,1));
 }
-#oai-pilgrimage-follow-view .oai-pilgrimage-follow-actions .primary{
-  background:var(--follow-blue);
-}
+
 #oai-pilgrimage-follow-view .oai-pilgrimage-follow-actions .done{
   border:1px solid #d6dde5;
   background:#fff;
   color:#526072;
 }
 #oai-pilgrimage-follow-view .oai-pilgrimage-follow-recalc{
-  min-height:38px;
+  
   margin-top:6px;
-  border:0;
-  background:transparent;
-  color:#718092;
-  text-decoration:underline;
-  font-size:calc(11.5px * var(--app-font-scale,1));
+  
+  
+  
+  
+  
 }
 #oai-pilgrimage-follow-view .oai-pilgrimage-follow-undo{
   color:#7b8794;
@@ -6799,14 +6784,14 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 
 
 /* V8-1-14-942: 순례계획 목록 필터 + 완료 히스토리 + 완료 워터마크 */
-.oai-pilgrimage-course-filters{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin:2px 0 12px;}
-.oai-pilgrimage-course-filters label{display:flex;min-width:0;flex-direction:column;gap:4px;}
+.oai-pilgrimage-course-filters{display:grid;}
+.oai-pilgrimage-course-filters label{flex-direction:column;gap:4px;}
 .oai-pilgrimage-course-filters span{padding-left:2px;color:#6b7482;font-size:11.5px;font-weight:850;line-height:1;}
-.oai-pilgrimage-course-filters select{width:100%;min-width:0;height:42px;padding:0 12px;border:1.5px solid #c8d3df;border-radius:12px;background:#fff;color:#17213a;font-family:inherit;font-size:13px;font-weight:850;outline:none;}
+.oai-pilgrimage-course-filters select{width:100%;min-width:0;font-family:inherit;outline:none;}
 .oai-pilgrimage-course-filters select:focus{border-color:#176fc0;box-shadow:0 0 0 3px rgba(23,111,192,.12);}
-.oai-pilgrimage-course-card{display:block;position:relative;}
+.oai-pilgrimage-course-card{position:relative;}
 .oai-pilgrimage-course-open{position:relative;overflow:hidden;}
-.oai-pilgrimage-course-card.is-completed .oai-pilgrimage-course-open::after{content:"순례";position:absolute;right:16px;top:12px;color:rgba(210,34,34,.13);font-size:clamp(34px,8.5vw,52px);font-weight:980;line-height:1;letter-spacing:-.06em;transform:rotate(-10deg);pointer-events:none;}
+.oai-pilgrimage-course-card.is-completed .oai-pilgrimage-course-open::after{position:absolute;right:16px;font-weight:980;line-height:1;letter-spacing:-.06em;transform:rotate(-10deg);pointer-events:none;}
 .oai-pilgrimage-course-date-btn,.oai-pilgrimage-course-count-btn{flex:none;border:0;background:transparent;color:#6d7480;font-family:inherit;font-size:11.5px;font-weight:900;line-height:1.2;white-space:nowrap;}
 .oai-pilgrimage-course-date-btn{text-decoration:underline;text-underline-offset:2px;}
 .oai-pilgrimage-course-count-btn{padding:0;color:#8b5b17;}
@@ -6829,7 +6814,7 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 .oai-pilgrimage-completion-empty{padding:14px;border:1px dashed #d0c19d;border-radius:13px;background:#faf8f3;color:#7d8794;text-align:center;font-size:12.5px;font-weight:800;line-height:1.5;}
 .oai-pilgrimage-completion-close-row{grid-template-columns:1fr!important;}
 @media(max-width:390px){
-  .oai-pilgrimage-course-filters{grid-template-columns:1fr;gap:6px;}
+  
   .oai-pilgrimage-course-date-btn,.oai-pilgrimage-course-count-btn{font-size:11px;}
   .oai-pilgrimage-course-card.is-completed .oai-pilgrimage-course-open::after{right:12px;top:16px;font-size:40px;}
 }
@@ -6847,7 +6832,7 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 }
 #oai-pilgrimage-detail-view .oai-pilgrimage-route-box{
   padding:0!important;
-  border:1px solid var(--plan-line)!important;
+  
   border-radius:16px!important;
   background:#fff!important;
   box-shadow:none!important;
@@ -6867,14 +6852,8 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
   background:#fff!important;
   box-shadow:none!important;
 }
-#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint.start{
-  border-left:4px solid var(--plan-blue)!important;
-  border-bottom:1px solid var(--plan-line)!important;
-}
-#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint.end{
-  border-left:4px solid var(--plan-red)!important;
-  border-top:1px solid var(--plan-line)!important;
-}
+
+
 #oai-pilgrimage-detail-view .oai-pilgrimage-endpoint small{
   font-size:calc(11px * var(--app-font-scale,1))!important;
   font-weight:900!important;
@@ -6894,30 +6873,28 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
   background:#fff!important;
 }
 #oai-pilgrimage-detail-view .oai-pilgrimage-item{
-  grid-template-columns:30px minmax(0,1fr)!important;
+  
   gap:8px!important;
-  min-height:66px!important;
-  padding:8px 2px!important;
+  
+  
   border:0!important;
   border-bottom:1px solid var(--plan-line)!important;
-  border-radius:0!important;
+  
   background:#fff!important;
-  box-shadow:none!important;
+  
 }
 #oai-pilgrimage-detail-view .oai-pilgrimage-item:last-child{
   border-bottom:0!important;
 }
 #oai-pilgrimage-detail-view .oai-pilgrimage-drag{
-  width:28px!important;
-  height:40px!important;
+  
+  
   border-radius:9px!important;
   background:transparent!important;
-  color:#8a95a4!important;
+  
   font-size:22px!important;
 }
-#oai-pilgrimage-detail-view .oai-pilgrimage-main{
-  gap:2px!important;
-}
+
 #oai-pilgrimage-detail-view .oai-pilgrimage-main b{
   color:var(--plan-text)!important;
   font-size:calc(16px * var(--app-font-scale,1))!important;
@@ -6973,7 +6950,7 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
   gap:0!important;
   margin:10px 0 7px!important;
   padding:10px 12px 12px!important;
-  border:1px solid var(--plan-line)!important;
+  
   border-radius:15px!important;
   background:#fff!important;
   box-shadow:none!important;
@@ -7023,29 +7000,15 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 
 
 /* V8-1-14-944: 순례계획 목록 한줄 필터 + GPS 기록 보호 + 실제 순례 위치확인 */
-.oai-pilgrimage-course-filters{
-  grid-template-columns:repeat(3,minmax(0,1fr))!important;
-  gap:7px!important;
-  margin:4px 0 12px!important;
-}
+
 .oai-pilgrimage-course-filters label{display:block!important;min-width:0!important;}
 .oai-pilgrimage-course-filters label>span{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important;}
-.oai-pilgrimage-course-filters select{
-  height:44px!important;
-  padding:0 10px!important;
-  border:1.5px solid #bcc8d5!important;
-  border-radius:12px!important;
-  font-size:calc(13px * var(--app-font-scale,1))!important;
-  text-align-last:center;
-}
+
 @media(max-width:390px){
-  .oai-pilgrimage-course-filters{grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:6px!important;}
-  .oai-pilgrimage-course-filters select{padding:0 6px!important;font-size:12px!important;}
+  .oai-pilgrimage-course-filters{grid-template-columns:repeat(3,minmax(0,1fr))!important;}
+  
 }
-.oai-pilgrimage-course-card.is-completed .oai-pilgrimage-course-open::after{
-  color:rgba(208,28,36,.24)!important;
-  text-shadow:0 1px 0 rgba(255,255,255,.25);
-}
+
 .oai-pilgrimage-completion-item.is-gps-protected{background:#fffaf4;border-color:#d9b98a;}
 .oai-pilgrimage-completion-item-lock{display:inline-flex;align-items:center;gap:4px;color:#9a5b14;font-size:11.5px;font-weight:900;}
 .oai-pilgrimage-completion-item.is-gps-protected .oai-pilgrimage-completion-item-date{text-decoration:none;cursor:default;}
@@ -7083,55 +7046,45 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 
 /* V8-1-14-947: 순례계획 목록 상단 순서/가독성 조정
    년·월·전체를 최상단에 두고, 그 아래 순례계획 세우기 버튼을 배치 */
-#oai-pilgrimage-list-view .oai-pilgrimage-course-filters{
-  margin:4px 0 10px!important;
-}
+
 #oai-pilgrimage-list-view .oai-pilgrimage-course-filters select{
-  height:50px!important;
-  font-size:calc(16px * var(--app-font-scale,1))!important;
+  
+  
   font-weight:950!important;
 }
 #oai-pilgrimage-list-view .oai-pilgrimage-new{
-  min-height:66px!important;
-  margin:0 0 14px!important;
-  font-size:calc(24px * var(--app-font-scale,1))!important;
+  
+  
+  
   font-weight:950!important;
 }
 @media(max-width:390px){
-  #oai-pilgrimage-list-view .oai-pilgrimage-course-filters select{
-    padding:0 5px!important;
-    font-size:calc(15px * var(--app-font-scale,1))!important;
-  }
-  #oai-pilgrimage-list-view .oai-pilgrimage-new{
-    font-size:calc(22px * var(--app-font-scale,1))!important;
-  }
+  
+  
 }
 
 
 /* V8-1-14-948: 순례하기 목록 순례번호 표시 */
-#oai-pilgrimage-detail-view .oai-pilgrimage-item{
-  display:flex!important;
-  align-items:center!important;
-}
+
 #oai-pilgrimage-detail-view .oai-pilgrimage-order{
   flex:0 0 auto;
-  display:inline-flex;
+  
   align-items:center;
   justify-content:center;
-  width:28px;
-  height:28px;
-  margin:0 10px 0 2px;
-  border-radius:50%;
-  background:#f4ead0;
-  border:1.5px solid #b99035;
-  color:#7a5510;
-  font-size:calc(13px * var(--app-font-scale,1));
-  font-weight:950;
+  
+  
+  
+  
+  
+  
+  
+  
+  
   line-height:1;
 }
 #oai-pilgrimage-detail-view .oai-pilgrimage-item.is-done .oai-pilgrimage-order{
-  background:#17365f;
-  border-color:#17365f;
+  
+  
   color:#fff;
 }
 
@@ -7217,7 +7170,7 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 #oai-pilgrimage-list-view{
   display:flex;
   flex-direction:column;
-  gap:12px;
+  
 }
 .oai-pilgrimage-course-filters{
   grid-template-columns:repeat(3,minmax(0,1fr))!important;
@@ -7254,7 +7207,7 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
   gap:10px;
 }
 @media(max-width:390px){
-  #oai-pilgrimage-list-view{gap:10px;}
+  
   .oai-pilgrimage-course-filters{gap:7px!important;padding-bottom:10px!important;}
   .oai-pilgrimage-course-filters select{height:44px!important;padding:0 6px!important;font-size:calc(13px * var(--app-font-scale,1))!important;}
   .oai-pilgrimage-new{min-height:54px!important;font-size:calc(16px * var(--app-font-scale,1))!important;}
@@ -7263,38 +7216,11 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 
 
 /* V8-1-14-951: 순례하기 목록에 우측 순례 배지 추가 + 번호/텍스트 정렬 통일 */
-#oai-pilgrimage-detail-view .oai-pilgrimage-item{
-  display:grid!important;
-  grid-template-columns:28px 34px minmax(0,1fr)!important;
-  align-items:center!important;
-  column-gap:10px!important;
-}
-#oai-pilgrimage-detail-view .oai-pilgrimage-drag{
-  grid-column:1;
-  justify-self:center;
-  width:24px!important;
-  min-width:24px!important;
-  margin:0!important;
-}
-#oai-pilgrimage-detail-view .oai-pilgrimage-order{
-  grid-column:2;
-  justify-self:center;
-  width:30px;
-  height:30px;
-  margin:0!important;
-  font-variant-numeric:tabular-nums;
-  font-feature-settings:"tnum" 1;
-}
-#oai-pilgrimage-detail-view .oai-pilgrimage-main{
-  grid-column:3;
-  min-width:0;
-}
-#oai-pilgrimage-detail-view .oai-pilgrimage-main-head{
-  display:flex;
-  align-items:center;
-  gap:8px;
-  min-width:0;
-}
+
+
+
+
+
 #oai-pilgrimage-detail-view .oai-pilgrimage-main-head b{
   flex:1 1 auto;
   min-width:0;
@@ -7303,20 +7229,20 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
   white-space:nowrap;
 }
 #oai-pilgrimage-detail-view .oai-pilgrimage-waypoint-chip{
-  flex:0 0 auto;
-  display:inline-flex;
-  align-items:center;
-  justify-content:center;
-  min-width:42px;
-  height:24px;
-  padding:0 9px;
-  border-radius:999px;
-  border:1.5px solid #d54c46;
-  background:#fff1f0;
-  color:#c53933;
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   font-size:calc(11px * var(--app-font-scale,1));
   font-weight:950;
-  line-height:1;
+  
   letter-spacing:-.01em;
 }
 #oai-pilgrimage-detail-view .oai-pilgrimage-item.is-done .oai-pilgrimage-waypoint-chip{
@@ -7325,20 +7251,13 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
   color:#86540c;
 }
 @media(max-width:390px){
-  #oai-pilgrimage-detail-view .oai-pilgrimage-item{
-    grid-template-columns:26px 32px minmax(0,1fr)!important;
-    column-gap:8px!important;
-  }
-  #oai-pilgrimage-detail-view .oai-pilgrimage-order{
-    width:28px;
-    height:28px;
-    font-size:calc(12.5px * var(--app-font-scale,1));
-  }
+  
+  
   #oai-pilgrimage-detail-view .oai-pilgrimage-waypoint-chip{
-    min-width:38px;
-    height:22px;
+    
+    
     padding:0 8px;
-    font-size:calc(10.5px * var(--app-font-scale,1));
+    
   }
 }
 
@@ -7347,37 +7266,31 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 .oai-pilgrimage-planner-body{
   padding:10px 16px max(24px,calc(env(safe-area-inset-bottom,0px) + 16px))!important;
 }
-#oai-pilgrimage-list-view{
-  gap:8px!important;
-}
+
 #oai-pilgrimage-list-view .oai-pilgrimage-course-filters{
-  margin:0!important;
-  padding:0 0 8px!important;
+  
+  
   border-bottom:1px solid #d8d0bf!important;
 }
 #oai-pilgrimage-list-view .oai-pilgrimage-new{
-  min-height:50px!important;
-  margin:2px 0 8px!important;
+  
+  
   border-radius:15px!important;
   font-size:calc(16.5px * var(--app-font-scale,1))!important;
   box-shadow:0 2px 6px rgba(23,111,192,.13)!important;
 }
-#oai-pilgrimage-list-view .oai-pilgrimage-course-list{
-  gap:8px!important;
-}
+
 @media(max-width:390px){
   .oai-pilgrimage-planner-body{
     padding:8px 14px max(22px,calc(env(safe-area-inset-bottom,0px) + 14px))!important;
   }
-  #oai-pilgrimage-list-view{
-    gap:7px!important;
-  }
+  
   #oai-pilgrimage-list-view .oai-pilgrimage-course-filters{
     padding-bottom:7px!important;
   }
   #oai-pilgrimage-list-view .oai-pilgrimage-new{
-    min-height:48px!important;
-    margin:1px 0 7px!important;
+    
+    
     font-size:calc(15.5px * var(--app-font-scale,1))!important;
   }
   #oai-pilgrimage-list-view .oai-pilgrimage-course-list{
@@ -7387,46 +7300,35 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 
 
 /* V8-1-14-953: 순례하기 화면 가독성 개선 */
-#oai-pilgrimage-detail-view .oai-pilgrimage-item{
-  grid-template-columns:24px 36px minmax(0,1fr)!important;
-  column-gap:12px!important;
-}
+
 #oai-pilgrimage-detail-view .oai-pilgrimage-drag{
-  width:22px!important;
-  min-width:22px!important;
+  
+  
   color:#8d97a6!important;
 }
 #oai-pilgrimage-detail-view .oai-pilgrimage-order{
-  width:32px!important;
-  height:32px!important;
+  
+  
   border-radius:50%!important;
   background:#b78a22!important;
   border:1.5px solid #a77810!important;
   color:#fff!important;
-  display:grid!important;
-  place-items:center!important;
-  margin:0!important;
-  padding:0!important;
+  
+  
+  
+  
   text-align:center!important;
   font-size:calc(15px * var(--app-font-scale,1))!important;
   font-weight:950!important;
   font-variant-numeric:tabular-nums!important;
   font-feature-settings:"tnum" 1,"lnum" 1!important;
 }
-#oai-pilgrimage-detail-view .oai-pilgrimage-item.is-next .oai-pilgrimage-order{
-  background:#d48806!important;
-  border-color:#bd6f00!important;
-}
+
 #oai-pilgrimage-detail-view .oai-pilgrimage-item.is-done .oai-pilgrimage-order{
   background:#17365f!important;
   border-color:#17365f!important;
 }
-#oai-pilgrimage-detail-view .oai-pilgrimage-main-head{
-  display:grid!important;
-  grid-template-columns:minmax(0,1fr) auto!important;
-  align-items:center!important;
-  column-gap:8px!important;
-}
+
 #oai-pilgrimage-detail-view .oai-pilgrimage-waypoint-chip{
   min-width:46px!important;
   height:24px!important;
@@ -7434,41 +7336,29 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
   border:1.5px solid #cd4842!important;
   background:#fff1f0!important;
   color:#c43731!important;
-  white-space:nowrap!important;
+  
 }
 #oai-pilgrimage-detail-view .oai-pilgrimage-waypoint-chip.is-next{
-  min-width:60px!important;
+  
   border-color:#c87a00!important;
-  background:#fff2d8!important;
+  
   color:#8c5600!important;
-  box-shadow:0 0 0 1px rgba(200,122,0,.08) inset!important;
+  
 }
 #oai-pilgrimage-detail-view .oai-pilgrimage-waypoint-chip.is-done{
-  min-width:62px!important;
+  
   border-color:#2f6b45!important;
-  background:#eef9f0!important;
-  color:#24603a!important;
+  
+  
 }
-#oai-pilgrimage-detail-view .oai-pilgrimage-item.is-next{
-  background:#fff6e7!important;
-  border-bottom:1px solid #e3c07e!important;
-  box-shadow:inset 3px 0 0 #d48806!important;
-}
-#oai-pilgrimage-detail-view .oai-pilgrimage-item.is-next .oai-pilgrimage-main b{
-  color:#744500!important;
-}
-#oai-pilgrimage-detail-view .oai-pilgrimage-item.is-next .oai-pilgrimage-item-metric{
-  color:#9c6a14!important;
-  font-weight:850!important;
-}
+
+
+
 @media(max-width:390px){
-  #oai-pilgrimage-detail-view .oai-pilgrimage-item{
-    grid-template-columns:22px 34px minmax(0,1fr)!important;
-    column-gap:10px!important;
-  }
+  
   #oai-pilgrimage-detail-view .oai-pilgrimage-order{
-    width:30px!important;
-    height:30px!important;
+    
+    
     font-size:calc(14px * var(--app-font-scale,1))!important;
   }
   #oai-pilgrimage-detail-view .oai-pilgrimage-waypoint-chip{
@@ -7476,9 +7366,7 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
     height:22px!important;
     font-size:calc(10px * var(--app-font-scale,1))!important;
   }
-  #oai-pilgrimage-detail-view .oai-pilgrimage-waypoint-chip.is-next{
-    min-width:55px!important;
-  }
+  
   #oai-pilgrimage-detail-view .oai-pilgrimage-waypoint-chip.is-done{
     min-width:58px!important;
   }
@@ -7490,7 +7378,7 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
   gap:6px!important;
 }
 #oai-pilgrimage-list-view .oai-pilgrimage-new{
-  margin:0 0 6px!important;
+  
   min-height:48px!important;
 }
 #oai-pilgrimage-list-view .oai-pilgrimage-course-list{
@@ -7511,18 +7399,18 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
   display:none!important;
 }
 #oai-pilgrimage-detail-view .oai-pilgrimage-main-head{
-  grid-template-columns:minmax(0,1fr) auto!important;
-  align-items:center!important;
+  
+  
   column-gap:8px!important;
 }
 #oai-pilgrimage-detail-view .oai-pilgrimage-waypoint-chip{
-  flex:0 0 auto;
+  
   display:inline-flex;
   align-items:center;
   justify-content:center;
   border-radius:999px;
   line-height:1;
-  white-space:nowrap;
+  
 }
 #oai-pilgrimage-detail-view .oai-pilgrimage-waypoint-chip.is-next{
   width:46px!important;
@@ -7544,17 +7432,9 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
   font-weight:950!important;
   box-shadow:inset 0 -1px 0 rgba(168,115,18,.10)!important;
 }
-#oai-pilgrimage-detail-view .oai-pilgrimage-item.is-next{
-  background:#fff5df!important;
-  border-bottom:1px solid #ddb96d!important;
-  box-shadow:inset 3px 0 0 #d08600!important;
-}
-#oai-pilgrimage-detail-view .oai-pilgrimage-item.is-next .oai-pilgrimage-main b{
-  color:#6f4706!important;
-}
-#oai-pilgrimage-detail-view .oai-pilgrimage-item.is-next .oai-pilgrimage-item-metric{
-  color:#946112!important;
-}
+
+
+
 @media(max-width:390px){
   #oai-pilgrimage-detail-view .oai-pilgrimage-waypoint-chip.is-next{
     width:42px!important;
@@ -7573,22 +7453,13 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 #oai-pilgrimage-detail-view .oai-pilgrimage-waypoint-chip.is-next{
   display:none!important;
 }
-#oai-pilgrimage-detail-view .oai-pilgrimage-item.is-next{
-  background:#f4dfad!important;
-  border-bottom:1px solid #d3a84d!important;
-  box-shadow:inset 4px 0 0 #c97c00!important;
-}
-#oai-pilgrimage-detail-view .oai-pilgrimage-item.is-next .oai-pilgrimage-main b{
-  color:#5f3d05!important;
-}
+
+
 #oai-pilgrimage-detail-view .oai-pilgrimage-item.is-next .oai-pilgrimage-item-metric{
-  color:#7f5510!important;
+  
   font-weight:900!important;
 }
-#oai-pilgrimage-detail-view .oai-pilgrimage-item.is-next .oai-pilgrimage-order{
-  background:#cf8200!important;
-  border-color:#b56e00!important;
-}
+
 
 
 /* V8-1-14-1016: 순례하기 화면의 코스 완료 요약 박스 완전 제거 */
@@ -7600,46 +7471,42 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 
 /* V8-1-14-1016: 순례계획 필터 틀고정 + 정렬 선택 */
 #oai-pilgrimage-list-view .oai-pilgrimage-course-filters{
-  position:sticky!important;
+  
   top:0!important;
-  z-index:12!important;
-  grid-template-columns:repeat(4,minmax(0,1fr))!important;
-  gap:7px!important;
-  margin:0!important;
-  padding:6px 0 9px!important;
-  background:#f4f0e7!important;
-  box-shadow:0 1px 0 #d8d0bf!important;
+  
+  
+  
+  
+  
+  
+  
 }
 #oai-pilgrimage-list-view .oai-pilgrimage-course-filters select{
-  height:44px!important;
-  padding:0 6px!important;
-  font-size:calc(13.5px * var(--app-font-scale,1))!important;
+  
+  
+  
   text-align-last:center!important;
 }
 @media(max-width:390px){
   #oai-pilgrimage-list-view .oai-pilgrimage-course-filters{
     grid-template-columns:repeat(4,minmax(0,1fr))!important;
-    gap:5px!important;
+    
     padding:5px 0 8px!important;
   }
-  #oai-pilgrimage-list-view .oai-pilgrimage-course-filters select{
-    height:42px!important;
-    padding:0 3px!important;
-    font-size:calc(11.5px * var(--app-font-scale,1))!important;
-  }
+  
 }
 
 
 /* V8-1-14-1016: 성지순례 - 순례계획 / 순례완료 탭 분리 */
-#oai-pilgrimage-list-view .oai-pilgrimage-list-sticky{position:sticky!important;top:0!important;z-index:14!important;margin:0 0 8px!important;padding:5px 0 8px!important;background:#f4f0e7!important;box-shadow:0 1px 0 #d8d0bf!important;}
+
 #oai-pilgrimage-list-view .oai-pilgrimage-course-tabs{display:grid!important;grid-template-columns:1fr 1fr!important;gap:7px!important;margin:0 0 7px!important;}
 #oai-pilgrimage-list-view .oai-pilgrimage-course-tabs button{min-height:44px!important;padding:0 10px!important;border:1.5px solid #bcc8d5!important;border-radius:13px!important;background:#fff!important;color:#536273!important;font-family:inherit!important;font-size:calc(15px * var(--app-font-scale,1))!important;font-weight:950!important;cursor:pointer!important;}
 #oai-pilgrimage-list-view .oai-pilgrimage-course-tabs button.is-active{border-color:#176fc0!important;background:#176fc0!important;color:#fff!important;box-shadow:0 2px 6px rgba(23,111,192,.16)!important;}
 #oai-pilgrimage-list-view .oai-pilgrimage-course-filters{position:static!important;z-index:auto!important;margin:0!important;padding:0!important;background:transparent!important;box-shadow:none!important;grid-template-columns:repeat(3,minmax(0,1fr))!important;gap:7px!important;}
 
-#oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-course-filters{display:flex!important;justify-content:flex-end!important;}
-#oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-sort-filter{width:min(42%,170px)!important;}
-#oai-pilgrimage-list-view[data-course-tab="complete"] .oai-pilgrimage-course-filters{display:grid!important;}
+#oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-course-filters{justify-content:flex-end!important;}
+
+
 #oai-pilgrimage-list-view .oai-pilgrimage-course-filters select{height:42px!important;padding:0 7px!important;font-size:calc(13px * var(--app-font-scale,1))!important;}
 
 #oai-pilgrimage-list-view .oai-pilgrimage-new{margin:0 0 8px!important;}
@@ -7653,46 +7520,24 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
   gap:7px!important;
   width:100%!important;
 }
-#oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-list-toolbar{
-  display:grid!important;
-  grid-template-columns:minmax(0,1fr) auto!important;
-}
-#oai-pilgrimage-list-view[data-course-tab="complete"] .oai-pilgrimage-list-toolbar{
-  display:block!important;
-}
+
+
 #oai-pilgrimage-list-view .oai-pilgrimage-list-toolbar .oai-pilgrimage-new{
   margin:0!important;
   min-height:42px!important;
   border-radius:12px!important;
   font-size:calc(15px * var(--app-font-scale,1))!important;
 }
-#oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-course-filters{
-  display:block!important;
-  width:auto!important;
-}
-#oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-sort-filter{
-  display:block!important;
-  width:116px!important;
-}
-#oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-sort-filter select{
-  width:116px!important;
-  height:42px!important;
-  padding:0 5px!important;
-  font-size:calc(12px * var(--app-font-scale,1))!important;
-}
+
+
+
 #oai-pilgrimage-list-view[data-course-tab="complete"] .oai-pilgrimage-course-filters{
-  display:grid!important;
+  
   grid-template-columns:1fr 1fr 1.15fr!important;
   gap:7px!important;
 }
 #oai-pilgrimage-list-view[data-course-tab="complete"] .oai-pilgrimage-new{display:none!important;}
-.oai-pilgrimage-course-plan-actions{
-  display:flex;
-  align-items:center;
-  justify-content:space-between;
-  gap:8px;
-  margin:5px 2px 1px;
-}
+
 .oai-pilgrimage-following-badge{
   display:inline-flex;
   align-items:center;
@@ -7715,10 +7560,7 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
   font-size:calc(12.5px * var(--app-font-scale,1));
   font-weight:950;
 }
-.oai-pilgrimage-course-follow-btn.is-active{
-  background:#176fc0;
-  color:#fff;
-}
+
 .oai-pilgrimage-course-card.is-following{
   padding:4px;
   border:1.5px solid #e0bd58;
@@ -7748,22 +7590,8 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 }
 
 /* 순례계획 탭: 계획세우기 + 정렬을 한 줄의 작은 툴바로 고정 */
-#oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-list-toolbar{
-  display:grid!important;
-  grid-template-columns:minmax(0,1fr) 108px!important;
-  align-items:center!important;
-  gap:8px!important;
-  margin:0!important;
-}
-#oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-list-toolbar .oai-pilgrimage-new{
-  width:100%!important;
-  min-height:38px!important;
-  height:38px!important;
-  padding:0 12px!important;
-  margin:0!important;
-  border-radius:11px!important;
-  font-size:calc(13.5px * var(--app-font-scale,1))!important;
-}
+
+
 #oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-course-filters{
   display:block!important;
   width:108px!important;
@@ -7779,20 +7607,9 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
   width:108px!important;
   margin:0!important;
 }
-#oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-sort-filter select{
-  width:108px!important;
-  min-width:0!important;
-  height:38px!important;
-  padding:0 4px!important;
-  border-radius:11px!important;
-  font-size:calc(11.5px * var(--app-font-scale,1))!important;
-  text-align-last:center!important;
-}
+
 @media(max-width:390px){
-  #oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-list-toolbar{
-    grid-template-columns:minmax(0,1fr) 100px!important;
-    gap:6px!important;
-  }
+  
   #oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-course-filters,
   #oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-sort-filter,
   #oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-sort-filter select{
@@ -7828,17 +7645,12 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 /* V8-1-14-1016: 다음 순례 노란 강조 제거 */
 #oai-pilgrimage-detail-view .oai-pilgrimage-item.is-next,
 #oai-pilgrimage-detail-view.gps-ready .oai-pilgrimage-item.is-next{
-  background:#fff!important;
+  
   border:0!important;
-  border-bottom:1px solid var(--plan-line)!important;
-  box-shadow:none!important;
+  
+  
 }
-#oai-pilgrimage-detail-view .oai-pilgrimage-item.is-next .oai-pilgrimage-order,
-#oai-pilgrimage-detail-view.gps-ready .oai-pilgrimage-item.is-next .oai-pilgrimage-order{
-  background:#f4ead0!important;
-  border:1.5px solid #b99035!important;
-  color:#7a5510!important;
-}
+
 #oai-pilgrimage-detail-view .oai-pilgrimage-item.is-next .oai-pilgrimage-main b,
 #oai-pilgrimage-detail-view.gps-ready .oai-pilgrimage-item.is-next .oai-pilgrimage-main b{
   color:#17213a!important;
@@ -7859,10 +7671,7 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 }
 
 /* 순례하기/순례완료 안의 따라가기 버튼 */
-#oai-pilgrimage-detail-view .oai-pilgrimage-follow{
-  display:block;
-  min-height:44px;
-}
+
 #oai-pilgrimage-detail-view .oai-pilgrimage-follow.is-stop{
   border-color:#b94843!important;
   background:#fff4f3!important;
@@ -7874,14 +7683,14 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
   margin-top:9px;
   border:1.5px solid #c35a54;
   border-radius:12px;
-  background:#fff;
-  color:#a83a35;
+  
+  
   font-family:inherit;
   font-size:calc(13px * var(--app-font-scale,1));
-  font-weight:950;
+  
 }
 #oai-pilgrimage-follow-view .oai-pilgrimage-follow-stop:active{
-  background:#fff1f0;
+  
   transform:scale(.99);
 }
 
@@ -7906,18 +7715,12 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 #oai-pilgrimage-detail-view .oai-pilgrimage-detail-actions{
   display:grid!important;
   grid-template-columns:1fr!important;
-  gap:8px!important;
+  
 }
 #oai-pilgrimage-detail-view:not(.is-completion-view) .oai-pilgrimage-detail-actions .oai-pilgrimage-save:not([hidden]) + .oai-pilgrimage-follow{
   margin-top:0!important;
 }
-#oai-pilgrimage-detail-view .oai-pilgrimage-follow{
-  width:100%!important;
-  min-height:48px!important;
-  border-radius:13px!important;
-  font-size:calc(15px * var(--app-font-scale,1))!important;
-  font-weight:950!important;
-}
+
 #oai-pilgrimage-detail-view.is-completion-view .oai-pilgrimage-follow{
   display:block!important;
 }
@@ -8011,24 +7814,17 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 /* V8-1-14-1016: 성지순례 목록 상단/순례하기 버튼 정렬 통일 */
 
 /* 순례계획 탭 아래 툴바를 위 2개 탭과 같은 1:1 폭으로 맞춤 */
-#oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-list-toolbar{
-  display:grid!important;
-  grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
-  gap:10px!important;
-  align-items:stretch!important;
-  margin:0 0 10px!important;
-  width:100%!important;
-}
+
 #oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-list-toolbar .oai-pilgrimage-new{
   width:100%!important;
   height:46px!important;
   min-height:46px!important;
   margin:0!important;
-  padding:0 10px!important;
-  border:1.5px solid #b58a33!important;
+  
+  
   border-radius:14px!important;
-  background:#fff9eb!important;
-  color:#7a5715!important;
+  
+  
   box-shadow:none!important;
   font-size:calc(14px * var(--app-font-scale,1))!important;
   font-weight:950!important;
@@ -8111,10 +7907,7 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 }
 
 @media(max-width:390px){
-  #oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-list-toolbar{
-    grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
-    gap:8px!important;
-  }
+  
   #oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-list-toolbar .oai-pilgrimage-new,
   #oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-sort-filter select{
     height:44px!important;
@@ -8171,7 +7964,7 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 
 /* 성지순례 상세 / 순례코스 보기 / 다음 순례지 길찾기 최종 규칙 */
 #oai-pilgrimage-detail-view{--oai-pilgrimage-track-width:7px;}
-#oai-pilgrimage-detail-view .oai-pilgrimage-place-title{display:inline-flex!important;align-items:center!important;gap:0!important;min-width:0!important;}
+#oai-pilgrimage-detail-view .oai-pilgrimage-place-title{align-items:center!important;gap:0!important;}
 #oai-pilgrimage-detail-view .oai-pilgrimage-place-title b{min-width:0!important;}
 #oai-pilgrimage-detail-view .oai-pilgrimage-place-dot{display:none!important;}
 
@@ -8184,9 +7977,9 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 #oai-pilgrimage-detail-view.is-active-follow .oai-pilgrimage-follow.is-stop{border:1.5px solid #c3443e!important;background:#fff0ef!important;color:#b5332e!important;}
 #oai-pilgrimage-detail-view .oai-pilgrimage-follow-progress{display:none!important;}
 
-#oai-pilgrimage-detail-view .oai-pilgrimage-plan-list{position:relative!important;padding-left:13px!important;padding-right:13px!important;}
+#oai-pilgrimage-detail-view .oai-pilgrimage-plan-list{position:relative!important;}
 #oai-pilgrimage-detail-view .oai-pilgrimage-plan-list::before{content:""!important;position:absolute!important;left:0!important;top:0!important;bottom:0!important;width:var(--oai-pilgrimage-track-width)!important;background:#169447!important;pointer-events:none!important;z-index:2!important;}
-#oai-pilgrimage-detail-view .oai-pilgrimage-item{position:relative!important;border-left:0!important;padding-left:2px!important;padding-right:2px!important;}
+#oai-pilgrimage-detail-view .oai-pilgrimage-item{padding-left:2px!important;}
 #oai-pilgrimage-detail-view .oai-pilgrimage-item::before{display:none!important;content:none!important;}
 #oai-pilgrimage-detail-view .oai-pilgrimage-endpoint.start{border-left-width:var(--oai-pilgrimage-track-width)!important;}
 #oai-pilgrimage-detail-view .oai-pilgrimage-endpoint.end{border-left-width:var(--oai-pilgrimage-track-width)!important;}
@@ -8309,12 +8102,12 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 }
 
 #oai-pilgrimage-detail-view .oai-pilgrimage-item{
-  position:relative!important;
+  
   display:grid!important;
-  grid-template-columns:24px 36px minmax(0,1fr)!important;
+  
   grid-template-rows:auto!important;
   align-items:center!important;
-  column-gap:12px!important;
+  
   min-height:72px!important;
   padding:8px 2px!important;
   padding-right:2px!important;
@@ -8325,19 +8118,19 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 }
 
 #oai-pilgrimage-detail-view .oai-pilgrimage-drag{
-  grid-column:1!important;
+  
   grid-row:1!important;
-  justify-self:center!important;
+  
   align-self:center!important;
-  width:22px!important;
-  min-width:22px!important;
-  height:40px!important;
-  margin:0!important;
-  padding:0!important;
+  
+  
+  
+  
+  
 }
 
 #oai-pilgrimage-detail-view .oai-pilgrimage-order{
-  grid-column:2!important;
+  
   grid-row:1!important;
   justify-self:center!important;
   align-self:center!important;
@@ -8351,7 +8144,7 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 }
 
 #oai-pilgrimage-detail-view .oai-pilgrimage-main{
-  grid-column:3!important;
+  
   grid-row:1!important;
   min-width:0!important;
   width:100%!important;
@@ -8415,7 +8208,7 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 
 #oai-pilgrimage-detail-view:not(.is-completion-view) .oai-pilgrimage-item.is-next .oai-pilgrimage-next-label{
   position:absolute!important;
-  right:8px!important;
+  
   top:50%!important;
   transform:translateY(-50%)!important;
   z-index:5!important;
@@ -8447,9 +8240,7 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 }
 
 /* 순례완료는 다음 라벨 공간을 전혀 사용하지 않는다 */
-#oai-pilgrimage-detail-view.is-completion-view .oai-pilgrimage-item{
-  padding-right:2px!important;
-}
+
 
 #oai-pilgrimage-detail-view.is-completion-view .oai-pilgrimage-next-label{
   display:none!important;
@@ -8458,19 +8249,17 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 /* 작은 화면에서도 동일한 열 구조를 유지 */
 @media(max-width:390px){
   #oai-pilgrimage-detail-view .oai-pilgrimage-item{
-    grid-template-columns:22px 34px minmax(0,1fr)!important;
-    column-gap:9px!important;
+    
+    
     min-height:68px!important;
   }
   #oai-pilgrimage-detail-view .oai-pilgrimage-order{
     width:30px!important;
     height:30px!important;
   }
-  #oai-pilgrimage-detail-view:not(.is-completion-view) .oai-pilgrimage-item.is-next{
-    padding-right:62px!important;
-  }
+  
   #oai-pilgrimage-detail-view:not(.is-completion-view) .oai-pilgrimage-item.is-next .oai-pilgrimage-next-label{
-    right:6px!important;
+    
     width:45px!important;
     min-width:45px!important;
     font-size:calc(9.8px * var(--app-font-scale,1))!important;
@@ -8481,9 +8270,7 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 
 
 /* 일반 길찾기 결과 화면: X 위치만 조정 */
-html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-sheet-x{
-  top:22px!important;
-}
+
 
 /* V8-1-14-1016: 순례 길찾기 UI 통합 규칙
    입력창 가로 위치/폭은 일반 성지·성당·피정 길찾기와 동일한
@@ -8875,16 +8662,9 @@ html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-total-card >
 
 
 /* V8-1-14-1041: 순례완료에서 다녀온 순례코스 수동 등록 */
-#oai-pilgrimage-list-view .oai-pilgrimage-list-sticky{
-  position:sticky!important;
-  top:0!important;
-  z-index:40!important;
-  background:#f4f0e7!important;
-}
+
 /* 순례완료의 년/월/최근순례까지 sticky 영역 안에서 함께 고정 */
-#oai-pilgrimage-list-view[data-course-tab="complete"] .oai-pilgrimage-course-filters{
-  position:static!important;
-}
+
 .oai-pilgrimage-manual-register-btn{
   display:block;
   width:100%;
@@ -8913,32 +8693,12 @@ html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-total-card >
 
 /* V8-1-14-1042: 순례완료 틀고정 범위 = 탭 + 년/월까지만 */
 
-#oai-pilgrimage-list-view .oai-pilgrimage-complete-fixed-filters{
-  display:grid;
-  grid-template-columns:minmax(0,1fr) minmax(0,1fr);
-  gap:7px;
-  width:100%;
-}
+
 #oai-pilgrimage-list-view .oai-pilgrimage-complete-fixed-filters[hidden]{
   display:none!important;
 }
-#oai-pilgrimage-list-view .oai-pilgrimage-complete-fixed-filters label{
-  display:block;
-  min-width:0;
-}
-#oai-pilgrimage-list-view .oai-pilgrimage-complete-fixed-filters select{
-  width:100%;
-  height:42px!important;
-  min-width:0;
-  padding:0 7px!important;
-  border:1.5px solid #bcc8d5!important;
-  border-radius:14px!important;
-  background:#fff!important;
-  color:#17213a!important;
-  font-size:calc(13px * var(--app-font-scale,1))!important;
-  font-weight:900!important;
-  text-align-last:center!important;
-}
+
+
 /* 최근순례/최근수정/이름순은 sticky 밖에서 목록과 함께 스크롤 */
 #oai-pilgrimage-list-view .oai-pilgrimage-list-toolbar{
   position:static!important;
@@ -8946,7 +8706,7 @@ html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-total-card >
   margin:0 0 8px!important;
 }
 #oai-pilgrimage-list-view[data-course-tab="complete"] .oai-pilgrimage-list-toolbar{
-  display:flex!important;
+  
   justify-content:flex-end!important;
 }
 #oai-pilgrimage-list-view[data-course-tab="complete"] .oai-pilgrimage-course-filters{
@@ -8977,14 +8737,8 @@ html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-total-card >
   text-align-last:center!important;
 }
 @media(max-width:390px){
-  #oai-pilgrimage-list-view .oai-pilgrimage-complete-fixed-filters{
-    gap:5px;
-  }
-  #oai-pilgrimage-list-view .oai-pilgrimage-complete-fixed-filters select{
-    height:40px!important;
-    padding:0 4px!important;
-    font-size:calc(11.5px * var(--app-font-scale,1))!important;
-  }
+  
+  
   #oai-pilgrimage-list-view[data-course-tab="complete"] .oai-pilgrimage-course-filters{
     width:min(46%,155px)!important;
   }
@@ -8999,11 +8753,11 @@ html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-total-card >
 /* V8-1-14-1043: 년 · 월 · 최근순례 한 줄 + 그 줄까지 틀고정 */
 #oai-pilgrimage-list-view .oai-pilgrimage-list-sticky{
   position:sticky!important;
-  top:0!important;
-  z-index:40!important;
+  
+  
   margin:0 0 8px!important;
   padding:5px 0 8px!important;
-  background:#f4f0e7!important;
+  
   box-shadow:0 1px 0 #d8d0bf!important;
 }
 #oai-pilgrimage-list-view .oai-pilgrimage-complete-fixed-filters{
@@ -9034,7 +8788,7 @@ html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-total-card >
 
 /* 계획 탭에서는 같은 고정행에서 년/월만 숨기고 정렬만 우측에 유지 */
 #oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-complete-fixed-filters{
-  display:flex!important;
+  
   justify-content:flex-end!important;
 }
 #oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-complete-fixed-filters .oai-pilgrimage-complete-only{
@@ -9046,10 +8800,7 @@ html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-total-card >
 
 /* 최근순례 select는 더 이상 별도 toolbar에 있지 않음 */
 
-#oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-list-toolbar{
-  display:block!important;
-  margin:0 0 8px!important;
-}
+
 #oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-new{
   display:block!important;
   width:100%!important;
@@ -9073,11 +8824,9 @@ html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-total-card >
 /* V8-1-14-1044: 순례코스 이중 sticky 충돌 수정
    상단 module-bar가 이미 top:0 고정이므로,
    탭 + 년/월/최근순례 고정영역은 실제 헤더 높이 바로 아래에 붙인다. */
-#oai-pilgrimage-planner-modal{
-  --oai-pilgrimage-list-sticky-top:126px;
-}
+
 #oai-pilgrimage-list-view .oai-pilgrimage-list-sticky{
-  top:var(--oai-pilgrimage-list-sticky-top,126px)!important;
+  
   z-index:110!important;
   background:#f4f0e7!important;
   isolation:isolate!important;
@@ -9091,7 +8840,7 @@ html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-total-card >
   --oai-pilgrimage-list-sticky-top:136px;
 }
 #oai-pilgrimage-list-view .oai-pilgrimage-list-sticky{
-  top:var(--oai-pilgrimage-list-sticky-top,136px)!important;
+  
   transform:none!important;
   transition:none!important;
   will-change:auto!important;
@@ -9172,8 +8921,8 @@ html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-total-card >
 #oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-complete-fixed-filters{display:none!important;}
 #oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-list-toolbar{
   display:grid!important;
-  grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
-  gap:10px!important;
+  
+  
   width:100%!important;
   margin:0!important;
   align-items:stretch!important;
@@ -9198,7 +8947,7 @@ html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-total-card >
 }
 #oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-plan-sort-filter{
   display:block!important;
-  min-width:0!important;
+  
   margin:0!important;
 }
 #oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-plan-sort-filter select{
@@ -9209,7 +8958,7 @@ html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-total-card >
   text-align-last:center!important;
 }
 @media(max-width:390px){
-  #oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-list-toolbar{gap:8px!important;}
+  
   #oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-list-toolbar .oai-pilgrimage-new,
   #oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-plan-sort-filter select{
     height:44px!important;
@@ -9330,37 +9079,26 @@ html.oai-pilgrimage-route-direct #sheet-route #rs-pilgrimage-return-btn{
 }
 
 /* 순례지 순서이동 핸들(⋮)을 왼쪽에서 오른쪽으로 이동 */
-#oai-pilgrimage-detail-view .oai-pilgrimage-item{
-  grid-template-columns:36px minmax(0,1fr) 24px!important;
-  column-gap:12px!important;
-}
+
 
 
 #oai-pilgrimage-detail-view .oai-pilgrimage-drag{
   grid-column:3!important;
   justify-self:end!important;
-  width:22px!important;
-  min-width:22px!important;
+  
+  
 }
 
 /* 다음 순례지 라벨은 기존 오른쪽 영역을 그대로 사용하고 핸들은 그 왼쪽에 유지 */
-#oai-pilgrimage-detail-view:not(.is-completion-view) .oai-pilgrimage-item.is-next{
-  padding-right:70px!important;
-}
+
 
 @media(max-width:390px){
   #oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-list-toolbar{
     grid-template-columns:minmax(0,.70fr) minmax(0,1.50fr)!important;
     gap:8px!important;
   }
-  #oai-pilgrimage-detail-view .oai-pilgrimage-item{
-    grid-template-columns:34px minmax(0,1fr) 22px!important;
-    column-gap:9px!important;
-  }
-  #oai-pilgrimage-detail-view .oai-pilgrimage-drag{
-    width:20px!important;
-    min-width:20px!important;
-  }
+  
+  
 }
 
 
