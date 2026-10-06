@@ -1,0 +1,75 @@
+plugins {
+    id 'com.android.application'
+}
+
+def hasReleaseSigning = System.getenv('KEYSTORE_FILE') &&
+        System.getenv('KEYSTORE_PASSWORD') &&
+        System.getenv('KEY_ALIAS') &&
+        System.getenv('KEY_PASSWORD')
+
+android {
+    namespace 'kr.catholic.gildonmu'
+    compileSdk 36
+
+    // MainActivity에서 BuildConfig.VERSION_CODE를 사용하므로
+    // AGP 8+에서 비활성화된 BuildConfig 생성을 이 앱 모듈에서 명시적으로 켭니다.
+    buildFeatures {
+        buildConfig true
+    }
+
+    defaultConfig {
+        // 중요: 기존 Google Play 앱의 패키지명과 반드시 같아야 업데이트 업로드가 됩니다.
+        // 현재 첨부 ZIP의 assetlinks.json 기준 package_name은 kr.catholic.gildonmu 입니다.
+        applicationId 'kr.catholic.gildonmu'
+        minSdk 24
+        targetSdk 36
+        // Play Console에서 "이미 사용한 versionCode"라고 나오면 이 숫자만 더 크게 올리세요.
+        versionCode 297
+        versionName '1.2.97'
+    }
+
+    signingConfigs {
+        release {
+            if (hasReleaseSigning) {
+                storeFile file(System.getenv('KEYSTORE_FILE'))
+                storePassword System.getenv('KEYSTORE_PASSWORD')
+                keyAlias System.getenv('KEY_ALIAS')
+                keyPassword System.getenv('KEY_PASSWORD')
+            }
+        }
+    }
+
+    buildTypes {
+        debug {
+            applicationIdSuffix '.debug'
+            versionNameSuffix '-debug'
+        }
+        release {
+            // Google Play 권장 release 최적화: R8 코드 축소 + 미사용 리소스 제거
+            minifyEnabled true
+            shrinkResources true
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+            if (hasReleaseSigning) {
+                signingConfig signingConfigs.release
+            }
+        }
+    }
+}
+
+
+dependencies {
+    // Fragment 1.8.9가 사용하는 kotlin-stdlib 1.8.22와
+    // Play App Update의 전이 종속성 kotlin-stdlib-jdk8 1.6.21이 섞이면
+    // Kotlin 1.8에서 통합된 JDK 7/8 클래스가 중복됩니다.
+    // Kotlin BOM을 종속성 버전의 단일 기준으로 사용해 모두 1.8.22로 정렬합니다.
+    implementation platform('org.jetbrains.kotlin:kotlin-bom:1.8.22')
+    implementation 'org.jetbrains.kotlin:kotlin-stdlib:1.8.22'
+
+    implementation 'com.google.android.play:app-update:2.1.0'
+    // Google Drive appDataFolder 권한 요청(사용자의 Google Drive에만 기록 보관)
+    implementation 'com.google.android.gms:play-services-auth:22.0.0'
+
+    // Play Console이 291에서 감지한 오래된 전이 종속성(fragment:1.0.0)을
+    // 현재 안정 버전으로 명시적으로 통일합니다.
+    implementation 'androidx.fragment:fragment:1.8.9'
+}
