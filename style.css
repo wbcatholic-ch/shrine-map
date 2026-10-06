@@ -9373,3 +9373,34 @@ html.oai-pilgrimage-course-route-view #sheet-route #rs-pilgrimage-return-btn{
 #sheet-route .rs-drag-slot.rs-drag-shift{
   transition:transform .10s cubic-bezier(.2,.75,.25,1)!important;
 }
+
+
+/* V8-1-14-1087: 순례완료 -> 순례코스 보기 전용 읽기 모드.
+   경로는 자동 계산된 상태로 보여 주되 장소 편집/검색/재선택/드래그는 모두 차단한다.
+   거리·시간·카카오내비·순례완료 복귀만 유지한다. */
+html.oai-pilgrimage-course-view-readonly #sheet-route .rs-start-box,
+html.oai-pilgrimage-course-view-readonly #sheet-route .rs-waypoint-box,
+html.oai-pilgrimage-course-view-readonly #sheet-route .rs-end-box,
+html.oai-pilgrimage-course-view-readonly #sheet-route #rs-waypoints-summary-box{
+  pointer-events:none!important;
+  cursor:default!important;
+}
+html.oai-pilgrimage-course-view-readonly #sheet-route .rs-x,
+html.oai-pilgrimage-course-view-readonly #sheet-route .rs-quick-select,
+html.oai-pilgrimage-course-view-readonly #sheet-route .rs-drag-handle,
+html.oai-pilgrimage-course-view-readonly #sheet-route .rs-drag-slot,
+html.oai-pilgrimage-course-view-readonly #sheet-route #rs-add-waypoint-btn,
+html.oai-pilgrimage-course-view-readonly #sheet-route #rs-search-btn,
+html.oai-pilgrimage-course-view-readonly #sheet-route #rs-reset-btn,
+html.oai-pilgrimage-course-view-readonly #sheet-route #rs-pilgrimage-plan-btn,
+html.oai-pilgrimage-course-view-readonly #sheet-route #rs-result-tip{
+  display:none!important;
+}
+html.oai-pilgrimage-course-view-readonly #sheet-route #rs-kakao-btn,
+html.oai-pilgrimage-course-view-readonly #sheet-route #rs-pilgrimage-return-btn{
+  display:flex!important;
+}
+html.oai-pilgrimage-course-view-readonly #sheet-route #rs-pilgrimage-return-btn{
+  width:100%!important;
+  margin-top:10px!important;
+}

@@ -11715,10 +11715,6 @@ function _syncRouteWaypointBoxes(){
   });
   /* V8-1-14-1076: 순례코스 보기도 일반 길찾기와 같은 입력/결과 구조를 사용한다.
      작은 화면의 결과에서는 경유지 요약, 큰 화면에서는 개별 경유지 칸을 유지한다. */
-  const courseViewReady=!!(
-    _isPilgrimageCourseViewReadOnly() &&
-    window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__===true
-  );
   const summaryVisible=!!(resultShowing && routeWaypoints.length && !foldWide);
   const routeUiResultMode=!!resultShowing;
   // 경유지 4번째 칸이 '생기는 순간'부터 카드 높이를 고정한다.
@@ -12588,8 +12584,8 @@ function _pilgrimageCourseViewKind(){
   return String(window.__OAI_PILGRIMAGE_COURSE_VIEW_KIND__||'');
 }
 function _isPilgrimageCourseViewReadOnly(){
-  /* 완료 코스에서 들어온 기존 '순례코스 보기'만 결과 자동표시 모드를 유지한다. */
-  return _pilgrimageCourseViewKind()==='complete' || window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__===true;
+  /* 순례완료에서 들어온 순례코스 보기만 완전한 읽기 전용으로 사용한다. */
+  return window.__OAI_PILGRIMAGE_COURSE_VIEW__===true && _pilgrimageCourseViewKind()==='complete';
 }
 function _isActivePilgrimageCourseRouteView(){
   /* 진행 중 '순례하기'에서 들어온 코스 지도는 일반 길찾기와 같은 편집/검색 UI를 쓴다. */
@@ -12660,26 +12656,28 @@ function _schedulePilgrimageRouteResult(label){
 }
 function _applyPilgrimageCourseViewReadOnlyState(){
   const on=_isAnyPilgrimageCourseView();
-  /* V8-1-14-1081:
-     - 순례하기 -> 순례코스 보기: 일반 길찾기 UI/기능을 그대로 사용한다.
-     - 순례완료 -> 순례코스 보기: 기존 자동 결과 표시 흐름을 유지한다.
-     공통으로 저장된 원래 순례코스는 이 지도 화면의 임시 조작으로 변경하지 않는다. */
+  const readOnly=_isPilgrimageCourseViewReadOnly();
+  /* V8-1-14-1087:
+     - 순례하기 -> 순례코스 보기: 경로검색 완료 상태로 열고 이후 일반 길찾기와 동일하게 편집 가능.
+     - 순례완료 -> 순례코스 보기: 경로검색 완료 상태의 읽기 전용 화면. 거리/시간/카카오내비/복귀만 제공.
+     저장된 원래 순례코스는 어느 모드에서도 이 지도 화면의 임시 조작으로 변경하지 않는다. */
   try{
-    document.documentElement.classList.remove('oai-pilgrimage-course-view-readonly');
+    document.documentElement.classList.toggle('oai-pilgrimage-course-view-readonly',readOnly);
     document.documentElement.classList.toggle('oai-pilgrimage-course-route-view',on);
     document.documentElement.classList.toggle('oai-pilgrimage-course-active-route',_isActivePilgrimageCourseRouteView());
   }catch(_e){}
   try{
     const sheet=document.getElementById('sheet-route');
     if(sheet){
-      sheet.classList.remove('oai-course-view-readonly');
+      sheet.classList.toggle('oai-course-view-readonly',readOnly);
       sheet.classList.toggle('oai-course-route-view',on);
       sheet.classList.toggle('oai-course-active-route',_isActivePilgrimageCourseRouteView());
+      sheet.setAttribute('aria-readonly',readOnly?'true':'false');
     }
   }catch(_e){}
 }
 function _isPilgrimageMapEditReturnMode(){
-  return !!(window.__OAI_PILGRIMAGE_ROUTE_EDIT__ && window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__!==true);
+  return !!window.__OAI_PILGRIMAGE_ROUTE_EDIT__;
 }
 function _syncPilgrimageRouteReturnButton(){
   try{
@@ -12695,13 +12693,12 @@ function _syncPilgrimageRouteReturnButton(){
     const result=$('rs-result');
     const resultShowing=!!(result&&result.style.display!=='none');
     if(courseView){
-      btn.textContent='↩ 순례코스보기로 돌아가기';
+      const kind=_pilgrimageCourseViewKind();
+      btn.textContent=kind==='complete'?'↩ 순례완료로 돌아가기':'↩ 순례하기로 돌아가기';
       if(resultShowing || _isPilgrimageCourseViewReadOnly()){
-        /* 순례완료에서 들어온 기존 코스 보기는 이전과 같이 결과 영역에 둔다. */
         const resultBox=document.querySelector('#rs-result .rs-result')||result;
         if(resultBox&&btn.parentNode!==resultBox)resultBox.appendChild(btn);
       }else{
-        /* 순례하기에서 일반 길찾기처럼 진입한 직후에도 복귀 버튼은 항상 접근 가능하게 둔다. */
         const top=$('rs-top');
         const actionRow=top&&top.querySelector('.rs-action-row');
         if(actionRow&&actionRow.parentNode){
@@ -12754,6 +12751,7 @@ function _dropEmptyWaypointInputsForRouteResult(){
 }
 
 function doSearchRoute(){ document.activeElement&&document.activeElement.blur();
+  if(_isPilgrimageCourseViewReadOnly()) return;
   if(!(_rS&&_rS.lat&&_rS.lng&&_rE&&_rE.lat&&_rE.lng)){
     _showRouteGuideText('출발지와 도착지를 먼저 선택하세요');
     _updateSearchBtn();
@@ -13123,6 +13121,7 @@ function _isRouteResultShowing(){
 }
 
 function _returnRouteResultToInputWindow(){
+  if(_isPilgrimageCourseViewReadOnly()) return true;
   if(!_isRouteResultShowing()) return false;
   _clearRouteResultOnly();
   _syncRoutePointLabels();
@@ -13150,6 +13149,7 @@ function _clearRouteResultOnly(){
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 function clearRoute(role, opts){
+  if(_isPilgrimageCourseViewReadOnly()) return;
   if(window.__oaiPilgrimageRouteReturn===true) return;
   opts = opts || {};
   const keepWaypointBox = !!(opts.keepWaypointBox && _isRouteWaypointRole(role));
@@ -14548,6 +14548,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   });
 
   function openRouteRoleFromBox(role){
+    if(_isPilgrimageCourseViewReadOnly()) return;
     // 경로 결과 화면에서는 출발·경유·도착 어느 칸을 눌러도
     // 곧바로 장소검색 전체화면을 열지 않고 먼저 편집입력 화면으로 돌아간다.
     // 편집입력 화면에서 해당 칸을 다시 누를 때 장소검색을 연다.
@@ -14556,7 +14557,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   on('rs-start-box', 'click', function() { openRouteRoleFromBox('start'); });
   on('rs-end-box',   'click', function() { openRouteRoleFromBox('end'); });
-  on('rs-waypoints-summary-box', 'click', function(e) { if(e){ e.preventDefault(); e.stopPropagation(); } _returnRouteResultToInputWindow(); });
+  on('rs-waypoints-summary-box', 'click', function(e) { if(e){ e.preventDefault(); e.stopPropagation(); } if(_isPilgrimageCourseViewReadOnly()) return; _returnRouteResultToInputWindow(); });
   on('rs-waypoint-box', 'click', function() { openRouteRoleFromBox('waypoint'); });
   on('rs-waypoint2-box', 'click', function() { openRouteRoleFromBox('waypoint2'); });
   on('rs-waypoint3-box', 'click', function() { openRouteRoleFromBox('waypoint3'); });
@@ -14569,6 +14570,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   on('rs-waypoint10-box', 'click', function() { openRouteRoleFromBox('waypoint10'); });
   on('rs-add-waypoint-btn', 'click', function(e) {
     if(e){ e.preventDefault(); e.stopPropagation(); }
+    if(_isPilgrimageCourseViewReadOnly()) return;
     var role=(this && this.dataset && this.dataset.nextWaypointRole) || (typeof _nextAvailableWaypointRole === 'function' ? _nextAvailableWaypointRole() : '') || 'waypoint';
     _beginWaypointAddMode(role);
   });
@@ -14623,6 +14625,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   _updateAllRouteFavoriteButtons();
   _renderRouteItinerary();
   on('rs-search-btn','click', function() {
+    if(_isPilgrimageCourseViewReadOnly()) return;
     doSearchRoute();
   });
   on('rs-pilgrimage-return-btn','click', function() {
@@ -14635,6 +14638,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   });
   on('rs-kakao-btn', 'click', function() { doKakaoRoute(); });
   on('rs-reset-btn', 'click', function() {
+    if(_isPilgrimageCourseViewReadOnly()) return;
     resetRoute({ fromButton: true });
   });
 
@@ -17182,11 +17186,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         _refreshRoutePilgrimageButtonMode();
         _updateSearchBtn();
         _syncPilgrimageRouteReturnButton();
-        if(readOnly){
+        if(readOnly||normalRoute){
           setTimeout(function(){
             try{
               _syncRouteWaypointBoxes();
-              _schedulePilgrimageRouteResult('순례코스 보기');
+              _schedulePilgrimageRouteResult(readOnly?'순례완료 코스 보기':'순례하기 코스 보기');
             }catch(_e){}
           },60);
         }
@@ -17404,11 +17408,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   async function openPilgrimageCourseMap(){
     const pts=_pilgrimageCoursePoints();
     if(!pts.length){alert('지도에 표시할 순례 코스가 없습니다.');return;}
-    /* V8-1-14-1081
-       순례코스 보기는 진입 출처를 분리한다.
-       1) 순례하기(진행/계획) -> 일반 길찾기와 같은 입력·드래그·검색·결과 기능을 사용하고,
-          '순례코스보기로 돌아가기'만 추가한다. 자동 경로검색은 하지 않는다.
-       2) 순례완료 -> 기존 순례코스 보기 동작(자동 결과 표시)을 그대로 유지한다. */
+    /* V8-1-14-1087
+       순례코스 보기는 진입 출처별 역할을 완전히 분리한다.
+       1) 순례하기 -> 경로검색 완료 상태로 열고 이후 일반 길찾기와 동일하게 편집/재검색 가능.
+       2) 순례완료 -> 경로검색 완료 상태의 읽기 전용 보기. 거리/시간/카카오내비/복귀만 사용. */
     const fromCompleted=pilgrimageDetailMode==='complete';
     try{
       window.__OAI_PILGRIMAGE_COURSE_VIEW__=true;
@@ -17428,8 +17431,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function returnFromPilgrimageCourseMap(){
     if(!window.__OAI_PILGRIMAGE_COURSE_VIEW__)return false;
+    const kind=_pilgrimageCourseViewKind();
     clearPilgrimageCourseMap();
-    try{openPlanner({returnFromSearch:true});setView('detail');renderDetail();}catch(_e){}
+    try{
+      pilgrimageDetailMode=kind==='complete'?'complete':'plan';
+      openPlanner({returnFromSearch:true});
+      setView('detail');
+      renderDetail();
+    }catch(_e){}
     return true;
   }
   window._oaiReturnFromPilgrimageCourseMap=returnFromPilgrimageCourseMap;
