@@ -1950,6 +1950,58 @@ html:not(.ios-device).oai-screen-compact-short #sheet-route .rs-x {
   
   
 }
+
+/* V8-1-14-1091: 길찾기 상태 구분
+   입력/편집 중에는 기존의 진한 역할색을 유지하고,
+   경로검색 완료 상태에서는 출발·경유·도착 선택창을 연하게 표시한다.
+   결과를 닫고 편집 화면으로 돌아오면 route-result-showing 클래스가 제거되어
+   자동으로 기존 진한 색으로 복귀한다. */
+#sheet-route.route-result-showing .rs-start-box{
+  background:#f8fbff!important;
+  border-color:#a8bfdc!important;
+}
+#sheet-route.route-result-showing .rs-waypoint-box,
+#sheet-route.route-result-showing .rs-waypoint2-box,
+#sheet-route.route-result-showing .rs-waypoint3-box,
+#sheet-route.route-result-showing .rs-waypoint4-box,
+#sheet-route.route-result-showing .rs-waypoint5-box,
+#sheet-route.route-result-showing .rs-waypoint6-box,
+#sheet-route.route-result-showing .rs-waypoint7-box,
+#sheet-route.route-result-showing .rs-waypoint8-box,
+#sheet-route.route-result-showing .rs-waypoint9-box,
+#sheet-route.route-result-showing .rs-waypoint10-box,
+#sheet-route.route-result-showing .rs-waypoints-summary-box{
+  background:#fffdf8!important;
+  border-color:#e5cfaa!important;
+}
+#sheet-route.route-result-showing .rs-end-box{
+  background:#fffafa!important;
+  border-color:#dfb9b5!important;
+}
+
+/* 순례완료에서 들어온 읽기 전용 코스보기는 항상 결과 상태의 연한 선택창을 사용한다. */
+html.oai-pilgrimage-course-view-readonly #sheet-route .rs-start-box{
+  background:#f8fbff!important;
+  border-color:#a8bfdc!important;
+}
+html.oai-pilgrimage-course-view-readonly #sheet-route .rs-waypoint-box,
+html.oai-pilgrimage-course-view-readonly #sheet-route .rs-waypoint2-box,
+html.oai-pilgrimage-course-view-readonly #sheet-route .rs-waypoint3-box,
+html.oai-pilgrimage-course-view-readonly #sheet-route .rs-waypoint4-box,
+html.oai-pilgrimage-course-view-readonly #sheet-route .rs-waypoint5-box,
+html.oai-pilgrimage-course-view-readonly #sheet-route .rs-waypoint6-box,
+html.oai-pilgrimage-course-view-readonly #sheet-route .rs-waypoint7-box,
+html.oai-pilgrimage-course-view-readonly #sheet-route .rs-waypoint8-box,
+html.oai-pilgrimage-course-view-readonly #sheet-route .rs-waypoint9-box,
+html.oai-pilgrimage-course-view-readonly #sheet-route .rs-waypoint10-box,
+html.oai-pilgrimage-course-view-readonly #sheet-route .rs-waypoints-summary-box{
+  background:#fffdf8!important;
+  border-color:#e5cfaa!important;
+}
+html.oai-pilgrimage-course-view-readonly #sheet-route .rs-end-box{
+  background:#fffafa!important;
+  border-color:#dfb9b5!important;
+}
 #sheet-route:not(.route-waypoint-scroll) {
   overflow: visible !important;
 }
@@ -9375,7 +9427,7 @@ html.oai-pilgrimage-course-route-view #sheet-route #rs-pilgrimage-return-btn{
 }
 
 
-/* V8-1-14-1090: 순례완료 -> 순례코스 보기 전용 읽기 모드.
+/* V8-1-14-1091: 순례완료 -> 순례코스 보기 전용 읽기 모드.
    경로는 자동 계산된 상태로 보여 주되 장소 편집/검색/재선택/드래그는 모두 차단한다.
    거리·시간·카카오내비·순례완료 복귀만 유지한다. */
 html.oai-pilgrimage-course-view-readonly #sheet-route .rs-start-box,
@@ -9406,7 +9458,7 @@ html.oai-pilgrimage-course-view-readonly #sheet-route #rs-pilgrimage-return-btn{
 }
 
 
-/* V8-1-14-1090: 순례완료 코스보기는 완전한 읽기 전용 화면으로 고정한다.
+/* V8-1-14-1091: 순례완료 코스보기는 완전한 읽기 전용 화면으로 고정한다.
    일반 길찾기의 검색/필터/편집 조작을 노출하지 않고 거리·시간·카카오내비·복귀만 사용한다. */
 html.oai-pilgrimage-course-view-readonly #tabbar,
 html.oai-pilgrimage-course-view-readonly #shrine-visit-map-filter,
