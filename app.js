@@ -1437,18 +1437,34 @@ function applyExternalReturnStabilize(){
    applyExternalReturnStabilize()가 연속 실행되지 않도록 한 진입점으로 모은다.
    Android native resume / GPS / 순례 / 기능별 복귀 판단은 건드리지 않는다. */
 var _oaiExternalLifecycleTimer = 0;
+function oaiCancelExternalReturnLifecycle(){
+  try{
+    if(_oaiExternalLifecycleTimer){
+      clearTimeout(_oaiExternalLifecycleTimer);
+      _oaiExternalLifecycleTimer = 0;
+    }
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+}
+/* V8-1-14-1074: lifecycle 5단계.
+   4단계에서 단일화한 복귀 타이머가 다시 hidden/pagehide 된 뒤 늦게 실행되지 않도록
+   hidden 진입 시 예약을 취소하고, 실제 실행 직전에도 visible 상태를 재확인한다.
+   기능별 복귀/Android native resume/GPS/순례 판단은 그대로 둔다. */
 function oaiScheduleExternalReturnLifecycle(reason, delay){
   try{
-    clearTimeout(_oaiExternalLifecycleTimer);
+    oaiCancelExternalReturnLifecycle();
     var wait = Math.max(0, Number(delay) || 0);
     _oaiExternalLifecycleTimer = setTimeout(function(){
       _oaiExternalLifecycleTimer = 0;
-      try{ applyExternalReturnStabilize(reason || 'lifecycle-return'); }catch(e){ console.warn('[가톨릭길동무]', e); }
+      try{
+        if(document.visibilityState === 'hidden') return;
+        applyExternalReturnStabilize(reason || 'lifecycle-return');
+      }catch(e){ console.warn('[가톨릭길동무]', e); }
     }, wait);
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 function oaiRecordExternalHiddenLifecycle(){
   try{
+    oaiCancelExternalReturnLifecycle();
     if(sessionStorage.getItem('oai_external_nav_pending') === '1'){
       sessionStorage.setItem('oai_external_nav_pagehide','1');
       /* 외부 브라우저로 나간 동안 기존 진입 보호창은 유지한다. */
