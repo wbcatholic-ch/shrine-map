@@ -1092,6 +1092,14 @@ function oaiClearExternalNavigationState(opts){
         elapsed = bg.elapsed;
       }
       var isLongReturn=(elapsed>=COVER_BG_RETURN_MS)||(nativeForceCover&&elapsed<0);
+      /* V8-1-14-1073: background 복귀 판단도 Return Conductor를 통과시킨다.
+         긴 복귀는 높은 우선순위, 짧은 복귀는 passive로 등록한다.
+         이미 더 중요한 외부/기능별 복귀가 진행 중이면 여기서 중복 판단하지 않는다. */
+      var returnLeaderType=isLongReturn?'long-background':'passive';
+      try{
+        if(window.oaiReturnConductorBusy && window.oaiReturnConductorBusy([returnLeaderType])) return;
+        if(window.oaiReturnConductorRequest && !window.oaiReturnConductorRequest(returnLeaderType,{ms:isLongReturn?2800:950})) return;
+      }catch(_e){}
       armBackgroundUiGuard(isLongReturn?2400:1600);
       if(isLongReturn){
         var specialResumeHandled=false;
@@ -1424,30 +1432,47 @@ function applyExternalReturnStabilize(){
     oaiClearExternalNavigationState();
   }catch(e){ console.warn("[가톨릭길동무]", e); }
 }
-window.addEventListener('pageshow', applyExternalReturnStabilize, true);
-window.addEventListener('pageshow', function(){ setTimeout(oaiReleasePassiveVeil, 2600); }, true);
-window.addEventListener('focus', function(){ setTimeout(applyExternalReturnStabilize, 40); setTimeout(oaiReleasePassiveVeil, 2600); }, true);
-window.addEventListener('pagehide', function(){
+/* V8-1-14-1073: lifecycle 4단계.
+   pageshow/focus/visibilitychange 감지는 그대로 유지하되, 같은 복귀 사이클에서
+   applyExternalReturnStabilize()가 연속 실행되지 않도록 한 진입점으로 모은다.
+   Android native resume / GPS / 순례 / 기능별 복귀 판단은 건드리지 않는다. */
+var _oaiExternalLifecycleTimer = 0;
+function oaiScheduleExternalReturnLifecycle(reason, delay){
+  try{
+    clearTimeout(_oaiExternalLifecycleTimer);
+    var wait = Math.max(0, Number(delay) || 0);
+    _oaiExternalLifecycleTimer = setTimeout(function(){
+      _oaiExternalLifecycleTimer = 0;
+      try{ applyExternalReturnStabilize(reason || 'lifecycle-return'); }catch(e){ console.warn('[가톨릭길동무]', e); }
+    }, wait);
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+}
+function oaiRecordExternalHiddenLifecycle(){
   try{
     if(sessionStorage.getItem('oai_external_nav_pending') === '1'){
       sessionStorage.setItem('oai_external_nav_pagehide','1');
-      /* V8-1-14-621:
-         외부 브라우저로 나간 뒤 돌아올 때 첫 화면이 비치지 않도록 진입 보호창을 숨겨진 동안 그대로 유지한다.
-         정상 복귀 시 return-freeze가 잡은 뒤 같은 DOM 보호창을 부드럽게 제거한다. */
+      /* 외부 브라우저로 나간 동안 기존 진입 보호창은 유지한다. */
       clearTimeout(window.__oaiExternalEntryGuardTimer);
     }
     clearTimeout(window.__oaiExternalLaunchWatchdogTimer);
-  }catch(e){ console.warn("[가톨릭길동무]", e); }
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
+}
+window.addEventListener('pageshow', function(){
+  oaiScheduleExternalReturnLifecycle('pageshow', 0);
+  setTimeout(oaiReleasePassiveVeil, 2600);
+}, true);
+window.addEventListener('focus', function(){
+  oaiScheduleExternalReturnLifecycle('focus', 40);
+  setTimeout(oaiReleasePassiveVeil, 2600);
+}, true);
+window.addEventListener('pagehide', function(){
+  oaiRecordExternalHiddenLifecycle();
 }, true);
 document.addEventListener('visibilitychange', function(){
   try{
-    if(document.visibilityState === 'hidden' && sessionStorage.getItem('oai_external_nav_pending') === '1'){
-      sessionStorage.setItem('oai_external_nav_pagehide','1');
-      clearTimeout(window.__oaiExternalLaunchWatchdogTimer);
-      clearTimeout(window.__oaiExternalEntryGuardTimer);
-    }
-    if(document.visibilityState === 'visible') applyExternalReturnStabilize();
-  }catch(e){ console.warn("[가톨릭길동무]", e); }
+    if(document.visibilityState === 'hidden') oaiRecordExternalHiddenLifecycle();
+    else if(document.visibilityState === 'visible') oaiScheduleExternalReturnLifecycle('visibility-visible', 0);
+  }catch(e){ console.warn('[가톨릭길동무]', e); }
 }, true);
 
 document.addEventListener('click', function(e){
