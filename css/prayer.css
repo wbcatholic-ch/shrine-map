@@ -17,7 +17,7 @@
   z-index: 20000;
   flex-direction: column;
   background: var(--v4-bg-ivory);
-  font-family: "Noto Sans KR", sans-serif;
+  font-family: 'Noto Sans KR', sans-serif;
   max-width: 100vw;
   overflow-x: hidden;
 }
@@ -303,12 +303,12 @@ html:not(.ios-device).oai-screen-compact-short .prayer-quick-btn{
 }
 
 @media (max-width: 390px) {
-  #prayer-bar{padding-left:10px; padding-right:10px; column-gap:4px;}html:not(.oai-fold-device) #prayer-bar{gap:4px;}
-  #prayer-bar .module-bar-main{column-gap:7px;}html:not(.oai-fold-device) #prayer-bar .module-bar-main{gap:7px;}
-  #prayer-bar .module-bar-ico{width:38px;  min-width:38px;}html:not(.oai-fold-device) #prayer-bar .module-bar-ico{height:38px;}
-  html:not(.oai-fold-device) #prayer-bar-ttl{font-size:17px !important;}
+  #prayer-bar { padding-left: 10px; padding-right: 10px; gap: 4px; }
+  #prayer-bar .module-bar-main { gap: 7px; }
+  #prayer-bar .module-bar-ico { width: 38px; height: 38px; min-width: 38px; }
+  #prayer-bar-ttl { font-size: 17px !important; }
   #prayer-bar-sub { display: none; }
   #prayer-search-font-controls { min-width: 64px; }
   #prayer-search-font-controls .pr-font-btn { width: 27px; }
-  #goodnews-prayer-btn{max-width:82px; padding-left:6px; padding-right:6px;}html:not(.oai-fold-device) #goodnews-prayer-btn{font-size:11px;}
+  #goodnews-prayer-btn { max-width: 82px; padding-left: 6px; padding-right: 6px; font-size: 11px; }
 }

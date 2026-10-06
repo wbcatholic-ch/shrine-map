@@ -12657,7 +12657,7 @@ function _schedulePilgrimageRouteResult(label){
 function _applyPilgrimageCourseViewReadOnlyState(){
   const on=_isAnyPilgrimageCourseView();
   const readOnly=_isPilgrimageCourseViewReadOnly();
-  /* V8-1-14-1089:
+  /* V8-1-14-1090:
      - 순례하기 -> 순례코스 보기: 경로검색 완료 상태로 열고 이후 일반 길찾기와 동일하게 편집 가능.
      - 순례완료 -> 순례코스 보기: 경로검색 완료 상태의 읽기 전용 화면. 거리/시간/카카오내비/복귀만 제공.
      저장된 원래 순례코스는 어느 모드에서도 이 지도 화면의 임시 조작으로 변경하지 않는다. */
@@ -17408,7 +17408,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   async function openPilgrimageCourseMap(){
     const pts=_pilgrimageCoursePoints();
     if(!pts.length){alert('지도에 표시할 순례 코스가 없습니다.');return;}
-    /* V8-1-14-1089
+    /* V8-1-14-1090
        순례코스 보기는 진입 출처별 역할을 완전히 분리한다.
        1) 순례하기 -> 경로검색 완료 상태로 열고 이후 일반 길찾기와 동일하게 편집/재검색 가능.
        2) 순례완료 -> 경로검색 완료 상태의 읽기 전용 보기. 거리/시간/카카오내비/복귀만 사용. */
