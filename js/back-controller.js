@@ -74,7 +74,7 @@
       }
 
       if(document.querySelector('.module-view.open')) return true;
-      if(document.querySelector('#myeongrye-materials-modal.open,#info-card.open,#sheet-route.open,#route-choice-modal.open,#route-quick-modal.show,#oai-pilgrimage-feature-modal.show,#oai-pilgrimage-marker-choice-modal.open,#oai-pilgrimage-follow-start-modal.show,#oai-pilgrimage-follow-stop-modal.show,#oai-pilgrimage-save-modal.show,#oai-pilgrimage-delete-modal.show,#oai-pilgrimage-completion-modal.show,#srch-modal.open,.sheet.open,.trail-sheet.open,#shrine-visit-modal.show,#shrine-auto-visit-modal.show,#shrine-visit-detail-view.show,#shrine-visit-cards-modal.show')) return true;
+      if(document.querySelector('#oai-common-date-picker.show,#myeongrye-materials-modal.open,#info-card.open,#sheet-route.open,#route-choice-modal.open,#route-quick-modal.show,#oai-pilgrimage-feature-modal.show,#oai-pilgrimage-marker-choice-modal.open,#oai-pilgrimage-follow-start-modal.show,#oai-pilgrimage-follow-stop-modal.show,#oai-pilgrimage-save-modal.show,#oai-pilgrimage-delete-modal.show,#oai-pilgrimage-completion-modal.show,#srch-modal.open,.sheet.open,.trail-sheet.open,#shrine-visit-modal.show,#shrine-auto-visit-modal.show,#shrine-visit-detail-view.show,#shrine-visit-cards-modal.show')) return true;
       if(typeof isGuideModalOpen==='function' && isGuideModalOpen()) return true;
 
       if(includeAppState){
@@ -258,6 +258,15 @@
 
   function closeLayer(){
     var el;
+
+    /* 공통 날짜선택기는 현재 화면 위에 뜨는 최상위 입력창이다.
+       뒤로가기는 날짜선택기만 닫고 아래 순례계획/등록 화면은 유지한다. */
+    el = $b('oai-common-date-picker');
+    if(el && el.classList && el.classList.contains('show')){
+      if(typeof window._oaiCloseDatePicker === 'function') window._oaiCloseDatePicker();
+      else { el.classList.remove('show'); el.setAttribute('aria-hidden','true'); }
+      return true;
+    }
 
     /* 새 기능 안내는 커버 위 최상위 안내창이다.
        뒤로가기는 안내만 닫고, '확인' 처리(localStorage)는 하지 않는다. */

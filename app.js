@@ -12137,6 +12137,7 @@ function _oaiCloseDatePicker(){
   _oaiDatePickerInput=null;
   _oaiDatePickerCursor=null;
 }
+try{ window._oaiCloseDatePicker=_oaiCloseDatePicker; }catch(_e){}
 function _oaiEnhanceDateInput(input){
   try{
     if(!input||String(input.type).toLowerCase()!=='date'||input.dataset.oaiDatePicker==='1')return;

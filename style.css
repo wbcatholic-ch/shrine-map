@@ -9463,9 +9463,9 @@ html.oai-pilgrimage-route-direct #sheet-route #rs-pilgrimage-return-btn{
   inset:0!important;
   z-index:100900!important;
   display:none!important;
-  align-items:center!important;
+  align-items:flex-start!important;
   justify-content:center!important;
-  padding:18px!important;
+  padding:max(18px,calc((100vh - 560px)/2)) 18px 18px!important;
   box-sizing:border-box!important;
 }
 .oai-common-date-picker.show{display:flex!important;}
@@ -9592,7 +9592,7 @@ input[type="date"][data-oai-date-picker="1"]{
   cursor:pointer!important;
 }
 @media(max-width:390px){
-  .oai-common-date-picker{padding:12px!important;}
+  .oai-common-date-picker{padding:max(12px,calc((100vh - 540px)/2)) 12px 12px!important;}
   .oai-common-date-card{width:calc(100vw - 24px)!important;}
   .oai-common-date-year-row{grid-template-columns:72px 1fr 72px!important;padding:10px 12px!important;}
   .oai-common-date-year-row strong{font-size:25px!important;}
