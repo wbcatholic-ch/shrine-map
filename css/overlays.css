@@ -176,9 +176,8 @@ html.pr-external-guide-active.oai-stability-veil::after {
   pointer-events:none;
 }
 @media(max-width:520px){
-  .route-choice-panel{width:calc(100vw - 36px);padding:18px 14px 16px;}
-  #route-choice-modal .route-choice-btn,
-#oai-pilgrimage-marker-choice-modal .route-choice-btn{min-height:60px;font-size:15.5px;}
+  .route-choice-panel{width:calc(100vw - 36px);padding-left:14px;padding-right:14px;}html:not(.oai-fold-device) .route-choice-panel{padding:18px 14px 16px;}
+  html:not(.oai-fold-device) #route-choice-modal .route-choice-btn,html:not(.oai-fold-device) #oai-pilgrimage-marker-choice-modal .route-choice-btn{min-height:60px;font-size:15.5px;}
 }
 html:not(.ios-device) .guide-modal{padding-bottom:calc(14px + var(--oai-android-bottom-gap, 10px))!important;}
 html:not(.ios-device) .modal-panel,
