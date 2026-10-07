@@ -16233,7 +16233,20 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const state=_dailyState(),dates=_dailyPendingDates(state);
       if(!dates.length)return;
       if(typeof _ensureShrineDataLoaded==='function')await _ensureShrineDataLoaded();
-      if(!Array.isArray(SHRINES)||!SHRINES.length||!Array.isArray(PARISHES)||!PARISHES.length)throw new Error('성지·성당 목록 미준비');
+      // 미정산 날짜에 성당 GPS 방문기록이 있을 때만 전국 교구 데이터를 완전히 준비합니다.
+      // 일부 교구만 로드된 PARISHES로 정산하면 다른 교구 방문이 누락된 채 정산 완료로 저장될 수 있습니다.
+      const pendingDateSet=new Set(dates);
+      const pendingParishGps=Object.values(_loadParishVisits()).some(function(record){
+        return !!(record&&Array.isArray(record.visits)&&record.visits.some(function(v){
+          return v&&typeof v==='object'&&String(v.method||'').toLowerCase()==='gps'&&pendingDateSet.has(String(v.date||''));
+        }));
+      });
+      if(pendingParishGps){
+        if(typeof _ensureAllParishDiocesesLoaded!=='function')throw new Error('성당 전체 데이터 로더 미준비');
+        await _ensureAllParishDiocesesLoaded({silent:true});
+        if(typeof _areAllParishDiocesesReady==='function'&&!_areAllParishDiocesesReady())throw new Error('성당 전체 데이터 미준비');
+      }
+      if(!Array.isArray(SHRINES)||!SHRINES.length)throw new Error('성지 목록 미준비');
       // 진행 상태는 날짜가 바뀌었다면 기록을 보존한 채 종료한다.
       const active=_readActiveFollowRaw();
       if(active&&_dailyIso(active.startedAt)<_dailyIso(Date.now()))_clearActiveFollow(active.courseId);
