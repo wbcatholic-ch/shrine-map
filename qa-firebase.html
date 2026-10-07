@@ -4,6 +4,16 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>문의 · 건의 | 가톨릭길동무</title>
+<script>
+(function(){
+  var v='';
+  try{ if(window.parent&&window.parent!==window&&window.parent.OAI_APP_BUILD_VERSION) v=String(window.parent.OAI_APP_BUILD_VERSION||'').trim(); }catch(_e){}
+  try{ if(!v) v=String(new URLSearchParams(location.search||'').get('v')||'').trim(); }catch(_e){}
+  window.OAI_APP_BUILD_VERSION=v;
+  window.APP_VERSION=v;
+  window.oaiVersionedAsset=function(path){ var u=String(path||''); return v ? (u+(u.indexOf('?')>=0?'&':'?')+'v='+encodeURIComponent(v)) : u; };
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700&display=swap" rel="stylesheet">
 
@@ -1145,11 +1155,11 @@ function oaiReturnToAppCover(reason){
   try{
     var url = new URL('index.html', location.href);
     url.searchParams.set('oai_cover_return', reason || 'qna-return-cover');
-    url.searchParams.set('v', 'V8-1-14-676');
+    if(window.OAI_APP_BUILD_VERSION) url.searchParams.set('v', window.OAI_APP_BUILD_VERSION);
     location.replace(url.href);
     return;
   }catch(e){
-    location.replace('index.html?oai_cover_return=' + encodeURIComponent(reason || 'qna-return-cover') + '&v=V8-1-14-676');
+    location.replace(window.oaiVersionedAsset('index.html?oai_cover_return=' + encodeURIComponent(reason || 'qna-return-cover')));
   }
 }
 function handleQaBack(){
@@ -1194,12 +1204,12 @@ if (QA_PRIVATE_MODE) {
 }
 </script>
 
-<script id="oai-cache-lifecycle-V8-1-14-676">
+<script id="oai-cache-lifecycle">
 (function(){
   'use strict';
-  var APP_VERSION = 'V8-1-14-676';
+  var APP_VERSION = window.OAI_APP_BUILD_VERSION || '';
   if('serviceWorker' in navigator){
-    try{ navigator.serviceWorker.register('./sw.js?v=' + encodeURIComponent(APP_VERSION)).then(function(reg){try{reg.update();}catch(e){}}).catch(function(){}); }catch(e){}
+    try{ navigator.serviceWorker.register(window.oaiVersionedAsset('./sw.js'), {updateViaCache:'none'}).then(function(reg){try{reg.update();}catch(e){}}).catch(function(){}); }catch(e){}
   }
 })();
 </script>
@@ -1231,6 +1241,6 @@ window.OAI_PAGE_TOUCH_CONFIG = {
   ].join(',')
 };
 </script>
-<script src="js/page-touch-keyboard.js?v=V8-1-14-676"></script>
+<script>document.write('<script src="'+window.oaiVersionedAsset('js/page-touch-keyboard.js')+'"><\/script>');</script>
 </body>
 </html>

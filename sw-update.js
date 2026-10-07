@@ -16,11 +16,12 @@
   function currentDocumentVersion(){
     var values=[];
     try{ if(window.OAI_APP_BUILD_VERSION) values.push(String(window.OAI_APP_BUILD_VERSION)); }catch(_e){}
+    try{ var cs=document.currentScript; if(cs&&cs.src){ var cv=new URL(cs.src,location.href).searchParams.get('v'); if(cv) values.push(String(cv)); } }catch(_e){}
     try{ var b=document.getElementById('cover-update-btn'); if(b&&b.getAttribute('data-target-version')) values.push(b.getAttribute('data-target-version')); }catch(_e){}
     try{ var m=document.getElementById('oai-build-marker'); if(m&&m.textContent) values.push(String(m.textContent).trim()); }catch(_e){}
     var best='';
     values.forEach(function(v){ if(v && (!best || compareVersions(v,best)>0)) best=v; });
-    return best || 'V8-1-14-923';
+    return best || '';
   }
   var APP_VERSION = currentDocumentVersion();
   var CHECK_URL = './version.json';

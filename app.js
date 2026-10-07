@@ -1,6 +1,15 @@
 
 'use strict';
 
+/* V8-1-14-1109: 동적 자산 버전은 index.html의 OAI_APP_BUILD_VERSION 하나만 따른다. */
+var OAI_ASSET_VERSION = String(window.OAI_APP_BUILD_VERSION || window.APP_VERSION || '').trim();
+function oaiVersionedAsset(path){
+  var url=String(path||'');
+  if(!OAI_ASSET_VERSION) return url;
+  return url + (url.indexOf('?')>=0 ? '&' : '?') + 'v=' + encodeURIComponent(OAI_ASSET_VERSION);
+}
+try{ window.oaiVersionedAsset=oaiVersionedAsset; window.OAI_ASSET_VERSION=OAI_ASSET_VERSION; }catch(_e){}
+
 function hideCoverAndRun(callback) {
   try{
     document.querySelectorAll('.module-view.open,#prayer-view.open,#diocese-view.open,#missa-view.open').forEach(function(v){v.classList.remove('open');});
@@ -4377,7 +4386,7 @@ function syncCoverUpdateVersionState(){
     if(!btn || !box) return;
     /* 버튼의 HTML 속성이 이전 배포값으로 남아도 허위로 '업데이트 필요'가 뜨지 않게,
        현재 문서가 실제로 불러온 빌드 버전을 항상 기준으로 쓴다. */
-    var target = window.OAI_APP_BUILD_VERSION || window.APP_VERSION || btn.getAttribute('data-target-version') || 'V8-1-14-679';
+    var target = window.OAI_APP_BUILD_VERSION || window.APP_VERSION || btn.getAttribute('data-target-version') || '';
     btn.setAttribute('data-target-version', target);
     var current = '';
     /* V8-1-14-621:
@@ -4452,7 +4461,7 @@ window.addEventListener('load', syncCoverUpdateVersionState, true);
     try{
       var frame=document.getElementById('privacy-policy-frame');
       if(frame){
-        var src=frame.getAttribute('data-src') || ('privacy.html?embedded=1&v=' + encodeURIComponent(window.APP_VERSION || 'V8-1-14-679'));
+        var src=frame.getAttribute('data-src') || oaiVersionedAsset('privacy.html?embedded=1');
         if(frame.getAttribute('src') === 'about:blank' || !frame.getAttribute('src')) frame.setAttribute('src', src);
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -4699,7 +4708,7 @@ function openDioceseView(opts){
   var loading=_getDioceseLoading();
   if(!view||!frame) return;
   var restore = !!(opts && opts.restore);
-  var url = (typeof oaiGetDioceseFrameUrl === 'function') ? oaiGetDioceseFrameUrl() : 'diocese.html?v=V8-1-14-679';
+  var url = (typeof oaiGetDioceseFrameUrl === 'function') ? oaiGetDioceseFrameUrl() : oaiVersionedAsset('diocese.html');
   var currentSrc = frame.getAttribute('src') || '';
   var needsLoad = (!currentSrc || currentSrc==='about:blank' || currentSrc.indexOf('diocese.html') < 0 || !frame._loaded);
 
@@ -4795,7 +4804,7 @@ function dioceseLoaded(){
   _setDioceseLoading(false);
 }
 function oaiGetDioceseFrameUrl(){
-  return 'diocese.html?v=V8-1-14-679';
+  return oaiVersionedAsset('diocese.html');
 }
 function oaiBindDioceseFrameLoad(frame, loading, restore){
   if(!frame) return;
@@ -5853,7 +5862,7 @@ const _PARISH_DIOCESE_LOAD_STATE={};
 const _PARISH_DIOCESE_LOAD_PROMISES={};
 /* 성당 데이터 파일도 앱 본문과 같은 빌드 번호로 요청한다.
    이전 고정 번호가 남아 있으면 새 앱을 설치해도 구 교구 목록이 캐시에 남을 수 있다. */
-const _PARISH_ASSET_VERSION=(window.OAI_APP_BUILD_VERSION || 'V8-1-14-738');
+const _PARISH_ASSET_VERSION=OAI_ASSET_VERSION;
 function _getParishDioceseAsset(code){
   return _PARISH_DIOCESE_ASSETS[code] || null;
 }
@@ -6234,7 +6243,7 @@ function _ensureParishDataLoaded(){
 }
 _initParishDataFromGlobal();
 
-const _PRAYER_ASSET_VERSION='V8-1-14-679';
+const _PRAYER_ASSET_VERSION=OAI_ASSET_VERSION;
 let _prayerModuleLoadPromise=null;
 function _isPrayerDataReady(){
   return !!(window.PRAYER_DATA && typeof window.PRAYER_DATA === 'object');
@@ -6309,7 +6318,7 @@ try{ window.ensurePrayerModuleLoaded=ensurePrayerModuleLoaded; }catch(e){ consol
 let _RT_RAW = [];
 let _retreatRawLoaded = false;
 let _retreatDataLoadPromise = null;
-const _RETREAT_ASSET_VERSION='V8-1-14-679';
+const _RETREAT_ASSET_VERSION=OAI_ASSET_VERSION;
 
 let RETREATS = [];
 function _buildRetreatList(raw){
@@ -7137,7 +7146,7 @@ const _TY={'A':'성지','B':'순례지','C':'순교 사적지'};
 let _myLocAt = 0;
 let _shrineRawLoaded = false;
 let _shrineDataLoadPromise = null;
-const _SHRINE_ASSET_VERSION='V8-1-14-693';
+const _SHRINE_ASSET_VERSION=OAI_ASSET_VERSION;
 /* 성지 좌표는 남한 본토·제주·도서 지역 전체를 포함하는 한 기준으로만 검사한다.
    실제 데이터 경계보다 여유를 두어 강원 북부와 동해 도서 좌표가 상한에서 누락되지 않게 한다. */
 const OAI_SOUTH_KOREA_COORD_BOUNDS=Object.freeze({

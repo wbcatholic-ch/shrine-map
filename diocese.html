@@ -3,6 +3,16 @@
 <head>
 <script>
 (function(){
+  var v='';
+  try{ if(window.parent&&window.parent!==window&&window.parent.OAI_APP_BUILD_VERSION) v=String(window.parent.OAI_APP_BUILD_VERSION||'').trim(); }catch(_e){}
+  try{ if(!v) v=String(new URLSearchParams(location.search||'').get('v')||'').trim(); }catch(_e){}
+  window.OAI_APP_BUILD_VERSION=v;
+  window.APP_VERSION=v;
+  window.oaiVersionedAsset=function(path){ var u=String(path||''); return v ? (u+(u.indexOf('?')>=0?'&':'?')+'v='+encodeURIComponent(v)) : u; };
+})();
+</script>
+<script>
+(function(){
   var ua=(navigator.userAgent||'').toLowerCase();
   var isIOS=/iphone|ipad|ipod/.test(ua) || (navigator.platform==='MacIntel' && navigator.maxTouchPoints>1);
   if(isIOS){ document.documentElement.classList.add('ios-device'); }
@@ -37,7 +47,7 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <title>교구지도</title>
-<link rel="stylesheet" href="css/diocese.css?v=V8-1-14-676">
+<script>document.write('<link rel="stylesheet" href="'+window.oaiVersionedAsset('css/diocese.css')+'">');</script>
 </head>
 <body>
 <header>
@@ -2173,7 +2183,7 @@ window.OAI_PAGE_TOUCH_CONFIG = {
   ].join(',')
 };
 </script>
-<script src="js/page-touch-keyboard.js?v=V8-1-14-1017"></script>
+<script>document.write('<script src="'+window.oaiVersionedAsset('js/page-touch-keyboard.js')+'"><\/script>');</script>
 
 
 </body>
