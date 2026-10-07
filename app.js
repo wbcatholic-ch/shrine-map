@@ -3028,7 +3028,7 @@ function _renderShrineVisitDetail(idx){
   const primaryRow='<div class="shrine-visit-detail-action-row detail-primary-row">'+telBtn+routeBtn+'</div>';
   const linkRow=isMyeongrye?'<div class="shrine-visit-detail-action-row detail-link-row">'+materialsBtn+'</div>':((hpBtn||guideBtn)?'<div class="shrine-visit-detail-action-row detail-link-row">'+hpBtn+guideBtn+'</div>':'');
   const kakaoRow='<div class="shrine-visit-detail-action-row detail-kakao-row">'+(isMyeongrye?'':goodnewsBtn)+kakaoBtn+'</div>';
-  body.innerHTML='<section class="shrine-visit-detail-hero"><div class="shrine-visit-detail-hero-head"><div class="shrine-visit-detail-kicker">순례 기록</div><button type="button" class="shrine-visit-detail-register" data-shrine-detail-register="1" aria-label="순례등록">순례등록</button></div><div class="shrine-visit-detail-count">순례 '+count+'회</div><div class="shrine-visit-detail-recent">최근 순례일 '+_visitHtmlEsc(recent)+'</div><div class="shrine-visit-detail-date-title">순례 날짜</div><div class="shrine-visit-detail-date-list">'+dateHtml+'</div></section>'+journalHtml+'<section class="shrine-visit-detail-info"><div class="shrine-visit-detail-info-head"><div class="shrine-visit-detail-section-title">성지 정보</div><button type="button" class="shrine-visit-detail-map-btn" data-shrine-detail-map="'+idx+'">지도에서 보기</button></div><div class="shrine-visit-detail-name">'+_visitHtmlEsc(item.name||'')+'</div><div class="shrine-visit-detail-row"><span>교구</span><strong>'+_visitHtmlEsc(item.diocese||'—')+'</strong></div><div class="shrine-visit-detail-row"><span>주소</span><strong>'+_visitHtmlEsc(item.addr||'—')+'</strong></div><div class="shrine-visit-detail-row"><span>전화</span><strong>'+telText+'</strong></div><div class="shrine-visit-detail-actions">'+primaryRow+linkRow+kakaoRow+'</div></section>';
+  body.innerHTML='<section class="shrine-visit-detail-hero"><div class="shrine-visit-detail-hero-head"><div class="shrine-visit-detail-kicker">순례 기록</div><button type="button" class="shrine-visit-detail-register" data-shrine-detail-register="1" aria-label="순례등록">순례등록</button></div><div class="shrine-visit-detail-count">순례 '+count+'회</div><div class="shrine-visit-detail-recent">최근 순례일 '+_visitHtmlEsc(recent)+'</div><div class="shrine-visit-detail-date-title">순례 날짜</div><div class="shrine-visit-detail-date-list">'+dateHtml+'</div></section>'+journalHtml;
 }
 /* V8-1-14-679: 순례 상세의 '지도에서 보기'는 카드 데이터와 지도 중심을 하나의 pending target으로 함께 적용한다. */
 function _isShrineMapTargetCenterLocked(){
@@ -3760,7 +3760,7 @@ function _renderParishVisitDetail(){
   const tel=p.tel?'<a class="shrine-visit-detail-action detail-tel" href="tel:'+_visitHtmlEsc(String(p.tel).replace(/[^0-9+]/g,''))+'">📞 '+_visitHtmlEsc(p.tel)+'</a>':'';
   const hp=p.hp?'<a class="shrine-visit-detail-action detail-home" href="'+_visitHtmlEsc(p.hp)+'" target="_blank" rel="noopener">홈페이지</a>':'';
   const guide=p.url?'<a class="shrine-visit-detail-action detail-guide" href="'+_visitHtmlEsc(p.url)+'" target="_blank" rel="noopener">교구 성당 안내</a>':'';
-  b.innerHTML='<section class="shrine-visit-detail-hero"><div class="shrine-visit-detail-hero-head"><div class="shrine-visit-detail-kicker">성당 방문 기록</div><button type="button" class="shrine-visit-detail-register" data-pvd-register="1">방문등록</button></div><div class="shrine-visit-detail-count">방문 '+n+'회</div><div class="shrine-visit-detail-recent">최근 방문일 '+_visitHtmlEsc(recent)+'</div><div class="shrine-visit-detail-date-title">방문 날짜</div><div class="shrine-visit-detail-date-list">'+dates+'</div></section>'+journalHtml+'<section class="shrine-visit-detail-info"><div class="shrine-visit-detail-info-head"><div class="shrine-visit-detail-section-title">성당 정보</div><button type="button" class="shrine-visit-detail-map-btn" data-pvd-map="1">지도에서 보기</button></div><div class="shrine-visit-detail-name">'+_visitHtmlEsc(p.name||'')+'</div><div class="shrine-visit-detail-row"><span>교구</span><strong>'+_visitHtmlEsc(p.diocese||'—')+'</strong></div><div class="shrine-visit-detail-row"><span>주소</span><strong>'+_visitHtmlEsc(p.addr||'—')+'</strong></div><div class="shrine-visit-detail-actions">'+tel+hp+guide+'</div></section>';
+  b.innerHTML='<section class="shrine-visit-detail-hero"><div class="shrine-visit-detail-hero-head"><div class="shrine-visit-detail-kicker">성당 방문 기록</div><button type="button" class="shrine-visit-detail-register" data-pvd-register="1">방문등록</button></div><div class="shrine-visit-detail-count">방문 '+n+'회</div><div class="shrine-visit-detail-recent">최근 방문일 '+_visitHtmlEsc(recent)+'</div><div class="shrine-visit-detail-date-title">방문 날짜</div><div class="shrine-visit-detail-date-list">'+dates+'</div></section>'+journalHtml;
 }
 function _openParishVisitDetail(p){
   window.__OAI_PARISH_JOURNAL_DATE__='';
@@ -5530,7 +5530,7 @@ function _renderMyeongryeSlide(instant){
 function _loadMyeongryePhoto(index,done){
   var modal=document.getElementById('myeongrye-materials-modal'), img=modal&&modal.querySelectorAll('.myeongrye-slide img')[index];
   if(!img){ if(done) done(false); return; }
-  /* V8-1-14-1122: 같은 사진을 사전로딩·자동재생·수동이동이 동시에 요청해도
+  /* V8-1-14-1123: 같은 사진을 사전로딩·자동재생·수동이동이 동시에 요청해도
      onload/onerror를 서로 덮어쓰지 않도록 요청 하나에 콜백을 합친다. */
   if(!img._oaiMyeongryeCallbacks) img._oaiMyeongryeCallbacks=[];
   if(done) img._oaiMyeongryeCallbacks.push(done);
@@ -5566,7 +5566,7 @@ function _warmMyeongryeUpcomingPhotos(fromIndex){
 }
 function _primeMyeongryeVisiblePhotos(){
   var photos=_getMyeongryePhotos(); if(!photos.length) return;
-  /* V8-1-14-1122: 현재(첫) 사진이 실제로 표시되기 전에는 자동재생 타이머를 시작하지 않는다.
+  /* V8-1-14-1123: 현재(첫) 사진이 실제로 표시되기 전에는 자동재생 타이머를 시작하지 않는다.
      첫 사진 네트워크/디코딩을 최우선으로 끝낸 뒤 2번, 그 다음 사진들을 준비한다. */
   clearTimeout(_myeongryeSlideTimer); _myeongryeSlideTimer=0;
   _loadMyeongryePhoto(_myeongryeSlideIndex,function(ok){
