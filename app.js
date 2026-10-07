@@ -2809,7 +2809,7 @@ function _closeShrineVisitCardsModal(opts){
 }
 
 
-/* V8-1-14-1126: 방문 회차별 개인 사진·메모 기록.
+/* V8-1-14-1127: 방문 회차별 개인 사진·메모 기록.
    파일명 목록 대신 사진 썸네일을 사용하고, 전체보기는 뒤로가기/X로 닫히는 독립 뷰어로 제공한다.
    사진 원본은 Android가 Google Drive appDataFolder에 보관하고 웹에는 fileId/이름만 저장한다. */
 const OAI_VISIT_PHOTO_LIMIT_SHRINE=15;
@@ -2829,20 +2829,20 @@ function _oaiFindVisitIndexByDate(arr,date){
   return -1;
 }
 function _oaiNormalizePhotos(v){return v&&Array.isArray(v.photos)?v.photos.filter(function(x){return x&&x.fileId;}):[];}
-function _oaiUpdateShrineVisitExtras(item,date,patch){
+function _oaiUpdateShrineVisitExtras(item,date,patch,opts){
   const key=_getShrineVisitKey(item),data=_loadShrineVisits();if(!key||!data[key]||!Array.isArray(data[key].visits))return false;
   const idx=_oaiFindVisitIndexByDate(data[key].visits,date);if(idx<0)return false;
   let rec=_normalizeVisitEntry(data[key].visits[idx]);if(!rec||typeof rec!=='object')rec={date:String(date),method:'manual'};
   Object.keys(patch||{}).forEach(function(k){rec[k]=patch[k];});data[key].visits[idx]=rec;_saveShrineVisits(data);
-  try{queueGoogleDriveBackup();}catch(_e){}
+  if(!(opts&&opts.skipBackup)){try{queueGoogleDriveBackup();}catch(_e){}}
   return true;
 }
-function _oaiUpdateParishVisitExtras(item,date,patch){
+function _oaiUpdateParishVisitExtras(item,date,patch,opts){
   const key=_parishVisitKey(item),data=_loadParishVisits();if(!key||!data[key]||!Array.isArray(data[key].visits))return false;
   const idx=_oaiFindVisitIndexByDate(data[key].visits,date);if(idx<0)return false;
   let rec=_normalizeVisitEntry(data[key].visits[idx]);if(!rec||typeof rec!=='object')rec={date:String(date),method:'manual'};
   Object.keys(patch||{}).forEach(function(k){rec[k]=patch[k];});data[key].visits[idx]=rec;_saveParishVisits(data);
-  try{queueGoogleDriveBackup();}catch(_e){}
+  if(!(opts&&opts.skipBackup)){try{queueGoogleDriveBackup();}catch(_e){}}
   return true;
 }
 function _oaiGetVisitByDate(kind,item,date){
@@ -2860,7 +2860,7 @@ function _oaiVisitJournalHtml(kind,item,visits){
   const limit=kind==='parish'?OAI_VISIT_PHOTO_LIMIT_PARISH:OAI_VISIT_PHOTO_LIMIT_SHRINE;
   const photos=_oaiNormalizePhotos(visit),memo=String(visit&&visit.memo||'').trim();
   const dateBtns=visits.map(function(v){const d=String(v.date||'');return '<button type="button" class="oai-visit-journal-date'+(d===date?' active':'')+'" data-oai-journal-date="'+_visitHtmlEsc(kind)+'" data-oai-journal-value="'+_visitHtmlEsc(d)+'">'+_visitHtmlEsc(_formatVisitDate(d))+'</button>';}).join('');
-  const photoGrid=photos.length?'<div class="oai-visit-photo-grid" data-oai-photo-grid="'+_visitHtmlEsc(kind)+'">'+photos.map(function(ph,i){return '<button type="button" class="oai-visit-photo-thumb" data-oai-photo-open="'+_visitHtmlEsc(kind)+'" data-oai-photo-index="'+i+'" data-oai-photo-file="'+_visitHtmlEsc(String(ph.fileId||''))+'" aria-label="방문 사진 '+(i+1)+' 보기"><span class="oai-visit-photo-placeholder" aria-hidden="true">사진</span><img alt="" loading="lazy"></button>';}).join('')+'</div>':'<div class="oai-visit-journal-empty">아직 등록한 사진이 없습니다.</div>';
+  const photoGrid=photos.length?'<div class="oai-visit-photo-grid" data-oai-photo-grid="'+_visitHtmlEsc(kind)+'">'+photos.map(function(ph,i){const local=String(ph&&ph.fileId||'').indexOf('local_')===0,status=String(ph&&ph.syncStatus||''),pending=status==='pending'||status==='waiting'||local,label=status==='waiting'?'동기화 대기':'저장 중';return '<button type="button" class="oai-visit-photo-thumb'+(pending?' syncing':'')+'" data-oai-photo-open="'+_visitHtmlEsc(kind)+'" data-oai-photo-index="'+i+'" data-oai-photo-file="'+_visitHtmlEsc(String(ph.fileId||''))+'" aria-label="방문 사진 '+(i+1)+' 보기"><span class="oai-visit-photo-placeholder" aria-hidden="true">사진</span><img alt="" loading="lazy">'+(pending?'<span class="oai-visit-photo-sync">'+label+'</span>':'')+'</button>';}).join('')+'</div>':'<div class="oai-visit-journal-empty">아직 등록한 사진이 없습니다.</div>';
   const memoHtml=memo?'<div class="oai-visit-memo-preview">'+_visitHtmlEsc(memo).replace(/\n/g,'<br>')+'</div>':'<div class="oai-visit-journal-empty">아직 작성한 메모가 없습니다.</div>';
   return '<section class="oai-visit-journal" data-oai-journal-kind="'+_visitHtmlEsc(kind)+'"><div class="oai-visit-journal-head"><div class="shrine-visit-detail-section-title">나의 기록</div><strong>'+_visitHtmlEsc(_formatVisitDate(date))+'</strong></div>'+(visits.length>1?'<div class="oai-visit-journal-dates">'+dateBtns+'</div>':'')+'<div class="oai-visit-journal-block oai-visit-photo-block"><div class="oai-visit-journal-row"><div><b>사진</b><small>'+photos.length+' / '+limit+'장</small></div><button type="button" data-oai-photo-add="'+_visitHtmlEsc(kind)+'"'+(photos.length>=limit?' disabled':'')+'>＋ 사진 추가</button></div>'+photoGrid+'</div><div class="oai-visit-journal-block"><div class="oai-visit-journal-row"><div><b>메모</b><small>'+(memo?'작성됨':'미작성')+'</small></div><button type="button" data-oai-memo-edit="'+_visitHtmlEsc(kind)+'">'+(memo?'메모 수정':'메모 작성')+'</button></div>'+memoHtml+'</div></section>';
 }
@@ -2900,14 +2900,41 @@ function _oaiAddPhotos(kind){
 window.oaiVisitPhotoProgress=function(requestId,current,total){
   if(!_oaiVisitPhotoPending[requestId])return;
   const c=Math.max(0,Number(current||0)),t=Math.max(0,Number(total||0));
-  if(t>0&&c<=0){_oaiVisitToast('사진 준비 중…');return;}if(t>1&&c>0)_oaiVisitToast('사진 저장 중 '+c+' / '+t);
+  if(t>0&&c<=0)_oaiVisitToast('사진을 준비하고 있습니다…');
+};
+function _oaiAppendLocalReadyPhoto(ctx,item){
+  if(!ctx||!item||!item.fileId)return false;const visit=_oaiGetVisitByDate(ctx.kind,ctx.item,ctx.date),current=_oaiNormalizePhotos(visit);
+  if(current.some(function(x){return String(x.fileId)===String(item.fileId);} ))return true;
+  const limit=ctx.kind==='parish'?OAI_VISIT_PHOTO_LIMIT_PARISH:OAI_VISIT_PHOTO_LIMIT_SHRINE,next=current.concat([item]).slice(0,limit);
+  return ctx.kind==='parish'?_oaiUpdateParishVisitExtras(ctx.item,ctx.date,{photos:next},{skipBackup:true}):_oaiUpdateShrineVisitExtras(ctx.item,ctx.date,{photos:next},{skipBackup:true});
+}
+window.oaiVisitPhotoLocalReady=function(requestId,itemJson,current,total){
+  const ctx=_oaiVisitPhotoPending[requestId];if(!ctx)return;let item=null;try{item=JSON.parse(String(itemJson||'{}'));}catch(_e){}
+  if(item&&_oaiAppendLocalReadyPhoto(ctx,item)){_oaiRerenderJournal(ctx.kind);}
+};
+window.oaiVisitPhotoLocalComplete=function(requestId,ok,ready,total,message){
+  const ctx=_oaiVisitPhotoPending[requestId];delete _oaiVisitPhotoPending[requestId];const msg=String(message||'');
+  if(!ok){if(msg)_oaiVisitToast(msg);return;}if(ctx)_oaiRerenderJournal(ctx.kind);if(msg)_oaiVisitToast(msg);
 };
 window.oaiVisitPhotoUploadResult=function(requestId,ok,json,message){
+  /* 구버전 Android 호환: 304 이하에서는 Drive 업로드 완료 뒤 한 번에 결과를 전달합니다. */
   const ctx=_oaiVisitPhotoPending[requestId];delete _oaiVisitPhotoPending[requestId];if(!ctx)return;
   const msg=String(message||'');if(!ok){if(/취소/.test(msg))return;_oaiVisitToast(msg||'사진을 저장하지 못했습니다.');return;}
   let added=[];try{added=JSON.parse(String(json||'[]'));}catch(_e){}
   const visit=_oaiGetVisitByDate(ctx.kind,ctx.item,ctx.date),current=_oaiNormalizePhotos(visit),limit=ctx.kind==='parish'?OAI_VISIT_PHOTO_LIMIT_PARISH:OAI_VISIT_PHOTO_LIMIT_SHRINE,next=current.concat(added).slice(0,limit);
   const saved=ctx.kind==='parish'?_oaiUpdateParishVisitExtras(ctx.item,ctx.date,{photos:next}):_oaiUpdateShrineVisitExtras(ctx.item,ctx.date,{photos:next});if(saved){_oaiRerenderJournal(ctx.kind);if(msg&&!/완료|저장/.test(msg))_oaiVisitToast(msg);}
+};
+function _oaiReplaceSyncedPhotoInMap(data,localId,remote){
+  let changed=false;Object.keys(data&&typeof data==='object'?data:{}).forEach(function(key){const rec=data[key];if(!rec||!Array.isArray(rec.visits))return;rec.visits=rec.visits.map(function(v){if(!v||!Array.isArray(v.photos))return v;let touched=false;const photos=v.photos.map(function(ph){if(!ph||String(ph.fileId)!==String(localId))return ph;touched=true;changed=true;return Object.assign({},ph,remote,{syncStatus:'saved'});});return touched?Object.assign({},v,{photos:photos}):v;});});return changed;
+}
+window.oaiVisitPhotoSyncResult=function(localId,ok,fileId,mimeType,savedAt,message){
+  const local=String(localId||'');if(!local)return;const shr=_loadShrineVisits(),par=_loadParishVisits();
+  if(!ok){const mark=function(data){let changed=false;Object.keys(data&&typeof data==='object'?data:{}).forEach(function(key){const rec=data[key];if(!rec||!Array.isArray(rec.visits))return;rec.visits.forEach(function(v){if(!v||!Array.isArray(v.photos))return;v.photos.forEach(function(ph){if(ph&&String(ph.fileId)===local&&ph.syncStatus!=='waiting'){ph.syncStatus='waiting';changed=true;}});});});return changed;};const a=mark(shr),b=mark(par);if(a)_saveShrineVisits(shr);if(b)_saveParishVisits(par);if(a||b){const pm=document.getElementById('parish-visit-detail-view');if(pm&&pm.classList.contains('show'))_oaiRerenderJournal('parish');const sm=document.getElementById('shrine-visit-detail-view');if(sm&&sm.classList.contains('show'))_oaiRerenderJournal('shrine');}return;}
+  const remoteId=String(fileId||'');if(!remoteId)return;const remote={fileId:remoteId,mimeType:String(mimeType||'image/jpeg'),savedAt:String(savedAt||Date.now())};
+  const a=_oaiReplaceSyncedPhotoInMap(shr,local,remote),b=_oaiReplaceSyncedPhotoInMap(par,local,remote);
+  if(a)_saveShrineVisits(shr);if(b)_saveParishVisits(par);
+  const t=_oaiVisitPhotoThumbCache.get(local),f=_oaiVisitPhotoFullCache.get(local);if(t){_oaiVisitPhotoThumbCache.delete(local);_oaiCachePhotoData(remoteId,t,'thumb');}if(f){_oaiVisitPhotoFullCache.delete(local);_oaiCachePhotoData(remoteId,f,'full');}
+  if(a||b){try{queueGoogleDriveBackup();}catch(_e){}const pm=document.getElementById('parish-visit-detail-view');if(pm&&pm.classList.contains('show'))_oaiRerenderJournal('parish');const sm=document.getElementById('shrine-visit-detail-view');if(sm&&sm.classList.contains('show'))_oaiRerenderJournal('shrine');}
 };
 function _oaiCachePhotoData(fileId,dataUri,type){const key=String(fileId||'');if(!key||!dataUri)return;const cache=type==='thumb'?_oaiVisitPhotoThumbCache:_oaiVisitPhotoFullCache;cache.delete(key);cache.set(key,dataUri);while(cache.size>OAI_VISIT_PHOTO_CACHE_MAX){const oldest=cache.keys().next().value;cache.delete(oldest);}}
 function _oaiLoadVisitPhotoData(fileId,meta){
@@ -15537,10 +15564,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function openRestore(){const m=restoreModal();if(!m)return;restoreMessage('');const input=document.getElementById('oai-record-restore-code');if(input)input.value='';m.classList.add('show');m.setAttribute('aria-hidden','false');}
   function closeRestore(){const m=restoreModal();if(!m)return;m.classList.remove('show');m.setAttribute('aria-hidden','true');}
   function localValue(key,fallback){try{const value=JSON.parse(localStorage.getItem(key)||'');return value==null?fallback:value;}catch(_e){return fallback;}}
+  function backupVisitMapWithoutLocalPhotos(value){
+    const src=value&&typeof value==='object'?value:{},out={};Object.keys(src).forEach(function(key){const rec=src[key]&&typeof src[key]==='object'?src[key]:{};const clone=Object.assign({},rec);clone.visits=(Array.isArray(rec.visits)?rec.visits:[]).map(function(v){const x=Object.assign({},v||{});if(Array.isArray(x.photos))x.photos=x.photos.filter(function(ph){return ph&&ph.fileId&&String(ph.fileId).indexOf('local_')!==0&&String(ph.syncStatus||'')!=='pending';});return x;});out[key]=clone;});return out;
+  }
   function backupSnapshot(){
     const parish=configuredParish();
     return {format:'catholic-gildongmu-backup',version:1,createdAt:new Date().toISOString(),data:{
-      shrineVisits:localValue(OAI_SHRINE_VISITS_KEY,{}),parishVisits:localValue(OAI_PARISH_VISITS_KEY,{}),
+      shrineVisits:backupVisitMapWithoutLocalPhotos(localValue(OAI_SHRINE_VISITS_KEY,{})),parishVisits:backupVisitMapWithoutLocalPhotos(localValue(OAI_PARISH_VISITS_KEY,{})),
       prayerFavorites:localValue('pr_favorites',[]),webFavorites:localValue('web_favorites_v1',[]),routeFavorites:localValue(OAI_ROUTE_FAVORITES_KEY,[]),pilgrimagePlan:localValue('oai_pilgrimage_plan_v1',[]),pilgrimageDraftMeta:localValue('oai_pilgrimage_draft_meta_v2',{}),pilgrimageCourses:localValue('oai_pilgrimage_courses_v1',[]),
       myDiocese:configuredDiocese(),myParish:parish?{diocese:parish.diocese||'',name:parish.name||''}:null,
       parishAutoVisit:_isMyParishAutoVisitEnabled(),prayerFontSize:localStorage.getItem('prayer_font_size')||'',
