@@ -1,5 +1,4 @@
 
-
 'use strict';
 
 function hideCoverAndRun(callback) {
@@ -16057,15 +16056,34 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   let dailySettlementTimer=null,dailyClockTimer=null,dailySettlementBusy=false;
   function _dailyPendingDates(state){
-    const today=_dailyIso(Date.now());const dates=[];
+    const today=_dailyIso(Date.now()),dates=[];
+    // 2026-10-02 한정 재검증: 이미 정산된 수동/기존 코스를 지운 경우에만
+    // 기존 정산 결과를 한 번 무효화합니다. GPS로 자동 생성한 코스를
+    // 사용자가 삭제한 경우에는 절대 복원하지 않습니다.
+    const testDate='2026-10-02',testDone=state.auto[testDate];
+    if(testDate<today&&testDone&&testDone.source!=='auto'&&!state.oct02ReplayChecked){
+      const retained=loadCourses().some(function(c){
+        if(!c)return false;
+        if(c.autoGps&&c.sourceDate===testDate)return true;
+        return Array.isArray(c.completions)&&c.completions.some(function(entry){
+          return entry&&_dailyIso(entry.completedAt)===testDate;
+        });
+      });
+      // 기존 수동 완료 기록이 없어졌을 때만 재검토합니다.
+      if(!retained){
+        delete state.auto[testDate];
+        delete state.manual[testDate];
+        state.oct02ReplayChecked=true;
+        _saveDailyState(state);
+        console.info('[순례 정산] 10월 2일: 삭제된 수동 코스 확인, GPS 재검증 1회 예약');
+      }
+    }
     let cursor=_courseDateValueToTs(DAILY_SETTLEMENT_START),steps=0;
     while(cursor&&_dailyIso(cursor)<today&&steps++<400){
       const date=_dailyIso(cursor),done=state.auto[date];
-      // 테스트 중 10월 2일 수동 완료 코스를 삭제했다면, 기존 코스가 사라진 날짜만 다시 평가한다.
-      if(done&&done.source==='existing'&&done.existingId&&!loadCourses().some(c=>c.id===done.existingId)){
-        delete state.auto[date];delete state.manual[date];_saveDailyState(state);
-      }
-      if(!state.auto[date])dates.push(date);
+      // 정산 상태가 없는 날짜만 다시 처리합니다.
+      // 기존 코드처럼 완료 코스를 삭제할 때마다 재생성하지 않습니다.
+      if(!done)dates.push(date);
       const d=new Date(cursor);cursor=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1,12).getTime();
     }
     return dates;
