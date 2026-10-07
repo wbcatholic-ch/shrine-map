@@ -1,7 +1,7 @@
 
 'use strict';
 
-/* V8-1-14-1109: 동적 자산 버전은 index.html의 OAI_APP_BUILD_VERSION 하나만 따른다. */
+/* V8-1-14-1110: 동적 자산 버전은 index.html의 OAI_APP_BUILD_VERSION 하나만 따른다. */
 var OAI_ASSET_VERSION = String(window.OAI_APP_BUILD_VERSION || window.APP_VERSION || '').trim();
 function oaiVersionedAsset(path){
   var url=String(path||'');
