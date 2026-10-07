@@ -1887,6 +1887,24 @@ function _formatVisitDate(v){
   if(/^\d{4}-\d{2}-\d{2}$/.test(s)) return s.replace(/-/g,'.');
   return s;
 }
+/* 공통 방문기록 형식: 성지/성당이 같은 날짜·중복·저장 시각 규칙을 사용한다.
+   기존 localStorage 키와 과거 문자열 기록은 변경하지 않는다. */
+function _normalizeVisitEntry(v){
+  return typeof v==='string'?{date:v,method:'manual'}:v;
+}
+function _visitDateOf(v){
+  const rec=_normalizeVisitEntry(v);
+  return String((rec&&rec.date)||'');
+}
+function _hasVisitDate(visits,date){
+  return Array.isArray(visits)&&visits.some(function(v){return _visitDateOf(v)===String(date);});
+}
+function _isVisitDate(date){
+  return /^\d{4}-\d{2}-\d{2}$/.test(String(date||''));
+}
+function _newVisitEntry(date,method){
+  return {date:String(date),method:method||'manual',savedAt:new Date().toISOString()};
+}
 function _getShrineVisitKey(item){
   if(!item) return '';
   if(item.visitId) return 'id:'+String(item.visitId);
@@ -1993,20 +2011,20 @@ function _compareShrineVisits(a,b){
 }
 function _getShrineVisitDates(item){
   const rec=_getShrineVisitRecord(item);
-  const arr=(rec&&Array.isArray(rec.visits)?rec.visits:[]).map(function(v){ return typeof v==='string'?{date:v,method:'manual'}:v; }).filter(function(v){ return v&&v.date; });
+  const arr=(rec&&Array.isArray(rec.visits)?rec.visits:[]).map(_normalizeVisitEntry).filter(function(v){return v&&v.date;});
   arr.sort(_compareShrineVisits);
   return arr;
 }
 function _getShrineVisitCount(item){ return _getShrineVisitDates(item).length; }
 function _isVisitedShrine(item){ return _getShrineVisitCount(item)>0; }
 function _hasShrineVisitOnDate(item,date){
-  return _getShrineVisitDates(item).some(function(v){ return String(v.date||'')===String(date||''); });
+  return _hasVisitDate(_getShrineVisitDates(item),date);
 }
 function _addShrineVisit(item,date,method){
   const key=_getShrineVisitKey(item);
   if(!key) return false;
   date=String(date||'').trim();
-  if(!/^\d{4}-\d{2}-\d{2}$/.test(date)) return false;
+  if(!_isVisitDate(date)) return false;
   const data=_loadShrineVisits();
   _migrateShrineVisitRecord(item,data);
   const rec=data[key]&&typeof data[key]==='object'?data[key]:{name:item.name||'',diocese:item.diocese||'',seq:item.seq||'',visits:[]};
@@ -2014,13 +2032,9 @@ function _addShrineVisit(item,date,method){
   rec.name=item.name||rec.name||'';
   rec.diocese=item.diocese||rec.diocese||'';
   rec.seq=item.seq||rec.seq||'';
-  if(rec.visits.some(function(v){ return String((typeof v==='string'?v:(v&&v.date))||'')===String(date); })) return false;
-  rec.visits.push({date:date,method:method||'manual',savedAt:new Date().toISOString()});
-  rec.visits.sort(function(a,b){
-    const aa=typeof a==='string'?{date:a,method:'manual'}:a;
-    const bb=typeof b==='string'?{date:b,method:'manual'}:b;
-    return _compareShrineVisits(aa,bb);
-  });
+  if(_hasVisitDate(rec.visits,date)) return false;
+  rec.visits.push(_newVisitEntry(date,method));
+  rec.visits.sort(function(a,b){return _compareShrineVisits(_normalizeVisitEntry(a),_normalizeVisitEntry(b));});
   data[key]=rec;
   _saveShrineVisits(data);
   try{ document.documentElement.classList.add('has-shrine-visits'); }catch(_e){}
@@ -3527,7 +3541,7 @@ function _renderInfoCardShrineVisit(item){
 }
 
 
-/* V8-1-14-1112: GPS 방문 기록 단일 진입점.
+/* V8-1-14-1113: GPS 방문 기록 단일 진입점.
    성지/성당 GPS 등록 여부와 당일 중복 판정을 이 함수에서만 결정한다.
    UI 알림과 순례코스 진행 처리는 각 호출부가 담당한다. */
 function _registerGpsPlaceVisit(kind,item,date){
@@ -3540,7 +3554,7 @@ function _registerGpsPlaceVisit(kind,item,date){
       return {added:!!_addShrineVisit(item,visitDate,'gps'),already:false,kind:'shrine',item:item};
     }
     if(kind==='parish'){
-      const already=_parishVisits(item).some(function(v){return String(v&&v.date||'')===visitDate;});
+      const already=_hasVisitDate(_parishVisits(item),visitDate);
       if(already)return {added:false,already:true,kind:'parish',item:item};
       return {added:!!_addParishVisit(item,visitDate,'gps'),already:false,kind:'parish',item:item};
     }
@@ -3572,9 +3586,9 @@ function _isSameParish(a,b){return !!(a&&b&&String(a.diocese||'')===String(b.dio
 function _parishVisitKey(p){return p?[String(p.diocese||''),String(p.name||''),String(p.addr||'')].join('|'):'';}
 function _loadParishVisits(){try{const v=localStorage.getItem(OAI_PARISH_VISITS_KEY);const d=v?JSON.parse(v):{};return d&&typeof d==='object'?d:{}}catch(_e){return {}}}
 function _saveParishVisits(d){try{localStorage.setItem(OAI_PARISH_VISITS_KEY,JSON.stringify(d||{}))}catch(_e){}}
-function _parishVisits(p){const r=_loadParishVisits()[_parishVisitKey(p)]||{},a=Array.isArray(r.visits)?r.visits:[];return a.map(function(v){return typeof v==='string'?{date:v,method:'manual'}:v;}).filter(function(v){return v&&v.date;}).sort(_compareShrineVisits);}
+function _parishVisits(p){const r=_loadParishVisits()[_parishVisitKey(p)]||{},a=Array.isArray(r.visits)?r.visits:[];return a.map(_normalizeVisitEntry).filter(function(v){return v&&v.date;}).sort(_compareShrineVisits);}
 function _parishVisitCount(p){return _parishVisits(p).length;}
-function _addParishVisit(p,date,method){const key=_parishVisitKey(p);if(!key||!/^\d{4}-\d{2}-\d{2}$/.test(String(date||'')))return false;const d=_loadParishVisits(),r=d[key]&&typeof d[key]==='object'?d[key]:{name:p.name||'',diocese:p.diocese||'',addr:p.addr||'',visits:[]};r.visits=Array.isArray(r.visits)?r.visits:[];if(r.visits.some(function(v){return String((typeof v==='string'?v:v&&v.date)||'')===String(date)}))return false;r.visits.push({date:String(date),method:method||'manual',savedAt:new Date().toISOString()});r.visits.sort(_compareShrineVisits);d[key]=r;_saveParishVisits(d);return true;}
+function _addParishVisit(p,date,method){const key=_parishVisitKey(p);if(!key||!_isVisitDate(date))return false;const d=_loadParishVisits(),r=d[key]&&typeof d[key]==='object'?d[key]:{name:p.name||'',diocese:p.diocese||'',addr:p.addr||'',visits:[]};r.visits=Array.isArray(r.visits)?r.visits:[];if(_hasVisitDate(r.visits,date))return false;r.visits.push(_newVisitEntry(date,method));r.visits.sort(_compareShrineVisits);d[key]=r;_saveParishVisits(d);return true;}
 function _deleteParishVisit(p,i){const key=_parishVisitKey(p),d=_loadParishVisits(),r=d[key];if(!r||!Array.isArray(r.visits)||i<0||i>=r.visits.length||String(r.visits[i].method||'')==='gps')return false;r.visits.splice(i,1);if(r.visits.length)d[key]=r;else delete d[key];_saveParishVisits(d);return true;}
 function _parishEntries(){const a=[];(PARISHES||[]).forEach(function(p,i){if(!p||p.diocese==='군종교구')return;const v=_parishVisits(p);if(v.length)a.push({p:p,i:i,v:v,n:v.length});});return a.sort(function(a,b){return _compareShrineVisits(a.v[0],b.v[0])||String(a.p.name).localeCompare(String(b.p.name),'ko')});}
 function _parishUnvisitedEntries(){const saved=_loadParishVisits();return (PARISHES||[]).map(function(p,i){const r=saved[_parishVisitKey(p)],v=r&&Array.isArray(r.visits)?r.visits:[];return {p:p,i:i,v:v};}).filter(function(x){return x.p&&x.p.diocese!=='군종교구'&&!x.v.length;}).sort(function(a,b){return String(a.p.name||'').localeCompare(String(b.p.name||''),'ko');});}
@@ -10844,7 +10858,7 @@ function _raiseMyLocationMarker(){
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 
-/* V8-1-14-1112: 위치 1회 갱신당 GPS 후처리를 한곳에서 순서대로 배포한다.
+/* V8-1-14-1113: 위치 1회 갱신당 GPS 후처리를 한곳에서 순서대로 배포한다.
    성지 → 성당 → 진행 중 순례 → 출발/도착 확인 순서를 유지한다. */
 function _oaiHandleGpsArrival(lat,lng,opts){
   opts=opts||{};
