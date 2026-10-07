@@ -1,7 +1,7 @@
 
 'use strict';
 
-/* V8-1-14-1110: 동적 자산 버전은 index.html의 OAI_APP_BUILD_VERSION 하나만 따른다. */
+/* V8-1-14-1111: 동적 자산 버전은 index.html의 OAI_APP_BUILD_VERSION 하나만 따른다. */
 var OAI_ASSET_VERSION = String(window.OAI_APP_BUILD_VERSION || window.APP_VERSION || '').trim();
 function oaiVersionedAsset(path){
   var url=String(path||'');
@@ -1500,6 +1500,33 @@ document.addEventListener('visibilitychange', function(){
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }, true);
 
+
+/* V8-1-14-1111: 보조 화면 복귀 처리를 한곳에서 배포한다.
+   Android native lifecycle, 외부사이트 복귀 conductor, back-controller처럼
+   순서에 민감한 핵심 수명주기는 기존 전용 listener를 유지한다. */
+var _oaiLifecycleObservers = { pageshow:[], focus:[], visible:[], hidden:[], pagehide:[] };
+function oaiAddLifecycleObserver(type, fn){
+  try{
+    if(!_oaiLifecycleObservers[type] || typeof fn !== 'function') return false;
+    _oaiLifecycleObservers[type].push(fn);
+    return true;
+  }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
+}
+function _oaiRunLifecycleObservers(type, ev){
+  var list = _oaiLifecycleObservers[type] || [];
+  list.slice().forEach(function(fn){
+    try{ fn(ev); }catch(e){ console.warn('[가톨릭길동무]', e); }
+  });
+}
+window.addEventListener('pageshow', function(ev){ _oaiRunLifecycleObservers('pageshow', ev); }, {capture:true,passive:true});
+window.addEventListener('focus', function(ev){ _oaiRunLifecycleObservers('focus', ev); }, {capture:true,passive:true});
+window.addEventListener('pagehide', function(ev){ _oaiRunLifecycleObservers('pagehide', ev); }, {capture:true,passive:true});
+document.addEventListener('visibilitychange', function(ev){
+  if(document.visibilityState === 'hidden') _oaiRunLifecycleObservers('hidden', ev);
+  else if(document.visibilityState === 'visible') _oaiRunLifecycleObservers('visible', ev);
+}, {capture:true,passive:true});
+try{ window.oaiAddLifecycleObserver = oaiAddLifecycleObserver; }catch(_e){}
+
 document.addEventListener('click', function(e){
   try{
     if(e.defaultPrevented) return;
@@ -1691,9 +1718,9 @@ function _clearStaleFaithFrameLoading(reason){
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 try{
-  window.addEventListener('pageshow', function(){ _clearStaleFaithFrameLoading('pageshow'); }, {passive:true});
-  window.addEventListener('focus', function(){ _clearStaleFaithFrameLoading('focus'); }, {passive:true});
-  document.addEventListener('visibilitychange', function(){ if(document.visibilityState === 'visible') _clearStaleFaithFrameLoading('visibility-visible'); }, {passive:true});
+  oaiAddLifecycleObserver('pageshow', function(){ _clearStaleFaithFrameLoading('pageshow'); });
+  oaiAddLifecycleObserver('focus', function(){ _clearStaleFaithFrameLoading('focus'); });
+  oaiAddLifecycleObserver('visible', function(){ _clearStaleFaithFrameLoading('visibility-visible'); });
 }catch(e){ console.warn('[가톨릭길동무]', e); }
 function _renderFaithBottomNav(current){
   const ids=['missa-faith-nav','prayer-faith-nav'];
@@ -4191,23 +4218,21 @@ function _tryResumeMassQuickSoon(){
   }catch(e){ console.warn("[가톨릭길동무]", e); }
   return false;
 }
-window.addEventListener('pageshow', function(){
+oaiAddLifecycleObserver('pageshow', function(){
   var handled = _tryResumeMassQuickSoon();
   if(!handled){
     try{ _clearMassQuickReturnForReload(); }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
   setTimeout(_tryResumeMassQuickSoon, 80);
-}, true);
-document.addEventListener('visibilitychange', function(){
-  if(document.visibilityState === 'visible'){
-    _tryResumeMassQuickSoon();
-    setTimeout(_tryResumeMassQuickSoon, 120);
-  }
-}, true);
-window.addEventListener('focus', function(){
+});
+oaiAddLifecycleObserver('visible', function(){
   _tryResumeMassQuickSoon();
   setTimeout(_tryResumeMassQuickSoon, 120);
-}, true);
+});
+oaiAddLifecycleObserver('focus', function(){
+  _tryResumeMassQuickSoon();
+  setTimeout(_tryResumeMassQuickSoon, 120);
+});
 if(document.readyState === 'loading') document.addEventListener('DOMContentLoaded', function(){ setTimeout(_tryResumeMassQuickSoon, 80); }, {once:true});
 else setTimeout(_tryResumeMassQuickSoon, 80);
 window.addEventListener('load', function(){ setTimeout(_tryResumeMassQuickSoon, 80); }, {once:true});
@@ -4688,7 +4713,7 @@ function _closePrayerAndReturn(){
     });
   }
   document.addEventListener('DOMContentLoaded', init, true);
-  window.addEventListener('pageshow', init, true);
+  oaiAddLifecycleObserver('pageshow', init);
 })();
 
 function _getDioceseLoading(){
@@ -5508,11 +5533,9 @@ function _resumeMyeongryeAfterBackground(){
     });
   },120);
 }
-document.addEventListener('visibilitychange',function(){
-  if(document.visibilityState==='hidden') _pauseMyeongryeForBackground();
-  else _resumeMyeongryeAfterBackground();
-},true);
-window.addEventListener('pageshow',function(){ _resumeMyeongryeAfterBackground(); },true);
+oaiAddLifecycleObserver('hidden', _pauseMyeongryeForBackground);
+oaiAddLifecycleObserver('visible', _resumeMyeongryeAfterBackground);
+oaiAddLifecycleObserver('pageshow', _resumeMyeongryeAfterBackground);
 function _oaiMyeongryeBackHandle(){
   var modal=document.getElementById('myeongrye-materials-modal'), viewer=modal&&modal.querySelector('.myeongrye-photo-viewer');
   if(viewer&&viewer.classList.contains('open')){ _closeMyeongryePhotoViewer(); return true; }
@@ -5756,7 +5779,7 @@ function restoreDioceseExternalState(opts){
   }catch(e){ console.warn('[가톨릭길동무]', e); window.__OAI_DIOCESE_RESTORING__ = false; }
   return true;
 }
-window.addEventListener('pageshow', function(ev){
+oaiAddLifecycleObserver('pageshow', function(ev){
   try{
     var state=_readDioceseReturnState();
     if(state){
@@ -5778,16 +5801,10 @@ window.addEventListener('pageshow', function(ev){
     }
   }catch(ex){}
   _scheduleDioceseExternalRestore((ev && ev.persisted) ? 'pageshow-persisted' : 'pageshow', 20);
-}, true);
+});
 try{ window.restoreDioceseExternalState = restoreDioceseExternalState; }catch(_e){}
-window.addEventListener('focus', function(){
-  _scheduleDioceseExternalRestore('focus', 60);
-}, true);
-document.addEventListener('visibilitychange', function(){
-  if(document.visibilityState === 'visible'){
-    _scheduleDioceseExternalRestore('visible', 80);
-  }
-}, true);
+oaiAddLifecycleObserver('focus', function(){ _scheduleDioceseExternalRestore('focus', 60); });
+oaiAddLifecycleObserver('visible', function(){ _scheduleDioceseExternalRestore('visible', 80); });
 /* V8-1-14-621: route reset helper is kept without inactive focus/map-entry hooks. */
 function clearRouteNoFocus(){
   try{
@@ -5809,7 +5826,7 @@ function clearRouteNoFocus(){
 }
 /* V8-1-14-621: 현재 성지 외부 링크는 웹사이트 카테고리와 같은 보호창 이동 방식이므로 옛 core external return 복원 로직은 제거하고,
    pageshow 시 지도 DOM이 비어 있는 경우에만 기존 지도 재로딩 보호 흐름을 유지한다. */
-window.addEventListener('pageshow', function(e){
+oaiAddLifecycleObserver('pageshow', function(){
   setTimeout(()=>{
     if(_screen==='map' && (!_map || !$('map')?.children.length)){
       const reopenTab=_activeTab||'';
@@ -14211,13 +14228,8 @@ function _fmtTime(s){
   ['touchstart','touchend','click','keydown','scroll'].forEach(ev=>{
     document.addEventListener(ev, _resetIdle, {passive:true});
   });
-  document.addEventListener('visibilitychange', function(){
-    if(document.visibilityState === 'hidden'){
-      clearTimeout(_idleTimer);
-      return;
-    }
-    _resetIdle();
-  }, {passive:true});
+  oaiAddLifecycleObserver('hidden', function(){ clearTimeout(_idleTimer); });
+  oaiAddLifecycleObserver('visible', _resetIdle);
   _resetIdle();
 })();
 
@@ -15252,7 +15264,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(initialDriveFirstFlow&&initialOnboarding)setTimeout(openInitialParishSetupAfterDrive,180);
     }
   };
-  document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden')queueGoogleDriveBackup();else if(document.visibilityState==='visible')setTimeout(maybePromptRestoreDaily,500);});
+  oaiAddLifecycleObserver('hidden',queueGoogleDriveBackup);
+  oaiAddLifecycleObserver('visible',function(){setTimeout(maybePromptRestoreDaily,500);});
   function openRestore(){const m=restoreModal();if(!m)return;restoreMessage('');const input=document.getElementById('oai-record-restore-code');if(input)input.value='';m.classList.add('show');m.setAttribute('aria-hidden','false');}
   function closeRestore(){const m=restoreModal();if(!m)return;m.classList.remove('show');m.setAttribute('aria-hidden','true');}
   function localValue(key,fallback){try{const value=JSON.parse(localStorage.getItem(key)||'');return value==null?fallback:value;}catch(_e){return fallback;}}
@@ -15682,7 +15695,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   const start=function(){retryTimer=setTimeout(maybeShow,1100);};
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});
   else start();
-  window.addEventListener('pageshow',function(){if(!seen())setTimeout(maybeShow,900);},{passive:true});
+  oaiAddLifecycleObserver('pageshow',function(){if(!seen())setTimeout(maybeShow,900);});
 })();
 
 /* V8-1-14-885: 숨김 개발자 모드 - 드래그 1초 길게 누르기 */
@@ -16196,7 +16209,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     // 화면 표시 후에만 작업 시작. 앱 실행 중 자정/백그라운드 복귀에도 처리.
     setTimeout(_settleDailyPilgrimages,1400);
     _scheduleNextDailySettlement();
-    document.addEventListener('visibilitychange',function(){if(!document.hidden)setTimeout(_settleDailyPilgrimages,700);});
+    oaiAddLifecycleObserver('visible',function(){setTimeout(_settleDailyPilgrimages,700);});
   }
 
   function _courseCompletionMatches(c,year,month){
@@ -16504,8 +16517,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     return false;
   };
   function _rememberBackgroundContextIfHidden(){try{if(document.visibilityState==='hidden')_rememberPilgrimageBackgroundContext();}catch(_e){}}
-  document.addEventListener('visibilitychange',_rememberBackgroundContextIfHidden,{passive:true});
-  window.addEventListener('pagehide',_rememberBackgroundContextIfHidden,{passive:true});
+  oaiAddLifecycleObserver('hidden',_rememberPilgrimageBackgroundContext);
+  oaiAddLifecycleObserver('pagehide',_rememberBackgroundContextIfHidden);
 
   function planner(){return document.getElementById('oai-pilgrimage-planner-modal');}
   /* CLEANUP-1017: 순례 planner도 공통 스크롤 관리자 사용 */
