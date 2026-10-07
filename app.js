@@ -15686,7 +15686,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   const COURSES_KEY='oai_pilgrimage_courses_v1';
   const ACTIVE_FOLLOW_KEY='oai_pilgrimage_active_follow_v1';
   const REPEAT_EDIT_GUARD_KEY='oai_pilgrimage_repeat_edit_guard_v1';
-  const ACTIVE_FOLLOW_MAX_MS=18*60*60*1000;
+  const DAILY_SETTLEMENT_START='2026-10-01';
+  const DAILY_SETTLEMENT_KEY='oai_pilgrimage_daily_settlement_v2';
+  const DAILY_SETTLEMENT_DELAY_MS=5000;
   let plannerReturnToCover=false, plannerEntrySource='unknown';
   let plannerView='list', currentCourseId='', pointRole='start', pendingPlanDeleteIndex=-1;
   let pilgrimageDetailMode='plan';
@@ -15732,7 +15734,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function normalizeCourse(c){
     if(!c||!c.id||!c.name)return null;
     const places=(Array.isArray(c.places)?c.places:[]).map(normalizePlace).filter(Boolean);
-    const out={id:String(c.id),name:String(c.name),updatedAt:Number(c.updatedAt)||0,start:normalizePoint(c.start),end:normalizePoint(c.end),places:places,completions:Array.isArray(c.completions)?c.completions:[],lastCompletedAt:Number(c.lastCompletedAt)||0,lastStartedAt:Number(c.lastStartedAt)||0,completionArmed:(typeof c.completionArmed==='boolean'?c.completionArmed:!(Array.isArray(c.completions)&&c.completions.length))};
+    const out={id:String(c.id),name:String(c.name),updatedAt:Number(c.updatedAt)||0,start:normalizePoint(c.start),end:normalizePoint(c.end),places:places,completions:Array.isArray(c.completions)?c.completions:[],lastCompletedAt:Number(c.lastCompletedAt)||0,lastStartedAt:Number(c.lastStartedAt)||0,autoGps:c.autoGps===true,sourceDate:String(c.sourceDate||''),gpsSettled:c.gpsSettled===true,completionArmed:(typeof c.completionArmed==='boolean'?c.completionArmed:!(Array.isArray(c.completions)&&c.completions.length))};
     return _courseRefreshCompletionState(out);
   }
   function loadCourses(){
@@ -15878,18 +15880,21 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function _clearActiveFollow(courseId){
     try{
       const cur=_readActiveFollowRaw();
-      if(!courseId||!cur||cur.courseId===String(courseId)) localStorage.removeItem(ACTIVE_FOLLOW_KEY);
+      if(!courseId||!cur||cur.courseId===String(courseId)){
+        if(cur)_endDailyFollowSession(cur);
+        localStorage.removeItem(ACTIVE_FOLLOW_KEY);
+      }
     }catch(_e){}
   }
   function _activeFollowState(){
     const s=_readActiveFollowRaw();
     if(!s)return null;
     const now=Date.now();
-    if(now-s.startedAt>=ACTIVE_FOLLOW_MAX_MS){_clearActiveFollow(s.courseId);return null;}
+    if(_courseDateInputValue(now)!==_courseDateInputValue(s.startedAt)){_clearActiveFollow(s.courseId);return null;}
     const c=loadCourses().find(function(x){return x.id===s.courseId;});
     if(!c){_clearActiveFollow(s.courseId);return null;}
     if(_courseAllPlacesDone(c.places)&&normalizePoint(c.end)){_clearActiveFollow(s.courseId);return null;}
-    return {courseId:s.courseId,startedAt:s.startedAt,course:c,remainingMs:Math.max(0,ACTIVE_FOLLOW_MAX_MS-(now-s.startedAt))};
+    return {courseId:s.courseId,startedAt:s.startedAt,course:c,remainingMs:Math.max(0,new Date(new Date(now).getFullYear(),new Date(now).getMonth(),new Date(now).getDate()+1).getTime()-now)};
   }
   function _activateFollowCourse(id){
     const requestedId=String(id||'');
@@ -15900,6 +15905,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const now=Date.now(),c=Object.assign({},a[i],{lastStartedAt:now,updatedAt:now});
     a[i]=c;
     try{localStorage.setItem(ACTIVE_FOLLOW_KEY,JSON.stringify({courseId:c.id,startedAt:now}));}catch(_e){}
+    _recordDailyFollowSession(c,now);
     saveCourses(a);
     return c;
   }
@@ -15916,7 +15922,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function _courseCompletionList(c){
     const places=(c&&Array.isArray(c.places))?c.places:[];
-    if(!c||!normalizePoint(c.end)) return [];
+    if(!c||(!normalizePoint(c.end)&&c.autoGps!==true&&c.gpsSettled!==true)) return [];
     return (Array.isArray(c&&c.completions)?c.completions:[]).map(function(x){
       if(!x)return null;
       const at=Number(x.completedAt)||0,count=Number(x.placeCount)||places.length;
@@ -15943,6 +15949,167 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const parts=s.split('-').map(function(x){return parseInt(x,10)||0;});
     return new Date(parts[0],parts[1]-1,parts[2],12,0,0,0).getTime();
   }
+  /* GPS 당일 정산: 2026-10-01 이전 방문은 그대로 보존하며 코스를 만들지 않는다.
+     수동 계획 일치 우선 -> 5초 뒤 자동 코스; 앱을 껐을 때도 다음 실행에서 미정산일 복구.
+     해당 GPS 방문의 실제 savedAt 시간이 존재할 때만 순서를 판정한다. */
+  function _dailyState(){
+    let state={};try{state=JSON.parse(localStorage.getItem(DAILY_SETTLEMENT_KEY)||'{}')||{};}catch(_e){}
+    if(!state||typeof state!=='object'||Array.isArray(state))state={};
+    if(!Array.isArray(state.sessions))state.sessions=[];
+    if(!state.manual||typeof state.manual!=='object')state.manual={};
+    if(!state.auto||typeof state.auto!=='object')state.auto={};
+    return state;
+  }
+  function _saveDailyState(state){localStorage.setItem(DAILY_SETTLEMENT_KEY,JSON.stringify(state));}
+  function _dailyIso(ts){return _courseDateInputValue(ts);}
+  function _dailyDayEnd(date){const n=_courseDateValueToTs(date);return n?new Date(new Date(n).getFullYear(),new Date(n).getMonth(),new Date(n).getDate(),23,59,59,0).getTime():0;}
+  function _recordDailyFollowSession(course,startedAt){
+    try{
+      const d=_dailyIso(startedAt),state=_dailyState();
+      if(!d||d<DAILY_SETTLEMENT_START||!course||!course.id)return;
+      if(!state.sessions.some(x=>x.courseId===String(course.id)&&x.startedAt===startedAt)){
+        state.sessions.push({courseId:String(course.id),date:d,startedAt:startedAt,endedAt:0,places:(course.places||[]).map(x=>({name:String(x.name||''),lat:Number(x.lat),lng:Number(x.lng)}))});
+        _saveDailyState(state);
+      }
+    }catch(e){console.warn('[순례 정산] 수동 세션 기록 실패',e);}
+  }
+  function _endDailyFollowSession(active){
+    try{
+      const state=_dailyState();let changed=false;
+      state.sessions.forEach(x=>{if(x.courseId===active.courseId&&x.startedAt===active.startedAt&&!x.endedAt){x.endedAt=Date.now();changed=true;}});
+      if(changed)_saveDailyState(state);
+    }catch(e){console.warn('[순례 정산] 수동 종료 저장 실패',e);}
+  }
+  function _dailySamePlace(a,b){
+    if(!a||!b)return false;
+    const ay=Number(a.lat),ax=Number(a.lng),by=Number(b.lat),bx=Number(b.lng);
+    if([ay,ax,by,bx].every(Number.isFinite)&&_validGpsPair(ay,ax)&&_validGpsPair(by,bx)){
+      return calcDist(ay,ax,by,bx)<=0.08;
+    }
+    return _normPilgrimageName(a.name)===_normPilgrimageName(b.name);
+  }
+  function _dailySameOrderedPlaces(planned,actual){return Array.isArray(planned)&&planned.length>0&&planned.length===actual.length&&planned.every((p,i)=>_dailySamePlace(p,actual[i]));}
+  function _dailyGpsEvents(date){
+    const events=[];
+    function collect(data,catalog){
+      Object.keys(data||{}).forEach(key=>{
+        const r=data[key];if(!r||!Array.isArray(r.visits))return;
+        const name=_normPilgrimageName(r.name),diocese=String(r.diocese||'');
+        const p=(Array.isArray(catalog)?catalog:[]).find(item=>item&&_normPilgrimageName(item.name)===name&&(!diocese||!item.diocese||String(item.diocese)===diocese));
+        const point=normalizePoint(p);
+        if(!point)return;
+        r.visits.forEach(v=>{
+          if(!v||typeof v!=='object'||String(v.method||'').toLowerCase()!=='gps'||String(v.date||'')!==date)return;
+          const at=Date.parse(String(v.savedAt||''));
+          if(!Number.isFinite(at)||_dailyIso(at)!==date)return; // 과거 스탬프의 날짜만으로 순서 추정 금지
+          events.push({name:point.name,addr:point.addr,lat:point.lat,lng:point.lng,at:at});
+        });
+      });
+    }
+    collect(_loadShrineVisits(),typeof SHRINES!=='undefined'?SHRINES:[]);
+    collect(_loadParishVisits(),typeof PARISHES!=='undefined'?PARISHES:[]);
+    events.sort((a,b)=>a.at-b.at||a.name.localeCompare(b.name,'ko'));
+    const unique=[];
+    events.forEach(ev=>{if(!unique.some(p=>_dailySamePlace(p,ev)))unique.push(ev);});
+    return unique;
+  }
+  function _dailySettleManual(date,events,state){
+    if(state.manual[date])return;
+    const courses=loadCourses();let changed=false,matchedId='';
+    const sessions=state.sessions.filter(x=>x.date===date).sort((a,b)=>a.startedAt-b.startedAt);
+    for(const session of sessions){
+      const i=courses.findIndex(c=>c.id===session.courseId);
+      if(i<0||!_dailySameOrderedPlaces(session.places,events))continue;
+      const c=courses[i],completions=_courseCompletionList(c);
+      if(completions.some(x=>_dailyIso(x.completedAt)===date)){matchedId=c.id;break;}
+      const ts=_dailyDayEnd(date);
+      const next=Object.assign({},c,{
+        completions:completions.concat([{completedAt:ts,placeCount:events.length,method:'gps',locked:true}]),
+        gpsSettled:true,completionArmed:false,updatedAt:Date.now()
+      });
+      courses[i]=_courseRefreshCompletionState(next);
+      matchedId=next.id;changed=true;break;
+    }
+    if(changed)saveCourses(courses);
+    state.manual[date]={done:true,matchedCourseId:matchedId};
+    _saveDailyState(state);
+  }
+  function _dailySettleAuto(date,events,state){
+    if(state.auto[date])return;
+    const matched=state.manual[date]&&state.manual[date].matchedCourseId;
+    const courses=loadCourses(),id='gps_daily_'+date.replace(/-/g,'');
+    // 해당 날짜에 동일한 경로의 완료 기록이 이미 있으면 재등록하지 않는다.
+    const existing=courses.find(c=>_dailySameOrderedPlaces(c.places,events)&&_courseCompletionList(c).some(x=>_dailyIso(x.completedAt)===date));
+    if(!matched&&!existing&&events.length>=2&&!courses.some(c=>c.id===id||(c.autoGps&&c.sourceDate===date))){
+      const at=_dailyDayEnd(date);
+      const course=_courseRefreshCompletionState({
+        id:id,name:date.replace(/-/g,'.')+' GPS 순례',autoGps:true,sourceDate:date,
+        start:null,end:null,places:events.map(ev=>({name:ev.name,addr:ev.addr,lat:ev.lat,lng:ev.lng,done:true,doneMethod:'gps'})),
+        completions:[{completedAt:at,placeCount:events.length,method:'gps',locked:true}],
+        completionArmed:false,lastStartedAt:0,updatedAt:Date.now(),lastCompletedAt:at
+      });
+      courses.unshift(course);saveCourses(courses);
+    }
+    state.auto[date]={done:true,source:existing?'existing':matched?'manual':events.length>=2?'auto':'none',existingId:existing?String(existing.id):''};
+    state.sessions=state.sessions.filter(x=>x.date!==date);
+    _saveDailyState(state);
+  }
+  let dailySettlementTimer=null,dailyClockTimer=null,dailySettlementBusy=false;
+  function _dailyPendingDates(state){
+    const today=_dailyIso(Date.now());const dates=[];
+    let cursor=_courseDateValueToTs(DAILY_SETTLEMENT_START),steps=0;
+    while(cursor&&_dailyIso(cursor)<today&&steps++<400){
+      const date=_dailyIso(cursor),done=state.auto[date];
+      // 테스트 중 10월 2일 수동 완료 코스를 삭제했다면, 기존 코스가 사라진 날짜만 다시 평가한다.
+      if(done&&done.source==='existing'&&done.existingId&&!loadCourses().some(c=>c.id===done.existingId)){
+        delete state.auto[date];delete state.manual[date];_saveDailyState(state);
+      }
+      if(!state.auto[date])dates.push(date);
+      const d=new Date(cursor);cursor=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1,12).getTime();
+    }
+    return dates;
+  }
+  async function _settleDailyPilgrimages(){
+    if(dailySettlementBusy||document.visibilityState==='hidden')return;
+    dailySettlementBusy=true;
+    try{
+      const state=_dailyState(),dates=_dailyPendingDates(state);
+      if(!dates.length)return;
+      if(typeof _ensureShrineDataLoaded==='function')await _ensureShrineDataLoaded();
+      if(!Array.isArray(SHRINES)||!SHRINES.length||!Array.isArray(PARISHES)||!PARISHES.length)throw new Error('성지·성당 목록 미준비');
+      // 진행 상태는 날짜가 바뀌었다면 기록을 보존한 채 종료한다.
+      const active=_readActiveFollowRaw();
+      if(active&&_dailyIso(active.startedAt)<_dailyIso(Date.now()))_clearActiveFollow(active.courseId);
+      for(const date of dates){
+        const stateNow=_dailyState();
+        if(!stateNow.manual[date])_dailySettleManual(date,_dailyGpsEvents(date),stateNow);
+      }
+      clearTimeout(dailySettlementTimer);
+      dailySettlementTimer=setTimeout(function(){
+        try{
+          if(document.hidden)return;
+          for(const date of dates){
+            const current=_dailyState();
+            if(!current.manual[date])return;
+            _dailySettleAuto(date,_dailyGpsEvents(date),current);
+          }
+        }catch(e){console.warn('[순례 정산] 자동등록 실패, 다음 실행 때 재시도',e);}
+      },DAILY_SETTLEMENT_DELAY_MS);
+    }catch(e){console.warn('[순례 정산] 정산 보류, 다음 실행 때 재시도',e);}
+    finally{dailySettlementBusy=false;}
+  }
+  function _scheduleNextDailySettlement(){
+    clearTimeout(dailyClockTimer);
+    const now=Date.now(),d=new Date(now),midnight=new Date(d.getFullYear(),d.getMonth(),d.getDate()+1).getTime();
+    dailyClockTimer=setTimeout(function(){_settleDailyPilgrimages();_scheduleNextDailySettlement();},Math.max(1000,midnight-now+150));
+  }
+  function _initializeDailyPilgrimageSettlement(){
+    // 화면 표시 후에만 작업 시작. 앱 실행 중 자정/백그라운드 복귀에도 처리.
+    setTimeout(_settleDailyPilgrimages,1400);
+    _scheduleNextDailySettlement();
+    document.addEventListener('visibilitychange',function(){if(!document.hidden)setTimeout(_settleDailyPilgrimages,700);});
+  }
+
   function _courseCompletionMatches(c,year,month){
     const y=String(year||'all'),m=String(month||'all');
     return _courseCompletionList(c).some(function(entry){
@@ -16872,6 +17039,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     pilgrimageDetailMode='plan';
     applyCourse(c);
     try{localStorage.setItem(ACTIVE_FOLLOW_KEY,JSON.stringify({courseId:c.id,startedAt:now}));}catch(_e){}
+    _recordDailyFollowSession(c,now);
     try{renderCourseList();}catch(_e){}
     // 완료 목록의 '다시 순례하기'에서 시작했다면
     // 버튼만 '순례 종료'로 바꾸고 목록에 머무르지 말고
@@ -18137,4 +18305,5 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   },true);
   document.addEventListener('keydown',e=>{if(e.key==='Enter'&&saveModal()&&saveModal().classList.contains('show')&&e.target&&e.target.id==='oai-pilgrimage-save-name'){e.preventDefault();confirmSave();}},true);
   refreshDev(); renderCourseList();
+  _initializeDailyPilgrimageSettlement();
 })();
