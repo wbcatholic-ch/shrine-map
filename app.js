@@ -2814,6 +2814,82 @@ function _closeShrineVisitCardsModal(opts){
    사진 원본은 Android가 Google Drive appDataFolder에 보관하고 웹에는 fileId/이름만 저장한다. */
 const OAI_VISIT_PHOTO_LIMIT_SHRINE=15;
 const OAI_VISIT_PHOTO_LIMIT_PARISH=10;
+/* V8-1-14-1129: 사용자가 확정한 성지-성당 33곳은 장소/스탬프는 분리 유지하되
+   같은 날짜의 개인 사진·메모만 성지 쪽 공통 저널로 공유한다. */
+const OAI_SHARED_VISIT_JOURNAL_GROUPS=[
+  {id:'g20190001',shrineSeq:'20190001',shrineName:'명동 대성당(명동 주교좌 성지 성당)',parishDiocese:'SE',parishName:'명동대성당'},
+  {id:'g20190113',shrineSeq:'20190113',shrineName:'가회동 성당',parishDiocese:'SE',parishName:'가회동성당'},
+  {id:'g20190122',shrineSeq:'20190122',shrineName:'종로 성당',parishDiocese:'SE',parishName:'종로성당'},
+  {id:'g20190124',shrineSeq:'20190124',shrineName:'중림동 약현 성당',parishDiocese:'SE',parishName:'중림동약현성당'},
+  {id:'g20190029',shrineSeq:'20190029',shrineName:'진산 성지',parishDiocese:'DJ',parishName:'진산성지성당'},
+  {id:'g20190143',shrineSeq:'20190143',shrineName:'답동 주교좌성당',parishDiocese:'IC',parishName:'답동주교좌성당'},
+  {id:'g20190149',shrineSeq:'20190149',shrineName:'원동 주교좌성당',parishDiocese:'WJ',parishName:'원동 주교좌 성당'},
+  {id:'g20190054',shrineSeq:'20190054',shrineName:'용소막 성당',parishDiocese:'WJ',parishName:'용소막성당'},
+  {id:'g20190055',shrineSeq:'20190055',shrineName:'풍수원 성당',parishDiocese:'WJ',parishName:'풍수원 성당'},
+  {id:'g20190060',shrineSeq:'20190060',shrineName:'계산 주교좌성당',parishDiocese:'DG',parishName:'계산성당'},
+  {id:'g20190156',shrineSeq:'20190156',shrineName:'참회와 속죄의 성당',parishDiocese:'UJ',parishName:'참회와 속죄의 성당'},
+  {id:'g20190159',shrineSeq:'20190159',shrineName:'경상 감영과 옥 터 (대안 성당)',parishDiocese:'DG',parishName:'대안성당'},
+  {id:'g20190160',shrineSeq:'20190160',shrineName:'경주 관아와 옥 터 (성건 성당)',parishDiocese:'DG',parishName:'성건성당'},
+  {id:'g20190153',shrineSeq:'20190153',shrineName:'의정부 주교좌성당',parishDiocese:'UJ',parishName:'주교좌 의정부성당'},
+  {id:'g20190154',shrineSeq:'20190154',shrineName:'갈곡리 성당',parishDiocese:'UJ',parishName:'갈곡리성당'},
+  {id:'g20190158',shrineSeq:'20190158',shrineName:'가실 성당',parishDiocese:'DG',parishName:'가실성당'},
+  {id:'g20190163',shrineSeq:'20190163',shrineName:'김천 황금 성당',parishDiocese:'DG',parishName:'김천황금성당'},
+  {id:'g20190164',shrineSeq:'20190164',shrineName:'비산(날뫼) 성당',parishDiocese:'DG',parishName:'비산성당'},
+  {id:'g20190165',shrineSeq:'20190165',shrineName:'새방골 성당',parishDiocese:'DG',parishName:'새방골성당'},
+  {id:'g20190071',shrineSeq:'20190071',shrineName:'언양 성당',parishDiocese:'BS',parishName:'언양성당'},
+  {id:'g20190075',shrineSeq:'20190075',shrineName:'감곡 매괴 성모 순례지 성당',parishDiocese:'CJ',parishName:'감곡성당'},
+  {id:'g20190169',shrineSeq:'20190169',shrineName:'청주 읍성 순교 성지(서운동 성당)',parishDiocese:'CJ',parishName:'서운동성당'},
+  {id:'g20190170',shrineSeq:'20190170',shrineName:'대산 성당 (복자 구한선 타대오 성지)',parishDiocese:'MS',parishName:'대산성지성당'},
+  {id:'g20190173',shrineSeq:'20190173',shrineName:'가톨릭 목포 성지(산정동 바실리카 / 목포 가톨릭 역사관)',parishDiocese:'GJ',parishName:'산정동성당'},
+  {id:'g20190093',shrineSeq:'20190093',shrineName:'곡성 옥 터 (곡성 성당)',parishDiocese:'GJ',parishName:'곡성성당'},
+  {id:'g20190092',shrineSeq:'20190092',shrineName:'나주 순교자 기념 성당',parishDiocese:'GJ',parishName:'나주성당'},
+  {id:'g20190174',shrineSeq:'20190174',shrineName:'영광 순교자 기념 성당',parishDiocese:'GJ',parishName:'영광성당'},
+  {id:'g20190176',shrineSeq:'20190176',shrineName:'김제 순교 성지',parishDiocese:'JJ',parishName:'요촌성당'},
+  {id:'g20190094',shrineSeq:'20190094',shrineName:'나바위 성지',parishDiocese:'JJ',parishName:'나바위성당'},
+  {id:'gsuryu',shrineName:'수류 성당',parishDiocese:'JJ',parishName:'수류성당'},
+  {id:'g20190098',shrineSeq:'20190098',shrineName:'여산 순교 성지',parishDiocese:'JJ',parishName:'여산성당'},
+  {id:'g20190099',shrineSeq:'20190099',shrineName:'전동 성당',parishDiocese:'JJ',parishName:'전동성당'},
+  {id:'g20190062',shrineSeq:'20190062',shrineName:'복자 성당',parishDiocese:'DG',parishName:'복자성당'}
+];
+function _oaiSharedJournalGroup(kind,item){
+  if(!item)return null;
+  return OAI_SHARED_VISIT_JOURNAL_GROUPS.find(function(g){
+    if(kind==='parish')return String(item.diocese||'')===g.parishDiocese&&String(item.name||'')===g.parishName;
+    if(g.shrineSeq&&String(item.seq||'')===g.shrineSeq)return true;
+    return String(item.name||'')===g.shrineName;
+  })||null;
+}
+function _oaiSharedGroupShrine(g){return g?(SHRINES||[]).find(function(s){return (g.shrineSeq&&String(s&&s.seq||'')===g.shrineSeq)||String(s&&s.name||'')===g.shrineName;})||null:null;}
+function _oaiSharedGroupParish(g){return g?(PARISHES||[]).find(function(p){return String(p&&p.diocese||'')===g.parishDiocese&&String(p&&p.name||'')===g.parishName;})||null:null;}
+function _oaiDirectVisitByDate(kind,item,date){
+  const visits=kind==='parish'?_parishVisits(item):_getShrineVisitDates(item);
+  return visits.find(function(v){return String(v&&v.date||'')===String(date||'');})||null;
+}
+function _oaiMergeJournalExtras(a,b){
+  const out={},aa=a&&typeof a==='object'?a:{},bb=b&&typeof b==='object'?b:{};
+  const map={};[].concat(Array.isArray(bb.photos)?bb.photos:[],Array.isArray(aa.photos)?aa.photos:[]).forEach(function(ph){if(ph&&ph.fileId)map[String(ph.fileId)]=ph;});
+  const photos=Object.keys(map).map(function(k){return map[k];});if(photos.length)out.photos=photos;
+  const memo=String(aa.memo||bb.memo||'').trim();if(memo)out.memo=memo;
+  return out;
+}
+function _oaiReadSharedJournalExtras(group,date){
+  if(!group||!date)return null;const shrine=_oaiSharedGroupShrine(group);if(!shrine)return null;
+  const data=_loadShrineVisits();_migrateShrineVisitRecord(shrine,data);const key=_getShrineVisitKey(shrine),rec=key&&data[key];
+  if(rec&&rec.sharedJournalByDate&&rec.sharedJournalByDate[date])return rec.sharedJournalByDate[date];
+  const s=_oaiDirectVisitByDate('shrine',shrine,date),p=_oaiDirectVisitByDate('parish',_oaiSharedGroupParish(group),date);
+  const merged=_oaiMergeJournalExtras(s,p);return (merged.photos||merged.memo)?merged:null;
+}
+function _oaiWriteSharedJournalExtras(kind,item,date,patch,opts){
+  const group=_oaiSharedJournalGroup(kind,item);if(!group)return false;const shrine=_oaiSharedGroupShrine(group);if(!shrine)return false;
+  const data=_loadShrineVisits();_migrateShrineVisitRecord(shrine,data);const key=_getShrineVisitKey(shrine);if(!key)return false;
+  const rec=data[key]&&typeof data[key]==='object'?data[key]:{name:shrine.name||'',diocese:shrine.diocese||'',seq:shrine.seq||'',visits:[]};
+  if(!Array.isArray(rec.visits))rec.visits=[];if(!rec.sharedJournalByDate||typeof rec.sharedJournalByDate!=='object')rec.sharedJournalByDate={};
+  const seed=_oaiReadSharedJournalExtras(group,date)||{},next=Object.assign({},seed,rec.sharedJournalByDate[date]||{},patch||{});next.updatedAt=new Date().toISOString();rec.sharedJournalByDate[date]=next;data[key]=rec;_saveShrineVisits(data);
+  if(!(opts&&opts.skipBackup)){try{queueGoogleDriveBackup();}catch(_e){}}
+  return true;
+}
+function _oaiVisitPhotoLimit(kind,item){return _oaiSharedJournalGroup(kind,item)?OAI_VISIT_PHOTO_LIMIT_SHRINE:(kind==='parish'?OAI_VISIT_PHOTO_LIMIT_PARISH:OAI_VISIT_PHOTO_LIMIT_SHRINE);}
+
 let _oaiVisitPhotoPending={};
 let _oaiVisitPhotoViewPending={};
 let _oaiVisitPhotoDeletePending={};
@@ -2830,6 +2906,7 @@ function _oaiFindVisitIndexByDate(arr,date){
 }
 function _oaiNormalizePhotos(v){return v&&Array.isArray(v.photos)?v.photos.filter(function(x){return x&&x.fileId;}):[];}
 function _oaiUpdateShrineVisitExtras(item,date,patch,opts){
+  if(_oaiSharedJournalGroup('shrine',item))return _oaiWriteSharedJournalExtras('shrine',item,date,patch,opts);
   const key=_getShrineVisitKey(item),data=_loadShrineVisits();if(!key||!data[key]||!Array.isArray(data[key].visits))return false;
   const idx=_oaiFindVisitIndexByDate(data[key].visits,date);if(idx<0)return false;
   let rec=_normalizeVisitEntry(data[key].visits[idx]);if(!rec||typeof rec!=='object')rec={date:String(date),method:'manual'};
@@ -2838,6 +2915,7 @@ function _oaiUpdateShrineVisitExtras(item,date,patch,opts){
   return true;
 }
 function _oaiUpdateParishVisitExtras(item,date,patch,opts){
+  if(_oaiSharedJournalGroup('parish',item))return _oaiWriteSharedJournalExtras('parish',item,date,patch,opts);
   const key=_parishVisitKey(item),data=_loadParishVisits();if(!key||!data[key]||!Array.isArray(data[key].visits))return false;
   const idx=_oaiFindVisitIndexByDate(data[key].visits,date);if(idx<0)return false;
   let rec=_normalizeVisitEntry(data[key].visits[idx]);if(!rec||typeof rec!=='object')rec={date:String(date),method:'manual'};
@@ -2846,8 +2924,9 @@ function _oaiUpdateParishVisitExtras(item,date,patch,opts){
   return true;
 }
 function _oaiGetVisitByDate(kind,item,date){
-  const visits=kind==='parish'?_parishVisits(item):_getShrineVisitDates(item);
-  return visits.find(function(v){return String(v&&v.date||'')===String(date||'');})||null;
+  const base=_oaiDirectVisitByDate(kind,item,date),group=_oaiSharedJournalGroup(kind,item);
+  if(!group)return base;
+  const extra=_oaiReadSharedJournalExtras(group,date);return extra?Object.assign({},base||{date:String(date||'')},extra):base;
 }
 function _oaiJournalSelectedDate(kind,visits){
   const prop=kind==='parish'?'__OAI_PARISH_JOURNAL_DATE__':'__OAI_SHRINE_JOURNAL_DATE__';
@@ -2857,7 +2936,7 @@ function _oaiJournalSelectedDate(kind,visits){
 function _oaiVisitJournalHtml(kind,item,visits){
   if(!visits||!visits.length)return '';
   const date=_oaiJournalSelectedDate(kind,visits),visit=visits.find(function(v){return String(v.date||'')===date;})||visits[0];
-  const limit=kind==='parish'?OAI_VISIT_PHOTO_LIMIT_PARISH:OAI_VISIT_PHOTO_LIMIT_SHRINE;
+  const limit=_oaiVisitPhotoLimit(kind,item);
   const photos=_oaiNormalizePhotos(visit),memo=String(visit&&visit.memo||'').trim();
   const dateBtns=visits.map(function(v){const d=String(v.date||'');return '<button type="button" class="oai-visit-journal-date'+(d===date?' active':'')+'" data-oai-journal-date="'+_visitHtmlEsc(kind)+'" data-oai-journal-value="'+_visitHtmlEsc(d)+'">'+_visitHtmlEsc(_formatVisitDate(d))+'</button>';}).join('');
   const photoGrid=photos.length?'<div class="oai-visit-photo-grid" data-oai-photo-grid="'+_visitHtmlEsc(kind)+'">'+photos.map(function(ph,i){const local=String(ph&&ph.fileId||'').indexOf('local_')===0,status=String(ph&&ph.syncStatus||''),pending=status==='pending'||status==='waiting'||local,label=status==='waiting'?'동기화 대기':'저장 중';return '<div class="oai-visit-photo-item'+(pending?' syncing':'')+'"><button type="button" class="oai-visit-photo-thumb" data-oai-photo-open="'+_visitHtmlEsc(kind)+'" data-oai-photo-index="'+i+'" data-oai-photo-file="'+_visitHtmlEsc(String(ph.fileId||''))+'" aria-label="방문 사진 '+(i+1)+' 보기"><span class="oai-visit-photo-placeholder" aria-hidden="true">사진</span><img alt="" loading="lazy">'+(pending?'<span class="oai-visit-photo-sync">'+label+'</span>':'')+'</button><button type="button" class="oai-visit-photo-thumb-delete" data-oai-photo-delete="'+_visitHtmlEsc(kind)+'" data-oai-photo-index="'+i+'" aria-label="방문 사진 '+(i+1)+' 삭제">×</button></div>';}).join('')+'</div>':'<div class="oai-visit-journal-empty">아직 등록한 사진이 없습니다.</div>';
@@ -2893,7 +2972,7 @@ function _oaiCloseMemoModal(){const m=document.getElementById('oai-visit-memo-mo
 try{window._oaiCloseMemoModal=_oaiCloseMemoModal;}catch(_e){}
 function _oaiOpenMemo(kind){const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const v=_oaiGetVisitByDate(kind,ctx.item,ctx.date),m=_oaiEnsureMemoModal();window.__OAI_MEMO_CONTEXT__=ctx;document.getElementById('oai-visit-memo-date').textContent=_formatVisitDate(ctx.date);document.getElementById('oai-visit-memo-text').value=String(v&&v.memo||'');m.classList.add('show');m.setAttribute('aria-hidden','false');setTimeout(function(){try{document.getElementById('oai-visit-memo-text').focus();}catch(_e){}},60);}
 function _oaiAddPhotos(kind){
-  const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const visit=_oaiGetVisitByDate(kind,ctx.item,ctx.date),photos=_oaiNormalizePhotos(visit),limit=kind==='parish'?OAI_VISIT_PHOTO_LIMIT_PARISH:OAI_VISIT_PHOTO_LIMIT_SHRINE,remaining=Math.max(0,limit-photos.length);if(!remaining){_oaiVisitToast('등록할 수 있는 사진 수를 모두 사용했습니다.');return;}
+  const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const visit=_oaiGetVisitByDate(kind,ctx.item,ctx.date),photos=_oaiNormalizePhotos(visit),limit=_oaiVisitPhotoLimit(kind,ctx.item),remaining=Math.max(0,limit-photos.length);if(!remaining){_oaiVisitToast('등록할 수 있는 사진 수를 모두 사용했습니다.');return;}
   const bridge=_oaiVisitNative();if(!bridge||typeof bridge.pickVisitPhotos!=='function'){_oaiVisitToast('사진 등록은 Android 앱에서 사용할 수 있습니다.');return;}
   const req=_oaiVisitRequestId('photo');_oaiVisitPhotoPending[req]=ctx;try{bridge.pickVisitPhotos(req,remaining);}catch(_e){delete _oaiVisitPhotoPending[req];_oaiVisitToast('사진 선택을 시작하지 못했습니다.');}
 }
@@ -2905,7 +2984,7 @@ window.oaiVisitPhotoProgress=function(requestId,current,total){
 function _oaiAppendLocalReadyPhoto(ctx,item){
   if(!ctx||!item||!item.fileId)return false;const visit=_oaiGetVisitByDate(ctx.kind,ctx.item,ctx.date),current=_oaiNormalizePhotos(visit);
   if(current.some(function(x){return String(x.fileId)===String(item.fileId);} ))return true;
-  const limit=ctx.kind==='parish'?OAI_VISIT_PHOTO_LIMIT_PARISH:OAI_VISIT_PHOTO_LIMIT_SHRINE,next=current.concat([item]).slice(0,limit);
+  const limit=_oaiVisitPhotoLimit(ctx.kind,ctx.item),next=current.concat([item]).slice(0,limit);
   return ctx.kind==='parish'?_oaiUpdateParishVisitExtras(ctx.item,ctx.date,{photos:next},{skipBackup:true}):_oaiUpdateShrineVisitExtras(ctx.item,ctx.date,{photos:next},{skipBackup:true});
 }
 window.oaiVisitPhotoLocalReady=function(requestId,itemJson,current,total){
@@ -2921,20 +3000,23 @@ window.oaiVisitPhotoUploadResult=function(requestId,ok,json,message){
   const ctx=_oaiVisitPhotoPending[requestId];delete _oaiVisitPhotoPending[requestId];if(!ctx)return;
   const msg=String(message||'');if(!ok){if(/취소/.test(msg))return;_oaiVisitToast(msg||'사진을 저장하지 못했습니다.');return;}
   let added=[];try{added=JSON.parse(String(json||'[]'));}catch(_e){}
-  const visit=_oaiGetVisitByDate(ctx.kind,ctx.item,ctx.date),current=_oaiNormalizePhotos(visit),limit=ctx.kind==='parish'?OAI_VISIT_PHOTO_LIMIT_PARISH:OAI_VISIT_PHOTO_LIMIT_SHRINE,next=current.concat(added).slice(0,limit);
+  const visit=_oaiGetVisitByDate(ctx.kind,ctx.item,ctx.date),current=_oaiNormalizePhotos(visit),limit=_oaiVisitPhotoLimit(ctx.kind,ctx.item),next=current.concat(added).slice(0,limit);
   const saved=ctx.kind==='parish'?_oaiUpdateParishVisitExtras(ctx.item,ctx.date,{photos:next}):_oaiUpdateShrineVisitExtras(ctx.item,ctx.date,{photos:next});if(saved){_oaiRerenderJournal(ctx.kind);if(msg&&!/완료|저장/.test(msg))_oaiVisitToast(msg);}
 };
 function _oaiReplaceSyncedPhotoInMap(data,localId,remote){
-  let changed=false;Object.keys(data&&typeof data==='object'?data:{}).forEach(function(key){const rec=data[key];if(!rec||!Array.isArray(rec.visits))return;rec.visits=rec.visits.map(function(v){if(!v||!Array.isArray(v.photos))return v;let touched=false;const photos=v.photos.map(function(ph){if(!ph||String(ph.fileId)!==String(localId))return ph;touched=true;changed=true;return Object.assign({},ph,remote,{syncStatus:'saved'});});return touched?Object.assign({},v,{photos:photos}):v;});});return changed;
+  let changed=false;Object.keys(data&&typeof data==='object'?data:{}).forEach(function(key){const rec=data[key];if(!rec)return;
+    if(Array.isArray(rec.visits))rec.visits=rec.visits.map(function(v){if(!v||!Array.isArray(v.photos))return v;let touched=false;const photos=v.photos.map(function(ph){if(!ph||String(ph.fileId)!==String(localId))return ph;touched=true;changed=true;return Object.assign({},ph,remote,{syncStatus:'saved'});});return touched?Object.assign({},v,{photos:photos}):v;});
+    if(rec.sharedJournalByDate&&typeof rec.sharedJournalByDate==='object')Object.keys(rec.sharedJournalByDate).forEach(function(d){const j=rec.sharedJournalByDate[d];if(!j||!Array.isArray(j.photos))return;let touched=false;const photos=j.photos.map(function(ph){if(!ph||String(ph.fileId)!==String(localId))return ph;touched=true;changed=true;return Object.assign({},ph,remote,{syncStatus:'saved'});});if(touched)rec.sharedJournalByDate[d]=Object.assign({},j,{photos:photos});});
+  });return changed;
 }
 window.oaiVisitPhotoSyncResult=function(localId,ok,fileId,mimeType,savedAt,message){
   const local=String(localId||'');if(!local)return;const shr=_loadShrineVisits(),par=_loadParishVisits();
-  if(!ok){const mark=function(data){let changed=false;Object.keys(data&&typeof data==='object'?data:{}).forEach(function(key){const rec=data[key];if(!rec||!Array.isArray(rec.visits))return;rec.visits.forEach(function(v){if(!v||!Array.isArray(v.photos))return;v.photos.forEach(function(ph){if(ph&&String(ph.fileId)===local&&ph.syncStatus!=='waiting'){ph.syncStatus='waiting';changed=true;}});});});return changed;};const a=mark(shr),b=mark(par);if(a)_saveShrineVisits(shr);if(b)_saveParishVisits(par);if(a||b){const pm=document.getElementById('parish-visit-detail-view');if(pm&&pm.classList.contains('show'))_oaiRerenderJournal('parish');const sm=document.getElementById('shrine-visit-detail-view');if(sm&&sm.classList.contains('show'))_oaiRerenderJournal('shrine');}return;}
+  if(!ok){const mark=function(data){let changed=false;Object.keys(data&&typeof data==='object'?data:{}).forEach(function(key){const rec=data[key];if(!rec)return;if(Array.isArray(rec.visits))rec.visits.forEach(function(v){if(!v||!Array.isArray(v.photos))return;v.photos.forEach(function(ph){if(ph&&String(ph.fileId)===local&&ph.syncStatus!=='waiting'){ph.syncStatus='waiting';changed=true;}});});if(rec.sharedJournalByDate&&typeof rec.sharedJournalByDate==='object')Object.keys(rec.sharedJournalByDate).forEach(function(d){const j=rec.sharedJournalByDate[d];if(!j||!Array.isArray(j.photos))return;j.photos.forEach(function(ph){if(ph&&String(ph.fileId)===local&&ph.syncStatus!=='waiting'){ph.syncStatus='waiting';changed=true;}});});});return changed;};const a=mark(shr),b=mark(par);if(a)_saveShrineVisits(shr);if(b)_saveParishVisits(par);if(a||b){const pm=document.getElementById('parish-visit-detail');if(pm&&pm.classList.contains('show'))_oaiRerenderJournal('parish');const sm=document.getElementById('shrine-visit-detail-view');if(sm&&sm.classList.contains('show'))_oaiRerenderJournal('shrine');}return;}
   const remoteId=String(fileId||'');if(!remoteId)return;const remote={fileId:remoteId,mimeType:String(mimeType||'image/jpeg'),savedAt:String(savedAt||Date.now())};
   const a=_oaiReplaceSyncedPhotoInMap(shr,local,remote),b=_oaiReplaceSyncedPhotoInMap(par,local,remote);
   if(a)_saveShrineVisits(shr);if(b)_saveParishVisits(par);
   const t=_oaiVisitPhotoThumbCache.get(local),f=_oaiVisitPhotoFullCache.get(local);if(t){_oaiVisitPhotoThumbCache.delete(local);_oaiCachePhotoData(remoteId,t,'thumb');}if(f){_oaiVisitPhotoFullCache.delete(local);_oaiCachePhotoData(remoteId,f,'full');}
-  if(a||b){try{queueGoogleDriveBackup();}catch(_e){}const pm=document.getElementById('parish-visit-detail-view');if(pm&&pm.classList.contains('show'))_oaiRerenderJournal('parish');const sm=document.getElementById('shrine-visit-detail-view');if(sm&&sm.classList.contains('show'))_oaiRerenderJournal('shrine');}
+  if(a||b){try{queueGoogleDriveBackup();}catch(_e){}const pm=document.getElementById('parish-visit-detail');if(pm&&pm.classList.contains('show'))_oaiRerenderJournal('parish');const sm=document.getElementById('shrine-visit-detail-view');if(sm&&sm.classList.contains('show'))_oaiRerenderJournal('shrine');}
 };
 function _oaiCachePhotoData(fileId,dataUri,type){const key=String(fileId||'');if(!key||!dataUri)return;const cache=type==='thumb'?_oaiVisitPhotoThumbCache:_oaiVisitPhotoFullCache;cache.delete(key);cache.set(key,dataUri);while(cache.size>OAI_VISIT_PHOTO_CACHE_MAX){const oldest=cache.keys().next().value;cache.delete(oldest);}}
 function _oaiLoadVisitPhotoData(fileId,meta){
@@ -2955,8 +3037,8 @@ function _oaiHydrateVisibleVisitThumbnails(kind){
 function _oaiApplyLoadedVisitPhoto(meta,dataUri){if(!meta)return;if(meta.type==='thumb'){const btn=meta.button;if(!btn||!btn.isConnected)return;const img=btn.querySelector('img');if(img){img.src=dataUri;btn.classList.add('loaded');btn.dataset.oaiLoading='0';}return;}if(meta.type==='viewer'){_oaiShowPhotoViewer(meta.kind,meta.index,dataUri);}}
 function _oaiOpenPhoto(kind,index){const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const visit=_oaiGetVisitByDate(kind,ctx.item,ctx.date),photos=_oaiNormalizePhotos(visit),ph=photos[index];if(!ph)return;_oaiPreparePhotoViewer(kind,index,ctx,photos.length);_oaiLoadVisitPhotoData(String(ph.fileId),{type:'viewer',kind:kind,index:index,ctx:ctx});}
 function _oaiEnsurePhotoViewer(){
-  let m=document.getElementById('oai-visit-photo-viewer');if(m)return m;m=document.createElement('div');m.id='oai-visit-photo-viewer';m.className='oai-visit-photo-viewer';m.setAttribute('aria-hidden','true');m.innerHTML='<div class="oai-visit-photo-viewer-bg"></div><div class="oai-visit-photo-viewer-panel"><div class="oai-visit-photo-viewer-top"><span id="oai-visit-photo-viewer-count"></span><button type="button" data-oai-photo-viewer-close="1" aria-label="사진 닫기">×</button></div><button type="button" class="oai-visit-photo-nav prev" data-oai-photo-prev="1" aria-label="이전 사진">‹</button><img id="oai-visit-photo-viewer-img" alt="방문 사진"><button type="button" class="oai-visit-photo-nav next" data-oai-photo-next="1" aria-label="다음 사진">›</button><button type="button" class="oai-visit-photo-viewer-delete" data-oai-photo-viewer-delete="1">사진 삭제</button></div>';
-  document.body.appendChild(m);m.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('[data-oai-photo-viewer-close]')){_oaiClosePhotoViewer();return;}if(e.target.closest&&e.target.closest('[data-oai-photo-prev]')){_oaiMovePhotoViewer(-1);return;}if(e.target.closest&&e.target.closest('[data-oai-photo-next]')){_oaiMovePhotoViewer(1);return;}if(e.target.closest&&e.target.closest('[data-oai-photo-viewer-delete]')){const st=_oaiVisitPhotoViewerState;if(st)_oaiDeletePhoto(st.kind,st.index);}});let sx=0,sy=0;m.addEventListener('touchstart',function(e){const t=e.touches&&e.touches[0];if(t){sx=t.clientX;sy=t.clientY;}},{passive:true});m.addEventListener('touchend',function(e){const t=e.changedTouches&&e.changedTouches[0];if(!t)return;const dx=t.clientX-sx,dy=t.clientY-sy;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.25)_oaiMovePhotoViewer(dx<0?1:-1);},{passive:true});return m;
+  let m=document.getElementById('oai-visit-photo-viewer');if(m)return m;m=document.createElement('div');m.id='oai-visit-photo-viewer';m.className='oai-visit-photo-viewer';m.setAttribute('aria-hidden','true');m.innerHTML='<div class="oai-visit-photo-viewer-bg"></div><div class="oai-visit-photo-viewer-panel"><div class="oai-visit-photo-viewer-top"><span id="oai-visit-photo-viewer-count"></span><button type="button" data-oai-photo-viewer-close="1" aria-label="사진 닫기">×</button></div><button type="button" class="oai-visit-photo-nav prev" data-oai-photo-prev="1" aria-label="이전 사진">‹</button><img id="oai-visit-photo-viewer-img" alt="방문 사진"><button type="button" class="oai-visit-photo-nav next" data-oai-photo-next="1" aria-label="다음 사진">›</button></div>';
+  document.body.appendChild(m);m.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('[data-oai-photo-viewer-close]')){_oaiClosePhotoViewer();return;}if(e.target.closest&&e.target.closest('[data-oai-photo-prev]')){_oaiMovePhotoViewer(-1);return;}if(e.target.closest&&e.target.closest('[data-oai-photo-next]')){_oaiMovePhotoViewer(1);return;}});let sx=0,sy=0;m.addEventListener('touchstart',function(e){const t=e.touches&&e.touches[0];if(t){sx=t.clientX;sy=t.clientY;}},{passive:true});m.addEventListener('touchend',function(e){const t=e.changedTouches&&e.changedTouches[0];if(!t)return;const dx=t.clientX-sx,dy=t.clientY-sy;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.25)_oaiMovePhotoViewer(dx<0?1:-1);},{passive:true});return m;
 }
 function _oaiPreparePhotoViewer(kind,index,ctx,total){const m=_oaiEnsurePhotoViewer(),img=document.getElementById('oai-visit-photo-viewer-img'),count=document.getElementById('oai-visit-photo-viewer-count');_oaiVisitPhotoViewerState={kind:kind,index:index,ctx:ctx};if(img){img.removeAttribute('src');img.classList.add('loading');}if(count)count.textContent=(index+1)+' / '+Number(total||0);m.classList.add('show');m.setAttribute('aria-hidden','false');const prev=m.querySelector('[data-oai-photo-prev]'),next=m.querySelector('[data-oai-photo-next]');if(prev)prev.disabled=index<=0;if(next)next.disabled=index>=Number(total||0)-1;try{document.documentElement.classList.add('oai-visit-photo-open');}catch(_e){}}
 function _oaiShowPhotoViewer(kind,index,dataUri){const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const visit=_oaiGetVisitByDate(kind,ctx.item,ctx.date),photos=_oaiNormalizePhotos(visit);if(!photos[index])return;const m=_oaiEnsurePhotoViewer(),img=document.getElementById('oai-visit-photo-viewer-img'),count=document.getElementById('oai-visit-photo-viewer-count');_oaiVisitPhotoViewerState={kind:kind,index:index,ctx:ctx};if(img){img.src=dataUri;img.classList.remove('loading');}if(count)count.textContent=(index+1)+' / '+photos.length;m.classList.add('show');m.setAttribute('aria-hidden','false');const prev=m.querySelector('[data-oai-photo-prev]'),next=m.querySelector('[data-oai-photo-next]');if(prev)prev.disabled=index<=0;if(next)next.disabled=index>=photos.length-1;try{document.documentElement.classList.add('oai-visit-photo-open');}catch(_e){}
@@ -15565,7 +15647,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function closeRestore(){const m=restoreModal();if(!m)return;m.classList.remove('show');m.setAttribute('aria-hidden','true');}
   function localValue(key,fallback){try{const value=JSON.parse(localStorage.getItem(key)||'');return value==null?fallback:value;}catch(_e){return fallback;}}
   function backupVisitMapWithoutLocalPhotos(value){
-    const src=value&&typeof value==='object'?value:{},out={};Object.keys(src).forEach(function(key){const rec=src[key]&&typeof src[key]==='object'?src[key]:{};const clone=Object.assign({},rec);clone.visits=(Array.isArray(rec.visits)?rec.visits:[]).map(function(v){const x=Object.assign({},v||{});if(Array.isArray(x.photos))x.photos=x.photos.filter(function(ph){return ph&&ph.fileId&&String(ph.fileId).indexOf('local_')!==0&&String(ph.syncStatus||'')!=='pending';});return x;});out[key]=clone;});return out;
+    const src=value&&typeof value==='object'?value:{},out={};Object.keys(src).forEach(function(key){const rec=src[key]&&typeof src[key]==='object'?src[key]:{};const clone=Object.assign({},rec);clone.visits=(Array.isArray(rec.visits)?rec.visits:[]).map(function(v){const x=Object.assign({},v||{});if(Array.isArray(x.photos))x.photos=x.photos.filter(function(ph){return ph&&ph.fileId&&String(ph.fileId).indexOf('local_')!==0&&String(ph.syncStatus||'')!=='pending';});return x;});if(rec.sharedJournalByDate&&typeof rec.sharedJournalByDate==='object'){clone.sharedJournalByDate={};Object.keys(rec.sharedJournalByDate).forEach(function(d){const j=Object.assign({},rec.sharedJournalByDate[d]||{});if(Array.isArray(j.photos))j.photos=j.photos.filter(function(ph){return ph&&ph.fileId&&String(ph.fileId).indexOf('local_')!==0&&String(ph.syncStatus||'')!=='pending';});clone.sharedJournalByDate[d]=j;});}out[key]=clone;});return out;
   }
   function backupSnapshot(){
     const parish=configuredParish();
@@ -15599,7 +15681,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     (Array.isArray(b)?b:[]).concat(Array.isArray(a)?a:[]).forEach(function(raw){const v=_normalizeVisitEntry(raw);if(!v||!v.date)return;const k=String(v.date);if(!map[k]){map[k]=v;order.push(k);}else map[k]=mergeVisitEntryPair(v,map[k]);});
     return order.map(function(k){return map[k];}).sort(_compareShrineVisits);
   }
-  function mergeVisitMaps(current,backup){const out=current&&typeof current==='object'?current:{};Object.keys(backup&&typeof backup==='object'?backup:{}).forEach(function(key){const oldRecord=out[key]&&typeof out[key]==='object'?out[key]:{};const newRecord=backup[key]&&typeof backup[key]==='object'?backup[key]:{};out[key]=Object.assign({},newRecord,oldRecord,{visits:mergeVisitEntries(oldRecord.visits,newRecord.visits)});});return out;}
+  function mergeSharedJournalMaps(a,b){const out={};const keys=new Set(Object.keys(b&&typeof b==='object'?b:{}).concat(Object.keys(a&&typeof a==='object'?a:{})));keys.forEach(function(d){const aa=a&&a[d]&&typeof a[d]==='object'?a[d]:{},bb=b&&b[d]&&typeof b[d]==='object'?b[d]:{};out[d]=_oaiMergeJournalExtras(aa,bb);out[d].updatedAt=String(aa.updatedAt||bb.updatedAt||'');});return out;}
+  function mergeVisitMaps(current,backup){const out=current&&typeof current==='object'?current:{};Object.keys(backup&&typeof backup==='object'?backup:{}).forEach(function(key){const oldRecord=out[key]&&typeof out[key]==='object'?out[key]:{};const newRecord=backup[key]&&typeof backup[key]==='object'?backup[key]:{};out[key]=Object.assign({},newRecord,oldRecord,{visits:mergeVisitEntries(oldRecord.visits,newRecord.visits),sharedJournalByDate:mergeSharedJournalMaps(oldRecord.sharedJournalByDate,newRecord.sharedJournalByDate)});});return out;}
   function applyBackup(data){
     _saveShrineVisits(mergeVisitMaps(_loadShrineVisits(),data.shrineVisits));
     _saveParishVisits(mergeVisitMaps(_loadParishVisits(),data.parishVisits));
