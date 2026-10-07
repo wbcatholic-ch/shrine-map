@@ -4841,7 +4841,7 @@ html.oai-cover-booting::after{
     linear-gradient(to right, #fbf8f1 0%, rgba(251,248,241,.96) 5%, rgba(251,248,241,.60) 13%, rgba(251,248,241,.16) 24%, rgba(251,248,241,0) 36%, rgba(251,248,241,0) 64%, rgba(251,248,241,.16) 76%, rgba(251,248,241,.60) 87%, rgba(251,248,241,.96) 95%, #fbf8f1 100%),
     linear-gradient(to bottom, #fbf8f1 0%, rgba(251,248,241,.90) 6%, rgba(251,248,241,.36) 17%, rgba(251,248,241,0) 30%, rgba(251,248,241,0) 70%, rgba(251,248,241,.36) 83%, rgba(251,248,241,.90) 94%, #fbf8f1 100%),
     radial-gradient(ellipse 96% 88% at 50% 48%, rgba(251,248,241,0) 50%, rgba(251,248,241,.08) 62%, rgba(251,248,241,.34) 76%, rgba(251,248,241,.76) 90%, rgba(251,248,241,1) 100%),
-    url("intro-cross-jesus.jpg?v=V8-1-14-1114") !important;
+    url("intro-cross-jesus.jpg?v=V8-1-14-1115") !important;
   background-position:center center, center center, center center, center center !important;
   background-size:100% 100%, 100% 100%, 100% 100%, auto 106% !important;
   background-repeat:no-repeat, no-repeat, no-repeat, no-repeat !important;
@@ -6013,21 +6013,21 @@ html.route-tab-active #info-card.open{
 .myeongrye-photo-viewer{position:fixed;inset:0;z-index:10;display:none;align-items:center;justify-content:center;background:#151b26;touch-action:none;overflow:hidden}.myeongrye-photo-viewer.open{display:flex}.myeongrye-viewer-stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;touch-action:none;overflow:hidden}.myeongrye-viewer-stage img{display:block;max-width:100%;max-height:100%;width:auto;height:auto;object-fit:contain;transform-origin:center center;will-change:transform}.myeongrye-photo-viewer.myeongrye-viewer-zoomed .myeongrye-viewer-nav{opacity:.22;pointer-events:none}.myeongrye-viewer-close{position:absolute;right:max(14px,env(safe-area-inset-right));top:max(28px,calc(env(safe-area-inset-top,0px) + 14px));z-index:3;width:44px;height:44px;border:1px solid rgba(255,255,255,.25);border-radius:50%;background:rgba(9,17,31,.72);color:#fff;font-size:30px;line-height:1;cursor:pointer}.myeongrye-viewer-nav{position:absolute;top:50%;z-index:3;width:46px;height:56px;transform:translateY(-50%);border:1px solid rgba(255,255,255,.25);border-radius:13px;background:rgba(9,17,31,.66);color:#fff;font-size:36px;line-height:1;cursor:pointer}.myeongrye-viewer-nav.prev{left:max(10px,env(safe-area-inset-left))}.myeongrye-viewer-nav.next{right:max(10px,env(safe-area-inset-right))}.myeongrye-viewer-meta{position:absolute;left:0;right:0;bottom:0;z-index:3;display:flex;justify-content:space-between;gap:12px;padding:46px max(18px,env(safe-area-inset-right)) max(18px,env(safe-area-inset-bottom)) max(18px,env(safe-area-inset-left));color:#fff;background:linear-gradient(transparent,rgba(0,0,0,.82));font-size:16px}.myeongrye-viewer-meta strong,.myeongrye-viewer-meta span{font-weight:900}
 .myeongrye-photo-viewer.no-photo-caption .myeongrye-viewer-meta{justify-content:flex-end}.myeongrye-photo-viewer.no-photo-caption .myeongrye-viewer-meta strong{display:none}
 @media(max-width:520px){.myeongrye-materials-head{padding-top:max(9px,env(safe-area-inset-top));padding-bottom:9px}.myeongrye-slide{height:auto;min-height:0;max-height:none;aspect-ratio:16/9}.myeongrye-enlarge-hint{font-size:14px;padding-top:9px}.myeongrye-material-links{padding-bottom:max(18px,env(safe-area-inset-bottom))}.myeongrye-material-link{min-height:54px;padding:12px 15px;font-size:17px}.myeongrye-viewer-nav{width:42px;height:52px}.myeongrye-viewer-meta{font-size:16px}}
-/* 폴드 펼친 화면·태블릿은 기존의 넓고 자연스러운 카드 비율을 그대로 유지한다. */
+/* V8-1-14-1115: 실제 태블릿만 세로 UI를 확대한다. Fold 펼침은 휴대폰과 같은 세로 리듬을 유지한다. */
 @media(min-width:521px){
-  .myeongrye-materials-panel{width:100%;height:100dvh;max-height:100dvh;background:#fff;border-radius:0}
-  .myeongrye-materials-head{padding:max(28px,calc(env(safe-area-inset-top,0px) + 14px)) 16px 14px}
-  .myeongrye-materials-head h2{margin:1px 0 0;font-size:20px}
-  .myeongrye-materials-kicker{font-size:12px;margin-bottom:0}
-  .myeongrye-materials-close{width:38px;height:38px;font-size:27px}
-  .myeongrye-gallery,.myeongrye-slides{min-height:0}
-  .myeongrye-slide{height:auto;max-height:520px;aspect-ratio:16/9}
-  .myeongrye-slide-nav{width:42px;height:48px;border-radius:10px;font-size:34px}
-  .myeongrye-slide-meta{bottom:3px;padding:28px 16px 12px;font-size:14px}
-  .myeongrye-slide-dots{display:flex}
-  .myeongrye-material-links{gap:10px;padding:14px 20px max(20px,env(safe-area-inset-bottom));background:#fff}
-  .myeongrye-material-link{min-height:56px;padding:13px 17px;border:1px solid #304c73;border-radius:12px;background:linear-gradient(135deg,#29486f,#1f3557);color:#fff;font-size:17px;box-shadow:0 4px 12px rgba(31,53,87,.18)}
-  .myeongrye-material-link::after{color:#f1c45a}
+  html.oai-screen-tablet .myeongrye-materials-panel{width:100%;height:100dvh;max-height:100dvh;background:#fff;border-radius:0}
+  html.oai-screen-tablet .myeongrye-materials-head{padding:max(28px,calc(env(safe-area-inset-top,0px) + 14px)) 16px 14px}
+  html.oai-screen-tablet .myeongrye-materials-head h2{margin:1px 0 0;font-size:20px}
+  html.oai-screen-tablet .myeongrye-materials-kicker{font-size:12px;margin-bottom:0}
+  html.oai-screen-tablet .myeongrye-materials-close{width:38px;height:38px;font-size:27px}
+  html.oai-screen-tablet .myeongrye-gallery,html.oai-screen-tablet .myeongrye-slides{min-height:0}
+  html.oai-screen-tablet .myeongrye-slide{height:auto;max-height:520px;aspect-ratio:16/9}
+  html.oai-screen-tablet .myeongrye-slide-nav{width:42px;height:48px;border-radius:10px;font-size:34px}
+  html.oai-screen-tablet .myeongrye-slide-meta{bottom:3px;padding:28px 16px 12px;font-size:14px}
+  html.oai-screen-tablet .myeongrye-slide-dots{display:flex}
+  html.oai-screen-tablet .myeongrye-material-links{gap:10px;padding:14px 20px max(20px,env(safe-area-inset-bottom));background:#fff}
+  html.oai-screen-tablet .myeongrye-material-link{min-height:56px;padding:13px 17px;border:1px solid #304c73;border-radius:12px;background:linear-gradient(135deg,#29486f,#1f3557);color:#fff;font-size:17px;box-shadow:0 4px 12px rgba(31,53,87,.18)}
+  html.oai-screen-tablet .myeongrye-material-link::after{color:#f1c45a}
 }
 @media(prefers-reduced-motion:reduce){.myeongrye-slide{transition-duration:.01ms}}
 
@@ -9588,4 +9588,4 @@ html.oai-screen-tablet #guide-manual-modal > .guide-manual-panel {
 }
 
 
-/* V8-1-14-1114: 순례 UI CSS 2단계 정리. 같은 반응형 구간 안의 중복 규칙만 단일화하고, 화면폭별 미디어쿼리 오버라이드는 유지한다. */
+/* V8-1-14-1115: 순례 UI CSS 2단계 정리. 같은 반응형 구간 안의 중복 규칙만 단일화하고, 화면폭별 미디어쿼리 오버라이드는 유지한다. */
