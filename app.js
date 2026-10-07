@@ -2809,13 +2809,17 @@ function _closeShrineVisitCardsModal(opts){
 }
 
 
-/* V8-1-14-1120: 방문 회차별 개인 사진·메모 기록.
+/* V8-1-14-1125: 방문 회차별 개인 사진·메모 기록.
+   파일명 목록 대신 사진 썸네일을 사용하고, 전체보기는 뒤로가기/X로 닫히는 독립 뷰어로 제공한다.
    사진 원본은 Android가 Google Drive appDataFolder에 보관하고 웹에는 fileId/이름만 저장한다. */
 const OAI_VISIT_PHOTO_LIMIT_SHRINE=15;
 const OAI_VISIT_PHOTO_LIMIT_PARISH=10;
 let _oaiVisitPhotoPending={};
 let _oaiVisitPhotoViewPending={};
 let _oaiVisitPhotoDeletePending={};
+let _oaiVisitPhotoViewerState=null;
+const _oaiVisitPhotoDataCache=new Map();
+const OAI_VISIT_PHOTO_CACHE_MAX=24;
 function _oaiVisitNative(){try{return window.GildongmuNative||null;}catch(_e){return null;}}
 function _oaiVisitRequestId(prefix){return String(prefix||'visit')+'-'+Date.now()+'-'+Math.random().toString(36).slice(2,8);}
 function _oaiFindVisitIndexByDate(arr,date){
@@ -2855,9 +2859,9 @@ function _oaiVisitJournalHtml(kind,item,visits){
   const limit=kind==='parish'?OAI_VISIT_PHOTO_LIMIT_PARISH:OAI_VISIT_PHOTO_LIMIT_SHRINE;
   const photos=_oaiNormalizePhotos(visit),memo=String(visit&&visit.memo||'').trim();
   const dateBtns=visits.map(function(v){const d=String(v.date||'');return '<button type="button" class="oai-visit-journal-date'+(d===date?' active':'')+'" data-oai-journal-date="'+_visitHtmlEsc(kind)+'" data-oai-journal-value="'+_visitHtmlEsc(d)+'">'+_visitHtmlEsc(_formatVisitDate(d))+'</button>';}).join('');
-  const photoRows=photos.length?'<div class="oai-visit-photo-list">'+photos.map(function(ph,i){return '<div class="oai-visit-photo-row"><button type="button" class="oai-visit-photo-open" data-oai-photo-open="'+_visitHtmlEsc(kind)+'" data-oai-photo-index="'+i+'"><span aria-hidden="true">▣</span><b>'+_visitHtmlEsc(ph.name||('사진 '+(i+1)))+'</b></button><button type="button" class="oai-visit-photo-delete" data-oai-photo-delete="'+_visitHtmlEsc(kind)+'" data-oai-photo-index="'+i+'" aria-label="사진 삭제">삭제</button></div>';}).join('')+'</div>':'<div class="oai-visit-journal-empty">아직 등록한 사진이 없습니다.</div>';
+  const photoGrid=photos.length?'<div class="oai-visit-photo-grid" data-oai-photo-grid="'+_visitHtmlEsc(kind)+'">'+photos.map(function(ph,i){return '<button type="button" class="oai-visit-photo-thumb" data-oai-photo-open="'+_visitHtmlEsc(kind)+'" data-oai-photo-index="'+i+'" data-oai-photo-file="'+_visitHtmlEsc(String(ph.fileId||''))+'" aria-label="방문 사진 '+(i+1)+' 보기"><span class="oai-visit-photo-placeholder" aria-hidden="true">사진</span><img alt="" loading="lazy"></button>';}).join('')+'</div>':'<div class="oai-visit-journal-empty">아직 등록한 사진이 없습니다.</div>';
   const memoHtml=memo?'<div class="oai-visit-memo-preview">'+_visitHtmlEsc(memo).replace(/\n/g,'<br>')+'</div>':'<div class="oai-visit-journal-empty">아직 작성한 메모가 없습니다.</div>';
-  return '<section class="oai-visit-journal" data-oai-journal-kind="'+_visitHtmlEsc(kind)+'"><div class="oai-visit-journal-head"><div><div class="shrine-visit-detail-section-title">나의 기록</div><small>방문 회차별 사진과 메모</small></div><strong>'+_visitHtmlEsc(_formatVisitDate(date))+'</strong></div>'+(visits.length>1?'<div class="oai-visit-journal-dates">'+dateBtns+'</div>':'')+'<div class="oai-visit-journal-block"><div class="oai-visit-journal-row"><div><b>사진</b><small>'+photos.length+' / '+limit+'장</small></div><button type="button" data-oai-photo-add="'+_visitHtmlEsc(kind)+'"'+(photos.length>=limit?' disabled':'')+'>＋ 사진 추가</button></div>'+photoRows+'</div><div class="oai-visit-journal-block"><div class="oai-visit-journal-row"><div><b>메모</b><small>'+(memo?'작성됨':'미작성')+'</small></div><button type="button" data-oai-memo-edit="'+_visitHtmlEsc(kind)+'">'+(memo?'메모 수정':'메모 작성')+'</button></div>'+memoHtml+'</div></section>';
+  return '<section class="oai-visit-journal" data-oai-journal-kind="'+_visitHtmlEsc(kind)+'"><div class="oai-visit-journal-head"><div class="shrine-visit-detail-section-title">나의 기록</div><strong>'+_visitHtmlEsc(_formatVisitDate(date))+'</strong></div>'+(visits.length>1?'<div class="oai-visit-journal-dates">'+dateBtns+'</div>':'')+'<div class="oai-visit-journal-block oai-visit-photo-block"><div class="oai-visit-journal-row"><div><b>사진</b><small>'+photos.length+' / '+limit+'장</small></div><button type="button" data-oai-photo-add="'+_visitHtmlEsc(kind)+'"'+(photos.length>=limit?' disabled':'')+'>＋ 사진 추가</button></div>'+photoGrid+'</div><div class="oai-visit-journal-block"><div class="oai-visit-journal-row"><div><b>메모</b><small>'+(memo?'작성됨':'미작성')+'</small></div><button type="button" data-oai-memo-edit="'+_visitHtmlEsc(kind)+'">'+(memo?'메모 수정':'메모 작성')+'</button></div>'+memoHtml+'</div></section>';
 }
 function _oaiCurrentJournalContext(kind){
   if(kind==='parish'){
@@ -2865,38 +2869,72 @@ function _oaiCurrentJournalContext(kind){
   }
   const idx=parseInt(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__,10),item=(idx>=0&&SHRINES[idx])?SHRINES[idx]:null,visits=item?_getShrineVisitDates(item):[],date=_oaiJournalSelectedDate('shrine',visits);return item&&date?{kind:'shrine',item:item,date:date,visits:visits}:null;
 }
-function _oaiRerenderJournal(kind){if(kind==='parish')_renderParishVisitDetail();else{const idx=parseInt(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__,10);if(idx>=0)_renderShrineVisitDetail(idx);}}
+function _oaiRerenderJournal(kind){if(kind==='parish')_renderParishVisitDetail();else{const idx=parseInt(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__,10);if(idx>=0)_renderShrineVisitDetail(idx);}setTimeout(function(){_oaiHydrateVisibleVisitThumbnails(kind);},0);}
+function _oaiVisitToast(message){
+  const text=String(message||'').trim();if(!text)return;
+  let t=document.getElementById('oai-visit-toast');if(!t){t=document.createElement('div');t.id='oai-visit-toast';t.className='oai-visit-toast';document.body.appendChild(t);}t.textContent=text;t.classList.add('show');clearTimeout(window.__OAI_VISIT_TOAST_TIMER__);window.__OAI_VISIT_TOAST_TIMER__=setTimeout(function(){t.classList.remove('show');},2200);
+}
+function _oaiVisitConfirm(message,onConfirm){
+  let m=document.getElementById('oai-visit-confirm');if(!m){m=document.createElement('div');m.id='oai-visit-confirm';m.className='oai-visit-confirm';m.setAttribute('aria-hidden','true');m.innerHTML='<div class="oai-visit-confirm-bg" data-oai-confirm-cancel="1"></div><section class="oai-visit-confirm-panel" role="dialog" aria-modal="true"><div class="oai-visit-confirm-message" id="oai-visit-confirm-message"></div><div class="oai-visit-confirm-actions"><button type="button" data-oai-confirm-cancel="1">취소</button><button type="button" data-oai-confirm-ok="1">삭제</button></div></section>';document.body.appendChild(m);m.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('[data-oai-confirm-cancel]')){_oaiCloseVisitConfirm();return;}if(e.target.closest&&e.target.closest('[data-oai-confirm-ok]')){const fn=window.__OAI_VISIT_CONFIRM_FN__;_oaiCloseVisitConfirm();if(typeof fn==='function')fn();}});}
+  const msg=document.getElementById('oai-visit-confirm-message');if(msg)msg.textContent=String(message||'');window.__OAI_VISIT_CONFIRM_FN__=onConfirm;m.classList.add('show');m.setAttribute('aria-hidden','false');
+}
+function _oaiCloseVisitConfirm(){const m=document.getElementById('oai-visit-confirm');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}window.__OAI_VISIT_CONFIRM_FN__=null;}
+try{window._oaiCloseVisitConfirm=_oaiCloseVisitConfirm;}catch(_e){}
 function _oaiEnsureMemoModal(){
   let m=document.getElementById('oai-visit-memo-modal');if(m)return m;
   m=document.createElement('div');m.id='oai-visit-memo-modal';m.className='oai-visit-memo-modal';m.setAttribute('aria-hidden','true');
   m.innerHTML='<div class="oai-visit-memo-backdrop" data-oai-memo-close="1"></div><section class="oai-visit-memo-panel" role="dialog" aria-modal="true" aria-label="방문 메모"><div class="oai-visit-memo-head"><div><b>나의 메모</b><small id="oai-visit-memo-date"></small></div><button type="button" data-oai-memo-close="1" aria-label="닫기">×</button></div><textarea id="oai-visit-memo-text" maxlength="2000" placeholder="이 방문에서 기억하고 싶은 내용을 적어보세요."></textarea><div class="oai-visit-memo-actions"><button type="button" data-oai-memo-save="1">저장</button><button type="button" data-oai-memo-close="1">취소</button></div></section>';
   document.body.appendChild(m);
-  m.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('[data-oai-memo-close]')){m.classList.remove('show');m.setAttribute('aria-hidden','true');return;}if(e.target.closest&&e.target.closest('[data-oai-memo-save]')){const ctx=window.__OAI_MEMO_CONTEXT__;if(!ctx)return;const memo=String((document.getElementById('oai-visit-memo-text')||{}).value||'').trim();const ok=ctx.kind==='parish'?_oaiUpdateParishVisitExtras(ctx.item,ctx.date,{memo:memo}):_oaiUpdateShrineVisitExtras(ctx.item,ctx.date,{memo:memo});if(ok){m.classList.remove('show');m.setAttribute('aria-hidden','true');_oaiRerenderJournal(ctx.kind);}}});
+  m.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('[data-oai-memo-close]')){_oaiCloseMemoModal();return;}if(e.target.closest&&e.target.closest('[data-oai-memo-save]')){const ctx=window.__OAI_MEMO_CONTEXT__;if(!ctx)return;const memo=String((document.getElementById('oai-visit-memo-text')||{}).value||'').trim();const ok=ctx.kind==='parish'?_oaiUpdateParishVisitExtras(ctx.item,ctx.date,{memo:memo}):_oaiUpdateShrineVisitExtras(ctx.item,ctx.date,{memo:memo});if(ok){_oaiCloseMemoModal();_oaiRerenderJournal(ctx.kind);}}});
   return m;
 }
+function _oaiCloseMemoModal(){const m=document.getElementById('oai-visit-memo-modal');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}window.__OAI_MEMO_CONTEXT__=null;}
+try{window._oaiCloseMemoModal=_oaiCloseMemoModal;}catch(_e){}
 function _oaiOpenMemo(kind){const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const v=_oaiGetVisitByDate(kind,ctx.item,ctx.date),m=_oaiEnsureMemoModal();window.__OAI_MEMO_CONTEXT__=ctx;document.getElementById('oai-visit-memo-date').textContent=_formatVisitDate(ctx.date);document.getElementById('oai-visit-memo-text').value=String(v&&v.memo||'');m.classList.add('show');m.setAttribute('aria-hidden','false');setTimeout(function(){try{document.getElementById('oai-visit-memo-text').focus();}catch(_e){}},60);}
 function _oaiAddPhotos(kind){
-  const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const visit=_oaiGetVisitByDate(kind,ctx.item,ctx.date),photos=_oaiNormalizePhotos(visit),limit=kind==='parish'?OAI_VISIT_PHOTO_LIMIT_PARISH:OAI_VISIT_PHOTO_LIMIT_SHRINE,remaining=Math.max(0,limit-photos.length);if(!remaining){alert('등록할 수 있는 사진 수를 모두 사용했습니다.');return;}
-  const bridge=_oaiVisitNative();if(!bridge||typeof bridge.pickVisitPhotos!=='function'){alert('사진 등록은 Android 앱에서 사용할 수 있습니다.');return;}
-  const req=_oaiVisitRequestId('photo');_oaiVisitPhotoPending[req]=ctx;try{bridge.pickVisitPhotos(req,remaining);}catch(_e){delete _oaiVisitPhotoPending[req];alert('사진 선택을 시작하지 못했습니다.');}
+  const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const visit=_oaiGetVisitByDate(kind,ctx.item,ctx.date),photos=_oaiNormalizePhotos(visit),limit=kind==='parish'?OAI_VISIT_PHOTO_LIMIT_PARISH:OAI_VISIT_PHOTO_LIMIT_SHRINE,remaining=Math.max(0,limit-photos.length);if(!remaining){_oaiVisitToast('등록할 수 있는 사진 수를 모두 사용했습니다.');return;}
+  const bridge=_oaiVisitNative();if(!bridge||typeof bridge.pickVisitPhotos!=='function'){_oaiVisitToast('사진 등록은 Android 앱에서 사용할 수 있습니다.');return;}
+  const req=_oaiVisitRequestId('photo');_oaiVisitPhotoPending[req]=ctx;try{bridge.pickVisitPhotos(req,remaining);}catch(_e){delete _oaiVisitPhotoPending[req];_oaiVisitToast('사진 선택을 시작하지 못했습니다.');}
 }
 window.oaiVisitPhotoUploadResult=function(requestId,ok,json,message){
-  const ctx=_oaiVisitPhotoPending[requestId];delete _oaiVisitPhotoPending[requestId];if(!ctx)return;if(!ok){alert(message||'사진을 저장하지 못했습니다.');return;}
+  const ctx=_oaiVisitPhotoPending[requestId];delete _oaiVisitPhotoPending[requestId];if(!ctx)return;
+  const msg=String(message||'');if(!ok){if(/취소/.test(msg))return;_oaiVisitToast(msg||'사진을 저장하지 못했습니다.');return;}
   let added=[];try{added=JSON.parse(String(json||'[]'));}catch(_e){}
   const visit=_oaiGetVisitByDate(ctx.kind,ctx.item,ctx.date),current=_oaiNormalizePhotos(visit),limit=ctx.kind==='parish'?OAI_VISIT_PHOTO_LIMIT_PARISH:OAI_VISIT_PHOTO_LIMIT_SHRINE,next=current.concat(added).slice(0,limit);
-  const saved=ctx.kind==='parish'?_oaiUpdateParishVisitExtras(ctx.item,ctx.date,{photos:next}):_oaiUpdateShrineVisitExtras(ctx.item,ctx.date,{photos:next});if(saved){_oaiRerenderJournal(ctx.kind);if(message)alert(message);}
+  const saved=ctx.kind==='parish'?_oaiUpdateParishVisitExtras(ctx.item,ctx.date,{photos:next}):_oaiUpdateShrineVisitExtras(ctx.item,ctx.date,{photos:next});if(saved){_oaiRerenderJournal(ctx.kind);if(msg&&!/완료|저장/.test(msg))_oaiVisitToast(msg);}
 };
-function _oaiOpenPhoto(kind,index){const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const visit=_oaiGetVisitByDate(kind,ctx.item,ctx.date),photos=_oaiNormalizePhotos(visit),ph=photos[index];if(!ph)return;const bridge=_oaiVisitNative();if(!bridge||typeof bridge.loadVisitPhoto!=='function'){alert('사진 보기는 Android 앱에서 사용할 수 있습니다.');return;}const req=_oaiVisitRequestId('view');_oaiVisitPhotoViewPending[req]={ctx:ctx,photo:ph};try{bridge.loadVisitPhoto(req,String(ph.fileId));}catch(_e){delete _oaiVisitPhotoViewPending[req];}}
-function _oaiEnsurePhotoViewer(){let m=document.getElementById('oai-visit-photo-viewer');if(m)return m;m=document.createElement('div');m.id='oai-visit-photo-viewer';m.className='oai-visit-photo-viewer';m.setAttribute('aria-hidden','true');m.innerHTML='<div class="oai-visit-photo-viewer-bg" data-oai-photo-viewer-close="1"></div><div class="oai-visit-photo-viewer-panel"><button type="button" data-oai-photo-viewer-close="1" aria-label="사진 닫기">×</button><img id="oai-visit-photo-viewer-img" alt="방문 사진"></div>';document.body.appendChild(m);m.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('[data-oai-photo-viewer-close]')){m.classList.remove('show');m.setAttribute('aria-hidden','true');const img=document.getElementById('oai-visit-photo-viewer-img');if(img)img.removeAttribute('src');}});return m;}
-window.oaiVisitPhotoLoaded=function(requestId,ok,mimeType,base64,message){const pending=_oaiVisitPhotoViewPending[requestId];delete _oaiVisitPhotoViewPending[requestId];if(!pending)return;if(!ok){alert(message||'사진을 불러오지 못했습니다.');return;}const m=_oaiEnsurePhotoViewer(),img=document.getElementById('oai-visit-photo-viewer-img');img.src='data:'+(mimeType||'image/jpeg')+';base64,'+String(base64||'');m.classList.add('show');m.setAttribute('aria-hidden','false');};
-function _oaiDeletePhoto(kind,index){const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const visit=_oaiGetVisitByDate(kind,ctx.item,ctx.date),photos=_oaiNormalizePhotos(visit),ph=photos[index];if(!ph)return;if(!confirm('이 사진을 방문 기록에서 삭제할까요?'))return;const bridge=_oaiVisitNative();if(!bridge||typeof bridge.deleteVisitPhoto!=='function'){alert('사진 삭제는 Android 앱에서 사용할 수 있습니다.');return;}const req=_oaiVisitRequestId('del');_oaiVisitPhotoDeletePending[req]={ctx:ctx,index:index,fileId:ph.fileId};try{bridge.deleteVisitPhoto(req,String(ph.fileId));}catch(_e){delete _oaiVisitPhotoDeletePending[req];}}
-window.oaiVisitPhotoDeleteResult=function(requestId,ok,message){const p=_oaiVisitPhotoDeletePending[requestId];delete _oaiVisitPhotoDeletePending[requestId];if(!p)return;if(!ok){alert(message||'사진을 삭제하지 못했습니다.');return;}const visit=_oaiGetVisitByDate(p.ctx.kind,p.ctx.item,p.ctx.date),photos=_oaiNormalizePhotos(visit).filter(function(x){return String(x.fileId)!==String(p.fileId);});const saved=p.ctx.kind==='parish'?_oaiUpdateParishVisitExtras(p.ctx.item,p.ctx.date,{photos:photos}):_oaiUpdateShrineVisitExtras(p.ctx.item,p.ctx.date,{photos:photos});if(saved)_oaiRerenderJournal(p.ctx.kind);};
+function _oaiCachePhotoData(fileId,dataUri){const key=String(fileId||'');if(!key||!dataUri)return;_oaiVisitPhotoDataCache.delete(key);_oaiVisitPhotoDataCache.set(key,dataUri);while(_oaiVisitPhotoDataCache.size>OAI_VISIT_PHOTO_CACHE_MAX){const oldest=_oaiVisitPhotoDataCache.keys().next().value;_oaiVisitPhotoDataCache.delete(oldest);}}
+function _oaiLoadVisitPhotoData(fileId,meta){
+  const key=String(fileId||'');if(!key)return;
+  if(_oaiVisitPhotoDataCache.has(key)){_oaiApplyLoadedVisitPhoto(meta,_oaiVisitPhotoDataCache.get(key));return;}
+  const bridge=_oaiVisitNative();if(!bridge||typeof bridge.loadVisitPhoto!=='function'){if(meta&&meta.type==='viewer')_oaiVisitToast('사진 보기는 Android 앱에서 사용할 수 있습니다.');return;}
+  const req=_oaiVisitRequestId(meta&&meta.type==='thumb'?'thumb':'view');_oaiVisitPhotoViewPending[req]=Object.assign({fileId:key},meta||{});try{bridge.loadVisitPhoto(req,key);}catch(_e){delete _oaiVisitPhotoViewPending[req];if(meta&&meta.type==='viewer')_oaiVisitToast('사진을 불러오지 못했습니다.');}
+}
+function _oaiHydrateVisibleVisitThumbnails(kind){
+  const root=document.querySelector('.oai-visit-journal[data-oai-journal-kind="'+String(kind||'')+'"]');if(!root)return;const thumbs=Array.from(root.querySelectorAll('.oai-visit-photo-thumb'));let cursor=0;
+  function loadBatch(){if(!root.isConnected)return;let loaded=0;while(cursor<thumbs.length&&loaded<3){const btn=thumbs[cursor++],fileId=btn.getAttribute('data-oai-photo-file')||'';if(!fileId||btn.dataset.oaiLoading==='1'||btn.classList.contains('loaded'))continue;btn.dataset.oaiLoading='1';_oaiLoadVisitPhotoData(fileId,{type:'thumb',button:btn});loaded++;}if(cursor<thumbs.length)setTimeout(loadBatch,cursor<=6?120:260);}
+  loadBatch();
+}
+function _oaiApplyLoadedVisitPhoto(meta,dataUri){if(!meta)return;if(meta.type==='thumb'){const btn=meta.button;if(!btn||!btn.isConnected)return;const img=btn.querySelector('img');if(img){img.src=dataUri;btn.classList.add('loaded');btn.dataset.oaiLoading='0';}return;}if(meta.type==='viewer'){_oaiShowPhotoViewer(meta.kind,meta.index,dataUri);}}
+function _oaiOpenPhoto(kind,index){const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const visit=_oaiGetVisitByDate(kind,ctx.item,ctx.date),photos=_oaiNormalizePhotos(visit),ph=photos[index];if(!ph)return;_oaiPreparePhotoViewer(kind,index,ctx,photos.length);_oaiLoadVisitPhotoData(String(ph.fileId),{type:'viewer',kind:kind,index:index,ctx:ctx});}
+function _oaiEnsurePhotoViewer(){
+  let m=document.getElementById('oai-visit-photo-viewer');if(m)return m;m=document.createElement('div');m.id='oai-visit-photo-viewer';m.className='oai-visit-photo-viewer';m.setAttribute('aria-hidden','true');m.innerHTML='<div class="oai-visit-photo-viewer-bg"></div><div class="oai-visit-photo-viewer-panel"><div class="oai-visit-photo-viewer-top"><span id="oai-visit-photo-viewer-count"></span><button type="button" data-oai-photo-viewer-close="1" aria-label="사진 닫기">×</button></div><button type="button" class="oai-visit-photo-nav prev" data-oai-photo-prev="1" aria-label="이전 사진">‹</button><img id="oai-visit-photo-viewer-img" alt="방문 사진"><button type="button" class="oai-visit-photo-nav next" data-oai-photo-next="1" aria-label="다음 사진">›</button><button type="button" class="oai-visit-photo-viewer-delete" data-oai-photo-viewer-delete="1">사진 삭제</button></div>';
+  document.body.appendChild(m);m.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('[data-oai-photo-viewer-close]')){_oaiClosePhotoViewer();return;}if(e.target.closest&&e.target.closest('[data-oai-photo-prev]')){_oaiMovePhotoViewer(-1);return;}if(e.target.closest&&e.target.closest('[data-oai-photo-next]')){_oaiMovePhotoViewer(1);return;}if(e.target.closest&&e.target.closest('[data-oai-photo-viewer-delete]')){const st=_oaiVisitPhotoViewerState;if(st)_oaiDeletePhoto(st.kind,st.index);}});let sx=0,sy=0;m.addEventListener('touchstart',function(e){const t=e.touches&&e.touches[0];if(t){sx=t.clientX;sy=t.clientY;}},{passive:true});m.addEventListener('touchend',function(e){const t=e.changedTouches&&e.changedTouches[0];if(!t)return;const dx=t.clientX-sx,dy=t.clientY-sy;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.25)_oaiMovePhotoViewer(dx<0?1:-1);},{passive:true});return m;
+}
+function _oaiPreparePhotoViewer(kind,index,ctx,total){const m=_oaiEnsurePhotoViewer(),img=document.getElementById('oai-visit-photo-viewer-img'),count=document.getElementById('oai-visit-photo-viewer-count');_oaiVisitPhotoViewerState={kind:kind,index:index,ctx:ctx};if(img){img.removeAttribute('src');img.classList.add('loading');}if(count)count.textContent=(index+1)+' / '+Number(total||0);m.classList.add('show');m.setAttribute('aria-hidden','false');const prev=m.querySelector('[data-oai-photo-prev]'),next=m.querySelector('[data-oai-photo-next]');if(prev)prev.disabled=index<=0;if(next)next.disabled=index>=Number(total||0)-1;try{document.documentElement.classList.add('oai-visit-photo-open');}catch(_e){}}
+function _oaiShowPhotoViewer(kind,index,dataUri){const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const visit=_oaiGetVisitByDate(kind,ctx.item,ctx.date),photos=_oaiNormalizePhotos(visit);if(!photos[index])return;const m=_oaiEnsurePhotoViewer(),img=document.getElementById('oai-visit-photo-viewer-img'),count=document.getElementById('oai-visit-photo-viewer-count');_oaiVisitPhotoViewerState={kind:kind,index:index,ctx:ctx};if(img){img.src=dataUri;img.classList.remove('loading');}if(count)count.textContent=(index+1)+' / '+photos.length;m.classList.add('show');m.setAttribute('aria-hidden','false');const prev=m.querySelector('[data-oai-photo-prev]'),next=m.querySelector('[data-oai-photo-next]');if(prev)prev.disabled=index<=0;if(next)next.disabled=index>=photos.length-1;try{document.documentElement.classList.add('oai-visit-photo-open');}catch(_e){}
+}
+function _oaiClosePhotoViewer(){const m=document.getElementById('oai-visit-photo-viewer');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}const img=document.getElementById('oai-visit-photo-viewer-img');if(img)img.removeAttribute('src');_oaiVisitPhotoViewerState=null;try{document.documentElement.classList.remove('oai-visit-photo-open');}catch(_e){} }
+try{window._oaiClosePhotoViewer=_oaiClosePhotoViewer;}catch(_e){}
+function _oaiMovePhotoViewer(delta){const st=_oaiVisitPhotoViewerState;if(!st)return;const visit=_oaiGetVisitByDate(st.kind,st.ctx.item,st.ctx.date),photos=_oaiNormalizePhotos(visit),next=Math.max(0,Math.min(photos.length-1,st.index+Number(delta||0)));if(next===st.index)return;_oaiOpenPhoto(st.kind,next);}
+window.oaiVisitPhotoLoaded=function(requestId,ok,mimeType,base64,message){const pending=_oaiVisitPhotoViewPending[requestId];delete _oaiVisitPhotoViewPending[requestId];if(!pending)return;if(!ok){if(pending.type==='viewer')_oaiVisitToast(message||'사진을 불러오지 못했습니다.');if(pending.button)pending.button.dataset.oaiLoading='0';return;}const dataUri='data:'+(mimeType||'image/jpeg')+';base64,'+String(base64||'');_oaiCachePhotoData(pending.fileId,dataUri);_oaiApplyLoadedVisitPhoto(pending,dataUri);};
+function _oaiDeletePhoto(kind,index){const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const visit=_oaiGetVisitByDate(kind,ctx.item,ctx.date),photos=_oaiNormalizePhotos(visit),ph=photos[index];if(!ph)return;_oaiVisitConfirm('이 사진을 방문 기록에서 삭제할까요?',function(){const bridge=_oaiVisitNative();if(!bridge||typeof bridge.deleteVisitPhoto!=='function'){_oaiVisitToast('사진 삭제는 Android 앱에서 사용할 수 있습니다.');return;}const req=_oaiVisitRequestId('del');_oaiVisitPhotoDeletePending[req]={ctx:ctx,index:index,fileId:ph.fileId};try{bridge.deleteVisitPhoto(req,String(ph.fileId));}catch(_e){delete _oaiVisitPhotoDeletePending[req];_oaiVisitToast('사진을 삭제하지 못했습니다.');}});}
+window.oaiVisitPhotoDeleteResult=function(requestId,ok,message){const p=_oaiVisitPhotoDeletePending[requestId];delete _oaiVisitPhotoDeletePending[requestId];if(!p)return;if(!ok){_oaiVisitToast(message||'사진을 삭제하지 못했습니다.');return;}const visit=_oaiGetVisitByDate(p.ctx.kind,p.ctx.item,p.ctx.date),photos=_oaiNormalizePhotos(visit).filter(function(x){return String(x.fileId)!==String(p.fileId);});_oaiVisitPhotoDataCache.delete(String(p.fileId));const saved=p.ctx.kind==='parish'?_oaiUpdateParishVisitExtras(p.ctx.item,p.ctx.date,{photos:photos}):_oaiUpdateShrineVisitExtras(p.ctx.item,p.ctx.date,{photos:photos});if(saved){_oaiClosePhotoViewer();_oaiRerenderJournal(p.ctx.kind);}};
 function _oaiHandleJournalClick(e){
   const date=e.target.closest&&e.target.closest('[data-oai-journal-date]');if(date){const kind=date.getAttribute('data-oai-journal-date'),value=date.getAttribute('data-oai-journal-value')||'';window[kind==='parish'?'__OAI_PARISH_JOURNAL_DATE__':'__OAI_SHRINE_JOURNAL_DATE__']=value;_oaiRerenderJournal(kind);return true;}
   const memo=e.target.closest&&e.target.closest('[data-oai-memo-edit]');if(memo){_oaiOpenMemo(memo.getAttribute('data-oai-memo-edit'));return true;}
   const add=e.target.closest&&e.target.closest('[data-oai-photo-add]');if(add){_oaiAddPhotos(add.getAttribute('data-oai-photo-add'));return true;}
   const open=e.target.closest&&e.target.closest('[data-oai-photo-open]');if(open){_oaiOpenPhoto(open.getAttribute('data-oai-photo-open'),parseInt(open.getAttribute('data-oai-photo-index'),10));return true;}
-  const del=e.target.closest&&e.target.closest('[data-oai-photo-delete]');if(del){_oaiDeletePhoto(del.getAttribute('data-oai-photo-delete'),parseInt(del.getAttribute('data-oai-photo-index'),10));return true;}
   return false;
 }
 
@@ -3029,6 +3067,7 @@ function _renderShrineVisitDetail(idx){
   const linkRow=isMyeongrye?'<div class="shrine-visit-detail-action-row detail-link-row">'+materialsBtn+'</div>':((hpBtn||guideBtn)?'<div class="shrine-visit-detail-action-row detail-link-row">'+hpBtn+guideBtn+'</div>':'');
   const kakaoRow='<div class="shrine-visit-detail-action-row detail-kakao-row">'+(isMyeongrye?'':goodnewsBtn)+kakaoBtn+'</div>';
   body.innerHTML='<section class="shrine-visit-detail-hero"><div class="shrine-visit-detail-hero-head"><div class="shrine-visit-detail-kicker">순례 기록</div><button type="button" class="shrine-visit-detail-register" data-shrine-detail-register="1" aria-label="순례등록">순례등록</button></div><div class="shrine-visit-detail-count">순례 '+count+'회</div><div class="shrine-visit-detail-recent">최근 순례일 '+_visitHtmlEsc(recent)+'</div><div class="shrine-visit-detail-date-title">순례 날짜</div><div class="shrine-visit-detail-date-list">'+dateHtml+'</div></section>'+journalHtml;
+  setTimeout(function(){_oaiHydrateVisibleVisitThumbnails('shrine');},0);
 }
 /* V8-1-14-679: 순례 상세의 '지도에서 보기'는 카드 데이터와 지도 중심을 하나의 pending target으로 함께 적용한다. */
 function _isShrineMapTargetCenterLocked(){
@@ -3761,6 +3800,7 @@ function _renderParishVisitDetail(){
   const hp=p.hp?'<a class="shrine-visit-detail-action detail-home" href="'+_visitHtmlEsc(p.hp)+'" target="_blank" rel="noopener">홈페이지</a>':'';
   const guide=p.url?'<a class="shrine-visit-detail-action detail-guide" href="'+_visitHtmlEsc(p.url)+'" target="_blank" rel="noopener">교구 성당 안내</a>':'';
   b.innerHTML='<section class="shrine-visit-detail-hero"><div class="shrine-visit-detail-hero-head"><div class="shrine-visit-detail-kicker">성당 방문 기록</div><button type="button" class="shrine-visit-detail-register" data-pvd-register="1">방문등록</button></div><div class="shrine-visit-detail-count">방문 '+n+'회</div><div class="shrine-visit-detail-recent">최근 방문일 '+_visitHtmlEsc(recent)+'</div><div class="shrine-visit-detail-date-title">방문 날짜</div><div class="shrine-visit-detail-date-list">'+dates+'</div></section>'+journalHtml;
+  setTimeout(function(){_oaiHydrateVisibleVisitThumbnails('parish');},0);
 }
 function _openParishVisitDetail(p){
   window.__OAI_PARISH_JOURNAL_DATE__='';
@@ -5530,7 +5570,7 @@ function _renderMyeongryeSlide(instant){
 function _loadMyeongryePhoto(index,done){
   var modal=document.getElementById('myeongrye-materials-modal'), img=modal&&modal.querySelectorAll('.myeongrye-slide img')[index];
   if(!img){ if(done) done(false); return; }
-  /* V8-1-14-1123: 같은 사진을 사전로딩·자동재생·수동이동이 동시에 요청해도
+  /* V8-1-14-1124: 같은 사진을 사전로딩·자동재생·수동이동이 동시에 요청해도
      onload/onerror를 서로 덮어쓰지 않도록 요청 하나에 콜백을 합친다. */
   if(!img._oaiMyeongryeCallbacks) img._oaiMyeongryeCallbacks=[];
   if(done) img._oaiMyeongryeCallbacks.push(done);
@@ -5566,7 +5606,7 @@ function _warmMyeongryeUpcomingPhotos(fromIndex){
 }
 function _primeMyeongryeVisiblePhotos(){
   var photos=_getMyeongryePhotos(); if(!photos.length) return;
-  /* V8-1-14-1123: 현재(첫) 사진이 실제로 표시되기 전에는 자동재생 타이머를 시작하지 않는다.
+  /* V8-1-14-1124: 현재(첫) 사진이 실제로 표시되기 전에는 자동재생 타이머를 시작하지 않는다.
      첫 사진 네트워크/디코딩을 최우선으로 끝낸 뒤 2번, 그 다음 사진들을 준비한다. */
   clearTimeout(_myeongryeSlideTimer); _myeongryeSlideTimer=0;
   _loadMyeongryePhoto(_myeongryeSlideIndex,function(ok){

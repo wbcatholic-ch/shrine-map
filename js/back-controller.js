@@ -74,7 +74,7 @@
       }
 
       if(document.querySelector('.module-view.open')) return true;
-      if(document.querySelector('#oai-common-date-picker.show,#myeongrye-materials-modal.open,#info-card.open,#sheet-route.open,#route-choice-modal.open,#route-quick-modal.show,#oai-pilgrimage-feature-modal.show,#oai-pilgrimage-marker-choice-modal.open,#oai-pilgrimage-follow-start-modal.show,#oai-pilgrimage-follow-stop-modal.show,#oai-pilgrimage-save-modal.show,#oai-pilgrimage-delete-modal.show,#oai-pilgrimage-completion-modal.show,#srch-modal.open,.sheet.open,.trail-sheet.open,#shrine-visit-modal.show,#shrine-auto-visit-modal.show,#shrine-visit-detail-view.show,#shrine-visit-cards-modal.show')) return true;
+      if(document.querySelector('#oai-visit-photo-viewer.show,#oai-visit-memo-modal.show,#oai-visit-confirm.show,#oai-common-date-picker.show,#myeongrye-materials-modal.open,#info-card.open,#sheet-route.open,#route-choice-modal.open,#route-quick-modal.show,#oai-pilgrimage-feature-modal.show,#oai-pilgrimage-marker-choice-modal.open,#oai-pilgrimage-follow-start-modal.show,#oai-pilgrimage-follow-stop-modal.show,#oai-pilgrimage-save-modal.show,#oai-pilgrimage-delete-modal.show,#oai-pilgrimage-completion-modal.show,#srch-modal.open,.sheet.open,.trail-sheet.open,#shrine-visit-modal.show,#shrine-auto-visit-modal.show,#shrine-visit-detail-view.show,#shrine-visit-cards-modal.show')) return true;
       if(typeof isGuideModalOpen==='function' && isGuideModalOpen()) return true;
 
       if(includeAppState){
@@ -255,6 +255,26 @@
 
   function closeLayer(){
     var el;
+
+    /* 방문 사진 전체보기/메모/삭제 확인은 방문 상세보다 먼저 닫는다. */
+    el = $b('oai-visit-confirm');
+    if(el && el.classList && el.classList.contains('show')){
+      if(typeof window._oaiCloseVisitConfirm === 'function') window._oaiCloseVisitConfirm();
+      else { el.classList.remove('show'); el.setAttribute('aria-hidden','true'); }
+      return true;
+    }
+    el = $b('oai-visit-photo-viewer');
+    if(el && el.classList && el.classList.contains('show')){
+      if(typeof window._oaiClosePhotoViewer === 'function') window._oaiClosePhotoViewer();
+      else { el.classList.remove('show'); el.setAttribute('aria-hidden','true'); }
+      return true;
+    }
+    el = $b('oai-visit-memo-modal');
+    if(el && el.classList && el.classList.contains('show')){
+      if(typeof window._oaiCloseMemoModal === 'function') window._oaiCloseMemoModal();
+      else { el.classList.remove('show'); el.setAttribute('aria-hidden','true'); }
+      return true;
+    }
 
     /* 공통 날짜선택기는 현재 화면 위에 뜨는 최상위 입력창이다.
        뒤로가기는 날짜선택기만 닫고 아래 순례계획/등록 화면은 유지한다. */
