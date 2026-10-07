@@ -16017,70 +16017,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     });
     return unique;
   }
-  // 당일 GPS 진단: 방문 데이터를 수정하지 않고 필터에서 제외된 원인을 보여준다.
-  function _dailyGpsDiagnostic(date){
-    const counts={gps:0,usable:0,missingTime:0,timeMismatch:0,missingPlace:0,nonGps:0,records:0};
-    const items=[];
-    function inspect(records,catalog,kind){
-      Object.keys(records||{}).forEach(key=>{
-        const record=records[key];if(!record||!Array.isArray(record.visits))return;
-        const name=String(record.name||''),diocese=String(record.diocese||'');
-        const matched=(Array.isArray(catalog)?catalog:[]).find(item=>item&&_normPilgrimageName(item.name)===_normPilgrimageName(name)&&(!diocese||!item.diocese||String(item.diocese)===diocese));
-        for(const v of record.visits){
-          const day=typeof v==='string'?v:String(v&&v.date||'');
-          if(day!==date)continue;
-          counts.records++;
-          let status='';
-          if(!v||typeof v!=='object'||String(v.method||'').toLowerCase()!=='gps'){counts.nonGps++;status='수동 기록';}
-          else{
-            counts.gps++;
-            const at=Date.parse(String(v.savedAt||''));
-            if(!Number.isFinite(at)){counts.missingTime++;status='GPS 등록시각 없음';}
-            else if(_dailyIso(at)!==date){counts.timeMismatch++;status='방문 날짜와 등록시각 날짜 불일치';}
-            else if(!normalizePoint(matched)){counts.missingPlace++;status='성지·성당 목록 매칭 실패';}
-            else{counts.usable++;status='GPS 조건 충족';}
-          }
-          if(items.length<20)items.push({name:name||'이름 없는 기록',kind:kind,status:status});
-        }
-      });
-    }
-    inspect(_loadShrineVisits(),typeof SHRINES!=='undefined'?SHRINES:[],'성지');
-    inspect(_loadParishVisits(),typeof PARISHES!=='undefined'?PARISHES:[],'성당');
-    const events=_dailyGpsEvents(date),eligible=_dailyAutoEvents(events),settlement=_dailyState();
-    const existing=loadCourses().filter(c=>c.autoGps&&c.sourceDate===date);
-    return {counts:counts,items:items,totalEvents:events.length,autoEvents:eligible.length,eligible:_dailyAutoEligible(eligible),excludedParish:events.length-eligible.length,manual:settlement.manual[date]||null,auto:settlement.auto[date]||null,existing:existing.length};
-  }
-  function _renderOct02Diagnosis(){
-    const target=document.getElementById('oai-pilgrimage-oct02-diagnostic');if(!target)return;
-    const report=target.querySelector('[data-oai-gps-diagnostic-report]');if(!report)return;
-    const d=_dailyGpsDiagnostic('2026-10-02'),n=d.counts;
-    let status=d.existing?'이미 GPS 자동 코스가 존재합니다.':d.auto?'기존 정산 상태: '+String(d.auto.source||'완료'):'아직 정산되지 않았습니다.';
-    const rows=['10월 2일 스탬프 기록 '+n.records+'건 (GPS '+n.gps+'건, 수동 '+n.nonGps+'건)',
-      'GPS 등록시각 유효 '+n.usable+'건 · 시각 누락 '+n.missingTime+'건 · 날짜 불일치 '+n.timeMismatch+'건 · 장소 매칭 실패 '+n.missingPlace+'건',
-      '코스 후보 '+d.totalEvents+'곳 · 나의 본당 제외 '+d.excludedParish+'곳 · 최종 후보 '+d.autoEvents+'곳',
-      '자동 코스 생성 조건 '+(d.eligible?'충족':'미충족'),status];
-    const description=d.items.length?'<div class="oai-gps-diagnostic-items">'+d.items.map(x=>'<div>'+esc(x.kind+' · '+x.name+' — '+x.status)+'</div>').join('')+'</div>':'';
-    report.innerHTML=rows.map(x=>'<p>'+esc(x)+'</p>').join('')+description;
-    const retry=target.querySelector('[data-oai-gps-retry]');
-    const deletedAuto=!!(d.auto&&d.auto.source==='auto'&&!d.existing);
-    if(deletedAuto)report.innerHTML+='<p>이 날짜에 자동 생성된 코스가 삭제된 이력이 있어 자동 복원하지 않습니다.</p>';
-    if(retry){retry.disabled=!!d.existing||!d.eligible||deletedAuto;retry.title=retry.disabled?'기존 GPS 코스가 있거나, 유효한 기록이 없거나, 사용자가 삭제한 코스입니다.':'';}
-  }
-  async function _retryOct02GpsSettlement(){
-    const date='2026-10-02';
-    try{
-      if(typeof _ensureShrineDataLoaded==='function')await _ensureShrineDataLoaded();
-      const d=_dailyGpsDiagnostic(date);
-      if(d.existing||(d.auto&&d.auto.source==='auto')){_renderOct02Diagnosis();return;}
-      if(!d.eligible){_renderOct02Diagnosis();return;}
-      const state=_dailyState();
-      // 사용자의 명시적인 재시도만 허용; 다른 날짜 정산 상태는 그대로 보존합니다.
-      delete state.auto[date];delete state.manual[date];_saveDailyState(state);
-      _dailySettleManual(date,_dailyGpsEvents(date),state);
-      _dailySettleAuto(date,_dailyGpsEvents(date),_dailyState());
-      renderCourseList();_renderOct02Diagnosis();
-    }catch(e){console.warn('[10월 2일 GPS 진단] 재정산 실패',e);alert('GPS 재정산을 완료하지 못했습니다. 진단 내용을 확인해 주세요.');}
-  }
   // 나의 본당은 매주 방문하는 장소이므로 GPS 자동 코스만 제외한다.
   // 스탬프/방문기록을 삭제하거나 수동 순례 정산의 GPS 비교를 바꾸지 않는다.
   function _dailyIsMyParish(ev){
@@ -16247,17 +16183,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     document.addEventListener('visibilitychange',function(){if(!document.hidden)setTimeout(_settleDailyPilgrimages,700);});
   }
 
-  document.addEventListener('click',function(event){
-    const el=event.target&&event.target.closest&&event.target.closest('[data-oai-gps-diagnose],[data-oai-gps-retry]');
-    if(!el)return;
-    event.preventDefault();
-    const panel=document.getElementById('oai-pilgrimage-oct02-diagnostic');
-    if(el.hasAttribute('data-oai-gps-diagnose')){
-      if(panel){panel.hidden=false;_renderOct02Diagnosis();}
-    }else if(el.hasAttribute('data-oai-gps-retry')){
-      _retryOct02GpsSettlement();
-    }
-  });
   function _courseCompletionMatches(c,year,month){
     const y=String(year||'all'),m=String(month||'all');
     return _courseCompletionList(c).some(function(entry){
