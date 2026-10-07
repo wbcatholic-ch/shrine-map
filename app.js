@@ -16002,7 +16002,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           if(!v||typeof v!=='object'||String(v.method||'').toLowerCase()!=='gps'||String(v.date||'')!==date)return;
           const at=Date.parse(String(v.savedAt||''));
           if(!Number.isFinite(at)||_dailyIso(at)!==date)return; // 과거 스탬프의 날짜만으로 순서 추정 금지
-          events.push({name:point.name,addr:point.addr,lat:point.lat,lng:point.lng,at:at});
+          events.push({name:point.name,addr:point.addr,lat:point.lat,lng:point.lng,at:at,kind:catalog===SHRINES?'shrine':'parish'});
         });
       });
     }
@@ -16010,8 +16010,16 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     collect(_loadParishVisits(),typeof PARISHES!=='undefined'?PARISHES:[]);
     events.sort((a,b)=>a.at-b.at||a.name.localeCompare(b.name,'ko'));
     const unique=[];
-    events.forEach(ev=>{if(!unique.some(p=>_dailySamePlace(p,ev)))unique.push(ev);});
+    events.forEach(function(ev){
+      const previous=unique.find(p=>_dailySamePlace(p,ev));
+      if(!previous)unique.push(ev);
+      else if(ev.kind==='shrine')previous.kind='shrine'; // 성지+성당 중복 지점은 성지로 판정
+    });
     return unique;
+  }
+  // 성지 GPS 스탬프 1곳은 코스로 인정하며, 성당만 방문한 날은 기존 2곳 기준을 유지한다.
+  function _dailyAutoEligible(events){
+    return events.length>=2||(events.length===1&&events[0].kind==='shrine');
   }
   function _dailySettleManual(date,events,state){
     if(state.manual[date])return;
@@ -16040,7 +16048,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const courses=loadCourses(),id='gps_daily_'+date.replace(/-/g,'');
     // 해당 날짜에 동일한 경로의 완료 기록이 이미 있으면 재등록하지 않는다.
     const existing=courses.find(c=>_dailySameOrderedPlaces(c.places,events)&&_courseCompletionList(c).some(x=>_dailyIso(x.completedAt)===date));
-    if(!matched&&!existing&&events.length>=2&&!courses.some(c=>c.id===id||(c.autoGps&&c.sourceDate===date))){
+    if(!matched&&!existing&&_dailyAutoEligible(events)&&!courses.some(c=>c.id===id||(c.autoGps&&c.sourceDate===date))){
       const at=_dailyDayEnd(date);
       const course=_courseRefreshCompletionState({
         id:id,name:date.replace(/-/g,'.')+' GPS 순례',autoGps:true,sourceDate:date,
@@ -16050,13 +16058,33 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       });
       courses.unshift(course);saveCourses(courses);
     }
-    state.auto[date]={done:true,source:existing?'existing':matched?'manual':events.length>=2?'auto':'none',existingId:existing?String(existing.id):''};
+    state.auto[date]={done:true,source:existing?'existing':matched?'manual':_dailyAutoEligible(events)?'auto':'none',existingId:existing?String(existing.id):''};
     state.sessions=state.sessions.filter(x=>x.date!==date);
     _saveDailyState(state);
   }
   let dailySettlementTimer=null,dailyClockTimer=null,dailySettlementBusy=false;
   function _dailyPendingDates(state){
     const today=_dailyIso(Date.now()),dates=[];
+    // 1094 정책 변경: 이전 버전에서 '대상 없음'으로 처리한 날짜만 한 번 재검토.
+    // 기존 수동 완료 및 자동 생성된 날짜는 절대 초기화하지 않습니다.
+    if(!state.singleShrineMigration1094){
+      Object.keys(state.auto).forEach(function(date){
+        if(date>=DAILY_SETTLEMENT_START&&date<today&&state.auto[date]&&state.auto[date].source==='none'){
+          delete state.auto[date];
+          delete state.manual[date];
+        }
+      });
+      // 10월 2일은 앞선 테스트에서 수동 코스를 삭제한 상태도 한 번 확인합니다.
+      const date='2026-10-02',entry=state.auto[date];
+      if(date<today&&entry&&(entry.source==='existing'||entry.source==='manual')){
+        const completed=loadCourses().some(function(c){
+          return _courseCompletionList(c).some(x=>_dailyIso(x.completedAt)===date);
+        });
+        if(!completed){delete state.auto[date];delete state.manual[date];}
+      }
+      state.singleShrineMigration1094=true;
+      _saveDailyState(state);
+    }
     // 2026-10-02 한정 재검증: 이미 정산된 수동/기존 코스를 지운 경우에만
     // 기존 정산 결과를 한 번 무효화합니다. GPS로 자동 생성한 코스를
     // 사용자가 삭제한 경우에는 절대 복원하지 않습니다.
