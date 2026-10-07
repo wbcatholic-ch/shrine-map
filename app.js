@@ -16066,6 +16066,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     state.manual[date]={done:true,matchedCourseId:matchedId};
     _saveDailyState(state);
   }
+  // GPS 자동 코스 제목은 출발·도착지가 아닌 실제 방문 순례지 기준으로 생성한다.
+  // 사용자가 이후 제목을 변경하면 정산이나 출발·도착지 편집 시 다시 덮어쓰지 않는다.
+  function _dailyAutoCourseName(events){
+    const names=(Array.isArray(events)?events:[]).map(ev=>String(ev&&ev.name||'').trim()).filter(Boolean);
+    if(!names.length)return 'GPS 자동 순례코스';
+    return (names.length===1?names[0]:names[0]+' → '+names[names.length-1])+' 순례코스';
+  }
   function _dailySettleAuto(date,events,state){
     if(state.auto[date])return;
     const matched=state.manual[date]&&state.manual[date].matchedCourseId;
@@ -16077,7 +16084,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!matched&&!existing&&_dailyAutoEligible(autoEvents)&&!courses.some(c=>c.id===id||(c.autoGps&&c.sourceDate===date))){
       const at=_dailyDayEnd(date);
       const course=_courseRefreshCompletionState({
-        id:id,name:date.replace(/-/g,'.')+' GPS 순례',autoGps:true,sourceDate:date,
+        id:id,name:_dailyAutoCourseName(autoEvents),autoGps:true,sourceDate:date,
         start:null,end:null,places:autoEvents.map(ev=>({name:ev.name,addr:ev.addr,lat:ev.lat,lng:ev.lng,done:true,doneMethod:'gps'})),
         completions:[{completedAt:at,placeCount:autoEvents.length,method:'gps',locked:true}],
         completionArmed:false,lastStartedAt:0,updatedAt:Date.now(),lastCompletedAt:at
