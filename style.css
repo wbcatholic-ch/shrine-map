@@ -9630,3 +9630,10 @@ html.oai-visit-photo-open,html.oai-visit-photo-open body{overflow:hidden!importa
 .shrine-visit-detail-kicker{font-size:17px!important;color:#27322b!important;margin-bottom:6px!important}
 html.oai-font-global .shrine-visit-detail-kicker{font-size:calc(17px * var(--app-inner-font-scale,1))!important}
 html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(17px * var(--app-inner-font-scale,1))!important}
+
+/* V8-1-14-1128 사진 썸네일에서 삭제를 바로 찾을 수 있도록 표시 */
+.oai-visit-photo-item{position:relative;min-width:0}
+.oai-visit-photo-item .oai-visit-photo-thumb{width:100%}
+.oai-visit-photo-thumb-delete{position:absolute;right:4px;top:4px;z-index:5;width:28px;height:28px;border:1px solid rgba(255,255,255,.72);border-radius:50%;background:rgba(22,27,24,.68);color:#fff;font-family:inherit;font-size:20px;font-weight:500;line-height:25px;text-align:center;padding:0;box-shadow:0 1px 5px rgba(0,0,0,.2);touch-action:manipulation}
+.oai-visit-photo-thumb-delete:active{background:rgba(136,45,39,.9)}
+.oai-visit-photo-item.syncing .oai-visit-photo-thumb{outline:1px solid rgba(169,141,63,.35);outline-offset:-1px}
