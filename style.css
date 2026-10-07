@@ -9601,7 +9601,7 @@ html.oai-screen-tablet #guide-manual-modal > .guide-manual-panel {
 .oai-visit-photo-viewer-panel{position:absolute;inset:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);display:flex;align-items:center;justify-content:center;padding:18px}.oai-visit-photo-viewer-panel>button{position:absolute;right:16px;top:16px;z-index:2;width:42px;height:42px;border:0;border-radius:50%;background:rgba(0,0,0,.58);color:#fff;font-size:28px}.oai-visit-photo-viewer-panel img{display:block;max-width:100%;max-height:100%;object-fit:contain;border-radius:12px;background:#111}
 html:not(.ios-device).oai-screen-compact-short .oai-visit-journal{padding:12px;border-radius:15px}.oai-screen-compact-short .oai-visit-journal-row>button{min-height:36px;padding:0 10px}
 
-/* V8-1-14-1125 방문 기록 UI: 큰 카드형 외곽선 제거 + 사진 썸네일 갤러리 */
+/* V8-1-14-1126 방문 기록 UI: 큰 카드형 외곽선 제거 + 사진 썸네일 갤러리 */
 .oai-visit-journal{margin:0 0 14px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
 .oai-visit-journal-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 10px!important;padding:12px 0 9px!important;border-top:1px solid #dfe3df;border-bottom:1px solid #dfe3df}
 .oai-visit-journal-head .shrine-visit-detail-section-title{font-size:17px!important;font-weight:900;color:#202a24!important}
@@ -9622,7 +9622,7 @@ html.oai-visit-photo-open,html.oai-visit-photo-open body{overflow:hidden!importa
 .oai-visit-toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 24px);transform:translate(-50%,16px);z-index:2147483600;max-width:min(86vw,420px);padding:10px 14px;border-radius:9px;background:rgba(27,34,30,.94);color:#fff;font-size:13px;font-weight:800;line-height:1.35;text-align:center;opacity:0;pointer-events:none;transition:opacity .16s ease,transform .16s ease}.oai-visit-toast.show{opacity:1;transform:translate(-50%,0)}
 .oai-visit-confirm{position:fixed;inset:0;z-index:2147483650;display:none}.oai-visit-confirm.show{display:block}.oai-visit-confirm-bg{position:absolute;inset:0;background:rgba(0,0,0,.46)}.oai-visit-confirm-panel{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(82vw,310px);background:#fff;border-radius:10px;padding:18px 16px 13px;box-shadow:0 14px 40px rgba(0,0,0,.24)}.oai-visit-confirm-message{font-size:15px;line-height:1.5;font-weight:800;color:#252c28;text-align:center}.oai-visit-confirm-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:16px}.oai-visit-confirm-actions button{height:40px;border-radius:8px;font-family:inherit;font-size:14px;font-weight:900}.oai-visit-confirm-actions button:first-child{border:1px solid #d4d8d4;background:#fff;color:#414a44}.oai-visit-confirm-actions button:last-child{border:0;background:#2f3c34;color:#fff}
 
-/* V8-1-14-1125 상세 상단도 카드형 외곽선 없이 한 화면 흐름으로 정리 */
+/* V8-1-14-1126 상세 상단도 카드형 외곽선 없이 한 화면 흐름으로 정리 */
 .shrine-visit-detail-view{background:#fff!important}
 .shrine-visit-detail-body{background:#fff!important}
 .shrine-visit-detail-hero{margin:0 0 2px!important;padding:4px 0 13px!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;border-bottom:1px solid #dfe3df!important}
