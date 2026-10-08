@@ -4054,7 +4054,7 @@ function _openParishVisitEditor(p){const m=_ensureParishVisitEditor();window.__O
 function _closeParishVisitEditor(opts){
   opts=opts||{};
   /* 방문등록은 지도 인포카드 위 보조 창이므로 닫으면 인포카드가 남는다. */
-  const m=document.getElementById('parish-visit-editor');if(m)m.classList.remove('show');
+  const m=document.getElementById('parish-visit-editor');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}
   _updateParishVisitButton();
 }
 function _renderInfoCardParishVisit(p){const b=document.getElementById('ic-type');if(!b||_mode!=='parish')return;const n=_parishVisitCount(p);b.textContent=n?'방문 '+n+'회':'방문등록';b.classList.add('shrine-pilgrim-register-badge');b.setAttribute('role','button');b.onclick=function(e){if(e){e.preventDefault();e.stopPropagation()}_openParishVisitEditor(p)};}
@@ -4089,7 +4089,9 @@ function _showParishVisitNotice(place,mode){
   let m=document.getElementById('parish-auto-visit-notice');if(!m){m=document.createElement('div');m.id='parish-auto-visit-notice';m.className='shrine-auto-visit-modal';m.innerHTML='<div class="shrine-auto-visit-backdrop"></div><div class="shrine-auto-visit-panel" role="dialog" aria-modal="true"><div id="parish-auto-visit-kicker" class="shrine-auto-visit-kicker"></div><div id="parish-auto-visit-title" class="shrine-auto-visit-title"></div><div class="shrine-auto-visit-actions"><button type="button" class="shrine-auto-visit-save">확인</button></div></div>';document.body.appendChild(m);m.querySelector('button').addEventListener('click',function(){_closeParishVisitNotice();});}
   try{if(document.activeElement&&document.activeElement.blur)document.activeElement.blur();}catch(_e){}
   const kicker=document.getElementById('parish-auto-visit-kicker');if(kicker)kicker.textContent=mode==='manual'?'방문등록 완료':'GPS 자동 방문등록';
-  const title=document.getElementById('parish-auto-visit-title');if(title)title.textContent='축하합니다. '+String(place.name||'성당')+' 방문이 등록되었습니다.';m.classList.add('show');m.setAttribute('aria-hidden','false');
+  const title=document.getElementById('parish-auto-visit-title');if(title)title.textContent='축하합니다. '+String(place.name||'성당')+' 방문이 등록되었습니다.';const editor=document.getElementById('parish-visit-editor');
+  if(editor){editor.classList.remove('show');editor.setAttribute('aria-hidden','true');}
+  m.classList.add('show');m.setAttribute('aria-hidden','false');
 }
 function _closeParishVisitNotice(){const m=document.getElementById('parish-auto-visit-notice');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}}
 window._closeParishVisitNotice=_closeParishVisitNotice;
