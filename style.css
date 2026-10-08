@@ -9890,9 +9890,9 @@ html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(17px * va
 .oai-visit-journal-title-wrap .oai-help-button:active{background:rgba(255,255,255,.25)!important}
 
 /* 방문 등록 축하 안내: 하위 시트까지 블러 처리하고 축하창을 최상단에 표시 */
-#parish-auto-visit-notice{z-index:2147483600!important}
+#parish-auto-visit-notice{z-index:2147483600!important;position:fixed!important;inset:0!important;height:100dvh!important;max-height:100dvh!important;align-items:center!important;justify-content:center!important;transform:none!important}
 #parish-auto-visit-notice .shrine-auto-visit-backdrop{background:rgba(22,42,62,.48)!important;backdrop-filter:blur(6px)!important;-webkit-backdrop-filter:blur(6px)!important}
-#parish-auto-visit-notice .shrine-auto-visit-panel{border:0!important;border-radius:24px!important;padding:24px 22px 20px!important;box-shadow:0 18px 48px rgba(15,35,58,.28)!important}
+#parish-auto-visit-notice .shrine-auto-visit-panel{max-height:calc(100dvh - 48px)!important;overflow-y:auto!important;border:0!important;border-radius:24px!important;padding:24px 22px 20px!important;box-shadow:0 18px 48px rgba(15,35,58,.28)!important}
 #parish-auto-visit-notice .shrine-auto-visit-kicker:before{content:'✓';display:block;width:56px;height:56px;margin:0 auto 16px;border-radius:50%;background:#d7eaff;color:#0873bb;font-size:38px;line-height:56px;font-weight:900}
 #parish-auto-visit-notice .shrine-auto-visit-title{white-space:pre-line!important;font-size:18px!important;line-height:1.65!important}
 #parish-auto-visit-notice .shrine-auto-visit-actions button{width:100%!important;max-width:none!important;background:#187db9!important}
