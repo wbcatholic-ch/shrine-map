@@ -9773,3 +9773,42 @@ html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(17px * va
 .oai-visit-memo-actions button{width:100%!important;min-width:0!important;white-space:nowrap!important}
 @media (max-width:420px){.shrine-visit-detail-hero,.oai-visit-journal{margin-left:10px!important;margin-right:10px!important}.oai-visit-memo-panel{width:calc(100vw - 16px)!important;padding:12px!important}}
 @media (max-height:620px){.oai-visit-memo-panel{padding:12px!important}.oai-visit-memo-head{min-height:42px!important;margin-bottom:7px!important}.oai-visit-memo-panel textarea{min-height:82px!important}.oai-visit-memo-actions{margin-top:8px!important}.oai-visit-memo-actions button{height:40px!important}}
+
+
+/* V8-1-14-1142 최종 상세화면 보정
+   - 썸네일은 JS가 직접 지연 로딩하므로 native loading=lazy와 display:none의 교착을 제거한다.
+   - 섹션 식별성을 선명한 블루 계열로 강화한다.
+   - 메모창은 Fold/키보드 visualViewport에서도 가로 위치가 이동하지 않도록 좌우 고정한다. */
+.oai-visit-photo-thumb img{
+  position:absolute!important;inset:0!important;width:100%!important;height:100%!important;
+  object-fit:cover!important;display:block!important;opacity:0!important;
+  transition:opacity .12s ease!important;
+}
+.oai-visit-photo-thumb.loaded img{opacity:1!important}
+.oai-visit-photo-placeholder{z-index:1!important;background:#edf2f4!important;color:#6d7b83!important}
+.oai-visit-photo-thumb.loaded .oai-visit-photo-placeholder{display:none!important}
+
+.shrine-visit-detail-view,.shrine-visit-detail-body{background:#eef3f6!important}
+.shrine-visit-detail-hero,.oai-visit-journal{border-color:#9fc2d8!important}
+.shrine-visit-detail-hero-head,.oai-visit-journal-head{
+  background:#1678b8!important;border-bottom-color:#0e6097!important;
+}
+.shrine-visit-detail-hero-head .shrine-visit-detail-kicker,
+.oai-visit-journal-head .shrine-visit-detail-section-title,
+.oai-visit-journal-head>strong{color:#fff!important}
+.shrine-visit-detail-kicker:before,.shrine-visit-detail-section-title:before{background:#fff!important}
+.oai-visit-journal-head>strong{opacity:.96!important}
+.oai-visit-journal-date-section{background:#eef7fc!important;border-bottom-color:#c8dfed!important}
+.oai-visit-journal-date.active{border-color:#1678b8!important;background:#dff1fb!important;color:#075b91!important}
+.oai-visit-journal-block{border-color:#b9d3e3!important}
+.oai-visit-journal-row{background:#e6f3fa!important;border-left-color:#1682c4!important;border-bottom-color:#c7deeb!important}
+.oai-visit-memo-block .oai-visit-journal-row{background:#eef2f5!important;border-left-color:#526f82!important}
+.oai-visit-journal-row>button,.oai-visit-journal-actions button{border-color:#78afd0!important;color:#0b669d!important}
+
+.oai-visit-memo-panel{
+  left:12px!important;right:12px!important;top:8px!important;bottom:auto!important;
+  width:auto!important;max-width:560px!important;margin:0 auto!important;
+  transform:none!important;
+  max-height:calc(var(--oai-memo-vh,100dvh) - 16px)!important;
+}
+@media (max-width:420px){.oai-visit-memo-panel{left:8px!important;right:8px!important;width:auto!important;margin:0!important}}
