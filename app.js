@@ -17869,8 +17869,8 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.ge
       totalCard.style.display='grid';
     }
     if(actions)actions.classList.add('is-integrated-pilgrimage');
-    calcPilgrimageTotalRoute();
     if(isCompletionView){
+      calcPilgrimageTotalRoute();
       try{
         if(detailRoot)detailRoot.classList.remove('gps-ready');
         list.forEach(function(_item,i){
@@ -17878,7 +17878,14 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.ge
           if(el)el.textContent='순례 완료';
         });
       }catch(_e){}
+    }else if(isActive){
+      /* V8-1-14-1153
+         진행 중 순례는 최초 출발지 기준 거리로 다시 그리지 않는다.
+         현재 위치 -> 다음 미완료 순례지만 새로 계산하고,
+         이후 고정 구간은 동일 좌표 쌍의 route cache를 재사용한다. */
+      _refreshActivePilgrimageDistances();
     }else{
+      calcPilgrimageTotalRoute();
       calcDetailItemMetrics();
     }
   }
@@ -18123,8 +18130,9 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.ge
     const done=function(lat,lng){
       try{_setMyLoc(Number(lat),Number(lng),{suppressAutoShrineVisit:true});}catch(_e){}
       const r=_oaiHandleGpsArrival(Number(lat),Number(lng),{endpointNow:true,endpointSilent:false,skipEndpoint:true});
-      try{calcDetailItemMetrics({lat:Number(lat),lng:Number(lng)});}catch(_e){}
-      try{calcPilgrimageTotalRoute({lat:Number(lat),lng:Number(lng)});}catch(_e){}
+      try{_savePilgrimageLivePosition(Number(lat),Number(lng));}catch(_e){}
+      try{calcDetailItemMetrics({lat:Number(lat),lng:Number(lng)},{remainingOnly:!!_activeFollowState()});}catch(_e){}
+      try{calcPilgrimageTotalRoute({lat:Number(lat),lng:Number(lng)},{remainingOnly:!!_activeFollowState()});}catch(_e){}
       if(btn){btn.classList.remove('is-checking');btn.disabled=false;}
       if(note&&!r.registered)note.textContent='현재 위치 확인 완료 · 순례지 GPS 등록과 출발·도착 성지/성당 등록을 확인했습니다. 내 본당은 제외됩니다.';
     };
@@ -18497,28 +18505,41 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.ge
   }
   window._oaiReturnFromPilgrimageCourseMap=returnFromPilgrimageCourseMap;
 
-  async function calcPilgrimageTotalRoute(startOverride){
+  async function calcPilgrimageTotalRoute(startOverride,opts){
+    opts=opts||{};
+    const remainingOnly=!!opts.remainingOnly;
     const seq=++pilgrimageTotalCalcSeq;
     const kmEl=document.getElementById('oai-pilgrimage-total-km');
     const timeEl=document.getElementById('oai-pilgrimage-total-time');
     const noteEl=document.getElementById('oai-pilgrimage-total-note');
     if(!kmEl||!timeEl||!noteEl) return;
-    const list=loadPlan(),meta=loadMeta();
-    if(!meta.start||!meta.end||!list.length){
+    const allList=loadPlan(),meta=loadMeta();
+    const ni=remainingOnly?nextIndex(allList):-1;
+    const list=remainingOnly?(ni>=0?allList.slice(ni):[]):allList;
+    if(!meta.end||(!remainingOnly&&(!meta.start||!allList.length))){
       kmEl.textContent='-';timeEl.textContent='-';
-      noteEl.textContent=!list.length?'순례 장소를 추가하면 총 이동 거리를 계산합니다.':'출발지와 도착지를 설정하면 총 이동 거리를 계산합니다.';
+      noteEl.textContent=!allList.length?'순례 장소를 추가하면 총 이동 거리를 계산합니다.':'출발지와 도착지를 설정하면 총 이동 거리를 계산합니다.';
       return;
     }
     kmEl.textContent='계산 중…';timeEl.textContent='-';noteEl.textContent='전체 자동차 경로를 계산하고 있습니다.';
     let start=(startOverride&&_validGpsPair(startOverride.lat,startOverride.lng))
       ? {name:'현재 위치',lat:Number(startOverride.lat),lng:Number(startOverride.lng),dynamicCurrent:true}
       : meta.start;
+    if(remainingOnly&&!startOverride){
+      const saved=_readPilgrimageLivePosition();
+      if(saved)start={name:'현재 위치',lat:saved.lat,lng:saved.lng,dynamicCurrent:true};
+    }
     if(start.dynamicCurrent && !(startOverride&&_validGpsPair(startOverride.lat,startOverride.lng))){
       start=await new Promise(resolve=>currentPosition((lat,lng)=>resolve(Object.assign({},start,{lat,lng})),()=>resolve(null)));
       if(seq!==pilgrimageTotalCalcSeq) return;
       if(!start){kmEl.textContent='위치 확인 필요';timeEl.textContent='-';noteEl.textContent='현재 위치를 확인한 뒤 다시 계산합니다.';return;}
     }
-    const points=[start].concat(list).concat([meta.end]);
+    const points=[start].concat(list).concat([meta.end]).filter(function(p,idx,arr){
+      if(!p)return false;
+      if(idx===0)return true;
+      const prev=arr[idx-1];
+      return !(prev&&Math.abs(Number(prev.lat)-Number(p.lat))<0.000001&&Math.abs(Number(prev.lng)-Number(p.lng))<0.000001);
+    });
     const legs=[];
     for(let i=0;i<points.length-1;i++){
       const a=points[i],b=points[i+1];
@@ -18538,11 +18559,13 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.ge
     const estimated=result.some(x=>x.estimated);
     kmEl.textContent=totalKm.toFixed(1)+' km';
     timeEl.textContent=typeof _fmtTime==='function'?_fmtTime(totalDur):Math.round(totalDur/60)+'분';
-    noteEl.textContent=estimated?'일부 구간은 도로 경로를 불러오지 못해 추정값이 포함됩니다.':'출발지 → 순례지 → 도착지 전체 자동차 기준입니다.';
+    noteEl.textContent=estimated?'일부 구간은 도로 경로를 불러오지 못해 추정값이 포함됩니다.':(remainingOnly?'현재 위치 → 남은 순례지 → 도착지 자동차 기준입니다.':'출발지 → 순례지 → 도착지 전체 자동차 기준입니다.');
   }
 
   function _validGpsPair(lat,lng){return Number.isFinite(Number(lat))&&Number.isFinite(Number(lng))&&Math.abs(Number(lat))<=90&&Math.abs(Number(lng))<=180;}
-  function calcDetailItemMetrics(startOverride){
+  function calcDetailItemMetrics(startOverride,opts){
+    opts=opts||{};
+    const remainingOnly=!!opts.remainingOnly;
     const seq=++detailMetricSeq,list=loadPlan(),meta=loadMeta(),view=document.getElementById('oai-pilgrimage-detail-view');
     const setMetric=(i,text)=>{const el=document.querySelector('[data-plan-metric="'+i+'"]');if(el)el.textContent=text;};
     if(view){view.classList.remove('gps-ready');view.querySelectorAll('.oai-pilgrimage-item.is-next').forEach(el=>el.classList.remove('is-next'));}
@@ -18559,6 +18582,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.ge
       let prev={lat:Number(startPoint.lat),lng:Number(startPoint.lng)},cumKm=0,cumDur=0,anyEstimated=false;
       for(let i=0;i<list.length;i++){
         const item=list[i];
+        if(remainingOnly&&item.done){setMetric(i,'순례 완료');continue;}
         if(!_validGpsPair(item.lat,item.lng)){setMetric(i,'위치 정보 확인 필요');continue;}
         let km=0,dur=0,estimated=false;
         try{
@@ -18593,6 +18617,34 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.ge
         list.forEach((item,i)=>{if(!item.done)setMetric(i,'출발지 확인 필요');});
       });
     }
+  }
+
+  const PILGRIMAGE_LIVE_POS_PREFIX='oai_pilgrimage_live_pos_v1_';
+  function _pilgrimageLivePosKey(){return PILGRIMAGE_LIVE_POS_PREFIX+String(currentCourseId||'draft');}
+  function _savePilgrimageLivePosition(lat,lng){
+    if(!_validGpsPair(lat,lng))return;
+    try{localStorage.setItem(_pilgrimageLivePosKey(),JSON.stringify({lat:Number(lat),lng:Number(lng),ts:Date.now()}));}catch(_e){}
+  }
+  function _readPilgrimageLivePosition(){
+    try{const x=JSON.parse(localStorage.getItem(_pilgrimageLivePosKey())||'null');return x&&_validGpsPair(x.lat,x.lng)?{lat:Number(x.lat),lng:Number(x.lng),ts:Number(x.ts)||0}:null;}catch(_e){return null;}
+  }
+  function _refreshActivePilgrimageDistances(){
+    const saved=_readPilgrimageLivePosition();
+    if(saved){
+      calcPilgrimageTotalRoute(saved,{remainingOnly:true});
+      calcDetailItemMetrics(saved,{remainingOnly:true});
+    }
+    currentPosition(function(lat,lng){
+      _savePilgrimageLivePosition(lat,lng);
+      calcPilgrimageTotalRoute({lat:lat,lng:lng},{remainingOnly:true});
+      calcDetailItemMetrics({lat:lat,lng:lng},{remainingOnly:true});
+    },function(){
+      if(saved)return;
+      const km=document.getElementById('oai-pilgrimage-total-km'),tm=document.getElementById('oai-pilgrimage-total-time'),note=document.getElementById('oai-pilgrimage-total-note');
+      if(km&&(!km.textContent||km.textContent==='계산 중…'))km.textContent='위치 확인 필요';
+      if(tm&&(!tm.textContent||tm.textContent==='-'))tm.textContent='-';
+      if(note)note.textContent='현재 위치를 확인한 뒤 남은 거리를 다시 계산합니다.';
+    });
   }
 
   function targetInfo(){const list=loadPlan(),i=nextIndex(list);if(i>=0)return {item:list[i],index:i,final:false};const e=loadMeta().end;if(e)return {item:e,index:-1,final:true};return null;}
