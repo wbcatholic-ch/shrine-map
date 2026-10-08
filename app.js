@@ -6352,9 +6352,28 @@ function _getParishRawGlobal(){
   const merged=_mergeLoadedParishRaw();
   return merged.length ? merged : null;
 }
+/* V8-1-14-1134: 공식 표시 주소와 실제 차량 진입 목적지를 분리한다.
+   복자성당은 화면에는 '대구 동구 송라로 22'를 유지하되 차량 길찾기만 전용 진입 좌표를 사용한다. */
+const OAI_SPECIAL_NAV_POINTS={
+  BOKJA:{lat:35.869257,lng:128.620115,label:'복자성당 차량 진입점'}
+};
+function _applySpecialNavigationPoint(item){
+  try{
+    if(!item) return item;
+    const compactName=String(item.name||'').replace(/\s+/g,'');
+    const seq=String(item.seq||'');
+    if(seq==='20190062' || compactName==='복자성당'){
+      item.navAddr=OAI_SPECIAL_NAV_POINTS.BOKJA.label;
+      item.navLat=OAI_SPECIAL_NAV_POINTS.BOKJA.lat;
+      item.navLng=OAI_SPECIAL_NAV_POINTS.BOKJA.lng;
+    }
+  }catch(e){ console.warn('[가톨릭길동무] 특수 내비 목적지 적용 실패',e); }
+  return item;
+}
+
 function _buildParishList(raw){
   raw = Array.isArray(raw) ? raw : [];
-  return raw.map((r,i)=>({
+  return raw.map((r,i)=>_applySpecialNavigationPoint({
     _idx:i,
     name:r[0],
     diocese:_DIO[r[1]]||r[1],
@@ -7664,6 +7683,7 @@ function _buildShrineList(raw){
     if(s.guideUrl) s.guideUrl = _decodeShrineHomePage(s.guideUrl);
     if(_DIO[s.diocese]) s.diocese = _DIO[s.diocese];
     if(_TY[s.type]) s.type = _TY[s.type];
+    _applySpecialNavigationPoint(s);
     return s;
   });
 }
@@ -10079,6 +10099,39 @@ function selectMapFromSearchModal(){
 }
 try{ window.selectMapFromSearchModal=selectMapFromSearchModal; }catch(e){ console.warn('[가톨릭길동무]', e); }
 
+function _oaiCloseNavigationNotice(){
+  const modal=document.getElementById('oai-nav-notice');
+  if(modal){ modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); }
+  window.__OAI_NAV_NOTICE_FN__=null;
+}
+function _oaiShowNavigationNotice(title,message,onContinue){
+  let modal=document.getElementById('oai-nav-notice');
+  if(!modal){
+    modal=document.createElement('div');
+    modal.id='oai-nav-notice';
+    modal.className='oai-nav-notice';
+    modal.setAttribute('aria-hidden','true');
+    modal.innerHTML='<div class="oai-nav-notice-bg" data-oai-nav-notice-cancel="1"></div><section class="oai-nav-notice-panel" role="dialog" aria-modal="true" aria-labelledby="oai-nav-notice-title"><div class="oai-nav-notice-title" id="oai-nav-notice-title"></div><div class="oai-nav-notice-message" id="oai-nav-notice-message"></div><div class="oai-nav-notice-actions"><button type="button" data-oai-nav-notice-cancel="1">취소</button><button type="button" data-oai-nav-notice-ok="1">길찾기</button></div></section>';
+    document.body.appendChild(modal);
+    modal.addEventListener('click',function(e){
+      if(e.target.closest&&e.target.closest('[data-oai-nav-notice-cancel]')){ _oaiCloseNavigationNotice(); return; }
+      if(e.target.closest&&e.target.closest('[data-oai-nav-notice-ok]')){
+        const fn=window.__OAI_NAV_NOTICE_FN__;
+        _oaiCloseNavigationNotice();
+        if(typeof fn==='function') fn();
+      }
+    });
+  }
+  const titleEl=document.getElementById('oai-nav-notice-title');
+  const messageEl=document.getElementById('oai-nav-notice-message');
+  if(titleEl) titleEl.textContent=String(title||'길찾기 안내');
+  if(messageEl) messageEl.textContent=String(message||'');
+  window.__OAI_NAV_NOTICE_FN__=onContinue;
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden','false');
+}
+try{ window._oaiCloseNavigationNotice=_oaiCloseNavigationNotice; }catch(_e){}
+
 function openKakaoNav(){
   if(!_curInfoItem) return;
   const {item,idx}=_curInfoItem;
@@ -10095,18 +10148,30 @@ function openKakaoNav(){
       _kakaoLaunch(w,a);
     });
   }
-  if((_curFromRegion || _isRegionSearchActiveForItem(item)) && _regionLat && _regionLng){
-    const placeName=_regionPlaceName||_regionName||'검색지';
-    _rememberRegionStart(_regionLat,_regionLng,placeName);
-    launch(_regionLat,_regionLng,'📍 '+placeName);
+  function startNavigation(){
+    if((_curFromRegion || _isRegionSearchActiveForItem(item)) && _regionLat && _regionLng){
+      const placeName=_regionPlaceName||_regionName||'검색지';
+      _rememberRegionStart(_regionLat,_regionLng,placeName);
+      launch(_regionLat,_regionLng,'📍 '+placeName);
+    }
+    else if(_myLat) launch(_myLat,_myLng,'현위치');
+    else {
+      const cached=_readRecentStoredLocation(OAI_LOCATION_CACHE_MAX_MS);
+      if(cached){ launch(cached.lat,cached.lng,'현위치'); _refreshFreshLocationThen(function(){},function(){}); }
+      else if(_GEO){ _refreshFreshLocationThen((lat,lng)=>launch(lat,lng,'현위치'),()=>launch(null,null)); }
+      else launch(null,null);
+    }
   }
-  else if(_myLat) launch(_myLat,_myLng,'현위치');
-  else {
-    const cached=_readRecentStoredLocation(OAI_LOCATION_CACHE_MAX_MS);
-    if(cached){ launch(cached.lat,cached.lng,'현위치'); _refreshFreshLocationThen(function(){},function(){}); }
-    else if(_GEO){ _refreshFreshLocationThen((lat,lng)=>launch(lat,lng,'현위치'),()=>launch(null,null)); }
-    else launch(null,null);
+  if(isJuk){
+    _oaiShowNavigationNotice(
+      '죽림굴 길찾기 안내',
+      '내비게이션은 죽림굴주차장까지만 안내합니다. 자동차가 올라가지 못하는 구간이므로 주차 후 도보로 이동하세요.',
+      startNavigation
+    );
+    return;
   }
+  // 복자성당 등 전용 내비 좌표가 있는 장소는 별도 안내 없이 바로 길찾기를 실행한다.
+  startNavigation();
 }
 
 function _mkrImgRetreat(color,big){

@@ -9679,7 +9679,7 @@ html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(17px * va
 @media (max-height:620px){.oai-visit-memo-panel{padding:12px!important}.oai-visit-memo-head{margin-bottom:8px!important}.oai-visit-memo-panel textarea{height:120px!important;min-height:96px!important}.oai-visit-memo-actions{margin-top:8px!important}.oai-visit-memo-actions button{height:40px!important}}
 
 
-/* V8-1-14-1133 순례 상세: 섹션 구분 강화 + 뉴트럴 블루 디자인 + 제목 정중앙 */
+/* V8-1-14-1134 순례 상세: 섹션 구분 강화 + 뉴트럴 블루 디자인 + 제목 정중앙 */
 .shrine-visit-detail-view{background:#eef3f7!important}
 .shrine-visit-detail-head{position:relative!important;display:flex!important;align-items:center!important;justify-content:center!important;background:#fff!important;border-bottom:1px solid #dce5eb!important;padding-left:56px!important;padding-right:56px!important}
 .shrine-visit-detail-head-title{width:100%!important;text-align:center!important;color:#162531!important;font-weight:900!important;letter-spacing:-.2px!important}
@@ -9712,7 +9712,7 @@ html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(17px * va
 .shrine-visit-cards-tabs button{color:#526775!important}.shrine-visit-cards-tabs button.active{color:#185f8b!important;border-bottom-color:#2b78a7!important;background:#f5faff!important}
 .shrine-visit-cards-diocese{background:#f7fafc!important;border-bottom-color:#dfe7ec!important}.shrine-visit-cards-diocese button.active{background:#2b78a7!important;border-color:#2b78a7!important;color:#fff!important}
 
-/* V8-1-14-1133 순례한 성지 등록 카드: 제목 정중앙 + 베이지/골드 제거 */
+/* V8-1-14-1134 순례한 성지 등록 카드: 제목 정중앙 + 베이지/골드 제거 */
 .shrine-visit-panel{background:#fff!important;border-color:#dce5eb!important;box-shadow:0 16px 44px rgba(20,38,52,.18)!important}
 .shrine-visit-head{position:relative!important;display:block!important;padding-right:44px!important;margin-bottom:14px!important}
 .shrine-visit-head>div{width:100%!important;min-width:0!important}
@@ -9721,3 +9721,6 @@ html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(17px * va
 .shrine-visit-x{position:absolute!important;right:0!important;top:0!important;width:36px!important;height:36px!important;border:1px solid #d5e0e7!important;border-radius:50%!important;background:#f8fbfd!important;color:#35576c!important;box-shadow:none!important}
 .shrine-visit-label{color:#465c6a!important}.shrine-visit-label input{border-color:#d6e0e7!important;background:#fbfdfe!important;color:#192b36!important}
 .shrine-visit-save{background:#286f9d!important;border-color:#286f9d!important;color:#fff!important}.shrine-visit-cancel{background:#fff!important;border-color:#d2dde5!important;color:#4b606d!important}
+
+/* V8-1-14-1134 죽림굴 전용 길찾기 안내: WebView 기본 alert 대신 앱 전용 안내창 */
+.oai-nav-notice{position:fixed;inset:0;z-index:2147483670;display:none}.oai-nav-notice.show{display:block}.oai-nav-notice-bg{position:absolute;inset:0;background:rgba(15,23,42,.42);backdrop-filter:blur(2px)}.oai-nav-notice-panel{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(86vw,340px);background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:20px 18px 15px;box-shadow:0 18px 48px rgba(15,23,42,.22)}.oai-nav-notice-title{font-size:17px;line-height:1.35;font-weight:900;color:#172033;text-align:center}.oai-nav-notice-message{margin-top:10px;font-size:14px;line-height:1.6;font-weight:700;color:#475569;white-space:pre-line;text-align:left}.oai-nav-notice-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:18px}.oai-nav-notice-actions button{height:42px;border-radius:9px;font-family:inherit;font-size:14px;font-weight:900}.oai-nav-notice-actions button:first-child{border:1px solid #cbd5e1;background:#fff;color:#475569}.oai-nav-notice-actions button:last-child{border:0;background:#334155;color:#fff}
