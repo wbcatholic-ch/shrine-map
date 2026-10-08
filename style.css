@@ -9762,8 +9762,8 @@ html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(17px * va
 .oai-visit-photo-thumb.load-error .oai-visit-photo-placeholder{display:flex!important;background:#eef2f3!important;color:#6f7f88!important}
 .oai-visit-journal-empty,.oai-visit-memo-preview{margin:12px!important;padding:12px!important;border:1px solid #e0e7eb!important;border-radius:8px!important;background:#fafcfd!important}
 .oai-visit-memo-preview{color:#243944!important}
-.oai-visit-memo-modal{position:fixed!important;inset:0!important;width:100vw!important;height:var(--oai-memo-vh,100dvh)!important;overflow:hidden!important}
-.oai-visit-memo-panel{position:absolute!important;left:50%!important;right:auto!important;top:8px!important;bottom:auto!important;width:min(calc(100vw - 24px),560px)!important;max-width:560px!important;max-height:calc(var(--oai-memo-vh,100dvh) - 16px)!important;margin:0!important;padding:14px!important;transform:translateX(-50%)!important;box-sizing:border-box!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;border-radius:16px!important}
+.oai-visit-memo-modal{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;overflow:hidden!important}
+.oai-visit-memo-panel{position:absolute!important;left:12px!important;right:12px!important;top:var(--oai-memo-top,12px)!important;bottom:auto!important;width:auto!important;max-width:560px!important;max-height:var(--oai-memo-maxh,calc(100dvh - 24px))!important;margin:0 auto!important;padding:14px!important;transform:none!important;box-sizing:border-box!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;border-radius:16px!important}
 .oai-visit-memo-head{position:relative!important;flex:0 0 auto!important;min-height:48px!important;margin-bottom:10px!important;padding-right:48px!important}
 .oai-visit-memo-head b{color:#172a36!important;font-size:20px!important}
 .oai-visit-memo-head>button{position:absolute!important;right:0!important;top:0!important;width:42px!important;height:42px!important;margin:0!important}
@@ -9771,6 +9771,9 @@ html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(17px * va
 .oai-visit-memo-actions{flex:0 0 auto!important;display:grid!important;grid-template-columns:1fr 1fr!important;gap:9px!important;width:100%!important;margin-top:10px!important}
 .oai-visit-memo-actions.has-delete{grid-template-columns:72px 1fr 1fr!important}
 .oai-visit-memo-actions button{width:100%!important;min-width:0!important;white-space:nowrap!important}
+.oai-visit-memo-actions [data-oai-memo-close]{border:1px solid #c9d5dc!important;background:#fff!important;color:#53646f!important}
+.oai-visit-memo-actions [data-oai-memo-save]{border:1px solid #1678b8!important;background:#1678b8!important;color:#fff!important;box-shadow:none!important}
+.oai-visit-memo-actions [data-oai-memo-delete-modal]{border:1px solid #d8a7a7!important;background:#fff7f7!important;color:#a33a3a!important}
 @media (max-width:420px){.shrine-visit-detail-hero,.oai-visit-journal{margin-left:10px!important;margin-right:10px!important}.oai-visit-memo-panel{width:calc(100vw - 16px)!important;padding:12px!important}}
 @media (max-height:620px){.oai-visit-memo-panel{padding:12px!important}.oai-visit-memo-head{min-height:42px!important;margin-bottom:7px!important}.oai-visit-memo-panel textarea{min-height:82px!important}.oai-visit-memo-actions{margin-top:8px!important}.oai-visit-memo-actions button{height:40px!important}}
 
@@ -9806,10 +9809,10 @@ html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(17px * va
 .oai-visit-journal-row>button,.oai-visit-journal-actions button{border-color:#78afd0!important;color:#0b669d!important}
 
 .oai-visit-memo-panel{
-  left:12px!important;right:12px!important;top:8px!important;bottom:auto!important;
+  left:12px!important;right:12px!important;top:var(--oai-memo-top,12px)!important;bottom:auto!important;
   width:auto!important;max-width:560px!important;margin:0 auto!important;
   transform:none!important;
-  max-height:calc(var(--oai-memo-vh,100dvh) - 16px)!important;
+  max-height:var(--oai-memo-maxh,calc(100dvh - 24px))!important;
 }
 @media (max-width:420px){.oai-visit-memo-panel{left:8px!important;right:8px!important;width:auto!important;margin:0!important}}
 
