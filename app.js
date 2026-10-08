@@ -2816,6 +2816,19 @@ const OAI_VISIT_PHOTO_LIMIT_SHRINE=15;
 const OAI_VISIT_PHOTO_LIMIT_PARISH=10;
 /* V8-1-14-1132: 주소가 같은 성지·성당은 자동으로 동일 장소 처리하고,
    주소가 달라도 사용자가 확정한 예외 그룹은 같은 날짜의 사진·메모를 공유한다. */
+/* V8-1-14-1135: 주소/GPS가 같아도 사진·메모를 절대 공유하지 않는 예외.
+   사용자 확인값을 우선하며 주소 자동 공통화보다 이 규칙을 먼저 적용한다. */
+const OAI_SEPARATE_VISIT_JOURNAL_PAIRS=[
+  {shrineName:'화현 이벽 성지(이벽 요한 세례자 진묘 터와 생가 터)',parishDiocese:'CC',parishName:'일동 그리스도왕'},
+  {shrineName:'대전교구청 성모당 순례지',parishDiocese:'DJ',parishName:'세종성요한바오로2세성당'}
+];
+function _oaiIsSeparateJournalPair(kind,item){
+  if(!item)return false;
+  return OAI_SEPARATE_VISIT_JOURNAL_PAIRS.some(function(x){
+    if(kind==='parish')return String(item.diocese||'')===x.parishDiocese&&String(item.name||'')===x.parishName;
+    return String(item.name||'')===x.shrineName;
+  });
+}
 const OAI_SHARED_VISIT_JOURNAL_GROUPS=[
   {id:'g20190001',shrineSeq:'20190001',shrineName:'명동 대성당(명동 주교좌 성지 성당)',parishDiocese:'SE',parishName:'명동대성당'},
   {id:'g20190113',shrineSeq:'20190113',shrineName:'가회동 성당',parishDiocese:'SE',parishName:'가회동성당'},
@@ -2874,6 +2887,7 @@ function _oaiVisitAddressKey(addr){
 }
 function _oaiSharedJournalGroup(kind,item){
   if(!item)return null;
+  if(_oaiIsSeparateJournalPair(kind,item))return null;
   const explicit=OAI_SHARED_VISIT_JOURNAL_GROUPS.find(function(g){
     if(kind==='parish')return String(item.diocese||'')===g.parishDiocese&&String(item.name||'')===g.parishName;
     if(g.shrineSeq&&String(item.seq||'')===g.shrineSeq)return true;
