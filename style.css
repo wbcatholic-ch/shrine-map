@@ -9724,3 +9724,46 @@ html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(17px * va
 
 /* V8-1-14-1134 죽림굴 전용 길찾기 안내: WebView 기본 alert 대신 앱 전용 안내창 */
 .oai-nav-notice{position:fixed;inset:0;z-index:2147483670;display:none}.oai-nav-notice.show{display:block}.oai-nav-notice-bg{position:absolute;inset:0;background:rgba(15,23,42,.42);backdrop-filter:blur(2px)}.oai-nav-notice-panel{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(86vw,340px);background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:20px 18px 15px;box-shadow:0 18px 48px rgba(15,23,42,.22)}.oai-nav-notice-title{font-size:17px;line-height:1.35;font-weight:900;color:#172033;text-align:center}.oai-nav-notice-message{margin-top:10px;font-size:14px;line-height:1.6;font-weight:700;color:#475569;white-space:pre-line;text-align:left}.oai-nav-notice-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:18px}.oai-nav-notice-actions button{height:42px;border-radius:9px;font-family:inherit;font-size:14px;font-weight:900}.oai-nav-notice-actions button:first-child{border:1px solid #cbd5e1;background:#fff;color:#475569}.oai-nav-notice-actions button:last-child{border:0;background:#334155;color:#fff}
+
+
+/* V8-1-14-1136 순례 상세 최종 정리: 섹션 경계를 구조로 구분 */
+.shrine-visit-detail-view{background:#f1f4f6!important}
+.shrine-visit-detail-body{background:#f1f4f6!important}
+.shrine-visit-detail-hero{padding:0 16px 16px!important;border-bottom:12px solid #f1f4f6!important}
+.shrine-visit-detail-hero-head{margin:0 -16px 16px!important;padding:11px 16px!important;min-height:42px!important;background:#e8eef2!important;border-bottom:1px solid #cdd8df!important}
+.shrine-visit-detail-kicker{padding-left:11px!important;font-size:17px!important;color:#172a36!important}
+.shrine-visit-detail-kicker:before{width:4px!important;height:18px!important;background:#3c6f8e!important;border-radius:0!important}
+.shrine-visit-detail-count{margin-top:4px!important;font-size:22px!important;font-weight:950!important}
+.shrine-visit-detail-recent{margin-top:4px!important}
+.shrine-visit-detail-date-title{margin-top:17px!important;padding-top:12px!important;border-top:1px solid #e1e7eb!important;font-size:13px!important;font-weight:900!important;color:#455a68!important}
+.shrine-visit-detail-date-list{background:#fff!important;border:1px solid #d8e0e5!important;border-radius:6px!important}
+
+.oai-visit-journal{padding:0 16px 20px!important;background:#fff!important;border-bottom:12px solid #f1f4f6!important}
+.oai-visit-journal-head{margin:0 -16px!important;padding:11px 16px!important;min-height:42px!important;background:#e8eef2!important;border-bottom:1px solid #cdd8df!important}
+.oai-visit-journal-head .shrine-visit-detail-section-title{padding-left:11px!important;font-size:17px!important;color:#172a36!important}
+.oai-visit-journal-head .shrine-visit-detail-section-title:before{width:4px!important;height:18px!important;background:#3c6f8e!important;border-radius:0!important}
+.oai-visit-journal-head>strong{font-size:12px!important;color:#526875!important}
+.oai-visit-journal-date-section{margin:0 -16px!important;padding:12px 16px 14px!important;background:#f8fafb!important;border-bottom:1px solid #e0e6ea!important}
+.oai-visit-subsection-label{margin-bottom:8px!important;font-size:13px!important;font-weight:900!important;color:#445966!important}
+.oai-visit-journal-dates{margin:0!important;padding:0!important}
+.oai-visit-journal-date{border-radius:6px!important}
+.oai-visit-journal-block{padding:16px 0 4px!important;background:#fff!important}
+.oai-visit-journal-block+.oai-visit-journal-block{margin-top:14px!important;padding-top:16px!important;border-top:8px solid #f1f4f6!important}
+.oai-visit-journal-row{min-height:42px!important;margin:0 0 12px!important;padding:9px 10px!important;background:#f3f6f8!important;border-left:4px solid #708a9a!important}
+.oai-visit-photo-block .oai-visit-journal-row{border-left-color:#467b9b!important}
+.oai-visit-memo-block .oai-visit-journal-row{border-left-color:#657885!important}
+.oai-visit-journal-row b{font-size:16px!important;color:#1a2b35!important}
+.oai-visit-journal-row small{margin-left:6px!important;color:#697984!important}
+.oai-visit-journal-actions{display:flex!important;align-items:center!important;gap:6px!important}
+.oai-visit-journal-actions button,.oai-visit-journal-row>button{min-height:34px!important;padding:0 11px!important;border:1px solid #a9bdca!important;border-radius:6px!important;background:#fff!important;color:#285f7f!important;font-weight:850!important}
+.oai-visit-journal-actions .oai-visit-memo-delete-inline{border-color:#d8c6c6!important;color:#8b4b4b!important;background:#fff!important}
+.oai-visit-journal-empty{margin-top:0!important;padding:12px!important;background:#fafbfc!important;border:1px solid #e5eaed!important;border-radius:6px!important;color:#73818a!important}
+.oai-visit-memo-preview{margin-top:0!important;padding:12px!important;background:#fafbfc!important;border:1px solid #dfe6ea!important;border-radius:6px!important;color:#263944!important}
+.oai-visit-photo-grid{margin-top:0!important}
+
+/* 메모: 수정/삭제/저장 동작을 명확하게 */
+.oai-visit-memo-actions{grid-template-columns:auto 1fr 1fr!important}
+.oai-visit-memo-actions button{border-radius:8px!important}
+.oai-visit-memo-actions button[data-oai-memo-delete-modal]{border:1px solid #d7c3c3!important;background:#fff!important;color:#8b4545!important;padding:0 14px!important}
+.oai-visit-memo-actions button[data-oai-memo-save]{border:0!important;background:#2f6f95!important;color:#fff!important}
+.oai-visit-memo-actions button[data-oai-memo-close]{border:1px solid #d6dee3!important;background:#fff!important;color:#455a67!important}
