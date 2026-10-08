@@ -2997,7 +2997,7 @@ function _oaiVisitJournalHtml(kind,item,visits){
   const dateBtns=visits.map(function(v){const d=String(v.date||'');return '<button type="button" class="oai-visit-journal-date'+(d===date?' active':'')+'" data-oai-journal-date="'+_visitHtmlEsc(kind)+'" data-oai-journal-value="'+_visitHtmlEsc(d)+'">'+_visitHtmlEsc(_formatVisitDate(d))+'</button>';}).join('');
   const photoGrid=photos.length?'<div class="oai-visit-photo-grid" data-oai-photo-grid="'+_visitHtmlEsc(kind)+'">'+photos.map(function(ph,i){const id=_oaiPhotoIdentity(ph),status=String(ph&&ph.syncStatus||''),pending=status==='pending'||status==='waiting',label=status==='waiting'?'동기화 대기':'저장 중';return '<div class="oai-visit-photo-item'+(pending?' syncing':'')+'"><button type="button" class="oai-visit-photo-thumb" data-oai-photo-open="'+_visitHtmlEsc(kind)+'" data-oai-photo-index="'+i+'" data-oai-photo-file="'+_visitHtmlEsc(id)+'" data-oai-photo-drive="'+_visitHtmlEsc(String(ph&&ph.driveFileId||''))+'" aria-label="방문 사진 '+(i+1)+' 보기"><span class="oai-visit-photo-placeholder" aria-hidden="true">사진</span><img alt="">'+(pending?'<span class="oai-visit-photo-sync">'+label+'</span>':'')+'</button><button type="button" class="oai-visit-photo-thumb-delete" data-oai-photo-delete="'+_visitHtmlEsc(kind)+'" data-oai-photo-index="'+i+'" aria-label="방문 사진 '+(i+1)+' 삭제">×</button></div>';}).join('')+'</div>':'<div class="oai-visit-journal-empty">아직 등록한 사진이 없습니다.</div>';
   const memoHtml=memo?'<div class="oai-visit-memo-preview">'+_visitHtmlEsc(memo).replace(/\n/g,'<br>')+'</div>':'<div class="oai-visit-journal-empty">아직 작성한 메모가 없습니다.</div>';
-  return '<section class="oai-visit-journal" data-oai-journal-kind="'+_visitHtmlEsc(kind)+'"><div class="oai-visit-journal-head"><div class="shrine-visit-detail-section-title">나의 기록</div><strong>'+_visitHtmlEsc(_formatVisitDate(date))+'</strong></div>'+(visits.length>1?'<div class="oai-visit-journal-date-section"><div class="oai-visit-subsection-label">방문 날짜</div><div class="oai-visit-journal-dates">'+dateBtns+'</div></div>':'')+'<div class="oai-visit-journal-block oai-visit-photo-block"><div class="oai-visit-journal-row"><div><b>사진</b><small>'+photos.length+' / '+limit+'장</small></div><button type="button" data-oai-photo-add="'+_visitHtmlEsc(kind)+'"'+(photos.length>=limit?' disabled':'')+'>＋ 사진 추가</button></div>'+photoGrid+'</div><div class="oai-visit-journal-block oai-visit-memo-block"><div class="oai-visit-journal-row"><div><b>메모</b><small>'+(memo?'작성됨':'미작성')+'</small></div><div class="oai-visit-journal-actions">'+(memo?'<button type="button" class="oai-visit-memo-delete-inline" data-oai-memo-delete="'+_visitHtmlEsc(kind)+'">삭제</button>':'')+'<button type="button" data-oai-memo-edit="'+_visitHtmlEsc(kind)+'">'+(memo?'수정':'작성')+'</button></div></div>'+memoHtml+'</div></section>';
+  return '<section class="oai-visit-journal" data-oai-journal-kind="'+_visitHtmlEsc(kind)+'"><div class="oai-visit-journal-head"><div class="shrine-visit-detail-section-title">나의 기록</div><strong>'+_visitHtmlEsc(_formatVisitDate(date))+'</strong></div>'+(visits.length>1?'<div class="oai-visit-journal-date-section"><div class="oai-visit-subsection-label">방문 날짜</div><div class="oai-visit-journal-dates">'+dateBtns+'</div></div>':'')+'<div class="oai-visit-journal-block oai-visit-photo-block"><div class="oai-visit-journal-row"><div><span class="oai-visit-photo-title"><b>사진</b><button type="button" class="oai-help-button oai-visit-photo-help" data-oai-help="visit-photos" aria-label="사진 저장 기능 설명">?</button></span><small>'+photos.length+' / '+limit+'장</small></div><button type="button" data-oai-photo-add="'+_visitHtmlEsc(kind)+'"'+(photos.length>=limit?' disabled':'')+'>＋ 사진 추가</button></div>'+photoGrid+'</div><div class="oai-visit-journal-block oai-visit-memo-block"><div class="oai-visit-journal-row"><div><b>메모</b><small>'+(memo?'작성됨':'미작성')+'</small></div><div class="oai-visit-journal-actions">'+(memo?'<button type="button" class="oai-visit-memo-delete-inline" data-oai-memo-delete="'+_visitHtmlEsc(kind)+'">삭제</button>':'')+'<button type="button" data-oai-memo-edit="'+_visitHtmlEsc(kind)+'">'+(memo?'수정':'작성')+'</button></div></div>'+memoHtml+'</div></section>';
 }
 function _oaiCurrentJournalContext(kind){
   if(kind==='parish'){
@@ -3010,9 +3010,19 @@ function _oaiVisitToast(message){
   const text=String(message||'').trim();if(!text)return;
   let t=document.getElementById('oai-visit-toast');if(!t){t=document.createElement('div');t.id='oai-visit-toast';t.className='oai-visit-toast';document.body.appendChild(t);}t.textContent=text;t.classList.add('show');clearTimeout(window.__OAI_VISIT_TOAST_TIMER__);window.__OAI_VISIT_TOAST_TIMER__=setTimeout(function(){t.classList.remove('show');},2200);
 }
-function _oaiVisitConfirm(message,onConfirm){
-  let m=document.getElementById('oai-visit-confirm');if(!m){m=document.createElement('div');m.id='oai-visit-confirm';m.className='oai-visit-confirm';m.setAttribute('aria-hidden','true');m.innerHTML='<div class="oai-visit-confirm-bg" data-oai-confirm-cancel="1"></div><section class="oai-visit-confirm-panel" role="dialog" aria-modal="true"><div class="oai-visit-confirm-message" id="oai-visit-confirm-message"></div><div class="oai-visit-confirm-actions"><button type="button" data-oai-confirm-cancel="1">취소</button><button type="button" data-oai-confirm-ok="1">삭제</button></div></section>';document.body.appendChild(m);m.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('[data-oai-confirm-cancel]')){_oaiCloseVisitConfirm();return;}if(e.target.closest&&e.target.closest('[data-oai-confirm-ok]')){const fn=window.__OAI_VISIT_CONFIRM_FN__;_oaiCloseVisitConfirm();if(typeof fn==='function')fn();}});}
-  const msg=document.getElementById('oai-visit-confirm-message');if(msg)msg.textContent=String(message||'');window.__OAI_VISIT_CONFIRM_FN__=onConfirm;m.classList.add('show');m.setAttribute('aria-hidden','false');
+function _oaiVisitConfirm(message,onConfirm,opts){
+  opts=opts||{};
+  let m=document.getElementById('oai-visit-confirm');
+  if(!m){
+    m=document.createElement('div');m.id='oai-visit-confirm';m.className='oai-visit-confirm';m.setAttribute('aria-hidden','true');
+    m.innerHTML='<div class="oai-visit-confirm-bg" data-oai-confirm-cancel="1"></div><section class="oai-visit-confirm-panel" role="dialog" aria-modal="true"><div class="oai-visit-confirm-title" id="oai-visit-confirm-title"></div><div class="oai-visit-confirm-message" id="oai-visit-confirm-message"></div><div class="oai-visit-confirm-actions"><button type="button" data-oai-confirm-cancel="1">취소</button><button type="button" data-oai-confirm-ok="1">삭제</button></div></section>';
+    document.body.appendChild(m);
+    m.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('[data-oai-confirm-cancel]')){_oaiCloseVisitConfirm();return;}if(e.target.closest&&e.target.closest('[data-oai-confirm-ok]')){const fn=window.__OAI_VISIT_CONFIRM_FN__;_oaiCloseVisitConfirm();if(typeof fn==='function')fn();}});
+  }
+  const title=document.getElementById('oai-visit-confirm-title');if(title)title.textContent=String(opts.title||'삭제 확인');
+  const msg=document.getElementById('oai-visit-confirm-message');if(msg)msg.textContent=String(message||'');
+  const ok=m.querySelector('[data-oai-confirm-ok]');if(ok)ok.textContent=String(opts.confirmLabel||'삭제');
+  window.__OAI_VISIT_CONFIRM_FN__=onConfirm;m.classList.add('show');m.setAttribute('aria-hidden','false');
 }
 function _oaiCloseVisitConfirm(){const m=document.getElementById('oai-visit-confirm');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}window.__OAI_VISIT_CONFIRM_FN__=null;}
 try{window._oaiCloseVisitConfirm=_oaiCloseVisitConfirm;}catch(_e){}
@@ -3618,7 +3628,7 @@ function _openShrineAutoVisitModal(entry,opts){
   const kicker=modal.querySelector('.shrine-auto-visit-kicker');
   const placeName=entry.item.name||'성지';
   if(kicker) kicker.textContent=opts.method==='manual'?'순례등록 완료':'GPS 자동 순례등록';
-  if(title) title.textContent='축하합니다. '+placeName+' 순례등록이 되었습니다.';
+  if(title) title.textContent='축하합니다. '+placeName+' 순례가 등록되었습니다.';
   modal.classList.add('show');
   modal.setAttribute('aria-hidden','false');
   try{
@@ -3811,8 +3821,8 @@ function _renderShrineVisitModalList(item){
     e.preventDefault(); e.stopPropagation();
     const idx=parseInt(btn.getAttribute('data-visit-del'),10);
     const target=_getShrineVisitDates(item)[idx];
-    if(target && String(target.method||'').toLowerCase()==='gps'){ alert('GPS로 등록된 순례 기록은 삭제할 수 없습니다.'); return; }
-    if(confirm('이 방문 날짜를 삭제할까요?')){
+    if(target && String(target.method||'').toLowerCase()==='gps'){ _oaiVisitToast('GPS로 등록된 순례 기록은 삭제할 수 없습니다.'); return; }
+    _oaiVisitConfirm('이 방문 날짜를 삭제할까요?',function(){
       _deleteShrineVisitAt(item,idx);
       _renderShrineVisitModalList(item);
       if(_curInfoItem&&_curInfoItem.item===item) _renderInfoCardShrineVisit(item);
@@ -3820,7 +3830,7 @@ function _renderShrineVisitModalList(item){
       try{ if(_activeTab==='nearby') _loadNearby(); }catch(_e){}
       _refreshShrineVisitMapState();
       try{ if(_isShrineVisitDetailOpen() && window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null) _renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__); }catch(_e){}
-    }
+    },{title:'방문 날짜 삭제',confirmLabel:'삭제'});
   }); });
 }
 
@@ -16151,6 +16161,12 @@ document.addEventListener('click',function(e){
   if(key==='frequent-places'){
     e.preventDefault();e.stopPropagation();
     _oaiOpenFeatureHelp('자주 가는 장소','성지·성당·집·직장 등 자주 이용하는 장소를 최대 10곳까지 등록할 수 있습니다.\n\n등록한 장소는 길찾기에서 빠르게 선택할 수 있습니다.\n\n‘매번 자동등록 방지’를 켜면 등록한 성지·성당은 평소 GPS 자동 순례코스 생성에서 제외됩니다. GPS 방문등록 기능은 그대로 작동합니다.\n\n단, 사용자가 그날 순례계획에 직접 넣은 장소는 정상 순례지로 인정됩니다.');
+    return;
+  }
+  if(key==='visit-photos'){
+    e.preventDefault();e.stopPropagation();
+    _oaiOpenFeatureHelp('사진·메모 저장 안내','성지는 방문 1회당 사진을 최대 15장, 성당은 최대 10장까지 저장할 수 있습니다. 성지와 성당이 같은 장소로 묶인 경우에는 성지 기준인 15장이 적용됩니다.\n\n사진은 휴대폰에서 선택하면 먼저 앱에 저장되어 바로 표시되고, 이후 사용자의 Google Drive 저장공간에 자동으로 백업됩니다. 메모도 같은 방문기록과 함께 Google Drive에 백업됩니다.\n\nGoogle Drive의 앱 전용 저장공간을 사용하기 때문에 일반 ‘내 드라이브’ 파일 목록에는 사진 파일이 직접 보이지 않을 수 있습니다.\n\n같은 Google 계정을 사용하면 새 휴대폰이나 재설치 후에도 방문기록과 사진·메모를 복원할 수 있습니다.');
+    return;
   }
 },true);
 document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.getElementById('oai-feature-help-modal')?.classList.contains('show')){e.preventDefault();_oaiCloseFeatureHelp();}},true);
