@@ -9637,7 +9637,43 @@ html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(17px * va
 .oai-visit-photo-thumb-delete:active{background:rgba(136,45,39,.9)}
 .oai-visit-photo-item.syncing .oai-visit-photo-thumb{outline:1px solid rgba(169,141,63,.35);outline-offset:-1px}
 
-/* V8-1-14-1129 방문 사진 전체보기 버튼 충돌 제거 */
+/* V8-1-14-1130 방문 사진 전체보기 버튼 충돌 제거 */
 .oai-visit-photo-viewer .oai-visit-photo-viewer-panel>.oai-visit-photo-nav{top:50%!important;bottom:auto!important;width:44px!important;height:64px!important;transform:translateY(-50%)!important;border:0!important;border-radius:0!important;background:rgba(0,0,0,.18)!important;color:#fff!important;font-size:42px!important;white-space:nowrap!important}
 .oai-visit-photo-viewer .oai-visit-photo-viewer-panel>.oai-visit-photo-nav.prev{left:0!important;right:auto!important}.oai-visit-photo-viewer .oai-visit-photo-viewer-panel>.oai-visit-photo-nav.next{right:0!important;left:auto!important}
 .oai-visit-photo-viewer .oai-visit-photo-viewer-panel>.oai-visit-photo-viewer-top>span{white-space:nowrap!important;word-break:keep-all!important;line-height:1!important}.oai-visit-photo-viewer-top>button{display:flex!important;align-items:center!important;justify-content:center!important}
+
+
+/* V8-1-14-1131 방문 기록: 베이지 제거 + 쿨 뉴트럴/블루 포인트 + 메모 키보드 대응 */
+.shrine-visit-detail-view,.shrine-visit-detail-body{background:#ffffff!important;color:#18222b!important}
+.shrine-visit-detail-hero{border-bottom:1px solid #e4e9ee!important}
+.shrine-visit-detail-kicker,.shrine-visit-detail-section-title{color:#1f2d38!important}
+.shrine-visit-detail-count{color:#111820!important}
+.shrine-visit-detail-recent{color:#566573!important}
+.shrine-visit-detail-date-title{color:#647482!important}
+.shrine-visit-detail-date-list{border-color:#e6ebef!important}
+.shrine-visit-detail-date-chip{color:#17212a!important}
+.shrine-visit-detail-date-chip:before{background:#2b7bb5!important}
+.shrine-visit-detail-date-chip+.shrine-visit-detail-date-chip{border-color:#eef2f5!important}
+.shrine-visit-detail-register{border-color:#8fb8d5!important;background:#f7fbfe!important;color:#145b8c!important;box-shadow:none!important}
+.shrine-visit-detail-register:active{background:#edf6fc!important}
+.oai-visit-journal-head{border-top-color:#e3e8ec!important;border-bottom-color:#e3e8ec!important}
+.oai-visit-journal-head .shrine-visit-detail-section-title{color:#1f2d38!important}
+.oai-visit-journal-head>strong{color:#60717e!important;background:transparent!important;border:0!important}
+.oai-visit-journal-date{border-color:#d5dde3!important;background:#fff!important;color:#455560!important}
+.oai-visit-journal-date.active{border-color:#73a9cd!important;background:#eef7fd!important;color:#145b8c!important;box-shadow:none!important}
+.oai-visit-journal-block+.oai-visit-journal-block{border-top-color:#e7ecef!important}
+.oai-visit-journal-row b{color:#1e2a33!important}.oai-visit-journal-row small{color:#788691!important}
+.oai-visit-journal-row>button{border-color:#a9c7dc!important;background:#fff!important;color:#205f8a!important;box-shadow:none!important}
+.oai-visit-journal-row>button:active{background:#f1f8fc!important}
+.oai-visit-journal-empty{color:#7b8993!important;background:transparent!important}
+.oai-visit-memo-preview{color:#26343e!important}
+.oai-visit-photo-item.syncing .oai-visit-photo-thumb{outline-color:rgba(43,123,181,.32)!important}
+
+.oai-visit-memo-modal{overflow:hidden!important}
+.oai-visit-memo-panel{box-sizing:border-box!important;left:14px!important;right:14px!important;width:auto!important;margin:0 auto!important;overflow:auto!important;overscroll-behavior:contain!important;border-radius:16px!important;box-shadow:0 16px 42px rgba(20,34,45,.22)!important}
+.oai-visit-memo-head b{color:#1d2a34!important}.oai-visit-memo-head small{color:#74838f!important}
+.oai-visit-memo-panel textarea{min-height:120px!important;height:min(180px,32vh)!important;border-color:#cfd9e0!important;background:#fbfdfe!important;color:#1d2a34!important}
+.oai-visit-memo-panel textarea:focus{border-color:#5e9bc5!important;box-shadow:0 0 0 3px rgba(43,123,181,.12)!important;background:#fff!important}
+.oai-visit-memo-actions button:first-child{background:#246b9d!important;color:#fff!important}
+.oai-visit-memo-actions button:last-child{border-color:#d7dfe5!important;color:#44545f!important}
+@media (max-height:620px){.oai-visit-memo-panel{padding:12px!important}.oai-visit-memo-head{margin-bottom:8px!important}.oai-visit-memo-panel textarea{height:120px!important;min-height:96px!important}.oai-visit-memo-actions{margin-top:8px!important}.oai-visit-memo-actions button{height:40px!important}}
