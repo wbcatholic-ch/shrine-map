@@ -2814,8 +2814,8 @@ function _closeShrineVisitCardsModal(opts){
    사진 원본은 Android가 Google Drive appDataFolder에 보관하고 웹에는 fileId/이름만 저장한다. */
 const OAI_VISIT_PHOTO_LIMIT_SHRINE=15;
 const OAI_VISIT_PHOTO_LIMIT_PARISH=10;
-/* V8-1-14-1130: 사용자가 확정한 성지-성당 33곳은 장소/스탬프는 분리 유지하되
-   같은 날짜의 개인 사진·메모만 성지 쪽 공통 저널로 공유한다. */
+/* V8-1-14-1132: 주소가 같은 성지·성당은 자동으로 동일 장소 처리하고,
+   주소가 달라도 사용자가 확정한 예외 그룹은 같은 날짜의 사진·메모를 공유한다. */
 const OAI_SHARED_VISIT_JOURNAL_GROUPS=[
   {id:'g20190001',shrineSeq:'20190001',shrineName:'명동 대성당(명동 주교좌 성지 성당)',parishDiocese:'SE',parishName:'명동대성당'},
   {id:'g20190113',shrineSeq:'20190113',shrineName:'가회동 성당',parishDiocese:'SE',parishName:'가회동성당'},
@@ -2849,15 +2849,49 @@ const OAI_SHARED_VISIT_JOURNAL_GROUPS=[
   {id:'gsuryu',shrineName:'수류 성당',parishDiocese:'JJ',parishName:'수류성당'},
   {id:'g20190098',shrineSeq:'20190098',shrineName:'여산 순교 성지',parishDiocese:'JJ',parishName:'여산성당'},
   {id:'g20190099',shrineSeq:'20190099',shrineName:'전동 성당',parishDiocese:'JJ',parishName:'전동성당'},
-  {id:'g20190062',shrineSeq:'20190062',shrineName:'복자 성당',parishDiocese:'DG',parishName:'복자성당'}
+  {id:'g20190062',shrineSeq:'20190062',shrineName:'복자 성당',parishDiocese:'DG',parishName:'복자성당'},
+  {id:'g20190077',shrineSeq:'20190077',shrineName:'연풍 순교 성지',parishDiocese:'CJ',parishName:'연풍성당'},
+  {id:'g20190030',shrineSeq:'20190030',shrineName:'합덕 성당',parishDiocese:'DJ',parishName:'합덕성당'},
+  {id:'g20190035',shrineSeq:'20190035',shrineName:'진무영 순교 성지',parishDiocese:'IC',parishName:'강화성당'},
+  {id:'g20190011',shrineSeq:'20190011',shrineName:'죽림동 순교 성지 (교구 순교자 묘역)',parishDiocese:'CC',parishName:'주교좌 죽림동 예수성심'},
+  {id:'g20190042',shrineSeq:'20190042',shrineName:'미리내 성지',parishDiocese:'SW',parishName:'미리내성당'},
+  {id:'g20190137',shrineSeq:'20190137',shrineName:'홍천 성당',parishDiocese:'CC',parishName:'홍천 원죄없이잉태되신복되신동정마리아'}
 ];
+function _oaiVisitAddressKey(addr){
+  let s=String(addr||'').trim();
+  if(!s)return '';
+  s=s.replace(/^\d{5}\s*/, '').replace(/\([^)]*\)/g,'');
+  const repl=[
+    [/^서울특별시|^서울시/,'서울'],[/^부산광역시|^부산시/,'부산'],[/^대구광역시|^대구시/,'대구'],
+    [/^인천광역시|^인천시/,'인천'],[/^광주광역시|^광주시/,'광주'],[/^대전광역시|^대전시/,'대전'],
+    [/^울산광역시|^울산시/,'울산'],[/^세종특별자치시|^세종시/,'세종'],[/^경기도/,'경기'],
+    [/^강원특별자치도|^강원도/,'강원'],[/^충청북도/,'충북'],[/^충청남도/,'충남'],
+    [/^전북특별자치도|^전라북도/,'전북'],[/^전라남도/,'전남'],[/^경상북도/,'경북'],[/^경상남도/,'경남'],
+    [/^제주특별자치도|^제주도/,'제주']
+  ];
+  repl.forEach(function(r){s=s.replace(r[0],r[1]);});
+  return s.replace(/\s+/g,'').replace(/[·ㆍ]/g,'');
+}
 function _oaiSharedJournalGroup(kind,item){
   if(!item)return null;
-  return OAI_SHARED_VISIT_JOURNAL_GROUPS.find(function(g){
+  const explicit=OAI_SHARED_VISIT_JOURNAL_GROUPS.find(function(g){
     if(kind==='parish')return String(item.diocese||'')===g.parishDiocese&&String(item.name||'')===g.parishName;
     if(g.shrineSeq&&String(item.seq||'')===g.shrineSeq)return true;
     return String(item.name||'')===g.shrineName;
-  })||null;
+  });
+  if(explicit)return explicit;
+  /* V8-1-14-1132: 성지와 성당의 정규화 주소가 같으면 동일 장소로 자동 공통화한다.
+     주소가 다른데도 동일 장소인 예외는 위 명시 그룹으로 관리한다. */
+  const addrKey=_oaiVisitAddressKey(item.addr);
+  if(!addrKey)return null;
+  if(kind==='parish'){
+    const shrine=(SHRINES||[]).find(function(s){return s&&_oaiVisitAddressKey(s.addr)===addrKey;});
+    if(!shrine)return null;
+    return {id:'ga'+String(shrine.seq||addrKey),shrineSeq:String(shrine.seq||''),shrineName:String(shrine.name||''),parishDiocese:String(item.diocese||''),parishName:String(item.name||'')};
+  }
+  const parish=(PARISHES||[]).find(function(p){return p&&_oaiVisitAddressKey(p.addr)===addrKey;});
+  if(!parish)return null;
+  return {id:'ga'+String(item.seq||addrKey),shrineSeq:String(item.seq||''),shrineName:String(item.name||''),parishDiocese:String(parish.diocese||''),parishName:String(parish.name||'')};
 }
 function _oaiSharedGroupShrine(g){return g?(SHRINES||[]).find(function(s){return (g.shrineSeq&&String(s&&s.seq||'')===g.shrineSeq)||String(s&&s.name||'')===g.shrineName;})||null:null;}
 function _oaiSharedGroupParish(g){return g?(PARISHES||[]).find(function(p){return String(p&&p.diocese||'')===g.parishDiocese&&String(p&&p.name||'')===g.parishName;})||null:null;}

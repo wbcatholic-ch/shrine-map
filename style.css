@@ -9643,7 +9643,7 @@ html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(17px * va
 .oai-visit-photo-viewer .oai-visit-photo-viewer-panel>.oai-visit-photo-viewer-top>span{white-space:nowrap!important;word-break:keep-all!important;line-height:1!important}.oai-visit-photo-viewer-top>button{display:flex!important;align-items:center!important;justify-content:center!important}
 
 
-/* V8-1-14-1131 방문 기록: 베이지 제거 + 쿨 뉴트럴/블루 포인트 + 메모 키보드 대응 */
+/* V8-1-14-1132 방문 기록: 베이지 제거 + 쿨 뉴트럴/블루 포인트 + 메모 키보드 대응 */
 .shrine-visit-detail-view,.shrine-visit-detail-body{background:#ffffff!important;color:#18222b!important}
 .shrine-visit-detail-hero{border-bottom:1px solid #e4e9ee!important}
 .shrine-visit-detail-kicker,.shrine-visit-detail-section-title{color:#1f2d38!important}
