@@ -9677,3 +9677,47 @@ html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(17px * va
 .oai-visit-memo-actions button:first-child{background:#246b9d!important;color:#fff!important}
 .oai-visit-memo-actions button:last-child{border-color:#d7dfe5!important;color:#44545f!important}
 @media (max-height:620px){.oai-visit-memo-panel{padding:12px!important}.oai-visit-memo-head{margin-bottom:8px!important}.oai-visit-memo-panel textarea{height:120px!important;min-height:96px!important}.oai-visit-memo-actions{margin-top:8px!important}.oai-visit-memo-actions button{height:40px!important}}
+
+
+/* V8-1-14-1133 순례 상세: 섹션 구분 강화 + 뉴트럴 블루 디자인 + 제목 정중앙 */
+.shrine-visit-detail-view{background:#eef3f7!important}
+.shrine-visit-detail-head{position:relative!important;display:flex!important;align-items:center!important;justify-content:center!important;background:#fff!important;border-bottom:1px solid #dce5eb!important;padding-left:56px!important;padding-right:56px!important}
+.shrine-visit-detail-head-title{width:100%!important;text-align:center!important;color:#162531!important;font-weight:900!important;letter-spacing:-.2px!important}
+.shrine-visit-detail-x{position:absolute!important;right:12px!important;top:50%!important;transform:translateY(-50%)!important}
+.shrine-visit-detail-body{background:#eef3f7!important;padding:0!important}
+.shrine-visit-detail-hero{margin:0!important;padding:18px 16px 16px!important;background:#fff!important;border:0!important;border-bottom:8px solid #eef3f7!important;border-radius:0!important;box-shadow:none!important}
+.shrine-visit-detail-kicker,.shrine-visit-detail-section-title{position:relative!important;padding-left:10px!important;color:#182a37!important;font-size:17px!important;font-weight:950!important}
+.shrine-visit-detail-kicker:before,.shrine-visit-detail-section-title:before{content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:16px;border-radius:2px;background:#2b78a7}
+.shrine-visit-detail-count{color:#0f1d27!important}.shrine-visit-detail-recent{color:#5d6d79!important}
+.shrine-visit-detail-date-title{margin-top:13px!important;color:#5f707c!important;font-size:12px!important;text-transform:none!important}
+.shrine-visit-detail-date-list{margin-top:6px!important;border:1px solid #e1e8ed!important;background:#f8fafc!important;border-radius:8px!important;overflow:hidden!important}
+.shrine-visit-detail-date-chip{background:#fff!important;color:#172630!important}.shrine-visit-detail-date-chip+.shrine-visit-detail-date-chip{border-color:#e9eef2!important}.shrine-visit-detail-date-chip:before{background:#2b78a7!important}
+.oai-visit-journal{margin:0!important;padding:0 16px 18px!important;background:#fff!important;border:0!important;border-radius:0!important;box-shadow:none!important}
+.oai-visit-journal-head{margin:0 -16px 12px!important;padding:14px 16px 12px!important;background:#f7fafc!important;border-top:0!important;border-bottom:1px solid #dde6ec!important;align-items:center!important}
+.oai-visit-journal-head>strong{color:#5a6d79!important;font-size:12px!important;font-weight:850!important}
+.oai-visit-journal-dates{margin:0 0 12px!important;padding:0 0 2px!important}
+.oai-visit-journal-date{border:1px solid #d7e1e8!important;background:#fff!important;color:#425664!important;border-radius:8px!important;padding:7px 10px!important}
+.oai-visit-journal-date.active{border-color:#6ca5c9!important;background:#eaf5fc!important;color:#155b87!important;box-shadow:none!important}
+.oai-visit-journal-block{padding:14px 0!important;border:0!important;border-radius:0!important;background:#fff!important}
+.oai-visit-journal-block+.oai-visit-journal-block{margin-top:0!important;border-top:1px solid #e2e9ee!important}
+.oai-visit-journal-row b{color:#192a35!important;font-size:15px!important}.oai-visit-journal-row small{color:#7a8993!important}
+.oai-visit-journal-row>button{min-height:36px!important;border:1px solid #9fc3da!important;border-radius:8px!important;background:#f8fcff!important;color:#1f648f!important;box-shadow:none!important}
+.oai-visit-journal-row>button:active{background:#eaf5fc!important}
+.oai-visit-journal-empty{color:#7b8992!important}.oai-visit-memo-preview{color:#22333e!important}
+.shrine-visit-detail-register{border:1px solid #91b9d1!important;border-radius:8px!important;background:#f7fbfe!important;color:#185f8b!important}
+/* 스탬프북 자체도 베이지 없이 차갑고 명확하게 */
+.shrine-visit-cards-modal,.shrine-visit-cards-panel,.shrine-visit-cards-body{background:#f2f6f9!important}
+.shrine-visit-cards-head{background:#fff!important;border-bottom-color:#dce5eb!important}
+.shrine-visit-cards-tabs{background:#fff!important;border-bottom-color:#dce5eb!important}
+.shrine-visit-cards-tabs button{color:#526775!important}.shrine-visit-cards-tabs button.active{color:#185f8b!important;border-bottom-color:#2b78a7!important;background:#f5faff!important}
+.shrine-visit-cards-diocese{background:#f7fafc!important;border-bottom-color:#dfe7ec!important}.shrine-visit-cards-diocese button.active{background:#2b78a7!important;border-color:#2b78a7!important;color:#fff!important}
+
+/* V8-1-14-1133 순례한 성지 등록 카드: 제목 정중앙 + 베이지/골드 제거 */
+.shrine-visit-panel{background:#fff!important;border-color:#dce5eb!important;box-shadow:0 16px 44px rgba(20,38,52,.18)!important}
+.shrine-visit-head{position:relative!important;display:block!important;padding-right:44px!important;margin-bottom:14px!important}
+.shrine-visit-head>div{width:100%!important;min-width:0!important}
+.shrine-visit-kicker{text-align:center!important;color:#405b6d!important;font-size:13px!important;font-weight:900!important;letter-spacing:.02em!important}
+.shrine-visit-title{margin-top:7px!important;color:#182a36!important}
+.shrine-visit-x{position:absolute!important;right:0!important;top:0!important;width:36px!important;height:36px!important;border:1px solid #d5e0e7!important;border-radius:50%!important;background:#f8fbfd!important;color:#35576c!important;box-shadow:none!important}
+.shrine-visit-label{color:#465c6a!important}.shrine-visit-label input{border-color:#d6e0e7!important;background:#fbfdfe!important;color:#192b36!important}
+.shrine-visit-save{background:#286f9d!important;border-color:#286f9d!important;color:#fff!important}.shrine-visit-cancel{background:#fff!important;border-color:#d2dde5!important;color:#4b606d!important}
