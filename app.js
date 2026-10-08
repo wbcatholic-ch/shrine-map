@@ -2913,11 +2913,18 @@ function _oaiDirectVisitByDate(kind,item,date){
   const visits=kind==='parish'?_parishVisits(item):_getShrineVisitDates(item);
   return visits.find(function(v){return String(v&&v.date||'')===String(date||'');})||null;
 }
+function _oaiPhotoIdentity(ph){return String(ph&&((ph.photoId||ph.fileId))||'');}
 function _oaiMergeJournalExtras(a,b){
   const out={},aa=a&&typeof a==='object'?a:{},bb=b&&typeof b==='object'?b:{};
-  const map={};[].concat(Array.isArray(bb.photos)?bb.photos:[],Array.isArray(aa.photos)?aa.photos:[]).forEach(function(ph){if(ph&&ph.fileId)map[String(ph.fileId)]=ph;});
+  const deleted=[].concat(Array.isArray(bb.deletedPhotoIds)?bb.deletedPhotoIds:[],Array.isArray(aa.deletedPhotoIds)?aa.deletedPhotoIds:[]).map(String);
+  const deletedSet=new Set(deleted);
+  const map={};[].concat(Array.isArray(bb.photos)?bb.photos:[],Array.isArray(aa.photos)?aa.photos:[]).forEach(function(ph){const id=_oaiPhotoIdentity(ph);if(id&&!deletedSet.has(id))map[id]=ph;});
   const photos=Object.keys(map).map(function(k){return map[k];});if(photos.length)out.photos=photos;
-  const memo=String(aa.memo||bb.memo||'').trim();if(memo)out.memo=memo;
+  if(deleted.length)out.deletedPhotoIds=Array.from(new Set(deleted));
+  const at=String(aa.memoUpdatedAt||''),bt=String(bb.memoUpdatedAt||'');
+  const src=(at&&bt)?(at>=bt?aa:bb):(at?aa:(bt?bb:(Object.prototype.hasOwnProperty.call(aa,'memo')?aa:bb)));
+  if(Object.prototype.hasOwnProperty.call(src,'memo'))out.memo=String(src.memo||'');
+  if(src.memoUpdatedAt)out.memoUpdatedAt=src.memoUpdatedAt;if(src.memoRevision)out.memoRevision=src.memoRevision;
   return out;
 }
 function _oaiReadSharedJournalExtras(group,date){
@@ -2932,7 +2939,7 @@ function _oaiWriteSharedJournalExtras(kind,item,date,patch,opts){
   const data=_loadShrineVisits();_migrateShrineVisitRecord(shrine,data);const key=_getShrineVisitKey(shrine);if(!key)return false;
   const rec=data[key]&&typeof data[key]==='object'?data[key]:{name:shrine.name||'',diocese:shrine.diocese||'',seq:shrine.seq||'',visits:[]};
   if(!Array.isArray(rec.visits))rec.visits=[];if(!rec.sharedJournalByDate||typeof rec.sharedJournalByDate!=='object')rec.sharedJournalByDate={};
-  const seed=_oaiReadSharedJournalExtras(group,date)||{},next=Object.assign({},seed,rec.sharedJournalByDate[date]||{},patch||{});next.updatedAt=new Date().toISOString();rec.sharedJournalByDate[date]=next;data[key]=rec;_saveShrineVisits(data);
+  const seed=_oaiReadSharedJournalExtras(group,date)||{},oldJournal=rec.sharedJournalByDate[date]||{},next=Object.assign({},seed,oldJournal,patch||{});next.updatedAt=new Date().toISOString();if(patch&&Object.prototype.hasOwnProperty.call(patch,'memo')){next.memoUpdatedAt=next.updatedAt;next.memoRevision=Math.max(Number(seed.memoRevision||0),Number(oldJournal.memoRevision||0))+1;}rec.sharedJournalByDate[date]=next;data[key]=rec;_saveShrineVisits(data);
   if(!(opts&&opts.skipBackup)){try{queueGoogleDriveBackup();}catch(_e){}}
   return true;
 }
@@ -2952,13 +2959,13 @@ function _oaiFindVisitIndexByDate(arr,date){
   for(let i=0;i<arr.length;i++){if(_visitDateOf(arr[i])===String(date||''))return i;}
   return -1;
 }
-function _oaiNormalizePhotos(v){return v&&Array.isArray(v.photos)?v.photos.filter(function(x){return x&&x.fileId;}):[];}
+function _oaiNormalizePhotos(v){const deleted=new Set((v&&Array.isArray(v.deletedPhotoIds)?v.deletedPhotoIds:[]).map(String));return v&&Array.isArray(v.photos)?v.photos.filter(function(x){const id=_oaiPhotoIdentity(x);return !!id&&!deleted.has(id);}):[];}
 function _oaiUpdateShrineVisitExtras(item,date,patch,opts){
   if(_oaiSharedJournalGroup('shrine',item))return _oaiWriteSharedJournalExtras('shrine',item,date,patch,opts);
   const key=_getShrineVisitKey(item),data=_loadShrineVisits();if(!key||!data[key]||!Array.isArray(data[key].visits))return false;
   const idx=_oaiFindVisitIndexByDate(data[key].visits,date);if(idx<0)return false;
   let rec=_normalizeVisitEntry(data[key].visits[idx]);if(!rec||typeof rec!=='object')rec={date:String(date),method:'manual'};
-  Object.keys(patch||{}).forEach(function(k){rec[k]=patch[k];});data[key].visits[idx]=rec;_saveShrineVisits(data);
+  Object.keys(patch||{}).forEach(function(k){rec[k]=patch[k];});rec.updatedAt=new Date().toISOString();if(patch&&Object.prototype.hasOwnProperty.call(patch,'memo')){rec.memoUpdatedAt=rec.updatedAt;rec.memoRevision=Number(rec.memoRevision||0)+1;}data[key].visits[idx]=rec;_saveShrineVisits(data);
   if(!(opts&&opts.skipBackup)){try{queueGoogleDriveBackup();}catch(_e){}}
   return true;
 }
@@ -2967,7 +2974,7 @@ function _oaiUpdateParishVisitExtras(item,date,patch,opts){
   const key=_parishVisitKey(item),data=_loadParishVisits();if(!key||!data[key]||!Array.isArray(data[key].visits))return false;
   const idx=_oaiFindVisitIndexByDate(data[key].visits,date);if(idx<0)return false;
   let rec=_normalizeVisitEntry(data[key].visits[idx]);if(!rec||typeof rec!=='object')rec={date:String(date),method:'manual'};
-  Object.keys(patch||{}).forEach(function(k){rec[k]=patch[k];});data[key].visits[idx]=rec;_saveParishVisits(data);
+  Object.keys(patch||{}).forEach(function(k){rec[k]=patch[k];});rec.updatedAt=new Date().toISOString();if(patch&&Object.prototype.hasOwnProperty.call(patch,'memo')){rec.memoUpdatedAt=rec.updatedAt;rec.memoRevision=Number(rec.memoRevision||0)+1;}data[key].visits[idx]=rec;_saveParishVisits(data);
   if(!(opts&&opts.skipBackup)){try{queueGoogleDriveBackup();}catch(_e){}}
   return true;
 }
@@ -2987,7 +2994,7 @@ function _oaiVisitJournalHtml(kind,item,visits){
   const limit=_oaiVisitPhotoLimit(kind,item);
   const photos=_oaiNormalizePhotos(visit),memo=String(visit&&visit.memo||'').trim();
   const dateBtns=visits.map(function(v){const d=String(v.date||'');return '<button type="button" class="oai-visit-journal-date'+(d===date?' active':'')+'" data-oai-journal-date="'+_visitHtmlEsc(kind)+'" data-oai-journal-value="'+_visitHtmlEsc(d)+'">'+_visitHtmlEsc(_formatVisitDate(d))+'</button>';}).join('');
-  const photoGrid=photos.length?'<div class="oai-visit-photo-grid" data-oai-photo-grid="'+_visitHtmlEsc(kind)+'">'+photos.map(function(ph,i){const local=String(ph&&ph.fileId||'').indexOf('local_')===0,status=String(ph&&ph.syncStatus||''),pending=status==='pending'||status==='waiting'||local,label=status==='waiting'?'동기화 대기':'저장 중';return '<div class="oai-visit-photo-item'+(pending?' syncing':'')+'"><button type="button" class="oai-visit-photo-thumb" data-oai-photo-open="'+_visitHtmlEsc(kind)+'" data-oai-photo-index="'+i+'" data-oai-photo-file="'+_visitHtmlEsc(String(ph.fileId||''))+'" aria-label="방문 사진 '+(i+1)+' 보기"><span class="oai-visit-photo-placeholder" aria-hidden="true">사진</span><img alt="" loading="lazy">'+(pending?'<span class="oai-visit-photo-sync">'+label+'</span>':'')+'</button><button type="button" class="oai-visit-photo-thumb-delete" data-oai-photo-delete="'+_visitHtmlEsc(kind)+'" data-oai-photo-index="'+i+'" aria-label="방문 사진 '+(i+1)+' 삭제">×</button></div>';}).join('')+'</div>':'<div class="oai-visit-journal-empty">아직 등록한 사진이 없습니다.</div>';
+  const photoGrid=photos.length?'<div class="oai-visit-photo-grid" data-oai-photo-grid="'+_visitHtmlEsc(kind)+'">'+photos.map(function(ph,i){const id=_oaiPhotoIdentity(ph),status=String(ph&&ph.syncStatus||''),pending=status==='pending'||status==='waiting',label=status==='waiting'?'동기화 대기':'저장 중';return '<div class="oai-visit-photo-item'+(pending?' syncing':'')+'"><button type="button" class="oai-visit-photo-thumb" data-oai-photo-open="'+_visitHtmlEsc(kind)+'" data-oai-photo-index="'+i+'" data-oai-photo-file="'+_visitHtmlEsc(id)+'" data-oai-photo-drive="'+_visitHtmlEsc(String(ph&&ph.driveFileId||''))+'" aria-label="방문 사진 '+(i+1)+' 보기"><span class="oai-visit-photo-placeholder" aria-hidden="true">사진</span><img alt="" loading="lazy">'+(pending?'<span class="oai-visit-photo-sync">'+label+'</span>':'')+'</button><button type="button" class="oai-visit-photo-thumb-delete" data-oai-photo-delete="'+_visitHtmlEsc(kind)+'" data-oai-photo-index="'+i+'" aria-label="방문 사진 '+(i+1)+' 삭제">×</button></div>';}).join('')+'</div>':'<div class="oai-visit-journal-empty">아직 등록한 사진이 없습니다.</div>';
   const memoHtml=memo?'<div class="oai-visit-memo-preview">'+_visitHtmlEsc(memo).replace(/\n/g,'<br>')+'</div>':'<div class="oai-visit-journal-empty">아직 작성한 메모가 없습니다.</div>';
   return '<section class="oai-visit-journal" data-oai-journal-kind="'+_visitHtmlEsc(kind)+'"><div class="oai-visit-journal-head"><div class="shrine-visit-detail-section-title">나의 기록</div><strong>'+_visitHtmlEsc(_formatVisitDate(date))+'</strong></div>'+(visits.length>1?'<div class="oai-visit-journal-date-section"><div class="oai-visit-subsection-label">방문 날짜</div><div class="oai-visit-journal-dates">'+dateBtns+'</div></div>':'')+'<div class="oai-visit-journal-block oai-visit-photo-block"><div class="oai-visit-journal-row"><div><b>사진</b><small>'+photos.length+' / '+limit+'장</small></div><button type="button" data-oai-photo-add="'+_visitHtmlEsc(kind)+'"'+(photos.length>=limit?' disabled':'')+'>＋ 사진 추가</button></div>'+photoGrid+'</div><div class="oai-visit-journal-block oai-visit-memo-block"><div class="oai-visit-journal-row"><div><b>메모</b><small>'+(memo?'작성됨':'미작성')+'</small></div><div class="oai-visit-journal-actions">'+(memo?'<button type="button" class="oai-visit-memo-delete-inline" data-oai-memo-delete="'+_visitHtmlEsc(kind)+'">삭제</button>':'')+'<button type="button" data-oai-memo-edit="'+_visitHtmlEsc(kind)+'">'+(memo?'수정':'작성')+'</button></div></div>'+memoHtml+'</div></section>';
 }
@@ -3040,8 +3047,8 @@ window.oaiVisitPhotoProgress=function(requestId,current,total){
   if(t>0&&c<=0)_oaiVisitToast('사진을 준비하고 있습니다…');
 };
 function _oaiAppendLocalReadyPhoto(ctx,item){
-  if(!ctx||!item||!item.fileId)return false;const visit=_oaiGetVisitByDate(ctx.kind,ctx.item,ctx.date),current=_oaiNormalizePhotos(visit);
-  if(current.some(function(x){return String(x.fileId)===String(item.fileId);} ))return true;
+  if(!ctx||!item||!(item.fileId||item.photoId))return false;item.photoId=String(item.photoId||item.fileId);item.fileId=item.photoId;const visit=_oaiGetVisitByDate(ctx.kind,ctx.item,ctx.date),current=_oaiNormalizePhotos(visit);
+  if(current.some(function(x){return _oaiPhotoIdentity(x)===_oaiPhotoIdentity(item);} ))return true;
   const limit=_oaiVisitPhotoLimit(ctx.kind,ctx.item),next=current.concat([item]).slice(0,limit);
   return ctx.kind==='parish'?_oaiUpdateParishVisitExtras(ctx.item,ctx.date,{photos:next},{skipBackup:true}):_oaiUpdateShrineVisitExtras(ctx.item,ctx.date,{photos:next},{skipBackup:true});
 }
@@ -3061,39 +3068,36 @@ window.oaiVisitPhotoUploadResult=function(requestId,ok,json,message){
   const visit=_oaiGetVisitByDate(ctx.kind,ctx.item,ctx.date),current=_oaiNormalizePhotos(visit),limit=_oaiVisitPhotoLimit(ctx.kind,ctx.item),next=current.concat(added).slice(0,limit);
   const saved=ctx.kind==='parish'?_oaiUpdateParishVisitExtras(ctx.item,ctx.date,{photos:next}):_oaiUpdateShrineVisitExtras(ctx.item,ctx.date,{photos:next});if(saved){_oaiRerenderJournal(ctx.kind);if(msg&&!/완료|저장/.test(msg))_oaiVisitToast(msg);}
 };
-function _oaiReplaceSyncedPhotoInMap(data,localId,remote){
+function _oaiReplaceSyncedPhotoInMap(data,photoId,remoteId,mimeType,savedAt){
   let changed=false;Object.keys(data&&typeof data==='object'?data:{}).forEach(function(key){const rec=data[key];if(!rec)return;
-    if(Array.isArray(rec.visits))rec.visits=rec.visits.map(function(v){if(!v||!Array.isArray(v.photos))return v;let touched=false;const photos=v.photos.map(function(ph){if(!ph||String(ph.fileId)!==String(localId))return ph;touched=true;changed=true;return Object.assign({},ph,remote,{syncStatus:'saved'});});return touched?Object.assign({},v,{photos:photos}):v;});
-    if(rec.sharedJournalByDate&&typeof rec.sharedJournalByDate==='object')Object.keys(rec.sharedJournalByDate).forEach(function(d){const j=rec.sharedJournalByDate[d];if(!j||!Array.isArray(j.photos))return;let touched=false;const photos=j.photos.map(function(ph){if(!ph||String(ph.fileId)!==String(localId))return ph;touched=true;changed=true;return Object.assign({},ph,remote,{syncStatus:'saved'});});if(touched)rec.sharedJournalByDate[d]=Object.assign({},j,{photos:photos});});
+    const patchPhotos=function(arr){if(!Array.isArray(arr))return arr;let touched=false;const photos=arr.map(function(ph){if(!ph||_oaiPhotoIdentity(ph)!==String(photoId))return ph;touched=true;changed=true;return Object.assign({},ph,{photoId:String(photoId),fileId:String(photoId),driveFileId:String(remoteId||ph.driveFileId||''),mimeType:String(mimeType||ph.mimeType||'image/jpeg'),savedAt:String(savedAt||ph.savedAt||Date.now()),syncStatus:'saved'});});return touched?photos:arr;};
+    if(Array.isArray(rec.visits))rec.visits=rec.visits.map(function(v){if(!v)return v;const photos=patchPhotos(v.photos);return photos!==v.photos?Object.assign({},v,{photos:photos}):v;});
+    if(rec.sharedJournalByDate&&typeof rec.sharedJournalByDate==='object')Object.keys(rec.sharedJournalByDate).forEach(function(d){const j=rec.sharedJournalByDate[d];if(!j)return;const photos=patchPhotos(j.photos);if(photos!==j.photos)rec.sharedJournalByDate[d]=Object.assign({},j,{photos:photos});});
   });return changed;
 }
 window.oaiVisitPhotoSyncResult=function(localId,ok,fileId,mimeType,savedAt,message){
-  const local=String(localId||'');if(!local)return;const shr=_loadShrineVisits(),par=_loadParishVisits();
-  if(!ok){const mark=function(data){let changed=false;Object.keys(data&&typeof data==='object'?data:{}).forEach(function(key){const rec=data[key];if(!rec)return;if(Array.isArray(rec.visits))rec.visits.forEach(function(v){if(!v||!Array.isArray(v.photos))return;v.photos.forEach(function(ph){if(ph&&String(ph.fileId)===local&&ph.syncStatus!=='waiting'){ph.syncStatus='waiting';changed=true;}});});if(rec.sharedJournalByDate&&typeof rec.sharedJournalByDate==='object')Object.keys(rec.sharedJournalByDate).forEach(function(d){const j=rec.sharedJournalByDate[d];if(!j||!Array.isArray(j.photos))return;j.photos.forEach(function(ph){if(ph&&String(ph.fileId)===local&&ph.syncStatus!=='waiting'){ph.syncStatus='waiting';changed=true;}});});});return changed;};const a=mark(shr),b=mark(par);if(a)_saveShrineVisits(shr);if(b)_saveParishVisits(par);if(a||b){const pm=document.getElementById('parish-visit-detail');if(pm&&pm.classList.contains('show'))_oaiRerenderJournal('parish');const sm=document.getElementById('shrine-visit-detail-view');if(sm&&sm.classList.contains('show'))_oaiRerenderJournal('shrine');}return;}
-  const remoteId=String(fileId||'');if(!remoteId)return;const remote={fileId:remoteId,mimeType:String(mimeType||'image/jpeg'),savedAt:String(savedAt||Date.now())};
-  const a=_oaiReplaceSyncedPhotoInMap(shr,local,remote),b=_oaiReplaceSyncedPhotoInMap(par,local,remote);
-  if(a)_saveShrineVisits(shr);if(b)_saveParishVisits(par);
-  const t=_oaiVisitPhotoThumbCache.get(local),f=_oaiVisitPhotoFullCache.get(local);if(t){_oaiVisitPhotoThumbCache.delete(local);_oaiCachePhotoData(remoteId,t,'thumb');}if(f){_oaiVisitPhotoFullCache.delete(local);_oaiCachePhotoData(remoteId,f,'full');}
-  if(a||b){try{queueGoogleDriveBackup();}catch(_e){}const pm=document.getElementById('parish-visit-detail');if(pm&&pm.classList.contains('show'))_oaiRerenderJournal('parish');const sm=document.getElementById('shrine-visit-detail-view');if(sm&&sm.classList.contains('show'))_oaiRerenderJournal('shrine');}
+  const photoId=String(localId||'');if(!photoId)return;const shr=_loadShrineVisits(),par=_loadParishVisits();
+  if(!ok){const mark=function(data){let changed=false;Object.keys(data&&typeof data==='object'?data:{}).forEach(function(key){const rec=data[key];if(!rec)return;const one=function(j){if(!j||!Array.isArray(j.photos))return;j.photos.forEach(function(ph){if(ph&&_oaiPhotoIdentity(ph)===photoId&&ph.syncStatus!=='waiting'){ph.syncStatus='waiting';changed=true;}});};if(Array.isArray(rec.visits))rec.visits.forEach(one);if(rec.sharedJournalByDate&&typeof rec.sharedJournalByDate==='object')Object.keys(rec.sharedJournalByDate).forEach(function(d){one(rec.sharedJournalByDate[d]);});});return changed;};const a=mark(shr),b=mark(par);if(a)_saveShrineVisits(shr);if(b)_saveParishVisits(par);if(a||b){const pm=document.getElementById('parish-visit-detail');if(pm&&pm.classList.contains('show'))_oaiRerenderJournal('parish');const sm=document.getElementById('shrine-visit-detail-view');if(sm&&sm.classList.contains('show'))_oaiRerenderJournal('shrine');}return;}
+  const remoteId=String(fileId||'');if(!remoteId)return;const a=_oaiReplaceSyncedPhotoInMap(shr,photoId,remoteId,mimeType,savedAt),b=_oaiReplaceSyncedPhotoInMap(par,photoId,remoteId,mimeType,savedAt);if(a)_saveShrineVisits(shr);if(b)_saveParishVisits(par);if(a||b){try{queueGoogleDriveBackup();}catch(_e){}const pm=document.getElementById('parish-visit-detail');if(pm&&pm.classList.contains('show'))_oaiRerenderJournal('parish');const sm=document.getElementById('shrine-visit-detail-view');if(sm&&sm.classList.contains('show'))_oaiRerenderJournal('shrine');}
 };
 function _oaiCachePhotoData(fileId,dataUri,type){const key=String(fileId||'');if(!key||!dataUri)return;const cache=type==='thumb'?_oaiVisitPhotoThumbCache:_oaiVisitPhotoFullCache;cache.delete(key);cache.set(key,dataUri);while(cache.size>OAI_VISIT_PHOTO_CACHE_MAX){const oldest=cache.keys().next().value;cache.delete(oldest);}}
 function _oaiLoadVisitPhotoData(fileId,meta){
   const key=String(fileId||'');if(!key)return;const isThumb=!!(meta&&meta.type==='thumb'),cache=isThumb?_oaiVisitPhotoThumbCache:_oaiVisitPhotoFullCache;
   if(cache.has(key)){_oaiApplyLoadedVisitPhoto(meta,cache.get(key));return;}
-  const bridge=_oaiVisitNative();if(!bridge||typeof bridge.loadVisitPhoto!=='function'){if(meta&&meta.type==='viewer')_oaiVisitToast('사진 보기는 Android 앱에서 사용할 수 있습니다.');return;}
+  const bridge=_oaiVisitNative();if(!bridge){if(meta&&meta.type==='viewer')_oaiVisitToast('사진 보기는 Android 앱에서 사용할 수 있습니다.');return;}
   const req=_oaiVisitRequestId(isThumb?'thumb':'view');_oaiVisitPhotoViewPending[req]=Object.assign({fileId:key,cacheType:isThumb?'thumb':'full'},meta||{});
-  try{if(isThumb&&typeof bridge.loadVisitPhotoThumb==='function')bridge.loadVisitPhotoThumb(req,key);else bridge.loadVisitPhoto(req,key);}catch(_e){delete _oaiVisitPhotoViewPending[req];if(meta&&meta.type==='viewer')_oaiVisitToast('사진을 불러오지 못했습니다.');}
+  try{if(typeof bridge.loadVisitPhotoV2==='function')bridge.loadVisitPhotoV2(req,key,String(meta&&meta.driveFileId||''),isThumb);else if(isThumb&&typeof bridge.loadVisitPhotoThumb==='function')bridge.loadVisitPhotoThumb(req,key);else if(typeof bridge.loadVisitPhoto==='function')bridge.loadVisitPhoto(req,key);else throw new Error();}catch(_e){delete _oaiVisitPhotoViewPending[req];if(meta&&meta.type==='viewer')_oaiVisitToast('사진을 불러오지 못했습니다.');}
 }
 function _oaiHydrateVisibleVisitThumbnails(kind){
   const root=document.querySelector('.oai-visit-journal[data-oai-journal-kind="'+String(kind||'')+'"]');if(!root)return;const thumbs=Array.from(root.querySelectorAll('.oai-visit-photo-thumb'));
   if('IntersectionObserver' in window){
-    const obs=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(!entry.isIntersecting)return;const btn=entry.target;obs.unobserve(btn);const fileId=btn.getAttribute('data-oai-photo-file')||'';if(!fileId||btn.dataset.oaiLoading==='1'||btn.classList.contains('loaded'))return;btn.dataset.oaiLoading='1';_oaiLoadVisitPhotoData(fileId,{type:'thumb',button:btn});});},{root:null,rootMargin:'220px 0px'});
-    thumbs.forEach(function(btn,i){if(i<6){const fileId=btn.getAttribute('data-oai-photo-file')||'';if(fileId){btn.dataset.oaiLoading='1';_oaiLoadVisitPhotoData(fileId,{type:'thumb',button:btn});}}else obs.observe(btn);});return;
+    const obs=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(!entry.isIntersecting)return;const btn=entry.target;obs.unobserve(btn);const fileId=btn.getAttribute('data-oai-photo-file')||'';if(!fileId||btn.dataset.oaiLoading==='1'||btn.classList.contains('loaded'))return;btn.dataset.oaiLoading='1';_oaiLoadVisitPhotoData(fileId,{type:'thumb',button:btn,driveFileId:btn.getAttribute('data-oai-photo-drive')||''});});},{root:null,rootMargin:'220px 0px'});
+    thumbs.forEach(function(btn,i){if(i<6){const fileId=btn.getAttribute('data-oai-photo-file')||'';if(fileId){btn.dataset.oaiLoading='1';_oaiLoadVisitPhotoData(fileId,{type:'thumb',button:btn,driveFileId:btn.getAttribute('data-oai-photo-drive')||''});}}else obs.observe(btn);});return;
   }
-  let cursor=0;function loadBatch(){if(!root.isConnected)return;let loaded=0;while(cursor<thumbs.length&&loaded<2){const btn=thumbs[cursor++],fileId=btn.getAttribute('data-oai-photo-file')||'';if(!fileId||btn.dataset.oaiLoading==='1'||btn.classList.contains('loaded'))continue;btn.dataset.oaiLoading='1';_oaiLoadVisitPhotoData(fileId,{type:'thumb',button:btn});loaded++;}if(cursor<thumbs.length)setTimeout(loadBatch,180);}loadBatch();
+  let cursor=0;function loadBatch(){if(!root.isConnected)return;let loaded=0;while(cursor<thumbs.length&&loaded<2){const btn=thumbs[cursor++],fileId=btn.getAttribute('data-oai-photo-file')||'';if(!fileId||btn.dataset.oaiLoading==='1'||btn.classList.contains('loaded'))continue;btn.dataset.oaiLoading='1';_oaiLoadVisitPhotoData(fileId,{type:'thumb',button:btn,driveFileId:btn.getAttribute('data-oai-photo-drive')||''});loaded++;}if(cursor<thumbs.length)setTimeout(loadBatch,180);}loadBatch();
 }
 function _oaiApplyLoadedVisitPhoto(meta,dataUri){if(!meta)return;if(meta.type==='thumb'){const btn=meta.button;if(!btn||!btn.isConnected)return;const img=btn.querySelector('img');if(img){img.src=dataUri;btn.classList.add('loaded');btn.dataset.oaiLoading='0';}return;}if(meta.type==='viewer'){_oaiShowPhotoViewer(meta.kind,meta.index,dataUri);}}
-function _oaiOpenPhoto(kind,index){const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const visit=_oaiGetVisitByDate(kind,ctx.item,ctx.date),photos=_oaiNormalizePhotos(visit),ph=photos[index];if(!ph)return;_oaiPreparePhotoViewer(kind,index,ctx,photos.length);_oaiLoadVisitPhotoData(String(ph.fileId),{type:'viewer',kind:kind,index:index,ctx:ctx});}
+function _oaiOpenPhoto(kind,index){const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const visit=_oaiGetVisitByDate(kind,ctx.item,ctx.date),photos=_oaiNormalizePhotos(visit),ph=photos[index];if(!ph)return;_oaiPreparePhotoViewer(kind,index,ctx,photos.length);_oaiLoadVisitPhotoData(_oaiPhotoIdentity(ph),{type:'viewer',kind:kind,index:index,ctx:ctx,driveFileId:String(ph.driveFileId||'')});}
 function _oaiEnsurePhotoViewer(){
   let m=document.getElementById('oai-visit-photo-viewer');if(m)return m;m=document.createElement('div');m.id='oai-visit-photo-viewer';m.className='oai-visit-photo-viewer';m.setAttribute('aria-hidden','true');m.innerHTML='<div class="oai-visit-photo-viewer-bg"></div><div class="oai-visit-photo-viewer-panel"><div class="oai-visit-photo-viewer-top"><span id="oai-visit-photo-viewer-count"></span><button type="button" data-oai-photo-viewer-close="1" aria-label="사진 닫기">×</button></div><button type="button" class="oai-visit-photo-nav prev" data-oai-photo-prev="1" aria-label="이전 사진">‹</button><img id="oai-visit-photo-viewer-img" alt="방문 사진"><button type="button" class="oai-visit-photo-nav next" data-oai-photo-next="1" aria-label="다음 사진">›</button></div>';
   document.body.appendChild(m);m.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('[data-oai-photo-viewer-close]')){_oaiClosePhotoViewer();return;}if(e.target.closest&&e.target.closest('[data-oai-photo-prev]')){_oaiMovePhotoViewer(-1);return;}if(e.target.closest&&e.target.closest('[data-oai-photo-next]')){_oaiMovePhotoViewer(1);return;}});let sx=0,sy=0;m.addEventListener('touchstart',function(e){const t=e.touches&&e.touches[0];if(t){sx=t.clientX;sy=t.clientY;}},{passive:true});m.addEventListener('touchend',function(e){const t=e.changedTouches&&e.changedTouches[0];if(!t)return;const dx=t.clientX-sx,dy=t.clientY-sy;if(Math.abs(dx)>55&&Math.abs(dx)>Math.abs(dy)*1.25)_oaiMovePhotoViewer(dx<0?1:-1);},{passive:true});return m;
@@ -3112,15 +3116,15 @@ function _oaiDeletePhoto(kind,index){
   const visit=_oaiGetVisitByDate(kind,ctx.item,ctx.date),photos=_oaiNormalizePhotos(visit),ph=photos[index];if(!ph)return;
   _oaiVisitConfirm('이 사진을 방문 기록에서 삭제할까요?',function(){
     const bridge=_oaiVisitNative();
-    const fileId=String(ph.fileId||'');
-    const nextPhotos=photos.filter(function(x){return String(x&&x.fileId||'')!==fileId;});
-    const saved=ctx.kind==='parish'?_oaiUpdateParishVisitExtras(ctx.item,ctx.date,{photos:nextPhotos}):_oaiUpdateShrineVisitExtras(ctx.item,ctx.date,{photos:nextPhotos});
+    const fileId=_oaiPhotoIdentity(ph),driveFileId=String(ph.driveFileId||(!String(fileId).startsWith('local_')?fileId:''));
+    const nextPhotos=photos.filter(function(x){return _oaiPhotoIdentity(x)!==fileId;});const deleted=Array.from(new Set([].concat(Array.isArray(visit&&visit.deletedPhotoIds)?visit.deletedPhotoIds:[],[fileId]).map(String)));
+    const saved=ctx.kind==='parish'?_oaiUpdateParishVisitExtras(ctx.item,ctx.date,{photos:nextPhotos,deletedPhotoIds:deleted}):_oaiUpdateShrineVisitExtras(ctx.item,ctx.date,{photos:nextPhotos,deletedPhotoIds:deleted});
     if(!saved){_oaiVisitToast('사진 기록을 삭제하지 못했습니다.');return;}
     _oaiVisitPhotoThumbCache.delete(fileId);_oaiVisitPhotoFullCache.delete(fileId);
     _oaiClosePhotoViewer();_oaiRerenderJournal(ctx.kind);_oaiVisitToast('사진을 삭제했습니다.');
     if(!bridge||typeof bridge.deleteVisitPhoto!=='function')return;
     const req=_oaiVisitRequestId('del');_oaiVisitPhotoDeletePending[req]={ctx:ctx,fileId:fileId,removed:true};
-    try{bridge.deleteVisitPhoto(req,fileId);}catch(_e){delete _oaiVisitPhotoDeletePending[req];}
+    try{if(typeof bridge.deleteVisitPhotoV2==='function')bridge.deleteVisitPhotoV2(req,fileId,driveFileId);else bridge.deleteVisitPhoto(req,driveFileId||fileId);}catch(_e){delete _oaiVisitPhotoDeletePending[req];}
   });
 }
 window.oaiVisitPhotoDeleteResult=function(requestId,ok,message){
@@ -15791,7 +15795,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function closeRestore(){const m=restoreModal();if(!m)return;m.classList.remove('show');m.setAttribute('aria-hidden','true');}
   function localValue(key,fallback){try{const value=JSON.parse(localStorage.getItem(key)||'');return value==null?fallback:value;}catch(_e){return fallback;}}
   function backupVisitMapWithoutLocalPhotos(value){
-    const src=value&&typeof value==='object'?value:{},out={};Object.keys(src).forEach(function(key){const rec=src[key]&&typeof src[key]==='object'?src[key]:{};const clone=Object.assign({},rec);clone.visits=(Array.isArray(rec.visits)?rec.visits:[]).map(function(v){const x=Object.assign({},v||{});if(Array.isArray(x.photos))x.photos=x.photos.filter(function(ph){return ph&&ph.fileId&&String(ph.fileId).indexOf('local_')!==0&&String(ph.syncStatus||'')!=='pending';});return x;});if(rec.sharedJournalByDate&&typeof rec.sharedJournalByDate==='object'){clone.sharedJournalByDate={};Object.keys(rec.sharedJournalByDate).forEach(function(d){const j=Object.assign({},rec.sharedJournalByDate[d]||{});if(Array.isArray(j.photos))j.photos=j.photos.filter(function(ph){return ph&&ph.fileId&&String(ph.fileId).indexOf('local_')!==0&&String(ph.syncStatus||'')!=='pending';});clone.sharedJournalByDate[d]=j;});}out[key]=clone;});return out;
+    const src=value&&typeof value==='object'?value:{},out={};
+    const clean=function(v){const x=Object.assign({},v||{});if(Array.isArray(x.photos))x.photos=x.photos.filter(function(ph){if(!ph)return false;const id=_oaiPhotoIdentity(ph);return !!(ph.driveFileId||(!id.startsWith('local_')&&id));}).map(function(ph){return Object.assign({},ph,{syncStatus:'saved'});});return x;};
+    Object.keys(src).forEach(function(key){const rec=src[key]&&typeof src[key]==='object'?src[key]:{},clone=Object.assign({},rec);clone.visits=(Array.isArray(rec.visits)?rec.visits:[]).map(clean);if(rec.sharedJournalByDate&&typeof rec.sharedJournalByDate==='object'){clone.sharedJournalByDate={};Object.keys(rec.sharedJournalByDate).forEach(function(d){clone.sharedJournalByDate[d]=clean(rec.sharedJournalByDate[d]);});}out[key]=clone;});return out;
   }
   function backupSnapshot(){
     const parish=configuredParish();
@@ -15812,12 +15818,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function mergeLists(a,b){const out=Array.isArray(a)?a.slice():[];(Array.isArray(b)?b:[]).forEach(function(item){const token=JSON.stringify(item);if(!out.some(function(current){return JSON.stringify(current)===token;}))out.push(item);});return out;}
   function mergeVisitEntryPair(current,backup){
-    const a=_normalizeVisitEntry(current)||{},b=_normalizeVisitEntry(backup)||{};
-    const out=Object.assign({},b,a);
-    const ap=Array.isArray(a.photos)?a.photos:[],bp=Array.isArray(b.photos)?b.photos:[];
-    const photoMap={};bp.concat(ap).forEach(function(ph){if(ph&&ph.fileId)photoMap[String(ph.fileId)]=ph;});
-    const photos=Object.keys(photoMap).map(function(k){return photoMap[k];});if(photos.length)out.photos=photos;
-    if(!String(out.memo||'').trim()&&String(b.memo||'').trim())out.memo=b.memo;
+    const a=_normalizeVisitEntry(current)||{},b=_normalizeVisitEntry(backup)||{},out=Object.assign({},b,a);
+    const deleted=Array.from(new Set([].concat(Array.isArray(b.deletedPhotoIds)?b.deletedPhotoIds:[],Array.isArray(a.deletedPhotoIds)?a.deletedPhotoIds:[]).map(String))),deletedSet=new Set(deleted);
+    const photoMap={};[].concat(Array.isArray(b.photos)?b.photos:[],Array.isArray(a.photos)?a.photos:[]).forEach(function(ph){const id=_oaiPhotoIdentity(ph);if(id&&!deletedSet.has(id))photoMap[id]=ph;});out.photos=Object.keys(photoMap).map(function(k){return photoMap[k];});if(deleted.length)out.deletedPhotoIds=deleted;
+    const at=String(a.memoUpdatedAt||''),bt=String(b.memoUpdatedAt||'');if(at||bt){const src=at>=bt?a:b;out.memo=String(src.memo||'');out.memoUpdatedAt=src.memoUpdatedAt||'';out.memoRevision=Number(src.memoRevision||0);}else if(Object.prototype.hasOwnProperty.call(a,'memo'))out.memo=String(a.memo||'');else if(Object.prototype.hasOwnProperty.call(b,'memo'))out.memo=String(b.memo||'');
     return out;
   }
   function mergeVisitEntries(a,b){
