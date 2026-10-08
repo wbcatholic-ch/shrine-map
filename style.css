@@ -9726,83 +9726,50 @@ html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(17px * va
 .oai-nav-notice{position:fixed;inset:0;z-index:2147483670;display:none}.oai-nav-notice.show{display:block}.oai-nav-notice-bg{position:absolute;inset:0;background:rgba(15,23,42,.42);backdrop-filter:blur(2px)}.oai-nav-notice-panel{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(86vw,340px);background:#fff;border:1px solid #e2e8f0;border-radius:14px;padding:20px 18px 15px;box-shadow:0 18px 48px rgba(15,23,42,.22)}.oai-nav-notice-title{font-size:17px;line-height:1.35;font-weight:900;color:#172033;text-align:center}.oai-nav-notice-message{margin-top:10px;font-size:14px;line-height:1.6;font-weight:700;color:#475569;white-space:pre-line;text-align:left}.oai-nav-notice-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-top:18px}.oai-nav-notice-actions button{height:42px;border-radius:9px;font-family:inherit;font-size:14px;font-weight:900}.oai-nav-notice-actions button:first-child{border:1px solid #cbd5e1;background:#fff;color:#475569}.oai-nav-notice-actions button:last-child{border:0;background:#334155;color:#fff}
 
 
-/* V8-1-14-1136 순례 상세 최종 정리: 섹션 경계를 구조로 구분 */
-.shrine-visit-detail-view{background:#f1f4f6!important}
-.shrine-visit-detail-body{background:#f1f4f6!important}
-.shrine-visit-detail-hero{padding:0 16px 16px!important;border-bottom:12px solid #f1f4f6!important}
-.shrine-visit-detail-hero-head{margin:0 -16px 16px!important;padding:11px 16px!important;min-height:42px!important;background:#e8eef2!important;border-bottom:1px solid #cdd8df!important}
-.shrine-visit-detail-kicker{padding-left:11px!important;font-size:17px!important;color:#172a36!important}
-.shrine-visit-detail-kicker:before{width:4px!important;height:18px!important;background:#3c6f8e!important;border-radius:0!important}
-.shrine-visit-detail-count{margin-top:4px!important;font-size:22px!important;font-weight:950!important}
-.shrine-visit-detail-recent{margin-top:4px!important}
-.shrine-visit-detail-date-title{margin-top:17px!important;padding-top:12px!important;border-top:1px solid #e1e7eb!important;font-size:13px!important;font-weight:900!important;color:#455a68!important}
-.shrine-visit-detail-date-list{background:#fff!important;border:1px solid #d8e0e5!important;border-radius:6px!important}
-
-.oai-visit-journal{padding:0 16px 20px!important;background:#fff!important;border-bottom:12px solid #f1f4f6!important}
-.oai-visit-journal-head{margin:0 -16px!important;padding:11px 16px!important;min-height:42px!important;background:#e8eef2!important;border-bottom:1px solid #cdd8df!important}
-.oai-visit-journal-head .shrine-visit-detail-section-title{padding-left:11px!important;font-size:17px!important;color:#172a36!important}
-.oai-visit-journal-head .shrine-visit-detail-section-title:before{width:4px!important;height:18px!important;background:#3c6f8e!important;border-radius:0!important}
-.oai-visit-journal-head>strong{font-size:12px!important;color:#526875!important}
-.oai-visit-journal-date-section{margin:0 -16px!important;padding:12px 16px 14px!important;background:#f8fafb!important;border-bottom:1px solid #e0e6ea!important}
-.oai-visit-subsection-label{margin-bottom:8px!important;font-size:13px!important;font-weight:900!important;color:#445966!important}
-.oai-visit-journal-dates{margin:0!important;padding:0!important}
-.oai-visit-journal-date{border-radius:6px!important}
-.oai-visit-journal-block{padding:16px 0 4px!important;background:#fff!important}
-.oai-visit-journal-block+.oai-visit-journal-block{margin-top:14px!important;padding-top:16px!important;border-top:8px solid #f1f4f6!important}
-.oai-visit-journal-row{min-height:42px!important;margin:0 0 12px!important;padding:9px 10px!important;background:#f3f6f8!important;border-left:4px solid #708a9a!important}
-.oai-visit-photo-block .oai-visit-journal-row{border-left-color:#467b9b!important}
-.oai-visit-memo-block .oai-visit-journal-row{border-left-color:#657885!important}
-.oai-visit-journal-row b{font-size:16px!important;color:#1a2b35!important}
-.oai-visit-journal-row small{margin-left:6px!important;color:#697984!important}
-.oai-visit-journal-actions{display:flex!important;align-items:center!important;gap:6px!important}
-.oai-visit-journal-actions button,.oai-visit-journal-row>button{min-height:34px!important;padding:0 11px!important;border:1px solid #a9bdca!important;border-radius:6px!important;background:#fff!important;color:#285f7f!important;font-weight:850!important}
-.oai-visit-journal-actions .oai-visit-memo-delete-inline{border-color:#d8c6c6!important;color:#8b4b4b!important;background:#fff!important}
-.oai-visit-journal-empty{margin-top:0!important;padding:12px!important;background:#fafbfc!important;border:1px solid #e5eaed!important;border-radius:6px!important;color:#73818a!important}
-.oai-visit-memo-preview{margin-top:0!important;padding:12px!important;background:#fafbfc!important;border:1px solid #dfe6ea!important;border-radius:6px!important;color:#263944!important}
-.oai-visit-photo-grid{margin-top:0!important}
-
-/* 메모: 수정/삭제/저장 동작을 명확하게 */
-.oai-visit-memo-actions{grid-template-columns:auto 1fr 1fr!important}
-.oai-visit-memo-actions button{border-radius:8px!important}
-.oai-visit-memo-actions button[data-oai-memo-delete-modal]{border:1px solid #d7c3c3!important;background:#fff!important;color:#8b4545!important;padding:0 14px!important}
-.oai-visit-memo-actions button[data-oai-memo-save]{border:0!important;background:#2f6f95!important;color:#fff!important}
-.oai-visit-memo-actions button[data-oai-memo-close]{border:1px solid #d6dee3!important;background:#fff!important;color:#455a67!important}
-\n\n/* V8-1-14-1137 기록 안정화: 키보드 메모 모달 + 즉시 반영 */\n.oai-visit-memo-modal{overflow:hidden!important}\n.oai-visit-memo-panel{left:50%!important;right:auto!important;top:10px;transform:translateX(-50%)!important;width:calc(100% - 28px)!important;max-width:560px!important;box-sizing:border-box!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;padding:16px!important}\n.oai-visit-memo-head{flex:0 0 auto!important;margin-bottom:10px!important;min-height:48px!important}\n.oai-visit-memo-head>button{flex:0 0 42px!important;width:42px!important;height:42px!important;margin:-5px -5px 0 0!important;display:flex!important;align-items:center!important;justify-content:center!important}\n.oai-visit-memo-panel textarea{flex:1 1 auto!important;width:100%!important;height:auto!important;min-height:96px!important;max-height:none!important;overflow-y:auto!important}\n.oai-visit-memo-actions{flex:0 0 auto!important;display:grid!important;grid-template-columns:1fr 1fr!important;gap:9px!important;width:100%!important;margin-top:10px!important}\n.oai-visit-memo-actions.has-delete{grid-template-columns:auto 1fr 1fr!important}\n.oai-visit-memo-actions button{min-width:0!important;width:100%!important;padding:0 10px!important;white-space:nowrap!important}\n.oai-visit-memo-actions button[data-oai-memo-delete-modal]{width:auto!important;min-width:70px!important}\n@media (max-height:620px){.oai-visit-memo-panel{padding:12px!important}.oai-visit-memo-head{min-height:42px!important;margin-bottom:7px!important}.oai-visit-memo-panel textarea{min-height:82px!important}.oai-visit-memo-actions{margin-top:8px!important}.oai-visit-memo-actions button{height:40px!important}}\n
-
-/* V8-1-14-1140 방문/순례 상세 식별성 + 메모 키보드 + 사진 복원 */
+/* V8-1-14-1141 방문/순례 상세 통합본
+   1136~1140의 중복/후반 패치 블록을 제거하고 이 규칙 하나로 통합한다. */
 .shrine-visit-detail-view,.shrine-visit-detail-body{background:#edf2f5!important}
-.shrine-visit-detail-hero{background:#fff!important;border-bottom:14px solid #dbe4ea!important;padding:0 18px 20px!important}
-.shrine-visit-detail-hero-head{margin:0 -18px 20px!important;padding:14px 18px!important;background:#dfeaf1!important;border-top:1px solid #c8d7e0!important;border-bottom:2px solid #b7ccd9!important}
-.shrine-visit-detail-kicker{font-size:19px!important;font-weight:950!important;color:#102b3c!important;padding-left:13px!important}
-.shrine-visit-detail-kicker:before{width:5px!important;height:22px!important;background:#2f789f!important}
-.shrine-visit-detail-count{font-size:29px!important;line-height:1.15!important;color:#111f28!important;margin-top:18px!important}
-.shrine-visit-detail-recent{font-size:14px!important;color:#627582!important}
-.shrine-visit-detail-date-title{font-size:14px!important;color:#354e5e!important;margin-top:20px!important;padding-top:14px!important;border-top:2px solid #e2e8ec!important}
-
-.oai-visit-journal{margin:0!important;padding:0 18px 24px!important;background:#fff!important;border-bottom:14px solid #dbe4ea!important}
-.oai-visit-journal-head{margin:0 -18px 0!important;padding:14px 18px!important;min-height:48px!important;background:#d7e6ef!important;border-top:1px solid #c2d4df!important;border-bottom:2px solid #aac4d4!important}
-.oai-visit-journal-head .shrine-visit-detail-section-title{font-size:19px!important;font-weight:950!important;color:#102b3c!important;padding-left:13px!important}
-.oai-visit-journal-head .shrine-visit-detail-section-title:before{width:5px!important;height:22px!important;background:#2f789f!important}
-.oai-visit-journal-head>strong{font-size:13px!important;color:#4d6878!important}
-.oai-visit-journal-date-section{margin:0 -18px!important;padding:14px 18px 16px!important;background:#f4f8fa!important;border-bottom:2px solid #dce6ec!important}
-
-.oai-visit-journal-block{margin:0 -18px!important;padding:18px 18px 20px!important;background:#fff!important;border-top:0!important}
-.oai-visit-journal-block+.oai-visit-journal-block{margin:0 -18px!important;padding-top:18px!important;border-top:12px solid #e6edf1!important}
-.oai-visit-journal-row{margin:0 0 14px!important;padding:11px 12px!important;min-height:48px!important;border-left:6px solid #2f789f!important;border-bottom:1px solid #dce5ea!important;background:#eef5f9!important}
-.oai-visit-photo-block .oai-visit-journal-row{background:#edf6fb!important;border-left-color:#287da8!important}
-.oai-visit-memo-block .oai-visit-journal-row{background:#f1f3f5!important;border-left-color:#667987!important}
-.oai-visit-journal-row b{font-size:18px!important;font-weight:950!important;color:#182a35!important}
-.oai-visit-journal-row small{font-size:13px!important;color:#607480!important}
-.oai-visit-photo-grid{gap:8px!important}
-.oai-visit-photo-thumb{background:#edf0ee!important;border:1px solid #dce3e6!important}
-.oai-visit-photo-thumb.load-error .oai-visit-photo-placeholder{display:flex!important;color:#687982!important;background:#eef2f3!important}
-.oai-visit-memo-preview,.oai-visit-journal-empty{border-radius:4px!important}
-
-/* 메모 모달은 좌우 계산/translate 금지. 키보드가 떠도 현재 화면 폭 안에서만 축소한다. */
-.oai-visit-memo-panel{position:absolute!important;left:12px!important;right:12px!important;width:auto!important;max-width:560px!important;margin:0 auto!important;transform:none!important;box-sizing:border-box!important;border-radius:16px!important;padding:14px!important}
-.oai-visit-memo-head{position:relative!important;flex:0 0 auto!important;min-height:48px!important;margin-bottom:10px!important;padding-right:46px!important}
-.oai-visit-memo-head b{font-size:20px!important;color:#172a36!important}
-.oai-visit-memo-head>button{position:absolute!important;right:0!important;top:0!important;margin:0!important;width:42px!important;height:42px!important}
-.oai-visit-memo-panel textarea{min-height:90px!important;max-height:none!important;flex:1 1 auto!important;font-size:16px!important}
-.oai-visit-memo-actions{flex:0 0 auto!important;margin-top:10px!important}
-@media (max-width:420px){.oai-visit-memo-panel{left:8px!important;right:8px!important;padding:12px!important}.oai-visit-memo-actions.has-delete{grid-template-columns:72px 1fr 1fr!important}}
+.shrine-visit-detail-head{position:relative!important;display:flex!important;align-items:center!important;justify-content:center!important;min-height:64px!important;padding:0 58px!important;background:#fff!important;border-bottom:1px solid #d7e1e7!important}
+.shrine-visit-detail-head-title{width:100%!important;text-align:center!important;color:#152632!important;font-size:20px!important;font-weight:950!important}
+.shrine-visit-detail-x{position:absolute!important;right:12px!important;top:50%!important;transform:translateY(-50%)!important}
+.shrine-visit-detail-hero{margin:14px 14px 0!important;padding:0 16px 18px!important;background:#fff!important;border:1px solid #cbd8e1!important;border-radius:16px!important;box-shadow:none!important;overflow:hidden!important}
+.shrine-visit-detail-hero-head{margin:0 -16px 18px!important;padding:14px 16px!important;min-height:50px!important;background:#dce9f1!important;border-bottom:2px solid #b9cedb!important}
+.shrine-visit-detail-kicker,.shrine-visit-detail-section-title{position:relative!important;padding-left:13px!important;color:#142d3c!important;font-size:19px!important;font-weight:950!important}
+.shrine-visit-detail-kicker:before,.shrine-visit-detail-section-title:before{content:"";position:absolute;left:0;top:50%;width:5px;height:22px;transform:translateY(-50%);background:#2f82ad}
+.shrine-visit-detail-count{margin-top:2px!important;color:#0f1d27!important;font-size:30px!important;line-height:1.15!important;font-weight:950!important}
+.shrine-visit-detail-recent{margin-top:6px!important;color:#617582!important;font-size:14px!important}
+.shrine-visit-detail-date-title{margin-top:20px!important;padding-top:14px!important;border-top:2px solid #e4eaee!important;color:#405965!important;font-size:14px!important;font-weight:900!important}
+.shrine-visit-detail-date-list{margin-top:8px!important;border:1px solid #d6e0e6!important;border-radius:9px!important;background:#fff!important;overflow:hidden!important}
+.oai-visit-journal{margin:14px!important;padding:0 16px 18px!important;background:#fff!important;border:1px solid #cbd8e1!important;border-radius:16px!important;box-shadow:none!important;overflow:hidden!important}
+.oai-visit-journal-head{margin:0 -16px 0!important;padding:14px 16px!important;min-height:50px!important;background:#d6e6ef!important;border:0!important;border-bottom:2px solid #b4cbd8!important;align-items:center!important}
+.oai-visit-journal-head .shrine-visit-detail-section-title{font-size:19px!important}
+.oai-visit-journal-head>strong{color:#506b7b!important;font-size:13px!important;font-weight:900!important;background:transparent!important;border:0!important;padding:0!important}
+.oai-visit-journal-date-section{margin:0 -16px!important;padding:13px 16px 15px!important;background:#f5f8fa!important;border-bottom:1px solid #dde6eb!important}
+.oai-visit-subsection-label{margin-bottom:8px!important;color:#405965!important;font-size:13px!important;font-weight:900!important}
+.oai-visit-journal-dates{margin:0!important;padding:0!important}
+.oai-visit-journal-date{border:1px solid #d5e0e7!important;border-radius:8px!important;background:#fff!important;color:#425763!important}
+.oai-visit-journal-date.active{border-color:#6ca9cb!important;background:#eaf5fb!important;color:#155f8a!important}
+.oai-visit-journal-block{margin:16px 0 0!important;padding:0!important;background:#fff!important;border:1px solid #d8e2e8!important;border-radius:12px!important;overflow:hidden!important}
+.oai-visit-journal-block+.oai-visit-journal-block{margin-top:16px!important;border-top:1px solid #d8e2e8!important}
+.oai-visit-journal-row{min-height:52px!important;margin:0!important;padding:11px 12px!important;background:#edf5f9!important;border:0!important;border-left:6px solid #2f82ad!important;border-bottom:1px solid #d8e3e9!important}
+.oai-visit-memo-block .oai-visit-journal-row{background:#f1f4f6!important;border-left-color:#667a87!important}
+.oai-visit-journal-row b{color:#172a35!important;font-size:18px!important;font-weight:950!important}
+.oai-visit-journal-row small{margin-left:6px!important;color:#667a87!important;font-size:13px!important}
+.oai-visit-journal-row>button,.oai-visit-journal-actions button{min-height:38px!important;padding:0 12px!important;border:1px solid #a7bfcd!important;border-radius:8px!important;background:#fff!important;color:#236688!important;font-weight:900!important}
+.oai-visit-journal-actions{display:flex!important;align-items:center!important;gap:7px!important}
+.oai-visit-photo-grid{gap:8px!important;margin:12px!important}
+.oai-visit-photo-thumb{background:#edf1ef!important;border:1px solid #d9e1e4!important}
+.oai-visit-photo-thumb.load-error .oai-visit-photo-placeholder{display:flex!important;background:#eef2f3!important;color:#6f7f88!important}
+.oai-visit-journal-empty,.oai-visit-memo-preview{margin:12px!important;padding:12px!important;border:1px solid #e0e7eb!important;border-radius:8px!important;background:#fafcfd!important}
+.oai-visit-memo-preview{color:#243944!important}
+.oai-visit-memo-modal{position:fixed!important;inset:0!important;width:100vw!important;height:var(--oai-memo-vh,100dvh)!important;overflow:hidden!important}
+.oai-visit-memo-panel{position:absolute!important;left:50%!important;right:auto!important;top:8px!important;bottom:auto!important;width:min(calc(100vw - 24px),560px)!important;max-width:560px!important;max-height:calc(var(--oai-memo-vh,100dvh) - 16px)!important;margin:0!important;padding:14px!important;transform:translateX(-50%)!important;box-sizing:border-box!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;border-radius:16px!important}
+.oai-visit-memo-head{position:relative!important;flex:0 0 auto!important;min-height:48px!important;margin-bottom:10px!important;padding-right:48px!important}
+.oai-visit-memo-head b{color:#172a36!important;font-size:20px!important}
+.oai-visit-memo-head>button{position:absolute!important;right:0!important;top:0!important;width:42px!important;height:42px!important;margin:0!important}
+.oai-visit-memo-panel textarea{flex:1 1 auto!important;width:100%!important;height:auto!important;min-height:96px!important;max-height:none!important;overflow-y:auto!important;box-sizing:border-box!important;font-size:16px!important}
+.oai-visit-memo-actions{flex:0 0 auto!important;display:grid!important;grid-template-columns:1fr 1fr!important;gap:9px!important;width:100%!important;margin-top:10px!important}
+.oai-visit-memo-actions.has-delete{grid-template-columns:72px 1fr 1fr!important}
+.oai-visit-memo-actions button{width:100%!important;min-width:0!important;white-space:nowrap!important}
+@media (max-width:420px){.shrine-visit-detail-hero,.oai-visit-journal{margin-left:10px!important;margin-right:10px!important}.oai-visit-memo-panel{width:calc(100vw - 16px)!important;padding:12px!important}}
+@media (max-height:620px){.oai-visit-memo-panel{padding:12px!important}.oai-visit-memo-head{min-height:42px!important;margin-bottom:7px!important}.oai-visit-memo-panel textarea{min-height:82px!important}.oai-visit-memo-actions{margin-top:8px!important}.oai-visit-memo-actions button{height:40px!important}}
