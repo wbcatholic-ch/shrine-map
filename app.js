@@ -4098,26 +4098,19 @@ function _maybeAutoParishVisit(lat,lng){
   const visitResult=_registerGpsPlaceVisit('parish',best,_todayISODate());
   if(!visitResult.added)return;
 
-  // 성지·성당은 각각 저장한다. 같은 실제 장소이면 안내만 한 번 표시한다.
-  // 세종성요한바오로2세성당과 대전교구청 성모당은 독립 장소로 예외 처리한다.
-  let shrineEntry=null;
-  try{shrineEntry=_nearestShrineWithinAutoVisitRadius(Number(lat),Number(lng));}catch(_e){}
-  const shrine=shrineEntry&&shrineEntry.item;
-  const separatePlaces=!!(shrine&&/성모당/.test(String(shrine.name||''))&&/성요한바오로2세/.test(String(best.name||'')));
-  let samePhysicalPlace=false;
-  if(shrine&&!separatePlaces){
-    const parishLat=Number(best.lat),parishLng=Number(best.lng);
-    const points=Array.isArray(shrine.gpsPoints)&&shrine.gpsPoints.length?shrine.gpsPoints:[shrine];
-    samePhysicalPlace=points.some(function(pt){
-      const slat=Number(pt.lat),slng=Number(pt.lng);
-      return Number.isFinite(slat)&&Number.isFinite(slng)&&Number.isFinite(parishLat)&&Number.isFinite(parishLng)&&calcDist(slat,slng,parishLat,parishLng)*1000<=35;
-    });
-  }
-  if(!samePhysicalPlace){
-    if(shrine||_oaiDeferredShrineAutoVisitEntry||document.querySelector('#shrine-auto-visit-modal.show,#parish-auto-visit-notice.show')||_oaiVisitNoticeBlocked()){
+  // GPS 근접 거리로 동일 장소를 추정하지 않는다. 사용자가 확정한 연결 목록만 사용한다.
+  // 인증/스탬프는 각자 저장하고, 동일 장소의 성지 배너가 이미 처리되었을 때만 성당 배너를 생략한다.
+  const group=OAI_SHARED_VISIT_JOURNAL_GROUPS.find(function(g){return g.parishDiocese===String(best.diocese||'')&&g.parishName===String(best.name||'');});
+  const linkedShrine=group?_oaiSharedGroupShrine(group):null;
+  const samePlace=!!(group&&linkedShrine&&
+    !_oaiIsSeparateJournalPair('parish',best)&&
+    !_oaiIsSeparateJournalPair('shrine',linkedShrine));
+  const shrineRegisteredToday=samePlace&&_hasShrineVisitOnDate(linkedShrine,_todayISODate());
+  if(!shrineRegisteredToday){
+    if(_oaiDeferredShrineAutoVisitEntry||document.querySelector('#shrine-auto-visit-modal.show,#parish-auto-visit-notice.show')||_oaiVisitNoticeBlocked()){
       _oaiDeferredParishAutoVisitPlace=best;
       _scheduleDeferredVisitNoticeFlush();
-    }else{_showParishAutoVisitNotice(best);}
+    }else _showParishAutoVisitNotice(best);
   }
   if(_curInfoItem&&_curInfoItem.item===best)_renderInfoCardParishVisit(best);
 }
