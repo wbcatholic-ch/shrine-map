@@ -57,6 +57,7 @@
   }
   /* CLEANUP-1017: 열린 앱 레이어 판정은 한 함수만 관리한다. */
   function closeFeatureHelpOnBack(){
+    if (typeof window._oaiCloseAutoExcludePickerOnBack === 'function' && window._oaiCloseAutoExcludePickerOnBack()) return true;
     try{return typeof window._oaiCloseFeatureHelpOnBack==='function' && window._oaiCloseFeatureHelpOnBack();}
     catch(e){console.warn('[가톨릭길동무] 도움말 뒤로가기',e);return false;}
   }
