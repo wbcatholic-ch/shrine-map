@@ -3036,18 +3036,27 @@ function _oaiEnsureMemoModal(){
   return m;
 }
 function _oaiMemoFitViewport(){
-  const m=document.getElementById('oai-visit-memo-modal'),p=m&&m.querySelector('.oai-visit-memo-panel');if(!m||!p||!m.classList.contains('show'))return;
+  const m=document.getElementById('oai-visit-memo-modal'),p=m&&m.querySelector('.oai-visit-memo-panel');
+  if(!m||!p||!m.classList.contains('show'))return;
   const vv=window.visualViewport;
-  const vh=Math.max(250,Math.floor(vv?vv.height:window.innerHeight));
-  const top=Math.max(12,Math.floor(vv&&Number.isFinite(vv.offsetTop)?vv.offsetTop+12:12));
+  // The Android keyboard reduces the *visual* viewport, not necessarily 100dvh.
+  // Keep the entire dialog within that viewport instead of just setting max-height.
+  const viewH=Math.max(120,Math.floor(vv?vv.height:window.innerHeight));
+  const viewTop=Math.max(0,Math.round(vv?vv.offsetTop:0));
+  const margin=viewH<380?6:12;
+  const available=Math.max(100,viewH-margin*2);
+  const wanted=Math.min(360,available);
+  const top=viewTop+margin+Math.max(0,Math.floor((available-wanted)/2));
   m.style.setProperty('--oai-memo-top',top+'px');
-  m.style.setProperty('--oai-memo-maxh',Math.max(226,vh-24)+'px');
-  p.style.maxHeight='var(--oai-memo-maxh)';
+  m.style.setProperty('--oai-memo-maxh',available+'px');
+  m.style.setProperty('--oai-memo-height',wanted+'px');
+  p.style.height=wanted+'px';
+  p.style.maxHeight=available+'px';
 }
 function _oaiInstallMemoViewportGuard(){if(window.__OAI_MEMO_VV_GUARD__)return;window.__OAI_MEMO_VV_GUARD__=true;const vv=window.visualViewport;if(vv){vv.addEventListener('resize',_oaiMemoFitViewport,{passive:true});vv.addEventListener('scroll',_oaiMemoFitViewport,{passive:true});}window.addEventListener('resize',_oaiMemoFitViewport,{passive:true});}
-function _oaiCloseMemoModal(){const m=document.getElementById('oai-visit-memo-modal');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');m.style.removeProperty('--oai-memo-top');m.style.removeProperty('--oai-memo-maxh');const p=m.querySelector('.oai-visit-memo-panel');if(p){p.style.maxHeight='';p.style.height='';}const actions=m.querySelector('.oai-visit-memo-actions');if(actions)actions.classList.remove('has-delete');}window.__OAI_MEMO_CONTEXT__=null;}
+function _oaiCloseMemoModal(){const m=document.getElementById('oai-visit-memo-modal');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');m.style.removeProperty('--oai-memo-top');m.style.removeProperty('--oai-memo-maxh');m.style.removeProperty('--oai-memo-height');const p=m.querySelector('.oai-visit-memo-panel');if(p){p.style.maxHeight='';p.style.height='';}const actions=m.querySelector('.oai-visit-memo-actions');if(actions)actions.classList.remove('has-delete');}window.__OAI_MEMO_CONTEXT__=null;}
 try{window._oaiCloseMemoModal=_oaiCloseMemoModal;}catch(_e){}
-function _oaiOpenMemo(kind){const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const v=_oaiGetVisitByDate(kind,ctx.item,ctx.date),m=_oaiEnsureMemoModal(),memo=String(v&&v.memo||'');window.__OAI_MEMO_CONTEXT__=ctx;document.getElementById('oai-visit-memo-date').textContent=_formatVisitDate(ctx.date);document.getElementById('oai-visit-memo-text').value=memo;const del=m.querySelector('[data-oai-memo-delete-modal]'),actions=m.querySelector('.oai-visit-memo-actions'),hasMemo=!!memo.trim();if(del)del.style.display=hasMemo?'':'none';if(actions)actions.classList.toggle('has-delete',hasMemo);m.classList.add('show');m.setAttribute('aria-hidden','false');_oaiInstallMemoViewportGuard();_oaiMemoFitViewport();setTimeout(function(){try{const ta=document.getElementById('oai-visit-memo-text');ta.focus({preventScroll:true});_oaiMemoFitViewport();setTimeout(_oaiMemoFitViewport,100);setTimeout(_oaiMemoFitViewport,260);}catch(_e){}},60);}
+function _oaiOpenMemo(kind){const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const v=_oaiGetVisitByDate(kind,ctx.item,ctx.date),m=_oaiEnsureMemoModal(),memo=String(v&&v.memo||'');window.__OAI_MEMO_CONTEXT__=ctx;document.getElementById('oai-visit-memo-date').textContent=_formatVisitDate(ctx.date);document.getElementById('oai-visit-memo-text').value=memo;const del=m.querySelector('[data-oai-memo-delete-modal]'),actions=m.querySelector('.oai-visit-memo-actions'),hasMemo=!!memo.trim();if(del)del.style.display=hasMemo?'':'none';if(actions)actions.classList.toggle('has-delete',hasMemo);m.classList.add('show');m.setAttribute('aria-hidden','false');_oaiInstallMemoViewportGuard();_oaiMemoFitViewport();setTimeout(function(){try{const ta=document.getElementById('oai-visit-memo-text');ta.focus({preventScroll:true});_oaiMemoFitViewport();setTimeout(_oaiMemoFitViewport,100);setTimeout(_oaiMemoFitViewport,260);setTimeout(_oaiMemoFitViewport,500);}catch(_e){}},60);}
 function _oaiDeleteMemo(kind,fromModal){const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const v=_oaiGetVisitByDate(kind,ctx.item,ctx.date);if(!String(v&&v.memo||'').trim()){if(fromModal)_oaiCloseMemoModal();return;}_oaiVisitConfirm('이 방문의 메모를 삭제할까요?',function(){const ok=ctx.kind==='parish'?_oaiUpdateParishVisitExtras(ctx.item,ctx.date,{memo:''}):_oaiUpdateShrineVisitExtras(ctx.item,ctx.date,{memo:''});if(!ok){_oaiVisitToast('메모를 삭제하지 못했습니다.');return;}if(fromModal)_oaiCloseMemoModal();_oaiRerenderJournal(ctx.kind);_oaiVisitToast('메모를 삭제했습니다.');});}
 function _oaiAddPhotos(kind){
   const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const visit=_oaiGetVisitByDate(kind,ctx.item,ctx.date),photos=_oaiNormalizePhotos(visit),limit=_oaiVisitPhotoLimit(kind,ctx.item),remaining=Math.max(0,limit-photos.length);if(!remaining){_oaiVisitToast('등록할 수 있는 사진 수를 모두 사용했습니다.');return;}
@@ -3578,6 +3587,8 @@ const _oaiVisitNoticeQueue=[];
 const _oaiVisitNoticeKeys=new Set();
 let _oaiDeferredVisitNoticeTimer=0;
 let _oaiVisitNoticeRetryTimer=0;
+// A GPS notice is acknowledged only when its visible dialog is closed.
+let _oaiActiveGpsNoticeKey=null;
 function _oaiVisitNoticeBlocked(){
   // GPS 인증은 백그라운드에서도 저장되지만 안내창은 화면이 실제 보일 때만 표시한다.
   // 일시적인 복귀 가드는 시간 경과 후 해제되므로 재시도 타이머가 후속 표시를 맡는다.
@@ -3628,6 +3639,18 @@ function _scheduleDeferredVisitNoticeFlush(){
   clearTimeout(_oaiDeferredVisitNoticeTimer);
   _oaiDeferredVisitNoticeTimer=setTimeout(_flushDeferredVisitNotices,120);
 }
+function _acknowledgeGpsVisitNotice(kind){
+  if(!_oaiActiveGpsNoticeKey)return;
+  const key=_oaiActiveGpsNoticeKey;
+  const next=_oaiVisitNoticeQueue[0];
+  if(!next||next.key!==key||next.kind!==kind)return;
+  _oaiActiveGpsNoticeKey=null;
+  _oaiVisitNoticeQueue.shift();
+  _persistGpsNotices();
+  if(!_oaiVisitNoticeQueue.length&&_oaiVisitNoticeRetryTimer){
+    clearInterval(_oaiVisitNoticeRetryTimer);_oaiVisitNoticeRetryTimer=0;
+  }
+}
 function _flushDeferredVisitNotices(){
   if(!_oaiVisitNoticeQueue.length||_oaiVisitNoticeBlocked())return;
   if(document.querySelector('#shrine-auto-visit-modal.show,#parish-auto-visit-notice.show,#parish-visit-editor.show,#shrine-visit-modal.show,#shrine-visit-cards-modal.show,#shrine-visit-detail-view.show'))return;
@@ -3637,12 +3660,13 @@ function _flushDeferredVisitNotices(){
     else _showParishAutoVisitNotice(next.item);
   }catch(err){console.warn('[가톨릭길동무] GPS 축하창 표시 재시도',err);return;}
   const modal=document.getElementById(next.kind==='shrine'?'shrine-auto-visit-modal':'parish-auto-visit-notice');
-  // 화면에 실제로 표시된 경우에만 대기열에서 제거한다.
+  // Merely adding .show is not a delivery receipt. Keep the notice until the user closes it.
   if(!modal||!modal.classList.contains('show')||modal.getAttribute('aria-hidden')==='true')return;
-  _oaiVisitNoticeQueue.shift();
-  _persistGpsNotices();
-  if(!_oaiVisitNoticeQueue.length&&_oaiVisitNoticeRetryTimer){clearInterval(_oaiVisitNoticeRetryTimer);_oaiVisitNoticeRetryTimer=0;}
+  const css=window.getComputedStyle(modal);
+  if(css.display==='none'||css.visibility==='hidden'||Number(css.opacity)===0)return;
+  _oaiActiveGpsNoticeKey=next.key;
 }
+
 setTimeout(_restoreGpsNotices,1500);
 document.addEventListener('click',function(){if(_oaiVisitNoticeQueue.length)_scheduleDeferredVisitNoticeFlush();},true);
 document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')_scheduleDeferredVisitNoticeFlush();});
@@ -3695,6 +3719,7 @@ function _openShrineAutoVisitModal(entry,opts){
 function _closeShrineAutoVisitModal(){
   const modal=document.getElementById('shrine-auto-visit-modal');
   if(modal){ modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); }
+  _acknowledgeGpsVisitNotice('shrine');
   window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__=false;
   _scheduleDeferredVisitNoticeFlush();
 }
@@ -4164,7 +4189,7 @@ function _showParishVisitNotice(place,mode){
   if(editor){editor.classList.remove('show');editor.setAttribute('aria-hidden','true');}
   m.classList.add('show');m.setAttribute('aria-hidden','false');
 }
-function _closeParishVisitNotice(){const m=document.getElementById('parish-auto-visit-notice');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}_scheduleDeferredVisitNoticeFlush();}
+function _closeParishVisitNotice(){const m=document.getElementById('parish-auto-visit-notice');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}_acknowledgeGpsVisitNotice('parish');_scheduleDeferredVisitNoticeFlush();}
 window._closeParishVisitNotice=_closeParishVisitNotice;
 function _showParishAutoVisitNotice(place){_showParishVisitNotice(place,'gps');}
 /* 방문 버튼은 등록·화면 전환 이벤트에서 갱신한다. 400ms 상시 폴링 제거. */

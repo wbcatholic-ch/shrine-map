@@ -4230,7 +4230,7 @@ html.oai-font-global .shrine-visit-detail-map-btn{font-size:calc(12.5px * var(--
 html:not(.ios-device).oai-screen-compact-short .shrine-visit-detail-action-row{gap:6px!important;}
 html:not(.ios-device).oai-screen-compact-short .shrine-visit-detail-action{min-height:48px!important;padding:0 6px!important;font-size:13px!important;}
 
-.shrine-auto-visit-modal{position:fixed;inset:0;z-index:10070;display:none;align-items:center;justify-content:center;padding:20px}.shrine-auto-visit-modal.show{display:flex}.shrine-auto-visit-backdrop{position:absolute;inset:0;background:rgba(22,42,62,.48)!important;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
+.shrine-auto-visit-modal{position:fixed;inset:0;z-index:2147483646;display:none;align-items:center;justify-content:center;padding:20px}.shrine-auto-visit-modal.show{display:flex}.shrine-auto-visit-backdrop{position:absolute;inset:0;background:rgba(22,42,62,.48)!important;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .shrine-auto-visit-panel{position:relative;width:min(420px,calc(100% - 8px));background:#fff;border-radius:22px;padding:22px 18px 18px;box-shadow:0 12px 34px rgba(0,0,0,.28);border:1px solid rgba(212,170,106,.45);text-align:center}
 .shrine-auto-visit-kicker{font-size:12px;font-weight:900;color:#8b6914;margin-bottom:8px}.shrine-auto-visit-title{font-size:18px;font-weight:900;color:#111;line-height:1.5;word-break:keep-all}.shrine-auto-visit-name{margin-top:8px;font-size:20px;font-weight:900;color:#111;line-height:1.28;word-break:keep-all}.shrine-auto-visit-dist{margin-top:5px;font-size:13px;font-weight:850;color:#4b5563}.shrine-auto-visit-actions{display:flex;justify-content:center;gap:9px;margin-top:18px}.shrine-auto-visit-actions button{width:min(220px,100%);height:48px;border-radius:13px;font-size:15px;font-weight:900;font-family:inherit}.shrine-auto-visit-save{border:2px solid #000;background:#111;color:#f6d58a;box-shadow:0 2px 8px rgba(17,17,17,.16)}.shrine-auto-visit-later{border:2px solid #8b6914;background:#fffaf0;color:#5b3c00;box-shadow:0 2px 8px rgba(91,60,0,.08)}
 html.oai-font-global .shrine-auto-visit-title{font-size:calc(16px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-auto-visit-name{font-size:calc(20px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-auto-visit-dist{font-size:calc(13px * var(--app-inner-font-scale,1))!important}
@@ -9763,7 +9763,7 @@ html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(17px * va
 .oai-visit-journal-empty,.oai-visit-memo-preview{margin:12px!important;padding:12px!important;border:1px solid #e0e7eb!important;border-radius:8px!important;background:#fafcfd!important}
 .oai-visit-memo-preview{color:#243944!important}
 .oai-visit-memo-modal{position:fixed!important;inset:0!important;width:100vw!important;height:100dvh!important;overflow:hidden!important}
-.oai-visit-memo-panel{position:absolute!important;left:12px!important;right:12px!important;top:var(--oai-memo-top,12px)!important;bottom:auto!important;width:auto!important;max-width:560px!important;max-height:var(--oai-memo-maxh,calc(100dvh - 24px))!important;margin:0 auto!important;padding:14px!important;transform:none!important;box-sizing:border-box!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;border-radius:16px!important}
+.oai-visit-memo-panel{position:absolute!important;left:12px!important;right:12px!important;top:var(--oai-memo-top,12px)!important;bottom:auto!important;width:auto!important;max-width:560px!important;height:var(--oai-memo-height,320px)!important;max-height:var(--oai-memo-maxh,calc(100dvh - 24px))!important;margin:0 auto!important;padding:14px!important;transform:none!important;box-sizing:border-box!important;display:flex!important;flex-direction:column!important;overflow:hidden!important;border-radius:16px!important}
 .oai-visit-memo-head{position:relative!important;flex:0 0 auto!important;min-height:48px!important;margin-bottom:10px!important;padding-right:48px!important}
 .oai-visit-memo-head b{color:#172a36!important;font-size:20px!important}
 .oai-visit-memo-head>button{position:absolute!important;right:0!important;top:0!important;width:42px!important;height:42px!important;margin:0!important}
@@ -9808,12 +9808,6 @@ html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(17px * va
 .oai-visit-memo-block .oai-visit-journal-row{background:#eef2f5!important;border-left-color:#526f82!important}
 .oai-visit-journal-row>button,.oai-visit-journal-actions button{border-color:#78afd0!important;color:#0b669d!important}
 
-.oai-visit-memo-panel{
-  left:12px!important;right:12px!important;top:var(--oai-memo-top,12px)!important;bottom:auto!important;
-  width:auto!important;max-width:560px!important;margin:0 auto!important;
-  transform:none!important;
-  max-height:var(--oai-memo-maxh,calc(100dvh - 24px))!important;
-}
 @media (max-width:420px){.oai-visit-memo-panel{left:8px!important;right:8px!important;width:auto!important;margin:0!important}}
 
 /* V8-1-14-1143: 전날 GPS 순례 자동정산/성당 코스 선택 안내창 */
