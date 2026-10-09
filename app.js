@@ -3602,7 +3602,7 @@ var _oaiDeferredParishAutoVisitPlace=null;
 var _oaiDeferredVisitNoticeTimer=0;
 function _oaiVisitNoticeBlocked(){try{if(document.visibilityState==='hidden')return true;if(window.oaiIsBackgroundReturnUiBlocked&&window.oaiIsBackgroundReturnUiBlocked())return true;if(window.oaiHasCriticalModalOpen&&window.oaiHasCriticalModalOpen())return true;}catch(_e){}return false;}
 function _scheduleDeferredVisitNoticeFlush(){clearTimeout(_oaiDeferredVisitNoticeTimer);_oaiDeferredVisitNoticeTimer=setTimeout(_flushDeferredVisitNotices,500);}
-function _flushDeferredVisitNotices(){try{if(_oaiVisitNoticeBlocked()){_scheduleDeferredVisitNoticeFlush();return;}if(_oaiDeferredShrineAutoVisitEntry){const entry=_oaiDeferredShrineAutoVisitEntry;_oaiDeferredShrineAutoVisitEntry=null;_openShrineAutoVisitModal(entry);return;}if(document.querySelector('#shrine-auto-visit-modal.show,#parish-auto-visit-notice.show'))return;if(_oaiDeferredParishAutoVisitPlace){const place=_oaiDeferredParishAutoVisitPlace;_oaiDeferredParishAutoVisitPlace=null;_showParishAutoVisitNotice(place);}}catch(_e){}}
+function _flushDeferredVisitNotices(){try{if(_oaiVisitNoticeBlocked()){_scheduleDeferredVisitNoticeFlush();return;}if(document.querySelector('#shrine-auto-visit-modal.show,#parish-auto-visit-notice.show'))return;if(_oaiDeferredShrineAutoVisitEntry){const entry=_oaiDeferredShrineAutoVisitEntry;_oaiDeferredShrineAutoVisitEntry=null;_openShrineAutoVisitModal(entry);return;}if(document.querySelector('#shrine-auto-visit-modal.show,#parish-auto-visit-notice.show'))return;if(_oaiDeferredParishAutoVisitPlace){const place=_oaiDeferredParishAutoVisitPlace;_oaiDeferredParishAutoVisitPlace=null;_showParishAutoVisitNotice(place);}}catch(_e){}}
 document.addEventListener('click',function(){if(_oaiDeferredShrineAutoVisitEntry||_oaiDeferredParishAutoVisitPlace)setTimeout(_flushDeferredVisitNotices,120);},true);
 window.addEventListener('oai-short-background-return',function(){setTimeout(_flushDeferredVisitNotices,900);},{passive:true});
 window.addEventListener('oai-long-background-return',function(){setTimeout(_flushDeferredVisitNotices,900);},{passive:true});
@@ -3644,7 +3644,7 @@ function _closeShrineAutoVisitModal(){
   const modal=document.getElementById('shrine-auto-visit-modal');
   if(modal){ modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); }
   window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__=false;
-  if(_oaiDeferredParishAutoVisitPlace)_scheduleDeferredVisitNoticeFlush();
+  if(_oaiDeferredParishAutoVisitPlace||_oaiDeferredShrineAutoVisitEntry)_scheduleDeferredVisitNoticeFlush();
 }
 function _isAnyVisitModalOpen(){
   return !!(document.querySelector('#shrine-visit-modal.show,#shrine-visit-cards-modal.show,#shrine-auto-visit-modal.show,#shrine-visit-detail-view.show'));
@@ -3669,18 +3669,18 @@ function _registerAutoShrineVisit(entry){
 function _maybePromptAutoShrineVisit(lat,lng){
   try{
     if(!lat||!lng) return;
-    if(window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__||_isAnyVisitModalOpen()) return;
+    if(window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__) return;
     const entry=_nearestShrineWithinAutoVisitRadius(lat,lng);
     if(!entry||!entry.item) return;
     const date=_todayISODate();
     if(_hasShrineVisitOnDate(entry.item,date)) return;
     window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__=true;
-    setTimeout(function(){
+    {
       const registered=_registerAutoShrineVisit(entry);
       if(!registered){window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__=false;return;}
-      if(_isAnyVisitModalOpen()||_oaiVisitNoticeBlocked()){_oaiDeferredShrineAutoVisitEntry=entry;window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__=false;_scheduleDeferredVisitNoticeFlush();return;}
+      if(_isAnyVisitModalOpen()||document.querySelector('#parish-auto-visit-notice.show')||_oaiVisitNoticeBlocked()){_oaiDeferredShrineAutoVisitEntry=entry;window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__=false;_scheduleDeferredVisitNoticeFlush();return;}
       _openShrineAutoVisitModal(entry);
-    },100);
+    }
   }catch(e){ console.warn('[가톨릭길동무]', e); window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__=false; }
 }
 
@@ -4098,21 +4098,27 @@ function _maybeAutoParishVisit(lat,lng){
   const visitResult=_registerGpsPlaceVisit('parish',best,_todayISODate());
   if(!visitResult.added)return;
 
-  // V8-1-14-1016:
-  // 같은 GPS 위치가 '성지 + 성당 + 활성 순례코스'에 동시에 해당하더라도
-  // 방문기록은 각각 정상 등록하되 축하 안내는 성지를 우선한다.
-  // 따라서 현재 위치가 성지 자동등록 반경 안이면 성당용 축하 팝업은 띄우지 않는다.
-  let shrineAtSameLocation=false;
-  try{
-    const shrineEntry=_nearestShrineWithinAutoVisitRadius(Number(lat),Number(lng));
-    shrineAtSameLocation=!!(shrineEntry&&shrineEntry.item);
-  }catch(_e){}
-  // 성모당(성지)과 성요한바오로2세성당은 별도 운영 장소다.
-  // 성지 안내가 먼저 표시되면 성당 안내는 다음 순서로 대기시킨다.
-  if(shrineAtSameLocation||_oaiDeferredShrineAutoVisitEntry||document.querySelector('#shrine-auto-visit-modal.show')||_oaiVisitNoticeBlocked()){
-    _oaiDeferredParishAutoVisitPlace=best;
-    _scheduleDeferredVisitNoticeFlush();
-  }else{_showParishAutoVisitNotice(best);}
+  // 성지·성당은 각각 저장한다. 같은 실제 장소이면 안내만 한 번 표시한다.
+  // 세종성요한바오로2세성당과 대전교구청 성모당은 독립 장소로 예외 처리한다.
+  let shrineEntry=null;
+  try{shrineEntry=_nearestShrineWithinAutoVisitRadius(Number(lat),Number(lng));}catch(_e){}
+  const shrine=shrineEntry&&shrineEntry.item;
+  const separatePlaces=!!(shrine&&/성모당/.test(String(shrine.name||''))&&/성요한바오로2세/.test(String(best.name||'')));
+  let samePhysicalPlace=false;
+  if(shrine&&!separatePlaces){
+    const parishLat=Number(best.lat),parishLng=Number(best.lng);
+    const points=Array.isArray(shrine.gpsPoints)&&shrine.gpsPoints.length?shrine.gpsPoints:[shrine];
+    samePhysicalPlace=points.some(function(pt){
+      const slat=Number(pt.lat),slng=Number(pt.lng);
+      return Number.isFinite(slat)&&Number.isFinite(slng)&&Number.isFinite(parishLat)&&Number.isFinite(parishLng)&&calcDist(slat,slng,parishLat,parishLng)*1000<=35;
+    });
+  }
+  if(!samePhysicalPlace){
+    if(shrine||_oaiDeferredShrineAutoVisitEntry||document.querySelector('#shrine-auto-visit-modal.show,#parish-auto-visit-notice.show')||_oaiVisitNoticeBlocked()){
+      _oaiDeferredParishAutoVisitPlace=best;
+      _scheduleDeferredVisitNoticeFlush();
+    }else{_showParishAutoVisitNotice(best);}
+  }
   if(_curInfoItem&&_curInfoItem.item===best)_renderInfoCardParishVisit(best);
 }
 function _showParishVisitNotice(place,mode){
@@ -4124,10 +4130,10 @@ function _showParishVisitNotice(place,mode){
   if(editor){editor.classList.remove('show');editor.setAttribute('aria-hidden','true');}
   m.classList.add('show');m.setAttribute('aria-hidden','false');
 }
-function _closeParishVisitNotice(){const m=document.getElementById('parish-auto-visit-notice');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}if(_oaiDeferredShrineAutoVisitEntry)_scheduleDeferredVisitNoticeFlush();}
+function _closeParishVisitNotice(){const m=document.getElementById('parish-auto-visit-notice');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}if(_oaiDeferredShrineAutoVisitEntry||_oaiDeferredParishAutoVisitPlace)_scheduleDeferredVisitNoticeFlush();}
 window._closeParishVisitNotice=_closeParishVisitNotice;
 function _showParishAutoVisitNotice(place){_showParishVisitNotice(place,'gps');}
-try{setInterval(function(){_updateParishVisitButton();},400);}catch(_e){}
+/* 방문 버튼은 등록·화면 전환 이벤트에서 갱신한다. 400ms 상시 폴링 제거. */
 try{document.addEventListener('change',function(e){const t=e.target;if(!t||!t.matches||!t.matches('#parish-visit-book [data-pv-select]'))return;const kind=t.getAttribute('data-pv-select'),value=t.value;if(kind==='sort')_parishVisitSort=value==='oldest'?'oldest':'recent';else if(kind==='dio'){_parishVisitDio=value||'all';_parishUnvisitedLimit=80;}_renderParishVisitBook();});}catch(_e){}
 try{window.addEventListener('oai-short-background-return',function(){setTimeout(function(){_updateParishVisitButton();},120);try{if(typeof window._oaiValidateActivePilgrimageFollow==='function')window._oaiValidateActivePilgrimageFollow();}catch(_e){}},{passive:true});}catch(_e){}
 
@@ -11407,7 +11413,7 @@ function _oaiHandleGpsArrival(lat,lng,opts){
     try{window._oaiPilgrimageEndpointGpsCheck(lat,lng,{silent:opts.endpointSilent!==false});}catch(_e){}
   }
   // 잦은 GPS 갱신에서 매번 4개의 타이머가 쌓이지 않도록 최신 위치만 처리한다.
-  _oaiGpsArrivalPending={lat:lat,lng:lng,opts:opts};
+  _oaiGpsArrivalPending={lat:lat,lng:lng,opts:Object.assign({},_oaiGpsArrivalPending&&_oaiGpsArrivalPending.opts||{},opts)};
   if(_oaiGpsArrivalTimer)return null;
   _oaiGpsArrivalTimer=setTimeout(function(){
     _oaiGpsArrivalTimer=0;
@@ -11418,7 +11424,7 @@ function _oaiHandleGpsArrival(lat,lng,opts){
     if(!o.skipParish){try{_maybeAutoParishVisit(a,b);}catch(_e){}}
     if(!o.skipActiveCourse){try{if(typeof window._oaiMarkActivePilgrimageCourseByLocation==='function')window._oaiMarkActivePilgrimageCourseByLocation(a,b);}catch(_e){}}
     if(!o.skipEndpoint&&!o.endpointNow){try{if(typeof window._oaiPilgrimageEndpointGpsCheck==='function'&&typeof window.isOaiPilgrimagePlannerOpen==='function'&&window.isOaiPilgrimagePlannerOpen())window._oaiPilgrimageEndpointGpsCheck(a,b,{silent:true});}catch(_e){}}
-  },220);
+  },80);
   return null;
 }
 window._oaiHandleGpsArrival=_oaiHandleGpsArrival;
