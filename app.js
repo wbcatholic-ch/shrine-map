@@ -3592,7 +3592,7 @@ function _restoreGpsNotices(){
   if(!Array.isArray(saved)||!saved.length)return;
   const now=Date.now(),today=_todayISODate();let unresolved=false;
   saved.forEach(function(n){
-    if(!n||!n.key||!String(n.key).startsWith(today+':')||now-Number(n.at||0)>15*60*1000)return;
+    if(!n||!n.key||!String(n.key).startsWith(today+':')||now-Number(n.at||0)>24*60*60*1000)return;
     const list=n.kind==='parish'?PARISHES:SHRINES;
     const item=Array.isArray(list)&&list.find(function(p){return p&&String(p.name)===String(n.name)&& (n.kind!=='parish'||String(p.diocese||'')===String(n.diocese||''));});
     if(!item){unresolved=true;return;}
@@ -3636,6 +3636,9 @@ function _flushDeferredVisitNotices(){
     if(next.kind==='shrine')_openShrineAutoVisitModal({item:next.item});
     else _showParishAutoVisitNotice(next.item);
   }catch(err){console.warn('[가톨릭길동무] GPS 축하창 표시 재시도',err);return;}
+  const modal=document.getElementById(next.kind==='shrine'?'shrine-auto-visit-modal':'parish-auto-visit-notice');
+  // 화면에 실제로 표시된 경우에만 대기열에서 제거한다.
+  if(!modal||!modal.classList.contains('show')||modal.getAttribute('aria-hidden')==='true')return;
   _oaiVisitNoticeQueue.shift();
   _persistGpsNotices();
   if(!_oaiVisitNoticeQueue.length&&_oaiVisitNoticeRetryTimer){clearInterval(_oaiVisitNoticeRetryTimer);_oaiVisitNoticeRetryTimer=0;}
@@ -3702,8 +3705,7 @@ function _registerAutoShrineVisit(entry){
   try{
     if(!entry||!entry.item) return false;
     const date=_todayISODate();
-    const visitResult=_registerGpsPlaceVisit('shrine',entry.item,date);
-    if(!visitResult.added) return false;
+    // 방문기록은 호출부에서 이미 저장했다. 화면만 갱신한다.
     _markAutoVisitPromptedToday(entry.item,date,'registered');
     if(_curInfoItem&&_curInfoItem.item===entry.item) _renderInfoCardShrineVisit(entry.item);
     try{ if(_activeTab==='list') renderList(); }catch(_e){}
@@ -3726,7 +3728,6 @@ function _maybePromptAutoShrineVisit(lat,lng){
     const result=_registerGpsPlaceVisit('shrine',shrine,_todayISODate());
     if(!result.added)return;
     _registerAutoShrineVisit({item:shrine,idx:idx});
-    _queueGpsVisitNotice('shrine',shrine);
   });
 }
 
@@ -3954,12 +3955,16 @@ function _registerGpsPlaceVisit(kind,item,date){
     if(kind==='shrine'){
       const already=_hasShrineVisitOnDate(item,visitDate);
       if(already)return {added:false,already:true,kind:'shrine',item:item};
-      return {added:!!_addShrineVisit(item,visitDate,'gps'),already:false,kind:'shrine',item:item};
+      const added=!!_addShrineVisit(item,visitDate,'gps');
+      if(added)_queueGpsVisitNotice('shrine',item);
+      return {added:added,already:false,kind:'shrine',item:item};
     }
     if(kind==='parish'){
       const already=_hasVisitDate(_parishVisits(item),visitDate);
       if(already)return {added:false,already:true,kind:'parish',item:item};
-      return {added:!!_addParishVisit(item,visitDate,'gps'),already:false,kind:'parish',item:item};
+      const added=!!_addParishVisit(item,visitDate,'gps');
+      if(added)_queueGpsVisitNotice('parish',item);
+      return {added:added,already:false,kind:'parish',item:item};
     }
   }catch(e){console.warn('[가톨릭길동무] GPS 방문 기록 실패',e);}
   return {added:false,already:false,kind:String(kind||''),item:item||null};
@@ -4147,7 +4152,6 @@ function _maybeAutoParishVisit(lat,lng){
     if(_isSameParish(place,_configuredMyParish())&&(!_isMyParishAutoVisitEnabled()||previous.length))return;
     if(previous.some(function(v){return v.date===_todayISODate();}))return;
     if(!_registerGpsPlaceVisit('parish',place,_todayISODate()).added)return;
-    _queueGpsVisitNotice('parish',place);
     if(_curInfoItem&&_curInfoItem.item===place)_renderInfoCardParishVisit(place);
   });
 }
