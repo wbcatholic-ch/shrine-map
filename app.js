@@ -3568,35 +3568,10 @@ function _saveShrineAutoVisitPrompts(data){
 function _autoVisitPromptKey(item,date){
   return _getShrineVisitKey(item)+'|'+String(date||_todayISODate());
 }
-function _wasAutoVisitPromptedToday(item,date){
-  const data=_loadShrineAutoVisitPrompts();
-  return !!data[_autoVisitPromptKey(item,date)];
-}
 function _markAutoVisitPromptedToday(item,date,action){
   const data=_loadShrineAutoVisitPrompts();
   data[_autoVisitPromptKey(item,date)]={date:date||_todayISODate(),action:action||'later',savedAt:new Date().toISOString()};
   _saveShrineAutoVisitPrompts(data);
-}
-function _nearestShrineWithinAutoVisitRadius(lat,lng){
-  if(!Array.isArray(SHRINES)||!SHRINES.length) return null;
-  let best=null,bestM=Infinity;
-  SHRINES.forEach(function(s,idx){
-    if(!s) return;
-    const radius=s.name==='대전교구청 성모당 순례지'?55:((Number(s.gpsRadiusM)>0)?Number(s.gpsRadiusM):OAI_SHRINE_AUTO_VISIT_RADIUS_M);
-    let points=[];
-    if(Array.isArray(s.gpsPoints)&&s.gpsPoints.length){
-      points=s.gpsPoints.filter(function(p){ return p&&Number(p.lat)&&Number(p.lng); });
-    }
-    if(!points.length && Number(s.lat)&&Number(s.lng)) points=[{name:s.name||'',lat:Number(s.lat),lng:Number(s.lng)}];
-    points.forEach(function(p){
-      const m=calcDist(lat,lng,Number(p.lat),Number(p.lng))*1000;
-      if(m<=radius && m<bestM){
-        bestM=m;
-        best={item:s,idx:idx,meters:m,gpsPointName:p.name||''};
-      }
-    });
-  });
-  return best;
 }
 // One FIFO for GPS notices; registration never waits for a visible dialog.
 const _oaiVisitNoticeQueue=[];
