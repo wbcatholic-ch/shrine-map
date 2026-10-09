@@ -12621,8 +12621,21 @@ function _oaiSyncScrollAffordance(el){
     const max=visible?Math.max(0,el.scrollHeight-el.clientHeight):0;
     const y=visible?Math.max(0,el.scrollTop):0;
     const canScroll=visible&&max>12;
-    const showTop=canScroll&&y>10;
+    let showTop=canScroll&&y>10;
     let showBottom=canScroll&&y<max-10;
+
+    /* 1175: 스탬프북은 큰 padding/scroll-padding 때문에 실제 마지막 항목이
+       모두 보여도 scrollHeight가 남는다. 콘텐츠 끝 기준으로 마크를 판단한다. */
+    if(canScroll&&el.classList&&el.classList.contains('shrine-visit-cards-body')){
+      const children=Array.prototype.filter.call(el.children||[],function(child){
+        try{const c=getComputedStyle(child),r=child.getBoundingClientRect();return c.display!=='none'&&c.visibility!=='hidden'&&r.height>0;}catch(_e){return false;}
+      });
+      const last=children.length?children[children.length-1]:null;
+      if(last){
+        const r=el.getBoundingClientRect(),end=last.getBoundingClientRect().bottom;
+        if(end<=r.bottom+3)showBottom=false;
+      }else{showBottom=false;showTop=false;}
+    }
 
     /* 순례 상세는 실제 콘텐츠가 모두 보이면 하단 padding 때문에 생긴
        가짜 스크롤 여유로 아래 마크를 띄우지 않는다. */
@@ -16253,6 +16266,8 @@ function _oaiOpenFeatureHelp(title,message){
   modal.classList.add('show');modal.setAttribute('aria-hidden','false');
 }
 function _oaiCloseFeatureHelp(){const m=document.getElementById('oai-feature-help-modal');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}}
+/* 1175: 두 ? 도움말 모두 공통 Android 뒤로가기 처리 대상. */
+window._oaiCloseFeatureHelpOnBack=function(){const m=document.getElementById('oai-feature-help-modal');if(!m||!m.classList.contains('show'))return false;_oaiCloseFeatureHelp();return true;};
 document.addEventListener('click',function(e){
   const close=e.target&&e.target.closest&&e.target.closest('[data-oai-feature-help-close]');if(close){e.preventDefault();_oaiCloseFeatureHelp();return;}
   const help=e.target&&e.target.closest&&e.target.closest('[data-oai-help]');if(!help)return;
