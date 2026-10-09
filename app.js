@@ -15809,8 +15809,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!isGoogleDriveConnected()){recordMessage('먼저 Google Drive 자동 보관을 켜고 계정을 연결해 주세요.');return;}
     const bridge=nativeDrive();
     if(!bridge||typeof bridge.loadGoogleDriveBackup!=='function'){recordMessage('Google Drive 자동백업은 앱에서 사용할 수 있습니다.');return;}
+    // Every download suspends writes until the native result is validated.
+    // A pending auto-save must not race with the remote read.
+    googleDriveInitialSyncPending=true;
+    setDriveWriteReady(false);
+    if(googleDriveBackupTimer){clearTimeout(googleDriveBackupTimer);googleDriveBackupTimer=0;}
+    oaiStartDriveCheckTimer();
     recordMessage('Google Drive의 기록을 확인하고 있습니다.');
-    bridge.loadGoogleDriveBackup();
+    try{bridge.loadGoogleDriveBackup();}catch(_e){oaiDriveCheckFailed('Google Drive 기록 확인을 시작하지 못했습니다.');recordMessage('Google Drive 기록을 확인하지 못했습니다. 자동 저장을 중지했습니다.');}
   }
   function hasBackupContent(){
     const data=backupSnapshot().data;
@@ -15965,6 +15971,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       }
     }
     if(status==='disconnected'){localStorage.removeItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY);if(googleDriveAutoConnectPending)localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'0');googleDriveAutoConnectPending=false;if(initialOnboarding&&initialDriveFirstFlow)oaiDriveCheckFailed(message||'Google 계정을 연결하지 못했습니다.');else if(initialOnboarding)onboardingMessage(message||'Google 계정을 연결하지 못했습니다. 다시 선택해 주세요.');}
+    if(status==='error'){
+      // Native read/write failures are not successful backup verification.
+      googleDriveInitialSyncPending=false;
+      oaiCancelDriveCheckTimer();
+      setDriveWriteReady(false);
+      if(googleDriveBackupTimer){clearTimeout(googleDriveBackupTimer);googleDriveBackupTimer=0;}
+      if(initialOnboarding&&initialDriveFirstFlow)oaiDriveCheckFailed(message||'Google Drive 확인에 실패했습니다.');
+      else recordMessage((message||'Google Drive 처리에 실패했습니다.')+' 자동 저장을 중지했습니다.');
+      refreshGoogleDriveButton();
+      return;
+    }
     if(status==='saved'){
       try{localStorage.setItem('oai_google_drive_saved_at_v1',new Date().toISOString());}catch(_e){}
       refreshGoogleDriveButton();
@@ -15992,17 +16009,20 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       return;
     }
     if(status==='empty'){
-      const isFirstCheck=googleDriveInitialSyncPending;
+      const verifiedLookup=googleDriveInitialSyncPending;
       googleDriveInitialSyncPending=false;oaiCancelDriveCheckTimer();
-      if(isFirstCheck&&shouldPromptRestore())markRestoreChecked();
-      if(initialDriveFirstFlow&&initialOnboarding){
-        recordMessage('Google Drive에 기존 기록이 없습니다. 새 기록부터 자동으로 보관합니다.');
-        setTimeout(openInitialParishSetupAfterDrive,180);
-        return;
+      if(verifiedLookup&&shouldPromptRestore())markRestoreChecked();
+      // Only a reply to our pending, successful Drive lookup proves absence.
+      // A stray/duplicate empty callback must never authorize writes.
+      if(verifiedLookup&&isGoogleDriveConnected()&&isGoogleDriveAutoBackupEnabled()){
+        setDriveWriteReady(true);
+        recordMessage('Google Drive에 기존 백업이 없습니다. 현재 기록을 처음 저장합니다.');
+        queueGoogleDriveBackup();
+      }else{
+        setDriveWriteReady(false);
+        recordMessage('Google Drive 저장 상태를 확인하지 못했습니다. 자동 저장을 중지했습니다.');
       }
-      // 'empty' is not enough to authorize overwriting any previous backup.
-      setDriveWriteReady(false);
-      recordMessage('Google Drive 백업이 비어 있다고 응답했습니다. 안전을 위해 자동 저장을 중지했습니다.');
+      if(initialDriveFirstFlow&&initialOnboarding){setTimeout(openInitialParishSetupAfterDrive,180);return;}
     }
   };
   window.oaiGoogleDriveBackupReceived=function(encoded){
