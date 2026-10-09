@@ -18704,6 +18704,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.ge
     if(!pilgrimageInfoRestore)return false;
     const state=pilgrimageInfoRestore;pilgrimageInfoRestore=null;
     try{closeInfoCard({keepMap:true});}catch(_e){}
+    if(state.backdrop)state.backdrop.remove();
     if(state.card)state.card.classList.remove('oai-pilgrimage-place-info');
     if(state.card&&state.parent){state.parent.insertBefore(state.card,state.next&&state.next.parentNode===state.parent?state.next:null);}
     try{_mode=state.mode;}catch(_e){}
@@ -18724,7 +18725,11 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.ge
     }}
     if(idx<0){alert('이 장소의 정보카드를 찾을 수 없습니다.');return;}
     const card=document.getElementById('info-card'),panel=planner();if(!card||!panel)return;
-    pilgrimageInfoRestore={card,parent:card.parentNode,next:card.nextSibling,mode:_mode};
+    const backdrop=document.createElement('div');
+    backdrop.className='oai-pilgrimage-info-backdrop';
+    backdrop.setAttribute('aria-hidden','true');
+    panel.appendChild(backdrop);
+    pilgrimageInfoRestore={card,parent:card.parentNode,next:card.nextSibling,mode:_mode,backdrop};
     panel.appendChild(card);
     try{_mode=mode;_showInfoCard(list[idx],idx);card.classList.add('oai-pilgrimage-place-info');}
     catch(err){console.warn('[가톨릭길동무] 순례지 정보카드',err);closePilgrimagePlaceInfo();}

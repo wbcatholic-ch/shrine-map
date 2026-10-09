@@ -9913,3 +9913,10 @@ html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(17px * va
 #oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info #ic-kakao-nav {display:none!important;}
 #oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-btn-row:has(#ic-tel-link[style*="display: none"]) {display:none!important;}
 #oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info #ic-kakao-row:not(:has(.ic-goodnews-btn:not([style*="display: none"]))) {display:none!important;}
+
+/* 1169: 순례 장소 정보카드만 선명하게, 뒤의 순례 화면은 흐리게 표시 */
+#oai-pilgrimage-planner-modal > .oai-pilgrimage-info-backdrop{
+  position:fixed;inset:0;z-index:2147482000;
+  background:rgba(8,18,35,.24);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
+  pointer-events:auto;touch-action:none;
+}
