@@ -9897,98 +9897,42 @@ html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(17px * va
 #parish-auto-visit-notice .shrine-auto-visit-title{white-space:pre-line!important;font-size:18px!important;line-height:1.65!important}
 #parish-auto-visit-notice .shrine-auto-visit-actions button{width:100%!important;max-width:none!important;background:#187db9!important}
 
-/* 순례하기 목록에서 연 기존 정보카드는 순례 화면 내부 최상위에 표시 */
-#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info{z-index:1200;max-height:min(65vh,680px);}
-#oai-pilgrimage-follow-view [data-follow-index]{cursor:pointer;}
-#oai-pilgrimage-follow-view [data-follow-index]:focus-visible{outline:2px solid #2078b6;outline-offset:-2px;}
-
-/* 1162: 순례계획 및 순례하기 장소 제목은 실제 클릭 가능한 버튼 */
-#oai-pilgrimage-plan-list .oai-pilgrimage-info-trigger{appearance:none;border:0;background:transparent;padding:0;margin:0;text-align:left;color:inherit;font:inherit;max-width:100%;cursor:pointer;}
-#oai-pilgrimage-plan-list .oai-pilgrimage-info-trigger b{font:inherit;font-weight:800;}
-#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info.open{display:block!important;position:fixed!important;z-index:2147483000!important;left:12px!important;right:12px!important;bottom:max(16px,env(safe-area-inset-bottom))!important;top:auto!important;width:auto!important;max-width:700px!important;margin-inline:auto!important;max-height:75dvh!important;overflow-y:auto!important;transform:none!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;}
-
-/* 1168: 순례하기에서 열린 장소 정보카드의 중복 길찾기 버튼 제거.
-   일반 성지/성당 지도 정보카드의 기능은 그대로 유지한다. */
-#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info #ic-route-btn,
-#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info #ic-kakao-nav {display:none!important;}
-#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-btn-row:has(#ic-tel-link[style*="display: none"]) {display:none!important;}
-#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info #ic-kakao-row:not(:has(.ic-goodnews-btn:not([style*="display: none"]))) {display:none!important;}
-
-/* 1169: 순례 장소 정보카드만 선명하게, 뒤의 순례 화면은 흐리게 표시 */
-#oai-pilgrimage-planner-modal > .oai-pilgrimage-info-backdrop{
-  position:fixed;inset:0;z-index:2147482000;
-  background:rgba(8,18,35,.24);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);
-  pointer-events:auto;touch-action:none;
-}
-
-/* 1171: 순례하기 정보카드 전용 균형 레이아웃. 지도 정보카드에는 적용하지 않음. */
+/* 순례하기 장소 정보카드: 단일 정의 (1173). 일반 지도 정보카드는 변경하지 않는다. */
+#oai-pilgrimage-follow-view [data-follow-index]{cursor:pointer}
+#oai-pilgrimage-follow-view [data-follow-index]:focus-visible{outline:2px solid #2078b6;outline-offset:-2px}
+#oai-pilgrimage-plan-list .oai-pilgrimage-info-trigger{appearance:none;border:0;background:transparent;padding:0;margin:0;text-align:left;color:inherit;font:inherit;max-width:100%;cursor:pointer}
+#oai-pilgrimage-plan-list .oai-pilgrimage-info-trigger b{font:inherit;font-weight:800}
+#oai-pilgrimage-planner-modal>.oai-pilgrimage-info-backdrop{position:fixed;inset:0;z-index:2147482000;background:rgba(8,18,35,.24);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);pointer-events:auto;touch-action:none}
 #oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info.open{
-  background:#fff!important;border:1px solid #e4e8ed!important;
-  border-radius:22px!important;box-shadow:0 14px 48px rgba(12,24,43,.24)!important;
-  max-height:min(78dvh,680px)!important;padding:0!important;overflow-x:hidden!important;
+ display:block!important;position:fixed!important;z-index:2147483000!important;
+ left:10px!important;right:10px!important;bottom:max(22px,env(safe-area-inset-bottom))!important;top:auto!important;
+ width:auto!important;max-width:600px!important;min-height:330px!important;max-height:min(78dvh,680px)!important;
+ margin-inline:auto!important;padding:0!important;overflow-x:hidden!important;overflow-y:auto!important;
+ transform:none!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;
+ background:#fff!important;border:1px solid #e4e8ed!important;border-radius:22px!important;
+ box-shadow:0 14px 48px rgba(12,24,43,.24)!important
 }
-#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-header{
-  display:grid!important;grid-template-columns:minmax(0,1fr) auto auto!important;
-  align-items:start!important;gap:10px!important;padding:23px 20px 15px!important;
-}
-#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-name{
-  font-size:clamp(17px,4.1vw,21px)!important;line-height:1.34!important;
-  letter-spacing:-.035em!important;max-width:100%!important;
-  display:-webkit-box!important;-webkit-line-clamp:2;-webkit-box-orient:vertical;
-  overflow:hidden!important;overflow-wrap:anywhere!important;
-}
-#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-close-btn{
-  width:32px!important;height:32px!important;font-size:20px!important;
-  border:1px solid #d6dce3!important;background:#f7f9fb!important;color:#344054!important;
-}
-#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-header .ic-type-badge{
-  min-height:30px!important;box-sizing:border-box!important;
-  box-shadow:none!important;font-size:12px!important;
-}
-#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-meta{
-  padding:0 20px 15px!important;gap:10px!important;align-items:center!important;
-}
-#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-dist-lbl{font-size:11px!important;}
-#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-dist-box{
-  font-size:12px!important;padding:5px 8px!important;border-radius:8px!important;
-}
-#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-addr-row{
-  padding:3px 20px 18px!important;border-bottom:1px solid #eef0f3!important;
-}
-#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-addr-val{
-  font-size:14px!important;line-height:1.45!important;color:#475467!important;
-}
-#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-body{
-  padding:4px 0 20px!important;min-height:0!important;height:auto!important;
-  max-height:none!important;overflow:visible!important;
-}
+#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-header{display:grid!important;grid-template-columns:minmax(0,1fr) auto auto!important;align-items:start!important;gap:10px!important;padding:25px 22px 18px!important}
+#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-name{font-size:clamp(17px,4.1vw,21px)!important;line-height:1.34!important;letter-spacing:-.035em!important;max-width:100%!important;display:-webkit-box!important;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden!important;overflow-wrap:anywhere!important}
+#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-close-btn{width:32px!important;height:32px!important;font-size:20px!important;border:1px solid #d6dce3!important;background:#f7f9fb!important;color:#344054!important}
+#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-header .ic-type-badge{min-height:30px!important;box-sizing:border-box!important;box-shadow:none!important;font-size:12px!important}
+#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-meta{padding:0 22px 19px!important;gap:10px!important;align-items:center!important}
+#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-dist-lbl{font-size:11px!important}
+#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-dist-box{font-size:12px!important;padding:5px 8px!important;border-radius:8px!important}
+#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-addr-row{padding:6px 22px 20px!important;border-bottom:1px solid #eef0f3!important}
+#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-addr-val{font-size:14px!important;line-height:1.45!important;color:#475467!important}
+#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-body{padding:4px 0 23px!important;min-height:0!important;height:auto!important;max-height:none!important;overflow:visible!important}
 #oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-btn-row,
 #oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-links,
-#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-kakao-row{
-  padding:12px 20px 0!important;gap:10px!important;
-}
-#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-tel-btn{
-  height:48px!important;font-size:16px!important;font-weight:800!important;color:#124b80!important;border-radius:11px!important;
-  background:#edf5ff!important;border:1px solid #c7d9ef!important;
-}
-#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-tel-icon{font-size:15px!important;}
-#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-link-btn{
-  height:48px!important;border-radius:11px!important;font-size:15px!important;
-}
-#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-hp-btn{
-  background:#197a40!important;
-}
-/* 비어 있는 버튼 행과 숨김 요소가 남기는 공백 제거 */
+#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-kakao-row{padding:12px 22px 0!important;gap:10px!important}
+#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-tel-btn{height:54px!important;font-size:17px!important;font-weight:900!important;color:#06345e!important;border-radius:11px!important;background:#e4effb!important;border:1px solid #9ebfe0!important}
+#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info #ic-tel-link,
+#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info #ic-tel-link *{color:#06345e!important;font-weight:900!important;text-decoration:none!important}
+#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-tel-icon{font-size:15px!important}
+#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-link-btn{height:48px!important;border-radius:11px!important;font-size:15px!important}
+#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-hp-btn{background:#197a40!important}
+#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info #ic-route-btn,
+#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info #ic-kakao-nav{display:none!important}
 #oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-btn-row:not(:has(#ic-tel-link:not([style*="display: none"]))) ,
 #oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-kakao-row:not(:has(#ic-goodnews:not([style*="display: none"]))) ,
-#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-links:not(:has(> :not([style*="display: none"]))) {
-  display:none!important;padding:0!important;margin:0!important;
-}
-@media (min-width:600px){
-  #oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info.open{
-    max-width:520px!important;
-  }
-}
-
-#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info #ic-tel-link,
-#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info #ic-tel-link *{color:#124b80!important;font-weight:800!important;}
+#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-links:not(:has(> :not([style*="display: none"]))) {display:none!important;padding:0!important;margin:0!important}

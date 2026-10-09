@@ -3577,7 +3577,32 @@ function _markAutoVisitPromptedToday(item,date,action){
 const _oaiVisitNoticeQueue=[];
 const _oaiVisitNoticeKeys=new Set();
 let _oaiDeferredVisitNoticeTimer=0;
-function _oaiVisitNoticeBlocked(){try{return document.visibilityState==='hidden'||!!(window.oaiIsBackgroundReturnUiBlocked&&window.oaiIsBackgroundReturnUiBlocked())||!!(window.oaiHasCriticalModalOpen&&window.oaiHasCriticalModalOpen());}catch(_e){return false;}}
+let _oaiVisitNoticeRetryTimer=0;
+function _oaiVisitNoticeBlocked(){
+  // GPS 인증은 백그라운드에서도 저장되지만 안내창은 화면이 실제 보일 때만 표시한다.
+  // 일시적인 복귀 가드는 시간 경과 후 해제되므로 재시도 타이머가 후속 표시를 맡는다.
+  try{return document.visibilityState==='hidden'||!!(window.oaiIsBackgroundReturnUiBlocked&&window.oaiIsBackgroundReturnUiBlocked())||!!(window.oaiHasCriticalModalOpen&&window.oaiHasCriticalModalOpen());}catch(_e){return false;}
+}
+const OAI_PENDING_GPS_NOTICE_KEY='oai_pending_gps_notice_v1';
+function _persistGpsNotices(){
+  try{localStorage.setItem(OAI_PENDING_GPS_NOTICE_KEY,JSON.stringify(_oaiVisitNoticeQueue.map(function(n){return {kind:n.kind,key:n.key,name:n.item&&n.item.name,diocese:n.item&&n.item.diocese,seq:n.item&&n.item.seq,at:n.at||Date.now()};})));}catch(_e){}
+}
+function _restoreGpsNotices(){
+  let saved=[];try{saved=JSON.parse(localStorage.getItem(OAI_PENDING_GPS_NOTICE_KEY)||'[]');}catch(_e){}
+  if(!Array.isArray(saved)||!saved.length)return;
+  const now=Date.now(),today=_todayISODate();let unresolved=false;
+  saved.forEach(function(n){
+    if(!n||!n.key||!String(n.key).startsWith(today+':')||now-Number(n.at||0)>15*60*1000)return;
+    const list=n.kind==='parish'?PARISHES:SHRINES;
+    const item=Array.isArray(list)&&list.find(function(p){return p&&String(p.name)===String(n.name)&& (n.kind!=='parish'||String(p.diocese||'')===String(n.diocese||''));});
+    if(!item){unresolved=true;return;}
+    if(!_oaiVisitNoticeKeys.has(n.key)){_oaiVisitNoticeKeys.add(n.key);_oaiVisitNoticeQueue.push({kind:n.kind,item:item,key:n.key,at:n.at});}
+  });
+  if(!unresolved)_persistGpsNotices();
+  if(_oaiVisitNoticeQueue.length){_ensureVisitNoticeRetry();_scheduleDeferredVisitNoticeFlush();}
+  if(unresolved)setTimeout(_restoreGpsNotices,2500);
+}
+
 function _oaiVisitGroupKey(kind,item){
   const group=OAI_SHARED_VISIT_JOURNAL_GROUPS.find(function(g){return kind==='shrine'?((g.shrineSeq&&String(item.seq||'')===String(g.shrineSeq))||g.shrineName===item.name):(g.parishDiocese===String(item.diocese||'')&&g.parishName===String(item.name||''));});
   if(group&&!_oaiIsSeparateJournalPair(kind,item))return 'group:'+group.id;
@@ -3587,8 +3612,17 @@ function _queueGpsVisitNotice(kind,item){
   const key=_todayISODate()+':'+_oaiVisitGroupKey(kind,item);
   if(_oaiVisitNoticeKeys.has(key))return;
   _oaiVisitNoticeKeys.add(key);
-  _oaiVisitNoticeQueue.push({kind:kind,item:item,key:key});
+  _oaiVisitNoticeQueue.push({kind:kind,item:item,key:key,at:Date.now()});
+  _persistGpsNotices();
   _scheduleDeferredVisitNoticeFlush();
+  _ensureVisitNoticeRetry();
+}
+function _ensureVisitNoticeRetry(){
+  if(_oaiVisitNoticeRetryTimer||!_oaiVisitNoticeQueue.length)return;
+  _oaiVisitNoticeRetryTimer=setInterval(function(){
+    if(!_oaiVisitNoticeQueue.length){clearInterval(_oaiVisitNoticeRetryTimer);_oaiVisitNoticeRetryTimer=0;return;}
+    _flushDeferredVisitNotices();
+  },1500);
 }
 function _scheduleDeferredVisitNoticeFlush(){
   clearTimeout(_oaiDeferredVisitNoticeTimer);
@@ -3597,10 +3631,16 @@ function _scheduleDeferredVisitNoticeFlush(){
 function _flushDeferredVisitNotices(){
   if(!_oaiVisitNoticeQueue.length||_oaiVisitNoticeBlocked())return;
   if(document.querySelector('#shrine-auto-visit-modal.show,#parish-auto-visit-notice.show,#parish-visit-editor.show,#shrine-visit-modal.show,#shrine-visit-cards-modal.show,#shrine-visit-detail-view.show'))return;
-  const next=_oaiVisitNoticeQueue.shift();
-  if(next.kind==='shrine')_openShrineAutoVisitModal({item:next.item});
-  else _showParishAutoVisitNotice(next.item);
+  const next=_oaiVisitNoticeQueue[0];
+  try{
+    if(next.kind==='shrine')_openShrineAutoVisitModal({item:next.item});
+    else _showParishAutoVisitNotice(next.item);
+  }catch(err){console.warn('[가톨릭길동무] GPS 축하창 표시 재시도',err);return;}
+  _oaiVisitNoticeQueue.shift();
+  _persistGpsNotices();
+  if(!_oaiVisitNoticeQueue.length&&_oaiVisitNoticeRetryTimer){clearInterval(_oaiVisitNoticeRetryTimer);_oaiVisitNoticeRetryTimer=0;}
 }
+setTimeout(_restoreGpsNotices,1500);
 document.addEventListener('click',function(){if(_oaiVisitNoticeQueue.length)_scheduleDeferredVisitNoticeFlush();},true);
 document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')_scheduleDeferredVisitNoticeFlush();});
 window.addEventListener('oai-short-background-return',_scheduleDeferredVisitNoticeFlush,{passive:true});
@@ -18723,7 +18763,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.ge
       const nearest=(arr)=>Array.isArray(arr)?arr.findIndex(p=>p&&norm(p.name)===norm(item.name)&&Math.abs(Number(p.lat)-lat)<0.001&&Math.abs(Number(p.lng)-lng)<0.001):-1;
       idx=nearest(SHRINES);if(idx<0){idx=nearest(PARISHES);mode='parish';list=PARISHES;}
     }}
-    if(idx<0){alert('이 장소의 정보카드를 찾을 수 없습니다.');return;}
+    if(idx<0){console.warn('[가톨릭길동무] 순례지 정보카드 대상 없음',item.name);return;}
     const card=document.getElementById('info-card'),panel=planner();if(!card||!panel)return;
     const backdrop=document.createElement('div');
     backdrop.className='oai-pilgrimage-info-backdrop';
