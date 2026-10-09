@@ -56,6 +56,10 @@
     }catch(e){ return false; }
   }
   /* CLEANUP-1017: 열린 앱 레이어 판정은 한 함수만 관리한다. */
+  function closeFeatureHelpOnBack(){
+    try{return typeof window._oaiCloseFeatureHelpOnBack==='function' && window._oaiCloseFeatureHelpOnBack();}
+    catch(e){console.warn('[가톨릭길동무] 도움말 뒤로가기',e);return false;}
+  }
   function hasKnownOpenLayer(includeAppState){
     try{
       if(typeof window.isOaiRestoreOpen === 'function' && window.isOaiRestoreOpen()) return true;
@@ -73,6 +77,7 @@
         if(el&&el.classList&&el.classList.contains('open')) return true;
       }
 
+      if(document.querySelector('#oai-feature-help-modal.show')) return true;
       if(document.querySelector('.module-view.open')) return true;
       if(document.querySelector('#oai-daily-pilgrimage-modal.show,#oai-nav-notice.show,#oai-visit-photo-viewer.show,#oai-visit-memo-modal.show,#oai-visit-confirm.show,#oai-common-date-picker.show,#myeongrye-materials-modal.open,#info-card.open,#sheet-route.open,#route-choice-modal.open,#route-quick-modal.show,#oai-pilgrimage-feature-modal.show,#oai-pilgrimage-marker-choice-modal.open,#oai-pilgrimage-follow-start-modal.show,#oai-pilgrimage-follow-stop-modal.show,#oai-pilgrimage-save-modal.show,#oai-pilgrimage-delete-modal.show,#oai-pilgrimage-completion-modal.show,#srch-modal.open,.sheet.open,.trail-sheet.open,#shrine-visit-modal.show,#shrine-auto-visit-modal.show,#shrine-visit-detail-view.show,#shrine-visit-cards-modal.show')) return true;
       if(typeof isGuideModalOpen==='function' && isGuideModalOpen()) return true;
@@ -254,6 +259,7 @@
   }
 
   function closeLayer(){
+    if(closeFeatureHelpOnBack()) return true;
     var el;
 
     /* 외부 길찾기 안내는 가장 먼저 닫는다. */
@@ -357,6 +363,13 @@
 
     /* 성당 방문은 이 공통 제어기만 뒤로가기를 처리한다.
        방문등록 → 인포카드, 상세 → 방문 목록, 방문 목록 → 지도 순서다. */
+    el = $b('parish-auto-visit-notice');
+    if(el && el.classList && el.classList.contains('show')){
+      if(typeof window._closeParishVisitNotice==='function')window._closeParishVisitNotice();
+      else el.classList.remove('show');
+      return true;
+    }
+
     el = $b('parish-visit-editor');
     if(el && el.classList && el.classList.contains('show')){
       if(typeof window._closeParishVisitEditor === 'function') window._closeParishVisitEditor({fromBackController:true});
@@ -578,6 +591,7 @@
     _restoring = true;
     try{ history.go(1); }catch(e){ _restoring = false; console.warn("[가톨릭길동무]", e); }
 
+    if(closeFeatureHelpOnBack()) return;
     if(typeof window._oaiPrayerBackHandle === 'function' && window._oaiPrayerBackHandle('prayer-popstate')) return;
     if(closeModuleInnerLayer()){ return; }
     if(closeExtOrModule()){ return; }
@@ -587,6 +601,7 @@
 
   document.addEventListener('backbutton', function(){
     try{ if(typeof window.oaiSuppressExternalReturnForUserBack === 'function') window.oaiSuppressExternalReturnForUserBack('hardware-first-back-after-external-return'); }catch(e){ console.warn('[가톨릭길동무]', e); }
+    if(closeFeatureHelpOnBack()) return;
     if(typeof window._oaiPrayerBackHandle === 'function' && window._oaiPrayerBackHandle('prayer-hardware-back')) return;
     try{ if(typeof window._oaiTrailBackHandle === 'function' && window._oaiTrailBackHandle('hardware-back')) return; }catch(e){ console.warn('[가톨릭길동무]', e); }
     if(closeRefreshDialog()){ try{ armCoverBackTrap('refresh-dialog-hardware', {force:true}); }catch(e){} return; }
