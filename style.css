@@ -9906,3 +9906,10 @@ html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(17px * va
 #oai-pilgrimage-plan-list .oai-pilgrimage-info-trigger{appearance:none;border:0;background:transparent;padding:0;margin:0;text-align:left;color:inherit;font:inherit;max-width:100%;cursor:pointer;}
 #oai-pilgrimage-plan-list .oai-pilgrimage-info-trigger b{font:inherit;font-weight:800;}
 #oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info.open{display:block!important;position:fixed!important;z-index:2147483000!important;left:12px!important;right:12px!important;bottom:max(16px,env(safe-area-inset-bottom))!important;top:auto!important;width:auto!important;max-width:700px!important;margin-inline:auto!important;max-height:75dvh!important;overflow-y:auto!important;transform:none!important;visibility:visible!important;opacity:1!important;pointer-events:auto!important;}
+
+/* 1168: 순례하기에서 열린 장소 정보카드의 중복 길찾기 버튼 제거.
+   일반 성지/성당 지도 정보카드의 기능은 그대로 유지한다. */
+#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info #ic-route-btn,
+#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info #ic-kakao-nav {display:none!important;}
+#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-btn-row:has(#ic-tel-link[style*="display: none"]) {display:none!important;}
+#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info #ic-kakao-row:not(:has(.ic-goodnews-btn:not([style*="display: none"]))) {display:none!important;}
