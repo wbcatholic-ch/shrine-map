@@ -4230,7 +4230,7 @@ html.oai-font-global .shrine-visit-detail-map-btn{font-size:calc(12.5px * var(--
 html:not(.ios-device).oai-screen-compact-short .shrine-visit-detail-action-row{gap:6px!important;}
 html:not(.ios-device).oai-screen-compact-short .shrine-visit-detail-action{min-height:48px!important;padding:0 6px!important;font-size:13px!important;}
 
-.shrine-auto-visit-modal{position:fixed;inset:0;z-index:10070;display:none;align-items:center;justify-content:center;padding:20px}.shrine-auto-visit-modal.show{display:flex}.shrine-auto-visit-backdrop{position:absolute;inset:0;background:rgba(0,0,0,0)!important}
+.shrine-auto-visit-modal{position:fixed;inset:0;z-index:10070;display:none;align-items:center;justify-content:center;padding:20px}.shrine-auto-visit-modal.show{display:flex}.shrine-auto-visit-backdrop{position:absolute;inset:0;background:rgba(22,42,62,.48)!important;backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px)}
 .shrine-auto-visit-panel{position:relative;width:min(420px,calc(100% - 8px));background:#fff;border-radius:22px;padding:22px 18px 18px;box-shadow:0 12px 34px rgba(0,0,0,.28);border:1px solid rgba(212,170,106,.45);text-align:center}
 .shrine-auto-visit-kicker{font-size:12px;font-weight:900;color:#8b6914;margin-bottom:8px}.shrine-auto-visit-title{font-size:18px;font-weight:900;color:#111;line-height:1.5;word-break:keep-all}.shrine-auto-visit-name{margin-top:8px;font-size:20px;font-weight:900;color:#111;line-height:1.28;word-break:keep-all}.shrine-auto-visit-dist{margin-top:5px;font-size:13px;font-weight:850;color:#4b5563}.shrine-auto-visit-actions{display:flex;justify-content:center;gap:9px;margin-top:18px}.shrine-auto-visit-actions button{width:min(220px,100%);height:48px;border-radius:13px;font-size:15px;font-weight:900;font-family:inherit}.shrine-auto-visit-save{border:2px solid #000;background:#111;color:#f6d58a;box-shadow:0 2px 8px rgba(17,17,17,.16)}.shrine-auto-visit-later{border:2px solid #8b6914;background:#fffaf0;color:#5b3c00;box-shadow:0 2px 8px rgba(91,60,0,.08)}
 html.oai-font-global .shrine-auto-visit-title{font-size:calc(16px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-auto-visit-name{font-size:calc(20px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-auto-visit-dist{font-size:calc(13px * var(--app-inner-font-scale,1))!important}
@@ -9896,3 +9896,8 @@ html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(17px * va
 #parish-auto-visit-notice .shrine-auto-visit-kicker:before{content:'✓';display:block;width:56px;height:56px;margin:0 auto 16px;border-radius:50%;background:#d7eaff;color:#0873bb;font-size:38px;line-height:56px;font-weight:900}
 #parish-auto-visit-notice .shrine-auto-visit-title{white-space:pre-line!important;font-size:18px!important;line-height:1.65!important}
 #parish-auto-visit-notice .shrine-auto-visit-actions button{width:100%!important;max-width:none!important;background:#187db9!important}
+
+/* 순례하기 목록에서 연 기존 정보카드는 순례 화면 내부 최상위에 표시 */
+#oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info{z-index:1200;max-height:min(65vh,680px);}
+#oai-pilgrimage-follow-view [data-follow-index]{cursor:pointer;}
+#oai-pilgrimage-follow-view [data-follow-index]:focus-visible{outline:2px solid #2078b6;outline-offset:-2px;}
