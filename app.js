@@ -3581,7 +3581,7 @@ function _nearestShrineWithinAutoVisitRadius(lat,lng){
   let best=null,bestM=Infinity;
   SHRINES.forEach(function(s,idx){
     if(!s) return;
-    const radius=(Number(s.gpsRadiusM)>0)?Number(s.gpsRadiusM):OAI_SHRINE_AUTO_VISIT_RADIUS_M;
+    const radius=s.name==='대전교구청 성모당 순례지'?55:((Number(s.gpsRadiusM)>0)?Number(s.gpsRadiusM):OAI_SHRINE_AUTO_VISIT_RADIUS_M);
     let points=[];
     if(Array.isArray(s.gpsPoints)&&s.gpsPoints.length){
       points=s.gpsPoints.filter(function(p){ return p&&Number(p.lat)&&Number(p.lng); });
@@ -3602,7 +3602,7 @@ var _oaiDeferredParishAutoVisitPlace=null;
 var _oaiDeferredVisitNoticeTimer=0;
 function _oaiVisitNoticeBlocked(){try{if(document.visibilityState==='hidden')return true;if(window.oaiIsBackgroundReturnUiBlocked&&window.oaiIsBackgroundReturnUiBlocked())return true;if(window.oaiHasCriticalModalOpen&&window.oaiHasCriticalModalOpen())return true;}catch(_e){}return false;}
 function _scheduleDeferredVisitNoticeFlush(){clearTimeout(_oaiDeferredVisitNoticeTimer);_oaiDeferredVisitNoticeTimer=setTimeout(_flushDeferredVisitNotices,500);}
-function _flushDeferredVisitNotices(){try{if(_oaiVisitNoticeBlocked()){_scheduleDeferredVisitNoticeFlush();return;}if(_oaiDeferredShrineAutoVisitEntry){const entry=_oaiDeferredShrineAutoVisitEntry;_oaiDeferredShrineAutoVisitEntry=null;_openShrineAutoVisitModal(entry);return;}if(_oaiDeferredParishAutoVisitPlace){const place=_oaiDeferredParishAutoVisitPlace;_oaiDeferredParishAutoVisitPlace=null;_showParishAutoVisitNotice(place);}}catch(_e){}}
+function _flushDeferredVisitNotices(){try{if(_oaiVisitNoticeBlocked()){_scheduleDeferredVisitNoticeFlush();return;}if(_oaiDeferredShrineAutoVisitEntry){const entry=_oaiDeferredShrineAutoVisitEntry;_oaiDeferredShrineAutoVisitEntry=null;_openShrineAutoVisitModal(entry);return;}if(document.querySelector('#shrine-auto-visit-modal.show,#parish-auto-visit-notice.show'))return;if(_oaiDeferredParishAutoVisitPlace){const place=_oaiDeferredParishAutoVisitPlace;_oaiDeferredParishAutoVisitPlace=null;_showParishAutoVisitNotice(place);}}catch(_e){}}
 document.addEventListener('click',function(){if(_oaiDeferredShrineAutoVisitEntry||_oaiDeferredParishAutoVisitPlace)setTimeout(_flushDeferredVisitNotices,120);},true);
 window.addEventListener('oai-short-background-return',function(){setTimeout(_flushDeferredVisitNotices,900);},{passive:true});
 window.addEventListener('oai-long-background-return',function(){setTimeout(_flushDeferredVisitNotices,900);},{passive:true});
@@ -3644,6 +3644,7 @@ function _closeShrineAutoVisitModal(){
   const modal=document.getElementById('shrine-auto-visit-modal');
   if(modal){ modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); }
   window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__=false;
+  if(_oaiDeferredParishAutoVisitPlace)_scheduleDeferredVisitNoticeFlush();
 }
 function _isAnyVisitModalOpen(){
   return !!(document.querySelector('#shrine-visit-modal.show,#shrine-visit-cards-modal.show,#shrine-auto-visit-modal.show,#shrine-visit-detail-view.show'));
@@ -3679,7 +3680,7 @@ function _maybePromptAutoShrineVisit(lat,lng){
       if(!registered){window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__=false;return;}
       if(_isAnyVisitModalOpen()||_oaiVisitNoticeBlocked()){_oaiDeferredShrineAutoVisitEntry=entry;window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__=false;_scheduleDeferredVisitNoticeFlush();return;}
       _openShrineAutoVisitModal(entry);
-    },700);
+    },100);
   }catch(e){ console.warn('[가톨릭길동무]', e); window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__=false; }
 }
 
@@ -3939,20 +3940,51 @@ function _configuredMyParish(){
   return (PARISHES||[]).find(function(p){return p&&p.name===saved.name&&(!saved.diocese||p.diocese===saved.diocese);})||{name:saved.name,diocese:saved.diocese||''};
 }
 function _isSameParish(a,b){return !!(a&&b&&String(a.diocese||'')===String(b.diocese||'')&&String(a.name||'')===String(b.name||''));}
-function _parishVisitKey(p){return p?[String(p.diocese||''),String(p.name||''),String(p.addr||'')].join('|'):'';}
-function _loadParishVisits(){try{const v=localStorage.getItem(OAI_PARISH_VISITS_KEY);const d=v?JSON.parse(v):{};return d&&typeof d==='object'?d:{}}catch(_e){return {}}}
-function _saveParishVisits(d){try{localStorage.setItem(OAI_PARISH_VISITS_KEY,JSON.stringify(d||{}))}catch(_e){}}
+function _parishVisitKey(p){return p?[String(p.diocese||'').trim(),String(p.name||'').trim()].join('|'):'';}
+function _loadParishVisits(){
+  try{
+    const raw=localStorage.getItem(OAI_PARISH_VISITS_KEY),src=raw?JSON.parse(raw):{};
+    if(!src||typeof src!=='object'||Array.isArray(src))return {};
+    const merged={};
+    Object.keys(src).forEach(function(oldKey){
+      const r=src[oldKey];if(!r||typeof r!=='object')return;
+      const parts=oldKey.split('|');
+      const key=[String(r.diocese||parts[0]||'').trim(),String(r.name||parts[1]||'').trim()].join('|');
+      if(!key||key==='|')return;
+      if(!merged[key])merged[key]={name:r.name||parts[1]||'',diocese:r.diocese||parts[0]||'',addr:r.addr||'',visits:[]};
+      (Array.isArray(r.visits)?r.visits:[]).forEach(function(v){
+        const entry=_normalizeVisitEntry(v);
+        if(entry&&entry.date){const found=merged[key].visits.findIndex(function(x){return x.date===entry.date;});
+          if(found<0)merged[key].visits.push(entry);
+          else if(entry.method==='gps')merged[key].visits[found]=entry;
+        }
+      });
+    });
+    return merged;
+  }catch(e){console.warn('성당 방문기록 읽기 실패',e);return {};}
+}
+function _saveParishVisits(d){
+  try{localStorage.setItem(OAI_PARISH_VISITS_KEY,JSON.stringify(d||{}));return true;}
+  catch(e){console.error('성당 방문기록 저장 실패',e);return false;}
+}
 function _parishVisits(p){const r=_loadParishVisits()[_parishVisitKey(p)]||{},a=Array.isArray(r.visits)?r.visits:[];return a.map(_normalizeVisitEntry).filter(function(v){return v&&v.date;}).sort(_compareShrineVisits);}
 function _parishVisitCount(p){return _parishVisits(p).length;}
-function _addParishVisit(p,date,method){const key=_parishVisitKey(p);if(!key||!_isVisitDate(date))return false;const d=_loadParishVisits(),r=d[key]&&typeof d[key]==='object'?d[key]:{name:p.name||'',diocese:p.diocese||'',addr:p.addr||'',visits:[]};r.visits=Array.isArray(r.visits)?r.visits:[];if(_hasVisitDate(r.visits,date))return false;r.visits.push(_newVisitEntry(date,method));r.visits.sort(_compareShrineVisits);d[key]=r;_saveParishVisits(d);return true;}
+function _addParishVisit(p,date,method){
+  const key=_parishVisitKey(p);if(!key||!_isVisitDate(date))return false;
+  const d=_loadParishVisits(),r=d[key]||{name:p.name||'',diocese:p.diocese||'',addr:p.addr||'',visits:[]};
+  r.visits=Array.isArray(r.visits)?r.visits:[];
+  if(_hasVisitDate(r.visits,date))return false;
+  r.visits.push(_newVisitEntry(date,method));r.visits.sort(_compareShrineVisits);d[key]=r;
+  if(!_saveParishVisits(d))return false;
+  return _hasVisitDate(_parishVisits(p),date);
+}
 function _deleteParishVisit(p,date){
   const key=_parishVisitKey(p),d=_loadParishVisits(),r=d[key];
   if(!r||!Array.isArray(r.visits))return false;
   const i=r.visits.findIndex(function(v){return _visitDateOf(v)===String(date);});
   if(i<0||String(_normalizeVisitEntry(r.visits[i]).method||'manual').toLowerCase()==='gps')return false;
-  r.visits.splice(i,1);
-  if(r.visits.length)d[key]=r;else delete d[key];
-  _saveParishVisits(d);
+  r.visits.splice(i,1);if(r.visits.length)d[key]=r;else delete d[key];
+  if(!_saveParishVisits(d))return false;
   return !_parishVisits(p).some(function(v){return v.date===String(date);});
 }
 function _parishEntries(){const a=[];(PARISHES||[]).forEach(function(p,i){if(!p||p.diocese==='군종교구')return;const v=_parishVisits(p);if(v.length)a.push({p:p,i:i,v:v,n:v.length});});return a.sort(function(a,b){return _compareShrineVisits(a.v[0],b.v[0])||String(a.p.name).localeCompare(String(b.p.name),'ko')});}
@@ -4060,7 +4092,7 @@ function _closeParishVisitEditor(opts){
 function _renderInfoCardParishVisit(p){const b=document.getElementById('ic-type');if(!b||_mode!=='parish')return;const n=_parishVisitCount(p);b.textContent=n?'방문 '+n+'회':'방문등록';b.classList.add('shrine-pilgrim-register-badge');b.setAttribute('role','button');b.onclick=function(e){if(e){e.preventDefault();e.stopPropagation()}_openParishVisitEditor(p)};}
 function _maybeAutoParishVisit(lat,lng){
   if(!lat||!lng)return;let best=null,bestM=Infinity;
-  (PARISHES||[]).forEach(function(p){if(!p||p.diocese==='군종교구'||!p.lat||!p.lng)return;const m=calcDist(lat,lng,p.lat,p.lng)*1000;if(m<=OAI_PARISH_AUTO_VISIT_RADIUS_M&&m<bestM){best=p;bestM=m;}});
+  (PARISHES||[]).forEach(function(p){if(!p||p.diocese==='군종교구'||!p.lat||!p.lng)return;const m=calcDist(lat,lng,p.lat,p.lng)*1000;if(m<=(p.name==='세종성요한바오로2세성당'?55:OAI_PARISH_AUTO_VISIT_RADIUS_M)&&m<bestM){best=p;bestM=m;}});
   if(!best)return;const myParish=_configuredMyParish(),isMyParish=_isSameParish(best,myParish),previousVisits=_parishVisits(best);
   if(isMyParish){if(!_isMyParishAutoVisitEnabled()||previousVisits.length)return;}else if(previousVisits.some(function(v){return v.date===_todayISODate();}))return;
   const visitResult=_registerGpsPlaceVisit('parish',best,_todayISODate());
@@ -4075,13 +4107,12 @@ function _maybeAutoParishVisit(lat,lng){
     const shrineEntry=_nearestShrineWithinAutoVisitRadius(Number(lat),Number(lng));
     shrineAtSameLocation=!!(shrineEntry&&shrineEntry.item);
   }catch(_e){}
-  if(shrineAtSameLocation){
-    if(_curInfoItem&&_curInfoItem.item===best)_renderInfoCardParishVisit(best);
-    try{_updateParishVisitButton();}catch(_e){}
-    return;
-  }
-
-  if(_oaiVisitNoticeBlocked()){_oaiDeferredParishAutoVisitPlace=best;_scheduleDeferredVisitNoticeFlush();}else{_showParishAutoVisitNotice(best);}
+  // 성모당(성지)과 성요한바오로2세성당은 별도 운영 장소다.
+  // 성지 안내가 먼저 표시되면 성당 안내는 다음 순서로 대기시킨다.
+  if(shrineAtSameLocation||_oaiDeferredShrineAutoVisitEntry||document.querySelector('#shrine-auto-visit-modal.show')||_oaiVisitNoticeBlocked()){
+    _oaiDeferredParishAutoVisitPlace=best;
+    _scheduleDeferredVisitNoticeFlush();
+  }else{_showParishAutoVisitNotice(best);}
   if(_curInfoItem&&_curInfoItem.item===best)_renderInfoCardParishVisit(best);
 }
 function _showParishVisitNotice(place,mode){
@@ -4093,7 +4124,7 @@ function _showParishVisitNotice(place,mode){
   if(editor){editor.classList.remove('show');editor.setAttribute('aria-hidden','true');}
   m.classList.add('show');m.setAttribute('aria-hidden','false');
 }
-function _closeParishVisitNotice(){const m=document.getElementById('parish-auto-visit-notice');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}}
+function _closeParishVisitNotice(){const m=document.getElementById('parish-auto-visit-notice');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}if(_oaiDeferredShrineAutoVisitEntry)_scheduleDeferredVisitNoticeFlush();}
 window._closeParishVisitNotice=_closeParishVisitNotice;
 function _showParishAutoVisitNotice(place){_showParishVisitNotice(place,'gps');}
 try{setInterval(function(){_updateParishVisitButton();},400);}catch(_e){}
@@ -11366,21 +11397,28 @@ function _raiseMyLocationMarker(){
 
 /* V8-1-14-1113: 위치 1회 갱신당 GPS 후처리를 한곳에서 순서대로 배포한다.
    성지 → 성당 → 진행 중 순례 → 출발/도착 확인 순서를 유지한다. */
+let _oaiGpsArrivalTimer=0;
+let _oaiGpsArrivalPending=null;
 function _oaiHandleGpsArrival(lat,lng,opts){
   opts=opts||{};
   lat=Number(lat);lng=Number(lng);
   if(!Number.isFinite(lat)||!Number.isFinite(lng))return null;
-  if(!opts.skipShrine){try{setTimeout(function(){_maybePromptAutoShrineVisit(lat,lng);},Number(opts.shrineDelayMs)||180);}catch(_e){}}
-  if(!opts.skipParish){try{setTimeout(function(){_maybeAutoParishVisit(lat,lng);},Number(opts.parishDelayMs)||220);}catch(_e){}}
-  if(!opts.skipActiveCourse){try{setTimeout(function(){if(typeof window._oaiMarkActivePilgrimageCourseByLocation==='function')window._oaiMarkActivePilgrimageCourseByLocation(lat,lng);},Number(opts.courseDelayMs)||250);}catch(_e){}}
   if(opts.endpointNow&&typeof window._oaiPilgrimageEndpointGpsCheck==='function'){
-    try{return window._oaiPilgrimageEndpointGpsCheck(lat,lng,{silent:opts.endpointSilent!==false});}catch(_e){return null;}
+    try{window._oaiPilgrimageEndpointGpsCheck(lat,lng,{silent:opts.endpointSilent!==false});}catch(_e){}
   }
-  if(!opts.skipEndpoint){
-    try{setTimeout(function(){
-      if(typeof window._oaiPilgrimageEndpointGpsCheck==='function'&&typeof window.isOaiPilgrimagePlannerOpen==='function'&&window.isOaiPilgrimagePlannerOpen())window._oaiPilgrimageEndpointGpsCheck(lat,lng,{silent:true});
-    },Number(opts.endpointDelayMs)||280);}catch(_e){}
-  }
+  // 잦은 GPS 갱신에서 매번 4개의 타이머가 쌓이지 않도록 최신 위치만 처리한다.
+  _oaiGpsArrivalPending={lat:lat,lng:lng,opts:opts};
+  if(_oaiGpsArrivalTimer)return null;
+  _oaiGpsArrivalTimer=setTimeout(function(){
+    _oaiGpsArrivalTimer=0;
+    const job=_oaiGpsArrivalPending;_oaiGpsArrivalPending=null;
+    if(!job)return;
+    const a=job.lat,b=job.lng,o=job.opts;
+    if(!o.skipShrine){try{_maybePromptAutoShrineVisit(a,b);}catch(_e){}}
+    if(!o.skipParish){try{_maybeAutoParishVisit(a,b);}catch(_e){}}
+    if(!o.skipActiveCourse){try{if(typeof window._oaiMarkActivePilgrimageCourseByLocation==='function')window._oaiMarkActivePilgrimageCourseByLocation(a,b);}catch(_e){}}
+    if(!o.skipEndpoint&&!o.endpointNow){try{if(typeof window._oaiPilgrimageEndpointGpsCheck==='function'&&typeof window.isOaiPilgrimagePlannerOpen==='function'&&window.isOaiPilgrimagePlannerOpen())window._oaiPilgrimageEndpointGpsCheck(a,b,{silent:true});}catch(_e){}}
+  },220);
   return null;
 }
 window._oaiHandleGpsArrival=_oaiHandleGpsArrival;
@@ -17893,7 +17931,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.ge
         });
       }catch(_e){}
     }else if(isActive){
-      /* V8-1-14-1153
+      /* V8-1-14-1154
          진행 중 순례는 최초 출발지 기준 거리로 다시 그리지 않는다.
          현재 위치 -> 다음 미완료 순례지만 새로 계산하고,
          이후 고정 구간은 동일 좌표 쌍의 route cache를 재사용한다. */
