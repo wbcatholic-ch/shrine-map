@@ -3590,7 +3590,10 @@ function _queueGpsVisitNotice(kind,item){
   _oaiVisitNoticeQueue.push({kind:kind,item:item,key:key});
   _scheduleDeferredVisitNoticeFlush();
 }
-function _scheduleDeferredVisitNoticeFlush(){clearTimeout(_oaiDeferredVisitNoticeTimer);_oaiDeferredVisitNoticeTimer=setTimeout(_flushDeferredVisitNotices,120);}
+function _scheduleDeferredVisitNoticeFlush(){
+  clearTimeout(_oaiDeferredVisitNoticeTimer);
+  _oaiDeferredVisitNoticeTimer=setTimeout(_flushDeferredVisitNotices,120);
+}
 function _flushDeferredVisitNotices(){
   if(!_oaiVisitNoticeQueue.length||_oaiVisitNoticeBlocked())return;
   if(document.querySelector('#shrine-auto-visit-modal.show,#parish-auto-visit-notice.show,#parish-visit-editor.show,#shrine-visit-modal.show,#shrine-visit-cards-modal.show,#shrine-visit-detail-view.show'))return;
@@ -3602,6 +3605,16 @@ document.addEventListener('click',function(){if(_oaiVisitNoticeQueue.length)_sch
 document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')_scheduleDeferredVisitNoticeFlush();});
 window.addEventListener('oai-short-background-return',_scheduleDeferredVisitNoticeFlush,{passive:true});
 window.addEventListener('oai-long-background-return',_scheduleDeferredVisitNoticeFlush,{passive:true});
+// If a native Android back event is not consumed elsewhere, close the visible visit notice.
+window.addEventListener('keydown',function(e){
+  if(e.key!=='Escape'&&e.key!=='Backspace')return;
+  const target=e.target;
+  if(target&&(/^(INPUT|TEXTAREA|SELECT)$/.test(target.tagName)||target.isContentEditable))return;
+  const parish=document.getElementById('parish-auto-visit-notice');
+  const shrine=document.getElementById('shrine-auto-visit-modal');
+  if(parish&&parish.classList.contains('show')){e.preventDefault();e.stopImmediatePropagation();_closeParishVisitNotice();}
+  else if(shrine&&shrine.classList.contains('show')){e.preventDefault();e.stopImmediatePropagation();_closeShrineAutoVisitModal();}
+},true);
 
 function _ensureShrineAutoVisitModal(){
   let modal=document.getElementById('shrine-auto-visit-modal');
