@@ -12942,6 +12942,40 @@ function _syncRouteWaypointBox(){
 const OAI_ROUTE_FAVORITES_KEY='oai_route_frequent_places_v1';
 const OAI_ROUTE_FAVORITES_MAX=10;
 const OAI_FREQUENT_AUTO_EXCLUDE_KEY='oai_frequent_auto_course_exclude_v1';
+const OAI_AUTO_EXCLUDED_PLACES_KEY='oai_auto_excluded_places_v2';
+function _loadAutoExcludedPlaces(){
+  try{const a=JSON.parse(localStorage.getItem(OAI_AUTO_EXCLUDED_PLACES_KEY)||'null');if(Array.isArray(a))return a.filter(x=>x&&x.name&&Number.isFinite(Number(x.lat))&&Number.isFinite(Number(x.lng))).slice(0,30);}catch(_e){}
+  // 기존 이용자의 설정을 보존하되 길찾기와 별도 목록으로 1회 복사합니다.
+  const oldOn=(()=>{try{return localStorage.getItem(OAI_FREQUENT_AUTO_EXCLUDE_KEY)!=='0';}catch(_e){return true;}})();
+  const a=oldOn?_loadRouteFavorites():[];
+  _saveAutoExcludedPlaces(a);return a;
+}
+function _saveAutoExcludedPlaces(a){try{localStorage.setItem(OAI_AUTO_EXCLUDED_PLACES_KEY,JSON.stringify(a||[]));}catch(_e){}}
+function _renderAutoExcludedSettings(){
+ const body=document.getElementById('oai-settings-auto-excluded-list');if(!body)return;
+ const list=_loadAutoExcludedPlaces(), count=document.getElementById('oai-settings-auto-excluded-count');if(count)count.textContent=list.length+'곳';
+ body.innerHTML=list.length?list.map((f,i)=>'<div class="oai-settings-frequent-item"><em>'+(i+1)+'</em><span><b>'+_placeText(f.name)+'</b><small>'+_placeText(f.addr||'등록된 장소')+'</small></span><div class="oai-settings-frequent-item-actions"><button type="button" class="remove" data-oai-auto-excluded-remove="'+i+'" aria-label="'+_placeText(f.name)+' 제외 해제">×</button></div></div>').join(''):'<div class="oai-settings-frequent-empty">자동 순례 제외 장소가 없습니다.</div>';
+}
+function _addAutoExcludedPlace(f){
+ const a=_loadAutoExcludedPlaces();if(a.some(x=>_routeFavoriteSame(x,f))){_oaiVisitToast('이미 제외 목록에 있습니다.');return;}
+ a.push({name:f.name,addr:f.addr,lat:Number(f.lat),lng:Number(f.lng)});_saveAutoExcludedPlaces(a);_renderAutoExcludedSettings();
+}
+function _openAutoExcludePicker(){
+ const fav=_loadRouteFavorites(), excluded=_loadAutoExcludedPlaces();
+ const available=fav.filter(f=>!excluded.some(x=>_routeFavoriteSame(x,f)));
+ if(!available.length){_oaiVisitToast('먼저 길찾기 빠른 선택에 장소를 등록해 주세요.');return;}
+ const modal=document.getElementById('oai-auto-exclude-picker')||document.createElement('div');modal.id='oai-auto-exclude-picker';modal.className='oai-feature-help-modal show';modal.setAttribute('aria-hidden','false');
+ modal.innerHTML='<div class="oai-feature-help-backdrop" data-oai-auto-picker-close="1"></div><section class="oai-feature-help-dialog" role="dialog" aria-modal="true" aria-label="자동 순례 제외 장소 선택"><header><h3>자동 순례 제외 장소 선택</h3><button type="button" data-oai-auto-picker-close="1" aria-label="닫기">×</button></header><div class="oai-feature-help-body">'+available.map((f,i)=>'<button type="button" class="oai-auto-picker-choice" data-oai-auto-picker-choice="'+i+'">'+_placeText(f.name)+'<small>'+_placeText(f.addr||'')+'</small></button>').join('')+'</div></section>';
+ modal.__available=available;if(!modal.isConnected)document.body.appendChild(modal);
+}
+window._oaiCloseAutoExcludePickerOnBack=function(){const m=document.getElementById('oai-auto-exclude-picker');if(!m||!m.classList.contains('show'))return false;m.classList.remove('show');m.setAttribute('aria-hidden','true');return true;};
+document.addEventListener('click',function(e){const t=e.target&&e.target.closest&&e.target.closest('[data-oai-auto-excluded-add],[data-oai-auto-excluded-remove],[data-oai-auto-picker-choice],[data-oai-auto-picker-close]');if(!t)return;e.preventDefault();e.stopPropagation();
+ if(t.hasAttribute('data-oai-auto-excluded-add'))_openAutoExcludePicker();
+ else if(t.hasAttribute('data-oai-auto-excluded-remove')){const a=_loadAutoExcludedPlaces();a.splice(Number(t.dataset.oaiAutoExcludedRemove),1);_saveAutoExcludedPlaces(a);_renderAutoExcludedSettings();}
+ else if(t.hasAttribute('data-oai-auto-picker-choice')){const m=document.getElementById('oai-auto-exclude-picker'),f=m&&m.__available[Number(t.dataset.oaiAutoPickerChoice)];if(f)_addAutoExcludedPlace(f);if(m)m.classList.remove('show');}
+ else if(t.hasAttribute('data-oai-auto-picker-close')){const m=document.getElementById('oai-auto-exclude-picker');if(m)m.classList.remove('show');}
+},true);
+
 function _isFrequentAutoCourseExcludeEnabled(){
   try{const v=localStorage.getItem(OAI_FREQUENT_AUTO_EXCLUDE_KEY);return v===null?true:v!=='0';}catch(_e){return true;}
 }
@@ -13057,6 +13091,7 @@ function _renderRouteFrequentSettings(){
   if(count) count.textContent=list.length+' / '+OAI_ROUTE_FAVORITES_MAX;
   const autoExclude=document.getElementById('oai-settings-frequent-auto-exclude');
   if(autoExclude)autoExclude.checked=_isFrequentAutoCourseExcludeEnabled();
+  _renderAutoExcludedSettings();
   if(!list.length){ body.innerHTML='<div class="oai-settings-frequent-empty"><span aria-hidden="true">⌖</span><div><b>등록된 장소가 없습니다</b><small>아래 버튼에서 장소를 검색해 등록하세요.</small></div></div>'; return; }
   body.innerHTML=list.map(function(f,i){
     return '<div class="oai-settings-frequent-item"><em>'+(i+1)+'</em><span><b>'+_placeText(f.name)+'</b><small>'+_placeText(f.addr||'등록된 장소')+'</small></span><div class="oai-settings-frequent-item-actions"><button type="button" class="edit" data-oai-frequent-edit="'+i+'" aria-label="'+_placeText(f.name)+' 닉네임 수정">닉네임 수정</button><button type="button" class="remove" data-oai-frequent-remove="'+i+'" aria-label="'+_placeText(f.name)+' 삭제">×</button></div></div>';
@@ -16299,9 +16334,10 @@ document.addEventListener('click',function(e){
   const key=String(help.getAttribute('data-oai-help')||'');
   if(key==='frequent-places'){
     e.preventDefault();e.stopPropagation();
-    _oaiOpenFeatureHelp('자주 가는 장소','성지·성당·집·직장 등 자주 이용하는 장소를 최대 10곳까지 등록할 수 있습니다.\n\n등록한 장소는 길찾기에서 빠르게 선택할 수 있습니다.\n\n‘매번 자동등록 방지’를 켜면 등록한 성지·성당은 평소 GPS 자동 순례코스 생성에서 제외됩니다. GPS 방문등록 기능은 그대로 작동합니다.\n\n단, 사용자가 그날 순례계획에 직접 넣은 장소는 정상 순례지로 인정됩니다.');
+    _oaiOpenFeatureHelp('길찾기 빠른 선택','집·본당·직장 등 길찾기에 자주 사용하는 장소를 최대 10곳까지 등록할 수 있습니다.\n\n자동 순례 제외는 아래 별도 목록에서 설정합니다.');
     return;
   }
+  if(key==='auto-excluded-places'){e.preventDefault();e.stopPropagation();_oaiOpenFeatureHelp('자동 순례 제외 장소','자주 머무는 성지·성당을 자동 순례코스 생성 및 자동 완료 판정에서 제외합니다.\n\nGPS 방문 스탬프·방문기록·사진·메모는 정상 등록됩니다. 직접 시작한 순례코스에서는 정상 판정됩니다.');return;}
   if(key==='visit-photos'){
     e.preventDefault();e.stopPropagation();
     _oaiOpenFeatureHelp('나의 기록 안내','성지는 사진 최대 15장, 성당은 최대 10장까지 저장할 수 있습니다. 같은 장소의 성지·성당은 15장까지 저장됩니다.\n\n사진과 메모는 내 Google Drive에 자동 백업되며, 같은 Google 계정으로 복원할 수 있습니다.');
@@ -16847,8 +16883,8 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.ge
     return false;
   }
   function _dailyIsFrequentAutoExcluded(ev){
-    if(!ev||!_isFrequentAutoCourseExcludeEnabled())return false;
-    const list=typeof _loadRouteFavorites==='function'?_loadRouteFavorites():[];
+    if(!ev)return false;
+    const list=_loadAutoExcludedPlaces();
     return list.some(function(f){return _dailySamePlace(f,ev);});
   }
   function _dailyAutoEvents(events){

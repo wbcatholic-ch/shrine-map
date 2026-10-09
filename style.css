@@ -9930,3 +9930,6 @@ html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(17px * va
 #oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-btn-row:not(:has(#ic-tel-link:not([style*="display: none"]))) ,
 #oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-kakao-row:not(:has(#ic-goodnews:not([style*="display: none"]))) ,
 #oai-pilgrimage-planner-modal #info-card.oai-pilgrimage-place-info .ic-links:not(:has(> :not([style*="display: none"]))) {display:none!important;padding:0!important;margin:0!important}
+
+/* 1178: 별도 자동 순례 제외 장소 선택 */
+.oai-auto-picker-choice{display:flex;flex-direction:column;gap:4px;width:100%;padding:13px 12px;margin:6px 0;border:1px solid #d6e0e9;border-radius:10px;background:#fff;color:#172d42;text-align:left;font-weight:700;font-size:15px}.oai-auto-picker-choice small{font-weight:400;color:#667684;font-size:12px}.oai-settings-auto-excluded-group{margin-top:14px}
