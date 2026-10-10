@@ -3846,6 +3846,7 @@ function _maybePromptAutoShrineVisit(lat,lng){
     const points=Array.isArray(shrine.gpsPoints)&&shrine.gpsPoints.length?shrine.gpsPoints:[shrine];
     const inside=points.some(function(point){return Number.isFinite(Number(point.lat))&&Number.isFinite(Number(point.lng))&&Number(point.lat)&&Number(point.lng)&&calcDist(lat,lng,Number(point.lat),Number(point.lng))*1000<=radius;});
     if(!inside||_hasShrineVisitOnDate(shrine,_todayISODate()))return;
+    if(_isAutoVisitRestrictedAfterFirst('shrine',shrine,_getShrineVisitDates(shrine)))return;
     const result=_registerGpsPlaceVisit('shrine',shrine,_todayISODate());
     if(!result.added)return;
     _registerAutoShrineVisit({item:shrine,idx:idx});
@@ -4273,7 +4274,8 @@ function _maybeAutoParishVisit(lat,lng){
     const radius=place.name==='세종성요한바오로2세성당'?55:OAI_PARISH_AUTO_VISIT_RADIUS_M;
     if(calcDist(lat,lng,Number(place.lat),Number(place.lng))*1000>radius)return;
     const previous=_parishVisits(place);
-    if(_isSameParish(place,_configuredMyParish())&&(!_isMyParishAutoVisitEnabled()||previous.length))return;
+    if(_isSameParish(place,_configuredMyParish())&&_isMyParishAutoVisitEnabled()&&previous.length)return;
+    if(_isAutoVisitRestrictedAfterFirst('parish',place,previous))return;
     if(previous.some(function(v){return v.date===_todayISODate();}))return;
     if(!_registerGpsPlaceVisit('parish',place,_todayISODate()).added)return;
     if(_curInfoItem&&_curInfoItem.item===place)_renderInfoCardParishVisit(place);
@@ -13060,22 +13062,53 @@ function _loadAutoExcludedPlaces(){
   _saveAutoExcludedPlaces(a);return a;
 }
 function _saveAutoExcludedPlaces(a){try{localStorage.setItem(OAI_AUTO_EXCLUDED_PLACES_KEY,JSON.stringify(a||[]));}catch(_e){}}
+/* 자동 방문 기록 제한은 자동 GPS 감지에만 적용한다. 직접 시작한 순례와 수동 등록은 허용. */
+function _isAutoVisitRestrictedAfterFirst(kind,place,previous){
+ if(!place||!Array.isArray(previous)||!previous.length)return false;
+ const name=String(place.name||'').trim(),dio=String(place.diocese||'').trim();
+ return _loadAutoExcludedPlaces().some(function(f){
+   if(String(f.name||'').trim()===name&&(!f.diocese||!dio||String(f.diocese).trim()===dio))return true;
+   const lat=Number(place.lat),lng=Number(place.lng),flat=Number(f.lat),flng=Number(f.lng);
+   return Number.isFinite(lat)&&Number.isFinite(lng)&&Number.isFinite(flat)&&Number.isFinite(flng)&&
+     Math.abs(lat)>0&&Math.abs(lng)>0&&Math.abs(flat)>0&&Math.abs(flng)>0&&
+     (!f.diocese||!dio||String(f.diocese).trim()===dio)&&calcDist(lat,lng,flat,flng)<=0.04;
+ });
+}
 function _renderAutoExcludedSettings(){
  const body=document.getElementById('oai-settings-auto-excluded-list');if(!body)return;
  const list=_loadAutoExcludedPlaces(), count=document.getElementById('oai-settings-auto-excluded-count');if(count)count.textContent=list.length+'곳';
- body.innerHTML=list.length?list.map((f,i)=>'<div class="oai-settings-frequent-item"><em>'+(i+1)+'</em><span><b>'+_placeText(f.name)+'</b><small>'+_placeText(f.addr||'등록된 장소')+'</small></span><div class="oai-settings-frequent-item-actions"><button type="button" class="remove" data-oai-auto-excluded-remove="'+i+'" aria-label="'+_placeText(f.name)+' 제외 해제">×</button></div></div>').join(''):'<div class="oai-settings-frequent-empty">자동 순례 제외 장소가 없습니다.</div>';
+ body.innerHTML=list.length?list.map((f,i)=>'<div class="oai-settings-frequent-item"><em>'+(i+1)+'</em><span><b>'+_placeText(f.name)+'</b><small>'+_placeText(f.addr||'등록된 장소')+'</small></span><div class="oai-settings-frequent-item-actions"><button type="button" class="remove" data-oai-auto-excluded-remove="'+i+'" aria-label="'+_placeText(f.name)+' 제외 해제">×</button></div></div>').join(''):'<div class="oai-settings-frequent-empty">자동 기록 제한 장소가 없습니다.</div>';
 }
 function _addAutoExcludedPlace(f){
- const a=_loadAutoExcludedPlaces();if(a.some(x=>_routeFavoriteSame(x,f))){_oaiVisitToast('이미 제외 목록에 있습니다.');return;}
- a.push({name:f.name,addr:f.addr,lat:Number(f.lat),lng:Number(f.lng)});_saveAutoExcludedPlaces(a);_renderAutoExcludedSettings();
+ const a=_loadAutoExcludedPlaces();if(a.some(x=>_routeFavoriteSame(x,f))){_oaiVisitToast('이미 제한 목록에 있습니다.');return;}
+ a.push({name:f.name,addr:f.addr,diocese:f.diocese||'',kind:f.kind||'',lat:Number(f.lat),lng:Number(f.lng)});_saveAutoExcludedPlaces(a);_renderAutoExcludedSettings();
 }
 function _openAutoExcludePicker(){
- const fav=_loadRouteFavorites(), excluded=_loadAutoExcludedPlaces();
- const available=fav.filter(f=>!excluded.some(x=>_routeFavoriteSame(x,f)));
- if(!available.length){_oaiVisitToast('먼저 길찾기 빠른 선택에 장소를 등록해 주세요.');return;}
- const modal=document.getElementById('oai-auto-exclude-picker')||document.createElement('div');modal.id='oai-auto-exclude-picker';modal.className='oai-feature-help-modal show';modal.setAttribute('aria-hidden','false');
- modal.innerHTML='<div class="oai-feature-help-backdrop" data-oai-auto-picker-close="1"></div><section class="oai-feature-help-dialog" role="dialog" aria-modal="true" aria-label="자동 순례 제외 장소 선택"><header><h3>자동 순례 제외 장소 선택</h3><button type="button" data-oai-auto-picker-close="1" aria-label="닫기">×</button></header><div class="oai-feature-help-body">'+available.map((f,i)=>'<button type="button" class="oai-auto-picker-choice" data-oai-auto-picker-choice="'+i+'">'+_placeText(f.name)+'<small>'+_placeText(f.addr||'')+'</small></button>').join('')+'</div></section>';
- modal.__available=available;if(!modal.isConnected)document.body.appendChild(modal);
+ const excluded=_loadAutoExcludedPlaces(), all=[];
+ const seen=new Set();
+ function add(f,kind){
+   if(!f||!f.name||!Number.isFinite(Number(f.lat))||!Number.isFinite(Number(f.lng))||!Number(f.lat)||!Number(f.lng))return;
+   const key=String(f.diocese||'')+'|'+String(f.name||'')+'|'+kind;
+   if(seen.has(key))return;seen.add(key);
+   if(excluded.some(x=>String(x.name||'')===String(f.name||'')&&(!x.diocese||!f.diocese||x.diocese===f.diocese)))return;
+   all.push({name:f.name,addr:f.addr||f.address||'',diocese:f.diocese||'',lat:Number(f.lat),lng:Number(f.lng),kind:kind});
+ }
+ (typeof SHRINES!=='undefined'&&Array.isArray(SHRINES)?SHRINES:[]).forEach(f=>add(f,'shrine'));
+ (typeof PARISHES!=='undefined'&&Array.isArray(PARISHES)?PARISHES:[]).forEach(f=>add(f,'parish'));
+ if(!all.length){_oaiVisitToast('선택할 성지·성당 정보를 불러오지 못했습니다.');return;}
+ const modal=document.getElementById('oai-auto-exclude-picker')||document.createElement('div');
+ modal.id='oai-auto-exclude-picker';modal.className='oai-feature-help-modal show';modal.setAttribute('aria-hidden','false');
+ modal.innerHTML='<div class="oai-feature-help-backdrop" data-oai-auto-picker-close="1"></div><section class="oai-feature-help-dialog" role="dialog" aria-modal="true" aria-label="자동 기록 제한 장소 선택"><header><h3>자동 기록 제한 장소 선택</h3><button type="button" data-oai-auto-picker-close="1" aria-label="닫기">×</button></header><div class="oai-feature-help-body"><input id="oai-auto-excluded-search" type="search" placeholder="성지·성당 이름 검색" autocomplete="off" aria-label="제한 장소 검색" style="width:100%;min-height:44px;margin-bottom:10px;padding:8px;border:1px solid #cbd5e1;border-radius:10px"><div id="oai-auto-excluded-results"></div></div></section>';
+ modal.__available=all;if(!modal.isConnected)document.body.appendChild(modal);
+ function render(){
+   const input=modal.querySelector('#oai-auto-excluded-search'),results=modal.querySelector('#oai-auto-excluded-results');
+   const keyword=String(input&&input.value||'').replace(/\s/g,'').toLowerCase();
+   if(!keyword){results.innerHTML='<div class="oai-settings-frequent-empty">등록할 성지나 성당의 이름을 검색해 주세요.</div>';return;}
+   const matches=all.map((f,i)=>({f,i})).filter(x=>String(x.f.name||'').replace(/\s/g,'').toLowerCase().includes(keyword)).slice(0,40);
+   results.innerHTML=matches.length?matches.map(x=>'<button type="button" class="oai-auto-picker-choice" data-oai-auto-picker-choice="'+x.i+'">'+_placeText(x.f.name)+'<small>'+_placeText((x.f.diocese||'')+' · '+(x.f.addr||''))+'</small></button>').join(''):'<div class="oai-settings-frequent-empty">검색 결과가 없습니다.</div>';
+ }
+ modal.querySelector('#oai-auto-excluded-search').addEventListener('input',render);
+ render();
 }
 window._oaiCloseAutoExcludePickerOnBack=function(){const m=document.getElementById('oai-auto-exclude-picker');if(!m||!m.classList.contains('show'))return false;m.classList.remove('show');m.setAttribute('aria-hidden','true');return true;};
 document.addEventListener('click',function(e){const t=e.target&&e.target.closest&&e.target.closest('[data-oai-auto-excluded-add],[data-oai-auto-excluded-remove],[data-oai-auto-picker-choice],[data-oai-auto-picker-close]');if(!t)return;e.preventDefault();e.stopPropagation();
@@ -16245,6 +16278,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // 1199: Drive recovery is a staged merge, not a replacement. No upload runs
   // until all destination values have been validated and committed.
   function oaiRestoreDriveCompleteData(remote){
+    const restoreStarted=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
     const changes={};
     const put=function(key,value){changes[key]=JSON.stringify(value);};
     const currentShrine=_loadShrineVisits(),currentParish=_loadParishVisits();
@@ -16273,13 +16307,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(!Array.isArray(remote.pilgrimageCourses))throw new Error('백업 코스 형식 오류');
       const current=localValue('oai_pilgrimage_courses_v1',[]);
       if(!Array.isArray(current))throw new Error('휴대폰 코스 형식 오류');
-      const next=current.slice(),ids=new Set(current.map(function(c){return String(c&&c.id||'');}));
+      const next=current.slice(),courseIndexes=new Map();
+      next.forEach(function(c,i){const id=String(c&&c.id||'');if(!courseIndexes.has(id))courseIndexes.set(id,i);});
       remote.pilgrimageCourses.forEach(function(c){
         if(!c||typeof c!=='object'||!c.id||!Array.isArray(c.places))throw new Error('백업 코스 내용 오류');
                 const id=String(c.id);
-        if(!ids.has(id)){ids.add(id);next.push(c);}
+        if(!courseIndexes.has(id)){courseIndexes.set(id,next.length);next.push(c);}
         else{
-          const index=next.findIndex(function(item){return String(item&&item.id||'')===id;});
+          const index=courseIndexes.get(id);
           if(index<0)return;
           const local=next[index],localDone=Array.isArray(local.completions)?local.completions:[],cloudDone=Array.isArray(c.completions)?c.completions:[];
           const merged=localDone.slice(),seen=new Set(localDone.map(function(v){return String(v&&v.completedAt||'')+'|'+String(v&&v.method||'');}));
@@ -16307,11 +16342,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const prior={};Object.keys(changes).forEach(function(k){prior[k]=localStorage.getItem(k);});
     // One atomic local batch: skip identical writes and do not schedule a remote
     // backup until the entire import has passed validation and committed.
+    const mergeMs=Math.round(((typeof performance!=='undefined'&&performance.now)?performance.now():Date.now())-restoreStarted);
+    const commitStarted=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
     oaiDriveRestoreBatchActive=true;
     let appliedChanges=0;
     try{Object.keys(changes).forEach(function(k){if(localStorage.getItem(k)!==changes[k]){localStorage.setItem(k,changes[k]);appliedChanges++;}});}
     catch(err){Object.keys(prior).forEach(function(k){try{if(prior[k]===null)localStorage.removeItem(k);else localStorage.setItem(k,prior[k]);}catch(_e){}});throw err;}
     finally{oaiDriveRestoreBatchActive=false;}
+    const commitMs=Math.round(((typeof performance!=='undefined'&&performance.now)?performance.now():Date.now())-commitStarted);
+    if(mergeMs>=80||commitMs>=80){
+      console.warn('[가톨릭길동무][복원 성능] 병합 '+mergeMs+'ms / 로컬 기록 '+commitMs+'ms / 변경 항목 '+appliedChanges+'개');
+    }
     // Only refresh dependent views if the imported data actually changed.
     // Only notify components whose source data changed. Previously *every* Drive
     // import, including visits-only imports, triggered parish listeners and
@@ -16328,9 +16369,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     return {courses:Array.isArray(remote.pilgrimageCourses)?remote.pilgrimageCourses.length:0,changed:appliedChanges>0};
   }
   window.oaiGoogleDriveBackupReceived=function(encoded){
+    const receiveStarted=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
     try{
       const text=decodeURIComponent(escape(atob(String(encoded||''))));
       const parsed=JSON.parse(text);
+      const decodeMs=Math.round(((typeof performance!=='undefined'&&performance.now)?performance.now():Date.now())-receiveStarted);
+      if(decodeMs>=80)console.warn('[가톨릭길동무][복원 성능] 수신 데이터 해석 '+decodeMs+'ms / '+text.length+'자');
       if(!parsed||parsed.format!=='catholic-gildongmu-backup'||!parsed.data||!parsed.data.shrineVisits||!parsed.data.parishVisits||typeof parsed.data.shrineVisits!=='object'||typeof parsed.data.parishVisits!=='object')throw new Error();
       if(!googleDriveInitialSyncPending)throw new Error('요청하지 않은 이전 Drive 응답입니다.');
       if(!hasMeaningfulDriveData(parsed.data)){
@@ -16345,6 +16389,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       // Keep uploads suspended until every backed-up field has been merged.
       // A failed transaction leaves both device data and the verified cloud backup intact.
       const restored=oaiRestoreDriveCompleteData(parsed.data);
+      const totalMs=Math.round(((typeof performance!=='undefined'&&performance.now)?performance.now():Date.now())-receiveStarted);
+      if(totalMs>=100)console.warn('[가톨릭길동무][복원 성능] 수신·검증·병합·저장 합계 '+totalMs+'ms');
       googleDriveInitialSyncPending=false;oaiCancelDriveCheckTimer();
       oaiVerifiedRemoteBackup=parsed;
       setDriveWriteReady(isGoogleDriveConnected()&&isGoogleDriveAutoBackupEnabled());
@@ -16857,7 +16903,7 @@ document.addEventListener('click',function(e){
     _oaiOpenFeatureHelp('길찾기 빠른 선택','집·본당·직장 등 길찾기에 자주 사용하는 장소를 최대 10곳까지 등록할 수 있습니다.');
     return;
   }
-  if(key==='auto-excluded-places'){e.preventDefault();e.stopPropagation();_oaiOpenFeatureHelp('자동 순례 제외 장소','자주 머무는 성지·성당을 자동 순례코스 생성 및 자동 완료 판정에서 제외합니다.\n\nGPS 방문 스탬프·방문기록·사진·메모는 정상 등록됩니다. 직접 시작한 순례코스에서는 정상 판정됩니다.');return;}
+  if(key==='auto-excluded-places'){e.preventDefault();e.stopPropagation();_oaiOpenFeatureHelp('자동 기록 제한 장소','성지나 성당이 직장이시거나 바로 근처에 거주하시는 분들이 사용하면 편리합니다.\n\n매일 또는 주일마다 방문기록이 자동으로 등록되는 것을 방지합니다. 스탬프가 없으면 최초 1회는 자동 기록하고, 이후 자동 기록을 제한합니다.\n\n자동 순례코스 생성에서도 제외되지만, 직접 시작한 순례와 수동 등록, 사진·메모는 정상 이용할 수 있습니다.');return;}
   if(key==='visit-photos'){
     e.preventDefault();e.stopPropagation();
     _oaiOpenFeatureHelp('나의 기록 안내','성지는 사진 최대 15장, 성당은 최대 10장까지 저장할 수 있습니다. 같은 장소의 성지·성당은 15장까지 저장됩니다.\n\n사진과 메모는 내 Google Drive에 자동 백업되며, 같은 Google 계정으로 복원할 수 있습니다.');
