@@ -16313,7 +16313,18 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     catch(err){Object.keys(prior).forEach(function(k){try{if(prior[k]===null)localStorage.removeItem(k);else localStorage.setItem(k,prior[k]);}catch(_e){}});throw err;}
     finally{oaiDriveRestoreBatchActive=false;}
     // Only refresh dependent views if the imported data actually changed.
-    if(appliedChanges){try{window.dispatchEvent(new CustomEvent('oai-my-parish-changed'));_updateAllRouteFavoriteButtons();_renderRouteFrequentPlaces();}catch(_e){}}
+    // Only notify components whose source data changed. Previously *every* Drive
+    // import, including visits-only imports, triggered parish listeners and
+    // rebuilt the route favorites UI synchronously during backup decoding.
+    if(appliedChanges){
+      const changedKeys=Object.keys(changes).filter(function(k){return prior[k]!==changes[k];});
+      const parishChanged=changedKeys.some(function(k){return k===OAI_SETTINGS_MY_PARISH_KEY||k==='oai_my_parish'||k==='oai_my_diocese_name'||k==='oai_my_parish_name'||k===OAI_PARISH_AUTO_VISIT_ENABLED_KEY;});
+      const routesChanged=changedKeys.indexOf(OAI_ROUTE_FAVORITES_KEY)>=0;
+      if(parishChanged){try{window.dispatchEvent(new CustomEvent('oai-my-parish-changed'));}catch(_e){}}
+      if(routesChanged){
+        try{_updateAllRouteFavoriteButtons();_renderRouteFrequentPlaces();}catch(_e){}
+      }
+    }
     return {courses:Array.isArray(remote.pilgrimageCourses)?remote.pilgrimageCourses.length:0,changed:appliedChanges>0};
   }
   window.oaiGoogleDriveBackupReceived=function(encoded){
@@ -16342,9 +16353,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       // expensive rendering so the WebView can process pending input first.
       refreshGoogleDriveButton();
       if(restored.changed){
+        // Settings refresh draws frequent-place controls; there is no reason
+        // to rebuild them while the settings sheet is closed. Opening it already
+        // calls refresh(), so a restored value is still displayed when needed.
         setTimeout(function(){
-          try{refresh();refreshRecords();}
-          catch(err){console.warn('[가톨릭길동무] 복원 후 화면 갱신 실패',err);}
+          try{if(modal()&&modal().classList.contains('show'))refresh();}
+          catch(err){console.warn('[가톨릭길동무] 복원 후 설정 갱신 실패',err);}
         },0);
       }
       recordMessage('Google Drive 방문기록·순례코스·설정을 병합했습니다. 코스 '+restored.courses+'개 확인.');
