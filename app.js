@@ -15867,6 +15867,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function driveWriteReady(){return oaiDriveSessionVerified;}
   function setDriveWriteReady(ready){oaiDriveSessionVerified=!!ready;}
   let googleDriveBackupTimer=0;
+  let oaiDriveBackupPriority='settings';
+  let oaiDriveBackupDueAt=0;
+  const OAI_DRIVE_CRITICAL_WAIT_MS=1800;
+  const OAI_DRIVE_SETTINGS_WAIT_MS=15000;
   let oaiDriveRestoreBatchActive=false; // Bulk Drive import must not enqueue per-key writes.
   let oaiVerifiedRemoteBackup=null; // Retain cloud-only settings until explicitly restored.
   let oaiDriveWriteInFlight=false;
@@ -15976,17 +15980,41 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       !!(data.myParish&&data.myParish.name);
   }
   function hasBackupContent(){return hasMeaningfulDriveData(backupSnapshot().data);}
-  function queueGoogleDriveBackup(){
+  // GPS·방문기록·사진·코스는 신속하게, 일반 설정은 짧게 모아서 백업한다.
+  // 중요 기록이 대기 중일 때 설정 변경이 그 저장을 뒤로 미루지 못하게 한다.
+  function queueGoogleDriveBackup(priority){
     if(!isGoogleDriveAutoBackupEnabled())return;
-    if(!driveWriteReady()||googleDriveInitialSyncPending){oaiDriveDirtyWhileSaving=true;if(!googleDriveInitialSyncPending)scheduleDriveRecheck();return;}
+    const urgent=priority!=='settings';
+    if(!driveWriteReady()||googleDriveInitialSyncPending){
+      oaiDriveDirtyWhileSaving=true;
+      if(!googleDriveInitialSyncPending)scheduleDriveRecheck();
+      return;
+    }
     const bridge=nativeDrive();if(!bridge||typeof bridge.saveGoogleDriveBackup!=='function')return;
     if(oaiDriveWriteInFlight){oaiDriveDirtyWhileSaving=true;return;}
-    try{if(googleDriveBackupTimer)clearTimeout(googleDriveBackupTimer);}catch(_e){}
+    const now=Date.now();
+    const due=now+(urgent?OAI_DRIVE_CRITICAL_WAIT_MS:OAI_DRIVE_SETTINGS_WAIT_MS);
+    // 설정 변경이 반복될 때는 시간을 합치되, 긴 변경 연속에도 백업을 무기한 지연하지 않는다.
+    const shouldKeep=!!googleDriveBackupTimer&&(
+      oaiDriveBackupPriority==='critical'||(urgent?false:oaiDriveBackupDueAt<=due)
+    );
+    if(shouldKeep)return;
+    if(googleDriveBackupTimer)clearTimeout(googleDriveBackupTimer);
+    oaiDriveBackupPriority=urgent?'critical':'settings';
+    oaiDriveBackupDueAt=due;
     googleDriveBackupTimer=setTimeout(function(){
-      googleDriveBackupTimer=0;
+      googleDriveBackupTimer=0;oaiDriveBackupPriority='settings';oaiDriveBackupDueAt=0;
       saveGoogleDriveBackupNow(false);
-    },1800);
+    },urgent?OAI_DRIVE_CRITICAL_WAIT_MS:OAI_DRIVE_SETTINGS_WAIT_MS);
   }
+  // 화면을 떠나는 순간 미저장된 설정 변경을 구글 전송 대기열에 넘긴다.
+  // 로컬 기록은 변경 시 이미 기록되어 있으며, 재확인 이전에는 클라우드를 덮어쓰지 않는다.
+  document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState!=='hidden'||!googleDriveBackupTimer)return;
+    clearTimeout(googleDriveBackupTimer);googleDriveBackupTimer=0;
+    oaiDriveBackupPriority='settings';oaiDriveBackupDueAt=0;
+    setTimeout(function(){saveGoogleDriveBackupNow(false);},0);
+  });
   // 방문·즐겨찾기·내 본당처럼 백업 대상이 바뀌면, 앱을 닫지 않아도
   // 약 1초 뒤 Drive에 저장합니다. 관련 없는 화면 설정은 백업하지 않습니다.
   (function watchBackupStorage(){
@@ -16004,7 +16032,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         const previous=watch?this.getItem(key):null;
         const result=setItem.call(this,key,value);
         if(watch&&!oaiDriveRestoreBatchActive&&previous!==String(value)){
-          if(isGoogleDriveAutoBackupEnabled())queueGoogleDriveBackup();
+          const important=key===OAI_SHRINE_VISITS_KEY||key===OAI_PARISH_VISITS_KEY||
+            key==='oai_pilgrimage_plan_v1'||key==='oai_pilgrimage_courses_v1'||key==='oai_pilgrimage_draft_meta_v2';
+          if(isGoogleDriveAutoBackupEnabled())queueGoogleDriveBackup(important?'critical':'settings');
           else setTimeout(maybeRecommendGoogleDrive,0);
         }
         return result;
@@ -16507,10 +16537,25 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const clean=function(v){const x=Object.assign({},v||{});if(Array.isArray(x.photos))x.photos=x.photos.filter(function(ph){if(!ph)return false;const id=_oaiPhotoIdentity(ph);return !!(ph.driveFileId||(!id.startsWith('local_')&&id));}).map(function(ph){return Object.assign({},ph,{syncStatus:'saved'});});return x;};
     Object.keys(src).forEach(function(key){const rec=src[key]&&typeof src[key]==='object'?src[key]:{},clone=Object.assign({},rec);clone.visits=(Array.isArray(rec.visits)?rec.visits:[]).map(clean);if(rec.sharedJournalByDate&&typeof rec.sharedJournalByDate==='object'){clone.sharedJournalByDate={};Object.keys(rec.sharedJournalByDate).forEach(function(d){clone.sharedJournalByDate[d]=clean(rec.sharedJournalByDate[d]);});}out[key]=clone;});return out;
   }
+  // Visit/photo metadata is usually unchanged when only a setting is edited.
+  // Cache the sanitized source by its exact localStorage JSON; never cache a
+  // merged snapshot, since Drive's verified remote records must still be merged
+  // on every save. A shallow copy protects the cache from mergeVisitMaps edits.
+  const oaiVisitBackupReadCache=new Map();
+  function cachedBackupVisitMap(storageKey){
+    const raw=localStorage.getItem(storageKey)||'';
+    const previous=oaiVisitBackupReadCache.get(storageKey);
+    if(previous&&previous.raw===raw)return Object.assign({},previous.cleaned);
+    let parsed={};
+    try{parsed=JSON.parse(raw)||{};}catch(_e){}
+    const cleaned=backupVisitMapWithoutLocalPhotos(parsed);
+    oaiVisitBackupReadCache.set(storageKey,{raw:raw,cleaned:cleaned});
+    return Object.assign({},cleaned);
+  }
   function backupSnapshot(){
     const parish=configuredParish();
     return {format:'catholic-gildongmu-backup',version:1,createdAt:new Date().toISOString(),data:{
-      shrineVisits:backupVisitMapWithoutLocalPhotos(localValue(OAI_SHRINE_VISITS_KEY,{})),parishVisits:backupVisitMapWithoutLocalPhotos(localValue(OAI_PARISH_VISITS_KEY,{})),
+      shrineVisits:cachedBackupVisitMap(OAI_SHRINE_VISITS_KEY),parishVisits:cachedBackupVisitMap(OAI_PARISH_VISITS_KEY),
       prayerFavorites:localValue('pr_favorites',[]),webFavorites:localValue('web_favorites_v1',[]),routeFavorites:localValue(OAI_ROUTE_FAVORITES_KEY,[]),routeFavoritesUpdatedAt:Number(localStorage.getItem('oai_route_favorites_modified_at_v1'))||0,pilgrimagePlan:localValue('oai_pilgrimage_plan_v1',[]),pilgrimageDraftMeta:localValue('oai_pilgrimage_draft_meta_v2',{}),pilgrimageCourses:localValue('oai_pilgrimage_courses_v1',[]),
       myDiocese:configuredDiocese(),myParish:parish?{diocese:parish.diocese||'',name:parish.name||''}:null,
       parishAutoVisit:_isMyParishAutoVisitEnabled(),prayerFontSize:localStorage.getItem('prayer_font_size')||'',
