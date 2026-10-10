@@ -16552,11 +16552,28 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     oaiVisitBackupReadCache.set(storageKey,{raw:raw,cleaned:cleaned});
     return Object.assign({},cleaned);
   }
+  // Settings-only writes do not change route/course/favorite JSON. Reuse the
+  // parsed source while keeping fresh top-level containers for the merge phase.
+  // Cache by exact stored bytes so remote-only GPS/course records are still
+  // merged on every backup and real edits invalidate the cache immediately.
+  const oaiBackupAuxReadCache=new Map();
+  function cachedBackupLocalValue(key,fallback){
+    const raw=localStorage.getItem(key)||'';
+    const previous=oaiBackupAuxReadCache.get(key);
+    if(previous&&previous.raw===raw){
+      const value=previous.value;
+      return Array.isArray(value)?value.slice():(value&&typeof value==='object'?Object.assign({},value):value);
+    }
+    let value=fallback;
+    try{const parsed=JSON.parse(raw);if(parsed!=null)value=parsed;}catch(_e){}
+    oaiBackupAuxReadCache.set(key,{raw:raw,value:value});
+    return Array.isArray(value)?value.slice():(value&&typeof value==='object'?Object.assign({},value):value);
+  }
   function backupSnapshot(){
     const parish=configuredParish();
     return {format:'catholic-gildongmu-backup',version:1,createdAt:new Date().toISOString(),data:{
       shrineVisits:cachedBackupVisitMap(OAI_SHRINE_VISITS_KEY),parishVisits:cachedBackupVisitMap(OAI_PARISH_VISITS_KEY),
-      prayerFavorites:localValue('pr_favorites',[]),webFavorites:localValue('web_favorites_v1',[]),routeFavorites:localValue(OAI_ROUTE_FAVORITES_KEY,[]),routeFavoritesUpdatedAt:Number(localStorage.getItem('oai_route_favorites_modified_at_v1'))||0,pilgrimagePlan:localValue('oai_pilgrimage_plan_v1',[]),pilgrimageDraftMeta:localValue('oai_pilgrimage_draft_meta_v2',{}),pilgrimageCourses:localValue('oai_pilgrimage_courses_v1',[]),
+      prayerFavorites:cachedBackupLocalValue('pr_favorites',[]),webFavorites:cachedBackupLocalValue('web_favorites_v1',[]),routeFavorites:cachedBackupLocalValue(OAI_ROUTE_FAVORITES_KEY,[]),routeFavoritesUpdatedAt:Number(localStorage.getItem('oai_route_favorites_modified_at_v1'))||0,pilgrimagePlan:cachedBackupLocalValue('oai_pilgrimage_plan_v1',[]),pilgrimageDraftMeta:cachedBackupLocalValue('oai_pilgrimage_draft_meta_v2',{}),pilgrimageCourses:cachedBackupLocalValue('oai_pilgrimage_courses_v1',[]),
       myDiocese:configuredDiocese(),myParish:parish?{diocese:parish.diocese||'',name:parish.name||''}:null,
       parishAutoVisit:_isMyParishAutoVisitEnabled(),prayerFontSize:localStorage.getItem('prayer_font_size')||'',
       noticeFlags:{pilgrimagePublicFeatureSeen:localStorage.getItem('oai_pilgrimage_public_feature_seen_v1')==='1'}
