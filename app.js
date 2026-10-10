@@ -18088,9 +18088,9 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.ge
     const last=Number(c.lastCompletedAt)||Number(completions[0]&&completions[0].completedAt)||0;
     const count=Math.max(1,completions.length);
     const repeatLabel=isFollowing?'■ 순례 종료':'▶ 다시 순례하기';
-    const countHtml=count>1?'<button type="button" class="oai-pilgrimage-course-count-btn" data-course-history="'+esc(c.id)+'">'+count+'회 기록</button>':'';
+    const countHtml=count>1?'<button type="button" class="oai-pilgrimage-course-count-btn" data-course-history="'+esc(c.id)+'">'+count+'회</button>':'';
     const gpsHtml=_courseHasGpsLockedCompletion(c)?'<span class="oai-pilgrimage-course-gps-lock">🔒 GPS 기록</span>':'';
-    return '<div class="oai-pilgrimage-course-complete"><div class="oai-pilgrimage-course-complete-main"><div class="oai-pilgrimage-course-complete-badges"><span class="oai-pilgrimage-course-stamp" aria-label="순례 완료">✓ 순례완료</span>'+gpsHtml+'</div><div class="oai-pilgrimage-course-complete-meta"><button type="button" class="oai-pilgrimage-course-date-btn" data-course-history="'+esc(c.id)+'">'+esc(_courseCompletionDate(last))+'</button>'+countHtml+'</div></div><button type="button" class="oai-pilgrimage-course-repeat'+(isFollowing?' is-active':'')+'" data-course-repeat="'+esc(c.id)+'">'+repeatLabel+'</button></div>';
+    return '<div class="oai-pilgrimage-course-complete"><span class="oai-pilgrimage-course-stamp" aria-label="순례 완료">✓ 순례완료</span><button type="button" class="oai-pilgrimage-course-date-btn" data-course-history="'+esc(c.id)+'">'+esc(_courseCompletionDate(last))+'</button>'+countHtml+gpsHtml+'<button type="button" class="oai-pilgrimage-course-repeat'+(isFollowing?' is-active':'')+'" data-course-repeat="'+esc(c.id)+'">'+repeatLabel+'</button></div>';
   }
   function renderCourseList(){
     const body=document.getElementById('oai-pilgrimage-course-list');if(!body)return;
@@ -19628,7 +19628,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.ge
     const m=ensureActionMenu(),title=m.querySelector('#oai-pilgrimage-action-title'),buttons=m.querySelector('#oai-pilgrimage-action-buttons');actionContext=ctx;
     if(ctx.type==='course'){
       const c=loadCourses().find(x=>x.id===ctx.id);if(!c)return;
-      title.textContent=c.name;buttons.innerHTML=_courseHasGpsLockedCompletion(c)?'<button type="button" disabled>🔒 GPS 완료 코스 · 삭제 불가</button>':'<button type="button" class="danger" data-oai-action="delete-course">삭제</button>';
+      title.textContent=c.name;buttons.innerHTML='<button type="button" data-oai-action="rename">이름 변경</button>'+(_courseHasGpsLockedCompletion(c)?'<button type="button" disabled>🔒 GPS 완료 코스 · 삭제 불가</button>':'<button type="button" class="danger" data-oai-action="delete-course">삭제</button>');
     }else{
       const item=loadPlan()[ctx.index];if(!item)return;
       title.textContent=item.name;buttons.innerHTML='<button type="button" data-oai-action="visit">'+(item.done?'순례 취소':'순례')+'</button><button type="button" class="danger" data-oai-action="delete-place">삭제</button>';
