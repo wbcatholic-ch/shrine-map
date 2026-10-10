@@ -2033,6 +2033,7 @@ function _addShrineVisit(item,date,method){
   rec.diocese=item.diocese||rec.diocese||'';
   rec.seq=item.seq||rec.seq||'';
   if(_hasVisitDate(rec.visits,date)) return false;
+  if(rec.deletedManualVisits)delete rec.deletedManualVisits[String(date)];
   rec.visits.push(_newVisitEntry(date,method));
   rec.visits.sort(function(a,b){return _compareShrineVisits(_normalizeVisitEntry(a),_normalizeVisitEntry(b));});
   data[key]=rec;
@@ -2051,9 +2052,13 @@ function _deleteShrineVisitAt(item,idx){
   if(idx<0||idx>=rec.visits.length) return false;
   var target=rec.visits[idx];
   if(target && typeof target==='object' && String(target.method||'').toLowerCase()==='gps') return false;
+  // Keep a deletion marker so older cloud backups cannot restore this manual visit.
+  const removed=_normalizeVisitEntry(target);
+  if(!removed||!removed.date)return false;
+  rec.deletedManualVisits=Object.assign({},rec.deletedManualVisits||{});
+  rec.deletedManualVisits[String(removed.date)]=new Date().toISOString();
   rec.visits.splice(idx,1);
-  if(rec.visits.length) data[key]=rec;
-  else delete data[key];
+  data[key]=rec;
   _saveShrineVisits(data);
   return true;
 }
@@ -4073,6 +4078,7 @@ function _addParishVisit(p,date,method){
   const d=_loadParishVisits(),r=d[key]||{name:p.name||'',diocese:p.diocese||'',addr:p.addr||'',visits:[]};
   r.visits=Array.isArray(r.visits)?r.visits:[];
   if(_hasVisitDate(r.visits,date))return false;
+  if(r.deletedManualVisits)delete r.deletedManualVisits[String(date)];
   r.visits.push(_newVisitEntry(date,method));r.visits.sort(_compareShrineVisits);d[key]=r;
   if(!_saveParishVisits(d))return false;
   return _hasVisitDate(_parishVisits(p),date);
@@ -4082,7 +4088,9 @@ function _deleteParishVisit(p,date){
   if(!r||!Array.isArray(r.visits))return false;
   const i=r.visits.findIndex(function(v){return _visitDateOf(v)===String(date);});
   if(i<0||String(_normalizeVisitEntry(r.visits[i]).method||'manual').toLowerCase()==='gps')return false;
-  r.visits.splice(i,1);if(r.visits.length)d[key]=r;else delete d[key];
+  r.deletedManualVisits=Object.assign({},r.deletedManualVisits||{});
+  r.deletedManualVisits[String(date)]=new Date().toISOString();
+  r.visits.splice(i,1);d[key]=r;
   if(!_saveParishVisits(d))return false;
   return !_parishVisits(p).some(function(v){return v.date===String(date);});
 }
@@ -15842,7 +15850,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function hasMeaningfulDriveData(data){
     if(!data||typeof data!=='object')return false;
     const countVisits=function(value){return Object.keys(value&&typeof value==='object'?value:{}).some(function(key){const item=value[key];return item&&Array.isArray(item.visits)&&item.visits.length>0;});};
-    return countVisits(data.shrineVisits)||countVisits(data.parishVisits)||
+    const hasDeletes=function(value){return Object.values(value&&typeof value==='object'?value:{}).some(function(rec){return rec&&rec.deletedManualVisits&&Object.keys(rec.deletedManualVisits).length>0;});};
+    return countVisits(data.shrineVisits)||countVisits(data.parishVisits)||hasDeletes(data.shrineVisits)||hasDeletes(data.parishVisits)||
       (Array.isArray(data.prayerFavorites)&&data.prayerFavorites.length>0)||
       (Array.isArray(data.webFavorites)&&data.webFavorites.length>0)||
       (Array.isArray(data.routeFavorites)&&data.routeFavorites.length>0)||
@@ -16084,7 +16093,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const items=JSON.parse(payload);if(!Array.isArray(items))throw new Error();
       items.sort(function(a,b){return String(b.name||'').localeCompare(String(a.name||''));});
       if(!items.length){host.textContent='이전 백업이 없습니다.';return;}
-      items.slice(0,5).forEach(function(item){
+      items.slice(0,1).forEach(function(item){
         const match=String(item.name||'').match(/history-(\d{13})-/);
         const stamp=match?new Date(Number(match[1])).toLocaleString('ko-KR'):'이전 백업';
         const button=document.createElement('button');button.type='button';button.className='oai-records-secondary';button.textContent=stamp+' 기록 병합하기';
@@ -16151,11 +16160,20 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function devImportParse(text){const raw=String(text||'').trim();let data;if(raw.startsWith('CGM1.'))data=decodeBackup(raw);else{const obj=JSON.parse(raw);if(!obj||obj.format!=='catholic-gildongmu-backup'||!obj.data)throw new Error('지원하지 않는 백업 형식입니다.');data=obj.data;}if(!data||!data.shrineVisits||!data.parishVisits||typeof data.shrineVisits!=='object'||typeof data.parishVisits!=='object'||Array.isArray(data.shrineVisits)||Array.isArray(data.parishVisits))throw new Error('방문기록 형식이 올바르지 않습니다.');return data;}
   function devImportCount(map){return Object.values(map||{}).reduce(function(n,r){return n+(Array.isArray(r&&r.visits)?r.visits.length:0);},0);}
   // 1183: CGM1 recovery changes ONLY visit maps. Keep photos, favorites and current settings untouched.
-  function devImportMergeVisitsOnly(data){
+  function devImportMergeVisitsOnly(data,explicitRestore){
     const shrineBefore=localStorage.getItem(OAI_SHRINE_VISITS_KEY),parishBefore=localStorage.getItem(OAI_PARISH_VISITS_KEY);
     try{
-      const shrine=mergeVisitMaps(_loadShrineVisits(),data.shrineVisits);
-      const parish=mergeVisitMaps(_loadParishVisits(),data.parishVisits);
+      const currentShrine=_loadShrineVisits(),currentParish=_loadParishVisits();
+      if(explicitRestore){
+        [[currentShrine,data.shrineVisits],[currentParish,data.parishVisits]].forEach(function(pair){
+          Object.keys(pair[1]||{}).forEach(function(key){
+            const existing=pair[0][key];if(!existing||!existing.deletedManualVisits)return;
+            (pair[1][key].visits||[]).forEach(function(v){const date=_visitDateOf(v);if(date&&existing.deletedManualVisits[String(date)]&&v&&typeof v==='object'&&String(v.method||'manual').toLowerCase()!=='gps')v.savedAt=new Date().toISOString();});
+          });
+        });
+      }
+      const shrine=mergeVisitMaps(currentShrine,data.shrineVisits);
+      const parish=mergeVisitMaps(currentParish,data.parishVisits);
       // Use direct writes: legacy _saveShrineVisits silently swallows storage failures.
       localStorage.setItem(OAI_SHRINE_VISITS_KEY,JSON.stringify(shrine));
       localStorage.setItem(OAI_PARISH_VISITS_KEY,JSON.stringify(parish));
@@ -16170,7 +16188,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function devImportPreview(data){devImportCandidate=data;const p=document.getElementById('oai-dev-import-preview');if(p)p.textContent='백업에 포함된 방문기록: 성지 '+devImportCount(data.shrineVisits)+'건 · 성당 '+devImportCount(data.parishVisits)+'건. 기존 기록과 병합하며 사진·설정은 변경하지 않습니다. Google Drive 기록 확인 후 자동 저장됩니다.';const b=document.getElementById('oai-dev-import-apply');if(b)b.disabled=false;devImportMessage('');}
   document.addEventListener('click',function(e){if(!e.target||!e.target.closest||!e.target.closest('#oai-dev-import-check'))return;e.preventDefault();devImportCandidate=null;const b=document.getElementById('oai-dev-import-apply');if(b)b.disabled=true;try{const code=document.getElementById('oai-dev-import-code');devImportPreview(devImportParse(code&&code.value));}catch(err){devImportMessage('코드 확인 실패: '+(err&&err.message||'백업 코드를 확인해 주세요.'));}});
-  document.addEventListener('click',function(e){const label=e.target&&e.target.closest&&e.target.closest('#oai-settings-version-label');if(label&&document.getElementById('oai-settings-modal')?.classList.contains('show')){const now=Date.now();devTapCount=(now-devTapLast>3000)?1:devTapCount+1;devTapLast=now;if(devTapCount>=5){devTapCount=0;devImportOpen();}return;}if(e.target&&e.target.closest&&e.target.closest('[data-oai-dev-import-close]')){e.preventDefault();devImportClose();return;}if(e.target&&e.target.closest&&e.target.closest('#oai-dev-import-apply')){e.preventDefault();if(!devImportCandidate)return;try{const data=Object.assign({},devImportCandidate);devImportMergeVisitsOnly(data);markRestoreChecked();devImportMessage('방문기록 병합을 완료했습니다. Google Drive 확인 후 자동 저장합니다. 화면에서 기록을 확인해 주세요.');const b=document.getElementById('oai-dev-import-apply');if(b)b.disabled=true;devImportCandidate=null;refresh();refreshRecords();}catch(err){devImportMessage('복원 실패: '+(err&&err.message||'알 수 없는 오류'));}}});
+  document.addEventListener('click',function(e){const label=e.target&&e.target.closest&&e.target.closest('#oai-settings-version-label');if(label&&document.getElementById('oai-settings-modal')?.classList.contains('show')){const now=Date.now();devTapCount=(now-devTapLast>3000)?1:devTapCount+1;devTapLast=now;if(devTapCount>=5){devTapCount=0;devImportOpen();}return;}if(e.target&&e.target.closest&&e.target.closest('[data-oai-dev-import-close]')){e.preventDefault();devImportClose();return;}if(e.target&&e.target.closest&&e.target.closest('#oai-dev-import-apply')){e.preventDefault();if(!devImportCandidate)return;try{const data=Object.assign({},devImportCandidate);devImportMergeVisitsOnly(data,true);markRestoreChecked();devImportMessage('방문기록 병합을 완료했습니다. Google Drive 확인 후 자동 저장합니다. 화면에서 기록을 확인해 주세요.');const b=document.getElementById('oai-dev-import-apply');if(b)b.disabled=true;devImportCandidate=null;refresh();refreshRecords();}catch(err){devImportMessage('복원 실패: '+(err&&err.message||'알 수 없는 오류'));}}});
   document.addEventListener('change',async function(e){if(!e.target||e.target.id!=='oai-dev-import-file')return;devImportCandidate=null;const b=document.getElementById('oai-dev-import-apply');if(b)b.disabled=true;const p=document.getElementById('oai-dev-import-preview');const file=e.target.files&&e.target.files[0];if(!file)return;try{if(file.size>20*1024*1024)throw new Error('파일 크기가 20MB를 초과합니다.');const data=devImportParse(await file.text());devImportPreview(data);}catch(err){if(p)p.textContent='백업 파일을 읽지 못했습니다.';devImportMessage(err&&err.message||'형식을 확인해 주세요.');}});
   function openRestore(){const m=restoreModal();if(!m)return;restoreMessage('');const input=document.getElementById('oai-record-restore-code');if(input)input.value='';m.classList.add('show');m.setAttribute('aria-hidden','false');}
   function closeRestore(){const m=restoreModal();if(!m)return;m.classList.remove('show');m.setAttribute('aria-hidden','true');}
@@ -16212,7 +16230,27 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     return order.map(function(k){return map[k];}).sort(_compareShrineVisits);
   }
   function mergeSharedJournalMaps(a,b){const out={};const keys=new Set(Object.keys(b&&typeof b==='object'?b:{}).concat(Object.keys(a&&typeof a==='object'?a:{})));keys.forEach(function(d){const aa=a&&a[d]&&typeof a[d]==='object'?a[d]:{},bb=b&&b[d]&&typeof b[d]==='object'?b[d]:{};out[d]=_oaiMergeJournalExtras(aa,bb);out[d].updatedAt=String(aa.updatedAt||bb.updatedAt||'');});return out;}
-  function mergeVisitMaps(current,backup){const out=current&&typeof current==='object'?current:{};Object.keys(backup&&typeof backup==='object'?backup:{}).forEach(function(key){const oldRecord=out[key]&&typeof out[key]==='object'?out[key]:{};const newRecord=backup[key]&&typeof backup[key]==='object'?backup[key]:{};out[key]=Object.assign({},newRecord,oldRecord,{visits:mergeVisitEntries(oldRecord.visits,newRecord.visits),sharedJournalByDate:mergeSharedJournalMaps(oldRecord.sharedJournalByDate,newRecord.sharedJournalByDate)});});return out;}
+  function mergeVisitMaps(current,backup){
+    const out=current&&typeof current==='object'?current:{};
+    Object.keys(backup&&typeof backup==='object'?backup:{}).forEach(function(key){
+      const local=out[key]&&typeof out[key]==='object'?out[key]:{};
+      const cloud=backup[key]&&typeof backup[key]==='object'?backup[key]:{};
+      const deleted=Object.assign({},cloud.deletedManualVisits||{});
+      Object.keys(local.deletedManualVisits||{}).forEach(function(date){
+        const at=String(local.deletedManualVisits[date]||'');
+        if(at>String(deleted[date]||''))deleted[date]=at;
+      });
+      const visits=mergeVisitEntries(local.visits,cloud.visits).filter(function(v){
+        // Never remove a genuine GPS-certified visit as a result of a manual deletion.
+        return String(v.method||'').toLowerCase()==='gps'||!deleted[String(v.date)]||String(v.savedAt||'')>String(deleted[String(v.date)]);
+      });
+      out[key]=Object.assign({},cloud,local,{
+        visits:visits,deletedManualVisits:deleted,
+        sharedJournalByDate:mergeSharedJournalMaps(local.sharedJournalByDate,cloud.sharedJournalByDate)
+      });
+    });
+    return out;
+  }
   function applyBackup(data){
     _saveShrineVisits(mergeVisitMaps(_loadShrineVisits(),data.shrineVisits));
     _saveParishVisits(mergeVisitMaps(_loadParishVisits(),data.parishVisits));
@@ -16245,7 +16283,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     try{
       const input=document.getElementById('oai-record-restore-code');
       const data=devImportParse(input&&input.value);
-      devImportMergeVisitsOnly(data);
+      devImportMergeVisitsOnly(data,true);
       markRestoreChecked();closeRestore();refresh();refreshRecords();
       recordMessage('성지·성당 방문기록을 병합했습니다. 사진과 설정은 유지하며 Google Drive 확인 후 저장합니다.');
     }catch(error){restoreMessage(error&&error.message||'백업 코드를 다시 확인해 주세요.');}
