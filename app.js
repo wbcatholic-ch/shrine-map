@@ -16398,12 +16398,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const routesChanged=changedKeys.indexOf(OAI_ROUTE_FAVORITES_KEY)>=0;
       if(parishChanged){try{window.dispatchEvent(new CustomEvent('oai-my-parish-changed'));}catch(_e){}}
       if(routesChanged){
-        // Route controls do not participate in the Drive restore transaction.
-        // Give the WebView a chance to process input before rebuilding them.
-        setTimeout(function(){
-          try{_updateAllRouteFavoriteButtons();_renderRouteFrequentPlaces();}
-          catch(err){console.warn('[가톨릭길동무] 복원 후 자주 가는 장소 표시 실패',err);}
-        },0);
+        try{_updateAllRouteFavoriteButtons();_renderRouteFrequentPlaces();}catch(_e){}
       }
     }
     return {courses:Array.isArray(remote.pilgrimageCourses)?remote.pilgrimageCourses.length:0,changed:appliedChanges>0};
