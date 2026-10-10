@@ -16112,6 +16112,56 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!bridge||typeof bridge.listGoogleDriveBackupHistory!=='function'){recordMessage('이 기능은 최신 Android 앱에서 사용할 수 있습니다.');return;}
     recordMessage('이전 백업 목록을 확인합니다.');bridge.listGoogleDriveBackupHistory();
   });
+  // 1199: Drive recovery is a staged merge, not a replacement. No upload runs
+  // until all destination values have been validated and committed.
+  function oaiRestoreDriveCompleteData(remote){
+    const changes={};
+    const put=function(key,value){changes[key]=JSON.stringify(value);};
+    const currentShrine=_loadShrineVisits(),currentParish=_loadParishVisits();
+    put(OAI_SHRINE_VISITS_KEY,mergeVisitMaps(currentShrine,remote.shrineVisits));
+    put(OAI_PARISH_VISITS_KEY,mergeVisitMaps(currentParish,remote.parishVisits));
+    const listFields=[['pr_favorites','prayerFavorites'],['web_favorites_v1','webFavorites'],[OAI_ROUTE_FAVORITES_KEY,'routeFavorites'],['oai_pilgrimage_plan_v1','pilgrimagePlan']];
+    listFields.forEach(function(pair){
+      const key=pair[0],field=pair[1],value=remote[field];
+      if(value===undefined)return;
+      if(!Array.isArray(value))throw new Error('백업 목록 형식 오류: '+field);
+      let combined=mergeLists(localValue(key,[]),value);
+      if(field==='routeFavorites')combined=combined.slice(0,OAI_ROUTE_FAVORITES_MAX);
+      put(key,combined);
+    });
+    if(remote.pilgrimageCourses!==undefined){
+      if(!Array.isArray(remote.pilgrimageCourses))throw new Error('백업 코스 형식 오류');
+      const current=localValue('oai_pilgrimage_courses_v1',[]);
+      if(!Array.isArray(current))throw new Error('휴대폰 코스 형식 오류');
+      const next=current.slice(),ids=new Set(current.map(function(c){return String(c&&c.id||'');}));
+      remote.pilgrimageCourses.forEach(function(c){
+        if(!c||typeof c!=='object'||!c.id||!Array.isArray(c.places))throw new Error('백업 코스 내용 오류');
+        if(!ids.has(String(c.id))){ids.add(String(c.id));next.push(c);}
+      });
+      put('oai_pilgrimage_courses_v1',next);
+    }
+    if(remote.pilgrimageDraftMeta&&typeof remote.pilgrimageDraftMeta==='object'&&!Array.isArray(remote.pilgrimageDraftMeta)){
+      const current=localValue('oai_pilgrimage_draft_meta_v2',{});
+      put('oai_pilgrimage_draft_meta_v2',Object.assign({},remote.pilgrimageDraftMeta,current));
+    }
+    const existingParish=configuredParish();
+    if(!existingParish||!existingParish.name){
+      if(remote.myParish&&remote.myParish.name){
+        const parish={diocese:String(remote.myParish.diocese||remote.myDiocese||''),name:String(remote.myParish.name)};
+        put(OAI_SETTINGS_MY_PARISH_KEY,parish);put('oai_my_parish',parish);
+        changes.oai_my_diocese_name=parish.diocese;changes.oai_my_parish_name=parish.name;
+      }else if(!configuredDiocese()&&remote.myDiocese)changes.oai_my_diocese_name=String(remote.myDiocese);
+    }
+    if(typeof remote.parishAutoVisit==='boolean'&&localStorage.getItem(OAI_PARISH_AUTO_VISIT_ENABLED_KEY)===null)changes[OAI_PARISH_AUTO_VISIT_ENABLED_KEY]=remote.parishAutoVisit?'1':'0';
+    if(remote.prayerFontSize&&!localStorage.getItem('prayer_font_size'))changes.prayer_font_size=String(remote.prayerFontSize);
+    if(remote.noticeFlags&&remote.noticeFlags.pilgrimagePublicFeatureSeen===true&&localStorage.getItem('oai_pilgrimage_public_feature_seen_v1')===null)changes.oai_pilgrimage_public_feature_seen_v1='1';
+    const prior={};Object.keys(changes).forEach(function(k){prior[k]=localStorage.getItem(k);});
+    // Do not perform network writes while this transaction is being applied.
+    try{Object.keys(changes).forEach(function(k){localStorage.setItem(k,changes[k]);});}
+    catch(err){Object.keys(prior).forEach(function(k){try{if(prior[k]===null)localStorage.removeItem(k);else localStorage.setItem(k,prior[k]);}catch(_e){}});throw err;}
+    try{window.dispatchEvent(new CustomEvent('oai-my-parish-changed'));_updateAllRouteFavoriteButtons();_renderRouteFrequentPlaces();}catch(_e){}
+    return {courses:Array.isArray(remote.pilgrimageCourses)?remote.pilgrimageCourses.length:0};
+  }
   window.oaiGoogleDriveBackupReceived=function(encoded){
     try{
       const text=decodeURIComponent(escape(atob(String(encoded||''))));
@@ -16127,18 +16177,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(initialDriveFirstFlow&&initialOnboarding)setTimeout(openInitialParishSetupAfterDrive,180);
         return;
       }
+      // Keep uploads suspended until every backed-up field has been merged.
+      // A failed transaction leaves both device data and the verified cloud backup intact.
+      const restored=oaiRestoreDriveCompleteData(parsed.data);
       googleDriveInitialSyncPending=false;oaiCancelDriveCheckTimer();
-      // Drive 수신은 방문기록만 병합합니다. 기존 사진/순례계획/설정은 유지합니다.
-      // 다운로드 성공을 업로드 허가로 취급하면 오래된/빈 백업이 다시 올라갈 수 있습니다.
-      devImportMergeVisitsOnly(parsed.data);
-      // Remote backup was verified; visit records are merged and cloud-only
-      // favorites/plans are kept for subsequent writes without silently
-      // replacing the device's active settings.
       oaiVerifiedRemoteBackup=parsed;
       setDriveWriteReady(isGoogleDriveConnected()&&isGoogleDriveAutoBackupEnabled());
       markRestoreChecked();
-      refresh();refreshRecords();
-      recordMessage('Google Drive 방문기록을 병합했습니다. 기존 사진·설정은 유지합니다.');
+      refresh();refreshRecords();refreshGoogleDriveButton();
+      recordMessage('Google Drive 방문기록·순례코스·설정을 병합했습니다. 코스 '+restored.courses+'개 확인.');
       if(driveWriteReady()){oaiDriveDirtyWhileSaving=false;queueGoogleDriveBackup();}
       if(initialDriveFirstFlow&&initialOnboarding){showInitialDriveImportComplete();return;}
     }catch(_e){
