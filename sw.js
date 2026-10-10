@@ -1,4 +1,4 @@
-const ASSET_VERSION = 'V8-1-14-1193';
+const ASSET_VERSION = 'V8-1-14-1204';
 const CACHE_VERSION = 'catholic-way-' + ASSET_VERSION;
 
 /* V8-1-14-923: service worker cache strategy overview.
@@ -45,20 +45,31 @@ const APP_SHELL = [
   withVersion('./assets/guide/home-parish.jpg'),
 ];
 
+/* Keep the previous active worker/cache if a critical file is unavailable.
+   Optional offline artwork must not prevent a safe update. */
+const CRITICAL_SHELL = [
+  './index.html',
+  withVersion('./style.css'),
+  withVersion('./app.js'),
+  withVersion('./web.js'),
+  withVersion('./sw-update.js'),
+  withVersion('./js/back-controller.js'),
+];
 self.addEventListener('install', (event) => {
-  event.waitUntil(
-    caches.open(CACHE_VERSION)
-      .then((cache) => Promise.all(APP_SHELL.map((url) => cache.add(url).catch(() => null))))
-      .then(() => self.skipWaiting())
-  );
+  event.waitUntil((async () => {
+    const cache = await caches.open(CACHE_VERSION);
+    await Promise.all(CRITICAL_SHELL.map((url) => cache.add(new Request(url, {cache:'reload'}))));
+    const optional = APP_SHELL.filter((url) => !CRITICAL_SHELL.includes(url));
+    await Promise.all(optional.map((url) => cache.add(new Request(url, {cache:'reload'})).catch(() => null)));
+    await self.skipWaiting();
+  })());
 });
-
 self.addEventListener('activate', (event) => {
-  event.waitUntil(
-    caches.keys()
-      .then((keys) => Promise.all(keys.map((key) => key === CACHE_VERSION ? null : caches.delete(key))))
-      .then(() => self.clients.claim())
-  );
+  event.waitUntil((async () => {
+    const keys = await caches.keys();
+    await Promise.all(keys.filter((key) => key.startsWith('catholic-way-') && key !== CACHE_VERSION).map((key) => caches.delete(key)));
+    await self.clients.claim();
+  })());
 });
 
 function sameOrigin(request) {
@@ -83,6 +94,19 @@ async function networkFirst(request) {
   } catch (e) {
     const cached = await cache.match(request);
     return cached || cache.match('./index.html');
+  }
+}
+async function versionedNetworkFirst(request) {
+  const cache = await caches.open(CACHE_VERSION);
+  try {
+    const fresh = await fetch(request, {cache:'no-cache'});
+    if (fresh && fresh.ok) {
+      cache.put(request, fresh.clone()).catch(() => null);
+      return fresh;
+    }
+    return (await cache.match(request)) || fresh;
+  } catch (_e) {
+    return (await cache.match(request)) || new Response('Offline', {status:503});
   }
 }
 async function cacheFirst(request) {
@@ -126,7 +150,7 @@ self.addEventListener('fetch', (event) => {
     return;
   }
   if (isVersionedAsset(request)) {
-    event.respondWith(cacheFirst(request));
+    event.respondWith(versionedNetworkFirst(request));
     return;
   }
   event.respondWith(staleWhileRevalidate(request));
