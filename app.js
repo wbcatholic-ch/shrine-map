@@ -3122,9 +3122,12 @@ function _oaiReplaceSyncedPhotoInMap(data,photoId,remoteId,mimeType,savedAt){
   });return changed;
 }
 window.oaiVisitPhotoSyncResult=function(localId,ok,fileId,mimeType,savedAt,message){
+  const _photoSyncT0=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
   const photoId=String(localId||'');if(!photoId)return;const shr=_loadShrineVisits(),par=_loadParishVisits();
   if(!ok){const mark=function(data){let changed=false;Object.keys(data&&typeof data==='object'?data:{}).forEach(function(key){const rec=data[key];if(!rec)return;const one=function(j){if(!j||!Array.isArray(j.photos))return;j.photos.forEach(function(ph){if(ph&&_oaiPhotoIdentity(ph)===photoId&&ph.syncStatus!=='waiting'){ph.syncStatus='waiting';changed=true;}});};if(Array.isArray(rec.visits))rec.visits.forEach(one);if(rec.sharedJournalByDate&&typeof rec.sharedJournalByDate==='object')Object.keys(rec.sharedJournalByDate).forEach(function(d){one(rec.sharedJournalByDate[d]);});});return changed;};const a=mark(shr),b=mark(par);if(a)_saveShrineVisits(shr);if(b)_saveParishVisits(par);if(a||b){const pm=document.getElementById('parish-visit-detail');if(pm&&pm.classList.contains('show'))_oaiSchedulePhotoJournalRender('parish');const sm=document.getElementById('shrine-visit-detail-view');if(sm&&sm.classList.contains('show'))_oaiSchedulePhotoJournalRender('shrine');}return;}
-  const remoteId=String(fileId||'');if(!remoteId)return;const a=_oaiReplaceSyncedPhotoInMap(shr,photoId,remoteId,mimeType,savedAt),b=_oaiReplaceSyncedPhotoInMap(par,photoId,remoteId,mimeType,savedAt);if(a)_saveShrineVisits(shr);if(b)_saveParishVisits(par);if(a||b){try{queueGoogleDriveBackup();}catch(_e){}const pm=document.getElementById('parish-visit-detail');if(pm&&pm.classList.contains('show'))_oaiSchedulePhotoJournalRender('parish');const sm=document.getElementById('shrine-visit-detail-view');if(sm&&sm.classList.contains('show'))_oaiSchedulePhotoJournalRender('shrine');}
+  const remoteId=String(fileId||'');if(!remoteId)return;const a=_oaiReplaceSyncedPhotoInMap(shr,photoId,remoteId,mimeType,savedAt),b=_oaiReplaceSyncedPhotoInMap(par,photoId,remoteId,mimeType,savedAt);if(a)_saveShrineVisits(shr);if(b)_saveParishVisits(par);if(a||b){/* _saveShrineVisits/_saveParishVisits triggers the storage watcher; do not queue a duplicate backup. */const pm=document.getElementById('parish-visit-detail');if(pm&&pm.classList.contains('show'))_oaiSchedulePhotoJournalRender('parish');const sm=document.getElementById('shrine-visit-detail-view');if(sm&&sm.classList.contains('show'))_oaiSchedulePhotoJournalRender('shrine');}
+  const _photoSyncMs=Math.round(((typeof performance!=='undefined'&&performance.now)?performance.now():Date.now())-_photoSyncT0);
+  if(_photoSyncMs>=80)console.warn('[가톨릭길동무][성능] 사진 Drive 완료 처리 '+_photoSyncMs+'ms');
 };
 function _oaiPrimeVisitPhoto(src){if(!src)return;try{const im=new Image();im.decoding='async';im.src=src;if(typeof im.decode==='function')im.decode().catch(function(){});}catch(_e){}}
 function _oaiCachePhotoData(fileId,dataUri,type){const key=String(fileId||'');if(!key||!dataUri)return;const cache=type==='thumb'?_oaiVisitPhotoThumbCache:_oaiVisitPhotoFullCache;cache.delete(key);cache.set(key,dataUri);if(type!=='thumb')_oaiPrimeVisitPhoto(dataUri);while(cache.size>OAI_VISIT_PHOTO_CACHE_MAX){const oldest=cache.keys().next().value;cache.delete(oldest);}}
@@ -16056,6 +16059,23 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       m.classList.add('show');m.setAttribute('aria-hidden','false');
     },120);
   }
+  // 1215: Measure browser main-thread stalls after a completed Drive save; diagnostic only.
+  // No photo content, personal data or backup JSON is collected.
+  try{
+    if(typeof PerformanceObserver==='function' && PerformanceObserver.supportedEntryTypes && PerformanceObserver.supportedEntryTypes.indexOf('longtask')>=0){
+      const observer=new PerformanceObserver(function(list){
+        const saved=performance.getEntriesByName('oai-drive-saved').slice(-1)[0];
+        if(!saved)return;
+        list.getEntries().forEach(function(entry){
+          const delta=Math.round(entry.startTime-saved.startTime);
+          if(delta>=0 && delta<=8000 && entry.duration>=100){
+            console.warn('[가톨릭길동무][성능] Drive 저장 완료 후 '+delta+'ms 시점 UI 점유 '+Math.round(entry.duration)+'ms');
+          }
+        });
+      });
+      observer.observe({entryTypes:['longtask']});
+    }
+  }catch(_e){}
   window.oaiGoogleDriveStatus=function(status,message){
     if(status==='connected'){
       localStorage.setItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY,'1');localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'1');googleDriveAutoConnectPending=false;
@@ -16092,6 +16112,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     if(status==='saved'){
       if(!oaiDriveWriteInFlight){return;}
+      try{performance.clearMarks('oai-drive-saved');performance.mark('oai-drive-saved');}catch(_e){}
       oaiDriveWriteInFlight=false;
       if(oaiDriveDirtyWhileSaving){oaiDriveDirtyWhileSaving=false;setTimeout(queueGoogleDriveBackup,0);}
       try{localStorage.setItem('oai_google_drive_saved_at_v1',new Date().toISOString());}catch(_e){}
