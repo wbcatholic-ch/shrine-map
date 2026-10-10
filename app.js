@@ -16567,7 +16567,7 @@ document.addEventListener('click',function(e){
   const key=String(help.getAttribute('data-oai-help')||'');
   if(key==='frequent-places'){
     e.preventDefault();e.stopPropagation();
-    _oaiOpenFeatureHelp('길찾기 빠른 선택','집·본당·직장 등 길찾기에 자주 사용하는 장소를 최대 10곳까지 등록할 수 있습니다.\n\n자동 순례 제외는 아래 별도 목록에서 설정합니다.');
+    _oaiOpenFeatureHelp('길찾기 빠른 선택','집·본당·직장 등 길찾기에 자주 사용하는 장소를 최대 10곳까지 등록할 수 있습니다.');
     return;
   }
   if(key==='auto-excluded-places'){e.preventDefault();e.stopPropagation();_oaiOpenFeatureHelp('자동 순례 제외 장소','자주 머무는 성지·성당을 자동 순례코스 생성 및 자동 완료 판정에서 제외합니다.\n\nGPS 방문 스탬프·방문기록·사진·메모는 정상 등록됩니다. 직접 시작한 순례코스에서는 정상 판정됩니다.');return;}
