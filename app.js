@@ -2538,12 +2538,17 @@ function _updateShrineVisitFloatingListButtonUI(){
 function _bindShrineVisitFloatingListButtonWatchers(){
   if(window.__OAI_SHRINE_VISIT_FLOATING_WATCH_BOUND__) return;
   window.__OAI_SHRINE_VISIT_FLOATING_WATCH_BOUND__=true;
+  // Batch focus/click/DOM notifications into a single UI refresh.
+  // The previous handler scheduled a fresh timer per event, even while a
+  // previous refresh was still pending, amplifying freezes on busy screens.
+  let pendingRefresh=0;
   const refresh=function(){
-    try{ if(typeof window.__oaiIsResumeFreeze === 'function' && window.__oaiIsResumeFreeze()) return; }catch(_e){}
-    setTimeout(function(){ try{
-      if(typeof window.__oaiIsResumeFreeze === 'function' && window.__oaiIsResumeFreeze()) return;
-      _updateShrineVisitFloatingListButtonUI();
-    }catch(_e){} }, 40);
+    if(_mode!=='shrine'||document.visibilityState==='hidden'||pendingRefresh)return;
+    try{if(typeof window.__oaiIsResumeFreeze==='function'&&window.__oaiIsResumeFreeze())return;}catch(_e){}
+    pendingRefresh=setTimeout(function(){
+      pendingRefresh=0;
+      try{if(typeof window.__oaiIsResumeFreeze==='function'&&window.__oaiIsResumeFreeze())return;_updateShrineVisitFloatingListButtonUI();}catch(_e){}
+    },70);
   };
   ['focusin','focusout','click','keyup','touchend'].forEach(function(ev){ document.addEventListener(ev, refresh, true); });
   ['resize','orientationchange','pageshow'].forEach(function(ev){ window.addEventListener(ev, refresh, {passive:true}); });
@@ -2555,7 +2560,8 @@ function _bindShrineVisitFloatingListButtonWatchers(){
     });
     window.__OAI_SHRINE_VISIT_FLOATING_MO__=mo;
   }catch(_e){}
-  setInterval(function(){ try{ if(_mode==='shrine') _updateShrineVisitFloatingListButtonUI(); }catch(_e){} }, 350);
+  // Keep a slow fallback for transitions missed by DOM observers.
+  setInterval(function(){ if(_mode==='shrine')refresh(); }, 2000);
 }
 try{ _bindShrineVisitFloatingListButtonWatchers(); }catch(_e){}
 
@@ -15907,6 +15913,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(oaiDriveWriteInFlight){oaiDriveDirtyWhileSaving=true;return;}
     if(showMessage)recordMessage('Google Drive에 기록을 저장하고 있습니다.');
     try{
+      const _oaiDrivePrepStarted=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
       const snapshot=backupSnapshot();
       if(oaiVerifiedRemoteBackup&&oaiVerifiedRemoteBackup.data){
         const remote=oaiVerifiedRemoteBackup.data, local=snapshot.data;
@@ -15944,8 +15951,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         recordMessage('저장할 기록이 없어 Google Drive 저장을 건너뛰었습니다.');
         return;
       }
+      const serialized=JSON.stringify(snapshot);
+      const prepMs=Math.round(((typeof performance!=='undefined'&&performance.now)?performance.now():Date.now())-_oaiDrivePrepStarted);
+      if(prepMs>=80){console.warn('[가톨릭길동무][성능] Google Drive 백업 준비 '+prepMs+'ms / '+serialized.length+'자');}
       oaiDriveWriteInFlight=true;
-      bridge.saveGoogleDriveBackup(JSON.stringify(snapshot));
+      bridge.saveGoogleDriveBackup(serialized);
     }catch(_e){oaiDriveWriteInFlight=false;if(showMessage)recordMessage('Google Drive에 기록을 저장하지 못했습니다.');}
   }
   function setOnboardingHeader(title,subtitle){
