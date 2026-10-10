@@ -3114,6 +3114,24 @@ window.oaiVisitPhotoUploadResult=function(requestId,ok,json,message){
   const visit=_oaiGetVisitByDate(ctx.kind,ctx.item,ctx.date),current=_oaiNormalizePhotos(visit),limit=_oaiVisitPhotoLimit(ctx.kind,ctx.item),next=current.concat(added).slice(0,limit);
   const saved=ctx.kind==='parish'?_oaiUpdateParishVisitExtras(ctx.item,ctx.date,{photos:next}):_oaiUpdateShrineVisitExtras(ctx.item,ctx.date,{photos:next});if(saved){_oaiSchedulePhotoJournalRender(ctx.kind);if(msg&&!/완료|저장/.test(msg))_oaiVisitToast(msg);}
 };
+/* 사진 Drive 응답 시 상세 화면 전체를 다시 만들지 않고 해당 상태 표시만 갱신한다. */
+function _oaiUpdateVisiblePhotoSyncBadge(photoId,status,remoteId){
+  const id=String(photoId||'');if(!id)return;
+  document.querySelectorAll('.oai-visit-photo-thumb[data-oai-photo-file]').forEach(function(btn){
+    if(btn.getAttribute('data-oai-photo-file')!==id)return;
+    const item=btn.closest('.oai-visit-photo-item');
+    if(remoteId)btn.setAttribute('data-oai-photo-drive',String(remoteId));
+    let badge=btn.querySelector('.oai-visit-photo-sync');
+    if(status==='saved'){
+      if(badge)badge.remove();
+      if(item)item.classList.remove('syncing');
+    }else if(status==='waiting'){
+      if(!badge){badge=document.createElement('span');badge.className='oai-visit-photo-sync';btn.appendChild(badge);}
+      badge.textContent='동기화 대기';
+      if(item)item.classList.add('syncing');
+    }
+  });
+}
 function _oaiReplaceSyncedPhotoInMap(data,photoId,remoteId,mimeType,savedAt){
   let changed=false;Object.keys(data&&typeof data==='object'?data:{}).forEach(function(key){const rec=data[key];if(!rec)return;
     const patchPhotos=function(arr){if(!Array.isArray(arr))return arr;let touched=false;const photos=arr.map(function(ph){if(!ph||_oaiPhotoIdentity(ph)!==String(photoId))return ph;touched=true;changed=true;return Object.assign({},ph,{photoId:String(photoId),fileId:String(photoId),driveFileId:String(remoteId||ph.driveFileId||''),mimeType:String(mimeType||ph.mimeType||'image/jpeg'),savedAt:String(savedAt||ph.savedAt||Date.now()),syncStatus:'saved'});});return touched?photos:arr;};
@@ -3124,8 +3142,8 @@ function _oaiReplaceSyncedPhotoInMap(data,photoId,remoteId,mimeType,savedAt){
 window.oaiVisitPhotoSyncResult=function(localId,ok,fileId,mimeType,savedAt,message){
   const _photoSyncT0=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
   const photoId=String(localId||'');if(!photoId)return;const shr=_loadShrineVisits(),par=_loadParishVisits();
-  if(!ok){const mark=function(data){let changed=false;Object.keys(data&&typeof data==='object'?data:{}).forEach(function(key){const rec=data[key];if(!rec)return;const one=function(j){if(!j||!Array.isArray(j.photos))return;j.photos.forEach(function(ph){if(ph&&_oaiPhotoIdentity(ph)===photoId&&ph.syncStatus!=='waiting'){ph.syncStatus='waiting';changed=true;}});};if(Array.isArray(rec.visits))rec.visits.forEach(one);if(rec.sharedJournalByDate&&typeof rec.sharedJournalByDate==='object')Object.keys(rec.sharedJournalByDate).forEach(function(d){one(rec.sharedJournalByDate[d]);});});return changed;};const a=mark(shr),b=mark(par);if(a)_saveShrineVisits(shr);if(b)_saveParishVisits(par);if(a||b){const pm=document.getElementById('parish-visit-detail');if(pm&&pm.classList.contains('show'))_oaiSchedulePhotoJournalRender('parish');const sm=document.getElementById('shrine-visit-detail-view');if(sm&&sm.classList.contains('show'))_oaiSchedulePhotoJournalRender('shrine');}return;}
-  const remoteId=String(fileId||'');if(!remoteId)return;const a=_oaiReplaceSyncedPhotoInMap(shr,photoId,remoteId,mimeType,savedAt),b=_oaiReplaceSyncedPhotoInMap(par,photoId,remoteId,mimeType,savedAt);if(a)_saveShrineVisits(shr);if(b)_saveParishVisits(par);if(a||b){/* _saveShrineVisits/_saveParishVisits triggers the storage watcher; do not queue a duplicate backup. */const pm=document.getElementById('parish-visit-detail');if(pm&&pm.classList.contains('show'))_oaiSchedulePhotoJournalRender('parish');const sm=document.getElementById('shrine-visit-detail-view');if(sm&&sm.classList.contains('show'))_oaiSchedulePhotoJournalRender('shrine');}
+  if(!ok){const mark=function(data){let changed=false;Object.keys(data&&typeof data==='object'?data:{}).forEach(function(key){const rec=data[key];if(!rec)return;const one=function(j){if(!j||!Array.isArray(j.photos))return;j.photos.forEach(function(ph){if(ph&&_oaiPhotoIdentity(ph)===photoId&&ph.syncStatus!=='waiting'){ph.syncStatus='waiting';changed=true;}});};if(Array.isArray(rec.visits))rec.visits.forEach(one);if(rec.sharedJournalByDate&&typeof rec.sharedJournalByDate==='object')Object.keys(rec.sharedJournalByDate).forEach(function(d){one(rec.sharedJournalByDate[d]);});});return changed;};const a=mark(shr),b=mark(par);if(a)_saveShrineVisits(shr);if(b)_saveParishVisits(par);if(a||b)_oaiUpdateVisiblePhotoSyncBadge(photoId,'waiting','');return;}
+  const remoteId=String(fileId||'');if(!remoteId)return;const a=_oaiReplaceSyncedPhotoInMap(shr,photoId,remoteId,mimeType,savedAt),b=_oaiReplaceSyncedPhotoInMap(par,photoId,remoteId,mimeType,savedAt);if(a)_saveShrineVisits(shr);if(b)_saveParishVisits(par);if(a||b){/* 기록 저장/자동 백업은 기존대로 유지하고, 사진의 저장 표시만 갱신한다. */_oaiUpdateVisiblePhotoSyncBadge(photoId,'saved',remoteId);}
   const _photoSyncMs=Math.round(((typeof performance!=='undefined'&&performance.now)?performance.now():Date.now())-_photoSyncT0);
   if(_photoSyncMs>=80)console.warn('[가톨릭길동무][성능] 사진 Drive 완료 처리 '+_photoSyncMs+'ms');
 };
