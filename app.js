@@ -16272,7 +16272,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(initialDriveFirstFlow&&initialOnboarding)setTimeout(openInitialParishSetupAfterDrive,180);
     }
   };
-  oaiAddLifecycleObserver('hidden',queueGoogleDriveBackup);
+  // Backgrounding is not a data change. Only flush a pending edit; a plain
+  // screen switch/lock must not create another full cloud snapshot.
+  oaiAddLifecycleObserver('hidden',function(){
+    if(!isGoogleDriveAutoBackupEnabled())return;
+    if(oaiDriveDirtyWhileSaving&&!oaiDriveWriteInFlight&&!googleDriveBackupTimer){
+      queueGoogleDriveBackup();
+    }
+  });
   oaiAddLifecycleObserver('visible',function(){setTimeout(maybePromptRestoreDaily,500);});
   // 1182: Settings bottom version label, five taps -> local backup import (no native dialog).
   let devImportCandidate=null,devTapCount=0,devTapLast=0;
