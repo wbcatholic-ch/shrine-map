@@ -16091,17 +16091,22 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           local.routeFavorites=mergeLists(local.routeFavorites,remote.routeFavorites).slice(0,OAI_ROUTE_FAVORITES_MAX);
         }
         // Preserve cloud GPS completions, including matching course ids.
-        const existingCourses=Array.isArray(local.pilgrimageCourses)?local.pilgrimageCourses:[];
-        const byId=new Map(existingCourses.map(function(c){return [String(c&&c.id||''),c];}));
-        (Array.isArray(remote.pilgrimageCourses)?remote.pilgrimageCourses:[]).forEach(function(c){
-          if(!c||!c.id)return;const id=String(c.id),current=byId.get(id);
-          if(!current){byId.set(id,c);return;}
-          const oldDone=Array.isArray(c.completions)?c.completions:[],newDone=Array.isArray(current.completions)?current.completions:[];
-          const combined=newDone.slice(),seen=new Set(combined.map(function(v){return String(v&&v.completedAt||'')+'|'+String(v&&v.method||'');}));
-          oldDone.forEach(function(v){if(!v)return;const token=String(v.completedAt||'')+'|'+String(v.method||'');if(!seen.has(token)){combined.push(v);seen.add(token);}});
-          byId.set(id,Object.assign({},current,{completions:combined,lastCompletedAt:Math.max(Number(current.lastCompletedAt)||0,Number(c.lastCompletedAt)||0)}));
-        });
-        local.pilgrimageCourses=Array.from(byId.values());
+        const remoteCourses=Array.isArray(remote.pilgrimageCourses)?remote.pilgrimageCourses:[];
+        // No cloud courses to merge: retain the already copied local list.
+        // Avoid rebuilding the entire completion index on settings-only saves.
+        if(remoteCourses.length){
+          const existingCourses=Array.isArray(local.pilgrimageCourses)?local.pilgrimageCourses:[];
+          const byId=new Map(existingCourses.map(function(c){return [String(c&&c.id||''),c];}));
+          remoteCourses.forEach(function(c){
+            if(!c||!c.id)return;const id=String(c.id),current=byId.get(id);
+            if(!current){byId.set(id,c);return;}
+            const oldDone=Array.isArray(c.completions)?c.completions:[],newDone=Array.isArray(current.completions)?current.completions:[];
+            const combined=newDone.slice(),seen=new Set(combined.map(function(v){return String(v&&v.completedAt||'')+'|'+String(v&&v.method||'');}));
+            oldDone.forEach(function(v){if(!v)return;const token=String(v.completedAt||'')+'|'+String(v.method||'');if(!seen.has(token)){combined.push(v);seen.add(token);}});
+            byId.set(id,Object.assign({},current,{completions:combined,lastCompletedAt:Math.max(Number(current.lastCompletedAt)||0,Number(c.lastCompletedAt)||0)}));
+          });
+          local.pilgrimageCourses=Array.from(byId.values());
+        }
         if(!local.myParish&&remote.myParish)local.myParish=remote.myParish;
         if(!local.myDiocese&&remote.myDiocese)local.myDiocese=remote.myDiocese;
         if(!local.prayerFontSize&&remote.prayerFontSize)local.prayerFontSize=remote.prayerFontSize;
