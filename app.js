@@ -16186,9 +16186,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       throw err;
     }
   }
-  function devImportPreview(data){devImportCandidate=data;const p=document.getElementById('oai-dev-import-preview');if(p)p.textContent='백업에 포함된 방문기록: 성지 '+devImportCount(data.shrineVisits)+'건 · 성당 '+devImportCount(data.parishVisits)+'건. 기존 기록과 병합하며 사진·설정은 변경하지 않습니다. Google Drive 기록 확인 후 자동 저장됩니다.';const b=document.getElementById('oai-dev-import-apply');if(b)b.disabled=false;devImportMessage('');}
+  function devImportPreview(data){devImportCandidate=data;const p=document.getElementById('oai-dev-import-preview');if(p){if(data.restoreType==='completed-courses-only'){const arr=data.completedCourseRestore||[];p.textContent='순례완료 코스 '+arr.length+'개를 추가합니다. 기존 방문기록·순례계획·설정은 변경하지 않습니다. 위치 확인 후 중복 코스는 건너뜁니다.';}else p.textContent='백업에 포함된 방문기록: 성지 '+devImportCount(data.shrineVisits)+'건 · 성당 '+devImportCount(data.parishVisits)+'건. 기존 기록과 병합하며 사진·설정은 변경하지 않습니다. Google Drive 기록 확인 후 자동 저장됩니다.';}const b=document.getElementById('oai-dev-import-apply');if(b)b.disabled=false;devImportMessage('');}
   document.addEventListener('click',function(e){if(!e.target||!e.target.closest||!e.target.closest('#oai-dev-import-check'))return;e.preventDefault();devImportCandidate=null;const b=document.getElementById('oai-dev-import-apply');if(b)b.disabled=true;try{const code=document.getElementById('oai-dev-import-code');devImportPreview(devImportParse(code&&code.value));}catch(err){devImportMessage('코드 확인 실패: '+(err&&err.message||'백업 코드를 확인해 주세요.'));}});
-  document.addEventListener('click',function(e){const label=e.target&&e.target.closest&&e.target.closest('#oai-settings-version-label');if(label&&document.getElementById('oai-settings-modal')?.classList.contains('show')){const now=Date.now();devTapCount=(now-devTapLast>3000)?1:devTapCount+1;devTapLast=now;if(devTapCount>=5){devTapCount=0;devImportOpen();}return;}if(e.target&&e.target.closest&&e.target.closest('[data-oai-dev-import-close]')){e.preventDefault();devImportClose();return;}if(e.target&&e.target.closest&&e.target.closest('#oai-dev-import-apply')){e.preventDefault();if(!devImportCandidate)return;try{const data=Object.assign({},devImportCandidate);devImportMergeVisitsOnly(data,true);markRestoreChecked();devImportMessage('방문기록 병합을 완료했습니다. Google Drive 확인 후 자동 저장합니다. 화면에서 기록을 확인해 주세요.');const b=document.getElementById('oai-dev-import-apply');if(b)b.disabled=true;devImportCandidate=null;refresh();refreshRecords();}catch(err){devImportMessage('복원 실패: '+(err&&err.message||'알 수 없는 오류'));}}});
+  document.addEventListener('click',function(e){const label=e.target&&e.target.closest&&e.target.closest('#oai-settings-version-label');if(label&&document.getElementById('oai-settings-modal')?.classList.contains('show')){const now=Date.now();devTapCount=(now-devTapLast>3000)?1:devTapCount+1;devTapLast=now;if(devTapCount>=5){devTapCount=0;devImportOpen();}return;}if(e.target&&e.target.closest&&e.target.closest('[data-oai-dev-import-close]')){e.preventDefault();devImportClose();return;}if(e.target&&e.target.closest&&e.target.closest('#oai-dev-import-apply')){e.preventDefault();if(!devImportCandidate)return;const data=Object.assign({},devImportCandidate);if(data.restoreType==='completed-courses-only'){const b=document.getElementById('oai-dev-import-apply');if(b)b.disabled=true;devImportMessage('순례코스 위치를 확인하는 중입니다.');Promise.resolve().then(function(){if(typeof window.__oaiRestoreCompletedCourses!=='function')throw new Error('코스 복원 기능을 불러오지 못했습니다. 페이지를 새로 열어 주세요.');return window.__oaiRestoreCompletedCourses(data.completedCourseRestore);}).then(function(result){devImportMessage('순례완료 코스 '+result.added+'개 추가, 중복 '+result.skipped+'개 건너뜀. 기존 기록은 유지했습니다.');devImportCandidate=null;}).catch(function(err){if(b)b.disabled=false;devImportMessage('코스 복원 실패: '+(err&&err.message||'위치 확인 실패')+'. 데이터는 변경하지 않았습니다.');});return;}try{devImportMergeVisitsOnly(data,true);markRestoreChecked();devImportMessage('방문기록 병합을 완료했습니다. Google Drive 확인 후 자동 저장합니다. 화면에서 기록을 확인해 주세요.');const b=document.getElementById('oai-dev-import-apply');if(b)b.disabled=true;devImportCandidate=null;refresh();refreshRecords();}catch(err){devImportMessage('복원 실패: '+(err&&err.message||'알 수 없는 오류'));}}});
   document.addEventListener('change',async function(e){if(!e.target||e.target.id!=='oai-dev-import-file')return;devImportCandidate=null;const b=document.getElementById('oai-dev-import-apply');if(b)b.disabled=true;const p=document.getElementById('oai-dev-import-preview');const file=e.target.files&&e.target.files[0];if(!file)return;try{if(file.size>20*1024*1024)throw new Error('파일 크기가 20MB를 초과합니다.');const data=devImportParse(await file.text());devImportPreview(data);}catch(err){if(p)p.textContent='백업 파일을 읽지 못했습니다.';devImportMessage(err&&err.message||'형식을 확인해 주세요.');}});
   function openRestore(){const m=restoreModal();if(!m)return;restoreMessage('');const input=document.getElementById('oai-record-restore-code');if(input)input.value='';m.classList.add('show');m.setAttribute('aria-hidden','false');}
   function closeRestore(){const m=restoreModal();if(!m)return;m.classList.remove('show');m.setAttribute('aria-hidden','true');}
@@ -16770,6 +16770,48 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.ge
     const out={id:String(c.id),name:String(c.name),updatedAt:Number(c.updatedAt)||0,start:normalizePoint(c.start),end:normalizePoint(c.end),places:places,completions:Array.isArray(c.completions)?c.completions:[],lastCompletedAt:Number(c.lastCompletedAt)||0,lastStartedAt:Number(c.lastStartedAt)||0,autoGps:c.autoGps===true,parishOnly:c.parishOnly===true,sourceDate:String(c.sourceDate||''),gpsSettled:c.gpsSettled===true,completionArmed:(typeof c.completionArmed==='boolean'?c.completionArmed:!(Array.isArray(c.completions)&&c.completions.length))};
     return _courseRefreshCompletionState(out);
   }
+  // 1195: data-loss recovery of completed routes only; no visit-map or settings mutation.
+  async function _restoreCompletedCoursesOnly(entries){
+    if(!Array.isArray(entries)||entries.length!==13||entries.some(x=>!/^2026-\d\d-\d\d$/.test(String(x.date||''))||!Array.isArray(x.places)||!x.places.length||!x.start||!x.end))throw new Error('13개 코스 형식이 올바르지 않습니다');
+    const norm=s=>String(s||'').replace(/\s|[()（）·ㆍ\-_,.]/g,'').toLowerCase();
+    const names=new Map();
+    (window._SH_RAW||[]).forEach(p=>{if(p&&p.name&&Number.isFinite(Number(p.lat))&&Number.isFinite(Number(p.lng)))names.set(norm(p.name),{name:p.name,addr:p.addr||'',lat:Number(p.lat),lng:Number(p.lng)});});
+    Object.values(window._PA_DIO_RAW||{}).forEach(rows=>(rows||[]).forEach(p=>{if(Array.isArray(p)&&p[0]&&Number.isFinite(Number(p[6]))&&Number.isFinite(Number(p[7])))names.set(norm(p[0]),{name:p[0],addr:p[2]||'',lat:Number(p[6]),lng:Number(p[7])});}));
+    const overrides={'부여군 그린메이트':'그린메이트 부여','정하상 바오로 수도원':'정하상 바오로 수도원'};
+    const cache=new Map();
+    const servicesReady=await _ensureKakaoServicesReady();
+    async function point(name){
+      const key=norm(name);if(cache.has(key))return cache.get(key);
+      let match=names.get(key);
+      if(!match){const list=[...names.values()].filter(p=>norm(p.name).includes(key)||key.includes(norm(p.name)));if(list.length===1)match=list[0];}
+      if(!match){
+        const maps=window.kakao&&window.kakao.maps&&window.kakao.maps.services;
+        if(!servicesReady||!maps||!maps.Places)throw new Error('위치 검색 기능이 준비되지 않았습니다: '+name);
+        const query=overrides[name]||name;
+        match=await new Promise((resolve,reject)=>{
+          const finder=new maps.Places();
+          finder.keywordSearch(query,function(result,status){
+            if(status===maps.Status.OK&&result&&result[0]){const p=result[0];resolve({name:name,addr:p.road_address_name||p.address_name||'',lat:Number(p.y),lng:Number(p.x)});}
+            else reject(new Error('위치를 찾지 못했습니다: '+name));
+          });
+        });
+      }
+      if(!Number.isFinite(match.lat)||!Number.isFinite(match.lng)||!match.lat||!match.lng)throw new Error('좌표 확인 실패: '+name);
+      const value={name:name,addr:match.addr||'',lat:match.lat,lng:match.lng};cache.set(key,value);return value;
+    }
+    const planned=[];
+    for(const e of entries){
+      const start=await point(e.start),end=await point(e.end),places=[];
+      for(const name of e.places){const p=await point(name);places.push(Object.assign({},p,{done:true,doneMethod:'gps'}));}
+      const at=new Date(e.date+'T18:00:00+09:00').getTime();
+      planned.push({id:'recovered_pilgrimage_'+e.date.replace(/-/g,''),name:e.date+' '+places[0].name+' 순례코스',updatedAt:Date.now(),start,end,places,completions:[{completedAt:at,placeCount:places.length,method:'gps',locked:true}],lastCompletedAt:at,sourceDate:e.date,gpsSettled:true,autoGps:false,completionArmed:false,restoredFromLoss:true});
+    }
+    const original=localStorage.getItem(COURSES_KEY),existing=loadCourses(),toAdd=[];
+    for(const c of planned){const date=c.sourceDate;const same=existing.some(x=>x.id===c.id||(x.sourceDate===date&&x.places.length===c.places.length&&x.places.every((p,i)=>norm(p.name)===norm(c.places[i].name))));if(!same)toAdd.push(c);}
+    if(toAdd.length){try{localStorage.setItem(COURSES_KEY,JSON.stringify(existing.concat(toAdd)));}catch(error){if(original===null)localStorage.removeItem(COURSES_KEY);else localStorage.setItem(COURSES_KEY,original);throw error;}renderCourseList();try{if(typeof window.scheduleOaiAutoBackup==='function')window.scheduleOaiAutoBackup();}catch(_e){}}
+    return {added:toAdd.length,skipped:planned.length-toAdd.length};
+  }
+  window.__oaiRestoreCompletedCourses=_restoreCompletedCoursesOnly;
   function loadCourses(){
     try{
       const a=JSON.parse(localStorage.getItem(COURSES_KEY)||'[]');
