@@ -16050,6 +16050,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     try{
       const _oaiDrivePrepStarted=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
       const snapshot=backupSnapshot();
+      const _oaiDriveSnapshotReady=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
       if(oaiVerifiedRemoteBackup&&oaiVerifiedRemoteBackup.data){
         const remote=oaiVerifiedRemoteBackup.data, local=snapshot.data;
         local.shrineVisits=mergeVisitMaps(local.shrineVisits,remote.shrineVisits);
@@ -16086,9 +16087,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         recordMessage('저장할 기록이 없어 Google Drive 저장을 건너뛰었습니다.');
         return;
       }
+      const _oaiDriveMergeReady=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
       const serialized=JSON.stringify(snapshot);
-      const prepMs=Math.round(((typeof performance!=='undefined'&&performance.now)?performance.now():Date.now())-_oaiDrivePrepStarted);
-      if(prepMs>=80){console.warn('[가톨릭길동무][성능] Google Drive 백업 준비 '+prepMs+'ms / '+serialized.length+'자');}
+      const _oaiDriveSerialized=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
+      const prepMs=Math.round(_oaiDriveSerialized-_oaiDrivePrepStarted);
+      if(prepMs>=80){
+        console.warn('[가톨릭길동무][성능] Google Drive 백업 준비 '+prepMs+'ms (기록 읽기 '+Math.round(_oaiDriveSnapshotReady-_oaiDrivePrepStarted)+'ms / 원격 병합 '+Math.round(_oaiDriveMergeReady-_oaiDriveSnapshotReady)+'ms / JSON 생성 '+Math.round(_oaiDriveSerialized-_oaiDriveMergeReady)+'ms) / '+serialized.length+'자');
+      }
       oaiDriveWriteInFlight=true;
       bridge.saveGoogleDriveBackup(serialized);
     }catch(_e){oaiDriveWriteInFlight=false;if(showMessage)recordMessage('Google Drive에 기록을 저장하지 못했습니다.');}
@@ -16590,8 +16595,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     // Snapshot merge: index existing items once, rather than re-serializing the
     // entire accumulated list for every incoming item.
     const out=Array.isArray(a)?a.slice():[];
+    // No incoming records: avoid indexing/serializing the entire local list.
+    if(!Array.isArray(b)||b.length===0)return out;
     const seen=new Set(out.map(function(item){return JSON.stringify(item);}));
-    (Array.isArray(b)?b:[]).forEach(function(item){
+    b.forEach(function(item){
       const token=JSON.stringify(item);
       if(!seen.has(token)){seen.add(token);out.push(item);}
     });
