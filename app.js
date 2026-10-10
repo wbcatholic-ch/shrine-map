@@ -3082,6 +3082,29 @@ function _oaiCloseMemoModal(){const m=document.getElementById('oai-visit-memo-mo
 try{window._oaiCloseMemoModal=_oaiCloseMemoModal;}catch(_e){}
 function _oaiOpenMemo(kind){const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const v=_oaiGetVisitByDate(kind,ctx.item,ctx.date),m=_oaiEnsureMemoModal(),memo=String(v&&v.memo||'');window.__OAI_MEMO_CONTEXT__=ctx;document.getElementById('oai-visit-memo-date').textContent=_formatVisitDate(ctx.date);document.getElementById('oai-visit-memo-text').value=memo;const del=m.querySelector('[data-oai-memo-delete-modal]'),actions=m.querySelector('.oai-visit-memo-actions'),hasMemo=!!memo.trim();if(del)del.style.display=hasMemo?'':'none';if(actions)actions.classList.toggle('has-delete',hasMemo);m.classList.add('show');m.setAttribute('aria-hidden','false');_oaiInstallMemoViewportGuard();_oaiMemoFitViewport();setTimeout(function(){try{const ta=document.getElementById('oai-visit-memo-text');ta.focus({preventScroll:true});_oaiMemoFitViewport();setTimeout(_oaiMemoFitViewport,100);setTimeout(_oaiMemoFitViewport,260);setTimeout(_oaiMemoFitViewport,500);}catch(_e){}},60);}
 function _oaiDeleteMemo(kind,fromModal){const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const v=_oaiGetVisitByDate(kind,ctx.item,ctx.date);if(!String(v&&v.memo||'').trim()){if(fromModal)_oaiCloseMemoModal();return;}_oaiVisitConfirm('이 방문의 메모를 삭제할까요?',function(){const ok=ctx.kind==='parish'?_oaiUpdateParishVisitExtras(ctx.item,ctx.date,{memo:''}):_oaiUpdateShrineVisitExtras(ctx.item,ctx.date,{memo:''});if(!ok){_oaiVisitToast('메모를 삭제하지 못했습니다.');return;}if(fromModal)_oaiCloseMemoModal();_oaiRerenderJournal(ctx.kind);_oaiVisitToast('메모를 삭제했습니다.');});}
+/* 1217: 화면을 막지 않는 사진 저장 안내. 실제 개별 Drive 결과를 모두 받은 뒤에만 종료한다. */
+const _oaiPhotoNoticePending=new Set();
+let _oaiPhotoNoticePicking=0;
+let _oaiPhotoNoticeFailures=0;
+function _oaiShowPhotoSavingNotice(){
+  let notice=document.getElementById('oai-photo-saving-notice');
+  if(!notice){
+    notice=document.createElement('div');notice.id='oai-photo-saving-notice';
+    notice.className='oai-photo-saving-notice';notice.setAttribute('role','status');notice.setAttribute('aria-live','polite');
+    notice.innerHTML='<strong>사진을 순차적으로 저장하고 있습니다.</strong><span>뒤로가기로 다른 화면을 이용하셔도 저장은 계속됩니다.</span><span>저장이 완료될 때까지 앱을 종료하지는 마세요.</span>';
+    document.body.appendChild(notice);
+  }
+  notice.classList.add('show');
+}
+function _oaiUpdatePhotoSavingNotice(){
+  if(_oaiPhotoNoticePicking>0||_oaiPhotoNoticePending.size>0){_oaiShowPhotoSavingNotice();return;}
+  const notice=document.getElementById('oai-photo-saving-notice');
+  if(notice)notice.classList.remove('show');
+  if(_oaiPhotoNoticeFailures){
+    _oaiVisitToast('일부 사진은 구글 동기화 대기 중입니다. 연결 상태를 확인해 주세요.');
+    _oaiPhotoNoticeFailures=0;
+  }
+}
 function _oaiAddPhotos(kind){
   const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const visit=_oaiGetVisitByDate(kind,ctx.item,ctx.date),photos=_oaiNormalizePhotos(visit),limit=_oaiVisitPhotoLimit(kind,ctx.item),remaining=Math.max(0,limit-photos.length);if(!remaining){_oaiVisitToast('등록할 수 있는 사진 수를 모두 사용했습니다.');return;}
   const bridge=_oaiVisitNative();if(!bridge||typeof bridge.pickVisitPhotos!=='function'){_oaiVisitToast('사진 등록은 Android 앱에서 사용할 수 있습니다.');return;}
@@ -3100,15 +3123,16 @@ function _oaiAppendLocalReadyPhoto(ctx,item){
 }
 window.oaiVisitPhotoLocalReady=function(requestId,itemJson,current,total){
   const ctx=_oaiVisitPhotoPending[requestId];if(!ctx)return;let item=null;try{item=JSON.parse(String(itemJson||'{}'));}catch(_e){}
-  if(item&&_oaiAppendLocalReadyPhoto(ctx,item)){_oaiSchedulePhotoJournalRender(ctx.kind);}
+  if(item&&_oaiAppendLocalReadyPhoto(ctx,item)){_oaiPhotoNoticePicking=1;_oaiPhotoNoticePending.add(_oaiPhotoIdentity(item));_oaiUpdatePhotoSavingNotice();_oaiSchedulePhotoJournalRender(ctx.kind);}
 };
 window.oaiVisitPhotoLocalComplete=function(requestId,ok,ready,total,message){
   const ctx=_oaiVisitPhotoPending[requestId];delete _oaiVisitPhotoPending[requestId];const msg=String(message||'');
+  _oaiPhotoNoticePicking=Object.keys(_oaiVisitPhotoPending).length;_oaiUpdatePhotoSavingNotice();
   if(!ok){if(msg)_oaiVisitToast(msg);return;}if(ctx)_oaiSchedulePhotoJournalRender(ctx.kind);if(msg)_oaiVisitToast(msg);
 };
 window.oaiVisitPhotoUploadResult=function(requestId,ok,json,message){
   /* 구버전 Android 호환: 304 이하에서는 Drive 업로드 완료 뒤 한 번에 결과를 전달합니다. */
-  const ctx=_oaiVisitPhotoPending[requestId];delete _oaiVisitPhotoPending[requestId];if(!ctx)return;
+  const ctx=_oaiVisitPhotoPending[requestId];delete _oaiVisitPhotoPending[requestId];_oaiPhotoNoticePicking=Object.keys(_oaiVisitPhotoPending).length;_oaiUpdatePhotoSavingNotice();if(!ctx)return;
   const msg=String(message||'');if(!ok){if(/취소/.test(msg))return;_oaiVisitToast(msg||'사진을 저장하지 못했습니다.');return;}
   let added=[];try{added=JSON.parse(String(json||'[]'));}catch(_e){}
   const visit=_oaiGetVisitByDate(ctx.kind,ctx.item,ctx.date),current=_oaiNormalizePhotos(visit),limit=_oaiVisitPhotoLimit(ctx.kind,ctx.item),next=current.concat(added).slice(0,limit);
@@ -3141,7 +3165,7 @@ function _oaiReplaceSyncedPhotoInMap(data,photoId,remoteId,mimeType,savedAt){
 }
 window.oaiVisitPhotoSyncResult=function(localId,ok,fileId,mimeType,savedAt,message){
   const _photoSyncT0=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
-  const photoId=String(localId||'');if(!photoId)return;const shr=_loadShrineVisits(),par=_loadParishVisits();
+  const photoId=String(localId||'');if(!photoId)return;_oaiPhotoNoticePending.delete(photoId);if(!ok)_oaiPhotoNoticeFailures++;_oaiUpdatePhotoSavingNotice();const shr=_loadShrineVisits(),par=_loadParishVisits();
   if(!ok){const mark=function(data){let changed=false;Object.keys(data&&typeof data==='object'?data:{}).forEach(function(key){const rec=data[key];if(!rec)return;const one=function(j){if(!j||!Array.isArray(j.photos))return;j.photos.forEach(function(ph){if(ph&&_oaiPhotoIdentity(ph)===photoId&&ph.syncStatus!=='waiting'){ph.syncStatus='waiting';changed=true;}});};if(Array.isArray(rec.visits))rec.visits.forEach(one);if(rec.sharedJournalByDate&&typeof rec.sharedJournalByDate==='object')Object.keys(rec.sharedJournalByDate).forEach(function(d){one(rec.sharedJournalByDate[d]);});});return changed;};const a=mark(shr),b=mark(par);if(a)_saveShrineVisits(shr);if(b)_saveParishVisits(par);if(a||b)_oaiUpdateVisiblePhotoSyncBadge(photoId,'waiting','');return;}
   const remoteId=String(fileId||'');if(!remoteId)return;const a=_oaiReplaceSyncedPhotoInMap(shr,photoId,remoteId,mimeType,savedAt),b=_oaiReplaceSyncedPhotoInMap(par,photoId,remoteId,mimeType,savedAt);if(a)_saveShrineVisits(shr);if(b)_saveParishVisits(par);if(a||b){/* 기록 저장/자동 백업은 기존대로 유지하고, 사진의 저장 표시만 갱신한다. */_oaiUpdateVisiblePhotoSyncBadge(photoId,'saved',remoteId);}
   const _photoSyncMs=Math.round(((typeof performance!=='undefined'&&performance.now)?performance.now():Date.now())-_photoSyncT0);

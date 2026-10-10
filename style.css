@@ -10034,3 +10034,9 @@ html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(17px * va
 .oai-visit-journal-block{
   border-color:#c6d4dd!important;
 }
+
+/* 1217: 사진 저장 중에도 화면을 사용할 수 있는 비차단 안내 */
+.oai-photo-saving-notice{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom,0px) + 70px);transform:translate(-50%,12px);z-index:2147483590;box-sizing:border-box;width:min(calc(100% - 28px),470px);padding:13px 16px;border:1.5px solid #a8c6d8;border-radius:15px;background:rgba(249,253,255,.98);box-shadow:0 6px 22px rgba(19,53,80,.15);color:#24465b;display:flex;flex-direction:column;gap:4px;opacity:0;visibility:hidden;pointer-events:none;transition:opacity .15s ease,transform .15s ease,visibility .15s ease;text-align:left}
+.oai-photo-saving-notice.show{opacity:1;visibility:visible;transform:translate(-50%,0)}
+.oai-photo-saving-notice strong{font-size:14px;font-weight:950;color:#135f8b}
+.oai-photo-saving-notice span{font-size:12px;font-weight:750;line-height:1.45;word-break:keep-all}
