@@ -15908,7 +15908,19 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         const remote=oaiVerifiedRemoteBackup.data, local=snapshot.data;
         local.shrineVisits=mergeVisitMaps(local.shrineVisits,remote.shrineVisits);
         local.parishVisits=mergeVisitMaps(local.parishVisits,remote.parishVisits);
-        ['prayerFavorites','webFavorites','routeFavorites','pilgrimagePlan','pilgrimageCourses'].forEach(function(k){local[k]=mergeLists(local[k],remote[k]);});
+        ['prayerFavorites','webFavorites','routeFavorites','pilgrimagePlan'].forEach(function(k){local[k]=mergeLists(local[k],remote[k]);});
+        // Preserve cloud GPS completions, including matching course ids.
+        const existingCourses=Array.isArray(local.pilgrimageCourses)?local.pilgrimageCourses:[];
+        const byId=new Map(existingCourses.map(function(c){return [String(c&&c.id||''),c];}));
+        (Array.isArray(remote.pilgrimageCourses)?remote.pilgrimageCourses:[]).forEach(function(c){
+          if(!c||!c.id)return;const id=String(c.id),current=byId.get(id);
+          if(!current){byId.set(id,c);return;}
+          const oldDone=Array.isArray(c.completions)?c.completions:[],newDone=Array.isArray(current.completions)?current.completions:[];
+          const combined=newDone.slice(),seen=new Set(combined.map(function(v){return String(v&&v.completedAt||'')+'|'+String(v&&v.method||'');}));
+          oldDone.forEach(function(v){if(!v)return;const token=String(v.completedAt||'')+'|'+String(v.method||'');if(!seen.has(token)){combined.push(v);seen.add(token);}});
+          byId.set(id,Object.assign({},current,{completions:combined,lastCompletedAt:Math.max(Number(current.lastCompletedAt)||0,Number(c.lastCompletedAt)||0)}));
+        });
+        local.pilgrimageCourses=Array.from(byId.values());
         if(!local.myParish&&remote.myParish)local.myParish=remote.myParish;
         if(!local.myDiocese&&remote.myDiocese)local.myDiocese=remote.myDiocese;
         if(!local.prayerFontSize&&remote.prayerFontSize)local.prayerFontSize=remote.prayerFontSize;
@@ -16043,11 +16055,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       return;
     }
     if(status==='saved'){
+      if(!oaiDriveWriteInFlight){recordMessage('요청하지 않은 저장 완료 응답은 무시했습니다.');return;}
       oaiDriveWriteInFlight=false;
       if(oaiDriveDirtyWhileSaving){oaiDriveDirtyWhileSaving=false;setTimeout(queueGoogleDriveBackup,0);}
       try{localStorage.setItem('oai_google_drive_saved_at_v1',new Date().toISOString());}catch(_e){}
       refreshGoogleDriveButton();
-      recordMessage('Google Drive에 저장했습니다.');
+      recordMessage('Google Drive에 기록을 저장했습니다. 사진은 개별 업로드 완료분만 복원됩니다.');
       return;
     }
     refreshGoogleDriveButton();recordMessage(message||'');
@@ -16140,7 +16153,16 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const next=current.slice(),ids=new Set(current.map(function(c){return String(c&&c.id||'');}));
       remote.pilgrimageCourses.forEach(function(c){
         if(!c||typeof c!=='object'||!c.id||!Array.isArray(c.places))throw new Error('백업 코스 내용 오류');
-        if(!ids.has(String(c.id))){ids.add(String(c.id));next.push(c);}
+                const id=String(c.id);
+        if(!ids.has(id)){ids.add(id);next.push(c);}
+        else{
+          const index=next.findIndex(function(item){return String(item&&item.id||'')===id;});
+          if(index<0)return;
+          const local=next[index],localDone=Array.isArray(local.completions)?local.completions:[],cloudDone=Array.isArray(c.completions)?c.completions:[];
+          const merged=localDone.slice(),seen=new Set(localDone.map(function(v){return String(v&&v.completedAt||'')+'|'+String(v&&v.method||'');}));
+          cloudDone.forEach(function(v){if(!v||!Number.isFinite(Number(v.completedAt)))return;const token=String(v.completedAt)+'|'+String(v.method||'');if(!seen.has(token)){seen.add(token);merged.push(v);}});
+          if(merged.length!==localDone.length){next[index]=Object.assign({},local,{completions:merged,lastCompletedAt:Math.max(Number(local.lastCompletedAt)||0,Number(c.lastCompletedAt)||0)});}
+        }
       });
       put('oai_pilgrimage_courses_v1',next);
     }
