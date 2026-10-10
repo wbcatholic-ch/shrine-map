@@ -10040,3 +10040,23 @@ html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(17px * va
 .oai-photo-saving-notice.show{opacity:1;visibility:visible;transform:translate(-50%,0)}
 .oai-photo-saving-notice strong{font-size:14px;font-weight:950;color:#135f8b}
 .oai-photo-saving-notice span{font-size:12px;font-weight:750;line-height:1.45;word-break:keep-all}
+
+
+/* V8-1-14-1218: 개인 사진은 목록에서 요청하지 않고, 선택 시 뷰어에서만 로드 */
+.oai-photo-summary-wrap{padding:13px 12px 14px;background:#fff}
+.oai-photo-summary{display:flex;align-items:center;justify-content:space-between;width:100%;min-height:52px;padding:0 15px;border:1.5px solid #b8cddd;border-radius:12px;background:#f7fbff;color:#1c5378;font-family:inherit;font-size:16px;line-height:1.35;font-weight:900;text-align:left}
+.oai-photo-summary>span:last-child{font-size:26px;font-weight:600}
+.oai-photo-summary-hint{display:block;margin-top:7px;color:#6c7a88;font-size:12px}
+.oai-photo-load-state{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:min(78vw,320px);display:flex;align-items:center;flex-direction:column;gap:10px;text-align:center;color:#fff;z-index:2;pointer-events:none}
+.oai-photo-load-state[hidden]{display:none!important}
+.oai-photo-load-state strong{font-size:16px;font-weight:900}
+.oai-photo-load-state span{font-size:13px;line-height:1.6;color:#cbd5e1}
+.oai-photo-load-state button{pointer-events:auto;min-height:40px;padding:0 18px;border:1px solid #b6c8db;border-radius:10px;background:#fff;color:#205982;font-size:14px;font-weight:900}
+.oai-photo-load-state button[hidden]{display:none!important}
+.oai-visit-photo-viewer-top>.oai-photo-viewer-delete{position:absolute;left:12px;right:auto;top:8px;width:auto;min-width:55px;height:35px;border:1px solid #c5d4e0;border-radius:9px;background:rgba(13,25,40,.35);color:#fff;font-size:13px;font-weight:850}
+.myeongrye-photo-loading{flex-direction:column!important;gap:9px!important;width:min(76%,310px);box-sizing:border-box;border-radius:14px!important;padding:15px 12px!important;text-align:center;pointer-events:none}
+.myeongrye-photo-loading strong{font-size:14px;font-weight:900}
+.myeongrye-photo-loading small{font-size:12px;line-height:1.55;color:#e1e9f0}
+.myeongrye-photo-loading .myeongrye-loading-spinner{display:block}
+.myeongrye-photo-loading button{pointer-events:auto;min-height:38px;padding:0 15px;border:0;border-radius:9px;background:white;color:#215c88;font-weight:900}
+.myeongrye-photo-loading button[hidden]{display:none!important}
