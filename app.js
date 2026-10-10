@@ -15740,13 +15740,18 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   const OAI_RESTORE_PROMPT_DATE_KEY='oai_restore_prompt_date_v1';
   const OAI_RESTORE_CHECKED_KEY='oai_restore_checked_v1';
   // 1181: Persisted write barrier. Connection is NOT proof of a successful restore.
-  const OAI_DRIVE_WRITE_READY_KEY='oai_drive_write_ready_v1181';
-  function driveWriteReady(){try{return localStorage.getItem(OAI_DRIVE_WRITE_READY_KEY)==='1';}catch(_e){return false;}}
-  function setDriveWriteReady(ready){try{localStorage.setItem(OAI_DRIVE_WRITE_READY_KEY,ready?'1':'0');}catch(_e){}}
+  let oaiDriveSessionVerified=false; // Each launch must verify remote state before any upload.
+  function driveWriteReady(){return oaiDriveSessionVerified;}
+  function setDriveWriteReady(ready){oaiDriveSessionVerified=!!ready;}
   let googleDriveBackupTimer=0;
   let oaiVerifiedRemoteBackup=null; // Retain cloud-only settings until explicitly restored.
   let oaiDriveWriteInFlight=false;
   let oaiDriveDirtyWhileSaving=false;
+  let oaiDriveRetryTimer=0;
+  function scheduleDriveRecheck(){
+    if(oaiDriveRetryTimer||!isGoogleDriveAutoBackupEnabled())return;
+    oaiDriveRetryTimer=setTimeout(function(){oaiDriveRetryTimer=0;if(!googleDriveInitialSyncPending&&!oaiDriveWriteInFlight)loadGoogleDriveBackup();},30000);
+  }
   let googleDriveInitialSyncPending=false;
   let googleDriveAutoConnectPending=false;
   let initialOnboarding=false;
@@ -15759,6 +15764,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     oaiCancelDriveCheckTimer();
     googleDriveInitialSyncPending=false;
     setDriveWriteReady(false);
+    scheduleDriveRecheck();
     if(!initialOnboarding||!initialDriveFirstFlow)return;
     const modal=onboardingModal(),body=document.getElementById('oai-onboarding-backup-body');
     if(!modal||!body)return;
@@ -15846,7 +15852,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function hasBackupContent(){return hasMeaningfulDriveData(backupSnapshot().data);}
   function queueGoogleDriveBackup(){
-    if(!isGoogleDriveAutoBackupEnabled()||!driveWriteReady()||googleDriveInitialSyncPending)return;
+    if(!isGoogleDriveAutoBackupEnabled())return;
+    if(!driveWriteReady()||googleDriveInitialSyncPending){oaiDriveDirtyWhileSaving=true;if(!googleDriveInitialSyncPending)scheduleDriveRecheck();return;}
     const bridge=nativeDrive();if(!bridge||typeof bridge.saveGoogleDriveBackup!=='function')return;
     if(oaiDriveWriteInFlight){oaiDriveDirtyWhileSaving=true;return;}
     try{if(googleDriveBackupTimer)clearTimeout(googleDriveBackupTimer);}catch(_e){}
@@ -15877,7 +15884,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }catch(_e){}
   })();
   function saveGoogleDriveBackupNow(showMessage){
-    if(!isGoogleDriveAutoBackupEnabled()||!driveWriteReady()||googleDriveInitialSyncPending)return;
+    if(!isGoogleDriveAutoBackupEnabled())return;
+    if(!driveWriteReady()||googleDriveInitialSyncPending){oaiDriveDirtyWhileSaving=true;if(!googleDriveInitialSyncPending)scheduleDriveRecheck();return;}
     const bridge=nativeDrive();if(!bridge||typeof bridge.saveGoogleDriveBackup!=='function')return;
     if(oaiDriveWriteInFlight){oaiDriveDirtyWhileSaving=true;return;}
     if(showMessage)recordMessage('Google Drive에 기록을 저장하고 있습니다.');
@@ -16016,7 +16024,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       setDriveWriteReady(false);
       if(googleDriveBackupTimer){clearTimeout(googleDriveBackupTimer);googleDriveBackupTimer=0;}
       if(initialOnboarding&&initialDriveFirstFlow)oaiDriveCheckFailed(message||'Google Drive 확인에 실패했습니다.');
-      else recordMessage((message||'Google Drive 처리에 실패했습니다.')+' 자동 저장을 중지했습니다.');
+      else recordMessage((message||'Google Drive 처리에 실패했습니다.')+' 연결 확인 후 자동 저장을 다시 시도합니다.');
+      scheduleDriveRecheck();
       refreshGoogleDriveButton();
       return;
     }
@@ -16059,7 +16068,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         oaiVerifiedRemoteBackup=null;
         recordMessage('Google Drive에 가져올 데이터가 없습니다. 휴대폰 기록은 그대로 유지합니다.');
         // 가져오기는 중단하지만, 기존 휴대폰 기록이 있으면 별도로 자동 보관한다.
-        if(hasBackupContent())queueGoogleDriveBackup();
+        if(hasBackupContent()){oaiDriveDirtyWhileSaving=false;queueGoogleDriveBackup();}
       }else{
         setDriveWriteReady(false);
         recordMessage('Google Drive 저장 상태를 확인하지 못했습니다. 자동 저장을 중지했습니다.');
@@ -16067,17 +16076,45 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(initialDriveFirstFlow&&initialOnboarding){setTimeout(openInitialParishSetupAfterDrive,180);return;}
     }
   };
+  // Older backups are always validated and merged; never replace device data.
+  window.oaiGoogleDriveHistoryReceived=function(payload){
+    const host=document.getElementById('oai-drive-history-list');if(!host)return;
+    host.replaceChildren();
+    try{
+      const items=JSON.parse(payload);if(!Array.isArray(items))throw new Error();
+      items.sort(function(a,b){return String(b.name||'').localeCompare(String(a.name||''));});
+      if(!items.length){host.textContent='이전 백업이 없습니다.';return;}
+      items.slice(0,5).forEach(function(item){
+        const match=String(item.name||'').match(/history-(\d{13})-/);
+        const stamp=match?new Date(Number(match[1])).toLocaleString('ko-KR'):'이전 백업';
+        const button=document.createElement('button');button.type='button';button.className='oai-records-secondary';button.textContent=stamp+' 기록 병합하기';
+        button.addEventListener('click',function(){
+          const bridge=nativeDrive();if(!bridge||typeof bridge.loadGoogleDriveBackupHistory!=='function')return;
+          googleDriveInitialSyncPending=true;setDriveWriteReady(false);oaiStartDriveCheckTimer();
+          recordMessage('이전 백업을 확인하고 기존 기록에 병합합니다.');
+          bridge.loadGoogleDriveBackupHistory(String(item.id));
+        });host.appendChild(button);
+      });
+    }catch(_e){host.textContent='백업 목록을 확인하지 못했습니다.';}
+  };
+  document.addEventListener('click',function(e){
+    if(!e.target||!e.target.closest||!e.target.closest('[data-oai-google-history]'))return;
+    e.preventDefault();const bridge=nativeDrive();
+    if(!bridge||typeof bridge.listGoogleDriveBackupHistory!=='function'){recordMessage('이 기능은 최신 Android 앱에서 사용할 수 있습니다.');return;}
+    recordMessage('이전 백업 목록을 확인합니다.');bridge.listGoogleDriveBackupHistory();
+  });
   window.oaiGoogleDriveBackupReceived=function(encoded){
     try{
       const text=decodeURIComponent(escape(atob(String(encoded||''))));
       const parsed=JSON.parse(text);
       if(!parsed||parsed.format!=='catholic-gildongmu-backup'||!parsed.data||!parsed.data.shrineVisits||!parsed.data.parishVisits||typeof parsed.data.shrineVisits!=='object'||typeof parsed.data.parishVisits!=='object')throw new Error();
+      if(!googleDriveInitialSyncPending)throw new Error('요청하지 않은 이전 Drive 응답입니다.');
       if(!hasMeaningfulDriveData(parsed.data)){
         googleDriveInitialSyncPending=false;oaiCancelDriveCheckTimer();
         oaiVerifiedRemoteBackup=null;
         setDriveWriteReady(isGoogleDriveConnected()&&isGoogleDriveAutoBackupEnabled());
         recordMessage('Google Drive에 가져올 데이터가 없습니다. 휴대폰 기록은 그대로 유지합니다.');
-        if(driveWriteReady()&&hasBackupContent())queueGoogleDriveBackup();
+        if(driveWriteReady()&&hasBackupContent()){oaiDriveDirtyWhileSaving=false;queueGoogleDriveBackup();}
         if(initialDriveFirstFlow&&initialOnboarding)setTimeout(openInitialParishSetupAfterDrive,180);
         return;
       }
@@ -16093,12 +16130,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       markRestoreChecked();
       refresh();refreshRecords();
       recordMessage('Google Drive 방문기록을 병합했습니다. 기존 사진·설정은 유지합니다.');
-      if(driveWriteReady())queueGoogleDriveBackup();
+      if(driveWriteReady()){oaiDriveDirtyWhileSaving=false;queueGoogleDriveBackup();}
       if(initialDriveFirstFlow&&initialOnboarding){showInitialDriveImportComplete();return;}
     }catch(_e){
       googleDriveInitialSyncPending=false;oaiCancelDriveCheckTimer();
       setDriveWriteReady(false);
-      recordMessage('Google Drive 기록을 불러오지 못했습니다. 자동 저장을 중지했습니다.');
+      recordMessage('Google Drive 기록을 검증하지 못했습니다. 휴대폰 기록은 유지하며 재확인합니다.');
+      scheduleDriveRecheck();
       if(initialDriveFirstFlow&&initialOnboarding)setTimeout(openInitialParishSetupAfterDrive,180);
     }
   };
@@ -16121,18 +16159,18 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       // Use direct writes: legacy _saveShrineVisits silently swallows storage failures.
       localStorage.setItem(OAI_SHRINE_VISITS_KEY,JSON.stringify(shrine));
       localStorage.setItem(OAI_PARISH_VISITS_KEY,JSON.stringify(parish));
-      // Recheck the cloud before permitting a subsequent automatic write.
-      setDriveWriteReady(false);
-      if(typeof googleDriveBackupTimer!=='undefined'&&googleDriveBackupTimer){clearTimeout(googleDriveBackupTimer);googleDriveBackupTimer=0;}
+      // Imported records become dirty, but cannot upload before verifying remote data.
+      oaiDriveDirtyWhileSaving=true;
+      if(!driveWriteReady()){scheduleDriveRecheck();}else queueGoogleDriveBackup();
     }catch(err){
       try{if(shrineBefore===null)localStorage.removeItem(OAI_SHRINE_VISITS_KEY);else localStorage.setItem(OAI_SHRINE_VISITS_KEY,shrineBefore);
       if(parishBefore===null)localStorage.removeItem(OAI_PARISH_VISITS_KEY);else localStorage.setItem(OAI_PARISH_VISITS_KEY,parishBefore);}catch(_rollbackError){}
       throw err;
     }
   }
-  function devImportPreview(data){devImportCandidate=data;const p=document.getElementById('oai-dev-import-preview');if(p)p.textContent='백업에 포함된 방문기록: 성지 '+devImportCount(data.shrineVisits)+'건 · 성당 '+devImportCount(data.parishVisits)+'건. 기존 기록과 병합하며 사진·설정은 변경하지 않습니다. Google Drive 자동 저장은 안전을 위해 중지됩니다.';const b=document.getElementById('oai-dev-import-apply');if(b)b.disabled=false;devImportMessage('');}
+  function devImportPreview(data){devImportCandidate=data;const p=document.getElementById('oai-dev-import-preview');if(p)p.textContent='백업에 포함된 방문기록: 성지 '+devImportCount(data.shrineVisits)+'건 · 성당 '+devImportCount(data.parishVisits)+'건. 기존 기록과 병합하며 사진·설정은 변경하지 않습니다. Google Drive 기록 확인 후 자동 저장됩니다.';const b=document.getElementById('oai-dev-import-apply');if(b)b.disabled=false;devImportMessage('');}
   document.addEventListener('click',function(e){if(!e.target||!e.target.closest||!e.target.closest('#oai-dev-import-check'))return;e.preventDefault();devImportCandidate=null;const b=document.getElementById('oai-dev-import-apply');if(b)b.disabled=true;try{const code=document.getElementById('oai-dev-import-code');devImportPreview(devImportParse(code&&code.value));}catch(err){devImportMessage('코드 확인 실패: '+(err&&err.message||'백업 코드를 확인해 주세요.'));}});
-  document.addEventListener('click',function(e){const label=e.target&&e.target.closest&&e.target.closest('#oai-settings-version-label');if(label&&document.getElementById('oai-settings-modal')?.classList.contains('show')){const now=Date.now();devTapCount=(now-devTapLast>3000)?1:devTapCount+1;devTapLast=now;if(devTapCount>=5){devTapCount=0;devImportOpen();}return;}if(e.target&&e.target.closest&&e.target.closest('[data-oai-dev-import-close]')){e.preventDefault();devImportClose();return;}if(e.target&&e.target.closest&&e.target.closest('#oai-dev-import-apply')){e.preventDefault();if(!devImportCandidate)return;try{const data=Object.assign({},devImportCandidate);devImportMergeVisitsOnly(data);markRestoreChecked();devImportMessage('방문기록 병합을 완료했습니다. Google Drive 자동 저장은 중지했습니다. 화면에서 기록을 확인해 주세요.');const b=document.getElementById('oai-dev-import-apply');if(b)b.disabled=true;devImportCandidate=null;refresh();refreshRecords();}catch(err){devImportMessage('복원 실패: '+(err&&err.message||'알 수 없는 오류'));}}});
+  document.addEventListener('click',function(e){const label=e.target&&e.target.closest&&e.target.closest('#oai-settings-version-label');if(label&&document.getElementById('oai-settings-modal')?.classList.contains('show')){const now=Date.now();devTapCount=(now-devTapLast>3000)?1:devTapCount+1;devTapLast=now;if(devTapCount>=5){devTapCount=0;devImportOpen();}return;}if(e.target&&e.target.closest&&e.target.closest('[data-oai-dev-import-close]')){e.preventDefault();devImportClose();return;}if(e.target&&e.target.closest&&e.target.closest('#oai-dev-import-apply')){e.preventDefault();if(!devImportCandidate)return;try{const data=Object.assign({},devImportCandidate);devImportMergeVisitsOnly(data);markRestoreChecked();devImportMessage('방문기록 병합을 완료했습니다. Google Drive 확인 후 자동 저장합니다. 화면에서 기록을 확인해 주세요.');const b=document.getElementById('oai-dev-import-apply');if(b)b.disabled=true;devImportCandidate=null;refresh();refreshRecords();}catch(err){devImportMessage('복원 실패: '+(err&&err.message||'알 수 없는 오류'));}}});
   document.addEventListener('change',async function(e){if(!e.target||e.target.id!=='oai-dev-import-file')return;devImportCandidate=null;const b=document.getElementById('oai-dev-import-apply');if(b)b.disabled=true;const p=document.getElementById('oai-dev-import-preview');const file=e.target.files&&e.target.files[0];if(!file)return;try{if(file.size>20*1024*1024)throw new Error('파일 크기가 20MB를 초과합니다.');const data=devImportParse(await file.text());devImportPreview(data);}catch(err){if(p)p.textContent='백업 파일을 읽지 못했습니다.';devImportMessage(err&&err.message||'형식을 확인해 주세요.');}});
   function openRestore(){const m=restoreModal();if(!m)return;restoreMessage('');const input=document.getElementById('oai-record-restore-code');if(input)input.value='';m.classList.add('show');m.setAttribute('aria-hidden','false');}
   function closeRestore(){const m=restoreModal();if(!m)return;m.classList.remove('show');m.setAttribute('aria-hidden','true');}
@@ -16162,6 +16200,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function mergeLists(a,b){const out=Array.isArray(a)?a.slice():[];(Array.isArray(b)?b:[]).forEach(function(item){const token=JSON.stringify(item);if(!out.some(function(current){return JSON.stringify(current)===token;}))out.push(item);});return out;}
   function mergeVisitEntryPair(current,backup){
     const a=_normalizeVisitEntry(current)||{},b=_normalizeVisitEntry(backup)||{},out=Object.assign({},b,a);
+    if(String(a.method||'').toLowerCase()==='gps'||String(b.method||'').toLowerCase()==='gps')out.method='gps';
     const deleted=Array.from(new Set([].concat(Array.isArray(b.deletedPhotoIds)?b.deletedPhotoIds:[],Array.isArray(a.deletedPhotoIds)?a.deletedPhotoIds:[]).map(String))),deletedSet=new Set(deleted);
     const photoMap={};[].concat(Array.isArray(b.photos)?b.photos:[],Array.isArray(a.photos)?a.photos:[]).forEach(function(ph){const id=_oaiPhotoIdentity(ph);if(id&&!deletedSet.has(id))photoMap[id]=ph;});out.photos=Object.keys(photoMap).map(function(k){return photoMap[k];});if(deleted.length)out.deletedPhotoIds=deleted;
     const at=String(a.memoUpdatedAt||''),bt=String(b.memoUpdatedAt||'');if(at||bt){const src=at>=bt?a:b;out.memo=String(src.memo||'');out.memoUpdatedAt=src.memoUpdatedAt||'';out.memoRevision=Number(src.memoRevision||0);}else if(Object.prototype.hasOwnProperty.call(a,'memo'))out.memo=String(a.memo||'');else if(Object.prototype.hasOwnProperty.call(b,'memo'))out.memo=String(b.memo||'');
@@ -16208,7 +16247,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const data=devImportParse(input&&input.value);
       devImportMergeVisitsOnly(data);
       markRestoreChecked();closeRestore();refresh();refreshRecords();
-      recordMessage('성지·성당 방문기록을 병합했습니다. 사진과 설정은 그대로 유지됩니다. Google Drive 자동 저장은 중지했습니다.');
+      recordMessage('성지·성당 방문기록을 병합했습니다. 사진과 설정은 유지하며 Google Drive 확인 후 저장합니다.');
     }catch(error){restoreMessage(error&&error.message||'백업 코드를 다시 확인해 주세요.');}
   }
 
