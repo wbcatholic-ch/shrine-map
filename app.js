@@ -16238,7 +16238,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       oaiVerifiedRemoteBackup=parsed;
       setDriveWriteReady(isGoogleDriveConnected()&&isGoogleDriveAutoBackupEnabled());
       markRestoreChecked();
-      refresh();refreshRecords();refreshGoogleDriveButton();
+      // A read-only import must not redraw every record view. Yield before
+      // expensive rendering so the WebView can process pending input first.
+      refreshGoogleDriveButton();
+      if(restored.changed){
+        setTimeout(function(){
+          try{refresh();refreshRecords();}
+          catch(err){console.warn('[가톨릭길동무] 복원 후 화면 갱신 실패',err);}
+        },0);
+      }
       recordMessage('Google Drive 방문기록·순례코스·설정을 병합했습니다. 코스 '+restored.courses+'개 확인.');
       if(driveWriteReady()){
         const pendingChanges=oaiDriveDirtyWhileSaving;
@@ -16349,7 +16357,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!parsed||parsed.format!=='catholic-gildongmu-backup'||!parsed.data)throw new Error('백업 코드 내용을 확인해 주세요.');
     return parsed.data;
   }
-  function mergeLists(a,b){const out=Array.isArray(a)?a.slice():[];(Array.isArray(b)?b:[]).forEach(function(item){const token=JSON.stringify(item);if(!out.some(function(current){return JSON.stringify(current)===token;}))out.push(item);});return out;}
+  function mergeLists(a,b){
+    // Snapshot merge: index existing items once, rather than re-serializing the
+    // entire accumulated list for every incoming item.
+    const out=Array.isArray(a)?a.slice():[];
+    const seen=new Set(out.map(function(item){return JSON.stringify(item);}));
+    (Array.isArray(b)?b:[]).forEach(function(item){
+      const token=JSON.stringify(item);
+      if(!seen.has(token)){seen.add(token);out.push(item);}
+    });
+    return out;
+  }
   function mergeVisitEntryPair(current,backup){
     const a=_normalizeVisitEntry(current)||{},b=_normalizeVisitEntry(backup)||{},out=Object.assign({},b,a);
     if(String(a.method||'').toLowerCase()==='gps'||String(b.method||'').toLowerCase()==='gps')out.method='gps';

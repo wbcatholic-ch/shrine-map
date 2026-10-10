@@ -9940,7 +9940,7 @@ html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(17px * va
 .oai-pilgrimage-course-rename-btn{border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#253854;padding:7px 13px;font-size:13px;font-weight:650;min-height:34px;}
 
 
-/* V8-1-14-1209: 완료 카드 하단 배너 단일 행 - 이름 변경은 길게 누르기 메뉴에만 */
+/* V8-1-14-1210: 완료 카드 하단 배너 단일 행 - 이름 변경은 길게 누르기 메뉴에만 */
 .oai-pilgrimage-course-rename-actions{display:none!important}
 .oai-pilgrimage-course-card.is-completed{overflow:hidden;border-radius:22px;background:#fff;box-shadow:0 3px 12px rgba(18,33,58,.045)}
 .oai-pilgrimage-course-card.is-completed .oai-pilgrimage-course-open{border-radius:20px 20px 0 0;border-bottom:0;padding:16px 15px;background:#fff}
@@ -9951,7 +9951,7 @@ html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(17px * va
 .oai-pilgrimage-course-complete>.oai-pilgrimage-course-count-btn{flex:0 0 auto;padding:0 2px;font-size:10px}
 .oai-pilgrimage-course-complete>.oai-pilgrimage-course-repeat{flex:0 1 auto;align-self:center!important;width:auto!important;min-width:0!important;min-height:36px!important;margin:0!important;padding:0 clamp(6px,1.7vw,12px)!important;border:1.5px solid #2878b4!important;border-radius:11px!important;background:#fff!important;color:#196a9e!important;box-shadow:none!important;font-size:clamp(10px,2.75vw,12px)!important;font-weight:900;white-space:nowrap}
 .oai-pilgrimage-course-complete>.oai-pilgrimage-course-repeat.is-active{background:#1d73bc!important;color:white!important}
-/* V8-1-14-1209: 순례완료 카드 하단 배너 + 길게누르기 메뉴 디자인 정리 */
+/* V8-1-14-1210: 순례완료 카드 하단 배너 + 길게누르기 메뉴 디자인 정리 */
 .oai-pilgrimage-course-rename-actions{display:none!important}
 .oai-pilgrimage-course-card.is-completed{overflow:hidden;border:1.5px solid #e4d5b1;border-radius:24px;background:linear-gradient(180deg,#fffefb 0%,#fffdf8 46%,#fff8ee 100%);box-shadow:0 8px 24px rgba(22,36,60,.06)}
 .oai-pilgrimage-course-card.is-completed .oai-pilgrimage-course-open{border-radius:22px 22px 0 0;border-bottom:0;padding:17px 16px 13px;background:transparent}
