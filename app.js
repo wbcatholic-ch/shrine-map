@@ -16403,6 +16403,20 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     return {courses:Array.isArray(remote.pilgrimageCourses)?remote.pilgrimageCourses.length:0,changed:appliedChanges>0};
   }
+  // A genuinely fresh install has no local backup records to merge back to Drive.
+  // Be deliberately conservative: a locally set preference, visit or revision
+  // makes this false, so it cannot suppress uploads of device-only changes.
+  function oaiDriveLocalWasPristineBeforeImport(){
+    const keys=[OAI_SHRINE_VISITS_KEY,OAI_PARISH_VISITS_KEY,
+      'pr_favorites','web_favorites_v1',OAI_ROUTE_FAVORITES_KEY,
+      'oai_route_favorites_modified_at_v1','oai_pilgrimage_plan_v1',
+      'oai_pilgrimage_draft_meta_v2','oai_pilgrimage_courses_v1',
+      OAI_SETTINGS_MY_PARISH_KEY,'oai_my_parish','oai_my_parish_name',
+      'oai_my_diocese_name',OAI_PARISH_AUTO_VISIT_ENABLED_KEY,
+      'prayer_font_size','oai_pilgrimage_public_feature_seen_v1'];
+    try{return keys.every(function(k){return localStorage.getItem(k)===null;});}
+    catch(_e){return false;}
+  }
   window.oaiGoogleDriveBackupReceived=function(encoded){
     const receiveStarted=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
     try{
@@ -16423,6 +16437,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       }
       // Keep uploads suspended until every backed-up field has been merged.
       // A failed transaction leaves both device data and the verified cloud backup intact.
+      const wasFreshEmpty=oaiDriveLocalWasPristineBeforeImport();
       const restored=oaiRestoreDriveCompleteData(parsed.data);
       const totalMs=Math.round(((typeof performance!=='undefined'&&performance.now)?performance.now():Date.now())-receiveStarted);
       if(totalMs>=100)console.warn('[가톨릭길동무][복원 성능] 수신·검증·병합·저장 합계 '+totalMs+'ms');
@@ -16446,7 +16461,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(driveWriteReady()){
         const pendingChanges=oaiDriveDirtyWhileSaving;
         oaiDriveDirtyWhileSaving=false;
-        if(pendingChanges||restored.changed)queueGoogleDriveBackup();
+        // A remote-only import onto an untouched device is not a new edit:
+        // uploading the same snapshot immediately adds work and can trigger ANR.
+        // If any local data or pending edit existed, keep the protective merge-upload.
+        if(pendingChanges||(restored.changed&&!wasFreshEmpty))queueGoogleDriveBackup();
       }
       if(initialDriveFirstFlow&&initialOnboarding){showInitialDriveImportComplete();return;}
     }catch(_e){
