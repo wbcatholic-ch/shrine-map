@@ -15833,8 +15833,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     recordMessage('Google Drive의 기록을 확인하고 있습니다.');
     try{bridge.loadGoogleDriveBackup();}catch(_e){oaiDriveCheckFailed('Google Drive 기록 확인을 시작하지 못했습니다.');recordMessage('Google Drive 기록을 확인하지 못했습니다. 자동 저장을 중지했습니다.');}
   }
-  function hasBackupContent(){
-    const data=backupSnapshot().data;
+  function hasMeaningfulDriveData(data){
+    if(!data||typeof data!=='object')return false;
     const countVisits=function(value){return Object.keys(value&&typeof value==='object'?value:{}).some(function(key){const item=value[key];return item&&Array.isArray(item.visits)&&item.visits.length>0;});};
     return countVisits(data.shrineVisits)||countVisits(data.parishVisits)||
       (Array.isArray(data.prayerFavorites)&&data.prayerFavorites.length>0)||
@@ -15844,6 +15844,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       (Array.isArray(data.pilgrimageCourses)&&data.pilgrimageCourses.length>0)||
       !!(data.myParish&&data.myParish.name);
   }
+  function hasBackupContent(){return hasMeaningfulDriveData(backupSnapshot().data);}
   function queueGoogleDriveBackup(){
     if(!isGoogleDriveAutoBackupEnabled()||!driveWriteReady()||googleDriveInitialSyncPending)return;
     const bridge=nativeDrive();if(!bridge||typeof bridge.saveGoogleDriveBackup!=='function')return;
@@ -15891,6 +15892,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(!local.myDiocese&&remote.myDiocese)local.myDiocese=remote.myDiocese;
         if(!local.prayerFontSize&&remote.prayerFontSize)local.prayerFontSize=remote.prayerFontSize;
         if(!local.pilgrimageDraftMeta||!Object.keys(local.pilgrimageDraftMeta).length)local.pilgrimageDraftMeta=remote.pilgrimageDraftMeta||{};
+      }
+      // 빈 기기 데이터로 기존 클라우드 백업을 덮어쓰거나 빈 백업을 생성하지 않는다.
+      if(!hasMeaningfulDriveData(snapshot.data)){
+        recordMessage('저장할 기록이 없어 Google Drive 저장을 건너뛰었습니다.');
+        return;
       }
       oaiDriveWriteInFlight=true;
       bridge.saveGoogleDriveBackup(JSON.stringify(snapshot));
@@ -16050,8 +16056,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       // A stray/duplicate empty callback must never authorize writes.
       if(verifiedLookup&&isGoogleDriveConnected()&&isGoogleDriveAutoBackupEnabled()){
         setDriveWriteReady(true);
-        recordMessage('Google Drive에 기존 백업이 없습니다. 현재 기록을 처음 저장합니다.');
-        queueGoogleDriveBackup();
+        oaiVerifiedRemoteBackup=null;
+        recordMessage('Google Drive에 가져올 데이터가 없습니다. 휴대폰 기록은 그대로 유지합니다.');
+        // 가져오기는 중단하지만, 기존 휴대폰 기록이 있으면 별도로 자동 보관한다.
+        if(hasBackupContent())queueGoogleDriveBackup();
       }else{
         setDriveWriteReady(false);
         recordMessage('Google Drive 저장 상태를 확인하지 못했습니다. 자동 저장을 중지했습니다.');
@@ -16064,6 +16072,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const text=decodeURIComponent(escape(atob(String(encoded||''))));
       const parsed=JSON.parse(text);
       if(!parsed||parsed.format!=='catholic-gildongmu-backup'||!parsed.data||!parsed.data.shrineVisits||!parsed.data.parishVisits||typeof parsed.data.shrineVisits!=='object'||typeof parsed.data.parishVisits!=='object')throw new Error();
+      if(!hasMeaningfulDriveData(parsed.data)){
+        googleDriveInitialSyncPending=false;oaiCancelDriveCheckTimer();
+        oaiVerifiedRemoteBackup=null;
+        setDriveWriteReady(isGoogleDriveConnected()&&isGoogleDriveAutoBackupEnabled());
+        recordMessage('Google Drive에 가져올 데이터가 없습니다. 휴대폰 기록은 그대로 유지합니다.');
+        if(driveWriteReady()&&hasBackupContent())queueGoogleDriveBackup();
+        if(initialDriveFirstFlow&&initialOnboarding)setTimeout(openInitialParishSetupAfterDrive,180);
+        return;
+      }
       googleDriveInitialSyncPending=false;oaiCancelDriveCheckTimer();
       // Drive 수신은 방문기록만 병합합니다. 기존 사진/순례계획/설정은 유지합니다.
       // 다운로드 성공을 업로드 허가로 취급하면 오래된/빈 백업이 다시 올라갈 수 있습니다.
