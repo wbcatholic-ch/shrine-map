@@ -15752,6 +15752,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function driveWriteReady(){return oaiDriveSessionVerified;}
   function setDriveWriteReady(ready){oaiDriveSessionVerified=!!ready;}
   let googleDriveBackupTimer=0;
+  let oaiDriveRestoreBatchActive=false; // Bulk Drive import must not enqueue per-key writes.
   let oaiVerifiedRemoteBackup=null; // Retain cloud-only settings until explicitly restored.
   let oaiDriveWriteInFlight=false;
   let oaiDriveDirtyWhileSaving=false;
@@ -15883,8 +15884,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       window.__oaiGoogleDriveStorageWatch=true;
       const setItem=Storage.prototype.setItem;
       Storage.prototype.setItem=function(key,value){
+        // Avoid repeatedly rebuilding large snapshots when a value is unchanged.
+        const watch=this===window.localStorage&&!!keys[String(key)];
+        const previous=watch?this.getItem(key):null;
         const result=setItem.call(this,key,value);
-        if(this===window.localStorage&&keys[String(key)]){
+        if(watch&&!oaiDriveRestoreBatchActive&&previous!==String(value)){
           if(isGoogleDriveAutoBackupEnabled())queueGoogleDriveBackup();
           else setTimeout(maybeRecommendGoogleDrive,0);
         }
@@ -16156,9 +16160,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(remote.prayerFontSize&&!localStorage.getItem('prayer_font_size'))changes.prayer_font_size=String(remote.prayerFontSize);
     if(remote.noticeFlags&&remote.noticeFlags.pilgrimagePublicFeatureSeen===true&&localStorage.getItem('oai_pilgrimage_public_feature_seen_v1')===null)changes.oai_pilgrimage_public_feature_seen_v1='1';
     const prior={};Object.keys(changes).forEach(function(k){prior[k]=localStorage.getItem(k);});
-    // Do not perform network writes while this transaction is being applied.
-    try{Object.keys(changes).forEach(function(k){localStorage.setItem(k,changes[k]);});}
+    // One atomic local batch: skip identical writes and do not schedule a remote
+    // backup until the entire import has passed validation and committed.
+    oaiDriveRestoreBatchActive=true;
+    try{Object.keys(changes).forEach(function(k){if(localStorage.getItem(k)!==changes[k])localStorage.setItem(k,changes[k]);});}
     catch(err){Object.keys(prior).forEach(function(k){try{if(prior[k]===null)localStorage.removeItem(k);else localStorage.setItem(k,prior[k]);}catch(_e){}});throw err;}
+    finally{oaiDriveRestoreBatchActive=false;}
     try{window.dispatchEvent(new CustomEvent('oai-my-parish-changed'));_updateAllRouteFavoriteButtons();_renderRouteFrequentPlaces();}catch(_e){}
     return {courses:Array.isArray(remote.pilgrimageCourses)?remote.pilgrimageCourses.length:0};
   }
