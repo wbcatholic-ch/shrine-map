@@ -16278,15 +16278,29 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(code).then(copied).catch(function(){(function(){openRestore();const field=document.getElementById('oai-record-restore-code');if(field){field.value=code;field.focus();field.select();}restoreMessage('복사가 지원되지 않아 백업 코드를 표시했습니다. 전체 선택하여 안전하게 보관하세요.');})()});}
     else (function(){openRestore();const field=document.getElementById('oai-record-restore-code');if(field){field.value=code;field.focus();field.select();}restoreMessage('복사가 지원되지 않아 백업 코드를 표시했습니다. 전체 선택하여 안전하게 보관하세요.');})()
   }
-  // 1185: All user-facing CGM1 restore paths share the same visits-only safe merge.
-  function applyRestore(){
+  // 1196: Respect the restore payload type in both backup-code entry screens.
+  // A completed-course restore must never silently report success as a visit-only import.
+  let courseRestoreInProgress=false;
+  async function applyRestore(){
+    if(courseRestoreInProgress)return;
     try{
       const input=document.getElementById('oai-record-restore-code');
       const data=devImportParse(input&&input.value);
+      if(data.restoreType==='completed-courses-only'){
+        courseRestoreInProgress=true;
+        restoreMessage('순례완료 코스 위치를 확인하고 있습니다.');
+        try{
+          if(typeof window.__oaiRestoreCompletedCourses!=='function')throw new Error('코스 복원 기능을 불러오지 못했습니다. 앱을 다시 열어 주세요.');
+          const result=await window.__oaiRestoreCompletedCourses(data.completedCourseRestore);
+          restoreMessage('순례완료 코스 '+result.added+'개 추가, 기존 코스 '+result.skipped+'개 유지. 순례완료 화면에서 확인해 주세요.');
+          // Keep the result visible until the user closes the dialog.
+        }finally{courseRestoreInProgress=false;}
+        return;
+      }
       devImportMergeVisitsOnly(data,true);
       markRestoreChecked();closeRestore();refresh();refreshRecords();
       recordMessage('성지·성당 방문기록을 병합했습니다. 사진과 설정은 유지하며 Google Drive 확인 후 저장합니다.');
-    }catch(error){restoreMessage(error&&error.message||'백업 코드를 다시 확인해 주세요.');}
+    }catch(error){courseRestoreInProgress=false;restoreMessage('복원 실패: '+(error&&error.message||'백업 코드를 다시 확인해 주세요.'));}
   }
 
   const parishSetup={dio:'',parish:null,query:'',view:'home'};
