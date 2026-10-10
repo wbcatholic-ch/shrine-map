@@ -16052,6 +16052,20 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       };
     }catch(_e){}
   })();
+  // Reuse an identical local+verified-cloud visit merge between unrelated settings saves.
+  // Cache is invalidated by exact local bytes OR a newly verified cloud object.
+  // A shallow copy prevents subsequent top-level writes from changing the cache.
+  const oaiBackupMergedVisitsCache=new Map();
+  function cachedMergedBackupVisits(storageKey,localVisits,remoteVisits){
+    const raw=localStorage.getItem(storageKey)||'';
+    const prior=oaiBackupMergedVisitsCache.get(storageKey);
+    if(prior&&prior.raw===raw&&prior.remote===remoteVisits){
+      return Object.assign({},prior.value);
+    }
+    const merged=mergeVisitMaps(localVisits,remoteVisits);
+    oaiBackupMergedVisitsCache.set(storageKey,{raw:raw,remote:remoteVisits,value:merged});
+    return Object.assign({},merged);
+  }
   function saveGoogleDriveBackupNow(showMessage){
     if(!isGoogleDriveAutoBackupEnabled())return;
     if(!driveWriteReady()||googleDriveInitialSyncPending){oaiDriveDirtyWhileSaving=true;if(!googleDriveInitialSyncPending)scheduleDriveRecheck();return;}
@@ -16064,8 +16078,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const _oaiDriveSnapshotReady=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
       if(oaiVerifiedRemoteBackup&&oaiVerifiedRemoteBackup.data){
         const remote=oaiVerifiedRemoteBackup.data, local=snapshot.data;
-        local.shrineVisits=mergeVisitMaps(local.shrineVisits,remote.shrineVisits);
-        local.parishVisits=mergeVisitMaps(local.parishVisits,remote.parishVisits);
+        local.shrineVisits=cachedMergedBackupVisits(OAI_SHRINE_VISITS_KEY,local.shrineVisits,remote.shrineVisits);
+        local.parishVisits=cachedMergedBackupVisits(OAI_PARISH_VISITS_KEY,local.parishVisits,remote.parishVisits);
         ['prayerFavorites','webFavorites','pilgrimagePlan'].forEach(function(k){local[k]=mergeLists(local[k],remote[k]);});
         // Never resurrect a favorite deleted locally: compare explicit edit revisions.
         const localFavoriteRevision=Number(local.routeFavoritesUpdatedAt)||0;
