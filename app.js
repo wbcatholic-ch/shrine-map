@@ -15979,7 +15979,30 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       (Array.isArray(data.pilgrimageCourses)&&data.pilgrimageCourses.length>0)||
       !!(data.myParish&&data.myParish.name);
   }
-  function hasBackupContent(){return hasMeaningfulDriveData(backupSnapshot().data);}
+  // A presence check must not rebuild the complete backup (photo sanitizing,
+  // JSON copies and course data). Inspect only the fields used by
+  // hasMeaningfulDriveData; malformed local data is treated as empty.
+  function hasBackupContent(){
+    const read=function(key,fallback){
+      try{const value=JSON.parse(localStorage.getItem(key)||'');return value==null?fallback:value;}
+      catch(_e){return fallback;}
+    };
+    const hasVisitsOrDeletes=function(key){
+      const map=read(key,{});
+      if(!map||typeof map!=='object')return false;
+      return Object.keys(map).some(function(id){
+        const rec=map[id];
+        return !!(rec&&((Array.isArray(rec.visits)&&rec.visits.length>0)||
+          (rec.deletedManualVisits&&typeof rec.deletedManualVisits==='object'&&Object.keys(rec.deletedManualVisits).length>0)));
+      });
+    };
+    if(hasVisitsOrDeletes(OAI_SHRINE_VISITS_KEY)||hasVisitsOrDeletes(OAI_PARISH_VISITS_KEY))return true;
+    const listKeys=['pr_favorites','web_favorites_v1',OAI_ROUTE_FAVORITES_KEY,
+      'oai_pilgrimage_plan_v1','oai_pilgrimage_courses_v1'];
+    if(listKeys.some(function(key){const items=read(key,[]);return Array.isArray(items)&&items.length>0;}))return true;
+    const parish=configuredParish();
+    return !!(parish&&parish.name);
+  }
   // GPS·방문기록·사진·코스는 신속하게, 일반 설정은 짧게 모아서 백업한다.
   // 중요 기록이 대기 중일 때 설정 변경이 그 저장을 뒤로 미루지 못하게 한다.
   function queueGoogleDriveBackup(priority){
