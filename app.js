@@ -16011,9 +16011,20 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // 로컬 기록은 변경 시 이미 기록되어 있으며, 재확인 이전에는 클라우드를 덮어쓰지 않는다.
   document.addEventListener('visibilitychange',function(){
     if(document.visibilityState!=='hidden'||!googleDriveBackupTimer)return;
+    const pendingPriority=oaiDriveBackupPriority;
     clearTimeout(googleDriveBackupTimer);googleDriveBackupTimer=0;
     oaiDriveBackupPriority='settings';oaiDriveBackupDueAt=0;
-    setTimeout(function(){saveGoogleDriveBackupNow(false);},0);
+    setTimeout(function(){
+      // WebView may suspend hidden-page timers. If this callback resumes only
+      // after the app becomes visible, do not run the heavy synchronous backup
+      // snapshot in the middle of the resume/GPS/UI work.
+      // Critical visit/course writes still use the normal short priority.
+      if(document.visibilityState==='visible'){
+        queueGoogleDriveBackup(pendingPriority==='critical'?'critical':'settings');
+        return;
+      }
+      saveGoogleDriveBackupNow(false);
+    },0);
   });
   // 방문·즐겨찾기·내 본당처럼 백업 대상이 바뀌면, 앱을 닫지 않아도
   // 약 1초 뒤 Drive에 저장합니다. 관련 없는 화면 설정은 백업하지 않습니다.
