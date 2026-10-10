@@ -20095,6 +20095,8 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.ge
     }
   },true);
   document.addEventListener('keydown',e=>{if(e.key==='Enter'&&saveModal()&&saveModal().classList.contains('show')&&e.target&&e.target.id==='oai-pilgrimage-save-name'){e.preventDefault();confirmSave();}},true);
-  refreshDev(); renderCourseList();
+  // 1224: Do not render the hidden course list during app boot.
+  // openPlanner() renders it when the user actually opens pilgrimage.
+  refreshDev();
   _initializeDailyPilgrimageSettlement();
 })();
