@@ -6797,7 +6797,7 @@ function _hideAllParishDioMkrs(){
   }catch(_e){}
   try{
     if(_parishIdleListener){
-      kakao.maps.event.removeListener(_parishIdleListener);
+      kakao.maps.event.removeListener(_parishIdleListener.__map || _map,'idle',_parishIdleListener);
       _parishIdleListener=null;
     }
   }catch(_e){}
@@ -8582,7 +8582,7 @@ function _resetMapState(){
   _parishDioProgrammaticMoveUntil=0;
   _pendingParishDioCode=null;
   try{ if(AppState){ AppState.nearbyParishDioCode=null; AppState.parishMapLayerMode=''; AppState.parishDioLayerToken=(Number(AppState.parishDioLayerToken||0)||0)+1; } }catch(e){ console.warn('[가톨릭길동무]',e); }
-  if(_parishIdleListener){ try{kakao.maps.event.removeListener(_parishIdleListener);}catch(e){ console.warn('[가톨릭길동무]',e); } _parishIdleListener=null; }
+  if(_parishIdleListener){ try{kakao.maps.event.removeListener(_parishIdleListener.__map || _map,'idle',_parishIdleListener);}catch(e){ console.warn('[가톨릭길동무]',e); } _parishIdleListener=null; }
   _myMkr=null;
   _myLat=null; _myLng=null;
   const mapEl=$('map');
@@ -11307,10 +11307,15 @@ function _showParishDioMkrs(code){
     if(_isParishNearbyMapMode()) try{ _syncParishDioLabels(); }catch(_e){}
     return;
   }
-  if(!code) return;
-  try{ _hideAllParishDioMkrs(); }catch(e){ console.warn('[가톨릭길동무]',e); }
-  _setParishMapLayerMode('dio','show-dio');
-  try{ _bumpParishDioLayerToken('show-dio:'+code); }catch(_e){}
+  if(!code || !_map) return;
+  // Re-selecting an already visible diocese must not detach and reattach every marker.
+  const sameLayer=_activeDio===code && AppState && AppState.parishMapLayerMode==='dio' &&
+    _dioMkrs[code] && _dioMkrs[code].length>0;
+  if(!sameLayer){
+    try{ _hideAllParishDioMkrs(); }catch(e){ console.warn('[가톨릭길동무]',e); }
+    _setParishMapLayerMode('dio','show-dio');
+    try{ _bumpParishDioLayerToken('show-dio:'+code); }catch(_e){}
+  }
   if(!_dioMkrs[code]){
     const cfg=_DIO_CFG[code]||{c:'#555'};
     const parishes=_PA_BY_DIO[code]||[];
@@ -11334,36 +11339,63 @@ function _showParishDioMkrs(code){
     });
   }
   _updateParishViewport(code);
-  if(_parishIdleListener){
-    try{kakao.maps.event.removeListener(_parishIdleListener);}catch(e){ console.warn('[가톨릭길동무]',e); }
-    _parishIdleListener=null;
+  // Recalculate only after map gestures settle, not during every drag/zoom frame.
+  if(!_parishIdleListener){
+    const mapAtRegistration=_map;
+    const onIdle=function(){
+      if(_map!==mapAtRegistration || _mode!=='parish' || _activeDio!==code ||
+         _isParishNearbyMapMode() || _isParishRouteLineActive()) return;
+      _updateParishViewport(code);
+    };
+    onIdle.__map=mapAtRegistration;
+    _parishIdleListener=onIdle;
+    try{kakao.maps.event.addListener(mapAtRegistration,'idle',onIdle);}
+    catch(e){_parishIdleListener=null;console.warn('[가톨릭길동무]',e);}
   }
-  /* V8-1-14-621: 성당 지도는 idle 때마다 교구 전체 마커 setMap을 반복해
-     확대·축소 후 버벅임이 커졌다. 현재 _updateParishViewport는 실제 뷰포트 필터링을 하지
-     않으므로 최초 표시 때 한 번만 실행하고 zoom/idle 반복 리스너는 붙이지 않는다. */
 }
 
+function _parishViewportBounds(){
+  try{
+    if(!_map || typeof _map.getBounds!=='function')return null;
+    const b=_map.getBounds(),sw=b.getSouthWest(),ne=b.getNorthEast();
+    const south=sw.getLat(),north=ne.getLat(),west=sw.getLng(),east=ne.getLng();
+    if(![south,north,west,east].every(Number.isFinite) || north<=south || east<=west)return null;
+    // Padding keeps markers visible while panning; off-screen objects are not rendered.
+    const latPad=(north-south)*0.4,lngPad=(east-west)*0.4;
+    return {s:south-latPad,n:north+latPad,w:west-lngPad,e:east+lngPad};
+  }catch(_e){return null;}
+}
 function _updateParishViewport(code){
+  const pass=(_updateParishViewport._pass||0)+1;
+  _updateParishViewport._pass=pass;
   const mkrs=_dioMkrs[code];
   if(!mkrs||!_map) return;
   if(_isParishNearbyMapMode() || _isParishRouteLineActive()){
-    mkrs.forEach(mk=>{
-      try{ _setMarkerMapIfChanged(mk,null); }catch(e){ console.warn('[가톨릭길동무]',e); }
-    });
+    mkrs.forEach(mk=>{try{_setMarkerMapIfChanged(mk,null);}catch(e){console.warn('[가톨릭길동무]',e);}});
     return;
   }
   const layerToken=_currentParishDioLayerToken();
   const buildToken=_currentMainMapBuildToken();
+  const bounds=_parishViewportBounds();
   let i=0;
   const batch=64;
   (function applyBatch(){
-    if(!_isMainMapBuildCurrent(buildToken,'parish')) return;
-    if(!_isParishDioLayerTokenCurrent(layerToken)) return;
-    if(_isParishNearbyMapMode() || _isParishRouteLineActive()) return;
-    if(_activeDio!==code || !_dioMkrs[code]) return;
-    const end=Math.min(i+batch, mkrs.length);
+    if(pass!==_updateParishViewport._pass)return;
+    if(!_isMainMapBuildCurrent(buildToken,'parish'))return;
+    if(!_isParishDioLayerTokenCurrent(layerToken))return;
+    if(_isParishNearbyMapMode() || _isParishRouteLineActive())return;
+    if(_activeDio!==code || !_dioMkrs[code])return;
+    const end=Math.min(i+batch,mkrs.length);
     for(;i<end;i++){
-      try{ _setMarkerMapIfChanged(mkrs[i],_map); }catch(e){ console.warn('[가톨릭길동무]',e); }
+      const mk=mkrs[i];
+      let visible=true;
+      if(bounds){
+        try{
+          const pos=mk.getPosition(),lat=pos.getLat(),lng=pos.getLng();
+          visible=lat>=bounds.s&&lat<=bounds.n&&lng>=bounds.w&&lng<=bounds.e;
+        }catch(_e){visible=true;}
+      }
+      _setMarkerMapIfChanged(mk,visible?_map:null);
     }
     if(i<mkrs.length) requestAnimationFrame(applyBatch);
   })();
@@ -11372,7 +11404,7 @@ function _updateParishViewport(code){
 function _hideParishDioMkrs(code){
   (_dioMkrs[code]||[]).forEach(mk=>{ try{_setMarkerMapIfChanged(mk,null);}catch(e){ console.warn('[가톨릭길동무]',e); } });
   if(_parishIdleListener){
-    try{kakao.maps.event.removeListener(_parishIdleListener);}catch(e){ console.warn('[가톨릭길동무]',e); }
+    try{kakao.maps.event.removeListener(_parishIdleListener.__map || _map,'idle',_parishIdleListener);}catch(e){ console.warn('[가톨릭길동무]',e); }
     _parishIdleListener=null;
   }
 }
@@ -14243,7 +14275,7 @@ function _hideParishMarkersForRouteDisplay(){
       });
     });
     if(_parishIdleListener){
-      try{ kakao.maps.event.removeListener(_parishIdleListener); }catch(e){ console.warn('[가톨릭길동무]', e); }
+      try{ kakao.maps.event.removeListener(_parishIdleListener.__map || _map,'idle',_parishIdleListener); }catch(e){ console.warn('[가톨릭길동무]', e); }
       _parishIdleListener=null;
     }
   }catch(e){ console.warn('[가톨릭길동무]', e); }
