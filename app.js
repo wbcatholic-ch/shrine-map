@@ -13034,7 +13034,11 @@ function _loadRouteFavorites(){
   }catch(_e){ return []; }
 }
 function _saveRouteFavorites(list){
-  try{ localStorage.setItem(OAI_ROUTE_FAVORITES_KEY,JSON.stringify((list||[]).slice(0,OAI_ROUTE_FAVORITES_MAX))); }catch(_e){}
+  try{
+    localStorage.setItem(OAI_ROUTE_FAVORITES_KEY,JSON.stringify((list||[]).slice(0,OAI_ROUTE_FAVORITES_MAX)));
+    // 1209: timestamp denotes an intentional local edit (including an empty list).
+    localStorage.setItem('oai_route_favorites_modified_at_v1',String(Date.now()));
+  }catch(_e){}
 }
 function _routeFavoriteSame(a,b){
   if(!a||!b) return false;
@@ -15870,7 +15874,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     googleDriveBackupTimer=setTimeout(function(){
       googleDriveBackupTimer=0;
       saveGoogleDriveBackupNow(false);
-    },900);
+    },1800);
   }
   // 방문·즐겨찾기·내 본당처럼 백업 대상이 바뀌면, 앱을 닫지 않아도
   // 약 1초 뒤 Drive에 저장합니다. 관련 없는 화면 설정은 백업하지 않습니다.
@@ -15908,7 +15912,16 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         const remote=oaiVerifiedRemoteBackup.data, local=snapshot.data;
         local.shrineVisits=mergeVisitMaps(local.shrineVisits,remote.shrineVisits);
         local.parishVisits=mergeVisitMaps(local.parishVisits,remote.parishVisits);
-        ['prayerFavorites','webFavorites','routeFavorites','pilgrimagePlan'].forEach(function(k){local[k]=mergeLists(local[k],remote[k]);});
+        ['prayerFavorites','webFavorites','pilgrimagePlan'].forEach(function(k){local[k]=mergeLists(local[k],remote[k]);});
+        // Never resurrect a favorite deleted locally: compare explicit edit revisions.
+        const localFavoriteRevision=Number(local.routeFavoritesUpdatedAt)||0;
+        const remoteFavoriteRevision=Number(remote.routeFavoritesUpdatedAt)||0;
+        if(remoteFavoriteRevision>localFavoriteRevision){
+          local.routeFavorites=Array.isArray(remote.routeFavorites)?remote.routeFavorites.slice(0,OAI_ROUTE_FAVORITES_MAX):[];
+          local.routeFavoritesUpdatedAt=remoteFavoriteRevision;
+        }else if(!localFavoriteRevision&&!remoteFavoriteRevision){
+          local.routeFavorites=mergeLists(local.routeFavorites,remote.routeFavorites).slice(0,OAI_ROUTE_FAVORITES_MAX);
+        }
         // Preserve cloud GPS completions, including matching course ids.
         const existingCourses=Array.isArray(local.pilgrimageCourses)?local.pilgrimageCourses:[];
         const byId=new Map(existingCourses.map(function(c){return [String(c&&c.id||''),c];}));
@@ -16055,7 +16068,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       return;
     }
     if(status==='saved'){
-      if(!oaiDriveWriteInFlight){recordMessage('요청하지 않은 저장 완료 응답은 무시했습니다.');return;}
+      if(!oaiDriveWriteInFlight){return;}
       oaiDriveWriteInFlight=false;
       if(oaiDriveDirtyWhileSaving){oaiDriveDirtyWhileSaving=false;setTimeout(queueGoogleDriveBackup,0);}
       try{localStorage.setItem('oai_google_drive_saved_at_v1',new Date().toISOString());}catch(_e){}
@@ -16143,7 +16156,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(value===undefined)return;
       if(!Array.isArray(value))throw new Error('백업 목록 형식 오류: '+field);
       let combined=mergeLists(localValue(key,[]),value);
-      if(field==='routeFavorites')combined=combined.slice(0,OAI_ROUTE_FAVORITES_MAX);
+      if(field==='routeFavorites'){
+        const currentRevision=Number(localStorage.getItem('oai_route_favorites_modified_at_v1'))||0;
+        const remoteRevision=Number(remote.routeFavoritesUpdatedAt)||0;
+        if(currentRevision>0&&currentRevision>=remoteRevision){
+          combined=localValue(key,[]);
+        }else if(remoteRevision>0){
+          combined=value.slice();
+          changes.oai_route_favorites_modified_at_v1=String(remoteRevision);
+        }
+        combined=combined.slice(0,OAI_ROUTE_FAVORITES_MAX);
+      }
       put(key,combined);
     });
     if(remote.pilgrimageCourses!==undefined){
@@ -16185,11 +16208,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     // One atomic local batch: skip identical writes and do not schedule a remote
     // backup until the entire import has passed validation and committed.
     oaiDriveRestoreBatchActive=true;
-    try{Object.keys(changes).forEach(function(k){if(localStorage.getItem(k)!==changes[k])localStorage.setItem(k,changes[k]);});}
+    let appliedChanges=0;
+    try{Object.keys(changes).forEach(function(k){if(localStorage.getItem(k)!==changes[k]){localStorage.setItem(k,changes[k]);appliedChanges++;}});}
     catch(err){Object.keys(prior).forEach(function(k){try{if(prior[k]===null)localStorage.removeItem(k);else localStorage.setItem(k,prior[k]);}catch(_e){}});throw err;}
     finally{oaiDriveRestoreBatchActive=false;}
-    try{window.dispatchEvent(new CustomEvent('oai-my-parish-changed'));_updateAllRouteFavoriteButtons();_renderRouteFrequentPlaces();}catch(_e){}
-    return {courses:Array.isArray(remote.pilgrimageCourses)?remote.pilgrimageCourses.length:0};
+    // Only refresh dependent views if the imported data actually changed.
+    if(appliedChanges){try{window.dispatchEvent(new CustomEvent('oai-my-parish-changed'));_updateAllRouteFavoriteButtons();_renderRouteFrequentPlaces();}catch(_e){}}
+    return {courses:Array.isArray(remote.pilgrimageCourses)?remote.pilgrimageCourses.length:0,changed:appliedChanges>0};
   }
   window.oaiGoogleDriveBackupReceived=function(encoded){
     try{
@@ -16215,7 +16240,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       markRestoreChecked();
       refresh();refreshRecords();refreshGoogleDriveButton();
       recordMessage('Google Drive 방문기록·순례코스·설정을 병합했습니다. 코스 '+restored.courses+'개 확인.');
-      if(driveWriteReady()){oaiDriveDirtyWhileSaving=false;queueGoogleDriveBackup();}
+      if(driveWriteReady()){
+        const pendingChanges=oaiDriveDirtyWhileSaving;
+        oaiDriveDirtyWhileSaving=false;
+        if(pendingChanges||restored.changed)queueGoogleDriveBackup();
+      }
       if(initialDriveFirstFlow&&initialOnboarding){showInitialDriveImportComplete();return;}
     }catch(_e){
       googleDriveInitialSyncPending=false;oaiCancelDriveCheckTimer();
@@ -16307,7 +16336,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const parish=configuredParish();
     return {format:'catholic-gildongmu-backup',version:1,createdAt:new Date().toISOString(),data:{
       shrineVisits:backupVisitMapWithoutLocalPhotos(localValue(OAI_SHRINE_VISITS_KEY,{})),parishVisits:backupVisitMapWithoutLocalPhotos(localValue(OAI_PARISH_VISITS_KEY,{})),
-      prayerFavorites:localValue('pr_favorites',[]),webFavorites:localValue('web_favorites_v1',[]),routeFavorites:localValue(OAI_ROUTE_FAVORITES_KEY,[]),pilgrimagePlan:localValue('oai_pilgrimage_plan_v1',[]),pilgrimageDraftMeta:localValue('oai_pilgrimage_draft_meta_v2',{}),pilgrimageCourses:localValue('oai_pilgrimage_courses_v1',[]),
+      prayerFavorites:localValue('pr_favorites',[]),webFavorites:localValue('web_favorites_v1',[]),routeFavorites:localValue(OAI_ROUTE_FAVORITES_KEY,[]),routeFavoritesUpdatedAt:Number(localStorage.getItem('oai_route_favorites_modified_at_v1'))||0,pilgrimagePlan:localValue('oai_pilgrimage_plan_v1',[]),pilgrimageDraftMeta:localValue('oai_pilgrimage_draft_meta_v2',{}),pilgrimageCourses:localValue('oai_pilgrimage_courses_v1',[]),
       myDiocese:configuredDiocese(),myParish:parish?{diocese:parish.diocese||'',name:parish.name||''}:null,
       parishAutoVisit:_isMyParishAutoVisitEnabled(),prayerFontSize:localStorage.getItem('prayer_font_size')||'',
       noticeFlags:{pilgrimagePublicFeatureSeen:localStorage.getItem('oai_pilgrimage_public_feature_seen_v1')==='1'}
