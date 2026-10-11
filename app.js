@@ -14481,7 +14481,19 @@ function _finishPilgrimageRouteEdit(){
     const draft=_buildPilgrimageDraftFromRoute();
     const edit=window.__OAI_PILGRIMAGE_ROUTE_EDIT__||{};
     if(Array.isArray(edit.extraPlaces)&&edit.extraPlaces.length){
-      draft.places=(draft.places||[]).concat(edit.extraPlaces.map(function(x){return Object.assign({},x);}));
+      // Keep waypoints beyond the route editor's 10 visible slots without
+      // re-appending places already present after returning from the map.
+      const places=Array.isArray(draft.places)?draft.places:[];
+      const samePlace=function(a,b){
+        const latA=Number(a&&a.lat),lngA=Number(a&&a.lng);
+        const latB=Number(b&&b.lat),lngB=Number(b&&b.lng);
+        return Number.isFinite(latA)&&Number.isFinite(lngA)&&Number.isFinite(latB)&&Number.isFinite(lngB)
+          &&Math.abs(latA-latB)+Math.abs(lngA-lngB)<.00002;
+      };
+      edit.extraPlaces.forEach(function(x){
+        if(x&&!places.some(function(p){return samePlace(p,x);}))places.push(Object.assign({},x));
+      });
+      draft.places=places;
     }
     if(typeof window.applyOaiPilgrimageRouteEdit==='function') window.applyOaiPilgrimageRouteEdit(draft);
     window.__OAI_PILGRIMAGE_ROUTE_EDIT__=null;
@@ -14500,6 +14512,8 @@ function _handleRoutePilgrimagePlanAction(){
 }
 function _openPilgrimagePlannerFromRoute(){
   try{
+    // This action creates a fresh course, never carries an earlier edit tail.
+    window.__OAI_PILGRIMAGE_ROUTE_EDIT__=null;
     const draft=_buildPilgrimageDraftFromRoute();
     if(typeof window.importOaiPilgrimageRouteDraft==='function') window.importOaiPilgrimageRouteDraft(draft);
     const sheet=$('sheet-route');
