@@ -18504,18 +18504,16 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.ge
 
     if(!(opts&&opts.returnFromSearch)){
       const active=_activeFollowState();
-      if(active){
+      if(active&&String(currentCourseId||'')===String(active.courseId)&&loadPlan().length){
+        // Opening a screen is read-only. Never copy the active course over a
+        // cleared/new draft: it would resurrect deleted places and re-backup.
         pilgrimageDetailMode='plan';
-        // A separately edited draft is not the running course. Opening the
-        // planner must never overwrite it or enqueue a new cloud backup.
-        if(currentCourseId||!loadPlan().length){
-          if(!(currentCourseId===active.courseId&&_pilgrimageStructureIsDirty()))applyCourse(active.course);
-        }
         setView('detail');
         renderDetail();
         return;
       }
-      if(currentCourseId&&!(_isActiveFollowCourse(currentCourseId)&&_pilgrimageStructureIsDirty()))updateCurrentCourseProgress();
+      // Do not persist an unchanged course on tab entry. Explicit edits and
+      // GPS progress already call updateCurrentCourseProgress at their source.
       const savedCourses=loadCourses();
       pilgrimageCourseTab=savedCourses.length?'complete':'plan';
       pilgrimageCourseFilterState.year='all';
@@ -18568,7 +18566,7 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.ge
       if(pilgrimageManualCreateMode){
         pilgrimageManualCreateMode=false;pilgrimageManualDraftCourse=null;currentCourseId='';clearDraft();const manualDate=document.getElementById('oai-pilgrimage-manual-date');if(manualDate)manualDate.value='';pilgrimageCourseTab='complete';setView('list');renderCourseList();return true;
       }
-      if(currentCourseId&&pilgrimageDetailMode!=='complete'&&!(_isActiveFollowCourse(currentCourseId)&&_pilgrimageStructureIsDirty()))updateCurrentCourseProgress();
+      // Back navigation must not save or resurrect an older saved course.
       setView('list');renderCourseList();return true;
     }
     closePlanner();return true;
