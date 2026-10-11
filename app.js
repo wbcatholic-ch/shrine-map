@@ -10729,10 +10729,11 @@ function _restoreAllCategoryMarkersForSelection(){
   }
   if(_mode==='retreat'){
     if(!_retreatMarkers.length) _buildRetreatMarkers();
+    const viewportBounds=_parishViewportBounds();
     _retreatMarkers.forEach(o=>{
       if(!o||!o.marker) return;
       try{
-        _setMarkerMapIfChanged(o.marker,_retreatMarkerWithinViewport(o.marker)?_map:null);
+        _setMarkerMapIfChanged(o.marker,_retreatMarkerWithinViewport(o.marker,viewportBounds)?_map:null);
         _setMarkerImageIfChanged(o.marker,_mkrImgRetreat('#2e7d32',false),'retreat:#2e7d32:0');
         _setMarkerZIfChanged(o.marker,45);
       }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -11448,8 +11449,7 @@ function _hideParishDioMkrs(code){
 // Reuse the existing markers and their click handlers; do not rebuild on idle.
 let _retreatViewportIdleMap=null;
 let _retreatViewportIdleCallback=null;
-function _retreatMarkerWithinViewport(marker){
-  const bounds=_parishViewportBounds();
+function _retreatMarkerWithinViewport(marker,bounds){
   if(!bounds) return true;
   try{
     const pos=marker.getPosition(),lat=pos.getLat(),lng=pos.getLng();
@@ -11482,6 +11482,7 @@ function _buildRetreatMarkers(){
     function buildBatch(){
       if(!_isMainMapBuildCurrent(buildToken,'retreat')){ window.__OAI_RETREAT_MARKER_BUILDING__ = false; return; }
       const end=Math.min(i+batch, RETREATS.length);
+      const viewportBounds=_parishViewportBounds();
       for(;i<end;i++){
         const p=RETREATS[i];
         if(!p.lat||!p.lng||p.lat===0) continue;
@@ -11495,7 +11496,7 @@ function _buildRetreatMarkers(){
           if(_isRouteSelectionModeActive()) _selectRouteItem(idx);
           else selectItem(idx,{fromNearby:false,fromRegion:_isRegionSearchActiveForItem(RETREATS[idx])});
         });})(i);
-        if(!_shouldDeferFullCategoryMarkers() && _retreatMarkerWithinViewport(mk)) _setMarkerMapIfChanged(mk,_map);
+        if(!_shouldDeferFullCategoryMarkers() && _retreatMarkerWithinViewport(mk,viewportBounds)) _setMarkerMapIfChanged(mk,_map);
         else mk.__oaiMapTarget=null;
         _retreatMarkers.push({marker:mk,item:p,index:i});
       }
@@ -11506,12 +11507,13 @@ function _buildRetreatMarkers(){
     return;
   }
   const buildToken=_currentMainMapBuildToken();
+  const viewportBounds=_parishViewportBounds();
   let j=0;
   const batch2=64;
   (function applyBatch(){
     if(!_isMainMapBuildCurrent(buildToken,'retreat')) return;
     const end=Math.min(j+batch2, _retreatMarkers.length);
-    for(;j<end;j++) { const mk=_retreatMarkers[j].marker; _setMarkerMapIfChanged(mk,_retreatMarkerWithinViewport(mk)?_map:null); }
+    for(;j<end;j++) { const mk=_retreatMarkers[j].marker; _setMarkerMapIfChanged(mk,_retreatMarkerWithinViewport(mk,viewportBounds)?_map:null); }
     if(j<_retreatMarkers.length) requestAnimationFrame(applyBatch);
     else _raiseMyLocationMarker();
   })();
@@ -11521,10 +11523,11 @@ function _clearRetreatMarkers(){
   if(_paSelMkr){try{_paSelMkr.setMap(null);}catch(e){ console.warn("[가톨릭길동무]", e); } _paSelMkr=null;}
 }
 function _restoreRetreatMarkers(){
+  const viewportBounds=_parishViewportBounds();
   _retreatMarkers.forEach(o=>{
     const s=o.item;
     const ok=(_listSrch||_filterDio==='all'||s.diocese===_filterDio)&&(!_listSrch||_itemSearchBlob(s).includes(_listSrch)||_itemSearchNorm(s).includes(String(_listSrch).replace(/\s+/g,'')));
-    _setMarkerMapIfChanged(o.marker, ok&&_retreatMarkerWithinViewport(o.marker)?_map:null);
+    _setMarkerMapIfChanged(o.marker, ok&&_retreatMarkerWithinViewport(o.marker,viewportBounds)?_map:null);
   });
 }
 function _selectRetreatMarker(p){
