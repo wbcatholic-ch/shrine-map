@@ -10301,7 +10301,9 @@ function _closeInfoRouteChoice(){
   _syncMapPanelUI('close-route-choice');
 }
 function _openRouteMarkerChoice(item,idx){
-  if(window.__oaiPilgrimageRouteReturn===true) return;
+  // Only the active, dedicated next-destination navigation disallows route edits.
+  // A stale return flag must never suppress ordinary shrine route choices.
+  if(window.__oaiPilgrimageRouteReturn===true && document.documentElement.classList.contains('oai-pilgrimage-route-direct')) return;
   if(!item) return;
   const dlg=$('route-choice-modal');
   if(!dlg){ _setRoutePointFromItem(_routeHasVisibleStart()?'end':'start',item,idx); return; }
@@ -15574,7 +15576,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   on('tab-btn-nearby', 'click', function() { toggleTab('nearby'); });
   on('tab-btn-list',   'click', function() { toggleTab('list'); });
   on('tab-btn-region', 'click', function() { toggleTab('region'); });
-  on('tab-btn-route',  'click', function() { toggleTab('route'); });
+  on('tab-btn-route',  'click', function() {
+    // An explicitly opened category route tab is not the locked
+    // 'next pilgrimage destination' navigation session.
+    if(!window.__OAI_PILGRIMAGE_COURSE_VIEW__ && !window.__OAI_PILGRIMAGE_ROUTE_EDIT__){
+      window.__oaiPilgrimageRouteReturn=false;
+      document.documentElement.classList.remove('oai-pilgrimage-route-direct');
+    }
+    toggleTab('route');
+  });
 
   on('nearby-close-btn', 'click', function(e) { e.stopPropagation(); closeSheetPanelOnly('nearby'); });
   on('list-close-btn',   'click', function(e) { e.stopPropagation(); closeSheetPanelOnly('list'); });
@@ -19321,6 +19331,8 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.ge
     _setPilgrimageLayerVisible(modal,false);
     plannerView='detail';
     const meta=loadMeta(),plan=loadPlan();
+    window.__oaiPilgrimageRouteReturn=false;
+    document.documentElement.classList.remove('oai-pilgrimage-route-direct');
     window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__=false;
     window.__OAI_PILGRIMAGE_ROUTE_EDIT__=(readOnly||normalRoute)
       ? null
@@ -19332,8 +19344,11 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.ge
         _mode='shrine';
         _filterDio='all';
         _listSrch='';
+        _shrineVisitMapFilter='all';
         _curFromRegion=false;
         document.documentElement.classList.remove('parish-mode','retreat-mode');
+        _updateSheetPanelTitles();
+        _renderDioFilterBars();
       }catch(_e){}
       const {mapWrap,mapEl}=_preparePilgrimageMainMapSurface();
       if(!_map&&typeof _loadMap==='function'){window._noAutoNearby=true;_loadMap();}
