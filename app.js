@@ -2952,7 +2952,7 @@ function _oaiWriteSharedJournalExtras(kind,item,date,patch,opts){
   const rec=data[key]&&typeof data[key]==='object'?data[key]:{name:shrine.name||'',diocese:shrine.diocese||'',seq:shrine.seq||'',visits:[]};
   if(!Array.isArray(rec.visits))rec.visits=[];if(!rec.sharedJournalByDate||typeof rec.sharedJournalByDate!=='object')rec.sharedJournalByDate={};
   const seed=_oaiReadSharedJournalExtras(group,date)||{},oldJournal=rec.sharedJournalByDate[date]||{},next=Object.assign({},seed,oldJournal,patch||{});next.updatedAt=new Date().toISOString();if(patch&&Object.prototype.hasOwnProperty.call(patch,'memo')){next.memoUpdatedAt=next.updatedAt;next.memoRevision=Math.max(Number(seed.memoRevision||0),Number(oldJournal.memoRevision||0))+1;}rec.sharedJournalByDate[date]=next;data[key]=rec;_saveShrineVisits(data);
-  if(!(opts&&opts.skipBackup)){try{queueGoogleDriveBackup();}catch(_e){}}
+  if(!(opts&&opts.skipBackup)&&!window.__oaiGoogleDriveStorageWatch){try{queueGoogleDriveBackup();}catch(_e){}}
   return true;
 }
 function _oaiVisitPhotoLimit(kind,item){return _oaiSharedJournalGroup(kind,item)?OAI_VISIT_PHOTO_LIMIT_SHRINE:(kind==='parish'?OAI_VISIT_PHOTO_LIMIT_PARISH:OAI_VISIT_PHOTO_LIMIT_SHRINE);}
@@ -2979,7 +2979,7 @@ function _oaiUpdateShrineVisitExtras(item,date,patch,opts){
   const idx=_oaiFindVisitIndexByDate(data[key].visits,date);if(idx<0)return false;
   let rec=_normalizeVisitEntry(data[key].visits[idx]);if(!rec||typeof rec!=='object')rec={date:String(date),method:'manual'};
   Object.keys(patch||{}).forEach(function(k){rec[k]=patch[k];});rec.updatedAt=new Date().toISOString();if(patch&&Object.prototype.hasOwnProperty.call(patch,'memo')){rec.memoUpdatedAt=rec.updatedAt;rec.memoRevision=Number(rec.memoRevision||0)+1;}data[key].visits[idx]=rec;_saveShrineVisits(data);
-  if(!(opts&&opts.skipBackup)){try{queueGoogleDriveBackup();}catch(_e){}}
+  if(!(opts&&opts.skipBackup)&&!window.__oaiGoogleDriveStorageWatch){try{queueGoogleDriveBackup();}catch(_e){}}
   return true;
 }
 function _oaiUpdateParishVisitExtras(item,date,patch,opts){
@@ -2988,7 +2988,7 @@ function _oaiUpdateParishVisitExtras(item,date,patch,opts){
   const idx=_oaiFindVisitIndexByDate(data[key].visits,date);if(idx<0)return false;
   let rec=_normalizeVisitEntry(data[key].visits[idx]);if(!rec||typeof rec!=='object')rec={date:String(date),method:'manual'};
   Object.keys(patch||{}).forEach(function(k){rec[k]=patch[k];});rec.updatedAt=new Date().toISOString();if(patch&&Object.prototype.hasOwnProperty.call(patch,'memo')){rec.memoUpdatedAt=rec.updatedAt;rec.memoRevision=Number(rec.memoRevision||0)+1;}data[key].visits[idx]=rec;_saveParishVisits(data);
-  if(!(opts&&opts.skipBackup)){try{queueGoogleDriveBackup();}catch(_e){}}
+  if(!(opts&&opts.skipBackup)&&!window.__oaiGoogleDriveStorageWatch){try{queueGoogleDriveBackup();}catch(_e){}}
   return true;
 }
 function _oaiGetVisitByDate(kind,item,date){
@@ -16178,7 +16178,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // 화면을 떠나는 순간 미저장된 설정 변경을 구글 전송 대기열에 넘긴다.
   // 로컬 기록은 변경 시 이미 기록되어 있으며, 재확인 이전에는 클라우드를 덮어쓰지 않는다.
   document.addEventListener('visibilitychange',function(){
-    if(document.visibilityState!=='hidden'||!googleDriveBackupTimer)return;
+    if(document.visibilityState!=='hidden')return;
+    // This listener also handles unscheduled dirty writes; do not register a
+    // second hidden observer that can enqueue the same change again.
+    if(!googleDriveBackupTimer){
+      if(oaiDriveDirtyWhileSaving&&!oaiDriveWriteInFlight)queueGoogleDriveBackup();
+      return;
+    }
     const pendingPriority=oaiDriveBackupPriority;
     clearTimeout(googleDriveBackupTimer);googleDriveBackupTimer=0;
     oaiDriveBackupPriority='settings';oaiDriveBackupDueAt=0;
@@ -16680,14 +16686,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(initialDriveFirstFlow&&initialOnboarding)setTimeout(openInitialParishSetupAfterDrive,180);
     }
   };
-  // Backgrounding is not a data change. Only flush a pending edit; a plain
-  // screen switch/lock must not create another full cloud snapshot.
-  oaiAddLifecycleObserver('hidden',function(){
-    if(!isGoogleDriveAutoBackupEnabled())return;
-    if(oaiDriveDirtyWhileSaving&&!oaiDriveWriteInFlight&&!googleDriveBackupTimer){
-      queueGoogleDriveBackup();
-    }
-  });
   oaiAddLifecycleObserver('visible',function(){setTimeout(maybePromptRestoreDaily,500);});
   // 1182: Settings bottom version label, five taps -> local backup import (no native dialog).
   let devImportCandidate=null,devTapCount=0,devTapLast=0;
