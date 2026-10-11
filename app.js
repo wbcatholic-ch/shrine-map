@@ -16018,6 +16018,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   let oaiVerifiedRemoteBackup=null; // Retain cloud-only settings until explicitly restored.
   let oaiDriveWriteInFlight=false;
   let oaiDriveDirtyWhileSaving=false;
+  // Keep the pending edit's priority while a Drive write is running.
+  let oaiDrivePendingWritePriority='settings';
   let oaiDriveRetryTimer=0;
   function scheduleDriveRecheck(){
     if(oaiDriveRetryTimer||!isGoogleDriveAutoBackupEnabled())return;
@@ -16157,7 +16159,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       return;
     }
     const bridge=nativeDrive();if(!bridge||typeof bridge.saveGoogleDriveBackup!=='function')return;
-    if(oaiDriveWriteInFlight){oaiDriveDirtyWhileSaving=true;return;}
+    if(oaiDriveWriteInFlight){oaiDriveDirtyWhileSaving=true;if(urgent)oaiDrivePendingWritePriority='critical';return;}
     const now=Date.now();
     const due=now+(urgent?OAI_DRIVE_CRITICAL_WAIT_MS:OAI_DRIVE_SETTINGS_WAIT_MS);
     // 설정 변경이 반복될 때는 시간을 합치되, 긴 변경 연속에도 백업을 무기한 지연하지 않는다.
@@ -16236,7 +16238,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!isGoogleDriveAutoBackupEnabled())return;
     if(!driveWriteReady()||googleDriveInitialSyncPending){oaiDriveDirtyWhileSaving=true;if(!googleDriveInitialSyncPending)scheduleDriveRecheck();return;}
     const bridge=nativeDrive();if(!bridge||typeof bridge.saveGoogleDriveBackup!=='function')return;
-    if(oaiDriveWriteInFlight){oaiDriveDirtyWhileSaving=true;return;}
+    if(oaiDriveWriteInFlight){oaiDriveDirtyWhileSaving=true;oaiDrivePendingWritePriority='critical';return;}
     if(showMessage)recordMessage('Google Drive에 기록을 저장하고 있습니다.');
     try{
       const _oaiDrivePrepStarted=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
@@ -16434,7 +16436,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(!oaiDriveWriteInFlight){return;}
       try{performance.clearMarks('oai-drive-saved');performance.mark('oai-drive-saved');}catch(_e){}
       oaiDriveWriteInFlight=false;
-      if(oaiDriveDirtyWhileSaving){oaiDriveDirtyWhileSaving=false;setTimeout(queueGoogleDriveBackup,0);}
+      if(oaiDriveDirtyWhileSaving){
+        const pendingPriority=oaiDrivePendingWritePriority;
+        oaiDriveDirtyWhileSaving=false;
+        oaiDrivePendingWritePriority='settings';
+        // Do not force every settings-only edit through the critical 1.8s path
+        // immediately after a completed save; preserve fast GPS/visit backups.
+        queueGoogleDriveBackup(pendingPriority);
+      }
       try{localStorage.setItem('oai_google_drive_saved_at_v1',new Date().toISOString());}catch(_e){}
       refreshGoogleDriveButton();
       recordMessage('Google Drive에 기록을 저장했습니다. 사진은 개별 업로드 완료분만 복원됩니다.');
