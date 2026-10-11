@@ -4082,8 +4082,16 @@ function _registerGpsPlaceVisit(kind,item,date){
       return {added:added,already:false,kind:'shrine',item:item};
     }
     if(kind==='parish'){
-      const already=_hasVisitDate(_parishVisits(item),visitDate);
+      const previous=_parishVisits(item);
+      const already=_hasVisitDate(previous,visitDate);
       if(already)return {added:false,already:true,kind:'parish',item:item};
+      // All GPS entry paths must honor an existing home-parish stamp and the
+      // automatic-visit restriction. This is a second safety check in the
+      // shared registration entry point; no existing visits are changed.
+      if(_isMyParishAutoVisitEnabled()&&previous.length&&_isSameParish(item,_configuredMyParish()))
+        return {added:false,already:false,blocked:true,kind:'parish',item:item};
+      if(_isAutoVisitRestrictedAfterFirst('parish',item,previous))
+        return {added:false,already:false,blocked:true,kind:'parish',item:item};
       const added=!!_addParishVisit(item,visitDate,'gps');
       if(added)_queueGpsVisitNotice('parish',item);
       return {added:added,already:false,kind:'parish',item:item};
@@ -4112,7 +4120,7 @@ function _configuredMyParish(){
   if(!saved||!saved.name)return null;
   return (PARISHES||[]).find(function(p){return p&&p.name===saved.name&&(!saved.diocese||p.diocese===saved.diocese);})||{name:saved.name,diocese:saved.diocese||''};
 }
-function _isSameParish(a,b){return !!(a&&b&&String(a.diocese||'')===String(b.diocese||'')&&String(a.name||'')===String(b.name||''));}
+function _isSameParish(a,b){return !!(a&&b&&String(a.diocese||'').trim()===String(b.diocese||'').trim()&&String(a.name||'').replace(/\s+/g,'')===String(b.name||'').replace(/\s+/g,''));}
 function _parishVisitKey(p){return p?[String(p.diocese||'').trim(),String(p.name||'').trim()].join('|'):'';}
 function _loadParishVisits(){
   try{
