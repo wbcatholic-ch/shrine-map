@@ -3208,8 +3208,7 @@ window.oaiVisitPhotoSyncResult=function(localId,ok,fileId,mimeType,savedAt,messa
   const _photoSyncMs=Math.round(((typeof performance!=='undefined'&&performance.now)?performance.now():Date.now())-_photoSyncT0);
   if(_photoSyncMs>=80)console.warn('[가톨릭길동무][성능] 사진 Drive 완료 처리 '+_photoSyncMs+'ms');
 };
-function _oaiPrimeVisitPhoto(src){if(!src)return;try{const im=new Image();im.decoding='async';im.src=src;if(typeof im.decode==='function')im.decode().catch(function(){});}catch(_e){}}
-function _oaiCachePhotoData(fileId,dataUri,type){const key=String(fileId||'');if(!key||!dataUri)return;const cache=type==='thumb'?_oaiVisitPhotoThumbCache:_oaiVisitPhotoFullCache;cache.delete(key);cache.set(key,dataUri);if(type!=='thumb')_oaiPrimeVisitPhoto(dataUri);while(cache.size>OAI_VISIT_PHOTO_CACHE_MAX){const oldest=cache.keys().next().value;cache.delete(oldest);}}
+function _oaiCachePhotoData(fileId,dataUri,type){const key=String(fileId||'');if(!key||!dataUri)return;const cache=type==='thumb'?_oaiVisitPhotoThumbCache:_oaiVisitPhotoFullCache;cache.delete(key);cache.set(key,dataUri);while(cache.size>OAI_VISIT_PHOTO_CACHE_MAX){const oldest=cache.keys().next().value;cache.delete(oldest);}}
 function _oaiLoadVisitPhotoData(fileId,meta){
   const key=String(fileId||'');if(!key)return;const forceFull=!!(meta&&meta.forceFull),isThumb=!!(meta&&meta.type==='thumb'&&!forceFull),cache=isThumb?_oaiVisitPhotoThumbCache:_oaiVisitPhotoFullCache;
   if(cache.has(key)){_oaiApplyLoadedVisitPhoto(meta,cache.get(key));return;}
