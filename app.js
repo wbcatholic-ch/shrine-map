@@ -3157,11 +3157,48 @@ function _oaiUpdateVisiblePhotoSyncBadge(photoId,status,remoteId){
   });
 }
 function _oaiReplaceSyncedPhotoInMap(data,photoId,remoteId,mimeType,savedAt){
-  let changed=false;Object.keys(data&&typeof data==='object'?data:{}).forEach(function(key){const rec=data[key];if(!rec)return;
-    const patchPhotos=function(arr){if(!Array.isArray(arr))return arr;let touched=false;const photos=arr.map(function(ph){if(!ph||_oaiPhotoIdentity(ph)!==String(photoId))return ph;touched=true;changed=true;return Object.assign({},ph,{photoId:String(photoId),fileId:String(photoId),driveFileId:String(remoteId||ph.driveFileId||''),mimeType:String(mimeType||ph.mimeType||'image/jpeg'),savedAt:String(savedAt||ph.savedAt||Date.now()),syncStatus:'saved'});});return touched?photos:arr;};
-    if(Array.isArray(rec.visits))rec.visits=rec.visits.map(function(v){if(!v)return v;const photos=patchPhotos(v.photos);return photos!==v.photos?Object.assign({},v,{photos:photos}):v;});
-    if(rec.sharedJournalByDate&&typeof rec.sharedJournalByDate==='object')Object.keys(rec.sharedJournalByDate).forEach(function(d){const j=rec.sharedJournalByDate[d];if(!j)return;const photos=patchPhotos(j.photos);if(photos!==j.photos)rec.sharedJournalByDate[d]=Object.assign({},j,{photos:photos});});
-  });return changed;
+  // A Drive result belongs to one photo. Do not rebuild every visit array in
+  // the entire stamp book when most entries do not contain that photo.
+  let changed=false;
+  const id=String(photoId);
+  const patchPhotos=function(arr){
+    if(!Array.isArray(arr)||!arr.some(function(ph){return ph&&_oaiPhotoIdentity(ph)===id;}))return arr;
+    return arr.map(function(ph){
+      if(!ph||_oaiPhotoIdentity(ph)!==id)return ph;
+      const nextRemote=String(remoteId||ph.driveFileId||'');
+      const nextMime=String(mimeType||ph.mimeType||'image/jpeg');
+      const nextSaved=String(savedAt||ph.savedAt||Date.now());
+      if(ph.driveFileId===nextRemote&&ph.mimeType===nextMime&&
+        String(ph.savedAt||'')===nextSaved&&ph.syncStatus==='saved')return ph;
+      changed=true;
+      return Object.assign({},ph,{photoId:id,fileId:id,driveFileId:nextRemote,
+        mimeType:nextMime,savedAt:nextSaved,syncStatus:'saved'});
+    });
+  };
+  Object.keys(data&&typeof data==='object'?data:{}).forEach(function(key){
+    const rec=data[key];if(!rec)return;
+    if(Array.isArray(rec.visits)){
+      // Only copy the outer visits array if at least one visit changed.
+      let nextVisits=null;
+      for(let i=0;i<rec.visits.length;i++){
+        const v=rec.visits[i];if(!v)continue;
+        const photos=patchPhotos(v.photos);
+        if(photos!==v.photos){
+          if(!nextVisits)nextVisits=rec.visits.slice();
+          nextVisits[i]=Object.assign({},v,{photos:photos});
+        }
+      }
+      if(nextVisits)rec.visits=nextVisits;
+    }
+    if(rec.sharedJournalByDate&&typeof rec.sharedJournalByDate==='object'){
+      Object.keys(rec.sharedJournalByDate).forEach(function(d){
+        const j=rec.sharedJournalByDate[d];if(!j)return;
+        const photos=patchPhotos(j.photos);
+        if(photos!==j.photos)rec.sharedJournalByDate[d]=Object.assign({},j,{photos:photos});
+      });
+    }
+  });
+  return changed;
 }
 window.oaiVisitPhotoSyncResult=function(localId,ok,fileId,mimeType,savedAt,message){
   const _photoSyncT0=(typeof performance!=='undefined'&&performance.now)?performance.now():Date.now();
