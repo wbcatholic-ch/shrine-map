@@ -8662,6 +8662,10 @@ window.oaiResetSearchStateForFreshStart=oaiResetSearchStateForFreshStart;
 })();
 
 function goToCover(){
+  if(_shrineViewportIdleMap && _shrineViewportIdleCallback){
+    try{kakao.maps.event.removeListener(_shrineViewportIdleMap,'idle',_shrineViewportIdleCallback);}catch(_e){}
+    _shrineViewportIdleMap=null;_shrineViewportIdleCallback=null;
+  }
   if(_retreatViewportIdleMap && _retreatViewportIdleCallback){
     try{kakao.maps.event.removeListener(_retreatViewportIdleMap,'idle',_retreatViewportIdleCallback);}catch(_e){}
     _retreatViewportIdleMap=null;_retreatViewportIdleCallback=null;
@@ -10558,7 +10562,31 @@ function _refreshRouteTmpMarkers(){
 
 function _typeColor(t){return t==='성지'?'#c0392b':t==='순례지'?'#1565c0':'#1b7a3e';}
 
+// Shrine map: only attach markers near the visible area after map movement settles.
+// Reuse existing marker instances/click handlers; route-selection keeps its own behavior.
+let _shrineViewportIdleMap=null;
+let _shrineViewportIdleCallback=null;
+function _shrineWithinViewport(shrine,bounds){
+  if(!bounds || !shrine) return true;
+  return shrine.lat>=bounds.s&&shrine.lat<=bounds.n&&shrine.lng>=bounds.w&&shrine.lng<=bounds.e;
+}
+function _ensureShrineViewportIdle(){
+  if(!_map || _shrineViewportIdleMap===_map) return;
+  if(_shrineViewportIdleMap&&_shrineViewportIdleCallback){
+    try{kakao.maps.event.removeListener(_shrineViewportIdleMap,'idle',_shrineViewportIdleCallback);}catch(_e){}
+  }
+  const currentMap=_map;
+  const onIdle=function(){
+    if(_map!==currentMap || _mode!=='shrine' || _screen==='cover' || _isRouteSelectionModeActive()) return;
+    _restoreMapMarkers();
+  };
+  _shrineViewportIdleMap=currentMap;
+  _shrineViewportIdleCallback=onIdle;
+  kakao.maps.event.addListener(currentMap,'idle',onIdle);
+}
+
 function _buildShrineMarkers(){
+  _ensureShrineViewportIdle();
   _markers=new Array(SHRINES.length).fill(null);
   const buildToken=_currentMainMapBuildToken();
   const BATCH=42;
@@ -10573,7 +10601,7 @@ function _buildShrineMarkers(){
     position:new _LL(s.lat,s.lng),
     image:_mkrImg(_shrineMarkerColor(s),false),title:s.name
    });
-   const showNow=!_shouldDeferFullCategoryMarkers();
+   const showNow=!_shouldDeferFullCategoryMarkers() && (_isRouteSelectionModeActive() || _shrineWithinViewport(s,_parishViewportBounds()));
    if(showNow) mk.setMap(_map);
    mk.__oaiMapTarget=showNow?_map:null;
    mk.__oaiImgKey='shrine:'+_shrineMarkerColor(s)+':0';
@@ -10662,6 +10690,8 @@ function _restoreMapMarkers(opts){
     _restoreRetreatMarkers();
     return;
   }
+  _ensureShrineViewportIdle();
+  const shrineBounds=_parishViewportBounds();
   _markers.forEach(m=>{
   if(!m) return;
   const s=m.shrine;
@@ -10673,20 +10703,22 @@ function _restoreMapMarkers(opts){
     _setMarkerImageIfChanged(m.marker,_mkrImg(c,false),'shrine:'+c+':0');
     _setMarkerZIfChanged(m.marker,1);
   }
-  _setMarkerMapIfChanged(m.marker, ok?_map:null);
+  _setMarkerMapIfChanged(m.marker, ok && (_isRouteSelectionModeActive() || m.index===_selIdx || _shrineWithinViewport(s,shrineBounds))?_map:null);
   });
 }
 
 function _restoreAllCategoryMarkersForSelection(){
   if(!_map) return;
   if(_mode==='shrine'){
+    _ensureShrineViewportIdle();
+    const shrineBounds=_parishViewportBounds();
     _markers.forEach(m=>{
       if(!m||!m.marker) return;
       try{
         const c=_shrineMarkerColor(m.shrine);
         const s=m.shrine || {};
         const valid=_isSouthKoreaCoordinate(s.lat,s.lng);
-        const visible=!!(valid && _isShrineVisibleByVisitFilter(s));
+        const visible=!!(valid && _isShrineVisibleByVisitFilter(s) && (_isRouteSelectionModeActive() || _shrineWithinViewport(s,shrineBounds)));
         _forceMarkerMap(m.marker,visible?_map:null);
         _setMarkerImageIfChanged(m.marker,_mkrImg(c,false),'shrine:'+c+':0');
         _setMarkerZIfChanged(m.marker,1);
