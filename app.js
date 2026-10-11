@@ -16135,6 +16135,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       (Array.isArray(data.webFavorites)&&data.webFavorites.length>0)||
       (Array.isArray(data.routeFavorites)&&data.routeFavorites.length>0)||
       (Array.isArray(data.pilgrimagePlan)&&data.pilgrimagePlan.length>0)||
+      (Number(data.pilgrimageDraftUpdatedAt)>0)||
       (Array.isArray(data.pilgrimageCourses)&&data.pilgrimageCourses.length>0)||
       !!(data.myParish&&data.myParish.name);
   }
@@ -16159,6 +16160,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const listKeys=['pr_favorites','web_favorites_v1',OAI_ROUTE_FAVORITES_KEY,
       'oai_pilgrimage_plan_v1','oai_pilgrimage_courses_v1'];
     if(listKeys.some(function(key){const items=read(key,[]);return Array.isArray(items)&&items.length>0;}))return true;
+    if(Number(localStorage.getItem('oai_pilgrimage_draft_updated_at_v1'))>0)return true;
     const parish=configuredParish();
     return !!(parish&&parish.name);
   }
@@ -16268,7 +16270,18 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         const remote=oaiVerifiedRemoteBackup.data, local=snapshot.data;
         local.shrineVisits=cachedMergedBackupVisits(OAI_SHRINE_VISITS_KEY,local.shrineVisits,remote.shrineVisits);
         local.parishVisits=cachedMergedBackupVisits(OAI_PARISH_VISITS_KEY,local.parishVisits,remote.parishVisits);
-        ['prayerFavorites','webFavorites','pilgrimagePlan'].forEach(function(k){local[k]=mergeLists(local[k],remote[k]);});
+        ['prayerFavorites','webFavorites'].forEach(function(k){local[k]=mergeLists(local[k],remote[k]);});
+        // A draft is one editable state, not an append-only list. Never union it
+        // with an old cloud draft: deletion and reordering must remain authoritative.
+        const localDraftRevision=Number(local.pilgrimageDraftUpdatedAt)||0;
+        const cloudDraftRevision=Number(remote.pilgrimageDraftUpdatedAt)||0;
+        const hasLocalDraft=localStorage.getItem('oai_pilgrimage_plan_v1')!==null;
+        if((cloudDraftRevision>localDraftRevision)||
+           (!cloudDraftRevision&&!localDraftRevision&&!hasLocalDraft)){
+          if(Array.isArray(remote.pilgrimagePlan))local.pilgrimagePlan=remote.pilgrimagePlan;
+          if(remote.pilgrimageDraftMeta&&typeof remote.pilgrimageDraftMeta==='object')local.pilgrimageDraftMeta=remote.pilgrimageDraftMeta;
+          local.pilgrimageDraftUpdatedAt=cloudDraftRevision;
+        }
         // Never resurrect a favorite deleted locally: compare explicit edit revisions.
         const localFavoriteRevision=Number(local.routeFavoritesUpdatedAt)||0;
         const remoteFavoriteRevision=Number(remote.routeFavoritesUpdatedAt)||0;
@@ -16544,7 +16557,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const currentShrine=_loadShrineVisits(),currentParish=_loadParishVisits();
     put(OAI_SHRINE_VISITS_KEY,mergeVisitMaps(currentShrine,remote.shrineVisits));
     put(OAI_PARISH_VISITS_KEY,mergeVisitMaps(currentParish,remote.parishVisits));
-    const listFields=[['pr_favorites','prayerFavorites'],['web_favorites_v1','webFavorites'],[OAI_ROUTE_FAVORITES_KEY,'routeFavorites'],['oai_pilgrimage_plan_v1','pilgrimagePlan']];
+    const listFields=[['pr_favorites','prayerFavorites'],['web_favorites_v1','webFavorites'],[OAI_ROUTE_FAVORITES_KEY,'routeFavorites']];
     listFields.forEach(function(pair){
       const key=pair[0],field=pair[1],value=remote[field];
       if(value===undefined)return;
@@ -16584,9 +16597,23 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       });
       put('oai_pilgrimage_courses_v1',next);
     }
-    if(remote.pilgrimageDraftMeta&&typeof remote.pilgrimageDraftMeta==='object'&&!Array.isArray(remote.pilgrimageDraftMeta)){
-      const current=localValue('oai_pilgrimage_draft_meta_v2',{});
-      put('oai_pilgrimage_draft_meta_v2',Object.assign({},remote.pilgrimageDraftMeta,current));
+    // Draft edits/deletes are replacements. Completed courses are merged above
+    // independently and NEVER removed by this draft rule.
+    const localDraftRevision=Number(localStorage.getItem('oai_pilgrimage_draft_updated_at_v1'))||0;
+    const cloudDraftRevision=Number(remote.pilgrimageDraftUpdatedAt)||0;
+    const localDraftExists=localStorage.getItem('oai_pilgrimage_plan_v1')!==null;
+    const useCloudDraft=cloudDraftRevision>localDraftRevision||
+      (!cloudDraftRevision&&!localDraftRevision&&!localDraftExists);
+    if(useCloudDraft){
+      if(remote.pilgrimagePlan!==undefined){
+        if(!Array.isArray(remote.pilgrimagePlan))throw new Error('순례계획 형식 오류');
+        put('oai_pilgrimage_plan_v1',remote.pilgrimagePlan);
+      }
+      if(remote.pilgrimageDraftMeta!==undefined){
+        if(!remote.pilgrimageDraftMeta||typeof remote.pilgrimageDraftMeta!=='object'||Array.isArray(remote.pilgrimageDraftMeta))throw new Error('순례계획 설정 형식 오류');
+        put('oai_pilgrimage_draft_meta_v2',remote.pilgrimageDraftMeta);
+      }
+      if(cloudDraftRevision)changes.oai_pilgrimage_draft_updated_at_v1=String(cloudDraftRevision);
     }
     const existingParish=configuredParish();
     if(!existingParish||!existingParish.name){
@@ -16635,7 +16662,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const keys=[OAI_SHRINE_VISITS_KEY,OAI_PARISH_VISITS_KEY,
       'pr_favorites','web_favorites_v1',OAI_ROUTE_FAVORITES_KEY,
       'oai_route_favorites_modified_at_v1','oai_pilgrimage_plan_v1',
-      'oai_pilgrimage_draft_meta_v2','oai_pilgrimage_courses_v1',
+      'oai_pilgrimage_draft_meta_v2','oai_pilgrimage_draft_updated_at_v1','oai_pilgrimage_courses_v1',
       OAI_SETTINGS_MY_PARISH_KEY,'oai_my_parish','oai_my_parish_name',
       'oai_my_diocese_name',OAI_PARISH_AUTO_VISIT_ENABLED_KEY,
       'prayer_font_size','oai_pilgrimage_public_feature_seen_v1'];
@@ -16813,7 +16840,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const parish=configuredParish();
     return {format:'catholic-gildongmu-backup',version:1,createdAt:new Date().toISOString(),data:{
       shrineVisits:cachedBackupVisitMap(OAI_SHRINE_VISITS_KEY),parishVisits:cachedBackupVisitMap(OAI_PARISH_VISITS_KEY),
-      prayerFavorites:cachedBackupLocalValue('pr_favorites',[]),webFavorites:cachedBackupLocalValue('web_favorites_v1',[]),routeFavorites:cachedBackupLocalValue(OAI_ROUTE_FAVORITES_KEY,[]),routeFavoritesUpdatedAt:Number(localStorage.getItem('oai_route_favorites_modified_at_v1'))||0,pilgrimagePlan:cachedBackupLocalValue('oai_pilgrimage_plan_v1',[]),pilgrimageDraftMeta:cachedBackupLocalValue('oai_pilgrimage_draft_meta_v2',{}),pilgrimageCourses:cachedBackupLocalValue('oai_pilgrimage_courses_v1',[]),
+      prayerFavorites:cachedBackupLocalValue('pr_favorites',[]),webFavorites:cachedBackupLocalValue('web_favorites_v1',[]),routeFavorites:cachedBackupLocalValue(OAI_ROUTE_FAVORITES_KEY,[]),routeFavoritesUpdatedAt:Number(localStorage.getItem('oai_route_favorites_modified_at_v1'))||0,pilgrimagePlan:cachedBackupLocalValue('oai_pilgrimage_plan_v1',[]),pilgrimageDraftMeta:cachedBackupLocalValue('oai_pilgrimage_draft_meta_v2',{}),pilgrimageDraftUpdatedAt:Number(localStorage.getItem('oai_pilgrimage_draft_updated_at_v1'))||0,pilgrimageCourses:cachedBackupLocalValue('oai_pilgrimage_courses_v1',[]),
       myDiocese:configuredDiocese(),myParish:parish?{diocese:parish.diocese||'',name:parish.name||''}:null,
       parishAutoVisit:_isMyParishAutoVisitEnabled(),prayerFontSize:localStorage.getItem('prayer_font_size')||'',
       noticeFlags:{pilgrimagePublicFeatureSeen:localStorage.getItem('oai_pilgrimage_public_feature_seen_v1')==='1'}
@@ -16880,8 +16907,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     localStorage.setItem('pr_favorites',JSON.stringify(mergeLists(localValue('pr_favorites',[]),data.prayerFavorites)));
     localStorage.setItem('web_favorites_v1',JSON.stringify(mergeLists(localValue('web_favorites_v1',[]),data.webFavorites)));
     localStorage.setItem(OAI_ROUTE_FAVORITES_KEY,JSON.stringify(mergeLists(localValue(OAI_ROUTE_FAVORITES_KEY,[]),data.routeFavorites).slice(0,OAI_ROUTE_FAVORITES_MAX)));
-    if(Array.isArray(data.pilgrimagePlan)&&data.pilgrimagePlan.length)localStorage.setItem('oai_pilgrimage_plan_v1',JSON.stringify(data.pilgrimagePlan));
-    if(data.pilgrimageDraftMeta&&typeof data.pilgrimageDraftMeta==='object')localStorage.setItem('oai_pilgrimage_draft_meta_v2',JSON.stringify(data.pilgrimageDraftMeta));
+    const localDraftRevision=Number(localStorage.getItem('oai_pilgrimage_draft_updated_at_v1'))||0;
+    const importDraftRevision=Number(data.pilgrimageDraftUpdatedAt)||0;
+    if(importDraftRevision>localDraftRevision||(!importDraftRevision&&!localDraftRevision&&localStorage.getItem('oai_pilgrimage_plan_v1')===null)){
+      if(Array.isArray(data.pilgrimagePlan))localStorage.setItem('oai_pilgrimage_plan_v1',JSON.stringify(data.pilgrimagePlan));
+      if(data.pilgrimageDraftMeta&&typeof data.pilgrimageDraftMeta==='object')localStorage.setItem('oai_pilgrimage_draft_meta_v2',JSON.stringify(data.pilgrimageDraftMeta));
+      if(importDraftRevision)localStorage.setItem('oai_pilgrimage_draft_updated_at_v1',String(importDraftRevision));
+    }
     if(Array.isArray(data.pilgrimageCourses))localStorage.setItem('oai_pilgrimage_courses_v1',JSON.stringify(data.pilgrimageCourses));
     try{_updateAllRouteFavoriteButtons();_renderRouteFrequentPlaces();}catch(_e){}
     if(data.myDiocese)localStorage.setItem('oai_my_diocese_name',String(data.myDiocese));
@@ -17392,9 +17424,16 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.ge
   function normalizePoint(p){if(!p||!p.name)return null;let lat=Number(p.lat),lng=Number(p.lng);if(!Number.isFinite(lat)||!Number.isFinite(lng))return null;if(Math.abs(lat)>90&&Math.abs(lng)<=90){const t=lat;lat=lng;lng=t;}if(Math.abs(lat)>90||Math.abs(lng)>180)return null;return {name:String(p.name),addr:String(p.addr||p.road_address_name||p.address_name||''),lat:lat,lng:lng,dynamicCurrent:!!p.dynamicCurrent};}
   function normalizePlace(p){const q=normalizePoint(p);return q?Object.assign(q,{done:!!p.done,doneMethod:String(p&&p.doneMethod||'')}):null;}
   function loadPlan(){try{const a=JSON.parse(localStorage.getItem(PLAN_KEY)||'[]');return Array.isArray(a)?a.map(normalizePlace).filter(Boolean):[];}catch(_e){return [];}}
-  function savePlan(list,noRender){try{localStorage.setItem(PLAN_KEY,JSON.stringify(list||[]));}catch(_e){}if(!noRender)renderDetail();}
+  const DRAFT_REV_KEY='oai_pilgrimage_draft_updated_at_v1';
+  function markDraftEdited(){
+    // Monotonic even for two edits in the same millisecond. A cleared draft
+    // is still a real edit, so cloud copies cannot resurrect old places.
+    const old=Number(localStorage.getItem(DRAFT_REV_KEY))||0;
+    localStorage.setItem(DRAFT_REV_KEY,String(Math.max(Date.now(),old+1)));
+  }
+  function savePlan(list,noRender){try{const next=JSON.stringify(list||[]);if(localStorage.getItem(PLAN_KEY)!==next){localStorage.setItem(PLAN_KEY,next);markDraftEdited();}}catch(_e){}if(!noRender)renderDetail();}
   function loadMeta(){try{const x=JSON.parse(localStorage.getItem(DRAFT_META_KEY)||'{}')||{};return {name:String(x.name||'새 순례계획'),start:normalizePoint(x.start),end:normalizePoint(x.end)};}catch(_e){return {name:'새 순례계획',start:null,end:null};}}
-  function saveMeta(meta,noRender){try{localStorage.setItem(DRAFT_META_KEY,JSON.stringify(meta||{}));}catch(_e){}if(!noRender)renderDetail();}
+  function saveMeta(meta,noRender){try{const next=JSON.stringify(meta||{});if(localStorage.getItem(DRAFT_META_KEY)!==next){localStorage.setItem(DRAFT_META_KEY,next);markDraftEdited();}}catch(_e){}if(!noRender)renderDetail();}
   function clearDraft(){
     pilgrimageSuppressRouteFork++;
     try{savePlan([],true);saveMeta({name:'새 순례계획',start:null,end:null},true);}
