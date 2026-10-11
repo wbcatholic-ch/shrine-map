@@ -10594,6 +10594,7 @@ function _buildShrineMarkers(){
   function next(){
   if(!_isMainMapBuildCurrent(buildToken,'shrine')) return;
   const end=Math.min(idx+BATCH,SHRINES.length);
+  const viewportBounds=_parishViewportBounds();
   for(let i=idx;i<end;i++){
    const s=SHRINES[i];
    if(!_isSouthKoreaCoordinate(s.lat,s.lng)) continue;
@@ -10601,7 +10602,7 @@ function _buildShrineMarkers(){
     position:new _LL(s.lat,s.lng),
     image:_mkrImg(_shrineMarkerColor(s),false),title:s.name
    });
-   const showNow=!_shouldDeferFullCategoryMarkers() && (_isRouteSelectionModeActive() || _shrineWithinViewport(s,_parishViewportBounds()));
+   const showNow=!_shouldDeferFullCategoryMarkers() && (_isRouteSelectionModeActive() || _shrineWithinViewport(s,viewportBounds));
    if(showNow) mk.setMap(_map);
    mk.__oaiMapTarget=showNow?_map:null;
    mk.__oaiImgKey='shrine:'+_shrineMarkerColor(s)+':0';
