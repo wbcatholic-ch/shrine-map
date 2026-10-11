@@ -16837,7 +16837,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function updateCurrentCourseProgress(){
     if(!currentCourseId)return;
     let a=loadCourses(),i=a.findIndex(c=>c.id===currentCourseId);if(i<0)return;
-    const prev=a[i],d=draftSnapshot(),hasDestination=!!normalizePoint(d.end),wasDone=_courseAllPlacesDone(prev.places)&&!!normalizePoint(prev.end),isDone=_courseAllPlacesDone(d.places)&&hasDestination,now=Date.now();
+    const prev=a[i],d=draftSnapshot();
+    // 확정된 완료 코스의 경로는 현재 초안의 저장으로 덮어쓰지 않는다.
+    // GPS 진행 중인 코스의 진행 상태 갱신은 기존대로 허용한다.
+    if(_courseCompletionList(prev).length && !_isActiveFollowCourse(currentCourseId) &&
+       _routeStructureSignature(prev)!==_routeStructureSignature(d)) return;
+    const hasDestination=!!normalizePoint(d.end),wasDone=_courseAllPlacesDone(prev.places)&&!!normalizePoint(prev.end),isDone=_courseAllPlacesDone(d.places)&&hasDestination,now=Date.now();
     const next=Object.assign({},prev,d,{updatedAt:now});
     const prevCompletions=_courseCompletionList(prev);
     if(isDone&&((!wasDone&&prev.completionArmed!==false)||!prevCompletions.length)){
@@ -17160,7 +17165,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         renderDetail();
         return;
       }
-      if(currentCourseId&&!(_isActiveFollowCourse(currentCourseId)&&_pilgrimageStructureIsDirty()))updateCurrentCourseProgress();
+      /* 목록 화면 진입은 읽기 전용: 코스 저장/완료기록 변경 금지 */
       const savedCourses=loadCourses();
       pilgrimageCourseTab=savedCourses.length?'complete':'plan';
       pilgrimageCourseFilterState.year='all';
@@ -17212,7 +17217,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(pilgrimageManualCreateMode){
         pilgrimageManualCreateMode=false;pilgrimageManualDraftCourse=null;currentCourseId='';clearDraft();const manualDate=document.getElementById('oai-pilgrimage-manual-date');if(manualDate)manualDate.value='';pilgrimageCourseTab='complete';setView('list');renderCourseList();return true;
       }
-      if(currentCourseId&&pilgrimageDetailMode!=='complete'&&!(_isActiveFollowCourse(currentCourseId)&&_pilgrimageStructureIsDirty()))updateCurrentCourseProgress();
+      /* 뒤로가기는 읽기 전용: 명시적 저장 없이 코스 내용 변경 금지 */
       setView('list');renderCourseList();return true;
     }
     closePlanner();return true;
