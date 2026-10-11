@@ -16309,7 +16309,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function saveCourses(a){
     const clean=_dedupeExactPlanCourses(a||[]);
-    try{localStorage.setItem(COURSES_KEY,JSON.stringify(clean));}catch(_e){}
+    const serialized=JSON.stringify(clean);
+    try{
+      // A GPS settlement or screen refresh may submit unchanged course data.
+      // In that case do not trigger storage observers, rendering or Drive backup.
+      if(localStorage.getItem(COURSES_KEY)===serialized)return;
+      localStorage.setItem(COURSES_KEY,serialized);
+    }catch(_e){return;}
     renderCourseList();
     try{if(typeof window.scheduleOaiAutoBackup==='function')window.scheduleOaiAutoBackup();}catch(_e){}
   }
@@ -16519,7 +16525,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!state.auto||typeof state.auto!=='object')state.auto={};
     return state;
   }
-  function _saveDailyState(state){localStorage.setItem(DAILY_SETTLEMENT_KEY,JSON.stringify(state));}
+  function _saveDailyState(state){const serialized=JSON.stringify(state);if(localStorage.getItem(DAILY_SETTLEMENT_KEY)!==serialized)localStorage.setItem(DAILY_SETTLEMENT_KEY,serialized);}
   function _dailyIso(ts){return _courseDateInputValue(ts);}
   function _dailyDayEnd(date){const n=_courseDateValueToTs(date);return n?new Date(new Date(n).getFullYear(),new Date(n).getMonth(),new Date(n).getDate(),23,59,59,0).getTime():0;}
   function _recordDailyFollowSession(course,startedAt){
