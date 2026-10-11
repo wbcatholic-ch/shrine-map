@@ -16838,8 +16838,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const prev=a[i],d=draftSnapshot();
     // 확정된 완료 코스의 경로는 현재 초안의 저장으로 덮어쓰지 않는다.
     // GPS 진행 중인 코스의 진행 상태 갱신은 기존대로 허용한다.
-    if(_courseCompletionList(prev).length && !_isActiveFollowCourse(currentCourseId) &&
+    // 완료 이력이 있는 코스는 진행 중에도 경로 구조를 바꾸지 않는다.
+    // 진행 상태(done/doneMethod)는 경로 서명에서 제외하므로 GPS 갱신은 허용된다.
+    if(_courseCompletionList(prev).length &&
        _routeStructureSignature(prev)!==_routeStructureSignature(d)) return;
+    // 실제 차이가 없으면 updatedAt 변경, 전체 목록 재렌더링, 백업 예약을 생략한다.
+    if(JSON.stringify({name:prev.name,start:prev.start,end:prev.end,places:prev.places})===
+       JSON.stringify({name:d.name,start:d.start,end:d.end,places:d.places})) return;
     const hasDestination=!!normalizePoint(d.end),wasDone=_courseAllPlacesDone(prev.places)&&!!normalizePoint(prev.end),isDone=_courseAllPlacesDone(d.places)&&hasDestination,now=Date.now();
     const next=Object.assign({},prev,d,{updatedAt:now});
     const prevCompletions=_courseCompletionList(prev);
@@ -17791,7 +17796,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       setView('list');
       renderCourseList();
       return;
-    }if(input&&input.dataset.renameOnly==='1'){if(currentCourseId)updateCurrentCourseProgress();closeSaveModal();renderDetail();return;}const d=draftSnapshot();let a=loadCourses();if(currentCourseId){const i=a.findIndex(c=>c.id===currentCourseId);if(i>=0)a[i]=Object.assign({},a[i],d,{updatedAt:Date.now()});else currentCourseId='';}if(!currentCourseId){currentCourseId='course_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);a.unshift(Object.assign({id:currentCourseId,updatedAt:Date.now(),lastStartedAt:Date.now(),completionArmed:true,completions:[]},d));}saveCourses(a);closeSaveModal();renderDetail();flashSaved();const next=pendingAfterSave;pendingAfterSave='';if(next==='follow')setTimeout(()=>openFollow(),120);}
+    }if(input&&input.dataset.renameOnly==='1'){if(currentCourseId)updateCurrentCourseProgress();closeSaveModal();renderDetail();return;}const d=draftSnapshot();let a=loadCourses();if(currentCourseId){const i=a.findIndex(c=>c.id===currentCourseId);if(i>=0){
+      // 순례완료 이력이 있는 코스의 장소·출발·도착은 계획 초안으로 덮어쓰지 않는다.
+      // 명시적인 완료 기록 변경은 완료 이력 전용 화면에서 처리한다.
+      if(_courseCompletionList(a[i]).length&&_routeStructureSignature(a[i])!==_routeStructureSignature(d)){
+        alert('완료한 순례코스의 경로는 변경할 수 없습니다. 새로운 순례계획으로 저장해 주세요.');
+        return;
+      }
+      a[i]=Object.assign({},a[i],d,{updatedAt:Date.now()});
+    }else currentCourseId='';}if(!currentCourseId){currentCourseId='course_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);a.unshift(Object.assign({id:currentCourseId,updatedAt:Date.now(),lastStartedAt:Date.now(),completionArmed:true,completions:[]},d));}saveCourses(a);closeSaveModal();renderDetail();flashSaved();const next=pendingAfterSave;pendingAfterSave='';if(next==='follow')setTimeout(()=>openFollow(),120);}
   function saveCurrent(){
     const list=loadPlan(),meta=loadMeta();
     if(!list.length&&!pilgrimageManualCreateMode&&!(normalizePoint(meta.start)&&normalizePoint(meta.end))){
