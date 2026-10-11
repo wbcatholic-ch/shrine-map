@@ -8662,6 +8662,10 @@ window.oaiResetSearchStateForFreshStart=oaiResetSearchStateForFreshStart;
 })();
 
 function goToCover(){
+  if(_retreatViewportIdleMap && _retreatViewportIdleCallback){
+    try{kakao.maps.event.removeListener(_retreatViewportIdleMap,'idle',_retreatViewportIdleCallback);}catch(_e){}
+    _retreatViewportIdleMap=null;_retreatViewportIdleCallback=null;
+  }
   try{ _cancelNearbyLoad(); }catch(e){ console.warn('[가톨릭길동무]', e); }
   try{ if(typeof _clearDioceseReturnState === 'function') _clearDioceseReturnState('go-to-cover'); }catch(e){ console.warn('[가톨릭길동무]', e); }
   try{
@@ -10696,7 +10700,7 @@ function _restoreAllCategoryMarkersForSelection(){
     _retreatMarkers.forEach(o=>{
       if(!o||!o.marker) return;
       try{
-        _setMarkerMapIfChanged(o.marker,_map);
+        _setMarkerMapIfChanged(o.marker,_retreatMarkerWithinViewport(o.marker)?_map:null);
         _setMarkerImageIfChanged(o.marker,_mkrImgRetreat('#2e7d32',false),'retreat:#2e7d32:0');
         _setMarkerZIfChanged(o.marker,45);
       }catch(e){ console.warn("[가톨릭길동무]", e); }
@@ -11408,8 +11412,35 @@ function _hideParishDioMkrs(code){
     _parishIdleListener=null;
   }
 }
+// Retreat marker visibility is recalculated only after a pan/zoom settles.
+// Reuse the existing markers and their click handlers; do not rebuild on idle.
+let _retreatViewportIdleMap=null;
+let _retreatViewportIdleCallback=null;
+function _retreatMarkerWithinViewport(marker){
+  const bounds=_parishViewportBounds();
+  if(!bounds) return true;
+  try{
+    const pos=marker.getPosition(),lat=pos.getLat(),lng=pos.getLng();
+    return lat>=bounds.s&&lat<=bounds.n&&lng>=bounds.w&&lng<=bounds.e;
+  }catch(_e){return true;}
+}
+function _ensureRetreatViewportIdle(){
+  if(!_map || _retreatViewportIdleMap===_map) return;
+  if(_retreatViewportIdleMap&&_retreatViewportIdleCallback){
+    try{kakao.maps.event.removeListener(_retreatViewportIdleMap,'idle',_retreatViewportIdleCallback);}catch(_e){}
+  }
+  const currentMap=_map;
+  const onIdle=function(){
+    if(_map!==currentMap || _mode!=='retreat' || _screen==='cover' || _isRouteSelectionModeActive()) return;
+    _restoreRetreatMarkers();
+  };
+  _retreatViewportIdleMap=currentMap;
+  _retreatViewportIdleCallback=onIdle;
+  kakao.maps.event.addListener(currentMap,'idle',onIdle);
+}
 function _buildRetreatMarkers(){
   if(!_map) return;
+  _ensureRetreatViewportIdle();
   if(!_retreatMarkers.length){
     if(window.__OAI_RETREAT_MARKER_BUILDING__) return;
     window.__OAI_RETREAT_MARKER_BUILDING__ = true;
@@ -11432,7 +11463,7 @@ function _buildRetreatMarkers(){
           if(_isRouteSelectionModeActive()) _selectRouteItem(idx);
           else selectItem(idx,{fromNearby:false,fromRegion:_isRegionSearchActiveForItem(RETREATS[idx])});
         });})(i);
-        if(!_shouldDeferFullCategoryMarkers()) _setMarkerMapIfChanged(mk,_map);
+        if(!_shouldDeferFullCategoryMarkers() && _retreatMarkerWithinViewport(mk)) _setMarkerMapIfChanged(mk,_map);
         else mk.__oaiMapTarget=null;
         _retreatMarkers.push({marker:mk,item:p,index:i});
       }
@@ -11448,7 +11479,7 @@ function _buildRetreatMarkers(){
   (function applyBatch(){
     if(!_isMainMapBuildCurrent(buildToken,'retreat')) return;
     const end=Math.min(j+batch2, _retreatMarkers.length);
-    for(;j<end;j++) _setMarkerMapIfChanged(_retreatMarkers[j].marker,_map);
+    for(;j<end;j++) { const mk=_retreatMarkers[j].marker; _setMarkerMapIfChanged(mk,_retreatMarkerWithinViewport(mk)?_map:null); }
     if(j<_retreatMarkers.length) requestAnimationFrame(applyBatch);
     else _raiseMyLocationMarker();
   })();
@@ -11461,7 +11492,7 @@ function _restoreRetreatMarkers(){
   _retreatMarkers.forEach(o=>{
     const s=o.item;
     const ok=(_listSrch||_filterDio==='all'||s.diocese===_filterDio)&&(!_listSrch||_itemSearchBlob(s).includes(_listSrch)||_itemSearchNorm(s).includes(String(_listSrch).replace(/\s+/g,'')));
-    _setMarkerMapIfChanged(o.marker, ok?_map:null);
+    _setMarkerMapIfChanged(o.marker, ok&&_retreatMarkerWithinViewport(o.marker)?_map:null);
   });
 }
 function _selectRetreatMarker(p){
