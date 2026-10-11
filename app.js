@@ -13987,10 +13987,8 @@ function _refreshRoutePilgrimageButtonMode(){
 function _finishPilgrimageRouteEdit(){
   try{
     const draft=_buildPilgrimageDraftFromRoute();
-    const edit=window.__OAI_PILGRIMAGE_ROUTE_EDIT__||{};
-    if(Array.isArray(edit.extraPlaces)&&edit.extraPlaces.length){
-      draft.places=(draft.places||[]).concat(edit.extraPlaces.map(function(x){return Object.assign({},x);}));
-    }
+    // 지도에서 실제로 선택한 장소만 현재 계획에 반영한다.
+    // 이전 편집에서 숨겨둔 장소를 다시 붙이지 않는다.
     if(typeof window.applyOaiPilgrimageRouteEdit==='function') window.applyOaiPilgrimageRouteEdit(draft);
     window.__OAI_PILGRIMAGE_ROUTE_EDIT__=null;
     
@@ -17955,7 +17953,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     options=options||{};
     const readOnly=options.readOnly===true;
     const normalRoute=options.normalRoute===true;
-    
+    // 지도 편집은 경유지 10곳까지 지원한다. 초과분을 숨긴 채 편집하면
+    // 오래된 장소가 재추가되거나 반대로 정상 장소가 사라질 수 있다.
+    if(!readOnly&&!normalRoute&&loadPlan().length>OAI_MAX_ROUTE_WAYPOINTS){
+      alert('현재 순례계획은 경유지 '+OAI_MAX_ROUTE_WAYPOINTS+'곳을 초과합니다. 계획 화면에서 경유지를 '+OAI_MAX_ROUTE_WAYPOINTS+'곳 이하로 정리한 뒤 지도에서 수정해 주세요. 기존 장소는 변경되지 않았습니다.');
+      return;
+    }
+
     closePointPicker();
     const modal=planner();
     _setPilgrimageLayerVisible(modal,false);
@@ -17964,7 +17968,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__=false;
     window.__OAI_PILGRIMAGE_ROUTE_EDIT__=(readOnly||normalRoute)
       ? null
-      : {entryRole:String(entryRole||'plan'),extraPlaces:plan.slice(OAI_MAX_ROUTE_WAYPOINTS).map(function(x){return Object.assign({},x);})};
+      : {entryRole:String(entryRole||'plan')};
     const run=()=>{try{
       try{
         /* 순례계획의 '지도에서 추가'는 직전에 사용한 성당/피정 모드를 물려받지 않는다.
