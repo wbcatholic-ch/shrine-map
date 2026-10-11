@@ -14482,20 +14482,14 @@ function _finishPilgrimageRouteEdit(){
   try{
     const draft=_buildPilgrimageDraftFromRoute();
     const edit=window.__OAI_PILGRIMAGE_ROUTE_EDIT__||{};
-    if(Array.isArray(edit.extraPlaces)&&edit.extraPlaces.length){
-      // Keep waypoints beyond the route editor's 10 visible slots without
-      // re-appending places already present after returning from the map.
-      const places=Array.isArray(draft.places)?draft.places:[];
-      const samePlace=function(a,b){
-        const latA=Number(a&&a.lat),lngA=Number(a&&a.lng);
-        const latB=Number(b&&b.lat),lngB=Number(b&&b.lng);
-        return Number.isFinite(latA)&&Number.isFinite(lngA)&&Number.isFinite(latB)&&Number.isFinite(lngB)
-          &&Math.abs(latA-latB)+Math.abs(lngA-lngB)<.00002;
-      };
-      edit.extraPlaces.forEach(function(x){
-        if(x&&!places.some(function(p){return samePlace(p,x);}))places.push(Object.assign({},x));
-      });
-      draft.places=places;
+    // The map editor is limited to 10 waypoints. Never append a hidden tail:
+    // it can contain removed or cloud-restored places and can resurrect them.
+    // The original draft remains in storage until the user confirms editing.
+    const openedRevision=Number(edit.draftRevision)||0;
+    const currentRevision=Number(localStorage.getItem('oai_pilgrimage_draft_updated_at_v1'))||0;
+    if(openedRevision!==currentRevision){
+      alert('지도를 편집하는 동안 순례계획이 변경되었습니다. 현재 계획을 다시 확인해 주세요.');
+      return false;
     }
     if(typeof window.applyOaiPilgrimageRouteEdit==='function') window.applyOaiPilgrimageRouteEdit(draft);
     window.__OAI_PILGRIMAGE_ROUTE_EDIT__=null;
@@ -18512,7 +18506,11 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.ge
       const active=_activeFollowState();
       if(active){
         pilgrimageDetailMode='plan';
-        applyCourse(active.course);
+        // A separately edited draft is not the running course. Opening the
+        // planner must never overwrite it or enqueue a new cloud backup.
+        if(currentCourseId||!loadPlan().length){
+          if(!(currentCourseId===active.courseId&&_pilgrimageStructureIsDirty()))applyCourse(active.course);
+        }
         setView('detail');
         renderDetail();
         return;
@@ -19331,12 +19329,19 @@ document.addEventListener('keydown',function(e){if(e.key==='Escape'&&document.ge
     _setPilgrimageLayerVisible(modal,false);
     plannerView='detail';
     const meta=loadMeta(),plan=loadPlan();
+    // Editing more than the route editor can show must not silently discard
+    // or invisibly reattach places. Use the full planner list for such edits.
+    if(!readOnly&&!normalRoute&&plan.length>OAI_MAX_ROUTE_WAYPOINTS){
+      _setPilgrimageLayerVisible(modal,true);
+      alert('경유지가 10곳을 초과합니다. 순례계획 목록에서 장소를 정리한 뒤 지도에서 추가해 주세요.');
+      return;
+    }
     window.__oaiPilgrimageRouteReturn=false;
     document.documentElement.classList.remove('oai-pilgrimage-route-direct');
     window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__=false;
     window.__OAI_PILGRIMAGE_ROUTE_EDIT__=(readOnly||normalRoute)
       ? null
-      : {entryRole:String(entryRole||'plan'),extraPlaces:plan.slice(OAI_MAX_ROUTE_WAYPOINTS).map(function(x){return Object.assign({},x);})};
+      : {entryRole:String(entryRole||'plan'),draftRevision:Number(localStorage.getItem(DRAFT_REV_KEY))||0};
     const run=()=>{try{
       try{
         /* 순례계획의 '지도에서 추가'는 직전에 사용한 성당/피정 모드를 물려받지 않는다.
