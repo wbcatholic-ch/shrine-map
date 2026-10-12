@@ -9868,3 +9868,19 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
 }
 #oai-pilgrimage-history-btn:not([hidden]):active{background:#28543f;}
 #oai-pilgrimage-history-btn[hidden]{display:none!important;}
+
+/* V1188: 설정 그룹별 도움말은 오른쪽 끝, 대비와 터치 영역 확보 */
+#oai-settings-modal .oai-settings-group > h3.cgm-help-heading,
+.oai-settings-panel .oai-settings-group > h3.cgm-help-heading {
+ display:flex!important;align-items:center!important;justify-content:space-between!important;gap:14px!important;min-height:52px;box-sizing:border-box;padding:7px 13px 7px 16px!important;
+}
+#oai-settings-modal .oai-settings-group > h3.cgm-help-heading .cgm-help-icon,
+.oai-settings-panel .oai-settings-group > h3.cgm-help-heading .cgm-help-icon {
+ margin:0!important;width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important;border:2px solid #fff!important;border-radius:50%!important;
+ background:rgba(255,255,255,.14)!important;color:#fff!important;font-size:21px!important;font-weight:900!important;line-height:1!important;opacity:1!important;flex-shrink:0!important;
+}
+#oai-settings-modal .oai-settings-group > h3.cgm-help-heading .cgm-help-icon:focus-visible,
+.oai-settings-panel .oai-settings-group > h3.cgm-help-heading .cgm-help-icon:focus-visible {outline:3px solid #e0b84f!important;outline-offset:2px!important;}
+
+.oai-settings-group > h3.cgm-help-heading{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:14px!important;min-height:52px;box-sizing:border-box;padding:7px 13px 7px 16px!important;}
+.oai-settings-group > h3.cgm-help-heading > .cgm-help-icon{margin:0!important;width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important;border:2px solid #fff!important;background:rgba(255,255,255,.14)!important;color:#fff!important;font-size:21px!important;font-weight:900!important;opacity:1!important;flex-shrink:0!important;}
