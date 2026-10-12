@@ -3759,8 +3759,8 @@ function _ensureShrineVisitModal(){
     const item=window.__OAI_CURRENT_SHRINE_VISIT_ITEM__;
     const inp=document.getElementById('shrine-visit-date');
     const date=inp&&inp.value?inp.value:_todayISODate();
-    if(_hasShrineVisitOnDate(item,date)){ alert('이미 등록된 순례 날짜입니다.'); return; }
-    if(!_addShrineVisit(item,date,'manual')){ alert('방문 날짜를 확인해 주세요.'); return; }
+    if(_hasShrineVisitOnDate(item,date)){ _oaiVisitToast('이미 등록된 순례 날짜입니다.'); return; }
+    if(!_addShrineVisit(item,date,'manual')){ _oaiVisitToast('방문 날짜를 확인해 주세요.'); return; }
     _renderShrineVisitModalList(item);
     if(_curInfoItem&&_curInfoItem.item===item) _renderInfoCardShrineVisit(item);
     try{ if(_activeTab==='list') renderList(); }catch(_e){}
@@ -3820,16 +3820,21 @@ function _renderShrineVisitModalList(item){
     e.preventDefault(); e.stopPropagation();
     const idx=parseInt(btn.getAttribute('data-visit-del'),10);
     const target=_getShrineVisitDates(item)[idx];
-    if(target && String(target.method||'').toLowerCase()==='gps'){ alert('GPS로 등록된 순례 기록은 삭제할 수 없습니다.'); return; }
-    if(confirm('이 방문 날짜를 삭제할까요?')){
-      _deleteShrineVisitAt(item,idx);
-      _renderShrineVisitModalList(item);
+    if(target && String(target.method||'').toLowerCase()==='gps'){ _oaiVisitToast('GPS로 등록된 순례 기록은 삭제할 수 없습니다.'); return; }
+    if(!target)return;
+    _oaiVisitConfirm('순례일 '+_formatVisitDate(target.date)+' 기록을 삭제할까요? 삭제한 기록은 되돌릴 수 없습니다.',function(){
+      // 확인창 표시 중 기록이 바뀌었어도 같은 날짜의 같은 수동 기록만 삭제한다.
+      const current=_getShrineVisitDates(item);
+      const actualIdx=current.findIndex(function(v){return _visitDateOf(v)===_visitDateOf(target)&&String(v.method||'').toLowerCase()!=='gps';});
+      if(actualIdx<0||!_deleteShrineVisitAt(item,actualIdx)){_oaiVisitToast('삭제하지 못했습니다.');return;}
+      _closeShrineVisitModal();
       if(_curInfoItem&&_curInfoItem.item===item) _renderInfoCardShrineVisit(item);
       try{ if(_activeTab==='list') renderList(); }catch(_e){}
       try{ if(_activeTab==='nearby') _loadNearby(); }catch(_e){}
       _refreshShrineVisitMapState();
       try{ if(_isShrineVisitDetailOpen() && window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null) _renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__); }catch(_e){}
-    }
+      _oaiVisitToast('순례 기록을 삭제했습니다.');
+    });
   }); });
 }
 
@@ -15638,7 +15643,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-copy],[data-oai-dev-preview],[data-oai-dev-apply]');if(!button)return;
     if(button.id==='oai-settings-version-label'){
       oaiDevTapCount++;
-      if(oaiDevTapCount>=10){oaiDevTapCount=0;const next=!oaiDevEnabled();localStorage.setItem(OAI_DEV_KEY,next?'1':'0');oaiRefreshDeveloperPanel();const detail=document.getElementById('parish-visit-detail');if(detail&&detail.classList.contains('show'))_renderParishVisitDetail();if(next){oaiDevStatus('개발자 모드가 열렸습니다.');document.getElementById('oai-developer-section').scrollIntoView({block:'nearest',behavior:'smooth'});} }
+      if(oaiDevTapCount>=10){oaiDevTapCount=0;const next=!oaiDevEnabled();localStorage.setItem(OAI_DEV_KEY,next?'1':'0');oaiRefreshDeveloperPanel();const detail=document.getElementById('parish-visit-detail');if(detail&&detail.classList.contains('show'))_renderParishVisitDetail();if(_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null)_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);if(next){oaiDevStatus('개발자 모드가 열렸습니다.');document.getElementById('oai-developer-section').scrollIntoView({block:'nearest',behavior:'smooth'});} }
       return;
     }
     if(!oaiDevEnabled())return;

@@ -9835,18 +9835,18 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
 /* V1168: parish visit detail and editor; no change to stored visit data. */
 .shrine-visit-detail-hero,.oai-visit-journal{border:1.5px solid #9eb7c7!important;box-shadow:0 2px 9px rgba(37,73,96,.07)!important}
 .shrine-visit-detail-date-list{border-color:#b7cbd7!important}
-#parish-visit-editor .shrine-visit-backdrop{background:rgba(14,30,43,.38)!important;backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);touch-action:none}
-#parish-visit-editor .shrine-visit-panel{background:#fff!important;border:1px solid #b9d0de!important;box-shadow:0 -12px 38px rgba(14,33,47,.20)!important}
-#parish-visit-editor .shrine-visit-kicker{color:#607886!important}
-#parish-visit-editor .shrine-visit-title{color:#203747!important}
-#parish-visit-editor .shrine-visit-x{border-color:#d0dce2!important;color:#344f60!important}
-#parish-visit-editor .shrine-visit-label{color:#425966!important}
-#parish-visit-editor .shrine-visit-label input{border-color:#b9cbd6!important;box-shadow:none!important}
-#parish-visit-editor .shrine-visit-save{background:#2e779d!important;color:#fff!important;border-color:#2e779d!important}
-#parish-visit-editor .shrine-visit-cancel{color:#526976!important;border-color:#c7d4db!important;background:#fff!important}
-#parish-visit-editor .shrine-visit-list{border-top-color:#dce6ec!important}
-#parish-visit-editor .shrine-visit-date-row{border-bottom-color:#e3eaef!important}
-#parish-visit-editor .shrine-visit-date-row button{border:1px solid #d6a4a4!important;color:#ac4141!important;background:#fff9f9!important;box-shadow:none!important}
+#parish-visit-editor .shrine-visit-backdrop,#shrine-visit-modal .shrine-visit-backdrop{background:rgba(14,30,43,.38)!important;backdrop-filter:blur(5px);-webkit-backdrop-filter:blur(5px);touch-action:none}
+#parish-visit-editor .shrine-visit-panel,#shrine-visit-modal .shrine-visit-panel{background:#fff!important;border:1px solid #b9d0de!important;box-shadow:0 -12px 38px rgba(14,33,47,.20)!important}
+#parish-visit-editor .shrine-visit-kicker,#shrine-visit-modal .shrine-visit-kicker{color:#607886!important}
+#parish-visit-editor .shrine-visit-title,#shrine-visit-modal .shrine-visit-title{color:#203747!important}
+#parish-visit-editor .shrine-visit-x,#shrine-visit-modal .shrine-visit-x{border-color:#d0dce2!important;color:#344f60!important}
+#parish-visit-editor .shrine-visit-label,#shrine-visit-modal .shrine-visit-label{color:#425966!important}
+#parish-visit-editor .shrine-visit-label input,#shrine-visit-modal .shrine-visit-label input{border-color:#b9cbd6!important;box-shadow:none!important}
+#parish-visit-editor .shrine-visit-save,#shrine-visit-modal .shrine-visit-save{background:#2e779d!important;color:#fff!important;border-color:#2e779d!important}
+#parish-visit-editor .shrine-visit-cancel,#shrine-visit-modal .shrine-visit-cancel{color:#526976!important;border-color:#c7d4db!important;background:#fff!important}
+#parish-visit-editor .shrine-visit-list,#shrine-visit-modal .shrine-visit-list{border-top-color:#dce6ec!important}
+#parish-visit-editor .shrine-visit-date-row,#shrine-visit-modal .shrine-visit-date-row{border-bottom-color:#e3eaef!important}
+#parish-visit-editor .shrine-visit-date-row button,#shrine-visit-modal .shrine-visit-date-row button{border:1px solid #d6a4a4!important;color:#ac4141!important;background:#fff9f9!important;box-shadow:none!important}
 .oai-visit-confirm{z-index:2147483000!important}
 .oai-visit-confirm-bg{background:rgba(13,28,39,.46)!important;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 .oai-visit-confirm-panel{width:min(calc(100vw - 48px),360px)!important;border-radius:22px!important;padding:23px 20px 20px!important;background:#fff!important;border:1px solid #d9e4eb!important;box-shadow:0 22px 65px rgba(11,36,51,.26)!important;text-align:center}
