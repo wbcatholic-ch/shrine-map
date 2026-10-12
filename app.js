@@ -2955,7 +2955,7 @@ function _oaiWriteSharedJournalExtras(kind,item,date,patch,opts){
   const rec=data[key]&&typeof data[key]==='object'?data[key]:{name:shrine.name||'',diocese:shrine.diocese||'',seq:shrine.seq||'',visits:[]};
   if(!Array.isArray(rec.visits))rec.visits=[];if(!rec.sharedJournalByDate||typeof rec.sharedJournalByDate!=='object')rec.sharedJournalByDate={};
   const seed=_oaiReadSharedJournalExtras(group,date)||{},oldJournal=rec.sharedJournalByDate[date]||{},next=Object.assign({},seed,oldJournal,patch||{});next.updatedAt=new Date().toISOString();if(patch&&Object.prototype.hasOwnProperty.call(patch,'memo')){next.memoUpdatedAt=next.updatedAt;next.memoRevision=Math.max(Number(seed.memoRevision||0),Number(oldJournal.memoRevision||0))+1;}rec.sharedJournalByDate[date]=next;data[key]=rec;_saveShrineVisits(data);
-  if(!(opts&&opts.skipBackup)){try{queueGoogleDriveBackup();}catch(_e){}}
+  
   return true;
 }
 function _oaiVisitPhotoLimit(kind,item){return _oaiSharedJournalGroup(kind,item)?OAI_VISIT_PHOTO_LIMIT_SHRINE:(kind==='parish'?OAI_VISIT_PHOTO_LIMIT_PARISH:OAI_VISIT_PHOTO_LIMIT_SHRINE);}
@@ -2981,7 +2981,7 @@ function _oaiUpdateShrineVisitExtras(item,date,patch,opts){
   const idx=_oaiFindVisitIndexByDate(data[key].visits,date);if(idx<0)return false;
   let rec=_normalizeVisitEntry(data[key].visits[idx]);if(!rec||typeof rec!=='object')rec={date:String(date),method:'manual'};
   Object.keys(patch||{}).forEach(function(k){rec[k]=patch[k];});rec.updatedAt=new Date().toISOString();if(patch&&Object.prototype.hasOwnProperty.call(patch,'memo')){rec.memoUpdatedAt=rec.updatedAt;rec.memoRevision=Number(rec.memoRevision||0)+1;}data[key].visits[idx]=rec;_saveShrineVisits(data);
-  if(!(opts&&opts.skipBackup)){try{queueGoogleDriveBackup();}catch(_e){}}
+  
   return true;
 }
 function _oaiUpdateParishVisitExtras(item,date,patch,opts){
@@ -2990,7 +2990,7 @@ function _oaiUpdateParishVisitExtras(item,date,patch,opts){
   const idx=_oaiFindVisitIndexByDate(data[key].visits,date);if(idx<0)return false;
   let rec=_normalizeVisitEntry(data[key].visits[idx]);if(!rec||typeof rec!=='object')rec={date:String(date),method:'manual'};
   Object.keys(patch||{}).forEach(function(k){rec[k]=patch[k];});rec.updatedAt=new Date().toISOString();if(patch&&Object.prototype.hasOwnProperty.call(patch,'memo')){rec.memoUpdatedAt=rec.updatedAt;rec.memoRevision=Number(rec.memoRevision||0)+1;}data[key].visits[idx]=rec;_saveParishVisits(data);
-  if(!(opts&&opts.skipBackup)){try{queueGoogleDriveBackup();}catch(_e){}}
+  
   return true;
 }
 function _oaiGetVisitByDate(kind,item,date){
@@ -3090,7 +3090,7 @@ function _oaiReplaceSyncedPhotoInMap(data,photoId,remoteId,mimeType,savedAt){
 window.oaiVisitPhotoSyncResult=function(localId,ok,fileId,mimeType,savedAt,message){
   const photoId=String(localId||'');if(!photoId)return;const shr=_loadShrineVisits(),par=_loadParishVisits();
   if(!ok){const mark=function(data){let changed=false;Object.keys(data&&typeof data==='object'?data:{}).forEach(function(key){const rec=data[key];if(!rec)return;const one=function(j){if(!j||!Array.isArray(j.photos))return;j.photos.forEach(function(ph){if(ph&&_oaiPhotoIdentity(ph)===photoId&&ph.syncStatus!=='waiting'){ph.syncStatus='waiting';changed=true;}});};if(Array.isArray(rec.visits))rec.visits.forEach(one);if(rec.sharedJournalByDate&&typeof rec.sharedJournalByDate==='object')Object.keys(rec.sharedJournalByDate).forEach(function(d){one(rec.sharedJournalByDate[d]);});});return changed;};const a=mark(shr),b=mark(par);if(a)_saveShrineVisits(shr);if(b)_saveParishVisits(par);if(a||b){const pm=document.getElementById('parish-visit-detail');if(pm&&pm.classList.contains('show'))_oaiRerenderJournal('parish');const sm=document.getElementById('shrine-visit-detail-view');if(sm&&sm.classList.contains('show'))_oaiRerenderJournal('shrine');}return;}
-  const remoteId=String(fileId||'');if(!remoteId)return;const a=_oaiReplaceSyncedPhotoInMap(shr,photoId,remoteId,mimeType,savedAt),b=_oaiReplaceSyncedPhotoInMap(par,photoId,remoteId,mimeType,savedAt);if(a)_saveShrineVisits(shr);if(b)_saveParishVisits(par);if(a||b){try{queueGoogleDriveBackup();}catch(_e){}const pm=document.getElementById('parish-visit-detail');if(pm&&pm.classList.contains('show'))_oaiRerenderJournal('parish');const sm=document.getElementById('shrine-visit-detail-view');if(sm&&sm.classList.contains('show'))_oaiRerenderJournal('shrine');}
+  const remoteId=String(fileId||'');if(!remoteId)return;const a=_oaiReplaceSyncedPhotoInMap(shr,photoId,remoteId,mimeType,savedAt),b=_oaiReplaceSyncedPhotoInMap(par,photoId,remoteId,mimeType,savedAt);if(a)_saveShrineVisits(shr);if(b)_saveParishVisits(par);if(a||b){const pm=document.getElementById('parish-visit-detail');if(pm&&pm.classList.contains('show'))_oaiRerenderJournal('parish');const sm=document.getElementById('shrine-visit-detail-view');if(sm&&sm.classList.contains('show'))_oaiRerenderJournal('shrine');}
 };
 function _oaiCachePhotoData(fileId,dataUri,type){const key=String(fileId||'');if(!key||!dataUri)return;const cache=type==='thumb'?_oaiVisitPhotoThumbCache:_oaiVisitPhotoFullCache;cache.delete(key);cache.set(key,dataUri);while(cache.size>OAI_VISIT_PHOTO_CACHE_MAX){const oldest=cache.keys().next().value;cache.delete(oldest);}}
 function _oaiLoadVisitPhotoData(fileId,meta){
@@ -15472,7 +15472,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(parishRow) parishRow.hidden=hasDioceseAndParish;
     if(combinedSummary&&hasDioceseAndParish) combinedSummary.textContent=diocese+' · '+parish.name;
     if(input){ input.disabled=!parish; input.checked=parish ? _isMyParishAutoVisitEnabled() : false; }
-    refreshGoogleDriveButton();
     try{_renderRouteFrequentSettings();}catch(_e){}
   }
   function open(opts){
@@ -15507,373 +15506,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       setTimeout(function(){try{if(typeof goToCover==='function')goToCover();}catch(_e){}},0);
     }
   }
-  function recordsModal(){return document.getElementById('oai-records-modal');}
   function visitPlaceCount(loader){
     try{const records=loader()||{};return Object.keys(records).filter(function(key){const value=records[key];return Array.isArray(value)?value.length>0:!!(value&&Array.isArray(value.visits)&&value.visits.length);}).length;}catch(_e){return 0;}
   }
   function arrayCount(key){try{const value=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(value)?value.length:0;}catch(_e){return 0;}}
-  function refreshRecords(){}
-  function openRecords(){const m=recordsModal();if(!m)return;refreshGoogleDriveButton();m.classList.add('show');m.setAttribute('aria-hidden','false');}
-  function closeRecords(){const m=recordsModal();if(!m)return;m.classList.remove('show');m.setAttribute('aria-hidden','true');}
-  function restoreModal(){return document.getElementById('oai-record-restore-modal');}
-  function restoreMessage(text){const el=document.getElementById('oai-record-restore-message');if(el)el.textContent=text||'';}
-  function recordMessage(text){const el=document.getElementById('oai-records-message');if(el)el.textContent=text||'';}
-  const OAI_GOOGLE_DRIVE_CONNECTED_KEY='oai_google_drive_connected_v1';
-  const OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY='oai_google_drive_auto_backup_v1';
+  // Data is stored locally. Cloud data backup, restore and history are deliberately absent.
   const OAI_ONBOARDING_DONE_KEY='oai_onboarding_done_v1';
-  const OAI_DIOCESE_PROMPT_DATE_KEY='oai_diocese_prompt_date_v1';
-  const OAI_GOOGLE_PROMPT_DATE_KEY='oai_google_prompt_date_v1';
-  const OAI_RESTORE_PROMPT_ELIGIBLE_KEY='oai_restore_prompt_eligible_v1';
-  const OAI_RESTORE_PROMPT_DATE_KEY='oai_restore_prompt_date_v1';
-  const OAI_RESTORE_CHECKED_KEY='oai_restore_checked_v1';
-  // 1148: 기존 자동 백업 설정은 중지한다. Google Drive 파일은 변경하지 않는다.
-  try{localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'0');}catch(_e){}
-  let googleDriveManualSavePending=false;
-  let googleDriveRestoreAfterConnect=false;
-  let googleDriveInitialSyncPending=false;
-  let googleDriveAutoConnectPending=false;
   let initialOnboarding=false;
-  let restoreReminderFromInitialFlow=false;
   let initialDriveFirstFlow=false;
-  try{
-    if(!localStorage.getItem(OAI_RESTORE_PROMPT_ELIGIBLE_KEY)&&!localStorage.getItem(OAI_RESTORE_CHECKED_KEY)&&!localStorage.getItem(OAI_ONBOARDING_DONE_KEY)&&!configuredDiocese()&&!hasBackupContent()){
-      localStorage.setItem(OAI_RESTORE_PROMPT_ELIGIBLE_KEY,'1');
-    }
-  }catch(_e){}
-  function nativeDrive(){try{return window.GildongmuNative||null;}catch(_e){return null;}}
-  function isGoogleDriveConnected(){return localStorage.getItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY)==='1';}
-  function isGoogleDriveAutoBackupEnabled(){
-    if(!isGoogleDriveConnected())return false;
-    return localStorage.getItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY)!=='0';
-  }
-  function formatGoogleDriveSavedAt(){
-    try{const raw=localStorage.getItem('oai_google_drive_saved_at_v1');if(!raw)return '';const date=new Date(raw);if(isNaN(date.getTime()))return '';return (date.getMonth()+1)+'/'+date.getDate()+' '+String(date.getHours()).padStart(2,'0')+':'+String(date.getMinutes()).padStart(2,'0');}catch(_e){return '';}
-  }
-  function refreshGoogleDriveButton(){
-    const descriptions=document.querySelectorAll('.oai-google-drive-description');
-    const notes=document.querySelectorAll('.oai-google-drive-note');
-    const inputs=document.querySelectorAll('[data-oai-google-auto]');
-    if(isGoogleDriveAutoBackupEnabled()){
-      inputs.forEach(function(input){input.checked=true;});
-      descriptions.forEach(function(description){description.textContent='기록이 바뀌면 자동으로 보관합니다.';});
-      notes.forEach(function(note){const at=formatGoogleDriveSavedAt();note.textContent=at?'마지막 저장: '+at:'연결되었습니다. 첫 기록부터 자동으로 보관합니다.';});
-    }else{
-      inputs.forEach(function(input){input.checked=false;});
-      descriptions.forEach(function(description){description.textContent='자동 백업은 중단되었습니다. 기록은 휴대폰에 저장됩니다.';});
-      notes.forEach(function(note){note.textContent='Google Drive 백업은 수동으로 실행할 수 있습니다.';});
-    }
-  }
-  // 자동 보관 기능은 안정화 기간 동안 중단. 이 버튼은 명시적인 수동 저장만 한다.
-  function setGoogleDriveAutoBackup(enabled){
-    try{localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'0');}catch(_e){}
-    refreshGoogleDriveButton();
-    if(enabled)recordMessage('자동 백업은 안정화 중 중단되었습니다. 수동 백업을 이용해 주세요.');
-  }
-  function connectGoogleDrive(){
-    const bridge=nativeDrive();
-    if(!bridge||typeof bridge.connectGoogleDrive!=='function'){recordMessage('Google Drive 백업은 Android 앱에서 사용할 수 있습니다.');return;}
-    if(isGoogleDriveConnected()){saveGoogleDriveBackupNow(true);return;}
-    googleDriveManualSavePending=true;
-    recordMessage('Google 계정을 연결합니다. 연결 후 백업 버튼을 다시 누르면 저장합니다.');
-    bridge.connectGoogleDrive();
-  }
-  function loadGoogleDriveBackup(){
-    if(!isGoogleDriveConnected()){recordMessage('먼저 Google Drive에 연결해 주세요.');return;}
-    const bridge=nativeDrive();
-    if(!bridge||typeof bridge.loadGoogleDriveBackup!=='function'){recordMessage('Google Drive 자동백업은 앱에서 사용할 수 있습니다.');return;}
-    if(hasBackupContent()&&!window.confirm('Google Drive의 이전 기록을 휴대폰에 병합합니다. 삭제한 기록이 다시 나타날 위험을 줄이기 위해 기존 데이터는 보존하지만, 이 작업은 되돌릴 수 없습니다. 계속할까요?'))return;
-    recordMessage('Google Drive의 기록을 확인하고 있습니다.');
-    bridge.loadGoogleDriveBackup();
-  }
-  function hasBackupContent(){
-    const data=backupSnapshot().data;
-    const countVisits=function(value){return Object.keys(value&&typeof value==='object'?value:{}).some(function(key){const item=value[key];return item&&Array.isArray(item.visits)&&item.visits.length>0;});};
-    return countVisits(data.shrineVisits)||countVisits(data.parishVisits)||
-      (Array.isArray(data.prayerFavorites)&&data.prayerFavorites.length>0)||
-      (Array.isArray(data.webFavorites)&&data.webFavorites.length>0)||
-      (Array.isArray(data.routeFavorites)&&data.routeFavorites.length>0)||
-      (Array.isArray(data.pilgrimagePlan)&&data.pilgrimagePlan.length>0)||
-      (Array.isArray(data.pilgrimageCourses)&&data.pilgrimageCourses.length>0)||
-      !!(data.myParish&&data.myParish.name);
-  }
-  let oaiBackupRestoreApplying=false;
-  // 1148: 화면의 localStorage 변경으로 Google Drive 백업을 자동 요청하지 않는다.
-  // 수동 백업만 사용하며, 기존 방문/사진/GPS 로컬 저장 경로는 그대로 둔다.
-  function queueGoogleDriveBackup(){}
-  function saveGoogleDriveBackupNow(showMessage){
-    if(!isGoogleDriveConnected())return;
-    const bridge=nativeDrive();if(!bridge||typeof bridge.saveGoogleDriveBackup!=='function')return;
-    if(!hasBackupContent()){if(showMessage)recordMessage('백업할 방문·순례 기록이 없습니다. 빈 백업을 만들지 않았습니다.');return;}
-    if(showMessage&&!window.confirm('현재 휴대폰 기록을 Google Drive에 수동 백업합니다. 기존 정상 백업은 보존됩니다. 진행할까요?'))return;
-    if(showMessage)recordMessage('Google Drive에 기록을 저장하고 있습니다.');
-    try{bridge.saveGoogleDriveBackup(JSON.stringify(backupSnapshot()));}catch(_e){if(showMessage)recordMessage('Google Drive에 기록을 저장하지 못했습니다.');}
-  }
-  function setOnboardingHeader(title,subtitle){
-    const h=document.getElementById('oai-onboarding-backup-title');
-    const p=h&&h.parentElement&&h.parentElement.querySelector('p');
-    if(h)h.textContent=title;
-    if(p)p.textContent=subtitle;
-  }
-  function markRestoreChecked(){
-    try{localStorage.setItem(OAI_RESTORE_CHECKED_KEY,'1');localStorage.removeItem(OAI_RESTORE_PROMPT_ELIGIBLE_KEY);localStorage.removeItem(OAI_RESTORE_PROMPT_DATE_KEY);}catch(_e){}
-  }
-  function shouldPromptRestore(){
-    try{return localStorage.getItem(OAI_RESTORE_PROMPT_ELIGIBLE_KEY)==='1'&&localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1';}catch(_e){return false;}
-  }
-  function closeRestoreReminder(continueInitialFlow){
-    const m=onboardingModal();
-    if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');m.dataset.oaiMode='';}
-    try{localStorage.setItem(OAI_RESTORE_PROMPT_DATE_KEY,todayKey());}catch(_e){}
-    const goNext=!!continueInitialFlow||restoreReminderFromInitialFlow;
-    restoreReminderFromInitialFlow=false;
-    if(goNext)setTimeout(openInitialDriveOnboarding,80);
-  }
-  function openRestoreReminder(fromInitialFlow){
-    if(!shouldPromptRestore())return false;
-    const m=onboardingModal(),body=document.getElementById('oai-onboarding-backup-body');
-    if(!m||!body)return false;
-    restoreReminderFromInitialFlow=!!fromInitialFlow;
-    m.dataset.oaiMode='restore';
-    setOnboardingHeader('이전 기록을 가져올까요?','순례기록과 즐겨찾기를 같은 Google 계정에서 다시 가져올 수 있습니다.');
-    body.innerHTML='<p class="oai-onboarding-intro">앱을 다시 설치했거나 휴대폰을 바꿨다면 이전에 저장한 <b>순례·방문 기록과 즐겨찾기</b>를 불러올 수 있습니다.</p><p class="oai-onboarding-privacy">가져오기를 하지 않으면 하루에 한 번 다시 안내합니다.</p><button type="button" class="oai-records-primary" data-oai-restore-reminder-now="1">순례기록·즐겨찾기 가져오기</button><button type="button" class="oai-onboarding-text-button" data-oai-restore-reminder-later="1">다음에 하기</button><em id="oai-onboarding-backup-message" aria-live="polite"></em>';
-    try{localStorage.setItem(OAI_RESTORE_PROMPT_DATE_KEY,todayKey());}catch(_e){}
-    m.classList.add('show');m.setAttribute('aria-hidden','false');
-    return true;
-  }
-  function maybePromptRestoreDaily(){
-    if(!shouldPromptRestore())return;
-    if(window.oaiShouldDeferAdvisoryModal&&window.oaiShouldDeferAdvisoryModal()){if(document.visibilityState==='visible')setTimeout(maybePromptRestoreDaily,1800);return;}
-    const today=todayKey();
-    try{if(localStorage.getItem(OAI_RESTORE_PROMPT_DATE_KEY)===today)return;}catch(_e){}
-    if(initialOnboarding)return;
-    if(window.isOaiSettingsOpen&&window.isOaiSettingsOpen())return;
-    if(window.isOaiParishSetupOpen&&window.isOaiParishSetupOpen())return;
-    const m=onboardingModal();if(m&&m.classList.contains('show'))return;
-    setTimeout(function(){if(window.oaiShouldDeferAdvisoryModal&&window.oaiShouldDeferAdvisoryModal()){setTimeout(maybePromptRestoreDaily,1800);return;}if(shouldPromptRestore())openRestoreReminder(false);},120);
-  }
-  function startRestoreFromReminder(){
-    const m=onboardingModal();
-    if(m){const em=document.getElementById('oai-onboarding-backup-message');if(em)em.textContent='Google Drive에서 순례기록과 즐겨찾기를 확인합니다.';}
-    const continueFlow=restoreReminderFromInitialFlow;
-    restoreReminderFromInitialFlow=false;
-    if(isGoogleDriveConnected()){
-      if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');m.dataset.oaiMode='';}
-      googleDriveInitialSyncPending=true;
-      loadGoogleDriveBackup();
-      if(continueFlow&& !isGoogleDriveAutoBackupEnabled())setTimeout(openInitialDriveOnboarding,250);
-      return;
-    }
-    googleDriveAutoConnectPending=true;
-    googleDriveRestoreAfterConnect=true;
-    try{localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'0');}catch(_e){}
-    const bridge=nativeDrive();
-    if(!bridge||typeof bridge.connectGoogleDrive!=='function'){
-      googleDriveAutoConnectPending=false;
-      try{localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'0');}catch(_e){}
-      const em=document.getElementById('oai-onboarding-backup-message');if(em)em.textContent='순례기록과 즐겨찾기 가져오기는 앱에서 사용할 수 있습니다.';
-      return;
-    }
-    if(continueFlow)m.dataset.oaiContinueInitial='1';
-    bridge.connectGoogleDrive();
-  }
-  // 1148: 로컬 저장 도중 Google 자동 백업 권유 팝업을 띄우지 않는다.
-  function maybeRecommendGoogleDrive(){}
-  window.oaiGoogleDriveStatus=function(status,message){
-    if(status==='connected'){
-      localStorage.setItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY,'1');localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'0');googleDriveAutoConnectPending=false;
-      const onboarding=onboardingModal();
-      if(initialDriveFirstFlow&&initialOnboarding){
-        // Connecting an account is not consent to restore/merge cloud records.
-        setTimeout(openInitialParishSetupAfterDrive,0);
-      }else if(onboarding&&onboarding.classList.contains('show')){
-        const wasRestore=onboarding.dataset.oaiMode==='restore';
-        const continueInitial=onboarding.dataset.oaiContinueInitial==='1';
-        onboarding.classList.remove('show');onboarding.setAttribute('aria-hidden','true');onboarding.dataset.oaiMode='';onboarding.dataset.oaiContinueInitial='';
-        if(!wasRestore&&initialOnboarding)closeOnboardingBackup();
-        else if(continueInitial)setTimeout(function(){if(!isGoogleDriveAutoBackupEnabled())openInitialDriveOnboarding();},250);
-      }
-    }
-    if(status==='connected'&&googleDriveRestoreAfterConnect){
-      googleDriveRestoreAfterConnect=false;
-      loadGoogleDriveBackup();
-      return;
-    }
-    if(status==='connected'&&googleDriveManualSavePending){
-      googleDriveManualSavePending=false;
-      refreshGoogleDriveButton();
-      recordMessage('Google Drive 연결 완료. 기록을 확인한 뒤 백업 버튼을 다시 눌러 주세요.');
-      return;
-    }
-    if(status==='disconnected'){googleDriveRestoreAfterConnect=false;googleDriveManualSavePending=false;localStorage.removeItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY);if(googleDriveAutoConnectPending)localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'0');googleDriveAutoConnectPending=false;if(initialOnboarding)onboardingMessage(message||'Google 계정을 연결하지 못했습니다. 다시 선택해 주세요.');}
-    if(status==='saved'){
-      try{localStorage.setItem('oai_google_drive_saved_at_v1',new Date().toISOString());}catch(_e){}
-      refreshGoogleDriveButton();
-      recordMessage('Google Drive에 저장했습니다.');
-      return;
-    }
-    refreshGoogleDriveButton();recordMessage(message||'');
-    // 1149: Connection does not automatically fetch or merge Drive backup.
-    // Only the explicit restore button/request fetches data.
-    if(status==='connected')return;
-    if(status==='empty'){
-      const isFirstCheck=googleDriveInitialSyncPending;
-      googleDriveInitialSyncPending=false;
-      if(isFirstCheck&&shouldPromptRestore())markRestoreChecked();
-      if(initialDriveFirstFlow&&initialOnboarding){
-        recordMessage('Google Drive에 이전 기록이 없습니다. 수동 백업을 이용해 주세요.');
-        setTimeout(openInitialParishSetupAfterDrive,180);
-        return;
-      }
-      if(isFirstCheck&&hasBackupContent()){
-        recordMessage('저장된 기록이 없어 이 휴대폰의 기록을 처음 보관합니다.');
-        recordMessage('기존 백업은 보존합니다. 필요하면 수동 백업을 눌러 주세요.');
-      }else recordMessage('Google Drive에 저장된 기록이 없습니다. 필요할 때 수동 백업을 이용해 주세요.');
-    }
-  };
-  window.oaiGoogleDriveBackupReceived=function(encoded){
-    try{
-      const text=decodeURIComponent(escape(atob(String(encoded||''))));
-      const parsed=JSON.parse(text);
-      if(!parsed||parsed.format!=='catholic-gildongmu-backup'||!parsed.data)throw new Error();
-      googleDriveInitialSyncPending=false;
-      applyBackup(parsed.data);
-      markRestoreChecked();
-      refresh();refreshRecords();
-      recordMessage('Google Drive에서 순례기록과 즐겨찾기를 불러왔습니다.');
-      if(initialDriveFirstFlow&&initialOnboarding){showInitialDriveImportComplete();return;}
-    }catch(_e){
-      googleDriveInitialSyncPending=false;
-      recordMessage('Google Drive 기록을 불러오지 못했습니다.');
-      if(initialDriveFirstFlow&&initialOnboarding)setTimeout(openInitialParishSetupAfterDrive,180);
-    }
-  };
-  // 1148: 앱 백그라운드 진입 시 Drive 자동 백업을 실행하지 않는다.
-  oaiAddLifecycleObserver('visible',function(){setTimeout(maybePromptRestoreDaily,500);});
-  function openRestore(){const m=restoreModal();if(!m)return;restoreMessage('');const input=document.getElementById('oai-record-restore-code');if(input)input.value='';m.classList.add('show');m.setAttribute('aria-hidden','false');}
-  function closeRestore(){const m=restoreModal();if(!m)return;m.classList.remove('show');m.setAttribute('aria-hidden','true');}
-  function localValue(key,fallback){try{const value=JSON.parse(localStorage.getItem(key)||'');return value==null?fallback:value;}catch(_e){return fallback;}}
-  function backupVisitMapWithoutLocalPhotos(value){
-    const src=value&&typeof value==='object'?value:{},out={};
-    const clean=function(v){const x=Object.assign({},v||{});if(Array.isArray(x.photos))x.photos=x.photos.filter(function(ph){if(!ph)return false;const id=_oaiPhotoIdentity(ph);return !!(ph.driveFileId||(!id.startsWith('local_')&&id));}).map(function(ph){return Object.assign({},ph,{syncStatus:'saved'});});return x;};
-    Object.keys(src).forEach(function(key){const rec=src[key]&&typeof src[key]==='object'?src[key]:{},clone=Object.assign({},rec);clone.visits=(Array.isArray(rec.visits)?rec.visits:[]).map(clean);if(rec.sharedJournalByDate&&typeof rec.sharedJournalByDate==='object'){clone.sharedJournalByDate={};Object.keys(rec.sharedJournalByDate).forEach(function(d){clone.sharedJournalByDate[d]=clean(rec.sharedJournalByDate[d]);});}out[key]=clone;});return out;
-  }
-  function backupSnapshot(){
-    const parish=configuredParish();
-    return {format:'catholic-gildongmu-backup',version:1,createdAt:new Date().toISOString(),data:{
-      shrineVisits:backupVisitMapWithoutLocalPhotos(localValue(OAI_SHRINE_VISITS_KEY,{})),parishVisits:backupVisitMapWithoutLocalPhotos(localValue(OAI_PARISH_VISITS_KEY,{})),deletedManualVisits:_loadManualVisitDeletions(),
-      prayerFavorites:localValue('pr_favorites',[]),webFavorites:localValue('web_favorites_v1',[]),routeFavorites:localValue(OAI_ROUTE_FAVORITES_KEY,[]),pilgrimagePlan:localValue('oai_pilgrimage_plan_v1',[]),pilgrimageDraftMeta:localValue('oai_pilgrimage_draft_meta_v2',{}),pilgrimageCourses:localValue('oai_pilgrimage_courses_v1',[]),
-      myDiocese:configuredDiocese(),myParish:parish?{diocese:parish.diocese||'',name:parish.name||''}:null,
-      parishAutoVisit:_isMyParishAutoVisitEnabled(),prayerFontSize:localStorage.getItem('prayer_font_size')||'',
-      noticeFlags:{pilgrimagePublicFeatureSeen:localStorage.getItem('oai_pilgrimage_public_feature_seen_v1')==='1'}
-    }};
-  }
-  function encodeBackup(snapshot){return 'CGM1.'+btoa(unescape(encodeURIComponent(JSON.stringify(snapshot))));}
-  function decodeBackup(code){
-    const raw=String(code||'').trim();if(!raw.startsWith('CGM1.'))throw new Error('백업 코드가 아닙니다.');
-    const parsed=JSON.parse(decodeURIComponent(escape(atob(raw.slice(5)))));
-    if(!parsed||parsed.format!=='catholic-gildongmu-backup'||!parsed.data)throw new Error('백업 코드 내용을 확인해 주세요.');
-    return parsed.data;
-  }
-  function mergeLists(a,b){const out=Array.isArray(a)?a.slice():[];(Array.isArray(b)?b:[]).forEach(function(item){const token=JSON.stringify(item);if(!out.some(function(current){return JSON.stringify(current)===token;}))out.push(item);});return out;}
-  function mergeVisitEntryPair(current,backup){
-    const a=_normalizeVisitEntry(current)||{},b=_normalizeVisitEntry(backup)||{},out=Object.assign({},b,a);
-    const deleted=Array.from(new Set([].concat(Array.isArray(b.deletedPhotoIds)?b.deletedPhotoIds:[],Array.isArray(a.deletedPhotoIds)?a.deletedPhotoIds:[]).map(String))),deletedSet=new Set(deleted);
-    const photoMap={};[].concat(Array.isArray(b.photos)?b.photos:[],Array.isArray(a.photos)?a.photos:[]).forEach(function(ph){const id=_oaiPhotoIdentity(ph);if(id&&!deletedSet.has(id))photoMap[id]=ph;});out.photos=Object.keys(photoMap).map(function(k){return photoMap[k];});if(deleted.length)out.deletedPhotoIds=deleted;
-    const at=String(a.memoUpdatedAt||''),bt=String(b.memoUpdatedAt||'');if(at||bt){const src=at>=bt?a:b;out.memo=String(src.memo||'');out.memoUpdatedAt=src.memoUpdatedAt||'';out.memoRevision=Number(src.memoRevision||0);}else if(Object.prototype.hasOwnProperty.call(a,'memo'))out.memo=String(a.memo||'');else if(Object.prototype.hasOwnProperty.call(b,'memo'))out.memo=String(b.memo||'');
-    return out;
-  }
-  function mergeVisitEntries(a,b){
-    const map={},order=[];
-    (Array.isArray(b)?b:[]).concat(Array.isArray(a)?a:[]).forEach(function(raw){const v=_normalizeVisitEntry(raw);if(!v||!v.date)return;const k=String(v.date);if(!map[k]){map[k]=v;order.push(k);}else map[k]=mergeVisitEntryPair(v,map[k]);});
-    return order.map(function(k){return map[k];}).sort(_compareShrineVisits);
-  }
-  function mergeSharedJournalMaps(a,b){const out={};const keys=new Set(Object.keys(b&&typeof b==='object'?b:{}).concat(Object.keys(a&&typeof a==='object'?a:{})));keys.forEach(function(d){const aa=a&&a[d]&&typeof a[d]==='object'?a[d]:{},bb=b&&b[d]&&typeof b[d]==='object'?b[d]:{};out[d]=_oaiMergeJournalExtras(aa,bb);out[d].updatedAt=String(aa.updatedAt||bb.updatedAt||'');});return out;}
-  function mergeVisitMaps(current,backup){const out=current&&typeof current==='object'?current:{};Object.keys(backup&&typeof backup==='object'?backup:{}).forEach(function(key){const oldRecord=out[key]&&typeof out[key]==='object'?out[key]:{};const newRecord=backup[key]&&typeof backup[key]==='object'?backup[key]:{};out[key]=Object.assign({},newRecord,oldRecord,{visits:mergeVisitEntries(oldRecord.visits,newRecord.visits),sharedJournalByDate:mergeSharedJournalMaps(oldRecord.sharedJournalByDate,newRecord.sharedJournalByDate)});});return out;}
-  function mergeManualDeletionMaps(a,b){
-    const out=Object.assign({},b||{});
-    Object.keys(a||{}).forEach(function(k){if(!out[k]||String(a[k])>String(out[k]))out[k]=a[k];});
-    return out;
-  }
-  function applyManualDeletionsToMap(visits,kind,deletions){
-    const out={};
-    Object.keys(visits||{}).forEach(function(key){
-      const rec=visits[key];if(!rec||typeof rec!=='object')return;
-      const arr=(Array.isArray(rec.visits)?rec.visits:[]).filter(function(raw){
-        const v=_normalizeVisitEntry(raw),date=v&&v.date;
-        if(!date||String(v.method||'').toLowerCase()==='gps')return true;
-        const deleted=deletions[kind+'|'+encodeURIComponent(key)+'|'+date];
-        return !deleted||(v.savedAt&&String(v.savedAt)>String(deleted));
-      });
-      // Do not resurrect a deleted-only record, but preserve shared journals.
-      if(arr.length||Object.keys(rec.sharedJournalByDate||{}).length)out[key]=Object.assign({},rec,{visits:arr});
-    });
-    return out;
-  }
-  // Restore must never replace local GPS completions or trigger a backup of
-  // partially restored records.  The remote file has been parsed but is not
-  // trusted until its essential shapes have been checked.
-  function applyBackup(data){
-    if(!data||typeof data!=='object'||Array.isArray(data))throw new Error('백업 데이터 형식이 올바르지 않습니다.');
-    ['shrineVisits','parishVisits','deletedManualVisits'].forEach(function(key){
-      if(data[key]!=null&&(typeof data[key]!=='object'||Array.isArray(data[key])))throw new Error('방문기록 형식이 올바르지 않습니다.');
-    });
-    ['pilgrimagePlan','pilgrimageCourses','prayerFavorites','webFavorites','routeFavorites'].forEach(function(key){
-      if(data[key]!=null&&!Array.isArray(data[key]))throw new Error('백업 목록 형식이 올바르지 않습니다.');
-    });
-    const localCourses=localValue('oai_pilgrimage_courses_v1',[]);
-    const byId=new Map();
-    // Keep the local version of an existing course, including its route.
-    (Array.isArray(localCourses)?localCourses:[]).forEach(function(c){if(c&&c.id)byId.set(String(c.id),c);});
-    (Array.isArray(data.pilgrimageCourses)?data.pilgrimageCourses:[]).forEach(function(remote){
-      if(!remote||!remote.id)return;
-      const id=String(remote.id),local=byId.get(id);
-      if(!local){byId.set(id,remote);return;}
-      const entries=Array.isArray(local.completions)?local.completions.slice():[];
-      // Preserve all remote GPS-certified completion dates, without copying
-      // remote route geometry over a locally edited course.
-      (Array.isArray(remote.completions)?remote.completions:[]).forEach(function(entry){
-        if(!entry||(entry.method!=='gps'&&entry.locked!==true))return;
-        if(!entries.some(function(e){return e&&String(e.completedAt)===String(entry.completedAt)&&(e.method==='gps'||e.locked===true);}))entries.push(entry);
-      });
-      byId.set(id,Object.assign({},local,{completions:entries,lastCompletedAt:Math.max(Number(local.lastCompletedAt)||0,Number(remote.lastCompletedAt)||0)}));
-    });
-    const deletions=mergeManualDeletionMaps(_loadManualVisitDeletions(),data.deletedManualVisits);
-    oaiBackupRestoreApplying=true;
-    try{
-      localStorage.setItem(OAI_DELETED_MANUAL_VISITS_KEY,JSON.stringify(deletions));
-      _saveShrineVisits(applyManualDeletionsToMap(mergeVisitMaps(_loadShrineVisits(),data.shrineVisits),'shrine',deletions));
-      _saveParishVisits(applyManualDeletionsToMap(mergeVisitMaps(_loadParishVisits(),data.parishVisits),'parish',deletions));
-      localStorage.setItem('pr_favorites',JSON.stringify(mergeLists(localValue('pr_favorites',[]),data.prayerFavorites)));
-      localStorage.setItem('web_favorites_v1',JSON.stringify(mergeLists(localValue('web_favorites_v1',[]),data.webFavorites)));
-      localStorage.setItem(OAI_ROUTE_FAVORITES_KEY,JSON.stringify(mergeLists(localValue(OAI_ROUTE_FAVORITES_KEY,[]),data.routeFavorites).slice(0,OAI_ROUTE_FAVORITES_MAX)));
-      // A present empty draft is an intentional deletion. Only restore a
-      // remote draft onto a device where the draft key has never existed.
-      if(localStorage.getItem('oai_pilgrimage_plan_v1')===null&&Array.isArray(data.pilgrimagePlan))localStorage.setItem('oai_pilgrimage_plan_v1',JSON.stringify(data.pilgrimagePlan));
-      if(localStorage.getItem('oai_pilgrimage_draft_meta_v2')===null&&data.pilgrimageDraftMeta&&typeof data.pilgrimageDraftMeta==='object')localStorage.setItem('oai_pilgrimage_draft_meta_v2',JSON.stringify(data.pilgrimageDraftMeta));
-      if(Array.isArray(data.pilgrimageCourses))localStorage.setItem('oai_pilgrimage_courses_v1',JSON.stringify(Array.from(byId.values())));
-      if(data.myDiocese&&!localStorage.getItem('oai_my_diocese_name'))localStorage.setItem('oai_my_diocese_name',String(data.myDiocese));
-      if(data.myParish&&data.myParish.name&&!localStorage.getItem(OAI_SETTINGS_MY_PARISH_KEY)){
-        const parish={diocese:String(data.myParish.diocese||data.myDiocese||''),name:String(data.myParish.name||'')};
-        localStorage.setItem(OAI_SETTINGS_MY_PARISH_KEY,JSON.stringify(parish));localStorage.setItem('oai_my_parish',JSON.stringify(parish));localStorage.setItem('oai_my_diocese_name',parish.diocese);localStorage.setItem('oai_my_parish_name',parish.name);
-      }
-      if(typeof data.parishAutoVisit==='boolean'&&localStorage.getItem(OAI_PARISH_AUTO_VISIT_ENABLED_KEY)===null)_setParishAutoVisitEnabled(data.parishAutoVisit);
-      if(data.prayerFontSize&&!localStorage.getItem('prayer_font_size'))localStorage.setItem('prayer_font_size',String(data.prayerFontSize));
-      if(data.noticeFlags&&data.noticeFlags.pilgrimagePublicFeatureSeen===true){localStorage.setItem('oai_pilgrimage_public_feature_seen_v1','1');try{if(typeof window.closeOaiPilgrimageFeatureNotice==='function')window.closeOaiPilgrimageFeatureNotice();}catch(_e){}}
-    }finally{oaiBackupRestoreApplying=false;}
-    try{_updateAllRouteFavoriteButtons();_renderRouteFrequentPlaces();}catch(_e){}
-    try{window.dispatchEvent(new CustomEvent('oai-my-parish-changed'));}catch(_e){}
-    // Never auto-upload an imported snapshot; the user must explicitly save
-    // after reviewing the restored data. This protects the previous Drive copy.
-  }
-  function copyBackup(){
-    const code=encodeBackup(backupSnapshot());
-    const copied=function(){recordMessage('백업 코드를 복사했습니다. 카카오톡 나에게 보내기에 보관해 주세요.');};
-    if(navigator.clipboard&&navigator.clipboard.writeText){navigator.clipboard.writeText(code).then(copied).catch(function(){window.prompt('백업 코드를 복사해 보관하세요.',code);});}
-    else window.prompt('백업 코드를 복사해 보관하세요.',code);
-  }
-  function applyRestore(){
-    try{const input=document.getElementById('oai-record-restore-code');applyBackup(decodeBackup(input&&input.value));markRestoreChecked();closeRestore();refresh();recordMessage('순례기록과 즐겨찾기를 불러왔습니다. 기존 내용과 함께 보관됩니다.');}catch(error){restoreMessage(error&&error.message||'백업 코드를 다시 확인해 주세요.');}
-  }
   const parishSetup={dio:'',parish:null,query:'',view:'home'};
   function setupModal(){return document.getElementById('oai-parish-setup-modal');}
   function closeParishSetup(){const m=setupModal();if(!m)return;if(initialOnboarding&&!configuredParish())return;m.classList.remove('show','oai-parish-setup-home');m.setAttribute('aria-hidden','true');}
@@ -15952,59 +15592,21 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     finishInitialOnboarding();
   }
   function onboardingModal(){return document.getElementById('oai-onboarding-backup-modal');}
-  function onboardingMessage(text){const el=document.getElementById('oai-onboarding-backup-message');if(el)el.textContent=text||'';}
   function finishInitialOnboarding(){
-    const m=onboardingModal();
-    if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');m.dataset.oaiMode='';m.dataset.oaiContinueInitial='';}
-    initialOnboarding=false;
-    initialDriveFirstFlow=false;
-    try{localStorage.setItem(OAI_ONBOARDING_DONE_KEY,'1');localStorage.setItem(OAI_GOOGLE_PROMPT_DATE_KEY,todayKey());}catch(_e){}
+    const m=onboardingModal();if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}
+    initialOnboarding=false;initialDriveFirstFlow=false;
+    try{localStorage.setItem(OAI_ONBOARDING_DONE_KEY,'1');}catch(_e){}
   }
-  function closeOnboardingBackup(){finishInitialOnboarding();}
   function openInitialParishSetupAfterDrive(){
-    const m=onboardingModal();
-    if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');m.dataset.oaiMode='';}
-    initialOnboarding=true;
-    initialDriveFirstFlow=false;
-    openParishChooser();
-    parishSetup.view='diocese';
-    renderParishSetup();
-    const title=document.getElementById('oai-parish-setup-title'),sub=document.getElementById('oai-parish-setup-subtitle');
-    if(title)title.textContent='나의 교구·본당 설정';
-    if(sub)sub.textContent='교구를 먼저 선택한 뒤 본당을 설정해 주세요.';
+    initialOnboarding=true;initialDriveFirstFlow=false;
+    openParishChooser();parishSetup.view='diocese';renderParishSetup();
   }
-  function showInitialDriveImportComplete(){
-    const m=onboardingModal(),body=document.getElementById('oai-onboarding-backup-body');
-    if(!m||!body)return;
-    initialOnboarding=true;
-    initialDriveFirstFlow=true;
-    m.dataset.oaiMode='drive-import-done';
-    setOnboardingHeader('기존 기록을 가져왔습니다.','순례·방문 기록과 즐겨찾기를 이 휴대폰에 적용했습니다.');
-    body.innerHTML='<p class="oai-onboarding-intro"><b>데이터 가져오기가 완료되었습니다.</b></p><p class="oai-onboarding-privacy">자동 백업은 중단되어 있습니다. 필요할 때 수동 백업을 이용해 주세요.</p><button type="button" class="oai-records-primary" data-oai-onboarding-import-done="1">확인</button>';
-    m.classList.add('show');m.setAttribute('aria-hidden','false');
-  }
-  function renderOnboardingBackup(risk){
-    const body=document.getElementById('oai-onboarding-backup-body');if(!body)return;
-    if(risk){body.innerHTML='<p class="oai-onboarding-warning">Google Drive를 연결하지 않으면 휴대폰을 바꾸거나 앱을 다시 설치할 때 방문·순례 기록과 즐겨찾기를 잃을 수 있습니다.</p><button type="button" class="oai-records-primary" data-oai-onboarding-connect="1">Google Drive 연결하기</button><button type="button" class="oai-onboarding-text-button" data-oai-onboarding-finish="1">그래도 나중에 설정하기</button>';return;}
-    body.innerHTML='<p class="oai-onboarding-intro">Google Drive 연결은 선택 사항입니다.</p><p class="oai-onboarding-privacy">연결해도 자동 백업하거나 기존 기록을 자동으로 합치지 않습니다. 복원 및 백업은 각각 수동으로 실행합니다.</p><button type="button" class="oai-records-primary" data-oai-onboarding-connect="1">Google Drive 연결하기</button><button type="button" class="oai-onboarding-text-button" data-oai-onboarding-later="1">나중에 연결하기</button><em id="oai-onboarding-backup-message" aria-live="polite"></em>';
-  }
-  function openOnboardingBackup(){
-    const m=onboardingModal();if(!m)return;m.dataset.oaiMode='backup';renderOnboardingBackup(false);m.classList.add('show');m.setAttribute('aria-hidden','false');
-  }
-  function openInitialDriveOnboarding(){
-    const setup=setupModal();
-    if(setup){setup.classList.remove('show','oai-parish-setup-home');setup.setAttribute('aria-hidden','true');}
-    initialOnboarding=true;
-    initialDriveFirstFlow=true;
-    setOnboardingHeader('Google Drive에 연결할까요?','연결해도 기록을 자동 저장하거나 가져오지 않습니다.');
-    openOnboardingBackup();
-  }
-  function openInitialRestoreOnboarding(){
-    const setup=setupModal();
-    if(setup){setup.classList.remove('show','oai-parish-setup-home');setup.setAttribute('aria-hidden','true');}
-    initialOnboarding=false;
-    if(shouldPromptRestore()&&openRestoreReminder(true))return;
-    openInitialDriveOnboarding();
+  function openInitialDriveOnboarding(){openInitialParishSetupAfterDrive();}
+  function openInitialRestoreOnboarding(){openInitialParishSetupAfterDrive();}
+  function setOnboardingHeader(title,subtitle){
+    const m=onboardingModal();if(!m)return;
+    const h=m.querySelector('h2'),p=m.querySelector('.oai-settings-head p');
+    if(h)h.textContent=title;if(p)p.textContent=subtitle;
   }
   function openInitialDiocesePrompt(){
     const m=onboardingModal(),body=document.getElementById('oai-onboarding-backup-body');
@@ -16031,27 +15633,23 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const m=onboardingModal();
     if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');m.dataset.oaiMode='';}
     initialOnboarding=true;
-    openInitialRestoreOnboarding();
+    openInitialParishSetupAfterDrive();
   }
   function startInitialOnboarding(){
     try{
-      if(localStorage.getItem(OAI_ONBOARDING_DONE_KEY)==='1'){maybePromptRestoreDaily();return;}
+      if(localStorage.getItem(OAI_ONBOARDING_DONE_KEY)==='1')return;
     }catch(_e){}
     openInitialDriveOnboarding();
   }
   window.openOaiSettings=open;
   window.closeOaiSettings=close;
   window.isOaiSettingsOpen=function(){const m=modal();return !!(m&&m.classList.contains('show'));};
-  window.isOaiRecordsOpen=function(){const m=recordsModal();return !!(m&&m.classList.contains('show'));};
-  window.closeOaiRecords=closeRecords;
-  window.isOaiRestoreOpen=function(){const m=restoreModal();return !!(m&&m.classList.contains('show'));};
-  window.closeOaiRestore=closeRestore;
-  window.isOaiParishSetupOpen=function(){const m=setupModal();return !!(m&&m.classList.contains('show'));};
+    window.isOaiParishSetupOpen=function(){const m=setupModal();return !!(m&&m.classList.contains('show'));};
   window.closeOaiParishSetup=closeParishSetup;
   window.goBackOaiParishSetup=stepBackParishSetup;
   enforceCoverSettingsLabel();
   document.addEventListener('click',function(e){
-    const target=e.target&&e.target.closest?e.target.closest('[data-oai-settings-close],[data-oai-settings-edit],[data-oai-settings-diocese],[data-oai-settings-parish],[data-oai-records-open],[data-oai-records-close],[data-oai-google-connect],[data-oai-google-restore],[data-oai-backup-copy],[data-oai-restore-open],[data-oai-restore-close],[data-oai-restore-apply],[data-oai-parish-setup-close],[data-oai-setup-open],[data-oai-setup-dio],[data-oai-setup-back],[data-oai-setup-parish],[data-oai-setup-skip],[data-oai-onboarding-connect],[data-oai-onboarding-later],[data-oai-onboarding-finish],[data-oai-onboarding-import-done],[data-oai-restore-reminder-now],[data-oai-restore-reminder-later],[data-oai-diocese-prompt-now],[data-oai-diocese-prompt-later],#cover-diocese-btn'):null;
+    const target=e.target&&e.target.closest?e.target.closest('[data-oai-settings-close],[data-oai-settings-edit],[data-oai-settings-diocese],[data-oai-settings-parish],[data-oai-parish-setup-close],[data-oai-setup-open],[data-oai-setup-dio],[data-oai-setup-back],[data-oai-setup-parish],[data-oai-setup-skip],[data-oai-diocese-prompt-now],[data-oai-diocese-prompt-later],#cover-diocese-btn'):null;
     if(!target) return;
     if(target.id==='cover-diocese-btn' && target.dataset.oaiNativeSettings==='1') return;
     if(target.id==='cover-diocese-btn'){
@@ -16061,34 +15659,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(target.hasAttribute('data-oai-settings-edit')){e.preventDefault();openParishChooser();return;}
     if(target.hasAttribute('data-oai-settings-diocese')){e.preventDefault();openParishChooser();parishSetup.view='diocese';renderParishSetup();return;}
     if(target.hasAttribute('data-oai-settings-parish')){e.preventDefault();openParishChooser();if(!parishSetup.dio){parishSetup.view='diocese';renderParishSetup();}else{parishSetup.view='parish';openParishChooser(true);}return;}
-    if(target.hasAttribute('data-oai-records-open')){e.preventDefault();openRecords();return;}
-    if(target.hasAttribute('data-oai-records-close')){e.preventDefault();closeRecords();return;}
-    if(target.hasAttribute('data-oai-google-connect')){e.preventDefault();connectGoogleDrive();return;}
-    if(target.hasAttribute('data-oai-google-restore')){e.preventDefault();loadGoogleDriveBackup();return;}
-    if(target.hasAttribute('data-oai-backup-copy')){e.preventDefault();copyBackup();return;}
-    if(target.hasAttribute('data-oai-restore-open')){e.preventDefault();openRestore();return;}
-    if(target.hasAttribute('data-oai-restore-close')){e.preventDefault();closeRestore();return;}
-    if(target.hasAttribute('data-oai-restore-apply')){e.preventDefault();applyRestore();return;}
-    if(target.hasAttribute('data-oai-onboarding-connect')){
-      e.preventDefault();
-      if(initialOnboarding)initialDriveFirstFlow=true;
-      if(isGoogleDriveConnected()){
-        onboardingMessage('Google Drive가 연결되어 있습니다. 복원과 백업은 설정에서 직접 실행합니다.');
-        if(initialOnboarding)setTimeout(openInitialParishSetupAfterDrive,0);
-      }else{
-        onboardingMessage('Google 계정을 선택해 주세요. 연결만 진행합니다.');
-        googleDriveAutoConnectPending=true;
-        const bridge=nativeDrive();
-        if(bridge&&typeof bridge.connectGoogleDrive==='function')bridge.connectGoogleDrive();
-        else onboardingMessage('Google Drive 연결은 Android 앱에서 사용할 수 있습니다.');
-      }
-      return;
-    }
-    if(target.hasAttribute('data-oai-onboarding-later')){e.preventDefault();renderOnboardingBackup(true);return;}
-    if(target.hasAttribute('data-oai-onboarding-finish')){e.preventDefault();if(initialOnboarding)openInitialParishSetupAfterDrive();else closeOnboardingBackup();return;}
-    if(target.hasAttribute('data-oai-onboarding-import-done')){e.preventDefault();finishInitialOnboarding();return;}
-    if(target.hasAttribute('data-oai-restore-reminder-now')){e.preventDefault();startRestoreFromReminder();return;}
-    if(target.hasAttribute('data-oai-restore-reminder-later')){e.preventDefault();closeRestoreReminder(false);return;}
     if(target.hasAttribute('data-oai-diocese-prompt-now')){e.preventDefault();beginInitialDioceseSetup();return;}
     if(target.hasAttribute('data-oai-diocese-prompt-later')){e.preventDefault();skipInitialDiocesePrompt();return;}
     if(target.hasAttribute('data-oai-parish-setup-close')){e.preventDefault();closeParishSetup();return;}
@@ -16110,11 +15680,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   },true);
   document.addEventListener('keydown',function(e){
     if((e.key==='Enter'||e.key===' ')&&e.target&&e.target.hasAttribute&&e.target.hasAttribute('data-oai-settings-edit')){e.preventDefault();openParishChooser();return;}
-    if(e.key==='Escape'&&window.isOaiRestoreOpen())closeRestore();
-    else if(e.key==='Escape'&&window.isOaiRecordsOpen())closeRecords();
-    else if(e.key==='Escape'&&window.isOaiSettingsOpen())close();
+    if(e.key==='Escape'&&window.isOaiSettingsOpen())close();
   });
-  document.addEventListener('change',function(e){if(e.target&&e.target.matches&&e.target.matches('[data-oai-google-auto]'))setGoogleDriveAutoBackup(!!e.target.checked);});
   setTimeout(startInitialOnboarding,650);
 })();
 
@@ -16331,7 +15898,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       localStorage.setItem(COURSES_KEY,serialized);
     }catch(_e){return;}
     renderCourseList();
-    try{if(typeof window.scheduleOaiAutoBackup==='function')window.scheduleOaiAutoBackup();}catch(_e){}
   }
   function draftSnapshot(){const m=loadMeta();return {name:m.name,start:m.start,end:m.end,places:loadPlan()};}
   function _routePointSignature(p){
