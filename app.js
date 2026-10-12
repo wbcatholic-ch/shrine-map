@@ -2033,12 +2033,26 @@ function _addShrineVisit(item,date,method){
   rec.diocese=item.diocese||rec.diocese||'';
   rec.seq=item.seq||rec.seq||'';
   if(_hasVisitDate(rec.visits,date)) return false;
+  _clearManualVisitDeletion('shrine',key,date);
   rec.visits.push(_newVisitEntry(date,method));
   rec.visits.sort(function(a,b){return _compareShrineVisits(_normalizeVisitEntry(a),_normalizeVisitEntry(b));});
   data[key]=rec;
   _saveShrineVisits(data);
   try{ document.documentElement.classList.add('has-shrine-visits'); }catch(_e){}
   return true;
+}
+const OAI_DELETED_MANUAL_VISITS_KEY='oai_deleted_manual_visits_v1';
+function _loadManualVisitDeletions(){try{const x=JSON.parse(localStorage.getItem(OAI_DELETED_MANUAL_VISITS_KEY)||'{}');return x&&typeof x==='object'&&!Array.isArray(x)?x:{};}catch(_e){return {};}}
+function _recordManualVisitDeletion(kind,key,visit){
+  const d=_loadManualVisitDeletions(),date=_visitDateOf(visit);
+  if(!date)return;
+  const token=kind+'|'+encodeURIComponent(key)+'|'+date;
+  d[token]=new Date().toISOString();
+  localStorage.setItem(OAI_DELETED_MANUAL_VISITS_KEY,JSON.stringify(d));
+}
+function _clearManualVisitDeletion(kind,key,date){
+  const d=_loadManualVisitDeletions(),token=kind+'|'+encodeURIComponent(key)+'|'+date;
+  if(Object.prototype.hasOwnProperty.call(d,token)){delete d[token];localStorage.setItem(OAI_DELETED_MANUAL_VISITS_KEY,JSON.stringify(d));}
 }
 function _deleteShrineVisitAt(item,idx){
   const key=_getShrineVisitKey(item);
@@ -2050,6 +2064,7 @@ function _deleteShrineVisitAt(item,idx){
   if(idx<0||idx>=rec.visits.length) return false;
   var target=rec.visits[idx];
   if(target && typeof target==='object' && String(target.method||'').toLowerCase()==='gps') return false;
+  _recordManualVisitDeletion('shrine',key,target);
   rec.visits.splice(idx,1);
   if(rec.visits.length) data[key]=rec;
   else delete data[key];
@@ -3920,8 +3935,8 @@ function _loadParishVisits(){try{const v=localStorage.getItem(OAI_PARISH_VISITS_
 function _saveParishVisits(d){try{localStorage.setItem(OAI_PARISH_VISITS_KEY,JSON.stringify(d||{}))}catch(_e){}}
 function _parishVisits(p){const r=_loadParishVisits()[_parishVisitKey(p)]||{},a=Array.isArray(r.visits)?r.visits:[];return a.map(_normalizeVisitEntry).filter(function(v){return v&&v.date;}).sort(_compareShrineVisits);}
 function _parishVisitCount(p){return _parishVisits(p).length;}
-function _addParishVisit(p,date,method){const key=_parishVisitKey(p);if(!key||!_isVisitDate(date))return false;const d=_loadParishVisits(),r=d[key]&&typeof d[key]==='object'?d[key]:{name:p.name||'',diocese:p.diocese||'',addr:p.addr||'',visits:[]};r.visits=Array.isArray(r.visits)?r.visits:[];if(_hasVisitDate(r.visits,date))return false;r.visits.push(_newVisitEntry(date,method));r.visits.sort(_compareShrineVisits);d[key]=r;_saveParishVisits(d);return true;}
-function _deleteParishVisit(p,i){const key=_parishVisitKey(p),d=_loadParishVisits(),r=d[key];if(!r||!Array.isArray(r.visits)||i<0||i>=r.visits.length||String(r.visits[i].method||'')==='gps')return false;r.visits.splice(i,1);if(r.visits.length)d[key]=r;else delete d[key];_saveParishVisits(d);return true;}
+function _addParishVisit(p,date,method){const key=_parishVisitKey(p);if(!key||!_isVisitDate(date))return false;const d=_loadParishVisits(),r=d[key]&&typeof d[key]==='object'?d[key]:{name:p.name||'',diocese:p.diocese||'',addr:p.addr||'',visits:[]};r.visits=Array.isArray(r.visits)?r.visits:[];if(_hasVisitDate(r.visits,date))return false;_clearManualVisitDeletion('parish',key,date);r.visits.push(_newVisitEntry(date,method));r.visits.sort(_compareShrineVisits);d[key]=r;_saveParishVisits(d);return true;}
+function _deleteParishVisit(p,i){const key=_parishVisitKey(p),d=_loadParishVisits(),r=d[key];if(!r||!Array.isArray(r.visits)||i<0||i>=r.visits.length||String(r.visits[i].method||'')==='gps')return false;_recordManualVisitDeletion('parish',key,r.visits[i]);r.visits.splice(i,1);if(r.visits.length)d[key]=r;else delete d[key];_saveParishVisits(d);return true;}
 function _parishEntries(){const a=[];(PARISHES||[]).forEach(function(p,i){if(!p||p.diocese==='군종교구')return;const v=_parishVisits(p);if(v.length)a.push({p:p,i:i,v:v,n:v.length});});return a.sort(function(a,b){return _compareShrineVisits(a.v[0],b.v[0])||String(a.p.name).localeCompare(String(b.p.name),'ko')});}
 function _parishUnvisitedEntries(){const saved=_loadParishVisits();return (PARISHES||[]).map(function(p,i){const r=saved[_parishVisitKey(p)],v=r&&Array.isArray(r.visits)?r.visits:[];return {p:p,i:i,v:v};}).filter(function(x){return x.p&&x.p.diocese!=='군종교구'&&!x.v.length;}).sort(function(a,b){return String(a.p.name||'').localeCompare(String(b.p.name||''),'ko');});}
 function _parishDios(){const s={};(PARISHES||[]).forEach(function(p){if(p&&p.diocese&&p.diocese!=='군종교구')s[p.diocese]=1;});const ordered=(typeof _DIOS!=='undefined'?_DIOS:[]).slice(1).map(function(x){return x[0]}).filter(function(d){return !!s[d]});const extra=Object.keys(s).filter(function(d){return ordered.indexOf(d)<0}).sort(function(a,b){return a.localeCompare(b,'ko')});return ordered.concat(extra);}
@@ -15596,14 +15611,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const keys={};
     [OAI_SHRINE_VISITS_KEY,OAI_PARISH_VISITS_KEY,OAI_PARISH_AUTO_VISIT_ENABLED_KEY,
       OAI_SETTINGS_MY_PARISH_KEY,'oai_my_parish','oai_my_diocese_name','oai_my_parish_name',
-      'pr_favorites','web_favorites_v1',OAI_ROUTE_FAVORITES_KEY,'oai_pilgrimage_plan_v1','oai_pilgrimage_draft_meta_v2','oai_pilgrimage_courses_v1','prayer_font_size','oai_pilgrimage_public_feature_seen_v1'].forEach(function(key){keys[key]=true;});
+      'pr_favorites','web_favorites_v1',OAI_ROUTE_FAVORITES_KEY,OAI_DELETED_MANUAL_VISITS_KEY,'oai_pilgrimage_plan_v1','oai_pilgrimage_draft_meta_v2','oai_pilgrimage_courses_v1','prayer_font_size','oai_pilgrimage_public_feature_seen_v1'].forEach(function(key){keys[key]=true;});
     try{
       if(window.__oaiGoogleDriveStorageWatch)return;
       window.__oaiGoogleDriveStorageWatch=true;
       const setItem=Storage.prototype.setItem;
       Storage.prototype.setItem=function(key,value){
+        const watch=this===window.localStorage&&keys[String(key)];
+        const old=watch?this.getItem(key):null;
         const result=setItem.call(this,key,value);
-        if(!oaiBackupRestoreApplying&&this===window.localStorage&&keys[String(key)]){
+        if(watch&&old===String(value))return result;
+        if(!oaiBackupRestoreApplying&&watch){
           if(isGoogleDriveAutoBackupEnabled())queueGoogleDriveBackup();
           else setTimeout(maybeRecommendGoogleDrive,0);
         }
@@ -15797,7 +15815,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function backupSnapshot(){
     const parish=configuredParish();
     return {format:'catholic-gildongmu-backup',version:1,createdAt:new Date().toISOString(),data:{
-      shrineVisits:backupVisitMapWithoutLocalPhotos(localValue(OAI_SHRINE_VISITS_KEY,{})),parishVisits:backupVisitMapWithoutLocalPhotos(localValue(OAI_PARISH_VISITS_KEY,{})),
+      shrineVisits:backupVisitMapWithoutLocalPhotos(localValue(OAI_SHRINE_VISITS_KEY,{})),parishVisits:backupVisitMapWithoutLocalPhotos(localValue(OAI_PARISH_VISITS_KEY,{})),deletedManualVisits:_loadManualVisitDeletions(),
       prayerFavorites:localValue('pr_favorites',[]),webFavorites:localValue('web_favorites_v1',[]),routeFavorites:localValue(OAI_ROUTE_FAVORITES_KEY,[]),pilgrimagePlan:localValue('oai_pilgrimage_plan_v1',[]),pilgrimageDraftMeta:localValue('oai_pilgrimage_draft_meta_v2',{}),pilgrimageCourses:localValue('oai_pilgrimage_courses_v1',[]),
       myDiocese:configuredDiocese(),myParish:parish?{diocese:parish.diocese||'',name:parish.name||''}:null,
       parishAutoVisit:_isMyParishAutoVisitEnabled(),prayerFontSize:localStorage.getItem('prayer_font_size')||'',
@@ -15826,12 +15844,32 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function mergeSharedJournalMaps(a,b){const out={};const keys=new Set(Object.keys(b&&typeof b==='object'?b:{}).concat(Object.keys(a&&typeof a==='object'?a:{})));keys.forEach(function(d){const aa=a&&a[d]&&typeof a[d]==='object'?a[d]:{},bb=b&&b[d]&&typeof b[d]==='object'?b[d]:{};out[d]=_oaiMergeJournalExtras(aa,bb);out[d].updatedAt=String(aa.updatedAt||bb.updatedAt||'');});return out;}
   function mergeVisitMaps(current,backup){const out=current&&typeof current==='object'?current:{};Object.keys(backup&&typeof backup==='object'?backup:{}).forEach(function(key){const oldRecord=out[key]&&typeof out[key]==='object'?out[key]:{};const newRecord=backup[key]&&typeof backup[key]==='object'?backup[key]:{};out[key]=Object.assign({},newRecord,oldRecord,{visits:mergeVisitEntries(oldRecord.visits,newRecord.visits),sharedJournalByDate:mergeSharedJournalMaps(oldRecord.sharedJournalByDate,newRecord.sharedJournalByDate)});});return out;}
+  function mergeManualDeletionMaps(a,b){
+    const out=Object.assign({},b||{});
+    Object.keys(a||{}).forEach(function(k){if(!out[k]||String(a[k])>String(out[k]))out[k]=a[k];});
+    return out;
+  }
+  function applyManualDeletionsToMap(visits,kind,deletions){
+    const out={};
+    Object.keys(visits||{}).forEach(function(key){
+      const rec=visits[key];if(!rec||typeof rec!=='object')return;
+      const arr=(Array.isArray(rec.visits)?rec.visits:[]).filter(function(raw){
+        const v=_normalizeVisitEntry(raw),date=v&&v.date;
+        if(!date||String(v.method||'').toLowerCase()==='gps')return true;
+        const deleted=deletions[kind+'|'+encodeURIComponent(key)+'|'+date];
+        return !deleted||(v.savedAt&&String(v.savedAt)>String(deleted));
+      });
+      // Do not resurrect a deleted-only record, but preserve shared journals.
+      if(arr.length||Object.keys(rec.sharedJournalByDate||{}).length)out[key]=Object.assign({},rec,{visits:arr});
+    });
+    return out;
+  }
   // Restore must never replace local GPS completions or trigger a backup of
   // partially restored records.  The remote file has been parsed but is not
   // trusted until its essential shapes have been checked.
   function applyBackup(data){
     if(!data||typeof data!=='object'||Array.isArray(data))throw new Error('백업 데이터 형식이 올바르지 않습니다.');
-    ['shrineVisits','parishVisits'].forEach(function(key){
+    ['shrineVisits','parishVisits','deletedManualVisits'].forEach(function(key){
       if(data[key]!=null&&(typeof data[key]!=='object'||Array.isArray(data[key])))throw new Error('방문기록 형식이 올바르지 않습니다.');
     });
     ['pilgrimagePlan','pilgrimageCourses','prayerFavorites','webFavorites','routeFavorites'].forEach(function(key){
@@ -15854,10 +15892,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       });
       byId.set(id,Object.assign({},local,{completions:entries,lastCompletedAt:Math.max(Number(local.lastCompletedAt)||0,Number(remote.lastCompletedAt)||0)}));
     });
+    const deletions=mergeManualDeletionMaps(_loadManualVisitDeletions(),data.deletedManualVisits);
     oaiBackupRestoreApplying=true;
     try{
-      _saveShrineVisits(mergeVisitMaps(_loadShrineVisits(),data.shrineVisits));
-      _saveParishVisits(mergeVisitMaps(_loadParishVisits(),data.parishVisits));
+      localStorage.setItem(OAI_DELETED_MANUAL_VISITS_KEY,JSON.stringify(deletions));
+      _saveShrineVisits(applyManualDeletionsToMap(mergeVisitMaps(_loadShrineVisits(),data.shrineVisits),'shrine',deletions));
+      _saveParishVisits(applyManualDeletionsToMap(mergeVisitMaps(_loadParishVisits(),data.parishVisits),'parish',deletions));
       localStorage.setItem('pr_favorites',JSON.stringify(mergeLists(localValue('pr_favorites',[]),data.prayerFavorites)));
       localStorage.setItem('web_favorites_v1',JSON.stringify(mergeLists(localValue('web_favorites_v1',[]),data.webFavorites)));
       localStorage.setItem(OAI_ROUTE_FAVORITES_KEY,JSON.stringify(mergeLists(localValue(OAI_ROUTE_FAVORITES_KEY,[]),data.routeFavorites).slice(0,OAI_ROUTE_FAVORITES_MAX)));
