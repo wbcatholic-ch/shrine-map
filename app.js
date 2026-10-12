@@ -19391,6 +19391,16 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     nearby:['내 주변','현재 위치를 기준으로 주변 성지·성당·피정 장소를 찾습니다.\n위치 권한이 필요할 수 있습니다.'],
     region:['지역검색','지역이나 주소를 입력하여 성지·성당을 검색합니다.'],
     find:['찾기 목록','장소 이름이나 주소로 검색하고 목록에서 상세 정보를 확인하세요.'],
+
+    shrine_nearby:['성지 · 내 주변','GPS 위치를 기준으로 가까운 성지를 찾습니다.\n위치 권한이 필요할 수 있습니다.'],
+    parish_nearby:['성당 · 내 주변','현재 위치에서 가까운 성당을 확인합니다.\n일반 성당은 하루 두 곳 이상 방문해야 자동 순례코스가 됩니다.'],
+    retreat_nearby:['피정 · 내 주변','현재 위치에서 가까운 피정 시설을 찾습니다.\n방문 전에 운영 정보를 확인해 주세요.'],
+    shrine_find:['성지 · 목록','성지 이름이나 주소로 검색하고 상세 정보를 확인합니다.'],
+    parish_find:['성당 · 목록','성당 이름이나 주소로 검색하고 상세 정보를 확인합니다.'],
+    retreat_find:['피정 · 목록','피정 시설 이름이나 지역으로 검색합니다.\n예약 및 운영 여부는 시설에 확인하세요.'],
+    shrine_region:['성지 · 지역검색','지역명으로 성지를 찾아볼 수 있습니다.'],
+    parish_region:['성당 · 지역검색','지역명으로 성당을 찾아볼 수 있습니다.'],
+    retreat_region:['피정 · 지역검색','지역명으로 피정 시설을 찾아볼 수 있습니다.'],
     shrine_book:['순례 스탬프북','GPS로 확인된 성지 방문기록을 볼 수 있습니다.\n스탬프와 사진·메모는 순례완료 코스와 별도로 보존됩니다.'],
     parish_book:['성당 방문 스탬프북','GPS로 확인된 성당 방문기록을 살펴봅니다.\n내 본당 자동 기록 제한은 설정에서 변경할 수 있습니다.'],
     shrine_detail:['순례 기록','이 성지의 GPS 순례 날짜와 횟수를 확인합니다.\n사진·메모 관리는 설정의 개발자 도구에서만 선택적으로 표시합니다.'],
@@ -19424,23 +19434,30 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     // V1191: 성지·성당·피정의 도움말은 모두 같은 sheet-hd 제목 줄에 배치한다.
     // 화면 제목이 비동기로 바뀌어도 설명을 현재 카테고리에 맞게 동기화한다.
     const sheetTitles=[['nearby-sheet-title','nearby'],['list-sheet-title','find'],['region-sheet-title','region']];
-    function helpForTitle(txt,fallback){
-      return /피정/.test(txt)?'retreat':/성당|본당/.test(txt)?'parish':/성지|순교/.test(txt)?'shrine':fallback;
+    // V1192: 화면 제목 글자 대신 실제 선택된 성지/성당/피정 모드를 사용한다.
+    function currentCategoryKey(){
+      const root=document.documentElement;
+      if(root.classList.contains('retreat-mode'))return 'retreat';
+      if(root.classList.contains('parish-mode'))return 'parish';
+      return 'shrine';
     }
     function syncSheetHelp(){
+      const category=currentCategoryKey();
       sheetTitles.forEach(function(row){
         const title=document.getElementById(row[0]);if(!title)return;
         const header=title.closest('.sheet-hd');if(!header)return;
         attachHelp(header,row[1]);
         const help=header.querySelector(':scope > [data-cgm-help]');if(!help)return;
-        const key=helpForTitle(title.textContent||'',row[1]);
-        if(help.dataset.cgmHelp!==key){help.dataset.cgmHelp=key;help.setAttribute('aria-label',HELP[key][0]+' 도움말');}
+        // 패널 목적은 유지하고 카테고리별 사용 설명만 현재 모드에 맞게 보완한다.
+        const key=category+'_'+row[1];
+        const resolved=HELP[key]?key:row[1];
+        if(help.dataset.cgmHelp!==resolved){help.dataset.cgmHelp=resolved;help.setAttribute('aria-label',HELP[resolved][0]+' 도움말');}
       });
     }
     syncSheetHelp();
-    // 카테고리 전환 시 설명의 종류뿐 아니라 버튼 위치도 동일하게 유지한다.
+    // 모드가 변하는 순간 도움말도 전환한다. 본문 변경 감시는 필요하지 않다.
     const sheetObserver=new MutationObserver(syncSheetHelp);
-    sheetTitles.forEach(function(row){const title=document.getElementById(row[0]);if(title)sheetObserver.observe(title,{childList:true,characterData:true,subtree:true});});
+    sheetObserver.observe(document.documentElement,{attributes:true,attributeFilter:['class']});
     // 동적으로 생성되는 방문 스탬프북은 열린 시점에 버튼을 붙임 (MutationObserver: 화면 안의 제목만 검사).
     const observer=new MutationObserver(function(){
       document.querySelectorAll('.shrine-visit-cards-head .module-bar-title').forEach(function(t){
