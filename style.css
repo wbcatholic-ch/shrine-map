@@ -9472,13 +9472,7 @@ html.oai-pilgrimage-course-view-readonly #loc-btn,
 html.oai-pilgrimage-course-view-readonly #sheet-route .route-sheet-x{
   display:none!important;
 }
-html.oai-pilgrimage-course-view-readonly #map-wrap,
-html.oai-pilgrimage-course-view-readonly #app #sheet-route{
-  top:0!important;
-}
-html.oai-pilgrimage-course-view-readonly.oai-map-split-wide #app #sheet-route{
-  top:0!important;
-}
+/* 완료 코스 경로 결과창도 일반 길찾기와 같은 시트 위치를 사용합니다. */
 html.oai-pilgrimage-course-view-readonly #sheet-route #rs-result .rs-note{
   display:none!important;
 }
@@ -9923,23 +9917,6 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
 }
 #oai-pilgrimage-planner-title > .cgm-help-icon{margin-left:8px!important;vertical-align:middle!important;}
 
-/* V1194: dark header help contrast. Visual icon size independent of hit-area. */
-#sheet-nearby .sheet-hd > .cgm-help-icon,#sheet-list .sheet-hd > .cgm-help-icon,#sheet-region .sheet-hd > .cgm-help-icon,
-#oai-pilgrimage-planner-title .cgm-help-icon{color:#fff!important;border-color:#fff!important;background:rgba(255,255,255,.12)!important;z-index:40!important;pointer-events:auto!important;cursor:pointer!important;}
-#oai-pilgrimage-planner-title .cgm-help-icon{display:inline-flex!important;position:relative!important;vertical-align:middle!important;}
-.cgm-help-overlay:not([hidden]){display:flex!important;pointer-events:auto!important;z-index:2147483640!important;}
-/* Settings helper replaces repeated explanatory subcopy; status lines remain visible. */
-#oai-settings-modal .oai-settings-frequent-info p,
-#oai-settings-modal .oai-settings-group .oai-settings-edit-row small,
-#oai-settings-modal .oai-settings-group .oai-settings-switch-row small{display:none!important;}
-
-/* V1195: help buttons visible and interactive over dark/light module headers */
-#sheet-nearby .sheet-hd .cgm-help-icon,#sheet-list .sheet-hd .cgm-help-icon,
-#sheet-region .sheet-hd .cgm-help-icon,#oai-pilgrimage-planner-title .cgm-help-icon,
-.module-bar .cgm-help-icon{color:#fff!important;border-color:#fff!important;background:rgba(255,255,255,.10)!important;pointer-events:auto!important;opacity:1!important;position:relative!important;z-index:3!important;}
-.cgm-help-icon{cursor:pointer!important;touch-action:manipulation!important;}
-.cgm-help-overlay[hidden]{display:none!important;}
-.cgm-help-overlay:not([hidden]){display:flex!important;z-index:2147483645!important;}
 /* Highlight only while GPS pilgrimage has actually been started */
 #oai-pilgrimage-detail-view:not(.gps-ready) .oai-pilgrimage-item.is-next{background:#fff!important;border-top-color:#e1e5e8!important;border-bottom-color:#e1e5e8!important;}
 /* Route-result information already explains actions; hide only on completed result views. */
