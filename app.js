@@ -15536,11 +15536,24 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   let oaiDriveReady=localStorage.getItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY)==='1';
   let oaiRestoreDecisionPending=false;
   const oaiAutoEnabled=()=>localStorage.getItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY)!=='0' && oaiDriveReady;
+  const OAI_GOOGLE_DRIVE_LAST_SAVED_KEY='oai_google_drive_last_saved_at_v1';
+  function oaiLastSavedLabel(){
+    const raw=localStorage.getItem(OAI_GOOGLE_DRIVE_LAST_SAVED_KEY);
+    if(!raw)return '마지막 저장: 기록 없음';
+    const date=new Date(raw);
+    if(!Number.isFinite(date.getTime()))return '마지막 저장: 기록 없음';
+    return '마지막 저장: '+new Intl.DateTimeFormat('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false}).format(date);
+  }
+  function oaiRefreshLastSavedLabel(){
+    const el=document.getElementById('oai-google-drive-last-saved');
+    if(el)el.textContent=oaiLastSavedLabel();
+  }
   function oaiTransferStatus(message){const el=document.getElementById('oai-data-transfer-status');if(el)el.textContent=message||'';}
   function refreshGoogleDriveButton(){
     const el=document.querySelector('[data-oai-google-auto]');if(el)el.checked=oaiAutoEnabled();
     document.querySelectorAll('.oai-google-drive-description').forEach(x=>x.textContent=oaiAutoEnabled()?'기록이 바뀌면 자동으로 보관합니다. 방문 사진 파일은 제외됩니다.':'켜면 기록 변경 시 Google Drive에 자동 보관합니다.');
     document.querySelectorAll('.oai-google-drive-note').forEach(x=>x.textContent=oaiAutoEnabled()?'자동 보관 사용 중':'자동 보관 꺼짐');
+    oaiRefreshLastSavedLabel();
   }
   function oaiTransferSnapshot(){
     const data={};for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(oaiTransferAllowedKey(key))data[key]=localStorage.getItem(key);}
@@ -15594,6 +15607,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(mode==='initial-load'){oaiRestoreDecisionPending=true;oaiAskRestoreOnFreshInstall();}
       return;}
     if(action==='save'){
+      localStorage.setItem(OAI_GOOGLE_DRIVE_LAST_SAVED_KEY,new Date().toISOString());
       localStorage.setItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY,'1');oaiDriveReady=true;
       oaiTransferStatus('Google Drive에 자동 보관되었습니다.');refreshGoogleDriveButton();
       if(oaiBackupDirty)oaiScheduleBackup();return;
