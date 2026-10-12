@@ -15613,6 +15613,33 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1'){oaiAskRestoreOnFreshInstall();return;}
     oaiScheduleBackup();
   }
+  function oaiConfirmDriveImport(count,onAccept){
+    const modal=document.getElementById('oai-drive-import-confirm');
+    if(!modal){oaiTransferStatus('가져오기 확인창을 열지 못했습니다.');return;}
+    const number=modal.querySelector('[data-oai-drive-import-count]');
+    if(number)number.textContent=String(count);
+    modal.classList.add('show');modal.setAttribute('aria-hidden','false');
+    const focusBefore=document.activeElement;
+    const cancel=modal.querySelector('[data-oai-drive-import-cancel]');
+    const approve=modal.querySelector('[data-oai-drive-import-approve]');
+    let closed=false;
+    function close(accepted){
+      if(closed)return;closed=true;
+      modal.classList.remove('show');modal.setAttribute('aria-hidden','true');
+      cancel.removeEventListener('click',onCancel);approve.removeEventListener('click',onApprove);
+      modal.removeEventListener('keydown',onKey);
+      if(focusBefore&&typeof focusBefore.focus==='function')focusBefore.focus();
+      if(accepted)onAccept();else oaiTransferStatus('기록 가져오기를 취소했습니다.');
+    }
+    function onCancel(){close(false);}
+    function onApprove(){close(true);}
+    function onKey(e){if(e.key==='Escape'){e.preventDefault();onCancel();}else if(e.key==='Tab'){
+      const target=e.shiftKey?cancel:approve;
+      if(document.activeElement===target){e.preventDefault();(e.shiftKey?approve:cancel).focus();}
+    }}
+    cancel.addEventListener('click',onCancel);approve.addEventListener('click',onApprove);
+    modal.addEventListener('keydown',onKey);cancel.focus();
+  }
   window.oaiDataTransferResult=function(action,ok,payload,message){
     const mode=oaiTransferPendingMode;oaiTransferBusy=false;oaiTransferPendingMode='';
     if(!ok){oaiTransferStatus(message||'Google Drive 작업에 실패했습니다.');
@@ -15632,17 +15659,19 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(parsed.format!=='cgm-single-transfer'||parsed.schema!==1||!parsed.data||Array.isArray(parsed.data)||typeof parsed.data!=='object')throw Error('지원하지 않는 데이터 형식입니다.');
       const entries=Object.entries(parsed.data).filter(([key,value])=>oaiTransferAllowedKey(key)&&typeof value==='string');
       if(!entries.length)throw Error('가져올 방문기록이 없습니다.');
-      if(!window.confirm('Google Drive의 기록 ('+entries.length+'개 항목)을 가져올까요? 같은 항목의 기기 기록은 교체되지만 사진 파일은 삭제되지 않습니다.')){
-        oaiTransferStatus('기록 가져오기를 취소했습니다.');return;
-      }
-      oaiApplyingRestore=true;
-      const previous=entries.map(([key])=>[key,localStorage.getItem(key)]);
-      try{for(const [key,value] of entries)localStorage.setItem(key,value);}
-      catch(e){for(const [key,value] of previous){try{if(value===null)localStorage.removeItem(key);else localStorage.setItem(key,value);}catch(_e){}}throw Error('기록 저장에 실패했습니다.');}
-      localStorage.setItem(OAI_RESTORE_CHECKED_KEY,'1');
-      localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'1');localStorage.setItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY,'1');oaiDriveReady=true;
-      oaiRestoreDecisionPending=false;oaiCloseRestoreQuestion();
-      oaiTransferStatus('기록을 가져왔습니다. 앱을 새로고침합니다.');setTimeout(()=>location.reload(),500);
+      oaiConfirmDriveImport(entries.length,function(){
+        oaiApplyingRestore=true;
+        try{
+          const previous=entries.map(([key])=>[key,localStorage.getItem(key)]);
+          try{for(const [key,value] of entries)localStorage.setItem(key,value);}
+          catch(e){for(const [key,value] of previous){try{if(value===null)localStorage.removeItem(key);else localStorage.setItem(key,value);}catch(_e){}}throw Error('기록 저장에 실패했습니다.');}
+          localStorage.setItem(OAI_RESTORE_CHECKED_KEY,'1');
+          localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'1');localStorage.setItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY,'1');oaiDriveReady=true;
+          oaiRestoreDecisionPending=false;oaiCloseRestoreQuestion();
+          oaiTransferStatus('기록을 가져왔습니다. 앱을 새로고침합니다.');setTimeout(()=>location.reload(),500);
+        }catch(err){oaiTransferStatus('가져오기 실패: '+err.message);}
+        finally{oaiApplyingRestore=false;}
+      });
     }catch(err){oaiTransferStatus('가져오기 실패: '+err.message);}
     finally{oaiApplyingRestore=false;}
   };
