@@ -15514,7 +15514,68 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     try{const records=loader()||{};return Object.keys(records).filter(function(key){const value=records[key];return Array.isArray(value)?value.length>0:!!(value&&Array.isArray(value.visits)&&value.visits.length);}).length;}catch(_e){return 0;}
   }
   function arrayCount(key){try{const value=JSON.parse(localStorage.getItem(key)||'[]');return Array.isArray(value)?value.length:0;}catch(_e){return 0;}}
-  // Data is stored locally. Cloud data backup, restore and history are deliberately absent.
+  // Data migration is a user-initiated, single-file transfer. No automatic backups or history.
+  const OAI_TRANSFER_KEYS=new Set([
+    'oai_shrine_visits_v1','oai_parish_visits_v1','oai_deleted_manual_visits_v1',
+    'oai_pilgrimage_plan_v1','oai_pilgrimage_draft_meta_v2','oai_pilgrimage_courses_v1',
+    'oai_pilgrimage_active_follow_v1','oai_pilgrimage_daily_settlement_v2',
+    'oai_my_diocese_name','oai_my_parish_name','oai_my_parish',
+    'oai_shrine_auto_visit_prompt_v1','oai_parish_auto_visit_enabled_v1',
+    'oai_pilgrimage_route_unknown_v1'
+  ]);
+  // Other persisted visit notes/settings may be stored by independent modules.
+  function oaiTransferAllowedKey(key){
+    return OAI_TRANSFER_KEYS.has(key) || /^(oai|cgm|catholic)[_-]/i.test(key) &&
+      /(visit|stamp|pilgrim|faith|journal|memo|note|photo|parish|diocese|favorite|frequent|course|route|setting)/i.test(key) &&
+      !/(cache|token|sync|queue|pending|worker|backup|restore|last_loc|background|viewport|scroll)/i.test(key);
+  }
+  let oaiTransferBusy=false;
+  function oaiTransferStatus(message){const el=document.getElementById('oai-data-transfer-status');if(el)el.textContent=message||'';}
+  function oaiTransferSnapshot(){
+    const data={};for(let i=0;i<localStorage.length;i++){
+      const key=localStorage.key(i);if(oaiTransferAllowedKey(key))data[key]=localStorage.getItem(key);
+    }
+    return JSON.stringify({format:'cgm-single-transfer',schema:1,createdAt:new Date().toISOString(),data:data});
+  }
+  window.oaiDataTransferResult=function(action,ok,payload,message){
+    oaiTransferBusy=false;
+    if(!ok){oaiTransferStatus(message||'Google Drive 데이터 작업에 실패했습니다.');return;}
+    if(action==='save'){oaiTransferStatus('Google Drive에 데이터 이전 파일을 저장했습니다.');return;}
+    if(action!=='load')return;
+    try{
+      const parsed=JSON.parse(payload||'{}');
+      if(parsed.format!=='cgm-single-transfer'||parsed.schema!==1||!parsed.data||Array.isArray(parsed.data)||typeof parsed.data!=='object')throw Error('지원하지 않는 데이터 형식입니다.');
+      const entries=Object.entries(parsed.data).filter(([key,value])=>oaiTransferAllowedKey(key)&&typeof value==='string');
+      if(!entries.length)throw Error('가져올 방문기록이 없습니다.');
+      // Never clear all localStorage: only overwrite keys actually present in the transfer file.
+      if(!window.confirm('Google Drive의 데이터 ('+entries.length+'개 항목)를 이 기기로 가져올까요? 같은 항목의 현재 기기 기록은 교체됩니다. 기존 사진 파일은 삭제되지 않습니다.')){
+        oaiTransferStatus('데이터 가져오기를 취소했습니다.');return;
+      }
+      const previous=entries.map(([key])=>[key,localStorage.getItem(key)]);
+      try{for(const [key,value] of entries)localStorage.setItem(key,value);}
+      catch(writeError){
+        for(const [key,value] of previous){try{if(value===null)localStorage.removeItem(key);else localStorage.setItem(key,value);}catch(_e){}}
+        throw Error('저장 공간 부족 등으로 가져오지 못했습니다. 원래 데이터를 최대한 복원했습니다.');
+      }
+      oaiTransferStatus('데이터를 가져왔습니다. 기록을 다시 읽기 위해 앱을 새로고침합니다.');
+      setTimeout(()=>location.reload(),600);
+    }catch(err){oaiTransferStatus('데이터 형식을 확인할 수 없습니다: '+err.message);}
+  };
+  function oaiTransferRequest(action){
+    if(oaiTransferBusy)return;
+    const native=window.GildongmuNative || window.Android;
+    if(!native||typeof native.transferVisitData!=='function'){
+      oaiTransferStatus('Google Drive 데이터 이전은 Android 앱에서 이용할 수 있습니다.');return;
+    }
+    if(action==='save'&&!window.confirm('현재 기기의 방문기록·순례계획·메모를 Google Drive의 단일 이전 파일에 저장할까요? 기존 이전 파일은 교체되며 사진 파일 자체는 업로드하지 않습니다.'))return;
+    oaiTransferBusy=true;oaiTransferStatus('Google Drive에 연결하고 있습니다...');
+    try{native.transferVisitData(action,action==='save'?oaiTransferSnapshot():'');}
+    catch(err){oaiTransferBusy=false;oaiTransferStatus('데이터 이전을 시작하지 못했습니다.');}
+  }
+  document.addEventListener('click',function(event){
+    const button=event.target&&event.target.closest&&event.target.closest('[data-oai-transfer]');
+    if(!button)return;event.preventDefault();oaiTransferRequest(button.dataset.oaiTransfer);
+  });
   const OAI_ONBOARDING_DONE_KEY='oai_onboarding_done_v1';
   let initialOnboarding=false;
   let initialDriveFirstFlow=false;
