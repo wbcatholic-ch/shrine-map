@@ -7790,9 +7790,7 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 
 
 /* V8-1-14-1016: 순례완료 / 순례하기 상세 정리 */
-#oai-pilgrimage-detail-view.is-completion-view .oai-pilgrimage-add-row{
-  display:none!important;
-}
+/* GPS 완료 코스의 수동 보완용 추가 행은 renderDetail()의 자격 판정에 따라 표시한다. */
 #oai-pilgrimage-detail-view.is-completion-view .oai-pilgrimage-current-check{
   display:none!important;
 }
@@ -9854,9 +9852,8 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
 .oai-visit-confirm-actions button:first-child{background:#fff!important;border:1px solid #cddce5!important;color:#3e5d70!important}
 .oai-visit-confirm-actions button:last-child{background:#b44e4a!important;border:1px solid #b44e4a!important;color:#fff!important}
 
-/* V1183: 완료 상세에서 수동 보완 버튼 행은 보이되 기존 계획 편집 버튼은 숨긴다. */
-#oai-pilgrimage-detail-view.is-completion-view .oai-pilgrimage-add-row{display:flex!important;justify-content:center!important}
-#oai-pilgrimage-detail-view.is-completion-view .oai-pilgrimage-add-row > :not(#oai-pilgrimage-manual-add){display:none!important}
+/* V1196: 완료 상세는 순례계획과 동일한 두 추가 버튼을 사용한다.
+   표시 가능 여부는 renderDetail()에서 GPS 완료 코스를 기준으로 제어한다. */
 #oai-pilgrimage-manual-add[hidden]{display:none!important}
 
 /* V1185: 미등록 GPS 버튼은 순례완료 탭의 유효 후보가 있을 때만 강조 표시 */
