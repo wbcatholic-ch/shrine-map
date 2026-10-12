@@ -303,3 +303,18 @@ html:not(.ios-device).oai-screen-compact-short #prayer-close{
   
   line-height:1!important;
 }
+
+/* V1186: 공통 헤더 도움말 - 기존 상태/상세 안내는 유지 */
+.module-bar-txt > .module-bar-sub,
+#oai-pilgrimage-planner-subtitle { display:none !important; }
+.cgm-help-heading { display:flex; align-items:center; gap:9px; }
+.cgm-help-icon { appearance:none; -webkit-appearance:none; display:inline-flex; align-items:center; justify-content:center; vertical-align:middle; width:21px; height:21px; min-width:21px; border-radius:50%; border:1.5px solid currentColor; background:transparent; color:inherit; font-size:13px; line-height:1; font-weight:800; padding:0; cursor:pointer; margin-left:9px; opacity:.9; touch-action:manipulation; }
+.cgm-help-heading .cgm-help-icon {margin-left:0;}
+.module-bar-title .cgm-help-icon {color:#fff;}
+.cgm-help-icon:focus-visible {outline:2px solid #356F57; outline-offset:3px;}
+.cgm-help-overlay[hidden] {display:none!important;}
+.cgm-help-overlay {position:fixed;inset:0;z-index:2147483600;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:20px;}
+.cgm-help-dialog {box-sizing:border-box;background:#FFFDF7;color:#333;border-radius:16px;max-width:365px;width:100%;padding:22px 20px;box-shadow:0 12px 36px rgba(0,0,0,.2);}
+.cgm-help-dialog h3{color:#71531D;font-size:18px;margin:0 0 12px;line-height:1.4;}
+.cgm-help-dialog p{font-size:14px;white-space:pre-line;line-height:1.7;margin:0 0 20px;}
+.cgm-help-close{display:block;margin-left:auto;background:#356F57;color:#fff;border:0;border-radius:9px;padding:10px 22px;font-size:14px;font-weight:700;cursor:pointer;}
