@@ -9793,3 +9793,41 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
 .oai-drive-import-actions{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px}
 .oai-drive-import-actions button{min-height:48px;padding:10px;border:1px solid #b5c0cd;border-radius:12px;background:#fff;color:#273c55;font:800 15px/1.3 inherit;cursor:pointer}
 .oai-drive-import-actions button.primary{border-color:#1e6fb6;background:#1e6fb6;color:#fff}
+
+/* Developer tools: existing settings panel controls only, no global rules. */
+.oai-dev-section[hidden],.oai-dev-subview[hidden],#oai-dev-restore-preview[hidden]{display:none!important}
+.oai-dev-section{overflow:hidden;border:1px solid #d4dfe9;border-radius:18px;background:#fff;box-shadow:0 3px 14px #152b4a0d}
+.oai-dev-title{display:flex;align-items:center;gap:11px;padding:17px 15px;background:#193d68;color:#fff}
+.oai-dev-title>span:nth-child(2){display:flex;flex:1;min-width:0;flex-direction:column;gap:3px}
+.oai-dev-title b{font-size:17px;line-height:1.3;font-weight:850;letter-spacing:-.035em}
+.oai-dev-title small{font-size:12px;line-height:1.45;color:#d9e8f7}
+.oai-dev-icon{display:grid;place-items:center;flex:none;width:40px;height:40px;border-radius:12px;background:#ffffff20;font-size:23px}
+.oai-dev-pill{flex:none;border:1px solid #ffffff65;border-radius:40px;padding:5px 8px;font-size:11px;white-space:nowrap;color:#fff}
+.oai-dev-content{padding:16px}
+.oai-dev-hint{margin:0 0 16px;color:#536274;font-size:13px;line-height:1.65;word-break:keep-all;text-align:left}
+.oai-dev-actions{display:flex;flex-direction:column;gap:10px}
+.oai-dev-actions button{display:flex;align-items:center;gap:12px;min-height:77px;width:100%;padding:13px;border:1.5px solid #d2dfeb;border-radius:15px;background:#f7fafc;color:#23354a;text-align:left;font-family:inherit;cursor:pointer}
+.oai-dev-actions button:first-child{background:#eaf3fd;border-color:#bdd5ee}
+.oai-dev-action-icon{display:grid;place-items:center;flex:none;width:42px;height:42px;border-radius:12px;background:#d8eafa;color:#24679f;font-size:25px;font-weight:800}
+.oai-dev-actions button:nth-child(2) .oai-dev-action-icon{background:#edeef4;color:#56657d}
+.oai-dev-action-text{display:flex;flex:1;min-width:0;flex-direction:column;gap:5px}
+.oai-dev-action-text b{font-size:16px;line-height:1.3;font-weight:850;letter-spacing:-.035em}
+.oai-dev-action-text small{font-size:12px;line-height:1.45;color:#68798b;word-break:keep-all}
+.oai-dev-action-arrow{font-size:26px;font-weight:400;color:#8698ac}
+.oai-dev-subview{display:flex;flex-direction:column;gap:11px;margin-top:16px;padding:16px 13px;border:1px solid #dce5ed;border-radius:15px;background:#fafcfe}
+.oai-dev-subhead{display:flex;flex-direction:column;gap:5px;margin-bottom:2px}
+.oai-dev-subhead strong{color:#243d5b;font-size:15px;line-height:1.4}
+.oai-dev-subhead small{color:#647689;font-size:12px;line-height:1.55;word-break:keep-all}
+.oai-dev-subview>label{font-size:12.5px;font-weight:800;color:#394e64}
+.oai-dev-subview textarea{display:block;width:100%;box-sizing:border-box;resize:vertical;border:1px solid #becddb;border-radius:12px;padding:12px;color:#263a50;background:#fff;font:12px/1.6 monospace;min-height:108px;overflow-wrap:anywhere}
+.oai-dev-subview textarea:focus{outline:2px solid #b1d5ef;outline-offset:1px}
+.oai-dev-copy,.oai-dev-danger{display:block;width:100%;min-height:48px;padding:10px 12px;border:1px solid #256ea9;border-radius:12px;background:#236da8;color:white;font:800 14px/1.4 inherit;cursor:pointer;letter-spacing:-.02em}
+#oai-dev-restore-preview{display:flex;flex-direction:column;gap:13px;margin-top:5px}
+#oai-dev-restore-details{border:1px solid #e5d7bf;border-radius:11px;background:#fff9ef;color:#5f4b33;padding:13px;font-size:12.5px;line-height:1.65;word-break:keep-all}
+.oai-dev-confirm{display:flex;gap:10px;align-items:flex-start;margin:2px 0;color:#674944;font-size:12.5px;line-height:1.55;word-break:keep-all}
+.oai-dev-confirm input{width:19px;height:19px;flex:none;margin:1px 0 0;accent-color:#ad4c43}
+.oai-dev-danger{border-color:#ad4a45;background:#a83f3b}
+.oai-dev-status{margin:12px 0 0;color:#285a4a;font-size:12.5px;line-height:1.6;word-break:keep-all;text-align:left}
+.oai-dev-status:empty{display:none}
+.oai-dev-footnote{margin:16px 0 0;padding-top:12px;border-top:1px solid #e6edf3;color:#788494;font-size:11.5px;line-height:1.6;word-break:keep-all}
+@media(max-width:350px){.oai-dev-content{padding:12px}.oai-dev-title{padding:13px}.oai-dev-pill{font-size:10px;padding:4px 6px}.oai-dev-action-text b{font-size:14px}}
