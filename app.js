@@ -3004,6 +3004,8 @@ function _oaiJournalSelectedDate(kind,visits){
   window[prop]=d;return d;
 }
 function _oaiVisitJournalHtml(kind,item,visits){
+  // Experimental developer mode: do not render personal photo/memo journal. Preserve stored records.
+  try{if(localStorage.getItem('oai_developer_mode_v1')==='1')return '';}catch(_e){}
   if(!visits||!visits.length)return '';
   const date=_oaiJournalSelectedDate(kind,visits),baseVisit=visits.find(function(v){return String(v.date||'')===date;})||visits[0],visit=_oaiGetVisitByDate(kind,item,date)||baseVisit;
   const limit=_oaiVisitPhotoLimit(kind,item);
