@@ -16899,7 +16899,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     try{remaining=_historyUnregisteredDates();}
     catch(e){console.warn('[미등록 GPS 버튼 확인 실패]',e);b.hidden=true;return;}
     b.hidden=remaining.length===0;
-    b.textContent='미등록 GPS 코스 확인 ('+remaining.length+'일)';
+    b.textContent='미등록 GPS 코스 확인';
   }
   function _historyEnsureDialog(){
     if(historyModal)return historyModal;
