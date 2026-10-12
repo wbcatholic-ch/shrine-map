@@ -9914,7 +9914,7 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
   width:26px!important;height:26px!important;min-width:26px!important;min-height:26px!important;
   padding:0!important;border:1.5px solid currentColor!important;border-radius:50%!important;
   font-size:16px!important;line-height:1!important;font-weight:800!important;
-  color:inherit!important;background:transparent!important;opacity:1!important;
+  color:#ffffff!important;background:transparent!important;opacity:1!important;
 }
 #sheet-nearby .sheet-hd,#sheet-list .sheet-hd,#sheet-region .sheet-hd{display:flex!important;align-items:center!important;}
 #sheet-nearby .sheet-hd > .cgm-help-icon,#sheet-list .sheet-hd > .cgm-help-icon,#sheet-region .sheet-hd > .cgm-help-icon{
@@ -9925,3 +9925,13 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
   color:#27445e!important;background:#fff!important;
 }
 #oai-pilgrimage-planner-title > .cgm-help-icon{margin-left:8px!important;vertical-align:middle!important;}
+
+/* V1194: dark header help contrast. Visual icon size independent of hit-area. */
+#sheet-nearby .sheet-hd > .cgm-help-icon,#sheet-list .sheet-hd > .cgm-help-icon,#sheet-region .sheet-hd > .cgm-help-icon,
+#oai-pilgrimage-planner-title .cgm-help-icon{color:#fff!important;border-color:#fff!important;background:rgba(255,255,255,.12)!important;z-index:40!important;pointer-events:auto!important;cursor:pointer!important;}
+#oai-pilgrimage-planner-title .cgm-help-icon{display:inline-flex!important;position:relative!important;vertical-align:middle!important;}
+.cgm-help-overlay:not([hidden]){display:flex!important;pointer-events:auto!important;z-index:2147483640!important;}
+/* Settings helper replaces repeated explanatory subcopy; status lines remain visible. */
+#oai-settings-modal .oai-settings-frequent-info p,
+#oai-settings-modal .oai-settings-group .oai-settings-edit-row small,
+#oai-settings-modal .oai-settings-group .oai-settings-switch-row small{display:none!important;}
