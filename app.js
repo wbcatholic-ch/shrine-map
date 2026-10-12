@@ -15555,6 +15555,88 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     document.querySelectorAll('.oai-google-drive-note').forEach(x=>x.textContent=oaiAutoEnabled()?'자동 보관 사용 중':'자동 보관 꺼짐');
     oaiRefreshLastSavedLabel();
   }
+  // Developer tools: all backup work is opt-in, with no startup serialization or polling.
+  const OAI_DEV_KEY='oai_developer_mode_v1';
+  let oaiDevTapCount=0, oaiDevPendingRestore=null;
+  function oaiDevEnabled(){return localStorage.getItem(OAI_DEV_KEY)==='1';}
+  function oaiDevStatus(value){const el=document.getElementById('oai-dev-status');if(el)el.textContent=value||'';}
+  function oaiRefreshDeveloperPanel(){
+    const section=document.getElementById('oai-developer-section');if(section)section.hidden=!oaiDevEnabled();
+    if(!oaiDevEnabled()){oaiDevPendingRestore=null;for(const id of ['oai-dev-export-view','oai-dev-import-view','oai-dev-restore-preview']){const el=document.getElementById(id);if(el)el.hidden=true;}}
+  }
+  function oaiEncodeCgm1(value){return 'CGM1.'+btoa(Array.from(new TextEncoder().encode(JSON.stringify(value)),v=>String.fromCharCode(v)).join(''));}
+  function oaiDecodeCgm1(value){
+    const raw=String(value||'').trim().replace(/\s+/g,'');if(!raw.startsWith('CGM1.'))throw Error('CGM1 코드가 아닙니다.');
+    const bytes=Uint8Array.from(atob(raw.slice(5)),v=>v.charCodeAt(0));return JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes));
+  }
+  function oaiDevSnapshot(){
+    const data=JSON.parse(oaiTransferSnapshot()).data;
+    for(const key of ['oai_shrine_visits_v1','oai_parish_visits_v1'])if(!Object.prototype.hasOwnProperty.call(data,key))data[key]='{}';
+    if(!Object.prototype.hasOwnProperty.call(data,'oai_pilgrimage_courses_v1'))data.oai_pilgrimage_courses_v1='[]';
+    return {format:'cgm-manual-full',schema:1,createdAt:new Date().toISOString(),data};
+  }
+  function oaiDevPreview(){
+    oaiDevPendingRestore=null;const check=document.getElementById('oai-dev-restore-check');if(check)check.checked=false;
+    document.getElementById('oai-dev-restore-preview').hidden=true;
+    const payload=oaiDecodeCgm1(document.getElementById('oai-dev-import-code').value);
+    // Never allow a partial historical backup to erase present-day pilgrimage or parish records.
+    if(payload.format!=='cgm-manual-full'||payload.schema!==1||!payload.data||typeof payload.data!=='object'||Array.isArray(payload.data))throw Error('전체 수동 백업 코드만 복원할 수 있습니다. 과거 일부 기록용 CGM1은 복원할 수 없습니다.');
+    const entries=Object.entries(payload.data);
+    if(!entries.length||entries.some(([key,value])=>!oaiTransferAllowedKey(key)||typeof value!=='string'))throw Error('백업 내용이나 저장 키가 올바르지 않습니다.');
+    for(const [key,value] of entries){if(value.length>0&&/visit|course|plan|settlement/i.test(key)){try{JSON.parse(value);}catch(_e){throw Error('기록 데이터가 손상되었습니다: '+key);}}}
+    const required=['oai_shrine_visits_v1','oai_parish_visits_v1','oai_pilgrimage_courses_v1'];
+    if(required.some(key=>!Object.prototype.hasOwnProperty.call(payload.data,key)))throw Error('방문·완료코스 필수 데이터가 없는 부분 백업입니다.');
+    oaiDevPendingRestore=payload;
+    const dt=new Date(payload.createdAt);const when=Number.isFinite(dt.getTime())?dt.toLocaleString('ko-KR'):'날짜 정보 없음';
+    const detail=document.getElementById('oai-dev-restore-details');detail.textContent='생성: '+when+' · 저장 항목 '+entries.length+'개. 현재 기기의 백업 대상 개인 기록을 전체 교체합니다. GPS 스탬프·순례코스도 교체되며 사진 원본은 삭제하지 않습니다.';
+    document.getElementById('oai-dev-restore-preview').hidden=false;
+    oaiDevStatus('복원 내용을 확인한 뒤 동의해 주세요.');
+  }
+  function oaiDevApplyRestore(){
+    if(!oaiDevEnabled()||!oaiDevPendingRestore||!document.getElementById('oai-dev-restore-check').checked){oaiDevStatus('복원 내용을 확인하고 동의란에 체크해 주세요.');return;}
+    const incoming=oaiDevPendingRestore.data;
+    // Replace only personal data keys; never touch app files, media bytes or Cloud credentials.
+    const prior={};const keys=[];
+    for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(oaiTransferAllowedKey(key))keys.push(key);}
+    for(const key of new Set([...keys,...Object.keys(incoming)]))prior[key]=localStorage.getItem(key);
+    oaiApplyingRestore=true;clearTimeout(oaiBackupTimer);oaiBackupTimer=0;
+    try{
+      for(const key of keys)localStorage.removeItem(key);
+      for(const [key,value] of Object.entries(incoming))localStorage.setItem(key,value);
+      if(typeof configuredDiocese==='function'&&configuredDiocese())localStorage.setItem('oai_onboarding_done_v1','1');
+      localStorage.setItem('oai_manual_restore_needs_drive_save_v1','1');oaiBackupDirty=true;oaiDevStatus('복원이 완료되었습니다. 앱을 다시 엽니다.');
+      setTimeout(()=>location.reload(),350);
+    }catch(err){
+      try{for(const key of new Set([...keys,...Object.keys(incoming)])){if(prior[key]==null)localStorage.removeItem(key);else localStorage.setItem(key,prior[key]);}}catch(_e){}
+      oaiDevStatus('복원 실패: '+(err.message||'저장 공간 오류'));
+    }finally{oaiApplyingRestore=false;}
+  }
+  document.addEventListener('click',function(event){
+    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-copy],[data-oai-dev-preview],[data-oai-dev-apply]');if(!button)return;
+    if(button.id==='oai-settings-version-label'){
+      oaiDevTapCount++;
+      if(oaiDevTapCount>=10){oaiDevTapCount=0;const next=!oaiDevEnabled();localStorage.setItem(OAI_DEV_KEY,next?'1':'0');oaiRefreshDeveloperPanel();if(next){oaiDevStatus('개발자 모드가 열렸습니다.');document.getElementById('oai-developer-section').scrollIntoView({block:'nearest',behavior:'smooth'});} }
+      return;
+    }
+    if(!oaiDevEnabled())return;
+    event.preventDefault();
+    try{
+      if(button.hasAttribute('data-oai-dev-export')){
+        document.getElementById('oai-dev-import-view').hidden=true;
+        const output=document.getElementById('oai-dev-export-code');output.value=oaiEncodeCgm1(oaiDevSnapshot());
+        document.getElementById('oai-dev-export-view').hidden=false;oaiDevStatus('백업 코드를 생성했습니다. 복사해서 안전하게 보관하세요.');
+      }else if(button.hasAttribute('data-oai-dev-import')){
+        document.getElementById('oai-dev-export-view').hidden=true;document.getElementById('oai-dev-import-view').hidden=false;
+        document.getElementById('oai-dev-restore-preview').hidden=true;oaiDevPendingRestore=null;oaiDevStatus('전체 수동 백업 CGM1 코드를 입력하세요.');
+      }else if(button.hasAttribute('data-oai-dev-copy')){
+        const input=document.getElementById('oai-dev-export-code');input.focus();input.select();
+        if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(input.value).then(()=>oaiDevStatus('코드를 복사했습니다.')).catch(()=>oaiDevStatus('복사 권한이 없으면 선택된 코드를 직접 복사하세요.'));
+        else oaiDevStatus('선택된 코드를 길게 눌러 복사하세요.');
+      }else if(button.hasAttribute('data-oai-dev-preview'))oaiDevPreview();
+      else if(button.hasAttribute('data-oai-dev-apply'))oaiDevApplyRestore();
+    }catch(err){oaiDevStatus(err.message||'요청을 처리할 수 없습니다.');}
+  },true);
+  setTimeout(oaiRefreshDeveloperPanel,0);
   function oaiTransferSnapshot(){
     const data={};for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(oaiTransferAllowedKey(key))data[key]=localStorage.getItem(key);}
     return JSON.stringify({format:'cgm-single-transfer',schema:1,createdAt:new Date().toISOString(),data});
@@ -15598,8 +15680,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   })();
   function oaiCloseRestoreQuestion(){const modal=document.getElementById('oai-onboarding-backup-modal');if(modal){modal.classList.remove('show');modal.setAttribute('aria-hidden','true');modal.dataset.oaiMode='';}}
   function oaiAskRestoreOnFreshInstall(){
-    if(localStorage.getItem(OAI_RESTORE_CHECKED_KEY)==='1')return false;
+    if(localStorage.getItem(OAI_RESTORE_CHECKED_KEY)==='1'||(oaiTransferBusy&&oaiTransferPendingMode==='initial-load'))return false;
     const modal=document.getElementById('oai-onboarding-backup-modal'),body=document.getElementById('oai-onboarding-backup-body');if(!modal||!body)return false;
+    if(modal.classList.contains('show')&&modal.dataset.oaiMode==='drive-restore-prompt')return true;
     oaiRestoreDecisionPending=true;modal.dataset.oaiMode='drive-restore-prompt';
     setOnboardingHeader('기존 기록을 가져올까요?','앱을 다시 설치했거나 휴대폰을 바꾼 경우');
     body.innerHTML='<p class="oai-onboarding-intro">Google Drive에 보관한 순례·방문 기록을 가져올 수 있습니다.</p><p class="oai-onboarding-privacy">기존 기록을 확인하기 전까지 새 빈 기록으로 Drive 파일을 덮어쓰지 않습니다.</p><button type="button" class="oai-records-primary" data-oai-restore-now="1">Google Drive에서 기록 가져오기</button><button type="button" class="oai-onboarding-text-button" data-oai-restore-later="1">나중에 하기</button>';
@@ -15679,7 +15762,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(parsed.format!=='cgm-single-transfer'||parsed.schema!==1||!parsed.data||Array.isArray(parsed.data)||typeof parsed.data!=='object')throw Error('지원하지 않는 데이터 형식입니다.');
       const entries=Object.entries(parsed.data).filter(([key,value])=>oaiTransferAllowedKey(key)&&typeof value==='string');
       if(!entries.length)throw Error('가져올 방문기록이 없습니다.');
-      oaiConfirmDriveImport(entries,function(){
+      const applyImportedRecords=function(){
         oaiApplyingRestore=true;
         try{
           const previous=entries.map(([key])=>[key,localStorage.getItem(key)]);
@@ -15693,21 +15776,29 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           oaiTransferStatus('기록을 가져왔습니다. 앱을 새로고침합니다.');setTimeout(()=>location.reload(),500);
         }catch(err){oaiTransferStatus('가져오기 실패: '+err.message);}
         finally{oaiApplyingRestore=false;}
-      });
-    }catch(err){oaiTransferStatus('가져오기 실패: '+err.message);}
+      };
+      if(mode==='initial-load')applyImportedRecords();else oaiConfirmDriveImport(entries,applyImportedRecords);
+    }catch(err){oaiTransferStatus('가져오기 실패: '+err.message);if(mode==='initial-load')oaiAskRestoreOnFreshInstall();}
     finally{oaiApplyingRestore=false;}
   };
   document.addEventListener('change',function(e){if(e.target&&e.target.matches('[data-oai-google-auto]'))oaiEnableAuto(!!e.target.checked);},true);
   document.addEventListener('click',function(e){
     const btn=e.target&&e.target.closest&&e.target.closest('[data-oai-google-restore],[data-oai-restore-now],[data-oai-restore-later]');if(!btn)return;e.preventDefault();
     if(btn.hasAttribute('data-oai-restore-later')){oaiCloseRestoreQuestion();oaiRestoreDecisionPending=true;oaiTransferStatus('기존 기록을 보호하기 위해 자동 보관을 시작하지 않았습니다. 가져오기를 먼저 진행해 주세요.');return;}
-    oaiTransferRequest('load',btn.hasAttribute('data-oai-restore-now')?'initial-load':'manual-load');
+    if(btn.hasAttribute('data-oai-restore-now')){
+      oaiCloseRestoreQuestion();
+      if(!oaiTransferRequest('load','initial-load'))oaiAskRestoreOnFreshInstall();
+    }else oaiTransferRequest('load','manual-load');
   },true);
   try{document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden'){clearTimeout(oaiBackupTimer);oaiBackupTimer=0;oaiFlushBackup();}});}catch(_e){}
   if(localStorage.getItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY)==='1'&&localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1'){
     oaiRestoreDecisionPending=true;
   }
   setTimeout(function(){refreshGoogleDriveButton();if(localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1')oaiAskRestoreOnFreshInstall();},900);
+  if(localStorage.getItem('oai_manual_restore_needs_drive_save_v1')==='1'){
+    localStorage.removeItem('oai_manual_restore_needs_drive_save_v1');
+    if(oaiAutoEnabled()&&localStorage.getItem(OAI_RESTORE_CHECKED_KEY)==='1'){oaiBackupDirty=true;oaiQueueBackup(1700);}
+  }
   const OAI_ONBOARDING_DONE_KEY='oai_onboarding_done_v1';
   let initialOnboarding=false;
   let initialDriveFirstFlow=false;
@@ -15840,6 +15931,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         return;
       }
     }catch(_e){}
+    // First installation: the Drive decision must finish before parish setup starts.
+    if(localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1'){oaiAskRestoreOnFreshInstall();return;}
     openInitialDriveOnboarding();
   }
   window.openOaiSettings=open;
