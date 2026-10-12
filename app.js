@@ -16246,7 +16246,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function _manualCompletionCourse(){
     if(pilgrimageDetailMode!=='complete'||!currentCourseId)return null;
     const c=loadCourses().find(x=>x.id===currentCourseId);
-    return c&&_courseHasGpsLockedCompletion(c)?c:null;
+    return c&&_courseCompletionList(c).some(x=>x.method==='gps'||x.locked===true)?c:null;
   }
   function _manualOrderFromMerged(merged){
     // 기존 GPS 항목의 상대 순서를 건드리지 않고, 수동 항목의 위치만 재색인한다.
@@ -16854,34 +16854,34 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     try{return Object.assign({notices:0},JSON.parse(localStorage.getItem(HISTORY_UI_KEY)||'{}')||{});}catch(_e){return {notices:0};}
   }
   function _historySavePrefs(p){localStorage.setItem(HISTORY_UI_KEY,JSON.stringify(p));}
-  function _historyCandidateDates(){
+  function _historyCandidateDates(includeToday){
     const rawShrines=localStorage.getItem('oai_shrine_visits_v1')||'';
     const rawParishes=localStorage.getItem('oai_parish_visits_v1')||'';
     const signature=rawShrines+'\u001f'+rawParishes;
-    if(historyDatesCache&&signature===historyDatesSignature)return historyDatesCache;
+    if(!includeToday&&historyDatesCache&&signature===historyDatesSignature)return historyDatesCache;
     historyDatesSignature=signature;
     const dates=new Set(),today=_dailyIso(Date.now());
     [_loadShrineVisits(),_loadParishVisits()].forEach(data=>{
       Object.values(data||{}).forEach(r=>{
         if(!r||!Array.isArray(r.visits))return;
         r.visits.forEach(v=>{
-          if(v&&String(v.method||'').toLowerCase()==='gps'&&/^\d{4}-\d{2}-\d{2}$/.test(String(v.date||''))&&v.date<today)dates.add(v.date);
+          if(v&&String(v.method||'').toLowerCase()==='gps'&&/^\d{4}-\d{2}-\d{2}$/.test(String(v.date||''))&&v.date<today||(includeToday&&v.date===today))dates.add(v.date);
         });
       });
     });
-    historyDatesCache=Array.from(dates).sort();return historyDatesCache;
+    const result=Array.from(dates).sort();if(!includeToday)historyDatesCache=result;return result;
   }
-  function _historyUnregisteredDates(){
+  function _historyUnregisteredDates(includeToday){
     const state=_dailyState(),courses=loadCourses();
-    return _historyCandidateDates().filter(date=>{
+    return _historyCandidateDates(includeToday).filter(date=>{
       return !courses.some(c=>_courseCompletionList(c).some(x=>_dailyIso(x.completedAt)===date));
     });
   }
   function _historyUpdateButton(){
     const b=document.getElementById('oai-pilgrimage-history-btn');if(!b)return;
     const remaining=_historyUnregisteredDates();
-    b.hidden=!remaining.length;
-    b.textContent='과거 코스 등록 ('+remaining.length+'일 남음)';
+    b.hidden=false;
+    b.textContent=remaining.length?'미등록 GPS 코스 확인 ('+remaining.length+'일)':'미등록 GPS 코스 확인';
   }
   function _historyEnsureDialog(){
     if(historyModal)return historyModal;
@@ -16901,8 +16901,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     _historyUpdateButton();
   }
   let historyCurrentDate='',historyPreviewEvents=null;
-  async function _historyShowNext(notice){
-    const dates=_historyUnregisteredDates();
+  async function _historyShowNext(notice,includeToday){
+    const dates=_historyUnregisteredDates(!!includeToday);
     if(!dates.length){_historyClose();_historyUpdateButton();return;}
     const date=dates[0];historyCurrentDate=date;
     try{
@@ -16912,7 +16912,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       historyPreviewEvents=events.map(ev=>Object.assign({},ev));
       const el=_historyEnsureDialog();
       el.querySelector('#oai-history-title').textContent='과거 순례코스 등록';
-      el.querySelector('#oai-history-message').textContent=date+' · 방문 '+events.length+'곳 — 이 날짜의 GPS 방문기록을 순례완료에 등록하시겠습니까?';
+      el.querySelector('#oai-history-message').textContent=date+' · 방문 '+events.length+'곳 — '+(date===_dailyIso(Date.now())?'오늘은 아직 GPS 기록이 더 추가될 수 있습니다. ':'')+'이 날짜의 GPS 방문기록을 순례완료에 등록하시겠습니까?';
       const list=el.querySelector('#oai-history-locations');list.replaceChildren();
       events.forEach(ev=>{const div=document.createElement('div');div.textContent=new Date(ev.at).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})+'  '+ev.name;list.appendChild(div);});
       if(!events.length){const div=document.createElement('div');div.textContent='등록 가능한 방문 장소가 없습니다. 취소 후 GPS 방문정보를 확인해 주세요.';list.appendChild(div);}
@@ -16939,17 +16939,21 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       _historyUpdateButton();
       _historyClose();
       renderCourseList();
-      await _historyShowNext(false);
+      await _historyShowNext(false,true);
     }catch(e){console.warn('[과거 코스 등록] 등록 실패',e);window.alert(date+' 코스 등록 실패. GPS 스탬프는 보존되어 있습니다. 다시 등록 버튼으로 시도해 주세요.');button.disabled=false;}
   }
   function _historyStart(fromButton){
     if(historyDialogOpen)return;
-    const dates=_historyUnregisteredDates();if(!dates.length){_historyUpdateButton();return;}
+    // 명시적 버튼은 자동 등록 장부/과거 안내횟수와 무관하게 언제든 재확인 가능.
+    historyDatesCache=null;historyDatesSignature=null;
+    let dates=[];
+    try{dates=_historyUnregisteredDates(!!fromButton);}catch(e){window.alert('GPS 스탬프 조회에 실패했습니다. 원본 기록은 변경하지 않았습니다.\n'+e.message);return;}
+    if(!dates.length){_historyUpdateButton();if(fromButton)window.alert('현재 등록 가능한 미등록 GPS 날짜가 없습니다.');return;}
     if(!fromButton){
       const p=_historyPrefs();if(p.notices>=2)return;
       p.notices++;_historySavePrefs(p);
     }
-    _historyShowNext(!fromButton);
+    _historyShowNext(!fromButton,!!fromButton);
   }
   function _historyOnPlannerOpened(){
     historyDatesCache=null;
@@ -17917,7 +17921,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       }).join('');
     }
     const manualAddBtn=document.getElementById('oai-pilgrimage-manual-add');
-    if(manualAddBtn)manualAddBtn.hidden=!gpsProtected;
+    if(manualAddBtn){manualAddBtn.hidden=!(isCompletionView&&gpsProtected);manualAddBtn.style.display=(isCompletionView&&gpsProtected)?'inline-flex':'none';}
     const addBtn=document.querySelector('.oai-pilgrimage-detail-view .oai-pilgrimage-add');
     const mapAddBtn=document.querySelector('.oai-pilgrimage-detail-view .oai-pilgrimage-map-add');
     if(mapAddBtn){
