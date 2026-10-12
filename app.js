@@ -16874,7 +16874,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       Object.values(data||{}).forEach(r=>{
         if(!r||!Array.isArray(r.visits))return;
         r.visits.forEach(v=>{
-          if(v&&String(v.method||'').toLowerCase()==='gps'&&/^\d{4}-\d{2}-\d{2}$/.test(String(v.date||''))&&v.date<today||(includeToday&&v.date===today))dates.add(v.date);
+          if(v&&String(v.method||'').toLowerCase()==='gps'&&/^\d{4}-\d{2}-\d{2}$/.test(String(v.date||''))&&(v.date<today||(includeToday&&v.date===today)))dates.add(v.date);
         });
       });
     });
@@ -16892,9 +16892,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function _historyUpdateButton(){
     const b=document.getElementById('oai-pilgrimage-history-btn');if(!b)return;
-    const remaining=_historyUnregisteredDates();
-    b.hidden=false;
-    b.textContent=remaining.length?'미등록 GPS 코스 확인 ('+remaining.length+'일)':'미등록 GPS 코스 확인';
+    // V1185: 순례완료 목록에서만, 실제 미등록 날짜가 있을 때에만 표시.
+    // 날짜 후보 계산이 실패한 경우 삭제/완료로 오인하지 않고 버튼을 보존한다.
+    if(pilgrimageCourseTab!=='complete'){b.hidden=true;return;}
+    let remaining;
+    try{remaining=_historyUnregisteredDates();}
+    catch(e){console.warn('[미등록 GPS 버튼 확인 실패]',e);b.hidden=true;return;}
+    b.hidden=remaining.length===0;
+    b.textContent='미등록 GPS 코스 확인 ('+remaining.length+'일)';
   }
   function _historyEnsureDialog(){
     if(historyModal)return historyModal;
@@ -17175,6 +17180,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(newBtn) newBtn.hidden=pilgrimageCourseTab!=='plan';
     const manualBtn=document.getElementById('oai-pilgrimage-manual-register-btn');
     if(manualBtn) manualBtn.hidden=pilgrimageCourseTab!=='complete';
+    _historyUpdateButton();
   }
   function _courseMatchesFilters(c,filters){
     const f=filters||pilgrimageCourseFilterState||{};

@@ -9858,3 +9858,13 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
 #oai-pilgrimage-detail-view.is-completion-view .oai-pilgrimage-add-row{display:flex!important;justify-content:center!important}
 #oai-pilgrimage-detail-view.is-completion-view .oai-pilgrimage-add-row > :not(#oai-pilgrimage-manual-add){display:none!important}
 #oai-pilgrimage-manual-add[hidden]{display:none!important}
+
+/* V1185: 미등록 GPS 버튼은 순례완료 탭의 유효 후보가 있을 때만 강조 표시 */
+#oai-pilgrimage-history-btn:not([hidden]){
+  background:#356F57;
+  color:#FFFFFF;
+  border:1.5px solid #28543f;
+  font-weight:800;
+}
+#oai-pilgrimage-history-btn:not([hidden]):active{background:#28543f;}
+#oai-pilgrimage-history-btn[hidden]{display:none!important;}
