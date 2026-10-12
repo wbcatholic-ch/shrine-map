@@ -62,10 +62,6 @@
     show(target.getAttribute('data-cgm-help'));
   },true);
 
-  function attachHelp(el,key){if(!el||el.querySelector(':scope > [data-cgm-help]'))return;
-    const btn=document.createElement('button');btn.type='button';btn.className='cgm-help-icon';btn.setAttribute('data-cgm-help',key);btn.setAttribute('aria-label',HELP[key][0]+' 도움말');btn.textContent='?';
-    if(el.classList && el.classList.contains('sheet-hd')) { const title=el.querySelector('.sheet-title');el.insertBefore(btn,title?title.nextSibling:el.firstChild); } else el.appendChild(btn);
-  }
   function setup(){
     // V1191: 성지·성당·피정의 도움말은 모두 같은 sheet-hd 제목 줄에 배치한다.
     // 화면 제목이 비동기로 바뀌어도 설명을 현재 카테고리에 맞게 동기화한다.
@@ -82,7 +78,6 @@
       sheetTitles.forEach(function(row){
         const title=document.getElementById(row[0]);if(!title)return;
         const header=title.closest('.sheet-hd');if(!header)return;
-        attachHelp(header,row[1]);
         const help=header.querySelector(':scope > [data-cgm-help]');if(!help)return;
         // 패널 목적은 유지하고 카테고리별 사용 설명만 현재 모드에 맞게 보완한다.
         const key=category+'_'+row[1];
@@ -94,14 +89,9 @@
     // 모드가 변하는 순간 도움말도 전환한다. 본문 변경 감시는 필요하지 않다.
     const sheetObserver=new MutationObserver(syncSheetHelp);
     sheetObserver.observe(document.documentElement,{attributes:true,attributeFilter:['class']});
-    // 동적으로 생성되는 방문 스탬프북은 열린 시점에 버튼을 붙임 (MutationObserver: 화면 안의 제목만 검사).
-    const observer=new MutationObserver(function(){
-        document.querySelectorAll('.shrine-visit-cards-head .module-bar-title').forEach(function(t){
-        const key=/성당/.test(t.textContent)?'parish_book':'shrine_book';attachHelp(t,key);
-        const sub=t.parentNode.querySelector('.module-bar-sub');if(sub)sub.style.display='none';
-      });
-    });
-    observer.observe(document.body,{childList:true,subtree:true});
+    // 스탬프북과 세 카테고리 시트는 HTML/화면 생성 시 도움말 버튼을 직접 만듭니다.
+    // 중복 삽입/DOM 전체 변경 감시는 사용하지 않습니다.
+
   }
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup,{once:true});else setup();
 })();
