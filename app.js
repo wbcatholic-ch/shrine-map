@@ -15686,6 +15686,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           try{for(const [key,value] of entries)localStorage.setItem(key,value);}
           catch(e){for(const [key,value] of previous){try{if(value===null)localStorage.removeItem(key);else localStorage.setItem(key,value);}catch(_e){}}throw Error('기록 저장에 실패했습니다.');}
           localStorage.setItem(OAI_RESTORE_CHECKED_KEY,'1');
+          // A restored diocese already satisfies first-run parish setup.
+          if(configuredDiocese())localStorage.setItem('oai_onboarding_done_v1','1');
           localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'1');localStorage.setItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY,'1');oaiDriveReady=true;
           oaiRestoreDecisionPending=false;oaiCloseRestoreQuestion();
           oaiTransferStatus('기록을 가져왔습니다. 앱을 새로고침합니다.');setTimeout(()=>location.reload(),500);
@@ -15833,6 +15835,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function startInitialOnboarding(){
     try{
       if(localStorage.getItem(OAI_ONBOARDING_DONE_KEY)==='1')return;
+      if(configuredDiocese()){
+        localStorage.setItem(OAI_ONBOARDING_DONE_KEY,'1');
+        return;
+      }
     }catch(_e){}
     openInitialDriveOnboarding();
   }
