@@ -2986,7 +2986,7 @@ function _oaiUpdateShrineVisitExtras(item,date,patch,opts){
 }
 function _oaiUpdateParishVisitExtras(item,date,patch,opts){
   if(_oaiSharedJournalGroup('parish',item))return _oaiWriteSharedJournalExtras('parish',item,date,patch,opts);
-  const key=_parishVisitKey(item),data=_loadParishVisits();if(!key||!data[key]||!Array.isArray(data[key].visits))return false;
+  const data=_loadParishVisits(),key=_parishVisitStoredKey(item,data);if(!key||!data[key]||!Array.isArray(data[key].visits))return false;
   const idx=_oaiFindVisitIndexByDate(data[key].visits,date);if(idx<0)return false;
   let rec=_normalizeVisitEntry(data[key].visits[idx]);if(!rec||typeof rec!=='object')rec={date:String(date),method:'manual'};
   Object.keys(patch||{}).forEach(function(k){rec[k]=patch[k];});rec.updatedAt=new Date().toISOString();if(patch&&Object.prototype.hasOwnProperty.call(patch,'memo')){rec.memoUpdatedAt=rec.updatedAt;rec.memoRevision=Number(rec.memoRevision||0)+1;}data[key].visits[idx]=rec;_saveParishVisits(data);
@@ -3935,14 +3935,37 @@ function _configuredMyParish(){
 }
 function _isSameParish(a,b){return !!(a&&b&&String(a.diocese||'')===String(b.diocese||'')&&String(a.name||'')===String(b.name||''));}
 function _parishVisitKey(p){return p?[String(p.diocese||''),String(p.name||''),String(p.addr||'')].join('|'):'';}
+/* 성당 주소 변경 호환: 저장된 키를 바꾸거나 전체 데이터를 이관하지 않는다.
+   과거 기록이 현재 주소의 키로 없을 때, 교구+성당명이 정확히 일치하는
+   저장 항목이 유일한 경우에만 과거 키를 사용한다. 동명이거나 모호하면 건드리지 않는다.
+   이름 변경/교구 이전을 주소 변경으로 추측해 병합하지 않는다. */
+function _parishVisitStoredKey(p,data){
+  const current=_parishVisitKey(p);
+  if(!current||!data||typeof data!=='object')return current;
+  if(Object.prototype.hasOwnProperty.call(data,current))return current;
+  const diocese=String(p.diocese||''),name=String(p.name||'');
+  if(!diocese||!name)return current;
+  let candidate='';
+  for(const key of Object.keys(data)){
+    const rec=data[key];
+    if(!rec||typeof rec!=='object')continue;
+    const parts=key.split('|');
+    const storedDiocese=String(rec.diocese||parts[0]||'');
+    const storedName=String(rec.name||parts[1]||'');
+    if(storedDiocese!==diocese||storedName!==name)continue;
+    if(candidate)return current; // 식별 불명확: 임의 결합 방지
+    candidate=key;
+  }
+  return candidate||current;
+}
 function _loadParishVisits(){try{const v=localStorage.getItem(OAI_PARISH_VISITS_KEY);const d=v?JSON.parse(v):{};return d&&typeof d==='object'?d:{}}catch(_e){return {}}}
 function _saveParishVisits(d){try{localStorage.setItem(OAI_PARISH_VISITS_KEY,JSON.stringify(d||{}))}catch(_e){}}
-function _parishVisits(p){const r=_loadParishVisits()[_parishVisitKey(p)]||{},a=Array.isArray(r.visits)?r.visits:[];return a.map(_normalizeVisitEntry).filter(function(v){return v&&v.date;}).sort(_compareShrineVisits);}
+function _parishVisits(p){const d=_loadParishVisits(),r=d[_parishVisitStoredKey(p,d)]||{},a=Array.isArray(r.visits)?r.visits:[];return a.map(_normalizeVisitEntry).filter(function(v){return v&&v.date;}).sort(_compareShrineVisits);}
 function _parishVisitCount(p){return _parishVisits(p).length;}
-function _addParishVisit(p,date,method){const key=_parishVisitKey(p);if(!key||!_isVisitDate(date))return false;const d=_loadParishVisits(),r=d[key]&&typeof d[key]==='object'?d[key]:{name:p.name||'',diocese:p.diocese||'',addr:p.addr||'',visits:[]};r.visits=Array.isArray(r.visits)?r.visits:[];if(_hasVisitDate(r.visits,date))return false;_clearManualVisitDeletion('parish',key,date);r.visits.push(_newVisitEntry(date,method));r.visits.sort(_compareShrineVisits);d[key]=r;_saveParishVisits(d);return true;}
-function _deleteParishVisit(p,i){const key=_parishVisitKey(p),d=_loadParishVisits(),r=d[key];if(!r||!Array.isArray(r.visits)||i<0||i>=r.visits.length||String(r.visits[i].method||'')==='gps')return false;_recordManualVisitDeletion('parish',key,r.visits[i]);r.visits.splice(i,1);if(r.visits.length)d[key]=r;else delete d[key];_saveParishVisits(d);return true;}
+function _addParishVisit(p,date,method){const d=_loadParishVisits(),key=_parishVisitStoredKey(p,d);if(!key||!_isVisitDate(date))return false;const r=d[key]&&typeof d[key]==='object'?d[key]:{name:p.name||'',diocese:p.diocese||'',addr:p.addr||'',visits:[]};r.visits=Array.isArray(r.visits)?r.visits:[];if(_hasVisitDate(r.visits,date))return false;_clearManualVisitDeletion('parish',key,date);r.visits.push(_newVisitEntry(date,method));r.visits.sort(_compareShrineVisits);d[key]=r;_saveParishVisits(d);return true;}
+function _deleteParishVisit(p,i){const d=_loadParishVisits(),key=_parishVisitStoredKey(p,d),r=d[key];if(!r||!Array.isArray(r.visits)||i<0||i>=r.visits.length||String(r.visits[i].method||'')==='gps')return false;_recordManualVisitDeletion('parish',key,r.visits[i]);r.visits.splice(i,1);if(r.visits.length)d[key]=r;else delete d[key];_saveParishVisits(d);return true;}
 function _parishEntries(){const a=[];(PARISHES||[]).forEach(function(p,i){if(!p||p.diocese==='군종교구')return;const v=_parishVisits(p);if(v.length)a.push({p:p,i:i,v:v,n:v.length});});return a.sort(function(a,b){return _compareShrineVisits(a.v[0],b.v[0])||String(a.p.name).localeCompare(String(b.p.name),'ko')});}
-function _parishUnvisitedEntries(){const saved=_loadParishVisits();return (PARISHES||[]).map(function(p,i){const r=saved[_parishVisitKey(p)],v=r&&Array.isArray(r.visits)?r.visits:[];return {p:p,i:i,v:v};}).filter(function(x){return x.p&&x.p.diocese!=='군종교구'&&!x.v.length;}).sort(function(a,b){return String(a.p.name||'').localeCompare(String(b.p.name||''),'ko');});}
+function _parishUnvisitedEntries(){const saved=_loadParishVisits();return (PARISHES||[]).map(function(p,i){const r=saved[_parishVisitStoredKey(p,saved)],v=r&&Array.isArray(r.visits)?r.visits:[];return {p:p,i:i,v:v};}).filter(function(x){return x.p&&x.p.diocese!=='군종교구'&&!x.v.length;}).sort(function(a,b){return String(a.p.name||'').localeCompare(String(b.p.name||''),'ko');});}
 function _parishDios(){const s={};(PARISHES||[]).forEach(function(p){if(p&&p.diocese&&p.diocese!=='군종교구')s[p.diocese]=1;});const ordered=(typeof _DIOS!=='undefined'?_DIOS:[]).slice(1).map(function(x){return x[0]}).filter(function(d){return !!s[d]});const extra=Object.keys(s).filter(function(d){return ordered.indexOf(d)<0}).sort(function(a,b){return a.localeCompare(b,'ko')});return ordered.concat(extra);}
 /* 성당 방문 스탬프는 해당 성당이 지도에서 쓰는 교구 마커 색을 따른다. */
 function _parishVisitMarkerColor(p){const code=typeof _parishDioCodeOf==='function'?_parishDioCodeOf(p):'';const cfg=typeof _DIO_CFG!=='undefined'&&_DIO_CFG[code];return cfg&&cfg.c?cfg.c:'#1A5276';}
