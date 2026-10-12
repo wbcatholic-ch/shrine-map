@@ -19421,16 +19421,26 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(el.classList && el.classList.contains('sheet-hd')) { const title=el.querySelector('.sheet-title');el.insertBefore(btn,title?title.nextSibling:el.firstChild); } else el.appendChild(btn);
   }
   function setup(){
-    // 기존 카테고리 탭 바로 아래의 소제목 옆에 배치. 상태/출처 문구는 제거하지 않음.
-    [['nearby-sheet-title','nearby'],['list-sheet-title','find'],['region-sheet-title','region']].forEach(function(row){const el=document.getElementById(row[0]);if(el)attachHelp(el.parentNode,row[1]);});
-    const categories=[['shrine','shrine'],['parish','parish'],['retreat','retreat']];
-    // 카테고리 정보가 바뀌는 위치이므로 도움말 제목/내용도 최신 카테고리로 선택
-    const list=document.getElementById('list-sheet-title');const nearby=document.getElementById('nearby-sheet-title');
-    function choose(txt){return /피정/.test(txt)?'retreat':(/성당/.test(txt)?'parish':(/성지|순교/.test(txt)?'shrine':'find'));}
-    [['list-sheet-title','find'],['nearby-sheet-title','nearby'],['region-sheet-title','region']].forEach(function(pair){
-      const el=document.getElementById(pair[0]);if(!el)return;const helpBtn=el.parentNode.querySelector('[data-cgm-help]');if(!helpBtn)return;
-      if(pair[1]==='find')helpBtn.addEventListener('pointerdown',function(){helpBtn.dataset.cgmHelp=choose(el.textContent||'');},true);
-    });
+    // V1191: 성지·성당·피정의 도움말은 모두 같은 sheet-hd 제목 줄에 배치한다.
+    // 화면 제목이 비동기로 바뀌어도 설명을 현재 카테고리에 맞게 동기화한다.
+    const sheetTitles=[['nearby-sheet-title','nearby'],['list-sheet-title','find'],['region-sheet-title','region']];
+    function helpForTitle(txt,fallback){
+      return /피정/.test(txt)?'retreat':/성당|본당/.test(txt)?'parish':/성지|순교/.test(txt)?'shrine':fallback;
+    }
+    function syncSheetHelp(){
+      sheetTitles.forEach(function(row){
+        const title=document.getElementById(row[0]);if(!title)return;
+        const header=title.closest('.sheet-hd');if(!header)return;
+        attachHelp(header,row[1]);
+        const help=header.querySelector(':scope > [data-cgm-help]');if(!help)return;
+        const key=helpForTitle(title.textContent||'',row[1]);
+        if(help.dataset.cgmHelp!==key){help.dataset.cgmHelp=key;help.setAttribute('aria-label',HELP[key][0]+' 도움말');}
+      });
+    }
+    syncSheetHelp();
+    // 카테고리 전환 시 설명의 종류뿐 아니라 버튼 위치도 동일하게 유지한다.
+    const sheetObserver=new MutationObserver(syncSheetHelp);
+    sheetTitles.forEach(function(row){const title=document.getElementById(row[0]);if(title)sheetObserver.observe(title,{childList:true,characterData:true,subtree:true});});
     // 동적으로 생성되는 방문 스탬프북은 열린 시점에 버튼을 붙임 (MutationObserver: 화면 안의 제목만 검사).
     const observer=new MutationObserver(function(){
       document.querySelectorAll('.shrine-visit-cards-head .module-bar-title').forEach(function(t){
