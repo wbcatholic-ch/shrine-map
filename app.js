@@ -15540,7 +15540,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function refreshGoogleDriveButton(){
     const el=document.querySelector('[data-oai-google-auto]');if(el)el.checked=oaiAutoEnabled();
     document.querySelectorAll('.oai-google-drive-description').forEach(x=>x.textContent=oaiAutoEnabled()?'기록이 바뀌면 자동으로 보관합니다. 방문 사진 파일은 제외됩니다.':'켜면 기록 변경 시 Google Drive에 자동 보관합니다.');
-    document.querySelectorAll('.oai-google-drive-note').forEach(x=>x.textContent=oaiAutoEnabled()?'자동 보관 사용 중 · 백업 5개 관리 없음':'자동 보관 꺼짐 · 사진 자동 업로드 없음');
+    document.querySelectorAll('.oai-google-drive-note').forEach(x=>x.textContent=oaiAutoEnabled()?'자동 보관 사용 중':'자동 보관 꺼짐');
   }
   function oaiTransferSnapshot(){
     const data={};for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(oaiTransferAllowedKey(key))data[key]=localStorage.getItem(key);}
@@ -15595,7 +15595,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       return;}
     if(action==='save'){
       localStorage.setItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY,'1');oaiDriveReady=true;
-      oaiTransferStatus('Google Drive에 기록을 자동 보관했습니다.');refreshGoogleDriveButton();
+      oaiTransferStatus('Google Drive에 자동 보관되었습니다.');refreshGoogleDriveButton();
       if(oaiBackupDirty)oaiScheduleBackup();return;
     }
     if(action!=='load')return;
