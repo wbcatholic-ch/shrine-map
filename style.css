@@ -9884,3 +9884,57 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
 
 .oai-settings-group > h3.cgm-help-heading{display:flex!important;align-items:center!important;justify-content:space-between!important;gap:14px!important;min-height:52px;box-sizing:border-box;padding:7px 13px 7px 16px!important;}
 .oai-settings-group > h3.cgm-help-heading > .cgm-help-icon{margin:0!important;width:36px!important;height:36px!important;min-width:36px!important;min-height:36px!important;border:2px solid #fff!important;background:rgba(255,255,255,.14)!important;color:#fff!important;font-size:21px!important;font-weight:900!important;opacity:1!important;flex-shrink:0!important;}
+
+/* V1189: 스탬프북 탭 경계 강화, 도움말 접근성 */
+.shrine-visit-cards-tabs{background:#f7f9fc!important;border-bottom:2px solid #345c76!important;gap:6px!important;}
+.shrine-visit-cards-tabs button{border:2px solid #90a5b6!important;background:#fff!important;color:#203b50!important;box-shadow:0 1px 3px rgba(22,40,57,.18)!important;}
+.shrine-visit-cards-tabs button.active,.shrine-visit-cards-tabs button.on{border:2px solid #1665a0!important;background:#e4f2ff!important;color:#124f7f!important;box-shadow:inset 0 0 0 1px #1665a0!important;}
+.shrine-visit-detail-head-title .cgm-visit-detail-help{vertical-align:middle!important;margin-left:9px!important;display:inline-flex!important;align-items:center;justify-content:center;}
+.shrine-visit-cards-head .module-bar-title>.cgm-help-icon{margin-left:8px!important;vertical-align:middle!important;}
+.cgm-dev-journal-switch{display:flex;align-items:center;gap:9px;font-weight:700;font-size:14px;line-height:1.5;padding:12px 6px;}
+.cgm-dev-journal-switch input{width:20px;height:20px;}
+
+
+/* V1190: compact help icons, clear settings header, unified title hierarchy */
+#oai-settings-modal .oai-settings-panel>.oai-settings-head{
+  background:#111936!important;border-bottom:3px solid #c6a965!important;
+  min-height:80px!important;padding:18px 23px!important;box-shadow:none!important;
+}
+#oai-settings-modal .oai-settings-panel>.oai-settings-head h2{
+  color:#fff!important;font-size:var(--oai-std-title-fs,25px)!important;font-weight:900!important;
+}
+#oai-settings-modal .oai-settings-panel>.oai-settings-head button[data-oai-settings-close]{
+  color:#d8b875!important;border-color:#d8b875!important;background:transparent!important;
+  width:43px!important;height:43px!important;font-size:29px!important;
+}
+/* Header labels stay left aligned as in all other modules. */
+#oai-settings-modal .oai-settings-group > h3.cgm-help-heading{
+  justify-content:space-between!important;text-align:left!important;font-size:inherit!important;
+  padding:8px 16px!important;min-height:48px!important;
+}
+/* Visual 24px, invisible tap box at least 44px wide/high, no layout expansion. */
+#oai-settings-modal .oai-settings-group > h3.cgm-help-heading > .cgm-help-icon,
+.oai-settings-panel .oai-settings-group > h3.cgm-help-heading > .cgm-help-icon{
+  position:relative!important;box-sizing:border-box!important;display:inline-flex!important;
+  align-items:center!important;justify-content:center!important;
+  width:26px!important;height:26px!important;min-width:26px!important;min-height:26px!important;
+  padding:0!important;border:1.5px solid #fff!important;
+  background:transparent!important;color:#fff!important;font-size:16px!important;
+  line-height:1!important;font-weight:800!important;
+}
+#oai-settings-modal .oai-settings-group > h3.cgm-help-heading > .cgm-help-icon::before{
+  content:'';position:absolute;inset:-9px;
+}
+/* Help icons in other titles match the same compact visual language. */
+.module-bar-title>.cgm-help-icon,
+.oai-pilgrimage-head .cgm-help-icon,
+.shrine-visit-detail-head-title>.cgm-help-icon,
+.sheet-hd>.cgm-help-icon{
+  box-sizing:border-box!important;width:26px!important;height:26px!important;
+  min-width:26px!important;min-height:26px!important;padding:0!important;
+  border-width:1.5px!important;font-size:16px!important;line-height:1!important;
+  vertical-align:middle!important;
+}
+@media (max-width:380px){
+  #oai-settings-modal .oai-settings-panel>.oai-settings-head{padding:16px 18px!important;}
+}
