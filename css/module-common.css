@@ -311,6 +311,7 @@ html:not(.ios-device).oai-screen-compact-short #prayer-close{
 .cgm-help-icon { appearance:none; -webkit-appearance:none; display:inline-flex; align-items:center; justify-content:center; vertical-align:middle; width:21px; height:21px; min-width:21px; border-radius:50%; border:1.5px solid currentColor; background:transparent; color:inherit; font-size:13px; line-height:1; font-weight:800; padding:0; cursor:pointer; margin-left:9px; opacity:.9; touch-action:manipulation; }
 .cgm-help-heading .cgm-help-icon {margin-left:0;}
 .module-bar-title .cgm-help-icon {color:#fff;}
+#oai-pilgrimage-planner-title .cgm-help-icon{color:#fff;border-color:#fff;background:rgba(255,255,255,.12);pointer-events:auto;}
 .cgm-help-icon:focus-visible {outline:2px solid #356F57; outline-offset:3px;}
 .cgm-help-overlay[hidden] {display:none!important;}
 .cgm-help-overlay {position:fixed;inset:0;z-index:2147483600;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:20px;}

@@ -1945,6 +1945,8 @@ html:not(.ios-device).oai-screen-compact-short #sheet-route .rs-x {
 #rs-search-btn.ready{background:#1565c0!important;color:#fff!important;box-shadow:0 4px 12px rgba(21,101,192,.24)!important;}
 #sheet-route.route-result-showing {
   max-height: min(62dvh, 520px) !important;
+  top:auto !important;
+  bottom:0 !important;
   overflow-y: auto !important;
   overflow-x: visible !important;
   
@@ -6566,7 +6568,7 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 .btn-route-pilgrimage:active{transform:translateY(1px);opacity:.88;}
 #rs-result .btn-route-pilgrimage{visibility:visible;opacity:1;}
 #sheet-route.route-result-showing{-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
-#app #sheet-route.route-result-showing.open{min-height:0;height:auto;max-height:min(72dvh,680px);}
+#app #sheet-route.route-result-showing.open{min-height:0;height:auto;}
 #sheet-route.route-result-showing #rs-bottom{padding-bottom:0!important;}
 #sheet-route.route-result-showing .route-btns{margin-bottom:0;}
 #sheet-route.route-result-showing .rs-drag-slot{display:none!important;}

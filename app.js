@@ -19378,38 +19378,43 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 
 /* V1197: 도움말은 js/help-ui.js 로 분리 (중복 이벤트 제거) */
 
-/* 순례완료·순례계획 순환 스와이프: 목록에 직접 연결. 일반 터치 스크롤/조작 버튼은 보존. */
+/* 순례코스 목록: 기존 탭 전환 버튼을 호출하는 단일 순환 스와이프 처리. */
 (function(){
   'use strict';
-  let lastChange=0;
-  function bind(){
-    const list=document.getElementById('oai-pilgrimage-list-view');
-    if(!list || list.dataset.pilgrimageSwipeBound==='1') return;
-    list.dataset.pilgrimageSwipeBound='1';
-    let start=null;
-    const active=()=>!list.hidden && !!list.closest('.oai-pilgrimage-planner-modal.show');
-    function begin(e){
-      start=null;
-      if(!active() || !e.touches || e.touches.length!==1) return;
-      if(e.target.closest('input,textarea,select,[data-oai-pilgrimage-drag],.oai-pilgrimage-drag')) return;
-      const p=e.touches[0];start={x:p.clientX,y:p.clientY,time:Date.now()};
-    }
-    function finish(e){
-      const origin=start; start=null;
-      if(!origin || !active() || !e.changedTouches || e.changedTouches.length!==1) return;
-      const p=e.changedTouches[0],dx=p.clientX-origin.x,dy=p.clientY-origin.y;
-      if(Math.abs(dx)<55 || Math.abs(dx)<Math.abs(dy)*1.25 || Date.now()-lastChange<380) return;
-      const current=list.dataset.courseTab || 'complete';
-      const next=current==='complete'?'plan':'complete';
-      const button=list.querySelector('[data-oai-pilgrimage-course-tab="'+next+'"]');
-      if(!button)return;
-      lastChange=Date.now();button.click();
-    }
-    list.addEventListener('touchstart',begin,{capture:true,passive:true});
-    list.addEventListener('touchend',finish,{capture:true,passive:true});
-    list.addEventListener('touchcancel',()=>{start=null;},{capture:true,passive:true});
+  const listId='oai-pilgrimage-list-view';
+  let gesture=null, lastSwitch=0;
+  function visible(){
+    const modal=document.getElementById('oai-pilgrimage-planner-modal');
+    const list=document.getElementById(listId);
+    return !!(modal&&modal.classList.contains('show')&&list&&!list.hidden);
   }
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind,{once:true}); else bind();
+  function begin(event){
+    gesture=null;
+    if(!visible()||!event.touches||event.touches.length!==1)return;
+    if(event.target.closest('input,select,textarea,button,[role="button"],[data-oai-pilgrimage-drag],.oai-pilgrimage-drag'))return;
+    const point=event.touches[0]; gesture={x:point.clientX,y:point.clientY};
+  }
+  function end(event){
+    const start=gesture;gesture=null;
+    if(!start||!visible()||!event.changedTouches||event.changedTouches.length!==1)return;
+    const point=event.changedTouches[0],dx=point.clientX-start.x,dy=point.clientY-start.y;
+    if(Math.abs(dx)<50||Math.abs(dx)<Math.abs(dy)*1.4||Date.now()-lastSwitch<320)return;
+    const list=document.getElementById(listId);
+    const current=list&&list.getAttribute('data-course-tab')==='plan'?'plan':'complete';
+    const next=current==='plan'?'complete':'plan';
+    const target=document.querySelector('#oai-pilgrimage-list-view [data-oai-pilgrimage-course-tab="'+next+'"]');
+    if(!target)return;
+    lastSwitch=Date.now();target.click();
+  }
+  function bind(){
+    const list=document.getElementById(listId);
+    if(!list||list.dataset.pilgrimageSwipeBound==='1')return;
+    list.dataset.pilgrimageSwipeBound='1';
+    list.addEventListener('touchstart',begin,{capture:true,passive:true});
+    list.addEventListener('touchend',end,{capture:true,passive:true});
+    list.addEventListener('touchcancel',()=>{gesture=null;},{capture:true,passive:true});
+  }
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',bind,{once:true});else bind();
 })();
 
 /* V1189: 개발자 설정을 켠 경우에만 상세 사진/메모 UI 활성화 */

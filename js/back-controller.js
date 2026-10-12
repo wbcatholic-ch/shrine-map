@@ -543,6 +543,11 @@
       return;
     }
 
+    if(window.CGMHelp && window.CGMHelp.close()){
+      // 도움말은 별도 history 항목을 만들지 않으므로 추가 이동을 수행하지 않는다.
+      return;
+    }
+
     if(closeRefreshDialog()){
       try{ armCoverBackTrap('refresh-dialog-close', {force:true}); }catch(e){ console.warn('[가톨릭길동무]', e); }
       return;
@@ -582,6 +587,7 @@
     try{ if(typeof window.oaiSuppressExternalReturnForUserBack === 'function') window.oaiSuppressExternalReturnForUserBack('hardware-first-back-after-external-return'); }catch(e){ console.warn('[가톨릭길동무]', e); }
     if(typeof window._oaiPrayerBackHandle === 'function' && window._oaiPrayerBackHandle('prayer-hardware-back')) return;
     try{ if(typeof window._oaiTrailBackHandle === 'function' && window._oaiTrailBackHandle('hardware-back')) return; }catch(e){ console.warn('[가톨릭길동무]', e); }
+    if(window.CGMHelp && window.CGMHelp.close()) return;
     if(closeRefreshDialog()){ try{ armCoverBackTrap('refresh-dialog-hardware', {force:true}); }catch(e){} return; }
     if(isGuideModalOpen()){
       closeGuideModals();
