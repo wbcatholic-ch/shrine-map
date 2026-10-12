@@ -15548,7 +15548,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const el=document.getElementById('oai-google-drive-last-saved');
     if(el)el.textContent=oaiLastSavedLabel();
   }
-  function oaiTransferStatus(message){const el=document.getElementById('oai-data-transfer-status');if(el)el.textContent=message||'';}
+  function oaiTransferStatus(message){const el=document.getElementById('oai-data-transfer-status');if(!el)return;const text=message||'';el.textContent=(text==='Google Drive에 자동 보관되었습니다.'||text==='Google Drive 자동 보관을 껐습니다.'||text==='기록 가져오기를 취소했습니다.')?'':text;}
   function refreshGoogleDriveButton(){
     const el=document.querySelector('[data-oai-google-auto]');if(el)el.checked=oaiAutoEnabled();
     document.querySelectorAll('.oai-google-drive-description').forEach(x=>x.textContent=oaiAutoEnabled()?'기록이 바뀌면 자동으로 보관합니다. 방문 사진 파일은 제외됩니다.':'켜면 기록 변경 시 Google Drive에 자동 보관합니다.');
