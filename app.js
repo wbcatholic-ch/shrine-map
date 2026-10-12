@@ -15526,7 +15526,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   const OAI_RESTORE_PROMPT_ELIGIBLE_KEY='oai_restore_prompt_eligible_v1';
   const OAI_RESTORE_PROMPT_DATE_KEY='oai_restore_prompt_date_v1';
   const OAI_RESTORE_CHECKED_KEY='oai_restore_checked_v1';
-  let googleDriveBackupTimer=0;
+  // 1148: 기존 자동 백업 설정은 중지한다. Google Drive 파일은 변경하지 않는다.
+  try{localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'0');}catch(_e){}
+  let googleDriveManualSavePending=false;
+  let googleDriveRestoreAfterConnect=false;
   let googleDriveInitialSyncPending=false;
   let googleDriveAutoConnectPending=false;
   let initialOnboarding=false;
@@ -15550,37 +15553,35 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const descriptions=document.querySelectorAll('.oai-google-drive-description');
     const notes=document.querySelectorAll('.oai-google-drive-note');
     const inputs=document.querySelectorAll('[data-oai-google-auto]');
-    if(!inputs.length)return;
     if(isGoogleDriveAutoBackupEnabled()){
       inputs.forEach(function(input){input.checked=true;});
       descriptions.forEach(function(description){description.textContent='기록이 바뀌면 자동으로 보관합니다.';});
       notes.forEach(function(note){const at=formatGoogleDriveSavedAt();note.textContent=at?'마지막 저장: '+at:'연결되었습니다. 첫 기록부터 자동으로 보관합니다.';});
     }else{
       inputs.forEach(function(input){input.checked=false;});
-      descriptions.forEach(function(description){description.textContent='켜면 Google 계정을 연결하고 기록을 자동으로 보관합니다.';});
-      notes.forEach(function(note){note.textContent='가톨릭길동무 운영자는 개인 기록을 보관하지 않습니다.';});
+      descriptions.forEach(function(description){description.textContent='자동 백업은 중단되었습니다. 기록은 휴대폰에 저장됩니다.';});
+      notes.forEach(function(note){note.textContent='Google Drive 백업은 수동으로 실행할 수 있습니다.';});
     }
   }
+  // 자동 보관 기능은 안정화 기간 동안 중단. 이 버튼은 명시적인 수동 저장만 한다.
   function setGoogleDriveAutoBackup(enabled){
-    if(!enabled){localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'0');googleDriveAutoConnectPending=false;refreshGoogleDriveButton();recordMessage('Google Drive 자동 보관을 껐습니다.');return;}
-    localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'1');
-    if(isGoogleDriveConnected()){refreshGoogleDriveButton();saveGoogleDriveBackupNow(true);return;}
-    googleDriveAutoConnectPending=true;refreshGoogleDriveButton();recordMessage('Google 계정을 선택해 주세요.');
-    const bridge=nativeDrive();
-    if(!bridge||typeof bridge.connectGoogleDrive!=='function'){localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'0');googleDriveAutoConnectPending=false;refreshGoogleDriveButton();recordMessage('Google Drive 자동 보관은 앱에서 사용할 수 있습니다.');return;}
-    bridge.connectGoogleDrive();
+    try{localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'0');}catch(_e){}
+    refreshGoogleDriveButton();
+    if(enabled)recordMessage('자동 백업은 안정화 중 중단되었습니다. 수동 백업을 이용해 주세요.');
   }
   function connectGoogleDrive(){
     const bridge=nativeDrive();
-    if(!bridge||typeof bridge.connectGoogleDrive!=='function'){recordMessage('Google Drive 자동백업은 앱에서 사용할 수 있습니다.');return;}
+    if(!bridge||typeof bridge.connectGoogleDrive!=='function'){recordMessage('Google Drive 백업은 Android 앱에서 사용할 수 있습니다.');return;}
     if(isGoogleDriveConnected()){saveGoogleDriveBackupNow(true);return;}
-    recordMessage('Google 계정을 확인하고 있습니다.');
+    googleDriveManualSavePending=true;
+    recordMessage('Google 계정을 연결합니다. 연결 후 백업 버튼을 다시 누르면 저장합니다.');
     bridge.connectGoogleDrive();
   }
   function loadGoogleDriveBackup(){
-    if(!isGoogleDriveConnected()){recordMessage('먼저 Google Drive 자동 보관을 켜고 계정을 연결해 주세요.');return;}
+    if(!isGoogleDriveConnected()){recordMessage('먼저 Google Drive에 연결해 주세요.');return;}
     const bridge=nativeDrive();
     if(!bridge||typeof bridge.loadGoogleDriveBackup!=='function'){recordMessage('Google Drive 자동백업은 앱에서 사용할 수 있습니다.');return;}
+    if(hasBackupContent()&&!window.confirm('Google Drive의 이전 기록을 휴대폰에 병합합니다. 삭제한 기록이 다시 나타날 위험을 줄이기 위해 기존 데이터는 보존하지만, 이 작업은 되돌릴 수 없습니다. 계속할까요?'))return;
     recordMessage('Google Drive의 기록을 확인하고 있습니다.');
     bridge.loadGoogleDriveBackup();
   }
@@ -15596,42 +15597,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       !!(data.myParish&&data.myParish.name);
   }
   let oaiBackupRestoreApplying=false;
-  function queueGoogleDriveBackup(){
-    if(oaiBackupRestoreApplying||!isGoogleDriveAutoBackupEnabled())return;
-    const bridge=nativeDrive();if(!bridge||typeof bridge.saveGoogleDriveBackup!=='function')return;
-    try{if(googleDriveBackupTimer)clearTimeout(googleDriveBackupTimer);}catch(_e){}
-    googleDriveBackupTimer=setTimeout(function(){
-      googleDriveBackupTimer=0;
-      saveGoogleDriveBackupNow(false);
-    },900);
-  }
-  // 방문·즐겨찾기·내 본당처럼 백업 대상이 바뀌면, 앱을 닫지 않아도
-  // 약 1초 뒤 Drive에 저장합니다. 관련 없는 화면 설정은 백업하지 않습니다.
-  (function watchBackupStorage(){
-    const keys={};
-    [OAI_SHRINE_VISITS_KEY,OAI_PARISH_VISITS_KEY,OAI_PARISH_AUTO_VISIT_ENABLED_KEY,
-      OAI_SETTINGS_MY_PARISH_KEY,'oai_my_parish','oai_my_diocese_name','oai_my_parish_name',
-      'pr_favorites','web_favorites_v1',OAI_ROUTE_FAVORITES_KEY,OAI_DELETED_MANUAL_VISITS_KEY,'oai_pilgrimage_plan_v1','oai_pilgrimage_draft_meta_v2','oai_pilgrimage_courses_v1','prayer_font_size','oai_pilgrimage_public_feature_seen_v1'].forEach(function(key){keys[key]=true;});
-    try{
-      if(window.__oaiGoogleDriveStorageWatch)return;
-      window.__oaiGoogleDriveStorageWatch=true;
-      const setItem=Storage.prototype.setItem;
-      Storage.prototype.setItem=function(key,value){
-        const watch=this===window.localStorage&&keys[String(key)];
-        const old=watch?this.getItem(key):null;
-        const result=setItem.call(this,key,value);
-        if(watch&&old===String(value))return result;
-        if(!oaiBackupRestoreApplying&&watch){
-          if(isGoogleDriveAutoBackupEnabled())queueGoogleDriveBackup();
-          else setTimeout(maybeRecommendGoogleDrive,0);
-        }
-        return result;
-      };
-    }catch(_e){}
-  })();
+  // 1148: 화면의 localStorage 변경으로 Google Drive 백업을 자동 요청하지 않는다.
+  // 수동 백업만 사용하며, 기존 방문/사진/GPS 로컬 저장 경로는 그대로 둔다.
+  function queueGoogleDriveBackup(){}
   function saveGoogleDriveBackupNow(showMessage){
-    if(!isGoogleDriveAutoBackupEnabled())return;
+    if(!isGoogleDriveConnected())return;
     const bridge=nativeDrive();if(!bridge||typeof bridge.saveGoogleDriveBackup!=='function')return;
+    if(!hasBackupContent()){if(showMessage)recordMessage('백업할 방문·순례 기록이 없습니다. 빈 백업을 만들지 않았습니다.');return;}
+    if(showMessage&&!window.confirm('현재 휴대폰 기록을 Google Drive에 수동 백업합니다. 기존 정상 백업은 보존됩니다. 진행할까요?'))return;
     if(showMessage)recordMessage('Google Drive에 기록을 저장하고 있습니다.');
     try{bridge.saveGoogleDriveBackup(JSON.stringify(backupSnapshot()));}catch(_e){if(showMessage)recordMessage('Google Drive에 기록을 저장하지 못했습니다.');}
   }
@@ -15691,7 +15664,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       return;
     }
     googleDriveAutoConnectPending=true;
-    try{localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'1');}catch(_e){}
+    googleDriveRestoreAfterConnect=true;
+    try{localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'0');}catch(_e){}
     const bridge=nativeDrive();
     if(!bridge||typeof bridge.connectGoogleDrive!=='function'){
       googleDriveAutoConnectPending=false;
@@ -15702,36 +15676,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(continueFlow)m.dataset.oaiContinueInitial='1';
     bridge.connectGoogleDrive();
   }
-  function maybeRecommendGoogleDrive(){
-    if(isGoogleDriveAutoBackupEnabled()||!hasBackupContent())return;
-    if(window.oaiShouldDeferAdvisoryModal&&window.oaiShouldDeferAdvisoryModal()){if(document.visibilityState==='visible')setTimeout(maybeRecommendGoogleDrive,1800);return;}
-    const today=todayKey();
-    try{if(localStorage.getItem(OAI_GOOGLE_PROMPT_DATE_KEY)===today)return;localStorage.setItem(OAI_GOOGLE_PROMPT_DATE_KEY,today);}catch(_e){}
-    const settingsOpen=window.isOaiSettingsOpen&&window.isOaiSettingsOpen();
-    if(settingsOpen)return;
-    setTimeout(function(){
-      if(window.oaiShouldDeferAdvisoryModal&&window.oaiShouldDeferAdvisoryModal()){setTimeout(maybeRecommendGoogleDrive,1800);return;}
-      if(isGoogleDriveAutoBackupEnabled()||!hasBackupContent())return;
-      const m=onboardingModal();if(!m||m.classList.contains('show'))return;
-      m.dataset.oaiMode='backup';
-      setOnboardingHeader('새 기록을 안전하게 보관하세요.','휴대폰을 바꾸거나 앱을 다시 설치해도 다시 가져올 수 있습니다.');
-      const body=document.getElementById('oai-onboarding-backup-body');if(!body)return;
-      body.innerHTML='<p class="oai-onboarding-intro">성지순례·성당 방문 기록과 즐겨찾기를 내 Google Drive에 자동으로 보관합니다.</p><p class="oai-onboarding-privacy">가톨릭길동무 운영자는 개인 기록을 보관하지 않습니다.</p><button type="button" class="oai-records-primary" data-oai-onboarding-connect="1">내 Google Drive에 자동 보관</button><button type="button" class="oai-onboarding-text-button" data-oai-onboarding-finish="1">나중에</button><em id="oai-onboarding-backup-message" aria-live="polite"></em>';
-      m.classList.add('show');m.setAttribute('aria-hidden','false');
-    },120);
-  }
+  // 1148: 로컬 저장 도중 Google 자동 백업 권유 팝업을 띄우지 않는다.
+  function maybeRecommendGoogleDrive(){}
   window.oaiGoogleDriveStatus=function(status,message){
     if(status==='connected'){
-      localStorage.setItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY,'1');localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'1');googleDriveAutoConnectPending=false;
+      localStorage.setItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY,'1');localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'0');googleDriveAutoConnectPending=false;
       const onboarding=onboardingModal();
       if(initialDriveFirstFlow&&initialOnboarding){
-        if(onboarding){
-          onboarding.dataset.oaiMode='drive-check';
-          setOnboardingHeader('Google Drive를 확인하고 있습니다.','기존 순례·방문 기록과 즐겨찾기가 있는지 확인합니다.');
-          const body=document.getElementById('oai-onboarding-backup-body');
-          if(body)body.innerHTML='<p class="oai-onboarding-intro">잠시만 기다려 주세요.</p><em id="oai-onboarding-backup-message" aria-live="polite">저장된 기록을 확인하고 있습니다…</em>';
-          onboarding.classList.add('show');onboarding.setAttribute('aria-hidden','false');
-        }
+        // Connecting an account is not consent to restore/merge cloud records.
+        setTimeout(openInitialParishSetupAfterDrive,0);
       }else if(onboarding&&onboarding.classList.contains('show')){
         const wasRestore=onboarding.dataset.oaiMode==='restore';
         const continueInitial=onboarding.dataset.oaiContinueInitial==='1';
@@ -15740,7 +15693,18 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         else if(continueInitial)setTimeout(function(){if(!isGoogleDriveAutoBackupEnabled())openInitialDriveOnboarding();},250);
       }
     }
-    if(status==='disconnected'){localStorage.removeItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY);if(googleDriveAutoConnectPending)localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'0');googleDriveAutoConnectPending=false;if(initialOnboarding)onboardingMessage(message||'Google 계정을 연결하지 못했습니다. 다시 선택해 주세요.');}
+    if(status==='connected'&&googleDriveRestoreAfterConnect){
+      googleDriveRestoreAfterConnect=false;
+      loadGoogleDriveBackup();
+      return;
+    }
+    if(status==='connected'&&googleDriveManualSavePending){
+      googleDriveManualSavePending=false;
+      refreshGoogleDriveButton();
+      recordMessage('Google Drive 연결 완료. 기록을 확인한 뒤 백업 버튼을 다시 눌러 주세요.');
+      return;
+    }
+    if(status==='disconnected'){googleDriveRestoreAfterConnect=false;googleDriveManualSavePending=false;localStorage.removeItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY);if(googleDriveAutoConnectPending)localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'0');googleDriveAutoConnectPending=false;if(initialOnboarding)onboardingMessage(message||'Google 계정을 연결하지 못했습니다. 다시 선택해 주세요.');}
     if(status==='saved'){
       try{localStorage.setItem('oai_google_drive_saved_at_v1',new Date().toISOString());}catch(_e){}
       refreshGoogleDriveButton();
@@ -15748,41 +15712,22 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       return;
     }
     refreshGoogleDriveButton();recordMessage(message||'');
-    // 새 휴대폰의 빈 기록이 기존 Drive 백업을 덮어쓰면 안 됩니다.
-    // 따라서 연결 직후에는 먼저 Drive에 저장된 기록을 확인합니다.
-    if(status==='connected'){
-      // 이전 Android 버전은 Drive에 파일이 없을 때도 connected를 보냅니다.
-      // 이미 한 번 확인한 뒤의 connected는 '저장된 기록 없음'으로 처리해
-      // 확인 요청이 반복되지 않게 합니다.
-      if(googleDriveInitialSyncPending){
-        googleDriveInitialSyncPending=false;
-        if(shouldPromptRestore())markRestoreChecked();
-        if(hasBackupContent()){
-          recordMessage('저장된 기록이 없어 이 휴대폰의 기록을 처음 보관합니다.');
-          saveGoogleDriveBackupNow(true);
-        }else recordMessage('Google Drive에 저장된 기록이 없습니다. 방문 기록을 만든 뒤 자동으로 보관합니다.');
-        return;
-      }
-      googleDriveInitialSyncPending=true;
-      recordMessage('Google Drive의 기존 기록을 확인하고 있습니다.');
-      if(initialDriveFirstFlow)onboardingMessage('저장된 기록을 확인하고 있습니다…');
-      const bridge=nativeDrive();
-      if(bridge&&typeof bridge.loadGoogleDriveBackup==='function')bridge.loadGoogleDriveBackup();
-      return;
-    }
+    // 1149: Connection does not automatically fetch or merge Drive backup.
+    // Only the explicit restore button/request fetches data.
+    if(status==='connected')return;
     if(status==='empty'){
       const isFirstCheck=googleDriveInitialSyncPending;
       googleDriveInitialSyncPending=false;
       if(isFirstCheck&&shouldPromptRestore())markRestoreChecked();
       if(initialDriveFirstFlow&&initialOnboarding){
-        recordMessage('Google Drive에 기존 기록이 없습니다. 새 기록부터 자동으로 보관합니다.');
+        recordMessage('Google Drive에 이전 기록이 없습니다. 수동 백업을 이용해 주세요.');
         setTimeout(openInitialParishSetupAfterDrive,180);
         return;
       }
       if(isFirstCheck&&hasBackupContent()){
         recordMessage('저장된 기록이 없어 이 휴대폰의 기록을 처음 보관합니다.');
-        saveGoogleDriveBackupNow(true);
-      }else recordMessage('Google Drive에 저장된 기록이 없습니다. 방문 기록을 만든 뒤 자동으로 보관합니다.');
+        recordMessage('기존 백업은 보존합니다. 필요하면 수동 백업을 눌러 주세요.');
+      }else recordMessage('Google Drive에 저장된 기록이 없습니다. 필요할 때 수동 백업을 이용해 주세요.');
     }
   };
   window.oaiGoogleDriveBackupReceived=function(encoded){
@@ -15802,7 +15747,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(initialDriveFirstFlow&&initialOnboarding)setTimeout(openInitialParishSetupAfterDrive,180);
     }
   };
-  oaiAddLifecycleObserver('hidden',queueGoogleDriveBackup);
+  // 1148: 앱 백그라운드 진입 시 Drive 자동 백업을 실행하지 않는다.
   oaiAddLifecycleObserver('visible',function(){setTimeout(maybePromptRestoreDaily,500);});
   function openRestore(){const m=restoreModal();if(!m)return;restoreMessage('');const input=document.getElementById('oai-record-restore-code');if(input)input.value='';m.classList.add('show');m.setAttribute('aria-hidden','false');}
   function closeRestore(){const m=restoreModal();if(!m)return;m.classList.remove('show');m.setAttribute('aria-hidden','true');}
@@ -16035,13 +15980,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     initialDriveFirstFlow=true;
     m.dataset.oaiMode='drive-import-done';
     setOnboardingHeader('기존 기록을 가져왔습니다.','순례·방문 기록과 즐겨찾기를 이 휴대폰에 적용했습니다.');
-    body.innerHTML='<p class="oai-onboarding-intro"><b>데이터 가져오기가 완료되었습니다.</b></p><p class="oai-onboarding-privacy">Google Drive 자동 보관도 켜져 있어 앞으로 바뀌는 기록을 계속 보관합니다.</p><button type="button" class="oai-records-primary" data-oai-onboarding-import-done="1">확인</button>';
+    body.innerHTML='<p class="oai-onboarding-intro"><b>데이터 가져오기가 완료되었습니다.</b></p><p class="oai-onboarding-privacy">자동 백업은 중단되어 있습니다. 필요할 때 수동 백업을 이용해 주세요.</p><button type="button" class="oai-records-primary" data-oai-onboarding-import-done="1">확인</button>';
     m.classList.add('show');m.setAttribute('aria-hidden','false');
   }
   function renderOnboardingBackup(risk){
     const body=document.getElementById('oai-onboarding-backup-body');if(!body)return;
     if(risk){body.innerHTML='<p class="oai-onboarding-warning">Google Drive를 연결하지 않으면 휴대폰을 바꾸거나 앱을 다시 설치할 때 방문·순례 기록과 즐겨찾기를 잃을 수 있습니다.</p><button type="button" class="oai-records-primary" data-oai-onboarding-connect="1">Google Drive 연결하기</button><button type="button" class="oai-onboarding-text-button" data-oai-onboarding-finish="1">그래도 나중에 설정하기</button>';return;}
-    body.innerHTML='<p class="oai-onboarding-intro">Google Drive를 연결하면 <b>기존 기록이 있는지 먼저 확인</b>합니다.</p><p class="oai-onboarding-privacy">기존 기록이 있으면 자동으로 가져오고, 없으면 새 기록부터 자동 보관합니다. 가톨릭길동무 운영자는 개인 기록을 보관하지 않습니다.</p><button type="button" class="oai-records-primary" data-oai-onboarding-connect="1">Google Drive 연결하기</button><button type="button" class="oai-onboarding-text-button" data-oai-onboarding-later="1">나중에 연결하기</button><em id="oai-onboarding-backup-message" aria-live="polite"></em>';
+    body.innerHTML='<p class="oai-onboarding-intro">Google Drive 연결은 선택 사항입니다.</p><p class="oai-onboarding-privacy">연결해도 자동 백업하거나 기존 기록을 자동으로 합치지 않습니다. 복원 및 백업은 각각 수동으로 실행합니다.</p><button type="button" class="oai-records-primary" data-oai-onboarding-connect="1">Google Drive 연결하기</button><button type="button" class="oai-onboarding-text-button" data-oai-onboarding-later="1">나중에 연결하기</button><em id="oai-onboarding-backup-message" aria-live="polite"></em>';
   }
   function openOnboardingBackup(){
     const m=onboardingModal();if(!m)return;m.dataset.oaiMode='backup';renderOnboardingBackup(false);m.classList.add('show');m.setAttribute('aria-hidden','false');
@@ -16051,13 +15996,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(setup){setup.classList.remove('show','oai-parish-setup-home');setup.setAttribute('aria-hidden','true');}
     initialOnboarding=true;
     initialDriveFirstFlow=true;
-    if(isGoogleDriveAutoBackupEnabled()){
-      googleDriveInitialSyncPending=true;
-      const bridge=nativeDrive();
-      if(bridge&&typeof bridge.loadGoogleDriveBackup==='function'){bridge.loadGoogleDriveBackup();return;}
-      openInitialParishSetupAfterDrive();return;
-    }
-    setOnboardingHeader('Google Drive에 연결할까요?','연결하면 기존 기록이 있는지 먼저 확인하고, 이후 기록은 자동으로 보관합니다.');
+    setOnboardingHeader('Google Drive에 연결할까요?','연결해도 기록을 자동 저장하거나 가져오지 않습니다.');
     openOnboardingBackup();
   }
   function openInitialRestoreOnboarding(){
@@ -16134,13 +16073,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       e.preventDefault();
       if(initialOnboarding)initialDriveFirstFlow=true;
       if(isGoogleDriveConnected()){
-        localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'1');
-        googleDriveInitialSyncPending=true;
-        onboardingMessage('Google Drive의 기존 기록을 확인합니다.');
-        loadGoogleDriveBackup();
+        onboardingMessage('Google Drive가 연결되어 있습니다. 복원과 백업은 설정에서 직접 실행합니다.');
+        if(initialOnboarding)setTimeout(openInitialParishSetupAfterDrive,0);
       }else{
-        onboardingMessage('Google 계정을 선택해 주세요.');
-        setGoogleDriveAutoBackup(true);
+        onboardingMessage('Google 계정을 선택해 주세요. 연결만 진행합니다.');
+        googleDriveAutoConnectPending=true;
+        const bridge=nativeDrive();
+        if(bridge&&typeof bridge.connectGoogleDrive==='function')bridge.connectGoogleDrive();
+        else onboardingMessage('Google Drive 연결은 Android 앱에서 사용할 수 있습니다.');
       }
       return;
     }
