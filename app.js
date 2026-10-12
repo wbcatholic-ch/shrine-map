@@ -16248,6 +16248,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const c=loadCourses().find(x=>x.id===currentCourseId);
     return c&&_courseHasGpsLockedCompletion(c)?c:null;
   }
+  function _manualOrderFromMerged(merged){
+    // 기존 GPS 항목의 상대 순서를 건드리지 않고, 수동 항목의 위치만 재색인한다.
+    let gpsBefore=0;const ordering={};
+    merged.forEach((row,index)=>{
+      if(row.gps)gpsBefore++;
+      else if(row.manualId)ordering[row.manualId]={position:gpsBefore,seq:index};
+    });
+    return ordering;
+  }
   function _manualPlaceAdd(){
     const c=_manualCompletionCourse();if(!c)return;
     const search=prompt('누락된 성지·성당 이름을 입력하세요. (공식 등록 장소만 가능)');
@@ -16262,10 +16271,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(existing.some(x=>_dailySamePlace(x.point,match))){alert('이미 순례완료 코스에 포함된 장소입니다.');return;}
     const position=Number(prompt('몇 번째 위치에 넣을까요? 1부터 '+(existing.length+1)+'까지 입력하세요.',''+(existing.length+1)));
     if(!Number.isInteger(position)||position<1||position>existing.length+1)return;
-    const gpsBefore=existing.slice(0,position-1).filter(x=>x.gps).length;
+    // V1182: 사용자가 지정한 전체 삽입 위치를 기존 GPS/수동 항목의 배열에 먼저 반영한다.
+    // 같은 GPS 구간의 수동 장소는 추가 시각 대신 배열 내 상대 순서로 저장한다.
     const entries=_manualPointsFor(c.id).map(x=>Object.assign({},x));
     const id='manual_'+Date.now()+'_'+Math.random().toString(36).slice(2,8);
-    entries.push({id,point:normalizePoint(match),position:gpsBefore,seq:Date.now()});
+    const arranged=existing.slice();
+    arranged.splice(position-1,0,{point:normalizePoint(match),gps:false,manualId:id});
+    const ordering=_manualOrderFromMerged(arranged);
+    entries.push({id,point:normalizePoint(match),position:0,seq:0});
+    for(const entry of entries){if(ordering[entry.id])Object.assign(entry,ordering[entry.id]);}
     try{_manualPointsWrite(c.id,entries);renderDetail();}catch(e){alert('수동 순례지 저장에 실패했습니다. 기존 기록은 변경하지 않았습니다.');}
   }
   function _manualPlaceDelete(id){
@@ -16279,8 +16293,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const merged=_manualMerged(c),from=merged.findIndex(x=>!x.gps&&x.manualId===id);
     if(from<0||targetIndex<0||targetIndex>=merged.length||targetIndex===from)return;
     const moving=merged.splice(from,1)[0];merged.splice(targetIndex,0,moving);
-    let gpsBefore=0;const updates={};
-    merged.forEach((x,i)=>{if(x.gps)gpsBefore++;else updates[x.manualId]={position:gpsBefore,seq:i};});
+    const updates=_manualOrderFromMerged(merged);
     const rows=_manualPointsFor(c.id).map(x=>Object.assign({},x,updates[x.id]||{}));
     try{_manualPointsWrite(c.id,rows);renderDetail();}catch(e){alert('순서 저장에 실패했습니다.');}
   }
