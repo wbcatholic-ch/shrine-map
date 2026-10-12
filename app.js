@@ -15613,11 +15613,31 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1'){oaiAskRestoreOnFreshInstall();return;}
     oaiScheduleBackup();
   }
-  function oaiConfirmDriveImport(count,onAccept){
+  function oaiConfirmDriveImport(entries,onAccept){
     const modal=document.getElementById('oai-drive-import-confirm');
     if(!modal){oaiTransferStatus('가져오기 확인창을 열지 못했습니다.');return;}
     const number=modal.querySelector('[data-oai-drive-import-count]');
-    if(number)number.textContent=String(count);
+    if(number)number.textContent=String(entries.length);
+    const summary=modal.querySelector('[data-oai-drive-import-summary]');
+    if(summary){
+      const label=[];
+      for(const [key,title] of [['oai_shrine_visits_v1','성지'],['oai_parish_visits_v1','성당']]){
+        const saved=entries.find(([name])=>name===key);
+        if(!saved)continue;
+        try{
+          const records=JSON.parse(saved[1]);
+          if(!records||typeof records!=='object'||Array.isArray(records))continue;
+          let places=0,visits=0;
+          for(const item of Object.values(records)){
+            const history=Array.isArray(item)?item:(item&&item.visits);
+            if(!Array.isArray(history)||!history.length)continue;
+            places++;visits+=history.length;
+          }
+          label.push(title+' '+places+'곳 · 방문 '+visits+'회');
+        }catch(_e){}
+      }
+      summary.textContent=label.length?label.join(' / '):'방문기록 세부 건수는 가져온 뒤 확인할 수 있습니다.';
+    }
     modal.classList.add('show');modal.setAttribute('aria-hidden','false');
     const focusBefore=document.activeElement;
     const cancel=modal.querySelector('[data-oai-drive-import-cancel]');
@@ -15659,7 +15679,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(parsed.format!=='cgm-single-transfer'||parsed.schema!==1||!parsed.data||Array.isArray(parsed.data)||typeof parsed.data!=='object')throw Error('지원하지 않는 데이터 형식입니다.');
       const entries=Object.entries(parsed.data).filter(([key,value])=>oaiTransferAllowedKey(key)&&typeof value==='string');
       if(!entries.length)throw Error('가져올 방문기록이 없습니다.');
-      oaiConfirmDriveImport(entries.length,function(){
+      oaiConfirmDriveImport(entries,function(){
         oaiApplyingRestore=true;
         try{
           const previous=entries.map(([key])=>[key,localStorage.getItem(key)]);
