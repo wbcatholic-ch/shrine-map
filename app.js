@@ -19405,7 +19405,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     parish_book:['성당 방문 스탬프북','GPS로 확인된 성당 방문기록을 살펴봅니다.\n내 본당 자동 기록 제한은 설정에서 변경할 수 있습니다.'],
     shrine_detail:['순례 기록','이 성지의 GPS 순례 날짜와 횟수를 확인합니다.\n사진·메모 관리는 설정의 개발자 도구에서만 선택적으로 표시합니다.'],
     parish_detail:['성당 방문기록','GPS 방문 날짜와 횟수를 확인합니다.\n일반 성당 한 곳만 방문한 날은 자동 순례코스를 생성하지 않습니다.'],
-    directions:['길찾기','출발지와 도착지를 선택하고, 필요하면 경유지를 추가합니다.\n경로 검색 후 길안내 앱을 이용할 수 있습니다.'],
+    directions:['길찾기','출발지와 도착지를 지정하고 필요한 경유지를 추가하세요.\n장소 칸을 누르면 바꿀 수 있고, 길찾기 결과에서 내비를 실행할 수 있습니다.'],
     stamps:['방문 스탬프','GPS로 확인한 방문기록을 날짜별로 보관합니다.\n사진과 메모 등 개인 기록은 별도로 유지됩니다.']
   };
   let lastFocused=null;
@@ -19470,25 +19470,30 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup,{once:true});else setup();
 })();
 
-/* V1189: 순례완료/순례계획 좌우 순환 스와이프. 기존 탭 클릭 흐름만 호출한다. */
+/* V1193: 순례완료 ↔ 순례계획 좌우 무한 순환. 목록에서만 동작. */
 (function(){
-  let x0=0,y0=0,active=false;
-  function getView(t){return t&&t.closest&&t.closest('#oai-pilgrimage-list-view');}
+  'use strict';
+  let touch=null;
+  const view='#oai-pilgrimage-list-view';
   document.addEventListener('touchstart',function(e){
-    const t=e.target;if(e.touches.length!==1||!getView(t)||t.closest('input,textarea,select,button,[role="button"],.oai-pilgrimage-course-tabs,[data-oai-pilgrimage-drag],.oai-pilgrimage-card-actions')){active=false;return;}
-    x0=e.touches[0].clientX;y0=e.touches[0].clientY;active=true;
+    touch=null;
+    if(e.touches.length!==1 || !e.target.closest(view))return;
+    if(e.target.closest('input,textarea,select,button,a,[role="button"],[data-oai-pilgrimage-drag],.oai-pilgrimage-card-actions'))return;
+    touch={x:e.touches[0].clientX,y:e.touches[0].clientY};
   },{passive:true});
   document.addEventListener('touchend',function(e){
-    if(!active||!getView(e.target)||!e.changedTouches.length)return;active=false;
-    const dx=e.changedTouches[0].clientX-x0,dy=e.changedTouches[0].clientY-y0;
-    if(Math.abs(dx)<65||Math.abs(dx)<Math.abs(dy)*1.6)return;
-    const currently=document.querySelector('#oai-pilgrimage-list-view [data-oai-pilgrimage-course-tab][aria-selected="true"]');
-    if(!currently)return;
-    const next=currently.getAttribute('data-oai-pilgrimage-course-tab')==='complete'?'plan':'complete';
-    const target=document.querySelector('#oai-pilgrimage-list-view [data-oai-pilgrimage-course-tab="'+next+'"]');
-    if(target)target.click();
+    if(!touch||!e.changedTouches.length)return;
+    const start=touch;touch=null;
+    if(!e.target.closest(view))return;
+    const dx=e.changedTouches[0].clientX-start.x,dy=e.changedTouches[0].clientY-start.y;
+    if(Math.abs(dx)<65||Math.abs(dx)<Math.abs(dy)*1.5)return;
+    const list=document.querySelector(view);if(!list)return;
+    const now=list.getAttribute('data-course-tab') || (list.querySelector('[data-oai-pilgrimage-course-tab].is-active')?.getAttribute('data-oai-pilgrimage-course-tab'));
+    const next=now==='complete'?'plan':'complete';
+    const btn=list.querySelector('[data-oai-pilgrimage-course-tab="'+next+'"]');
+    if(btn)btn.click();
   },{passive:true});
-  document.addEventListener('touchcancel',function(){active=false;},{passive:true});
+  document.addEventListener('touchcancel',function(){touch=null;},{passive:true});
 })();
 
 /* V1189: 개발자 설정을 켠 경우에만 상세 사진/메모 UI 활성화 */

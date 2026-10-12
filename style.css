@@ -9879,76 +9879,49 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
 .cgm-dev-journal-switch input{width:20px;height:20px;}
 
 
-/* V1190: compact help icons, clear settings header, unified title hierarchy */
-#oai-settings-modal .oai-settings-panel>.oai-settings-head{
+/* V1193: 단일 표준 규격 - 중복된 설정/시트 도움말 오버라이드 제거 */
+#oai-settings-modal .oai-settings-panel > .oai-settings-head{
+  box-sizing:border-box!important;min-height:0!important;height:auto!important;
+  padding:max(13px, env(safe-area-inset-top, 0px)) 18px 13px!important;
+  display:flex!important;align-items:center!important;gap:12px!important;
   background:#111936!important;border-bottom:3px solid #c6a965!important;
-  min-height:80px!important;padding:18px 23px!important;box-shadow:none!important;
 }
-#oai-settings-modal .oai-settings-panel>.oai-settings-head h2{
-  color:#fff!important;font-size:var(--oai-std-title-fs,25px)!important;font-weight:900!important;
+#oai-settings-modal .oai-settings-panel > .oai-settings-head h2{
+  display:block!important;overflow:visible!important;white-space:normal!important;
+  margin:0!important;padding:0!important;font-size:24px!important;line-height:1.38!important;
+  color:#fff!important;font-weight:900!important;
 }
-#oai-settings-modal .oai-settings-panel>.oai-settings-head button[data-oai-settings-close]{
+#oai-settings-modal .oai-settings-panel > .oai-settings-head button[data-oai-settings-close]{
+  margin-left:auto!important;flex-shrink:0!important;width:40px!important;height:40px!important;
   color:#d8b875!important;border-color:#d8b875!important;background:transparent!important;
-  width:43px!important;height:43px!important;font-size:29px!important;
 }
-/* Header labels stay left aligned as in all other modules. */
 #oai-settings-modal .oai-settings-group > h3.cgm-help-heading{
-  justify-content:space-between!important;text-align:left!important;font-size:inherit!important;
-  padding:8px 16px!important;min-height:48px!important;
+  display:flex!important;align-items:center!important;justify-content:flex-start!important;
+  text-align:left!important;min-height:54px!important;line-height:1.3!important;
+  gap:10px!important;padding:11px 17px!important;
+  font-size:calc(19px * var(--app-font-scale, 1))!important;
 }
-/* Visual 24px, invisible tap box at least 44px wide/high, no layout expansion. */
-#oai-settings-modal .oai-settings-group > h3.cgm-help-heading > .cgm-help-icon,
-.oai-settings-panel .oai-settings-group > h3.cgm-help-heading > .cgm-help-icon{
-  position:relative!important;box-sizing:border-box!important;display:inline-flex!important;
-  align-items:center!important;justify-content:center!important;
-  width:26px!important;height:26px!important;min-width:26px!important;min-height:26px!important;
-  padding:0!important;border:1.5px solid #fff!important;
-  background:transparent!important;color:#fff!important;font-size:16px!important;
-  line-height:1!important;font-weight:800!important;
-}
-#oai-settings-modal .oai-settings-group > h3.cgm-help-heading > .cgm-help-icon::before{
-  content:'';position:absolute;inset:-9px;
-}
-/* Help icons in other titles match the same compact visual language. */
-.module-bar-title>.cgm-help-icon,
-.oai-pilgrimage-head .cgm-help-icon,
-.shrine-visit-detail-head-title>.cgm-help-icon,
-.sheet-hd>.cgm-help-icon{
-  box-sizing:border-box!important;width:26px!important;height:26px!important;
-  min-width:26px!important;min-height:26px!important;padding:0!important;
-  border-width:1.5px!important;font-size:16px!important;line-height:1!important;
-  vertical-align:middle!important;
-}
-@media (max-width:380px){
-  #oai-settings-modal .oai-settings-panel>.oai-settings-head{padding:16px 18px!important;}
-}
-
-/* V1191: 모든 설정 헤더는 금색 표시선 다음 왼쪽 제목, 오른쪽 작은 도움말. */
-#oai-settings-modal .oai-settings-group > h3.cgm-help-heading,
-.oai-settings-panel .oai-settings-group > h3.cgm-help-heading{
-  display:flex!important;justify-content:flex-start!important;align-items:center!important;
-  text-align:left!important;gap:12px!important;padding-left:19px!important;
-  padding-right:18px!important;
-}
-#oai-settings-modal .oai-settings-group > h3.cgm-help-heading > .cgm-help-icon,
-.oai-settings-panel .oai-settings-group > h3.cgm-help-heading > .cgm-help-icon{
+#oai-settings-modal .oai-settings-group > h3.cgm-help-heading > .cgm-help-icon{
   margin-left:auto!important;flex-shrink:0!important;
-  width:26px!important;height:26px!important;min-width:26px!important;min-height:26px!important;
-  font-size:16px!important;border-width:1.5px!important;
 }
-/* V1191: 성지/성당/피정 공통 시트의 동일한 제목 줄 및 도움말 좌표 */
-#sheet-nearby .sheet-hd, #sheet-list .sheet-hd, #sheet-region .sheet-hd{display:flex;align-items:center;}
-#sheet-nearby .sheet-hd>.cgm-help-icon,
-#sheet-list .sheet-hd>.cgm-help-icon,
-#sheet-region .sheet-hd>.cgm-help-icon{
-  margin-left:10px!important;margin-right:auto!important;
+#oai-settings-modal .oai-settings-group > h3.cgm-help-heading > .cgm-help-icon,
+#sheet-nearby .sheet-hd > .cgm-help-icon,
+#sheet-list .sheet-hd > .cgm-help-icon,
+#sheet-region .sheet-hd > .cgm-help-icon,
+#sheet-route > .cgm-route-help,
+#oai-pilgrimage-planner-title > .cgm-help-icon{
+  box-sizing:border-box!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;
   width:26px!important;height:26px!important;min-width:26px!important;min-height:26px!important;
-  font-size:16px!important;border-width:1.5px!important;
+  padding:0!important;border:1.5px solid currentColor!important;border-radius:50%!important;
+  font-size:16px!important;line-height:1!important;font-weight:800!important;
+  color:inherit!important;background:transparent!important;opacity:1!important;
 }
-
-/* V1192: 도움말 시각 크기 통일, 설정 박스 제목 왼쪽/도움말 오른쪽 */
-#oai-settings-modal .oai-settings-group>h3.cgm-help-heading,
-.oai-settings-panel .oai-settings-group>h3.cgm-help-heading{justify-content:flex-start!important;text-align:left!important;gap:12px!important;}
-#oai-settings-modal .oai-settings-group>h3.cgm-help-heading>.cgm-help-icon,
-.oai-settings-panel .oai-settings-group>h3.cgm-help-heading>.cgm-help-icon{margin-left:auto!important;width:26px!important;height:26px!important;min-width:26px!important;min-height:26px!important;font-size:16px!important;border-width:1.5px!important;}
-#sheet-nearby .sheet-hd>.cgm-help-icon,#sheet-list .sheet-hd>.cgm-help-icon,#sheet-region .sheet-hd>.cgm-help-icon{flex-shrink:0!important;}
+#sheet-nearby .sheet-hd,#sheet-list .sheet-hd,#sheet-region .sheet-hd{display:flex!important;align-items:center!important;}
+#sheet-nearby .sheet-hd > .cgm-help-icon,#sheet-list .sheet-hd > .cgm-help-icon,#sheet-region .sheet-hd > .cgm-help-icon{
+  flex-shrink:0!important;margin-left:10px!important;margin-right:auto!important;
+}
+#sheet-route > .cgm-route-help{
+  position:absolute!important;z-index:25!important;right:62px!important;top:12px!important;
+  color:#27445e!important;background:#fff!important;
+}
+#oai-pilgrimage-planner-title > .cgm-help-icon{margin-left:8px!important;vertical-align:middle!important;}
