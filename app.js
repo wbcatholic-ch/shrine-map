@@ -19423,15 +19423,32 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     layer.querySelector('#cgm-help-title').textContent=data[0];
     layer.querySelector('#cgm-help-text').textContent=data[1];
-    layer.hidden=false;layer.querySelector('button').focus();
+    layer.hidden=false;layer.style.display='flex';layer.querySelector('button').focus();
   }
-  function hide(){const layer=document.getElementById('cgm-help-overlay');if(layer)layer.hidden=true;if(lastFocused&&lastFocused.focus)lastFocused.focus();}
-  window.addEventListener('click',function(e){const target=e.target&&e.target.closest&&e.target.closest('[data-cgm-help]');if(!target)return;e.preventDefault();e.stopPropagation();e.stopImmediatePropagation();show(target.getAttribute('data-cgm-help'));},true);
+  function hide(){const layer=document.getElementById('cgm-help-overlay');if(layer){layer.hidden=true;layer.style.display='none';}if(lastFocused&&lastFocused.focus)lastFocused.focus();}
+  function connectHelpButton(button){
+    if(!button||button.dataset.cgmHelpBound==='1')return;
+    button.dataset.cgmHelpBound='1';
+    button.addEventListener('click',function(e){
+      e.preventDefault();e.stopPropagation();
+      show(button.getAttribute('data-cgm-help'));
+    },true);
+  }
+  // Every existing button gets its own handler. Newly-rendered module buttons are bound too.
+  document.addEventListener('click',function(e){
+    const target=e.target&&e.target.closest&&e.target.closest('[data-cgm-help]');
+    if(!target)return;
+    e.preventDefault();e.stopPropagation();
+    show(target.getAttribute('data-cgm-help'));
+  },true);
+  function bindHelpButtons(){document.querySelectorAll('[data-cgm-help]').forEach(connectHelpButton);}
+
   function attachHelp(el,key){if(!el||el.querySelector(':scope > [data-cgm-help]'))return;
-    const btn=document.createElement('button');btn.type='button';btn.className='cgm-help-icon';btn.setAttribute('data-cgm-help',key);btn.setAttribute('aria-label',HELP[key][0]+' 도움말');btn.textContent='?';
+    const btn=document.createElement('button');btn.type='button';btn.className='cgm-help-icon';btn.setAttribute('data-cgm-help',key);btn.setAttribute('aria-label',HELP[key][0]+' 도움말');btn.textContent='?';connectHelpButton(btn);
     if(el.classList && el.classList.contains('sheet-hd')) { const title=el.querySelector('.sheet-title');el.insertBefore(btn,title?title.nextSibling:el.firstChild); } else el.appendChild(btn);
   }
   function setup(){
+    bindHelpButtons();
     // V1191: 성지·성당·피정의 도움말은 모두 같은 sheet-hd 제목 줄에 배치한다.
     // 화면 제목이 비동기로 바뀌어도 설명을 현재 카테고리에 맞게 동기화한다.
     const sheetTitles=[['nearby-sheet-title','nearby'],['list-sheet-title','find'],['region-sheet-title','region']];
@@ -19461,6 +19478,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     sheetObserver.observe(document.documentElement,{attributes:true,attributeFilter:['class']});
     // 동적으로 생성되는 방문 스탬프북은 열린 시점에 버튼을 붙임 (MutationObserver: 화면 안의 제목만 검사).
     const observer=new MutationObserver(function(){
+      bindHelpButtons();
       document.querySelectorAll('.shrine-visit-cards-head .module-bar-title').forEach(function(t){
         const key=/성당/.test(t.textContent)?'parish_book':'shrine_book';attachHelp(t,key);
         const sub=t.parentNode.querySelector('.module-bar-sub');if(sub)sub.style.display='none';
@@ -19471,29 +19489,34 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',setup,{once:true});else setup();
 })();
 
-/* V1193: 순례완료 ↔ 순례계획 좌우 무한 순환. 목록에서만 동작. */
+/* V1195: 순례완료 ↔ 순례계획 반복 전환, 카드/목록 스와이프 */
 (function(){
-  'use strict';
-  let touch=null;
-  const view='#oai-pilgrimage-list-view';
-  document.addEventListener('touchstart',function(e){
-    touch=null;
-    if(e.touches.length!==1 || !e.target.closest(view))return;
-    if(e.target.closest('input,textarea,select,button,a,[role="button"],[data-oai-pilgrimage-drag],.oai-pilgrimage-card-actions'))return;
-    touch={x:e.touches[0].clientX,y:e.touches[0].clientY};
-  },{passive:true});
-  document.addEventListener('touchend',function(e){
-    if(!touch||!e.changedTouches.length)return;
-    const start=touch;touch=null;
-    const dx=e.changedTouches[0].clientX-start.x,dy=e.changedTouches[0].clientY-start.y;
-    if(Math.abs(dx)<65||Math.abs(dx)<Math.abs(dy)*1.5)return;
-    const list=document.querySelector(view);if(!list)return;
-    const now=list.getAttribute('data-course-tab') || (list.querySelector('[data-oai-pilgrimage-course-tab].is-active')?.getAttribute('data-oai-pilgrimage-course-tab'));
-    const next=now==='complete'?'plan':'complete';
-    const btn=list.querySelector('[data-oai-pilgrimage-course-tab="'+next+'"]');
-    if(btn)btn.click();
-  },{passive:true});
-  document.addEventListener('touchcancel',function(){touch=null;},{passive:true});
+ 'use strict';
+ const viewId='oai-pilgrimage-list-view';
+ let gesture=null, lastDone=0;
+ function inList(el){const node=el&&el.closest&&el.closest('#'+viewId);return node&&!node.hidden&&node.offsetParent!==null;}
+ function start(e,x,y){
+   gesture=null;
+   if(!inList(e.target))return;
+   if(e.target.closest('input,textarea,select,[data-oai-pilgrimage-drag],.oai-pilgrimage-drag'))return;
+   gesture={x,y,at:Date.now()};
+ }
+ function finish(e,x,y){
+   if(!gesture)return;
+   const g=gesture;gesture=null;
+   if(Date.now()-lastDone<400)return;
+   const dx=x-g.x,dy=y-g.y;
+   if(Math.abs(dx)<55||Math.abs(dx)<Math.abs(dy)*1.3)return;
+   const list=document.getElementById(viewId);
+   if(!list||list.offsetParent===null)return;
+   const current=list.getAttribute('data-course-tab')||'complete';
+   const next=current==='complete'?'plan':'complete';
+   const target=list.querySelector('[data-oai-pilgrimage-course-tab="'+next+'"]');
+   if(target){lastDone=Date.now();target.click();}
+ }
+ document.addEventListener('touchstart',function(e){if(e.touches.length===1)start(e,e.touches[0].clientX,e.touches[0].clientY);},{passive:true});
+ document.addEventListener('touchend',function(e){if(e.changedTouches.length)finish(e,e.changedTouches[0].clientX,e.changedTouches[0].clientY);},{passive:true});
+ document.addEventListener('touchcancel',function(){gesture=null;},{passive:true});
 })();
 
 /* V1189: 개발자 설정을 켠 경우에만 상세 사진/메모 UI 활성화 */

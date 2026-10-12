@@ -9935,3 +9935,15 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
 #oai-settings-modal .oai-settings-frequent-info p,
 #oai-settings-modal .oai-settings-group .oai-settings-edit-row small,
 #oai-settings-modal .oai-settings-group .oai-settings-switch-row small{display:none!important;}
+
+/* V1195: help buttons visible and interactive over dark/light module headers */
+#sheet-nearby .sheet-hd .cgm-help-icon,#sheet-list .sheet-hd .cgm-help-icon,
+#sheet-region .sheet-hd .cgm-help-icon,#oai-pilgrimage-planner-title .cgm-help-icon,
+.module-bar .cgm-help-icon{color:#fff!important;border-color:#fff!important;background:rgba(255,255,255,.10)!important;pointer-events:auto!important;opacity:1!important;position:relative!important;z-index:3!important;}
+.cgm-help-icon{cursor:pointer!important;touch-action:manipulation!important;}
+.cgm-help-overlay[hidden]{display:none!important;}
+.cgm-help-overlay:not([hidden]){display:flex!important;z-index:2147483645!important;}
+/* Highlight only while GPS pilgrimage has actually been started */
+#oai-pilgrimage-detail-view:not(.gps-ready) .oai-pilgrimage-item.is-next{background:#fff!important;border-top-color:#e1e5e8!important;border-bottom-color:#e1e5e8!important;}
+/* Route-result information already explains actions; hide only on completed result views. */
+#sheet-route.route-result-showing > .cgm-route-help{display:none!important;}
