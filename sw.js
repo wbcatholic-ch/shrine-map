@@ -1,4 +1,4 @@
-const ASSET_VERSION = 'V8-1-14-1230';
+const ASSET_VERSION = 'V8-1-14-1234';
 const CACHE_VERSION = 'catholic-way-' + ASSET_VERSION;
 
 /* V8-1-14-923: service worker cache strategy overview.
@@ -25,6 +25,7 @@ const APP_SHELL = [
   withVersion('./css/overlays.css'),
   withVersion('./css/cover-modals.css'),
   withVersion('./js/help-ui.js'),
+  withVersion('./js/parish-fixed-ids.js'),
   withVersion('./app.js'),
   withVersion('./js/cover-common.js'),
   withVersion('./js/touch-ux.js'),
@@ -72,7 +73,7 @@ function isVersionedAsset(request) {
   try {
     const url = new URL(request.url);
     return url.searchParams.has('v') ||
-      /parishes-[a-z-]+\.js|prayer-data\.js|prayer\.js|retreats\.js|shrines\.js|diocese\.html|privacy\.html|diocese\.css|qa-firebase\.html|app\.js|style\.css|module-common\.css|prayer\.css|web\.css|pilgrimage\.css|overlays\.css|cover-modals\.css|web\.js|touch-ux\.js|prayer-ui\.js|cover-refresh\.js|app-state-guards\.js|route-web-guards\.js|back-controller\.js|sw-update\.js/.test(url.pathname);
+      /parishes-[a-z-]+\.js|prayer-data\.js|prayer\.js|retreats\.js|shrines\.js|diocese\.html|privacy\.html|diocese\.css|qa-firebase\.html|app\.js|parish-fixed-ids\.js|style\.css|module-common\.css|prayer\.css|web\.css|pilgrimage\.css|overlays\.css|cover-modals\.css|web\.js|touch-ux\.js|prayer-ui\.js|cover-refresh\.js|app-state-guards\.js|route-web-guards\.js|back-controller\.js|sw-update\.js/.test(url.pathname);
   } catch (e) { return false; }
 }
 async function networkFirst(request) {
