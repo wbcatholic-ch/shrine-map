@@ -317,5 +317,5 @@ html:not(.ios-device).oai-screen-compact-short #prayer-close{
 .cgm-help-overlay {position:fixed;inset:0;z-index:2147483600;background:rgba(0,0,0,.5);display:flex;align-items:center;justify-content:center;padding:20px;}
 .cgm-help-dialog {box-sizing:border-box;background:#FFFDF7;color:#333;border-radius:16px;max-width:365px;width:100%;max-height:calc(100dvh - 48px);overflow-y:auto;-webkit-overflow-scrolling:touch;padding:22px 20px;box-shadow:0 12px 36px rgba(0,0,0,.2);}
 .cgm-help-dialog h3{color:#71531D;font-size:calc(24px * var(--app-inner-font-scale,1));margin:0 0 12px;line-height:1.45;}
-.cgm-help-dialog p{font-size:calc(22px * var(--app-inner-font-scale,1));white-space:pre-line;line-height:1.65;margin:0 0 20px;overflow-wrap:anywhere;}
+.cgm-help-dialog p{font-size:calc(20px * var(--app-inner-font-scale,1));white-space:pre-line;line-height:1.65;margin:0 0 20px;overflow-wrap:anywhere;}
 .cgm-help-close{display:block;margin-left:auto;background:#356F57;color:#fff;border:0;border-radius:9px;padding:10px 22px;font-size:calc(20px * var(--app-inner-font-scale,1));font-weight:700;cursor:pointer;}

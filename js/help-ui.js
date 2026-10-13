@@ -75,7 +75,7 @@
       layer.addEventListener('keydown',function(ev){if(ev.key==='Escape'){ev.preventDefault();hide();}if(ev.key==='Tab'){ev.preventDefault();layer.querySelector('button').focus();}});
     }
     layer.querySelector('#cgm-help-title').textContent=data[0];
-    layer.querySelector('#cgm-help-text').textContent=data[1];
+    layer.querySelector('#cgm-help-text').textContent=data[1].replace(/\n(?=\[)/g,'\n\n');
     layer.hidden=false;layer.style.display='flex';layer.querySelector('button').focus();
     if(!helpHistoryPending){
       try{history.pushState({cgm_help_overlay:true},'',location.href);helpHistoryPending=true;}catch(_e){}

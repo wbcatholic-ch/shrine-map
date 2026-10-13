@@ -15601,10 +15601,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // Developer tools: all backup work is opt-in, with no startup serialization or polling.
   const OAI_DEV_KEY='oai_developer_mode_v1';
   let oaiDevTapCount=0, oaiDevPendingRestore=null;
+  // 개발자 도구의 화면 노출은 실행 중 10회 탭으로만 해제한다. 저장된 사용 권한과 분리한다.
+  let oaiDevPanelUnlocked=false;
   function oaiDevEnabled(){return localStorage.getItem(OAI_DEV_KEY)==='1';}
   function oaiDevStatus(value){const el=document.getElementById('oai-dev-status');if(el)el.textContent=value||'';}
   function oaiRefreshDeveloperPanel(){
-    const section=document.getElementById('oai-developer-section');if(section)section.hidden=!oaiDevEnabled();
+    const section=document.getElementById('oai-developer-section');if(section)section.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked);
     if(!oaiDevEnabled()){oaiDevPendingRestore=null;for(const id of ['oai-dev-export-view','oai-dev-import-view','oai-dev-restore-preview']){const el=document.getElementById(id);if(el)el.hidden=true;}}
   }
   function oaiEncodeCgm1(value){return 'CGM1.'+btoa(Array.from(new TextEncoder().encode(JSON.stringify(value)),v=>String.fromCharCode(v)).join(''));}
@@ -15661,7 +15663,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-copy],[data-oai-dev-preview],[data-oai-dev-apply]');if(!button)return;
     if(button.id==='oai-settings-version-label'){
       oaiDevTapCount++;
-      if(oaiDevTapCount>=10){oaiDevTapCount=0;const next=!oaiDevEnabled();localStorage.setItem(OAI_DEV_KEY,next?'1':'0');oaiRefreshDeveloperPanel();const detail=document.getElementById('parish-visit-detail');if(detail&&detail.classList.contains('show'))_renderParishVisitDetail();if(_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null)_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);if(next){oaiDevStatus('개발자 모드가 열렸습니다.');document.getElementById('oai-developer-section').scrollIntoView({block:'nearest',behavior:'smooth'});} }
+      if(oaiDevTapCount>=10){oaiDevTapCount=0;const next=!(oaiDevEnabled()&&oaiDevPanelUnlocked);oaiDevPanelUnlocked=next;localStorage.setItem(OAI_DEV_KEY,next?'1':'0');oaiRefreshDeveloperPanel();const detail=document.getElementById('parish-visit-detail');if(detail&&detail.classList.contains('show'))_renderParishVisitDetail();if(_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null)_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);if(next){oaiDevStatus('개발자 모드가 열렸습니다.');document.getElementById('oai-developer-section').scrollIntoView({block:'nearest',behavior:'smooth'});} }
       return;
     }
     if(!oaiDevEnabled())return;
@@ -16290,34 +16292,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const rows=_manualPointsFor(c.id).map(x=>Object.assign({},x,updates[x.id]||{}));
     try{_manualPointsWrite(c.id,rows);renderDetail();}catch(e){alert('순서 저장에 실패했습니다.');}
   }
-  let _manualDrag=null;
-  document.addEventListener('pointerdown',function(e){
-    const h=e.target&&e.target.closest&&e.target.closest('[data-manual-drag]');if(!h)return;
-    const c=_manualCompletionCourse();if(!c)return;
-    _manualDrag={id:h.getAttribute('data-manual-drag'),y:e.clientY,pointerId:e.pointerId,started:false};
-    try{h.setPointerCapture(e.pointerId);}catch(_e){}
-    e.preventDefault();
-  },true);
-  document.addEventListener('pointermove',function(e){
-    if(!_manualDrag||_manualDrag.pointerId!==e.pointerId)return;
-    if(Math.abs(e.clientY-_manualDrag.y)>6)_manualDrag.started=true;
-    if(_manualDrag.started){
-      const target=document.elementFromPoint(e.clientX,e.clientY),row=target&&target.closest('[data-completion-place-index]');
-      _manualDrag.target=row?Number(row.getAttribute('data-completion-place-index')):null;
-      e.preventDefault();
-    }
-  },true);
-  document.addEventListener('pointerup',function(e){
-    if(!_manualDrag||_manualDrag.pointerId!==e.pointerId)return;
-    const drag=_manualDrag;_manualDrag=null;
-    if(drag.started&&Number.isInteger(drag.target))_manualPlaceMove(drag.id,drag.target);
-  },true);
-  document.addEventListener('pointercancel',()=>{_manualDrag=null;},true);
-  document.addEventListener('click',function(e){
-    const b=e.target&&e.target.closest&&e.target.closest('[data-manual-completion-delete]');if(!b)return;
-    e.preventDefault();e.stopImmediatePropagation();
-    _manualPlaceDelete(b.getAttribute('data-manual-completion-delete'));
-  },true);
   function loadCourses(){
     try{
       const raw=localStorage.getItem(COURSES_KEY)||'[]';
@@ -17959,7 +17933,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         const nextLabel=(!isCompletionView&&i===next)?'<span class="oai-pilgrimage-next-label" aria-label="다음 순례지"><b>다음</b><b>순례지</b></span>':'';
         const holdAttr=isCompletionView?'':' data-plan-hold="'+i+'"';
         const dragHtml=isCompletionView?(row.gps?'':'<button type="button" class="oai-pilgrimage-drag" data-manual-drag="'+esc(row.manualId)+'" aria-label="'+esc(item.name)+' 수동 순서 이동">⋮</button>'):'<button type="button" class="oai-pilgrimage-drag" data-plan-drag="'+i+'" aria-label="'+esc(item.name)+' 순서 이동">⋮</button>';
-        return '<div class="'+cls+'" data-plan-index="'+i+'"'+(isCompletionView?' data-completion-place-index="'+i+'"':'')+holdAttr+'><span class="oai-pilgrimage-order" aria-label="순례 '+(i+1)+'번">'+(i+1)+'</span><div class="oai-pilgrimage-main"><div class="oai-pilgrimage-main-head"><span class="oai-pilgrimage-place-title"><b>'+esc(item.name)+'</b>'+(isCompletionView&&!row.gps?'<small class="oai-manual-visit-label">수동</small>':'')+'</span>'+statusHtml+'</div>'+(metric?'<small class="oai-pilgrimage-item-metric" data-plan-metric="'+i+'">'+metric+'</small>':'')+'</div>'+nextLabel+(isCompletionView&&!row.gps?'<button type="button" class="oai-manual-remove" data-manual-completion-delete="'+esc(row.manualId)+'" aria-label="수동 추가 장소 삭제">×</button>':'')+dragHtml+'</div>';
+        return '<div class="'+cls+'" data-plan-index="'+i+'"'+(isCompletionView?' data-completion-place-index="'+i+'"'+(!row.gps?' data-manual-hold="'+esc(row.manualId)+'"':''):'')+holdAttr+'><span class="oai-pilgrimage-order" aria-label="순례 '+(i+1)+'번">'+(i+1)+'</span><div class="oai-pilgrimage-main"><div class="oai-pilgrimage-main-head"><span class="oai-pilgrimage-place-title"><b>'+esc(item.name)+'</b>'+(isCompletionView&&!row.gps?'<small class="oai-manual-visit-label">수동</small>':'')+'</span>'+statusHtml+'</div>'+(metric?'<small class="oai-pilgrimage-item-metric" data-plan-metric="'+i+'">'+metric+'</small>':'')+'</div>'+nextLabel+dragHtml+'</div>';
       }).join('');
     }
     const manualAddBtn=document.getElementById('oai-pilgrimage-manual-add');
@@ -19197,6 +19171,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(ctx.type==='course'){
       const c=loadCourses().find(x=>x.id===ctx.id);if(!c)return;
       title.textContent=c.name;buttons.innerHTML='<button type="button" data-oai-action="rename">이름 변경</button>'+(_courseCompletionList(c).length?'<button type="button" disabled>🔒 순례완료 코스 · 삭제 불가</button>':'<button type="button" class="danger" data-oai-action="delete-course">삭제</button>');
+    }else if(ctx.type==='manual'){
+      const course=_manualCompletionCourse();if(!course)return;
+      const item=_manualPointsFor(course.id).find(x=>String(x.id)===String(ctx.id));if(!item)return;
+      title.textContent=item.point.name;buttons.innerHTML='<button type="button" class="danger" data-oai-action="delete-manual">삭제</button>';
     }else{
       const item=loadPlan()[ctx.index];if(!item)return;
       title.textContent=item.name;buttons.innerHTML='<button type="button" data-oai-action="visit">'+(item.done?'순례 취소':'순례')+'</button><button type="button" class="danger" data-oai-action="delete-place">삭제</button>';
@@ -19215,19 +19193,23 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   document.addEventListener('pointerdown',e=>{
     const course=e.target&&e.target.closest&&e.target.closest('[data-course-hold]');
     if(course){armActionHold(e,course,{type:'course',id:course.getAttribute('data-course-hold')});return;}
+    const manual=e.target&&e.target.closest&&e.target.closest('[data-manual-hold]');
+    if(manual && !(e.target&&e.target.closest&&e.target.closest('[data-manual-drag]'))){armActionHold(e,manual,{type:'manual',id:manual.getAttribute('data-manual-hold')});return;}
     const plan=e.target&&e.target.closest&&e.target.closest('[data-plan-hold]');
     if(plan && !(e.target&&e.target.closest&&e.target.closest('[data-plan-drag]'))){armActionHold(e,plan,{type:'place',index:parseInt(plan.getAttribute('data-plan-hold'),10)});}
   },true);
   document.addEventListener('pointermove',moveActionHold,true);
   document.addEventListener('pointerup',endActionHold,true);
   document.addEventListener('pointercancel',cancelActionHold,true);
-  document.addEventListener('contextmenu',e=>{const c=e.target&&e.target.closest&&e.target.closest('[data-course-hold],[data-plan-hold]');if(c){e.preventDefault();e.stopPropagation();}},true);
+  document.addEventListener('contextmenu',e=>{const c=e.target&&e.target.closest&&e.target.closest('[data-course-hold],[data-plan-hold],[data-manual-hold]');if(c){e.preventDefault();e.stopPropagation();}},true);
   document.addEventListener('click',e=>{
     const close=e.target&&e.target.closest&&e.target.closest('[data-oai-pilgrimage-action-close]');if(close){e.preventDefault();closeActionMenu();return;}
     const b=e.target&&e.target.closest&&e.target.closest('[data-oai-action]');if(!b||!actionContext)return;
     e.preventDefault();e.stopPropagation();const act=b.getAttribute('data-oai-action'),ctx=actionContext;closeActionMenu();
     if(ctx.type==='course'){
       if(act==='rename')openCourseRenameModal(ctx.id);else if(act==='delete-course')deleteCourse(ctx.id);
+    }else if(ctx.type==='manual'){
+      if(act==='delete-manual')_manualPlaceDelete(ctx.id);
     }else{
       const list=loadPlan(),i=ctx.index;if(i<0||i>=list.length)return;
       if(act==='visit'){
@@ -19321,9 +19303,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function cancelPlanDrag(){if(drag&&drag.holdTimer){clearTimeout(drag.holdTimer);}cleanupPlanDrag(drag);drag=null;}
   function armPlanDrag(e,h){
-    const i=parseInt(h.getAttribute('data-plan-drag'),10);if(!Number.isFinite(i))return;
+    const manualId=h.getAttribute('data-manual-drag');
     const card=h.closest('.oai-pilgrimage-item');
-    const st={index:i,target:i,pointerId:e.pointerId,startY:e.clientY,lastY:e.clientY,card:card,handle:h,active:false,holdTimer:0,placeholder:null,parent:null,sourceRect:null};
+    const i=manualId?Number(card&&card.getAttribute('data-completion-place-index')):parseInt(h.getAttribute('data-plan-drag'),10);
+    if(!card||!Number.isFinite(i))return;
+    const st={index:i,target:i,manualId:manualId||'',pointerId:e.pointerId,startY:e.clientY,lastY:e.clientY,card:card,handle:h,active:false,holdTimer:0,placeholder:null,parent:null,sourceRect:null};
     st.holdTimer=setTimeout(()=>{
       if(drag!==st)return;
       st.holdTimer=0;st.active=true;
@@ -19348,14 +19332,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!st.active){drag=null;clearDragVisuals();return;}
     const from=st.index,to=Number.isFinite(st.target)?st.target:st.index;
     cleanupPlanDrag(st);drag=null;
-    const changed=reorder(from,to);if(changed)vibrate(32);else{const card=document.querySelector('#oai-pilgrimage-plan-list [data-plan-index="'+from+'"]');if(card){card.classList.add('is-drop-same');setTimeout(()=>card.classList.remove('is-drop-same'),420);}}
+    const changed=st.manualId?(to!==from&&!!_manualCompletionCourse()&&(_manualPlaceMove(st.manualId,to),true)):reorder(from,to);if(changed)vibrate(32);else{const card=document.querySelector('#oai-pilgrimage-plan-list [data-plan-index="'+from+'"]');if(card){card.classList.add('is-drop-same');setTimeout(()=>card.classList.remove('is-drop-same'),420);}}
     e.preventDefault();e.stopPropagation();
   }
-  document.addEventListener('pointerdown',e=>{const h=e.target&&e.target.closest&&e.target.closest('[data-plan-drag]');if(h)armPlanDrag(e,h);},true);
+  document.addEventListener('pointerdown',e=>{const h=e.target&&e.target.closest&&e.target.closest('[data-plan-drag],[data-manual-drag]');if(h)armPlanDrag(e,h);},true);
   document.addEventListener('pointermove',e=>{if(drag)moveDrag(e);},true);
   document.addEventListener('pointerup',e=>{if(drag)endDrag(e);},true);
   document.addEventListener('pointercancel',()=>{cancelPlanDrag();},true);
-  document.addEventListener('contextmenu',e=>{const h=e.target&&e.target.closest&&e.target.closest('[data-plan-drag]');if(h){e.preventDefault();e.stopPropagation();}},true);
+  document.addEventListener('contextmenu',e=>{const h=e.target&&e.target.closest&&e.target.closest('[data-plan-drag],[data-manual-drag]');if(h){e.preventDefault();e.stopPropagation();}},true);
 
   function openPlanDelete(index){
     const list=loadPlan(),item=list[index],modal=document.getElementById('oai-pilgrimage-delete-modal'),name=document.getElementById('oai-pilgrimage-delete-name'),title=document.getElementById('oai-pilgrimage-delete-title'),msg=document.getElementById('oai-pilgrimage-delete-message');
