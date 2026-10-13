@@ -2116,7 +2116,7 @@ function _ensureShrineVisitMapFilter(){
 function _updateShrineVisitMapFilterUI(){
   const bar=_ensureShrineVisitMapFilter();
   if(!bar) return;
-  const show=(_mode==='shrine' && _screen==='map');
+  const show=(_mode==='shrine' && _screen==='map' && !window.__OAI_PILGRIMAGE_PLACE_PICK__ && !window.__OAI_PILGRIMAGE_ROUTE_EDIT__ && !window.__OAI_PILGRIMAGE_COURSE_VIEW__);
   bar.classList.toggle('show', !!show);
   try{
     const wrap=document.getElementById('map-wrap');
@@ -16280,8 +16280,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function _manualPlaceDelete(id){
     const c=_manualCompletionCourse();if(!c)return;
     const rows=_manualPointsFor(c.id),entry=rows.find(x=>String(x.id)===String(id));if(!entry)return;
-    if(!confirm('수동 추가한 「'+entry.point.name+'」만 삭제할까요? GPS 순례지는 그대로 유지됩니다.'))return;
-    try{_manualPointsWrite(c.id,rows.filter(x=>String(x.id)!==String(id)));renderDetail();}catch(e){alert('삭제 저장에 실패했습니다.');}
+    // 순례계획과 같은 앱 내부 삭제 확인창을 사용한다. GPS 원본은 수정하지 않는다.
+    pendingManualDeleteId=String(id);
+    const modal=document.getElementById('oai-pilgrimage-delete-modal');
+    const title=document.getElementById('oai-pilgrimage-delete-title');
+    const msg=document.getElementById('oai-pilgrimage-delete-message');
+    if(!modal){pendingManualDeleteId='';return;}
+    if(title)title.textContent='수동 순례 장소 삭제';
+    if(msg)msg.textContent='「'+String(entry.point.name||'이 장소')+'」을(를) 삭제할까요? GPS로 등록된 순례 기록은 그대로 유지됩니다.';
+    _setPilgrimageLayerVisible(modal,true);
   }
   function _manualPlaceMove(id,targetIndex){
     const c=_manualCompletionCourse();if(!c)return;
@@ -18489,6 +18496,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       _mode='shrine';_filterDio='all';_listSrch='';_curFromRegion=false;
       document.documentElement.classList.remove('parish-mode','retreat-mode');
       const {mapWrap,mapEl}=_preparePilgrimageMainMapSurface();
+      // 장소 선택 화면은 일반 성지 필터와 길찾기 결과를 사용하지 않는다.
+      // 진입 당시 UI를 정리하고 확대·이동 후에도 필터가 재생성되지 않도록 공통 표시 조건을 분리한다.
+      try{_updateShrineVisitMapFilterUI();}catch(_e){}
+      try{if(typeof _clearRouteVisualOnly==='function')_clearRouteVisualOnly();}catch(_e){}
       try{if(typeof _hideRouteGuide==='function')_hideRouteGuide();}catch(_e){}
       // 지도에서 추가 전용 마커만 남긴다. 기존 성지/성당/피정 마커와 검색 임시 마커를 함께 그리면 드래그가 버벅인다.
       try{if(typeof _clearShrineMarkers==='function')_clearShrineMarkers();}catch(_e){}
@@ -18504,28 +18515,39 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(_map&&typeof _map.relayout==='function')_map.relayout();
         // 기존 경1·경2… 전체가 보이도록 지도 경계를 먼저 설정한다.
         // 코스가 없을 때만 기존 출발지/현재 위치 중심 규칙을 사용한다.
-        const completed=_manualCompletionCourse();
+        const completed=pilgrimageDetailMode==='complete'&&currentCourseId
+          ?loadCourses().find(c=>c.id===currentCourseId):null;
         const selected=completed?_manualMerged(completed).map(x=>x.point):loadPlan();
         const points=selected.map(normalizePoint).filter(p=>p&&_validGpsPair(p.lat,p.lng));
-        if(_map&&points.length>=2&&typeof _map.setBounds==='function'){
-          const bounds=new kakao.maps.LatLngBounds();
-          points.forEach(p=>bounds.extend(new _LL(Number(p.lat),Number(p.lng))));
-          _map.setBounds(bounds,100,46,125,46);
-        }else if(_map&&points.length===1){
-          _map.setCenter(new _LL(Number(points[0].lat),Number(points[0].lng)));
-          if(typeof _map.setLevel==='function')_map.setLevel(OAI_PILGRIMAGE_ENDPOINT_MAP_LEVEL);
-        }else{
-          const initial=_pilgrimageMapInitialPoint(entryRole);
-          if(_map&&initial&&_validGpsPair(initial.lat,initial.lng)){
-            _map.setCenter(new _LL(Number(initial.lat),Number(initial.lng)));
+        const fitCourseMarkers=()=>{
+          if(!window.__OAI_PILGRIMAGE_PLACE_PICK__||!_map)return;
+          if(typeof _map.relayout==='function')_map.relayout();
+          if(points.length>=2&&typeof _map.setBounds==='function'){
+            const bounds=new kakao.maps.LatLngBounds();
+            points.forEach(p=>bounds.extend(new _LL(Number(p.lat),Number(p.lng))));
+            _map.setBounds(bounds,72,46,92,46);
+          }else if(points.length===1){
+            _map.setCenter(new _LL(Number(points[0].lat),Number(points[0].lng)));
             if(typeof _map.setLevel==='function')_map.setLevel(OAI_PILGRIMAGE_ENDPOINT_MAP_LEVEL);
-          }else if(_map&&_validGpsPair(_myLat,_myLng)){
-            _map.setCenter(new _LL(Number(_myLat),Number(_myLng)));
-            if(typeof _map.setLevel==='function')_map.setLevel(OAI_PILGRIMAGE_ENDPOINT_MAP_LEVEL);
+          }else{
+            const initial=_pilgrimageMapInitialPoint(entryRole);
+            if(initial&&_validGpsPair(initial.lat,initial.lng)){
+              _map.setCenter(new _LL(Number(initial.lat),Number(initial.lng)));
+              if(typeof _map.setLevel==='function')_map.setLevel(OAI_PILGRIMAGE_ENDPOINT_MAP_LEVEL);
+            }else if(_validGpsPair(_myLat,_myLng)){
+              _map.setCenter(new _LL(Number(_myLat),Number(_myLng)));
+              if(typeof _map.setLevel==='function')_map.setLevel(OAI_PILGRIMAGE_ENDPOINT_MAP_LEVEL);
+            }
           }
-        }
+        };
         if(typeof _syncMapPanelUI==='function')_syncMapPanelUI('pilgrimage-map-add');
-        _preparePilgrimageMapPickMarkers();
+        // 데이터와 지도 표면이 준비된 다음 코스 기준으로 배치한다.
+        // 최초 로딩 중 GPS 중심 이동이 경유지 범위를 덮는 문제를 피한다.
+        Promise.resolve(_preparePilgrimageMapPickMarkers()).then(()=>{
+          fitCourseMarkers();
+          requestAnimationFrame(fitCourseMarkers);
+          setTimeout(fitCourseMarkers,400);
+        });
         setTimeout(()=>{try{if(_map&&typeof _map.relayout==='function')_map.relayout();}catch(_e){}},260);
       }catch(_e){}};
       requestAnimationFrame(()=>requestAnimationFrame(afterReady));
@@ -19384,12 +19406,22 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   document.addEventListener('pointercancel',()=>{cancelPlanDrag();},true);
   document.addEventListener('contextmenu',e=>{const h=e.target&&e.target.closest&&e.target.closest('[data-plan-drag],[data-manual-drag]');if(h){e.preventDefault();e.stopPropagation();}},true);
 
+  let pendingManualDeleteId='';
   function openPlanDelete(index){
     const list=loadPlan(),item=list[index],modal=document.getElementById('oai-pilgrimage-delete-modal'),name=document.getElementById('oai-pilgrimage-delete-name'),title=document.getElementById('oai-pilgrimage-delete-title'),msg=document.getElementById('oai-pilgrimage-delete-message');
     if(!item||!modal)return;pendingCourseDeleteId='';pendingPlanDeleteIndex=index;if(title)title.textContent='순례지 삭제';if(msg)msg.innerHTML='<b id="oai-pilgrimage-delete-name">'+esc('「'+String(item.name||'이 장소')+'」')+'</b>을(를) 순례계획에서 삭제할까요?';modal.classList.add('show');modal.setAttribute('aria-hidden','false');
   }
-  function closePlanDelete(){const modal=document.getElementById('oai-pilgrimage-delete-modal'),title=document.getElementById('oai-pilgrimage-delete-title');_setPilgrimageLayerVisible(modal,false);if(title)title.textContent='순례지 삭제';pendingPlanDeleteIndex=-1;pendingCourseDeleteId='';}
+  function closePlanDelete(){const modal=document.getElementById('oai-pilgrimage-delete-modal'),title=document.getElementById('oai-pilgrimage-delete-title');_setPilgrimageLayerVisible(modal,false);if(title)title.textContent='순례지 삭제';pendingPlanDeleteIndex=-1;pendingCourseDeleteId='';pendingManualDeleteId='';}
   function confirmPlanDelete(){
+    if(pendingManualDeleteId){
+      const id=pendingManualDeleteId,c=_manualCompletionCourse();
+      if(!c){closePlanDelete();return;}
+      const rows=_manualPointsFor(c.id);
+      if(!rows.some(x=>String(x.id)===id)){closePlanDelete();return;}
+      try{_manualPointsWrite(c.id,rows.filter(x=>String(x.id)!==id));closePlanDelete();renderDetail();}
+      catch(e){closePlanDelete();console.warn('[수동 순례지 삭제 저장 실패]',e);}
+      return;
+    }
     if(pendingCourseDeleteId){const id=pendingCourseDeleteId,a=loadCourses();if(a.some(x=>x.id===id&&_courseCompletionList(x).length)){closePlanDelete();alert('순례완료 코스는 삭제할 수 없습니다.');return;}closePlanDelete();saveCourses(a.filter(x=>x.id!==id));if(currentCourseId===id)currentCourseId='';return;}
     const i=pendingPlanDeleteIndex,list=loadPlan();if(i<0||i>=list.length){closePlanDelete();return;}list.splice(i,1);closePlanDelete();savePlan(list);
   }
@@ -19455,44 +19487,38 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 
 /* V1197: 도움말은 js/help-ui.js 로 분리 (중복 이벤트 제거) */
 
-/* 순례코스 목록: 화면 재렌더링과 무관한 단일 터치 처리.
-   목록 내에서 시작한 손가락을 문서에서 놓아도 판정하며 기존 탭 버튼 클릭만 재사용한다. */
+/* 순례코스 목록: 목록 전체에서 시작된 좌우 제스처를 직접 탭 상태로 전환한다.
+   각 코스 카드가 button이므로 버튼 전체를 터치 대상에서 제외하지 않는다. */
 (function(){
   'use strict';
-  let gesture=null, lastSwitch=0, suppressCardClickUntil=0;
-  const listId='oai-pilgrimage-list-view';
-  function activeList(){
+  let gesture=null,lastSwitch=0,suppressCardClickUntil=0;
+  function isListOpen(){
     const modal=document.getElementById('oai-pilgrimage-planner-modal');
-    const list=document.getElementById(listId);
-    if(!modal||!modal.classList.contains('show')||!list||list.hidden)return null;
-    if(getComputedStyle(list).display==='none')return null;
-    return list;
+    const list=document.getElementById('oai-pilgrimage-list-view');
+    return !!(modal&&modal.classList.contains('show')&&list&&!list.hidden&&plannerView==='list');
   }
-  function begin(event){
+  function begin(e){
     gesture=null;
-    const list=activeList();
-    if(!list||!list.contains(event.target)||!event.touches||event.touches.length!==1)return;
-    // 코스 카드 전체가 <button>으로 구성된다. 버튼 전체 차단은 스와이프를 사실상 비활성화한다.
-    // 편집/선택 컨트롤만 제외하고 코스 카드 버튼과 탭 버튼에서도 제스처를 받는다.
-    if(event.target.closest('input,select,textarea,a,[data-oai-pilgrimage-drag],.oai-pilgrimage-drag'))return;
-    const control=event.target.closest('button,[role="button"]');
-    if(control && !control.matches('[data-course-open],[data-oai-pilgrimage-course-tab]'))return;
-    const t=event.touches[0];gesture={x:t.clientX,y:t.clientY};
+    if(!isListOpen()||!e.touches||e.touches.length!==1)return;
+    const panel=document.querySelector('#oai-pilgrimage-planner-modal .oai-pilgrimage-planner-panel');
+    if(!panel||!panel.contains(e.target))return;
+    if(e.target.closest('input,select,textarea,a,[data-oai-pilgrimage-drag],[data-plan-drag],[data-manual-drag]'))return;
+    const t=e.touches[0];gesture={x:t.clientX,y:t.clientY};
   }
-  function end(event){
+  function end(e){
     const start=gesture;gesture=null;
-    if(!start||!activeList()||!event.changedTouches||event.changedTouches.length!==1)return;
-    const t=event.changedTouches[0],dx=t.clientX-start.x,dy=t.clientY-start.y;
-    if(Math.abs(dx)<55||Math.abs(dx)<Math.abs(dy)*1.3||Date.now()-lastSwitch<350)return;
-    const list=activeList();
-    const current=list.getAttribute('data-course-tab')==='plan'?'plan':'complete';
-    const next=current==='plan'?'complete':'plan';
-    const target=list.querySelector('[data-oai-pilgrimage-course-tab="'+next+'"]');
-    if(target){lastSwitch=Date.now();target.click();suppressCardClickUntil=lastSwitch+450;}
+    if(!start||!isListOpen()||!e.changedTouches||e.changedTouches.length!==1)return;
+    const t=e.changedTouches[0],dx=t.clientX-start.x,dy=t.clientY-start.y;
+    if(Math.abs(dx)<48||Math.abs(dx)<Math.abs(dy)*1.3||Date.now()-lastSwitch<300)return;
+    const next=pilgrimageCourseTab==='plan'?'complete':'plan';
+    lastSwitch=Date.now();suppressCardClickUntil=lastSwitch+500;
+    pilgrimageCourseTab=next;
+    pilgrimageCourseFilterState.year='all';pilgrimageCourseFilterState.month='all';
+    pilgrimageCourseFilterState.sort=next==='complete'?'completed':'updated';
+    renderCourseList();
   }
-  // 터치로 스와이프한 카드의 후속 click이 코스 상세 화면을 열지 않게 한다.
   document.addEventListener('click',function(e){
-    if(e.isTrusted && Date.now()<suppressCardClickUntil && e.target.closest && e.target.closest('[data-course-open],[data-oai-pilgrimage-course-tab]')){
+    if(e.isTrusted&&Date.now()<suppressCardClickUntil&&e.target.closest&&e.target.closest('[data-course-open],[data-oai-pilgrimage-course-tab]')){
       e.preventDefault();e.stopImmediatePropagation();suppressCardClickUntil=0;
     }
   },true);
