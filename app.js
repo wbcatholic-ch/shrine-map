@@ -16617,12 +16617,19 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function _endDailyFollowSession(active){}
   function _dailySamePlace(a,b){
     if(!a||!b)return false;
-    if(a.placeId&&b.placeId&&String(a.placeId)===String(b.placeId))return true;
+    // 양쪽 고유 ID가 있으면 ID만 비교한다. 다른 ID는 이름·좌표가 같아도 별도 장소다.
+    // ID가 없는 과거 GPS 기록에 한해서만 기존 이름·교구·좌표 호환 판정을 허용한다.
+    const aId=String(a.placeId||'').trim(),bId=String(b.placeId||'').trim();
+    if(aId&&bId)return aId===bId;
+    if(a.kind&&b.kind&&String(a.kind)!==String(b.kind))return false;
+    if(a.diocese&&b.diocese&&String(a.diocese)!==String(b.diocese))return false;
+    const aName=_normPilgrimageName(a.name),bName=_normPilgrimageName(b.name);
+    if(!aName||aName!==bName)return false;
     const ay=Number(a.lat),ax=Number(a.lng),by=Number(b.lat),bx=Number(b.lng);
     if([ay,ax,by,bx].every(Number.isFinite)&&_validGpsPair(ay,ax)&&_validGpsPair(by,bx)){
-      return _normPilgrimageName(a.name)===_normPilgrimageName(b.name) && calcDist(ay,ax,by,bx)<=0.08;
+      return calcDist(ay,ax,by,bx)<=0.08;
     }
-    return _normPilgrimageName(a.name)===_normPilgrimageName(b.name);
+    return true;
   }
   function _dailySameOrderedPlaces(planned,actual){
     return Array.isArray(planned)&&planned.length===actual.length&&planned.every((p,i)=>_dailySamePlace(p,actual[i]));
