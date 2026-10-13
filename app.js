@@ -17212,7 +17212,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const hasDestination=!!normalizePoint(d.end),wasDone=_courseAllPlacesDone(prev.places)&&!!normalizePoint(prev.end),isDone=_courseAllPlacesDone(d.places)&&hasDestination,now=Date.now();
     const next=Object.assign({},prev,d,{updatedAt:now});
     const activeNow=_readActiveFollowRaw();
-    const gpsCompletedAll=!!(activeNow&&activeNow.courseId===prev.id&&d.places.length>0&&normalizePoint(d.end))&&d.places.every(x=>x&&x.done&&String(x.doneMethod||'')==='gps')&&d.places.every(x=>!!_dailyRecordedVisitAt(x,_dailyIso(now),activeNow.startedAt));
+    /* 날짜·장소 기준 원칙: 순례하기 시작 전이라도 같은 날의 GPS 스탬프는 인정한다. */
+    const gpsCompletedAll=!!(activeNow&&activeNow.courseId===prev.id&&d.places.length>0&&normalizePoint(d.end))&&d.places.every(x=>x&&x.done&&String(x.doneMethod||'')==='gps')&&d.places.every(x=>!!_dailyRecordedVisitAt(x,_dailyIso(now)));
     const prevCompletions=_courseCompletionList(prev);
     if(isDone&&gpsCompletedAll&&((!wasDone&&prev.completionArmed!==false)||!prevCompletions.length)){
       const completions=prevCompletions.slice(),today=_courseDateInputValue(now);
@@ -17285,12 +17286,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       let changed=false;
       places.forEach(function(item){
         if(!item||(item.done&&item.doneMethod==='gps'))return;
-        if(_activeCoursePlaceReached(item,Number(lat),Number(lng))&&_dailyRecordedVisitAt(item,_dailyIso(Date.now()),active.startedAt)){
+        if(_activeCoursePlaceReached(item,Number(lat),Number(lng))&&_dailyRecordedVisitAt(item,_dailyIso(Date.now()))){
           item.done=true;item.doneMethod='gps';changed=true;
         }
       });
       const routeOnlyDestination=places.length===0?_pilgrimageRegisteredDestination(prev.end):null;
-      const routeOnlyEndReached=!!(routeOnlyDestination&&_activeCoursePlaceReached(prev.end,Number(lat),Number(lng))&&_dailyRecordedVisitAt(prev.end,_dailyIso(Date.now()),active.startedAt));
+      const routeOnlyEndReached=!!(routeOnlyDestination&&_activeCoursePlaceReached(prev.end,Number(lat),Number(lng))&&_dailyRecordedVisitAt(prev.end,_dailyIso(Date.now())));
       if(routeOnlyEndReached)changed=true;
       if(!changed)return false;
       const now=Date.now(),isDone=!!normalizePoint(prev.end)&&(routeOnlyEndReached||(places.length>0&&places.every(x=>x&&x.done&&x.doneMethod==='gps')));
