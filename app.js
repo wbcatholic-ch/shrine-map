@@ -19476,44 +19476,59 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   refreshDev(); renderCourseList();
   _initializeDailyPilgrimageSettlement();
 
-  /* 순례코스 목록: 목록 전체에서 시작된 좌우 제스처를 직접 탭 상태로 전환한다.
-     각 코스 카드가 button이므로 버튼 전체를 터치 대상에서 제외하지 않는다. */
+  /* 순례코스 목록 스와이프: 목록 상태를 소유한 이 함수 안에서 한 번만 연결한다.
+     Pointer Events 우선, 구형 WebView에서는 Touch Events 사용. */
   (function(){
     'use strict';
     let gesture=null,lastSwitch=0,suppressCardClickUntil=0;
+    const modal=document.getElementById('oai-pilgrimage-planner-modal');
+    const list=document.getElementById('oai-pilgrimage-list-view');
     function isListOpen(){
-      const modal=document.getElementById('oai-pilgrimage-planner-modal');
-      const list=document.getElementById('oai-pilgrimage-list-view');
       return !!(modal&&modal.classList.contains('show')&&list&&!list.hidden&&plannerView==='list');
     }
-    function begin(e){
+    function begin(target,x,y,id){
       gesture=null;
-      if(!isListOpen()||!e.touches||e.touches.length!==1)return;
-      const panel=document.querySelector('#oai-pilgrimage-planner-modal .oai-pilgrimage-planner-panel');
-      if(!panel||!panel.contains(e.target))return;
-      if(e.target.closest('input,select,textarea,a,[data-oai-pilgrimage-drag],[data-plan-drag],[data-manual-drag]'))return;
-      const t=e.touches[0];gesture={x:t.clientX,y:t.clientY};
+      if(!isListOpen()||!target||!list.contains(target))return;
+      if(target.closest&&target.closest('input,select,textarea,a,[data-oai-pilgrimage-drag],[data-plan-drag],[data-manual-drag]'))return;
+      gesture={x,y,id};
     }
-    function end(e){
+    function finish(x,y,id){
       const start=gesture;gesture=null;
-      if(!start||!isListOpen()||!e.changedTouches||e.changedTouches.length!==1)return;
-      const t=e.changedTouches[0],dx=t.clientX-start.x,dy=t.clientY-start.y;
-      if(Math.abs(dx)<48||Math.abs(dx)<Math.abs(dy)*1.3||Date.now()-lastSwitch<300)return;
+      if(!start||start.id!==id||!isListOpen())return;
+      const dx=x-start.x,dy=y-start.y,now=Date.now();
+      if(Math.abs(dx)<48||Math.abs(dx)<Math.abs(dy)*1.35||now-lastSwitch<300)return;
       const next=pilgrimageCourseTab==='plan'?'complete':'plan';
-      lastSwitch=Date.now();suppressCardClickUntil=lastSwitch+500;
+      lastSwitch=now;suppressCardClickUntil=now+550;
       pilgrimageCourseTab=next;
       pilgrimageCourseFilterState.year='all';pilgrimageCourseFilterState.month='all';
       pilgrimageCourseFilterState.sort=next==='complete'?'completed':'updated';
       renderCourseList();
     }
     document.addEventListener('click',function(e){
-      if(e.isTrusted&&Date.now()<suppressCardClickUntil&&e.target.closest&&e.target.closest('[data-course-open],[data-oai-pilgrimage-course-tab]')){
+      if(Date.now()<suppressCardClickUntil&&e.target.closest&&e.target.closest('[data-course-open],[data-oai-pilgrimage-course-tab]')){
         e.preventDefault();e.stopImmediatePropagation();suppressCardClickUntil=0;
       }
     },true);
-    document.addEventListener('touchstart',begin,{capture:true,passive:true});
-    document.addEventListener('touchend',end,{capture:true,passive:true});
-    document.addEventListener('touchcancel',function(){gesture=null;},{capture:true,passive:true});
+    if(window.PointerEvent){
+      document.addEventListener('pointerdown',function(e){
+        if(e.pointerType==='mouse'||e.isPrimary===false){gesture=null;return;}
+        begin(e.target,e.clientX,e.clientY,e.pointerId);
+      },true);
+      document.addEventListener('pointerup',function(e){
+        if(e.pointerType!=='mouse')finish(e.clientX,e.clientY,e.pointerId);
+      },true);
+      document.addEventListener('pointercancel',function(){gesture=null;},true);
+    }else{
+      document.addEventListener('touchstart',function(e){
+        if(!e.touches||e.touches.length!==1){gesture=null;return;}
+        const t=e.touches[0];begin(e.target,t.clientX,t.clientY,t.identifier);
+      },{capture:true,passive:true});
+      document.addEventListener('touchend',function(e){
+        if(!e.changedTouches||e.changedTouches.length!==1){gesture=null;return;}
+        const t=e.changedTouches[0];finish(t.clientX,t.clientY,t.identifier);
+      },{capture:true,passive:true});
+      document.addEventListener('touchcancel',function(){gesture=null;},{capture:true,passive:true});
+    }
   })();
 })();
 
