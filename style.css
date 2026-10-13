@@ -9187,7 +9187,8 @@ html.oai-pilgrimage-route-direct #sheet-route #rs-pilgrimage-return-btn{
   padding-right:2px!important;
 }
 #oai-pilgrimage-detail-view.is-completion-view .oai-pilgrimage-item.is-manual-completion{
-  padding-right:2px!important;
+  /* 수동 장소의 오른쪽 드래그 핸들(24px)과 간격을 확보한다. */
+  padding-right:34px!important;
 }
 #oai-pilgrimage-detail-view.is-completion-view .is-manual-completion .oai-pilgrimage-drag{
   display:flex!important;
@@ -9196,12 +9197,15 @@ html.oai-pilgrimage-route-direct #sheet-route #rs-pilgrimage-return-btn{
 }
 #oai-pilgrimage-detail-view.is-completion-view .is-manual-completion .oai-pilgrimage-place-title{
   display:flex!important;
-  align-items:center!important;
-  gap:6px!important;
+  flex-direction:column!important;
+  align-items:flex-start!important;
+  min-width:0!important;
+  gap:3px!important;
 }
 #oai-pilgrimage-detail-view.is-completion-view .is-manual-completion .oai-pilgrimage-place-title b{
   flex:0 1 auto!important;
-  width:auto!important;
+  width:100%!important;
+  max-width:100%!important;
 }
 #oai-pilgrimage-detail-view.is-completion-view .is-manual-completion .oai-manual-visit-label{
   display:inline-block;
