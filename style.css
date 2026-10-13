@@ -4836,24 +4836,24 @@ html.oai-cover-booting::after{
   left:50% !important;
   top:50% !important;
   z-index:2147482501 !important;
-  width:min(84vw, 540px) !important;
-  height:min(84vh, 740px) !important;
-  transform:translate(-50%,-50%) scale(.54);
+  width:min(90vw, 700px) !important;
+  height:min(92vh, 1244px) !important;
+  transform:translate(-50%,-50%) scale(.84) !important;
   background-image:
-    linear-gradient(to right, #fbf8f1 0%, rgba(251,248,241,.96) 5%, rgba(251,248,241,.60) 13%, rgba(251,248,241,.16) 24%, rgba(251,248,241,0) 36%, rgba(251,248,241,0) 64%, rgba(251,248,241,.16) 76%, rgba(251,248,241,.60) 87%, rgba(251,248,241,.96) 95%, #fbf8f1 100%),
-    linear-gradient(to bottom, #fbf8f1 0%, rgba(251,248,241,.90) 6%, rgba(251,248,241,.36) 17%, rgba(251,248,241,0) 30%, rgba(251,248,241,0) 70%, rgba(251,248,241,.36) 83%, rgba(251,248,241,.90) 94%, #fbf8f1 100%),
-    radial-gradient(ellipse 96% 88% at 50% 48%, rgba(251,248,241,0) 50%, rgba(251,248,241,.08) 62%, rgba(251,248,241,.34) 76%, rgba(251,248,241,.76) 90%, rgba(251,248,241,1) 100%),
-    url("intro-cross-jesus.jpg?v=V8-1-14-1115") !important;
+    linear-gradient(to right, #fbf8f1 0%, rgba(251,248,241,.92) 4%, rgba(251,248,241,.48) 10%, rgba(251,248,241,.14) 18%, rgba(251,248,241,0) 28%, rgba(251,248,241,0) 72%, rgba(251,248,241,.14) 82%, rgba(251,248,241,.48) 90%, rgba(251,248,241,.92) 96%, #fbf8f1 100%),
+    linear-gradient(to bottom, #fbf8f1 0%, rgba(251,248,241,.82) 4%, rgba(251,248,241,.28) 12%, rgba(251,248,241,0) 22%, rgba(251,248,241,0) 78%, rgba(251,248,241,.28) 88%, rgba(251,248,241,.82) 96%, #fbf8f1 100%),
+    radial-gradient(ellipse 98% 92% at 50% 50%, rgba(251,248,241,0) 58%, rgba(251,248,241,.06) 70%, rgba(251,248,241,.24) 84%, rgba(251,248,241,.64) 94%, rgba(251,248,241,.96) 100%),
+    url("intro-cross-jesus.jpg?v=V8-1-14-1237") !important;
   background-position:center center, center center, center center, center center !important;
-  background-size:100% 100%, 100% 100%, 100% 100%, auto 106% !important;
+  background-size:100% 100%, 100% 100%, 100% 100%, auto 100% !important;
   background-repeat:no-repeat, no-repeat, no-repeat, no-repeat !important;
   border-radius:38px !important;
   background-color:#fbf8f1 !important;
   box-shadow:
     0 0 0 999px #fbf8f1,
     0 8px 18px rgba(80,54,18,.05),
-    inset 0 0 72px rgba(251,248,241,.28),
-    inset 0 0 150px rgba(251,248,241,.18) !important;
+    inset 0 0 48px rgba(251,248,241,.18),
+    inset 0 0 96px rgba(251,248,241,.10) !important;
   -webkit-mask-image:
     linear-gradient(to right, transparent 0%, rgba(0,0,0,.35) 6%, rgba(0,0,0,.82) 15%, #000 28%, #000 72%, rgba(0,0,0,.82) 85%, rgba(0,0,0,.35) 94%, transparent 100%),
     linear-gradient(to bottom, transparent 0%, rgba(0,0,0,.50) 5%, rgba(0,0,0,.90) 13%, #000 24%, #000 76%, rgba(0,0,0,.90) 87%, rgba(0,0,0,.50) 95%, transparent 100%) !important;
@@ -4885,7 +4885,7 @@ html.oai-cover-revealing::after{
     height:100vh !important;
     transform:none;
     border-radius:0 !important;
-    background-size:100% 100%, 100% 100%, 100% 100%, auto 108% !important;
+    background-size:100% 100%, 100% 100%, 100% 100%, auto 100% !important;
     -webkit-mask-image:none !important;
     mask-image:none !important;
     box-shadow:0 0 0 999px #fbf8f1 !important;
