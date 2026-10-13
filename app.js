@@ -17682,6 +17682,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     setTimeout(()=>{try{if(typeof window.openOaiSettings==='function')window.openOaiSettings({fromPilgrimagePlanner:true,returnToCover:ret});}catch(_e){}},60);
   }
   function plannerBackOrClose(){
+    if(closePilgrimagePlaceInfo())return true;
     const startConfirm=followStartModal();if(startConfirm&&startConfirm.classList.contains('show')){closeFollowStartConfirm();return true;}
     const am=document.getElementById('oai-pilgrimage-action-menu');if(am&&am.classList.contains('show')){closeActionMenu();return true;}
     const pm=pointModal();if(pm&&pm.classList.contains('show')){closePointPicker();return true;}
@@ -18018,24 +18019,66 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       return false;
     }
   }
-  // 순례완료/계획의 장소 정보 전용 읽기 카드. 지도 이동 및 경로 조작 없이 표시한다.
+  // 순례 상세 전용 정보카드: 정식 장소 정보의 검증된 외부 링크만 사용한다.
+  function closePilgrimagePlaceInfo(){
+    const overlay=document.getElementById('oai-pilgrimage-place-info-overlay');
+    if(!overlay||!overlay.classList.contains('open'))return false;
+    overlay.classList.remove('open');overlay.setAttribute('aria-hidden','true');
+    return true;
+  }
   function openPilgrimagePlaceInfo(index){
     const completion=pilgrimageDetailMode==='complete';
     const course=completion&&currentCourseId?loadCourses().find(c=>c.id===currentCourseId):null;
     const rows=completion&&course&&_courseHasGpsLockedCompletion(course)?_manualMerged(course):loadPlan().map(p=>({point:p}));
     const row=rows[index],place=row&&row.point;
     if(!place)return;
+    const name=String(place.name||'').trim();
+    const addr=String(place.addr||'').trim();
+    const normalized=s=>String(s||'').replace(/\s+/g,'').replace(/[()·\-]/g,'').toLowerCase();
+    // 1차: 저장된 고유 ID, 2차: 이름과 주소가 모두 부합하는 장소만 연결.
+    function locate(collection){
+      const candidates=Array.isArray(collection)?collection:[];
+      const id=String(place.placeId||'');
+      if(id){const match=candidates.find(item=>item&&String(item.placeId||'')===id);if(match)return match;}
+      const sameName=candidates.filter(item=>item&&normalized(item.name)===normalized(name));
+      if(sameName.length===1){
+        const item=sameName[0];
+        if(!addr||!item.addr||normalized(item.addr)===normalized(addr))return item;
+      }
+      return sameName.find(item=>addr&&item.addr&&normalized(item.addr)===normalized(addr))||null;
+    }
+    const shrine=locate(typeof SHRINES!=='undefined'?SHRINES:[]);
+    const parish=shrine?null:locate(typeof PARISHES!=='undefined'?PARISHES:[]);
+    let links=[];
+    if(shrine){
+      const hp=_getShrineHomepageUrl(shrine),guide=_getShrineGuideUrl(shrine);
+      if(hp)links.push({label:'홈페이지',url:hp});
+      if(guide&&guide!==hp)links.push({label:'성지 상세페이지',url:guide});
+    }else if(parish){
+      const hp=parish.hp?normalizeCatholicExternalUrl(parish.hp):'';
+      const guide=parish.url?normalizeCatholicExternalUrl(parish.url):'';
+      if(hp)links.push({label:'홈페이지',url:hp});
+      if(guide&&guide!==hp)links.push({label:'교구 성당 안내',url:guide});
+    }
     let overlay=document.getElementById('oai-pilgrimage-place-info-overlay');
     if(!overlay){
       overlay=document.createElement('div');overlay.id='oai-pilgrimage-place-info-overlay';overlay.className='oai-pilgrimage-place-info-overlay';
       overlay.setAttribute('role','presentation');
-      overlay.innerHTML='<div class="oai-pilgrimage-place-info-backdrop" data-pilgrimage-info-close="1"></div><section class="oai-pilgrimage-place-info-panel" role="dialog" aria-modal="true" aria-labelledby="oai-pilgrimage-place-info-name"><header><strong id="oai-pilgrimage-place-info-name"></strong><button type="button" data-pilgrimage-info-close="1" aria-label="장소 정보 닫기">×</button></header><div class="oai-pilgrimage-place-info-body"><div class="oai-pilgrimage-place-info-category" id="oai-pilgrimage-place-info-kind"></div><div class="oai-pilgrimage-place-info-label">주소</div><div id="oai-pilgrimage-place-info-address"></div></div></section>';
-      overlay.addEventListener('click',e=>{if(e.target.closest('[data-pilgrimage-info-close]')){overlay.classList.remove('open');overlay.setAttribute('aria-hidden','true');}});
+      overlay.innerHTML='<div class="oai-pilgrimage-place-info-backdrop" data-pilgrimage-info-close="1"></div><section class="oai-pilgrimage-place-info-panel" role="dialog" aria-modal="true" aria-labelledby="oai-pilgrimage-place-info-name"><header><strong id="oai-pilgrimage-place-info-name"></strong><button type="button" data-pilgrimage-info-close="1" aria-label="장소 정보 닫기">×</button></header><div class="oai-pilgrimage-place-info-body"><div class="oai-pilgrimage-place-info-category" id="oai-pilgrimage-place-info-kind"></div><div class="oai-pilgrimage-place-info-label">주소</div><div id="oai-pilgrimage-place-info-address"></div><div id="oai-pilgrimage-place-info-links" class="oai-pilgrimage-place-info-links"></div></div></section>';
+      overlay.addEventListener('click',e=>{
+        if(e.target.closest('[data-pilgrimage-info-close]')){closePilgrimagePlaceInfo();return;}
+        const btn=e.target.closest('[data-pilgrimage-external-index]');if(!btn)return;
+        const link=overlay._pilgrimageLinks&&overlay._pilgrimageLinks[Number(btn.getAttribute('data-pilgrimage-external-index'))];
+        if(link&&link.url)openCoreExternalUrl(link.url,{source:'pilgrimage-place-info'});
+      });
       document.body.appendChild(overlay);
     }
-    overlay.querySelector('#oai-pilgrimage-place-info-name').textContent=String(place.name||'');
+    overlay.querySelector('#oai-pilgrimage-place-info-name').textContent=name;
     overlay.querySelector('#oai-pilgrimage-place-info-kind').textContent=completion?'순례완료 · 장소 정보':'순례계획 · 장소 정보';
-    overlay.querySelector('#oai-pilgrimage-place-info-address').textContent=String(place.addr||'주소 정보가 없습니다.');
+    overlay.querySelector('#oai-pilgrimage-place-info-address').textContent=addr||'주소 정보가 없습니다.';
+    const linksBox=overlay.querySelector('#oai-pilgrimage-place-info-links');
+    linksBox.replaceChildren();overlay._pilgrimageLinks=links;
+    links.forEach((link,i)=>{const btn=document.createElement('button');btn.type='button';btn.textContent=link.label;btn.setAttribute('data-pilgrimage-external-index',String(i));linksBox.appendChild(btn);});
     overlay.classList.add('open');overlay.setAttribute('aria-hidden','false');
     overlay.querySelector('button[data-pilgrimage-info-close]').focus();
   }
