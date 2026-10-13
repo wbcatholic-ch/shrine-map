@@ -3606,7 +3606,7 @@ function _nearestShrineWithinAutoVisitRadius(lat,lng){
 var _oaiDeferredShrineAutoVisitEntry=null;
 var _oaiDeferredParishAutoVisitPlace=null;
 var _oaiDeferredVisitNoticeTimer=0;
-function _oaiVisitNoticeBlocked(){try{if(document.visibilityState==='hidden')return true;if(window.oaiIsBackgroundReturnUiBlocked&&window.oaiIsBackgroundReturnUiBlocked())return true;if(window.oaiHasCriticalModalOpen&&window.oaiHasCriticalModalOpen())return true;}catch(_e){}return false;}
+function _oaiVisitNoticeBlocked(){try{if(document.visibilityState==='hidden')return true;if(window.oaiIsBackgroundReturnUiBlocked&&window.oaiIsBackgroundReturnUiBlocked())return true;if(window.oaiHasCriticalModalOpen&&window.oaiHasCriticalModalOpen())return true;if(_isAnyVisitModalOpen())return true;}catch(_e){}return false;}
 function _scheduleDeferredVisitNoticeFlush(){clearTimeout(_oaiDeferredVisitNoticeTimer);_oaiDeferredVisitNoticeTimer=setTimeout(_flushDeferredVisitNotices,500);}
 function _flushDeferredVisitNotices(){try{if(_oaiVisitNoticeBlocked()){_scheduleDeferredVisitNoticeFlush();return;}if(_oaiDeferredShrineAutoVisitEntry){const entry=_oaiDeferredShrineAutoVisitEntry;_oaiDeferredShrineAutoVisitEntry=null;_openShrineAutoVisitModal(entry);return;}if(_oaiDeferredParishAutoVisitPlace){const place=_oaiDeferredParishAutoVisitPlace;_oaiDeferredParishAutoVisitPlace=null;_showParishAutoVisitNotice(place);}}catch(_e){}}
 document.addEventListener('click',function(){if(_oaiDeferredShrineAutoVisitEntry||_oaiDeferredParishAutoVisitPlace)setTimeout(_flushDeferredVisitNotices,120);},true);
@@ -3674,7 +3674,8 @@ function _registerAutoShrineVisit(entry){
 function _maybePromptAutoShrineVisit(lat,lng){
   try{
     if(!lat||!lng) return;
-    if(window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__||_isAnyVisitModalOpen()) return;
+    // GPS 등록은 다른 방문 안내창이 열려 있어도 수행한다. 안내창 표시는 등록 후 대기열에서 처리한다.
+    if(window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__) return;
     const entry=_nearestShrineWithinAutoVisitRadius(lat,lng);
     if(!entry||!entry.item) return;
     const date=_todayISODate();
@@ -17928,6 +17929,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const count=document.getElementById('oai-pilgrimage-plan-count');if(count)count.textContent=list.length+'곳';
     const summary=document.getElementById('oai-pilgrimage-plan-next');if(summary&&gpsMissingEndpoint)summary.textContent='출발·도착지를 입력해 주세요.';else if(summary)summary.textContent=!list.length?(isManualCreate?'다녀온 성지·성당을 등록해 주세요.':(normalizePoint(m.start)&&normalizePoint(m.end)?'출발지와 도착지만으로도 순례계획을 저장할 수 있습니다.':'장소를 등록해 순례 일정을 만들어 보세요.')):(isManualCreate?'다녀온 장소와 순서를 확인한 뒤 저장하세요.':isCompletionView?'완료한 순례코스입니다.':next<0?'등록한 모든 순례 장소를 완료했습니다.':'순례코스를 확인하세요.');
     [['start',m.start],['end',m.end]].forEach(([r,p])=>{const n=document.getElementById('oai-pilgrimage-'+r+'-name'),a=document.getElementById('oai-pilgrimage-'+r+'-addr');if(n)n.textContent=p?p.name:(r==='start'?'출발지 설정':'도착지 설정');if(a){a.textContent=p?'':'현재 위치 · 자주 가는 장소 · 주소 검색';a.hidden=!!p;}});
+    const isActiveFollowForDetail=!isCompletionView&&!!(currentCourseId&&_isActiveFollowCourse(currentCourseId));
     const body=document.getElementById('oai-pilgrimage-plan-list');
     if(body){
       if(!displayItems.length) body.innerHTML='<button type="button" class="oai-pilgrimage-empty oai-pilgrimage-empty-action" data-oai-pilgrimage-add="1"><b>＋ 먼저 순례 장소를 추가하세요</b><small>여기를 눌러 성지·성당을 검색합니다.</small></button>';
@@ -17937,7 +17939,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         const cls='oai-pilgrimage-item'+(done?' is-done':'')+(isCompletionView&&!row.gps?' is-manual-completion':'');
         const metric=isCompletionView&&!row.gps?'':(done?'순례 완료':'GPS 확인 중…');
         const statusHtml=done&&(!isCompletionView||row.gps)?'<span class="oai-pilgrimage-waypoint-chip is-done">✓ 순례완료</span>':'';
-        const nextLabel=(!isCompletionView&&i===next)?'<span class="oai-pilgrimage-next-label" aria-label="다음 순례지"><b>다음</b><b>순례지</b></span>':'';
+        const nextLabel=(isActiveFollowForDetail&&i===next)?'<span class="oai-pilgrimage-next-label" aria-label="다음 순례지"><b>다음</b><b>순례지</b></span>':'';
         const holdAttr=isCompletionView?'':' data-plan-hold="'+i+'"';
         const dragHtml=isCompletionView?(row.gps?'':'<button type="button" class="oai-pilgrimage-drag" data-manual-drag="'+esc(row.manualId)+'" aria-label="'+esc(item.name)+' 수동 순서 이동">⋮</button>'):'<button type="button" class="oai-pilgrimage-drag" data-plan-drag="'+i+'" aria-label="'+esc(item.name)+' 순서 이동">⋮</button>';
         return '<div class="'+cls+'" data-plan-index="'+i+'"'+(isCompletionView?' data-completion-place-index="'+i+'"'+(!row.gps?' data-manual-hold="'+esc(row.manualId)+'"':''):'')+holdAttr+'><span class="oai-pilgrimage-order" aria-label="순례 '+(i+1)+'번">'+(i+1)+'</span><div class="oai-pilgrimage-main"><div class="oai-pilgrimage-main-head"><span class="oai-pilgrimage-place-title"><b>'+esc(item.name)+'</b>'+(isCompletionView&&!row.gps?'<small class="oai-manual-visit-label">수동</small>':'')+'</span>'+statusHtml+'</div>'+(metric?'<small class="oai-pilgrimage-item-metric" data-plan-metric="'+i+'">'+metric+'</small>':'')+'</div>'+nextLabel+dragHtml+'</div>';
@@ -18836,7 +18838,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         list.forEach((item,i)=>{if(!item.done)setMetric(i,'출발지 확인 필요');});
         return;
       }
-      if(view){view.classList.add('gps-ready');const ni=nextIndex(list);if(ni>=0){const card=view.querySelector('[data-plan-index="'+ni+'"]');if(card)card.classList.add('is-next');}}
+      if(view){view.classList.add('gps-ready');const ni=nextIndex(list);if(ni>=0&&currentCourseId&&_isActiveFollowCourse(currentCourseId)){const card=view.querySelector('[data-plan-index="'+ni+'"]');if(card)card.classList.add('is-next');}}
       let prev={lat:Number(startPoint.lat),lng:Number(startPoint.lng)},cumKm=0,cumDur=0,anyEstimated=false;
       for(let i=0;i<list.length;i++){
         const item=list[i];
