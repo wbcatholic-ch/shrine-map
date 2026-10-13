@@ -19473,18 +19473,19 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
   },true);
   document.addEventListener('keydown',e=>{if(e.key==='Enter'&&saveModal()&&saveModal().classList.contains('show')&&e.target&&e.target.id==='oai-pilgrimage-save-name'){e.preventDefault();confirmSave();}},true);
-  refreshDev(); renderCourseList();
-  _initializeDailyPilgrimageSettlement();
-
-  /* 순례코스 목록의 단일 스와이프 처리. 다른 화면의 터치 처리와 합치지 않는다.
-     WebView의 pointercancel로 종료가 유실되지 않도록 모바일에서는 Touch Events를 사용한다. */
   (function(){
     let gesture=null, lastSwitch=0, suppressClickUntil=0;
     const modal=document.getElementById('oai-pilgrimage-planner-modal');
     const list=document.getElementById('oai-pilgrimage-list-view');
-    function isOpen(){return !!(modal&&modal.classList.contains('show')&&list&&!list.hidden&&plannerView==='list');}
+    function isOpen(){
+      return !!(modal&&modal.classList.contains('show')&&list&&!list.hidden
+        &&document.getElementById('oai-pilgrimage-detail-view')?.hidden
+        &&document.getElementById('oai-pilgrimage-follow-view')?.hidden);
+    }
     function eligible(target){
-      return !!(target&&list.contains(target)&&!(target.closest&&target.closest('input,select,textarea,a,[data-plan-drag],[data-manual-drag],[data-oai-pilgrimage-drag]')));
+      const panel=modal&&modal.querySelector('.oai-pilgrimage-planner-panel');
+      return !!(target&&panel&&panel.contains(target)
+        &&!(target.closest&&target.closest('input,select,textarea,a,[data-plan-drag],[data-manual-drag],[data-oai-pilgrimage-drag],.oai-pilgrimage-planner-panel > header')));
     }
     function start(target,x,y,id){
       gesture=null;
@@ -19536,6 +19537,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       document.addEventListener('pointercancel',function(){gesture=null;},true);
     }
   })();
+  // 스와이프 등록은 데이터 초기화보다 앞에 둔다. 초기화 예외가 제스처를 막지 않는다.
+  refreshDev(); renderCourseList();
+  _initializeDailyPilgrimageSettlement();
 })();
 
 /* V1172: 공통 순례 축하창. 기존 방문 스탬프 축하창과 색상을 통일한다. */
