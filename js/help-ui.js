@@ -9,7 +9,7 @@
     settings_backup:['내 기록 보관','GPS 스탬프, 순례코스, 사진·메모 등 내 기록을 백업하거나 복원합니다.\n복원하면 기기에 저장된 현재 기록이 교체될 수 있습니다.\n복원 전 반드시 최신 전체 백업을 따로 보관하세요.'],
     diocese:['관구·교구 지도','한국 천주교의 관구와 교구 정보를 지도에서 살펴볼 수 있습니다.'],
     prayer:['주요 기도문','가톨릭 주요 기도문을 찾아 읽을 수 있습니다.\n굿뉴스 기도문 바로가기도 이용할 수 있습니다.'],
-    pilgrimage:['순례코스','[순례계획] 방문할 장소를 검색하거나 지도에서 추가하고 순서를 정합니다.\n[순례하기] 시작 후 GPS로 방문한 장소가 기록되며, 전부 방문하면 즉시 완료됩니다.\n[순례완료] 날짜별 GPS 기록을 확인합니다. 일반 성당 1곳만 방문한 날은 자동 코스가 아닙니다.\nGPS 완료 코스는 삭제할 수 없고, 누락된 장소는 수동 추가·이동·삭제만 가능합니다.'],
+    pilgrimage:['순례코스','[순례계획] 장소 검색에서 성지·성당을 선택하거나 지도에서 성지 마커를 추가하고, 핸들로 방문 순서를 변경합니다. 출발·도착을 지정해 저장할 수 있습니다.\n[순례하기] 저장한 코스에서 순례하기를 누르면 GPS 방문 확인이 시작됩니다. 진행 중에는 다음 순례지와 거리 확인, 길찾기 등을 이용합니다.\n[순례완료] 실제 GPS 방문 기록에 따라 완료한 코스를 날짜별로 확인합니다. 순례완료의 연도·월 필터와 정렬을 사용할 수 있습니다.\n[자동 코스] 일반 성당 한 곳만 방문한 날은 자동 순례코스가 생성되지 않습니다. 성지 1곳 이상 또는 일반 성당 2곳 이상 방문한 날이 대상입니다. 완료된 날짜는 중복 등록하지 않습니다.\n[GPS 기록 보호] GPS로 완료한 코스는 전체 삭제와 원본 방문 장소 삭제·순서 변경이 불가합니다. GPS 원본 스탬프와 날짜는 유지됩니다.\n[누락 장소 보완] 순례완료 코스에서 ＋ 순례 장소 추가로 성지·성당을 검색하거나 지도에서 추가로 성지 마커를 선택해 수동 보완할 수 있습니다. 수동 장소에만 수동 표시와 삭제 ×, 순서 이동 핸들이 나타납니다.\n[순례코스보기] 저장된 방문 순서를 지도로 확인합니다. GPS 완료 코스는 읽기 전용이며 수동 추가 장소도 순서에 포함됩니다. 길찾기 지도는 경유지 최대 10곳 제한이 있습니다.\n[미등록 GPS 코스 확인] 실제 등록 가능한 과거 방문 날짜가 있을 때에만 순례완료에 표시됩니다. 이미 등록된 날짜나 당일 방문은 대상이 아닙니다.'],
     websites:['가톨릭 주요 웹사이트','교구와 가톨릭 기관 홈페이지를 분류별로 찾아볼 수 있습니다.'],
     trails:['전국 순례길','순례길을 지도나 목록에서 살펴보고 경로를 확인할 수 있습니다.'],
     feedback:['문의·건의','앱의 오류, 자료 수정, 기능 개선 의견을 남길 수 있습니다.'],
@@ -37,6 +37,21 @@
     stamps:['방문 스탬프','GPS로 확인한 방문기록을 날짜별로 보관합니다.\n사진과 메모 등 개인 기록은 별도로 유지됩니다.']
   };
   let lastFocused=null;
+  let helpHistoryPending=false;
+  // 도움말이 열리면 그 창만을 위한 기록 한 칸을 둔다.
+  // 뒤로가기는 아래 캡처 리스너가 우선 소비해 앱 화면 전환과 충돌하지 않는다.
+  window.addEventListener('popstate',function(event){
+    if(helpHistoryPending){
+      helpHistoryPending=false;
+      if(window.CGMHelp && window.CGMHelp.isOpen())hide(false);
+      event.stopImmediatePropagation();
+    }
+  },true);
+  document.addEventListener('backbutton',function(event){
+    if(window.CGMHelp&&window.CGMHelp.isOpen()){
+      event.preventDefault();event.stopImmediatePropagation();hide();
+    }
+  },true);
   function show(key){
     const data=HELP[key];if(!data)return;
     lastFocused=document.activeElement;
@@ -51,8 +66,18 @@
     layer.querySelector('#cgm-help-title').textContent=data[0];
     layer.querySelector('#cgm-help-text').textContent=data[1];
     layer.hidden=false;layer.style.display='flex';layer.querySelector('button').focus();
+    if(!helpHistoryPending){
+      try{history.pushState({cgm_help_overlay:true},'',location.href);helpHistoryPending=true;}catch(_e){}
+    }
   }
-  function hide(){const layer=document.getElementById('cgm-help-overlay');if(layer){layer.hidden=true;layer.style.display='none';}if(lastFocused&&lastFocused.focus)lastFocused.focus();}
+  function hide(consumeHistory=true){
+    const layer=document.getElementById('cgm-help-overlay');
+    if(layer){layer.hidden=true;layer.style.display='none';}
+    if(lastFocused&&lastFocused.focus)lastFocused.focus();
+    if(consumeHistory&&helpHistoryPending){
+      try{history.back();}catch(_e){helpHistoryPending=false;}
+    }
+  }
   window.CGMHelp = {isOpen:function(){const x=document.getElementById('cgm-help-overlay');return !!(x&&!x.hidden);},close:function(){if(this.isOpen()){hide();return true;}return false;}};
   // 공통 캡처 이벤트 한 곳에서 처리하여 이중 호출/중복 바인딩을 방지한다.
   document.addEventListener('click',function(e){
