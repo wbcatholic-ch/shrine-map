@@ -18352,6 +18352,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     closePilgrimageMarkerChoice();
     window.__OAI_PILGRIMAGE_PLACE_PICK__=false;
     clearPilgrimageMapPickMarkers();
+    try{if(_polyline){_polyline.setMap(null);_polyline=null;}if(typeof _clearRouteTmpMarkers==='function')_clearRouteTmpMarkers();}catch(_e){}
     try{if(typeof _hideRouteGuide==='function')_hideRouteGuide();}catch(_e){}
     setTimeout(()=>{try{openPlanner({returnFromSearch:true});setView('detail');renderDetail();}catch(_e){}},40);
   }
@@ -18478,6 +18479,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(typeof hideCoverAndRun==='function')hideCoverAndRun(run);else run();
   }
   function _openPilgrimageEndpointMapAdd(entryRole){
+    // 장소 선택 화면은 이전 코스보기/길찾기 객체를 이어받지 않는다.
+    // 데이터가 아닌 지도에 그린 임시 객체만 제거한다.
+    clearPilgrimageCourseMap();
+    clearPilgrimageMapPickMarkers();
+    try{if(_polyline){_polyline.setMap(null);_polyline=null;}}catch(_e){}
+    try{if(typeof _clearRouteTmpMarkers==='function')_clearRouteTmpMarkers();}catch(_e){}
+    try{if(typeof _clearRegionMarker==='function')_clearRegionMarker();}catch(_e){}
+    try{if(typeof _clearRegionResultMarkers==='function')_clearRegionResultMarkers();}catch(_e){}
+    try{if(typeof _hideRouteGuide==='function')_hideRouteGuide();}catch(_e){}
     closePointPicker();
     const modal=planner();
     _setPilgrimageLayerVisible(modal,false);
@@ -18499,7 +18509,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       // 장소 선택 화면은 일반 성지 필터와 길찾기 결과를 사용하지 않는다.
       // 진입 당시 UI를 정리하고 확대·이동 후에도 필터가 재생성되지 않도록 공통 표시 조건을 분리한다.
       try{_updateShrineVisitMapFilterUI();}catch(_e){}
-      try{if(typeof _clearRouteVisualOnly==='function')_clearRouteVisualOnly();}catch(_e){}
+      // _clearRouteVisualOnly()는 이전 경로 마커를 다시 복원하므로 여기서는 호출 금지.
       try{if(typeof _hideRouteGuide==='function')_hideRouteGuide();}catch(_e){}
       // 지도에서 추가 전용 마커만 남긴다. 기존 성지/성당/피정 마커와 검색 임시 마커를 함께 그리면 드래그가 버벅인다.
       try{if(typeof _clearShrineMarkers==='function')_clearShrineMarkers();}catch(_e){}
@@ -18678,6 +18688,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!window.__OAI_PILGRIMAGE_PLACE_PICK__)return false;
     window.__OAI_PILGRIMAGE_PLACE_PICK__=false;
     clearPilgrimageMapPickMarkers();
+    try{if(_polyline){_polyline.setMap(null);_polyline=null;}if(typeof _clearRouteTmpMarkers==='function')_clearRouteTmpMarkers();}catch(_e){}
     closePilgrimageMarkerChoice();
     try{if(typeof _hideRouteGuide==='function')_hideRouteGuide();}catch(_e){}
     try{
@@ -19464,6 +19475,46 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   document.addEventListener('keydown',e=>{if(e.key==='Enter'&&saveModal()&&saveModal().classList.contains('show')&&e.target&&e.target.id==='oai-pilgrimage-save-name'){e.preventDefault();confirmSave();}},true);
   refreshDev(); renderCourseList();
   _initializeDailyPilgrimageSettlement();
+
+  /* 순례코스 목록: 목록 전체에서 시작된 좌우 제스처를 직접 탭 상태로 전환한다.
+     각 코스 카드가 button이므로 버튼 전체를 터치 대상에서 제외하지 않는다. */
+  (function(){
+    'use strict';
+    let gesture=null,lastSwitch=0,suppressCardClickUntil=0;
+    function isListOpen(){
+      const modal=document.getElementById('oai-pilgrimage-planner-modal');
+      const list=document.getElementById('oai-pilgrimage-list-view');
+      return !!(modal&&modal.classList.contains('show')&&list&&!list.hidden&&plannerView==='list');
+    }
+    function begin(e){
+      gesture=null;
+      if(!isListOpen()||!e.touches||e.touches.length!==1)return;
+      const panel=document.querySelector('#oai-pilgrimage-planner-modal .oai-pilgrimage-planner-panel');
+      if(!panel||!panel.contains(e.target))return;
+      if(e.target.closest('input,select,textarea,a,[data-oai-pilgrimage-drag],[data-plan-drag],[data-manual-drag]'))return;
+      const t=e.touches[0];gesture={x:t.clientX,y:t.clientY};
+    }
+    function end(e){
+      const start=gesture;gesture=null;
+      if(!start||!isListOpen()||!e.changedTouches||e.changedTouches.length!==1)return;
+      const t=e.changedTouches[0],dx=t.clientX-start.x,dy=t.clientY-start.y;
+      if(Math.abs(dx)<48||Math.abs(dx)<Math.abs(dy)*1.3||Date.now()-lastSwitch<300)return;
+      const next=pilgrimageCourseTab==='plan'?'complete':'plan';
+      lastSwitch=Date.now();suppressCardClickUntil=lastSwitch+500;
+      pilgrimageCourseTab=next;
+      pilgrimageCourseFilterState.year='all';pilgrimageCourseFilterState.month='all';
+      pilgrimageCourseFilterState.sort=next==='complete'?'completed':'updated';
+      renderCourseList();
+    }
+    document.addEventListener('click',function(e){
+      if(e.isTrusted&&Date.now()<suppressCardClickUntil&&e.target.closest&&e.target.closest('[data-course-open],[data-oai-pilgrimage-course-tab]')){
+        e.preventDefault();e.stopImmediatePropagation();suppressCardClickUntil=0;
+      }
+    },true);
+    document.addEventListener('touchstart',begin,{capture:true,passive:true});
+    document.addEventListener('touchend',end,{capture:true,passive:true});
+    document.addEventListener('touchcancel',function(){gesture=null;},{capture:true,passive:true});
+  })();
 })();
 
 /* V1172: 공통 순례 축하창. 기존 방문 스탬프 축하창과 색상을 통일한다. */
@@ -19486,46 +19537,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 
 
 /* V1197: 도움말은 js/help-ui.js 로 분리 (중복 이벤트 제거) */
-
-/* 순례코스 목록: 목록 전체에서 시작된 좌우 제스처를 직접 탭 상태로 전환한다.
-   각 코스 카드가 button이므로 버튼 전체를 터치 대상에서 제외하지 않는다. */
-(function(){
-  'use strict';
-  let gesture=null,lastSwitch=0,suppressCardClickUntil=0;
-  function isListOpen(){
-    const modal=document.getElementById('oai-pilgrimage-planner-modal');
-    const list=document.getElementById('oai-pilgrimage-list-view');
-    return !!(modal&&modal.classList.contains('show')&&list&&!list.hidden&&plannerView==='list');
-  }
-  function begin(e){
-    gesture=null;
-    if(!isListOpen()||!e.touches||e.touches.length!==1)return;
-    const panel=document.querySelector('#oai-pilgrimage-planner-modal .oai-pilgrimage-planner-panel');
-    if(!panel||!panel.contains(e.target))return;
-    if(e.target.closest('input,select,textarea,a,[data-oai-pilgrimage-drag],[data-plan-drag],[data-manual-drag]'))return;
-    const t=e.touches[0];gesture={x:t.clientX,y:t.clientY};
-  }
-  function end(e){
-    const start=gesture;gesture=null;
-    if(!start||!isListOpen()||!e.changedTouches||e.changedTouches.length!==1)return;
-    const t=e.changedTouches[0],dx=t.clientX-start.x,dy=t.clientY-start.y;
-    if(Math.abs(dx)<48||Math.abs(dx)<Math.abs(dy)*1.3||Date.now()-lastSwitch<300)return;
-    const next=pilgrimageCourseTab==='plan'?'complete':'plan';
-    lastSwitch=Date.now();suppressCardClickUntil=lastSwitch+500;
-    pilgrimageCourseTab=next;
-    pilgrimageCourseFilterState.year='all';pilgrimageCourseFilterState.month='all';
-    pilgrimageCourseFilterState.sort=next==='complete'?'completed':'updated';
-    renderCourseList();
-  }
-  document.addEventListener('click',function(e){
-    if(e.isTrusted&&Date.now()<suppressCardClickUntil&&e.target.closest&&e.target.closest('[data-course-open],[data-oai-pilgrimage-course-tab]')){
-      e.preventDefault();e.stopImmediatePropagation();suppressCardClickUntil=0;
-    }
-  },true);
-  document.addEventListener('touchstart',begin,{capture:true,passive:true});
-  document.addEventListener('touchend',end,{capture:true,passive:true});
-  document.addEventListener('touchcancel',function(){gesture=null;},{capture:true,passive:true});
-})();
 
 /* V1189: 개발자 설정을 켠 경우에만 상세 사진/메모 UI 활성화 */
 (function(){

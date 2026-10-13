@@ -691,6 +691,5 @@ html:not(.ios-device) .trail-sheet.hanti-main-card{
 
 /* V1180: 완료 코스는 GPS 순서를 고정하고 수동 항목만 오른쪽 핸들 사용 */
 .oai-pilgrimage-detail-view .oai-manual-visit-label{margin-left:6px;font-size:11px;color:#356f57;font-weight:700}
-.oai-pilgrimage-detail-view .oai-manual-remove{flex:0 0 26px;border:1px solid #ddd;background:white;color:#844;font-size:19px;border-radius:7px}
 #oai-pilgrimage-manual-add{border:1px solid #356f57;border-radius:8px;background:#fff;color:#356f57;padding:9px 14px;font-weight:700;cursor:pointer}
 .oai-pilgrimage-detail-view [data-manual-drag]{touch-action:none;user-select:none;cursor:grab}
