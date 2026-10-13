@@ -70,6 +70,12 @@ html.pr-external-guide-active.oai-stability-veil::after {
 }
 #route-choice-modal.open,
 #oai-pilgrimage-marker-choice-modal.open{display:flex;}
+#oai-pilgrimage-marker-choice-modal .route-choice-btn[hidden]{display:none!important;}
+#oai-pilgrimage-marker-choice-modal .route-choice-panel{width:min(420px,calc(100vw - 36px));border-radius:24px;padding:24px 20px 20px;box-shadow:0 22px 60px rgba(5,15,35,.28);transform:none;}
+#oai-pilgrimage-marker-choice-modal .route-choice-title{font-size:22px;line-height:1.38;margin-bottom:12px;}
+#oai-pilgrimage-marker-choice-modal .route-choice-desc{font-size:16px;line-height:1.55;font-weight:600;margin-bottom:20px;}
+#oai-pilgrimage-marker-choice-modal .route-choice-actions{grid-template-columns:1fr;}
+#oai-pilgrimage-marker-choice-modal .route-choice-btn.cancel{background:#f1f4f8;color:#263449;border-color:#d9dfe8;}
 .route-choice-backdrop{
   position:absolute;
   inset:0;

@@ -18313,8 +18313,41 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function pilgrimageMarkerChoiceModal(){return document.getElementById('oai-pilgrimage-marker-choice-modal');}
   let pilgrimageMarkerChoiceItem=null;
   function closePilgrimageMarkerChoice(){const m=pilgrimageMarkerChoiceModal();_setPilgrimageLayerVisible(m,false,'open');pilgrimageMarkerChoiceItem=null;}
-  function openPilgrimageMarkerChoice(item){const q=normalizePoint(item),m=pilgrimageMarkerChoiceModal();if(!q||!m)return false;pilgrimageMarkerChoiceItem=q;const title=document.getElementById('oai-pilgrimage-marker-choice-name');const desc=document.getElementById('oai-pilgrimage-marker-choice-desc');const waypoint=document.getElementById('oai-pilgrimage-marker-choice-waypoint');const already=_pilgrimageMapPickIsAlreadyAdded(q);if(title)title.textContent=q.name||'장소';if(desc)desc.textContent=already?'이미 순례계획에 등록된 장소입니다. 출발지 또는 도착지로도 설정할 수 있습니다.':'이 장소를 출발지, 도착지 또는 경유지로 사용할 수 있습니다.';if(waypoint){waypoint.disabled=!!already;waypoint.textContent=already?'이미 경유지에 있음':'경유지로 추가';waypoint.classList.toggle('is-disabled',!!already);}_setPilgrimageLayerVisible(m,true,'open');try{document.activeElement&&document.activeElement.blur();}catch(_e){}return true;}
-  function finishPilgrimageMapChoice(action){const item=pilgrimageMarkerChoiceItem?normalizePoint(pilgrimageMarkerChoiceItem):null;closePilgrimageMarkerChoice();if(!item)return;if(action==='start'||action==='end'){const meta=loadMeta();meta[action]=item;saveMeta(meta,true);_persistAutoGpsEndpoints();}else if(action==='waypoint'){if(_pilgrimageMapPickIsAlreadyAdded(item))return;const list=loadPlan();list.push(Object.assign({},item,{done:false}));savePlan(list,true);}else return;window.__OAI_PILGRIMAGE_PLACE_PICK__=false;clearPilgrimageMapPickMarkers();try{if(typeof _hideRouteGuide==='function')_hideRouteGuide();}catch(_e){}setTimeout(()=>{try{openPlanner({returnFromSearch:true});setView('detail');renderDetail();}catch(_e){}},40);}
+  function openPilgrimageMarkerChoice(item){
+    const q=normalizePoint(item),m=pilgrimageMarkerChoiceModal();
+    if(!q||!m)return false;
+    pilgrimageMarkerChoiceItem=q;
+    const completed=!!_manualCompletionCourse();
+    const already=_pilgrimageMapPickIsAlreadyAdded(q);
+    const title=document.getElementById('oai-pilgrimage-marker-choice-name');
+    const desc=document.getElementById('oai-pilgrimage-marker-choice-desc');
+    const waypoint=document.getElementById('oai-pilgrimage-marker-choice-waypoint');
+    const start=document.getElementById('oai-pilgrimage-marker-choice-start');
+    const end=document.getElementById('oai-pilgrimage-marker-choice-end');
+    if(title)title.textContent=q.name||'장소';
+    if(desc)desc.textContent=already?'이미 현재 순례코스에 포함된 장소입니다. 다른 장소를 선택해 주세요.':completed?'이 장소를 순례완료 코스에 수동으로 추가하시겠습니까? GPS 방문 기록은 변경되지 않습니다.':'이 장소를 순례계획의 경유지로 추가하시겠습니까?';
+    if(start)start.hidden=true;
+    if(end)end.hidden=true;
+    if(waypoint){waypoint.disabled=already;waypoint.textContent=already?'이미 추가된 장소':'＋ 이 장소 추가하기';waypoint.classList.toggle('is-disabled',already);}
+    _setPilgrimageLayerVisible(m,true,'open');
+    try{document.activeElement&&document.activeElement.blur();}catch(_e){}
+    return true;
+  }
+  function finishPilgrimageMapChoice(action){
+    const item=pilgrimageMarkerChoiceItem?normalizePoint(pilgrimageMarkerChoiceItem):null;
+    if(action!=='waypoint'||!item){closePilgrimageMarkerChoice();return;}
+    if(_pilgrimageMapPickIsAlreadyAdded(item))return;
+    if(_manualCompletionCourse()){
+      if(!_manualCompletionSelectPlace(item))return;
+    }else{
+      const list=loadPlan();list.push(Object.assign({},item,{done:false}));savePlan(list,true);
+    }
+    closePilgrimageMarkerChoice();
+    window.__OAI_PILGRIMAGE_PLACE_PICK__=false;
+    clearPilgrimageMapPickMarkers();
+    try{if(typeof _hideRouteGuide==='function')_hideRouteGuide();}catch(_e){}
+    setTimeout(()=>{try{openPlanner({returnFromSearch:true});setView('detail');renderDetail();}catch(_e){}},40);
+  }
   window._registerPilgrimagePlanPoint=function(role,item){const r=role==='pilgrimage-start'?'start':'end';setPoint(r,item);closeSearchModal();};
   function chooseFrequent(i){const a=_loadRouteFavorites(),f=a[i];if(f)setPoint(pointRole,f);}
   function chooseCurrent(){const role=pointRole==='end'?'end':'start';const done=(lat,lng)=>setPoint(role,{name:'현재 위치',addr:role==='start'?'순례 시작 시 현재 위치 사용':'선택 시점의 현재 위치 사용',lat:Number(lat),lng:Number(lng),dynamicCurrent:role==='start'});if(Number.isFinite(Number(_myLat))&&Number.isFinite(Number(_myLng)))done(_myLat,_myLng);else if(typeof _refreshFreshLocationThen==='function')_refreshFreshLocationThen(done,()=>alert('현재 위치를 가져올 수 없습니다.'));else alert('현재 위치를 가져올 수 없습니다.');}
@@ -18446,16 +18479,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     window.__OAI_PILGRIMAGE_MAP_PICK__=null;
     window._oaiTryPilgrimageMapPlacePick=function(item){
       if(!window.__OAI_PILGRIMAGE_PLACE_PICK__||!item)return false;
-      let ok=false;try{ok=(Array.isArray(SHRINES)&&SHRINES.indexOf(item)>=0)||(Array.isArray(PARISHES)&&PARISHES.indexOf(item)>=0);}catch(_e){}
-      if(!ok){const q=normalizePoint(item);ok=!!q;}
-      if(!ok)return false;
-      if(_manualCompletionCourse()){
-        if(!_manualCompletionSelectPlace(item))return true;
-        window.__OAI_PILGRIMAGE_PLACE_PICK__=false;clearPilgrimageMapPickMarkers();
-        openPlanner({returnFromSearch:true});setView('detail');renderDetail();
-        return true;
-      }
-      return openPilgrimageMarkerChoice(item);
+      const q=normalizePoint(item);
+      if(!q)return false;
+      // 선택 즉시 저장하지 않는다. 계획/완료 모두 확인창에서만 추가한다.
+      return openPilgrimageMarkerChoice(q);
     };
     const run=()=>{try{
       // 이전에 사용한 성당·피정 화면 상태를 물려받지 않는다.
@@ -18475,15 +18502,27 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       let opened=false;
       const afterReady=()=>{if(opened)return;opened=true;try{
         if(_map&&typeof _map.relayout==='function')_map.relayout();
-        const initial=_pilgrimageMapInitialPoint(entryRole);
-        if(_map&&initial&&_validGpsPair(initial.lat,initial.lng)&&typeof _map.setCenter==='function'){
-          _map.setCenter(new _LL(Number(initial.lat),Number(initial.lng)));
+        // 기존 경1·경2… 전체가 보이도록 지도 경계를 먼저 설정한다.
+        // 코스가 없을 때만 기존 출발지/현재 위치 중심 규칙을 사용한다.
+        const completed=_manualCompletionCourse();
+        const selected=completed?_manualMerged(completed).map(x=>x.point):loadPlan();
+        const points=selected.map(normalizePoint).filter(p=>p&&_validGpsPair(p.lat,p.lng));
+        if(_map&&points.length>=2&&typeof _map.setBounds==='function'){
+          const bounds=new kakao.maps.LatLngBounds();
+          points.forEach(p=>bounds.extend(new _LL(Number(p.lat),Number(p.lng))));
+          _map.setBounds(bounds,100,46,125,46);
+        }else if(_map&&points.length===1){
+          _map.setCenter(new _LL(Number(points[0].lat),Number(points[0].lng)));
           if(typeof _map.setLevel==='function')_map.setLevel(OAI_PILGRIMAGE_ENDPOINT_MAP_LEVEL);
-        }else if(_map&&_validGpsPair(_myLat,_myLng)&&typeof _map.setCenter==='function'){
-          _map.setCenter(new _LL(Number(_myLat),Number(_myLng)));
-          if(typeof _map.setLevel==='function')_map.setLevel(OAI_PILGRIMAGE_ENDPOINT_MAP_LEVEL);
-        }else if(typeof currentPosition==='function'){
-          currentPosition(function(lat,lng){try{if(window.__OAI_PILGRIMAGE_PLACE_PICK__&&_map&&typeof _map.setCenter==='function'){_map.setCenter(new _LL(Number(lat),Number(lng)));if(typeof _map.setLevel==='function')_map.setLevel(OAI_PILGRIMAGE_ENDPOINT_MAP_LEVEL);}}catch(_e){}},function(){});
+        }else{
+          const initial=_pilgrimageMapInitialPoint(entryRole);
+          if(_map&&initial&&_validGpsPair(initial.lat,initial.lng)){
+            _map.setCenter(new _LL(Number(initial.lat),Number(initial.lng)));
+            if(typeof _map.setLevel==='function')_map.setLevel(OAI_PILGRIMAGE_ENDPOINT_MAP_LEVEL);
+          }else if(_map&&_validGpsPair(_myLat,_myLng)){
+            _map.setCenter(new _LL(Number(_myLat),Number(_myLng)));
+            if(typeof _map.setLevel==='function')_map.setLevel(OAI_PILGRIMAGE_ENDPOINT_MAP_LEVEL);
+          }
         }
         if(typeof _syncMapPanelUI==='function')_syncMapPanelUI('pilgrimage-map-add');
         _preparePilgrimageMapPickMarkers();
