@@ -18510,7 +18510,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   let pilgrimageMapPickIdleHandler=null;
   let pilgrimageMapPickBuildSeq=0;
   const OAI_PILGRIMAGE_MAP_PICK_VIEW_LEVEL=9;
-  const OAI_PILGRIMAGE_ENDPOINT_MAP_LEVEL=6;
+  const OAI_PILGRIMAGE_ENDPOINT_MAP_LEVEL=7;
   const OAI_PILGRIMAGE_PLAN_MARKER_COLOR='#ec4899';
   const OAI_PILGRIMAGE_FOCUS_MARKER_COLOR='#f4c430';
   function clearPilgrimageMapPickMarkers(){
@@ -18574,6 +18574,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const focusInfo=_pilgrimageMapPickFocusInfo();
     const focusPoint=focusInfo&&focusInfo.point?focusInfo.point:null;
     const selectedKey=(p)=>selected.some(x=>_pilgrimageMapPickIsSamePoint(x,p));
+    const selectedOrder=(p)=>selected.findIndex(x=>_pilgrimageMapPickIsSamePoint(x,p))+1;
     const focusKey=(p)=>!!(focusPoint&&_pilgrimageMapPickIsSamePoint(focusPoint,p));
     const items=[];
     // 지도에서 추가는 성지 마커만 사용한다. 성당 마커는 표시하지 않는다.
@@ -18586,7 +18587,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(seq!==pilgrimageMapPickBuildSeq||!window.__OAI_PILGRIMAGE_PLACE_PICK__)return;
       const end=Math.min(i+BATCH,items.length);
       for(;i<end;i++){
-        const item=items[i],isSelected=selectedKey(item),isFocused=focusKey(item),img=_pilgrimageMapPickMarkerImage(item,isSelected,isFocused);
+        const item=items[i],order=selectedOrder(item),isSelected=order>0,isFocused=focusKey(item);
+        // 계획·완료 양쪽 모두 기존 코스에 포함된 장소는 경유 순서를 마커에 직접 표시한다.
+        // 코스 밖 성지는 원래 카테고리별 마커를 유지한다.
+        const img=isSelected?_mkrImgRoute(OAI_PILGRIMAGE_PLAN_MARKER_COLOR,'경'+order):_pilgrimageMapPickMarkerImage(item,false,isFocused);
         try{
           const opt={position:new _LL(Number(item.lat),Number(item.lng)),title:String(item.name||'')};
           if(img)opt.image=img;
