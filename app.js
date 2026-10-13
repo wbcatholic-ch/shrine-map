@@ -16778,7 +16778,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function _dailyUpdateRetryButton(){
     const b=document.getElementById('oai-pilgrimage-retry-btn');if(!b)return;
     b.hidden=true;
-    if(pilgrimageCourseTab!=='complete')return;
+    const list=document.getElementById('oai-pilgrimage-list-view');
+    if(pilgrimageCourseTab!=='complete'||!list||list.hidden)return;
     let actionable=[];
     try{
       const state=_dailyState(),completed=new Set(loadCourses().flatMap(c=>_courseCompletionList(c).map(x=>_dailyIso(x.completedAt))));
@@ -16904,7 +16905,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const b=document.getElementById('oai-pilgrimage-history-btn');if(!b)return;
     // V1185: 순례완료 목록에서만, 실제 미등록 날짜가 있을 때에만 표시.
     // 날짜 후보 계산이 실패한 경우 삭제/완료로 오인하지 않고 버튼을 보존한다.
-    if(pilgrimageCourseTab!=='complete'){b.hidden=true;return;}
+    const list=document.getElementById('oai-pilgrimage-list-view');
+    if(pilgrimageCourseTab!=='complete'||!list||list.hidden){b.hidden=true;return;}
     let remaining;
     try{remaining=_historyUnregisteredDates();}
     catch(e){console.warn('[미등록 GPS 버튼 확인 실패]',e);b.hidden=true;return;}
@@ -16991,8 +16993,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     historyDatesCache=null;
     _historyUpdateButton();
     _dailyUpdateRetryButton();
-    // 안내는 최초/두 번째 성지순례 진입 때만. 세 번째부터는 버튼만 남긴다.
-    if(_historyPrefs().notices<2)setTimeout(()=>_historyStart(false),500);
+    // 과거 GPS 코스 확인은 실제 미등록 대상이 있는 경우 버튼을 눌렀을 때만 실행한다.
+    // 화면 진입 시 자동 등록 대화상자를 띄우지 않는다.
   }
   document.addEventListener('click',e=>{
     const t=e.target&&e.target.closest&&e.target.closest('#oai-pilgrimage-history-btn');
