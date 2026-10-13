@@ -19475,14 +19475,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   document.addEventListener('keydown',e=>{if(e.key==='Enter'&&saveModal()&&saveModal().classList.contains('show')&&e.target&&e.target.id==='oai-pilgrimage-save-name'){e.preventDefault();confirmSave();}},true);
   (function(){
     let gesture=null, lastSwitch=0, suppressClickUntil=0;
-    const modal=document.getElementById('oai-pilgrimage-planner-modal');
-    const list=document.getElementById('oai-pilgrimage-list-view');
+    // app.js is loaded before the planner DOM in index.html. Resolve nodes at event time,
+    // not during script evaluation, when both elements are still absent.
     function isOpen(){
+      const modal=document.getElementById('oai-pilgrimage-planner-modal');
+      const list=document.getElementById('oai-pilgrimage-list-view');
       return !!(modal&&modal.classList.contains('show')&&list&&!list.hidden
         &&document.getElementById('oai-pilgrimage-detail-view')?.hidden
         &&document.getElementById('oai-pilgrimage-follow-view')?.hidden);
     }
     function eligible(target){
+      const modal=document.getElementById('oai-pilgrimage-planner-modal');
       const panel=modal&&modal.querySelector('.oai-pilgrimage-planner-panel');
       return !!(target&&panel&&panel.contains(target)
         &&!(target.closest&&target.closest('input,select,textarea,a,[data-plan-drag],[data-manual-drag],[data-oai-pilgrimage-drag],.oai-pilgrimage-planner-panel > header')));
