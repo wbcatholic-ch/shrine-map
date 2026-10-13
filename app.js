@@ -19476,58 +19476,64 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   refreshDev(); renderCourseList();
   _initializeDailyPilgrimageSettlement();
 
-  /* 순례코스 목록 스와이프: 목록 상태를 소유한 이 함수 안에서 한 번만 연결한다.
-     Pointer Events 우선, 구형 WebView에서는 Touch Events 사용. */
+  /* 순례코스 목록의 단일 스와이프 처리. 다른 화면의 터치 처리와 합치지 않는다.
+     WebView의 pointercancel로 종료가 유실되지 않도록 모바일에서는 Touch Events를 사용한다. */
   (function(){
-    'use strict';
-    let gesture=null,lastSwitch=0,suppressCardClickUntil=0;
+    let gesture=null, lastSwitch=0, suppressClickUntil=0;
     const modal=document.getElementById('oai-pilgrimage-planner-modal');
     const list=document.getElementById('oai-pilgrimage-list-view');
-    function isListOpen(){
-      return !!(modal&&modal.classList.contains('show')&&list&&!list.hidden&&plannerView==='list');
+    function isOpen(){return !!(modal&&modal.classList.contains('show')&&list&&!list.hidden&&plannerView==='list');}
+    function eligible(target){
+      return !!(target&&list.contains(target)&&!(target.closest&&target.closest('input,select,textarea,a,[data-plan-drag],[data-manual-drag],[data-oai-pilgrimage-drag]')));
     }
-    function begin(target,x,y,id){
+    function start(target,x,y,id){
       gesture=null;
-      if(!isListOpen()||!target||!list.contains(target))return;
-      if(target.closest&&target.closest('input,select,textarea,a,[data-oai-pilgrimage-drag],[data-plan-drag],[data-manual-drag]'))return;
-      gesture={x,y,id};
+      if(isOpen()&&eligible(target))gesture={x,y,lastX:x,lastY:y,id,axis:null};
     }
-    function finish(x,y,id){
-      const start=gesture;gesture=null;
-      if(!start||start.id!==id||!isListOpen())return;
-      const dx=x-start.x,dy=y-start.y,now=Date.now();
-      if(Math.abs(dx)<48||Math.abs(dx)<Math.abs(dy)*1.35||now-lastSwitch<300)return;
-      const next=pilgrimageCourseTab==='plan'?'complete':'plan';
-      lastSwitch=now;suppressCardClickUntil=now+550;
+    function move(x,y,id,event){
+      const g=gesture;if(!g||g.id!==id)return;
+      g.lastX=x;g.lastY=y;
+      const dx=x-g.x,dy=y-g.y;
+      if(!g.axis&&(Math.abs(dx)>12||Math.abs(dy)>12))g.axis=Math.abs(dx)>Math.abs(dy)*1.25?'horizontal':'vertical';
+      if(g.axis==='horizontal'&&event&&event.cancelable)event.preventDefault();
+      if(g.axis==='vertical')gesture=null;
+    }
+    function end(x,y,id){
+      const g=gesture;gesture=null;
+      if(!g||g.id!==id||!isOpen())return;
+      const dx=x-g.x,dy=y-g.y,now=Date.now();
+      if(Math.abs(dx)<48||Math.abs(dx)<Math.abs(dy)*1.25||now-lastSwitch<250)return;
+      lastSwitch=now;suppressClickUntil=now+550;
+      const next=pilgrimageCourseTab==='complete'?'plan':'complete';
       pilgrimageCourseTab=next;
       pilgrimageCourseFilterState.year='all';pilgrimageCourseFilterState.month='all';
       pilgrimageCourseFilterState.sort=next==='complete'?'completed':'updated';
       renderCourseList();
     }
     document.addEventListener('click',function(e){
-      if(Date.now()<suppressCardClickUntil&&e.target.closest&&e.target.closest('[data-course-open],[data-oai-pilgrimage-course-tab]')){
-        e.preventDefault();e.stopImmediatePropagation();suppressCardClickUntil=0;
+      if(Date.now()<suppressClickUntil&&e.target.closest&&e.target.closest('[data-course-open],[data-oai-pilgrimage-course-tab]')){
+        e.preventDefault();e.stopImmediatePropagation();suppressClickUntil=0;
       }
     },true);
-    if(window.PointerEvent){
-      document.addEventListener('pointerdown',function(e){
-        if(e.pointerType==='mouse'||e.isPrimary===false){gesture=null;return;}
-        begin(e.target,e.clientX,e.clientY,e.pointerId);
-      },true);
-      document.addEventListener('pointerup',function(e){
-        if(e.pointerType!=='mouse')finish(e.clientX,e.clientY,e.pointerId);
-      },true);
-      document.addEventListener('pointercancel',function(){gesture=null;},true);
-    }else{
+    if('ontouchstart' in window || navigator.maxTouchPoints>0){
       document.addEventListener('touchstart',function(e){
-        if(!e.touches||e.touches.length!==1){gesture=null;return;}
-        const t=e.touches[0];begin(e.target,t.clientX,t.clientY,t.identifier);
+        if(e.touches.length!==1){gesture=null;return;}
+        const t=e.touches[0];start(e.target,t.clientX,t.clientY,t.identifier);
       },{capture:true,passive:true});
+      document.addEventListener('touchmove',function(e){
+        if(!gesture||e.touches.length!==1)return;
+        const t=e.touches[0];move(t.clientX,t.clientY,t.identifier,e);
+      },{capture:true,passive:false});
       document.addEventListener('touchend',function(e){
-        if(!e.changedTouches||e.changedTouches.length!==1){gesture=null;return;}
-        const t=e.changedTouches[0];finish(t.clientX,t.clientY,t.identifier);
+        if(!gesture||e.changedTouches.length!==1)return;
+        const t=e.changedTouches[0];end(t.clientX,t.clientY,t.identifier);
       },{capture:true,passive:true});
       document.addEventListener('touchcancel',function(){gesture=null;},{capture:true,passive:true});
+    }else if(window.PointerEvent){
+      document.addEventListener('pointerdown',function(e){if(e.pointerType!=='mouse')start(e.target,e.clientX,e.clientY,e.pointerId);},true);
+      document.addEventListener('pointermove',function(e){if(e.pointerType!=='mouse')move(e.clientX,e.clientY,e.pointerId,e);},true);
+      document.addEventListener('pointerup',function(e){if(e.pointerType!=='mouse')end(e.clientX,e.clientY,e.pointerId);},true);
+      document.addEventListener('pointercancel',function(){gesture=null;},true);
     }
   })();
 })();
