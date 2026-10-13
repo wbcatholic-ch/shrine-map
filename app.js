@@ -16703,8 +16703,25 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(events.length!==rawGpsRows.length)throw new Error(date+' GPS 스탬프 누락 또는 장소 연결 오류');
     events.sort((a,b)=>a.at-b.at||a.name.localeCompare(b.name,'ko'));
     const unique=[];
-    events.forEach(ev=>{const old=unique.find(x=>_dailySamePlace(x,ev));if(!old)unique.push(ev);else if(ev.kind==='shrine')old.kind='shrine';});
+    events.forEach(ev=>{
+      const index=unique.findIndex(x=>_dailySamePlace(x,ev)||_dailyLinkedGpsPair(x,ev));
+      if(index<0){unique.push(ev);return;}
+      const existing=unique[index];
+      if(ev.kind==='shrine'&&existing.kind!=='shrine')unique[index]=Object.assign({},ev,{at:Math.min(existing.at,ev.at)});
+      else existing.at=Math.min(existing.at,ev.at);
+    });
     return unique;
+  }
+  // 공동 인증의 중복 코스 판정은 명시적 성지·성당 연결 명부만 사용한다.
+  // 사진/메모의 주소 자동 공통화나 단순 거리 근접은 GPS 코스 병합 근거가 아니다.
+  function _dailyLinkedGpsPair(a,b){
+    if(!a||!b||a.kind===b.kind)return false;
+    const shrine=a.kind==='shrine'?a:b,parish=a.kind==='parish'?a:b;
+    return OAI_SHARED_VISIT_JOURNAL_GROUPS.some(function(g){
+      return _normPilgrimageName(shrine.name)===_normPilgrimageName(g.shrineName)&&
+        _normPilgrimageName(parish.name)===_normPilgrimageName(g.parishName)&&
+        String(parish.diocese||'')===String(g.parishDiocese||'');
+    });
   }
   function _dailyIsMyParish(ev){
     if(!ev)return false;
@@ -16738,11 +16755,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(_readActiveFollowRaw())throw new Error('기존 완료 코스 종료 상태 저장 실패');
       return true;
     }
-    const raw=_dailyRawGpsEvents(date);
+    // 해당 방문 날짜에 이미 획득한 GPS 스탬프는 순례하기 시작 전이라도 인정한다.
+    // 장소 고유 ID를 먼저 조회하므로 동일 명칭의 다른 장소를 잘못 완료하지 않는다.
     const visited=(Array.isArray(course.places)?course.places:[]).map(place=>{
-      const hits=raw.filter(e=>_normPilgrimageName(e.name)===_normPilgrimageName(place.name)&&e.at>=active.startedAt-2000&&e.at<_dailyDayEnd(date));
-      if(!hits.length)return null;
-      return {place:Object.assign({},place,{done:true,doneMethod:'gps'}),at:hits[0].at};
+      const at=_dailyRecordedVisitAt(place,date);
+      if(!at||at>=_dailyDayEnd(date))return null;
+      return {place:Object.assign({},place,{done:true,doneMethod:'gps'}),at};
     }).filter(Boolean).sort((a,b)=>a.at-b.at);
     if(visited.length&&!normalizePoint(course.end)){
       // 도착지를 지정하지 않은 수동 계획은 완료 처리 금지. 원본 계획/스탬프는 보존.
@@ -16806,7 +16824,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(courses.some(c=>c.id===id))throw new Error('등록 날짜와 같은 ID의 코스가 이미 있습니다');
       const at=_dailyDayEnd(date)-1; // 실제 GPS 방문일의 마지막 시각. 실행은 익일 00:01:30
       const course=_courseRefreshCompletionState({id,name:_dailyAutoCourseName(date,eligible),autoGps:true,sourceDate:date,start:null,end:null,
-        places:eligible.map(ev=>({name:ev.name,addr:ev.addr,lat:ev.lat,lng:ev.lng,done:true,doneMethod:'gps'})),
+        places:eligible.map(ev=>({name:ev.name,addr:ev.addr,lat:ev.lat,lng:ev.lng,placeId:ev.placeId,diocese:ev.diocese,done:true,doneMethod:'gps'})),
         completions:[{completedAt:at,placeCount:eligible.length,method:'gps',locked:true}],gpsSettled:true,
         completionArmed:false,lastStartedAt:0,updatedAt:Date.now(),lastCompletedAt:at});
       courses.unshift(course);
