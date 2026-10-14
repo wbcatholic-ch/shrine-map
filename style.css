@@ -9953,17 +9953,17 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
 .oai-pilgrimage-place-info-overlay{display:none;position:fixed;inset:0;z-index:2147482000;align-items:center;justify-content:center;padding:18px;box-sizing:border-box;}
 .oai-pilgrimage-place-info-overlay.open{display:flex;}
 .oai-pilgrimage-place-info-backdrop{position:absolute;inset:0;background:rgba(10,20,38,.46);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);}
-.oai-pilgrimage-place-info-panel{position:relative;background:#fff;color:#15233a;width:min(100%,460px);max-height:85dvh;overflow:auto;border-radius:18px;box-shadow:0 14px 40px rgba(0,0,0,.23);}
+.oai-pilgrimage-place-info-panel{position:relative;background:#fff;color:#142238;width:min(100%,460px);max-height:85dvh;overflow:auto;border:1px solid #c3ced9;border-radius:18px;box-shadow:0 18px 46px rgba(0,0,0,.30);}
 .oai-pilgrimage-place-info-panel header{display:flex;gap:14px;align-items:center;justify-content:space-between;padding:19px 20px 15px;border-bottom:1px solid #e0e6ee;}
-.oai-pilgrimage-place-info-panel header strong{font-size:19px;line-height:1.4;}
-.oai-pilgrimage-place-info-panel header button{border:0;background:#f0f3f6;border-radius:50%;width:35px;height:35px;flex:none;font-size:24px;color:#25364b;}
-.oai-pilgrimage-place-info-body{padding:19px 20px 25px;font-size:16px;line-height:1.6;}
-.oai-pilgrimage-place-info-category{color:#175993;font-weight:700;margin-bottom:15px;font-size:14px;}
-.oai-pilgrimage-place-info-label{font-weight:700;font-size:13px;color:#687587;margin-bottom:3px;}
+.oai-pilgrimage-place-info-panel header strong{font-size:19px;line-height:1.4;color:#101d32;font-weight:900;}
+.oai-pilgrimage-place-info-panel header button{border:1px solid #ccd5df;background:#edf1f5;border-radius:50%;width:35px;height:35px;flex:none;font-size:24px;color:#1c2b40;}
+.oai-pilgrimage-place-info-body{padding:19px 20px 25px;font-size:16px;line-height:1.6;color:#15233a;font-weight:550;}
+.oai-pilgrimage-place-info-category{color:#124a79;font-weight:850;margin-bottom:15px;font-size:14px;}
+.oai-pilgrimage-place-info-label{font-weight:850;font-size:13px;color:#425168;margin-bottom:3px;}
 
 .oai-pilgrimage-place-info-links{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;}
 .oai-pilgrimage-place-info-links:empty{display:none;}
-.oai-pilgrimage-place-info-links button{flex:1 1 120px;padding:12px;border:1px solid #aac3db;background:#f5faff;border-radius:11px;color:#155a91;font:inherit;font-weight:750;cursor:pointer;}
+.oai-pilgrimage-place-info-links button{flex:1 1 120px;padding:12px;border:1.5px solid #155d96;background:#156bb0;border-radius:11px;color:#fff;font:inherit;font-weight:850;cursor:pointer;}
 
 /* V1243: 자동 코스 등록 2회 실패 시 앱 전용 수동 등록 안내 */
 .oai-daily-failure-overlay[hidden]{display:none!important}
