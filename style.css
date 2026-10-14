@@ -9963,3 +9963,15 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
 .oai-pilgrimage-place-info-links{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;}
 .oai-pilgrimage-place-info-links:empty{display:none;}
 .oai-pilgrimage-place-info-links button{flex:1 1 120px;padding:12px;border:1px solid #aac3db;background:#f5faff;border-radius:11px;color:#155a91;font:inherit;font-weight:750;cursor:pointer;}
+
+/* V1243: 자동 코스 등록 2회 실패 시 앱 전용 수동 등록 안내 */
+.oai-daily-failure-overlay[hidden]{display:none!important}
+.oai-daily-failure-overlay{position:fixed;inset:0;z-index:2147482000;background:rgba(15,23,42,.45);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;padding:22px;box-sizing:border-box}
+.oai-daily-failure-panel{position:relative;background:#fff;border-radius:20px;width:min(100%,420px);padding:24px;box-sizing:border-box;box-shadow:0 12px 48px rgba(0,0,0,.22);color:#18253a}
+.oai-daily-failure-panel h3{margin:0 0 16px;font-size:21px;font-weight:800}
+.oai-daily-failure-panel p{font-size:15px;line-height:1.55;margin:10px 0}
+.oai-daily-failure-actions{display:flex;gap:10px;margin-top:22px}
+.oai-daily-failure-actions button{flex:1;border:1px solid #c9d4e2;border-radius:12px;min-height:46px;font-size:15px;font-weight:700;background:#fff;color:#19395b}
+.oai-daily-failure-actions [data-daily-failure-register]{background:#277b48;border-color:#277b48;color:#fff}
+.oai-daily-failure-x{position:absolute;right:13px;top:12px;width:36px;height:36px;border:0;background:transparent;color:#475569;font-size:27px;line-height:1;cursor:pointer}
+.oai-daily-failure-panel h3{padding-right:32px}

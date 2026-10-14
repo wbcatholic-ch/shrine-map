@@ -16857,27 +16857,62 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   let dailyRegisterTimer=null,dailyCloseTimer=null,dailyRegisterBusy=false,dailyPromptedDate='';
   function _dailyUpdateRetryButton(){
-    const b=document.getElementById('oai-pilgrimage-retry-btn');if(!b)return;
-    b.hidden=true;
-    const list=document.getElementById('oai-pilgrimage-list-view');
-    if(pilgrimageCourseTab!=='complete'||!list||list.hidden)return;
-    let actionable=[];
-    try{
-      const state=_dailyState(),completed=new Set(loadCourses().flatMap(c=>_courseCompletionList(c).map(x=>_dailyIso(x.completedAt))));
-      const candidate=new Set(_historyCandidateDates(false));
-      actionable=Object.keys(state.failures||{}).filter(d=>candidate.has(d)&&!completed.has(d));
-    }catch(e){console.warn('[GPS 재등록 버튼 검증 보류]',e);return;}
-    b.hidden=!actionable.length;
-    b.textContent=actionable.length?'다시 등록 ('+actionable.length+'일 미처리)':'다시 등록';
+    // 실패 복구는 기존 녹색 「미등록된 순례코스 등록하기」 버튼만 사용한다.
+    const old=document.getElementById('oai-pilgrimage-retry-btn');
+    if(old)old.hidden=true;
+    if(typeof _historyUpdateButton==='function')_historyUpdateButton();
   }
   function _dailyMarkUnresolved(date,error){
     try{const state=_dailyState();state.failures[date]={failedAt:Date.now(),message:String(error&&error.message||error)};_saveDailyState(state);}
     catch(e){console.warn('[강제종료 보류 상태 저장 실패]',e);}
     _dailyShowFailure(date);
   }
+  // 실패 장부는 유지하되, 사용자에게 앱 전용 안내창으로 수동 등록을 요청한다.
+  // 실패일별 안내는 앱 실행 중 한 번만 표시하며, 다음 앱 실행에서도 미처리 실패를 알린다.
+  const dailyFailureNotified=new Set();
+  function _dailyFailureClose(){
+    const modal=document.getElementById('oai-daily-register-failure');
+    if(!modal||modal.hidden)return false;
+    modal.hidden=true;
+    return true;
+  }
+  // 기존 공통 뒤로가기 처리보다 먼저 이 안내창만 닫는다.
+  window._oaiDailyFailureBackHandle=_dailyFailureClose;
+  function _dailyFailureModal(){
+    let modal=document.getElementById('oai-daily-register-failure');
+    if(modal)return modal;
+    modal=document.createElement('div');modal.id='oai-daily-register-failure';
+    modal.className='oai-daily-failure-overlay';modal.hidden=true;
+    modal.innerHTML='<section class="oai-daily-failure-panel" role="dialog" aria-modal="true" aria-labelledby="oai-daily-failure-heading"><button type="button" class="oai-daily-failure-x" data-daily-failure-close="1" aria-label="닫기">×</button><h3 id="oai-daily-failure-heading">코스 자동 등록 실패</h3><p id="oai-daily-failure-text"></p><p>방문 스탬프는 그대로 보존되어 있습니다.</p><p>아래 <strong>「미등록된 순례코스 등록하기」</strong> 버튼을 눌러 등록해 주세요.</p><div class="oai-daily-failure-actions"><button type="button" data-daily-failure-register="1">미등록된 순례코스 등록하기</button></div></section>';
+    document.body.appendChild(modal);
+    modal.addEventListener('click',e=>{
+      if(e.target===modal||e.target.closest('[data-daily-failure-close]')){_dailyFailureClose();return;}
+      if(e.target.closest('[data-daily-failure-register]')){
+        _dailyFailureClose();
+        _historyStart(true); // 기존 녹색 버튼과 동일한 GPS 미등록 코스 등록 흐름
+      }
+    });
+    return modal;
+  }
   function _dailyShowFailure(date){
     console.warn('[성지순례 등록 보류] '+date+' — GPS 스탬프는 그대로 보존됩니다.');
     _dailyUpdateRetryButton();
+    if(document.hidden||dailyFailureNotified.has(date))return;
+    const modal=_dailyFailureModal();
+    if(!modal.hidden)return;
+    dailyFailureNotified.add(date);
+    modal.dataset.date=date;
+    modal.querySelector('#oai-daily-failure-text').textContent=date+' 순례코스를 자동 등록하지 못했습니다. (총 2회 시도)';
+    modal.hidden=false;
+  }
+  function _dailyNotifyStoredFailures(){
+    if(document.hidden)return;
+    try{
+      const state=_dailyState();
+      const completed=new Set(loadCourses().flatMap(c=>_courseCompletionList(c).map(x=>_dailyIso(x.completedAt))));
+      const first=Object.keys(state.failures||{}).filter(d=>!completed.has(d)&&d<_dailyIso(Date.now())).sort()[0];
+      if(first)_dailyShowFailure(first);
+    }catch(e){console.warn('[코스 등록 실패 안내 확인]',e);}
   }
   async function _dailyRegisterPrevious(date,manualRetry){
     // 방문일 다음 날 00:01:30 이전에는 등록을 시작하지 않는다.
@@ -16926,15 +16961,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       setTimeout(_dailyRegisterPendingDate,250);
     }
   }
-  document.addEventListener('click',e=>{
-    const t=e.target&&e.target.closest&&e.target.closest('#oai-pilgrimage-retry-btn');
-    if(!t)return;e.preventDefault();e.stopPropagation();
-    const completed=new Set(loadCourses().flatMap(c=>_courseCompletionList(c).map(x=>_dailyIso(x.completedAt))));
-    const eligible=new Set(_historyCandidateDates(false));
-    const failures=Object.keys(_dailyState().failures||{}).sort().filter(d=>eligible.has(d)&&!completed.has(d));
-    if(failures.length)_dailyRegisterPrevious(failures[0],true);
-    else _dailyUpdateRetryButton();
-  },true);
   /* V1172: 과거 날짜별 수동 등록. 최초 목록은 사용자 진입 시 한 번만 구성.
      안내는 두 번까지만 표시하며 이미 완료한 날짜는 절대 새로 생성하지 않는다. */
   const HISTORY_UI_KEY='oai_pilgrimage_history_ui_v1172';
@@ -16992,7 +17018,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     try{remaining=_historyUnregisteredDates();}
     catch(e){console.warn('[미등록 GPS 버튼 확인 실패]',e);b.hidden=true;return;}
     b.hidden=remaining.length===0;
-    b.textContent='미등록 GPS 코스 확인';
+    b.textContent='미등록된 순례코스 등록하기';
   }
   function _historyEnsureDialog(){
     if(historyModal)return historyModal;
@@ -17209,6 +17235,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     setTimeout(_dailyRegisterPendingDate,3500);
     _scheduleNextDailySettlement();
     _dailyUpdateRetryButton();
+    setTimeout(_dailyNotifyStoredFailures,2100);
     setTimeout(_dailyRegisterTodaysTestOnce,700);
     setTimeout(_showLatePilgrimageCongratulations,2300);
     oaiAddLifecycleObserver('visible',()=>{
@@ -17218,6 +17245,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       }
       _dailyRegisterPrevious(_dailyPreviousDate(Date.now()),false);
       setTimeout(_dailyRegisterPendingDate,1900);
+      setTimeout(_dailyNotifyStoredFailures,2400);
       _showLatePilgrimageCongratulations();
       _scheduleNextDailySettlement();
     });
