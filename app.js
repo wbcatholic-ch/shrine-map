@@ -15670,6 +15670,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function oaiDevStatus(value){const el=document.getElementById('oai-dev-status');if(el)el.textContent=value||'';}
   function oaiRefreshDeveloperPanel(){
     const section=document.getElementById('oai-developer-section');if(section)section.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked);
+    if(typeof window.oaiRefreshVisitJournalSwitch==='function')window.oaiRefreshVisitJournalSwitch();
     if(!oaiDevEnabled()){oaiDevPendingRestore=null;for(const id of ['oai-dev-export-view','oai-dev-import-view','oai-dev-restore-preview']){const el=document.getElementById(id);if(el)el.hidden=true;}}
   }
   function oaiEncodeCgm1(value){return 'CGM1.'+btoa(Array.from(new TextEncoder().encode(JSON.stringify(value)),v=>String.fromCharCode(v)).join(''));}
@@ -19794,20 +19795,41 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 
 /* V1197: 도움말은 js/help-ui.js 로 분리 (중복 이벤트 제거) */
 
-/* V1189: 개발자 설정을 켠 경우에만 상세 사진/메모 UI 활성화 */
+/* 방문 사진·메모 개발자 토글: 입력 즉시 저장·확인하며 실패는 화면에 알린다. */
 (function(){
   const key='oai_dev_visit_journal_visible_v1';
+  const devKey='oai_developer_mode_v1';
   function refresh(){
     const cb=document.getElementById('cgm-dev-journal-switch');if(!cb)return;
-    try{cb.checked=localStorage.getItem(key)==='1';}catch(_e){cb.checked=false;}
+    let enabled=false,readable=true;
+    try{enabled=localStorage.getItem(key)==='1';}catch(_e){readable=false;}
+    cb.checked=enabled;
     const status=document.getElementById('cgm-dev-journal-status');
-    if(status)status.textContent=cb.checked?'현재 사진·메모 표시: 켜짐 · 방문기록 상세에서 확인하세요.':'현재 사진·메모 표시: 꺼짐';
+    if(status)status.textContent=!readable?'현재 사진·메모 표시: 저장소를 읽을 수 없습니다.':enabled?'현재 사진·메모 표시: 켜짐 · 방문기록 상세에서 확인하세요.':'현재 사진·메모 표시: 꺼짐';
   }
-  document.addEventListener('change',function(e){if(!e.target||e.target.id!=='cgm-dev-journal-switch')return;
-    try{if(localStorage.getItem('oai_developer_mode_v1')!=='1'){e.target.checked=false;return;}localStorage.setItem(key,e.target.checked?'1':'0');}catch(_e){}
-    refresh();
-    const detail=document.getElementById('parish-visit-detail');if(detail&&detail.classList.contains('show')&&typeof _renderParishVisitDetail==='function')_renderParishVisitDetail();
+  function updateDetail(){
+    const detail=document.getElementById('parish-visit-detail');
+    if(detail&&detail.classList.contains('show')&&typeof _renderParishVisitDetail==='function')_renderParishVisitDetail();
     if(typeof _isShrineVisitDetailOpen==='function'&&_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null&&typeof _renderShrineVisitDetail==='function')_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);
-  });
+  }
+  function save(checked){
+    const status=document.getElementById('cgm-dev-journal-status');
+    try{
+      // 개발자 도구가 실제 표시 중일 때만 허용한다.
+      const panel=document.getElementById('oai-developer-section');
+      if(localStorage.getItem(devKey)!=='1'||!panel||panel.hidden){refresh();return;}
+      localStorage.setItem(key,checked?'1':'0');
+      if(localStorage.getItem(key)!==(checked?'1':'0'))throw new Error('설정 저장 확인 실패');
+      refresh();updateDetail();
+    }catch(_e){
+      refresh();
+      if(status)status.textContent='설정을 저장하지 못했습니다. 앱 저장 공간을 확인해 주세요.';
+    }
+  }
+  // input 이벤트는 모바일의 맞춤형 토글에서도 change보다 먼저 동작한다.
+  document.addEventListener('input',function(e){if(e.target&&e.target.id==='cgm-dev-journal-switch')save(e.target.checked);},true);
+  document.addEventListener('change',function(e){if(e.target&&e.target.id==='cgm-dev-journal-switch')save(e.target.checked);},true);
+  window.oaiRefreshVisitJournalSwitch=refresh;
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',refresh,{once:true});else refresh();
 })();
+
