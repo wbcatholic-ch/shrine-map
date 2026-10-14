@@ -1,6 +1,10 @@
 
 'use strict';
 
+// Developer access is runtime-only: a fresh app/webview load starts locked.
+window.__OAI_DEV_RUNTIME_ACTIVE__ = false;
+try { localStorage.removeItem('oai_developer_mode_v1'); } catch (_e) {}
+
 /* V8-1-14-1111: 동적 자산 버전은 index.html의 OAI_APP_BUILD_VERSION 하나만 따른다. */
 var OAI_ASSET_VERSION = String(window.OAI_APP_BUILD_VERSION || window.APP_VERSION || '').trim();
 function oaiVersionedAsset(path){
@@ -3019,7 +3023,7 @@ function _oaiJournalSelectedDate(kind,visits){
   let d=String(window[prop]||'');if(!visits.some(function(v){return String(v.date||'')===d;}))d=visits.length?String(visits[0].date||''):'';
   window[prop]=d;return d;
 }
-function _oaiJournalDeveloperEnabled(){try{return window.__OAI_DEV_RUNTIME_ENABLED__===true&&localStorage.getItem('oai_dev_visit_journal_visible_v1')==='1';}catch(_e){return false;}}
+function _oaiJournalDeveloperEnabled(){try{return window.__OAI_DEV_RUNTIME_ACTIVE__===true&&localStorage.getItem('oai_dev_visit_journal_visible_v1')==='1';}catch(_e){return false;}}
 function _oaiVisitJournalHtml(kind,item,visits){
   // Personal visit journal is available only in developer mode; do not touch saved data.
   try{if(!_oaiJournalDeveloperEnabled())return '';}catch(_e){return '';}
@@ -15662,11 +15666,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     oaiRefreshLastSavedLabel();
   }
   // Developer tools: all backup work is opt-in, with no startup serialization or polling.
-  // Developer mode is only valid for this page lifecycle. Never restore it from persistent storage.
-  window.__OAI_DEV_RUNTIME_ENABLED__=false;
   let oaiDevTapCount=0, oaiDevPendingRestore=null;
+  // 개발자 도구의 화면 노출은 실행 중 10회 탭으로만 해제한다. 저장된 사용 권한과 분리한다.
   let oaiDevPanelUnlocked=false;
-  function oaiDevEnabled(){return window.__OAI_DEV_RUNTIME_ENABLED__===true;}
+  function oaiDevEnabled(){return window.__OAI_DEV_RUNTIME_ACTIVE__===true;}
   function oaiDevStatus(value){const el=document.getElementById('oai-dev-status');if(el)el.textContent=value||'';}
   // Developer visit journal: one owner for permission, saved setting, and display.
   const OAI_JOURNAL_KEY='oai_dev_visit_journal_visible_v1';
@@ -15764,7 +15767,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-copy],[data-oai-dev-preview],[data-oai-dev-apply],[data-oai-dev-failure-preview],[data-oai-dev-daily-results]');if(!button)return;
     if(button.id==='oai-settings-version-label'){
       oaiDevTapCount++;
-      if(oaiDevTapCount>=10){oaiDevTapCount=0;const next=!(oaiDevEnabled()&&oaiDevPanelUnlocked);oaiDevPanelUnlocked=next;window.__OAI_DEV_RUNTIME_ENABLED__=next;oaiRefreshDeveloperPanel();const detail=document.getElementById('parish-visit-detail');if(detail&&detail.classList.contains('show'))_renderParishVisitDetail();if(_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null)_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);if(next){oaiDevStatus('개발자 모드가 열렸습니다.');document.getElementById('oai-developer-section').scrollIntoView({block:'nearest',behavior:'smooth'});} }
+      if(oaiDevTapCount>=10){oaiDevTapCount=0;const next=!(oaiDevEnabled()&&oaiDevPanelUnlocked);oaiDevPanelUnlocked=next;window.__OAI_DEV_RUNTIME_ACTIVE__=next;oaiRefreshDeveloperPanel();const detail=document.getElementById('parish-visit-detail');if(detail&&detail.classList.contains('show'))_renderParishVisitDetail();if(_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null)_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);if(next){oaiDevStatus('개발자 모드가 열렸습니다.');document.getElementById('oai-developer-section').scrollIntoView({block:'nearest',behavior:'smooth'});} }
       return;
     }
     if(!oaiDevEnabled())return;
@@ -16304,7 +16307,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
 
   function esc(v){return _placeText(String(v==null?'':v));}
-  function isDev(){return window.__OAI_DEV_RUNTIME_ENABLED__===true;}
+  function isDev(){return window.__OAI_DEV_RUNTIME_ACTIVE__===true;}
 
   function normalizePoint(p){if(!p||!p.name)return null;let lat=Number(p.lat),lng=Number(p.lng);if(!Number.isFinite(lat)||!Number.isFinite(lng))return null;if(Math.abs(lat)>90&&Math.abs(lng)<=90){const t=lat;lat=lng;lng=t;}if(Math.abs(lat)>90||Math.abs(lng)>180)return null;return {name:String(p.name),addr:String(p.addr||p.road_address_name||p.address_name||''),lat:lat,lng:lng,placeId:String(p.placeId||''),dynamicCurrent:!!p.dynamicCurrent};}
   function normalizePlace(p){const q=normalizePoint(p);return q?Object.assign(q,{done:!!p.done,doneMethod:String(p&&p.doneMethod||'')}):null;}
@@ -16931,6 +16934,22 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const merged=[...auto.map(([date,v])=>({date,label:'등록 완료 ('+(v.source||'출처 확인 불가')+')'})),...failures.map(([date])=>({date,label:'등록 실패 기록 있음'}))].sort((x,y)=>y.date.localeCompare(x.date));
     if(merged.length)merged.slice(0,25).forEach(v=>append(v.date+' · '+v.label));
     else append('날짜별 등록 장부가 비어 있습니다.');
+    // Read-only preflight: explain why the automatic execution log may be empty.
+    const check=document.createElement('b');check.textContent='자동 등록 진입 조건 (현재 상태)';target.appendChild(check);
+    append('자동 등록 초기화: '+(dailySettlementInitialized?'실행됨':'실행 기록 없음'));
+    append('앱 화면 상태: '+(document.hidden?'백그라운드 (자동 등록 보류)':'화면 표시 중'));
+    const yesterday=_dailyPreviousDate(Date.now());
+    append('확인 대상 방문일: '+yesterday);
+    const yState=state.auto&&state.auto[yesterday];
+    if(yState&&yState.done)append('해당 날짜 등록 장부: 완료 ('+(yState.source||'출처 확인 불가')+')');
+    else if(state.failures&&state.failures[yesterday])append('해당 날짜 등록 장부: 실패 (자동 재시도 중단)');
+    else append('해당 날짜 등록 장부: 완료·실패 기록 없음');
+    try{
+      const raw=JSON.parse(localStorage.getItem(OAI_GPS_PENDING_DATES_KEY)||'[]');
+      if(Array.isArray(raw))append('미등록 GPS 날짜 대기 목록: '+(raw.length?raw.slice(-15).join(', '):'비어 있음'));
+      else append('미등록 GPS 날짜 대기 목록: 형식 오류');
+    }catch(_e){append('미등록 GPS 날짜 대기 목록: 읽기 실패');}
+    append('참고: 로그가 없어도 자동 등록이 시도되지 않았다는 뜻은 아닙니다. 위 조건을 함께 확인해 주세요.');
     return true;
   };
   let dailyRegisterTimer=null,dailyCloseTimer=null,dailyRegisterBusy=false,dailyPromptedDate='';
@@ -17318,7 +17337,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(localStorage.getItem(OAI_GPS_PENDING_DATES_KEY)!==result)throw new Error('GPS 날짜 색인 저장 실패');
     localStorage.setItem(DAILY_GPS_INDEX_MIGRATION_KEY,'done');
   }
+  let dailySettlementInitialized=false;
   function _initializeDailyPilgrimageSettlement(){
+    dailySettlementInitialized=true;
     try{_dailyMigratePendingGpsDatesOnce();}catch(e){console.warn('[GPS 원본 날짜 색인 실패]',e);}
     // 앱이 꺼져 있었던 경우에도 전날 한 날짜만 처리. 수백 일 과거 탐색 금지.
     const pending=_readActiveFollowRaw();
