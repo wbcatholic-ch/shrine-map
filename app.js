@@ -15668,9 +15668,46 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   let oaiDevPanelUnlocked=false;
   function oaiDevEnabled(){return localStorage.getItem(OAI_DEV_KEY)==='1';}
   function oaiDevStatus(value){const el=document.getElementById('oai-dev-status');if(el)el.textContent=value||'';}
+  // Developer visit journal: one owner for permission, saved setting, and display.
+  const OAI_JOURNAL_KEY='oai_dev_visit_journal_visible_v1';
+  function oaiRefreshVisitJournalSwitch(){
+    const cb=document.getElementById('cgm-dev-journal-switch');
+    const status=document.getElementById('cgm-dev-journal-status');
+    if(!cb)return;
+    try{
+      const saved=localStorage.getItem(OAI_JOURNAL_KEY)==='1';
+      const available=oaiDevEnabled()&&oaiDevPanelUnlocked;
+      cb.checked=saved;
+      if(status)status.textContent=!available?'개발자 도구가 닫혀 있습니다.':(saved?'현재 사진·메모 표시: 켜짐 · 방문기록 상세에서 확인하세요.':'현재 사진·메모 표시: 꺼짐');
+    }catch(err){if(status)status.textContent='사진·메모 설정을 읽을 수 없습니다.';}
+  }
+  function oaiSaveVisitJournalSwitch(checked){
+    const status=document.getElementById('cgm-dev-journal-status');
+    if(!(oaiDevEnabled()&&oaiDevPanelUnlocked)){
+      oaiRefreshVisitJournalSwitch();
+      if(status)status.textContent='개발자 모드를 활성화한 뒤 다시 시도해 주세요.';
+      return;
+    }
+    try{
+      localStorage.setItem(OAI_JOURNAL_KEY,checked?'1':'0');
+      if(localStorage.getItem(OAI_JOURNAL_KEY)!==(checked?'1':'0'))throw Error('저장 확인 실패');
+      oaiRefreshVisitJournalSwitch();
+      const detail=document.getElementById('parish-visit-detail');
+      if(detail&&detail.classList.contains('show')&&typeof _renderParishVisitDetail==='function')_renderParishVisitDetail();
+      if(typeof _isShrineVisitDetailOpen==='function'&&_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null&&typeof _renderShrineVisitDetail==='function')_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);
+    }catch(err){
+      oaiRefreshVisitJournalSwitch();
+      if(status)status.textContent='사진·메모 설정을 저장하지 못했습니다.';
+    }
+  }
+  // Installed with the developer controller rather than at the end of app.js.
+  document.addEventListener('change',function(event){
+    if(event.target&&event.target.id==='cgm-dev-journal-switch')oaiSaveVisitJournalSwitch(!!event.target.checked);
+  },true);
+
   function oaiRefreshDeveloperPanel(){
     const section=document.getElementById('oai-developer-section');if(section)section.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked);
-    if(typeof window.oaiRefreshVisitJournalSwitch==='function')window.oaiRefreshVisitJournalSwitch();
+    oaiRefreshVisitJournalSwitch();
     if(!oaiDevEnabled()){oaiDevPendingRestore=null;for(const id of ['oai-dev-export-view','oai-dev-import-view','oai-dev-restore-preview']){const el=document.getElementById(id);if(el)el.hidden=true;}}
   }
   function oaiEncodeCgm1(value){return 'CGM1.'+btoa(Array.from(new TextEncoder().encode(JSON.stringify(value)),v=>String.fromCharCode(v)).join(''));}
@@ -15750,11 +15787,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(!oaiDevPanelUnlocked)return;
         if(typeof window._oaiShowDailyRegisterDiagnostics==='function')window._oaiShowDailyRegisterDiagnostics();
         else oaiDevStatus('자동 등록 기록을 조회할 수 없습니다.');
-      }
-      else if(button.hasAttribute('data-oai-dev-failure-preview')){
-        if(!oaiDevPanelUnlocked)return;
-        if(typeof window._oaiOpenDailyFailurePreview==='function')window._oaiOpenDailyFailurePreview();
-        else oaiDevStatus('안내창을 준비할 수 없습니다.');
       }
     }catch(err){oaiDevStatus(err.message||'요청을 처리할 수 없습니다.');}
   },true);
@@ -16935,26 +16967,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     modal.addEventListener('click',e=>{
       if(e.target===modal||e.target.closest('[data-daily-failure-close]')){_dailyFailureClose();return;}
       if(e.target.closest('[data-daily-failure-register]')){
-        if(modal.dataset.preview==='1')return; // 개발자 미리보기에서는 절대 코스 등록하지 않음
         _dailyFailureClose();
         _historyStart(true); // 기존 녹색 버튼과 동일한 GPS 미등록 코스 등록 흐름
       }
     });
     return modal;
   }
-  // 개발자 전용 미리보기: 실패 장부·GPS·등록 대기열을 변경하지 않는다.
-  window._oaiOpenDailyFailurePreview=function(){
-    try{if(localStorage.getItem('oai_developer_mode_v1')!=='1')return false;}catch(_e){return false;}
-    const modal=_dailyFailureModal();
-    if(!modal.hidden)return false;
-    modal.dataset.preview='1';
-    modal.dataset.date='';
-    modal.querySelector('#oai-daily-failure-text').textContent='10월 13일 순례코스를 자동으로 등록하지 못했습니다.';
-    const registerButton=modal.querySelector('[data-daily-failure-register]');
-    if(registerButton){registerButton.disabled=true;registerButton.textContent='미등록된 순례코스 등록하기 (미리보기)';}
-    modal.hidden=false;
-    return true;
-  };
   function _dailyShowFailure(date){
     console.warn('[성지순례 등록 보류] '+date+' — GPS 스탬프는 그대로 보존됩니다.');
     _dailyUpdateRetryButton();
@@ -16963,7 +16981,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!modal.hidden)return;
     dailyFailureNotified.add(date);
     modal.dataset.date=date;
-    modal.dataset.preview='0';
     const registerButton=modal.querySelector('[data-daily-failure-register]');
     if(registerButton){registerButton.disabled=false;registerButton.textContent='미등록된 순례코스 등록하기';}
     modal.querySelector('#oai-daily-failure-text').textContent=Number(date.slice(5,7))+'월 '+Number(date.slice(8,10))+'일 순례코스를 자동으로 등록하지 못했습니다.';
@@ -19838,48 +19855,3 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 
 
 /* V1197: 도움말은 js/help-ui.js 로 분리 (중복 이벤트 제거) */
-
-/* 방문 사진·메모 개발자 토글: 체크 즉시 저장하고 저장 상태만 표시한다. */
-(function(){
-  const key='oai_dev_visit_journal_visible_v1';
-  const devKey='oai_developer_mode_v1';
-  const switchId='cgm-dev-journal-switch';
-  function isDeveloper(){try{return localStorage.getItem(devKey)==='1';}catch(_e){return false;}}
-  function refresh(){
-    const cb=document.getElementById(switchId);if(!cb)return;
-    const status=document.getElementById('cgm-dev-journal-status');
-    try{
-      const enabled=localStorage.getItem(key)==='1';
-      cb.checked=enabled;
-      if(status)status.textContent=enabled?'현재 사진·메모 표시: 켜짐 · 방문기록 상세에서 확인하세요.':'현재 사진·메모 표시: 꺼짐';
-    }catch(_e){if(status)status.textContent='현재 사진·메모 표시: 저장소를 읽을 수 없습니다.';}
-  }
-  function updateDetail(){
-    const detail=document.getElementById('parish-visit-detail');
-    if(detail&&detail.classList.contains('show')&&typeof _renderParishVisitDetail==='function')_renderParishVisitDetail();
-    if(typeof _isShrineVisitDetailOpen==='function'&&_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null&&typeof _renderShrineVisitDetail==='function')_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);
-  }
-  function save(checked){
-    const status=document.getElementById('cgm-dev-journal-status');
-    if(!isDeveloper()){
-      refresh();if(status)status.textContent='개발자 모드를 활성화한 뒤 다시 시도해 주세요.';return;
-    }
-    try{
-      localStorage.setItem(key,checked?'1':'0');
-      if(localStorage.getItem(key)!==(checked?'1':'0'))throw new Error('저장 확인 실패');
-      refresh();updateDetail();
-    }catch(_e){
-      refresh();if(status)status.textContent='설정을 저장하지 못했습니다. 앱 저장 공간을 확인해 주세요.';
-    }
-  }
-  // app.js는 설정 패널 HTML보다 먼저 실행된다. 체크박스 생성 시점과 무관하게
-  // 문서 단계에서 change를 감지하여 체크만 바뀌고 설정이 저장되지 않는 상황을 방지한다.
-  document.addEventListener('change',function(e){
-    const cb=e.target;
-    if(!cb||cb.id!==switchId)return;
-    save(cb.checked);
-  },true);
-  window.oaiRefreshVisitJournalSwitch=refresh;
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',refresh,{once:true});else refresh();
-})();
-
