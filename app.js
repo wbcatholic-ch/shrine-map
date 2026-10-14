@@ -19839,7 +19839,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 
 /* V1197: 도움말은 js/help-ui.js 로 분리 (중복 이벤트 제거) */
 
-/* 방문 사진·메모 개발자 토글: 입력 즉시 저장·확인하며 실패는 화면에 알린다. */
+/* 방문 사진·메모 개발자 토글: 체크 변경 1회만 처리한다. */
 (function(){
   const key='oai_dev_visit_journal_visible_v1';
   const devKey='oai_developer_mode_v1';
@@ -19856,24 +19856,21 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(detail&&detail.classList.contains('show')&&typeof _renderParishVisitDetail==='function')_renderParishVisitDetail();
     if(typeof _isShrineVisitDetailOpen==='function'&&_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null&&typeof _renderShrineVisitDetail==='function')_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);
   }
-  function save(checked){
-    const status=document.getElementById('cgm-dev-journal-status');
+  document.addEventListener('change',function(e){
+    if(!e.target||e.target.id!=='cgm-dev-journal-switch')return;
+    const checked=!!e.target.checked,status=document.getElementById('cgm-dev-journal-status');
     try{
-      // 개발자 도구가 실제 표시 중일 때만 허용한다.
-      const panel=document.getElementById('oai-developer-section');
-      if(localStorage.getItem(devKey)!=='1'||!panel||panel.hidden){refresh();return;}
+      // 개발자 모드 활성화 여부만 검증한다. 패널 표시/숨김 전환 타이밍은 저장을 차단하지 않는다.
+      if(localStorage.getItem(devKey)!=='1'){
+        refresh();if(status)status.textContent='개발자 모드를 먼저 활성화해 주세요.';return;
+      }
       localStorage.setItem(key,checked?'1':'0');
       if(localStorage.getItem(key)!==(checked?'1':'0'))throw new Error('설정 저장 확인 실패');
       refresh();updateDetail();
     }catch(_e){
-      refresh();
-      if(status)status.textContent='설정을 저장하지 못했습니다. 앱 저장 공간을 확인해 주세요.';
+      refresh();if(status)status.textContent='설정을 저장하지 못했습니다. 앱 저장 공간을 확인해 주세요.';
     }
-  }
-  // input 이벤트는 모바일의 맞춤형 토글에서도 change보다 먼저 동작한다.
-  document.addEventListener('input',function(e){if(e.target&&e.target.id==='cgm-dev-journal-switch')save(e.target.checked);},true);
-  document.addEventListener('change',function(e){if(e.target&&e.target.id==='cgm-dev-journal-switch')save(e.target.checked);},true);
+  },true);
   window.oaiRefreshVisitJournalSwitch=refresh;
   if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',refresh,{once:true});else refresh();
 })();
-
