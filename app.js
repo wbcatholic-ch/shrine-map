@@ -15764,7 +15764,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }finally{oaiApplyingRestore=false;}
   }
   document.addEventListener('click',function(event){
-    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-copy],[data-oai-dev-preview],[data-oai-dev-apply],[data-oai-dev-failure-preview],[data-oai-dev-daily-results]');if(!button)return;
+    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-copy],[data-oai-dev-preview],[data-oai-dev-apply],[data-oai-dev-failure-preview],[data-oai-dev-daily-results],[data-oai-dev-daily-memory-test]');if(!button)return;
     if(button.id==='oai-settings-version-label'){
       oaiDevTapCount++;
       if(oaiDevTapCount>=10){oaiDevTapCount=0;const next=!(oaiDevEnabled()&&oaiDevPanelUnlocked);oaiDevPanelUnlocked=next;window.__OAI_DEV_RUNTIME_ACTIVE__=next;oaiRefreshDeveloperPanel();const detail=document.getElementById('parish-visit-detail');if(detail&&detail.classList.contains('show'))_renderParishVisitDetail();if(_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null)_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);if(next){oaiDevStatus('개발자 모드가 열렸습니다.');document.getElementById('oai-developer-section').scrollIntoView({block:'nearest',behavior:'smooth'});} }
@@ -15790,6 +15790,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(!oaiDevPanelUnlocked)return;
         if(typeof window._oaiShowDailyRegisterDiagnostics==='function')window._oaiShowDailyRegisterDiagnostics();
         else oaiDevStatus('자동 등록 기록을 조회할 수 없습니다.');
+      }else if(button.hasAttribute('data-oai-dev-daily-memory-test')){
+        if(!oaiDevPanelUnlocked)return;
+        if(typeof window._oaiRunDailyRegisterMemoryTest==='function')window._oaiRunDailyRegisterMemoryTest();
+        else oaiDevStatus('임시 자동 등록 시험을 시작할 수 없습니다.');
       }
     }catch(err){oaiDevStatus(err.message||'요청을 처리할 수 없습니다.');}
   },true);
@@ -16847,6 +16851,42 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     throw failure||new Error('진행 중인 순례 종료 실패');
   }
+  // 실제 자동 등록과 임시 시험에 동일하게 사용하는 코스 생성 규칙. 이 함수에는 저장 동작이 없다.
+  function _dailyBuildAutoCourse(date,eligible,id){
+    const at=_dailyDayEnd(date)-1;
+    return _courseRefreshCompletionState({id,name:_dailyAutoCourseName(date,eligible),autoGps:true,sourceDate:date,start:null,end:null,
+      places:eligible.map(ev=>({name:ev.name,addr:ev.addr,lat:ev.lat,lng:ev.lng,placeId:ev.placeId,diocese:ev.diocese,done:true,doneMethod:'gps'})),
+      completions:[{completedAt:at,placeCount:eligible.length,method:'gps',locked:true}],gpsSettled:true,
+      completionArmed:false,lastStartedAt:0,updatedAt:Date.now(),lastCompletedAt:at});
+  }
+  // 개발자 전용: GPS 기록, 코스, 날짜별 장부에 쓰지 않는 메모리 기반 규칙 시험.
+  // 실제 등록의 영구 저장/앱 재실행 동작까지 검증했다고 해석하면 안 된다.
+  function _dailyRunMemoryTest(){
+    if(!window.__OAI_DEV_RUNTIME_ACTIVE__)throw new Error('개발자 모드에서만 실행할 수 있습니다.');
+    const date=_dailyPreviousDate(Date.now());
+    const shrine=(typeof SHRINES!=='undefined'&&Array.isArray(SHRINES)?SHRINES:[]).map(normalizePoint).find(Boolean);
+    if(!shrine)throw new Error('성지 목록에서 테스트용 장소를 읽을 수 없습니다.');
+    const fake=[{name:shrine.name,addr:shrine.addr,lat:shrine.lat,lng:shrine.lng,placeId:shrine.placeId||'',diocese:shrine.diocese||'',kind:'shrine',at:_dailyDayEnd(date)-3600000}];
+    const eligible=_dailyAutoEvents(fake);
+    if(!_dailyAutoEligible(eligible))throw new Error('성지 1곳 자동 등록 조건 검사 실패');
+    const id='memory_test_'+date.replace(/-/g,'');
+    const course=_dailyBuildAutoCourse(date,eligible,id);
+    const inMemoryCourses=[course]; // localStorage, 저장 함수, GPS 기록에 접근하지 않는다.
+    const found=inMemoryCourses.find(c=>c.id===id);
+    const valid=!!(found&&found.autoGps&&found.sourceDate===date&&found.places.length===1&&
+      !found.start&&!found.end&&_dailySameOrderedPlaces(found.places,eligible)&&
+      _courseCompletionList(found).some(x=>_dailyIso(x.completedAt)===date&&x.placeCount===1&&x.locked));
+    inMemoryCourses.length=0; // 시험 데이터는 반환 전에 폐기한다.
+    if(!valid)throw new Error('가상 코스 생성·재조회 검증 실패');
+    return '가상 방문일 '+date+' · 성지 1곳 · 자동 코스 생성 규칙 통과 · 메모리 데이터 폐기 완료';
+  }
+  window._oaiRunDailyRegisterMemoryTest=function(){
+    const target=document.getElementById('oai-dev-daily-memory-results');
+    if(!target)return false;
+    target.hidden=false;
+    try{target.textContent='시험 결과: '+_dailyRunMemoryTest()+'\n※ 실제 GPS 인식, 자동 실행 시각, 영구 저장 및 Google Drive 동작은 검증하지 않습니다.';return true;}
+    catch(e){target.textContent='시험 실패: '+String(e&&e.message||e);return false;}
+  };
   function _dailyRegisterOnce(date,events){
     const state=_dailyState(),gpsSignature=_dailyGpsSignature(date),courses=_dailyStoredCourses();
     if(!Array.isArray(events))throw new Error('GPS 등록 입력 형식 오류');
@@ -16874,11 +16914,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }else if(_dailyAutoEligible(eligible)){
       const id='gps_daily_'+date.replace(/-/g,'');
       if(courses.some(c=>c.id===id))throw new Error('등록 날짜와 같은 ID의 코스가 이미 있습니다');
-      const at=_dailyDayEnd(date)-1; // 실제 GPS 방문일의 마지막 시각. 실행은 익일 00:01:30
-      const course=_courseRefreshCompletionState({id,name:_dailyAutoCourseName(date,eligible),autoGps:true,sourceDate:date,start:null,end:null,
-        places:eligible.map(ev=>({name:ev.name,addr:ev.addr,lat:ev.lat,lng:ev.lng,placeId:ev.placeId,diocese:ev.diocese,done:true,doneMethod:'gps'})),
-        completions:[{completedAt:at,placeCount:eligible.length,method:'gps',locked:true}],gpsSettled:true,
-        completionArmed:false,lastStartedAt:0,updatedAt:Date.now(),lastCompletedAt:at});
+      // 실제 등록과 개발자 메모리 시험이 공유하는 단일 코스 생성 함수.
+      const course=_dailyBuildAutoCourse(date,eligible,id);
       courses.unshift(course);
       if(!saveCourses(courses))throw new Error('자동 코스 저장 실패');
       const persisted=_dailyStoredCourses().find(c=>c.id===id);
