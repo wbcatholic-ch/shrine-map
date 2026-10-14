@@ -3019,7 +3019,7 @@ function _oaiJournalSelectedDate(kind,visits){
   let d=String(window[prop]||'');if(!visits.some(function(v){return String(v.date||'')===d;}))d=visits.length?String(visits[0].date||''):'';
   window[prop]=d;return d;
 }
-function _oaiJournalDeveloperEnabled(){try{return localStorage.getItem('oai_developer_mode_v1')==='1'&&localStorage.getItem('oai_dev_visit_journal_visible_v1')==='1';}catch(_e){return false;}}
+function _oaiJournalDeveloperEnabled(){try{return window.__OAI_DEV_RUNTIME_ENABLED__===true&&localStorage.getItem('oai_dev_visit_journal_visible_v1')==='1';}catch(_e){return false;}}
 function _oaiVisitJournalHtml(kind,item,visits){
   // Personal visit journal is available only in developer mode; do not touch saved data.
   try{if(!_oaiJournalDeveloperEnabled())return '';}catch(_e){return '';}
@@ -15662,11 +15662,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     oaiRefreshLastSavedLabel();
   }
   // Developer tools: all backup work is opt-in, with no startup serialization or polling.
-  const OAI_DEV_KEY='oai_developer_mode_v1';
+  // Developer mode is only valid for this page lifecycle. Never restore it from persistent storage.
+  window.__OAI_DEV_RUNTIME_ENABLED__=false;
   let oaiDevTapCount=0, oaiDevPendingRestore=null;
-  // 개발자 도구의 화면 노출은 실행 중 10회 탭으로만 해제한다. 저장된 사용 권한과 분리한다.
   let oaiDevPanelUnlocked=false;
-  function oaiDevEnabled(){return localStorage.getItem(OAI_DEV_KEY)==='1';}
+  function oaiDevEnabled(){return window.__OAI_DEV_RUNTIME_ENABLED__===true;}
   function oaiDevStatus(value){const el=document.getElementById('oai-dev-status');if(el)el.textContent=value||'';}
   // Developer visit journal: one owner for permission, saved setting, and display.
   const OAI_JOURNAL_KEY='oai_dev_visit_journal_visible_v1';
@@ -15764,7 +15764,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-copy],[data-oai-dev-preview],[data-oai-dev-apply],[data-oai-dev-failure-preview],[data-oai-dev-daily-results]');if(!button)return;
     if(button.id==='oai-settings-version-label'){
       oaiDevTapCount++;
-      if(oaiDevTapCount>=10){oaiDevTapCount=0;const next=!(oaiDevEnabled()&&oaiDevPanelUnlocked);oaiDevPanelUnlocked=next;localStorage.setItem(OAI_DEV_KEY,next?'1':'0');oaiRefreshDeveloperPanel();const detail=document.getElementById('parish-visit-detail');if(detail&&detail.classList.contains('show'))_renderParishVisitDetail();if(_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null)_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);if(next){oaiDevStatus('개발자 모드가 열렸습니다.');document.getElementById('oai-developer-section').scrollIntoView({block:'nearest',behavior:'smooth'});} }
+      if(oaiDevTapCount>=10){oaiDevTapCount=0;const next=!(oaiDevEnabled()&&oaiDevPanelUnlocked);oaiDevPanelUnlocked=next;window.__OAI_DEV_RUNTIME_ENABLED__=next;oaiRefreshDeveloperPanel();const detail=document.getElementById('parish-visit-detail');if(detail&&detail.classList.contains('show'))_renderParishVisitDetail();if(_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null)_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);if(next){oaiDevStatus('개발자 모드가 열렸습니다.');document.getElementById('oai-developer-section').scrollIntoView({block:'nearest',behavior:'smooth'});} }
       return;
     }
     if(!oaiDevEnabled())return;
@@ -16268,7 +16268,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 (function installOaiPilgrimagePlannerDev(){
   if(window.__OAI_PILGRIMAGE_PLANNER_DEV_V866__) return;
   window.__OAI_PILGRIMAGE_PLANNER_DEV_V866__=true;
-  const DEV_KEY='oai_developer_mode_v1';
   const PLAN_KEY='oai_pilgrimage_plan_v1';
   const DRAFT_META_KEY='oai_pilgrimage_draft_meta_v2';
   const COURSES_KEY='oai_pilgrimage_courses_v1';
@@ -16305,7 +16304,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
 
   function esc(v){return _placeText(String(v==null?'':v));}
-  function isDev(){try{return localStorage.getItem(DEV_KEY)==='1';}catch(_e){return false;}}
+  function isDev(){return window.__OAI_DEV_RUNTIME_ENABLED__===true;}
 
   function normalizePoint(p){if(!p||!p.name)return null;let lat=Number(p.lat),lng=Number(p.lng);if(!Number.isFinite(lat)||!Number.isFinite(lng))return null;if(Math.abs(lat)>90&&Math.abs(lng)<=90){const t=lat;lat=lng;lng=t;}if(Math.abs(lat)>90||Math.abs(lng)>180)return null;return {name:String(p.name),addr:String(p.addr||p.road_address_name||p.address_name||''),lat:lat,lng:lng,placeId:String(p.placeId||''),dynamicCurrent:!!p.dynamicCurrent};}
   function normalizePlace(p){const q=normalizePoint(p);return q?Object.assign(q,{done:!!p.done,doneMethod:String(p&&p.doneMethod||'')}):null;}
