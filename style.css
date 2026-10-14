@@ -9986,3 +9986,8 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
 .oai-dev-failure-preview b{font-size:14px}
 .oai-dev-failure-preview small{font-size:12px;line-height:1.5}
 .oai-daily-failure-actions button:disabled{opacity:1;cursor:default}
+
+/* V1250: 개발자 전용 자동 등록 기록 읽기 화면 */
+.oai-dev-daily-results{margin:10px 0 14px;padding:12px;border:1px solid #d7ded7;border-radius:12px;background:#f8faf8;max-height:280px;overflow-y:auto;overflow-wrap:anywhere;font-size:12px;line-height:1.55;color:#263d30}
+.oai-dev-daily-results b{display:block;margin:8px 0 5px;font-size:13px}
+.oai-dev-daily-results p{margin:4px 0 8px}

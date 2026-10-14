@@ -15724,7 +15724,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }finally{oaiApplyingRestore=false;}
   }
   document.addEventListener('click',function(event){
-    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-copy],[data-oai-dev-preview],[data-oai-dev-apply],[data-oai-dev-failure-preview]');if(!button)return;
+    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-copy],[data-oai-dev-preview],[data-oai-dev-apply],[data-oai-dev-failure-preview],[data-oai-dev-daily-results]');if(!button)return;
     if(button.id==='oai-settings-version-label'){
       oaiDevTapCount++;
       if(oaiDevTapCount>=10){oaiDevTapCount=0;const next=!(oaiDevEnabled()&&oaiDevPanelUnlocked);oaiDevPanelUnlocked=next;localStorage.setItem(OAI_DEV_KEY,next?'1':'0');oaiRefreshDeveloperPanel();const detail=document.getElementById('parish-visit-detail');if(detail&&detail.classList.contains('show'))_renderParishVisitDetail();if(_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null)_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);if(next){oaiDevStatus('개발자 모드가 열렸습니다.');document.getElementById('oai-developer-section').scrollIntoView({block:'nearest',behavior:'smooth'});} }
@@ -15746,6 +15746,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         else oaiDevStatus('선택된 코드를 길게 눌러 복사하세요.');
       }else if(button.hasAttribute('data-oai-dev-preview'))oaiDevPreview();
       else if(button.hasAttribute('data-oai-dev-apply'))oaiDevApplyRestore();
+      else if(button.hasAttribute('data-oai-dev-daily-results')){
+        if(!oaiDevPanelUnlocked)return;
+        if(typeof window._oaiShowDailyRegisterDiagnostics==='function')window._oaiShowDailyRegisterDiagnostics();
+        else oaiDevStatus('자동 등록 기록을 조회할 수 없습니다.');
+      }
       else if(button.hasAttribute('data-oai-dev-failure-preview')){
         if(!oaiDevPanelUnlocked)return;
         if(typeof window._oaiOpenDailyFailurePreview==='function')window._oaiOpenDailyFailurePreview();
@@ -16861,6 +16866,42 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     try{const a=JSON.parse(localStorage.getItem(OAI_GPS_PENDING_DATES_KEY)||'[]');if(Array.isArray(a)&&a.includes(date))localStorage.setItem(OAI_GPS_PENDING_DATES_KEY,JSON.stringify(a.filter(d=>d!==date)));}catch(e){console.warn('[미등록 날짜 정리]',e);}
     return true;
   }
+  // V1250: 읽기 전용 개발자 진단 화면용 별도 로그. GPS/코스/Drive 저장소와 분리.
+  const DAILY_DIAGNOSTIC_KEY='oai_daily_register_diagnostics_v1250';
+  function _dailyDiagnosticEntries(){
+    try{const v=JSON.parse(localStorage.getItem(DAILY_DIAGNOSTIC_KEY)||'[]');return Array.isArray(v)?v:[];}catch(_e){return [];}
+  }
+  function _dailyDiagnosticWrite(date,status,detail){
+    try{
+      const items=_dailyDiagnosticEntries();
+      items.push({time:new Date().toISOString(),date:String(date||''),status:String(status),detail:String(detail||'').slice(0,180)});
+      localStorage.setItem(DAILY_DIAGNOSTIC_KEY,JSON.stringify(items.slice(-60)));
+    }catch(e){console.warn('[자동 코스 진단 로그 저장 생략]',e);}
+  }
+  window._oaiShowDailyRegisterDiagnostics=function(){
+    let target=document.getElementById('oai-dev-daily-register-results');
+    if(!target)return false;
+    target.hidden=false;
+    const state=_dailyState(),events=_dailyDiagnosticEntries().slice().reverse();
+    const heading=document.createElement('b');heading.textContent='실제 자동 코스 등록 기록';
+    target.replaceChildren(heading);
+    const helper=document.createElement('p');helper.textContent='이 화면은 읽기 전용입니다. 구버전의 실행 시각은 알 수 없으며, 신규 로그는 V1250 이후부터 기록됩니다.';target.appendChild(helper);
+    const append=function(text){const p=document.createElement('p');p.textContent=text;target.appendChild(p);};
+    const labels={attempt:'자동 등록 시도',success:'자동 등록 성공',ineligible:'등록 대상 없음',failure:'자동 등록 2회 실패'};
+    if(events.length){
+      events.slice(0,25).forEach(e=>{
+        const stamp=new Date(e.time),time=Number.isFinite(stamp.getTime())?stamp.toLocaleString('ko-KR'):'시각 확인 불가';
+        append(time+' · 방문일 '+e.date+' · '+(labels[e.status]||e.status)+(e.detail?' · '+e.detail:''));
+      });
+    }else append('V1250 이후 자동 등록 실행 로그가 아직 없습니다.');
+    const summary=document.createElement('b');summary.textContent='기존 날짜별 등록 장부';target.appendChild(summary);
+    const auto=Object.entries(state.auto||{}).filter(([d,v])=>/^\d{4}-\d{2}-\d{2}$/.test(d)&&v&&v.done);
+    const failures=Object.entries(state.failures||{}).filter(([d])=>/^\d{4}-\d{2}-\d{2}$/.test(d));
+    const merged=[...auto.map(([date,v])=>({date,label:'등록 완료 ('+(v.source||'출처 확인 불가')+')'})),...failures.map(([date])=>({date,label:'등록 실패 기록 있음'}))].sort((x,y)=>y.date.localeCompare(x.date));
+    if(merged.length)merged.slice(0,25).forEach(v=>append(v.date+' · '+v.label));
+    else append('날짜별 등록 장부가 비어 있습니다.');
+    return true;
+  };
   let dailyRegisterTimer=null,dailyCloseTimer=null,dailyRegisterBusy=false,dailyPromptedDate='';
   function _dailyUpdateRetryButton(){
     // 실패 복구는 기존 녹색 「미등록된 순례코스 등록하기」 버튼만 사용한다.
@@ -16954,6 +16995,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       catch(e){console.warn('[진행 순례 종료 보류]',e);_dailyMarkUnresolved(date,e);return;}
     }
     dailyRegisterBusy=true;
+    if(!manualRetry)_dailyDiagnosticWrite(date,'attempt','자동 등록 시작');
     try{
       let lastError=null;
       for(let attempt=0;attempt<2;attempt++){
@@ -16971,11 +17013,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           if(!completed){
             try{const q=JSON.parse(localStorage.getItem(OAI_GPS_PENDING_DATES_KEY)||'[]');if(Array.isArray(q))localStorage.setItem(OAI_GPS_PENDING_DATES_KEY,JSON.stringify(q.filter(x=>x!==date)));}catch(_e){}
           }
+          if(!manualRetry)_dailyDiagnosticWrite(date,completed?'success':'ineligible',completed?'등록 처리 및 저장 확인 완료':'자동 등록 대상 성지가 없음');
           _dailyUpdateRetryButton();return;
         }catch(e){lastError=e;}
       }
       throw lastError||new Error('등록 실패');
     }catch(e){
+      if(!manualRetry)_dailyDiagnosticWrite(date,'failure',String(e&&e.message||e));
       console.warn('[순례코스 등록] 자동 시도 2회 실패',date,e);
       try{const next=_dailyState();next.failures[date]={failedAt:Date.now(),message:String(e&&e.message||e)};_saveDailyState(next);}catch(err){console.warn('[등록 실패 상태 저장]',err);}
       _dailyShowFailure(date);
