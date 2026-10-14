@@ -19839,38 +19839,47 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 
 /* V1197: 도움말은 js/help-ui.js 로 분리 (중복 이벤트 제거) */
 
-/* 방문 사진·메모 개발자 토글: 체크 변경 1회만 처리한다. */
+/* 방문 사진·메모 개발자 토글: 체크 즉시 저장하고 저장 상태만 표시한다. */
 (function(){
   const key='oai_dev_visit_journal_visible_v1';
   const devKey='oai_developer_mode_v1';
+  const switchId='cgm-dev-journal-switch';
+  function isDeveloper(){try{return localStorage.getItem(devKey)==='1';}catch(_e){return false;}}
   function refresh(){
-    const cb=document.getElementById('cgm-dev-journal-switch');if(!cb)return;
-    let enabled=false,readable=true;
-    try{enabled=localStorage.getItem(key)==='1';}catch(_e){readable=false;}
-    cb.checked=enabled;
+    const cb=document.getElementById(switchId);if(!cb)return;
     const status=document.getElementById('cgm-dev-journal-status');
-    if(status)status.textContent=!readable?'현재 사진·메모 표시: 저장소를 읽을 수 없습니다.':enabled?'현재 사진·메모 표시: 켜짐 · 방문기록 상세에서 확인하세요.':'현재 사진·메모 표시: 꺼짐';
+    try{
+      const enabled=localStorage.getItem(key)==='1';
+      cb.checked=enabled;
+      if(status)status.textContent=enabled?'현재 사진·메모 표시: 켜짐 · 방문기록 상세에서 확인하세요.':'현재 사진·메모 표시: 꺼짐';
+    }catch(_e){if(status)status.textContent='현재 사진·메모 표시: 저장소를 읽을 수 없습니다.';}
   }
   function updateDetail(){
     const detail=document.getElementById('parish-visit-detail');
     if(detail&&detail.classList.contains('show')&&typeof _renderParishVisitDetail==='function')_renderParishVisitDetail();
     if(typeof _isShrineVisitDetailOpen==='function'&&_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null&&typeof _renderShrineVisitDetail==='function')_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);
   }
-  document.addEventListener('change',function(e){
-    if(!e.target||e.target.id!=='cgm-dev-journal-switch')return;
-    const checked=!!e.target.checked,status=document.getElementById('cgm-dev-journal-status');
+  function save(checked){
+    const status=document.getElementById('cgm-dev-journal-status');
+    if(!isDeveloper()){
+      refresh();if(status)status.textContent='개발자 모드를 활성화한 뒤 다시 시도해 주세요.';return;
+    }
     try{
-      // 개발자 모드 활성화 여부만 검증한다. 패널 표시/숨김 전환 타이밍은 저장을 차단하지 않는다.
-      if(localStorage.getItem(devKey)!=='1'){
-        refresh();if(status)status.textContent='개발자 모드를 먼저 활성화해 주세요.';return;
-      }
       localStorage.setItem(key,checked?'1':'0');
-      if(localStorage.getItem(key)!==(checked?'1':'0'))throw new Error('설정 저장 확인 실패');
+      if(localStorage.getItem(key)!==(checked?'1':'0'))throw new Error('저장 확인 실패');
       refresh();updateDetail();
     }catch(_e){
       refresh();if(status)status.textContent='설정을 저장하지 못했습니다. 앱 저장 공간을 확인해 주세요.';
     }
-  },true);
+  }
+  function attach(){
+    const cb=document.getElementById(switchId);if(!cb)return;
+    if(cb.dataset.oaiJournalBound==='1'){refresh();return;}
+    cb.dataset.oaiJournalBound='1';
+    cb.addEventListener('change',function(){save(cb.checked);});
+    refresh();
+  }
   window.oaiRefreshVisitJournalSwitch=refresh;
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',refresh,{once:true});else refresh();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',attach,{once:true});else attach();
 })();
+
