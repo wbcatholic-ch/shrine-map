@@ -19888,8 +19888,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
   })();
   // 스와이프 등록은 데이터 초기화보다 앞에 둔다. 초기화 예외가 제스처를 막지 않는다.
-  refreshDev(); renderCourseList();
+  // 자동 등록 초기화는 목록 렌더링·개발자 패널 표시 실패와 독립적으로 실행한다.
   _initializeDailyPilgrimageSettlement();
+  refreshDev(); renderCourseList();
 })();
 
 /* V1172: 공통 순례 축하창. 기존 방문 스탬프 축하창과 색상을 통일한다. */
