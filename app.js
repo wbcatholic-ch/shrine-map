@@ -16883,7 +16883,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(modal)return modal;
     modal=document.createElement('div');modal.id='oai-daily-register-failure';
     modal.className='oai-daily-failure-overlay';modal.hidden=true;
-    modal.innerHTML='<section class="oai-daily-failure-panel" role="dialog" aria-modal="true" aria-labelledby="oai-daily-failure-heading"><button type="button" class="oai-daily-failure-x" data-daily-failure-close="1" aria-label="닫기">×</button><h3 id="oai-daily-failure-heading">코스 자동 등록 실패</h3><p id="oai-daily-failure-text"></p><p>방문 스탬프는 그대로 보존되어 있습니다.</p><p>아래 <strong>「미등록된 순례코스 등록하기」</strong> 버튼을 눌러 등록해 주세요.</p><div class="oai-daily-failure-actions"><button type="button" data-daily-failure-register="1">미등록된 순례코스 등록하기</button></div></section>';
+    modal.innerHTML='<section class="oai-daily-failure-panel" role="dialog" aria-modal="true" aria-labelledby="oai-daily-failure-heading"><button type="button" class="oai-daily-failure-x" data-daily-failure-close="1" aria-label="닫기">×</button><h3 id="oai-daily-failure-heading">코스 자동 등록 실패</h3><p id="oai-daily-failure-text"></p><p>방문 스탬프는 그대로 보존되어 있으니, 아래 버튼을 눌러 등록해 주세요.</p><div class="oai-daily-failure-actions"><button type="button" data-daily-failure-register="1">미등록된 순례코스 등록하기</button></div></section>';
     document.body.appendChild(modal);
     modal.addEventListener('click',e=>{
       if(e.target===modal||e.target.closest('[data-daily-failure-close]')){_dailyFailureClose();return;}
@@ -16902,7 +16902,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!modal.hidden)return;
     dailyFailureNotified.add(date);
     modal.dataset.date=date;
-    modal.querySelector('#oai-daily-failure-text').textContent=date+' 순례코스를 자동 등록하지 못했습니다. (총 2회 시도)';
+    modal.querySelector('#oai-daily-failure-text').textContent=Number(date.slice(5,7))+'월 '+Number(date.slice(8,10))+'일 순례코스를 자동으로 등록하지 못했습니다.';
     modal.hidden=false;
   }
   function _dailyNotifyStoredFailures(){
@@ -17014,10 +17014,21 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     // 날짜 후보 계산이 실패한 경우 삭제/완료로 오인하지 않고 버튼을 보존한다.
     const list=document.getElementById('oai-pilgrimage-list-view');
     if(pilgrimageCourseTab!=='complete'||!list||list.hidden){b.hidden=true;return;}
-    let remaining;
+    // GPS 자동 등록이 실패한 날짜는 후보 자료 로딩이 늦더라도 복구 버튼을 숨기지 않는다.
+    // GPS 원본이 없거나 이미 완료된 날짜는 버튼 활성화 대상이 아니다.
+    let failurePending=false;
+    try{
+      const state=_dailyState();
+      const courses=loadCourses();
+      failurePending=Object.keys(state.failures||{}).some(date=>
+        /^\d{4}-\d{2}-\d{2}$/.test(date)&&date<_dailyIso(Date.now())&&
+        !courses.some(c=>_courseCompletionList(c).some(x=>_dailyIso(x.completedAt)===date))&&
+        _dailyRawGpsEvents(date).length>0);
+    }catch(e){console.warn('[미등록 코스 실패 상태 검증 보류]',e);}
+    let remaining=[];
     try{remaining=_historyUnregisteredDates();}
-    catch(e){console.warn('[미등록 GPS 버튼 확인 실패]',e);b.hidden=true;return;}
-    b.hidden=remaining.length===0;
+    catch(e){console.warn('[미등록 GPS 버튼 확인 보류]',e);}
+    b.hidden=!failurePending&&remaining.length===0;
     b.textContent='미등록된 순례코스 등록하기';
   }
   function _historyEnsureDialog(){
