@@ -19872,14 +19872,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       refresh();if(status)status.textContent='설정을 저장하지 못했습니다. 앱 저장 공간을 확인해 주세요.';
     }
   }
-  function attach(){
-    const cb=document.getElementById(switchId);if(!cb)return;
-    if(cb.dataset.oaiJournalBound==='1'){refresh();return;}
-    cb.dataset.oaiJournalBound='1';
-    cb.addEventListener('change',function(){save(cb.checked);});
-    refresh();
-  }
+  // app.js는 설정 패널 HTML보다 먼저 실행된다. 체크박스 생성 시점과 무관하게
+  // 문서 단계에서 change를 감지하여 체크만 바뀌고 설정이 저장되지 않는 상황을 방지한다.
+  document.addEventListener('change',function(e){
+    const cb=e.target;
+    if(!cb||cb.id!==switchId)return;
+    save(cb.checked);
+  },true);
   window.oaiRefreshVisitJournalSwitch=refresh;
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',attach,{once:true});else attach();
+  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',refresh,{once:true});else refresh();
 })();
 
