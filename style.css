@@ -9975,3 +9975,13 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
 .oai-daily-failure-actions [data-daily-failure-register]{background:#277b48;border-color:#277b48;color:#fff}
 .oai-daily-failure-x{position:absolute;right:13px;top:12px;width:36px;height:36px;border:0;background:transparent;color:#475569;font-size:27px;line-height:1;cursor:pointer}
 .oai-daily-failure-panel h3{padding-right:32px}
+
+/* V1247: developer-only visit-journal discovery and safe failure preview. */
+.cgm-dev-journal-control{border:1px solid #cddde8;border-radius:13px;background:#f5fafc;padding:6px 10px;margin:8px 0 14px}
+.cgm-dev-journal-switch span{display:flex;flex-direction:column;gap:5px;min-width:0}
+.cgm-dev-journal-switch small{font-size:12px;font-weight:400;color:#51687a;line-height:1.55;word-break:keep-all}
+.cgm-dev-journal-status{margin:0 5px 8px;font-size:12px;color:#276241;font-weight:700}
+.oai-dev-failure-preview{width:100%;display:flex;flex-direction:column;gap:5px;text-align:left;border:1px solid #b4c8db;border-radius:12px;padding:13px;background:#f2f7fc;color:#234461;font:inherit;cursor:pointer;margin-bottom:15px}
+.oai-dev-failure-preview b{font-size:14px}
+.oai-dev-failure-preview small{font-size:12px;line-height:1.5}
+.oai-daily-failure-actions button:disabled{opacity:.63;cursor:default}

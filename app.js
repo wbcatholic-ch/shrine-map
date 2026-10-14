@@ -15723,7 +15723,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }finally{oaiApplyingRestore=false;}
   }
   document.addEventListener('click',function(event){
-    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-copy],[data-oai-dev-preview],[data-oai-dev-apply]');if(!button)return;
+    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-copy],[data-oai-dev-preview],[data-oai-dev-apply],[data-oai-dev-failure-preview]');if(!button)return;
     if(button.id==='oai-settings-version-label'){
       oaiDevTapCount++;
       if(oaiDevTapCount>=10){oaiDevTapCount=0;const next=!(oaiDevEnabled()&&oaiDevPanelUnlocked);oaiDevPanelUnlocked=next;localStorage.setItem(OAI_DEV_KEY,next?'1':'0');oaiRefreshDeveloperPanel();const detail=document.getElementById('parish-visit-detail');if(detail&&detail.classList.contains('show'))_renderParishVisitDetail();if(_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null)_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);if(next){oaiDevStatus('개발자 모드가 열렸습니다.');document.getElementById('oai-developer-section').scrollIntoView({block:'nearest',behavior:'smooth'});} }
@@ -15745,6 +15745,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         else oaiDevStatus('선택된 코드를 길게 눌러 복사하세요.');
       }else if(button.hasAttribute('data-oai-dev-preview'))oaiDevPreview();
       else if(button.hasAttribute('data-oai-dev-apply'))oaiDevApplyRestore();
+      else if(button.hasAttribute('data-oai-dev-failure-preview')){
+        if(!oaiDevPanelUnlocked)return;
+        if(typeof window._oaiOpenDailyFailurePreview==='function')window._oaiOpenDailyFailurePreview();
+        else oaiDevStatus('안내창을 준비할 수 없습니다.');
+      }
     }catch(err){oaiDevStatus(err.message||'요청을 처리할 수 없습니다.');}
   },true);
   setTimeout(oaiRefreshDeveloperPanel,0);
@@ -16888,12 +16893,26 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     modal.addEventListener('click',e=>{
       if(e.target===modal||e.target.closest('[data-daily-failure-close]')){_dailyFailureClose();return;}
       if(e.target.closest('[data-daily-failure-register]')){
+        if(modal.dataset.preview==='1')return; // 개발자 미리보기에서는 절대 코스 등록하지 않음
         _dailyFailureClose();
         _historyStart(true); // 기존 녹색 버튼과 동일한 GPS 미등록 코스 등록 흐름
       }
     });
     return modal;
   }
+  // 개발자 전용 미리보기: 실패 장부·GPS·등록 대기열을 변경하지 않는다.
+  window._oaiOpenDailyFailurePreview=function(){
+    try{if(localStorage.getItem('oai_developer_mode_v1')!=='1')return false;}catch(_e){return false;}
+    const modal=_dailyFailureModal();
+    if(!modal.hidden)return false;
+    modal.dataset.preview='1';
+    modal.dataset.date='';
+    modal.querySelector('#oai-daily-failure-text').textContent='10월 13일 순례코스를 자동으로 등록하지 못했습니다.';
+    const registerButton=modal.querySelector('[data-daily-failure-register]');
+    if(registerButton){registerButton.disabled=true;registerButton.textContent='미등록된 순례코스 등록하기 (미리보기)';}
+    modal.hidden=false;
+    return true;
+  };
   function _dailyShowFailure(date){
     console.warn('[성지순례 등록 보류] '+date+' — GPS 스탬프는 그대로 보존됩니다.');
     _dailyUpdateRetryButton();
@@ -16902,6 +16921,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!modal.hidden)return;
     dailyFailureNotified.add(date);
     modal.dataset.date=date;
+    modal.dataset.preview='0';
+    const registerButton=modal.querySelector('[data-daily-failure-register]');
+    if(registerButton){registerButton.disabled=false;registerButton.textContent='미등록된 순례코스 등록하기';}
     modal.querySelector('#oai-daily-failure-text').textContent=Number(date.slice(5,7))+'월 '+Number(date.slice(8,10))+'일 순례코스를 자동으로 등록하지 못했습니다.';
     modal.hidden=false;
   }
@@ -19775,9 +19797,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 /* V1189: 개발자 설정을 켠 경우에만 상세 사진/메모 UI 활성화 */
 (function(){
   const key='oai_dev_visit_journal_visible_v1';
-  function refresh(){const cb=document.getElementById('cgm-dev-journal-switch');if(!cb)return;try{cb.checked=localStorage.getItem(key)==='1';}catch(_e){cb.checked=false;}}
+  function refresh(){
+    const cb=document.getElementById('cgm-dev-journal-switch');if(!cb)return;
+    try{cb.checked=localStorage.getItem(key)==='1';}catch(_e){cb.checked=false;}
+    const status=document.getElementById('cgm-dev-journal-status');
+    if(status)status.textContent=cb.checked?'현재 사진·메모 표시: 켜짐 · 방문기록 상세에서 확인하세요.':'현재 사진·메모 표시: 꺼짐';
+  }
   document.addEventListener('change',function(e){if(!e.target||e.target.id!=='cgm-dev-journal-switch')return;
     try{if(localStorage.getItem('oai_developer_mode_v1')!=='1'){e.target.checked=false;return;}localStorage.setItem(key,e.target.checked?'1':'0');}catch(_e){}
+    refresh();
     const detail=document.getElementById('parish-visit-detail');if(detail&&detail.classList.contains('show')&&typeof _renderParishVisitDetail==='function')_renderParishVisitDetail();
     if(typeof _isShrineVisitDetailOpen==='function'&&_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null&&typeof _renderShrineVisitDetail==='function')_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);
   });
