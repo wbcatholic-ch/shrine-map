@@ -494,6 +494,12 @@
     if(window._appExiting) return;
     try{ if(typeof window.oaiSuppressExternalReturnForUserBack === 'function') window.oaiSuppressExternalReturnForUserBack('popstate-first-back-after-external-return'); }catch(e){ console.warn('[가톨릭길동무]', e); }
 
+    if(typeof window._oaiDailyFailureBackHandle==='function' && window._oaiDailyFailureBackHandle()){
+      _restoring=true;
+      try{ history.go(1); }catch(e){ _restoring=false; console.warn('[코스 실패 안내 뒤로가기]',e); }
+      return;
+    }
+
     if(_restoring){
       _restoring = false;
       if(typeof window._oaiPrayerRunPendingCoverReset === 'function' && window._oaiPrayerRunPendingCoverReset()) return;
@@ -585,6 +591,7 @@
 
   document.addEventListener('backbutton', function(){
     try{ if(typeof window.oaiSuppressExternalReturnForUserBack === 'function') window.oaiSuppressExternalReturnForUserBack('hardware-first-back-after-external-return'); }catch(e){ console.warn('[가톨릭길동무]', e); }
+    if(typeof window._oaiDailyFailureBackHandle==='function' && window._oaiDailyFailureBackHandle()) return;
     if(typeof window._oaiPrayerBackHandle === 'function' && window._oaiPrayerBackHandle('prayer-hardware-back')) return;
     try{ if(typeof window._oaiTrailBackHandle === 'function' && window._oaiTrailBackHandle('hardware-back')) return; }catch(e){ console.warn('[가톨릭길동무]', e); }
     if(window.CGMHelp && window.CGMHelp.close()) return;
