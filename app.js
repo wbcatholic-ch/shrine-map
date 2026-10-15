@@ -15883,13 +15883,50 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(name===currentName&&diocese===currentDiocese)return 'legacy';
     return '';
   }
+  // Developer-only: catalog dioceses use Korean labels, explicit shared groups use codes.
+  // Do not alter GPS, shared-journal or existing stamp identity logic.
+  function oaiDevStampGroupParish(group){
+    if(!group)return null;
+    const dio=String(_DIO[String(group.parishDiocese||'')]||group.parishDiocese||'');
+    return (PARISHES||[]).find(function(p){
+      return p&&String(p.name||'')===String(group.parishName||'')&&String(p.diocese||'')===dio;
+    })||null;
+  }
+  function oaiDevStampDiagnostics(){
+    const groups=Array.isArray(OAI_SHARED_VISIT_JOURNAL_GROUPS)?OAI_SHARED_VISIT_JOURNAL_GROUPS:[];
+    const parishRecords=oaiDevStampRawRecords();
+    const shrineRaw=localStorage.getItem(OAI_SHRINE_VISITS_KEY);
+    let shrines={};
+    try{shrines=shrineRaw?JSON.parse(shrineRaw):{};}catch(_err){return '성지 방문 원본 JSON 해석 실패 · 등록 금지';}
+    if(!shrines||typeof shrines!=='object'||Array.isArray(shrines))return '성지 방문 원본 형식 오류 · 등록 금지';
+    let joined=0,shrineVisits=0,totalDays=0;
+    const messages=[];
+    groups.forEach(function(g){
+      const s=_oaiSharedGroupShrine(g),p=oaiDevStampGroupParish(g);
+      if(s&&p)joined++;
+      if(!s||!p){messages.push(g.parishName+': 장소 연결 실패 ('+(!s?'성지 ':'')+(!p?'성당':'')+')');return;}
+      const dates=_getShrineVisitDates(s).map(v=>String(v&&v.date||'')).filter(_isVisitDate);
+      if(dates.length)shrineVisits++;
+      totalDays+=dates.length;
+      if(/대안성당|새방골성당|가실성당/.test(g.parishName)){
+        const matches=Object.keys(parishRecords).filter(k=>parishRecords[k]&&typeof parishRecords[k]==='object'&&oaiDevStampIdentity(p,parishRecords[k],k));
+        const existing=Array.from(new Set(matches.flatMap(k=>Array.isArray(parishRecords[k].visits)?parishRecords[k].visits.map(_visitDateOf).filter(Boolean):[])));
+        messages.push(g.parishName+': 성지 방문 '+dates.length+'일 / 성당 원본 연결 키 '+matches.length+'개 / 성당 원본 방문일 '+existing.length+'건');
+      }
+    });
+    return ['읽기 전용 진단 · 저장 데이터를 변경하지 않습니다.',
+      '성지 원본 키 '+Object.keys(shrines).length+'개 / 성당 원본 키 '+Object.keys(parishRecords).length+'개',
+      '공통 그룹 '+groups.length+'개 / 양쪽 장소 연결 '+joined+'개 / 성지 방문 있는 그룹 '+shrineVisits+'개 / 해당 방문일 '+totalDays+'건',
+      '성당 원본에는 수동·GPS 방문기록이 혼재할 수 있으므로 모든 기록을 중복 검사합니다.',
+      ...messages].join('\n');
+  }
   function oaiDevStampBackfillCandidates(){
     const matches=[], skipped=[], ambiguous=[];
     const data=oaiDevStampRawRecords();
     const groups=Array.isArray(OAI_SHARED_VISIT_JOURNAL_GROUPS)?OAI_SHARED_VISIT_JOURNAL_GROUPS:[];
     const used=new Set();
     groups.forEach(function(group){
-      const shrine=_oaiSharedGroupShrine(group),parish=_oaiSharedGroupParish(group);
+      const shrine=_oaiSharedGroupShrine(group),parish=oaiDevStampGroupParish(group);
       if(!shrine||!parish)return;
       const records=Object.keys(data).map(function(key){
         const r=data[key];
@@ -15926,49 +15963,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const sorter=(a,b)=>b.date.localeCompare(a.date)||a.parishName.localeCompare(b.parishName,'ko');
     return {eligible:matches.sort(sorter),existing:skipped.sort(sorter),ambiguous:ambiguous.sort(sorter)};
   }
-  // V1275: Developer-only diagnostics, original local records are read without mutation.
-  function oaiDevStampDiagnostics(){
-    const groups=Array.isArray(OAI_SHARED_VISIT_JOURNAL_GROUPS)?OAI_SHARED_VISIT_JOURNAL_GROUPS:[];
-    const srRaw=localStorage.getItem(OAI_SHRINE_VISITS_KEY);
-    let shrines={};
-    try{shrines=srRaw?JSON.parse(srRaw):{};}catch(_e){return '성지 원본 기록 JSON 읽기 실패';}
-    if(!shrines||typeof shrines!=='object'||Array.isArray(shrines))return '성지 원본 기록 형식 오류';
-    const parishes=oaiDevStampRawRecords();
-    const asDates=function(record){return record&&Array.isArray(record.visits)?record.visits.map(_visitDateOf).filter(Boolean):[];};
-    const sample=groups.filter(g=>/대안성당|새방골성당|가실성당/.test(String(g.parishName||'')));
-    let both=0,shrineStamped=0,validTotal=0;
-    groups.forEach(function(g){
-      const sh=_oaiSharedGroupShrine(g),pa=_oaiSharedGroupParish(g);
-      if(sh&&pa)both++;
-      if(!sh)return;
-      const keys=[_getShrineVisitKey(sh)].concat(_getShrineVisitLegacyKeys(sh));
-      const dates=new Set(keys.flatMap(k=>asDates(shrines[k])));
-      if(dates.size)shrineStamped++;
-      validTotal+=dates.size;
-    });
-    const lines=[
-      '진단 전용 · 스탬프를 변경하지 않습니다.',
-      '성지 원본 저장 키 '+Object.keys(shrines).length+'개 · 성당 원본 저장 키 '+Object.keys(parishes).length+'개',
-      '명시적 사진 공통 그룹 '+groups.length+'개 · 성지/성당 연결 '+both+'개',
-      '그룹 성지 중 원본 방문일 조회 '+shrineStamped+'곳 · 방문일 합계 '+validTotal+'건',
-      '※ 수치는 현재 기기에 저장된 기록만 검사하며 Google Drive 데이터는 조회하지 않습니다.'
-    ];
-    sample.forEach(function(g){
-      const sh=_oaiSharedGroupShrine(g),pa=_oaiSharedGroupParish(g);
-      if(!sh||!pa){lines.push(g.parishName+': 연결 실패 ('+(!sh?'성지 ':'')+(!pa?'성당':'')+')');return;}
-      const keys=[_getShrineVisitKey(sh)].concat(_getShrineVisitLegacyKeys(sh)).filter(Boolean);
-      const direct=Array.from(new Set(keys.flatMap(k=>asDates(shrines[k]))));
-      const related=Object.keys(shrines).filter(function(k){const r=shrines[k];return r&&typeof r==='object'&&(String(r.seq||'')===String(sh.seq||'')&&!!sh.seq || String(r.name||'')===String(sh.name||''));});
-      const indirect=Array.from(new Set(related.flatMap(k=>asDates(shrines[k]))));
-      const pk=Object.keys(parishes).filter(k=>parishes[k]&&typeof parishes[k]==='object'&&oaiDevStampIdentity(pa,parishes[k],k));
-      const pd=Array.from(new Set(pk.flatMap(k=>asDates(parishes[k]))));
-      lines.push(g.parishName+' ↔ '+sh.name+' : 성지 현재키 '+direct.length+'일 / 성지 이름·seq 원본 '+indirect.length+'일 / 성당 원본 '+pd.length+'일'+
-        ' / 성지 ID '+(_getShrineVisitKey(sh)||'없음')+ (indirect.length?' / 성지 방문일 '+indirect.join(', '):''));
-      if(!direct.length&&indirect.length)lines.push('  → 성지 방문기록 조회키 불일치 의심 (신규 등록 금지)');
-      if(!direct.length&&!indirect.length)lines.push('  → 현재 기기 원본에서 해당 성지 방문일을 확인하지 못함');
-    });
-    return lines.join('\n');
-  }
   function oaiDevStampBackfillPreview(){
     if(!(oaiDevEnabled()&&oaiDevPanelUnlocked))return;
     const body=document.getElementById('oai-dev-stamp-results');
@@ -15979,12 +15973,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const result=oaiDevStampBackfillCandidates();
       oaiStampBackfillCandidates=result.eligible;
       const escape=_visitHtmlEsc;
-      const summary='<p><b>보완 가능 '+result.eligible.length+'건 · 원본 등록 확인 '+result.existing.length+'건 · 확인 필요 '+result.ambiguous.length+'건</b></p>'+
-        '<details open><summary><b>원본 방문기록 진단 (읽기 전용)</b></summary><pre style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px">'+escape(oaiDevStampDiagnostics())+'</pre></details>';
+      const summary='<p><b>보완 가능 '+result.eligible.length+'건 · 원본 등록 확인 '+result.existing.length+'건 · 확인 필요 '+result.ambiguous.length+'건</b></p>';
+      const diag='<details open><summary><b>원본 방문기록 진단 (읽기 전용)</b></summary><pre style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px">'+escape(oaiDevStampDiagnostics())+'</pre></details>';
       const details=result.existing.concat(result.ambiguous).map(function(c){
         return '<div style="padding:5px 2px">'+escape(c.date+' · '+c.parishName)+' — '+escape(c.reason)+'</div>';
       }).join('');
-      body.innerHTML=summary+
+      body.innerHTML=summary+diag+
         '<p>원본 기록에 방문일이 있으면 새로 등록하지 않습니다. 불명확한 기록도 제외합니다. 아래 보완 가능 항목은 실제 동일 장소를 방문했는지 직접 확인한 후 선택하세요.</p>'+
         (result.eligible.length?'<div style="max-height:270px;overflow:auto;border:1px solid #ddd;border-radius:8px;padding:8px">'+
           result.eligible.map(function(c,i){return '<label style="display:flex;gap:8px;align-items:flex-start;padding:7px 3px;border-bottom:1px solid #eee"><input type="checkbox" data-oai-stamp-row="'+i+'"><span><b>'+escape(c.date)+' · '+escape(c.parishName)+'</b><small style="display:block">성지: '+escape(c.shrineName)+' · '+escape(c.diocese)+'</small></span></label>';}).join('')+'</div>'+
