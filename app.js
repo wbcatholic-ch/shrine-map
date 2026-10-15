@@ -15832,9 +15832,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(event.target&&event.target.id==='cgm-dev-journal-switch')oaiSaveVisitJournalSwitch(!!event.target.checked);
   },true);
 
+  window.oaiDevPhotoBackupResult=function(state,message){
+    const el=document.getElementById('oai-dev-five-photo-status');
+    const button=document.getElementById('oai-dev-five-photo-backup');
+    if(el){el.hidden=false;el.textContent=String(message||'');}
+    if(button)button.disabled=(state==='working');
+  };
   function oaiRefreshDeveloperPanel(){
     const section=document.getElementById('oai-developer-section');if(section)section.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked);
     oaiRefreshVisitJournalSwitch();
+    const test=document.getElementById('oai-dev-five-photo-backup');
+    if(test)test.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.testBackupFiveVisitPhotos==='function');
     if(!oaiDevEnabled()){oaiDevPendingRestore=null;for(const id of ['oai-dev-export-view','oai-dev-import-view','oai-dev-restore-preview']){const el=document.getElementById(id);if(el)el.hidden=true;}}
   }
   function oaiEncodeCgm1(value){return 'CGM1.'+btoa(Array.from(new TextEncoder().encode(JSON.stringify(value)),v=>String.fromCharCode(v)).join(''));}
@@ -15888,7 +15896,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }finally{oaiApplyingRestore=false;}
   }
   document.addEventListener('click',function(event){
-    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-copy],[data-oai-dev-preview],[data-oai-dev-apply],[data-oai-dev-failure-preview],[data-oai-dev-daily-results],[data-oai-dev-daily-memory-test]');if(!button)return;
+    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-copy],[data-oai-dev-preview],[data-oai-dev-apply],[data-oai-dev-failure-preview],[data-oai-dev-daily-results],[data-oai-dev-daily-memory-test],[data-oai-dev-five-photo-backup]');if(!button)return;
     if(button.id==='oai-settings-version-label'){
       oaiDevTapCount++;
       if(oaiDevTapCount>=10){oaiDevTapCount=0;const next=!(oaiDevEnabled()&&oaiDevPanelUnlocked);oaiDevPanelUnlocked=next;window.__OAI_DEV_RUNTIME_ACTIVE__=next;oaiRefreshDeveloperPanel();const detail=document.getElementById('parish-visit-detail');if(detail&&detail.classList.contains('show'))_renderParishVisitDetail();if(_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null)_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);if(next){oaiDevStatus('개발자 모드가 열렸습니다.');document.getElementById('oai-developer-section').scrollIntoView({block:'nearest',behavior:'smooth'});} }
@@ -15897,7 +15905,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!oaiDevEnabled())return;
     event.preventDefault();
     try{
-      if(button.hasAttribute('data-oai-dev-export')){
+      if(button.hasAttribute('data-oai-dev-five-photo-backup')){
+        if(!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.testBackupFiveVisitPhotos==='function'))return;
+        window.oaiDevPhotoBackupResult('working','Google Drive 연결 및 사진 백업을 시작합니다.');
+        window.GildongmuNative.testBackupFiveVisitPhotos();
+      }else if(button.hasAttribute('data-oai-dev-export')){
         document.getElementById('oai-dev-import-view').hidden=true;
         const output=document.getElementById('oai-dev-export-code');output.value=oaiEncodeCgm1(oaiDevSnapshot());
         document.getElementById('oai-dev-export-view').hidden=false;oaiDevStatus('백업 코드를 생성했습니다. 복사해서 안전하게 보관하세요.');
