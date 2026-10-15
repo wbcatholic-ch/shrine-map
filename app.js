@@ -3066,9 +3066,9 @@ function _oaiVisitToast(message){
   const text=String(message||'').trim();if(!text)return;
   let t=document.getElementById('oai-visit-toast');if(!t){t=document.createElement('div');t.id='oai-visit-toast';t.className='oai-visit-toast';document.body.appendChild(t);}t.textContent=text;t.classList.add('show');clearTimeout(window.__OAI_VISIT_TOAST_TIMER__);window.__OAI_VISIT_TOAST_TIMER__=setTimeout(function(){t.classList.remove('show');},2200);
 }
-function _oaiVisitConfirm(message,onConfirm){
+function _oaiVisitConfirm(message,onConfirm,options){
   let m=document.getElementById('oai-visit-confirm');if(!m){m=document.createElement('div');m.id='oai-visit-confirm';m.className='oai-visit-confirm';m.setAttribute('aria-hidden','true');m.innerHTML='<div class="oai-visit-confirm-bg" data-oai-confirm-cancel="1"></div><section class="oai-visit-confirm-panel" role="dialog" aria-modal="true" aria-labelledby="oai-visit-confirm-heading"><div class="oai-visit-confirm-symbol" aria-hidden="true">!</div><h3 class="oai-visit-confirm-heading" id="oai-visit-confirm-heading">기록 삭제 확인</h3><div class="oai-visit-confirm-message" id="oai-visit-confirm-message"></div><div class="oai-visit-confirm-actions"><button type="button" data-oai-confirm-cancel="1">취소</button><button type="button" data-oai-confirm-ok="1">삭제</button></div></section>';document.body.appendChild(m);m.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('[data-oai-confirm-cancel]')){_oaiCloseVisitConfirm();return;}if(e.target.closest&&e.target.closest('[data-oai-confirm-ok]')){const fn=window.__OAI_VISIT_CONFIRM_FN__;_oaiCloseVisitConfirm();if(typeof fn==='function')fn();}});}
-  const msg=document.getElementById('oai-visit-confirm-message');if(msg)msg.textContent=String(message||'');window.__OAI_VISIT_CONFIRM_FN__=onConfirm;m.classList.add('show');m.setAttribute('aria-hidden','false');
+  const confOptions=options||{};const heading=document.getElementById('oai-visit-confirm-heading'),okBtn=m.querySelector('[data-oai-confirm-ok]');if(heading)heading.textContent=confOptions.title||'기록 삭제 확인';if(okBtn)okBtn.textContent=confOptions.confirmLabel||'삭제';const msg=document.getElementById('oai-visit-confirm-message');if(msg)msg.textContent=String(message||'');window.__OAI_VISIT_CONFIRM_FN__=onConfirm;m.classList.add('show');m.setAttribute('aria-hidden','false');
 }
 function _oaiCloseVisitConfirm(){const m=document.getElementById('oai-visit-confirm');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}window.__OAI_VISIT_CONFIRM_FN__=null;}
 try{window._oaiCloseVisitConfirm=_oaiCloseVisitConfirm;}catch(_e){}
@@ -15858,6 +15858,94 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const raw=String(value||'').trim().replace(/\s+/g,'');if(!raw.startsWith('CGM1.'))throw Error('CGM1 코드가 아닙니다.');
     const bytes=Uint8Array.from(atob(raw.slice(5)),v=>v.charCodeAt(0));return JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes));
   }
+  // V1273: Developer-only recovery of missing parish stamps from confirmed shrine stamps.
+  // Existing GPS stamps, shrine data, course data and photo journals remain untouched.
+  let oaiStampBackfillCandidates=[];
+  function oaiDevStampBackfillCandidates(){
+    const matches=[];
+    const groups=Array.isArray(OAI_SHARED_VISIT_JOURNAL_GROUPS)?OAI_SHARED_VISIT_JOURNAL_GROUPS:[];
+    const used=new Set();
+    groups.forEach(function(group){
+      // A photo-sharing match alone is not proof of the same GPS point.
+      // Present explicit pairs for human review; never auto-select.
+      const shrine=_oaiSharedGroupShrine(group),parish=_oaiSharedGroupParish(group);
+      if(!shrine||!parish)return;
+      const shrineVisits=_getShrineVisitDates(shrine),parishDates=new Set(_parishVisits(parish).map(v=>v.date));
+      shrineVisits.forEach(function(visit){
+        const date=String(visit&&visit.date||'');
+        if(!_isVisitDate(date)||parishDates.has(date))return;
+        const key=String(group.id)+'|'+date;
+        if(used.has(key))return;
+        used.add(key);
+        matches.push({key:key,groupId:String(group.id),date:date,shrineName:String(shrine.name||''),shrineId:String(_oaiPlaceCanonicalId('shrine',shrine)||''),parishName:String(parish.name||''),diocese:String(parish.diocese||''),parish:parish});
+      });
+    });
+    return matches.sort((a,b)=>b.date.localeCompare(a.date)||a.parishName.localeCompare(b.parishName,'ko'));
+  }
+  function oaiDevStampBackfillPreview(){
+    if(!(oaiDevEnabled()&&oaiDevPanelUnlocked))return;
+    const body=document.getElementById('oai-dev-stamp-results');
+    if(!body)return;
+    body.hidden=false;body.textContent='성당 목록과 방문기록을 확인하고 있습니다…';
+    _ensureAllParishDiocesesLoaded({silent:true}).then(function(){
+      if(!(oaiDevEnabled()&&oaiDevPanelUnlocked))return;
+      oaiStampBackfillCandidates=oaiDevStampBackfillCandidates();
+      if(!oaiStampBackfillCandidates.length){body.textContent='명시적 성지·성당 연결에서 누락된 성당 방문일을 찾지 못했습니다.';return;}
+      const escape=_visitHtmlEsc;
+      const unique=new Set(oaiStampBackfillCandidates.map(v=>v.groupId)).size;
+      body.innerHTML='<p><b>검토 대상 '+unique+'개 성당 · '+oaiStampBackfillCandidates.length+'개 방문일</b></p>'+
+        '<p>사진 공유 관계만으로 실제 같은 장소라고 확정할 수 없습니다. <b>직접 방문한 동일 장소만</b> 선택하세요. 기존 스탬프는 변경하지 않습니다.</p>'+
+        '<div style="max-height:290px;overflow:auto;border:1px solid #ddd;border-radius:8px;padding:8px">'+
+        oaiStampBackfillCandidates.map(function(c,i){return '<label style="display:flex;gap:8px;align-items:flex-start;padding:7px 3px;border-bottom:1px solid #eee"><input type="checkbox" data-oai-stamp-row="'+i+'"><span><b>'+escape(c.date)+' · '+escape(c.parishName)+'</b><small style="display:block">성지: '+escape(c.shrineName)+' · '+escape(c.diocese)+'</small></span></label>';}).join('')+'</div>'+
+        '<p><label><input type="checkbox" id="oai-dev-stamp-backup-ok"> 기존 방문기록의 별도 백업을 확보했습니다.</label></p>'+
+        '<button type="button" class="oai-dev-copy" data-oai-dev-stamp-apply="1">선택한 성당 스탬프 일괄 보완</button>'+
+        '<p id="oai-dev-stamp-message" role="status"></p>';
+    }).catch(function(err){body.textContent='성당 전체 목록을 읽지 못했습니다: '+(err.message||'오류');});
+  }
+  function oaiDevStampBackfillApply(){
+    if(!(oaiDevEnabled()&&oaiDevPanelUnlocked))return;
+    const box=document.getElementById('oai-dev-stamp-results');
+    const message=document.getElementById('oai-dev-stamp-message');
+    const selected=Array.from(box?box.querySelectorAll('[data-oai-stamp-row]:checked'):[]).map(el=>oaiStampBackfillCandidates[Number(el.getAttribute('data-oai-stamp-row'))]).filter(Boolean);
+    if(!selected.length){if(message)message.textContent='보완할 방문일을 먼저 선택하세요.';return;}
+    if(!document.getElementById('oai-dev-stamp-backup-ok').checked){if(message)message.textContent='기존 기록의 별도 백업을 먼저 확보하세요.';return;}
+    // Re-evaluate against today's data; never apply a stale preview after a restore/import.
+    const current=new Map(oaiDevStampBackfillCandidates().map(row=>[row.key,row]));
+    if(selected.some(row=>!current.has(row.key)||current.get(row.key).shrineId!==row.shrineId)){
+      if(message)message.textContent='방문기록이 변경됐습니다. 다시 조회한 후 진행하세요.';return;
+    }
+    _oaiVisitConfirm('선택한 '+selected.length+'건의 성당 방문일을 기존 성지 스탬프 날짜로 보완합니다. 성지·성당이 실제 동일 장소인지 확인하셨나요?',function(){
+      if(!(oaiDevEnabled()&&oaiDevPanelUnlocked))return;
+      const now=new Map(oaiDevStampBackfillCandidates().map(row=>[row.key,row]));
+      if(selected.some(row=>!now.has(row.key)||now.get(row.key).shrineId!==row.shrineId)){if(message)message.textContent='기록이 변경됐습니다. 다시 조회하세요.';return;}
+      const key=OAI_PARISH_VISITS_KEY,prior=localStorage.getItem(key),data=_loadParishVisits();
+      let added=0;
+      try{
+        selected.forEach(function(row){
+          const p=now.get(row.key).parish,storedKey=_parishVisitStoredKey(p,data);
+          if(!storedKey)throw Error('성당 식별키 없음: '+p.name);
+          const r=data[storedKey]&&typeof data[storedKey]==='object'?data[storedKey]:{name:p.name||'',diocese:p.diocese||'',addr:p.addr||'',visits:[]};
+          r.visits=Array.isArray(r.visits)?r.visits:[];
+          if(_hasVisitDate(r.visits,row.date))return;
+          const entry=_newVisitEntry(row.date,'manual');
+          entry.source='shrine-stamp-backfill';entry.sourceShrineId=row.shrineId;
+          r.visits.push(entry);r.visits.sort(_compareShrineVisits);
+          if(!r.placeId)r.placeId=_oaiPlaceCanonicalId('parish',p);
+          data[storedKey]=r;added++;
+        });
+        if(added){
+          localStorage.setItem(key,JSON.stringify(data));
+          const checked=_loadParishVisits();
+          if(selected.some(row=>!_hasVisitDate((checked[_parishVisitStoredKey(row.parish,checked)]||{}).visits,row.date)))throw Error('저장 후 방문일 검증 실패');
+        }
+        oaiDevStampBackfillPreview();
+        oaiDevStatus('성당 스탬프 '+added+'건 보완 완료 · 기존 성지 및 순례기록 유지');
+      }catch(err){
+        try{if(prior===null)localStorage.removeItem(key);else localStorage.setItem(key,prior);}catch(_e){}
+        if(message)message.textContent='저장 실패: '+(err.message||'오류')+' · 이전 성당 기록 복구 시도';
+      }
+    },{title:'성당 방문기록 보완 확인',confirmLabel:'등록'});
+  }
   function oaiDevSnapshot(){
     const data=JSON.parse(oaiTransferSnapshot()).data;
     for(const key of ['oai_shrine_visits_v1','oai_parish_visits_v1'])if(!Object.prototype.hasOwnProperty.call(data,key))data[key]='{}';
@@ -15904,7 +15992,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }finally{oaiApplyingRestore=false;}
   }
   document.addEventListener('click',function(event){
-    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-copy],[data-oai-dev-preview],[data-oai-dev-apply],[data-oai-dev-failure-preview],[data-oai-dev-daily-results],[data-oai-dev-daily-memory-test],[data-oai-dev-five-photo-backup],[data-oai-dev-five-photo-verify]');if(!button)return;
+    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-copy],[data-oai-dev-preview],[data-oai-dev-apply],[data-oai-dev-failure-preview],[data-oai-dev-daily-results],[data-oai-dev-daily-memory-test],[data-oai-dev-five-photo-backup],[data-oai-dev-five-photo-verify],[data-oai-dev-stamp-preview],[data-oai-dev-stamp-apply]');if(!button)return;
     if(button.id==='oai-settings-version-label'){
       oaiDevTapCount++;
       if(oaiDevTapCount>=10){oaiDevTapCount=0;const next=!(oaiDevEnabled()&&oaiDevPanelUnlocked);oaiDevPanelUnlocked=next;window.__OAI_DEV_RUNTIME_ACTIVE__=next;oaiRefreshDeveloperPanel();const detail=document.getElementById('parish-visit-detail');if(detail&&detail.classList.contains('show'))_renderParishVisitDetail();if(_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null)_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);if(next){oaiDevStatus('개발자 모드가 열렸습니다.');document.getElementById('oai-developer-section').scrollIntoView({block:'nearest',behavior:'smooth'});} }
@@ -15913,7 +16001,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!oaiDevEnabled())return;
     event.preventDefault();
     try{
-      if(button.hasAttribute('data-oai-dev-five-photo-verify')){
+      if(button.hasAttribute('data-oai-dev-stamp-preview')){oaiDevStampBackfillPreview();}
+      else if(button.hasAttribute('data-oai-dev-stamp-apply')){oaiDevStampBackfillApply();}
+      else if(button.hasAttribute('data-oai-dev-five-photo-verify')){
         if(!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.verifyBackupFiveVisitPhotos==='function'))return;
         window.oaiDevPhotoVerifyResult('working','Google 백업 사진을 읽기 전용으로 확인합니다.');
         window.GildongmuNative.verifyBackupFiveVisitPhotos();
