@@ -3225,15 +3225,39 @@ function _oaiDeleteSelectedPhotos(kind){
   });
 }
 function _oaiInitPhotoLongPress(){
+  // 손가락의 미세한 흔들림은 누르기 취소로 보지 않는다.
+  // 실제 스크롤/드래그 시에만 취소하며, 사진 선택·보기 이벤트를 중복 설치하지 않는다.
+  let press=null;
+  function cancel(){
+    if(_oaiPhotoPressTimer){clearTimeout(_oaiPhotoPressTimer);_oaiPhotoPressTimer=null;}
+    press=null;
+  }
   document.addEventListener('pointerdown',function(e){
-    const thumb=e.target.closest&&e.target.closest('.oai-visit-photo-thumb');if(!thumb||!_oaiJournalDeveloperEnabled())return;
-    if(_oaiPhotoPressTimer)clearTimeout(_oaiPhotoPressTimer);
+    const thumb=e.target.closest&&e.target.closest('.oai-visit-photo-thumb');
+    if(!thumb||!_oaiJournalDeveloperEnabled()||e.isPrimary===false||e.button>0)return;
+    cancel();
     _oaiPhotoLongPressed=false;
     const kind=thumb.getAttribute('data-oai-photo-open'),index=Number(thumb.getAttribute('data-oai-photo-index'));
-    _oaiPhotoPressTimer=setTimeout(function(){_oaiPhotoPressTimer=null;_oaiPhotoLongPressed=true;_oaiPhotoSelectToggle(kind,index);},550);
+    press={id:e.pointerId,x:e.clientX,y:e.clientY};
+    _oaiPhotoPressTimer=setTimeout(function(){
+      _oaiPhotoPressTimer=null;
+      if(!press)return;
+      press=null;
+      _oaiPhotoLongPressed=true;
+      _oaiPhotoSelectToggle(kind,index);
+    },550);
   },{passive:true});
-  ['pointerup','pointercancel','pointermove'].forEach(function(type){document.addEventListener(type,function(){if(_oaiPhotoPressTimer){clearTimeout(_oaiPhotoPressTimer);_oaiPhotoPressTimer=null;}},{passive:true});});
-  document.addEventListener('contextmenu',function(e){if(e.target.closest&&e.target.closest('.oai-visit-photo-thumb'))e.preventDefault();});
+  document.addEventListener('pointermove',function(e){
+    if(!press||e.pointerId!==press.id)return;
+    const dx=e.clientX-press.x,dy=e.clientY-press.y;
+    if(dx*dx+dy*dy>144)cancel(); // 12px 이상 실제 이동
+  },{passive:true});
+  ['pointerup','pointercancel'].forEach(function(type){
+    document.addEventListener(type,function(e){if(press&&e.pointerId===press.id)cancel();},{passive:true});
+  });
+  document.addEventListener('contextmenu',function(e){
+    if(e.target.closest&&e.target.closest('.oai-visit-photo-thumb'))e.preventDefault();
+  });
 }
 _oaiInitPhotoLongPress();
 window.oaiVisitPhotoDeleteResult=function(requestId,ok,message){
