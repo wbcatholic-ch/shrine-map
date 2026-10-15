@@ -15861,46 +15861,94 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // V1273: Developer-only recovery of missing parish stamps from confirmed shrine stamps.
   // Existing GPS stamps, shrine data, course data and photo journals remain untouched.
   let oaiStampBackfillCandidates=[];
+  // Inspect every original parish record independently of the UI lookup key.
+  // Never convert malformed or ambiguous data into a new stamp.
+  function oaiDevStampRawRecords(){
+    const raw=localStorage.getItem(OAI_PARISH_VISITS_KEY);
+    if(!raw)return {};
+    const data=JSON.parse(raw);
+    if(!data||typeof data!=='object'||Array.isArray(data))throw Error('성당 원본 방문기록 형식이 올바르지 않습니다.');
+    return data;
+  }
+  function oaiDevStampIdentity(p,record,key){
+    const parts=String(key||'').split('|');
+    const canonical=String(_oaiPlaceCanonicalId('parish',p)||'');
+    const currentKey=_parishVisitKey(p);
+    const placeId=String(record.placeId||'');
+    const name=String(record.name||parts[1]||'');
+    const diocese=String(record.diocese||parts[0]||'');
+    const currentName=String(p.name||''),currentDiocese=String(p.diocese||'');
+    if(key===currentKey)return 'exact';
+    if(placeId&&canonical&&placeId===canonical)return 'identity';
+    if(name===currentName&&diocese===currentDiocese)return 'legacy';
+    return '';
+  }
   function oaiDevStampBackfillCandidates(){
-    const matches=[];
+    const matches=[], skipped=[], ambiguous=[];
+    const data=oaiDevStampRawRecords();
     const groups=Array.isArray(OAI_SHARED_VISIT_JOURNAL_GROUPS)?OAI_SHARED_VISIT_JOURNAL_GROUPS:[];
     const used=new Set();
     groups.forEach(function(group){
-      // A photo-sharing match alone is not proof of the same GPS point.
-      // Present explicit pairs for human review; never auto-select.
       const shrine=_oaiSharedGroupShrine(group),parish=_oaiSharedGroupParish(group);
       if(!shrine||!parish)return;
-      const shrineVisits=_getShrineVisitDates(shrine),parishDates=new Set(_parishVisits(parish).map(v=>v.date));
-      shrineVisits.forEach(function(visit){
+      const records=Object.keys(data).map(function(key){
+        const r=data[key];
+        if(!r||typeof r!=='object'||Array.isArray(r))return null;
+        const type=oaiDevStampIdentity(parish,r,key);
+        if(!type)return null;
+        if(!Array.isArray(r.visits))throw Error('성당 기록의 방문일 목록이 올바르지 않습니다: '+parish.name);
+        return {key:key,record:r,type:type};
+      }).filter(Boolean);
+      _getShrineVisitDates(shrine).forEach(function(visit){
         const date=String(visit&&visit.date||'');
-        if(!_isVisitDate(date)||parishDates.has(date))return;
-        const key=String(group.id)+'|'+date;
-        if(used.has(key))return;
-        used.add(key);
-        matches.push({key:key,groupId:String(group.id),date:date,shrineName:String(shrine.name||''),shrineId:String(_oaiPlaceCanonicalId('shrine',shrine)||''),parishName:String(parish.name||''),diocese:String(parish.diocese||''),parish:parish});
+        if(!_isVisitDate(date))return;
+        const rowKey=String(group.id)+'|'+date;
+        if(used.has(rowKey))return;
+        used.add(rowKey);
+        const matched=records.filter(function(r){return _hasVisitDate(r.record.visits,date);});
+        const base={key:rowKey,groupId:String(group.id),date:date,shrineName:String(shrine.name||''),shrineId:String(_oaiPlaceCanonicalId('shrine',shrine)||''),parishName:String(parish.name||''),diocese:String(parish.diocese||''),parish:parish};
+        if(matched.length){
+          skipped.push(Object.assign({},base,{reason:'원본 성당 방문기록에서 이미 확인 ('+matched.map(r=>r.type).join(', ')+')'}));
+          return;
+        }
+        // Competing historical records could belong to this parish. Never write to one arbitrarily.
+        if(records.length>1){
+          ambiguous.push(Object.assign({},base,{reason:'동일 성당으로 식별되는 원본 기록이 여러 개 있음'}));
+          return;
+        }
+        if(records.length===1&&records[0].type==='legacy'&&records[0].key!==_parishVisitStoredKey(parish,data)){
+          ambiguous.push(Object.assign({},base,{reason:'화면 조회 키와 과거 저장 키가 일치하지 않음'}));
+          return;
+        }
+        matches.push(base);
       });
     });
-    return matches.sort((a,b)=>b.date.localeCompare(a.date)||a.parishName.localeCompare(b.parishName,'ko'));
+    const sorter=(a,b)=>b.date.localeCompare(a.date)||a.parishName.localeCompare(b.parishName,'ko');
+    return {eligible:matches.sort(sorter),existing:skipped.sort(sorter),ambiguous:ambiguous.sort(sorter)};
   }
   function oaiDevStampBackfillPreview(){
     if(!(oaiDevEnabled()&&oaiDevPanelUnlocked))return;
     const body=document.getElementById('oai-dev-stamp-results');
     if(!body)return;
-    body.hidden=false;body.textContent='성당 목록과 방문기록을 확인하고 있습니다…';
+    body.hidden=false;body.textContent='원본 성당 방문기록과 성지 방문일을 대조하고 있습니다…';
     _ensureAllParishDiocesesLoaded({silent:true}).then(function(){
       if(!(oaiDevEnabled()&&oaiDevPanelUnlocked))return;
-      oaiStampBackfillCandidates=oaiDevStampBackfillCandidates();
-      if(!oaiStampBackfillCandidates.length){body.textContent='명시적 성지·성당 연결에서 누락된 성당 방문일을 찾지 못했습니다.';return;}
+      const result=oaiDevStampBackfillCandidates();
+      oaiStampBackfillCandidates=result.eligible;
       const escape=_visitHtmlEsc;
-      const unique=new Set(oaiStampBackfillCandidates.map(v=>v.groupId)).size;
-      body.innerHTML='<p><b>검토 대상 '+unique+'개 성당 · '+oaiStampBackfillCandidates.length+'개 방문일</b></p>'+
-        '<p>사진 공유 관계만으로 실제 같은 장소라고 확정할 수 없습니다. <b>직접 방문한 동일 장소만</b> 선택하세요. 기존 스탬프는 변경하지 않습니다.</p>'+
-        '<div style="max-height:290px;overflow:auto;border:1px solid #ddd;border-radius:8px;padding:8px">'+
-        oaiStampBackfillCandidates.map(function(c,i){return '<label style="display:flex;gap:8px;align-items:flex-start;padding:7px 3px;border-bottom:1px solid #eee"><input type="checkbox" data-oai-stamp-row="'+i+'"><span><b>'+escape(c.date)+' · '+escape(c.parishName)+'</b><small style="display:block">성지: '+escape(c.shrineName)+' · '+escape(c.diocese)+'</small></span></label>';}).join('')+'</div>'+
-        '<p><label><input type="checkbox" id="oai-dev-stamp-backup-ok"> 기존 방문기록의 별도 백업을 확보했습니다.</label></p>'+
-        '<button type="button" class="oai-dev-copy" data-oai-dev-stamp-apply="1">선택한 성당 스탬프 일괄 보완</button>'+
+      const summary='<p><b>보완 가능 '+result.eligible.length+'건 · 원본 등록 확인 '+result.existing.length+'건 · 확인 필요 '+result.ambiguous.length+'건</b></p>';
+      const details=result.existing.concat(result.ambiguous).map(function(c){
+        return '<div style="padding:5px 2px">'+escape(c.date+' · '+c.parishName)+' — '+escape(c.reason)+'</div>';
+      }).join('');
+      body.innerHTML=summary+
+        '<p>원본 기록에 방문일이 있으면 새로 등록하지 않습니다. 불명확한 기록도 제외합니다. 아래 보완 가능 항목은 실제 동일 장소를 방문했는지 직접 확인한 후 선택하세요.</p>'+
+        (result.eligible.length?'<div style="max-height:270px;overflow:auto;border:1px solid #ddd;border-radius:8px;padding:8px">'+
+          result.eligible.map(function(c,i){return '<label style="display:flex;gap:8px;align-items:flex-start;padding:7px 3px;border-bottom:1px solid #eee"><input type="checkbox" data-oai-stamp-row="'+i+'"><span><b>'+escape(c.date)+' · '+escape(c.parishName)+'</b><small style="display:block">성지: '+escape(c.shrineName)+' · '+escape(c.diocese)+'</small></span></label>';}).join('')+'</div>'+
+          '<p><label><input type="checkbox" id="oai-dev-stamp-backup-ok"> 기존 방문기록의 별도 백업을 확보했습니다.</label></p>'+
+          '<button type="button" class="oai-dev-copy" data-oai-dev-stamp-apply="1">선택한 성당 스탬프 일괄 보완</button>':'<p>현재 자동 보완 가능한 방문일이 없습니다.</p>')+
+        (details?'<details><summary>원본에 있는 기록·확인 필요 항목 보기</summary><div style="max-height:220px;overflow:auto">'+details+'</div></details>':'')+
         '<p id="oai-dev-stamp-message" role="status"></p>';
-    }).catch(function(err){body.textContent='성당 전체 목록을 읽지 못했습니다: '+(err.message||'오류');});
+    }).catch(function(err){oaiStampBackfillCandidates=[];body.textContent='안전 검사 중단: '+(err.message||'오류')+' · 등록하지 마세요.';});
   }
   function oaiDevStampBackfillApply(){
     if(!(oaiDevEnabled()&&oaiDevPanelUnlocked))return;
@@ -15910,20 +15958,22 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!selected.length){if(message)message.textContent='보완할 방문일을 먼저 선택하세요.';return;}
     if(!document.getElementById('oai-dev-stamp-backup-ok').checked){if(message)message.textContent='기존 기록의 별도 백업을 먼저 확보하세요.';return;}
     // Re-evaluate against today's data; never apply a stale preview after a restore/import.
-    const current=new Map(oaiDevStampBackfillCandidates().map(row=>[row.key,row]));
+    const current=new Map(oaiDevStampBackfillCandidates().eligible.map(row=>[row.key,row]));
     if(selected.some(row=>!current.has(row.key)||current.get(row.key).shrineId!==row.shrineId)){
       if(message)message.textContent='방문기록이 변경됐습니다. 다시 조회한 후 진행하세요.';return;
     }
     _oaiVisitConfirm('선택한 '+selected.length+'건의 성당 방문일을 기존 성지 스탬프 날짜로 보완합니다. 성지·성당이 실제 동일 장소인지 확인하셨나요?',function(){
       if(!(oaiDevEnabled()&&oaiDevPanelUnlocked))return;
-      const now=new Map(oaiDevStampBackfillCandidates().map(row=>[row.key,row]));
+      const now=new Map(oaiDevStampBackfillCandidates().eligible.map(row=>[row.key,row]));
       if(selected.some(row=>!now.has(row.key)||now.get(row.key).shrineId!==row.shrineId)){if(message)message.textContent='기록이 변경됐습니다. 다시 조회하세요.';return;}
-      const key=OAI_PARISH_VISITS_KEY,prior=localStorage.getItem(key),data=_loadParishVisits();
+      const key=OAI_PARISH_VISITS_KEY,prior=localStorage.getItem(key),data=oaiDevStampRawRecords();
       let added=0;
       try{
         selected.forEach(function(row){
           const p=now.get(row.key).parish,storedKey=_parishVisitStoredKey(p,data);
           if(!storedKey)throw Error('성당 식별키 없음: '+p.name);
+          const records=Object.keys(data).filter(k=>data[k]&&typeof data[k]==='object'&&oaiDevStampIdentity(p,data[k],k));
+          if(records.length>1||(records.length===1&&records[0]!==storedKey))throw Error('원본 식별이 불명확합니다: '+p.name);
           const r=data[storedKey]&&typeof data[storedKey]==='object'?data[storedKey]:{name:p.name||'',diocese:p.diocese||'',addr:p.addr||'',visits:[]};
           r.visits=Array.isArray(r.visits)?r.visits:[];
           if(_hasVisitDate(r.visits,row.date))return;
