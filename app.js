@@ -15926,6 +15926,49 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const sorter=(a,b)=>b.date.localeCompare(a.date)||a.parishName.localeCompare(b.parishName,'ko');
     return {eligible:matches.sort(sorter),existing:skipped.sort(sorter),ambiguous:ambiguous.sort(sorter)};
   }
+  // V1275: Developer-only diagnostics, original local records are read without mutation.
+  function oaiDevStampDiagnostics(){
+    const groups=Array.isArray(OAI_SHARED_VISIT_JOURNAL_GROUPS)?OAI_SHARED_VISIT_JOURNAL_GROUPS:[];
+    const srRaw=localStorage.getItem(OAI_SHRINE_VISITS_KEY);
+    let shrines={};
+    try{shrines=srRaw?JSON.parse(srRaw):{};}catch(_e){return '성지 원본 기록 JSON 읽기 실패';}
+    if(!shrines||typeof shrines!=='object'||Array.isArray(shrines))return '성지 원본 기록 형식 오류';
+    const parishes=oaiDevStampRawRecords();
+    const asDates=function(record){return record&&Array.isArray(record.visits)?record.visits.map(_visitDateOf).filter(Boolean):[];};
+    const sample=groups.filter(g=>/대안성당|새방골성당|가실성당/.test(String(g.parishName||'')));
+    let both=0,shrineStamped=0,validTotal=0;
+    groups.forEach(function(g){
+      const sh=_oaiSharedGroupShrine(g),pa=_oaiSharedGroupParish(g);
+      if(sh&&pa)both++;
+      if(!sh)return;
+      const keys=[_getShrineVisitKey(sh)].concat(_getShrineVisitLegacyKeys(sh));
+      const dates=new Set(keys.flatMap(k=>asDates(shrines[k])));
+      if(dates.size)shrineStamped++;
+      validTotal+=dates.size;
+    });
+    const lines=[
+      '진단 전용 · 스탬프를 변경하지 않습니다.',
+      '성지 원본 저장 키 '+Object.keys(shrines).length+'개 · 성당 원본 저장 키 '+Object.keys(parishes).length+'개',
+      '명시적 사진 공통 그룹 '+groups.length+'개 · 성지/성당 연결 '+both+'개',
+      '그룹 성지 중 원본 방문일 조회 '+shrineStamped+'곳 · 방문일 합계 '+validTotal+'건',
+      '※ 수치는 현재 기기에 저장된 기록만 검사하며 Google Drive 데이터는 조회하지 않습니다.'
+    ];
+    sample.forEach(function(g){
+      const sh=_oaiSharedGroupShrine(g),pa=_oaiSharedGroupParish(g);
+      if(!sh||!pa){lines.push(g.parishName+': 연결 실패 ('+(!sh?'성지 ':'')+(!pa?'성당':'')+')');return;}
+      const keys=[_getShrineVisitKey(sh)].concat(_getShrineVisitLegacyKeys(sh)).filter(Boolean);
+      const direct=Array.from(new Set(keys.flatMap(k=>asDates(shrines[k]))));
+      const related=Object.keys(shrines).filter(function(k){const r=shrines[k];return r&&typeof r==='object'&&(String(r.seq||'')===String(sh.seq||'')&&!!sh.seq || String(r.name||'')===String(sh.name||''));});
+      const indirect=Array.from(new Set(related.flatMap(k=>asDates(shrines[k]))));
+      const pk=Object.keys(parishes).filter(k=>parishes[k]&&typeof parishes[k]==='object'&&oaiDevStampIdentity(pa,parishes[k],k));
+      const pd=Array.from(new Set(pk.flatMap(k=>asDates(parishes[k]))));
+      lines.push(g.parishName+' ↔ '+sh.name+' : 성지 현재키 '+direct.length+'일 / 성지 이름·seq 원본 '+indirect.length+'일 / 성당 원본 '+pd.length+'일'+
+        ' / 성지 ID '+(_getShrineVisitKey(sh)||'없음')+ (indirect.length?' / 성지 방문일 '+indirect.join(', '):''));
+      if(!direct.length&&indirect.length)lines.push('  → 성지 방문기록 조회키 불일치 의심 (신규 등록 금지)');
+      if(!direct.length&&!indirect.length)lines.push('  → 현재 기기 원본에서 해당 성지 방문일을 확인하지 못함');
+    });
+    return lines.join('\n');
+  }
   function oaiDevStampBackfillPreview(){
     if(!(oaiDevEnabled()&&oaiDevPanelUnlocked))return;
     const body=document.getElementById('oai-dev-stamp-results');
@@ -15936,7 +15979,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const result=oaiDevStampBackfillCandidates();
       oaiStampBackfillCandidates=result.eligible;
       const escape=_visitHtmlEsc;
-      const summary='<p><b>보완 가능 '+result.eligible.length+'건 · 원본 등록 확인 '+result.existing.length+'건 · 확인 필요 '+result.ambiguous.length+'건</b></p>';
+      const summary='<p><b>보완 가능 '+result.eligible.length+'건 · 원본 등록 확인 '+result.existing.length+'건 · 확인 필요 '+result.ambiguous.length+'건</b></p>'+
+        '<details open><summary><b>원본 방문기록 진단 (읽기 전용)</b></summary><pre style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px">'+escape(oaiDevStampDiagnostics())+'</pre></details>';
       const details=result.existing.concat(result.ambiguous).map(function(c){
         return '<div style="padding:5px 2px">'+escape(c.date+' · '+c.parishName)+' — '+escape(c.reason)+'</div>';
       }).join('');
