@@ -3083,14 +3083,16 @@ function _oaiMemoFitViewport(){
   const vv=window.visualViewport;
   const vh=Math.max(180,Math.floor(vv?vv.height:window.innerHeight));
   const offset=Math.max(0,Math.floor(vv?vv.offsetTop:0));
-  // 웹뷰가 키보드로 줄인 실제 표시 영역을 기준으로 모달을 배치한다.
-  // top:50% CSS만 사용하면 키보드가 나타나도 모달 중심이 이전 위치에 남을 수 있다.
+  // 화면 가운데 배치와 최대 높이를 동일한 visualViewport 기준으로 계산한다.
+  // 키보드가 뜨면 입력 영역을 줄여 버튼이 화면 밖으로 밀리지 않게 한다.
   m.style.setProperty('--oai-memo-vh',vh+'px');
   p.style.setProperty('top',(offset+vh/2)+'px','important');
-  p.style.maxHeight=Math.max(140,vh-24)+'px';
+  p.style.setProperty('max-height',Math.max(160,vh-16)+'px','important');
+  const field=p.querySelector('textarea');
+  if(field)field.style.setProperty('height',Math.max(78,Math.min(170,Math.floor(vh*.25)))+'px','important');
 }
 function _oaiInstallMemoViewportGuard(){if(window.__OAI_MEMO_VV_GUARD__)return;window.__OAI_MEMO_VV_GUARD__=true;const vv=window.visualViewport;if(vv){vv.addEventListener('resize',_oaiMemoFitViewport,{passive:true});vv.addEventListener('scroll',_oaiMemoFitViewport,{passive:true});}window.addEventListener('resize',_oaiMemoFitViewport,{passive:true});}
-function _oaiCloseMemoModal(){const m=document.getElementById('oai-visit-memo-modal');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');m.style.removeProperty('--oai-memo-vh');const p=m.querySelector('.oai-visit-memo-panel');if(p){p.style.maxHeight='';p.style.height='';p.style.removeProperty('top');}const actions=m.querySelector('.oai-visit-memo-actions');if(actions)actions.classList.remove('has-delete');}window.__OAI_MEMO_CONTEXT__=null;}
+function _oaiCloseMemoModal(){const m=document.getElementById('oai-visit-memo-modal');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');m.style.removeProperty('--oai-memo-vh');const p=m.querySelector('.oai-visit-memo-panel');if(p){p.style.removeProperty('max-height');p.style.height='';p.style.removeProperty('top');const field=p.querySelector('textarea');if(field)field.style.removeProperty('height');}const actions=m.querySelector('.oai-visit-memo-actions');if(actions)actions.classList.remove('has-delete');}window.__OAI_MEMO_CONTEXT__=null;}
 try{window._oaiCloseMemoModal=_oaiCloseMemoModal;}catch(_e){}
 function _oaiOpenMemo(kind){if(!(_oaiJournalDeveloperEnabled()))return;const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const v=_oaiGetVisitByDate(kind,ctx.item,ctx.date),m=_oaiEnsureMemoModal(),memo=String(v&&v.memo||'');window.__OAI_MEMO_CONTEXT__=ctx;document.getElementById('oai-visit-memo-date').textContent=_formatVisitDate(ctx.date);document.getElementById('oai-visit-memo-text').value=memo;const del=m.querySelector('[data-oai-memo-delete-modal]'),actions=m.querySelector('.oai-visit-memo-actions'),hasMemo=!!memo.trim();if(del)del.style.display=hasMemo?'':'none';if(actions)actions.classList.toggle('has-delete',hasMemo);m.classList.add('show');m.setAttribute('aria-hidden','false');_oaiInstallMemoViewportGuard();_oaiMemoFitViewport();setTimeout(_oaiMemoFitViewport,240);setTimeout(_oaiMemoFitViewport,500);}
 function _oaiDeleteMemo(kind,fromModal){const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const v=_oaiGetVisitByDate(kind,ctx.item,ctx.date);if(!String(v&&v.memo||'').trim()){if(fromModal)_oaiCloseMemoModal();return;}_oaiVisitConfirm('이 방문의 메모를 삭제할까요?',function(){const ok=ctx.kind==='parish'?_oaiUpdateParishVisitExtras(ctx.item,ctx.date,{memo:''}):_oaiUpdateShrineVisitExtras(ctx.item,ctx.date,{memo:''});if(!ok){_oaiVisitToast('메모를 삭제하지 못했습니다.');return;}if(fromModal)_oaiCloseMemoModal();_oaiRerenderJournal(ctx.kind);_oaiVisitToast('메모를 삭제했습니다.');});}
