@@ -12548,6 +12548,7 @@ const OAI_SCROLL_AFFORDANCE_SELECTOR=[
   '#web-view .web-list',
   '#trail-view #trail-list',
   '.shrine-visit-cards-body',
+  '.shrine-visit-detail-body',
   '#prayer-list-view',
   '#prayer-detail-body',
   '[data-oai-scroll-affordance]'
@@ -12558,6 +12559,8 @@ function _oaiScrollAffordanceVisible(el){
     if(!el||!el.isConnected)return false;
     const routeQuick=$('route-quick-modal');
     if(routeQuick && routeQuick.classList.contains('show'))return false;
+    const openVisitDetail=document.querySelector('.shrine-visit-detail-view.show');
+    if(openVisitDetail&&!openVisitDetail.contains(el))return false;
 
     /* 기도문 상세가 리스트 위를 덮을 때 뒤쪽 리스트의 스크롤 마크는 즉시 숨긴다. */
     const prayerDetail=document.getElementById('prayer-detail');
@@ -12688,8 +12691,27 @@ function _oaiSyncScrollAffordance(el){
     const max=visible?Math.max(0,el.scrollHeight-el.clientHeight):0;
     const y=visible?Math.max(0,el.scrollTop):0;
     const canScroll=visible&&max>12;
-    const showTop=canScroll&&y>10;
+    let showTop=canScroll&&y>10;
     let showBottom=canScroll&&y<max-10;
+
+    /* 성지·성당 방문 상세: 하단 안전 여백만 남았을 때는 스크롤 안내를 표시하지 않는다.
+       실제 마지막 콘텐츠가 화면 밖에 있을 때만 아래 안내를 켠다. */
+    if(el.classList&&el.classList.contains('shrine-visit-detail-body')){
+      const detailView=el.closest('.shrine-visit-detail-view');
+      if(!detailView||!detailView.classList.contains('show')){
+        showTop=false;
+        showBottom=false;
+      }else if(showBottom){
+        const children=Array.from(el.children||[]).filter(function(child){
+          const style=getComputedStyle(child);
+          return style.display!=='none'&&style.visibility!=='hidden'&&child.getBoundingClientRect().height>0;
+        });
+        if(children.length){
+          const lastBottom=Math.max.apply(null,children.map(function(child){return child.getBoundingClientRect().bottom;}));
+          if(lastBottom<=el.getBoundingClientRect().bottom+3)showBottom=false;
+        }else showBottom=false;
+      }
+    }
 
     /* 순례 상세는 실제 콘텐츠가 모두 보이면 하단 padding 때문에 생긴
        가짜 스크롤 여유로 아래 마크를 띄우지 않는다. */
