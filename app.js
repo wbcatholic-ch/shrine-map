@@ -2999,6 +2999,8 @@ function _oaiPhotoSelectToggle(kind,index){
 
 const _oaiVisitPhotoThumbCache=new Map();
 const _oaiVisitPhotoFullCache=new Map();
+/* 동일한 사진·화질에 대한 Android 중복 로딩을 합치되, 각 화면에는 결과를 별도로 반영한다. */
+const _oaiVisitPhotoInFlight=new Map();
 const OAI_VISIT_PHOTO_CACHE_MAX=24;
 function _oaiVisitNative(){try{return window.GildongmuNative||null;}catch(_e){return null;}}
 function _oaiVisitRequestId(prefix){return String(prefix||'visit')+'-'+Date.now()+'-'+Math.random().toString(36).slice(2,8);}
@@ -3154,9 +3156,15 @@ window.oaiVisitPhotoSyncResult=function(localId,ok,fileId,mimeType,savedAt,messa
 function _oaiCachePhotoData(fileId,dataUri,type){const key=String(fileId||'');if(!key||!dataUri)return;const cache=type==='thumb'?_oaiVisitPhotoThumbCache:_oaiVisitPhotoFullCache;cache.delete(key);cache.set(key,dataUri);while(cache.size>OAI_VISIT_PHOTO_CACHE_MAX){const oldest=cache.keys().next().value;cache.delete(oldest);}}
 function _oaiLoadVisitPhotoData(fileId,meta){
   const key=String(fileId||'');if(!key)return;const forceFull=!!(meta&&meta.forceFull),isThumb=!!(meta&&meta.type==='thumb'&&!forceFull),cache=isThumb?_oaiVisitPhotoThumbCache:_oaiVisitPhotoFullCache;
-  if(cache.has(key)){_oaiApplyLoadedVisitPhoto(meta,cache.get(key));return;}const bridge=_oaiVisitNative();if(!bridge){if(meta&&meta.type==='viewer')_oaiVisitToast('사진 보기는 Android 앱에서 사용할 수 있습니다.');return;}
-  const req=_oaiVisitRequestId(isThumb?'thumb':'view');_oaiVisitPhotoViewPending[req]=Object.assign({fileId:key,cacheType:isThumb?'thumb':'full',forceFull:forceFull},meta||{});
-  try{if(typeof bridge.loadVisitPhotoV2==='function')bridge.loadVisitPhotoV2(req,key,String(meta&&meta.driveFileId||''),isThumb);else if(isThumb&&typeof bridge.loadVisitPhotoThumb==='function')bridge.loadVisitPhotoThumb(req,key);else if(typeof bridge.loadVisitPhoto==='function')bridge.loadVisitPhoto(req,key);else throw new Error();}catch(_e){delete _oaiVisitPhotoViewPending[req];if(meta&&meta.type==='viewer')_oaiVisitToast('사진을 불러오지 못했습니다.');}
+  if(cache.has(key)){_oaiApplyLoadedVisitPhoto(meta,cache.get(key));return;}
+  const flightKey=(isThumb?'thumb:':'full:')+key;
+  const existing=_oaiVisitPhotoInFlight.get(flightKey);
+  if(existing){existing.waiters.push(meta||{});return;}
+  const bridge=_oaiVisitNative();if(!bridge){if(meta&&meta.type==='viewer')_oaiVisitToast('사진 보기는 Android 앱에서 사용할 수 있습니다.');return;}
+  const req=_oaiVisitRequestId(isThumb?'thumb':'view');
+  _oaiVisitPhotoInFlight.set(flightKey,{waiters:[meta||{}]});
+  _oaiVisitPhotoViewPending[req]=Object.assign({fileId:key,cacheType:isThumb?'thumb':'full',forceFull:forceFull,flightKey:flightKey},meta||{});
+  try{if(typeof bridge.loadVisitPhotoV2==='function')bridge.loadVisitPhotoV2(req,key,String(meta&&meta.driveFileId||''),isThumb);else if(isThumb&&typeof bridge.loadVisitPhotoThumb==='function')bridge.loadVisitPhotoThumb(req,key);else if(typeof bridge.loadVisitPhoto==='function')bridge.loadVisitPhoto(req,key);else throw new Error();}catch(_e){delete _oaiVisitPhotoViewPending[req];_oaiVisitPhotoInFlight.delete(flightKey);if(meta&&meta.type==='viewer')_oaiVisitToast('사진을 불러오지 못했습니다.');}
 }
 function _oaiHydrateVisibleVisitThumbnails(kind){
   const root=document.querySelector('.oai-visit-journal[data-oai-journal-kind="'+String(kind||'')+'"]');if(!root)return;const thumbs=Array.from(root.querySelectorAll('.oai-visit-photo-thumb'));
@@ -3178,7 +3186,20 @@ function _oaiShowPhotoViewer(kind,index,dataUri){const ctx=_oaiCurrentJournalCon
 function _oaiClosePhotoViewer(){const m=document.getElementById('oai-visit-photo-viewer');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}const img=document.getElementById('oai-visit-photo-viewer-img');if(img)img.removeAttribute('src');_oaiVisitPhotoViewerState=null;try{document.documentElement.classList.remove('oai-visit-photo-open');}catch(_e){} }
 try{window._oaiClosePhotoViewer=_oaiClosePhotoViewer;}catch(_e){}
 function _oaiMovePhotoViewer(delta){const st=_oaiVisitPhotoViewerState;if(!st)return;const visit=_oaiGetVisitByDate(st.kind,st.ctx.item,st.ctx.date),photos=_oaiNormalizePhotos(visit),next=Math.max(0,Math.min(photos.length-1,st.index+Number(delta||0)));if(next===st.index)return;_oaiOpenPhoto(st.kind,next);}
-window.oaiVisitPhotoLoaded=function(requestId,ok,mimeType,payload,message){const pending=_oaiVisitPhotoViewPending[requestId];delete _oaiVisitPhotoViewPending[requestId];if(!pending)return;if(!ok){if(pending.type==='thumb'&&!pending.forceFull&&pending.button&&pending.button.isConnected){pending.button.dataset.oaiLoading='1';_oaiLoadVisitPhotoData(pending.fileId,{type:'thumb',button:pending.button,driveFileId:pending.driveFileId||'',forceFull:true});return;}if(pending.type==='viewer')_oaiVisitToast(message||'사진을 불러오지 못했습니다.');if(pending.button){pending.button.dataset.oaiLoading='0';pending.button.classList.add('load-error');}return;}const raw=String(payload||'');const src=/^(https?:|blob:|data:)/i.test(raw)?raw:('data:'+(mimeType||'image/jpeg')+';base64,'+raw);_oaiCachePhotoData(pending.fileId,src,pending.cacheType||'full');_oaiApplyLoadedVisitPhoto(pending,src);};
+window.oaiVisitPhotoLoaded=function(requestId,ok,mimeType,payload,message){
+  const pending=_oaiVisitPhotoViewPending[requestId];delete _oaiVisitPhotoViewPending[requestId];if(!pending)return;
+  const flight=_oaiVisitPhotoInFlight.get(pending.flightKey);
+  if(flight)_oaiVisitPhotoInFlight.delete(pending.flightKey);
+  const waiters=flight?flight.waiters:[pending];
+  if(!ok){waiters.forEach(function(meta){
+    if(meta.type==='thumb'&&!pending.forceFull&&meta.button&&meta.button.isConnected){meta.button.dataset.oaiLoading='1';_oaiLoadVisitPhotoData(pending.fileId,{type:'thumb',button:meta.button,driveFileId:meta.driveFileId||'',forceFull:true});return;}
+    if(meta.type==='viewer')_oaiVisitToast(message||'사진을 불러오지 못했습니다.');
+    if(meta.button&&meta.button.isConnected){meta.button.dataset.oaiLoading='0';meta.button.classList.add('load-error');}
+  });return;}
+  const raw=String(payload||'');const src=/^(https?:|blob:|data:)/i.test(raw)?raw:('data:'+(mimeType||'image/jpeg')+';base64,'+raw);
+  _oaiCachePhotoData(pending.fileId,src,pending.cacheType||'full');
+  waiters.forEach(function(meta){_oaiApplyLoadedVisitPhoto(meta,src);});
+};
 /* 사진 선택 삭제: 방문기록에 선택 ID를 단 한 번 반영한다. 원본 GPS 스탬프와 메모는 유지한다. */
 function _oaiDeleteSelectedPhotos(kind){
   if(!_oaiJournalDeveloperEnabled())return;
