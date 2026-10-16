@@ -13026,12 +13026,37 @@ function _oaiSyncScrollAffordance(el){
     if(!el)return;
     const pair=_oaiEnsureScrollAffordance(el);
     if(!pair)return;
-    const visible=_oaiScrollAffordanceVisible(el);
+    let visible=_oaiScrollAffordanceVisible(el);
+    /* 스탬프북의 표시 마크는 열린 스탬프북 하나에만 속한다.
+       별도의 성지/성당 스탬프북 또는 상세창이 위에 있으면 기존 마크는 숨긴다. */
+    const stampBookBody=!!(el.classList&&el.classList.contains('shrine-visit-cards-body'));
+    if(stampBookBody){
+      const owner=el.closest('.shrine-visit-cards-modal');
+      if(!owner||!owner.classList.contains('show')||
+         document.querySelector('.shrine-visit-detail-view.show'))visible=false;
+    }
     const max=visible?Math.max(0,el.scrollHeight-el.clientHeight):0;
     const y=visible?Math.max(0,el.scrollTop):0;
     const canScroll=visible&&max>12;
     let showTop=canScroll&&y>10;
     let showBottom=canScroll&&y<max-10;
+
+    /* 성지/성당 스탬프북: padding과 화면에 이미 보이는 마지막 카드 때문에
+       가짜 아래쪽 스크롤 마크가 생기지 않도록 실제 콘텐츠 경계로 판정한다. */
+    if(stampBookBody&&visible){
+      const view=el.getBoundingClientRect();
+      let lastBottom=-Infinity;
+      Array.from(el.children||[]).forEach(function(child){
+        const css=getComputedStyle(child);
+        if(css.display==='none'||css.visibility==='hidden'||
+           css.position==='fixed'||css.position==='absolute')return;
+        const rect=child.getBoundingClientRect();
+        if(rect.height>0&&rect.width>0)lastBottom=Math.max(lastBottom,rect.bottom);
+      });
+      if(lastBottom===-Infinity||lastBottom<=Math.min(view.bottom,window.innerHeight)-2)showBottom=false;
+      /* 스크롤 높이가 있어도 마지막 내용이 전부 표시되면 마크를 표시하지 않는다. */
+      if(lastBottom===-Infinity&&y<=10)showTop=false;
+    }
 
     /* V1305: 스크롤 영역의 padding/빈 여백으로 생긴 가짜 '더보기' 표시를 제외한다.
        최하단 실제 일반 흐름 콘텐츠가 이미 화면 안에 보인다면 아래 마크가 필요 없다.
@@ -13096,6 +13121,11 @@ function _oaiBindScrollAffordance(el){
   if(!el.__oaiScrollAffordanceBound){
     el.__oaiScrollAffordanceBound=true;
     el.addEventListener('scroll',function(){_oaiSyncScrollAffordance(el);},{passive:true});
+    if(el.classList&&el.classList.contains('shrine-visit-cards-body')&&typeof ResizeObserver!=='undefined'){
+      const ro=new ResizeObserver(function(){requestAnimationFrame(function(){_oaiSyncScrollAffordance(el);});});
+      ro.observe(el);
+      el.__oaiScrollAffordanceResizeObserver=ro;
+    }
   }
   requestAnimationFrame(function(){_oaiSyncScrollAffordance(el);});
 }
@@ -13117,7 +13147,7 @@ let _oaiScrollRefreshTimer=0;
 function _oaiScheduleScrollAffordanceRefresh(){
   try{
     clearTimeout(_oaiScrollRefreshTimer);
-    _oaiScrollRefreshTimer=setTimeout(function(){_oaiRefreshScrollAffordances(document);},35);
+    _oaiScrollRefreshTimer=setTimeout(function(){_oaiRefreshScrollAffordances(document);},0);
   }catch(_e){}
 }
 try{
