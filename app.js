@@ -7052,6 +7052,35 @@ function _ensureParishDataLoaded(){
   return _parishDataLoadPromise;
 }
 _initParishDataFromGlobal();
+/* V1305: 과거 공통 장소 방문이 있어도 성당 카테고리를 열지 않았다면
+   성당 교구 파일이 로딩되지 않아 V1304 보완이 실행되지 않았던 문제를 보완한다.
+   모든 성당 명부가 아닌 과거 방문이 있는 공통 그룹의 교구만 백그라운드 로딩한다. */
+let _oaiJointHistoryLoadStarted=false;
+function _oaiLoadJointHistoryParishes(){
+  if(_oaiJointHistoryLoadStarted)return;
+  _oaiJointHistoryLoadStarted=true;
+  try{
+    const need=new Set();
+    _oaiJointStampPairs().forEach(function(group){
+      const shrine=_oaiSharedGroupShrine(group);
+      if(!shrine)return;
+      if(_getShrineVisitDates(shrine).some(function(v){return _isVisitDate(v.date);})){
+        const code=String(group.parishDiocese||'');
+        if(_PARISH_DIOCESE_ASSETS[code])need.add(code);
+      }
+    });
+    if(!need.size)return;
+    Promise.all(Array.from(need).map(function(code){
+      return _ensureParishDioceseDataLoaded(code).catch(function(e){
+        console.warn('[공통 스탬프 교구 자료 로드 실패]',code,e);
+        return null;
+      });
+    })).then(function(){_oaiJointStampRepair();});
+  }catch(e){console.warn('[공통 스탬프 기록 준비 실패]',e);}
+}
+if(document.readyState==='loading'){
+  document.addEventListener('DOMContentLoaded',function(){setTimeout(_oaiLoadJointHistoryParishes,800);},{once:true});
+}else setTimeout(_oaiLoadJointHistoryParishes,800);
 
 const _PRAYER_ASSET_VERSION=OAI_ASSET_VERSION;
 let _prayerModuleLoadPromise=null;
