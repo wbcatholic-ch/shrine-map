@@ -9719,8 +9719,8 @@ function _fitInfoCardButtons(){
 const _oaiPilgrimSiteGuides = {
  '20190169':{intro:'청주 시내 여섯 곳에 순례 장소가 흩어져 있습니다. 각 지점을 도보로 둘러보세요. 종이 스탬프는 서운동성당에 있습니다.',points:[
   ['서운동성당','충북 청주시 상당구 대성로 41',36.6289584876463,127.492740432105,'종이 스탬프 장소'],
-  ['청주진영 순교지 (청주제일교회)','청주제일교회',null,null,'청주제일교회 일대'],
-  ['청주 남문장터','충북 청주시 상당구 성안로 59'],['청주병영 순교지 (중앙공원)','청주 중앙공원'],
+  ['청주진영 순교지 (청주제일교회)','충북 청주시 상당구 상당로13번길 15',36.6290109,127.4901273,'청주제일교회'],
+  ['청주 남문장터','충북 청주시 상당구 성안로 59'],['청주병영 순교지 (중앙공원)','충북 청주시 상당구 남사로 117',null,null,'청주중앙공원'],
   ['청주 북문 밖 장대 순교지','충북 청주시 상당구 중앙로 2'],['청주옥 신앙 증거터','충북 청주시 상당구 남문로2가 48-9']]},
  '20190101':{intro:'생가터·교리당·바우배기는 서로 떨어진 순례 장소입니다. 교리당의 새 성전은 2026년 12월 완공 예정이며, 교리당을 중심으로 각 지점을 둘러보세요.',points:[
   ['유항검 생가터','',35.8551259368733,127.022588709935],['교리당·새 성전','',35.85039336,127.0273121,'주요 순례 거점 · 새 성전 완공 예정'],['바우배기','',35.86302817,127.0224271]]},
@@ -9838,6 +9838,14 @@ function _oaiOpenDistributedMap(item,guide){
    const normalized=v=>String(v||'').replace(/\s|[()·.,-]/g,'').toLowerCase();
    const matches=res.filter(r=>normalized(r.place_name||r.address_name||r.road_address_name)===normalized(point[0]) || (point[1]&&normalized(r.road_address_name||r.address_name)===normalized(point[1])));
    if(matches.length===1){showPoint(point,i,Number(matches[0].y),Number(matches[0].x));return;}
+   // 청주병영 순교지는 사용자 지정 중앙공원 대표 주소 한 곳만 사용한다.
+   // 주소가 실제 일치하지 않으면 다른 공원 시설을 임의로 찍지 않는다.
+   if(String(item.seq)==='20190169' && i===3){
+    const road='충북 청주시 상당구 남사로 117';
+    const sameAddress=res.filter(r=>normalized(r.road_address_name||r.address_name)===normalized(road) || normalized(r.road_address_name||r.address_name)===normalized('충청북도 청주시 상당구 남사로 117'));
+    if(sameAddress.length){showPoint(point,i,Number(sameAddress[0].y),Number(sameAddress[0].x));return;}
+    status.textContent='중앙공원 주소 위치 확인 필요';return;
+   }
    status.textContent='여러 위치 검색됨 · 장소 선택 필요';
    const options=document.createElement('div');options.className='oai-dist-candidates';
    res.slice(0,5).forEach(r=>{const b=document.createElement('button');b.type='button';b.className='oai-dist-candidate';b.textContent=(r.place_name||r.address_name||r.road_address_name||'검색 위치')+' · '+(r.road_address_name||r.address_name||'');b.onclick=()=>{showPoint(point,i,Number(r.y),Number(r.x));options.remove();};options.appendChild(b);});
@@ -9980,7 +9988,10 @@ function _showInfoCard(item, idx){
   /* V1279: 정보카드에서는 설명을 보여주지 않고 성지 자료로 진입한다. */
   if(_mode==='shrine'&&_oaiDistributedGuideFor(item)){
     const materialLink=$('ic-guide');
-    if(materialLink){materialLink.textContent='성지 자료';materialLink.onclick=function(e){if(e){e.preventDefault();e.stopPropagation();}_openMyeongryeMaterials(item);};_show(materialLink);}
+    // 분산형 성지는 기존 홈페이지 영역 하나만 자료 버튼으로 사용한다.
+    // ic-guide를 별도 자료 버튼으로 바꾸면 중복 노출된다.
+    if(hp){hp.removeAttribute('href');hp.textContent='성지 자료';hp.onclick=function(e){if(e){e.preventDefault();e.stopPropagation();}_openMyeongryeMaterials(item);};_show(hp);}
+    if(materialLink){materialLink.onclick=null;_hide(materialLink);}
     const links=$('ic-links-row');if(links)_show(links);
   }
   _renderInfoCardShrineVisit(item);
