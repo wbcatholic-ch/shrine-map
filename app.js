@@ -3384,7 +3384,7 @@ function _renderShrineVisitDetail(idx){
   const visits=_getShrineVisitDates(item);
   const count=visits.length;
   const headTitle=document.querySelector('#shrine-visit-detail-view .shrine-visit-detail-head-title');
-  if(headTitle) headTitle.textContent=count?'순례한 성지':'미방문 성지';
+  if(headTitle&&headTitle.firstChild)headTitle.firstChild.nodeValue=(count?'순례한 성지':'미방문 성지')+' · '+String(item.name||'')+' ';
   const recent=count?_formatVisitDate(visits[0].date):'—';
   const dateHtml=count?visits.map(function(v){ return '<span class="shrine-visit-detail-date-chip">'+_visitHtmlEsc(_formatVisitDate(v.date))+'</span>'; }).join(''):'<span class="shrine-visit-detail-empty-date">아직 등록된 날짜가 없습니다.</span>';
   const journalHtml=count?_oaiVisitJournalHtml('shrine',item,visits):'';
@@ -3506,6 +3506,7 @@ function _openShrineVisitDetailOnMap(idx){
 }
 
 function _openShrineVisitDetail(idx){
+  _oaiPhotoSelectionClear();
   window.__OAI_SHRINE_JOURNAL_DATE__='';
   idx=parseInt(idx,10);
   if(!(idx>=0)&&idx!==0) return;
@@ -3517,10 +3518,11 @@ function _openShrineVisitDetail(idx){
   _renderShrineVisitDetail(idx);
   view.classList.add('show');
   view.setAttribute('aria-hidden','false');
+  const detailBody=view.querySelector('#shrine-visit-detail-body');if(detailBody)detailBody.scrollTop=0;view.scrollTop=0;
   _pushShrineVisitDetailHistory();
 }
 function _closeShrineVisitDetail(opts){
-  opts=opts||{};
+  opts=opts||{};_oaiPhotoSelectionClear();
   const view=document.getElementById('shrine-visit-detail-view');
   const wasOpen=!!(view&&view.classList.contains('show'));
   const shouldResumeCards=wasOpen && window.__OAI_SHRINE_VISIT_DETAIL_FROM_CARDS__===true && window.__OAI_SHRINE_VISIT_RETURN_TO_CARDS__===true && !opts.fromPopstate && !opts.noReturnCards;
@@ -4270,6 +4272,7 @@ function _ensureParishVisitDetail(){
 function _renderParishVisitDetail(){
   const p=window.__OAI_PV_DETAIL_ITEM__,b=document.getElementById('parish-visit-detail-body');if(!p||!b)return;
   const visits=_parishVisits(p),n=visits.length,recent=n?_formatVisitDate(visits[0].date):'—';
+  const headTitle=document.querySelector('#parish-visit-detail .shrine-visit-detail-head-title');if(headTitle&&headTitle.firstChild)headTitle.firstChild.nodeValue='방문한 성당 · '+String(p.name||'')+' ';
   const dates=visits.length?visits.map(function(v){return '<span class="shrine-visit-detail-date-chip">'+_visitHtmlEsc(_formatVisitDate(v.date))+'</span>';}).join(''):'<span class="shrine-visit-detail-empty-date">아직 등록된 방문 날짜가 없습니다.</span>';
   const journalHtml=n?_oaiVisitJournalHtml('parish',p,visits):'';
   const tel=p.tel?'<a class="shrine-visit-detail-action detail-tel" href="tel:'+_visitHtmlEsc(String(p.tel).replace(/[^0-9+]/g,''))+'">📞 '+_visitHtmlEsc(p.tel)+'</a>':'';
@@ -4279,13 +4282,14 @@ function _renderParishVisitDetail(){
   setTimeout(function(){_oaiHydrateVisibleVisitThumbnails('parish');},0);
 }
 function _openParishVisitDetail(p){
+  _oaiPhotoSelectionClear();
   window.__OAI_PARISH_JOURNAL_DATE__='';
   _closeOaiVisitPicker();
   const book=document.getElementById('parish-visit-book');if(book){book.classList.remove('show');book.setAttribute('aria-hidden','true');}
-  const v=_ensureParishVisitDetail();window.__OAI_PV_DETAIL_ITEM__=p;window.__OAI_PV_DETAIL_FROM_BOOK__=true;_renderParishVisitDetail();v.classList.add('show');v.setAttribute('aria-hidden','false');
+  const v=_ensureParishVisitDetail();window.__OAI_PV_DETAIL_ITEM__=p;window.__OAI_PV_DETAIL_FROM_BOOK__=true;_renderParishVisitDetail();v.classList.add('show');v.setAttribute('aria-hidden','false');const detailBody=v.querySelector('#parish-visit-detail-body');if(detailBody)detailBody.scrollTop=0;v.scrollTop=0;
 }
 function _closeParishVisitDetail(opts){
-  opts=opts||{};
+  opts=opts||{};_oaiPhotoSelectionClear();
   /* 상세의 X와 뒤로가기는 방문 목록으로 돌아간다. */
   const v=document.getElementById('parish-visit-detail');if(v){v.classList.remove('show');v.setAttribute('aria-hidden','true');}
   if(window.__OAI_PV_DETAIL_FROM_BOOK__&&!opts.noResume){
