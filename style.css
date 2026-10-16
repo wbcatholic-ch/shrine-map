@@ -10097,3 +10097,18 @@ html:not(.ios-device).oai-screen-compact-short .shrine-visit-card-badge strong{f
 /* Deeper visible border, without changing the original text-scale settings. */
 .oai-distributed-guide{border:2px solid #719788;}
 @media(max-height:600px){.oai-distributed-map{flex-basis:48%;}}
+
+/* V1291: visually separate the scrollable stop list from the fixed Kakao map.
+   Keep the list scrollable but never let its content appear under the map.
+   Remove the artificial bottom space left after the final stop. */
+.oai-distributed-map{position:relative;z-index:0;overflow:hidden;}
+.oai-distributed-points{
+  position:relative;z-index:1;isolation:isolate;
+  background:#fff;
+  border-top:2px solid #c7d2da;
+  padding:8px 12px calc(10px + env(safe-area-inset-bottom,0px));
+  scroll-padding-top:8px;
+  scroll-padding-bottom:10px;
+  overscroll-behavior-y:contain;
+}
+.oai-distributed-point:last-child{margin-bottom:0;}
