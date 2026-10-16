@@ -9782,32 +9782,8 @@ function _oaiOpenDistributedMap(item,guide){
  document.body.appendChild(modal);modal.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();_oaiCloseDistributedMap();}});modal.querySelector('header strong').textContent=item.name+' · 순례 장소';
  modal.querySelector('.oai-distributed-close').onclick=_oaiCloseDistributedMap;
  const mapBox=modal.querySelector('.oai-distributed-map'),list=modal.querySelector('.oai-distributed-points');
- // One layout rule: the title and map stay fixed; three complete cards fit in the scroll pane.
- // Measure after creating the rows, not during asynchronous map searches.
- function layoutDistributedPlaces(){
-  if(!modal.isConnected)return;
-  const panel=modal.querySelector('.oai-distributed-panel');
-  const header=panel.querySelector('header');
-  const rows=Array.from(list.children).filter(el=>el.classList.contains('oai-distributed-point'));
-  if(!rows.length)return;
-  const available=panel.clientHeight-header.offsetHeight;
-  const paneMax=Math.max(0,Math.floor(available*0.42));
-  const listStyle=getComputedStyle(list);
-  let height=(parseFloat(listStyle.paddingTop)||0)+(parseFloat(listStyle.paddingBottom)||0)
-   +(parseFloat(listStyle.borderTopWidth)||0)+(parseFloat(listStyle.borderBottomWidth)||0);
-  for(const row of rows.slice(0,3)){
-   const cs=getComputedStyle(row);
-   const next=row.getBoundingClientRect().height+(parseFloat(cs.marginTop)||0)+(parseFloat(cs.marginBottom)||0);
-   if(height+next>paneMax)break;
-   height+=next;
-  }
-  list.style.height=Math.floor(Math.min(height,paneMax))+'px';
-  if(_oaiDistMap)requestAnimationFrame(()=>{if(modal.isConnected){try{_oaiDistMap.relayout();}catch(_e){}}});
- }
- const onDistributedResize=()=>requestAnimationFrame(layoutDistributedPlaces);
- window.addEventListener('resize',onDistributedResize);
- const cleanupDistributedResize=()=>window.removeEventListener('resize',onDistributedResize);
- _oaiDistResizeCleanup=cleanupDistributedResize;
+ // The fixed title and map use the panel grid. Only the location list scrolls.
+ // No card-height measurement, resize observer or runtime height overrides.
  const kakaoOK=window.kakao&&kakao.maps&&kakao.maps.Map&&kakao.maps.LatLng;
  if(!kakaoOK){mapBox.textContent='지도를 불러올 수 없습니다. 인터넷 연결과 지도 설정을 확인해 주세요.';}
  else{_oaiDistMap=new kakao.maps.Map(mapBox,{center:new kakao.maps.LatLng(Number(item.lat),Number(item.lng)),level:5});}
@@ -9885,7 +9861,6 @@ function _oaiOpenDistributedMap(item,guide){
    new kakao.maps.services.Places().keywordSearch(query,chooseCandidates);
   }else status.textContent='위치 확인 필요';
  });
- requestAnimationFrame(layoutDistributedPlaces);
  if(_oaiDistMap){setTimeout(fit,100);}
  if(navigator.geolocation&&_oaiDistMap){
   const locationButton=document.createElement('button');locationButton.type='button';locationButton.className='oai-distributed-locate';locationButton.textContent='내 위치';mapBox.appendChild(locationButton);
