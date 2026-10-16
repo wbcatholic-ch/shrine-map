@@ -2597,6 +2597,37 @@ function _updateShrineVisitCardsButtonUI(){
   }
   _updateShrineVisitSheetButtonsUI();
 }
+// Transfer hints only: real map/GPS activity blocks photo network traffic.
+// Native work is never started by this helper; active photo viewers are not maps.
+let _oaiPhotoGpsRequests=0, _oaiPhotoLocationLast=null;
+function _oaiNotifyPhotoLocationActivity(){
+  try{
+    const bridge=window.GildongmuNative||window.Android;
+    if(!bridge||typeof bridge.setVisitPhotoTransferActivity!=='function')return;
+    const showing=function(id){const x=document.getElementById(id);return !!(x&&x.classList.contains('show'));};
+    const photoOverlay=showing('shrine-visit-cards-modal')||showing('parish-visit-book')||
+      showing('shrine-visit-detail-view')||showing('parish-visit-detail');
+    const mapUsed=typeof _screen!=='undefined'&&_screen==='map'&&!photoOverlay;
+    const active=mapUsed||_oaiPhotoGpsRequests>0;
+    if(_oaiPhotoLocationLast!==active){
+      bridge.setVisitPhotoTransferActivity('location',active);
+      _oaiPhotoLocationLast=active;
+    }
+  }catch(_e){}
+}
+// Native transfer hint only; never starts transfers or changes visit records.
+function _oaiNotifyStampListVisibility(){
+  try{
+    const bridge=window.GildongmuNative||window.Android;
+    if(!bridge||typeof bridge.setVisitPhotoTransferActivity!=='function')return;
+    const shrine=document.getElementById('shrine-visit-cards-modal');
+    const parish=document.getElementById('parish-visit-book');
+    const visible=!!((shrine&&shrine.classList.contains('show'))||(parish&&parish.classList.contains('show')));
+    bridge.setVisitPhotoTransferActivity('stamp-list',visible);
+    _oaiNotifyPhotoLocationActivity();
+  }catch(_e){}
+}
+
 function _ensureShrineVisitCardsModal(){
   let modal=document.getElementById('shrine-visit-cards-modal');
   if(modal) return modal;
@@ -2790,6 +2821,7 @@ function _suspendShrineVisitCardsForDetail(){
       modal.classList.remove('show','detail-covered');
       modal.setAttribute('aria-hidden','true');
     }
+    _oaiNotifyStampListVisibility();
     window.__OAI_SHRINE_VISIT_RETURN_TO_CARDS__=true;
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
@@ -2802,6 +2834,7 @@ function _resumeShrineVisitCardsFromDetail(){
     modal.classList.remove('detail-covered');
     modal.classList.add('show');
     modal.setAttribute('aria-hidden','false');
+    _oaiNotifyStampListVisibility();
     setTimeout(_resetShrineVisitCardsTopStable, 0);
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
@@ -2828,6 +2861,7 @@ function _openShrineVisitCardsModal(){
   }catch(_e){}
   modal.classList.add('show');
   modal.setAttribute('aria-hidden','false');
+  _oaiNotifyStampListVisibility();
   _resetShrineVisitCardsTopStable();
   _pushShrineVisitCardsHistory();
 }
@@ -2836,6 +2870,7 @@ function _closeShrineVisitCardsModal(opts){
   const modal=document.getElementById('shrine-visit-cards-modal');
   const wasOpen=!!(modal&&modal.classList.contains('show'));
   if(modal){ modal.classList.remove('show','detail-covered'); modal.setAttribute('aria-hidden','true'); }
+  _oaiNotifyStampListVisibility();
   if(!opts.suspendForDetail) window.__OAI_SHRINE_VISIT_RETURN_TO_CARDS__=false;
   if(!_isShrineVisitDetailOpen()) _setShrineVisitDetailFromCardsActive(false);
   _resetShrineVisitStatsExpansion();
@@ -3123,7 +3158,21 @@ function _oaiAppendLocalReadyPhoto(ctx,item){
 // 중도 종료 시 유실을 줄이고, 상세 화면 갱신만 완료 통지에 한 번 수행한다.
 window.oaiVisitPhotoLocalReady=function(requestId,itemJson,current,total){
   const ctx=_oaiVisitPhotoPending[requestId];if(!ctx)return;let item=null;try{item=JSON.parse(String(itemJson||'{}'));}catch(_e){}
-  if(item){if(_oaiAppendLocalReadyPhoto(ctx,item))ctx._oaiPhotosReadyChanged=true;else ctx._oaiPhotosSaveFailed=true;}
+  if(item){
+    if(_oaiAppendLocalReadyPhoto(ctx,item)){
+      ctx._oaiPhotosReadyChanged=true;
+      // Best-effort metadata index linking, only after a confirmed visit journal save.
+      // Older Android builds do not implement this optional bridge method.
+      try{
+        const bridge=_oaiVisitNative();
+        if(bridge&&typeof bridge.linkVisitPhotoMetadata==='function'){
+          const place=String(_oaiPlaceCanonicalId(ctx.kind,ctx.item)||
+            (ctx.kind==='parish'?'P:'+_parishVisitKey(ctx.item):'S:'+_getShrineVisitKey(ctx.item)));
+          if(place&&place.length<256)bridge.linkVisitPhotoMetadata(String(item.photoId||''),place,String(ctx.date||''));
+        }
+      }catch(_e){} // Auxiliary index errors must never undo saved visit records.
+    }else ctx._oaiPhotosSaveFailed=true;
+  }
 };
 window.oaiVisitPhotoLocalComplete=function(requestId,ok,ready,total,message){
   const ctx=_oaiVisitPhotoPending[requestId];delete _oaiVisitPhotoPending[requestId];const msg=String(message||'');
@@ -3518,6 +3567,7 @@ function _openShrineVisitDetail(idx){
   _renderShrineVisitDetail(idx);
   view.classList.add('show');
   view.setAttribute('aria-hidden','false');
+  _oaiNotifyPhotoLocationActivity();
   const detailBody=view.querySelector('#shrine-visit-detail-body');if(detailBody)detailBody.scrollTop=0;view.scrollTop=0;
   _pushShrineVisitDetailHistory();
 }
@@ -3527,6 +3577,7 @@ function _closeShrineVisitDetail(opts){
   const wasOpen=!!(view&&view.classList.contains('show'));
   const shouldResumeCards=wasOpen && window.__OAI_SHRINE_VISIT_DETAIL_FROM_CARDS__===true && window.__OAI_SHRINE_VISIT_RETURN_TO_CARDS__===true && !opts.fromPopstate && !opts.noReturnCards;
   if(view){ view.classList.remove('show'); view.setAttribute('aria-hidden','true'); }
+  _oaiNotifyPhotoLocationActivity();
   window.__OAI_SHRINE_VISIT_DETAIL_FROM_CARDS__=false;
   window.__OAI_SHRINE_VISIT_RETURN_TO_CARDS__=false;
   _setShrineVisitDetailFromCardsActive(false);
@@ -4243,6 +4294,7 @@ function _openParishVisitBook(){
   _closeOaiVisitPicker();
   _parishVisitTab='visited';_parishVisitDio='all';_parishVisitSort='recent';
   const m=_ensureParishVisitBook();m.classList.add('show');m.setAttribute('aria-hidden','false');
+  _oaiNotifyStampListVisibility();
   const body=document.getElementById('pv-body');if(body)body.innerHTML='<div class="shrine-visit-cards-empty">전국 성당 정보를 불러오는 중입니다.</div>';
   _updateParishVisitButton();
   /* 지도는 선택 교구만 가볍게 읽지만, 방문 기록은 전국 교구 전체를 기준으로 보여준다. */
@@ -4256,6 +4308,7 @@ function _openParishVisitBook(){
 function _closeParishVisitBook(){
   _closeOaiVisitPicker();
   const m=document.getElementById('parish-visit-book');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}
+  _oaiNotifyStampListVisibility();
   _updateParishVisitButton();
 }
 function _ensureParishVisitDetail(){
@@ -4286,7 +4339,8 @@ function _openParishVisitDetail(p){
   window.__OAI_PARISH_JOURNAL_DATE__='';
   _closeOaiVisitPicker();
   const book=document.getElementById('parish-visit-book');if(book){book.classList.remove('show');book.setAttribute('aria-hidden','true');}
-  const v=_ensureParishVisitDetail();window.__OAI_PV_DETAIL_ITEM__=p;window.__OAI_PV_DETAIL_FROM_BOOK__=true;_renderParishVisitDetail();v.classList.add('show');v.setAttribute('aria-hidden','false');const detailBody=v.querySelector('#parish-visit-detail-body');if(detailBody)detailBody.scrollTop=0;v.scrollTop=0;
+  _oaiNotifyStampListVisibility();
+  const v=_ensureParishVisitDetail();window.__OAI_PV_DETAIL_ITEM__=p;window.__OAI_PV_DETAIL_FROM_BOOK__=true;_renderParishVisitDetail();v.classList.add('show');v.setAttribute('aria-hidden','false');_oaiNotifyPhotoLocationActivity();const detailBody=v.querySelector('#parish-visit-detail-body');if(detailBody)detailBody.scrollTop=0;v.scrollTop=0;
 }
 function _closeParishVisitDetail(opts){
   opts=opts||{};_oaiPhotoSelectionClear();
@@ -4294,8 +4348,9 @@ function _closeParishVisitDetail(opts){
   const v=document.getElementById('parish-visit-detail');if(v){v.classList.remove('show');v.setAttribute('aria-hidden','true');}
   if(window.__OAI_PV_DETAIL_FROM_BOOK__&&!opts.noResume){
     const book=_ensureParishVisitBook();_renderParishVisitBook();book.classList.add('show');book.setAttribute('aria-hidden','false');
+    _oaiNotifyStampListVisibility();
   }
-  window.__OAI_PV_DETAIL_FROM_BOOK__=false;_updateParishVisitButton();
+  window.__OAI_PV_DETAIL_FROM_BOOK__=false;_updateParishVisitButton();_oaiNotifyPhotoLocationActivity();
 }
 function _ensureParishVisitEditor(){let m=document.getElementById('parish-visit-editor');if(m)return m;m=document.createElement('div');m.id='parish-visit-editor';m.className='shrine-visit-modal';m.innerHTML='<div class="shrine-visit-backdrop" data-pve-close="1"></div><div class="shrine-visit-panel"><div class="shrine-visit-head"><div><div class="shrine-visit-kicker">방문한 성당</div><div id="pve-title" class="shrine-visit-title"></div></div><button type="button" class="shrine-visit-x" data-pve-close="1">×</button></div><label class="shrine-visit-label">방문 날짜<input id="pve-date" type="date"></label><div class="shrine-visit-actions"><button id="pve-save" type="button" class="shrine-visit-save">등록</button><button type="button" class="shrine-visit-cancel" data-pve-close="1">취소</button></div><div id="pve-list" class="shrine-visit-list"></div></div>';document.body.appendChild(m);m.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('[data-pve-close]')){_closeParishVisitEditor();return;}const d=e.target.closest&&e.target.closest('[data-pve-del]');if(d&&window.__OAI_PV_ITEM__){const p=window.__OAI_PV_ITEM__,i=parseInt(d.getAttribute('data-pve-del'),10),v=_parishVisits(p)[i];if(!v||v.method==='gps')return;_oaiVisitConfirm('방문일 '+_formatVisitDate(v.date)+' 기록을 삭제할까요? 삭제한 기록은 되돌릴 수 없습니다.',function(){if(!_deleteParishVisit(p,i)){_oaiVisitToast('삭제하지 못했습니다.');return;}_closeParishVisitEditor();_renderParishVisitDetail();_renderParishVisitBook();_renderInfoCardParishVisit(p);_oaiVisitToast('방문 기록을 삭제했습니다.');});}});m.querySelector('#pve-save').addEventListener('click',function(){const p=window.__OAI_PV_ITEM__,date=document.getElementById('pve-date').value;if(p&&_addParishVisit(p,date,'manual')){_renderParishVisitEditor();_renderParishVisitBook();_renderInfoCardParishVisit(p);}});return m;}
 function _renderParishVisitEditor(){const p=window.__OAI_PV_ITEM__,l=document.getElementById('pve-list');if(!p||!l)return;const a=_parishVisits(p);l.innerHTML=a.length?'<div class="shrine-visit-list-title">방문 날짜 '+a.length+'회</div>'+a.map(function(v,i){return '<div class="shrine-visit-date-row'+(v.method==='gps'?' gps':'')+'"><span>'+_formatVisitDate(v.date)+'</span>'+(v.method==='gps'?'<em class="shrine-visit-gps-lock">GPS 등록</em>':'<button type="button" data-pve-del="'+i+'">삭제</button>')+'</div>'}).join(''):'<div class="shrine-visit-empty">아직 등록된 방문 날짜가 없습니다.</div>';}
@@ -8627,6 +8682,7 @@ function startApp(mode){
   $$('.sm-fb').forEach((b,i)=>b.classList.toggle('on',i===0));
 
  _renderDioFilterBars();  _screen='map';
+  _oaiNotifyPhotoLocationActivity();
   if(mode==='shrine' || mode==='parish' || mode==='retreat') _prepareCategoryMapSurface(mode);
   if(mode==='shrine' || mode==='parish' || mode==='retreat'){
     if(_carryNearbyPreopen){
@@ -8770,6 +8826,7 @@ function goToCover(){
   try{ _clearParishNearbyMarkers(); }catch(e){ console.warn('[가톨릭길동무]',e); }
   if(_myMkr){try{_myMkr.setMap(null);}catch(e){ console.warn("[가톨릭길동무]", e); } _myMkr=null;}
   _screen='cover';
+  _oaiNotifyPhotoLocationActivity();
   try{ _updateShrineVisitMapFilterUI(); _updateShrineVisitCardsButtonUI(); }catch(e){ console.warn('[가톨릭길동무]', e); }
   if(typeof oaiSetMainMapLayerHidden==='function') oaiSetMainMapLayerHidden(false);
   document.documentElement.classList.remove('app-active','parish-mode','retreat-mode','oai-cover-resetting-to-intro','oai-cover-booting','oai-first-entry-intro','oai-background-return-intro','oai-cover-under-intro-reveal','oai-cover-first-reveal');
@@ -11920,19 +11977,28 @@ function _requestLifecycleFreshLocation(opts){
   }
   function requestNow(){
     if(!_GEO) return;
+    _oaiPhotoGpsRequests++;
+    _oaiNotifyPhotoLocationActivity();
     let finished=false;
+    function endGps(){
+      if(finished)return false;
+      finished=true;
+      _oaiPhotoGpsRequests=Math.max(0,_oaiPhotoGpsRequests-1);
+      _oaiNotifyPhotoLocationActivity();
+      return true;
+    }
     const first={enableHighAccuracy:true,timeout:5500,maximumAge:0};
     const second={enableHighAccuracy:false,timeout:1800,maximumAge:0};
     function success(pos){
-      if(finished||!stillCurrent()) return;
-      finished=true;
+      if(!endGps()||!stillCurrent()) return;
       usePosition(pos);
     }
     function secondTry(){
-      if(finished||!stillCurrent()) return;
+      if(finished)return;
+      if(!stillCurrent()){endGps();return;}
       try{
-        _GEO.getCurrentPosition(success,function(){ finished=true; },second);
-      }catch(_e){ finished=true; }
+        _GEO.getCurrentPosition(success,endGps,second);
+      }catch(_e){endGps();}
     }
     try{
       _GEO.getCurrentPosition(success,secondTry,first);
@@ -16150,11 +16216,76 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(el)el.textContent=oaiLastSavedLabel();
   }
   function oaiTransferStatus(message){const el=document.getElementById('oai-data-transfer-status');if(!el)return;const text=message||'';el.textContent=(text==='Google Drive에 자동 보관되었습니다.'||text==='Google Drive 자동 보관을 껐습니다.'||text==='기록 가져오기를 취소했습니다.')?'':text;}
+  const OAI_PHOTO_WIFI_ONLY_KEY='oai_visit_photo_wifi_only_v1';
+  function oaiNotifyNativePhotoCloudSettings(requestAuthorization){
+    try{
+      const native=window.GildongmuNative||window.Android;
+      if(native&&typeof native.setVisitPhotoCloudOptions==='function'){
+        // First-run records restore decision stays independent and mandatory.
+        const permitted=oaiAutoEnabled() && localStorage.getItem(OAI_RESTORE_CHECKED_KEY)==='1';
+        native.setVisitPhotoCloudOptions(permitted,
+          localStorage.getItem(OAI_PHOTO_WIFI_ONLY_KEY)!=='0',
+          !!requestAuthorization && permitted);
+      }
+    }catch(_e){}
+  }
+  let oaiPhotoManifestStarted=false;
+  function oaiQueuePhotoRestoreManifest(){
+    if(oaiPhotoManifestStarted||!oaiAutoEnabled()||localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1')return;
+    const native=window.GildongmuNative||window.Android;
+    if(!native||typeof native.enqueueVisitPhotoRestoreManifest!=='function')return;
+    oaiPhotoManifestStarted=true;
+    const idle=fn=>typeof window.requestIdleCallback==='function'?requestIdleCallback(fn):setTimeout(fn,0);
+    idle(function(){
+      try{
+        // Read only existing visit journals. No records are changed or imported here.
+        const shrine=_loadShrineVisits(),parish=_loadParishVisits(),byId=new Map();
+        function collect(data,kind){
+          Object.keys(data||{}).forEach(function(key){
+            const record=data[key];if(!record||typeof record!=='object')return;
+            const place=String(record.placeId||((kind==='parish'?'P:':'S:')+key));
+            if(!place||place.length>=256)return;
+            function addPhotos(visit,date){
+              if(!visit||!Array.isArray(visit.photos)||!/^\d{4}-\d{2}-\d{2}$/.test(date))return;
+              const deleted=new Set((Array.isArray(visit.deletedPhotoIds)?visit.deletedPhotoIds:[]).map(String));
+              visit.photos.forEach(function(ph){
+                const id=String(ph&&_oaiPhotoIdentity(ph)||'');
+                if(!/^[A-Za-z0-9_-]{8,200}$/.test(id)||deleted.has(id))return;
+                const remote=String(ph&&ph.driveFileId||'');
+                const old=byId.get(id);
+                if(!old||date>old.visitDate||(!old.driveFileId&&remote))
+                  byId.set(id,{photoId:id,driveFileId:remote,placeCode:place,visitDate:date});
+              });
+            }
+            if(Array.isArray(record.visits))record.visits.forEach(v=>addPhotos(v,String(v&&v.date||'')));
+            const shared=record.sharedJournalByDate;
+            if(shared&&typeof shared==='object')Object.keys(shared).forEach(d=>addPhotos(shared[d],String(d)));
+          });
+        }
+        collect(shrine,'shrine');collect(parish,'parish');
+        const photos=Array.from(byId.values()).sort((a,b)=>b.visitDate.localeCompare(a.visitDate)||a.photoId.localeCompare(b.photoId));
+        byId.clear();
+        let offset=0;
+        function sendBatch(){
+          try{
+            if(offset>=photos.length)return;
+            native.enqueueVisitPhotoRestoreManifest(JSON.stringify(photos.slice(offset,offset+100)));
+            offset+=100;
+            if(offset<photos.length)idle(sendBatch);
+          }catch(_e){oaiPhotoManifestStarted=false;}
+        }
+        sendBatch();
+      }catch(_e){oaiPhotoManifestStarted=false;}
+    });
+  }
   function refreshGoogleDriveButton(){
     const el=document.querySelector('[data-oai-google-auto]');if(el)el.checked=oaiAutoEnabled();
     document.querySelectorAll('.oai-google-drive-description').forEach(x=>x.textContent=oaiAutoEnabled()?'방문기록 등은 Google Drive에 자동 저장됩니다.':'자동 보관을 켜면 방문기록 등이 Google Drive에 저장됩니다.');
     document.querySelectorAll('.oai-google-drive-note').forEach(x=>x.textContent=oaiAutoEnabled()?'자동 보관 사용 중':'자동 보관 꺼짐');
     oaiRefreshLastSavedLabel();
+    const wifi=document.getElementById('oai-visit-photo-network');
+    if(wifi)wifi.value=localStorage.getItem(OAI_PHOTO_WIFI_ONLY_KEY)==='0'?'any':'wifi';
+    oaiNotifyNativePhotoCloudSettings(false);
   }
   // Developer tools: all backup work is opt-in, with no startup serialization or polling.
   let oaiDevTapCount=0, oaiDevPendingRestore=null;
@@ -16548,6 +16679,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     refreshGoogleDriveButton();
     // Never overwrite remote data before the first restore decision on a fresh install.
     if(localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1'){oaiAskRestoreOnFreshInstall();return;}
+    oaiNotifyNativePhotoCloudSettings(true);
     oaiScheduleBackup();
   }
   function oaiConfirmDriveImport(entries,onAccept){
@@ -16635,7 +16767,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }catch(err){oaiTransferStatus('가져오기 실패: '+err.message);if(mode==='initial-load')oaiAskRestoreOnFreshInstall();}
     finally{oaiApplyingRestore=false;}
   };
-  document.addEventListener('change',function(e){if(e.target&&e.target.matches('[data-oai-google-auto]'))oaiEnableAuto(!!e.target.checked);},true);
+  document.addEventListener('change',function(e){
+    if(e.target&&e.target.matches('[data-oai-google-auto]'))oaiEnableAuto(!!e.target.checked);
+    else if(e.target&&e.target.id==='oai-visit-photo-network'){
+      localStorage.setItem(OAI_PHOTO_WIFI_ONLY_KEY,e.target.value==='any'?'0':'1');
+      oaiNotifyNativePhotoCloudSettings(false);
+    }
+  },true);
   document.addEventListener('click',function(e){
     const btn=e.target&&e.target.closest&&e.target.closest('[data-oai-google-restore],[data-oai-restore-now],[data-oai-restore-later]');if(!btn)return;e.preventDefault();
     if(btn.hasAttribute('data-oai-restore-later')){oaiCloseRestoreQuestion();oaiRestoreDecisionPending=true;oaiTransferStatus('기존 기록을 보호하기 위해 자동 보관을 시작하지 않았습니다. 가져오기를 먼저 진행해 주세요.');return;}
@@ -16648,7 +16786,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   if(localStorage.getItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY)==='1'&&localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1'){
     oaiRestoreDecisionPending=true;
   }
-  setTimeout(function(){refreshGoogleDriveButton();if(localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1')oaiAskRestoreOnFreshInstall();},900);
+  setTimeout(function(){refreshGoogleDriveButton();oaiQueuePhotoRestoreManifest();if(localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1')oaiAskRestoreOnFreshInstall();},900);
   if(localStorage.getItem('oai_manual_restore_needs_drive_save_v1')==='1'){
     localStorage.removeItem('oai_manual_restore_needs_drive_save_v1');
     if(oaiAutoEnabled()&&localStorage.getItem(OAI_RESTORE_CHECKED_KEY)==='1'){oaiBackupDirty=true;oaiQueueBackup(1700);}
