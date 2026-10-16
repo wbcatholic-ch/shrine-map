@@ -9799,16 +9799,15 @@ function _oaiOpenDistributedMap(item,guide){
    const hint=el.querySelector('.oai-dist-selected-hint');if(hint)hint.hidden=!active;
   });
   if(pan){try{_oaiDistMap.panTo(entry.marker.getPosition());}catch(_e){}}
-  // Scroll only the stop list. scrollIntoView can move the full-screen overlay instead.
-  const card=entry.row;
-  if(card&&list){
-   const top=card.getBoundingClientRect().top-list.getBoundingClientRect().top+list.scrollTop;
-   const bottom=top+card.offsetHeight;
-   const viewTop=list.scrollTop;
-   const viewBottom=viewTop+list.clientHeight;
-   const inset=12;
-   if(top<viewTop+inset)list.scrollTo({top:Math.max(0,top-inset),behavior:'smooth'});
-   else if(bottom>viewBottom-inset)list.scrollTo({top:Math.max(0,bottom-list.clientHeight+inset),behavior:'smooth'});
+  // One scrolling panel contains both map and cards. Do not scroll a nested list.
+  const card=entry.row, panel=modal.querySelector('.oai-distributed-panel');
+  if(card&&panel){
+   const cardRect=card.getBoundingClientRect(),panelRect=panel.getBoundingClientRect();
+   const header=panel.querySelector('header');
+   const headerHeight=header?header.getBoundingClientRect().height:0;
+   const visibleTop=panelRect.top+headerHeight+10, visibleBottom=panelRect.bottom-12;
+   if(cardRect.top<visibleTop)panel.scrollBy({top:cardRect.top-visibleTop,behavior:'smooth'});
+   else if(cardRect.bottom>visibleBottom)panel.scrollBy({top:cardRect.bottom-visibleBottom,behavior:'smooth'});
   }
  }
 
