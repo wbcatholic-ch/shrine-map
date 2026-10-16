@@ -10012,7 +10012,7 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
 .oai-distributed-message{display:none!important}
 .oai-distributed-map{position:relative;width:100%;min-height:0;overflow:hidden;background:#edf1f0}
 .oai-distributed-locate{position:absolute;right:10px;bottom:16px;z-index:3;border:1px solid #ccc;border-radius:8px;padding:9px;background:#fff;color:#222}
-.oai-distributed-points{box-sizing:border-box;min-height:0;width:100%;overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;scroll-padding-top:26px;scroll-padding-bottom:14px;padding:26px 12px 14px;background:#f6f8fa;border-top:2px solid #c7d2da}
+.oai-distributed-points{box-sizing:border-box;min-height:0;width:100%;overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;scroll-padding-top:18px;scroll-padding-bottom:14px;padding:18px 12px 14px;background:#f6f8fa;border-top:2px solid #c7d2da}
 .oai-distributed-list-frame{position:relative;min-height:0;overflow:hidden}
 .oai-distributed-list-frame>.oai-distributed-points{height:100%}
 .oai-dist-scroll-mark{position:absolute;left:50%;width:52px;height:5px;border-radius:999px;background:rgba(67,76,91,.66);box-shadow:0 1px 6px rgba(31,42,68,.18);transform:translateX(-50%);pointer-events:none;z-index:3}
