@@ -10020,3 +10020,9 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
 
 /* V1279: 성지 자료 아래에 분산형 성지 순례 안내 배치 */
 .myeongrye-materials-panel > .oai-distributed-guide{margin:12px 16px 24px;flex-shrink:0;}
+
+/* V1281: 순례 지도 마커-장소 카드 양방향 선택 */
+.oai-distributed-point{cursor:pointer;border:1px solid transparent;border-bottom:1px solid #eee;border-radius:8px;padding:8px;margin:2px 0;}
+.oai-distributed-point.oai-dist-selected{background:#eef6ff;border:2px solid #3682d2;padding:7px;}
+.oai-dist-selected-hint{color:#1766ab!important;font-weight:700;flex-basis:100%;}
+.oai-dist-selected-hint[hidden]{display:none!important;}

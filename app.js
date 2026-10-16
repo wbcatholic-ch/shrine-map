@@ -9767,6 +9767,7 @@ function _oaiRenderDistributedMaterials(item,modal){
  wrap.append(head,note,btn);
 }
 let _oaiDistWatchId=null,_oaiDistMap=null,_oaiDistUserMarker=null,_oaiDistActiveInfo=null;
+window._oaiCloseDistributedMapFromBack=function(){if(!document.getElementById('oai-distributed-modal'))return false;_oaiCloseDistributedMap();return true;};
 function _oaiCloseDistributedMap(){
  if(_oaiDistWatchId!==null){try{navigator.geolocation.clearWatch(_oaiDistWatchId);}catch(_e){}_oaiDistWatchId=null;}
  const modal=document.getElementById('oai-distributed-modal');if(modal){modal.remove();}
@@ -9785,7 +9786,23 @@ function _oaiOpenDistributedMap(item,guide){
  if(!kakaoOK){mapBox.textContent='지도를 불러올 수 없습니다. 위치 목록에서 카카오맵 검색을 이용하세요.';}
  else{_oaiDistMap=new kakao.maps.Map(mapBox,{center:new kakao.maps.LatLng(Number(item.lat),Number(item.lng)),level:5});}
  const bounds=kakaoOK?new kakao.maps.LatLngBounds():null;
- let found=0;let userPosition=null;const plotted=new Set();
+ let found=0;let userPosition=null;const plotted=new Set(),markerEntries=new Map();
+ let selectedIndex=-1;
+ function selectPoint(index,pan){
+  const entry=markerEntries.get(index);if(!entry)return;
+  if(_oaiDistActiveInfo){try{_oaiDistActiveInfo.close();}catch(_e){}}
+  entry.info.open(_oaiDistMap,entry.marker);_oaiDistActiveInfo=entry.info;
+  selectedIndex=index;
+  list.querySelectorAll('.oai-distributed-point').forEach(el=>{
+   const active=el.getAttribute('data-dist-point')===String(index);
+   el.classList.toggle('oai-dist-selected',active);
+   el.setAttribute('aria-selected',active?'true':'false');
+   const hint=el.querySelector('.oai-dist-selected-hint');if(hint)hint.hidden=!active;
+  });
+  if(pan){try{_oaiDistMap.panTo(entry.marker.getPosition());}catch(_e){}}
+  const card=entry.row;if(card){try{card.scrollIntoView({block:'nearest',behavior:'smooth'});}catch(_e){card.scrollIntoView(false);}}
+ }
+
  const fit=()=>{if(_oaiDistMap&&found>0){try{_oaiDistMap.relayout();_oaiDistMap.setBounds(bounds); }catch(_e){}}};
  function showPoint(point,index,lat,lng){
   if(!modal.isConnected||plotted.has(index)||!Number.isFinite(lat)||!Number.isFinite(lng))return;
@@ -9794,17 +9811,21 @@ function _oaiOpenDistributedMap(item,guide){
   if(!_oaiDistMap)return;
   const ll=new kakao.maps.LatLng(lat,lng),marker=new kakao.maps.Marker({map:_oaiDistMap,position:ll,title:point[0]});
   const info=new kakao.maps.InfoWindow({content:'<div style="padding:6px 9px;font-size:12px;white-space:nowrap">'+String(index+1)+'. '+String(point[0]).replace(/[<>&"']/g,'')+'</div>'});
-  kakao.maps.event.addListener(marker,'click',()=>{if(_oaiDistActiveInfo){try{_oaiDistActiveInfo.close();}catch(_e){}}info.open(_oaiDistMap,marker);_oaiDistActiveInfo=info;});
+  markerEntries.set(index,{marker,info,row});
+  kakao.maps.event.addListener(marker,'click',()=>selectPoint(index,false));
   bounds.extend(ll);found++;fit();
   if(row){const link=row.querySelector('.oai-dist-direction');link.hidden=false;link.onclick=()=>{const url='https://map.kakao.com/link/to/'+encodeURIComponent(point[0])+','+lat+','+lng;openCoreExternalUrl(url,{source:'distributed-shrine-route'});};}
  }
  guide.points.forEach((point,i)=>{
   const row=document.createElement('div');row.className='oai-distributed-point';row.setAttribute('data-dist-point',String(i));
   const title=document.createElement('span');title.textContent=String(i+1)+'. '+point[0]+(point[4]?' · '+point[4]:'');
+  const hint=document.createElement('small');hint.className='oai-dist-selected-hint';hint.textContent='✓ 지도에서 선택한 장소';hint.hidden=true;
+  row.setAttribute('role','option');row.setAttribute('aria-selected','false');
+  row.addEventListener('click',e=>{if(e.target.closest('button'))return;selectPoint(i,true);});
   const status=document.createElement('small');status.className='oai-dist-status';status.textContent='위치 검색 중';
   const route=document.createElement('button');route.type='button';route.className='oai-dist-direction';route.textContent='길찾기';route.hidden=true;
   const search=document.createElement('button');search.type='button';search.textContent='카카오맵 검색';search.onclick=()=>openCoreExternalUrl('https://map.kakao.com/?q='+encodeURIComponent(point[1]||point[0]),{source:'distributed-shrine-search'});
-  row.append(title,status,route,search);list.appendChild(row);
+  row.append(title,hint,status,route,search);list.appendChild(row);
   if(Number.isFinite(point[2])&&Number.isFinite(point[3])){showPoint(point,i,point[2],point[3]);return;}
   // 위치가 제공되지 않은 지점은 카카오 장소 검색 결과가 한 곳일 때만 자동 마커 배치한다.
   if(!kakaoOK||!kakao.maps.services){status.textContent='검색 링크 이용';return;}

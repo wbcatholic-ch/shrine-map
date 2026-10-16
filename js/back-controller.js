@@ -74,6 +74,7 @@
       }
 
       if(document.querySelector('.module-view.open')) return true;
+      if($b('oai-distributed-modal')) return true;
       if(document.querySelector('#oai-nav-notice.show,#oai-visit-photo-viewer.show,#oai-visit-memo-modal.show,#oai-visit-confirm.show,#oai-common-date-picker.show,#myeongrye-materials-modal.open,#info-card.open,#sheet-route.open,#route-choice-modal.open,#route-quick-modal.show,#oai-pilgrimage-feature-modal.show,#oai-pilgrimage-marker-choice-modal.open,#oai-pilgrimage-follow-start-modal.show,#oai-pilgrimage-follow-stop-modal.show,#oai-pilgrimage-save-modal.show,#oai-pilgrimage-delete-modal.show,#oai-pilgrimage-completion-modal.show,#srch-modal.open,.sheet.open,.trail-sheet.open,#shrine-visit-modal.show,#shrine-auto-visit-modal.show,#shrine-visit-detail-view.show,#shrine-visit-cards-modal.show')) return true;
       if(typeof isGuideModalOpen==='function' && isGuideModalOpen()) return true;
 
@@ -255,6 +256,8 @@
 
   function closeLayer(){
     var el;
+    /* 분산형 순례 지도는 성지 자료 위의 최상위 화면이다. */
+    try{if(typeof window._oaiCloseDistributedMapFromBack==='function'&&window._oaiCloseDistributedMapFromBack())return true;}catch(e){console.warn('[가톨릭길동무]',e);}
 
     /* 외부 길찾기 안내는 가장 먼저 닫는다. */
     el = $b('oai-nav-notice');
