@@ -10046,7 +10046,30 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
 .oai-distributed-panel header{min-height:60px;padding:13px 16px}
 .oai-distributed-panel header strong{font-size:20px;line-height:1.4;font-weight:800}
 .oai-distributed-point{min-height:75px;padding:16px 14px}
-.oai-distributed-point .oai-dist-name{font-size:19px;line-height:1.4;font-weight:800}
+.oai-distributed-point .oai-dist-name{font-size:18px;line-height:1.4;font-weight:800}
 .oai-distributed-point button.oai-dist-direction{font-size:16px;font-weight:800;padding:11px 13px}
 .oai-distributed-point .oai-dist-selected-hint{font-size:14px}
 .oai-distributed-point.oai-dist-selected{padding:15px 13px}
+
+/* V1287: one existing app text-size setting shared by shrine materials, distributed map and stampbooks. */
+:root { --oai-reading-scale: var(--app-inner-font-scale, 1); }
+.oai-distributed-guide strong{font-size:calc(18px * var(--oai-reading-scale));}
+.oai-distributed-guide p{font-size:calc(17px * var(--oai-reading-scale));}
+.oai-distributed-open{font-size:calc(18px * var(--oai-reading-scale));}
+.oai-distributed-panel header strong{font-size:calc(20px * var(--oai-reading-scale));}
+.oai-distributed-point .oai-dist-name{font-size:calc(16px * var(--oai-reading-scale));}
+.oai-distributed-point button.oai-dist-direction{font-size:calc(16px * var(--oai-reading-scale));}
+.oai-distributed-point .oai-dist-selected-hint{font-size:calc(14px * var(--oai-reading-scale));}
+/* Stampbook: selected body text reacts to exactly the same user preference.
+   Keep compact-screen fixed card size and stamp graphics unchanged. */
+.shrine-visit-cards-tabs button{font-size:calc(14px * var(--oai-reading-scale))!important;}
+.shrine-visit-card-badge strong{font-size:calc(14.2px * var(--oai-reading-scale))!important;}
+.shrine-visit-cards-head .module-bar-title{font-size:calc(var(--oai-std-title-fs) * var(--oai-reading-scale))!important;}
+
+html.oai-font-global .shrine-visit-card-badge strong,
+html:not(.ios-device).oai-screen-compact-short .shrine-visit-card-badge strong{font-size:calc(14.2px * var(--oai-reading-scale))!important;}
+
+/* Materials screen title and resource buttons follow the same setting, including phone overrides. */
+.myeongrye-materials-head h2,html.oai-screen-tablet .myeongrye-materials-head h2{font-size:calc(20px * var(--oai-reading-scale));}
+.myeongrye-materials-kicker{font-size:calc(11px * var(--oai-reading-scale));}
+.myeongrye-material-link,.myeongrye-materials-panel .myeongrye-material-link{font-size:calc(17px * var(--oai-reading-scale));}
