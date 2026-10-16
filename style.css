@@ -10053,9 +10053,9 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
 
 /* V1287: one existing app text-size setting shared by shrine materials, distributed map and stampbooks. */
 :root { --oai-reading-scale: var(--app-inner-font-scale, 1); }
-.oai-distributed-guide strong{font-size:calc(18px * var(--oai-reading-scale));}
-.oai-distributed-guide p{font-size:calc(17px * var(--oai-reading-scale));}
-.oai-distributed-open{font-size:calc(18px * var(--oai-reading-scale));}
+.oai-distributed-guide strong{font-size:calc(15px * var(--oai-reading-scale));}
+.oai-distributed-guide p{font-size:calc(14px * var(--oai-reading-scale));line-height:1.55;margin:8px 0 12px;}
+.oai-distributed-open{font-size:calc(15px * var(--oai-reading-scale));padding:10px 12px;min-height:44px;line-height:1.35;}
 .oai-distributed-panel header strong{font-size:calc(20px * var(--oai-reading-scale));}
 .oai-distributed-point .oai-dist-name{font-size:calc(16px * var(--oai-reading-scale));}
 .oai-distributed-point button.oai-dist-direction{font-size:calc(16px * var(--oai-reading-scale));}
@@ -10073,3 +10073,27 @@ html:not(.ios-device).oai-screen-compact-short .shrine-visit-card-badge strong{f
 .myeongrye-materials-head h2,html.oai-screen-tablet .myeongrye-materials-head h2{font-size:calc(20px * var(--oai-reading-scale));}
 .myeongrye-materials-kicker{font-size:calc(11px * var(--oai-reading-scale));}
 .myeongrye-material-link,.myeongrye-materials-panel .myeongrye-material-link{font-size:calc(17px * var(--oai-reading-scale));}
+
+/* V1288: compact pilgrimage stop cards without changing the shared user text scaling. */
+.oai-distributed-points{padding:9px 12px 12px;}
+.oai-distributed-point{min-height:0;padding:9px 12px;margin-bottom:7px;gap:8px;}
+.oai-distributed-point.oai-dist-selected{padding:8px 11px;}
+.oai-distributed-point .oai-dist-name{line-height:1.3;}
+.oai-distributed-point button.oai-dist-direction{padding:8px 10px;line-height:1.2;}
+.oai-distributed-point .oai-dist-selected-hint{line-height:1.25;}
+
+/* V1289: keep the final pilgrimage stop fully scrollable above the system inset. */
+.oai-distributed-panel{height:100%;box-sizing:border-box;overflow:hidden;}
+.oai-distributed-points{box-sizing:border-box;flex:0 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding-bottom:calc(24px + env(safe-area-inset-bottom, 0px));scroll-padding-bottom:24px;}
+.oai-distributed-point:last-child{margin-bottom:0;}
+
+/* V1290: distribute the true visible viewport between map and internally scrolling stops.
+   Avoid auto-sized list being pushed below the Android viewport by the flexible map. */
+.oai-distributed-modal{inset:0;height:100%;height:100dvh;overflow:hidden;}
+.oai-distributed-panel{height:100%;min-height:0;max-height:100%;overflow:hidden;box-sizing:border-box;}
+.oai-distributed-panel>header{flex:0 0 auto;}
+.oai-distributed-map{flex:0 0 55%;min-height:0;}
+.oai-distributed-points{flex:1 1 0;max-height:none;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;padding-bottom:calc(22px + env(safe-area-inset-bottom,0px));scroll-padding-bottom:22px;}
+/* Deeper visible border, without changing the original text-scale settings. */
+.oai-distributed-guide{border:2px solid #719788;}
+@media(max-height:600px){.oai-distributed-map{flex-basis:48%;}}
