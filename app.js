@@ -9799,15 +9799,12 @@ function _oaiOpenDistributedMap(item,guide){
    const hint=el.querySelector('.oai-dist-selected-hint');if(hint)hint.hidden=!active;
   });
   if(pan){try{_oaiDistMap.panTo(entry.marker.getPosition());}catch(_e){}}
-  // One scrolling panel contains both map and cards. Do not scroll a nested list.
-  const card=entry.row, panel=modal.querySelector('.oai-distributed-panel');
-  if(card&&panel){
-   const cardRect=card.getBoundingClientRect(),panelRect=panel.getBoundingClientRect();
-   const header=panel.querySelector('header');
-   const headerHeight=header?header.getBoundingClientRect().height:0;
-   const visibleTop=panelRect.top+headerHeight+10, visibleBottom=panelRect.bottom-12;
-   if(cardRect.top<visibleTop)panel.scrollBy({top:cardRect.top-visibleTop,behavior:'smooth'});
-   else if(cardRect.bottom>visibleBottom)panel.scrollBy({top:cardRect.bottom-visibleBottom,behavior:'smooth'});
+  // Keep the title and map fixed; scroll only the place list to the selected card.
+  const card=entry.row;
+  if(card){
+   const cardRect=card.getBoundingClientRect(),listRect=list.getBoundingClientRect();
+   if(cardRect.top<listRect.top+8)list.scrollBy({top:cardRect.top-listRect.top-8,behavior:'smooth'});
+   else if(cardRect.bottom>listRect.bottom-8)list.scrollBy({top:cardRect.bottom-listRect.bottom+8,behavior:'smooth'});
   }
  }
 

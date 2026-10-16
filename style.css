@@ -10006,14 +10006,14 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
 .oai-distributed-open{width:100%;min-height:44px;padding:10px 12px;border:0;border-radius:9px;background:#246a5b;color:#fff;font-size:calc(15px * var(--app-inner-font-scale,1));font-weight:800;line-height:1.35}
 .myeongrye-materials-panel > .oai-distributed-guide{margin:12px 16px 24px;flex-shrink:0}
 .oai-distributed-modal{position:fixed;inset:0;z-index:2147482700;display:flex;align-items:stretch;justify-content:center;background:#fff;overflow:hidden;height:100%;height:100dvh}
-.oai-distributed-panel{display:block;width:100%;max-width:800px;height:100%;box-sizing:border-box;overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);background:#f6f8fa}
-.oai-distributed-panel > header{position:sticky;top:0;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:60px;padding:13px 16px;border-bottom:1px solid #ddd;background:#fff;box-sizing:border-box}
+.oai-distributed-panel{display:flex;flex-direction:column;width:100%;max-width:800px;height:100%;min-height:0;box-sizing:border-box;overflow:hidden;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);background:#f6f8fa}
+.oai-distributed-panel > header{position:relative;flex:0 0 auto;z-index:5;display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:60px;padding:13px 16px;border-bottom:1px solid #ddd;background:#fff;box-sizing:border-box}
 .oai-distributed-panel header strong{font-size:calc(20px * var(--app-inner-font-scale,1));line-height:1.4;font-weight:800;min-width:0}
 .oai-distributed-close{flex:none;border:0;background:transparent;font-size:26px;padding:2px 12px;color:#333}
 .oai-distributed-message{display:none!important}
-.oai-distributed-map{position:relative;width:100%;height:clamp(270px,52dvh,510px);overflow:hidden;background:#edf1f0}
+.oai-distributed-map{position:relative;flex:0 0 clamp(270px,52dvh,510px);width:100%;min-height:0;overflow:hidden;background:#edf1f0}
 .oai-distributed-locate{position:absolute;right:10px;bottom:16px;z-index:3;border:1px solid #ccc;border-radius:8px;padding:9px;background:#fff;color:#222}
-.oai-distributed-points{box-sizing:border-box;width:100%;overflow:visible;padding:10px 12px 14px;background:#f6f8fa;border-top:2px solid #c7d2da}
+.oai-distributed-points{box-sizing:border-box;flex:1 1 0;min-height:0;width:100%;overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;padding:10px 12px 14px;background:#f6f8fa;border-top:2px solid #c7d2da}
 .oai-distributed-point{display:flex;align-items:center;flex-wrap:wrap;gap:8px;min-height:0;box-sizing:border-box;margin:0 0 7px;padding:9px 12px;border:1px solid #a9b7c3;border-radius:12px;background:#fff;box-shadow:0 1px 3px rgba(16,34,52,.06);color:#172d3e;cursor:pointer}
 .oai-distributed-point:last-child{margin-bottom:0}
 .oai-distributed-point .oai-dist-name{flex:1 1 66%;min-width:0;font-size:calc(16px * var(--app-inner-font-scale,1));line-height:1.3;font-weight:800;overflow-wrap:anywhere}
@@ -10032,4 +10032,4 @@ html.oai-font-global .shrine-visit-card-badge strong,html:not(.ios-device).oai-s
 .myeongrye-materials-head h2,html.oai-screen-tablet .myeongrye-materials-head h2{font-size:calc(20px * var(--app-inner-font-scale,1))}
 .myeongrye-materials-kicker{font-size:calc(11px * var(--app-inner-font-scale,1))}
 .myeongrye-material-link,.myeongrye-materials-panel .myeongrye-material-link{font-size:calc(17px * var(--app-inner-font-scale,1))}
-@media(max-height:600px){.oai-distributed-map{flex-basis:48%}}
+@media(max-height:600px){.oai-distributed-map{flex-basis:clamp(190px,42dvh,310px)}}
