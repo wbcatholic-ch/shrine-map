@@ -9997,118 +9997,39 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
 /* V1263: 방문 사진 선택 모드 */
 .oai-photo-select-actions{display:flex;justify-content:flex-end;gap:8px;margin:8px 0 0}.oai-photo-select-actions button{border:1px solid #91a8bc;border-radius:8px;background:#fff;color:#203a50;padding:6px 11px;font-weight:750}.oai-visit-photo-grid.selecting .oai-visit-photo-thumb{touch-action:pan-y;user-select:none;-webkit-user-select:none}.oai-photo-selection-check{position:absolute;z-index:6;right:6px;top:6px;border:2px solid #fff;border-radius:5px;background:#fff;color:#fff;width:24px;height:24px;line-height:20px;font-weight:900;font-size:16px;box-shadow:0 1px 4px #0005}.oai-visit-photo-item.selected .oai-photo-selection-check{background:#196da7;border-color:#196da7}.oai-visit-photo-item.selected .oai-visit-photo-thumb{outline:3px solid #196da7;outline-offset:-3px}.oai-photo-delete-selected{margin-top:11px;width:100%;padding:10px;border-radius:9px;border:0;background:#a82d32;color:white;font-weight:850}.oai-photo-delete-selected:disabled{opacity:.5}
 
-/* V1277 distributed shrine guide */
-.oai-distributed-guide{margin:12px 0 2px;padding:12px;border:1px solid #d7e2de;border-radius:12px;background:#f8fbf9;color:#253d34}
+/* Distributed shrine views: consolidated layout (V1292).
+   One set of selectors replaces overlapping V1277–V1291 overrides. */
+.oai-distributed-guide{margin:12px 0 2px;padding:12px;border:2px solid #719788;border-radius:12px;background:#f8fbf9;color:#253d34}
 .oai-distributed-guide[hidden]{display:none!important}
-.oai-distributed-guide strong{display:block;font-size:14px}.oai-distributed-guide p{font-size:13px;line-height:1.55;margin:7px 0 10px}
-.oai-distributed-open{width:100%;padding:11px 8px;border:0;border-radius:9px;background:#246a5b;color:white;font-weight:700;font-size:13px}
-.oai-distributed-modal{position:fixed;inset:0;z-index:2147482700;background:#fff;display:flex;align-items:stretch;justify-content:center}
-.oai-distributed-panel{width:100%;max-width:800px;display:flex;flex-direction:column;min-height:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
-.oai-distributed-panel header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #ddd;min-height:50px;background:#fff}
-.oai-distributed-panel header strong{font-size:15px}.oai-distributed-close{background:transparent;border:0;font-size:26px;padding:2px 12px;color:#333}
-.oai-distributed-message{font-size:13px;line-height:1.5;padding:10px 16px;background:#f5f8f6}
-.oai-distributed-map{position:relative;flex:1;min-height:200px;background:#edf1f0}
-.oai-distributed-locate{position:absolute;right:10px;bottom:16px;z-index:3;border:1px solid #ccc;border-radius:8px;padding:9px;background:white;color:#222}
-.oai-distributed-points{max-height:34%;min-height:100px;overflow-y:auto;padding:5px 12px 12px;background:white}
-.oai-distributed-point{display:flex;align-items:center;gap:6px;padding:8px 0;border-bottom:1px solid #eee;flex-wrap:wrap;font-size:12px}
-.oai-distributed-point span{flex:1;min-width:55%}.oai-distributed-point small{font-size:11px;color:#777}
-.oai-distributed-point button{border:1px solid #bbc9c4;border-radius:6px;background:#fff;padding:6px;color:#245a50;font-size:11px}
-.oai-distributed-point button[hidden]{display:none}
-
-/* V1278: 분산형 성지 동명이칭 장소 선택 */
-.oai-dist-candidates{display:flex;flex-direction:column;gap:5px;margin:5px 0}.oai-dist-candidate{display:block;width:100%;text-align:left;white-space:normal;overflow-wrap:anywhere;padding:8px;border:1px solid #ccd5df;border-radius:7px;background:#fff;color:#263449;font-size:12px}
-
-/* V1279: 성지 자료 아래에 분산형 성지 순례 안내 배치 */
-.myeongrye-materials-panel > .oai-distributed-guide{margin:12px 16px 24px;flex-shrink:0;}
-
-/* V1281: 순례 지도 마커-장소 카드 양방향 선택 */
-.oai-distributed-point{cursor:pointer;border:1px solid transparent;border-bottom:1px solid #eee;border-radius:8px;padding:8px;margin:2px 0;}
-.oai-distributed-point.oai-dist-selected{background:#eef6ff;border:2px solid #3682d2;padding:7px;}
-.oai-dist-selected-hint{color:#1766ab!important;font-weight:700;flex-basis:100%;}
-.oai-dist-selected-hint[hidden]{display:none!important;}
-
-/* V1283: 분산형 순례 지도는 설명 대신 지도와 명료한 장소 카드에 집중한다. */
+.oai-distributed-guide strong{display:block;font-size:calc(15px * var(--app-inner-font-scale,1));line-height:1.4;font-weight:800}
+.oai-distributed-guide p{font-size:calc(14px * var(--app-inner-font-scale,1));line-height:1.55;margin:8px 0 12px;color:#203a30}
+.oai-distributed-open{width:100%;min-height:44px;padding:10px 12px;border:0;border-radius:9px;background:#246a5b;color:#fff;font-size:calc(15px * var(--app-inner-font-scale,1));font-weight:800;line-height:1.35}
+.myeongrye-materials-panel > .oai-distributed-guide{margin:12px 16px 24px;flex-shrink:0}
+.oai-distributed-modal{position:fixed;inset:0;z-index:2147482700;display:flex;align-items:stretch;justify-content:center;background:#fff;overflow:hidden;height:100%;height:100dvh}
+.oai-distributed-panel{display:flex;flex-direction:column;width:100%;max-width:800px;height:100%;min-height:0;box-sizing:border-box;overflow:hidden;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+.oai-distributed-panel > header{display:flex;flex:0 0 auto;align-items:center;justify-content:space-between;gap:10px;min-height:60px;padding:13px 16px;border-bottom:1px solid #ddd;background:#fff;box-sizing:border-box}
+.oai-distributed-panel header strong{font-size:calc(20px * var(--app-inner-font-scale,1));line-height:1.4;font-weight:800;min-width:0}
+.oai-distributed-close{flex:none;border:0;background:transparent;font-size:26px;padding:2px 12px;color:#333}
 .oai-distributed-message{display:none!important}
-.oai-distributed-points{max-height:38%;padding:12px 14px 18px;background:#f6f8fa}
-.oai-distributed-point{display:flex;align-items:center;gap:10px;margin:0 0 10px;padding:14px 13px;min-height:64px;border:1px solid #a9b7c3;border-radius:12px;background:#fff;box-shadow:0 1px 3px rgba(16,34,52,.06);color:#172d3e}
-.oai-distributed-point .oai-dist-name{flex:1 1 66%;min-width:0;font-size:16px;line-height:1.4;font-weight:750;overflow-wrap:anywhere}
+.oai-distributed-map{position:relative;flex:0 0 55%;min-height:0;overflow:hidden;background:#edf1f0}
+.oai-distributed-locate{position:absolute;right:10px;bottom:16px;z-index:3;border:1px solid #ccc;border-radius:8px;padding:9px;background:#fff;color:#222}
+.oai-distributed-points{flex:1 1 0;min-height:0;max-height:none;box-sizing:border-box;overflow-x:hidden;overflow-y:auto;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;padding:8px 12px calc(10px + env(safe-area-inset-bottom,0px));scroll-padding:8px 0 10px;background:#f6f8fa;border-top:2px solid #c7d2da}
+.oai-distributed-point{display:flex;align-items:center;flex-wrap:wrap;gap:8px;min-height:0;box-sizing:border-box;margin:0 0 7px;padding:9px 12px;border:1px solid #a9b7c3;border-radius:12px;background:#fff;box-shadow:0 1px 3px rgba(16,34,52,.06);color:#172d3e;cursor:pointer}
+.oai-distributed-point:last-child{margin-bottom:0}
+.oai-distributed-point .oai-dist-name{flex:1 1 66%;min-width:0;font-size:calc(16px * var(--app-inner-font-scale,1));line-height:1.3;font-weight:800;overflow-wrap:anywhere}
 .oai-distributed-point .oai-dist-status{flex:1 1 100%;font-size:12px;color:#ad412c;font-weight:600}
 .oai-distributed-point .oai-dist-status:empty{display:none}
-.oai-distributed-point button.oai-dist-direction{font-size:14px;font-weight:750;line-height:1.3;padding:10px 12px;border:1px solid #2c6ca8;border-radius:9px;color:#175a95;background:#f5faff}
-.oai-distributed-point.oai-dist-selected{background:#e8f3ff;border:2px solid #176dbb;padding:13px 12px;box-shadow:0 2px 8px rgba(23,109,187,.12)}
-.oai-distributed-point .oai-dist-selected-hint{font-size:12px;color:#145d9f;font-weight:750;flex:1 1 100%}
-.oai-distributed-panel header strong{font-size:17px;line-height:1.35}
-
-/* V1285: 분산형 성지 안내와 순례 지도 가독성 개선 */
-.oai-distributed-guide strong{font-size:18px;line-height:1.4;font-weight:800}
-.oai-distributed-guide p{font-size:17px;line-height:1.65;margin:10px 0 15px;color:#203a30}
-.oai-distributed-open{font-size:18px;font-weight:800;padding:15px 12px;line-height:1.4;min-height:54px}
-.oai-distributed-panel header{min-height:60px;padding:13px 16px}
-.oai-distributed-panel header strong{font-size:20px;line-height:1.4;font-weight:800}
-.oai-distributed-point{min-height:75px;padding:16px 14px}
-.oai-distributed-point .oai-dist-name{font-size:18px;line-height:1.4;font-weight:800}
-.oai-distributed-point button.oai-dist-direction{font-size:16px;font-weight:800;padding:11px 13px}
-.oai-distributed-point .oai-dist-selected-hint{font-size:14px}
-.oai-distributed-point.oai-dist-selected{padding:15px 13px}
-
-/* V1287: one existing app text-size setting shared by shrine materials, distributed map and stampbooks. */
-:root { --oai-reading-scale: var(--app-inner-font-scale, 1); }
-.oai-distributed-guide strong{font-size:calc(15px * var(--oai-reading-scale));}
-.oai-distributed-guide p{font-size:calc(14px * var(--oai-reading-scale));line-height:1.55;margin:8px 0 12px;}
-.oai-distributed-open{font-size:calc(15px * var(--oai-reading-scale));padding:10px 12px;min-height:44px;line-height:1.35;}
-.oai-distributed-panel header strong{font-size:calc(20px * var(--oai-reading-scale));}
-.oai-distributed-point .oai-dist-name{font-size:calc(16px * var(--oai-reading-scale));}
-.oai-distributed-point button.oai-dist-direction{font-size:calc(16px * var(--oai-reading-scale));}
-.oai-distributed-point .oai-dist-selected-hint{font-size:calc(14px * var(--oai-reading-scale));}
-/* Stampbook: selected body text reacts to exactly the same user preference.
-   Keep compact-screen fixed card size and stamp graphics unchanged. */
-.shrine-visit-cards-tabs button{font-size:calc(14px * var(--oai-reading-scale))!important;}
-.shrine-visit-card-badge strong{font-size:calc(14.2px * var(--oai-reading-scale))!important;}
-.shrine-visit-cards-head .module-bar-title{font-size:calc(var(--oai-std-title-fs) * var(--oai-reading-scale))!important;}
-
-html.oai-font-global .shrine-visit-card-badge strong,
-html:not(.ios-device).oai-screen-compact-short .shrine-visit-card-badge strong{font-size:calc(14.2px * var(--oai-reading-scale))!important;}
-
-/* Materials screen title and resource buttons follow the same setting, including phone overrides. */
-.myeongrye-materials-head h2,html.oai-screen-tablet .myeongrye-materials-head h2{font-size:calc(20px * var(--oai-reading-scale));}
-.myeongrye-materials-kicker{font-size:calc(11px * var(--oai-reading-scale));}
-.myeongrye-material-link,.myeongrye-materials-panel .myeongrye-material-link{font-size:calc(17px * var(--oai-reading-scale));}
-
-/* V1288: compact pilgrimage stop cards without changing the shared user text scaling. */
-.oai-distributed-points{padding:9px 12px 12px;}
-.oai-distributed-point{min-height:0;padding:9px 12px;margin-bottom:7px;gap:8px;}
-.oai-distributed-point.oai-dist-selected{padding:8px 11px;}
-.oai-distributed-point .oai-dist-name{line-height:1.3;}
-.oai-distributed-point button.oai-dist-direction{padding:8px 10px;line-height:1.2;}
-.oai-distributed-point .oai-dist-selected-hint{line-height:1.25;}
-
-/* V1289: keep the final pilgrimage stop fully scrollable above the system inset. */
-.oai-distributed-panel{height:100%;box-sizing:border-box;overflow:hidden;}
-.oai-distributed-points{box-sizing:border-box;flex:0 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding-bottom:calc(24px + env(safe-area-inset-bottom, 0px));scroll-padding-bottom:24px;}
-.oai-distributed-point:last-child{margin-bottom:0;}
-
-/* V1290: distribute the true visible viewport between map and internally scrolling stops.
-   Avoid auto-sized list being pushed below the Android viewport by the flexible map. */
-.oai-distributed-modal{inset:0;height:100%;height:100dvh;overflow:hidden;}
-.oai-distributed-panel{height:100%;min-height:0;max-height:100%;overflow:hidden;box-sizing:border-box;}
-.oai-distributed-panel>header{flex:0 0 auto;}
-.oai-distributed-map{flex:0 0 55%;min-height:0;}
-.oai-distributed-points{flex:1 1 0;max-height:none;min-height:0;overflow-y:auto;overflow-x:hidden;overscroll-behavior-y:contain;-webkit-overflow-scrolling:touch;padding-bottom:calc(22px + env(safe-area-inset-bottom,0px));scroll-padding-bottom:22px;}
-/* Deeper visible border, without changing the original text-scale settings. */
-.oai-distributed-guide{border:2px solid #719788;}
-@media(max-height:600px){.oai-distributed-map{flex-basis:48%;}}
-
-/* V1291: visually separate the scrollable stop list from the fixed Kakao map.
-   Keep the list scrollable but never let its content appear under the map.
-   Remove the artificial bottom space left after the final stop. */
-.oai-distributed-map{position:relative;z-index:0;overflow:hidden;}
-.oai-distributed-points{
-  position:relative;z-index:1;isolation:isolate;
-  background:#fff;
-  border-top:2px solid #c7d2da;
-  padding:8px 12px calc(10px + env(safe-area-inset-bottom,0px));
-  scroll-padding-top:8px;
-  scroll-padding-bottom:10px;
-  overscroll-behavior-y:contain;
-}
-.oai-distributed-point:last-child{margin-bottom:0;}
+.oai-distributed-point button.oai-dist-direction{flex:none;font-size:calc(16px * var(--app-inner-font-scale,1));font-weight:800;line-height:1.2;padding:8px 10px;border:1px solid #2c6ca8;border-radius:9px;color:#175a95;background:#f5faff}
+.oai-distributed-point button[hidden]{display:none}
+.oai-distributed-point.oai-dist-selected{background:#e8f3ff;border:2px solid #176dbb;padding:8px 11px;box-shadow:0 2px 8px rgba(23,109,187,.12)}
+.oai-distributed-point .oai-dist-selected-hint{flex:1 1 100%;font-size:calc(14px * var(--app-inner-font-scale,1));line-height:1.25;color:#145d9f;font-weight:750}
+.oai-distributed-point .oai-dist-selected-hint[hidden]{display:none!important}
+/* Other screens retain the same existing user text-size preference. */
+.shrine-visit-cards-tabs button{font-size:calc(14px * var(--app-inner-font-scale,1))!important}
+.shrine-visit-card-badge strong{font-size:calc(14.2px * var(--app-inner-font-scale,1))!important}
+.shrine-visit-cards-head .module-bar-title{font-size:calc(var(--oai-std-title-fs) * var(--app-inner-font-scale,1))!important}
+html.oai-font-global .shrine-visit-card-badge strong,html:not(.ios-device).oai-screen-compact-short .shrine-visit-card-badge strong{font-size:calc(14.2px * var(--app-inner-font-scale,1))!important}
+.myeongrye-materials-head h2,html.oai-screen-tablet .myeongrye-materials-head h2{font-size:calc(20px * var(--app-inner-font-scale,1))}
+.myeongrye-materials-kicker{font-size:calc(11px * var(--app-inner-font-scale,1))}
+.myeongrye-material-link,.myeongrye-materials-panel .myeongrye-material-link{font-size:calc(17px * var(--app-inner-font-scale,1))}
+@media(max-height:600px){.oai-distributed-map{flex-basis:48%}}
