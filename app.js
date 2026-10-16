@@ -9778,13 +9778,10 @@ function _oaiCloseDistributedMap(){
 function _oaiOpenDistributedMap(item,guide){
  _oaiCloseDistributedMap();
  const modal=document.createElement('div');modal.id='oai-distributed-modal';modal.className='oai-distributed-modal';modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');
- modal.innerHTML='<div class="oai-distributed-panel"><header><strong></strong><button type="button" class="oai-distributed-close" aria-label="순례 지도 뒤로가기">←</button></header><div class="oai-distributed-map"></div><div class="oai-distributed-list-frame"><div class="oai-distributed-points"></div><span class="oai-dist-scroll-mark top" aria-hidden="true" hidden>⌃</span><span class="oai-dist-scroll-mark bottom" aria-hidden="true" hidden>⌄</span></div></div>';
+ modal.innerHTML='<div class="oai-distributed-panel"><header><strong></strong><button type="button" class="oai-distributed-close" aria-label="순례 지도 닫기">×</button></header><div class="oai-distributed-map"></div><div class="oai-distributed-list-frame"><div class="oai-distributed-points"></div></div></div>';
  document.body.appendChild(modal);modal.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();_oaiCloseDistributedMap();}});modal.querySelector('header strong').textContent=item.name+' · 순례 장소';
  modal.querySelector('.oai-distributed-close').onclick=_oaiCloseDistributedMap;
  const mapBox=modal.querySelector('.oai-distributed-map'),list=modal.querySelector('.oai-distributed-points');
- const markTop=modal.querySelector('.oai-dist-scroll-mark.top'),markBottom=modal.querySelector('.oai-dist-scroll-mark.bottom');
- const syncScrollMarks=()=>{const max=Math.max(0,list.scrollHeight-list.clientHeight);markTop.hidden=max<3||list.scrollTop<=2;markBottom.hidden=max<3||list.scrollTop>=max-2;};
- list.addEventListener('scroll',syncScrollMarks,{passive:true});
  // The fixed title and map use the panel grid. Only the location list scrolls.
  // No card-height measurement, resize observer or runtime height overrides.
  const kakaoOK=window.kakao&&kakao.maps&&kakao.maps.Map&&kakao.maps.LatLng;
@@ -9864,8 +9861,8 @@ function _oaiOpenDistributedMap(item,guide){
    new kakao.maps.services.Places().keywordSearch(query,chooseCandidates);
   }else status.textContent='위치 확인 필요';
  });
- requestAnimationFrame(syncScrollMarks);
- setTimeout(syncScrollMarks,250);
+ _oaiBindScrollAffordance(list);
+ setTimeout(()=>_oaiSyncScrollAffordance(list),250);
  if(_oaiDistMap){setTimeout(fit,100);}
  if(navigator.geolocation&&_oaiDistMap){
   const locationButton=document.createElement('button');locationButton.type='button';locationButton.className='oai-distributed-locate';locationButton.textContent='내 위치';mapBox.appendChild(locationButton);
@@ -12772,7 +12769,8 @@ const OAI_SCROLL_AFFORDANCE_SELECTOR=[
   '.shrine-visit-detail-body',
   '#prayer-list-view',
   '#prayer-detail-body',
-  '[data-oai-scroll-affordance]'
+  '[data-oai-scroll-affordance]',
+  '.oai-distributed-points'
 ].join(',');
 
 function _oaiScrollAffordanceVisible(el){
@@ -12807,8 +12805,9 @@ function _oaiEnsureScrollAffordance(el){
     bottom.className='oai-scroll-affordance is-bottom';
     top.setAttribute('aria-hidden','true');
     bottom.setAttribute('aria-hidden','true');
-    document.body.appendChild(top);
-    document.body.appendChild(bottom);
+    const scrollHost=el.closest('.oai-distributed-modal')||document.body;
+    scrollHost.appendChild(top);
+    scrollHost.appendChild(bottom);
     pair={top:top,bottom:bottom};
     el.__oaiScrollAffordancePair=pair;
     return pair;
