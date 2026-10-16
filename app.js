@@ -16110,6 +16110,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       '성당 원본에는 수동·GPS 방문기록이 혼재할 수 있으므로 모든 기록을 중복 검사합니다.',
       ...messages].join('\n');
   }
+  // 스탬프 보완용 판단은 사진·메모 공유 그룹과 구분한다.
+  // 성지 GPS 인증만으로 별도 성당 건물 방문을 입증할 수 없는 분산형 성지는 보류한다.
+  const OAI_STAMP_BACKFILL_REVIEW_GROUPS = new Set([
+    'g20190029', // 진산: 옛 성당과 새 성당
+    'g20190098', // 여산: 성지성당/백지사터/숲정이
+    'g20190160', // 경주 관아·옥터·성건성당
+    'g20190042'  // 미리내 성지와 미리내 성요셉성당: 별개 장소
+  ]);
   function oaiDevStampBackfillCandidates(){
     const matches=[], skipped=[], ambiguous=[];
     const data=oaiDevStampRawRecords();
@@ -16138,6 +16146,16 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           skipped.push(Object.assign({},base,{reason:'원본 성당 방문기록에서 이미 확인 ('+matched.map(r=>r.type).join(', ')+')'}));
           return;
         }
+        // GPS가 아닌 수동/과거 기록은 GPS 인증으로 간주하지 않는다.
+        // 방문 장소가 여러 개인 성지에서는 어느 지점에서 인증했는지 저장돼 있지 않다.
+        if(String(visit.method||'').toLowerCase()!=='gps'){
+          ambiguous.push(Object.assign({},base,{reason:'성지 GPS 인증 기록이 아님 · 수동/과거 기록 검토 필요'}));
+          return;
+        }
+        if(OAI_STAMP_BACKFILL_REVIEW_GROUPS.has(String(group.id))){
+          ambiguous.push(Object.assign({},base,{reason:'성지 내 방문 지점을 특정할 수 없어 성당 방문으로 자동 보완 불가'}));
+          return;
+        }
         // Competing historical records could belong to this parish. Never write to one arbitrarily.
         if(records.length>1){
           ambiguous.push(Object.assign({},base,{reason:'동일 성당으로 식별되는 원본 기록이 여러 개 있음'}));
@@ -16163,7 +16181,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const result=oaiDevStampBackfillCandidates();
       oaiStampBackfillCandidates=result.eligible;
       const escape=_visitHtmlEsc;
-      const summary='<p><b>보완 가능 '+result.eligible.length+'건 · 원본 등록 확인 '+result.existing.length+'건 · 확인 필요 '+result.ambiguous.length+'건</b></p>';
+      const summary='<p><b>보완 가능 '+result.eligible.length+'건 · 원본 등록 확인 '+result.existing.length+'건 · 확인 필요 '+result.ambiguous.length+'건</b></p><p>GPS로 인증한 성지 방문일만 후보로 사용합니다. 분산형 성지에서 어느 건물을 방문했는지 확인할 수 없는 기록은 자동 보완에서 제외합니다.</p>';
       const diag='<details open><summary><b>원본 방문기록 진단 (읽기 전용)</b></summary><pre style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px">'+escape(oaiDevStampDiagnostics())+'</pre></details>';
       const details=result.existing.concat(result.ambiguous).map(function(c){
         return '<div style="padding:5px 2px">'+escape(c.date+' · '+c.parishName)+' — '+escape(c.reason)+'</div>';
