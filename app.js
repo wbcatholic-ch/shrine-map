@@ -7052,35 +7052,6 @@ function _ensureParishDataLoaded(){
   return _parishDataLoadPromise;
 }
 _initParishDataFromGlobal();
-/* V1305: 과거 공통 장소 방문이 있어도 성당 카테고리를 열지 않았다면
-   성당 교구 파일이 로딩되지 않아 V1304 보완이 실행되지 않았던 문제를 보완한다.
-   모든 성당 명부가 아닌 과거 방문이 있는 공통 그룹의 교구만 백그라운드 로딩한다. */
-let _oaiJointHistoryLoadStarted=false;
-function _oaiLoadJointHistoryParishes(){
-  if(_oaiJointHistoryLoadStarted)return;
-  _oaiJointHistoryLoadStarted=true;
-  try{
-    const need=new Set();
-    _oaiJointStampPairs().forEach(function(group){
-      const shrine=_oaiSharedGroupShrine(group);
-      if(!shrine)return;
-      if(_getShrineVisitDates(shrine).some(function(v){return _isVisitDate(v.date);})){
-        const code=String(group.parishDiocese||'');
-        if(_PARISH_DIOCESE_ASSETS[code])need.add(code);
-      }
-    });
-    if(!need.size)return;
-    Promise.all(Array.from(need).map(function(code){
-      return _ensureParishDioceseDataLoaded(code).catch(function(e){
-        console.warn('[공통 스탬프 교구 자료 로드 실패]',code,e);
-        return null;
-      });
-    })).then(function(){_oaiJointStampRepair();});
-  }catch(e){console.warn('[공통 스탬프 기록 준비 실패]',e);}
-}
-if(document.readyState==='loading'){
-  document.addEventListener('DOMContentLoaded',function(){setTimeout(_oaiLoadJointHistoryParishes,800);},{once:true});
-}else setTimeout(_oaiLoadJointHistoryParishes,800);
 
 const _PRAYER_ASSET_VERSION=OAI_ASSET_VERSION;
 let _prayerModuleLoadPromise=null;
@@ -13061,6 +13032,24 @@ function _oaiSyncScrollAffordance(el){
     const canScroll=visible&&max>12;
     let showTop=canScroll&&y>10;
     let showBottom=canScroll&&y<max-10;
+
+    /* V1305: 스크롤 영역의 padding/빈 여백으로 생긴 가짜 '더보기' 표시를 제외한다.
+       최하단 실제 일반 흐름 콘텐츠가 이미 화면 안에 보인다면 아래 마크가 필요 없다.
+       좌표는 현재 화면 기준이므로 중첩 스크롤 패널에도 같은 원칙을 적용한다. */
+    if(showBottom){
+      const er=el.getBoundingClientRect();
+      const contentChildren=Array.from(el.children||[]).filter(function(child){
+        if(child.classList&&child.classList.contains('oai-scroll-affordance'))return false;
+        const cs=getComputedStyle(child);
+        if(cs.display==='none'||cs.visibility==='hidden'||cs.position==='fixed'||cs.position==='absolute')return false;
+        const r=child.getBoundingClientRect();
+        return r.width>0&&r.height>0;
+      });
+      if(contentChildren.length){
+        const lastBottom=Math.max.apply(null,contentChildren.map(function(child){return child.getBoundingClientRect().bottom;}));
+        if(lastBottom<=Math.min(er.bottom,window.innerHeight)+3)showBottom=false;
+      }
+    }
 
     /* 성지·성당 방문 상세: 하단 안전 여백만 남았을 때는 스크롤 안내를 표시하지 않는다.
        실제 마지막 콘텐츠가 화면 밖에 있을 때만 아래 안내를 켠다. */
