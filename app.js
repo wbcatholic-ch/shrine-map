@@ -9766,11 +9766,10 @@ function _oaiRenderDistributedMaterials(item,modal){
  btn.addEventListener('click',()=>_oaiOpenDistributedMap(item,guide));
  wrap.append(head,note,btn);
 }
-let _oaiDistWatchId=null,_oaiDistMap=null,_oaiDistUserMarker=null,_oaiDistActiveInfo=null;
+let _oaiDistWatchId=null,_oaiDistMap=null,_oaiDistUserMarker=null,_oaiDistActiveInfo=null,_oaiDistResizeCleanup=null;
 window._oaiCloseDistributedMapFromBack=function(){if(!document.getElementById('oai-distributed-modal'))return false;_oaiCloseDistributedMap();return true;};
-let _oaiDistributedLayoutDispose=null;
 function _oaiCloseDistributedMap(){
- if(_oaiDistributedLayoutDispose){_oaiDistributedLayoutDispose();_oaiDistributedLayoutDispose=null;}
+ if(_oaiDistResizeCleanup){_oaiDistResizeCleanup();_oaiDistResizeCleanup=null;}
  if(_oaiDistWatchId!==null){try{navigator.geolocation.clearWatch(_oaiDistWatchId);}catch(_e){}_oaiDistWatchId=null;}
  const modal=document.getElementById('oai-distributed-modal');if(modal){modal.remove();}
  if(_oaiDistActiveInfo){try{_oaiDistActiveInfo.close();}catch(_e){}_oaiDistActiveInfo=null;}
@@ -9783,43 +9782,32 @@ function _oaiOpenDistributedMap(item,guide){
  document.body.appendChild(modal);modal.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();_oaiCloseDistributedMap();}});modal.querySelector('header strong').textContent=item.name+' · 순례 장소';
  modal.querySelector('.oai-distributed-close').onclick=_oaiCloseDistributedMap;
  const mapBox=modal.querySelector('.oai-distributed-map'),list=modal.querySelector('.oai-distributed-points');
- // Reserve only space for complete place cards. No half-visible next card at rest.
- // The map occupies the remaining height; both areas retain independent behavior.
- function sizeDistributedList(){
+ // One layout rule: the title and map stay fixed; three complete cards fit in the scroll pane.
+ // Measure after creating the rows, not during asynchronous map searches.
+ function layoutDistributedPlaces(){
   if(!modal.isConnected)return;
   const panel=modal.querySelector('.oai-distributed-panel');
   const header=panel.querySelector('header');
   const rows=Array.from(list.children).filter(el=>el.classList.contains('oai-distributed-point'));
   if(!rows.length)return;
   const available=panel.clientHeight-header.offsetHeight;
-  const mapMinimum=Math.min(240,Math.max(150,Math.floor(available*.36)));
-  const listMaximum=Math.max(0,available-mapMinimum);
+  const paneMax=Math.max(0,Math.floor(available*0.42));
   const listStyle=getComputedStyle(list);
-  const fixed=(parseFloat(listStyle.paddingTop)||0)+(parseFloat(listStyle.paddingBottom)||0)+(parseFloat(listStyle.borderTopWidth)||0)+(parseFloat(listStyle.borderBottomWidth)||0);
-  let used=fixed,count=0;
-  for(const row of rows){
-   const style=getComputedStyle(row),h=row.getBoundingClientRect().height+(parseFloat(style.marginTop)||0)+(parseFloat(style.marginBottom)||0);
-   if(count&&used+h>listMaximum)break;
-   if(used+h>listMaximum)break;
-   used+=h;count++;
+  let height=(parseFloat(listStyle.paddingTop)||0)+(parseFloat(listStyle.paddingBottom)||0)
+   +(parseFloat(listStyle.borderTopWidth)||0)+(parseFloat(listStyle.borderBottomWidth)||0);
+  for(const row of rows.slice(0,3)){
+   const cs=getComputedStyle(row);
+   const next=row.getBoundingClientRect().height+(parseFloat(cs.marginTop)||0)+(parseFloat(cs.marginBottom)||0);
+   if(height+next>paneMax)break;
+   height+=next;
   }
-  // On small displays the list still needs one usable card.
-  if(!count){used=Math.min(listMaximum,fixed+rows[0].getBoundingClientRect().height+7);}
-  const desired=Math.max(0,Math.min(listMaximum,Math.ceil(used)));
-  const previous=parseFloat(list.style.height)||0;
-  if(Math.abs(previous-desired)>1){list.style.height=desired+'px';list.style.flex='0 0 '+desired+'px';
-   if(_oaiDistMap){requestAnimationFrame(()=>{if(modal.isConnected)try{_oaiDistMap.relayout();}catch(_e){}});}
-  }
+  list.style.height=Math.floor(Math.min(height,paneMax))+'px';
+  if(_oaiDistMap)requestAnimationFrame(()=>{if(modal.isConnected){try{_oaiDistMap.relayout();}catch(_e){}}});
  }
- const layoutObserver=typeof ResizeObserver!=='undefined'?new ResizeObserver(()=>sizeDistributedList()):null;
- if(layoutObserver)layoutObserver.observe(modal.querySelector('.oai-distributed-panel'));
- const layoutResize=()=>sizeDistributedList();
- window.addEventListener('resize',layoutResize);
- const disposeLayout=()=>{window.removeEventListener('resize',layoutResize);if(layoutObserver)layoutObserver.disconnect();};
- _oaiDistributedLayoutDispose=disposeLayout;
- const originalClose=modal.querySelector('.oai-distributed-close');
- originalClose.addEventListener('click',disposeLayout,{once:true});
- // Other dismissal paths are handled by the modal's disconnected check in observer.
+ const onDistributedResize=()=>requestAnimationFrame(layoutDistributedPlaces);
+ window.addEventListener('resize',onDistributedResize);
+ const cleanupDistributedResize=()=>window.removeEventListener('resize',onDistributedResize);
+ _oaiDistResizeCleanup=cleanupDistributedResize;
  const kakaoOK=window.kakao&&kakao.maps&&kakao.maps.Map&&kakao.maps.LatLng;
  if(!kakaoOK){mapBox.textContent='지도를 불러올 수 없습니다. 인터넷 연결과 지도 설정을 확인해 주세요.';}
  else{_oaiDistMap=new kakao.maps.Map(mapBox,{center:new kakao.maps.LatLng(Number(item.lat),Number(item.lng)),level:5});}
@@ -9869,7 +9857,6 @@ function _oaiOpenDistributedMap(item,guide){
   const status=document.createElement('small');status.className='oai-dist-status';status.textContent='';
   const route=document.createElement('button');route.type='button';route.className='oai-dist-direction';route.textContent='길찾기';route.hidden=true;
   row.append(title,hint,status,route);list.appendChild(row);
-  if(layoutObserver)layoutObserver.observe(row);
   if(Number.isFinite(point[2])&&Number.isFinite(point[3])){showPoint(point,i,point[2],point[3]);return;}
   // 위치가 제공되지 않은 지점은 카카오 장소 검색 결과가 한 곳일 때만 자동 마커 배치한다.
   if(!kakaoOK||!kakao.maps.services){status.textContent='지도 위치 확인 불가';return;}
@@ -9898,7 +9885,7 @@ function _oaiOpenDistributedMap(item,guide){
    new kakao.maps.services.Places().keywordSearch(query,chooseCandidates);
   }else status.textContent='위치 확인 필요';
  });
- requestAnimationFrame(()=>{sizeDistributedList();requestAnimationFrame(sizeDistributedList);});
+ requestAnimationFrame(layoutDistributedPlaces);
  if(_oaiDistMap){setTimeout(fit,100);}
  if(navigator.geolocation&&_oaiDistMap){
   const locationButton=document.createElement('button');locationButton.type='button';locationButton.className='oai-distributed-locate';locationButton.textContent='내 위치';mapBox.appendChild(locationButton);
