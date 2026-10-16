@@ -16342,6 +16342,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(el){el.hidden=false;el.textContent=String(message||'');}
     if(button)button.disabled=(state==='working');
   };
+  window.oaiDevPhotoUploadAuditResult=function(state,message){
+    const el=document.getElementById('oai-dev-photo-upload-audit-status');
+    const button=document.getElementById('oai-dev-photo-upload-audit');
+    if(el){el.hidden=false;el.textContent=String(message||'');}
+    if(button)button.disabled=(state==='working');
+  };
   function oaiRefreshDeveloperPanel(){
     const section=document.getElementById('oai-developer-section');if(section)section.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked);
     oaiRefreshVisitJournalSwitch();
@@ -16349,6 +16355,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(test)test.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.testBackupFiveVisitPhotos==='function');
     const verify=document.getElementById('oai-dev-five-photo-verify');
     if(verify)verify.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.verifyBackupFiveVisitPhotos==='function');
+    const audit=document.getElementById('oai-dev-photo-upload-audit');
+    if(audit)audit.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.auditRecentVisitPhotoUploads==='function');
     if(!oaiDevEnabled()){oaiDevPendingRestore=null;for(const id of ['oai-dev-export-view','oai-dev-import-view','oai-dev-restore-preview']){const el=document.getElementById(id);if(el)el.hidden=true;}}
   }
   function oaiEncodeCgm1(value){return 'CGM1.'+btoa(Array.from(new TextEncoder().encode(JSON.stringify(value)),v=>String.fromCharCode(v)).join(''));}
@@ -16578,7 +16586,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }finally{oaiApplyingRestore=false;}
   }
   document.addEventListener('click',function(event){
-    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-copy],[data-oai-dev-preview],[data-oai-dev-apply],[data-oai-dev-failure-preview],[data-oai-dev-daily-results],[data-oai-dev-daily-memory-test],[data-oai-dev-five-photo-backup],[data-oai-dev-five-photo-verify],[data-oai-dev-stamp-preview],[data-oai-dev-stamp-apply]');if(!button)return;
+    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-copy],[data-oai-dev-preview],[data-oai-dev-apply],[data-oai-dev-failure-preview],[data-oai-dev-daily-results],[data-oai-dev-daily-memory-test],[data-oai-dev-five-photo-backup],[data-oai-dev-five-photo-verify],[data-oai-dev-photo-upload-audit],[data-oai-dev-stamp-preview],[data-oai-dev-stamp-apply]');if(!button)return;
     if(button.id==='oai-settings-version-label'){
       oaiDevTapCount++;
       if(oaiDevTapCount>=10){oaiDevTapCount=0;const next=!(oaiDevEnabled()&&oaiDevPanelUnlocked);oaiDevPanelUnlocked=next;window.__OAI_DEV_RUNTIME_ACTIVE__=next;oaiRefreshDeveloperPanel();const detail=document.getElementById('parish-visit-detail');if(detail&&detail.classList.contains('show'))_renderParishVisitDetail();if(_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null)_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);if(next){oaiDevStatus('개발자 모드가 열렸습니다.');document.getElementById('oai-developer-section').scrollIntoView({block:'nearest',behavior:'smooth'});} }
@@ -16593,6 +16601,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.verifyBackupFiveVisitPhotos==='function'))return;
         window.oaiDevPhotoVerifyResult('working','Google 백업 사진을 읽기 전용으로 확인합니다.');
         window.GildongmuNative.verifyBackupFiveVisitPhotos();
+      }else if(button.hasAttribute('data-oai-dev-photo-upload-audit')){
+        if(!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.auditRecentVisitPhotoUploads==='function'))return;
+        window.oaiDevPhotoUploadAuditResult('working','최근 사진 5장의 백업 상태를 읽기 전용으로 확인합니다.');
+        window.GildongmuNative.auditRecentVisitPhotoUploads();
       }else if(button.hasAttribute('data-oai-dev-five-photo-backup')){
         if(!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.testBackupFiveVisitPhotos==='function'))return;
         window.oaiDevPhotoBackupResult('working','Google Drive 연결 및 사진 백업을 시작합니다.');
