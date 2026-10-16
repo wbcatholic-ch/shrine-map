@@ -9717,10 +9717,10 @@ function _fitInfoCardButtons(){
 
 /* V1277: 분산형 성지 안내. 순례 지점은 안내 전용이며 GPS 스탬프 저장값과 무관하다. */
 const _oaiPilgrimSiteGuides = {
- '20190169':{intro:'청주 시내 여섯 곳에 순례 장소가 흩어져 있습니다. 각 지점을 도보로 둘러보세요. 종이 스탬프는 서운동성당에 있습니다.',points:[
-  ['서운동성당','충북 청주시 상당구 대성로 41',36.6289584876463,127.492740432105,'종이 스탬프 장소'],
-  ['청주진영 순교지 (청주제일교회)','충북 청주시 상당구 상당로13번길 15',36.6290109,127.4901273,'청주제일교회'],
-  ['청주 남문장터','충북 청주시 상당구 성안로 59'],['청주병영 순교지 (중앙공원)','충북 청주시 상당구 남사로 117',null,null,'청주중앙공원'],
+ '20190169':{intro:'청주 시내 여섯 곳에 순례 장소가 흩어져 있습니다. 각 지점을 도보로 둘러보세요. 스탬프도장은 서운동성당에 있습니다.',points:[
+  ['서운동성당','충북 청주시 상당구 대성로 41',36.6289584876463,127.492740432105],
+  ['청주진영 순교지 (청주제일교회)','충북 청주시 상당구 상당로13번길 15',36.6290109,127.4901273],
+  ['청주 남문장터','충북 청주시 상당구 성안로 59'],['청주병영 순교지 (청주중앙공원)','충북 청주시 상당구 남사로 117'],
   ['청주 북문 밖 장대 순교지','충북 청주시 상당구 중앙로 2'],['청주옥 신앙 증거터','충북 청주시 상당구 남문로2가 48-9']]},
  '20190101':{intro:'생가터·교리당·바우배기는 서로 떨어진 순례 장소입니다. 교리당의 새 성전은 2026년 12월 완공 예정이며, 교리당을 중심으로 각 지점을 둘러보세요.',points:[
   ['유항검 생가터','',35.8551259368733,127.022588709935],['교리당·새 성전','',35.85039336,127.0273121,'주요 순례 거점 · 새 성전 완공 예정'],['바우배기','',35.86302817,127.0224271]]},
@@ -9730,16 +9730,16 @@ const _oaiPilgrimSiteGuides = {
   ['병인박해기념성당','',36.85812736,127.2339397,'주요 순례 거점'],['기존 성거산성지 소성당','',36.8767840456946,127.239218887436],['성거산 제2줄무덤','',36.86093196,127.2319072,'제1줄무덤·교우촌 등은 기념성당 일대에 위치']]},
  '20190103':{intro:'평화의전당·순교자묘·순례자성당을 별도로 둘러볼 수 있습니다.',points:[
   ['치명자산성지 평화의전당','',35.80320676,127.1676653],['천주교순교자묘','',35.80884848,127.1677935],['치명자산성지 순례자성당','치명자산성지 순례자성당',null,null,'카카오맵 장소 검색으로 위치 확인']]},
- '20190021':{intro:'산막골과 작은재는 서로 떨어져 있습니다. 산막골에서 작은재까지 약 3.5km 도보 이동하거나, 판문로624번길 153에 주차 후 약 1km를 등산합니다. 종이 스탬프는 산막골성지에 있습니다.',points:[
-  ['산막골성지','',36.1602038657744,126.709686785866,'종이 스탬프 장소'],['작은재성지','',36.14382486,126.7189371],['작은재 등산 시작 주차 지점','충남 서천군 문산면 판문로624번길 153',null,null,'주차 후 약 1km 등산 · 접근 지점']]},
+ '20190021':{intro:'산막골과 작은재는 서로 떨어져 있습니다. 산막골에서 작은재까지 약 3.5km 도보 이동하거나, 판문로624번길 153에 주차 후 약 1km를 등산합니다. 스탬프도장은 산막골성지에 있습니다.',points:[
+  ['산막골성지','',36.1602038657744,126.709686785866,'스탬프도장 위치'],['작은재성지','',36.14382486,126.7189371],['작은재 등산 시작 주차 지점','충남 서천군 문산면 판문로624번길 153',null,null,'주차 후 약 1km 등산 · 접근 지점']]},
  '20190036':{intro:'이승훈 베드로의 묘소와 기념관은 각각 떨어져 있는 순례 장소입니다.',points:[
   ['이승훈 베드로 성지기념관','',37.452026,126.7457733],['이승훈 베드로 묘소','',37.4553516882758,126.743715242391]]},
  '20190029':{intro:'옛 진산성지와 새 진산성지성당은 떨어진 순례 장소입니다.',points:[
   ['진산성지성당','',36.18039117,127.3532312],['옛 진산성지','',36.18500842,127.3497168]]},
- '20190069':{intro:'살티공소와 살티순교성지는 서로 다른 위치입니다.',points:[
-  ['살티공소','',35.61105449,129.0407334],['살티순교성지','',35.60730952,129.0399873]]},
- '20190160':{intro:'경주관아터와 옥터를 함께 둘러보세요. 종이 스탬프는 성건성당에 있습니다.',points:[
-  ['성건성당','',35.8522424853093,129.208777546254,'종이 스탬프 장소'],['경주관아터','',35.84638365,129.2105294],['경주옥터','',35.84845585,129.2081887]]}
+ '20190069':{intro:'살티공소에서 살티순교성지까지 도보로 약 600m입니다. 두 장소를 함께 둘러보세요. 스탬프도장은 살티공소에 있습니다.',points:[
+  ['살티공소','',35.61105449,129.0407334,'스탬프도장 위치'],['살티순교성지','',35.60730952,129.0399873]]},
+ '20190160':{intro:'경주관아터와 옥터를 함께 둘러보세요. 스탬프도장은 성건성당에 있습니다.',points:[
+  ['성건성당','',35.8522424853093,129.208777546254,'스탬프도장 위치'],['경주관아터','',35.84638365,129.2105294],['경주옥터','',35.84845585,129.2081887]]}
 };
 function _oaiDistributedGuideFor(item){
   if(!item)return null;
@@ -9777,13 +9777,12 @@ function _oaiCloseDistributedMap(){
 function _oaiOpenDistributedMap(item,guide){
  _oaiCloseDistributedMap();
  const modal=document.createElement('div');modal.id='oai-distributed-modal';modal.className='oai-distributed-modal';modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');
- modal.innerHTML='<div class="oai-distributed-panel"><header><strong></strong><button type="button" class="oai-distributed-close" aria-label="순례 지도 뒤로가기">←</button></header><div class="oai-distributed-message"></div><div class="oai-distributed-map"></div><div class="oai-distributed-points"></div></div>';
+ modal.innerHTML='<div class="oai-distributed-panel"><header><strong></strong><button type="button" class="oai-distributed-close" aria-label="순례 지도 뒤로가기">←</button></header><div class="oai-distributed-map"></div><div class="oai-distributed-points"></div></div>';
  document.body.appendChild(modal);modal.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();_oaiCloseDistributedMap();}});modal.querySelector('header strong').textContent=item.name+' · 순례 장소';
- modal.querySelector('.oai-distributed-message').textContent=guide.intro;
  modal.querySelector('.oai-distributed-close').onclick=_oaiCloseDistributedMap;
  const mapBox=modal.querySelector('.oai-distributed-map'),list=modal.querySelector('.oai-distributed-points');
  const kakaoOK=window.kakao&&kakao.maps&&kakao.maps.Map&&kakao.maps.LatLng;
- if(!kakaoOK){mapBox.textContent='지도를 불러올 수 없습니다. 위치 목록에서 카카오맵 검색을 이용하세요.';}
+ if(!kakaoOK){mapBox.textContent='지도를 불러올 수 없습니다. 인터넷 연결과 지도 설정을 확인해 주세요.';}
  else{_oaiDistMap=new kakao.maps.Map(mapBox,{center:new kakao.maps.LatLng(Number(item.lat),Number(item.lng)),level:5});}
  const bounds=kakaoOK?new kakao.maps.LatLngBounds():null;
  let found=0;let userPosition=null;const plotted=new Set(),markerEntries=new Map();
@@ -9807,7 +9806,7 @@ function _oaiOpenDistributedMap(item,guide){
  function showPoint(point,index,lat,lng){
   if(!modal.isConnected||plotted.has(index)||!Number.isFinite(lat)||!Number.isFinite(lng))return;
   plotted.add(index);
-  const row=list.querySelector('[data-dist-point="'+index+'"]');if(row){row.querySelector('.oai-dist-status').textContent='위치 확인';}
+  const row=list.querySelector('[data-dist-point="'+index+'"]');if(row){row.querySelector('.oai-dist-status').textContent='';}
   if(!_oaiDistMap)return;
   const ll=new kakao.maps.LatLng(lat,lng),marker=new kakao.maps.Marker({map:_oaiDistMap,position:ll,title:point[0]});
   const info=new kakao.maps.InfoWindow({content:'<div style="padding:6px 9px;font-size:12px;white-space:nowrap">'+String(index+1)+'. '+String(point[0]).replace(/[<>&"']/g,'')+'</div>'});
@@ -9818,21 +9817,20 @@ function _oaiOpenDistributedMap(item,guide){
  }
  guide.points.forEach((point,i)=>{
   const row=document.createElement('div');row.className='oai-distributed-point';row.setAttribute('data-dist-point',String(i));
-  const title=document.createElement('span');title.textContent=String(i+1)+'. '+point[0]+(point[4]?' · '+point[4]:'');
+  const title=document.createElement('span');title.className='oai-dist-name';title.textContent=String(i+1)+'. '+point[0];
   const hint=document.createElement('small');hint.className='oai-dist-selected-hint';hint.textContent='✓ 지도에서 선택한 장소';hint.hidden=true;
   row.setAttribute('role','option');row.setAttribute('aria-selected','false');
   row.addEventListener('click',e=>{if(e.target.closest('button'))return;selectPoint(i,true);});
-  const status=document.createElement('small');status.className='oai-dist-status';status.textContent='위치 검색 중';
+  const status=document.createElement('small');status.className='oai-dist-status';status.textContent='';
   const route=document.createElement('button');route.type='button';route.className='oai-dist-direction';route.textContent='길찾기';route.hidden=true;
-  const search=document.createElement('button');search.type='button';search.textContent='카카오맵 검색';search.onclick=()=>openCoreExternalUrl('https://map.kakao.com/?q='+encodeURIComponent(point[1]||point[0]),{source:'distributed-shrine-search'});
-  row.append(title,hint,status,route,search);list.appendChild(row);
+  row.append(title,hint,status,route);list.appendChild(row);
   if(Number.isFinite(point[2])&&Number.isFinite(point[3])){showPoint(point,i,point[2],point[3]);return;}
   // 위치가 제공되지 않은 지점은 카카오 장소 검색 결과가 한 곳일 때만 자동 마커 배치한다.
-  if(!kakaoOK||!kakao.maps.services){status.textContent='검색 링크 이용';return;}
+  if(!kakaoOK||!kakao.maps.services){status.textContent='지도 위치 확인 불가';return;}
   const query=point[1]||point[0];
   const chooseCandidates=(res,st)=>{
    if(!modal.isConnected)return;
-   if(st!==kakao.maps.services.Status.OK||!Array.isArray(res)||!res.length){status.textContent='검색 결과 없음 · 카카오맵 검색 이용';return;}
+   if(st!==kakao.maps.services.Status.OK||!Array.isArray(res)||!res.length){status.textContent='위치 확인 필요';return;}
    // 주소의 정확한 검색 결과는 즉시 표시한다. 동명이칭 장소는 임의로 첫 결과를 선택하지 않는다.
    if(res.length===1){showPoint(point,i,Number(res[0].y),Number(res[0].x));return;}
    const normalized=v=>String(v||'').replace(/\s|[()·.,-]/g,'').toLowerCase();
@@ -9846,16 +9844,13 @@ function _oaiOpenDistributedMap(item,guide){
     if(sameAddress.length){showPoint(point,i,Number(sameAddress[0].y),Number(sameAddress[0].x));return;}
     status.textContent='중앙공원 주소 위치 확인 필요';return;
    }
-   status.textContent='여러 위치 검색됨 · 장소 선택 필요';
-   const options=document.createElement('div');options.className='oai-dist-candidates';
-   res.slice(0,5).forEach(r=>{const b=document.createElement('button');b.type='button';b.className='oai-dist-candidate';b.textContent=(r.place_name||r.address_name||r.road_address_name||'검색 위치')+' · '+(r.road_address_name||r.address_name||'');b.onclick=()=>{showPoint(point,i,Number(r.y),Number(r.x));options.remove();};options.appendChild(b);});
-   row.appendChild(options);
+   status.textContent='위치 확인 필요'; // 후보를 임의로 표시하거나 사용자에게 선택을 요구하지 않는다.
   };
   if(kakao.maps.services.Geocoder&&/\d/.test(query)&&/[로길동읍면]/.test(query)){
    new kakao.maps.services.Geocoder().addressSearch(query,chooseCandidates);
   }else if(kakao.maps.services.Places){
    new kakao.maps.services.Places().keywordSearch(query,chooseCandidates);
-  }else status.textContent='검색 링크 이용';
+  }else status.textContent='위치 확인 필요';
  });
  if(_oaiDistMap){setTimeout(fit,100);}
  if(navigator.geolocation&&_oaiDistMap){
