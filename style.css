@@ -10026,3 +10026,27 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
 .oai-distributed-point.oai-dist-selected{background:#eef6ff;border:2px solid #3682d2;padding:7px;}
 .oai-dist-selected-hint{color:#1766ab!important;font-weight:700;flex-basis:100%;}
 .oai-dist-selected-hint[hidden]{display:none!important;}
+
+/* V1283: 분산형 순례 지도는 설명 대신 지도와 명료한 장소 카드에 집중한다. */
+.oai-distributed-message{display:none!important}
+.oai-distributed-points{max-height:38%;padding:12px 14px 18px;background:#f6f8fa}
+.oai-distributed-point{display:flex;align-items:center;gap:10px;margin:0 0 10px;padding:14px 13px;min-height:64px;border:1px solid #a9b7c3;border-radius:12px;background:#fff;box-shadow:0 1px 3px rgba(16,34,52,.06);color:#172d3e}
+.oai-distributed-point .oai-dist-name{flex:1 1 66%;min-width:0;font-size:16px;line-height:1.4;font-weight:750;overflow-wrap:anywhere}
+.oai-distributed-point .oai-dist-status{flex:1 1 100%;font-size:12px;color:#ad412c;font-weight:600}
+.oai-distributed-point .oai-dist-status:empty{display:none}
+.oai-distributed-point button.oai-dist-direction{font-size:14px;font-weight:750;line-height:1.3;padding:10px 12px;border:1px solid #2c6ca8;border-radius:9px;color:#175a95;background:#f5faff}
+.oai-distributed-point.oai-dist-selected{background:#e8f3ff;border:2px solid #176dbb;padding:13px 12px;box-shadow:0 2px 8px rgba(23,109,187,.12)}
+.oai-distributed-point .oai-dist-selected-hint{font-size:12px;color:#145d9f;font-weight:750;flex:1 1 100%}
+.oai-distributed-panel header strong{font-size:17px;line-height:1.35}
+
+/* V1285: 분산형 성지 안내와 순례 지도 가독성 개선 */
+.oai-distributed-guide strong{font-size:18px;line-height:1.4;font-weight:800}
+.oai-distributed-guide p{font-size:17px;line-height:1.65;margin:10px 0 15px;color:#203a30}
+.oai-distributed-open{font-size:18px;font-weight:800;padding:15px 12px;line-height:1.4;min-height:54px}
+.oai-distributed-panel header{min-height:60px;padding:13px 16px}
+.oai-distributed-panel header strong{font-size:20px;line-height:1.4;font-weight:800}
+.oai-distributed-point{min-height:75px;padding:16px 14px}
+.oai-distributed-point .oai-dist-name{font-size:19px;line-height:1.4;font-weight:800}
+.oai-distributed-point button.oai-dist-direction{font-size:16px;font-weight:800;padding:11px 13px}
+.oai-distributed-point .oai-dist-selected-hint{font-size:14px}
+.oai-distributed-point.oai-dist-selected{padding:15px 13px}
