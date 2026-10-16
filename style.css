@@ -9891,7 +9891,7 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
 .shrine-visit-cards-tabs{background:#f7f9fc!important;border-bottom:2px solid #345c76!important;gap:6px!important;}
 .shrine-visit-cards-tabs button{border:2px solid #90a5b6!important;background:#fff!important;color:#203b50!important;box-shadow:0 1px 3px rgba(22,40,57,.18)!important;}
 .shrine-visit-cards-tabs button.active,.shrine-visit-cards-tabs button.on{border:2px solid #1665a0!important;background:#e4f2ff!important;color:#124f7f!important;box-shadow:inset 0 0 0 1px #1665a0!important;}
-.shrine-visit-detail-head>.cgm-visit-detail-help{position:absolute!important;left:12px!important;top:50%!important;transform:translateY(-50%)!important;margin:0!important;display:inline-flex!important;align-items:center;justify-content:center;flex:none!important;z-index:1!important;}
+
 .shrine-visit-cards-head .module-bar-title>.cgm-help-icon{margin-left:8px!important;vertical-align:middle!important;}
 .cgm-dev-journal-switch{display:flex;align-items:center;gap:9px;font-weight:700;font-size:14px;line-height:1.5;padding:12px 6px;}
 .cgm-dev-journal-switch input{width:20px;height:20px;}
@@ -10038,3 +10038,7 @@ html.oai-font-global .shrine-visit-card-badge strong,html:not(.ios-device).oai-s
 .myeongrye-materials-kicker{font-size:calc(11px * var(--app-inner-font-scale,1))}
 .myeongrye-material-link,.myeongrye-materials-panel .myeongrye-material-link{font-size:calc(17px * var(--app-inner-font-scale,1))}
 
+
+/* V1310: 방문 상세 도움말은 해당 섹션 제목 바로 옆에 배치한다. */
+.shrine-visit-detail-kicker,.oai-visit-journal-head .shrine-visit-detail-section-title{display:inline-flex!important;align-items:center!important;gap:9px!important;}
+.shrine-visit-detail-kicker .cgm-visit-section-help,.oai-visit-journal-head .cgm-visit-section-help{position:static!important;flex:0 0 auto!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;transform:none!important;margin:0!important;vertical-align:middle!important;}
