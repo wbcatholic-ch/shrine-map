@@ -10014,3 +10014,6 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
 .oai-distributed-point span{flex:1;min-width:55%}.oai-distributed-point small{font-size:11px;color:#777}
 .oai-distributed-point button{border:1px solid #bbc9c4;border-radius:6px;background:#fff;padding:6px;color:#245a50;font-size:11px}
 .oai-distributed-point button[hidden]{display:none}
+
+/* V1278: 분산형 성지 동명이칭 장소 선택 */
+.oai-dist-candidates{display:flex;flex-direction:column;gap:5px;margin:5px 0}.oai-dist-candidate{display:block;width:100%;text-align:left;white-space:normal;overflow-wrap:anywhere;padding:8px;border:1px solid #ccd5df;border-radius:7px;background:#fff;color:#263449;font-size:12px}

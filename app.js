@@ -9757,10 +9757,11 @@ function _oaiEnsureDistributedInfo(item){
  btn.onclick=function(e){e.stopPropagation();_oaiOpenDistributedMap(item,guide);};
  wrap.append(head,text,btn);
 }
-let _oaiDistWatchId=null,_oaiDistMap=null,_oaiDistUserMarker=null;
+let _oaiDistWatchId=null,_oaiDistMap=null,_oaiDistUserMarker=null,_oaiDistActiveInfo=null;
 function _oaiCloseDistributedMap(){
  if(_oaiDistWatchId!==null){try{navigator.geolocation.clearWatch(_oaiDistWatchId);}catch(_e){}_oaiDistWatchId=null;}
  const modal=document.getElementById('oai-distributed-modal');if(modal){modal.remove();}
+ if(_oaiDistActiveInfo){try{_oaiDistActiveInfo.close();}catch(_e){}_oaiDistActiveInfo=null;}
  _oaiDistMap=null;_oaiDistUserMarker=null;
 }
 function _oaiOpenDistributedMap(item,guide){
@@ -9775,15 +9776,16 @@ function _oaiOpenDistributedMap(item,guide){
  if(!kakaoOK){mapBox.textContent='지도를 불러올 수 없습니다. 위치 목록에서 카카오맵 검색을 이용하세요.';}
  else{_oaiDistMap=new kakao.maps.Map(mapBox,{center:new kakao.maps.LatLng(Number(item.lat),Number(item.lng)),level:5});}
  const bounds=kakaoOK?new kakao.maps.LatLngBounds():null;
- let found=0;let userPosition=null;
+ let found=0;let userPosition=null;const plotted=new Set();
  const fit=()=>{if(_oaiDistMap&&found>0){try{_oaiDistMap.relayout();_oaiDistMap.setBounds(bounds); }catch(_e){}}};
  function showPoint(point,index,lat,lng){
-  if(!modal.isConnected)return;
+  if(!modal.isConnected||plotted.has(index)||!Number.isFinite(lat)||!Number.isFinite(lng))return;
+  plotted.add(index);
   const row=list.querySelector('[data-dist-point="'+index+'"]');if(row){row.querySelector('.oai-dist-status').textContent='위치 확인';}
   if(!_oaiDistMap)return;
   const ll=new kakao.maps.LatLng(lat,lng),marker=new kakao.maps.Marker({map:_oaiDistMap,position:ll,title:point[0]});
   const info=new kakao.maps.InfoWindow({content:'<div style="padding:6px 9px;font-size:12px;white-space:nowrap">'+String(index+1)+'. '+String(point[0]).replace(/[<>&"']/g,'')+'</div>'});
-  kakao.maps.event.addListener(marker,'click',()=>{info.open(_oaiDistMap,marker);});
+  kakao.maps.event.addListener(marker,'click',()=>{if(_oaiDistActiveInfo){try{_oaiDistActiveInfo.close();}catch(_e){}}info.open(_oaiDistMap,marker);_oaiDistActiveInfo=info;});
   bounds.extend(ll);found++;fit();
   if(row){const link=row.querySelector('.oai-dist-direction');link.hidden=false;link.onclick=()=>{const url='https://map.kakao.com/link/to/'+encodeURIComponent(point[0])+','+lat+','+lng;openCoreExternalUrl(url,{source:'distributed-shrine-route'});};}
  }
@@ -9798,13 +9800,23 @@ function _oaiOpenDistributedMap(item,guide){
   // 위치가 제공되지 않은 지점은 카카오 장소 검색 결과가 한 곳일 때만 자동 마커 배치한다.
   if(!kakaoOK||!kakao.maps.services){status.textContent='검색 링크 이용';return;}
   const query=point[1]||point[0];
+  const chooseCandidates=(res,st)=>{
+   if(!modal.isConnected)return;
+   if(st!==kakao.maps.services.Status.OK||!Array.isArray(res)||!res.length){status.textContent='검색 결과 없음 · 카카오맵 검색 이용';return;}
+   // 주소의 정확한 검색 결과는 즉시 표시한다. 동명이칭 장소는 임의로 첫 결과를 선택하지 않는다.
+   if(res.length===1){showPoint(point,i,Number(res[0].y),Number(res[0].x));return;}
+   const normalized=v=>String(v||'').replace(/\s|[()·.,-]/g,'').toLowerCase();
+   const matches=res.filter(r=>normalized(r.place_name||r.address_name||r.road_address_name)===normalized(point[0]) || (point[1]&&normalized(r.road_address_name||r.address_name)===normalized(point[1])));
+   if(matches.length===1){showPoint(point,i,Number(matches[0].y),Number(matches[0].x));return;}
+   status.textContent='여러 위치 검색됨 · 장소 선택 필요';
+   const options=document.createElement('div');options.className='oai-dist-candidates';
+   res.slice(0,5).forEach(r=>{const b=document.createElement('button');b.type='button';b.className='oai-dist-candidate';b.textContent=(r.place_name||r.address_name||r.road_address_name||'검색 위치')+' · '+(r.road_address_name||r.address_name||'');b.onclick=()=>{showPoint(point,i,Number(r.y),Number(r.x));options.remove();};options.appendChild(b);});
+   row.appendChild(options);
+  };
   if(kakao.maps.services.Geocoder&&/\d/.test(query)&&/[로길동읍면]/.test(query)){
-   new kakao.maps.services.Geocoder().addressSearch(query,(res,st)=>{if(st===kakao.maps.services.Status.OK&&res.length===1)showPoint(point,i,Number(res[0].y),Number(res[0].x));else status.textContent='위치 선택 필요';});
+   new kakao.maps.services.Geocoder().addressSearch(query,chooseCandidates);
   }else if(kakao.maps.services.Places){
-   new kakao.maps.services.Places().keywordSearch(query,(res,st)=>{
-     if(st===kakao.maps.services.Status.OK&&res.length===1)showPoint(point,i,Number(res[0].y),Number(res[0].x));
-     else status.textContent='카카오맵에서 위치 확인';
-   });
+   new kakao.maps.services.Places().keywordSearch(query,chooseCandidates);
   }else status.textContent='검색 링크 이용';
  });
  if(_oaiDistMap){setTimeout(fit,100);}
