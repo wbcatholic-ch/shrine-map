@@ -9799,7 +9799,17 @@ function _oaiOpenDistributedMap(item,guide){
    const hint=el.querySelector('.oai-dist-selected-hint');if(hint)hint.hidden=!active;
   });
   if(pan){try{_oaiDistMap.panTo(entry.marker.getPosition());}catch(_e){}}
-  const card=entry.row;if(card){try{card.scrollIntoView({block:'nearest',behavior:'smooth'});}catch(_e){card.scrollIntoView(false);}}
+  // Scroll only the stop list. scrollIntoView can move the full-screen overlay instead.
+  const card=entry.row;
+  if(card&&list){
+   const top=card.getBoundingClientRect().top-list.getBoundingClientRect().top+list.scrollTop;
+   const bottom=top+card.offsetHeight;
+   const viewTop=list.scrollTop;
+   const viewBottom=viewTop+list.clientHeight;
+   const inset=12;
+   if(top<viewTop+inset)list.scrollTo({top:Math.max(0,top-inset),behavior:'smooth'});
+   else if(bottom>viewBottom-inset)list.scrollTo({top:Math.max(0,bottom-list.clientHeight+inset),behavior:'smooth'});
+  }
  }
 
  const fit=()=>{if(_oaiDistMap&&found>0){try{_oaiDistMap.relayout();_oaiDistMap.setBounds(bounds); }catch(_e){}}};

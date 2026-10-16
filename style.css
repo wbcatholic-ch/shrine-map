@@ -10081,3 +10081,8 @@ html:not(.ios-device).oai-screen-compact-short .shrine-visit-card-badge strong{f
 .oai-distributed-point .oai-dist-name{line-height:1.3;}
 .oai-distributed-point button.oai-dist-direction{padding:8px 10px;line-height:1.2;}
 .oai-distributed-point .oai-dist-selected-hint{line-height:1.25;}
+
+/* V1289: keep the final pilgrimage stop fully scrollable above the system inset. */
+.oai-distributed-panel{height:100%;box-sizing:border-box;overflow:hidden;}
+.oai-distributed-points{box-sizing:border-box;flex:0 1 auto;min-height:0;overflow-y:auto;overscroll-behavior:contain;-webkit-overflow-scrolling:touch;padding-bottom:calc(24px + env(safe-area-inset-bottom, 0px));scroll-padding-bottom:24px;}
+.oai-distributed-point:last-child{margin-bottom:0;}
