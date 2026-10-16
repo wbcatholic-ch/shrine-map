@@ -10002,7 +10002,7 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
 .oai-distributed-guide[hidden]{display:none!important}
 .oai-distributed-guide strong{display:block;font-size:14px}.oai-distributed-guide p{font-size:13px;line-height:1.55;margin:7px 0 10px}
 .oai-distributed-open{width:100%;padding:11px 8px;border:0;border-radius:9px;background:#246a5b;color:white;font-weight:700;font-size:13px}
-.oai-distributed-modal{position:fixed;inset:0;z-index:2147481600;background:#fff;display:flex;align-items:stretch;justify-content:center}
+.oai-distributed-modal{position:fixed;inset:0;z-index:2147482700;background:#fff;display:flex;align-items:stretch;justify-content:center}
 .oai-distributed-panel{width:100%;max-width:800px;display:flex;flex-direction:column;min-height:0;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 .oai-distributed-panel header{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #ddd;min-height:50px;background:#fff}
 .oai-distributed-panel header strong{font-size:15px}.oai-distributed-close{background:transparent;border:0;font-size:26px;padding:2px 12px;color:#333}
@@ -10017,3 +10017,6 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
 
 /* V1278: 분산형 성지 동명이칭 장소 선택 */
 .oai-dist-candidates{display:flex;flex-direction:column;gap:5px;margin:5px 0}.oai-dist-candidate{display:block;width:100%;text-align:left;white-space:normal;overflow-wrap:anywhere;padding:8px;border:1px solid #ccd5df;border-radius:7px;background:#fff;color:#263449;font-size:12px}
+
+/* V1279: 성지 자료 아래에 분산형 성지 순례 안내 배치 */
+.myeongrye-materials-panel > .oai-distributed-guide{margin:12px 16px 24px;flex-shrink:0;}

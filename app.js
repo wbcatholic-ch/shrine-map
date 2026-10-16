@@ -6106,6 +6106,7 @@ function _openMyeongryeMaterials(item){
   ].filter(function(link){ return !!link.url; }).map(function(link){ return {label:_getShrineMaterialLinkLabel(link.url,link.kind),url:link.url}; });
   links.innerHTML=linkData.map(function(link){ return '<button type="button" class="myeongrye-material-link" data-myeongrye-url="'+_visitHtmlEsc(link.url)+'">'+_visitHtmlEsc(link.label)+'</button>'; }).join('');
   links.querySelectorAll('[data-myeongrye-url]').forEach(function(btn){ btn.addEventListener('click',function(){ openCoreExternalUrl(btn.getAttribute('data-myeongrye-url'),{source:'myeongrye-materials'}); }); });
+  _oaiRenderDistributedMaterials(item,modal);
 
   if(photos.length){ _renderMyeongryeSlide(true); _primeMyeongryeVisiblePhotos(); }
   if(!wasAlreadyOpen) _myeongryeBodyOverflow=document.body.style.overflow||'';
@@ -6164,6 +6165,7 @@ oaiAddLifecycleObserver('hidden', _pauseMyeongryeForBackground);
 oaiAddLifecycleObserver('visible', _resumeMyeongryeAfterBackground);
 oaiAddLifecycleObserver('pageshow', _resumeMyeongryeAfterBackground);
 function _oaiMyeongryeBackHandle(){
+  if(document.getElementById('oai-distributed-modal')){_oaiCloseDistributedMap();return true;}
   var modal=document.getElementById('myeongrye-materials-modal'), viewer=modal&&modal.querySelector('.myeongrye-photo-viewer');
   if(viewer&&viewer.classList.contains('open')){ _closeMyeongryePhotoViewer(); return true; }
   if(modal&&modal.classList.contains('open')){ _closeMyeongryeMaterials(); return true; }
@@ -9744,18 +9746,25 @@ function _oaiDistributedGuideFor(item){
   if(/음성 봉암 성지/.test(item.name||''))return {intro:'기존 봉암성지 외에 새 피정의집과 야외 12사도상이 있는 구역이 별도로 있습니다.',points:[['기존 음성 봉암성지','',36.9379842237998,127.536301164455],['새 피정의집·야외 12사도상','충청북도 음성군 맹동면 봉현로 159-19']]};
   return _oaiPilgrimSiteGuides[String(item.seq)]||null;
 }
-function _oaiEnsureDistributedInfo(item){
- const card=document.getElementById('info-card'); if(!card)return;
- let wrap=document.getElementById('oai-distributed-guide');
- if(!wrap){wrap=document.createElement('section');wrap.id='oai-distributed-guide';wrap.className='oai-distributed-guide';const body=card.querySelector('.ic-body');if(body)body.appendChild(wrap);}
- const guide=_mode==='shrine'?_oaiDistributedGuideFor(item):null;
- if(!guide){wrap.hidden=true;wrap.innerHTML='';return;}
- wrap.hidden=false;wrap.innerHTML='';
+/* V1279: 분산형 성지 안내는 성지 자료 하단에서만 표시한다. */
+function _oaiEnsureDistributedInfo(){
+ const old=document.getElementById('oai-distributed-guide');
+ if(old)old.remove();
+}
+function _oaiRenderDistributedMaterials(item,modal){
+ const panel=modal&&modal.querySelector('.myeongrye-materials-panel');
+ if(!panel)return;
+ let wrap=panel.querySelector('.oai-distributed-guide');
+ if(!wrap){wrap=document.createElement('section');wrap.className='oai-distributed-guide';panel.appendChild(wrap);}
+ const guide=_oaiDistributedGuideFor(item);
+ if(!guide){wrap.hidden=true;wrap.replaceChildren();return;}
+ wrap.hidden=false;wrap.replaceChildren();
  const head=document.createElement('strong');head.textContent='여러 장소로 이루어진 성지';
- const text=document.createElement('p');text.textContent=guide.intro;
- const btn=document.createElement('button');btn.type='button';btn.className='oai-distributed-open';btn.textContent='순례 장소 '+guide.points.filter(p=>!String(p[4]||'').includes('접근 지점')).length+'곳 지도 보기';
- btn.onclick=function(e){e.stopPropagation();_oaiOpenDistributedMap(item,guide);};
- wrap.append(head,text,btn);
+ const note=document.createElement('p');note.textContent=guide.intro;
+ const btn=document.createElement('button');btn.type='button';btn.className='oai-distributed-open';
+ btn.textContent='순례 장소 '+guide.points.filter(p=>!String(p[4]||'').includes('접근 지점')).length+'곳 지도 보기';
+ btn.addEventListener('click',()=>_oaiOpenDistributedMap(item,guide));
+ wrap.append(head,note,btn);
 }
 let _oaiDistWatchId=null,_oaiDistMap=null,_oaiDistUserMarker=null,_oaiDistActiveInfo=null;
 function _oaiCloseDistributedMap(){
@@ -9767,7 +9776,7 @@ function _oaiCloseDistributedMap(){
 function _oaiOpenDistributedMap(item,guide){
  _oaiCloseDistributedMap();
  const modal=document.createElement('div');modal.id='oai-distributed-modal';modal.className='oai-distributed-modal';modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');
- modal.innerHTML='<div class="oai-distributed-panel"><header><strong></strong><button type="button" class="oai-distributed-close" aria-label="순례 지도 닫기">×</button></header><div class="oai-distributed-message"></div><div class="oai-distributed-map"></div><div class="oai-distributed-points"></div></div>';
+ modal.innerHTML='<div class="oai-distributed-panel"><header><strong></strong><button type="button" class="oai-distributed-close" aria-label="순례 지도 뒤로가기">←</button></header><div class="oai-distributed-message"></div><div class="oai-distributed-map"></div><div class="oai-distributed-points"></div></div>';
  document.body.appendChild(modal);modal.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();_oaiCloseDistributedMap();}});modal.querySelector('header strong').textContent=item.name+' · 순례 장소';
  modal.querySelector('.oai-distributed-message').textContent=guide.intro;
  modal.querySelector('.oai-distributed-close').onclick=_oaiCloseDistributedMap;
@@ -9947,6 +9956,12 @@ function _showInfoCard(item, idx){
     hp.textContent='홈페이지';
   }
 
+  /* V1279: 정보카드에서는 설명을 보여주지 않고 성지 자료로 진입한다. */
+  if(_mode==='shrine'&&_oaiDistributedGuideFor(item)){
+    const materialLink=$('ic-guide');
+    if(materialLink){materialLink.textContent='성지 자료';materialLink.onclick=function(e){if(e){e.preventDefault();e.stopPropagation();}_openMyeongryeMaterials(item);};_show(materialLink);}
+    const links=$('ic-links-row');if(links)_show(links);
+  }
   _renderInfoCardShrineVisit(item);
   _oaiEnsureDistributedInfo(item);
   $('info-card').classList.add('open');
