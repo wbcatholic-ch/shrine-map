@@ -75,7 +75,7 @@
 
       if(document.querySelector('.module-view.open')) return true;
       if($b('oai-distributed-modal')) return true;
-      if(document.querySelector('#oai-nav-notice.show,#oai-visit-photo-viewer.show,#oai-visit-memo-modal.show,#oai-visit-confirm.show,#oai-common-date-picker.show,#myeongrye-materials-modal.open,#info-card.open,#sheet-route.open,#route-choice-modal.open,#route-quick-modal.show,#oai-pilgrimage-feature-modal.show,#oai-pilgrimage-marker-choice-modal.open,#oai-pilgrimage-follow-start-modal.show,#oai-pilgrimage-follow-stop-modal.show,#oai-pilgrimage-save-modal.show,#oai-pilgrimage-delete-modal.show,#oai-pilgrimage-completion-modal.show,#srch-modal.open,.sheet.open,.trail-sheet.open,#shrine-visit-modal.show,#shrine-auto-visit-modal.show,#shrine-visit-detail-view.show,#shrine-visit-cards-modal.show')) return true;
+      if(document.querySelector('#oai-nav-notice.show,#oai-visit-photo-viewer.show,#oai-visit-memo-modal.show,#oai-visit-confirm.show,#oai-common-date-picker.show,#myeongrye-materials-modal.open,#info-card.open,#sheet-route.open,#route-choice-modal.open,#route-quick-modal.show,#oai-pilgrimage-marker-choice-modal.open,#oai-pilgrimage-follow-start-modal.show,#oai-pilgrimage-follow-stop-modal.show,#oai-pilgrimage-save-modal.show,#oai-pilgrimage-delete-modal.show,#oai-pilgrimage-completion-modal.show,#srch-modal.open,.sheet.open,.trail-sheet.open,#shrine-visit-modal.show,#shrine-auto-visit-modal.show,#shrine-visit-detail-view.show,#shrine-visit-cards-modal.show')) return true;
       if(typeof isGuideModalOpen==='function' && isGuideModalOpen()) return true;
 
       if(includeAppState){
@@ -295,15 +295,7 @@
       else { el.classList.remove('show'); el.setAttribute('aria-hidden','true'); }
       return true;
     }
-
-    /* 새 기능 안내는 커버 위 최상위 안내창이다.
-       뒤로가기는 안내만 닫고, '확인' 처리(localStorage)는 하지 않는다. */
-    try{ if(typeof window.isOaiPilgrimageFeatureNoticeOpen==='function' && window.isOaiPilgrimageFeatureNoticeOpen()){
-      if(typeof window.closeOaiPilgrimageFeatureNotice==='function')window.closeOaiPilgrimageFeatureNotice();
-      return true;
-    }}catch(e){ console.warn('[가톨릭길동무]',e); }
-
-    /* 자주 가는 장소 닉네임 입력창은 설정/순례계획보다 위에 뜨는 최상위 팝업이다. */
+/* 자주 가는 장소 닉네임 입력창은 설정/순례계획보다 위에 뜨는 최상위 팝업이다. */
     try{ if(typeof window.isOaiFrequentNicknameOpen==='function' && window.isOaiFrequentNicknameOpen()){
       if(typeof window.closeOaiFrequentNickname==='function') window.closeOaiFrequentNickname();
       else { var fnm=$b('oai-frequent-nickname-modal'); if(fnm){ fnm.classList.remove('show'); fnm.setAttribute('aria-hidden','true'); } }
