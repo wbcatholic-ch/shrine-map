@@ -10045,6 +10045,7 @@ html.oai-font-global .shrine-visit-card-badge strong,html:not(.ios-device).oai-s
 .oai-first-run-panel p{font-size:15px;line-height:1.65;color:#4a5261;margin:0 0 22px}
 .oai-first-run-choice{display:flex;align-items:center;gap:13px;width:100%;padding:14px 16px;border:1.5px solid #dfe5ee;border-radius:17px;background:#fff;text-align:left;margin:0 0 10px;color:#141a25;font-family:inherit;cursor:pointer}
 .oai-first-run-choice:focus-visible,.oai-first-run-choice:active{border-color:#1677f2;background:#f0f7ff}
+.oai-first-run-choice.is-selected{border-color:#1677f2;background:#eaf4ff;box-shadow:0 0 0 2px rgba(22,119,242,.13)}
 .oai-first-run-choice-icon{font-size:26px;color:#2478ee;width:34px;text-align:center}
 .oai-first-run-choice span:nth-child(2){flex:1}.oai-first-run-choice b{display:block;font-size:16px}.oai-first-run-choice small{display:block;font-size:12px;color:#697382;margin-top:3px}
 .oai-first-run-radio{width:17px;height:17px;border:2px solid #a5adbb;border-radius:50%}

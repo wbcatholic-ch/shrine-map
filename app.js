@@ -16664,7 +16664,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   // First-run guidance for new Android installations. Independent, dismissible dialogs.
   // No backup is written before Drive authorization and a successful remote listing.
-  let oaiFirstRunSeen=false, oaiFirstRunConnecting=false, oaiFirstRunDialog='';
+  let oaiFirstRunSeen=false, oaiFirstRunConnecting=false, oaiFirstRunDialog='', oaiFirstRunNetworkTimer=0;
   const oaiFirstRunAndroid=()=>{const m=String(navigator.userAgent||'').match(/GildongmuAndroid\/(\d+)/i);return !!m&&Number(m[1])>=360;};
   function oaiFirstRunHasVisits(){
     try{
@@ -16677,6 +16677,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function oaiFirstRunOverlay(){return document.getElementById('oai-first-run-dialog');}
   function oaiFirstRunClose(advance){
+    clearTimeout(oaiFirstRunNetworkTimer);oaiFirstRunNetworkTimer=0;
     const el=oaiFirstRunOverlay();if(el){el.hidden=true;el.setAttribute('aria-hidden','true');}
     const previous=oaiFirstRunDialog;oaiFirstRunDialog='';
     if(advance&&previous==='network')oaiFirstRunShow('drive');
@@ -16710,6 +16711,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const btn=e.target&&e.target.closest&&e.target.closest('[data-first-run-action],[data-first-run-option],[data-first-run-connect]');
     if(!btn)return;e.preventDefault();e.stopPropagation();
     if(btn.hasAttribute('data-first-run-option')){
+      if(oaiFirstRunNetworkTimer)return;
       const value=btn.getAttribute('data-first-run-option')==='any'?'any':'wifi';
       const selector=document.getElementById('oai-visit-photo-network');
       if(selector)selector.value=value;
@@ -16718,14 +16720,23 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(oaiPhotoChoiceEligible())localStorage.setItem(OAI_PHOTO_CHOICE_RELEASE_KEY,'1');
       // Do not request Google authorization while choosing the network.
       refreshVisitPhotoNetworkSelector();oaiNotifyNativePhotoCloudSettings(false);
-      oaiFirstRunClose(true);return;
+      // Keep the selected option visible for 700ms, then advance once.
+      if(oaiFirstRunNetworkTimer)return;
+      el.querySelectorAll('[data-first-run-option]').forEach(function(option){
+        const selected=option.getAttribute('data-first-run-option')===value;
+        option.classList.toggle('is-selected',selected);
+        option.disabled=true;
+      });
+      oaiFirstRunNetworkTimer=setTimeout(function(){oaiFirstRunClose(true);},700);
+      return;
     }
     if(btn.hasAttribute('data-first-run-connect')){
       if(oaiFirstRunConnecting)return;
       oaiFirstRunConnecting=true;btn.disabled=true;
-      const status=el.querySelector('[data-first-run-status]');if(status)status.textContent='Google 계정 연결 및 기존 기록을 확인하고 있습니다.';
-      // The existing native load operation authorizes Drive and checks for a backup.
-      // A missing file is reported distinctly from authentication/network failure.
+      // Close the explanation before Android opens its account chooser.
+      // The asynchronous result updates saved Drive state; it must not keep
+      // an obsolete explanation overlay visible behind the account chooser.
+      oaiFirstRunClose(false);
       if(!oaiTransferRequest('load','initial-connect'))oaiFirstRunConnectFinished(false);
       return;
     }
