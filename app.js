@@ -16664,7 +16664,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   // First-run guidance for new Android installations. Independent, dismissible dialogs.
   // No backup is written before Drive authorization and a successful remote listing.
-  let oaiFirstRunSeen=false, oaiFirstRunConnecting=false, oaiFirstRunDialog='', oaiFirstRunNetworkTimer=0;
+  let oaiFirstRunSeen=false, oaiFirstRunConnecting=false, oaiFirstRunDialog='', oaiFirstRunNetworkTimer=0, oaiFirstRunConnectTimer=0;
   const oaiFirstRunAndroid=()=>{const m=String(navigator.userAgent||'').match(/GildongmuAndroid\/(\d+)/i);return !!m&&Number(m[1])>=360;};
   function oaiFirstRunHasVisits(){
     try{
@@ -16720,24 +16720,27 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(oaiPhotoChoiceEligible())localStorage.setItem(OAI_PHOTO_CHOICE_RELEASE_KEY,'1');
       // Do not request Google authorization while choosing the network.
       refreshVisitPhotoNetworkSelector();oaiNotifyNativePhotoCloudSettings(false);
-      // Keep the selected option visible for 700ms, then advance once.
+      // Keep the selected option visible for 500ms, then advance once.
       if(oaiFirstRunNetworkTimer)return;
       el.querySelectorAll('[data-first-run-option]').forEach(function(option){
         const selected=option.getAttribute('data-first-run-option')===value;
         option.classList.toggle('is-selected',selected);
         option.disabled=true;
       });
-      oaiFirstRunNetworkTimer=setTimeout(function(){oaiFirstRunClose(true);},700);
+      oaiFirstRunNetworkTimer=setTimeout(function(){oaiFirstRunClose(true);},500);
       return;
     }
     if(btn.hasAttribute('data-first-run-connect')){
       if(oaiFirstRunConnecting)return;
       oaiFirstRunConnecting=true;btn.disabled=true;
-      // Close the explanation before Android opens its account chooser.
-      // The asynchronous result updates saved Drive state; it must not keep
-      // an obsolete explanation overlay visible behind the account chooser.
-      oaiFirstRunClose(false);
-      if(!oaiTransferRequest('load','initial-connect'))oaiFirstRunConnectFinished(false);
+      // Show the pressed state briefly, then dismiss before opening the
+      // Android account chooser. Never leave the explanation behind it.
+      if(oaiFirstRunConnectTimer)return;
+      oaiFirstRunConnectTimer=setTimeout(function(){
+        oaiFirstRunConnectTimer=0;
+        oaiFirstRunClose(false);
+        if(!oaiTransferRequest('load','initial-connect'))oaiFirstRunConnectFinished(false);
+      },500);
       return;
     }
     if(btn.getAttribute('data-first-run-action')==='close')oaiFirstRunClose(true);
