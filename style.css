@@ -10026,5 +10026,9 @@ html.oai-font-global .shrine-visit-card-badge strong,html:not(.ios-device).oai-s
 @supports not (height: 100dvh){.oai-onboarding-panel{max-height:calc(100vh - 48px);}}
 
 /* First-run record import: require a photo network choice before continuing. */
+.oai-onboarding-body .oai-records-check{display:flex;align-items:center;gap:12px;width:100%;min-height:50px;padding:12px 14px;box-sizing:border-box;border:2px solid #c9d8e8;border-radius:14px;background:#fff;color:#173f66;font-size:15px;font-weight:900;line-height:1.35;cursor:pointer;}
+.oai-onboarding-body .oai-records-check:has(input:checked){border-color:#1e6fb6;background:#eef6ff;}
+.oai-onboarding-body .oai-records-check input{appearance:auto;flex:none;width:23px;height:23px;margin:0;accent-color:#1e6fb6;cursor:pointer;}
+.oai-onboarding-body .oai-records-check:focus-within{outline:3px solid rgba(30,111,182,.24);outline-offset:2px;}
 .oai-onboarding-body .oai-records-primary:disabled,.oai-onboarding-body .oai-onboarding-text-button:disabled{opacity:.43;cursor:not-allowed;filter:grayscale(.3);}
 .oai-onboarding-body [data-oai-first-network-hint][hidden],.oai-onboarding-body [data-oai-restore-error][hidden]{display:none!important;}
