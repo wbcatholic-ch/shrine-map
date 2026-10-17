@@ -16278,6 +16278,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       }catch(_e){oaiPhotoManifestStarted=false;}
     });
   }
+  function refreshVisitPhotoNetworkSelector(){
+    const wifi=document.getElementById('oai-visit-photo-network');
+    const value=wifi&&wifi.value==='any'?'any':'wifi';
+    document.querySelectorAll('[data-oai-photo-network-value]').forEach(function(btn){
+      const selected=btn.getAttribute('data-oai-photo-network-value')===value;
+      btn.classList.toggle('is-selected',selected);
+      btn.setAttribute('aria-pressed',selected?'true':'false');
+    });
+  }
   function refreshGoogleDriveButton(){
     const el=document.querySelector('[data-oai-google-auto]');if(el)el.checked=oaiAutoEnabled();
     document.querySelectorAll('.oai-google-drive-description').forEach(x=>x.textContent=oaiAutoEnabled()?'방문기록 등은 Google Drive에 자동 저장됩니다.':'자동 보관을 켜면 방문기록 등이 Google Drive에 저장됩니다.');
@@ -16285,6 +16294,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     oaiRefreshLastSavedLabel();
     const wifi=document.getElementById('oai-visit-photo-network');
     if(wifi)wifi.value=localStorage.getItem(OAI_PHOTO_WIFI_ONLY_KEY)==='0'?'any':'wifi';
+    refreshVisitPhotoNetworkSelector();
     oaiNotifyNativePhotoCloudSettings(false);
   }
   // Developer tools: all backup work is opt-in, with no startup serialization or polling.
@@ -16783,10 +16793,22 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(e.target&&e.target.matches('[data-oai-google-auto]'))oaiEnableAuto(!!e.target.checked);
     else if(e.target&&e.target.id==='oai-visit-photo-network'){
       localStorage.setItem(OAI_PHOTO_WIFI_ONLY_KEY,e.target.value==='any'?'0':'1');
+      refreshVisitPhotoNetworkSelector();
       oaiNotifyNativePhotoCloudSettings(false);
     }
   },true);
   document.addEventListener('click',function(e){
+    const networkBtn=e.target&&e.target.closest&&e.target.closest('[data-oai-photo-network-value]');
+    if(networkBtn){
+      e.preventDefault();
+      const value=networkBtn.getAttribute('data-oai-photo-network-value')==='any'?'any':'wifi';
+      const select=document.getElementById('oai-visit-photo-network');
+      if(select)select.value=value;
+      localStorage.setItem(OAI_PHOTO_WIFI_ONLY_KEY,value==='any'?'0':'1');
+      refreshVisitPhotoNetworkSelector();
+      oaiNotifyNativePhotoCloudSettings(false);
+      return;
+    }
     const btn=e.target&&e.target.closest&&e.target.closest('[data-oai-google-restore],[data-oai-restore-now],[data-oai-restore-later]');if(!btn)return;e.preventDefault();
     if(btn.hasAttribute('data-oai-restore-later')){oaiCloseRestoreQuestion();oaiRestoreDecisionPending=true;oaiTransferStatus('기존 기록을 보호하기 위해 자동 보관을 시작하지 않았습니다. 가져오기를 먼저 진행해 주세요.');return;}
     if(btn.hasAttribute('data-oai-restore-now')){

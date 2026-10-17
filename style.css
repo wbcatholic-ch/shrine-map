@@ -6063,6 +6063,19 @@ html.route-tab-active #info-card.open{
 .oai-settings-row b.oai-drive-setting-title{font-size:16px;letter-spacing:-.055em;white-space:nowrap;}
 .oai-settings-row small{display:block;margin-top:4px;color:#687386;font-size:12.5px;line-height:1.4;font-weight:650;letter-spacing:-.02em;word-break:keep-all;overflow-wrap:normal;}
 .oai-settings-note{margin:0;padding:11px 16px 12px;border-top:1px solid #d5cbb9;background:#f7fbf8;color:#2b6f4e;font-size:12.5px;line-height:1.5;font-weight:800;letter-spacing:-.02em;text-align:left;}
+.oai-photo-network-row{display:block;min-height:0;padding:16px;}
+.oai-photo-network-control{display:flex;flex-direction:column;gap:12px;}
+.oai-photo-network-head{display:flex;flex-direction:column;gap:4px;}
+.oai-photo-network-title{display:block;color:#17213a;font-size:17px;line-height:1.28;font-weight:900;letter-spacing:-.035em;}
+.oai-photo-network-help{display:block;color:#687386;font-size:12.5px;line-height:1.45;font-weight:700;letter-spacing:-.02em;}
+.oai-photo-network-options{display:grid;grid-template-columns:1fr;gap:10px;}
+.oai-photo-network-option{display:flex;flex-direction:column;align-items:flex-start;justify-content:center;gap:4px;width:100%;min-height:68px;padding:14px 15px;border:2px solid #cfd8e4;border-radius:15px;background:#fff;color:#1a2743;text-align:left;font-family:inherit;cursor:pointer;transition:border-color .16s ease,background-color .16s ease,box-shadow .16s ease,color .16s ease;}
+.oai-photo-network-option strong{display:block;font-size:15px;line-height:1.25;font-weight:900;letter-spacing:-.03em;}
+.oai-photo-network-option span{display:block;color:#697688;font-size:12.5px;line-height:1.4;font-weight:700;letter-spacing:-.02em;}
+.oai-photo-network-option.is-selected{border-color:#1e6fb6;background:#eef6ff;box-shadow:0 0 0 1px rgba(30,111,182,.07) inset;color:#0f4473;}
+.oai-photo-network-option.is-selected span{color:#1d5d96;font-weight:800;}
+.oai-photo-network-option:focus-visible{outline:3px solid rgba(30,111,182,.24);outline-offset:2px;}
+
 .oai-settings-edit-row{cursor:pointer;}.oai-settings-edit-row:focus-visible{outline:3px solid rgba(31,105,177,.35);outline-offset:-3px;}.oai-settings-arrow{flex:0 0 auto;color:#296ca5;font:400 31px/1 sans-serif;}
 .oai-settings-link{cursor:pointer;}
 .oai-settings-link:active{background:#f7f9fc;}
@@ -6073,7 +6086,7 @@ html.route-tab-active #info-card.open{
 .oai-settings-switch i{display:block;width:100%;height:100%;border-radius:999px;background:#b8c0cb;transition:.18s;}
 .oai-settings-switch i:after{content:"";position:absolute;top:4px;left:4px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.22);transition:.18s;}
 .oai-settings-switch input:checked+i{background:#176cc2;}.oai-settings-switch input:checked+i:after{transform:translateX(20px);}.oai-settings-switch input:disabled+i{opacity:.45;}
-@media (min-width:700px){html.oai-screen-tablet .oai-settings-head h2{font-size:27px;}html.oai-screen-tablet .oai-settings-row{min-height:80px;}html.oai-screen-tablet .oai-settings-row b{font-size:18px;}html.oai-screen-tablet .oai-settings-row small{font-size:14px;}}
+@media (min-width:700px){html.oai-screen-tablet .oai-settings-head h2{font-size:27px;}html.oai-screen-tablet .oai-settings-row{min-height:80px;}html.oai-screen-tablet .oai-settings-row b{font-size:18px;}html.oai-screen-tablet .oai-settings-row small{font-size:14px;}html.oai-screen-tablet .oai-photo-network-row{padding:18px 18px 20px;}html.oai-screen-tablet .oai-photo-network-title{font-size:18px;}html.oai-screen-tablet .oai-photo-network-help,html.oai-screen-tablet .oai-photo-network-option span{font-size:14px;}html.oai-screen-tablet .oai-photo-network-option strong{font-size:16px;}}
 /* 설정한 교구·본당은 가톨릭 웹사이트 즐겨찾기 첫머리에만 고정한다. */
 #web-list .web-personal-section{margin:16px 14px 9px;padding:10px 12px;border-radius:11px;background:#e7f1fb;color:#174f82;font-size:14px;font-weight:900;letter-spacing:-.025em;}
 #web-list .web-my-shortcut-card{border:2px solid #1766a7;background:linear-gradient(135deg,#f7fbff 0%,#e6f2fc 100%);box-shadow:0 5px 14px rgba(23,82,135,.16);}
@@ -6247,6 +6260,9 @@ html.oai-font-global .oai-settings-row b{font-size:calc(17px * var(--app-font-sc
 html.oai-font-global .oai-settings-row b.oai-drive-setting-title{font-size:calc(17px * var(--app-font-scale,1))!important;white-space:normal!important;}
 html.oai-font-global .oai-settings-row small{font-size:calc(12.5px * var(--app-font-scale,1))!important;line-height:1.4!important;}
 html.oai-font-global .oai-settings-note{font-size:calc(12.5px * var(--app-font-scale,1))!important;line-height:1.5!important;}
+html.oai-font-global .oai-photo-network-title{font-size:calc(17px * var(--app-font-scale,1))!important;line-height:1.3!important;}
+html.oai-font-global .oai-photo-network-help,html.oai-font-global .oai-photo-network-option span{font-size:calc(12.5px * var(--app-font-scale,1))!important;line-height:1.45!important;}
+html.oai-font-global .oai-photo-network-option strong{font-size:calc(15px * var(--app-font-scale,1))!important;line-height:1.3!important;}
 html.oai-font-global .oai-settings-arrow{font-size:calc(31px * var(--app-font-scale,1))!important;}
 
 html.oai-font-global .oai-settings-frequent-info>div>b{font-size:calc(17px * var(--app-font-scale,1))!important;line-height:1.3!important;}
