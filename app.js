@@ -16548,7 +16548,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     return true;
   }
   let oaiRestoreImportClicked=false;
-  function oaiRestoreHasDecision(){return oaiRestoreImportClicked||localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)==='1';}
+  function oaiRestoreHasDecision(){return oaiRestoreImportClicked&&localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)==='1';}
   function oaiShowRequiredChoiceNotice(){
     const box=document.getElementById('oai-onboarding-choice-notice');if(!box)return;
     box.hidden=false;box.style.display='flex';box.setAttribute('aria-hidden','false');
