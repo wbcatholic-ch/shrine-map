@@ -9915,8 +9915,6 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
 .shrine-visit-cards-tabs button.active,.shrine-visit-cards-tabs button.on{border:2px solid #1665a0!important;background:#e4f2ff!important;color:#124f7f!important;box-shadow:inset 0 0 0 1px #1665a0!important;}
 
 .shrine-visit-cards-head .module-bar-title>.cgm-help-icon{margin-left:8px!important;vertical-align:middle!important;}
-.cgm-dev-journal-switch{display:flex;align-items:center;gap:9px;font-weight:700;font-size:14px;line-height:1.5;padding:12px 6px;}
-.cgm-dev-journal-switch input{width:20px;height:20px;}
 
 
 /* V1193: 단일 표준 규격 - 중복된 설정/시트 도움말 오버라이드 제거 */
@@ -10002,10 +10000,6 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
 .oai-daily-failure-panel h3{padding-right:32px}
 
 /* V1247: developer-only visit-journal discovery and safe failure preview. */
-.cgm-dev-journal-control{border:1px solid #cddde8;border-radius:13px;background:#f5fafc;padding:6px 10px;margin:8px 0 14px}
-.cgm-dev-journal-switch span{display:flex;flex-direction:column;gap:5px;min-width:0}
-.cgm-dev-journal-switch small{font-size:12px;font-weight:400;color:#51687a;line-height:1.55;word-break:keep-all}
-.cgm-dev-journal-status{margin:0 5px 8px;font-size:12px;color:#276241;font-weight:700}
 .oai-dev-failure-preview{width:100%;display:flex;flex-direction:column;gap:5px;text-align:left;border:1px solid #b4c8db;border-radius:12px;padding:13px;background:#f2f7fc;color:#234461;font:inherit;cursor:pointer;margin-bottom:15px}
 .oai-dev-failure-preview b{font-size:14px}
 .oai-dev-failure-preview small{font-size:12px;line-height:1.5}
