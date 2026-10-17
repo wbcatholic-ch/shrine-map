@@ -16728,9 +16728,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(mode==='initial-load'){
         oaiRestoreDecisionPending=true;
         const modal=document.getElementById('oai-onboarding-backup-modal');
-        const error=modal&&modal.querySelector('[data-oai-restore-error]');
-        if(error){error.textContent=message||'Google Drive 기록을 가져오지 못했습니다. 다시 시도해 주세요.';error.hidden=false;}
-        if(!modal||!modal.classList.contains('show'))oaiAskRestoreOnFreshInstall();
+        // Keep the original selections when authorization/import fails. Rebuilding the
+        // onboarding dialog here silently clears its checkbox and traps the user.
+        if(modal&&modal.dataset.oaiMode==='drive-restore-prompt'){
+          modal.classList.add('show');
+          modal.setAttribute('aria-hidden','false');
+          const checkbox=modal.querySelector('[data-oai-restore-now]');
+          if(checkbox)checkbox.checked=oaiRestoreImportRequested;
+          const error=modal.querySelector('[data-oai-restore-error]');
+          if(error){error.textContent=(message||'Google Drive 기록을 가져오지 못했습니다.')+' 기록 가져오기를 다시 선택하여 재시도해 주세요.';error.hidden=false;}
+          oaiRefreshFirstRunNetworkButtons();
+        }
       }
       return;}
     if(action==='save'){
@@ -16784,11 +16792,34 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
             oaiTransferStatus('기록을 가져왔습니다. 아래 사진 백업 네트워크를 선택해 주세요.');
             oaiRefreshFirstRunNetworkButtons();
           }
-        }catch(err){oaiTransferStatus('가져오기 실패: '+err.message);}
+        }catch(err){
+          oaiTransferStatus('가져오기 실패: '+err.message);
+          if(mode==='initial-load'){
+            const modal=document.getElementById('oai-onboarding-backup-modal');
+            if(modal&&modal.dataset.oaiMode==='drive-restore-prompt'){
+              modal.classList.add('show');modal.setAttribute('aria-hidden','false');
+              const error=modal.querySelector('[data-oai-restore-error]');
+              if(error){error.textContent='가져오기 실패: '+err.message;error.hidden=false;}
+            }
+          }
+        }
         finally{oaiApplyingRestore=false;}
       };
       if(mode==='initial-load')applyImportedRecords();else oaiConfirmDriveImport(entries,applyImportedRecords);
-    }catch(err){oaiTransferStatus('가져오기 실패: '+err.message);if(mode==='initial-load')oaiAskRestoreOnFreshInstall();}
+    }catch(err){
+      oaiTransferStatus('가져오기 실패: '+err.message);
+      if(mode==='initial-load'){
+        const modal=document.getElementById('oai-onboarding-backup-modal');
+        if(modal&&modal.dataset.oaiMode==='drive-restore-prompt'){
+          modal.classList.add('show');modal.setAttribute('aria-hidden','false');
+          const checkbox=modal.querySelector('[data-oai-restore-now]');
+          if(checkbox)checkbox.checked=oaiRestoreImportRequested;
+          const error=modal.querySelector('[data-oai-restore-error]');
+          if(error){error.textContent='가져오기 실패: '+err.message;error.hidden=false;}
+          oaiRefreshFirstRunNetworkButtons();
+        }
+      }
+    }
     finally{oaiApplyingRestore=false;}
   };
   document.addEventListener('change',function(e){
