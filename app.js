@@ -16236,11 +16236,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   const oaiPhotoChoiceEligible=()=>{const match=String(navigator.userAgent||'').match(/GildongmuAndroid\/(\d+)/i);return !!match&&Number(match[1])>=351;};
   let oaiPhotoChoiceCheck='pending';
   function oaiPhotoNetworkChoiceNeeded(){
-    return oaiPhotoChoiceEligible() && oaiPhotoChoiceCheck!=='pending'
-      && localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)!=='1';
+    return false; // Network-choice rollout is not enabled for users.
   }
   function oaiCheckPhotoChoiceOnStartup(){
-    if(!oaiPhotoChoiceEligible())return;
+    if(!oaiPhotoNetworkChoiceNeeded())return;
     // Fresh install: authorization belongs to the explicit record-import action.
     // Otherwise an asynchronous Drive account picker races with the first-run dialog.
     if(localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1'){
@@ -16265,7 +16264,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
   }
   window.oaiPhotoNetworkCloudResult=function(status,value){
-    if(!oaiPhotoChoiceEligible())return;
+    if(!oaiPhotoNetworkChoiceNeeded())return;
     if(status==='saved'){
       localStorage.removeItem('oai_photo_choice_remote_pending');
       return;
@@ -16571,7 +16570,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     oaiRefreshFirstRunNetworkButtons();
   }
   function oaiStartWithoutRestore(){
-    if(localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)!=='1' || oaiTransferBusy){
+    if(oaiTransferBusy){
       oaiShowRequiredChoiceNotice();return;
     }
     // A missing remote record file is not a successful import. Do not enable
@@ -16588,10 +16587,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(localStorage.getItem(OAI_ONBOARDING_DONE_KEY)!=='1')startInitialOnboarding();
   }
   function oaiRestoreHasDecision(){
-    return localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)==='1' && (oaiRestoreImportFinished || !oaiRestoreImportRequested);
+    return oaiRestoreImportFinished || !oaiRestoreImportRequested;
   }
   function oaiStartRequestedImport(){
-    if(!oaiRestoreImportRequested || localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)!=='1' || oaiTransferBusy || oaiRestoreImportFinished)return false;
+    if(!oaiRestoreImportRequested || oaiTransferBusy || oaiRestoreImportFinished)return false;
     const error=document.querySelector('#oai-onboarding-backup-modal [data-oai-restore-error]');
     if(error){error.hidden=true;error.textContent='';}
     oaiRestoreMissingRemoteFile=false;
@@ -16612,9 +16611,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!oaiRestoreImportRequested && !oaiRestoreImportFinished){oaiStartWithoutRestore();return true;}
     oaiRestoreDecisionPending=false;
     oaiCloseRestoreQuestion();
-    // Save a choice made after record import as well as one made before import.
-    const native=oaiNativePhotoChoice();
-    if(native&&typeof native.savePhotoNetworkChoice==='function')native.savePhotoNetworkChoice(localStorage.getItem(OAI_PHOTO_WIFI_ONLY_KEY)==='0'?'any':'wifi');
     oaiTransferStatus('기록 가져오기와 사진 백업 설정을 완료했습니다. 앱을 새로고침합니다.');
     setTimeout(function(){location.reload();},500);
     return true;
@@ -16652,7 +16648,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   },true);
 
   function oaiInlinePhotoNetworkChoice(){
-    if(!oaiPhotoChoiceEligible())return '';
+    if(!oaiPhotoNetworkChoiceNeeded())return '';
     if(localStorage.getItem(OAI_RESTORE_CHECKED_KEY)==='1')return '';
     const chosen=localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)==='1';
     const network=chosen?(localStorage.getItem(OAI_PHOTO_WIFI_ONLY_KEY)==='0'?'any':'wifi'):'';
@@ -16686,7 +16682,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     oaiRefreshFirstRunNetworkButtons();
   }
   function oaiAskRestoreOnFreshInstall(){
-    if(oaiPhotoNetworkChoiceNeeded()&&localStorage.getItem(OAI_RESTORE_CHECKED_KEY)==='1')return oaiAskPhotoNetworkChoice();
+    // Photo-network rollout remains disabled for both new and existing users.
     if(localStorage.getItem(OAI_RESTORE_CHECKED_KEY)==='1'||(oaiTransferBusy&&oaiTransferPendingMode==='initial-load'))return false;
     const modal=document.getElementById('oai-onboarding-backup-modal'),body=document.getElementById('oai-onboarding-backup-body');if(!modal||!body)return false;
     if(modal.classList.contains('show')&&modal.dataset.oaiMode==='drive-restore-prompt'){
@@ -16831,11 +16827,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           // handing off the full-photo inventory. Native SQLite deduplicates IDs.
           oaiNotifyNativePhotoCloudSettings(true);
           oaiQueuePhotoRestoreManifest();
-          if(!oaiCompleteInitialRestore()){
-            oaiRestoreDecisionPending=true;
-            oaiTransferStatus('기록을 가져왔습니다. 아래 사진 백업 네트워크를 선택해 주세요.');
-            oaiRefreshFirstRunNetworkButtons();
-          }
+          oaiCompleteInitialRestore();
         }catch(err){
           oaiTransferStatus('가져오기 실패: '+err.message);
           if(mode==='initial-load'){
@@ -16869,7 +16861,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   document.addEventListener('change',function(e){
     if(e.target&&e.target.matches('[data-oai-google-auto]'))oaiEnableAuto(!!e.target.checked);
     else if(e.target&&e.target.matches('[data-oai-restore-now]')){
-      // The import choice is a checkbox; authentication starts only after a network is selected.
+      // Start the selected record import independently of photo-network settings.
       if(oaiTransferBusy||oaiRestoreImportFinished){e.target.checked=oaiRestoreImportRequested;return;}
       oaiRestoreImportRequested=!!e.target.checked;
       if(oaiRestoreImportRequested)oaiStartRequestedImport();
@@ -16937,7 +16929,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     const btn=e.target&&e.target.closest&&e.target.closest('[data-oai-google-restore],[data-oai-restore-later]');if(!btn)return;e.preventDefault();
     if(btn.hasAttribute('data-oai-restore-later')){
-      if(!oaiRestoreHasDecision()){oaiShowRequiredChoiceNotice();return;}
+      oaiRestoreImportRequested=false;
       oaiCompleteInitialRestore();return;
     }
     oaiTransferRequest('load','manual-load');
