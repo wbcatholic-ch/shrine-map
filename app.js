@@ -12068,6 +12068,42 @@ function _isNearbyLoadCurrent(mode, token, body){
   }
 }
 
+function oaiNearbyLocationPermissionGate(){
+  const native=window.GildongmuNative;
+  if(!native||typeof native.isNearbyLocationPermissionGranted!=='function')return false;
+  try{if(native.isNearbyLocationPermissionGranted())return false;}catch(_e){return false;}
+  const dialog=document.getElementById('oai-location-permission-dialog');
+  if(!dialog)return false;
+  dialog.hidden=false;dialog.setAttribute('aria-hidden','false');
+  const allow=dialog.querySelector('[data-location-action="allow"]');
+  if(allow){
+    let canAsk=true;
+    try{if(typeof native.canRequestNearbyLocationPermission==='function')canAsk=native.canRequestNearbyLocationPermission();}catch(_e){}
+    allow.textContent=canAsk?'위치 권한 허용하기':'앱 권한 설정으로 이동';
+  }
+  return true;
+}
+function oaiCloseNearbyPermissionDialog(){
+  const dialog=document.getElementById('oai-location-permission-dialog');
+  if(dialog){dialog.hidden=true;dialog.setAttribute('aria-hidden','true');}
+}
+document.addEventListener('click',function(e){
+  const dialog=document.getElementById('oai-location-permission-dialog');
+  if(!dialog||dialog.hidden)return;
+  const button=e.target&&e.target.closest&&e.target.closest('[data-location-action]');
+  if(!button)return;
+  e.preventDefault();e.stopPropagation();
+  const action=button.getAttribute('data-location-action');
+  oaiCloseNearbyPermissionDialog();
+  if(action!=='allow')return;
+  try{
+    const native=window.GildongmuNative;
+    if(native&&typeof native.canRequestNearbyLocationPermission==='function'&&native.canRequestNearbyLocationPermission()){
+      if(native.requestNearbyLocationPermission())return;
+    }
+    if(native&&typeof native.openAppLocationSettings==='function')native.openAppLocationSettings();
+  }catch(_e){}
+},true);
 function _loadNearby(){
   const body=$('nearby-body');
   if(!body) return;
@@ -12135,12 +12171,8 @@ function _loadNearby(){
     return;
   }
 
-  // On Android, a previously denied runtime permission must be requested on the
-  // user's next explicit nearby search, before WebView geolocation is attempted.
-  try{
-    const native=window.GildongmuNative||window.Android;
-    if(native&&typeof native.requestNearbyLocationPermission==='function'&&native.requestNearbyLocationPermission())return;
-  }catch(_e){}
+  // Permission denied: explain the reason first; only a user tap requests Android permission.
+  if(oaiNearbyLocationPermissionGate())return;
 
   /* 성지/성당/피정 내주변 거리 계산은 저장 위치·이전 위치·캐시 위치로 확정하지 않는다.
      maximumAge:0 새 위치를 받은 경우에만 거리와 목록을 계산한다. */
@@ -16726,7 +16758,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   document.addEventListener('click',function(e){
     const el=oaiFirstRunOverlay();if(!el||el.hidden)return;
-    const btn=e.target&&e.target.closest&&e.target.closest('[data-first-run-action],[data-first-run-option],[data-first-run-connect],[data-first-run-restore-connect],[data-first-run-existing]');
+    const btn=e.target&&e.target.closest&&e.target.closest('[data-first-run-action],[data-first-run-option],[data-first-run-connect],[data-first-run-restore-connect]');
     if(!btn)return;e.preventDefault();e.stopPropagation();
     if(btn.hasAttribute('data-first-run-option')){
       if(oaiFirstRunNetworkTimer)return;
@@ -16748,7 +16780,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       oaiFirstRunNetworkTimer=setTimeout(function(){oaiFirstRunClose(true);},500);
       return;
     }
-    if(btn.hasAttribute('data-first-run-existing')){oaiFirstRunShow('restore');return;}
     if(btn.hasAttribute('data-first-run-connect')||btn.hasAttribute('data-first-run-restore-connect')){
       if(oaiFirstRunConnecting)return;
       oaiFirstRunConnecting=true;btn.disabled=true;
