@@ -16231,23 +16231,66 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const match=String(navigator.userAgent||'').match(/GildongmuAndroid\/(\d+)/);
     return !!match && Number(match[1])>=349;
   }
+  const OAI_PHOTO_CHOICE_RELEASE_KEY='oai_photo_network_release_351_v1';
+  const oaiNativePhotoChoice=()=>window.GildongmuNative||window.Android;
+  const oaiPhotoChoiceEligible=()=>{const match=String(navigator.userAgent||'').match(/GildongmuAndroid\/(\d+)/i);return !!match&&Number(match[1])>=351;};
+  let oaiPhotoChoiceCheck='pending';
   function oaiPhotoNetworkChoiceNeeded(){
-    // 사진 네트워크 선택 안내는 별도의 명시적 배포 지시 전까지 비활성화한다.
-    // 기존 설정 화면에서의 수동 선택은 계속 이용할 수 있다.
-    return false;
+    return oaiPhotoChoiceEligible() && oaiPhotoChoiceCheck!=='pending'
+      && localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)!=='1';
   }
-  // Existing installs retain their saved Wi-Fi/mobile setting. Do not gate their
-  // already-running photo uploads on a new web-only selection flag.
-  if(localStorage.getItem(OAI_PHOTO_NETWORK_CHOICE_KEY)!=='1'){
-    localStorage.setItem(OAI_PHOTO_NETWORK_CHOICE_KEY,'1');
+  function oaiCheckPhotoChoiceOnStartup(){
+    if(!oaiPhotoChoiceEligible())return;
+    if(localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)==='1'){
+      oaiPhotoChoiceCheck='found';
+      // After an offline selection, retry persisting the receipt when Drive authorization is available.
+      if(localStorage.getItem('oai_photo_choice_remote_pending')==='1'){
+        const n=oaiNativePhotoChoice();
+        if(n&&typeof n.savePhotoNetworkChoice==='function')n.savePhotoNetworkChoice(localStorage.getItem(OAI_PHOTO_WIFI_ONLY_KEY)==='0'?'any':'wifi');
+      }
+      return;
+    }
+    const n=oaiNativePhotoChoice();
+    if(n&&typeof n.checkPhotoNetworkChoice==='function'){
+      n.checkPhotoNetworkChoice();
+    }else{
+      oaiPhotoChoiceCheck='unknown';
+      oaiAskPhotoNetworkChoice();
+    }
   }
-
+  window.oaiPhotoNetworkCloudResult=function(status,value){
+    if(!oaiPhotoChoiceEligible())return;
+    if(status==='saved'){
+      localStorage.removeItem('oai_photo_choice_remote_pending');
+      return;
+    }
+    if(status==='found'&&(value==='wifi'||value==='any')){
+      // If the user chose a setting locally since a cloud read began, local choice wins.
+      if(localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)!=='1'){
+        localStorage.setItem(OAI_PHOTO_WIFI_ONLY_KEY,value==='any'?'0':'1');
+        localStorage.setItem(OAI_PHOTO_CHOICE_RELEASE_KEY,'1');
+        localStorage.setItem(OAI_PHOTO_NETWORK_CHOICE_KEY,'1');
+      }
+      oaiPhotoChoiceCheck='found';
+      refreshGoogleDriveButton();
+      oaiQueuePhotoRestoreManifest();
+      const modal=document.getElementById('oai-onboarding-backup-modal');
+      if(modal&&modal.dataset.oaiMode==='photo-network-choice')oaiCloseRestoreQuestion();
+      if(localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1')oaiAskRestoreOnFreshInstall();
+      return;
+    }
+    // Missing/unknown receipts: retry the prompt on subsequent launches until chosen.
+    if(localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)!=='1'){
+      oaiPhotoChoiceCheck=status==='missing'?'missing':'unknown';
+      oaiAskPhotoNetworkChoice();
+    }
+  };
   function oaiNotifyNativePhotoCloudSettings(requestAuthorization){
     try{
       const native=window.GildongmuNative||window.Android;
       if(native&&typeof native.setVisitPhotoCloudOptions==='function'){
         // First-run records restore decision stays independent and mandatory.
-        const permitted=oaiAutoEnabled() && localStorage.getItem(OAI_RESTORE_CHECKED_KEY)==='1' && localStorage.getItem(OAI_PHOTO_NETWORK_CHOICE_KEY)==='1' && !oaiPhotoNetworkChoiceNeeded();
+        const permitted=oaiAutoEnabled() && localStorage.getItem(OAI_RESTORE_CHECKED_KEY)==='1' && localStorage.getItem(OAI_PHOTO_NETWORK_CHOICE_KEY)==='1' && (!oaiPhotoChoiceEligible() || localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)==='1');
         native.setVisitPhotoCloudOptions(permitted,
           localStorage.getItem(OAI_PHOTO_WIFI_ONLY_KEY)!=='0',
           !!requestAuthorization && permitted);
@@ -16256,7 +16299,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   let oaiPhotoManifestStarted=false;
   function oaiQueuePhotoRestoreManifest(){
-    if(oaiPhotoManifestStarted||!oaiAutoEnabled()||localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1'||localStorage.getItem(OAI_PHOTO_NETWORK_CHOICE_KEY)!=='1'||oaiPhotoNetworkChoiceNeeded())return;
+    if(oaiPhotoManifestStarted||!oaiAutoEnabled()||localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1'||localStorage.getItem(OAI_PHOTO_NETWORK_CHOICE_KEY)!=='1'||oaiPhotoNetworkChoiceNeeded()||(oaiPhotoChoiceEligible()&&localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)!=='1'))return;
     const native=window.GildongmuNative||window.Android;
     if(!native||typeof native.enqueueVisitPhotoRestoreManifest!=='function')return;
     oaiPhotoManifestStarted=true;
@@ -16483,10 +16526,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!oaiPhotoNetworkChoiceNeeded())return false;
     const modal=document.getElementById('oai-onboarding-backup-modal'),body=document.getElementById('oai-onboarding-backup-body');
     if(!modal||!body)return false;
-    if(modal.classList.contains('show')&&modal.dataset.oaiMode!=='photo-network-choice')return false;
+    if(modal.classList.contains('show')&&modal.dataset.oaiMode!=='photo-network-choice'&&modal.dataset.oaiMode!=='drive-restore-prompt')return false;
     modal.dataset.oaiMode='photo-network-choice';
     setOnboardingHeader('Google Drive 사진 백업 네트워크 설정',localStorage.getItem('oai_onboarding_done_v1')==='1'?'이번 업데이트에서 한 번만 선택해 주세요.':'처음 이용할 때 한 번 선택해 주세요.');
-    body.innerHTML='<p class="oai-onboarding-intro">사진은 먼저 휴대폰에 안전하게 저장됩니다. Google Drive로 사진을 보낼 때 사용할 네트워크를 선택해 주세요.</p><div class="oai-photo-network-options"><button type="button" class="oai-photo-network-option" data-oai-photo-network-first="wifi"><strong>Wi-Fi 연결 시만 전송</strong><span>Wi-Fi가 없을 때는 전송을 기다립니다.</span></button><button type="button" class="oai-photo-network-option" data-oai-photo-network-first="any"><strong>모바일 데이터로도 전송</strong><span>Wi-Fi가 없어도 전송합니다. 데이터가 사용될 수 있습니다.</span></button></div><p class="oai-onboarding-privacy">나중에 설정에서 언제든 변경할 수 있습니다.</p>';
+    body.innerHTML='<p class="oai-onboarding-intro">사진은 먼저 휴대폰에 안전하게 저장됩니다. Google Drive로 사진을 보낼 때 사용할 네트워크를 선택해 주세요.</p><div class="oai-photo-network-options"><button type="button" class="oai-photo-network-option" data-oai-photo-network-first="wifi"><strong>Wi-Fi 연결 시에만 전송</strong><span>Wi-Fi가 없을 때는 전송을 기다립니다.</span></button><button type="button" class="oai-photo-network-option" data-oai-photo-network-first="any"><strong>모바일 데이터로도 전송</strong><span>Wi-Fi가 없어도 전송합니다. 데이터가 사용될 수 있습니다.</span></button></div><p class="oai-onboarding-privacy">나중에 설정에서 언제든 변경할 수 있습니다. 같은 Google 계정에 선택 기록이 보관됩니다.</p>';
     modal.classList.add('show');modal.setAttribute('aria-hidden','false');
     return true;
   }
@@ -16601,6 +16644,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     else if(e.target&&e.target.id==='oai-visit-photo-network'){
       localStorage.setItem(OAI_PHOTO_WIFI_ONLY_KEY,e.target.value==='any'?'0':'1');
       localStorage.setItem(OAI_PHOTO_NETWORK_CHOICE_KEY,'1');
+      if(oaiPhotoChoiceEligible()){
+        localStorage.setItem(OAI_PHOTO_CHOICE_RELEASE_KEY,'1');
+        localStorage.setItem('oai_photo_choice_remote_pending','1');
+        const cloud=oaiNativePhotoChoice();
+        if(cloud&&typeof cloud.savePhotoNetworkChoice==='function')cloud.savePhotoNetworkChoice(e.target.value==='any'?'any':'wifi');
+      }
       refreshVisitPhotoNetworkSelector();
       oaiNotifyNativePhotoCloudSettings(false);
     }
@@ -16613,8 +16662,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       localStorage.setItem(OAI_PHOTO_WIFI_ONLY_KEY,selected==='any'?'0':'1');
       localStorage.setItem(OAI_PHOTO_NETWORK_CHOICE_KEY,'1');
       localStorage.setItem(OAI_PHOTO_NETWORK_PLAY_CHOICE_KEY,'1');
+      localStorage.setItem(OAI_PHOTO_CHOICE_RELEASE_KEY,'1');
+      localStorage.setItem('oai_photo_choice_remote_pending','1');
+      const cloud=oaiNativePhotoChoice();
+      if(cloud&&typeof cloud.savePhotoNetworkChoice==='function')cloud.savePhotoNetworkChoice(selected);
       oaiCloseRestoreQuestion();
       refreshGoogleDriveButton();
+      oaiQueuePhotoRestoreManifest();
       if(localStorage.getItem(OAI_ONBOARDING_DONE_KEY)!=='1')startInitialOnboarding();
       else if(localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1')oaiAskRestoreOnFreshInstall();
       return;
@@ -16627,6 +16681,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(select)select.value=value;
       localStorage.setItem(OAI_PHOTO_WIFI_ONLY_KEY,value==='any'?'0':'1');
       localStorage.setItem(OAI_PHOTO_NETWORK_CHOICE_KEY,'1');
+      if(oaiPhotoChoiceEligible()){
+        localStorage.setItem(OAI_PHOTO_CHOICE_RELEASE_KEY,'1');
+        localStorage.setItem('oai_photo_choice_remote_pending','1');
+        const cloud=oaiNativePhotoChoice();
+        if(cloud&&typeof cloud.savePhotoNetworkChoice==='function')cloud.savePhotoNetworkChoice(value);
+      }
       refreshVisitPhotoNetworkSelector();
       oaiNotifyNativePhotoCloudSettings(false);
       return;
@@ -16642,7 +16702,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   if(localStorage.getItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY)==='1'&&localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1'){
     oaiRestoreDecisionPending=true;
   }
-  setTimeout(function(){refreshGoogleDriveButton();oaiQueuePhotoRestoreManifest();if(oaiPhotoNetworkChoiceNeeded())oaiAskPhotoNetworkChoice();else if(localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1')oaiAskRestoreOnFreshInstall();},900);
+  setTimeout(function(){refreshGoogleDriveButton();oaiQueuePhotoRestoreManifest();oaiCheckPhotoChoiceOnStartup();if((!oaiPhotoChoiceEligible()||localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)==='1')&&localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1')oaiAskRestoreOnFreshInstall();},900);
   if(localStorage.getItem('oai_manual_restore_needs_drive_save_v1')==='1'){
     localStorage.removeItem('oai_manual_restore_needs_drive_save_v1');
     if(oaiAutoEnabled()&&localStorage.getItem(OAI_RESTORE_CHECKED_KEY)==='1'){oaiBackupDirty=true;oaiQueueBackup(1700);}
@@ -16772,6 +16832,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     openInitialParishSetupAfterDrive();
   }
   function startInitialOnboarding(){
+    if(oaiPhotoChoiceEligible()&&localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)!=='1'&&oaiPhotoChoiceCheck==='pending')return;
     // A fresh installation must choose the photo network before starting the existing setup flow.
     // Returning users are prompted by the existing one-time update choice on startup.
     if(oaiPhotoNetworkChoiceNeeded()){
