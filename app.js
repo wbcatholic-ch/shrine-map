@@ -16556,7 +16556,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!oaiRestoreImportRequested || localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)!=='1' || oaiTransferBusy || oaiRestoreImportFinished)return false;
     const error=document.querySelector('#oai-onboarding-backup-modal [data-oai-restore-error]');
     if(error)error.hidden=true;
-    return !!oaiTransferRequest('load','initial-load');
+    const started=!!oaiTransferRequest('load','initial-load');
+    if(started){
+      // Both selections are complete. Do not keep the first-run dialog visible
+      // while native Google account selection and Drive import run asynchronously.
+      const modal=document.getElementById('oai-onboarding-backup-modal');
+      if(modal&&modal.dataset.oaiMode==='drive-restore-prompt'){
+        modal.classList.remove('show');
+        modal.setAttribute('aria-hidden','true');
+      }
+    }
+    return started;
   }
   function oaiCompleteInitialRestore(){
     if(!oaiRestoreHasDecision())return false;
