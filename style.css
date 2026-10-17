@@ -10024,3 +10024,7 @@ html.oai-font-global .shrine-visit-card-badge strong,html:not(.ios-device).oai-s
 .oai-onboarding-photo-inline>p{margin:6px 0 12px;font-size:13px;line-height:1.5;color:#536276;}
 
 @supports not (height: 100dvh){.oai-onboarding-panel{max-height:calc(100vh - 48px);}}
+
+/* First-run record import: require a photo network choice before continuing. */
+.oai-onboarding-body .oai-records-primary:disabled,.oai-onboarding-body .oai-onboarding-text-button:disabled{opacity:.43;cursor:not-allowed;filter:grayscale(.3);}
+.oai-onboarding-body [data-oai-first-network-hint][hidden],.oai-onboarding-body [data-oai-restore-error][hidden]{display:none!important;}
