@@ -16550,7 +16550,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     function cleanup(){modal.classList.remove('show');modal.setAttribute('aria-hidden','true');cancel.removeEventListener('click',later);approve.removeEventListener('click',accept);}
     function later(){cleanup();oaiFirstRunParishIfNeeded();}
     function accept(){cleanup();oaiFirstRunConnecting=true;oaiFirstRunRestoreAuthorized=true;
-      if(!oaiTransferRequest('load','initial-connect'))oaiFirstRunConnectFinished(false);
+      sessionStorage.setItem(OAI_FIRST_RUN_RESTORE_INTENT,String(Date.now()));
+      if(!oaiTransferRequest('load','initial-connect')){oaiClearRestoreIntent();oaiFirstRunConnectFinished(false);}
     }
     cancel.addEventListener('click',later);approve.addEventListener('click',accept);approve.focus();
   }
@@ -16777,15 +16778,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function oaiFirstRunShow(which){
     if(which==='network' && localStorage.getItem(OAI_PHOTO_NETWORK_CHOICE_KEY)==='1')which='drive';
-    if((which==='drive'||which==='restore') && localStorage.getItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY)==='1')return;
-    if(which!=='network'&&which!=='drive'&&which!=='restore')return;
+    if(which==='drive' && localStorage.getItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY)==='1')return;
+    if(which!=='network'&&which!=='drive')return;
     const el=oaiFirstRunOverlay();if(!el)return;
     oaiFirstRunDialog=which;
     el.querySelector('[data-first-run-network]').hidden=which!=='network';
     el.querySelector('[data-first-run-drive]').hidden=which!=='drive';
-    const oldRestore=el.querySelector('[data-first-run-restore]');if(oldRestore)oldRestore.hidden=true;
     el.hidden=false;el.setAttribute('aria-hidden','false');
-    const first=el.querySelector(which==='network'?'[data-first-run-option="wifi"]':which==='restore'?'[data-first-run-restore-connect]':'[data-first-run-connect]');
+    const first=el.querySelector(which==='network'?'[data-first-run-option="wifi"]':'[data-first-run-restore-connect]');
     if(first)first.focus({preventScroll:true});
   }
   function oaiFirstRunConnectFinished(success){
