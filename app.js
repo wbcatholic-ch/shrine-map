@@ -3073,7 +3073,13 @@ function _oaiJournalSelectedDate(kind,visits){
   let d=String(window[prop]||'');if(!visits.some(function(v){return String(v.date||'')===d;}))d=visits.length?String(visits[0].date||''):'';
   window[prop]=d;return d;
 }
-function _oaiJournalDeveloperEnabled(){return true;}
+function _oaiJournalDeveloperEnabled(){
+  // Release gate: existing production Android versions must not expose the new
+  // photo/memo UI before the Play production rollout. Internal-test v350 keeps it.
+  // This checks the installed native version, not the web asset version.
+  const match=String(navigator.userAgent||'').match(/GildongmuAndroid\/(\d+)/i);
+  return !!match && Number(match[1])>=350;
+}
 function _oaiVisitJournalHtml(kind,item,visits){
   // Personal visit journal is available for all users with existing visits; do not touch saved data.
   try{if(!_oaiJournalDeveloperEnabled())return '';}catch(_e){return '';}
