@@ -3073,9 +3073,9 @@ function _oaiJournalSelectedDate(kind,visits){
   let d=String(window[prop]||'');if(!visits.some(function(v){return String(v.date||'')===d;}))d=visits.length?String(visits[0].date||''):'';
   window[prop]=d;return d;
 }
-function _oaiJournalDeveloperEnabled(){try{return window.__OAI_DEV_RUNTIME_ACTIVE__===true&&localStorage.getItem('oai_dev_visit_journal_visible_v1')==='1';}catch(_e){return false;}}
+function _oaiJournalDeveloperEnabled(){return true;}
 function _oaiVisitJournalHtml(kind,item,visits){
-  // Personal visit journal is available only in developer mode; do not touch saved data.
+  // Personal visit journal is available for all users with existing visits; do not touch saved data.
   try{if(!_oaiJournalDeveloperEnabled())return '';}catch(_e){return '';}
   if(!visits||!visits.length)return '';
   const date=_oaiJournalSelectedDate(kind,visits),baseVisit=visits.find(function(v){return String(v.date||'')===date;})||visits[0],visit=_oaiGetVisitByDate(kind,item,date)||baseVisit;
@@ -16322,43 +16322,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   let oaiDevPanelUnlocked=false;
   function oaiDevEnabled(){return window.__OAI_DEV_RUNTIME_ACTIVE__===true;}
   function oaiDevStatus(value){const el=document.getElementById('oai-dev-status');if(el)el.textContent=value||'';}
-  // Developer visit journal: one owner for permission, saved setting, and display.
-  const OAI_JOURNAL_KEY='oai_dev_visit_journal_visible_v1';
-  function oaiRefreshVisitJournalSwitch(){
-    const cb=document.getElementById('cgm-dev-journal-switch');
-    const status=document.getElementById('cgm-dev-journal-status');
-    if(!cb)return;
-    try{
-      const saved=localStorage.getItem(OAI_JOURNAL_KEY)==='1';
-      const available=oaiDevEnabled()&&oaiDevPanelUnlocked;
-      cb.checked=saved;
-      if(status)status.textContent=!available?'개발자 도구가 닫혀 있습니다.':(saved?'현재 사진·메모 표시: 켜짐 · 방문기록 상세에서 확인하세요.':'현재 사진·메모 표시: 꺼짐');
-    }catch(err){if(status)status.textContent='사진·메모 설정을 읽을 수 없습니다.';}
-  }
-  function oaiSaveVisitJournalSwitch(checked){
-    const status=document.getElementById('cgm-dev-journal-status');
-    if(!(oaiDevEnabled()&&oaiDevPanelUnlocked)){
-      oaiRefreshVisitJournalSwitch();
-      if(status)status.textContent='개발자 모드를 활성화한 뒤 다시 시도해 주세요.';
-      return;
-    }
-    try{
-      localStorage.setItem(OAI_JOURNAL_KEY,checked?'1':'0');
-      if(localStorage.getItem(OAI_JOURNAL_KEY)!==(checked?'1':'0'))throw Error('저장 확인 실패');
-      oaiRefreshVisitJournalSwitch();
-      const detail=document.getElementById('parish-visit-detail');
-      if(detail&&detail.classList.contains('show')&&typeof _renderParishVisitDetail==='function')_renderParishVisitDetail();
-      if(typeof _isShrineVisitDetailOpen==='function'&&_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null&&typeof _renderShrineVisitDetail==='function')_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);
-    }catch(err){
-      oaiRefreshVisitJournalSwitch();
-      if(status)status.textContent='사진·메모 설정을 저장하지 못했습니다.';
-    }
-  }
-  // Installed with the developer controller rather than at the end of app.js.
-  document.addEventListener('change',function(event){
-    if(event.target&&event.target.id==='cgm-dev-journal-switch')oaiSaveVisitJournalSwitch(!!event.target.checked);
-  },true);
-
   window.oaiDevPhotoBackupResult=function(state,message){
     const el=document.getElementById('oai-dev-five-photo-status');
     const button=document.getElementById('oai-dev-five-photo-backup');
@@ -16371,203 +16334,18 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(el){el.hidden=false;el.textContent=String(message||'');}
     if(button)button.disabled=(state==='working');
   };
-  window.oaiDevPhotoUploadAuditResult=function(state,message){
-    const el=document.getElementById('oai-dev-photo-upload-audit-status');
-    const button=document.getElementById('oai-dev-photo-upload-audit');
-    if(el){el.hidden=false;el.textContent=String(message||'');}
-    if(button)button.disabled=(state==='working');
-  };
   function oaiRefreshDeveloperPanel(){
     const section=document.getElementById('oai-developer-section');if(section)section.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked);
-    oaiRefreshVisitJournalSwitch();
     const test=document.getElementById('oai-dev-five-photo-backup');
     if(test)test.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.testBackupFiveVisitPhotos==='function');
     const verify=document.getElementById('oai-dev-five-photo-verify');
     if(verify)verify.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.verifyBackupFiveVisitPhotos==='function');
-    const audit=document.getElementById('oai-dev-photo-upload-audit');
-    if(audit)audit.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.auditRecentVisitPhotoUploads==='function');
     if(!oaiDevEnabled()){oaiDevPendingRestore=null;for(const id of ['oai-dev-export-view','oai-dev-import-view','oai-dev-restore-preview']){const el=document.getElementById(id);if(el)el.hidden=true;}}
   }
   function oaiEncodeCgm1(value){return 'CGM1.'+btoa(Array.from(new TextEncoder().encode(JSON.stringify(value)),v=>String.fromCharCode(v)).join(''));}
   function oaiDecodeCgm1(value){
     const raw=String(value||'').trim().replace(/\s+/g,'');if(!raw.startsWith('CGM1.'))throw Error('CGM1 코드가 아닙니다.');
     const bytes=Uint8Array.from(atob(raw.slice(5)),v=>v.charCodeAt(0));return JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes));
-  }
-  // V1273: Developer-only recovery of missing parish stamps from confirmed shrine stamps.
-  // Existing GPS stamps, shrine data, course data and photo journals remain untouched.
-  let oaiStampBackfillCandidates=[];
-  // Inspect every original parish record independently of the UI lookup key.
-  // Never convert malformed or ambiguous data into a new stamp.
-  function oaiDevStampRawRecords(){
-    const raw=localStorage.getItem(OAI_PARISH_VISITS_KEY);
-    if(!raw)return {};
-    const data=JSON.parse(raw);
-    if(!data||typeof data!=='object'||Array.isArray(data))throw Error('성당 원본 방문기록 형식이 올바르지 않습니다.');
-    return data;
-  }
-  function oaiDevStampIdentity(p,record,key){
-    const parts=String(key||'').split('|');
-    const canonical=String(_oaiPlaceCanonicalId('parish',p)||'');
-    const currentKey=_parishVisitKey(p);
-    const placeId=String(record.placeId||'');
-    const name=String(record.name||parts[1]||'');
-    const diocese=String(record.diocese||parts[0]||'');
-    const currentName=String(p.name||''),currentDiocese=String(p.diocese||'');
-    if(key===currentKey)return 'exact';
-    if(placeId&&canonical&&placeId===canonical)return 'identity';
-    if(name===currentName&&diocese===currentDiocese)return 'legacy';
-    return '';
-  }
-  // Developer-only: catalog dioceses use Korean labels, explicit shared groups use codes.
-  // Do not alter GPS, shared-journal or existing stamp identity logic.
-  function oaiDevStampGroupParish(group){
-    if(!group)return null;
-    const dio=String(_DIO[String(group.parishDiocese||'')]||group.parishDiocese||'');
-    return (PARISHES||[]).find(function(p){
-      return p&&String(p.name||'')===String(group.parishName||'')&&String(p.diocese||'')===dio;
-    })||null;
-  }
-  function oaiDevStampDiagnostics(){
-    const groups=_oaiJointStampPairs();
-    const parishRecords=oaiDevStampRawRecords();
-    const shrineRaw=localStorage.getItem(OAI_SHRINE_VISITS_KEY);
-    let shrines={};
-    try{shrines=shrineRaw?JSON.parse(shrineRaw):{};}catch(_err){return '성지 방문 원본 JSON 해석 실패 · 등록 금지';}
-    if(!shrines||typeof shrines!=='object'||Array.isArray(shrines))return '성지 방문 원본 형식 오류 · 등록 금지';
-    let joined=0,shrineVisits=0,totalDays=0;
-    const messages=[];
-    groups.forEach(function(g){
-      const s=_oaiSharedGroupShrine(g),p=oaiDevStampGroupParish(g);
-      if(s&&p)joined++;
-      if(!s||!p){messages.push(g.parishName+': 장소 연결 실패 ('+(!s?'성지 ':'')+(!p?'성당':'')+')');return;}
-      const dates=_getShrineVisitDates(s).map(v=>String(v&&v.date||'')).filter(_isVisitDate);
-      if(dates.length)shrineVisits++;
-      totalDays+=dates.length;
-      if(/대안성당|새방골성당|가실성당/.test(g.parishName)){
-        const matches=Object.keys(parishRecords).filter(k=>parishRecords[k]&&typeof parishRecords[k]==='object'&&oaiDevStampIdentity(p,parishRecords[k],k));
-        const existing=Array.from(new Set(matches.flatMap(k=>Array.isArray(parishRecords[k].visits)?parishRecords[k].visits.map(_visitDateOf).filter(Boolean):[])));
-        messages.push(g.parishName+': 성지 방문 '+dates.length+'일 / 성당 원본 연결 키 '+matches.length+'개 / 성당 원본 방문일 '+existing.length+'건');
-      }
-    });
-    return ['읽기 전용 진단 · 저장 데이터를 변경하지 않습니다.',
-      '성지 원본 키 '+Object.keys(shrines).length+'개 / 성당 원본 키 '+Object.keys(parishRecords).length+'개',
-      '공통 그룹 '+groups.length+'개 / 양쪽 장소 연결 '+joined+'개 / 성지 방문 있는 그룹 '+shrineVisits+'개 / 해당 방문일 '+totalDays+'건',
-      '성당 원본에는 수동·GPS 방문기록이 혼재할 수 있으므로 모든 기록을 중복 검사합니다.',
-      ...messages].join('\n');
-  }
-  function oaiDevStampBackfillCandidates(){
-    const matches=[], skipped=[], ambiguous=[];
-    const data=oaiDevStampRawRecords();
-    const groups=_oaiJointStampPairs();
-    const used=new Set();
-    groups.forEach(function(group){
-      const shrine=_oaiSharedGroupShrine(group),parish=oaiDevStampGroupParish(group);
-      if(!shrine||!parish)return;
-      const records=Object.keys(data).map(function(key){
-        const r=data[key];
-        if(!r||typeof r!=='object'||Array.isArray(r))return null;
-        const type=oaiDevStampIdentity(parish,r,key);
-        if(!type)return null;
-        if(!Array.isArray(r.visits))throw Error('성당 기록의 방문일 목록이 올바르지 않습니다: '+parish.name);
-        return {key:key,record:r,type:type};
-      }).filter(Boolean);
-      _getShrineVisitDates(shrine).forEach(function(visit){
-        const date=String(visit&&visit.date||'');
-        if(!_isVisitDate(date))return;
-        const rowKey=String(group.id)+'|'+date;
-        if(used.has(rowKey))return;
-        used.add(rowKey);
-        const matched=records.filter(function(r){return _hasVisitDate(r.record.visits,date);});
-        const base={key:rowKey,groupId:String(group.id),date:date,shrineName:String(shrine.name||''),shrineId:String(_oaiPlaceCanonicalId('shrine',shrine)||''),parishName:String(parish.name||''),diocese:String(parish.diocese||''),parish:parish};
-        if(matched.length){
-          skipped.push(Object.assign({},base,{reason:'원본 성당 방문기록에서 이미 확인 ('+matched.map(r=>r.type).join(', ')+')'}));
-          return;
-        }
-        // Competing historical records could belong to this parish. Never write to one arbitrarily.
-        if(records.length>1){
-          ambiguous.push(Object.assign({},base,{reason:'동일 성당으로 식별되는 원본 기록이 여러 개 있음'}));
-          return;
-        }
-        if(records.length===1&&records[0].type==='legacy'&&records[0].key!==_parishVisitStoredKey(parish,data)){
-          ambiguous.push(Object.assign({},base,{reason:'화면 조회 키와 과거 저장 키가 일치하지 않음'}));
-          return;
-        }
-        matches.push(base);
-      });
-    });
-    const sorter=(a,b)=>b.date.localeCompare(a.date)||a.parishName.localeCompare(b.parishName,'ko');
-    return {eligible:matches.sort(sorter),existing:skipped.sort(sorter),ambiguous:ambiguous.sort(sorter)};
-  }
-  function oaiDevStampBackfillPreview(){
-    if(!(oaiDevEnabled()&&oaiDevPanelUnlocked))return;
-    const body=document.getElementById('oai-dev-stamp-results');
-    if(!body)return;
-    body.hidden=false;body.textContent='원본 성당 방문기록과 성지 방문일을 대조하고 있습니다…';
-    _ensureAllParishDiocesesLoaded({silent:true}).then(function(){
-      if(!(oaiDevEnabled()&&oaiDevPanelUnlocked))return;
-      const result=oaiDevStampBackfillCandidates();
-      oaiStampBackfillCandidates=result.eligible;
-      const escape=_visitHtmlEsc;
-      const summary='<p><b>보완 가능 '+result.eligible.length+'건 · 원본 등록 확인 '+result.existing.length+'건 · 확인 필요 '+result.ambiguous.length+'건</b></p>';
-      const diag='<details open><summary><b>원본 방문기록 진단 (읽기 전용)</b></summary><pre style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px">'+escape(oaiDevStampDiagnostics())+'</pre></details>';
-      const details=result.existing.concat(result.ambiguous).map(function(c){
-        return '<div style="padding:5px 2px">'+escape(c.date+' · '+c.parishName)+' — '+escape(c.reason)+'</div>';
-      }).join('');
-      body.innerHTML=summary+diag+
-        '<p>원본 기록에 방문일이 있으면 새로 등록하지 않습니다. 불명확한 기록도 제외합니다. 아래 보완 가능 항목은 실제 동일 장소를 방문했는지 직접 확인한 후 선택하세요.</p>'+
-        (result.eligible.length?'<div style="max-height:270px;overflow:auto;border:1px solid #ddd;border-radius:8px;padding:8px">'+
-          result.eligible.map(function(c,i){return '<label style="display:flex;gap:8px;align-items:flex-start;padding:7px 3px;border-bottom:1px solid #eee"><input type="checkbox" data-oai-stamp-row="'+i+'"><span><b>'+escape(c.date)+' · '+escape(c.parishName)+'</b><small style="display:block">성지: '+escape(c.shrineName)+' · '+escape(c.diocese)+'</small></span></label>';}).join('')+'</div>'+
-          '<p><label><input type="checkbox" id="oai-dev-stamp-backup-ok"> 기존 방문기록의 별도 백업을 확보했습니다.</label></p>'+
-          '<button type="button" class="oai-dev-copy" data-oai-dev-stamp-apply="1">선택한 성당 스탬프 일괄 보완</button>':'<p>현재 자동 보완 가능한 방문일이 없습니다.</p>')+
-        (details?'<details><summary>원본에 있는 기록·확인 필요 항목 보기</summary><div style="max-height:220px;overflow:auto">'+details+'</div></details>':'')+
-        '<p id="oai-dev-stamp-message" role="status"></p>';
-    }).catch(function(err){oaiStampBackfillCandidates=[];body.textContent='안전 검사 중단: '+(err.message||'오류')+' · 등록하지 마세요.';});
-  }
-  function oaiDevStampBackfillApply(){
-    if(!(oaiDevEnabled()&&oaiDevPanelUnlocked))return;
-    const box=document.getElementById('oai-dev-stamp-results');
-    const message=document.getElementById('oai-dev-stamp-message');
-    const selected=Array.from(box?box.querySelectorAll('[data-oai-stamp-row]:checked'):[]).map(el=>oaiStampBackfillCandidates[Number(el.getAttribute('data-oai-stamp-row'))]).filter(Boolean);
-    if(!selected.length){if(message)message.textContent='보완할 방문일을 먼저 선택하세요.';return;}
-    if(!document.getElementById('oai-dev-stamp-backup-ok').checked){if(message)message.textContent='기존 기록의 별도 백업을 먼저 확보하세요.';return;}
-    // Re-evaluate against today's data; never apply a stale preview after a restore/import.
-    const current=new Map(oaiDevStampBackfillCandidates().eligible.map(row=>[row.key,row]));
-    if(selected.some(row=>!current.has(row.key)||current.get(row.key).shrineId!==row.shrineId)){
-      if(message)message.textContent='방문기록이 변경됐습니다. 다시 조회한 후 진행하세요.';return;
-    }
-    _oaiVisitConfirm('선택한 '+selected.length+'건의 성당 방문일을 기존 성지 스탬프 날짜로 보완합니다. 성지·성당이 실제 동일 장소인지 확인하셨나요?',function(){
-      if(!(oaiDevEnabled()&&oaiDevPanelUnlocked))return;
-      const now=new Map(oaiDevStampBackfillCandidates().eligible.map(row=>[row.key,row]));
-      if(selected.some(row=>!now.has(row.key)||now.get(row.key).shrineId!==row.shrineId)){if(message)message.textContent='기록이 변경됐습니다. 다시 조회하세요.';return;}
-      const key=OAI_PARISH_VISITS_KEY,prior=localStorage.getItem(key),data=oaiDevStampRawRecords();
-      let added=0;
-      try{
-        selected.forEach(function(row){
-          const p=now.get(row.key).parish,storedKey=_parishVisitStoredKey(p,data);
-          if(!storedKey)throw Error('성당 식별키 없음: '+p.name);
-          const records=Object.keys(data).filter(k=>data[k]&&typeof data[k]==='object'&&oaiDevStampIdentity(p,data[k],k));
-          if(records.length>1||(records.length===1&&records[0]!==storedKey))throw Error('원본 식별이 불명확합니다: '+p.name);
-          const r=data[storedKey]&&typeof data[storedKey]==='object'?data[storedKey]:{name:p.name||'',diocese:p.diocese||'',addr:p.addr||'',visits:[]};
-          r.visits=Array.isArray(r.visits)?r.visits:[];
-          if(_hasVisitDate(r.visits,row.date))return;
-          const entry=_newVisitEntry(row.date,'manual');
-          entry.source='shrine-stamp-backfill';entry.sourceShrineId=row.shrineId;
-          r.visits.push(entry);r.visits.sort(_compareShrineVisits);
-          if(!r.placeId)r.placeId=_oaiPlaceCanonicalId('parish',p);
-          data[storedKey]=r;added++;
-        });
-        if(added){
-          localStorage.setItem(key,JSON.stringify(data));
-          const checked=_loadParishVisits();
-          if(selected.some(row=>!_hasVisitDate((checked[_parishVisitStoredKey(row.parish,checked)]||{}).visits,row.date)))throw Error('저장 후 방문일 검증 실패');
-        }
-        oaiDevStampBackfillPreview();
-        oaiDevStatus('성당 스탬프 '+added+'건 보완 완료 · 기존 성지 및 순례기록 유지');
-      }catch(err){
-        try{if(prior===null)localStorage.removeItem(key);else localStorage.setItem(key,prior);}catch(_e){}
-        if(message)message.textContent='저장 실패: '+(err.message||'오류')+' · 이전 성당 기록 복구 시도';
-      }
-    },{title:'성당 방문기록 보완 확인',confirmLabel:'등록'});
   }
   function oaiDevSnapshot(){
     const data=JSON.parse(oaiTransferSnapshot()).data;
@@ -16615,7 +16393,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }finally{oaiApplyingRestore=false;}
   }
   document.addEventListener('click',function(event){
-    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-copy],[data-oai-dev-preview],[data-oai-dev-apply],[data-oai-dev-failure-preview],[data-oai-dev-daily-results],[data-oai-dev-daily-memory-test],[data-oai-dev-five-photo-backup],[data-oai-dev-five-photo-verify],[data-oai-dev-photo-upload-audit],[data-oai-dev-stamp-preview],[data-oai-dev-stamp-apply]');if(!button)return;
+    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-copy],[data-oai-dev-preview],[data-oai-dev-apply],[data-oai-dev-failure-preview],[data-oai-dev-daily-results],[data-oai-dev-five-photo-backup],[data-oai-dev-five-photo-verify]');if(!button)return;
     if(button.id==='oai-settings-version-label'){
       oaiDevTapCount++;
       if(oaiDevTapCount>=10){oaiDevTapCount=0;const next=!(oaiDevEnabled()&&oaiDevPanelUnlocked);oaiDevPanelUnlocked=next;window.__OAI_DEV_RUNTIME_ACTIVE__=next;oaiRefreshDeveloperPanel();const detail=document.getElementById('parish-visit-detail');if(detail&&detail.classList.contains('show'))_renderParishVisitDetail();if(_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null)_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);if(next){oaiDevStatus('개발자 모드가 열렸습니다.');document.getElementById('oai-developer-section').scrollIntoView({block:'nearest',behavior:'smooth'});} }
@@ -16624,16 +16402,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!oaiDevEnabled())return;
     event.preventDefault();
     try{
-      if(button.hasAttribute('data-oai-dev-stamp-preview')){oaiDevStampBackfillPreview();}
-      else if(button.hasAttribute('data-oai-dev-stamp-apply')){oaiDevStampBackfillApply();}
-      else if(button.hasAttribute('data-oai-dev-five-photo-verify')){
+      if(button.hasAttribute('data-oai-dev-five-photo-verify')){
         if(!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.verifyBackupFiveVisitPhotos==='function'))return;
         window.oaiDevPhotoVerifyResult('working','Google 백업 사진을 읽기 전용으로 확인합니다.');
         window.GildongmuNative.verifyBackupFiveVisitPhotos();
-      }else if(button.hasAttribute('data-oai-dev-photo-upload-audit')){
-        if(!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.auditRecentVisitPhotoUploads==='function'))return;
-        window.oaiDevPhotoUploadAuditResult('working','최근 사진 5장의 백업 상태를 읽기 전용으로 확인합니다.');
-        window.GildongmuNative.auditRecentVisitPhotoUploads();
       }else if(button.hasAttribute('data-oai-dev-five-photo-backup')){
         if(!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.testBackupFiveVisitPhotos==='function'))return;
         window.oaiDevPhotoBackupResult('working','Google Drive 연결 및 사진 백업을 시작합니다.');
@@ -16655,10 +16427,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(!oaiDevPanelUnlocked)return;
         if(typeof window._oaiShowDailyRegisterDiagnostics==='function')window._oaiShowDailyRegisterDiagnostics();
         else oaiDevStatus('자동 등록 기록을 조회할 수 없습니다.');
-      }else if(button.hasAttribute('data-oai-dev-daily-memory-test')){
-        if(!oaiDevPanelUnlocked)return;
-        if(typeof window._oaiRunDailyRegisterMemoryTest==='function')window._oaiRunDailyRegisterMemoryTest();
-        else oaiDevStatus('임시 자동 등록 시험을 시작할 수 없습니다.');
+
       }
     }catch(err){oaiDevStatus(err.message||'요청을 처리할 수 없습니다.');}
   },true);
@@ -17777,34 +17546,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       completions:[{completedAt:at,placeCount:eligible.length,method:'gps',locked:true}],gpsSettled:true,
       completionArmed:false,lastStartedAt:0,updatedAt:Date.now(),lastCompletedAt:at});
   }
-  // 개발자 전용: GPS 기록, 코스, 날짜별 장부에 쓰지 않는 메모리 기반 규칙 시험.
-  // 실제 등록의 영구 저장/앱 재실행 동작까지 검증했다고 해석하면 안 된다.
-  function _dailyRunMemoryTest(){
-    if(!window.__OAI_DEV_RUNTIME_ACTIVE__)throw new Error('개발자 모드에서만 실행할 수 있습니다.');
-    const date=_dailyPreviousDate(Date.now());
-    const shrine=(typeof SHRINES!=='undefined'&&Array.isArray(SHRINES)?SHRINES:[]).map(normalizePoint).find(Boolean);
-    if(!shrine)throw new Error('성지 목록에서 테스트용 장소를 읽을 수 없습니다.');
-    const fake=[{name:shrine.name,addr:shrine.addr,lat:shrine.lat,lng:shrine.lng,placeId:shrine.placeId||'',diocese:shrine.diocese||'',kind:'shrine',at:_dailyDayEnd(date)-3600000}];
-    const eligible=_dailyAutoEvents(fake);
-    if(!_dailyAutoEligible(eligible))throw new Error('성지 1곳 자동 등록 조건 검사 실패');
-    const id='memory_test_'+date.replace(/-/g,'');
-    const course=_dailyBuildAutoCourse(date,eligible,id);
-    const inMemoryCourses=[course]; // localStorage, 저장 함수, GPS 기록에 접근하지 않는다.
-    const found=inMemoryCourses.find(c=>c.id===id);
-    const valid=!!(found&&found.autoGps&&found.sourceDate===date&&found.places.length===1&&
-      !found.start&&!found.end&&_dailySameOrderedPlaces(found.places,eligible)&&
-      _courseCompletionList(found).some(x=>_dailyIso(x.completedAt)===date&&x.placeCount===1&&x.locked));
-    inMemoryCourses.length=0; // 시험 데이터는 반환 전에 폐기한다.
-    if(!valid)throw new Error('가상 코스 생성·재조회 검증 실패');
-    return '가상 방문일 '+date+' · 성지 1곳 · 자동 코스 생성 규칙 통과 · 메모리 데이터 폐기 완료';
-  }
-  window._oaiRunDailyRegisterMemoryTest=function(){
-    const target=document.getElementById('oai-dev-daily-memory-results');
-    if(!target)return false;
-    target.hidden=false;
-    try{target.textContent='시험 결과: '+_dailyRunMemoryTest()+'\n※ 실제 GPS 인식, 자동 실행 시각, 영구 저장 및 Google Drive 동작은 검증하지 않습니다.';return true;}
-    catch(e){target.textContent='시험 실패: '+String(e&&e.message||e);return false;}
-  };
   function _dailyRegisterOnce(date,events,result){
     // 반환값(boolean)은 기존 수동/자동 호출자와 호환한다. 상세 결과는 선택적 별도 객체에만 기록한다.
     const report=(status,detail)=>{if(result){result.status=status;result.detail=detail;}};
