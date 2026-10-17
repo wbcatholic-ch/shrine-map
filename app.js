@@ -12114,10 +12114,11 @@ function _loadNearby(){
         <div style="font-size:36px;margin-bottom:12px">📍</div>
         <div style="font-size:14px;font-weight:700;color:#c0392b;margin-bottom:8px">위치 권한이 거부되어 있습니다</div>
         <div style="font-size:12px;color:#888;line-height:1.7;margin-bottom:18px">
-          브라우저 주소창 왼쪽의 🔒 아이콘을 탭한 뒤<br>
-          <b>위치</b> 권한을 <b>허용</b>으로 변경하고 다시 시도하세요.
+          휴대폰의 앱 정보 → 권한 → 위치에서<br>
+          <b>앱 사용 중에만 허용</b>으로 변경하고 다시 시도하세요.
         </div>
         <button onclick="_loadNearby()" style="background:#0e1535;color:#d4aa6a;border:none;border-radius:20px;padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">↺ 현재 위치 다시 확인</button>
+        <button onclick="try{(window.GildongmuNative||window.Android).openAppLocationSettings()}catch(e){}" style="background:#fff;color:#0e1535;border:1px solid #0e1535;border-radius:20px;padding:10px 18px;margin-left:6px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">앱 권한 설정</button>
       </div>`;
     } else {
       body.innerHTML=`<div style="padding:28px 20px;text-align:center;">
@@ -12133,6 +12134,13 @@ function _loadNearby(){
     showLocationError({code:0});
     return;
   }
+
+  // On Android, a previously denied runtime permission must be requested on the
+  // user's next explicit nearby search, before WebView geolocation is attempted.
+  try{
+    const native=window.GildongmuNative||window.Android;
+    if(native&&typeof native.requestNearbyLocationPermission==='function'&&native.requestNearbyLocationPermission())return;
+  }catch(_e){}
 
   /* 성지/성당/피정 내주변 거리 계산은 저장 위치·이전 위치·캐시 위치로 확정하지 않는다.
      maximumAge:0 새 위치를 받은 경우에만 거리와 목록을 계산한다. */
@@ -16523,7 +16531,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       cancel.removeEventListener('click',onCancel);approve.removeEventListener('click',onApprove);
       modal.removeEventListener('keydown',onKey);
       if(focusBefore&&typeof focusBefore.focus==='function')focusBefore.focus();
+      oaiFirstRunRestorePending=false;
       if(accepted)onAccept();else oaiTransferStatus('기록 가져오기를 취소했습니다.');
+      if(!accepted)oaiFirstRunParishIfNeeded();
     }
     function onCancel(){close(false);}
     function onApprove(){close(true);}
@@ -16537,7 +16547,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   window.oaiDataTransferResult=function(action,ok,payload,message){
     const mode=oaiTransferPendingMode;oaiTransferBusy=false;oaiTransferPendingMode='';
     if(!ok){
-      if(mode==='initial-connect' && action==='load' && message==='이전에 옮긴 데이터 파일이 없습니다.'){
+      if((mode==='initial-connect'||(mode==='manual-load'&&oaiFirstRunAndroid())) && action==='load' && message==='이전에 옮긴 데이터 파일이 없습니다.'){
         // Authorization and remote listing succeeded; no existing backup file.
         // Never treat a network/authentication error as an empty Drive.
         localStorage.setItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY,'1');
@@ -16545,7 +16555,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'1');
         oaiDriveReady=true;oaiRestoreDecisionPending=false;
         refreshGoogleDriveButton();
-        oaiFirstRunConnectFinished(true);
+        if(mode==='initial-connect')oaiFirstRunConnectFinished(true);
+        else oaiFirstRunParishIfNeeded();
         return;
       }
       if(mode==='initial-connect')oaiFirstRunConnectFinished(false);
@@ -16562,6 +16573,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(action!=='load')return;
     if(mode==='initial-connect'){
       // A backup exists. Keep automatic writes off until the user explicitly imports it.
+      oaiFirstRunRestorePending=true;
       localStorage.setItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY,'1');oaiDriveReady=true;
       localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'0');
       refreshGoogleDriveButton();
@@ -16604,7 +16616,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           // handing off the full-photo inventory. Native SQLite deduplicates IDs.
           oaiNotifyNativePhotoCloudSettings(true);
           oaiQueuePhotoRestoreManifest();
-          if(mode==='initial-load')setTimeout(function(){location.reload();},500);
+          if(mode==='manual-load')oaiFirstRunParishIfNeeded();
+          if(mode==='initial-load'||mode==='initial-connect')setTimeout(function(){location.reload();},500);
         }catch(err){
           oaiTransferStatus('가져오기 실패: '+err.message);
         }
@@ -16664,7 +16677,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   // First-run guidance for new Android installations. Independent, dismissible dialogs.
   // No backup is written before Drive authorization and a successful remote listing.
-  let oaiFirstRunSeen=false, oaiFirstRunConnecting=false, oaiFirstRunDialog='', oaiFirstRunNetworkTimer=0, oaiFirstRunConnectTimer=0;
+  let oaiFirstRunSeen=false, oaiFirstRunConnecting=false, oaiFirstRunDialog='', oaiFirstRunNetworkTimer=0, oaiFirstRunConnectTimer=0, oaiFirstRunRestorePending=false;
   const oaiFirstRunAndroid=()=>{const m=String(navigator.userAgent||'').match(/GildongmuAndroid\/(\d+)/i);return !!m&&Number(m[1])>=360;};
   function oaiFirstRunHasVisits(){
     try{
@@ -16680,35 +16693,40 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     clearTimeout(oaiFirstRunNetworkTimer);oaiFirstRunNetworkTimer=0;
     const el=oaiFirstRunOverlay();if(el){el.hidden=true;el.setAttribute('aria-hidden','true');}
     const previous=oaiFirstRunDialog;oaiFirstRunDialog='';
-    if(advance&&previous==='network')oaiFirstRunShow('drive');
+    if(advance&&previous==='network'){
+      if(localStorage.getItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY)!=='1')oaiFirstRunShow(oaiFirstRunHasVisits()?'restore':'drive');
+      else oaiFirstRunParishIfNeeded();
+    }else if((previous==='drive'||previous==='restore')&&!oaiFirstRunConnecting&&!oaiFirstRunRestorePending)oaiFirstRunParishIfNeeded();
   }
   function oaiFirstRunShow(which){
     if(which==='network' && localStorage.getItem(OAI_PHOTO_NETWORK_CHOICE_KEY)==='1')which='drive';
-    if(which==='drive' && localStorage.getItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY)==='1')return;
-    if(which!=='network'&&which!=='drive')return;
+    if((which==='drive'||which==='restore') && localStorage.getItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY)==='1')return;
+    if(which!=='network'&&which!=='drive'&&which!=='restore')return;
     const el=oaiFirstRunOverlay();if(!el)return;
     oaiFirstRunDialog=which;
     el.querySelector('[data-first-run-network]').hidden=which!=='network';
     el.querySelector('[data-first-run-drive]').hidden=which!=='drive';
+    el.querySelector('[data-first-run-restore]').hidden=which!=='restore';
     el.hidden=false;el.setAttribute('aria-hidden','false');
-    const first=el.querySelector(which==='network'?'[data-first-run-option="wifi"]':'[data-first-run-connect]');
+    const first=el.querySelector(which==='network'?'[data-first-run-option="wifi"]':which==='restore'?'[data-first-run-restore-connect]':'[data-first-run-connect]');
     if(first)first.focus({preventScroll:true});
   }
   function oaiFirstRunConnectFinished(success){
     oaiFirstRunConnecting=false;
     const button=document.querySelector('[data-first-run-connect]');if(button)button.disabled=false;
-    if(success){oaiFirstRunClose(false);}
-    else {const status=document.querySelector('[data-first-run-status]');if(status)status.textContent='연결하지 못했습니다. 나중에 다시 설정할 수 있습니다.';}
+    if(success){oaiFirstRunClose(false);if(!oaiFirstRunRestorePending)oaiFirstRunParishIfNeeded();}
+    else {const status=document.querySelector('[data-first-run-status]');if(status)status.textContent='연결하지 못했습니다. 나중에 다시 설정할 수 있습니다.';oaiFirstRunParishIfNeeded();}
   }
   function oaiFirstRunBegin(){
-    if(oaiFirstRunSeen||!oaiFirstRunAndroid()||oaiFirstRunHasVisits())return;
+    if(oaiFirstRunSeen||!oaiFirstRunAndroid())return;
     oaiFirstRunSeen=true;
     if(localStorage.getItem(OAI_PHOTO_NETWORK_CHOICE_KEY)!=='1')oaiFirstRunShow('network');
-    else if(localStorage.getItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY)!=='1')oaiFirstRunShow('drive');
+    else if(localStorage.getItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY)!=='1')oaiFirstRunShow(oaiFirstRunHasVisits()?'restore':'drive');
+    else oaiFirstRunParishIfNeeded();
   }
   document.addEventListener('click',function(e){
     const el=oaiFirstRunOverlay();if(!el||el.hidden)return;
-    const btn=e.target&&e.target.closest&&e.target.closest('[data-first-run-action],[data-first-run-option],[data-first-run-connect]');
+    const btn=e.target&&e.target.closest&&e.target.closest('[data-first-run-action],[data-first-run-option],[data-first-run-connect],[data-first-run-restore-connect],[data-first-run-existing]');
     if(!btn)return;e.preventDefault();e.stopPropagation();
     if(btn.hasAttribute('data-first-run-option')){
       if(oaiFirstRunNetworkTimer)return;
@@ -16730,7 +16748,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       oaiFirstRunNetworkTimer=setTimeout(function(){oaiFirstRunClose(true);},500);
       return;
     }
-    if(btn.hasAttribute('data-first-run-connect')){
+    if(btn.hasAttribute('data-first-run-existing')){oaiFirstRunShow('restore');return;}
+    if(btn.hasAttribute('data-first-run-connect')||btn.hasAttribute('data-first-run-restore-connect')){
       if(oaiFirstRunConnecting)return;
       oaiFirstRunConnecting=true;btn.disabled=true;
       // Show the pressed state briefly, then dismiss before opening the
@@ -16743,7 +16762,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       },500);
       return;
     }
-    if(btn.getAttribute('data-first-run-action')==='close')oaiFirstRunClose(true);
+    if(btn.getAttribute('data-first-run-action')==='close'){
+      const was=oaiFirstRunDialog;oaiFirstRunClose(was==='network');
+      if(was==='drive'||was==='restore')oaiFirstRunParishIfNeeded();
+    }
   },true);
   document.addEventListener('keydown',function(e){
     const el=oaiFirstRunOverlay();if(!el||el.hidden)return;
@@ -16761,11 +16783,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   let initialDriveFirstFlow=false;
   const parishSetup={dio:'',parish:null,query:'',view:'home'};
   function setupModal(){return document.getElementById('oai-parish-setup-modal');}
-  function closeParishSetup(){const m=setupModal();if(!m)return;if(initialOnboarding&&!configuredParish())return;m.classList.remove('show','oai-parish-setup-home');m.setAttribute('aria-hidden','true');}
+  function closeParishSetup(){const m=setupModal();if(!m)return;m.classList.remove('show','oai-parish-setup-home');m.setAttribute('aria-hidden','true');if(initialOnboarding)finishInitialOnboarding();}
   function stepBackParishSetup(){
     const m=setupModal();if(!m||!m.classList.contains('show'))return false;
     if(parishSetup.view!=='home'){parishSetup.view='home';parishSetup.query='';renderParishSetup();return true;}
-    if(initialOnboarding&&!configuredParish())return true;
+
     closeParishSetup();return true;
   }
   function renderParishSetup(){
@@ -16834,9 +16856,19 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function skipInitialParishSetup(){
     if(!initialOnboarding)return;
-    finishInitialOnboarding();
+    closeParishSetup();
   }
-  function finishInitialOnboarding(){initialOnboarding=false;initialDriveFirstFlow=false;localStorage.setItem(OAI_ONBOARDING_DONE_KEY,'1');}
+  function finishInitialOnboarding(){initialOnboarding=false;initialDriveFirstFlow=false;
+    if(configuredDiocese())localStorage.setItem(OAI_ONBOARDING_DONE_KEY,'1');
+    else localStorage.removeItem(OAI_ONBOARDING_DONE_KEY);
+  }
+  function oaiFirstRunParishIfNeeded(){
+    if(!oaiFirstRunAndroid()||configuredDiocese())return;
+    const overlay=oaiFirstRunOverlay();if(overlay&&!overlay.hidden)return;
+    if(initialOnboarding)return;
+    initialOnboarding=true;
+    setTimeout(function(){if(initialOnboarding&&!configuredDiocese())openParishChooser();},250);
+  }
   window.openOaiSettings=open;
   window.closeOaiSettings=close;
   window.isOaiSettingsOpen=function(){const m=modal();return !!(m&&m.classList.contains('show'));};
