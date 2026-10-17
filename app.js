@@ -12154,7 +12154,7 @@ function _loadNearby(){
           <b>앱 사용 중에만 허용</b>으로 변경하고 다시 시도하세요.
         </div>
         <button onclick="_loadNearby()" style="background:#0e1535;color:#d4aa6a;border:none;border-radius:20px;padding:10px 22px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">↺ 현재 위치 다시 확인</button>
-        <button onclick="try{(window.GildongmuNative||window.Android).openAppLocationSettings()}catch(e){}" style="background:#fff;color:#0e1535;border:1px solid #0e1535;border-radius:20px;padding:10px 18px;margin-left:6px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">앱 권한 설정</button>
+        <button onclick="oaiNearbyLocationPermissionGate()" style="background:#fff;color:#0e1535;border:1px solid #0e1535;border-radius:20px;padding:10px 18px;margin-left:6px;font-size:13px;font-weight:700;cursor:pointer;font-family:inherit;">위치 권한 안내</button>
       </div>`;
     } else {
       body.innerHTML=`<div style="padding:28px 20px;text-align:center;">
