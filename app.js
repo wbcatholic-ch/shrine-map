@@ -3102,7 +3102,27 @@ function _oaiCurrentJournalContext(kind){
   }
   const idx=parseInt(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__,10),item=(idx>=0&&SHRINES[idx])?SHRINES[idx]:null,visits=item?_getShrineVisitDates(item):[],date=_oaiJournalSelectedDate('shrine',visits);return item&&date?{kind:'shrine',item:item,date:date,visits:visits}:null;
 }
-function _oaiRerenderJournal(kind){if(kind==='parish')_renderParishVisitDetail();else{const idx=parseInt(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__,10);if(idx>=0)_renderShrineVisitDetail(idx);}setTimeout(function(){_oaiHydrateVisibleVisitThumbnails(kind);},0);}
+function _oaiRerenderJournal(kind){
+  // Preserve confirmed visible thumbnails when the visit journal is re-rendered.
+  // Replacing an already-loaded <img> with a blank placeholder causes flicker
+  // and an unnecessary native photo request on the first visible six items.
+  const selector='.oai-visit-journal[data-oai-journal-kind="'+String(kind||'')+'"]';
+  const before=document.querySelector(selector),displayed=new Map();
+  if(before)before.querySelectorAll('.oai-visit-photo-thumb.loaded').forEach(function(btn){
+    const id=btn.getAttribute('data-oai-photo-file'),img=btn.querySelector('img');
+    if(id&&img&&img.getAttribute('src'))displayed.set(id,img.getAttribute('src'));
+  });
+  if(kind==='parish')_renderParishVisitDetail();
+  else{const idx=parseInt(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__,10);if(idx>=0)_renderShrineVisitDetail(idx);}
+  const after=document.querySelector(selector);
+  if(after&&displayed.size)after.querySelectorAll('.oai-visit-photo-thumb').forEach(function(btn){
+    const src=displayed.get(btn.getAttribute('data-oai-photo-file'));
+    if(!src)return;
+    const img=btn.querySelector('img');if(!img)return;
+    img.src=src;btn.classList.add('loaded');btn.dataset.oaiLoading='0';
+  });
+  setTimeout(function(){_oaiHydrateVisibleVisitThumbnails(kind);},0);
+}
 function _oaiVisitToast(message){
   const text=String(message||'').trim();if(!text)return;
   let t=document.getElementById('oai-visit-toast');if(!t){t=document.createElement('div');t.id='oai-visit-toast';t.className='oai-visit-toast';document.body.appendChild(t);}t.textContent=text;t.classList.add('show');clearTimeout(window.__OAI_VISIT_TOAST_TIMER__);window.__OAI_VISIT_TOAST_TIMER__=setTimeout(function(){t.classList.remove('show');},2200);
@@ -3225,7 +3245,7 @@ function _oaiHydrateVisibleVisitThumbnails(kind){
   const root=document.querySelector('.oai-visit-journal[data-oai-journal-kind="'+String(kind||'')+'"]');if(!root)return;const thumbs=Array.from(root.querySelectorAll('.oai-visit-photo-thumb'));
   if('IntersectionObserver' in window){
     const obs=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(!entry.isIntersecting)return;const btn=entry.target;obs.unobserve(btn);const fileId=btn.getAttribute('data-oai-photo-file')||'';if(!fileId||btn.dataset.oaiLoading==='1'||btn.classList.contains('loaded'))return;btn.dataset.oaiLoading='1';_oaiLoadVisitPhotoData(fileId,{type:'thumb',button:btn,driveFileId:btn.getAttribute('data-oai-photo-drive')||''});});},{root:null,rootMargin:'220px 0px'});
-    thumbs.forEach(function(btn,i){if(i<6){const fileId=btn.getAttribute('data-oai-photo-file')||'';if(fileId){btn.dataset.oaiLoading='1';_oaiLoadVisitPhotoData(fileId,{type:'thumb',button:btn,driveFileId:btn.getAttribute('data-oai-photo-drive')||''});}}else obs.observe(btn);});return;
+    thumbs.forEach(function(btn,i){if(i<6){const fileId=btn.getAttribute('data-oai-photo-file')||'';if(fileId&&!btn.classList.contains('loaded')&&btn.dataset.oaiLoading!=='1'){btn.dataset.oaiLoading='1';_oaiLoadVisitPhotoData(fileId,{type:'thumb',button:btn,driveFileId:btn.getAttribute('data-oai-photo-drive')||''});}}else if(!btn.classList.contains('loaded'))obs.observe(btn);});return;
   }
   let cursor=0;function loadBatch(){if(!root.isConnected)return;let loaded=0;while(cursor<thumbs.length&&loaded<2){const btn=thumbs[cursor++],fileId=btn.getAttribute('data-oai-photo-file')||'';if(!fileId||btn.dataset.oaiLoading==='1'||btn.classList.contains('loaded'))continue;btn.dataset.oaiLoading='1';_oaiLoadVisitPhotoData(fileId,{type:'thumb',button:btn,driveFileId:btn.getAttribute('data-oai-photo-drive')||''});loaded++;}if(cursor<thumbs.length)setTimeout(loadBatch,180);}loadBatch();
 }
