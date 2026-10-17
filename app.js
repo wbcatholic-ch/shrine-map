@@ -762,7 +762,7 @@ function oaiClearExternalNavigationState(opts){
     'oai-pilgrimage-save-modal','oai-pilgrimage-delete-modal','oai-pilgrimage-completion-modal',
     'oai-pilgrimage-marker-choice-modal','oai-pilgrimage-follow-start-modal','oai-pilgrimage-follow-stop-modal',
     'oai-frequent-nickname-modal','route-quick-modal','route-choice-modal','mass-quick-modal',
-    'cover-menu-modal','oai-pilgrimage-feature-modal','privacy-policy-modal','guide-manual-modal','srch-modal'
+    'cover-menu-modal','privacy-policy-modal','guide-manual-modal','srch-modal'
   ];
   var _backgroundUiGuardUntil=0;
   function isElementVisiblyOpen(el,id){
@@ -783,7 +783,7 @@ function oaiClearExternalNavigationState(opts){
   }
   function hasCriticalModalOpen(){
     try{
-      var ids=['oai-settings-modal','oai-parish-setup-modal','oai-records-modal','oai-onboarding-backup-modal','oai-record-restore-modal','oai-pilgrimage-point-modal','oai-pilgrimage-save-modal','oai-pilgrimage-delete-modal','oai-pilgrimage-completion-modal','oai-pilgrimage-marker-choice-modal','oai-pilgrimage-follow-start-modal','oai-pilgrimage-follow-stop-modal','oai-frequent-nickname-modal','route-quick-modal','route-choice-modal','mass-quick-modal','oai-pilgrimage-feature-modal','privacy-policy-modal','guide-manual-modal','srch-modal'];
+      var ids=['oai-settings-modal','oai-parish-setup-modal','oai-records-modal','oai-onboarding-backup-modal','oai-record-restore-modal','oai-pilgrimage-point-modal','oai-pilgrimage-save-modal','oai-pilgrimage-delete-modal','oai-pilgrimage-completion-modal','oai-pilgrimage-marker-choice-modal','oai-pilgrimage-follow-start-modal','oai-pilgrimage-follow-stop-modal','oai-frequent-nickname-modal','route-quick-modal','route-choice-modal','mass-quick-modal','privacy-policy-modal','guide-manual-modal','srch-modal'];
       for(var i=0;i<ids.length;i++){var id=ids[i],el=document.getElementById(id);if(isElementVisiblyOpen(el,id))return true;}
     }catch(_e){}
     return false;
@@ -16971,59 +16971,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 })();;
 
 
-
-/* V8-1-14-1034: 순례코스 정식 공개 1회 안내
-   '확인'을 눌렀을 때만 영구 확인 처리한다.
-   시스템 뒤로가기로 닫으면 다음 앱 실행에서 다시 안내한다. */
-(function installPilgrimagePublicFeatureNotice(){
-  if(window.__OAI_PILGRIMAGE_PUBLIC_FEATURE_NOTICE__)return;
-  window.__OAI_PILGRIMAGE_PUBLIC_FEATURE_NOTICE__=true;
-  const KEY='oai_pilgrimage_public_feature_seen_v1';
-  let retryTimer=0;
-
-  function modal(){return document.getElementById('oai-pilgrimage-feature-modal');}
-  function seen(){try{return localStorage.getItem(KEY)==='1';}catch(_e){return false;}}
-  function coverReady(){
-    try{
-      const c=document.getElementById('cover');
-      return !!(c&&getComputedStyle(c).display!=='none'&&!document.documentElement.classList.contains('app-active'));
-    }catch(_e){return false;}
-  }
-  function isOpen(){const m=modal();return !!(m&&m.classList.contains('show'));}
-  function close(markSeen){
-    const m=modal();if(!m)return;
-    if(markSeen){try{localStorage.setItem(KEY,'1');}catch(_e){}}
-    m.classList.remove('show');m.setAttribute('aria-hidden','true');
-  }
-  function maybeShow(){
-    clearTimeout(retryTimer);
-    if(seen()||isOpen())return;
-    if(!coverReady()){retryTimer=setTimeout(maybeShow,1800);return;}
-    try{
-      if(window.oaiShouldDeferAdvisoryModal&&window.oaiShouldDeferAdvisoryModal()){
-        retryTimer=setTimeout(maybeShow,1800);return;
-      }
-    }catch(_e){}
-    const m=modal();if(!m)return;
-    m.classList.add('show');m.setAttribute('aria-hidden','false');
-  }
-
-  window.isOaiPilgrimageFeatureNoticeOpen=isOpen;
-  window.closeOaiPilgrimageFeatureNotice=function(){close(false);};
-  window.oaiMaybeShowPilgrimageFeatureNotice=maybeShow;
-
-  document.addEventListener('click',function(e){
-    const t=e.target&&e.target.closest?e.target.closest('#oai-pilgrimage-feature-ok'):null;
-    if(!t)return;
-    e.preventDefault();e.stopPropagation();
-    close(true);
-  },true);
-
-  const start=function(){retryTimer=setTimeout(maybeShow,1100);};
-  if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',start,{once:true});
-  else start();
-  oaiAddLifecycleObserver('pageshow',function(){if(!seen())setTimeout(maybeShow,900);});
-})();
 
 /* V8-1-14-885: 숨김 개발자 모드 - 드래그 1초 길게 누르기 */
 (function installOaiPilgrimagePlannerDev(){

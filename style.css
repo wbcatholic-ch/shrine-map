@@ -8660,47 +8660,6 @@ html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-total-card >
 }
 
 
-/* V8-1-14-1034: 순례코스 정식 공개 / 1회 새 기능 안내 */
-.pilgrimage-feature-modal{z-index:2147483300!important;}
-.pilgrimage-feature-panel{
-  width:min(90vw,440px)!important;
-  max-height:min(82dvh,720px)!important;
-  overflow-y:auto!important;
-  box-sizing:border-box!important;
-}
-.pilgrimage-feature-hero h2{
-  margin-top:7px!important;
-  word-break:keep-all!important;
-}
-.pilgrimage-feature-list{
-  display:flex;
-  flex-direction:column;
-  gap:8px;
-  margin:15px 0 18px;
-}
-.pilgrimage-feature-list>div{
-  padding:11px 12px;
-  border:1px solid #e0d7c6;
-  border-radius:12px;
-  background:#fffdf8;
-}
-.pilgrimage-feature-list b{
-  display:block;
-  color:#17213a;
-  font-size:14px;
-  font-weight:950;
-}
-.pilgrimage-feature-list span{
-  display:block;
-  margin-top:4px;
-  color:#667085;
-  font-size:12.5px;
-  font-weight:700;
-  line-height:1.45;
-  word-break:keep-all;
-}
-
-
 /* V8-1-14-1039: 순례완료 수동 저장 확인 + 최종 저장 방식 */
 #oai-pilgrimage-manual-complete-confirm-message{
   line-height:1.55!important;
