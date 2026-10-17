@@ -16217,12 +16217,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function oaiTransferStatus(message){const el=document.getElementById('oai-data-transfer-status');if(!el)return;const text=message||'';el.textContent=(text==='Google Drive에 자동 보관되었습니다.'||text==='Google Drive 자동 보관을 껐습니다.'||text==='기록 가져오기를 취소했습니다.')?'':text;}
   const OAI_PHOTO_WIFI_ONLY_KEY='oai_visit_photo_wifi_only_v1';
+  const OAI_PHOTO_NETWORK_CHOICE_KEY='oai_visit_photo_network_selected_1316_v1';
   function oaiNotifyNativePhotoCloudSettings(requestAuthorization){
     try{
       const native=window.GildongmuNative||window.Android;
       if(native&&typeof native.setVisitPhotoCloudOptions==='function'){
         // First-run records restore decision stays independent and mandatory.
-        const permitted=oaiAutoEnabled() && localStorage.getItem(OAI_RESTORE_CHECKED_KEY)==='1';
+        const permitted=oaiAutoEnabled() && localStorage.getItem(OAI_RESTORE_CHECKED_KEY)==='1' && localStorage.getItem(OAI_PHOTO_NETWORK_CHOICE_KEY)==='1';
         native.setVisitPhotoCloudOptions(permitted,
           localStorage.getItem(OAI_PHOTO_WIFI_ONLY_KEY)!=='0',
           !!requestAuthorization && permitted);
@@ -16231,7 +16232,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   let oaiPhotoManifestStarted=false;
   function oaiQueuePhotoRestoreManifest(){
-    if(oaiPhotoManifestStarted||!oaiAutoEnabled()||localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1')return;
+    if(oaiPhotoManifestStarted||!oaiAutoEnabled()||localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1'||localStorage.getItem(OAI_PHOTO_NETWORK_CHOICE_KEY)!=='1')return;
     const native=window.GildongmuNative||window.Android;
     if(!native||typeof native.enqueueVisitPhotoRestoreManifest!=='function')return;
     oaiPhotoManifestStarted=true;
@@ -16685,8 +16686,21 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     Storage.prototype.setItem=function(key,value){const old=this===window.localStorage?this.getItem(key):null;const result=original.call(this,key,value);
       if(this===window.localStorage&&old!==String(value)&&oaiTransferAllowedKey(String(key)))oaiScheduleBackup();return result;};
   })();
+  function oaiAskPhotoNetworkChoice(){
+    if(localStorage.getItem(OAI_PHOTO_NETWORK_CHOICE_KEY)==='1')return false;
+    const modal=document.getElementById('oai-onboarding-backup-modal'),body=document.getElementById('oai-onboarding-backup-body');
+    if(!modal||!body)return false;
+    if(modal.classList.contains('show')&&modal.dataset.oaiMode!=='photo-network-choice')return false;
+    modal.dataset.oaiMode='photo-network-choice';
+    setOnboardingHeader('개인 사진 전송 방식 선택','이번 업데이트에서 한 번만 선택해 주세요.');
+    body.innerHTML='<p class="oai-onboarding-intro">사진은 먼저 휴대폰에 안전하게 저장됩니다. Google Drive로 사진을 보낼 때 사용할 네트워크를 선택해 주세요.</p><div class="oai-photo-network-options"><button type="button" class="oai-photo-network-option" data-oai-photo-network-first="wifi"><strong>Wi-Fi 연결 시만 전송</strong><span>Wi-Fi가 없을 때는 전송을 기다립니다.</span></button><button type="button" class="oai-photo-network-option" data-oai-photo-network-first="any"><strong>모바일 데이터로도 전송</strong><span>Wi-Fi가 없어도 전송합니다. 데이터가 사용될 수 있습니다.</span></button></div><p class="oai-onboarding-privacy">나중에 설정에서 언제든 변경할 수 있습니다.</p>';
+    modal.classList.add('show');modal.setAttribute('aria-hidden','false');
+    return true;
+  }
   function oaiCloseRestoreQuestion(){const modal=document.getElementById('oai-onboarding-backup-modal');if(modal){modal.classList.remove('show');modal.setAttribute('aria-hidden','true');modal.dataset.oaiMode='';}}
+
   function oaiAskRestoreOnFreshInstall(){
+    if(localStorage.getItem(OAI_PHOTO_NETWORK_CHOICE_KEY)!=='1')return oaiAskPhotoNetworkChoice();
     if(localStorage.getItem(OAI_RESTORE_CHECKED_KEY)==='1'||(oaiTransferBusy&&oaiTransferPendingMode==='initial-load'))return false;
     const modal=document.getElementById('oai-onboarding-backup-modal'),body=document.getElementById('oai-onboarding-backup-body');if(!modal||!body)return false;
     if(modal.classList.contains('show')&&modal.dataset.oaiMode==='drive-restore-prompt')return true;
@@ -16793,11 +16807,23 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(e.target&&e.target.matches('[data-oai-google-auto]'))oaiEnableAuto(!!e.target.checked);
     else if(e.target&&e.target.id==='oai-visit-photo-network'){
       localStorage.setItem(OAI_PHOTO_WIFI_ONLY_KEY,e.target.value==='any'?'0':'1');
+      localStorage.setItem(OAI_PHOTO_NETWORK_CHOICE_KEY,'1');
       refreshVisitPhotoNetworkSelector();
       oaiNotifyNativePhotoCloudSettings(false);
     }
   },true);
   document.addEventListener('click',function(e){
+    const firstChoice=e.target&&e.target.closest&&e.target.closest('[data-oai-photo-network-first]');
+    if(firstChoice){
+      e.preventDefault();
+      const selected=firstChoice.getAttribute('data-oai-photo-network-first')==='any'?'any':'wifi';
+      localStorage.setItem(OAI_PHOTO_WIFI_ONLY_KEY,selected==='any'?'0':'1');
+      localStorage.setItem(OAI_PHOTO_NETWORK_CHOICE_KEY,'1');
+      oaiCloseRestoreQuestion();
+      refreshGoogleDriveButton();
+      if(localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1')oaiAskRestoreOnFreshInstall();
+      return;
+    }
     const networkBtn=e.target&&e.target.closest&&e.target.closest('[data-oai-photo-network-value]');
     if(networkBtn){
       e.preventDefault();
@@ -16805,6 +16831,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const select=document.getElementById('oai-visit-photo-network');
       if(select)select.value=value;
       localStorage.setItem(OAI_PHOTO_WIFI_ONLY_KEY,value==='any'?'0':'1');
+      localStorage.setItem(OAI_PHOTO_NETWORK_CHOICE_KEY,'1');
       refreshVisitPhotoNetworkSelector();
       oaiNotifyNativePhotoCloudSettings(false);
       return;
@@ -16820,7 +16847,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   if(localStorage.getItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY)==='1'&&localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1'){
     oaiRestoreDecisionPending=true;
   }
-  setTimeout(function(){refreshGoogleDriveButton();oaiQueuePhotoRestoreManifest();if(localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1')oaiAskRestoreOnFreshInstall();},900);
+  setTimeout(function(){refreshGoogleDriveButton();oaiQueuePhotoRestoreManifest();if(localStorage.getItem(OAI_PHOTO_NETWORK_CHOICE_KEY)!=='1')oaiAskPhotoNetworkChoice();else if(localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1')oaiAskRestoreOnFreshInstall();},900);
   if(localStorage.getItem('oai_manual_restore_needs_drive_save_v1')==='1'){
     localStorage.removeItem('oai_manual_restore_needs_drive_save_v1');
     if(oaiAutoEnabled()&&localStorage.getItem(OAI_RESTORE_CHECKED_KEY)==='1'){oaiBackupDirty=true;oaiQueueBackup(1700);}
