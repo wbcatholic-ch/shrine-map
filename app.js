@@ -16347,6 +16347,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         collect(shrine,'shrine');collect(parish,'parish');
         const photos=Array.from(byId.values()).sort((a,b)=>b.visitDate.localeCompare(a.visitDate)||a.photoId.localeCompare(b.photoId));
         byId.clear();
+        // The first app launch may run before imported journals exist. A blank
+        // inventory is not a completed registration: allow the successful import
+        // callback (or a later startup) to submit the restored records.
+        if(!photos.length){oaiPhotoManifestStarted=false;return;}
         let offset=0;
         function sendBatch(){
           try{
@@ -16758,6 +16762,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
             localStorage.setItem('oai_photo_choice_remote_pending','1');
           }
           localStorage.setItem(OAI_RESTORE_CHECKED_KEY,'1');
+          // Journal data has just changed. Any earlier manifest snapshot (including
+          // an empty one from startup) is stale; rebuild from these imported records.
+          oaiPhotoManifestStarted=false;
           // A restored diocese already satisfies first-run parish setup.
           if(configuredDiocese())localStorage.setItem('oai_onboarding_done_v1','1');
           localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'1');localStorage.setItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY,'1');oaiDriveReady=true;
@@ -16768,6 +16775,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
             const cloud=oaiNativePhotoChoice();
             if(cloud&&typeof cloud.savePhotoNetworkChoice==='function')cloud.savePhotoNetworkChoice(firstRunNetwork);
           }
+          // Native photo consent and the restored journal must be ready before
+          // handing off the full-photo inventory. Native SQLite deduplicates IDs.
+          oaiNotifyNativePhotoCloudSettings(true);
+          oaiQueuePhotoRestoreManifest();
           if(!oaiCompleteInitialRestore()){
             oaiRestoreDecisionPending=true;
             oaiTransferStatus('기록을 가져왔습니다. 아래 사진 백업 네트워크를 선택해 주세요.');
