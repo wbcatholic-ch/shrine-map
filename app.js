@@ -757,7 +757,7 @@ function oaiClearExternalNavigationState(opts){
     }catch(_e){ return false; }
   }
   var OAI_BACKGROUND_OVERLAY_IDS=[
-    'oai-settings-modal','oai-parish-setup-modal','oai-records-modal','oai-onboarding-backup-modal',
+    'oai-settings-modal','oai-parish-setup-modal','oai-records-modal',
     'oai-record-restore-modal','oai-pilgrimage-planner-modal','oai-pilgrimage-point-modal',
     'oai-pilgrimage-save-modal','oai-pilgrimage-delete-modal','oai-pilgrimage-completion-modal',
     'oai-pilgrimage-marker-choice-modal','oai-pilgrimage-follow-start-modal','oai-pilgrimage-follow-stop-modal',
@@ -783,7 +783,7 @@ function oaiClearExternalNavigationState(opts){
   }
   function hasCriticalModalOpen(){
     try{
-      var ids=['oai-settings-modal','oai-parish-setup-modal','oai-records-modal','oai-onboarding-backup-modal','oai-record-restore-modal','oai-pilgrimage-point-modal','oai-pilgrimage-save-modal','oai-pilgrimage-delete-modal','oai-pilgrimage-completion-modal','oai-pilgrimage-marker-choice-modal','oai-pilgrimage-follow-start-modal','oai-pilgrimage-follow-stop-modal','oai-frequent-nickname-modal','route-quick-modal','route-choice-modal','mass-quick-modal','privacy-policy-modal','guide-manual-modal','srch-modal'];
+      var ids=['oai-settings-modal','oai-parish-setup-modal','oai-records-modal','oai-record-restore-modal','oai-pilgrimage-point-modal','oai-pilgrimage-save-modal','oai-pilgrimage-delete-modal','oai-pilgrimage-completion-modal','oai-pilgrimage-marker-choice-modal','oai-pilgrimage-follow-start-modal','oai-pilgrimage-follow-stop-modal','oai-frequent-nickname-modal','route-quick-modal','route-choice-modal','mass-quick-modal','privacy-policy-modal','guide-manual-modal','srch-modal'];
       for(var i=0;i<ids.length;i++){var id=ids[i],el=document.getElementById(id);if(isElementVisiblyOpen(el,id))return true;}
     }catch(_e){}
     return false;
@@ -16234,70 +16234,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   const OAI_PHOTO_CHOICE_RELEASE_KEY='oai_photo_network_release_351_v1';
   const oaiNativePhotoChoice=()=>window.GildongmuNative||window.Android;
   const oaiPhotoChoiceEligible=()=>{const match=String(navigator.userAgent||'').match(/GildongmuAndroid\/(\d+)/i);return !!match&&Number(match[1])>=351;};
-  let oaiPhotoChoiceCheck='pending';
   function oaiPhotoNetworkChoiceNeeded(){
     return false; // Network-choice rollout is not enabled for users.
   }
-  function oaiCheckPhotoChoiceOnStartup(){
-    if(!oaiPhotoNetworkChoiceNeeded())return;
-    // Fresh install: authorization belongs to the explicit record-import action.
-    // Otherwise an asynchronous Drive account picker races with the first-run dialog.
-    if(localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1'){
-      oaiPhotoChoiceCheck='missing';
-      return;
-    }
-    if(localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)==='1'){
-      oaiPhotoChoiceCheck='found';
-      // After an offline selection, retry persisting the receipt when Drive authorization is available.
-      if(localStorage.getItem('oai_photo_choice_remote_pending')==='1'){
-        const n=oaiNativePhotoChoice();
-        if(n&&typeof n.savePhotoNetworkChoice==='function')n.savePhotoNetworkChoice(localStorage.getItem(OAI_PHOTO_WIFI_ONLY_KEY)==='0'?'any':'wifi');
-      }
-      return;
-    }
-    const n=oaiNativePhotoChoice();
-    if(n&&typeof n.checkPhotoNetworkChoice==='function'){
-      n.checkPhotoNetworkChoice();
-    }else{
-      oaiPhotoChoiceCheck='unknown';
-      oaiAskPhotoNetworkChoice();
-    }
-  }
-  window.oaiPhotoNetworkCloudResult=function(status,value){
-    if(!oaiPhotoNetworkChoiceNeeded())return;
-    if(status==='saved'){
-      localStorage.removeItem('oai_photo_choice_remote_pending');
-      return;
-    }
-    if(status==='found'&&(value==='wifi'||value==='any')){
-      // If the user chose a setting locally since a cloud read began, local choice wins.
-      if(localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)!=='1'){
-        localStorage.setItem(OAI_PHOTO_WIFI_ONLY_KEY,value==='any'?'0':'1');
-        localStorage.setItem(OAI_PHOTO_CHOICE_RELEASE_KEY,'1');
-        localStorage.setItem(OAI_PHOTO_NETWORK_CHOICE_KEY,'1');
-      }
-      oaiPhotoChoiceCheck='found';
-      refreshGoogleDriveButton();
-      oaiQueuePhotoRestoreManifest();
-      const modal=document.getElementById('oai-onboarding-backup-modal');
-      if(modal&&modal.dataset.oaiMode==='photo-network-choice')oaiCloseRestoreQuestion();
-      if(localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1'){
-        const first=document.getElementById('oai-onboarding-backup-modal');
-        if(first&&first.classList.contains('show')&&first.dataset.oaiMode==='drive-restore-prompt')oaiRefreshInlinePhotoNetworkChoice();
-        else if(!oaiTransferBusy)oaiAskRestoreOnFreshInstall();
-      }
-      return;
-    }
-    // Missing/unknown receipts: retry the prompt on subsequent launches until chosen.
-    if(localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)!=='1'){
-      oaiPhotoChoiceCheck=status==='missing'?'missing':'unknown';
-      if(localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1'){
-        const first=document.getElementById('oai-onboarding-backup-modal');
-        if(first&&first.classList.contains('show')&&first.dataset.oaiMode==='drive-restore-prompt')oaiRefreshInlinePhotoNetworkChoice();
-        else if(!oaiTransferBusy)oaiAskRestoreOnFreshInstall();
-      }else oaiAskPhotoNetworkChoice();
-    }
-  };
   function oaiNotifyNativePhotoCloudSettings(requestAuthorization){
     try{
       const native=window.GildongmuNative||window.Android;
@@ -16539,126 +16478,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     Storage.prototype.setItem=function(key,value){const old=this===window.localStorage?this.getItem(key):null;const result=original.call(this,key,value);
       if(this===window.localStorage&&old!==String(value)&&oaiTransferAllowedKey(String(key)))oaiScheduleBackup();return result;};
   })();
-  function oaiAskPhotoNetworkChoice(){
-    if(!oaiPhotoNetworkChoiceNeeded())return false;
-    const modal=document.getElementById('oai-onboarding-backup-modal'),body=document.getElementById('oai-onboarding-backup-body');
-    if(!modal||!body)return false;
-    if(modal.classList.contains('show')&&modal.dataset.oaiMode!=='photo-network-choice')return false;
-    modal.dataset.oaiMode='photo-network-choice';
-    setOnboardingHeader('Google Drive 사진 백업 네트워크 설정',localStorage.getItem('oai_onboarding_done_v1')==='1'?'이번 업데이트에서 한 번만 선택해 주세요.':'처음 이용할 때 한 번 선택해 주세요.');
-    body.innerHTML='<p class="oai-onboarding-intro">사진은 먼저 휴대폰에 안전하게 저장됩니다. Google Drive로 사진을 보낼 때 사용할 네트워크를 선택해 주세요.</p><div class="oai-photo-network-options"><button type="button" class="oai-photo-network-option" data-oai-photo-network-first="wifi"><strong>Wi-Fi 연결 시에만 전송</strong><span>Wi-Fi가 없을 때는 전송을 기다립니다.</span></button><button type="button" class="oai-photo-network-option" data-oai-photo-network-first="any"><strong>모바일 데이터로도 전송</strong><span>Wi-Fi가 없어도 전송합니다. 데이터가 사용될 수 있습니다.</span></button></div><p class="oai-onboarding-privacy">나중에 설정에서 언제든 변경할 수 있습니다. 같은 Google 계정에 선택 기록이 보관됩니다.</p>';
-    modal.classList.add('show');modal.setAttribute('aria-hidden','false');
-    return true;
-  }
-  let oaiRestoreImportFinished=false;
-  let oaiRestoreImportRequested=false;
-  let oaiRestoreMissingRemoteFile=false;
-  function oaiShowMissingRestoreFile(message){
-    oaiRestoreMissingRemoteFile=true;
-    oaiRestoreDecisionPending=true;
-    const modal=document.getElementById('oai-onboarding-backup-modal');
-    if(!modal||modal.dataset.oaiMode!=='drive-restore-prompt')return;
-    modal.classList.add('show');modal.setAttribute('aria-hidden','false');
-    const error=modal.querySelector('[data-oai-restore-error]');
-    if(!error)return;
-    error.hidden=false;
-    error.textContent='선택한 Google 계정에서 기존 기록 파일을 찾지 못했습니다. 기록이 있는 다른 계정으로 다시 시도하거나, 기록 없이 시작할 수 있습니다.';
-    const option=document.createElement('button');
-    option.type='button';option.setAttribute('data-oai-start-without-restore','1');
-    option.className='oai-onboarding-text-button';option.textContent='기록 없이 시작하기';
-    error.appendChild(document.createElement('div')).appendChild(option);
-
-  }
-  function oaiStartWithoutRestore(){
-    if(oaiTransferBusy){
-      oaiShowRequiredChoiceNotice();return;
-    }
-    // A missing remote record file is not a successful import. Do not enable
-    // automatic journal backup or replace anything in the chosen Drive account.
-    localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'0');
-    localStorage.setItem(OAI_RESTORE_CHECKED_KEY,'1');
-    oaiBackupDirty=false;clearTimeout(oaiBackupTimer);oaiBackupTimer=0;
-    oaiRestoreImportFinished=true;
-    oaiRestoreDecisionPending=false;
-    oaiRestoreMissingRemoteFile=false;
-    oaiCloseRestoreQuestion();
-    refreshGoogleDriveButton();
-    oaiTransferStatus('기존 기록 없이 시작합니다. Google Drive 자동 기록 백업은 꺼져 있습니다.');
-    if(localStorage.getItem(OAI_ONBOARDING_DONE_KEY)!=='1')startInitialOnboarding();
-  }
-  function oaiRestoreHasDecision(){
-    return oaiRestoreImportFinished || !oaiRestoreImportRequested;
-  }
-  function oaiStartRequestedImport(){
-    if(!oaiRestoreImportRequested || oaiTransferBusy || oaiRestoreImportFinished)return false;
-    const error=document.querySelector('#oai-onboarding-backup-modal [data-oai-restore-error]');
-    if(error){error.hidden=true;error.textContent='';}
-    oaiRestoreMissingRemoteFile=false;
-    const started=!!oaiTransferRequest('load','initial-load');
-    if(started){
-      // Both selections are complete. Do not keep the first-run dialog visible
-      // while native Google account selection and Drive import run asynchronously.
-      const modal=document.getElementById('oai-onboarding-backup-modal');
-      if(modal&&modal.dataset.oaiMode==='drive-restore-prompt'){
-        modal.classList.remove('show');
-        modal.setAttribute('aria-hidden','true');
-      }
-    }
-    return started;
-  }
-  function oaiCompleteInitialRestore(){
-    if(!oaiRestoreHasDecision())return false;
-    if(!oaiRestoreImportRequested && !oaiRestoreImportFinished){oaiStartWithoutRestore();return true;}
-    oaiRestoreDecisionPending=false;
-    oaiCloseRestoreQuestion();
-    oaiTransferStatus('기록 가져오기를 완료했습니다. 앱을 새로고침합니다.');
-    setTimeout(function(){location.reload();},500);
-    return true;
-  }
-  function oaiShowRequiredChoiceNotice(){
-    const box=document.getElementById('oai-onboarding-choice-notice');if(!box)return;
-    box.hidden=false;box.style.display='flex';box.setAttribute('aria-hidden','false');
-    const ok=box.querySelector('[data-oai-choice-notice-ok]');if(ok)ok.focus();
-  }
-  function oaiCloseRestoreQuestion(){
-    const modal=document.getElementById('oai-onboarding-backup-modal');
-    if(modal){modal.classList.remove('show');modal.setAttribute('aria-hidden','true');modal.dataset.oaiMode='';}
-  }
-  // Only intercept dismissal attempts on this dialog; do not change history/popstate handling.
-  document.addEventListener('click',function(e){
-    const box=document.getElementById('oai-onboarding-choice-notice');
-    if(box&&!box.hidden&&(e.target.closest('[data-oai-choice-notice-ok]')||e.target===box.querySelector('.oai-settings-backdrop'))){e.preventDefault();e.stopImmediatePropagation();box.hidden=true;box.style.display='none';box.setAttribute('aria-hidden','true');return;}
-    const modal=document.getElementById('oai-onboarding-backup-modal');
-    if(modal&&modal.classList.contains('show')&&modal.dataset.oaiMode==='drive-restore-prompt'&&e.target===modal.querySelector('.oai-settings-backdrop')){
-      e.preventDefault();e.stopImmediatePropagation();oaiCloseRestoreQuestion();
-    }
-  },true);
-  document.addEventListener('keydown',function(e){
-    const modal=document.getElementById('oai-onboarding-backup-modal');
-    if(e.key!=='Escape')return;
-    const notice=document.getElementById('oai-onboarding-choice-notice');
-    if(notice&&!notice.hidden){e.preventDefault();e.stopImmediatePropagation();notice.hidden=true;notice.style.display='none';notice.setAttribute('aria-hidden','true');return;}
-    if(!modal||!modal.classList.contains('show')||modal.dataset.oaiMode!=='drive-restore-prompt')return;
-    e.preventDefault();e.stopImmediatePropagation();oaiCloseRestoreQuestion();
-  },true);
-
-  function oaiAskRestoreOnFreshInstall(){
-    if(localStorage.getItem(OAI_RESTORE_CHECKED_KEY)==='1'||(oaiTransferBusy&&oaiTransferPendingMode==='initial-load'))return false;
-    const modal=document.getElementById('oai-onboarding-backup-modal'),body=document.getElementById('oai-onboarding-backup-body');if(!modal||!body)return false;
-    if(modal.classList.contains('show')&&modal.dataset.oaiMode==='drive-restore-prompt')return true;
-    oaiRestoreImportFinished=false;
-    oaiRestoreImportRequested=false;
-    oaiRestoreDecisionPending=true;modal.dataset.oaiMode='drive-restore-prompt';
-    setOnboardingHeader('기존 기록을 가져올까요?','앱을 다시 설치했거나 휴대폰을 바꾼 경우');
-    body.innerHTML='<p class="oai-onboarding-intro">Google Drive에 보관한 순례·방문 기록을 가져올 수 있습니다.</p><p class="oai-onboarding-privacy">기존 기록을 가져오기 전에는 Google Drive의 저장된 기록을 덮어쓰지 않습니다.</p><label class="oai-records-check"><input type="checkbox" data-oai-restore-now="1"><span>Google Drive에서 기록 가져오기</span></label><button type="button" class="oai-onboarding-text-button" data-oai-restore-later="1">나중에 하기</button><em data-oai-restore-error hidden></em>';
-    modal.classList.add('show');modal.setAttribute('aria-hidden','false');return true;
-  }
   function oaiEnableAuto(yes){
     if(!yes){localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'0');oaiBackupDirty=false;oaiBackupRetryCount=0;clearTimeout(oaiBackupTimer);refreshGoogleDriveButton();oaiTransferStatus('Google Drive 자동 보관을 껐습니다.');return;}
     localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'1');oaiDriveReady=true;localStorage.setItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY,'1');
     refreshGoogleDriveButton();
     // Never overwrite remote data before the first restore decision on a fresh install.
-    if(localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1'){oaiAskRestoreOnFreshInstall();return;}
+    if(localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1'){localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'0');refreshGoogleDriveButton();oaiTransferStatus('기존 기록 보호를 위해 먼저 수동으로 기록을 가져와 주세요.');return;}
     oaiNotifyNativePhotoCloudSettings(true);
     oaiScheduleBackup();
   }
@@ -16713,26 +16538,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const mode=oaiTransferPendingMode;oaiTransferBusy=false;oaiTransferPendingMode='';
     if(!ok){oaiTransferStatus(message||'Google Drive 작업에 실패했습니다.');
       if(mode==='auto-save'){oaiBackupDirty=true;oaiRetryBackup();}
-      if(mode==='initial-load'){
-        if(String(message||'').includes('이전에 옮긴 데이터 파일이 없습니다.')){
-          oaiShowMissingRestoreFile(message);return;
-        }
-        oaiRestoreMissingRemoteFile=false;
-        oaiRestoreDecisionPending=true;
-        const modal=document.getElementById('oai-onboarding-backup-modal');
-        // Keep the original selections when authorization/import fails. Rebuilding the
-        // onboarding dialog here silently clears its checkbox and traps the user.
-        if(modal&&modal.dataset.oaiMode==='drive-restore-prompt'){
-          modal.classList.add('show');
-          modal.setAttribute('aria-hidden','false');
-          const checkbox=modal.querySelector('[data-oai-restore-now]');
-          if(checkbox)checkbox.checked=false;
-          oaiRestoreImportRequested=false;
-          const error=modal.querySelector('[data-oai-restore-error]');
-          if(error){error.textContent=(message||'Google Drive 기록을 가져오지 못했습니다.')+' 기록 가져오기를 다시 선택하여 재시도해 주세요.';error.hidden=false;}
-
-        }
-      }
       return;}
     if(action==='save'){
       oaiBackupRetryCount=0;
@@ -16769,7 +16574,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           // A restored diocese already satisfies first-run parish setup.
           if(configuredDiocese())localStorage.setItem('oai_onboarding_done_v1','1');
           localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'1');localStorage.setItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY,'1');oaiDriveReady=true;
-          oaiRestoreImportFinished=true;
           // The record-import authorization is already granted. Persist this
           // small choice receipt afterward, never when the radio is merely tapped.
           if(firstRunNetwork){
@@ -16780,48 +16584,20 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           // handing off the full-photo inventory. Native SQLite deduplicates IDs.
           oaiNotifyNativePhotoCloudSettings(true);
           oaiQueuePhotoRestoreManifest();
-          oaiCompleteInitialRestore();
+          if(mode==='initial-load')setTimeout(function(){location.reload();},500);
         }catch(err){
           oaiTransferStatus('가져오기 실패: '+err.message);
-          if(mode==='initial-load'){
-            oaiAskRestoreOnFreshInstall();
-            const modal=document.getElementById('oai-onboarding-backup-modal');
-            if(modal&&modal.dataset.oaiMode==='drive-restore-prompt'){
-              modal.classList.add('show');modal.setAttribute('aria-hidden','false');
-              const error=modal.querySelector('[data-oai-restore-error]');
-              if(error){error.textContent='가져오기 실패: '+err.message;error.hidden=false;}
-            }
-          }
         }
         finally{oaiApplyingRestore=false;}
       };
-      if(mode==='initial-load')applyImportedRecords();else oaiConfirmDriveImport(entries,applyImportedRecords);
+      oaiConfirmDriveImport(entries,applyImportedRecords);
     }catch(err){
       oaiTransferStatus('가져오기 실패: '+err.message);
-      if(mode==='initial-load'){
-        oaiAskRestoreOnFreshInstall();
-        const modal=document.getElementById('oai-onboarding-backup-modal');
-        if(modal&&modal.dataset.oaiMode==='drive-restore-prompt'){
-          modal.classList.add('show');modal.setAttribute('aria-hidden','false');
-          const checkbox=modal.querySelector('[data-oai-restore-now]');
-          if(checkbox)checkbox.checked=false;
-          oaiRestoreImportRequested=false;
-          const error=modal.querySelector('[data-oai-restore-error]');
-          if(error){error.textContent='가져오기 실패: '+err.message;error.hidden=false;}
-
-        }
-      }
     }
     finally{oaiApplyingRestore=false;}
   };
   document.addEventListener('change',function(e){
     if(e.target&&e.target.matches('[data-oai-google-auto]'))oaiEnableAuto(!!e.target.checked);
-    else if(e.target&&e.target.matches('[data-oai-restore-now]')){
-      if(!e.target.checked||oaiTransferBusy)return;
-      oaiRestoreImportRequested=true;
-      oaiCloseRestoreQuestion();
-      if(!oaiTransferRequest('load','initial-load'))oaiAskRestoreOnFreshInstall();
-    }
     else if(e.target&&e.target.id==='oai-visit-photo-network'){
       localStorage.setItem(OAI_PHOTO_WIFI_ONLY_KEY,e.target.value==='any'?'0':'1');
       localStorage.setItem(OAI_PHOTO_NETWORK_CHOICE_KEY,'1');
@@ -16836,8 +16612,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
   },true);
   document.addEventListener('click',function(e){
-    const without=e.target&&e.target.closest&&e.target.closest('[data-oai-start-without-restore]');
-    if(without){e.preventDefault();oaiStartWithoutRestore();return;}
     const networkBtn=e.target&&e.target.closest&&e.target.closest('[data-oai-photo-network-value]');
     if(networkBtn){
       e.preventDefault();
@@ -16856,12 +16630,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       oaiNotifyNativePhotoCloudSettings(false);
       return;
     }
-    const btn=e.target&&e.target.closest&&e.target.closest('[data-oai-google-restore],[data-oai-restore-later]');if(!btn)return;e.preventDefault();
-    if(btn.hasAttribute('data-oai-restore-later')){
-      oaiRestoreImportRequested=false;
-      oaiCloseRestoreQuestion();oaiRestoreDecisionPending=true;
-      oaiTransferStatus('기존 기록을 보호하기 위해 자동 보관을 시작하지 않았습니다. 가져오기를 먼저 진행해 주세요.');return;
-    }
+    const btn=e.target&&e.target.closest&&e.target.closest('[data-oai-google-restore]');if(!btn)return;e.preventDefault();
     oaiTransferRequest('load','manual-load');
   },true);
   try{document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden'){clearTimeout(oaiBackupTimer);oaiBackupTimer=0;oaiFlushBackup();}});}catch(_e){}
@@ -16953,55 +16722,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!initialOnboarding)return;
     finishInitialOnboarding();
   }
-  function onboardingModal(){return document.getElementById('oai-onboarding-backup-modal');}
-  function finishInitialOnboarding(){
-    const m=onboardingModal();if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}
-    initialOnboarding=false;initialDriveFirstFlow=false;
-    try{localStorage.setItem(OAI_ONBOARDING_DONE_KEY,'1');}catch(_e){}
-  }
-  function openInitialParishSetupAfterDrive(){
-    initialOnboarding=true;initialDriveFirstFlow=false;
-    openParishChooser();parishSetup.view='diocese';renderParishSetup();
-  }
-  function openInitialDriveOnboarding(){openInitialParishSetupAfterDrive();}
-  function openInitialRestoreOnboarding(){openInitialParishSetupAfterDrive();}
-  function setOnboardingHeader(title,subtitle){
-    const m=onboardingModal();if(!m)return;
-    const h=m.querySelector('h2'),p=m.querySelector('.oai-settings-head p');
-    if(h)h.textContent=title;if(p)p.textContent=subtitle;
-  }
-  function openInitialDiocesePrompt(){
-    const m=onboardingModal(),body=document.getElementById('oai-onboarding-backup-body');
-    if(!m||!body)return false;
-    initialOnboarding=true;
-    m.dataset.oaiMode='diocese';
-    setOnboardingHeader('나의 교구를 설정해 주세요.','교구를 설정하면 관련 정보를 더 쉽게 확인할 수 있습니다.');
-    body.innerHTML='<p class="oai-onboarding-intro">나의 교구를 설정하면 교구 홈페이지와 관련 정보를 더 편리하게 이용할 수 있습니다. <b>본당은 필요할 때 나중에 설정해도 됩니다.</b></p><button type="button" class="oai-records-primary" data-oai-diocese-prompt-now="1">교구 설정하기</button><button type="button" class="oai-onboarding-text-button" data-oai-diocese-prompt-later="1">다음에 하기</button>';
-    m.classList.add('show');m.setAttribute('aria-hidden','false');
-    return true;
-  }
-  function beginInitialDioceseSetup(){
-    const m=onboardingModal();
-    if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');m.dataset.oaiMode='';}
-    initialOnboarding=true;
-    openParishChooser();
-    parishSetup.view='diocese';
-    renderParishSetup();
-    const title=document.getElementById('oai-parish-setup-title'),sub=document.getElementById('oai-parish-setup-subtitle');
-    if(title)title.textContent='나의 교구 설정';
-    if(sub)sub.textContent='교구를 설정하면 관련 정보를 더 쉽게 확인할 수 있습니다.';
-  }
-  function skipInitialDiocesePrompt(){
-    const m=onboardingModal();
-    if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');m.dataset.oaiMode='';}
-    initialOnboarding=true;
-    openInitialParishSetupAfterDrive();
-  }
-  function startInitialOnboarding(){
-    // Initial-install prompts are disabled for the diagnostic build.
-    // Manual Google Drive import remains available from settings.
-    return;
-  }
+  function finishInitialOnboarding(){initialOnboarding=false;initialDriveFirstFlow=false;localStorage.setItem(OAI_ONBOARDING_DONE_KEY,'1');}
   window.openOaiSettings=open;
   window.closeOaiSettings=close;
   window.isOaiSettingsOpen=function(){const m=modal();return !!(m&&m.classList.contains('show'));};
@@ -17010,7 +16731,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   window.goBackOaiParishSetup=stepBackParishSetup;
   enforceCoverSettingsLabel();
   document.addEventListener('click',function(e){
-    const target=e.target&&e.target.closest?e.target.closest('[data-oai-settings-close],[data-oai-settings-edit],[data-oai-settings-diocese],[data-oai-settings-parish],[data-oai-parish-setup-close],[data-oai-setup-open],[data-oai-setup-dio],[data-oai-setup-back],[data-oai-setup-parish],[data-oai-setup-skip],[data-oai-diocese-prompt-now],[data-oai-diocese-prompt-later],#cover-diocese-btn'):null;
+    const target=e.target&&e.target.closest?e.target.closest('[data-oai-settings-close],[data-oai-settings-edit],[data-oai-settings-diocese],[data-oai-settings-parish],[data-oai-parish-setup-close],[data-oai-setup-open],[data-oai-setup-dio],[data-oai-setup-back],[data-oai-setup-parish],[data-oai-setup-skip],#cover-diocese-btn'):null;
     if(!target) return;
     if(target.id==='cover-diocese-btn' && target.dataset.oaiNativeSettings==='1') return;
     if(target.id==='cover-diocese-btn'){
@@ -17020,8 +16741,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(target.hasAttribute('data-oai-settings-edit')){e.preventDefault();openParishChooser();return;}
     if(target.hasAttribute('data-oai-settings-diocese')){e.preventDefault();openParishChooser();parishSetup.view='diocese';renderParishSetup();return;}
     if(target.hasAttribute('data-oai-settings-parish')){e.preventDefault();openParishChooser();if(!parishSetup.dio){parishSetup.view='diocese';renderParishSetup();}else{parishSetup.view='parish';openParishChooser(true);}return;}
-    if(target.hasAttribute('data-oai-diocese-prompt-now')){e.preventDefault();beginInitialDioceseSetup();return;}
-    if(target.hasAttribute('data-oai-diocese-prompt-later')){e.preventDefault();skipInitialDiocesePrompt();return;}
     if(target.hasAttribute('data-oai-parish-setup-close')){e.preventDefault();closeParishSetup();return;}
     if(target.hasAttribute('data-oai-setup-skip')){e.preventDefault();skipInitialParishSetup();return;}
     if(target.hasAttribute('data-oai-setup-open')){e.preventDefault();const next=target.getAttribute('data-oai-setup-open');if(next==='diocese'){parishSetup.view='diocese';renderParishSetup();return;}if(next==='parish'){if(!parishSetup.dio){parishSetup.view='diocese';renderParishSetup();return;}parishSetup.view='parish';openParishChooser(true);return;}}
@@ -17043,7 +16762,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if((e.key==='Enter'||e.key===' ')&&e.target&&e.target.hasAttribute&&e.target.hasAttribute('data-oai-settings-edit')){e.preventDefault();openParishChooser();return;}
     if(e.key==='Escape'&&window.isOaiSettingsOpen())close();
   });
-  setTimeout(startInitialOnboarding,650);
 })();
 
 
