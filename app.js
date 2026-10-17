@@ -16611,7 +16611,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!oaiRestoreImportRequested && !oaiRestoreImportFinished){oaiStartWithoutRestore();return true;}
     oaiRestoreDecisionPending=false;
     oaiCloseRestoreQuestion();
-    oaiTransferStatus('기록 가져오기와 사진 백업 설정을 완료했습니다. 앱을 새로고침합니다.');
+    oaiTransferStatus('기록 가져오기를 완료했습니다. 앱을 새로고침합니다.');
     setTimeout(function(){location.reload();},500);
     return true;
   }
@@ -16774,7 +16774,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           modal.classList.add('show');
           modal.setAttribute('aria-hidden','false');
           const checkbox=modal.querySelector('[data-oai-restore-now]');
-          if(checkbox)checkbox.checked=oaiRestoreImportRequested;
+          if(checkbox)checkbox.checked=false;
+          oaiRestoreImportRequested=false;
           const error=modal.querySelector('[data-oai-restore-error]');
           if(error){error.textContent=(message||'Google Drive 기록을 가져오지 못했습니다.')+' 기록 가져오기를 다시 선택하여 재시도해 주세요.';error.hidden=false;}
           oaiRefreshFirstRunNetworkButtons();
@@ -16849,7 +16850,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(modal&&modal.dataset.oaiMode==='drive-restore-prompt'){
           modal.classList.add('show');modal.setAttribute('aria-hidden','false');
           const checkbox=modal.querySelector('[data-oai-restore-now]');
-          if(checkbox)checkbox.checked=oaiRestoreImportRequested;
+          if(checkbox)checkbox.checked=false;
+          oaiRestoreImportRequested=false;
           const error=modal.querySelector('[data-oai-restore-error]');
           if(error){error.textContent='가져오기 실패: '+err.message;error.hidden=false;}
           oaiRefreshFirstRunNetworkButtons();
@@ -16863,6 +16865,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     else if(e.target&&e.target.matches('[data-oai-restore-now]')){
       // Start the selected record import independently of photo-network settings.
       if(oaiTransferBusy||oaiRestoreImportFinished){e.target.checked=oaiRestoreImportRequested;return;}
+      // A failed request leaves the box selected. Tapping it again must retry, not cancel.
+      if(oaiRestoreImportRequested && !e.target.checked){e.target.checked=true;oaiStartRequestedImport();return;}
       oaiRestoreImportRequested=!!e.target.checked;
       if(oaiRestoreImportRequested)oaiStartRequestedImport();
     }
@@ -16904,7 +16908,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       // Network selection is required; Drive record import is optional.
       if(firstChoice.getAttribute('data-oai-photo-network-inline')==='1'){
         if(oaiRestoreImportFinished || !oaiRestoreImportRequested)oaiCompleteInitialRestore();
-        else oaiStartRequestedImport();
+        else if(!oaiTransferBusy)oaiStartRequestedImport();
       }
       setTimeout(function(){refreshGoogleDriveButton();oaiQueuePhotoRestoreManifest();},0);
       return;
@@ -17068,7 +17072,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     openInitialParishSetupAfterDrive();
   }
   function startInitialOnboarding(){
-    if(oaiPhotoChoiceEligible()&&localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)!=='1'&&oaiPhotoChoiceCheck==='pending'&&localStorage.getItem(OAI_RESTORE_CHECKED_KEY)==='1')return;
+    // Photo-network consent rollout is disabled; it must not block initial setup.
     // A fresh installation must choose the photo network before starting the existing setup flow.
     // Returning users are prompted by the existing one-time update choice on startup.
     if(oaiPhotoNetworkChoiceNeeded()&&localStorage.getItem(OAI_RESTORE_CHECKED_KEY)==='1'){
