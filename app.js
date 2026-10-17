@@ -16548,8 +16548,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     return true;
   }
   let oaiRestoreImportFinished=false;
+  let oaiRestoreImportRequested=false;
   function oaiRestoreHasDecision(){
     return oaiRestoreImportFinished&&localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)==='1';
+  }
+  function oaiStartRequestedImport(){
+    if(!oaiRestoreImportRequested || localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)!=='1' || oaiTransferBusy || oaiRestoreImportFinished)return false;
+    const error=document.querySelector('#oai-onboarding-backup-modal [data-oai-restore-error]');
+    if(error)error.hidden=true;
+    return !!oaiTransferRequest('load','initial-load');
   }
   function oaiCompleteInitialRestore(){
     if(!oaiRestoreHasDecision())return false;
@@ -16637,6 +16644,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     // Keep the first prompt in place until the user completes or postpones the record import.
     if(oaiTransferBusy&&oaiTransferPendingMode==='initial-load')return false;
     oaiRestoreImportFinished=false;
+    oaiRestoreImportRequested=false;
     oaiRestoreDecisionPending=true;modal.dataset.oaiMode='drive-restore-prompt';
     setOnboardingHeader('기존 기록을 가져올까요?','앱을 다시 설치했거나 휴대폰을 바꾼 경우');
     body.innerHTML='<p class="oai-onboarding-intro">Google Drive에 보관한 순례·방문 기록을 가져올 수 있습니다.</p><p class="oai-onboarding-privacy">기존 기록을 가져오기 전에는 Google Drive의 저장된 기록을 덮어쓰지 않습니다.</p><button type="button" class="oai-records-primary" data-oai-restore-now="1">Google Drive에서 기록 가져오기</button><button type="button" class="oai-onboarding-text-button" data-oai-restore-later="1">나중에 하기</button>' + oaiInlinePhotoNetworkChoice() + '<em data-oai-restore-error hidden></em>';
@@ -16798,8 +16806,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         else if(localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1')oaiAskRestoreOnFreshInstall();
       }
       // A completed import and a network selection are both required before leaving.
-      if(firstChoice.getAttribute('data-oai-photo-network-inline')==='1'&&oaiRestoreImportFinished){
-        oaiCompleteInitialRestore();
+      if(firstChoice.getAttribute('data-oai-photo-network-inline')==='1'){
+        if(oaiRestoreImportFinished)oaiCompleteInitialRestore();
+        else oaiStartRequestedImport();
       }
       setTimeout(function(){refreshGoogleDriveButton();oaiQueuePhotoRestoreManifest();},0);
       return;
@@ -16828,12 +16837,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       oaiCompleteInitialRestore();return;
     }
     if(btn.hasAttribute('data-oai-restore-now')){
-      // Keep the one initial dialog mounted under the Google account picker.
-      // Success closes it; failures show a retry message without re-opening it.
-      if(oaiTransferBusy)return;
-      const error=document.querySelector('#oai-onboarding-backup-modal [data-oai-restore-error]');
-      if(error)error.hidden=true;
-      oaiTransferRequest('load','initial-load');
+      // A first tap marks the record-import choice; Google auth starts only when
+      // the separate photo network choice has also been made.
+      oaiRestoreImportRequested=true;
+      const b=document.querySelector('#oai-onboarding-backup-modal [data-oai-restore-now]');
+      if(b){b.classList.add('is-selected');b.setAttribute('aria-pressed','true');}
+      if(!oaiStartRequestedImport()){
+        oaiTransferStatus('아래 사진 백업 네트워크를 선택해 주세요.');
+      }
     }else oaiTransferRequest('load','manual-load');
   },true);
   try{document.addEventListener('visibilitychange',function(){if(document.visibilityState==='hidden'){clearTimeout(oaiBackupTimer);oaiBackupTimer=0;oaiFlushBackup();}});}catch(_e){}
