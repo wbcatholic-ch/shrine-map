@@ -10023,5 +10023,4 @@ html.oai-font-global .shrine-visit-card-badge strong,html:not(.ios-device).oai-s
 .oai-onboarding-photo-inline>strong{display:block;color:#17213a;font-size:16px;font-weight:900;}
 .oai-onboarding-photo-inline>p{margin:6px 0 12px;font-size:13px;line-height:1.5;color:#536276;}
 
-/* V1327: keep first-run dialog within the visible screen and make all choices scrollable. */
 @supports not (height: 100dvh){.oai-onboarding-panel{max-height:calc(100vh - 48px);}}
