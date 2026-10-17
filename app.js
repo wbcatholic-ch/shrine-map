@@ -16547,7 +16547,36 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     modal.classList.add('show');modal.setAttribute('aria-hidden','false');
     return true;
   }
-  function oaiCloseRestoreQuestion(){const modal=document.getElementById('oai-onboarding-backup-modal');if(modal){modal.classList.remove('show');modal.setAttribute('aria-hidden','true');modal.dataset.oaiMode='';}}
+  let oaiRestoreImportClicked=false;
+  function oaiRestoreHasDecision(){return oaiRestoreImportClicked||localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)==='1';}
+  function oaiShowRequiredChoiceNotice(){
+    const box=document.getElementById('oai-onboarding-choice-notice');if(!box)return;
+    box.hidden=false;box.style.display='flex';box.setAttribute('aria-hidden','false');
+    const ok=box.querySelector('[data-oai-choice-notice-ok]');if(ok)ok.focus();
+  }
+  function oaiCloseRestoreQuestion(){
+    const modal=document.getElementById('oai-onboarding-backup-modal');
+    if(!modal)return;
+    if(modal.dataset.oaiMode==='drive-restore-prompt'&&!oaiRestoreHasDecision()){oaiShowRequiredChoiceNotice();return;}
+    modal.classList.remove('show');modal.setAttribute('aria-hidden','true');modal.dataset.oaiMode='';
+  }
+  // Only intercept dismissal attempts on this dialog; do not change history/popstate handling.
+  document.addEventListener('click',function(e){
+    const box=document.getElementById('oai-onboarding-choice-notice');
+    if(box&&!box.hidden&&(e.target.closest('[data-oai-choice-notice-ok]')||e.target===box.querySelector('.oai-settings-backdrop'))){e.preventDefault();e.stopImmediatePropagation();box.hidden=true;box.style.display='none';box.setAttribute('aria-hidden','true');return;}
+    const modal=document.getElementById('oai-onboarding-backup-modal');
+    if(modal&&modal.classList.contains('show')&&modal.dataset.oaiMode==='drive-restore-prompt'&&e.target===modal.querySelector('.oai-settings-backdrop')){
+      e.preventDefault();e.stopImmediatePropagation();oaiCloseRestoreQuestion();
+    }
+  },true);
+  document.addEventListener('keydown',function(e){
+    const modal=document.getElementById('oai-onboarding-backup-modal');
+    if(e.key!=='Escape')return;
+    const notice=document.getElementById('oai-onboarding-choice-notice');
+    if(notice&&!notice.hidden){e.preventDefault();e.stopImmediatePropagation();notice.hidden=true;notice.style.display='none';notice.setAttribute('aria-hidden','true');return;}
+    if(!modal||!modal.classList.contains('show')||modal.dataset.oaiMode!=='drive-restore-prompt')return;
+    e.preventDefault();e.stopImmediatePropagation();oaiCloseRestoreQuestion();
+  },true);
 
   function oaiInlinePhotoNetworkChoice(){
     if(!oaiPhotoChoiceEligible())return '';
@@ -16570,7 +16599,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       btn.classList.toggle('is-selected',selected);
       btn.setAttribute('aria-pressed',selected?'true':'false');
     });
-    modal.querySelectorAll('[data-oai-restore-now],[data-oai-restore-later]').forEach(function(btn){btn.disabled=!chosen;});
+    // Both record import and postponing stay clickable; only dismissals without any choice are blocked.
     const hint=modal.querySelector('[data-oai-first-network-hint]');
     if(hint)hint.hidden=chosen;
   }
@@ -16750,8 +16779,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(localStorage.getItem(OAI_ONBOARDING_DONE_KEY)!=='1')startInitialOnboarding();
         else if(localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1')oaiAskRestoreOnFreshInstall();
       }
-      refreshGoogleDriveButton();
-      oaiQueuePhotoRestoreManifest();
+      // Render the selection immediately; schedule potentially slow Drive work separately.
+      setTimeout(function(){refreshGoogleDriveButton();oaiQueuePhotoRestoreManifest();},0);
       return;
     }
     const networkBtn=e.target&&e.target.closest&&e.target.closest('[data-oai-photo-network-value]');
@@ -16773,18 +16802,16 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       return;
     }
     const btn=e.target&&e.target.closest&&e.target.closest('[data-oai-google-restore],[data-oai-restore-now],[data-oai-restore-later]');if(!btn)return;e.preventDefault();
-    if(btn.hasAttribute('data-oai-restore-later')||btn.hasAttribute('data-oai-restore-now')){
-      if(oaiPhotoChoiceEligible()&&localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)!=='1'){
-        const hint=document.querySelector('#oai-onboarding-backup-modal [data-oai-first-network-hint]');
-        if(hint){hint.hidden=false;hint.textContent='Wi-Fi 또는 모바일 데이터 중 하나를 먼저 선택해 주세요.';}
-        return;
-      }
+    if(btn.hasAttribute('data-oai-restore-later')){
+      if(!oaiRestoreHasDecision()){oaiShowRequiredChoiceNotice();return;}
+      oaiCloseRestoreQuestion();oaiRestoreDecisionPending=true;
+      oaiTransferStatus('기존 기록을 보호하기 위해 자동 보관을 시작하지 않았습니다. 가져오기를 먼저 진행해 주세요.');return;
     }
-    if(btn.hasAttribute('data-oai-restore-later')){oaiCloseRestoreQuestion();oaiRestoreDecisionPending=true;oaiTransferStatus('기존 기록을 보호하기 위해 자동 보관을 시작하지 않았습니다. 가져오기를 먼저 진행해 주세요.');return;}
     if(btn.hasAttribute('data-oai-restore-now')){
       // Keep the one initial dialog mounted under the Google account picker.
       // Success closes it; failures show a retry message without re-opening it.
       if(oaiTransferBusy)return;
+      oaiRestoreImportClicked=true;
       const error=document.querySelector('#oai-onboarding-backup-modal [data-oai-restore-error]');
       if(error)error.hidden=true;
       oaiTransferRequest('load','initial-load');
