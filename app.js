@@ -16579,9 +16579,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   window.oaiDataTransferResult=function(action,ok,payload,message){
     const mode=oaiTransferPendingMode;oaiTransferBusy=false;oaiTransferPendingMode='';
     if(!ok){
+      // A failed or cancelled account authorization must not authorize a later import.
+      if(mode==='initial-connect')oaiFirstRunRestoreAuthorized=false;
       if((mode==='initial-connect'||(mode==='manual-load'&&oaiFirstRunAndroid())) && action==='load' && message==='이전에 옮긴 데이터 파일이 없습니다.'){
         // Authorization and remote listing succeeded; no existing backup file.
         // Never treat a network/authentication error as an empty Drive.
+        oaiFirstRunRestoreAuthorized=false;
         localStorage.setItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY,'1');
         localStorage.setItem(OAI_RESTORE_CHECKED_KEY,'1');
         localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'1');
@@ -16655,8 +16658,16 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         }
         finally{oaiApplyingRestore=false;}
       };
-      oaiConfirmDriveImport(entries,applyImportedRecords);
+      // The existing-user entry dialog already obtained explicit consent to
+      // restore. Do not ask for the same consent again after account selection.
+      // Keep the confirmation for ordinary/manual imports and new-user flows.
+      if(mode==='initial-connect'&&oaiFirstRunRestoreAuthorized){
+        oaiFirstRunRestoreAuthorized=false;
+        oaiFirstRunRestorePending=false;
+        applyImportedRecords();
+      }else oaiConfirmDriveImport(entries,applyImportedRecords);
     }catch(err){
+      if(mode==='initial-connect')oaiFirstRunRestoreAuthorized=false;
       oaiTransferStatus('가져오기 실패: '+err.message);
     }
     finally{oaiApplyingRestore=false;}
@@ -16709,7 +16720,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   // First-run guidance for new Android installations. Independent, dismissible dialogs.
   // No backup is written before Drive authorization and a successful remote listing.
-  let oaiFirstRunSeen=false, oaiFirstRunConnecting=false, oaiFirstRunDialog='', oaiFirstRunNetworkTimer=0, oaiFirstRunConnectTimer=0, oaiFirstRunRestorePending=false;
+  let oaiFirstRunSeen=false, oaiFirstRunConnecting=false, oaiFirstRunDialog='', oaiFirstRunNetworkTimer=0, oaiFirstRunConnectTimer=0, oaiFirstRunRestorePending=false, oaiFirstRunRestoreAuthorized=false;
   const oaiFirstRunAndroid=()=>{const m=String(navigator.userAgent||'').match(/GildongmuAndroid\/(\d+)/i);return !!m&&Number(m[1])>=360;};
   function oaiFirstRunHasVisits(){
     try{
@@ -16783,6 +16794,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(btn.hasAttribute('data-first-run-connect')||btn.hasAttribute('data-first-run-restore-connect')){
       if(oaiFirstRunConnecting)return;
       oaiFirstRunConnecting=true;btn.disabled=true;
+      // Only the explicit existing-records choice authorizes skipping the
+      // second import confirmation. New-user Drive connection never does.
+      oaiFirstRunRestoreAuthorized=btn.hasAttribute('data-first-run-restore-connect');
       // Show the pressed state briefly, then dismiss before opening the
       // Android account chooser. Never leave the explanation behind it.
       if(oaiFirstRunConnectTimer)return;
