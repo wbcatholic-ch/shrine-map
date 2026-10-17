@@ -10032,3 +10032,23 @@ html.oai-font-global .shrine-visit-card-badge strong,html:not(.ios-device).oai-s
 .oai-onboarding-body .oai-records-check:focus-within{outline:3px solid rgba(30,111,182,.24);outline-offset:2px;}
 .oai-onboarding-body .oai-records-primary:disabled,.oai-onboarding-body .oai-onboarding-text-button:disabled{opacity:.43;cursor:not-allowed;filter:grayscale(.3);}
 .oai-onboarding-body [data-oai-first-network-hint][hidden],.oai-onboarding-body [data-oai-restore-error][hidden]{display:none!important;}
+
+/* First-run dialogs: isolated presentation, existing Drive and network controllers remain authoritative. */
+.oai-first-run-overlay[hidden],.oai-first-run-panel [hidden]{display:none!important}
+.oai-first-run-overlay{position:fixed;inset:0;z-index:2147482900;background:rgba(9,23,43,.62);display:flex;align-items:center;justify-content:center;padding:18px;box-sizing:border-box}
+.oai-first-run-panel{position:relative;width:min(100%,420px);max-height:calc(100dvh - 36px);overflow:auto;background:#fff;border-radius:26px;padding:36px 22px 24px;box-sizing:border-box;box-shadow:0 20px 55px rgba(0,0,0,.24);text-align:center;color:#121824}
+.oai-first-run-x{position:absolute;right:16px;top:12px;border:0;background:transparent;color:#697382;font-size:32px;line-height:1.2;padding:3px 8px;cursor:pointer}
+.oai-first-run-symbol{height:94px;display:flex;align-items:center;justify-content:center;font-size:78px;margin:0 auto 8px}
+.oai-first-run-antenna{color:#6478f6;font-size:82px}
+.oai-first-run-drive span{font-size:72px;color:#20a467;text-shadow:13px 9px #f6bd24,-12px 11px #2685ee}
+.oai-first-run-panel h2{font-size:clamp(21px,5vw,26px);font-weight:900;line-height:1.38;letter-spacing:-.04em;margin:8px 0 16px;color:#10151c}
+.oai-first-run-panel p{font-size:15px;line-height:1.65;color:#4a5261;margin:0 0 22px}
+.oai-first-run-choice{display:flex;align-items:center;gap:13px;width:100%;padding:14px 16px;border:1.5px solid #dfe5ee;border-radius:17px;background:#fff;text-align:left;margin:0 0 10px;color:#141a25;font-family:inherit;cursor:pointer}
+.oai-first-run-choice:focus-visible,.oai-first-run-choice:active{border-color:#1677f2;background:#f0f7ff}
+.oai-first-run-choice-icon{font-size:26px;color:#2478ee;width:34px;text-align:center}
+.oai-first-run-choice span:nth-child(2){flex:1}.oai-first-run-choice b{display:block;font-size:16px}.oai-first-run-choice small{display:block;font-size:12px;color:#697382;margin-top:3px}
+.oai-first-run-radio{width:17px;height:17px;border:2px solid #a5adbb;border-radius:50%}
+.oai-first-run-connect,.oai-first-run-later{width:100%;min-height:49px;border:0;border-radius:15px;font-family:inherit;font-weight:800;font-size:16px;cursor:pointer}
+.oai-first-run-connect{background:#1778f5;color:white;margin:0 0 10px}.oai-first-run-connect:disabled{opacity:.55}
+.oai-first-run-later{background:#f0f1f4;color:#171a21;margin-top:2px}
+.oai-first-run-foot{display:block;color:#3576c8;font-size:12px;line-height:1.45;margin-top:17px}

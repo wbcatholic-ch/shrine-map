@@ -16536,7 +16536,20 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   window.oaiDataTransferResult=function(action,ok,payload,message){
     const mode=oaiTransferPendingMode;oaiTransferBusy=false;oaiTransferPendingMode='';
-    if(!ok){oaiTransferStatus(message||'Google Drive 작업에 실패했습니다.');
+    if(!ok){
+      if(mode==='initial-connect' && action==='load' && message==='이전에 옮긴 데이터 파일이 없습니다.'){
+        // Authorization and remote listing succeeded; no existing backup file.
+        // Never treat a network/authentication error as an empty Drive.
+        localStorage.setItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY,'1');
+        localStorage.setItem(OAI_RESTORE_CHECKED_KEY,'1');
+        localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'1');
+        oaiDriveReady=true;oaiRestoreDecisionPending=false;
+        refreshGoogleDriveButton();
+        oaiFirstRunConnectFinished(true);
+        return;
+      }
+      if(mode==='initial-connect')oaiFirstRunConnectFinished(false);
+      oaiTransferStatus(message||'Google Drive 작업에 실패했습니다.');
       if(mode==='auto-save'){oaiBackupDirty=true;oaiRetryBackup();}
       return;}
     if(action==='save'){
@@ -16547,6 +16560,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(oaiBackupDirty)oaiScheduleBackup();return;
     }
     if(action!=='load')return;
+    if(mode==='initial-connect'){
+      // A backup exists. Keep automatic writes off until the user explicitly imports it.
+      localStorage.setItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY,'1');oaiDriveReady=true;
+      localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'0');
+      refreshGoogleDriveButton();
+      oaiFirstRunConnectFinished(true);
+    }
     try{
       const parsed=JSON.parse(payload||'{}');
       if(parsed.format!=='cgm-single-transfer'||parsed.schema!==1||!parsed.data||Array.isArray(parsed.data)||typeof parsed.data!=='object')throw Error('지원하지 않는 데이터 형식입니다.');
@@ -16605,7 +16625,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         localStorage.setItem(OAI_PHOTO_CHOICE_RELEASE_KEY,'1');
         localStorage.setItem('oai_photo_choice_remote_pending','1');
         const cloud=oaiNativePhotoChoice();
-        if(cloud&&typeof cloud.savePhotoNetworkChoice==='function')cloud.savePhotoNetworkChoice(e.target.value==='any'?'any':'wifi');
+        if(oaiDriveReady&&cloud&&typeof cloud.savePhotoNetworkChoice==='function')cloud.savePhotoNetworkChoice(e.target.value==='any'?'any':'wifi');
       }
       refreshVisitPhotoNetworkSelector();
       oaiNotifyNativePhotoCloudSettings(false);
@@ -16624,7 +16644,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         localStorage.setItem(OAI_PHOTO_CHOICE_RELEASE_KEY,'1');
         localStorage.setItem('oai_photo_choice_remote_pending','1');
         const cloud=oaiNativePhotoChoice();
-        if(cloud&&typeof cloud.savePhotoNetworkChoice==='function')cloud.savePhotoNetworkChoice(value);
+        if(oaiDriveReady&&cloud&&typeof cloud.savePhotoNetworkChoice==='function')cloud.savePhotoNetworkChoice(value);
       }
       refreshVisitPhotoNetworkSelector();
       oaiNotifyNativePhotoCloudSettings(false);
@@ -16642,6 +16662,86 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     localStorage.removeItem('oai_manual_restore_needs_drive_save_v1');
     if(oaiAutoEnabled()&&localStorage.getItem(OAI_RESTORE_CHECKED_KEY)==='1'){oaiBackupDirty=true;oaiQueueBackup(1700);}
   }
+  // First-run guidance for new Android installations. Independent, dismissible dialogs.
+  // No backup is written before Drive authorization and a successful remote listing.
+  let oaiFirstRunSeen=false, oaiFirstRunConnecting=false, oaiFirstRunDialog='';
+  const oaiFirstRunAndroid=()=>{const m=String(navigator.userAgent||'').match(/GildongmuAndroid\/(\d+)/i);return !!m&&Number(m[1])>=360;};
+  function oaiFirstRunHasVisits(){
+    try{
+      for(const key of ['oai_shrine_visits_v1','oai_parish_visits_v1']){
+        const v=JSON.parse(localStorage.getItem(key)||'{}');
+        if(v&&typeof v==='object'&&Object.keys(v).length)return true;
+      }
+    }catch(_e){return true;} // Corrupt/unknown records: never assume a new user.
+    return false;
+  }
+  function oaiFirstRunOverlay(){return document.getElementById('oai-first-run-dialog');}
+  function oaiFirstRunClose(advance){
+    const el=oaiFirstRunOverlay();if(el){el.hidden=true;el.setAttribute('aria-hidden','true');}
+    const previous=oaiFirstRunDialog;oaiFirstRunDialog='';
+    if(advance&&previous==='network')oaiFirstRunShow('drive');
+  }
+  function oaiFirstRunShow(which){
+    if(which==='network' && localStorage.getItem(OAI_PHOTO_NETWORK_CHOICE_KEY)==='1')which='drive';
+    if(which==='drive' && localStorage.getItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY)==='1')return;
+    if(which!=='network'&&which!=='drive')return;
+    const el=oaiFirstRunOverlay();if(!el)return;
+    oaiFirstRunDialog=which;
+    el.querySelector('[data-first-run-network]').hidden=which!=='network';
+    el.querySelector('[data-first-run-drive]').hidden=which!=='drive';
+    el.hidden=false;el.setAttribute('aria-hidden','false');
+    const first=el.querySelector(which==='network'?'[data-first-run-option="wifi"]':'[data-first-run-connect]');
+    if(first)first.focus({preventScroll:true});
+  }
+  function oaiFirstRunConnectFinished(success){
+    oaiFirstRunConnecting=false;
+    const button=document.querySelector('[data-first-run-connect]');if(button)button.disabled=false;
+    if(success){oaiFirstRunClose(false);}
+    else {const status=document.querySelector('[data-first-run-status]');if(status)status.textContent='연결하지 못했습니다. 나중에 다시 설정할 수 있습니다.';}
+  }
+  function oaiFirstRunBegin(){
+    if(oaiFirstRunSeen||!oaiFirstRunAndroid()||oaiFirstRunHasVisits())return;
+    oaiFirstRunSeen=true;
+    if(localStorage.getItem(OAI_PHOTO_NETWORK_CHOICE_KEY)!=='1')oaiFirstRunShow('network');
+    else if(localStorage.getItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY)!=='1')oaiFirstRunShow('drive');
+  }
+  document.addEventListener('click',function(e){
+    const el=oaiFirstRunOverlay();if(!el||el.hidden)return;
+    const btn=e.target&&e.target.closest&&e.target.closest('[data-first-run-action],[data-first-run-option],[data-first-run-connect]');
+    if(!btn)return;e.preventDefault();e.stopPropagation();
+    if(btn.hasAttribute('data-first-run-option')){
+      const value=btn.getAttribute('data-first-run-option')==='any'?'any':'wifi';
+      const selector=document.getElementById('oai-visit-photo-network');
+      if(selector)selector.value=value;
+      localStorage.setItem(OAI_PHOTO_WIFI_ONLY_KEY,value==='any'?'0':'1');
+      localStorage.setItem(OAI_PHOTO_NETWORK_CHOICE_KEY,'1');
+      if(oaiPhotoChoiceEligible())localStorage.setItem(OAI_PHOTO_CHOICE_RELEASE_KEY,'1');
+      // Do not request Google authorization while choosing the network.
+      refreshVisitPhotoNetworkSelector();oaiNotifyNativePhotoCloudSettings(false);
+      oaiFirstRunClose(true);return;
+    }
+    if(btn.hasAttribute('data-first-run-connect')){
+      if(oaiFirstRunConnecting)return;
+      oaiFirstRunConnecting=true;btn.disabled=true;
+      const status=el.querySelector('[data-first-run-status]');if(status)status.textContent='Google 계정 연결 및 기존 기록을 확인하고 있습니다.';
+      // The existing native load operation authorizes Drive and checks for a backup.
+      // A missing file is reported distinctly from authentication/network failure.
+      if(!oaiTransferRequest('load','initial-connect'))oaiFirstRunConnectFinished(false);
+      return;
+    }
+    if(btn.getAttribute('data-first-run-action')==='close')oaiFirstRunClose(true);
+  },true);
+  document.addEventListener('keydown',function(e){
+    const el=oaiFirstRunOverlay();if(!el||el.hidden)return;
+    if(e.key==='Escape'||e.key==='Backspace'&&e.target.tagName!=='INPUT'){
+      e.preventDefault();e.stopImmediatePropagation();oaiFirstRunClose(true);
+    }
+  },true);
+  window.oaiDismissFirstRunForBack=function(){
+    const el=oaiFirstRunOverlay();if(!el||el.hidden)return false;
+    oaiFirstRunClose(true);return true;
+  };
+  setTimeout(oaiFirstRunBegin,1700);
   const OAI_ONBOARDING_DONE_KEY='oai_onboarding_done_v1';
   let initialOnboarding=false;
   let initialDriveFirstFlow=false;
