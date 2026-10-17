@@ -16553,13 +16553,48 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   let oaiRestoreImportFinished=false;
   let oaiRestoreImportRequested=false;
+  let oaiRestoreMissingRemoteFile=false;
+  function oaiShowMissingRestoreFile(message){
+    oaiRestoreMissingRemoteFile=true;
+    oaiRestoreDecisionPending=true;
+    const modal=document.getElementById('oai-onboarding-backup-modal');
+    if(!modal||modal.dataset.oaiMode!=='drive-restore-prompt')return;
+    modal.classList.add('show');modal.setAttribute('aria-hidden','false');
+    const error=modal.querySelector('[data-oai-restore-error]');
+    if(!error)return;
+    error.hidden=false;
+    error.textContent='선택한 Google 계정에서 기존 기록 파일을 찾지 못했습니다. 기록이 있는 다른 계정으로 다시 시도하거나, 기록 없이 시작할 수 있습니다.';
+    const option=document.createElement('button');
+    option.type='button';option.setAttribute('data-oai-start-without-restore','1');
+    option.className='oai-onboarding-text-button';option.textContent='기록 없이 시작하기';
+    error.appendChild(document.createElement('div')).appendChild(option);
+    oaiRefreshFirstRunNetworkButtons();
+  }
+  function oaiStartWithoutRestore(){
+    if(!oaiRestoreMissingRemoteFile||localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)!=='1'){
+      oaiShowRequiredChoiceNotice();return;
+    }
+    // A missing remote record file is not a successful import. Do not enable
+    // automatic journal backup or replace anything in the chosen Drive account.
+    localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'0');
+    localStorage.setItem(OAI_RESTORE_CHECKED_KEY,'1');
+    oaiBackupDirty=false;clearTimeout(oaiBackupTimer);oaiBackupTimer=0;
+    oaiRestoreImportFinished=true;
+    oaiRestoreDecisionPending=false;
+    oaiRestoreMissingRemoteFile=false;
+    oaiCloseRestoreQuestion();
+    refreshGoogleDriveButton();
+    oaiTransferStatus('기존 기록 없이 시작합니다. Google Drive 자동 기록 백업은 꺼져 있습니다.');
+    if(localStorage.getItem(OAI_ONBOARDING_DONE_KEY)!=='1')startInitialOnboarding();
+  }
   function oaiRestoreHasDecision(){
     return oaiRestoreImportFinished&&localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)==='1';
   }
   function oaiStartRequestedImport(){
     if(!oaiRestoreImportRequested || localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)!=='1' || oaiTransferBusy || oaiRestoreImportFinished)return false;
     const error=document.querySelector('#oai-onboarding-backup-modal [data-oai-restore-error]');
-    if(error)error.hidden=true;
+    if(error){error.hidden=true;error.textContent='';}
+    oaiRestoreMissingRemoteFile=false;
     const started=!!oaiTransferRequest('load','initial-load');
     if(started){
       // Both selections are complete. Do not keep the first-run dialog visible
@@ -16659,6 +16694,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(oaiTransferBusy&&oaiTransferPendingMode==='initial-load')return false;
     oaiRestoreImportFinished=false;
     oaiRestoreImportRequested=false;
+    oaiRestoreMissingRemoteFile=false;
     oaiRestoreDecisionPending=true;modal.dataset.oaiMode='drive-restore-prompt';
     setOnboardingHeader('기존 기록을 가져올까요?','앱을 다시 설치했거나 휴대폰을 바꾼 경우');
     body.innerHTML='<p class="oai-onboarding-intro">Google Drive에 보관한 순례·방문 기록을 가져올 수 있습니다.</p><p class="oai-onboarding-privacy">기존 기록을 가져오기 전에는 Google Drive의 저장된 기록을 덮어쓰지 않습니다.</p><label class="oai-records-check"><input type="checkbox" data-oai-restore-now="1"><span>Google Drive에서 기록 가져오기</span></label><button type="button" class="oai-onboarding-text-button" data-oai-restore-later="1">나중에 하기</button>' + oaiInlinePhotoNetworkChoice() + '<em data-oai-restore-error hidden></em>';
@@ -16726,6 +16762,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!ok){oaiTransferStatus(message||'Google Drive 작업에 실패했습니다.');
       if(mode==='auto-save'){oaiBackupDirty=true;oaiRetryBackup();}
       if(mode==='initial-load'){
+        if(String(message||'').includes('이전에 옮긴 데이터 파일이 없습니다.')){
+          oaiShowMissingRestoreFile(message);return;
+        }
+        oaiRestoreMissingRemoteFile=false;
         oaiRestoreDecisionPending=true;
         const modal=document.getElementById('oai-onboarding-backup-modal');
         // Keep the original selections when authorization/import fails. Rebuilding the
@@ -16844,6 +16884,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
   },true);
   document.addEventListener('click',function(e){
+    const without=e.target&&e.target.closest&&e.target.closest('[data-oai-start-without-restore]');
+    if(without){e.preventDefault();oaiStartWithoutRestore();return;}
     const firstChoice=e.target&&e.target.closest&&e.target.closest('[data-oai-photo-network-first]');
     if(firstChoice){
       e.preventDefault();
