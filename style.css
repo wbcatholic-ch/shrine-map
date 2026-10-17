@@ -10017,3 +10017,8 @@ html.oai-font-global .shrine-visit-card-badge strong,html:not(.ios-device).oai-s
 /* V1310: 방문 상세 도움말은 해당 섹션 제목 바로 옆에 배치한다. */
 .shrine-visit-detail-kicker,.oai-visit-journal-head .shrine-visit-detail-section-title{display:inline-flex!important;align-items:center!important;gap:9px!important;}
 .shrine-visit-detail-kicker .cgm-visit-section-help,.oai-visit-journal-head .cgm-visit-section-help{position:static!important;flex:0 0 auto!important;display:inline-flex!important;align-items:center!important;justify-content:center!important;transform:none!important;margin:0!important;vertical-align:middle!important;}
+
+/* Photo backup choice follows Drive record import on fresh install. */
+.oai-onboarding-photo-inline{margin:14px 0 0;padding:15px 0 0;border-top:2px solid #d5cbb9;}
+.oai-onboarding-photo-inline>strong{display:block;color:#17213a;font-size:16px;font-weight:900;}
+.oai-onboarding-photo-inline>p{margin:6px 0 12px;font-size:13px;line-height:1.5;color:#536276;}
