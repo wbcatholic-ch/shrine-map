@@ -12079,7 +12079,7 @@ function oaiNearbyLocationPermissionGate(){
   if(allow){
     let canAsk=true;
     try{if(typeof native.canRequestNearbyLocationPermission==='function')canAsk=native.canRequestNearbyLocationPermission();}catch(_e){}
-    allow.textContent=canAsk?'위치 권한 허용하기':'앱 권한 설정으로 이동';
+    allow.textContent=canAsk?'위치 권한 허용하기':'휴대폰에서 위치 권한 변경';
   }
   return true;
 }
@@ -16580,11 +16580,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const mode=oaiTransferPendingMode;oaiTransferBusy=false;oaiTransferPendingMode='';
     if(!ok){
       // A failed or cancelled account authorization must not authorize a later import.
-      if(mode==='initial-connect')oaiFirstRunRestoreAuthorized=false;
+      if(mode==='initial-connect'||oaiRestoreIntentValid())oaiClearRestoreIntent();
       if((mode==='initial-connect'||(mode==='manual-load'&&oaiFirstRunAndroid())) && action==='load' && message==='이전에 옮긴 데이터 파일이 없습니다.'){
         // Authorization and remote listing succeeded; no existing backup file.
         // Never treat a network/authentication error as an empty Drive.
-        oaiFirstRunRestoreAuthorized=false;
+        oaiClearRestoreIntent();
         localStorage.setItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY,'1');
         localStorage.setItem(OAI_RESTORE_CHECKED_KEY,'1');
         localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'1');
@@ -16661,13 +16661,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       // The existing-user entry dialog already obtained explicit consent to
       // restore. Do not ask for the same consent again after account selection.
       // Keep the confirmation for ordinary/manual imports and new-user flows.
-      if(mode==='initial-connect'&&oaiFirstRunRestoreAuthorized){
-        oaiFirstRunRestoreAuthorized=false;
+      if(oaiRestoreIntentValid() || (mode==='initial-connect'&&oaiFirstRunRestoreAuthorized)){
+        oaiClearRestoreIntent();
         oaiFirstRunRestorePending=false;
         applyImportedRecords();
       }else oaiConfirmDriveImport(entries,applyImportedRecords);
     }catch(err){
-      if(mode==='initial-connect')oaiFirstRunRestoreAuthorized=false;
+      if(mode==='initial-connect'||oaiRestoreIntentValid())oaiClearRestoreIntent();
       oaiTransferStatus('가져오기 실패: '+err.message);
     }
     finally{oaiApplyingRestore=false;}
@@ -16721,6 +16721,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // First-run guidance for new Android installations. Independent, dismissible dialogs.
   // No backup is written before Drive authorization and a successful remote listing.
   let oaiFirstRunSeen=false, oaiFirstRunConnecting=false, oaiFirstRunDialog='', oaiFirstRunNetworkTimer=0, oaiFirstRunConnectTimer=0, oaiFirstRunRestorePending=false, oaiFirstRunRestoreAuthorized=false;
+  const OAI_FIRST_RUN_RESTORE_INTENT='oai_first_run_restore_intent';
+  function oaiRestoreIntentValid(){try{const stamp=Number(sessionStorage.getItem(OAI_FIRST_RUN_RESTORE_INTENT)||0);return stamp>0&&Date.now()-stamp<180000;}catch(_e){return false;}}
+  function oaiClearRestoreIntent(){try{sessionStorage.removeItem(OAI_FIRST_RUN_RESTORE_INTENT);}catch(_e){}oaiFirstRunRestoreAuthorized=false;}
   const oaiFirstRunAndroid=()=>{const m=String(navigator.userAgent||'').match(/GildongmuAndroid\/(\d+)/i);return !!m&&Number(m[1])>=360;};
   function oaiFirstRunHasVisits(){
     try{
@@ -16797,6 +16800,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       // Only the explicit existing-records choice authorizes skipping the
       // second import confirmation. New-user Drive connection never does.
       oaiFirstRunRestoreAuthorized=btn.hasAttribute('data-first-run-restore-connect');
+      try{if(oaiFirstRunRestoreAuthorized)sessionStorage.setItem(OAI_FIRST_RUN_RESTORE_INTENT,String(Date.now()));else sessionStorage.removeItem(OAI_FIRST_RUN_RESTORE_INTENT);}catch(_e){}
       // Show the pressed state briefly, then dismiss before opening the
       // Android account chooser. Never leave the explanation behind it.
       if(oaiFirstRunConnectTimer)return;
@@ -16809,7 +16813,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     if(btn.getAttribute('data-first-run-action')==='close'){
       const was=oaiFirstRunDialog;oaiFirstRunClose(was==='network');
-      if(was==='drive'||was==='restore')oaiFirstRunParishIfNeeded();
+      if(was==='drive'||was==='restore'){oaiClearRestoreIntent();oaiFirstRunParishIfNeeded();}
     }
   },true);
   document.addEventListener('keydown',function(e){
