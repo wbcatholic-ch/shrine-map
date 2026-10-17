@@ -16692,7 +16692,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!modal||!body)return false;
     if(modal.classList.contains('show')&&modal.dataset.oaiMode!=='photo-network-choice')return false;
     modal.dataset.oaiMode='photo-network-choice';
-    setOnboardingHeader('개인 사진 전송 방식 선택','이번 업데이트에서 한 번만 선택해 주세요.');
+    setOnboardingHeader('개인 사진 전송 방식 선택',localStorage.getItem('oai_onboarding_done_v1')==='1'?'이번 업데이트에서 한 번만 선택해 주세요.':'처음 이용할 때 한 번 선택해 주세요.');
     body.innerHTML='<p class="oai-onboarding-intro">사진은 먼저 휴대폰에 안전하게 저장됩니다. Google Drive로 사진을 보낼 때 사용할 네트워크를 선택해 주세요.</p><div class="oai-photo-network-options"><button type="button" class="oai-photo-network-option" data-oai-photo-network-first="wifi"><strong>Wi-Fi 연결 시만 전송</strong><span>Wi-Fi가 없을 때는 전송을 기다립니다.</span></button><button type="button" class="oai-photo-network-option" data-oai-photo-network-first="any"><strong>모바일 데이터로도 전송</strong><span>Wi-Fi가 없어도 전송합니다. 데이터가 사용될 수 있습니다.</span></button></div><p class="oai-onboarding-privacy">나중에 설정에서 언제든 변경할 수 있습니다.</p>';
     modal.classList.add('show');modal.setAttribute('aria-hidden','false');
     return true;
@@ -16821,7 +16821,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       localStorage.setItem(OAI_PHOTO_NETWORK_CHOICE_KEY,'1');
       oaiCloseRestoreQuestion();
       refreshGoogleDriveButton();
-      if(localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1')oaiAskRestoreOnFreshInstall();
+      if(localStorage.getItem(OAI_ONBOARDING_DONE_KEY)!=='1')startInitialOnboarding();
+      else if(localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1')oaiAskRestoreOnFreshInstall();
       return;
     }
     const networkBtn=e.target&&e.target.closest&&e.target.closest('[data-oai-photo-network-value]');
@@ -16977,6 +16978,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     openInitialParishSetupAfterDrive();
   }
   function startInitialOnboarding(){
+    // A fresh installation must choose the photo network before starting the existing setup flow.
+    // Returning users are prompted by the existing one-time update choice on startup.
+    if(localStorage.getItem(OAI_PHOTO_NETWORK_CHOICE_KEY)!=='1'){
+      oaiAskPhotoNetworkChoice();
+      return;
+    }
     try{
       if(localStorage.getItem(OAI_ONBOARDING_DONE_KEY)==='1')return;
       if(configuredDiocese()){
