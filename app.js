@@ -16689,12 +16689,25 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // actual response selects exactly one subsequent action, never both.
   let oaiFirstRunRemotePayload=null;
   let oaiFirstRunImportConflict=false;
+  function oaiFirstRunShowDriveError(message){
+    oaiFirstRunConnecting=false;
+    oaiFirstRunRemotePayload=null;
+    oaiFirstRunRestorePending=false;
+    // A failed query/import is NOT a verified empty backup and grants no
+    // permission to replace remote records or turn on automatic backup.
+    oaiFirstRunShow('drive-error');
+    const el=oaiFirstRunOverlay();if(!el)return;
+    const status=el.querySelector('[data-first-run-status]');
+    if(status)status.textContent=message||'Google Drive 확인에 실패했습니다. 다시 확인하거나 나중에 진행해 주세요.';
+  }
   function oaiFirstRunRemoteChoice(kind,payload){
     oaiFirstRunRemotePayload=kind==='found'?payload:null;
     oaiFirstRunConnecting=false;
     oaiFirstRunRestorePending=kind==='found';
     oaiFirstRunShow('drive-result');
     const el=oaiFirstRunOverlay();if(!el)return;
+    const status=el.querySelector('[data-first-run-status]');
+    if(status)status.textContent='ⓘ 기록을 확인했습니다. 아래 버튼으로 진행해 주세요.';
     const heading=el.querySelector('[data-first-run-drive-title]');
     const description=el.querySelector('[data-first-run-drive-description]');
     const action=el.querySelector('[data-first-run-drive-primary]');
@@ -16780,10 +16793,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         return;
       }
       if(mode==='initial-connect'){
-        oaiFirstRunConnecting=false;oaiFirstRunRestorePending=false;
-        const driveStatus=document.querySelector('[data-first-run-status]');
-        if(driveStatus)driveStatus.textContent=message||'Drive 확인에 실패했습니다. 나중에 다시 연결해 주세요.';
-        oaiFirstRunShow('drive');
+        oaiFirstRunShowDriveError(message||'Drive 확인에 실패했습니다. 다시 확인하거나 나중에 진행해 주세요.');
       }
       oaiTransferStatus(message||'Google Drive 작업에 실패했습니다.');
       if(mode==='auto-save'){oaiBackupDirty=true;oaiRetryBackup();}
@@ -16898,8 +16908,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }catch(err){
       oaiTransferStatus('가져오기 실패: '+err.message);
       if(mode==='initial-connect'){
-        oaiFirstRunConnecting=false;oaiFirstRunRestorePending=false;
-        oaiFirstRunShow('drive');
+        oaiFirstRunShowDriveError('Drive 백업을 읽지 못했습니다: '+err.message);
       }
     }
     finally{oaiApplyingRestore=false;}
@@ -16983,7 +16992,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function oaiFirstRunShow(which){
     if(which==='network'&&localStorage.getItem(OAI_PHOTO_NETWORK_CHOICE_KEY)==='1')which='drive';
     if(which==='drive'&&!oaiFirstRunNeedsDrive())return;
-    if(!['network','drive','drive-result'].includes(which))return;
+    if(!['network','drive','drive-result','drive-error'].includes(which))return;
     const el=oaiFirstRunOverlay();if(!el)return;
     oaiFirstRunDialog=which;
     el.querySelector('[data-first-run-network]').hidden=which!=='network';
@@ -16993,8 +17002,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const action=el.querySelector('[data-first-run-drive-primary]');
     if(which==='drive'){
       heading.textContent='Google 계정을 선택해 주세요';
-      description.textContent='연결할 Google 계정을 선택하면 기존 백업이 있는지 안전하게 확인합니다.';
+      description.textContent='연결할 Google 계정을 선택하면 기존 백업이 있는지 확인합니다.';
       action.textContent='Google 계정 선택';
+      const status=el.querySelector('[data-first-run-status]');
+      if(status)status.textContent='ⓘ 나중에 설정해도 앱을 사용할 수 있습니다.';
+    }else if(which==='drive-error'){
+      heading.textContent='Google Drive 확인에 실패했습니다';
+      description.textContent='기존 백업은 변경되지 않았습니다. 인터넷 연결을 확인한 뒤 다시 시도해 주세요.';
+      action.textContent='다시 확인';
     }
     el.hidden=false;el.setAttribute('aria-hidden','false');
     const first=el.querySelector(which==='network'?'[data-first-run-option="wifi"]':'[data-first-run-drive-primary]');
@@ -17003,7 +17018,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function oaiFirstRunConnectFinished(success){
     oaiFirstRunConnecting=false;
     if(success){oaiFirstRunClose(false);oaiFirstRunParishIfNeeded();}
-    else {oaiFirstRunShow('drive');}
+    else {oaiFirstRunShowDriveError('Google Drive 확인을 시작하지 못했습니다. 다시 확인하거나 나중에 진행해 주세요.');}
   }
   function oaiFirstRunBegin(){
     if(oaiFirstRunSeen||!oaiFirstRunAndroid())return;
@@ -17053,6 +17068,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         return;
       }
       oaiFirstRunConnecting=true;btn.disabled=true;
+      const status=el.querySelector('[data-first-run-status]');
+      if(status)status.textContent='Google Drive 기록을 확인하고 있습니다.';
       oaiFirstRunConnectTimer=setTimeout(function(){
         oaiFirstRunConnectTimer=0;
         oaiFirstRunClose(false);
@@ -17061,10 +17078,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     if(btn.getAttribute('data-first-run-action')==='close'){
       // Later is never consent to automatic backup, even after account selection.
-      if(oaiFirstRunDialog==='drive-result'){
+      if(oaiFirstRunDialog!=='network'){
         oaiFirstRunRemotePayload=null;oaiFirstRunRestorePending=false;
-        localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'0');
-        refreshGoogleDriveButton();
+        if(localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1'){
+          localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'0');
+          refreshGoogleDriveButton();
+        }
       }
       oaiFirstRunClose(oaiFirstRunDialog==='network');
     }
@@ -17074,12 +17093,18 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(e.key==='Escape'||e.key==='Backspace'&&e.target.tagName!=='INPUT'){
       e.preventDefault();e.stopImmediatePropagation();
       oaiFirstRunRemotePayload=null;oaiFirstRunRestorePending=false;
+      if(oaiFirstRunDialog!=='network'&&localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1'){
+        localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'0');refreshGoogleDriveButton();
+      }
       oaiFirstRunClose(oaiFirstRunDialog==='network');
     }
   },true);
   window.oaiDismissFirstRunForBack=function(){
     const el=oaiFirstRunOverlay();if(!el||el.hidden)return false;
     oaiFirstRunRemotePayload=null;oaiFirstRunRestorePending=false;
+    if(oaiFirstRunDialog!=='network'&&localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1'){
+      localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'0');refreshGoogleDriveButton();
+    }
     oaiFirstRunClose(oaiFirstRunDialog==='network');return true;
   };
   setTimeout(oaiFirstRunBegin,1700);
