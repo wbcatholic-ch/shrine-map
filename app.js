@@ -16395,6 +16395,19 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   let oaiRestoreDecisionPending=false;
   const oaiAutoEnabled=()=>localStorage.getItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY)==='1' && oaiDriveReady && localStorage.getItem(OAI_RESTORE_CHECKED_KEY)==='1';
   const OAI_GOOGLE_DRIVE_LAST_SAVED_KEY='oai_google_drive_last_saved_at_v1';
+  const OAI_DRIVE_OFF_REMINDER_AT_KEY='oai_drive_off_reminder_last_shown_v1';
+  const OAI_DRIVE_OFF_REMINDER_PENDING_KEY='oai_drive_off_reminder_pending_v1';
+  const OAI_DRIVE_OFF_REMINDER_INTERVAL=14*24*60*60*1000;
+  function oaiClearDriveOffReminder(){
+    localStorage.removeItem(OAI_DRIVE_OFF_REMINDER_AT_KEY);
+    localStorage.removeItem(OAI_DRIVE_OFF_REMINDER_PENDING_KEY);
+  }
+  function oaiMarkDriveOffByUser(){
+    // Show on the next cold start, not immediately after the user toggles OFF.
+    localStorage.setItem(OAI_DRIVE_OFF_REMINDER_PENDING_KEY,'1');
+    localStorage.removeItem(OAI_DRIVE_OFF_REMINDER_AT_KEY);
+  }
+
   function oaiLastSavedLabel(){
     const raw=localStorage.getItem(OAI_GOOGLE_DRIVE_LAST_SAVED_KEY);
     if(!raw)return '마지막 저장: 기록 없음';
@@ -16670,6 +16683,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!yes){
       localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'0');
       oaiBackupDirty=false;oaiBackupRetryCount=0;clearTimeout(oaiBackupTimer);
+      oaiMarkDriveOffByUser();
       refreshGoogleDriveButton();oaiTransferStatus('Google Drive 자동 보관을 껐습니다.');return;
     }
     // A switch tap does not prove that an account is connected or a backup
@@ -16681,6 +16695,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       return;
     }
     localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'1');
+    oaiClearDriveOffReminder();
     refreshGoogleDriveButton();
     oaiNotifyNativePhotoCloudSettings(true);
     oaiScheduleBackup();
@@ -16718,7 +16733,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }else{
       heading.textContent='Google Drive 연결이 확인되었습니다';
       description.textContent='기존 백업 데이터가 없습니다. 연결을 완료하면 기록을 자동 보관합니다.';
-      action.textContent='Google Drive 연결';
+      action.textContent='자동 백업 시작하기';
     }
     action.focus({preventScroll:true});
   }
@@ -16787,6 +16802,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           localStorage.setItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY,'1');
           localStorage.setItem(OAI_RESTORE_CHECKED_KEY,'1');
           localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'1');
+          oaiClearDriveOffReminder();
           oaiDriveReady=true;oaiRestoreDecisionPending=false;
           refreshGoogleDriveButton();oaiFirstRunParishIfNeeded();
         }
@@ -16874,6 +16890,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           // A restored diocese already satisfies first-run parish setup.
           if(configuredDiocese())localStorage.setItem('oai_onboarding_done_v1','1');
           localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'1');localStorage.setItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY,'1');oaiDriveReady=true;
+          oaiClearDriveOffReminder();
           // The record-import authorization is already granted. Persist this
           // small choice receipt afterward, never when the radio is merely tapped.
           if(firstRunNetwork){
@@ -17020,12 +17037,56 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(success){oaiFirstRunClose(false);oaiFirstRunParishIfNeeded();}
     else {oaiFirstRunShowDriveError('Google Drive 확인을 시작하지 못했습니다. 다시 확인하거나 나중에 진행해 주세요.');}
   }
+  function oaiDriveOffReminderEligible(){
+    if(!oaiFirstRunAndroid() || localStorage.getItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY)!=='0')return false;
+    // An incomplete initial setup uses the existing first-run dialog instead.
+    if(localStorage.getItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY)!=='1' || localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1')return false;
+    if(!configuredDiocese() || localStorage.getItem(OAI_PHOTO_NETWORK_CHOICE_KEY)!=='1')return false;
+    const last=Number(localStorage.getItem(OAI_DRIVE_OFF_REMINDER_AT_KEY)||'0');
+    const now=Date.now();
+    return localStorage.getItem(OAI_DRIVE_OFF_REMINDER_PENDING_KEY)==='1' ||
+      !Number.isFinite(last) || last<=0 || (now-last)>=OAI_DRIVE_OFF_REMINDER_INTERVAL;
+  }
+  function oaiShowDriveOffReminder(){
+    if(!oaiDriveOffReminderEligible())return;
+    const first=oaiFirstRunOverlay();
+    const reminder=document.getElementById('oai-drive-off-reminder');
+    if(!reminder || (first&&!first.hidden) || initialOnboarding)return;
+    reminder.hidden=false;reminder.setAttribute('aria-hidden','false');
+    const action=reminder.querySelector('[data-oai-drive-off-action="on"]');
+    if(action)action.focus({preventScroll:true});
+  }
+  function oaiCloseDriveOffReminder(){
+    const reminder=document.getElementById('oai-drive-off-reminder');
+    if(!reminder)return;
+    reminder.hidden=true;reminder.setAttribute('aria-hidden','true');
+    localStorage.setItem(OAI_DRIVE_OFF_REMINDER_AT_KEY,String(Date.now()));
+    localStorage.removeItem(OAI_DRIVE_OFF_REMINDER_PENDING_KEY);
+  }
+  document.addEventListener('click',function(e){
+    const reminder=document.getElementById('oai-drive-off-reminder');
+    if(!reminder || reminder.hidden)return;
+    const btn=e.target&&e.target.closest&&e.target.closest('[data-oai-drive-off-action]');
+    if(!btn)return;
+    e.preventDefault();e.stopPropagation();
+    const action=btn.getAttribute('data-oai-drive-off-action');
+    oaiCloseDriveOffReminder();
+    if(action==='on')oaiEnableAuto(true);
+  },true);
+  document.addEventListener('keydown',function(e){
+    const reminder=document.getElementById('oai-drive-off-reminder');
+    if(!reminder || reminder.hidden)return;
+    if(e.key==='Escape'||e.key==='Backspace'){
+      e.preventDefault();e.stopPropagation();oaiCloseDriveOffReminder();
+    }
+  },true);
   function oaiFirstRunBegin(){
     if(oaiFirstRunSeen||!oaiFirstRunAndroid())return;
     oaiFirstRunSeen=true;
     if(localStorage.getItem(OAI_PHOTO_NETWORK_CHOICE_KEY)!=='1')oaiFirstRunShow('network');
     else if(oaiFirstRunNeedsDrive())oaiFirstRunShow('drive');
-    else oaiFirstRunParishIfNeeded();
+    else if(!configuredDiocese())oaiFirstRunParishIfNeeded();
+    else oaiShowDriveOffReminder();
   }
   document.addEventListener('click',function(e){
     const el=oaiFirstRunOverlay();if(!el||el.hidden)return;
@@ -17061,6 +17122,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           localStorage.setItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY,'1');
           localStorage.setItem(OAI_RESTORE_CHECKED_KEY,'1');
           localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'1');
+          oaiClearDriveOffReminder();
           oaiDriveReady=true;oaiRestoreDecisionPending=false;
           refreshGoogleDriveButton();oaiNotifyNativePhotoCloudSettings(true);
           oaiFirstRunClose(false);
