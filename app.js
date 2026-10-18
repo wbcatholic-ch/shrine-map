@@ -16498,11 +16498,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function refreshGoogleDriveButton(){
     const el=document.querySelector('[data-oai-google-auto]');if(el)el.checked=oaiAutoEnabled();
-    // An older successful save is not proof of a completed restore decision.
-    // Surface the pending verification in Settings, never silently turn backup on.
-    const status=document.getElementById('oai-data-transfer-status');
-    if(status&&oaiLegacyDriveNeedsVerification()&&!status.textContent.trim())
-      status.textContent='이전 Google Drive 저장 기록이 있습니다. 자동보관을 안전하게 다시 연결하려면 위의 자동보관을 켜서 백업을 확인해 주세요.';
+    const notice=document.getElementById('oai-data-transfer-status');
+    if(notice && oaiLegacyDriveNeedsVerification() && !notice.textContent.trim())
+      notice.textContent='이전 Google Drive 저장 이력은 확인됐지만 연결 확인이 필요합니다. 현재 자동보관은 대기 중입니다. 설정에서 자동보관을 켜서 기존 백업을 확인해 주세요.';
     document.querySelectorAll('.oai-google-drive-description').forEach(x=>x.textContent=oaiAutoEnabled()?'방문기록 등은 Google Drive에 자동 저장됩니다.':'자동 보관을 켜면 방문기록 등이 Google Drive에 저장됩니다.');
     document.querySelectorAll('.oai-google-drive-note').forEach(x=>x.textContent=oaiAutoEnabled()?'자동 보관 사용 중':'자동 보관 꺼짐');
     oaiRefreshLastSavedLabel();
@@ -16767,7 +16765,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const mode=oaiTransferPendingMode;oaiTransferBusy=false;oaiTransferPendingMode='';
     if(!ok){
       // A failed or cancelled account authorization must not authorize a later import.
-      if((mode==='initial-connect'||mode==='settings-connect'||(mode==='manual-load'&&oaiFirstRunAndroid())) && action==='load' && message==='이전에 옮긴 데이터 파일이 없습니다.'){
+      if((mode==='initial-connect'||mode==='settings-connect') && action==='load' && message==='이전에 옮긴 데이터 파일이 없습니다.'){
         // Only the native verified-empty response allows an empty-Drive decision.
         if(mode==='initial-connect'){
           oaiFirstRunRemoteChoice('empty',null);
@@ -16802,7 +16800,47 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(parsed.format!=='cgm-single-transfer'||parsed.schema!==1||!parsed.data||Array.isArray(parsed.data)||typeof parsed.data!=='object')throw Error('지원하지 않는 데이터 형식입니다.');
       const entries=Object.entries(parsed.data).filter(([key,value])=>oaiTransferAllowedKey(key)&&typeof value==='string');
       if(!entries.length)throw Error('가져올 방문기록이 없습니다.');
+      // Compare structured pilgrimage information BEFORE showing an import button.
+      // No remote record may silently replace meaningful local visits, plans or notes.
+      // Deliberately do not merge unknown historic schemas by guessing their shape.
+      const oaiImportCriticalKey=(key)=>/(visit|stamp|pilgrim|course|plan|memo|journal|note|photo|faith|settlement)/i.test(key);
+      const oaiImportHasContent=(raw)=>{
+        if(raw==null||raw===''||raw==='null')return false;
+        try{const value=JSON.parse(raw);
+          if(value==null)return false;
+          if(Array.isArray(value))return value.length>0;
+          if(typeof value==='object')return Object.keys(value).length>0;
+          if(typeof value==='string')return value.trim().length>0;
+          return value!==false&&value!==0;
+        }catch(_e){return raw.trim().length>0;}
+      };
+      const conflicts=entries.filter(([key,incoming])=>{
+        if(!oaiImportCriticalKey(key))return false;
+        const local=localStorage.getItem(key);
+        if(!oaiImportHasContent(local))return false;
+        if(local===incoming)return false;
+        try{return JSON.stringify(JSON.parse(local))!==JSON.stringify(JSON.parse(incoming));}
+        catch(_e){return true;}
+      });
+      if(conflicts.length){
+        // Not an empty/new installation. Never overwrite another device's local history.
+        // Keep the locally selected account's remote records untouched as well.
+        localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'0');
+        refreshGoogleDriveButton();
+        oaiTransferStatus('이 기기에 Google Drive와 다른 방문기록·순례정보가 있어 가져오기를 중단했습니다. 현재 기록과 Drive 백업은 변경하지 않았습니다.');
+        if(mode==='initial-connect'){
+          oaiFirstRunConnecting=false;
+          oaiFirstRunShow('drive');
+          const notice=document.querySelector('[data-first-run-status]');
+          if(notice)notice.textContent='기존 휴대폰 기록과 Google Drive 기록이 달라 안전하게 가져오기를 중단했습니다. 데이터는 그대로 보존됩니다.';
+        }
+        return;
+      }
       const applyImportedRecords=function(){
+        if(entries.some(([key,incoming])=>oaiImportCriticalKey(key)&&oaiImportHasContent(localStorage.getItem(key))&&localStorage.getItem(key)!==incoming)){
+          oaiTransferStatus('가져오기 대기 중 기기의 기록이 변경되어 안전하게 중단했습니다. 다시 확인해 주세요.');
+          return;
+        }
         oaiApplyingRestore=true;
         try{
           const firstRunNetwork=localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)==='1'
@@ -16914,9 +16952,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   let oaiFirstRunSeen=false, oaiFirstRunConnecting=false, oaiFirstRunDialog='', oaiFirstRunNetworkTimer=0, oaiFirstRunConnectTimer=0, oaiFirstRunRestorePending=false;
   const oaiFirstRunAndroid=()=>{const m=String(navigator.userAgent||'').match(/GildongmuAndroid\/(\d+)/i);return !!m&&Number(m[1])>=360;};
   function oaiLegacyDriveNeedsVerification(){
-    // Legacy updates can have a native save receipt but lack the newer
-    // restore-decision flag. Do not mistake this for a fresh installation.
-    // A receipt alone never establishes account identity or permission to save.
     const receipt=localStorage.getItem(OAI_GOOGLE_DRIVE_LAST_SAVED_KEY);
     return localStorage.getItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY)==='1' &&
       localStorage.getItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY)==='1' &&
@@ -16924,10 +16959,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       !!receipt && Number.isFinite(Date.parse(receipt));
   }
   function oaiFirstRunNeedsDrive(){
-    if(localStorage.getItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY)==='1'&&
+    if(localStorage.getItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY)==='1' &&
        localStorage.getItem(OAI_RESTORE_CHECKED_KEY)==='1')return false;
-    // Do not repeat account selection on every app update for a proven older
-    // installation. Auto-save remains gated until explicit Drive validation.
+    // Existing installations with a confirmed old save are not fresh installs.
+    // Do not infer restore approval or authorize saving from that old receipt.
     return !oaiLegacyDriveNeedsVerification();
   }
   function oaiFirstRunOverlay(){return document.getElementById('oai-first-run-dialog');}
