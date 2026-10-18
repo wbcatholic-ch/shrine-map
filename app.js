@@ -2616,6 +2616,10 @@ function _oaiNotifyPhotoLocationActivity(){
     // Stamp details issue foreground photo reads; pause unrelated bulk restore
     // until the detail closes. Reuse the native requested-photo priority policy.
     const detailVisible=showing('shrine-visit-detail-view')||showing('parish-visit-detail');
+    // Stop queuing additional detail thumbnails after its panel closes.
+    if(typeof _oaiDetailThumbQueues!=='undefined')_oaiDetailThumbQueues.forEach(function(queue,kind){
+      if(!showing(kind==='parish'?'parish-visit-detail':'shrine-visit-detail-view'))queue.cancelled=true;
+    });
     if(_oaiRequestedStampDetailLast!==detailVisible){
       bridge.setVisitPhotoTransferActivity('requested-photo',detailVisible);
       _oaiRequestedStampDetailLast=detailVisible;
@@ -3242,21 +3246,51 @@ function _oaiLoadVisitPhotoData(fileId,meta){
   const flightKey=(isThumb?'thumb:':'full:')+key;
   const existing=_oaiVisitPhotoInFlight.get(flightKey);
   if(existing){existing.waiters.push(meta||{});return;}
-  const bridge=_oaiVisitNative();if(!bridge){if(meta&&meta.type==='viewer')_oaiVisitToast('사진 보기는 Android 앱에서 사용할 수 있습니다.');return;}
+  const bridge=_oaiVisitNative();if(!bridge){if(meta&&meta.type==='viewer')_oaiVisitToast('사진 보기는 Android 앱에서 사용할 수 있습니다.');if(meta&&meta.onSettled)meta.onSettled();return;}
   const req=_oaiVisitRequestId(isThumb?'thumb':'view');
   _oaiVisitPhotoInFlight.set(flightKey,{waiters:[meta||{}]});
   _oaiVisitPhotoViewPending[req]=Object.assign({fileId:key,cacheType:isThumb?'thumb':'full',forceFull:forceFull,flightKey:flightKey},meta||{});
-  try{if(typeof bridge.loadVisitPhotoV2==='function')bridge.loadVisitPhotoV2(req,key,String(meta&&meta.driveFileId||''),isThumb);else if(isThumb&&typeof bridge.loadVisitPhotoThumb==='function')bridge.loadVisitPhotoThumb(req,key);else if(typeof bridge.loadVisitPhoto==='function')bridge.loadVisitPhoto(req,key);else throw new Error();}catch(_e){delete _oaiVisitPhotoViewPending[req];_oaiVisitPhotoInFlight.delete(flightKey);if(meta&&meta.type==='viewer')_oaiVisitToast('사진을 불러오지 못했습니다.');}
+  try{if(typeof bridge.loadVisitPhotoV2==='function')bridge.loadVisitPhotoV2(req,key,String(meta&&meta.driveFileId||''),isThumb);else if(isThumb&&typeof bridge.loadVisitPhotoThumb==='function')bridge.loadVisitPhotoThumb(req,key);else if(typeof bridge.loadVisitPhoto==='function')bridge.loadVisitPhoto(req,key);else throw new Error();}catch(_e){delete _oaiVisitPhotoViewPending[req];_oaiVisitPhotoInFlight.delete(flightKey);if(meta&&meta.type==='viewer')_oaiVisitToast('사진을 불러오지 못했습니다.');if(meta&&meta.onSettled)meta.onSettled();}
 }
+// A stamp detail owns its visible photo queue. The four slots cap foreground
+// thumbnail reads while the native bulk restore is paused by requested-photo.
+const _oaiDetailThumbQueues=new Map();
 function _oaiHydrateVisibleVisitThumbnails(kind){
-  const root=document.querySelector('.oai-visit-journal[data-oai-journal-kind="'+String(kind||'')+'"]');if(!root)return;const thumbs=Array.from(root.querySelectorAll('.oai-visit-photo-thumb'));
-  if('IntersectionObserver' in window){
-    const obs=new IntersectionObserver(function(entries){entries.forEach(function(entry){if(!entry.isIntersecting)return;const btn=entry.target;obs.unobserve(btn);const fileId=btn.getAttribute('data-oai-photo-file')||'';if(!fileId||btn.dataset.oaiLoading==='1'||btn.classList.contains('loaded'))return;btn.dataset.oaiLoading='1';_oaiLoadVisitPhotoData(fileId,{type:'thumb',button:btn,driveFileId:btn.getAttribute('data-oai-photo-drive')||''});});},{root:null,rootMargin:'220px 0px'});
-    thumbs.forEach(function(btn,i){if(i<6){const fileId=btn.getAttribute('data-oai-photo-file')||'';if(fileId&&!btn.classList.contains('loaded')&&btn.dataset.oaiLoading!=='1'){btn.dataset.oaiLoading='1';_oaiLoadVisitPhotoData(fileId,{type:'thumb',button:btn,driveFileId:btn.getAttribute('data-oai-photo-drive')||''});}}else if(!btn.classList.contains('loaded'))obs.observe(btn);});return;
-  }
-  let cursor=0;function loadBatch(){if(!root.isConnected)return;let loaded=0;while(cursor<thumbs.length&&loaded<2){const btn=thumbs[cursor++],fileId=btn.getAttribute('data-oai-photo-file')||'';if(!fileId||btn.dataset.oaiLoading==='1'||btn.classList.contains('loaded'))continue;btn.dataset.oaiLoading='1';_oaiLoadVisitPhotoData(fileId,{type:'thumb',button:btn,driveFileId:btn.getAttribute('data-oai-photo-drive')||''});loaded++;}if(cursor<thumbs.length)setTimeout(loadBatch,180);}loadBatch();
+  const root=document.querySelector('.oai-visit-journal[data-oai-journal-kind="'+String(kind||'')+'"]');
+  if(!root)return;
+  const previous=_oaiDetailThumbQueues.get(kind);
+  if(previous&&!previous.cancelled&&previous.root===root)return; // Do not restart an active queue.
+  if(previous)previous.cancelled=true;
+  const queue={root:root,cancelled:false,active:0,cursor:0,buttons:[]};
+  // The screen is already open: all of this visit's thumbnails are relevant,
+  // including those currently below the viewport. Do not rely on scrolling.
+  queue.buttons=Array.from(root.querySelectorAll('.oai-visit-photo-thumb')).filter(function(btn){
+    return !!btn.getAttribute('data-oai-photo-file')&&!btn.classList.contains('loaded');
+  });
+  _oaiDetailThumbQueues.set(kind,queue);
+  const pump=function(){
+    if(queue.cancelled||!root.isConnected)return;
+    while(queue.active<4&&queue.cursor<queue.buttons.length){
+      const btn=queue.buttons[queue.cursor++];
+      if(!btn.isConnected||btn.classList.contains('loaded'))continue;
+      const fileId=btn.getAttribute('data-oai-photo-file')||'';
+      if(!fileId)continue;
+      queue.active++;
+      btn.dataset.oaiLoading='1';
+      let settled=false;
+      const finish=function(){
+        if(settled)return;
+        settled=true;
+        queue.active=Math.max(0,queue.active-1);
+        pump();
+      };
+      _oaiLoadVisitPhotoData(fileId,{type:'thumb',button:btn,
+        driveFileId:btn.getAttribute('data-oai-photo-drive')||'',onSettled:finish});
+    }
+  };
+  pump();
 }
-function _oaiApplyLoadedVisitPhoto(meta,dataUri){if(!meta)return;if(meta.type==='thumb'){const btn=meta.button;if(!btn||!btn.isConnected)return;const img=btn.querySelector('img');if(!img)return;img.onload=function(){if(!btn.isConnected)return;btn.classList.add('loaded');btn.classList.remove('load-error');btn.dataset.oaiLoading='0';};img.onerror=function(){try{img.removeAttribute('src');}catch(_e){}btn.classList.remove('loaded');btn.dataset.oaiLoading='0';if(!meta.forceFull&&!btn.dataset.oaiFullRetried){btn.dataset.oaiFullRetried='1';btn.dataset.oaiLoading='1';const id=btn.getAttribute('data-oai-photo-file')||'';if(id){_oaiLoadVisitPhotoData(id,{type:'thumb',button:btn,driveFileId:btn.getAttribute('data-oai-photo-drive')||'',forceFull:true});return;}}btn.classList.add('load-error');const ph=btn.querySelector('.oai-visit-photo-placeholder');if(ph)ph.textContent='사진';};img.src=dataUri;return;}if(meta.type==='viewer'){_oaiShowPhotoViewer(meta.kind,meta.index,dataUri);}}
+function _oaiApplyLoadedVisitPhoto(meta,dataUri){if(!meta)return;if(meta.type==='thumb'){const btn=meta.button;if(!btn||!btn.isConnected){if(meta.onSettled)meta.onSettled();return;}const img=btn.querySelector('img');if(!img){if(meta.onSettled)meta.onSettled();return;}img.onload=function(){if(!btn.isConnected){if(meta.onSettled)meta.onSettled();return;}btn.classList.add('loaded');btn.classList.remove('load-error');btn.dataset.oaiLoading='0';if(meta.onSettled)meta.onSettled();};img.onerror=function(){try{img.removeAttribute('src');}catch(_e){}btn.classList.remove('loaded');btn.dataset.oaiLoading='0';if(!meta.forceFull&&!btn.dataset.oaiFullRetried){btn.dataset.oaiFullRetried='1';btn.dataset.oaiLoading='1';const id=btn.getAttribute('data-oai-photo-file')||'';if(id){_oaiLoadVisitPhotoData(id,{type:'thumb',button:btn,driveFileId:btn.getAttribute('data-oai-photo-drive')||'',forceFull:true,onSettled:meta.onSettled});return;}}btn.classList.add('load-error');if(meta.onSettled)meta.onSettled();const ph=btn.querySelector('.oai-visit-photo-placeholder');if(ph)ph.textContent='사진';};img.src=dataUri;return;}if(meta.type==='viewer'){_oaiShowPhotoViewer(meta.kind,meta.index,dataUri);}}
 function _oaiOpenPhoto(kind,index){if(!(_oaiJournalDeveloperEnabled()))return;const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const visit=_oaiGetVisitByDate(kind,ctx.item,ctx.date),photos=_oaiNormalizePhotos(visit),ph=photos[index];if(!ph)return;_oaiPreparePhotoViewer(kind,index,ctx,photos.length);_oaiLoadVisitPhotoData(_oaiPhotoIdentity(ph),{type:'viewer',kind:kind,index:index,ctx:ctx,driveFileId:String(ph.driveFileId||'')});}
 function _oaiEnsurePhotoViewer(){
   let m=document.getElementById('oai-visit-photo-viewer');if(m)return m;m=document.createElement('div');m.id='oai-visit-photo-viewer';m.className='oai-visit-photo-viewer';m.setAttribute('aria-hidden','true');m.innerHTML='<div class="oai-visit-photo-viewer-bg"></div><div class="oai-visit-photo-viewer-panel"><div class="oai-visit-photo-viewer-top"><span id="oai-visit-photo-viewer-count"></span><button type="button" data-oai-photo-viewer-close="1" aria-label="사진 닫기">×</button></div><button type="button" class="oai-visit-photo-nav prev" data-oai-photo-prev="1" aria-label="이전 사진">‹</button><img id="oai-visit-photo-viewer-img" alt="방문 사진"><button type="button" class="oai-visit-photo-nav next" data-oai-photo-next="1" aria-label="다음 사진">›</button></div>';
@@ -3274,9 +3308,9 @@ window.oaiVisitPhotoLoaded=function(requestId,ok,mimeType,payload,message){
   if(flight)_oaiVisitPhotoInFlight.delete(pending.flightKey);
   const waiters=flight?flight.waiters:[pending];
   if(!ok){waiters.forEach(function(meta){
-    if(meta.type==='thumb'&&!pending.forceFull&&meta.button&&meta.button.isConnected){meta.button.dataset.oaiLoading='1';_oaiLoadVisitPhotoData(pending.fileId,{type:'thumb',button:meta.button,driveFileId:meta.driveFileId||'',forceFull:true});return;}
+    if(meta.type==='thumb'&&!pending.forceFull&&meta.button&&meta.button.isConnected){meta.button.dataset.oaiLoading='1';_oaiLoadVisitPhotoData(pending.fileId,{type:'thumb',button:meta.button,driveFileId:meta.driveFileId||'',forceFull:true,onSettled:meta.onSettled});return;}
     if(meta.type==='viewer')_oaiVisitToast(message||'사진을 불러오지 못했습니다.');
-    if(meta.button&&meta.button.isConnected){meta.button.dataset.oaiLoading='0';meta.button.classList.add('load-error');}
+    if(meta.button&&meta.button.isConnected){meta.button.dataset.oaiLoading='0';meta.button.classList.add('load-error');}if(meta.onSettled)meta.onSettled();
   });return;}
   const raw=String(payload||'');const src=/^(https?:|blob:|data:)/i.test(raw)?raw:('data:'+(mimeType||'image/jpeg')+';base64,'+raw);
   _oaiCachePhotoData(pending.fileId,src,pending.cacheType||'full');
