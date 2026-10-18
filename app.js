@@ -3261,9 +3261,9 @@ function _oaiHydrateVisibleVisitThumbnails(kind){
   const previous=_oaiDetailThumbQueues.get(kind);
   if(previous&&!previous.cancelled&&previous.root===root)return; // Do not restart an active queue.
   if(previous)previous.cancelled=true;
-  const queue={root:root,cancelled:false,active:0,cursor:0,buttons:[]};
-  // The screen is already open: all of this visit's thumbnails are relevant,
-  // including those currently below the viewport. Do not rely on scrolling.
+  const queue={root:root,cancelled:false,active:0,cursor:0,buttons:[],attempts:new Map()};
+  // Process the entire open visit without relying on viewport scrolling. Failed
+  // requests return to this same bounded queue; never spin or re-render the grid.
   queue.buttons=Array.from(root.querySelectorAll('.oai-visit-photo-thumb')).filter(function(btn){
     return !!btn.getAttribute('data-oai-photo-file')&&!btn.classList.contains('loaded');
   });
@@ -3282,6 +3282,20 @@ function _oaiHydrateVisibleVisitThumbnails(kind){
         if(settled)return;
         settled=true;
         queue.active=Math.max(0,queue.active-1);
+        // Each missing photo gets up to two spaced retries while this visit stays
+        // open; one failed Drive object cannot block the other thumbnails.
+        if(!queue.cancelled&&root.isConnected&&btn.isConnected&&!btn.classList.contains('loaded')){
+          const attempt=(queue.attempts.get(btn)||0)+1;
+          queue.attempts.set(btn,attempt);
+          if(attempt<=2){
+            setTimeout(function(){
+              if(queue.cancelled||!root.isConnected||!btn.isConnected||btn.classList.contains('loaded'))return;
+              btn.dataset.oaiFullRetried='';
+              queue.buttons.push(btn);
+              pump();
+            },attempt===1?5000:15000);
+          }
+        }
         pump();
       };
       _oaiLoadVisitPhotoData(fileId,{type:'thumb',button:btn,
