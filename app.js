@@ -16688,6 +16688,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // The first-run account chooser runs before checking Drive. The account's
   // actual response selects exactly one subsequent action, never both.
   let oaiFirstRunRemotePayload=null;
+  let oaiFirstRunImportConflict=false;
   function oaiFirstRunRemoteChoice(kind,payload){
     oaiFirstRunRemotePayload=kind==='found'?payload:null;
     oaiFirstRunConnecting=false;
@@ -16699,7 +16700,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const action=el.querySelector('[data-first-run-drive-primary]');
     if(kind==='found'){
       heading.textContent='기존 순례기록이 확인되었습니다';
-      description.textContent='Google Drive에 보관된 기록이 있습니다. 가져오기를 누르면 실제로 기록을 복원합니다.';
+      description.textContent=oaiFirstRunImportConflict?'휴대폰에도 기록이 있습니다. 가져오기를 누르면 같은 항목의 휴대폰 기록이 Google Drive 기록으로 교체됩니다.':'Google Drive에 보관된 기록이 있습니다. 가져오기를 누르면 실제로 기록을 복원합니다.';
       action.textContent='기존 데이터 가져오기';
     }else{
       heading.textContent='Google Drive 연결이 확인되었습니다';
@@ -16708,12 +16709,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     action.focus({preventScroll:true});
   }
-  function oaiConfirmDriveImport(entries,onAccept){
+  function oaiConfirmDriveImport(entries,onAccept,hasLocalConflict){
     const modal=document.getElementById('oai-drive-import-confirm');
     if(!modal){oaiTransferStatus('가져오기 확인창을 열지 못했습니다.');return;}
     const heading=modal.querySelector('#oai-drive-import-heading');if(heading)heading.textContent='Google Drive 기록 가져오기';
     const description=modal.querySelector('#oai-drive-import-description');if(description)description.innerHTML='Google Drive에 보관된 <strong><span data-oai-drive-import-count>0</span>개 저장 데이터 항목</strong>을 이 기기로 가져올까요?';
-    const caution=modal.querySelector('.oai-drive-import-caution');if(caution)caution.textContent='같은 항목의 현재 기기 기록은 교체됩니다. 기존 사진 파일은 삭제하지 않습니다.';
+    const caution=modal.querySelector('.oai-drive-import-caution');if(caution)caution.textContent=hasLocalConflict?'휴대폰에도 기록이 있습니다. 가져오기를 승인하면 같은 항목의 휴대폰 기록은 Drive 기록으로 교체됩니다. 기존 사진 파일은 삭제하지 않습니다.':'같은 항목의 현재 기기 기록은 교체됩니다. 기존 사진 파일은 삭제하지 않습니다.';
     modal.querySelector('[data-oai-drive-import-cancel]').textContent='취소';modal.querySelector('[data-oai-drive-import-approve]').textContent='가져오기';
     const number=modal.querySelector('[data-oai-drive-import-count]');
     if(number)number.textContent=String(entries.length);
@@ -16800,45 +16801,46 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(parsed.format!=='cgm-single-transfer'||parsed.schema!==1||!parsed.data||Array.isArray(parsed.data)||typeof parsed.data!=='object')throw Error('지원하지 않는 데이터 형식입니다.');
       const entries=Object.entries(parsed.data).filter(([key,value])=>oaiTransferAllowedKey(key)&&typeof value==='string');
       if(!entries.length)throw Error('가져올 방문기록이 없습니다.');
-      // Compare structured pilgrimage information BEFORE showing an import button.
-      // No remote record may silently replace meaningful local visits, plans or notes.
-      // Deliberately do not merge unknown historic schemas by guessing their shape.
-      const oaiImportCriticalKey=(key)=>/(visit|stamp|pilgrim|course|plan|memo|journal|note|photo|faith|settlement)/i.test(key);
-      const oaiImportHasContent=(raw)=>{
+      // Different local and remote values are normal. A difference alone must
+      // never abort restore or send the user back to account selection.
+      // Only meaningful existing visit/plan/note information needs an explicit
+      // replacement warning; transfer settings and empty defaults do not.
+      const oaiImportRecordKeys=new Set([
+        'oai_shrine_visits_v1','oai_parish_visits_v1',
+        'oai_deleted_manual_visits_v1','oai_pilgrimage_plan_v1',
+        'oai_pilgrimage_draft_meta_v2','oai_pilgrimage_courses_v1',
+        'oai_pilgrimage_active_follow_v1','oai_pilgrimage_daily_settlement_v2'
+      ]);
+      const oaiImportIsRecordKey=(key)=>oaiImportRecordKeys.has(key) ||
+        /^(oai|cgm|catholic)[_-]/i.test(key) &&
+        /(visit|stamp|pilgrim|journal|memo|note|course)/i.test(key) &&
+        !/(setting|network|wifi|choice|enabled|prompt|sync|cache|pending|queue|last|status|photo)/i.test(key);
+      const oaiImportHasRecords=(raw)=>{
         if(raw==null||raw===''||raw==='null')return false;
         try{const value=JSON.parse(raw);
           if(value==null)return false;
           if(Array.isArray(value))return value.length>0;
           if(typeof value==='object')return Object.keys(value).length>0;
           if(typeof value==='string')return value.trim().length>0;
-          return value!==false&&value!==0;
-        }catch(_e){return raw.trim().length>0;}
+          return false;
+        }catch(_e){return false;}
       };
-      const conflicts=entries.filter(([key,incoming])=>{
-        if(!oaiImportCriticalKey(key))return false;
+      const oaiImportHasLocalConflict=()=>entries.some(([key,incoming])=>{
+        if(!oaiImportIsRecordKey(key))return false;
         const local=localStorage.getItem(key);
-        if(!oaiImportHasContent(local))return false;
-        if(local===incoming)return false;
+        if(!oaiImportHasRecords(local)||local===incoming)return false;
         try{return JSON.stringify(JSON.parse(local))!==JSON.stringify(JSON.parse(incoming));}
         catch(_e){return true;}
       });
-      if(conflicts.length){
-        // Not an empty/new installation. Never overwrite another device's local history.
-        // Keep the locally selected account's remote records untouched as well.
-        localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'0');
-        refreshGoogleDriveButton();
-        oaiTransferStatus('이 기기에 Google Drive와 다른 방문기록·순례정보가 있어 가져오기를 중단했습니다. 현재 기록과 Drive 백업은 변경하지 않았습니다.');
-        if(mode==='initial-connect'){
-          oaiFirstRunConnecting=false;
-          oaiFirstRunShow('drive');
-          const notice=document.querySelector('[data-first-run-status]');
-          if(notice)notice.textContent='기존 휴대폰 기록과 Google Drive 기록이 달라 안전하게 가져오기를 중단했습니다. 데이터는 그대로 보존됩니다.';
-        }
-        return;
-      }
+      // Import is only applied after the user's explicit approval. When real
+      // local records differ, disclose replacement; never treat this as failure.
+      let localConflict=oaiImportHasLocalConflict();
       const applyImportedRecords=function(){
-        if(entries.some(([key,incoming])=>oaiImportCriticalKey(key)&&oaiImportHasContent(localStorage.getItem(key))&&localStorage.getItem(key)!==incoming)){
-          oaiTransferStatus('가져오기 대기 중 기기의 기록이 변경되어 안전하게 중단했습니다. 다시 확인해 주세요.');
+        // If the local data changed after the warning was shown, require a
+        // fresh confirmation rather than silently replacing the newer state.
+        if(!localConflict && oaiImportHasLocalConflict()){
+          localConflict=true;
+          oaiConfirmDriveImport(entries,applyImportedRecords,true);
           return;
         }
         oaiApplyingRestore=true;
@@ -16888,10 +16890,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       // restore. Do not ask for the same consent again after account selection.
       // Keep the confirmation for ordinary/manual imports and new-user flows.
       if(mode==='initial-connect'){
+        oaiFirstRunImportConflict=localConflict;
         // The payload is validated and kept in memory; it is not applied until
         // the user's single post-account 'import' approval.
         oaiFirstRunRemoteChoice('found',applyImportedRecords);
-      }else oaiConfirmDriveImport(entries,applyImportedRecords);
+      }else oaiConfirmDriveImport(entries,applyImportedRecords,localConflict);
     }catch(err){
       oaiTransferStatus('가져오기 실패: '+err.message);
       if(mode==='initial-connect'){
@@ -16971,6 +16974,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const previous=oaiFirstRunDialog;
     const el=oaiFirstRunOverlay();if(el){el.hidden=true;el.setAttribute('aria-hidden','true');}
     oaiFirstRunDialog='';
+    if(previous==='drive-result')oaiFirstRunImportConflict=false;
     if(advance&&previous==='network'){
       if(oaiFirstRunNeedsDrive())oaiFirstRunShow('drive');
       else oaiFirstRunParishIfNeeded();
