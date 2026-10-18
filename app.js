@@ -2599,7 +2599,7 @@ function _updateShrineVisitCardsButtonUI(){
 }
 // Transfer hints only: real map/GPS activity blocks photo network traffic.
 // Native work is never started by this helper; active photo viewers are not maps.
-let _oaiPhotoGpsRequests=0, _oaiPhotoLocationLast=null;
+let _oaiPhotoGpsRequests=0, _oaiPhotoLocationLast=null, _oaiRequestedStampDetailLast=null;
 function _oaiNotifyPhotoLocationActivity(){
   try{
     const bridge=window.GildongmuNative||window.Android;
@@ -2612,6 +2612,13 @@ function _oaiNotifyPhotoLocationActivity(){
     if(_oaiPhotoLocationLast!==active){
       bridge.setVisitPhotoTransferActivity('location',active);
       _oaiPhotoLocationLast=active;
+    }
+    // Stamp details issue foreground photo reads; pause unrelated bulk restore
+    // until the detail closes. Reuse the native requested-photo priority policy.
+    const detailVisible=showing('shrine-visit-detail-view')||showing('parish-visit-detail');
+    if(_oaiRequestedStampDetailLast!==detailVisible){
+      bridge.setVisitPhotoTransferActivity('requested-photo',detailVisible);
+      _oaiRequestedStampDetailLast=detailVisible;
     }
   }catch(_e){}
 }
