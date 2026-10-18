@@ -10053,3 +10053,6 @@ html.oai-font-global .shrine-visit-card-badge strong,html:not(.ios-device).oai-s
 .oai-first-run-connect{background:#1778f5;color:white;margin:0 0 10px}.oai-first-run-connect:disabled{opacity:.55}
 .oai-first-run-later{background:#f0f1f4;color:#171a21;margin-top:2px}
 .oai-first-run-foot{display:block;color:#3576c8;font-size:12px;line-height:1.45;margin-top:17px}
+
+/* Personal visit photos: gestures belong to the full-size image, not nav controls. */
+#oai-visit-photo-viewer-img{touch-action:none;user-select:none;-webkit-user-select:none;-webkit-user-drag:none;transform-origin:center center;will-change:transform;}
