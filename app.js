@@ -16393,7 +16393,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   let oaiTransferBusy=false, oaiBackupTimer=0, oaiBackupDirty=false, oaiTransferPendingMode='', oaiApplyingRestore=false, oaiBackupRetryCount=0;
   let oaiDriveReady=localStorage.getItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY)==='1';
   let oaiRestoreDecisionPending=false;
-  const oaiAutoEnabled=()=>localStorage.getItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY)!=='0' && oaiDriveReady && localStorage.getItem(OAI_RESTORE_CHECKED_KEY)==='1';
+  const oaiAutoEnabled=()=>localStorage.getItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY)==='1' && oaiDriveReady && localStorage.getItem(OAI_RESTORE_CHECKED_KEY)==='1';
   const OAI_GOOGLE_DRIVE_LAST_SAVED_KEY='oai_google_drive_last_saved_at_v1';
   function oaiLastSavedLabel(){
     const raw=localStorage.getItem(OAI_GOOGLE_DRIVE_LAST_SAVED_KEY);
@@ -16498,6 +16498,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function refreshGoogleDriveButton(){
     const el=document.querySelector('[data-oai-google-auto]');if(el)el.checked=oaiAutoEnabled();
+    // An older successful save is not proof of a completed restore decision.
+    // Surface the pending verification in Settings, never silently turn backup on.
+    const status=document.getElementById('oai-data-transfer-status');
+    if(status&&oaiLegacyDriveNeedsVerification()&&!status.textContent.trim())
+      status.textContent='이전 Google Drive 저장 기록이 있습니다. 자동보관을 안전하게 다시 연결하려면 위의 자동보관을 켜서 백업을 확인해 주세요.';
     document.querySelectorAll('.oai-google-drive-description').forEach(x=>x.textContent=oaiAutoEnabled()?'방문기록 등은 Google Drive에 자동 저장됩니다.':'자동 보관을 켜면 방문기록 등이 Google Drive에 저장됩니다.');
     document.querySelectorAll('.oai-google-drive-note').forEach(x=>x.textContent=oaiAutoEnabled()?'자동 보관 사용 중':'자동 보관 꺼짐');
     oaiRefreshLastSavedLabel();
@@ -16908,7 +16913,23 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // Account selection is not proof of an empty backup; never auto-save before decision.
   let oaiFirstRunSeen=false, oaiFirstRunConnecting=false, oaiFirstRunDialog='', oaiFirstRunNetworkTimer=0, oaiFirstRunConnectTimer=0, oaiFirstRunRestorePending=false;
   const oaiFirstRunAndroid=()=>{const m=String(navigator.userAgent||'').match(/GildongmuAndroid\/(\d+)/i);return !!m&&Number(m[1])>=360;};
-  function oaiFirstRunNeedsDrive(){return localStorage.getItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY)!=='1'||localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1';}
+  function oaiLegacyDriveNeedsVerification(){
+    // Legacy updates can have a native save receipt but lack the newer
+    // restore-decision flag. Do not mistake this for a fresh installation.
+    // A receipt alone never establishes account identity or permission to save.
+    const receipt=localStorage.getItem(OAI_GOOGLE_DRIVE_LAST_SAVED_KEY);
+    return localStorage.getItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY)==='1' &&
+      localStorage.getItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY)==='1' &&
+      localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1' &&
+      !!receipt && Number.isFinite(Date.parse(receipt));
+  }
+  function oaiFirstRunNeedsDrive(){
+    if(localStorage.getItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY)==='1'&&
+       localStorage.getItem(OAI_RESTORE_CHECKED_KEY)==='1')return false;
+    // Do not repeat account selection on every app update for a proven older
+    // installation. Auto-save remains gated until explicit Drive validation.
+    return !oaiLegacyDriveNeedsVerification();
+  }
   function oaiFirstRunOverlay(){return document.getElementById('oai-first-run-dialog');}
   function oaiFirstRunClose(advance){
     clearTimeout(oaiFirstRunNetworkTimer);oaiFirstRunNetworkTimer=0;
