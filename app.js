@@ -16586,6 +16586,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(btn)btn.disabled=false;
     if(copy)copy.hidden=!message;
   };
+  window.oaiDevMissingPhotoDriveCheckResult=function(state,message){
+    const el=document.getElementById('oai-dev-missing-photo-drive-report');
+    const btn=document.getElementById('oai-dev-missing-photo-drive');
+    const copy=document.getElementById('oai-dev-missing-photo-drive-copy');
+    if(el){el.hidden=false;el.textContent=String(message||'');}
+    if(btn)btn.disabled=(state==='working');
+    if(copy)copy.hidden=state==='working'||!message;
+  };
   function oaiRefreshDeveloperPanel(){
     const section=document.getElementById('oai-developer-section');if(section)section.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked);
     const test=document.getElementById('oai-dev-five-photo-backup');
@@ -16594,6 +16602,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(verify)verify.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.verifyBackupFiveVisitPhotos==='function');
     const diag=document.getElementById('oai-dev-photo-download-diagnose');
     if(diag)diag.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.diagnoseVisitPhotoDownloads==='function');
+    const remoteCheck=document.getElementById('oai-dev-missing-photo-drive');
+    if(remoteCheck)remoteCheck.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.checkMissingVisitPhotosInDrive==='function');
     if(!oaiDevEnabled()){oaiDevPendingRestore=null;for(const id of ['oai-dev-export-view','oai-dev-import-view','oai-dev-restore-preview']){const el=document.getElementById(id);if(el)el.hidden=true;}}
   }
   function oaiEncodeCgm1(value){return 'CGM1.'+btoa(Array.from(new TextEncoder().encode(JSON.stringify(value)),v=>String.fromCharCode(v)).join(''));}
@@ -16647,7 +16657,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }finally{oaiApplyingRestore=false;}
   }
   document.addEventListener('click',function(event){
-    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-copy],[data-oai-dev-preview],[data-oai-dev-apply],[data-oai-dev-failure-preview],[data-oai-dev-daily-results],[data-oai-dev-five-photo-backup],[data-oai-dev-five-photo-verify],[data-oai-dev-photo-download-diagnose],[data-oai-dev-photo-download-copy]');if(!button)return;
+    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-copy],[data-oai-dev-preview],[data-oai-dev-apply],[data-oai-dev-failure-preview],[data-oai-dev-daily-results],[data-oai-dev-five-photo-backup],[data-oai-dev-five-photo-verify],[data-oai-dev-photo-download-diagnose],[data-oai-dev-photo-download-copy,[data-oai-dev-missing-photo-drive],[data-oai-dev-missing-photo-drive-copy]');if(!button)return;
     if(button.id==='oai-settings-version-label'){
       oaiDevTapCount++;
       if(oaiDevTapCount>=10){oaiDevTapCount=0;const next=!(oaiDevEnabled()&&oaiDevPanelUnlocked);oaiDevPanelUnlocked=next;window.__OAI_DEV_RUNTIME_ACTIVE__=next;oaiRefreshDeveloperPanel();const detail=document.getElementById('parish-visit-detail');if(detail&&detail.classList.contains('show'))_renderParishVisitDetail();if(_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null)_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);if(next){oaiDevStatus('개발자 모드가 열렸습니다.');document.getElementById('oai-developer-section').scrollIntoView({block:'nearest',behavior:'smooth'});} }
@@ -16656,7 +16666,18 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!oaiDevEnabled())return;
     event.preventDefault();
     try{
-      if(button.hasAttribute('data-oai-dev-photo-download-diagnose')){
+      if(button.hasAttribute('data-oai-dev-missing-photo-drive')){
+        if(!oaiDevPanelUnlocked||!window.GildongmuNative||typeof window.GildongmuNative.checkMissingVisitPhotosInDrive!=='function')return;
+        window.oaiDevMissingPhotoDriveCheckResult('working','미완료 사진의 Google Drive 파일을 읽기 전용으로 조회 중입니다.');
+        window.GildongmuNative.checkMissingVisitPhotosInDrive();
+      }else if(button.hasAttribute('data-oai-dev-missing-photo-drive-copy')){
+        const content=document.getElementById('oai-dev-missing-photo-drive-report');
+        if(!content||!content.textContent)return;
+        if(navigator.clipboard&&navigator.clipboard.writeText){
+          navigator.clipboard.writeText(content.textContent).then(()=>oaiDevStatus('Drive 확인 결과를 복사했습니다.'))
+            .catch(()=>oaiDevStatus('길게 눌러 복사해 주세요.'));
+        }else oaiDevStatus('길게 눌러 복사해 주세요.');
+      }else if(button.hasAttribute('data-oai-dev-photo-download-diagnose')){
         if(!oaiDevPanelUnlocked||!window.GildongmuNative||typeof window.GildongmuNative.diagnoseVisitPhotoDownloads!=='function')return;
         const diagBtn=document.getElementById('oai-dev-photo-download-diagnose');if(diagBtn)diagBtn.disabled=true;
         window.oaiDevPhotoDownloadDiagnosisResult('working','휴대폰에 저장된 다운로드 상태를 읽는 중입니다.');
