@@ -16435,12 +16435,21 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function oaiPhotoNetworkChoiceNeeded(){
     return false; // Network-choice rollout is not enabled for users.
   }
+  function oaiPhotoRestoreAllowed(){
+    // Photo network-choice dialog has not been released. Its hidden completion
+    // keys must not prevent a consented Drive restore. Default remains Wi-Fi
+    // only unless the user explicitly selected mobile data in Settings.
+    if(!oaiAutoEnabled() || localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1')return false;
+    if(oaiPhotoNetworkChoiceNeeded())return localStorage.getItem(OAI_PHOTO_NETWORK_CHOICE_KEY)==='1' &&
+      (!oaiPhotoChoiceEligible() || localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)==='1');
+    return true;
+  }
   function oaiNotifyNativePhotoCloudSettings(requestAuthorization){
     try{
       const native=window.GildongmuNative||window.Android;
       if(native&&typeof native.setVisitPhotoCloudOptions==='function'){
         // First-run records restore decision stays independent and mandatory.
-        const permitted=oaiAutoEnabled() && localStorage.getItem(OAI_RESTORE_CHECKED_KEY)==='1' && localStorage.getItem(OAI_PHOTO_NETWORK_CHOICE_KEY)==='1' && (!oaiPhotoChoiceEligible() || localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)==='1');
+        const permitted=oaiPhotoRestoreAllowed();
         native.setVisitPhotoCloudOptions(permitted,
           localStorage.getItem(OAI_PHOTO_WIFI_ONLY_KEY)!=='0',
           !!requestAuthorization && permitted);
@@ -16449,7 +16458,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   let oaiPhotoManifestStarted=false;
   function oaiQueuePhotoRestoreManifest(){
-    if(oaiPhotoManifestStarted||!oaiAutoEnabled()||localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1'||localStorage.getItem(OAI_PHOTO_NETWORK_CHOICE_KEY)!=='1'||oaiPhotoNetworkChoiceNeeded()||(oaiPhotoChoiceEligible()&&localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)!=='1'))return;
+    if(oaiPhotoManifestStarted||!oaiPhotoRestoreAllowed())return;
     const native=window.GildongmuNative||window.Android;
     if(!native||typeof native.enqueueVisitPhotoRestoreManifest!=='function')return;
     oaiPhotoManifestStarted=true;
