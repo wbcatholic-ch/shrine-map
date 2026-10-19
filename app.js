@@ -3334,10 +3334,14 @@ function _oaiEnsurePhotoViewer(){
     if(e.target.closest&&e.target.closest('[data-oai-photo-prev]')){_oaiMovePhotoViewer(-1);return;}
     if(e.target.closest&&e.target.closest('[data-oai-photo-next]')){_oaiMovePhotoViewer(1);return;}
   });
-  const img=m.querySelector('#oai-visit-photo-viewer-img'),z=_oaiVisitViewerZoom;
+  const img=m.querySelector('#oai-visit-photo-viewer-img'),panel=m.querySelector('.oai-visit-photo-viewer-panel'),z=_oaiVisitViewerZoom;
+  let gestureActive=false;
   const distance=function(t){return Math.hypot(t[0].clientX-t[1].clientX,t[0].clientY-t[1].clientY);};
   const midpoint=function(t){return {x:(t[0].clientX+t[1].clientX)/2,y:(t[0].clientY+t[1].clientY)/2};};
-  img.addEventListener('touchstart',function(e){
+  panel.addEventListener('touchstart',function(e){
+    // Swipe on the photo or surrounding black space, but never on viewer controls.
+    gestureActive=!(e.target.closest&&e.target.closest('button,.oai-visit-photo-viewer-top'));
+    if(!gestureActive)return;
     const t=e.touches;if(!t||!t.length)return;
     if(t.length>=2){
       e.preventDefault();z.pinchDist=Math.max(1,distance(t));z.pinchScale=z.scale;
@@ -3347,7 +3351,8 @@ function _oaiEnsurePhotoViewer(){
     z.startX=t[0].clientX;z.startY=t[0].clientY;z.baseX=z.x;z.baseY=z.y;
     z.moved=false;z.multitouch=false;
   },{passive:false});
-  img.addEventListener('touchmove',function(e){
+  panel.addEventListener('touchmove',function(e){
+    if(!gestureActive)return;
     const t=e.touches;if(!t||!t.length)return;
     if(t.length>=2&&z.pinchDist){
       e.preventDefault();const mid=midpoint(t),next=Math.max(1,Math.min(4,z.pinchScale*distance(t)/z.pinchDist));
@@ -3359,13 +3364,17 @@ function _oaiEnsurePhotoViewer(){
       e.preventDefault();z.x=z.baseX+t[0].clientX-z.startX;z.y=z.baseY+t[0].clientY-z.startY;
       z.moved=true;_oaiVisitViewerClamp();return;
     }
-    if(Math.abs(t[0].clientX-z.startX)>10||Math.abs(t[0].clientY-z.startY)>10)z.moved=true;
+    const dx=t[0].clientX-z.startX,dy=t[0].clientY-z.startY;
+    if(Math.abs(dx)>10||Math.abs(dy)>10)z.moved=true;
+    if(Math.abs(dx)>10&&Math.abs(dx)>Math.abs(dy)*1.25)e.preventDefault();
   },{passive:false});
-  img.addEventListener('touchend',function(e){
+  panel.addEventListener('touchend',function(e){
+    if(!gestureActive)return;
     if(e.touches&&e.touches.length){
       if(e.touches.length===1){z.startX=e.touches[0].clientX;z.startY=e.touches[0].clientY;z.baseX=z.x;z.baseY=z.y;}
       return;
     }
+    gestureActive=false;
     const t=e.changedTouches&&e.changedTouches[0];z.pinchDist=0;
     if(!t)return;
     if(z.multitouch){z.multitouch=false;return;}
@@ -3377,7 +3386,7 @@ function _oaiEnsurePhotoViewer(){
       else z.lastTap=now;
     }else z.lastTap=0;
   },{passive:true});
-  img.addEventListener('touchcancel',function(){z.pinchDist=0;z.multitouch=false;z.moved=false;});
+  panel.addEventListener('touchcancel',function(){gestureActive=false;z.pinchDist=0;z.multitouch=false;z.moved=false;});
   return m;
 }
 function _oaiPreparePhotoViewer(kind,index,ctx,total){const m=_oaiEnsurePhotoViewer(),img=document.getElementById('oai-visit-photo-viewer-img'),count=document.getElementById('oai-visit-photo-viewer-count');_oaiVisitPhotoViewerState={kind:kind,index:index,ctx:ctx};if(img){_oaiResetVisitViewerZoom();img.removeAttribute('src');img.classList.add('loading');}if(count)count.textContent=(index+1)+' / '+Number(total||0);m.classList.add('show');m.setAttribute('aria-hidden','false');const prev=m.querySelector('[data-oai-photo-prev]'),next=m.querySelector('[data-oai-photo-next]');if(prev)prev.disabled=index<=0;if(next)next.disabled=index>=Number(total||0)-1;try{document.documentElement.classList.add('oai-visit-photo-open');}catch(_e){}}
