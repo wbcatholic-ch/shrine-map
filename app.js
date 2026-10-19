@@ -3248,9 +3248,29 @@ function _oaiLoadVisitPhotoData(fileId,meta){
   if(existing){existing.waiters.push(meta||{});return;}
   const bridge=_oaiVisitNative();if(!bridge){if(meta&&meta.type==='viewer')_oaiVisitToast('사진 보기는 Android 앱에서 사용할 수 있습니다.');if(meta&&meta.onSettled)meta.onSettled();return;}
   const req=_oaiVisitRequestId(isThumb?'thumb':'view');
-  _oaiVisitPhotoInFlight.set(flightKey,{waiters:[meta||{}]});
+  const flight={waiters:[meta||{}],timer:null};
+  _oaiVisitPhotoInFlight.set(flightKey,flight);
   _oaiVisitPhotoViewPending[req]=Object.assign({fileId:key,cacheType:isThumb?'thumb':'full',forceFull:forceFull,flightKey:flightKey},meta||{});
-  try{if(typeof bridge.loadVisitPhotoV2==='function')bridge.loadVisitPhotoV2(req,key,String(meta&&meta.driveFileId||''),isThumb);else if(isThumb&&typeof bridge.loadVisitPhotoThumb==='function')bridge.loadVisitPhotoThumb(req,key);else if(typeof bridge.loadVisitPhoto==='function')bridge.loadVisitPhoto(req,key);else throw new Error();}catch(_e){delete _oaiVisitPhotoViewPending[req];_oaiVisitPhotoInFlight.delete(flightKey);if(meta&&meta.type==='viewer')_oaiVisitToast('사진을 불러오지 못했습니다.');if(meta&&meta.onSettled)meta.onSettled();}
+  // A native callback may never arrive (auth interruption, WebView suspend, or a
+  // stalled request). Bound the foreground slot; late callbacks are ignored.
+  // Native Drive requests already have network timeouts. Do not increase the
+  // number of simultaneous requests; the existing queue retries at most twice.
+  flight.timer=setTimeout(function(){
+    if(_oaiVisitPhotoViewPending[req]===undefined)return;
+    delete _oaiVisitPhotoViewPending[req];
+    if(_oaiVisitPhotoInFlight.get(flightKey)===flight)_oaiVisitPhotoInFlight.delete(flightKey);
+    flight.waiters.forEach(function(waiter){
+      if(waiter.button&&waiter.button.isConnected){waiter.button.dataset.oaiLoading='0';waiter.button.classList.add('load-error');}
+      if(waiter.type==='viewer')_oaiVisitToast('사진 요청이 지연되고 있습니다. 다시 시도해 주세요.');
+      if(typeof waiter.onSettled==='function')waiter.onSettled();
+    });
+  },90000);
+  try{if(typeof bridge.loadVisitPhotoV2==='function')bridge.loadVisitPhotoV2(req,key,String(meta&&meta.driveFileId||''),isThumb);else if(isThumb&&typeof bridge.loadVisitPhotoThumb==='function')bridge.loadVisitPhotoThumb(req,key);else if(typeof bridge.loadVisitPhoto==='function')bridge.loadVisitPhoto(req,key);else throw new Error();}catch(_e){
+    clearTimeout(flight.timer);delete _oaiVisitPhotoViewPending[req];
+    if(_oaiVisitPhotoInFlight.get(flightKey)===flight)_oaiVisitPhotoInFlight.delete(flightKey);
+    flight.waiters.forEach(function(waiter){if(typeof waiter.onSettled==='function')waiter.onSettled();});
+    if(meta&&meta.type==='viewer')_oaiVisitToast('사진을 불러오지 못했습니다.');
+  }
 }
 // A stamp detail owns its visible photo queue. The four slots cap foreground
 // thumbnail reads while the native bulk restore is paused by requested-photo.
@@ -3398,7 +3418,7 @@ function _oaiMovePhotoViewer(delta){const st=_oaiVisitPhotoViewerState;if(!st)re
 window.oaiVisitPhotoLoaded=function(requestId,ok,mimeType,payload,message){
   const pending=_oaiVisitPhotoViewPending[requestId];delete _oaiVisitPhotoViewPending[requestId];if(!pending)return;
   const flight=_oaiVisitPhotoInFlight.get(pending.flightKey);
-  if(flight)_oaiVisitPhotoInFlight.delete(pending.flightKey);
+  if(flight){clearTimeout(flight.timer);_oaiVisitPhotoInFlight.delete(pending.flightKey);}
   const waiters=flight?flight.waiters:[pending];
   if(!ok){waiters.forEach(function(meta){
     if(meta.type==='thumb'&&!pending.forceFull&&meta.button&&meta.button.isConnected){meta.button.dataset.oaiLoading='1';_oaiLoadVisitPhotoData(pending.fileId,{type:'thumb',button:meta.button,driveFileId:meta.driveFileId||'',forceFull:true,onSettled:meta.onSettled});return;}
