@@ -3174,7 +3174,12 @@ function _oaiAddPhotos(kind){if(!(_oaiJournalDeveloperEnabled()))return;
   if(Object.keys(_oaiVisitPhotoPending).length){_oaiVisitToast('사진 등록이 진행 중입니다. 완료 후 다시 시도해 주세요.');return;}
   const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const visit=_oaiGetVisitByDate(kind,ctx.item,ctx.date),photos=_oaiNormalizePhotos(visit),limit=_oaiVisitPhotoLimit(kind,ctx.item),remaining=Math.max(0,limit-photos.length);if(!remaining){_oaiVisitToast('등록할 수 있는 사진 수를 모두 사용했습니다.');return;}
   const bridge=_oaiVisitNative();if(!bridge||typeof bridge.pickVisitPhotos!=='function'){_oaiVisitToast('사진 등록은 Android 앱에서 사용할 수 있습니다.');return;}
-  const req=_oaiVisitRequestId('photo');_oaiVisitPhotoPending[req]=ctx;try{bridge.pickVisitPhotos(req,remaining);}catch(_e){delete _oaiVisitPhotoPending[req];_oaiVisitToast('사진 선택을 시작하지 못했습니다.');}
+  const req=_oaiVisitRequestId('photo');_oaiVisitPhotoPending[req]=ctx;
+  try{
+    const names=photos.map(function(p){return String(p.originalFileName||(p.name!=='방문사진.jpg'?p.name:'')||'').trim();}).filter(Boolean);
+    if(typeof bridge.pickVisitPhotosWithNames==='function')bridge.pickVisitPhotosWithNames(req,remaining,JSON.stringify(names));
+    else bridge.pickVisitPhotos(req,remaining);
+  }catch(_e){delete _oaiVisitPhotoPending[req];_oaiVisitToast('사진 선택을 시작하지 못했습니다.');}
 }
 window.oaiVisitPhotoProgress=function(requestId,current,total){
   if(!_oaiVisitPhotoPending[requestId])return;
