@@ -10155,10 +10155,10 @@ html.oai-font-global .shrine-visit-card-badge strong,html:not(.ios-device).oai-s
 /* V8-1-14-1383: pilgrimage list cards match the warm, restrained website palette.
    Scope intentionally excludes pilgrimage detail screens. */
 #oai-pilgrimage-list-view{
-  --oai-complete-color:#237E58;
-  --oai-complete-dark:#176848;
-  --oai-plan-color:#225E99;
-  --oai-plan-dark:#194F84;
+  --oai-complete-color:#8B283A;
+  --oai-complete-dark:#762134;
+  --oai-plan-color:#245C91;
+  --oai-plan-dark:#194B7A;
   --oai-complete-pale:#F2F7F2;
   --oai-plan-pale:#F2F5F9;
   background:#F8F6F1!important;
@@ -10166,12 +10166,12 @@ html.oai-font-global .shrine-visit-card-badge strong,html:not(.ios-device).oai-s
 #oai-pilgrimage-list-view .oai-pilgrimage-planner-body,
 #oai-pilgrimage-list-view .oai-pilgrimage-list-sticky,
 #oai-pilgrimage-list-view .oai-pilgrimage-course-list{background:#F8F6F1!important;}
-#oai-pilgrimage-list-view .oai-pilgrimage-course-tabs button:first-child.is-active{background:#237E58!important;border-color:#237E58!important;}
-#oai-pilgrimage-list-view .oai-pilgrimage-course-tabs button:nth-child(2).is-active{background:#225E99!important;border-color:#225E99!important;}
+#oai-pilgrimage-list-view .oai-pilgrimage-course-tabs button:first-child.is-active{background:#111936!important;border-color:#111936!important;box-shadow:none!important;color:#fff!important;}
+#oai-pilgrimage-list-view .oai-pilgrimage-course-tabs button:nth-child(2).is-active{background:#111936!important;border-color:#111936!important;box-shadow:none!important;color:#fff!important;}
 #oai-pilgrimage-list-view .oai-pilgrimage-manual-register-btn,
-#oai-pilgrimage-list-view[data-course-tab="complete"] .oai-pilgrimage-manual-register-btn{background:#E2F0E6!important;border-color:#A6C9B2!important;color:#23724D!important;}
+#oai-pilgrimage-list-view[data-course-tab="complete"] .oai-pilgrimage-manual-register-btn{background:#F6E9EC!important;border-color:#D7ABB5!important;color:#82283A!important;}
 #oai-pilgrimage-list-view .oai-pilgrimage-list-toolbar .oai-pilgrimage-new,
-#oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-list-toolbar .oai-pilgrimage-new{background:#E6EFF9!important;border-color:#A7C1DC!important;color:#225E99!important;}
+#oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-list-toolbar .oai-pilgrimage-new{background:#EAF0F8!important;border-color:#ADC2D9!important;color:#245C91!important;}
 #oai-pilgrimage-list-view .oai-pilgrimage-course-card,
 #oai-pilgrimage-list-view[data-course-tab="complete"] .oai-pilgrimage-course-card{
   border:1.5px solid #BEB6A7!important;
@@ -10189,10 +10189,10 @@ html.oai-font-global .shrine-visit-card-badge strong,html:not(.ios-device).oai-s
 }
 #oai-pilgrimage-list-view .oai-pilgrimage-course-meta .oai-pilgrimage-course-stamp{
   min-height:23px!important;padding:0 8px!important;border:0!important;
-  background:#E5F0E9!important;color:#237E58!important;font-size:11.5px!important;
+  background:#F6E9EC!important;color:#82283A!important;font-size:11.5px!important;
 }
 #oai-pilgrimage-list-view .oai-pilgrimage-course-meta .oai-pilgrimage-course-plan-label{
-  display:inline-flex;padding:4px 9px;border-radius:7px;background:#E6EFF8;color:#225E99;font-weight:900;font-size:11.5px;
+  display:inline-flex;padding:4px 9px;border-radius:7px;background:#EAF0F8;color:#245C91;font-weight:900;font-size:11.5px;
 }
 #oai-pilgrimage-list-view .oai-pilgrimage-course-meta .oai-pilgrimage-course-date-btn,
 #oai-pilgrimage-list-view .oai-pilgrimage-course-meta .oai-pilgrimage-course-count-btn{
@@ -10225,8 +10225,8 @@ html.oai-font-global .shrine-visit-card-badge strong,html:not(.ios-device).oai-s
 #oai-pilgrimage-list-view[data-course-tab="complete"] .oai-pilgrimage-course-complete{background:#F7F5F0!important;}
 #oai-pilgrimage-list-view[data-course-tab="plan"] .oai-pilgrimage-course-plan-actions{background:#F7F5F0!important;}
 #oai-pilgrimage-list-view .oai-pilgrimage-course-repeat:not(.is-active),
-#oai-pilgrimage-list-view[data-course-tab="complete"] .oai-pilgrimage-course-repeat:not(.is-active){background:#237E58!important;border-color:#237E58!important;color:#fff!important;}
-#oai-pilgrimage-list-view .oai-pilgrimage-course-follow-btn:not(.is-active):not(:disabled){background:#225E99!important;border-color:#225E99!important;color:#fff!important;}
+#oai-pilgrimage-list-view[data-course-tab="complete"] .oai-pilgrimage-course-repeat:not(.is-active){background:#8B283A!important;border-color:#8B283A!important;color:#fff!important;}
+#oai-pilgrimage-list-view .oai-pilgrimage-course-follow-btn:not(.is-active):not(:disabled){background:#245C91!important;border-color:#245C91!important;color:#fff!important;}
 #oai-pilgrimage-list-view .oai-pilgrimage-course-repeat,
 #oai-pilgrimage-list-view .oai-pilgrimage-course-follow-btn{min-height:35px!important;border-radius:9px!important;}
 #oai-pilgrimage-list-view .oai-pilgrimage-course-card *{-webkit-touch-callout:none;}
