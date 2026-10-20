@@ -10047,7 +10047,7 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
 .oai-pilgrimage-place-info-backdrop{position:absolute;inset:0;background:rgba(15,25,45,.48);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);}
 .oai-pilgrimage-place-info-panel{position:relative;background:#fff;color:#17243a;width:min(100%,460px);max-height:85dvh;overflow:auto;border:1.5px solid #c5ac7c;border-radius:20px;box-shadow:0 18px 46px rgba(15,30,55,.25);}
 .oai-pilgrimage-place-info-panel header{display:flex;gap:14px;align-items:center;justify-content:space-between;padding:19px 20px 15px;border-bottom:1px solid #e3e9f0;background:#fff;}
-.oai-pilgrimage-place-info-panel header strong{font-size:19px;line-height:1.4;color:#17243a;font-weight:900;}
+.oai-pilgrimage-place-info-panel header strong{font-size:clamp(22px,5.4vw,26px);line-height:1.35;color:#17243a;font-weight:900;overflow-wrap:anywhere;}
 .oai-pilgrimage-place-info-panel header button{border:1px solid #d5dde7;background:#f3f6f9;border-radius:50%;width:35px;height:35px;flex:none;font-size:24px;color:#22344e;}
 .oai-pilgrimage-place-info-body{padding:19px 20px 25px;font-size:16px;line-height:1.6;color:#17243a;font-weight:550;}
 .oai-pilgrimage-place-info-category{color:#2a638f;font-weight:850;margin-bottom:15px;font-size:14px;}
@@ -10261,12 +10261,14 @@ html.oai-font-global .shrine-visit-card-badge strong,html:not(.ios-device).oai-s
 #oai-pilgrimage-list-view .oai-pilgrimage-course-card *{-webkit-touch-callout:none;}
 
 /* 방문 기록 설정: 자동 기록 제한 장소 */
-.oai-settings-restricted{padding:14px 0 3px;border-top:1px solid #e5e7eb;margin-top:12px;}
-.oai-settings-restricted-heading{display:flex;align-items:center;gap:8px;font-size:14px;color:#172b45;}
-.oai-settings-restricted-heading span{margin-left:auto;color:#64748b;font-size:12px;font-weight:700;}
-.oai-settings-restricted>small{display:block;color:#667085;margin:5px 0 10px;font-size:12px;}
-#oai-restricted-place-search{box-sizing:border-box;width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#1e293b;font-size:14px;}
-.oai-restricted-place-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #eef1f5;font-size:13px;color:#273449;}
-.oai-restricted-place-row button{border:1px solid #cbd5e1;border-radius:8px;background:white;color:#475569;padding:6px 10px;font-size:12px;flex:none;}
+.oai-settings-restricted{box-sizing:border-box;padding:17px 16px 19px;border-top:1px solid #d5cbb9;margin:0;background:#fff;}
+.oai-settings-restricted-heading{display:flex;align-items:center;flex-wrap:wrap;column-gap:9px;row-gap:8px;color:#17213a;}
+.oai-settings-restricted-heading>b{min-width:0;font-size:calc(17px * var(--app-font-scale,1));line-height:1.3;font-weight:900;letter-spacing:-.035em;word-break:keep-all;}
+.oai-settings-restricted-heading>.cgm-help-icon{box-sizing:border-box;display:inline-flex;align-items:center;justify-content:center;flex:0 0 26px;width:26px;height:26px;padding:0;border:1.5px solid #34465d;border-radius:50%;background:#fff;color:#34465d;font-size:16px;line-height:1;font-weight:800;}
+.oai-settings-restricted-heading span{margin-left:auto;white-space:nowrap;color:#657086;font-size:calc(13px * var(--app-font-scale,1));font-weight:800;}
+.oai-settings-restricted>small{display:block;margin:7px 0 14px;color:#687386;font-size:calc(12.5px * var(--app-font-scale,1));line-height:1.5;font-weight:650;word-break:keep-all;}
+#oai-restricted-place-search{display:block;box-sizing:border-box;width:100%;min-width:0;min-height:46px;padding:11px 13px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#17213a;font-size:calc(14px * var(--app-font-scale,1));}
+.oai-restricted-place-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:11px 0;border-bottom:1px solid #eef1f5;font-size:calc(14px * var(--app-font-scale,1));line-height:1.4;color:#273449;}
+.oai-restricted-place-row button{border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#475569;padding:7px 11px;font-size:13px;flex:none;}
 #oai-restricted-place-results{max-height:185px;overflow-y:auto;}
-.oai-restricted-match{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid #eef1f5;background:#fff;color:#243b53;padding:10px 8px;font-size:13px;}
+.oai-restricted-match{display:block;box-sizing:border-box;width:100%;text-align:left;border:0;border-bottom:1px solid #eef1f5;background:#fff;color:#243b53;padding:12px 8px;font-size:calc(14px * var(--app-font-scale,1));line-height:1.4;}

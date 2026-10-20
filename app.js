@@ -6633,6 +6633,7 @@ function _openMyeongryeMaterials(item){
   var materials=_getShrineMaterials(item); if(!materials) return;
   _myeongryeCurrentMaterials=materials;
   var photos=_getMyeongryePhotos(), modal=_ensureMyeongryeMaterialsModal(), wasAlreadyOpen=modal.classList.contains('open');
+  if(!wasAlreadyOpen) modal._returnToPilgrimagePlaceInfo=false;
   var preservedFile=wasAlreadyOpen?_myeongryeCurrentPhotoFile:'', preservedManualPause=wasAlreadyOpen?_myeongryeManualPause:false;
   var preservedIndex=0;
   if(preservedFile&&photos.length){
@@ -6698,7 +6699,12 @@ function _openMyeongryeMaterials(item){
 function _closeMyeongryeMaterials(){
   var modal=document.getElementById('myeongrye-materials-modal'); clearTimeout(_myeongryeSlideTimer); _myeongryeSlideTimer=0;
   clearTimeout(_myeongryeResumeTimer); _myeongryeResumeTimer=0; _myeongryeWasOpenBeforeBackground=false; _myeongryeRenderedSlideIndex=-1;
-  if(modal){ _closeMyeongryePhotoViewer(); modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); } document.body.style.overflow=_myeongryeBodyOverflow;
+  var returnToPlace=!!(modal&&modal._returnToPilgrimagePlaceInfo&&modal.classList.contains('open'));
+  if(modal){ modal._returnToPilgrimagePlaceInfo=false; _closeMyeongryePhotoViewer(); modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); } document.body.style.overflow=_myeongryeBodyOverflow;
+  if(returnToPlace){
+    var previous=document.getElementById('oai-pilgrimage-place-info-overlay');
+    if(previous){ previous.classList.add('open'); previous.setAttribute('aria-hidden','false'); var back=previous.querySelector('[data-pilgrimage-info-close]'); if(back)back.focus(); }
+  }
 }
 
 /* 자료창·큰 사진창도 앱의 백그라운드 복귀 수명주기에 함께 참여한다. */
@@ -19675,7 +19681,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const hp=_getShrineHomepageUrl(shrine),guide=_getShrineGuideUrl(shrine);
       // 지도 상세 카드와 동일한 내부 성지 자료 화면을 최우선으로 표시한다.
       links.push({label:'성지 자료',materials:shrine});
-      if(hp)links.push({label:'홈페이지',url:hp});
+      // 성지 자료 화면에 공식 홈페이지가 포함되므로 중복 버튼은 표시하지 않는다.
     }else if(parish){
       const hp=parish.hp?normalizeCatholicExternalUrl(parish.hp):'';
       const guide=parish.url?normalizeCatholicExternalUrl(parish.url):'';
@@ -19733,7 +19739,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(e.target.closest('[data-pilgrimage-waypoints-map]')){if(overlay._pilgrimageShowMap)overlay._pilgrimageShowMap();return;}
         const btn=e.target.closest('[data-pilgrimage-external-index]');if(!btn)return;
         const link=overlay._pilgrimageLinks&&overlay._pilgrimageLinks[Number(btn.getAttribute('data-pilgrimage-external-index'))];
-        if(link&&link.materials){closePilgrimagePlaceInfo();_openMyeongryeMaterials(link.materials);return;}
+        if(link&&link.materials){closePilgrimagePlaceInfo();_openMyeongryeMaterials(link.materials);const materialsModal=document.getElementById('myeongrye-materials-modal');if(materialsModal&&materialsModal.classList.contains('open'))materialsModal._returnToPilgrimagePlaceInfo=true;return;}
         if(link&&link.url)openCoreExternalUrl(link.url,{source:'pilgrimage-place-info'});
       });
       document.body.appendChild(overlay);
