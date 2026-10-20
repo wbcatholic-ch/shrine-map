@@ -1019,6 +1019,35 @@ html.retreat-mode .region-search-btn {
 }
 .nearby-dist { font-size: 16px; color: var(--mode-dist-color, #b07a3d); font-weight: 900; margin-top: 4px; line-height: 1.2; }
 
+/* 내 주변: 성지·성당·피정 공통. 거리 정보를 별도 하단 행에 배치해 이름과 주소 폭을 확보한다. */
+#nearby-body .nearby-item.nearby-distance-stacked {
+  display: grid;
+  grid-template-columns: 34px minmax(0, 1fr) auto;
+  align-items: center;
+  column-gap: 10px;
+  row-gap: 5px;
+}
+#nearby-body .nearby-distance-stacked .nearby-num { grid-column: 1; grid-row: 1; }
+#nearby-body .nearby-distance-stacked .nearby-info { grid-column: 2; grid-row: 1; min-width: 0; }
+#nearby-body .nearby-distance-stacked .nearby-meta {
+  grid-column: 3;
+  grid-row: 1;
+  min-width: 0;
+  margin-left: 0;
+}
+#nearby-body .nearby-distance-stacked .nearby-distance-bottom {
+  grid-column: 2 / -1;
+  grid-row: 2;
+  margin-top: 0;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  font-size: 13px;
+  line-height: 1.4;
+  font-weight: 700;
+}
+
+
 html.retreat-mode #nearby-body .nearby-meta {
   width: auto;
   max-width: none;
