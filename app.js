@@ -19690,14 +19690,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(manualAddBtn){manualAddBtn.hidden=true;manualAddBtn.style.display='none';}
     const addBtn=document.querySelector('.oai-pilgrimage-detail-view .oai-pilgrimage-add');
     const mapAddBtn=document.querySelector('.oai-pilgrimage-detail-view .oai-pilgrimage-map-add');
+    // 순례 진행 중에는 코스 편집용 추가 버튼을 숨긴다. GPS 방문 등록에는 영향이 없다.
+    const activeForEditControls=_activeFollowState();
+    const editingActive=!!(activeForEditControls&&currentCourseId&&String(activeForEditControls.courseId)===String(currentCourseId));
     if(mapAddBtn){
-      const canAdd=!isCompletionView||gpsProtected;
+      const canAdd=!editingActive&&(!isCompletionView||gpsProtected);
       mapAddBtn.hidden=!canAdd;
       mapAddBtn.style.display=canAdd?'':'none';
       mapAddBtn.setAttribute('aria-hidden',canAdd?'false':'true');
     }
     if(addBtn){
-      const showAdd=(list.length>0&&!isCompletionView)||(isCompletionView&&gpsProtected);
+      const showAdd=!editingActive&&((list.length>0&&!isCompletionView)||(isCompletionView&&gpsProtected));
       addBtn.hidden=!showAdd;
       if(showAdd){
         addBtn.removeAttribute('hidden');
@@ -19736,8 +19739,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(detailRoot)detailRoot.classList.toggle('is-active-follow',isActive);
     if(saveBtn){
       const dirty=_pilgrimageDraftIsDirty(),saveable=!!(list.length||(normalizePoint(m.start)&&normalizePoint(m.end))),enabled=!isCompletionView&&saveable&&dirty;
-      saveBtn.hidden=isCompletionView;
-      saveBtn.style.display=isCompletionView?'none':'';
+      saveBtn.hidden=isCompletionView||isActive;
+      saveBtn.style.display=(isCompletionView||isActive)?'none':'';
       saveBtn.disabled=!enabled;
       saveBtn.setAttribute('aria-disabled',enabled?'false':'true');
       saveBtn.classList.toggle('is-dirty',enabled);
