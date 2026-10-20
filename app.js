@@ -18120,11 +18120,29 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // 성지 한 곳 이상, 또는 일반 성당 두 곳 이상일 때만 날짜별 코스를 만든다.
   // 성지/성당 양쪽에 등록된 같은 장소는 _dailyGpsEvents에서 성지 우선으로 1회 합쳐진다.
   function _dailyAutoEligible(events){return events.some(ev=>ev.kind==='shrine');}
-  // 완료된 코스는 그대로 두고, 해당 날짜에 아직 코스에 포함되지 않은 GPS 장소만 추린다.
-  // 날짜 전체가 완료됐다는 이유로 다른 코스의 남은 스탬프를 버리지 않는다.
+  // 과거 완료 코스에는 placeId가 없거나 GPS 인증 지점과 다른 대표 좌표가 저장될 수 있다.
+  // 완료 코스 대조에서만 고유 ID 또는 이름+교구를 사용한다. 다른 장소의 동명이인
+  // 오인 방지를 위해 고유 ID가 서로 다르면 절대로 이름으로 합치지 않는다.
+  function _dailyCompletedPlaceMatches(place,ev){
+    if(_dailySamePlace(place,ev)||_dailyLinkedGpsPair(place,ev))return true;
+    if(!place||!ev)return false;
+    const aId=String(place.placeId||'').trim(),bId=String(ev.placeId||'').trim();
+    if(aId&&bId)return false;
+    const aName=_normPilgrimageName(place.name),bName=_normPilgrimageName(ev.name);
+    if(!aName||aName!==bName)return false;
+    const aD=String(place.diocese||'').trim(),bD=String(ev.diocese||'').trim();
+    if(aD&&bD&&aD!==bD)return false;
+    // 한쪽에 교구 정보가 없다면 동일 이름의 별도 성지를 합치지 않는다.
+    if(!aD||!bD){
+      const catalog=(ev.kind==='parish'?(typeof PARISHES!=='undefined'?PARISHES:[]):(typeof SHRINES!=='undefined'?SHRINES:[]));
+      if(!Array.isArray(catalog)||catalog.filter(x=>x&&_normPilgrimageName(x.name)===bName).length!==1)return false;
+    }
+    return true;
+  }
+  // 이미 완료한 코스의 같은 날짜·같은 장소만 제외한다. 다른 코스의 미등록 성지는 남긴다.
   function _dailyUnregisteredEvents(date,events,courses){
     const completed=(courses||_dailyStoredCourses()).filter(c=>_courseCompletionList(c).some(x=>_dailyIso(x.completedAt)===date));
-    return _dailyAutoEvents(events).filter(ev=>!completed.some(c=>(c.places||[]).some(p=>_dailySamePlace(p,ev)||_dailyLinkedGpsPair(p,ev))));
+    return _dailyAutoEvents(events).filter(ev=>!completed.some(c=>(c.places||[]).some(p=>_dailyCompletedPlaceMatches(p,ev))));
   }
   function _dailyAutoCourseName(date,events){
     const names=events.map(ev=>String(ev.name||'').trim()).filter(Boolean);
@@ -18203,16 +18221,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       return !!doneForDate.length;
     }
     if(existing&&!_dailyAutoEligible(eligible)){
-      // 기존 자동 완료 코스는 덮어쓰지 않는다. 남은 GPS 방문이 없으면 기존 기록만 확인한다.
-      if(!_dailyAutoEligible(eligible)){
-        state.auto[date]={done:true,source:'auto',existingId:existing.id,gpsSignature};
-        report('existing_auto','기존 자동 완료 코스 확인 (신규 저장 없음)');
-      }else{
-        throw new Error(date+' 미등록 성지 스탬프가 추가되었습니다. 기존 코스는 보존하고 수동 확인이 필요합니다');
-      }
+      // 남은 성지가 없으면 완료 코스는 수정하지 않고 등록 장부만 확인한다.
+      state.auto[date]={done:true,source:'auto',existingId:existing.id,gpsSignature};
+      report('existing_auto','기존 자동 완료 코스 확인 (신규 저장 없음)');
     }else if(_dailyAutoEligible(eligible)){
-      const id='gps_daily_'+date.replace(/-/g,'');
-      if(courses.some(c=>c.id===id))throw new Error('등록 날짜와 같은 ID의 코스가 이미 있습니다');
+      // 날짜별 첫 코스 ID는 유지. 같은 날 추가된 미등록 성지는 별도 ID로 생성한다.
+      const baseId='gps_daily_'+date.replace(/-/g,'');
+      let id=baseId,sequence=2;
+      while(courses.some(c=>c.id===id))id=baseId+'_'+sequence++;
       // 실제 등록과 개발자 메모리 시험이 공유하는 단일 코스 생성 함수.
       const course=_dailyBuildAutoCourse(date,eligible,id);
       courses.unshift(course);
