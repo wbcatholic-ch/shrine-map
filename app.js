@@ -3032,7 +3032,7 @@ function _oaiSharedJournalGroup(kind,item){
   if(!item)return null;
   if(_oaiIsSeparateJournalPair(kind,item))return null;
   const explicit=OAI_SHARED_VISIT_JOURNAL_GROUPS.find(function(g){
-    if(kind==='parish')return String(item.diocese||'')===g.parishDiocese&&String(item.name||'')===g.parishName;
+    if(kind==='parish')return (String(item.diocese||'')===g.parishDiocese||String(item.diocese||'')===(_DIO[g.parishDiocese]||''))&&String(item.name||'')===g.parishName;
     if(g.shrineSeq&&String(item.seq||'')===g.shrineSeq)return true;
     return String(item.name||'')===g.shrineName;
   });
@@ -19591,9 +19591,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     let links=[];
     if(shrine){
       const hp=_getShrineHomepageUrl(shrine),guide=_getShrineGuideUrl(shrine);
-      if(hp)links.push({label:'홈페이지',url:hp});
-      // 지도 상세 카드와 동일한 내부 성지 자료 화면을 연다.
+      // 지도 상세 카드와 동일한 내부 성지 자료 화면을 최우선으로 표시한다.
       links.push({label:'성지 자료',materials:shrine});
+      if(hp)links.push({label:'홈페이지',url:hp});
     }else if(parish){
       const hp=parish.hp?normalizeCatholicExternalUrl(parish.hp):'';
       const guide=parish.url?normalizeCatholicExternalUrl(parish.url):'';
