@@ -10046,14 +10046,14 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
 .oai-pilgrimage-place-info-overlay.open{display:flex;}
 .oai-pilgrimage-place-info-backdrop{position:absolute;inset:0;background:rgba(15,25,45,.48);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);}
 .oai-pilgrimage-place-info-panel{position:relative;background:#fff;color:#17243a;width:min(100%,460px);max-height:85dvh;overflow:auto;border:1.5px solid #c5ac7c;border-radius:20px;box-shadow:0 18px 46px rgba(15,30,55,.25);}
-.oai-pilgrimage-place-info-panel header{display:flex;gap:14px;align-items:center;justify-content:space-between;padding:19px 20px 15px;border-bottom:1px solid #e3e9f0;background:#fff;}
+.oai-pilgrimage-place-info-panel header{display:flex;gap:14px;align-items:center;justify-content:space-between;padding:19px 20px 15px;border-bottom:1.5px solid #a0a8b3;background:#fff;}
 .oai-pilgrimage-place-info-panel header strong{font-size:clamp(22px,5.4vw,26px);line-height:1.35;color:#17243a;font-weight:900;overflow-wrap:anywhere;}
 .oai-pilgrimage-place-info-panel header button{border:1px solid #d5dde7;background:#f3f6f9;border-radius:50%;width:35px;height:35px;flex:none;font-size:24px;color:#22344e;}
 .oai-pilgrimage-place-info-body{padding:19px 20px 25px;font-size:16px;line-height:1.6;color:#17243a;font-weight:550;}
 .oai-pilgrimage-place-info-category{color:#2a638f;font-weight:850;margin-bottom:15px;font-size:14px;}
 .oai-pilgrimage-place-info-label{font-weight:850;font-size:13px;color:#647184;margin-bottom:3px;}
 
-.oai-pilgrimage-place-info-links{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;}
+.oai-pilgrimage-place-info-links{display:flex;gap:10px;flex-wrap:wrap;margin-top:18px;padding-top:18px;border-top:1.5px solid #a0a8b3;}
 .oai-pilgrimage-place-info-links:empty{display:none;}
 .oai-pilgrimage-place-info-links button{flex:1 1 120px;padding:12px;border:1.5px solid #b7cadb;background:#f6f9fc;border-radius:11px;color:#1b5484;font:inherit;font-weight:850;cursor:pointer;}
 

@@ -1,4 +1,4 @@
-const ASSET_VERSION = 'V8-1-14-1414';
+const ASSET_VERSION = 'V8-1-14-1415';
 const CACHE_VERSION = 'catholic-way-' + ASSET_VERSION;
 
 /* V8-1-14-923: service worker cache strategy overview.
