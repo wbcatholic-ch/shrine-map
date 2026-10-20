@@ -4675,7 +4675,7 @@ function _closeParishVisitEditor(opts){
   const m=document.getElementById('parish-visit-editor');if(m)m.classList.remove('show');
   _updateParishVisitButton();
 }
-function _renderInfoCardParishVisit(p){const b=document.getElementById('ic-type');if(!b||_mode!=='parish')return;const n=_parishVisitCount(p);b.textContent=n?'방문 '+n+'회':'방문등록';b.classList.add('shrine-pilgrim-register-badge');b.setAttribute('role','button');b.onclick=function(e){if(e){e.preventDefault();e.stopPropagation()}_openParishVisitEditor(p)};}
+function _renderInfoCardParishVisit(p){const b=document.getElementById('ic-type');if(!b||_mode!=='parish')return;const n=_parishVisitCount(p);b.textContent=n?'방문한 성당 · '+n+'회':'방문등록';b.classList.toggle('shrine-pilgrim-visited',n>0);b.classList.toggle('shrine-pilgrim-register-badge',n===0);b.setAttribute('role','button');b.setAttribute('tabindex','0');const open=function(e){if(e){e.preventDefault();e.stopPropagation()}_openParishVisitEditor(p)};b.onclick=open;b.onkeydown=function(e){if(e&&(e.key==='Enter'||e.key===' '))open(e)};}
 /* GPS 공동 인증 안내: 사진·메모의 주소 기반 공통화와 구분한다.
    명시적으로 확인된 성지·성당 쌍이 모두 각자의 인증 반경 안에 있을 때만
    같은 GPS 수신으로 판단한다. 좌표가 가까운 다른 장소는 병합하지 않는다. */
