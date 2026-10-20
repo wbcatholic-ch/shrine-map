@@ -16804,6 +16804,54 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // 개발자 도구의 화면 노출은 실행 중 10회 탭으로만 해제한다. 저장된 사용 권한과 분리한다.
   let oaiDevPanelUnlocked=false;
   function oaiDevEnabled(){return window.__OAI_DEV_RUNTIME_ACTIVE__===true;}
+  function oaiAnniversaryPreview(date){
+    if(date!=='2026-10-09')return;
+    const all=[];
+    [['shrine',_loadShrineVisits()],['parish',_loadParishVisits()]].forEach(pair=>{
+      Object.values(pair[1]||{}).forEach(record=>{
+        if(!record||!Array.isArray(record.visits))return;
+        record.visits.filter(v=>v&&v.date===date).forEach(v=>{
+          all.push({kind:pair[0],name:String(record.name||''),diocese:String(record.diocese||''),time:Date.parse(v.savedAt||'')||0,visit:v});
+        });
+      });
+    });
+    all.sort((a,b)=>a.time-b.time);
+    const unique=[];
+    all.forEach(item=>{
+      const key=item.name.replace(/\s+/g,'').toLowerCase();
+      if(!unique.some(x=>x.name.replace(/\s+/g,'').toLowerCase()===key))unique.push(item);
+    });
+    let layer=document.getElementById('oai-anniversary-preview');
+    if(!layer){
+      layer=document.createElement('div');layer.id='oai-anniversary-preview';
+      layer.style.cssText='position:fixed;inset:0;z-index:2147483000;background:rgba(16,28,48,.68);display:flex;align-items:center;justify-content:center;padding:18px;box-sizing:border-box';
+      const panel=document.createElement('section');panel.style.cssText='background:#fff;border-radius:17px;width:min(100%,430px);max-height:85dvh;overflow:auto;padding:20px;color:#213149;box-sizing:border-box';
+      layer.appendChild(panel);document.body.appendChild(layer);
+      layer.addEventListener('click',e=>{if(e.target===layer||e.target.closest('[data-anniversary-close]'))layer.remove();});
+    }
+    const panel=layer.firstElementChild;panel.replaceChildren();
+    const header=document.createElement('div');header.style.cssText='display:flex;justify-content:space-between;align-items:start;gap:12px;border-bottom:1px solid #a0a8b3;padding-bottom:14px;margin-bottom:12px';
+    const title=document.createElement('div');title.innerHTML='<small>2026년 10월 9일</small><h2 style="margin:3px 0;font-size:23px">그날의 순례</h2>';
+    const close=document.createElement('button');close.type='button';close.textContent='✕';close.dataset.anniversaryClose='1';close.style.cssText='background:white;border:1px solid #cbd5e1;border-radius:50%;width:34px;height:34px';
+    header.append(title,close);panel.appendChild(header);
+    const intro=document.createElement('p');intro.textContent=unique.length?'그날 방문한 '+unique.length+'곳의 순례 기록입니다.':'해당 날짜에 저장된 방문기록이 없습니다.';panel.appendChild(intro);
+    unique.forEach((entry,i)=>{
+      const card=document.createElement('article');card.style.cssText='border:1px solid #cbd5e1;border-radius:12px;padding:14px;margin:10px 0';
+      const h=document.createElement('strong');h.textContent=(i+1)+'. '+entry.name;h.style.cssText='display:block;font-size:18px;margin-bottom:8px';card.appendChild(h);
+      const note=document.createElement('div');note.textContent=(entry.visit.method==='gps'?'GPS 방문 스탬프':'방문 기록')+' · '+date;note.style.cssText='font-size:13px;color:#64748b;margin-bottom:10px';card.appendChild(note);
+      const photoCount=Array.isArray(entry.visit.photos)?entry.visit.photos.length:0;
+      const photo=document.createElement('div');photo.textContent=photoCount?'저장된 사진 '+photoCount+'장 · 아래에서 방문기록 열기':'사진은 방문기록에서 확인할 수 있습니다.';photo.style.cssText='font-size:13px;color:#475569;margin-bottom:9px';card.appendChild(photo);
+      const button=document.createElement('button');button.type='button';button.textContent='사진 · 메모 · 스탬프 보기';button.style.cssText='background:#1d2b4d;color:white;border:0;border-radius:9px;padding:11px;width:100%;font-weight:700';
+      button.addEventListener('click',()=>{
+        const list=entry.kind==='shrine'?(typeof SHRINES!=='undefined'?SHRINES:[]):(typeof PARISHES!=='undefined'?PARISHES:[]);
+        const found=list.find(x=>x&&String(x.name||'').replace(/\s+/g,'')===entry.name.replace(/\s+/g,'')&&(!entry.diocese||!x.diocese||String(x.diocese)===entry.diocese));
+        if(!found){_oaiVisitToast('장소 기록을 연결할 수 없습니다.');return;}
+        layer.remove();
+        if(entry.kind==='shrine')_openShrineVisitDetail(list.indexOf(found));else _openParishVisitDetail(found);
+      });card.appendChild(button);panel.appendChild(card);
+    });
+  }
+  window.addEventListener('oai-anniversary-notification-open',e=>oaiAnniversaryPreview(String(e.detail&&e.detail.date||'')));
   function oaiDevStatus(value){const el=document.getElementById('oai-dev-status');if(el)el.textContent=value||'';}
   window.oaiDevPhotoBackupResult=function(state,message){
     const el=document.getElementById('oai-dev-five-photo-status');
@@ -16843,6 +16891,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(diag)diag.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.diagnoseVisitPhotoDownloads==='function');
     const remoteCheck=document.getElementById('oai-dev-missing-photo-drive');
     if(remoteCheck)remoteCheck.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.checkMissingVisitPhotosInDrive==='function');
+    const anniversaryTest=document.getElementById('oai-dev-anniversary-test');if(anniversaryTest)anniversaryTest.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.sendPilgrimageAnniversaryTestNotification==='function');
     if(!oaiDevEnabled()){oaiDevPendingRestore=null;for(const id of ['oai-dev-export-view','oai-dev-import-view','oai-dev-restore-preview']){const el=document.getElementById(id);if(el)el.hidden=true;}}
   }
   function oaiEncodeCgm1(value){return 'CGM1.'+btoa(Array.from(new TextEncoder().encode(JSON.stringify(value)),v=>String.fromCharCode(v)).join(''));}
@@ -16896,7 +16945,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }finally{oaiApplyingRestore=false;}
   }
   document.addEventListener('click',function(event){
-    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-copy],[data-oai-dev-preview],[data-oai-dev-apply],[data-oai-dev-failure-preview],[data-oai-dev-daily-results],[data-oai-dev-five-photo-backup],[data-oai-dev-five-photo-verify],[data-oai-dev-photo-download-diagnose],[data-oai-dev-photo-download-copy],[data-oai-dev-missing-photo-drive],[data-oai-dev-missing-photo-drive-copy]');if(!button)return;
+    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-copy],[data-oai-dev-preview],[data-oai-dev-apply],[data-oai-dev-failure-preview],[data-oai-dev-daily-results],[data-oai-dev-five-photo-backup],[data-oai-dev-five-photo-verify],[data-oai-dev-photo-download-diagnose],[data-oai-dev-photo-download-copy],[data-oai-dev-missing-photo-drive],[data-oai-dev-missing-photo-drive-copy],[data-oai-dev-anniversary-test]');if(!button)return;
     if(button.id==='oai-settings-version-label'){
       oaiDevTapCount++;
       if(oaiDevTapCount>=10){oaiDevTapCount=0;const next=!(oaiDevEnabled()&&oaiDevPanelUnlocked);oaiDevPanelUnlocked=next;window.__OAI_DEV_RUNTIME_ACTIVE__=next;oaiRefreshDeveloperPanel();const detail=document.getElementById('parish-visit-detail');if(detail&&detail.classList.contains('show'))_renderParishVisitDetail();if(_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null)_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);if(next){oaiDevStatus('개발자 모드가 열렸습니다.');document.getElementById('oai-developer-section').scrollIntoView({block:'nearest',behavior:'smooth'});} }
@@ -16905,7 +16954,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!oaiDevEnabled())return;
     event.preventDefault();
     try{
-      if(button.hasAttribute('data-oai-dev-missing-photo-drive')){
+      if(button.hasAttribute('data-oai-dev-anniversary-test')){
+        if(!oaiDevPanelUnlocked||!window.GildongmuNative||typeof window.GildongmuNative.sendPilgrimageAnniversaryTestNotification!=='function')return;
+        window.GildongmuNative.sendPilgrimageAnniversaryTestNotification();
+        oaiDevStatus('10월 9일 순례 추억 알림을 요청했습니다. 알림 권한을 허용한 뒤 상태표시줄을 확인해 주세요.');
+      }else if(button.hasAttribute('data-oai-dev-missing-photo-drive')){
         if(!oaiDevPanelUnlocked||!window.GildongmuNative||typeof window.GildongmuNative.checkMissingVisitPhotosInDrive!=='function')return;
         window.oaiDevMissingPhotoDriveCheckResult('working','미완료 사진의 Google Drive 파일을 읽기 전용으로 조회 중입니다.');
         window.GildongmuNative.checkMissingVisitPhotosInDrive();
