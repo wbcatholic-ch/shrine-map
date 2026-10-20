@@ -19198,7 +19198,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function _courseHasGpsLockedCompletion(c){return _courseCompletionList(c).some(function(x){return String(x.method||'')==='gps'||x.locked===true;});}
   function _courseCompletionMetaHtml(c,isFollowing){
     const completions=_courseCompletionList(c);
-    if(!completions.length&&!c.lastCompletedAt)return '';
+    if(!completions.length&&!c.lastCompletedAt)return {header:'',footer:''};
     if(typeof isFollowing!=='boolean'){
       const active=_activeFollowState();
       isFollowing=!!(active&&active.courseId===String(c&&c.id||''));
@@ -19206,7 +19206,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const last=Number(c.lastCompletedAt)||Number(completions[0]&&completions[0].completedAt)||0;
     const count=Math.max(1,completions.length);
     const repeatLabel=isFollowing?'■ 순례 종료':'▶ 다시 순례하기';
-    return '<div class="oai-pilgrimage-course-complete"><span class="oai-pilgrimage-course-stamp" aria-label="순례 완료">✓ 순례완료</span><button type="button" class="oai-pilgrimage-course-date-btn" data-course-history="'+esc(c.id)+'">'+esc(_courseCompletionDate(last))+'</button>'+(count>1?'<button type="button" class="oai-pilgrimage-course-count-btn" data-course-history="'+esc(c.id)+'">'+count+'회 기록</button>':'')+(_courseHasGpsLockedCompletion(c)?'<span class="oai-pilgrimage-course-gps-lock">🔒 GPS 기록</span>':'')+'<button type="button" class="oai-pilgrimage-course-repeat'+(isFollowing?' is-active':'')+'" data-course-repeat="'+esc(c.id)+'">'+repeatLabel+'</button></div>';
+    const dateBtn='<button type="button" class="oai-pilgrimage-course-date-btn" data-course-history="'+esc(c.id)+'">'+esc(_courseCompletionDate(last))+'</button>';
+    const historyCount=count>1?'<button type="button" class="oai-pilgrimage-course-count-btn" data-course-history="'+esc(c.id)+'">'+count+'회</button>':'';
+    const gps=_courseHasGpsLockedCompletion(c)?'<span class="oai-pilgrimage-course-gps-lock">🔒 GPS 기록</span>':'';
+    return {
+      header:'<div class="oai-pilgrimage-course-meta"><span class="oai-pilgrimage-course-stamp">✓ 순례완료</span>'+dateBtn+historyCount+gps+'</div>',
+      footer:'<div class="oai-pilgrimage-course-complete"><button type="button" class="oai-pilgrimage-course-repeat'+(isFollowing?' is-active':'')+'" data-course-repeat="'+esc(c.id)+'">'+repeatLabel+'</button></div>'
+    };
   }
   function renderCourseList(){
     const body=document.getElementById('oai-pilgrimage-course-list');if(!body)return;
@@ -19221,7 +19227,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const canFollow=!!((Array.isArray(c.places)&&c.places.length)||_pilgrimageDestinationCanFollow(c.end));
       const followLabel=isFollowing?'■ 순례 종료':'▶ 순례하기';
       const followHtml=pilgrimageCourseTab==='plan'?'<div class="oai-pilgrimage-course-plan-actions">'+(isFollowing?'<span class="oai-pilgrimage-following-badge">진행 중</span>':'<span></span>')+'<button type="button" class="oai-pilgrimage-course-follow-btn'+(isFollowing?' is-active':'')+(!canFollow?' is-disabled':'')+'" data-course-follow="'+esc(c.id)+'"'+(canFollow?'':' disabled aria-disabled="true"')+'>'+followLabel+'</button></div>':'';
-      return '<article class="oai-pilgrimage-course-card'+(hasDone?' is-completed':'')+(isFollowing?' is-following':'')+'"><button type="button" class="oai-pilgrimage-course-open" data-course-open="'+esc(c.id)+'" data-course-hold="'+esc(c.id)+'"><span><b>'+esc(c.name)+'</b><small>'+courseSummary(c)+'</small></span><i>›</i></button>'+followHtml+_courseCompletionMetaHtml(c,isFollowing)+(c.autoGps===true&&(!normalizePoint(c.start)||!normalizePoint(c.end))?'<div class="oai-gps-endpoint-list-hint">출발·도착지를 입력해 주세요.</div>':'')+'</article>';
+      const completed=pilgrimageCourseTab==='complete'?_courseCompletionMetaHtml(c,isFollowing):{header:'',footer:''};
+      const heading=pilgrimageCourseTab==='complete'?completed.header:'<div class="oai-pilgrimage-course-meta"><span class="oai-pilgrimage-course-plan-label">순례계획</span></div>';
+      const name=String(c.name||'').trim()||autoCourseNameFromPlaces(c.places);
+      return '<article class="oai-pilgrimage-course-card'+(hasDone?' is-completed':'')+(isFollowing?' is-following':'')+'" data-course-hold="'+esc(c.id)+'">'+heading+'<button type="button" class="oai-pilgrimage-course-open" data-course-open="'+esc(c.id)+'"><span><b>'+esc(name)+'</b></span><i>›</i></button>'+followHtml+completed.footer+(c.autoGps===true&&(!normalizePoint(c.start)||!normalizePoint(c.end))?'<div class="oai-gps-endpoint-list-hint">출발·도착지를 입력해 주세요.</div>':'')+'</article>';
     }).join('');
   }
   function completionModal(){return document.getElementById('oai-pilgrimage-completion-modal');}
@@ -20864,8 +20873,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function moveActionHold(e){if(!actionHold||e.pointerId!==actionHold.pointerId)return;if(Math.abs(e.clientX-actionHold.startX)>OAI_ACTION_HOLD_CANCEL_MOVE_PX||Math.abs(e.clientY-actionHold.startY)>OAI_ACTION_HOLD_CANCEL_MOVE_PX)cancelActionHold();}
   function endActionHold(e){if(!actionHold||e.pointerId!==actionHold.pointerId)return;const fired=actionHold.fired;cancelActionHold();if(fired){e.preventDefault();e.stopPropagation();}}
   document.addEventListener('pointerdown',e=>{
-    const course=e.target&&e.target.closest&&e.target.closest('[data-course-hold]');
-    if(course){armActionHold(e,course,{type:'course',id:course.getAttribute('data-course-hold')});return;}
+    const course=e.target&&e.target.closest&&e.target.closest('#oai-pilgrimage-course-list .oai-pilgrimage-course-card[data-course-hold]');
+    if(course){
+      if(e.target.closest('[data-course-repeat],[data-course-follow],[data-course-history],[data-course-completion-delete],.oai-pilgrimage-course-count-btn'))return;
+      armActionHold(e,course,{type:'course',id:course.getAttribute('data-course-hold')});return;
+    }
     const manual=e.target&&e.target.closest&&e.target.closest('[data-manual-hold]');
     if(manual && !(e.target&&e.target.closest&&e.target.closest('[data-manual-drag]'))){armActionHold(e,manual,{type:'manual',id:manual.getAttribute('data-manual-hold')});return;}
     const plan=e.target&&e.target.closest&&e.target.closest('[data-plan-hold]');
