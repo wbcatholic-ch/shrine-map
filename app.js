@@ -2293,14 +2293,18 @@ function _sortShrineVisitEntriesByDate(entries){
 function _renderShrineVisitFilterControls(active){
   const wrap=document.getElementById('shrine-visit-cards-filters');
   if(!wrap) return;
-  const show=(active==='visited');
+  // 성당 스탬프북과 동일한 교구 선택창을 모든 성지 목록 탭에서 사용한다.
+  const show=(active!=='stats');
   wrap.classList.toggle('show', show);
+  wrap.classList.toggle('diocese-only', show&&active!=='visited');
   wrap.setAttribute('aria-hidden', show?'false':'true');
   if(!show){ wrap.innerHTML=''; return; }
   const dioEntry=_getShrineVisitDioceseEntries().filter(function(pair){return String(pair&&pair[0]||'all')===String(_shrineVisitCardsDiocese||'all');})[0];
   const dioLabel=_getShrineVisitFullDioceseLabel(_shrineVisitCardsDiocese||'all',dioEntry&&dioEntry[1]);
+  const dioField='<label class="shrine-visit-filter-field"><span>교구별</span>'+_oaiVisitPickerButton('shrine-dio',dioLabel,'교구별 선택')+'</label>';
+  if(active!=='visited'){wrap.innerHTML=dioField;return;}
   wrap.innerHTML='<label class="shrine-visit-filter-field"><span>날짜별</span>'+_oaiVisitPickerButton('shrine-date',_shrineVisitCardsDateSort==='oldest'?'오래된순':'최근순','날짜별 정렬')+'</label>'
-    +'<label class="shrine-visit-filter-field"><span>교구별</span>'+_oaiVisitPickerButton('shrine-dio',dioLabel,'교구별 선택')+'</label>'
+    +dioField
     +'<label class="shrine-visit-filter-field"><span>유형별</span>'+_oaiVisitPickerButton('shrine-type',_shrineVisitTypeFilterLabel(_shrineVisitCardsType),'유형별 선택')+'</label>';
 }
 function _renderShrineVisitDioceseTabs(visitedCount,totalCount){
@@ -3237,7 +3241,7 @@ function _oaiAddPhotos(kind){if(!(_oaiJournalDeveloperEnabled()))return;
   const bridge=_oaiVisitNative();if(!bridge||typeof bridge.pickVisitPhotos!=='function'){_oaiVisitToast('사진 등록은 Android 앱에서 사용할 수 있습니다.');return;}
   // Keep the existing gallery; it cannot always enforce a native selection cap.
   // The Android result is validated before any decoding or local registration.
-  if(typeof bridge.pickVisitPhotosWithNames==='function')_oaiVisitToast('갤러리에서 최대 '+remaining+'장까지 선택해 주세요.');
+  if(typeof bridge.pickVisitPhotosWithNames==='function')_oaiVisitToast('사진은 '+remaining+'장 더 등록할 수 있습니다. 더 많이 선택하면 초과 사진은 제외됩니다.');
   const req=_oaiVisitRequestId('photo');_oaiVisitPhotoPending[req]=ctx;
   try{
     const names=photos.map(function(p){return String(p.originalFileName||(p.name!=='방문사진.jpg'?p.name:'')||'').trim();}).filter(Boolean);
@@ -3915,12 +3919,11 @@ function _renderShrineVisitCardsModal(){
   const unvisited=(active==='visited')?_filterShrineVisitEntriesByType(unvisitedByDiocese):unvisitedByDiocese;
   const total=visited.length+unvisited.length;
   _renderShrineVisitFilterControls(active);
-  _renderShrineVisitDioceseTabs(visited.length,total);
   const dioWrap=document.getElementById('shrine-visit-cards-diocese');
   if(dioWrap){
-    const hideDio=(active==='stats'||active==='visited');
-    dioWrap.classList.toggle('stats-hidden', hideDio);
-    dioWrap.setAttribute('aria-hidden', hideDio?'true':'false');
+    // 기존 가로 교구 버튼은 사용하지 않는다. 교구 선택은 상단 공통 선택창에서 처리한다.
+    dioWrap.classList.add('stats-hidden');
+    dioWrap.setAttribute('aria-hidden','true');
   }
   const stats=document.getElementById('shrine-visit-cards-stats');
   if(stats){
@@ -3933,9 +3936,6 @@ function _renderShrineVisitCardsModal(){
     const typeLabel=(active==='visited'&&_shrineVisitCardsType!=='all')?_shrineVisitTypeFilterLabel(_shrineVisitCardsType):'';
     const scopeLabel=typeLabel?(dioLabel+' · '+typeLabel):dioLabel;
     stats.innerHTML=hideTopStats?'':'<strong>'+displayVisited+'곳 순례</strong><span>/ '+displayTotal+'곳</span><b>ㅣ</b><span>'+pct+'% 순례</span><em>'+_visitHtmlEsc(scopeLabel)+'</em>';
-  }
-  if(active!=='stats'&&active!=='visited'){
-    setTimeout(function(){ _scrollShrineVisitDioceseTabIntoView(_shrineVisitCardsDiocese||'all','auto'); }, 40);
   }
   const modal=document.getElementById('shrine-visit-cards-modal');
   if(modal){
