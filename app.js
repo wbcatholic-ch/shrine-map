@@ -17916,7 +17916,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     let a=loadCourses(),i=a.findIndex(function(x){return x.id===requestedId;});
     if(i<0)return null;
     const now=Date.now();
-    if(a.some(x=>_courseCompletionList(x).some(v=>_dailyIso(v.completedAt)===_dailyIso(now)))){window.alert('오늘 이미 완료한 순례코스가 있습니다. 같은 날 다시 등록할 수 없습니다.');return null;}
     if(now>=_dailyDayEnd(_dailyIso(now))){window.alert('날짜가 변경되었습니다. 새 날짜의 순례하기를 시작해 주세요.');return null;}
     const c=Object.assign({},a[i],{lastStartedAt:now,updatedAt:now});
     a[i]=c;
@@ -18121,6 +18120,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // 성지 한 곳 이상, 또는 일반 성당 두 곳 이상일 때만 날짜별 코스를 만든다.
   // 성지/성당 양쪽에 등록된 같은 장소는 _dailyGpsEvents에서 성지 우선으로 1회 합쳐진다.
   function _dailyAutoEligible(events){return events.some(ev=>ev.kind==='shrine');}
+  // 완료된 코스는 그대로 두고, 해당 날짜에 아직 코스에 포함되지 않은 GPS 장소만 추린다.
+  // 날짜 전체가 완료됐다는 이유로 다른 코스의 남은 스탬프를 버리지 않는다.
+  function _dailyUnregisteredEvents(date,events,courses){
+    const completed=(courses||_dailyStoredCourses()).filter(c=>_courseCompletionList(c).some(x=>_dailyIso(x.completedAt)===date));
+    return _dailyAutoEvents(events).filter(ev=>!completed.some(c=>(c.places||[]).some(p=>_dailySamePlace(p,ev)||_dailyLinkedGpsPair(p,ev))));
+  }
   function _dailyAutoCourseName(date,events){
     const names=events.map(ev=>String(ev.name||'').trim()).filter(Boolean);
     return date.replace(/-/g,'.')+' '+names.join(' → ');
@@ -18146,13 +18151,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(!at||at>=_dailyDayEnd(date))return null;
       return {place:Object.assign({},place,{done:true,doneMethod:'gps'}),at};
     }).filter(Boolean).sort((a,b)=>a.at-b.at);
-    if(visited.length&&!normalizePoint(course.end)){
-      // 도착지를 지정하지 않은 수동 계획은 완료 처리 금지. 원본 계획/스탬프는 보존.
-      _clearActiveFollow(active.courseId);
-      if(_readActiveFollowRaw())throw new Error('도착지 미설정 순례 종료 상태 저장 실패');
-      return true;
-    }
-    if(visited.length){
+    if(visited.length&&_dailyAutoEligible(_dailyAutoEvents(_dailyGpsEvents(date).filter(ev=>visited.some(x=>_dailySamePlace(x.place,ev)||_dailyLinkedGpsPair(x.place,ev)))))){
       const at=_dailyDayEnd(date)-1; // 종료는 다음 날 00:00, 완료 날짜는 전날 유지
       const places=visited.map(x=>x.place);
       const next=_courseRefreshCompletionState(Object.assign({},course,{
@@ -18194,27 +18193,23 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!Array.isArray(events))throw new Error('GPS 등록 입력 형식 오류');
     const gpsCount=_dailyRawGpsEvents(date).length;
     if(gpsCount>0&&!events.length)throw new Error('GPS 스탬프 장소를 확인할 수 없습니다');
-    const eligible=_dailyAutoEvents(events);
+    const eligible=_dailyUnregisteredEvents(date,events,courses);
     const doneForDate=courses.filter(c=>_courseCompletionList(c).some(x=>_dailyIso(x.completedAt)===date));
-    const manual=doneForDate.find(c=>!c.autoGps);
     const existing=doneForDate.find(c=>c.autoGps&&c.sourceDate===date);
     const logged=state.auto[date];
     // GPS 원본은 변경하지 않는다. 이 날짜의 등록 결과·코스 ID·GPS 지문은 별도 장부에 보존한다.
-    if(logged&&logged.done&&logged.gpsSignature===gpsSignature){
-      if(logged.source==='auto'&&existing&&existing.id===logged.existingId&&_dailySameOrderedPlaces(existing.places,eligible)){report('existing_auto','기존 자동 완료 코스 확인 (신규 저장 없음)');return true;}
-      if(logged.source==='manual'&&manual&&manual.id===logged.existingId){report('existing_manual','기존 수동 완료 코스 확인 (신규 저장 없음)');return true;}
-      if(logged.source==='none'&&!_dailyAutoEligible(eligible)){report('ineligible','등록 대상 성지가 없음');return false;}
-      throw new Error(date+' 기존 완료 기록과 현재 스탬프가 일치하지 않습니다');
+    if(logged&&logged.done&&logged.gpsSignature===gpsSignature&&!_dailyAutoEligible(eligible)){
+      report('existing','이미 등록된 GPS 장소만 확인 (신규 저장 없음)');
+      return !!doneForDate.length;
     }
-    if(manual){
-      // 수동 완료 코스는 날짜별 GPS 스탬프가 더 있어도 절대 변경하지 않는다.
-      state.auto[date]={done:true,source:'manual',existingId:manual.id,gpsSignature};
-      report('existing_manual','기존 수동 완료 코스 확인 (신규 저장 없음)');
-    }else if(existing){
-      // 자동 완료 코스도 원본 보존. 사후에 GPS 원본이 달라지면 조용히 변경하지 않는다.
-      if(!_dailySameOrderedPlaces(existing.places,eligible))throw new Error(date+' 완료 후 GPS 스탬프가 변경되었습니다. 기존 완료 코스는 자동으로 수정하지 않습니다');
-      state.auto[date]={done:true,source:'auto',existingId:existing.id,gpsSignature};
-      report('existing_auto','기존 자동 완료 코스 확인 (신규 저장 없음)');
+    if(existing&&!_dailyAutoEligible(eligible)){
+      // 기존 자동 완료 코스는 덮어쓰지 않는다. 남은 GPS 방문이 없으면 기존 기록만 확인한다.
+      if(!_dailyAutoEligible(eligible)){
+        state.auto[date]={done:true,source:'auto',existingId:existing.id,gpsSignature};
+        report('existing_auto','기존 자동 완료 코스 확인 (신규 저장 없음)');
+      }else{
+        throw new Error(date+' 미등록 성지 스탬프가 추가되었습니다. 기존 코스는 보존하고 수동 확인이 필요합니다');
+      }
     }else if(_dailyAutoEligible(eligible)){
       const id='gps_daily_'+date.replace(/-/g,'');
       if(courses.some(c=>c.id===id))throw new Error('등록 날짜와 같은 ID의 코스가 이미 있습니다');
@@ -18351,8 +18346,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(document.hidden)return;
     try{
       const state=_dailyState();
-      const completed=new Set(loadCourses().flatMap(c=>_courseCompletionList(c).map(x=>_dailyIso(x.completedAt))));
-      const first=Object.keys(state.failures||{}).filter(d=>!completed.has(d)&&d<_dailyIso(Date.now())).sort()[0];
+      const first=Object.keys(state.failures||{}).filter(d=>d<_dailyIso(Date.now())).sort()[0];
       if(first)_dailyShowFailure(first);
     }catch(e){console.warn('[코스 등록 실패 안내 확인]',e);}
   }
@@ -18431,7 +18425,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       });
     });
     const result=Array.from(dates).sort().filter(date=>{
-      try{return _dailyAutoEligible(_dailyAutoEvents(_dailyGpsEvents(date)));}
+      try{return _dailyAutoEligible(_dailyUnregisteredEvents(date,_dailyGpsEvents(date),loadCourses()));}
       catch(e){
         // 장소 연결 실패/자료 미로딩은 '등록할 코스가 있다'는 증거가 아니다.
         // 원본 스탬프/실패 장부는 보존하며, 데이터가 준비된 다음 다시 검증한다.
@@ -18444,8 +18438,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function _historyUnregisteredDates(includeToday){
     const state=_dailyState(),courses=loadCourses();
     return _historyCandidateDates(includeToday).filter(date=>{
-      // 실제 완료된 날짜는 장부의 성공/실패 상태와 무관하게 중복 등록 대상이 아니다.
-      if(courses.some(c=>_courseCompletionList(c).some(x=>_dailyIso(x.completedAt)===date)))return false;
+      // 날짜가 아닌 실제 GPS 장소별로 미등록 여부를 확인한다.
+      if(!_dailyAutoEligible(_dailyUnregisteredEvents(date,_dailyGpsEvents(date),courses)))return false;
       const logged=state.auto[date];
       if(logged&&logged.done&&logged.source==='none'){
         // 단독 성당 등 '코스 대상 아님'이 확정된 같은 GPS 원본은 재노출하지 않는다.
@@ -18468,7 +18462,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const courses=loadCourses();
       failurePending=Object.keys(state.failures||{}).some(date=>
         /^\d{4}-\d{2}-\d{2}$/.test(date)&&date<_dailyIso(Date.now())&&
-        !courses.some(c=>_courseCompletionList(c).some(x=>_dailyIso(x.completedAt)===date))&&
         _dailyRawGpsEvents(date).length>0);
     }catch(e){console.warn('[미등록 코스 실패 상태 검증 보류]',e);}
     let remaining=[];
@@ -18502,7 +18495,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     try{
       if(typeof _ensureShrineDataLoaded==='function')await _ensureShrineDataLoaded();
       if(typeof _ensureAllParishDiocesesLoaded==='function')await _ensureAllParishDiocesesLoaded({silent:true});
-      const events=_dailyAutoEvents(_dailyGpsEvents(date));
+      const events=_dailyUnregisteredEvents(date,_dailyGpsEvents(date),loadCourses());
       if(!_dailyAutoEligible(events)){
         // 실시간 GPS 스탬프 변경 등으로 후보가 유효하지 않으면 빈 등록창을 띄우지 않는다.
         historyDatesCache=null;historyDatesSignature=null;_historyClose();_historyUpdateButton();return;
@@ -18527,7 +18520,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       for(let attempt=0;attempt<2;attempt++){
         try{
           if(!Array.isArray(historyPreviewEvents)||!_dailyAutoEligible(historyPreviewEvents))throw new Error('순례코스 등록 조건을 충족하지 않습니다');
-          const latest=_dailyAutoEvents(_dailyGpsEvents(date));
+          const latest=_dailyUnregisteredEvents(date,_dailyGpsEvents(date),loadCourses());
           if(!_dailySameOrderedPlaces(historyPreviewEvents,latest))throw new Error('GPS 방문 목록이 변경됐습니다. 날짜를 다시 확인해 주세요');
           if(!_dailyRegisterOnce(date,latest))throw new Error('등록 가능한 장소가 없습니다');error=null;break;
         }catch(e){error=e;}
@@ -18648,10 +18641,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const a=JSON.parse(localStorage.getItem(OAI_GPS_PENDING_DATES_KEY)||'[]');
       if(!Array.isArray(a))return;
       const today=_dailyIso(Date.now()),state=_dailyState(),courses=loadCourses();
-      const completed=new Set(courses.flatMap(c=>_courseCompletionList(c).map(x=>_dailyIso(x.completedAt))));
-      // 완료 코스가 실제 남아 있는 날짜만 큐에서 제외한다.
-      // 이전 버전의 '등록 완료' 표시만 있고 코스가 없다면 다시 확인한다.
-      const remaining=a.filter(d=>!completed.has(d)||!state.auto[d]?.done);
+      // 같은 날 완료 코스가 있어도 별도의 미등록 방문이 있을 수 있으므로 날짜만으로 제외하지 않는다.
+      const remaining=a.filter(d=>!state.auto[d]?.done||state.failures[d]);
       if(remaining.length!==a.length)localStorage.setItem(OAI_GPS_PENDING_DATES_KEY,JSON.stringify(remaining));
       const dates=remaining.filter(d=>/^\d{4}-\d{2}-\d{2}$/.test(d)&&d<today&&!state.failures[d]).sort();
       if(dates.length)_dailyRegisterPrevious(dates[0],false);
