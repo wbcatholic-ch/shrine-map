@@ -3206,6 +3206,7 @@ function _oaiVisitConfirm(message,onConfirm,options){
 }
 function _oaiCloseVisitConfirm(){const m=document.getElementById('oai-visit-confirm');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}window.__OAI_VISIT_CONFIRM_FN__=null;}
 try{window._oaiCloseVisitConfirm=_oaiCloseVisitConfirm;}catch(_e){}
+document.addEventListener('keydown',function(e){if((e.key==='Escape'||e.key==='Backspace')&&document.getElementById('oai-visit-confirm')?.classList.contains('show')){e.preventDefault();e.stopImmediatePropagation();_oaiCloseVisitConfirm();}},true);
 function _oaiEnsureMemoModal(){
   let m=document.getElementById('oai-visit-memo-modal');if(m)return m;
   m=document.createElement('div');m.id='oai-visit-memo-modal';m.className='oai-visit-memo-modal';m.setAttribute('aria-hidden','true');
@@ -4542,10 +4543,13 @@ function _oaiRenderRestrictedSettings(){
       const current=_oaiRestrictedPlaces();
       const index=current.findIndex(v=>v.kind===x.kind&&v.id===x.id);
       if(index<0)return;
-      const updated=current.filter((_,j)=>j!==index);
-      if(!_oaiSaveRestrictedPlaces(updated)){_oaiVisitToast('해제하지 못했습니다.');return;}
-      _oaiRenderRestrictedSettings();
-      _oaiRenderRestrictedMatches();
+      _oaiVisitConfirm('‘'+x.name+'’의 자동 GPS 기록 제한을 해제할까요?\n기존 방문 스탬프와 사진·메모는 그대로 유지됩니다.',function(){
+        const latest=_oaiRestrictedPlaces();
+        const updated=latest.filter(v=>!(v.kind===x.kind&&v.id===x.id));
+        if(updated.length===latest.length)return;
+        if(!_oaiSaveRestrictedPlaces(updated)){_oaiVisitToast('해제하지 못했습니다.');return;}
+        _oaiRenderRestrictedSettings();_oaiRenderRestrictedMatches();
+      },{title:'제한 장소 해제',confirmLabel:'해제'});
     });
     row.append(label,remove);list.appendChild(row);
   });
@@ -4566,8 +4570,13 @@ function _oaiRenderRestrictedMatches(){
       const now=_oaiRestrictedPlaces(),id=_oaiRestrictedIdentity(x.kind,x.item);
       if(now.length>=10){_oaiVisitToast('자동 기록 제한 장소는 최대 10곳입니다.');return;}
       if(!id||now.some(y=>y.kind===x.kind&&y.id===id))return;
-      if(!_oaiSaveRestrictedPlaces([...now,{kind:x.kind,id,name:String(x.item.name||'')}])){_oaiVisitToast('저장하지 못했습니다.');return;}
-      input.value='';_oaiRenderRestrictedMatches();_oaiRenderRestrictedSettings();
+      _oaiVisitConfirm('‘'+x.item.name+'’을 자동 GPS 기록 제한 장소로 등록할까요?\n기존 방문 스탬프는 그대로 유지됩니다.',function(){
+        const latest=_oaiRestrictedPlaces();
+        if(latest.length>=10){_oaiVisitToast('자동 기록 제한 장소는 최대 10곳입니다.');return;}
+        if(latest.some(y=>y.kind===x.kind&&y.id===id))return;
+        if(!_oaiSaveRestrictedPlaces([...latest,{kind:x.kind,id,name:String(x.item.name||'')}])){_oaiVisitToast('저장하지 못했습니다.');return;}
+        input.value='';_oaiRenderRestrictedMatches();_oaiRenderRestrictedSettings();
+      },{title:'제한 장소 등록',confirmLabel:'등록'});
     });
     list.appendChild(button);
   });
@@ -17575,6 +17584,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
   },true);
   window.oaiDismissFirstRunForBack=function(){
+    const confirm=document.getElementById('oai-visit-confirm');
+    if(confirm&&confirm.classList.contains('show')){_oaiCloseVisitConfirm();return true;}
     const el=oaiFirstRunOverlay();if(!el||el.hidden)return false;
     oaiFirstRunRemotePayload=null;oaiFirstRunRestorePending=false;
     if(oaiFirstRunDialog!=='network'&&localStorage.getItem(OAI_RESTORE_CHECKED_KEY)!=='1'){
