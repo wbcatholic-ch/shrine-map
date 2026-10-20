@@ -2,6 +2,23 @@
 (function(){
   const WEB_SITES = [
 
+  {cat:"주보", ico:"📰", name:"서울대교구 주보", op:"서울대교구", prov:"서울관구", url:"https://cc.catholic.or.kr/html/sub3/jubo.asp", desc:"교구 주보 보기"},
+  {cat:"주보", ico:"📰", name:"인천교구 주보", op:"인천교구", prov:"서울관구", url:"http://www.caincheon.or.kr/news/mgz_list.do", desc:"교구 주보 보기"},
+  {cat:"주보", ico:"📰", name:"수원교구 주보", op:"수원교구", prov:"서울관구", url:"https://www.casuwon.or.kr/journal/jubo", desc:"교구 주보 보기"},
+  {cat:"주보", ico:"📰", name:"의정부교구 주보", op:"의정부교구", prov:"서울관구", url:"https://ucatholic.or.kr/bbs/board.php?bo_table=jubo", desc:"교구 주보 보기"},
+  {cat:"주보", ico:"📰", name:"대전교구 주보", op:"대전교구", prov:"서울관구", url:"https://jubo.djcatholic.or.kr/home/jubo.asp", desc:"교구 주보 보기"},
+  {cat:"주보", ico:"📰", name:"춘천교구 주보", op:"춘천교구", prov:"서울관구", url:"https://www.cccatholic.or.kr/publication/jubo", desc:"교구 주보 보기"},
+  {cat:"주보", ico:"📰", name:"원주교구 주보", op:"원주교구", prov:"서울관구", url:"http://www.wjcatholic.or.kr/board/file2", desc:"교구 주보 보기"},
+  {cat:"주보", ico:"📰", name:"대구대교구 주보", op:"대구대교구", prov:"대구관구", url:"https://www.daegujubo.or.kr/", desc:"교구 주보 보기"},
+  {cat:"주보", ico:"📰", name:"부산교구 주보", op:"부산교구", prov:"대구관구", url:"https://www.catholicbusan.or.kr/bulletin/busan", desc:"교구 주보 보기"},
+  {cat:"주보", ico:"📰", name:"청주교구 주보", op:"청주교구", prov:"대구관구", url:"https://www.cdcj.or.kr/media/journal", desc:"교구 주보 보기"},
+  {cat:"주보", ico:"📰", name:"마산교구 주보", op:"마산교구", prov:"대구관구", url:"https://cathms.kr/C_8", desc:"교구 주보 보기"},
+  {cat:"주보", ico:"📰", name:"안동교구 주보", op:"안동교구", prov:"대구관구", url:"https://www.acatholic.or.kr/sub6/sub1.asp", desc:"교구 주보 보기"},
+  {cat:"주보", ico:"📰", name:"광주대교구 주보", op:"광주대교구", prov:"광주관구", url:"https://www.gjcatholic.or.kr/journal/lightvill", desc:"교구 주보 보기"},
+  {cat:"주보", ico:"📰", name:"전주교구 주보", op:"전주교구", prov:"광주관구", url:"https://www.jcatholic.or.kr/theme/main/pages/forest.php", desc:"교구 주보 보기"},
+  {cat:"주보", ico:"📰", name:"제주교구 주보", op:"제주교구", prov:"광주관구", url:"https://www.diocesejeju.or.kr/jubo_main", desc:"교구 주보 보기"},
+  {cat:"주보", ico:"📚", name:"전국 주보 모아보기 (굿뉴스)", op:"굿뉴스", url:"https://maria.catholic.or.kr/jubo/", desc:"전국 교구 주보 통합 보기"},
+
   {cat:"사제찾기", ico:"✝", name:"서울대교구 사제찾기",
    op:"서울대교구", prov:"서울관구", url:"https://aos.catholic.or.kr/pro10315",
    desc:"교구 사제 검색 바로가기"},
@@ -1609,6 +1626,8 @@
     if(parish && parish.url && parish.url!==parish.hp) out.push({myShortcut:true,ico:'📍',name:dioName+' 성당 안내',url:parish.url,desc:parish.name+' 정보가 있는 교구 홈페이지'});
     const dioHome=WEB_SITES.find(function(s){return s.cat==='교구' && s.name===dioName;});
     if(dioHome) out.push({myShortcut:true,ico:'⛪',name:dioName+' 홈페이지',url:dioHome.url,desc:'내 교구 공식 홈페이지'});
+    const jubo=WEB_SITES.find(function(s){return s.cat==='주보' && normalizeDioceseName(s.op)===normalizeDioceseName(dioName);});
+    if(jubo) out.push({myShortcut:true,ico:'📰',name:dioName+' 주보',url:jubo.url,desc:'내 교구 주보 바로가기'});
     const priest=WEB_SITES.find(function(s){return s.cat==='사제찾기' && String(s.op||'')===dioName;});
     if(priest) out.push({myShortcut:true,ico:'✝',name:dioName+' 사제찾기',url:priest.url,desc:'내 교구 사제 찾기'});
     return out;
@@ -1625,6 +1644,9 @@
     if(item.cat === '사제찾기'){
       return itemName === myName + ' 사제찾기' || itemName.indexOf(myName) === 0;
     }
+    if(item.cat === '주보'){
+      return normalizeDioceseName(item.op) === normalizeDioceseName(myName);
+    }
     if(item.cat === '교구'){
       return itemName === myName;
     }
@@ -1639,7 +1661,8 @@
   function webCategoryRank(cat){
     var order = {
       '교구': 0,
-      '사제찾기': 1,
+      '주보': 1,
+      '사제찾기': 2,
       '중앙기구': 2,
       '신앙 포털': 3,
       '미디어': 4,
@@ -1653,7 +1676,7 @@
     if(!Array.isArray(items) || items.length < 2) return items;
     var myName = getMyDioceseName();
     var isFavTab = webState.curCat === '⭐ 즐겨찾기';
-    var shouldPreferMyDiocese = !!(myName && (isFavTab || webState.curCat === '사제찾기' || webState.curCat === '교구'));
+    var shouldPreferMyDiocese = !!(myName && (isFavTab || webState.curCat === '사제찾기' || webState.curCat === '교구' || webState.curCat === '주보'));
     return items.slice().sort(function(a,b){
       if(isFavTab){
         var ca = webCategoryRank(a && a.cat);
@@ -1679,9 +1702,9 @@
     return '<span class="web-province-inline">' + esc(prov) + '</span>';
   }
   function webCardNameHtml(item){
-    if(item && (item.cat === '사제찾기' || item.cat === '교구')){
-      var dioName = item.cat === '사제찾기' ? String(item.op || item.name || '').replace(/\s*사제찾기\s*$/, '') : String(item.name || '');
-      var tail = item.cat === '사제찾기' ? '사제찾기' : '홈페이지';
+    if(item && (item.cat === '사제찾기' || item.cat === '교구' || item.cat === '주보')){
+      var dioName = item.cat === '사제찾기' ? String(item.op || item.name || '').replace(/\s*사제찾기\s*$/, '') : item.cat === '주보' ? (item.op === '굿뉴스' ? String(item.name) : String(item.op)) : String(item.name || '');
+      var tail = item.cat === '사제찾기' ? '사제찾기' : item.cat === '주보' ? (item.op === '굿뉴스' ? '' : '주보') : '홈페이지';
       return '<span class="web-diocese-name-main">' + esc(dioName) + '</span>'
         + '<span class="web-card-name-tail">' + esc(tail) + '</span>';
     }
@@ -1943,7 +1966,7 @@
 
   function webOrderedCats(){
     const cats = [];
-    const priority = ['교구', '사제찾기', '중앙기구'];
+    const priority = ['교구', '주보', '사제찾기', '중앙기구'];
     if(myShortcutSites().length || (webFavs && webFavs.length)) cats.push('⭐ 즐겨찾기');
     priority.forEach(function(cat){
       if(!cats.includes(cat) && WEB_SITES.some(function(s){ return s.cat === cat; })) cats.push(cat);
@@ -2069,7 +2092,7 @@
     }
     personal.concat(filtered).forEach(s => {
       const isPersonal=!!s.myShortcut;
-      const color = ((s.cat==='교구' || s.cat==='사제찾기') && s.prov)
+      const color = ((s.cat==='교구' || s.cat==='사제찾기' || s.cat==='주보') && s.prov)
         ? (WEB_PROV_COLORS[s.prov] || WEB_CAT_COLORS[s.cat] || '#555')
         : (isPersonal ? '#8A6A2F' : (WEB_CAT_COLORS[s.cat] || '#555'));
       const bg = WEB_CAT_BG[s.cat] || '#f8f8f8';
@@ -2085,8 +2108,8 @@
       if(isPriestCard){
         card.setAttribute('aria-label', s.name + ' 새창 열기');
       }
-      const badgeText = isPersonal ? '내 설정' : (((s.cat==='교구' || s.cat==='사제찾기') && s.prov) ? esc(s.prov) : esc(s.cat));
-      const topRight = isPersonal ? '<span class="web-my-diocese-badge">바로가기</span>' : ((s.cat==='교구' || s.cat==='사제찾기') ? (isMyWebCard ? myDioceseBadgeHtml() : '') : esc(s.op));
+      const badgeText = isPersonal ? '내 설정' : (((s.cat==='교구' || s.cat==='사제찾기' || s.cat==='주보') && s.prov) ? esc(s.prov) : esc(s.cat));
+      const topRight = isPersonal ? '<span class="web-my-diocese-badge">바로가기</span>' : ((s.cat==='교구' || s.cat==='사제찾기' || s.cat==='주보') ? (isMyWebCard ? myDioceseBadgeHtml() : '') : esc(s.op));
       const cardName = webCardNameHtml(s);
       const cardDesc = s.cat==='교구' ? '교구 공식 홈페이지' : esc(s.desc);
       const icoStyle = s.cat==='사제찾기' ? 'color:' + color + ';font-weight:900;font-family:Georgia,serif' : '';
