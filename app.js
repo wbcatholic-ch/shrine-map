@@ -4023,16 +4023,23 @@ function _queueDeferredVisitNotice(kind,place){if(!place)return;const id=typeof 
 function _flushDeferredVisitNotices(){
   if(!_oaiDeferredVisitNotices.length)return;
   if(_oaiVisitNoticeBlocked()){_scheduleDeferredVisitNoticeFlush();return;}
-  // 표시 함수가 실패하면 해당 방문 안내를 잃지 않고 다음 시도에서 다시 표시한다.
   const next=_oaiDeferredVisitNotices[0];
   try{
+    // 성지·성당은 같은 방문 축하창을 사용한다. 실제로 열린 경우에만 큐에서 제거한다.
     if(next.kind==='shrine')_openShrineAutoVisitModal(next.place);
-    else _showParishAutoVisitNotice(next.place);
+    else if(next.kind==='parish')_showParishAutoVisitNotice(next.place);
+    else {console.warn('[GPS 방문 안내] 알 수 없는 방문 유형',next.kind);_oaiDeferredVisitNotices.shift();}
     const shown=document.getElementById('shrine-auto-visit-modal');
-    if(shown&&shown.classList.contains('show'))_oaiDeferredVisitNotices.shift();
-    else { _oaiDeferredVisitNotices.shift(); console.warn('[GPS 방문 안내] 표시할 수 없는 방문 안내 건너뜀'); }
-  }catch(e){console.warn('[GPS 방문 안내]',e);}
+    if(shown&&shown.classList.contains('show')&&shown.getAttribute('aria-hidden')==='false'){
+      _oaiDeferredVisitNotices.shift();
+    }else if(next===_oaiDeferredVisitNotices[0]){
+      // 다른 모달이 막았거나 표시 실패한 경우 안내를 삭제하지 않는다.
+      // 재시도는 기존 공통 대기열에서 수행하며 중복 창을 생성하지 않는다.
+      console.warn('[GPS 방문 안내] 축하창 표시 대기',next.kind);
+    }
+  }catch(e){console.warn('[GPS 방문 안내] 축하창 표시 재시도 예정',e);}
   if(_oaiDeferredVisitNotices.length)_scheduleDeferredVisitNoticeFlush();
+  else if(typeof window._oaiFlushPilgrimageCongratulations==='function')setTimeout(window._oaiFlushPilgrimageCongratulations,120);
 }
 document.addEventListener('click',function(){if(_oaiDeferredVisitNotices.length)setTimeout(_flushDeferredVisitNotices,120);},true);
 window.addEventListener('oai-short-background-return',function(){setTimeout(_flushDeferredVisitNotices,900);},{passive:true});
@@ -4701,7 +4708,7 @@ function _maybeAutoParishVisit(lat,lng){
 }
 function _showParishAutoVisitNotice(place){
   if(!place)return;
-  if(!_isMyParishAutoVisitEnabled()&&_isSameParish(place,_configuredMyParish()))return;
+  // GPS 등록 성공 시 큐에 들어온 방문은 설정 변경과 무관하게 축하를 표시한다.
   // 성지·성당·순례하기 GPS 방문은 동일한 앱 전용 축하창을 공유한다.
   const modal=_ensureShrineAutoVisitModal();
   const kicker=modal.querySelector('.shrine-auto-visit-kicker');
