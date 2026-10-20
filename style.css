@@ -10259,3 +10259,14 @@ html.oai-font-global .shrine-visit-card-badge strong,html:not(.ios-device).oai-s
 #oai-pilgrimage-list-view .oai-pilgrimage-course-repeat,
 #oai-pilgrimage-list-view .oai-pilgrimage-course-follow-btn{min-height:35px!important;border-radius:9px!important;}
 #oai-pilgrimage-list-view .oai-pilgrimage-course-card *{-webkit-touch-callout:none;}
+
+/* 방문 기록 설정: 자동 기록 제한 장소 */
+.oai-settings-restricted{padding:14px 0 3px;border-top:1px solid #e5e7eb;margin-top:12px;}
+.oai-settings-restricted-heading{display:flex;align-items:center;gap:8px;font-size:14px;color:#172b45;}
+.oai-settings-restricted-heading span{margin-left:auto;color:#64748b;font-size:12px;font-weight:700;}
+.oai-settings-restricted>small{display:block;color:#667085;margin:5px 0 10px;font-size:12px;}
+#oai-restricted-place-search{box-sizing:border-box;width:100%;padding:12px;border:1px solid #cbd5e1;border-radius:10px;background:#fff;color:#1e293b;font-size:14px;}
+.oai-restricted-place-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:8px 0;border-bottom:1px solid #eef1f5;font-size:13px;color:#273449;}
+.oai-restricted-place-row button{border:1px solid #cbd5e1;border-radius:8px;background:white;color:#475569;padding:6px 10px;font-size:12px;flex:none;}
+#oai-restricted-place-results{max-height:185px;overflow-y:auto;}
+.oai-restricted-match{display:block;width:100%;text-align:left;border:0;border-bottom:1px solid #eef1f5;background:#fff;color:#243b53;padding:10px 8px;font-size:13px;}
