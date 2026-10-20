@@ -4482,7 +4482,11 @@ const OAI_PARISH_AUTO_VISIT_ENABLED_KEY='oai_parish_auto_visit_enabled_v1';
 let _parishVisitTab='visited',_parishVisitDio='all',_parishVisitSort='recent',_parishUnvisitedLimit=80;
 const OAI_SETTINGS_MY_PARISH_KEY='oai_settings_my_parish_v1';
 function _isMyParishAutoVisitEnabled(){try{return localStorage.getItem(OAI_PARISH_AUTO_VISIT_ENABLED_KEY)!=='0';}catch(_e){return true;}}
-function _setParishAutoVisitEnabled(enabled){try{localStorage.setItem(OAI_PARISH_AUTO_VISIT_ENABLED_KEY,enabled?'1':'0');}catch(_e){}if(!enabled){try{const p=_configuredMyParish();_oaiDeferredVisitNotices=_oaiDeferredVisitNotices.filter(x=>x.kind!=='parish'||!_isSameParish(x.place,p));const notice=document.getElementById('parish-auto-visit-notice');if(notice)notice.classList.remove('show');_scheduleDeferredVisitNoticeFlush();}catch(_e){}}}
+function _setParishAutoVisitEnabled(enabled){
+  // enabled=true: 내 본당 첫 방문만 자동 기록. false: 일반 성당처럼 날짜별 기록.
+  // 이미 GPS로 등록된 방문 축하 안내는 설정 변경으로 취소하지 않는다.
+  try{localStorage.setItem(OAI_PARISH_AUTO_VISIT_ENABLED_KEY,enabled?'1':'0');}catch(_e){}
+}
 function _configuredMyParish(){
   let saved=null;
   try{saved=JSON.parse(localStorage.getItem(OAI_SETTINGS_MY_PARISH_KEY)||'null');}catch(_e){}
@@ -4685,9 +4689,13 @@ function _maybeAutoParishVisit(lat,lng){
   if(!lat||!lng)return;let best=null,bestM=Infinity;
   (PARISHES||[]).forEach(function(p){if(!p||p.diocese==='군종교구'||!p.lat||!p.lng)return;const m=calcDist(lat,lng,p.lat,p.lng)*1000;if(m<=OAI_PARISH_AUTO_VISIT_RADIUS_M&&m<bestM){best=p;bestM=m;}});
   if(!best)return;const myParish=_configuredMyParish(),isMyParish=_isSameParish(best,myParish),previousVisits=_parishVisits(best);
-  // 설정이 꺼진 내 본당 GPS 자동 등록은 방문 기록 유무와 관계없이 제외한다.
-  if(isMyParish&&!_isMyParishAutoVisitEnabled())return;
-  if(isMyParish){if(!_isMyParishAutoVisitEnabled()||previousVisits.length)return;}else if(previousVisits.some(function(v){return v.date===_todayISODate();}))return;
+  // 내 본당 기록 제한이 켜져 있을 때만 과거 전체 방문기록으로 재등록을 제한한다.
+  // 제한이 꺼졌거나 내 본당 지정이 해제되면 일반 성당처럼 당일 중복만 검사한다.
+  if(isMyParish&&_isMyParishAutoVisitEnabled()){
+    if(previousVisits.length)return;
+  }else if(previousVisits.some(function(v){return v.date===_todayISODate();})){
+    return;
+  }
   const visitResult=_registerGpsPlaceVisit('parish',best,_todayISODate());
   if(!visitResult.added)return;
 
