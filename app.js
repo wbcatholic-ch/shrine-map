@@ -16804,22 +16804,44 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // 개발자 도구의 화면 노출은 실행 중 10회 탭으로만 해제한다. 저장된 사용 권한과 분리한다.
   let oaiDevPanelUnlocked=false;
   function oaiDevEnabled(){return window.__OAI_DEV_RUNTIME_ACTIVE__===true;}
+  // 기념일은 실제 GPS 스탬프가 있는 날짜만 사용한다. 저장 데이터는 읽기 전용이다.
   function oaiAnniversaryPreview(date){
     if(date!=='2026-10-09')return;
-    const all=[];
-    [['shrine',_loadShrineVisits()],['parish',_loadParishVisits()]].forEach(pair=>{
-      Object.values(pair[1]||{}).forEach(record=>{
+    const shrineData=_loadShrineVisits(),parishData=_loadParishVisits(),all=[];
+    function collect(kind,data,places){
+      Object.entries(data||{}).forEach(([storedKey,record])=>{
         if(!record||!Array.isArray(record.visits))return;
-        record.visits.filter(v=>v&&v.date===date).forEach(v=>{
-          all.push({kind:pair[0],name:String(record.name||''),diocese:String(record.diocese||''),time:Date.parse(v.savedAt||'')||0,visit:v});
+        const stamp=record.visits.map(_normalizeVisitEntry).find(v=>v&&_visitDateOf(v)===date&&String(v.method||'').toLowerCase()==='gps');
+        if(!stamp)return;
+        // 기록의 저장 키 또는 고정 ID로 확인한다. 동명이면 추측해서 연결하지 않는다.
+        const candidates=(places||[]).filter(item=>{
+          if(!item)return false;
+          if(kind==='shrine'){
+            return _getShrineVisitKey(item)===storedKey||
+              _getShrineVisitLegacyKeys(item).includes(storedKey)||
+              (record.seq&&item.seq&&String(record.seq)===String(item.seq));
+          }
+          return _parishVisitKey(item)===storedKey||
+            (record.placeId&&String(record.placeId)===String(_oaiPlaceCanonicalId('parish',item)))||
+            _parishVisitStoredKey(item,data)===storedKey;
         });
+        if(candidates.length!==1)return;
+        const item=candidates[0],visits=kind==='shrine'?_getShrineVisitDates(item):_parishVisits(item);
+        if(!_hasVisitDate(visits,date))return;
+        const journal=_oaiGetVisitByDate(kind,item,date)||stamp;
+        all.push({kind,item,date,time:Date.parse(stamp.savedAt||'')||0,
+          photos:_oaiNormalizePhotos(journal).length,memo:!!String(journal.memo||'').trim()});
       });
-    });
+    }
+    collect('shrine',shrineData,typeof SHRINES!=='undefined'?SHRINES:[]);
+    collect('parish',parishData,typeof PARISHES!=='undefined'?PARISHES:[]);
     all.sort((a,b)=>a.time-b.time);
     const unique=[];
-    all.forEach(item=>{
-      const key=item.name.replace(/\s+/g,'').toLowerCase();
-      if(!unique.some(x=>x.name.replace(/\s+/g,'').toLowerCase()===key))unique.push(item);
+    all.forEach(entry=>{
+      const group=_oaiSharedJournalGroup(entry.kind,entry.item);
+      const key=group?'shared:'+String(group.parishDiocese||'')+':'+String(group.parishName||''):
+        entry.kind+':'+String(_oaiPlaceCanonicalId(entry.kind,entry.item)||entry.item.name);
+      if(!unique.some(x=>x.key===key))unique.push({...entry,key});
     });
     let layer=document.getElementById('oai-anniversary-preview');
     if(!layer){
@@ -16834,21 +16856,31 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const title=document.createElement('div');title.innerHTML='<small>2026년 10월 9일</small><h2 style="margin:3px 0;font-size:23px">그날의 순례</h2>';
     const close=document.createElement('button');close.type='button';close.textContent='✕';close.dataset.anniversaryClose='1';close.style.cssText='background:white;border:1px solid #cbd5e1;border-radius:50%;width:34px;height:34px';
     header.append(title,close);panel.appendChild(header);
-    const intro=document.createElement('p');intro.textContent=unique.length?'그날 방문한 '+unique.length+'곳의 순례 기록입니다.':'해당 날짜에 저장된 방문기록이 없습니다.';panel.appendChild(intro);
+    const intro=document.createElement('p');intro.textContent=unique.length?'GPS 스탬프가 확인된 '+unique.length+'곳의 순례 기록입니다.':'이 날짜에 연결 가능한 GPS 스탬프 기록이 없습니다.';panel.appendChild(intro);
     unique.forEach((entry,i)=>{
       const card=document.createElement('article');card.style.cssText='border:1px solid #cbd5e1;border-radius:12px;padding:14px;margin:10px 0';
-      const h=document.createElement('strong');h.textContent=(i+1)+'. '+entry.name;h.style.cssText='display:block;font-size:18px;margin-bottom:8px';card.appendChild(h);
-      const note=document.createElement('div');note.textContent=(entry.visit.method==='gps'?'GPS 방문 스탬프':'방문 기록')+' · '+date;note.style.cssText='font-size:13px;color:#64748b;margin-bottom:10px';card.appendChild(note);
-      const photoCount=Array.isArray(entry.visit.photos)?entry.visit.photos.length:0;
-      const photo=document.createElement('div');photo.textContent=photoCount?'저장된 사진 '+photoCount+'장 · 아래에서 방문기록 열기':'사진은 방문기록에서 확인할 수 있습니다.';photo.style.cssText='font-size:13px;color:#475569;margin-bottom:9px';card.appendChild(photo);
-      const button=document.createElement('button');button.type='button';button.textContent='사진 · 메모 · 스탬프 보기';button.style.cssText='background:#1d2b4d;color:white;border:0;border-radius:9px;padding:11px;width:100%;font-weight:700';
-      button.addEventListener('click',()=>{
-        const list=entry.kind==='shrine'?(typeof SHRINES!=='undefined'?SHRINES:[]):(typeof PARISHES!=='undefined'?PARISHES:[]);
-        const found=list.find(x=>x&&String(x.name||'').replace(/\s+/g,'')===entry.name.replace(/\s+/g,'')&&(!entry.diocese||!x.diocese||String(x.diocese)===entry.diocese));
-        if(!found){_oaiVisitToast('장소 기록을 연결할 수 없습니다.');return;}
-        layer.remove();
-        if(entry.kind==='shrine')_openShrineVisitDetail(list.indexOf(found));else _openParishVisitDetail(found);
-      });card.appendChild(button);panel.appendChild(card);
+      const h=document.createElement('strong');h.textContent=(i+1)+'. '+entry.item.name;h.style.cssText='display:block;font-size:18px;margin-bottom:8px';card.appendChild(h);
+      const note=document.createElement('div');note.textContent='GPS 순례 스탬프 · '+date;note.style.cssText='font-size:13px;color:#64748b;margin-bottom:10px';card.appendChild(note);
+      if(entry.photos||entry.memo){
+        const detail=document.createElement('div');detail.textContent=[entry.photos?'사진 '+entry.photos+'장':'',entry.memo?'메모 있음':''].filter(Boolean).join(' · ');detail.style.cssText='font-size:13px;color:#475569;margin-bottom:9px';card.appendChild(detail);
+        const button=document.createElement('button');button.type='button';button.textContent=entry.photos&&entry.memo?'그날의 사진 · 메모 보기':entry.photos?'그날의 사진 보기':'그날의 메모 보기';
+        button.style.cssText='background:#1d2b4d;color:white;border:0;border-radius:9px;padding:11px;width:100%;font-weight:700';
+        button.addEventListener('click',()=>{
+          layer.remove();
+          if(entry.kind==='shrine'){
+            _openShrineVisitDetail(SHRINES.indexOf(entry.item));
+            window.__OAI_SHRINE_JOURNAL_DATE__=date;
+            _renderShrineVisitDetail(SHRINES.indexOf(entry.item));
+          }else{
+            _openParishVisitDetail(entry.item);
+            window.__OAI_PARISH_JOURNAL_DATE__=date;
+            _renderParishVisitDetail();
+          }
+        });card.appendChild(button);
+      }else{
+        const stamp=document.createElement('div');stamp.textContent='✓ 그날의 방문 스탬프가 기록되어 있습니다.';stamp.style.cssText='font-size:14px;color:#34465c;font-weight:650';card.appendChild(stamp);
+      }
+      panel.appendChild(card);
     });
   }
   window.addEventListener('oai-anniversary-notification-open',e=>oaiAnniversaryPreview(String(e.detail&&e.detail.date||'')));
