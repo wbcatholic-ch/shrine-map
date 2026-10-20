@@ -4020,7 +4020,7 @@ function _nearestShrineWithinAutoVisitRadius(lat,lng,unvisitedOnDate){
 /* 방문 안내는 GPS 저장 성공 후 큐에 넣는다. 다른 방문이 발생해도 앞선 안내를 덮지 않는다. */
 var _oaiDeferredVisitNotices=[];
 var _oaiDeferredVisitNoticeTimer=0;
-function _oaiVisitNoticeBlocked(){try{if(document.visibilityState==='hidden')return true;if(window.oaiIsBackgroundReturnUiBlocked&&window.oaiIsBackgroundReturnUiBlocked())return true;if(window.oaiHasCriticalModalOpen&&window.oaiHasCriticalModalOpen())return true;if(_isAnyVisitModalOpen())return true;const parishNotice=document.getElementById('parish-auto-visit-notice');if(parishNotice&&parishNotice.classList.contains('show'))return true;}catch(_e){}return false;}
+function _oaiVisitNoticeBlocked(){try{if(document.visibilityState==='hidden')return true;if(window.oaiIsBackgroundReturnUiBlocked&&window.oaiIsBackgroundReturnUiBlocked())return true;if(window.oaiHasCriticalModalOpen&&window.oaiHasCriticalModalOpen())return true;if(_isAnyVisitModalOpen())return true;const courseNotice=document.getElementById('oai-cgm-congrats');if(courseNotice&&!courseNotice.hidden)return true;const parishNotice=document.getElementById('parish-auto-visit-notice');if(parishNotice&&parishNotice.classList.contains('show'))return true;}catch(_e){}return false;}
 function _scheduleDeferredVisitNoticeFlush(){clearTimeout(_oaiDeferredVisitNoticeTimer);if(_oaiDeferredVisitNotices.length)_oaiDeferredVisitNoticeTimer=setTimeout(_flushDeferredVisitNotices,500);}
 function _queueDeferredVisitNotice(kind,place){if(!place)return;const id=typeof _oaiPlaceCanonicalId==='function'?_oaiPlaceCanonicalId(kind,kind==='shrine'&&place.item?place.item:place):'';if(_oaiDeferredVisitNotices.some(x=>x.kind===kind&&((id&&x.id===id)||x.place===place)))return;_oaiDeferredVisitNotices.push({kind,place,id});_scheduleDeferredVisitNoticeFlush();}
 function _flushDeferredVisitNotices(){
@@ -4031,7 +4031,9 @@ function _flushDeferredVisitNotices(){
   try{
     if(next.kind==='shrine')_openShrineAutoVisitModal(next.place);
     else _showParishAutoVisitNotice(next.place);
-    _oaiDeferredVisitNotices.shift();
+    const shown=document.getElementById('shrine-auto-visit-modal');
+    if(shown&&shown.classList.contains('show'))_oaiDeferredVisitNotices.shift();
+    else { _oaiDeferredVisitNotices.shift(); console.warn('[GPS 방문 안내] 표시할 수 없는 방문 안내 건너뜀'); }
   }catch(e){console.warn('[GPS 방문 안내]',e);}
   if(_oaiDeferredVisitNotices.length)_scheduleDeferredVisitNoticeFlush();
 }
@@ -4077,6 +4079,7 @@ function _closeShrineAutoVisitModal(){
   if(modal){ modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); }
   window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__=false;
   _scheduleDeferredVisitNoticeFlush();
+  if(typeof window._oaiFlushPilgrimageCongratulations==='function')setTimeout(window._oaiFlushPilgrimageCongratulations,120);
 }
 function _isAnyVisitModalOpen(){
   return !!(document.querySelector('#shrine-visit-modal.show,#shrine-visit-cards-modal.show,#shrine-auto-visit-modal.show,#shrine-visit-detail-view.show'));
@@ -18872,8 +18875,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       let changed=false;
       places.forEach(function(item){
         if(!item||(item.done&&item.doneMethod==='gps'))return;
-        if(_dailyRecordedVisitAt(item,_dailyIso(Date.now()))){
-          item.done=true;item.doneMethod='gps';changed=true;
+        const visitedAt=_dailyRecordedVisitAt(item,_dailyIso(Date.now()));
+        if(visitedAt){
+          item.done=true;item.doneMethod='gps';item.gpsVisitAt=visitedAt;changed=true;
         }
       });
       const routeOnlyDestination=places.length===0?_pilgrimageRegisteredDestination(prev.end):null;
@@ -18897,9 +18901,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           next.lastCompletedAt=now;
         }
         next.completionArmed=false;
-      }
-      if(routeOnlyEndReached){
-        try{/* 도착지 GPS 확인은 기존 위치 처리 경로에서 수행한다. */}catch(_e){}
       }
       a[i]=next;
       if(!saveCourses(a))throw new Error('순례완료 코스 저장 실패');
@@ -21213,28 +21214,49 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   refreshDev(); renderCourseList();
 })();
 
-/* V1172: 공통 순례 축하창. 기존 방문 스탬프 축하창과 색상을 통일한다. */
+/* 순례코스 완료 안내는 개별 GPS 방문 축하창이 닫힌 다음 순서대로 표시한다. */
 (function(){
-  window.oaiPilgrimageCongratulation=function(message,onAcknowledge){
-    let overlay=document.getElementById('oai-cgm-congrats');
+  const pending=[];
+  let retryTimer=0;
+  function flush(){
+    clearTimeout(retryTimer);retryTimer=0;
+    if(!pending.length||document.hidden)return;
+    const visitModal=document.getElementById('shrine-auto-visit-modal');
+    const courseModal=document.getElementById('oai-cgm-congrats');
+    const blocked=!!(visitModal&&visitModal.classList.contains('show'))||
+      !!(courseModal&&!courseModal.hidden)||
+      !!(typeof _oaiDeferredVisitNotices!=='undefined'&&_oaiDeferredVisitNotices.length)||
+      !!(typeof window.oaiHasCriticalModalOpen==='function'&&window.oaiHasCriticalModalOpen())||
+      !!(typeof window.oaiIsBackgroundReturnUiBlocked==='function'&&window.oaiIsBackgroundReturnUiBlocked());
+    if(blocked){retryTimer=setTimeout(flush,500);return;}
+    const next=pending.shift();
+    let overlay=courseModal;
     if(!overlay){
       overlay=document.createElement('div');overlay.id='oai-cgm-congrats';overlay.className='oai-cgm-congrats';overlay.hidden=true;
       overlay.innerHTML='<div class="oai-cgm-congrats-panel" role="dialog" aria-modal="true" aria-labelledby="oai-cgm-congrats-title"><div class="oai-cgm-congrats-icon">✦</div><h3 class="oai-cgm-congrats-title" id="oai-cgm-congrats-title">성지순례를 축하합니다!</h3><p class="oai-cgm-congrats-message" id="oai-cgm-congrats-message"></p><button type="button" class="oai-cgm-congrats-ok">확인</button></div>';
-      overlay.querySelector('button').addEventListener('click',()=>{overlay.hidden=true;const cb=overlay._onAcknowledge;overlay._onAcknowledge=null;if(typeof cb==='function')cb();});
+      overlay.querySelector('button').addEventListener('click',()=>{
+        overlay.hidden=true;
+        const cb=overlay._onAcknowledge;overlay._onAcknowledge=null;
+        if(typeof cb==='function')cb();
+        if(typeof _flushDeferredVisitNotices==='function')_flushDeferredVisitNotices();
+        flush();
+      });
       document.body.appendChild(overlay);
     }
-    const str=String(message||'');const parts=str.split('\n');
+    const parts=String(next.message||'').split('\n');
     overlay.querySelector('#oai-cgm-congrats-title').textContent=parts.shift()||'성지순례를 축하합니다!';
     overlay.querySelector('#oai-cgm-congrats-message').textContent=parts.join('\n');
-    overlay._onAcknowledge=typeof onAcknowledge==='function'?onAcknowledge:null;
-    const showWhenReady=()=>{
-      if((typeof _isAnyVisitModalOpen==='function'&&_isAnyVisitModalOpen())||(typeof _oaiDeferredVisitNotices!=='undefined'&&_oaiDeferredVisitNotices.length)){
-        setTimeout(showWhenReady,300);return;
-      }
-      overlay.hidden=false;
-    };
-    showWhenReady();
+    overlay._onAcknowledge=next.onAcknowledge;
+    overlay.hidden=false;
+  }
+  window._oaiFlushPilgrimageCongratulations=flush;
+  window.oaiPilgrimageCongratulation=function(message,onAcknowledge){
+    pending.push({message:String(message||''),onAcknowledge:typeof onAcknowledge==='function'?onAcknowledge:null});
+    flush();
   };
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)flush();});
+  window.addEventListener('oai-short-background-return',flush,{passive:true});
+  window.addEventListener('oai-long-background-return',flush,{passive:true});
 })();
 
 
