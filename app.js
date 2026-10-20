@@ -4538,6 +4538,15 @@ function _oaiRenderRestrictedSettings(){
     const row=document.createElement('div');row.className='oai-restricted-place-row';
     const label=document.createElement('span');label.textContent=(x.kind==='shrine'?'성지 · ':'성당 · ')+x.name;
     const remove=document.createElement('button');remove.type='button';remove.textContent='해제';remove.dataset.oaiRestrictedRemove=String(i);
+    remove.addEventListener('click',()=>{
+      const current=_oaiRestrictedPlaces();
+      const index=current.findIndex(v=>v.kind===x.kind&&v.id===x.id);
+      if(index<0)return;
+      const updated=current.filter((_,j)=>j!==index);
+      if(!_oaiSaveRestrictedPlaces(updated)){_oaiVisitToast('해제하지 못했습니다.');return;}
+      _oaiRenderRestrictedSettings();
+      _oaiRenderRestrictedMatches();
+    });
     row.append(label,remove);list.appendChild(row);
   });
 }
