@@ -4183,6 +4183,11 @@ function _shrineVisitBadgeHtml(item,context){
   const label=context==='compact'?'순례한 성지':'순례한 성지 · '+count+'회';
   return '<span class="shrine-visited-chip">'+label+'</span>';
 }
+function _parishNearbyVisitHtml(item){
+  if(!item) return '';
+  const count=_parishVisitCount(item);
+  return count>0?'<span class="parish-visited-nearby">방문한 성당 · '+count+'회</span>':'';
+}
 function _isNewShrineItem(item){
   return !!(item && (item.isNew === true || item.addedGroup));
 }
@@ -8155,11 +8160,11 @@ function _renderPlaceDistanceRow(item, idx, order, kind, routeInfo, fallbackKm, 
   const directKm=(kind==='nearby' && Number.isFinite(opts.directKm))?opts.directKm:null;
   const directTxt=directKm==null?'':(directKm<1?Math.round(directKm*1000)+'m':directKm.toFixed(1)+'km');
   const roadTxt=kmVal==null?'':(isEst?'자동차 약 '+kmVal.toFixed(1)+'km':'자동차 '+kmVal.toFixed(1)+'km');
-  const distTxt=directTxt ? ('직선 '+directTxt+(roadTxt?' / '+roadTxt:'')) : (kmVal==null?'':(isEst?'~'+kmVal.toFixed(1)+'km':'🚗'+kmVal.toFixed(1)+'km'));
-  const dur=(!isEst && routeInfo && routeInfo.dur)?`<span style="font-size:10px;color:#aaa;font-weight:400;margin-left:3px">${_fmtTime(routeInfo.dur)}</span>`:'';
+  const dur=(!isEst && routeInfo && routeInfo.dur)?_fmtTime(routeInfo.dur):'';
+  const distTxt=directTxt ? (roadTxt?roadTxt+(dur?' · '+dur:'')+' / 직선 '+directTxt:'직선 '+directTxt) : (kmVal==null?'':(isEst?'~'+kmVal.toFixed(1)+'km':'🚗'+kmVal.toFixed(1)+'km')+(dur?' · '+dur:''));
   const numExtra=(kind==='region')?'width:28px;height:28px;font-size:12px':'';
   const stacked=(kind==='nearby');
-  return `<div class="${rowClass}${stacked?' nearby-distance-stacked':''}" onclick="selectItem(${idx},{${clickFrom}:true})"><div class="nearby-num" style="background:${c}!important;${numExtra}">${order+1}</div><div class="nearby-info"><div class="nearby-name">${_placeText(item&&item.name||'')}${mode==='shrine'?_shrineNewBadgeHtml(item):''}</div><div class="nearby-addr">${_placeShort(item&&item.addr||'',26)}</div>${mode==='shrine'?_shrineVisitBadgeHtml(item,kind==='region'?'region':'nearby'):''}</div><div class="nearby-meta"><div class="nearby-type" style="background:${c}18!important;color:${c}!important">${_placeText(lbl)}</div>${!stacked&&distTxt?`<div class="nearby-dist" style="color:${isEst?'#aaa':c}!important">${distTxt}${dur}</div>`:''}</div>${stacked&&distTxt?`<div class="nearby-distance-bottom nearby-dist" style="color:${isEst?'#aaa':c}!important">${distTxt}${dur}</div>`:''}</div>`;
+  return `<div class="${rowClass}${stacked?' nearby-distance-stacked':''}" onclick="selectItem(${idx},{${clickFrom}:true})"><div class="nearby-num" style="background:${c}!important;${numExtra}">${order+1}</div><div class="nearby-info"><div class="nearby-name">${_placeText(item&&item.name||'')}${mode==='shrine'?_shrineNewBadgeHtml(item):''}</div><div class="nearby-addr">${_placeShort(item&&item.addr||'',26)}</div>${mode==='shrine'?_shrineVisitBadgeHtml(item,kind==='region'?'region':'nearby'):(mode==='parish'&&kind==='nearby'?_parishNearbyVisitHtml(item):'')}</div><div class="nearby-meta"><div class="nearby-type" style="background:${c}18!important;color:${c}!important">${_placeText(lbl)}</div>${!stacked&&distTxt?`<div class="nearby-dist" style="color:${isEst?'#aaa':c}!important">${distTxt}</div>`:''}</div>${stacked&&distTxt?`<div class="nearby-distance-bottom nearby-dist">${distTxt}</div>`:''}</div>`;
 }
 function _renderPlaceListRowHtml(item, idx, opts){
   opts=opts||{};
