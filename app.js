@@ -19588,6 +19588,46 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(hp)links.push({label:'홈페이지',url:hp});
       if(guide&&guide!==hp)links.push({label:'교구 성당 안내',url:guide});
     }
+    // 개별 장소 길찾기는 코스 출발지가 아닌 새로 측정한 현재 GPS 위치를 사용한다.
+    function navigateFromCurrent(){
+      if(!_validGpsPair(place.lat,place.lng)){_oaiShowNavigationNotice('길찾기 안내','이 장소의 좌표가 없어 길찾기를 시작할 수 없습니다.',function(){});return;}
+      currentPosition((lat,lng)=>{
+        const destination={name:name,lat:Number(place.lat),lng:Number(place.lng),addr:addr};
+        Promise.resolve(_resolveNavigationDestinationItem(destination)).then(target=>{
+          const ep=_EC(_kakaoRouteDisplayName(target,name));
+          const web=`https://map.kakao.com/link/from/${_EC('현위치')},${lat},${lng}/to/${ep},${target.lat},${target.lng}`;
+          const app=`kakaomap://route?sp=${lat},${lng}&ep=${target.lat},${target.lng}&by=CAR`;
+          closePilgrimagePlaceInfo();
+          _kakaoLaunch(web,app);
+        }).catch(()=>_oaiShowNavigationNotice('길찾기 안내','목적지를 확인하지 못했습니다. 다시 시도해 주세요.',function(){}));
+      },()=>_oaiShowNavigationNotice('위치 확인 필요','현재 GPS 위치를 확인하지 못했습니다. 위치 서비스를 확인하고 다시 눌러 주세요.',function(){}));
+    }
+    // 전체 경유지만 지도에 표시하는 독립 읽기 전용 화면. 기존 길찾기 상태는 건드리지 않는다.
+    function showWaypointsMap(){
+      const courseRows=completion&&course&&_courseHasGpsLockedCompletion(course)?_manualMerged(course).map(x=>x.point):loadPlan();
+      const points=courseRows.map((x,i)=>({name:String(x&&x.name||''),lat:Number(x&&x.lat),lng:Number(x&&x.lng),order:i+1})).filter(x=>_validGpsPair(x.lat,x.lng));
+      if(!points.length){_oaiShowNavigationNotice('지도 안내','표시할 경유지 좌표가 없습니다.',function(){});return;}
+      if(!(window.kakao&&kakao.maps)){_oaiShowNavigationNotice('지도 안내','지도가 아직 준비되지 않았습니다. 잠시 후 다시 시도해 주세요.',function(){});return;}
+      closePilgrimagePlaceInfo();
+      let layer=document.getElementById('oai-pilgrimage-waypoints-readonly');
+      if(!layer){
+        layer=document.createElement('div');layer.id='oai-pilgrimage-waypoints-readonly';layer.className='oai-pilgrimage-waypoints-readonly';
+        layer.innerHTML='<section role="dialog" aria-modal="true" aria-label="순례 경유지 지도"><header><strong>경유지 지도 · 보기 전용</strong><button type="button" data-waypoint-map-close aria-label="닫기">×</button></header><div class="oai-pilgrimage-waypoints-map" id="oai-pilgrimage-waypoints-map"></div><p>경유지 전체를 표시합니다. 출발지·도착지는 지도 범위에서 제외합니다.</p></section>';
+        layer.addEventListener('click',e=>{if(e.target===layer||e.target.closest('[data-waypoint-map-close]')){layer.classList.remove('open');layer.replaceChildren();layer.remove();}});
+        document.body.appendChild(layer);
+      }
+      layer.classList.add('open');
+      const mapEl=layer.querySelector('#oai-pilgrimage-waypoints-map');
+      const map=new kakao.maps.Map(mapEl,{center:new kakao.maps.LatLng(points[0].lat,points[0].lng),level:7});
+      const bounds=new kakao.maps.LatLngBounds();
+      points.forEach(point=>{
+        const pos=new kakao.maps.LatLng(point.lat,point.lng);bounds.extend(pos);
+        const marker=new kakao.maps.Marker({map,position:pos,title:point.order+'. '+point.name,image:_mkrImgRoute(point.order===index+1?'#c18b12':'#1969aa',String(point.order)),zIndex:point.order===index+1?1000:100});
+        const info=new kakao.maps.InfoWindow({content:'<div style="padding:7px 10px;font-size:13px;white-space:nowrap;">'+esc(point.order+'. '+point.name)+'</div>'});
+        kakao.maps.event.addListener(marker,'click',()=>info.open(map,marker));
+      });
+      requestAnimationFrame(()=>{map.relayout();if(points.length>1)map.setBounds(bounds,65,35,65,35);else map.setLevel(5);});
+    }
     let overlay=document.getElementById('oai-pilgrimage-place-info-overlay');
     if(!overlay){
       overlay=document.createElement('div');overlay.id='oai-pilgrimage-place-info-overlay';overlay.className='oai-pilgrimage-place-info-overlay';
@@ -19595,6 +19635,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       overlay.innerHTML='<div class="oai-pilgrimage-place-info-backdrop" data-pilgrimage-info-close="1"></div><section class="oai-pilgrimage-place-info-panel" role="dialog" aria-modal="true" aria-labelledby="oai-pilgrimage-place-info-name"><header><strong id="oai-pilgrimage-place-info-name"></strong><button type="button" data-pilgrimage-info-close="1" aria-label="장소 정보 닫기">×</button></header><div class="oai-pilgrimage-place-info-body"><div class="oai-pilgrimage-place-info-category" id="oai-pilgrimage-place-info-kind"></div><div class="oai-pilgrimage-place-info-label">주소</div><div id="oai-pilgrimage-place-info-address"></div><div id="oai-pilgrimage-place-info-links" class="oai-pilgrimage-place-info-links"></div></div></section>';
       overlay.addEventListener('click',e=>{
         if(e.target.closest('[data-pilgrimage-info-close]')){closePilgrimagePlaceInfo();return;}
+        if(e.target.closest('[data-pilgrimage-current-nav]')){if(overlay._pilgrimageNavigate)overlay._pilgrimageNavigate();return;}
+        if(e.target.closest('[data-pilgrimage-waypoints-map]')){if(overlay._pilgrimageShowMap)overlay._pilgrimageShowMap();return;}
         const btn=e.target.closest('[data-pilgrimage-external-index]');if(!btn)return;
         const link=overlay._pilgrimageLinks&&overlay._pilgrimageLinks[Number(btn.getAttribute('data-pilgrimage-external-index'))];
         if(link&&link.url)openCoreExternalUrl(link.url,{source:'pilgrimage-place-info'});
@@ -19606,7 +19648,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     overlay.querySelector('#oai-pilgrimage-place-info-address').textContent=addr||'주소 정보가 없습니다.';
     const linksBox=overlay.querySelector('#oai-pilgrimage-place-info-links');
     linksBox.replaceChildren();overlay._pilgrimageLinks=links;
+    overlay._pilgrimageNavigate=navigateFromCurrent;
+    overlay._pilgrimageShowMap=showWaypointsMap;
     links.forEach((link,i)=>{const btn=document.createElement('button');btn.type='button';btn.textContent=link.label;btn.setAttribute('data-pilgrimage-external-index',String(i));linksBox.appendChild(btn);});
+    const actions=document.createElement('div');actions.className='oai-pilgrimage-place-info-actions';
+    actions.innerHTML='<button type="button" data-pilgrimage-current-nav>현위치에서 길찾기</button><button type="button" data-pilgrimage-waypoints-map>지도에서 보기</button>';
+    linksBox.appendChild(actions);
     overlay.classList.add('open');overlay.setAttribute('aria-hidden','false');
     overlay.querySelector('button[data-pilgrimage-info-close]').focus();
   }
