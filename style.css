@@ -9963,6 +9963,8 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
 
 /* 성지의 미방문·신규 화면에서도 성당과 같은 교구 선택창을 사용한다. */
 .shrine-visit-cards-filters.diocese-only{grid-template-columns:minmax(0,1fr)!important;}
+.shrine-visit-cards-filters.diocese-type{grid-template-columns:repeat(2,minmax(0,1fr))!important;}
+.parish-visit-book .shrine-visit-cards-filters.parish-dio-only{grid-template-columns:minmax(0,1fr)!important;}
 
 .shrine-visit-cards-head .module-bar-title>.cgm-help-icon{margin-left:8px!important;vertical-align:middle!important;}
 
