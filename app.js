@@ -8150,7 +8150,12 @@ function _renderPlaceDistanceRow(item, idx, order, kind, routeInfo, fallbackKm, 
   const clickFrom=(kind==='region')?'fromRegion':'fromNearby';
   const kmVal=(routeInfo&&isFinite(routeInfo.km))?routeInfo.km:(isFinite(fallbackKm)?fallbackKm:null);
   const isEst=!!opts.estimate;
-  const distTxt=kmVal==null?'':(isEst?'~'+kmVal.toFixed(1)+'km':'🚗'+kmVal.toFixed(1)+'km');
+  // 내주변에서만 같은 GPS 원점의 직선거리와 자동차 경로거리를 함께 보여준다.
+  // 지역검색의 거리 표시 방식은 유지한다.
+  const directKm=(kind==='nearby' && Number.isFinite(opts.directKm))?opts.directKm:null;
+  const directTxt=directKm==null?'':(directKm<1?Math.round(directKm*1000)+'m':directKm.toFixed(1)+'km');
+  const roadTxt=kmVal==null?'':(isEst?'자동차 약 '+kmVal.toFixed(1)+'km':'자동차 '+kmVal.toFixed(1)+'km');
+  const distTxt=directTxt ? ('직선 '+directTxt+(roadTxt?' / '+roadTxt:'')) : (kmVal==null?'':(isEst?'~'+kmVal.toFixed(1)+'km':'🚗'+kmVal.toFixed(1)+'km'));
   const dur=(!isEst && routeInfo && routeInfo.dur)?`<span style="font-size:10px;color:#aaa;font-weight:400;margin-left:3px">${_fmtTime(routeInfo.dur)}</span>`:'';
   const numExtra=(kind==='region')?'width:28px;height:28px;font-size:12px':'';
   return `<div class="${rowClass}" onclick="selectItem(${idx},{${clickFrom}:true})"><div class="nearby-num" style="background:${c}!important;${numExtra}">${order+1}</div><div class="nearby-info"><div class="nearby-name">${_placeText(item&&item.name||'')}${mode==='shrine'?_shrineNewBadgeHtml(item):''}</div><div class="nearby-addr">${_placeShort(item&&item.addr||'',26)}</div>${mode==='shrine'?_shrineVisitBadgeHtml(item,kind==='region'?'region':'nearby'):''}</div><div class="nearby-meta"><div class="nearby-type" style="background:${c}18!important;color:${c}!important">${_placeText(lbl)}</div>${distTxt?`<div class="nearby-dist" style="color:${isEst?'#aaa':c}!important">${distTxt}${dur}</div>`:''}</div></div>`;
@@ -12595,7 +12600,8 @@ function _renderNearbyDone(prelim,results,getIdx,getColor,getLabel,phase,request
       mode:requestMode || _mode,
       color:getColor(item),
       label:getLabel(item),
-      estimate:(phase==='est') || !!(o.r && o.r.estimate)
+      estimate:(phase==='est') || !!(o.r && o.r.estimate),
+      directKm:o.x.d
     });
   }).join('');
   if(phase==='final'){
