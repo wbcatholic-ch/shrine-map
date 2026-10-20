@@ -10208,8 +10208,9 @@ html.oai-font-global .shrine-visit-card-badge strong,html:not(.ios-device).oai-s
   align-items:center!important;gap:7px!important;text-align:left!important;
 }
 #oai-pilgrimage-list-view .oai-pilgrimage-course-open b{
-  display:block!important;white-space:normal!important;overflow:visible!important;
-  -webkit-line-clamp:unset!important;text-overflow:clip!important;
+  display:-webkit-box!important;white-space:normal!important;overflow:hidden!important;
+  -webkit-box-orient:vertical!important;-webkit-line-clamp:2!important;
+  text-overflow:ellipsis!important;
   font-size:calc(16px * var(--app-font-scale,1))!important;
   font-weight:900!important;line-height:1.48!important;color:#17223A!important;
   overflow-wrap:anywhere;
