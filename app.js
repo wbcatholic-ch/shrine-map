@@ -4023,7 +4023,18 @@ var _oaiDeferredVisitNoticeTimer=0;
 function _oaiVisitNoticeBlocked(){try{if(document.visibilityState==='hidden')return true;if(window.oaiIsBackgroundReturnUiBlocked&&window.oaiIsBackgroundReturnUiBlocked())return true;if(window.oaiHasCriticalModalOpen&&window.oaiHasCriticalModalOpen())return true;if(_isAnyVisitModalOpen())return true;const parishNotice=document.getElementById('parish-auto-visit-notice');if(parishNotice&&parishNotice.classList.contains('show'))return true;}catch(_e){}return false;}
 function _scheduleDeferredVisitNoticeFlush(){clearTimeout(_oaiDeferredVisitNoticeTimer);if(_oaiDeferredVisitNotices.length)_oaiDeferredVisitNoticeTimer=setTimeout(_flushDeferredVisitNotices,500);}
 function _queueDeferredVisitNotice(kind,place){if(!place)return;const id=typeof _oaiPlaceCanonicalId==='function'?_oaiPlaceCanonicalId(kind,kind==='shrine'&&place.item?place.item:place):'';if(_oaiDeferredVisitNotices.some(x=>x.kind===kind&&((id&&x.id===id)||x.place===place)))return;_oaiDeferredVisitNotices.push({kind,place,id});_scheduleDeferredVisitNoticeFlush();}
-function _flushDeferredVisitNotices(){try{if(!_oaiDeferredVisitNotices.length)return;if(_oaiVisitNoticeBlocked()){_scheduleDeferredVisitNoticeFlush();return;}const next=_oaiDeferredVisitNotices.shift();if(next.kind==='shrine')_openShrineAutoVisitModal(next.place);else _showParishAutoVisitNotice(next.place);if(_oaiDeferredVisitNotices.length)_scheduleDeferredVisitNoticeFlush();}catch(e){console.warn('[GPS 방문 안내]',e);_scheduleDeferredVisitNoticeFlush();}}
+function _flushDeferredVisitNotices(){
+  if(!_oaiDeferredVisitNotices.length)return;
+  if(_oaiVisitNoticeBlocked()){_scheduleDeferredVisitNoticeFlush();return;}
+  // 표시 함수가 실패하면 해당 방문 안내를 잃지 않고 다음 시도에서 다시 표시한다.
+  const next=_oaiDeferredVisitNotices[0];
+  try{
+    if(next.kind==='shrine')_openShrineAutoVisitModal(next.place);
+    else _showParishAutoVisitNotice(next.place);
+    _oaiDeferredVisitNotices.shift();
+  }catch(e){console.warn('[GPS 방문 안내]',e);}
+  if(_oaiDeferredVisitNotices.length)_scheduleDeferredVisitNoticeFlush();
+}
 document.addEventListener('click',function(){if(_oaiDeferredVisitNotices.length)setTimeout(_flushDeferredVisitNotices,120);},true);
 window.addEventListener('oai-short-background-return',function(){setTimeout(_flushDeferredVisitNotices,900);},{passive:true});
 window.addEventListener('oai-long-background-return',function(){setTimeout(_flushDeferredVisitNotices,900);},{passive:true});
@@ -4684,10 +4695,16 @@ function _maybeAutoParishVisit(lat,lng){
 }
 function _showParishAutoVisitNotice(place){
   if(!place)return;
-  // 대기 중이던 안내창에도 현재의 내 본당 제외 설정을 적용한다.
   if(!_isMyParishAutoVisitEnabled()&&_isSameParish(place,_configuredMyParish()))return;
-  let m=document.getElementById('parish-auto-visit-notice');if(!m){m=document.createElement('div');m.id='parish-auto-visit-notice';m.className='shrine-auto-visit-modal';m.innerHTML='<div class="shrine-auto-visit-backdrop"></div><div class="shrine-auto-visit-panel" role="dialog" aria-modal="true"><div class="shrine-auto-visit-kicker">GPS 자동 방문등록</div><div id="parish-auto-visit-title" class="shrine-auto-visit-title"></div><div class="shrine-auto-visit-actions"><button type="button" class="shrine-auto-visit-save">확인</button></div></div>';document.body.appendChild(m);m.querySelector('button').addEventListener('click',function(){m.classList.remove('show');_scheduleDeferredVisitNoticeFlush();});}
-  const title=document.getElementById('parish-auto-visit-title');if(title)title.textContent='축하합니다. '+String(place.name||'성당')+' 방문이 등록되었습니다.';m.classList.add('show');
+  // 성지·성당·순례하기 GPS 방문은 동일한 앱 전용 축하창을 공유한다.
+  const modal=_ensureShrineAutoVisitModal();
+  const kicker=modal.querySelector('.shrine-auto-visit-kicker');
+  const title=modal.querySelector('#shrine-auto-visit-title');
+  if(kicker)kicker.textContent='GPS 자동 방문등록';
+  if(title)title.textContent='축하합니다. '+String(place.name||'성당')+' 방문이 등록되었습니다.';
+  window.__OAI_SHRINE_AUTO_VISIT_ENTRY__=null;
+  modal.classList.add('show');
+  modal.setAttribute('aria-hidden','false');
 }
 try{setInterval(function(){_updateParishVisitButton();},400);}catch(_e){}
 try{document.addEventListener('change',function(e){const t=e.target;if(!t||!t.matches||!t.matches('#parish-visit-book [data-pv-select]'))return;const kind=t.getAttribute('data-pv-select'),value=t.value;if(kind==='sort')_parishVisitSort=value==='oldest'?'oldest':'recent';else if(kind==='dio'){_parishVisitDio=value||'all';_parishUnvisitedLimit=80;}_renderParishVisitBook();});}catch(_e){}
