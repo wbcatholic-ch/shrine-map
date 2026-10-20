@@ -19283,6 +19283,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     return '성지·성당을 등록해 주세요';
   }
   function _courseHasGpsLockedCompletion(c){return _courseCompletionList(c).some(function(x){return String(x.method||'')==='gps'||x.locked===true;});}
+  function _courseCompletedToday(c){
+    const today=_courseDateInputValue(Date.now());
+    if(!today||!c)return false;
+    return _courseCompletionList(c).some(function(entry){return _courseDateInputValue(entry.completedAt)===today;})
+      ||(!!c.lastCompletedAt&&_courseDateInputValue(c.lastCompletedAt)===today);
+  }
   function _courseCompletionMetaHtml(c,isFollowing){
     const completions=_courseCompletionList(c);
     if(!completions.length&&!c.lastCompletedAt)return {header:'',footer:''};
@@ -19298,7 +19304,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const gps=_courseHasGpsLockedCompletion(c)?'<span class="oai-pilgrimage-course-gps-lock">🔒 GPS 기록</span>':'';
     return {
       header:'<div class="oai-pilgrimage-course-meta"><span class="oai-pilgrimage-course-stamp">✓ 순례완료</span>'+dateBtn+historyCount+gps+'</div>',
-      footer:'<div class="oai-pilgrimage-course-complete"><button type="button" class="oai-pilgrimage-course-repeat'+(isFollowing?' is-active':'')+'" data-course-repeat="'+esc(c.id)+'">'+repeatLabel+'</button></div>'
+      footer:(!isFollowing&&_courseCompletedToday(c))?'':'<div class="oai-pilgrimage-course-complete"><button type="button" class="oai-pilgrimage-course-repeat'+(isFollowing?' is-active':'')+'" data-course-repeat="'+esc(c.id)+'">'+repeatLabel+'</button></div>'
     };
   }
   function renderCourseList(){
@@ -19575,8 +19581,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       }
       return sameName.find(item=>addr&&item.addr&&normalized(item.addr)===normalized(addr))||null;
     }
-    const shrine=locate(typeof SHRINES!=='undefined'?SHRINES:[]);
-    const parish=shrine?null:locate(typeof PARISHES!=='undefined'?PARISHES:[]);
+    // 성지·성당이 동일 장소로 확정된 경우, 계획에 성당 명칭으로 저장되어도 성지 자료를 우선한다.
+    // 기존 방문기록 공통 장소 대응표를 재사용하며 GPS/방문기록의 식별자는 변경하지 않는다.
+    const directShrine=locate(typeof SHRINES!=='undefined'?SHRINES:[]);
+    const matchedParish=locate(typeof PARISHES!=='undefined'?PARISHES:[]);
+    const sharedGroup=!directShrine&&matchedParish?_oaiSharedJournalGroup('parish',matchedParish):null;
+    const shrine=directShrine||(sharedGroup?_oaiSharedGroupShrine(sharedGroup):null);
+    const parish=shrine?null:matchedParish;
     let links=[];
     if(shrine){
       const hp=_getShrineHomepageUrl(shrine),guide=_getShrineGuideUrl(shrine);
@@ -19770,6 +19781,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       followBtn.setAttribute('aria-disabled',enableFollow?'false':'true');
       followBtn.classList.toggle('is-disabled-before-save',showFollow&&!enableFollow);
       followBtn.classList.toggle('is-stop',isActive);
+      const completedToday=isCompletionView&&_courseCompletedToday(manualCourse);
+      followBtn.hidden=!showFollow||(!isActive&&completedToday);
+      followBtn.style.setProperty('display',(!showFollow||(!isActive&&completedToday))?'none':'block','important');
       followBtn.textContent=isActive?'■ 순례 종료':(isCompletionView?'▶ 다시 순례하기':'▶ 순례하기');
     }
     if(totalCard){
@@ -19821,6 +19835,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const targetId=String(id||'');
     const active=_activeFollowState();
     if(active&&active.courseId===targetId){stopActiveFollow(targetId);return;}
+    if(_courseCompletedToday(loadCourses().find(function(c){return String(c.id)===targetId;})))return;
     if(active&&active.courseId&&active.courseId!==targetId){openFollowSwitchConfirm(targetId,'repeat');return;}
     if(!confirmed){openFollowStartConfirm(targetId,'repeat');return;}
     let a=loadCourses(),i=a.findIndex(x=>String(x.id)===targetId);if(i<0)return;
@@ -20855,6 +20870,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       openFollowSwitchConfirm(currentCourseId,pilgrimageDetailMode==='complete'?'repeat':'start');
       return;
     }
+    if(pilgrimageDetailMode==='complete'&&_courseCompletedToday(loadCourses().find(function(c){return String(c.id)===String(currentCourseId); })))return;
     if(pilgrimageDetailMode==='complete'){openFollowStartConfirm(currentCourseId,'repeat-detail');return;}
     openFollowStartConfirm(currentCourseId,'start-detail');
   }
