@@ -4442,6 +4442,10 @@ function _oaiJointStampRepair(){
 /* V8-1-14-1113: GPS 방문 기록 단일 진입점.
    성지/성당 GPS 등록 여부와 당일 중복 판정을 이 함수에서만 결정한다.
    UI 알림과 순례코스 진행 처리는 각 호출부가 담당한다. */
+function _oaiNotifyActiveCourseGpsVisit(){
+  // 저장 완료 후 기존 순례코스 조회 함수가 기록을 재대조한다.
+  try{setTimeout(function(){if(typeof window._oaiSyncActivePilgrimageFromVisits==='function')window._oaiSyncActivePilgrimageFromVisits();},0);}catch(_e){}
+}
 function _registerGpsPlaceVisit(kind,item,date){
   try{
     if(!item)return {added:false,already:false,kind:String(kind||'')};
@@ -4450,12 +4454,14 @@ function _registerGpsPlaceVisit(kind,item,date){
       const already=_hasShrineVisitOnDate(item,visitDate);
       const added=!already&&!!_addShrineVisit(item,visitDate,'gps');
       if(already||added)_oaiJointStampCounterpart('shrine',item,visitDate);
+      if(added)_oaiNotifyActiveCourseGpsVisit();
       return {added:added,already:already,kind:'shrine',item:item};
     }
     if(kind==='parish'){
       const already=_hasVisitDate(_parishVisits(item),visitDate);
       const added=!already&&!!_addParishVisit(item,visitDate,'gps');
       if(already||added)_oaiJointStampCounterpart('parish',item,visitDate);
+      if(added)_oaiNotifyActiveCourseGpsVisit();
       return {added:added,already:already,kind:'parish',item:item};
     }
   }catch(e){console.warn('[가톨릭길동무] GPS 방문 기록 실패',e);}
@@ -12220,7 +12226,7 @@ function _oaiHandleGpsArrival(lat,lng,opts){
   if(!Number.isFinite(lat)||!Number.isFinite(lng))return null;
   if(!opts.skipShrine){try{setTimeout(function(){_maybePromptAutoShrineVisit(lat,lng);},Number(opts.shrineDelayMs)||180);}catch(_e){}}
   if(!opts.skipParish){try{setTimeout(function(){_maybeAutoParishVisit(lat,lng);},Number(opts.parishDelayMs)||220);}catch(_e){}}
-  if(!opts.skipActiveCourse){try{setTimeout(function(){if(typeof window._oaiMarkActivePilgrimageCourseByLocation==='function')window._oaiMarkActivePilgrimageCourseByLocation(lat,lng);},Number(opts.courseDelayMs)||1020);}catch(_e){}}
+  // 순례코스는 좌표를 재판정하지 않는다. 저장된 성지·성당 GPS 방문 기록만 사용한다.
   if(opts.endpointNow&&typeof window._oaiPilgrimageEndpointGpsCheck==='function'){
     try{return window._oaiPilgrimageEndpointGpsCheck(lat,lng,{silent:opts.endpointSilent!==false});}catch(_e){return null;}
   }
@@ -18856,7 +18862,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }catch(_e){}
     return _validGpsPair(item.lat,item.lng)&&calcDist(myLat,myLng,Number(item.lat),Number(item.lng))*1000<=150;
   }
-  function _recordActiveCourseGpsByLocation(lat,lng){
+  function _recordActiveCourseGpsFromVisits(){
     try{
       const active=_activeFollowState();
       if(!active)return false;
@@ -18893,7 +18899,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         next.completionArmed=false;
       }
       if(routeOnlyEndReached){
-        try{window._oaiPilgrimageEndpointGpsCheck(Number(lat),Number(lng),{silent:true});}catch(_e){}
+        try{/* 도착지 GPS 확인은 기존 위치 처리 경로에서 수행한다. */}catch(_e){}
       }
       a[i]=next;
       if(!saveCourses(a))throw new Error('순례완료 코스 저장 실패');
@@ -18902,7 +18908,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(currentCourseId===next.id){savePlan(places,true);saveMeta({name:next.name||'새 순례계획',start:next.start||null,end:next.end||null},true);}
       if(isDone){_clearActiveFollow(next.id);_clearRepeatEditGuard(next.id);}
       if(isDone&&justCompleted){
-        setTimeout(()=>{const msg='성지순례를 축하합니다!\n방문한 순례지 '+(routeOnlyEndReached?1:places.length)+'곳이 등록되었습니다.';if(typeof window.oaiPilgrimageCongratulation==='function')window.oaiPilgrimageCongratulation(msg);else window.alert(msg);},120);
+        setTimeout(()=>{const msg='순례를 축하합니다!\n계획하신 순례코스가 완료되어 순례완료 목록에 저장되었습니다.';if(typeof window.oaiPilgrimageCongratulation==='function')window.oaiPilgrimageCongratulation(msg);},120);
       }
       if(plannerView==='follow'&&currentCourseId===next.id)refreshFollow();
       else if(plannerView==='detail'&&currentCourseId===next.id)renderDetail();
@@ -18910,7 +18916,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       return true;
     }catch(e){console.warn('[가톨릭길동무] 활성 순례코스 GPS 연동 실패',e);return false;}
   }
-  window._oaiMarkActivePilgrimageCourseByLocation=_recordActiveCourseGpsByLocation;
+  window._oaiSyncActivePilgrimageFromVisits=_recordActiveCourseGpsFromVisits;
   window._oaiValidateActivePilgrimageFollow=function(){return _activeFollowState();};
 
   const OAI_PILGRIMAGE_BG_CONTEXT_KEY='oai_pilgrimage_bg_context_v1032';
@@ -20768,7 +20774,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(pilgrimageDetailMode==='complete'){openFollowStartConfirm(currentCourseId,'repeat-detail');return;}
     openFollowStartConfirm(currentCourseId,'start-detail');
   }
-  function openFollow(alreadyActivated){pilgrimageDetailMode='plan';const followList=loadPlan(),followMeta=loadMeta();if(!followList.length&&!_pilgrimageDestinationCanFollow(followMeta.end)){alert('순례 장소를 등록하거나 도착지를 성지·성당으로 설정해 주세요.');return;}if(!currentCourseId){pendingAfterSave='follow';openSaveModal(false);return;}if(!alreadyActivated){const active=_activeFollowState();if(active&&active.courseId&&active.courseId!==String(currentCourseId)){openFollowSwitchConfirm(currentCourseId,'start');return;}if(!active){openFollowStartConfirm(currentCourseId,'follow');return;}const c=_activateFollowCourse(currentCourseId);if(c)applyCourse(c);}updateCurrentCourseProgress();setView('follow');const t=targetInfo();const n=document.getElementById('oai-pilgrimage-follow-next'),a=document.getElementById('oai-pilgrimage-follow-addr'),doneBtn=document.querySelector('[data-oai-pilgrimage-follow-done]'),actions=document.querySelector('.oai-pilgrimage-follow-actions');updateFollowHeader();if(n)n.textContent=t?t.item.name:'순례 완료';if(a)a.textContent=t?(t.item.addr||''):'';if(doneBtn){doneBtn.style.display=t&&t.index>=0?'':'none';}if(actions)actions.classList.toggle('single',!(t&&t.index>=0));calcFollowDistance();calcFollowItemMetrics();}
+  function openFollow(alreadyActivated){pilgrimageDetailMode='plan';const followList=loadPlan(),followMeta=loadMeta();if(!followList.length&&!_pilgrimageDestinationCanFollow(followMeta.end)){alert('순례 장소를 등록하거나 도착지를 성지·성당으로 설정해 주세요.');return;}if(!currentCourseId){pendingAfterSave='follow';openSaveModal(false);return;}if(!alreadyActivated){const active=_activeFollowState();if(active&&active.courseId&&active.courseId!==String(currentCourseId)){openFollowSwitchConfirm(currentCourseId,'start');return;}if(!active){openFollowStartConfirm(currentCourseId,'follow');return;}const c=_activateFollowCourse(currentCourseId);if(c)applyCourse(c);}updateCurrentCourseProgress();if(typeof window._oaiSyncActivePilgrimageFromVisits==='function')window._oaiSyncActivePilgrimageFromVisits();setView('follow');const t=targetInfo();const n=document.getElementById('oai-pilgrimage-follow-next'),a=document.getElementById('oai-pilgrimage-follow-addr'),doneBtn=document.querySelector('[data-oai-pilgrimage-follow-done]'),actions=document.querySelector('.oai-pilgrimage-follow-actions');updateFollowHeader();if(n)n.textContent=t?t.item.name:'순례 완료';if(a)a.textContent=t?(t.item.addr||''):'';if(doneBtn){doneBtn.style.display=t&&t.index>=0?'':'none';}if(actions)actions.classList.toggle('single',!(t&&t.index>=0));calcFollowDistance();calcFollowItemMetrics();}
   function refreshFollow(){const t=targetInfo(),n=document.getElementById('oai-pilgrimage-follow-next'),a=document.getElementById('oai-pilgrimage-follow-addr'),doneBtn=document.querySelector('[data-oai-pilgrimage-follow-done]'),actions=document.querySelector('.oai-pilgrimage-follow-actions');updateFollowHeader();if(n)n.textContent=t?t.item.name:'순례 완료';if(a)a.textContent=t?(t.item.addr||''):'';if(doneBtn)doneBtn.style.display=t&&t.index>=0?'':'none';if(actions)actions.classList.toggle('single',!(t&&t.index>=0));calcFollowDistance();calcFollowItemMetrics();}
   function _normPilgrimageName(v){return String(v||'').replace(/\s+/g,'').replace(/[()（）·ㆍ\-_,.]/g,'').toLowerCase();}
 
@@ -21221,7 +21227,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     overlay.querySelector('#oai-cgm-congrats-title').textContent=parts.shift()||'성지순례를 축하합니다!';
     overlay.querySelector('#oai-cgm-congrats-message').textContent=parts.join('\n');
     overlay._onAcknowledge=typeof onAcknowledge==='function'?onAcknowledge:null;
-    overlay.hidden=false;
+    const showWhenReady=()=>{
+      if((typeof _isAnyVisitModalOpen==='function'&&_isAnyVisitModalOpen())||(typeof _oaiDeferredVisitNotices!=='undefined'&&_oaiDeferredVisitNotices.length)){
+        setTimeout(showWhenReady,300);return;
+      }
+      overlay.hidden=false;
+    };
+    showWhenReady();
   };
 })();
 
