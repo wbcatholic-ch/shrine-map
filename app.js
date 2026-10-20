@@ -4186,7 +4186,7 @@ function _shrineVisitBadgeHtml(item,context){
 function _parishNearbyVisitHtml(item){
   if(!item) return '';
   const count=_parishVisitCount(item);
-  return count>0?'<span class="parish-visited-nearby">방문한 성당 · '+count+'회</span>':'';
+  return count>0?'<span class="shrine-visited-chip">방문한 성당 · '+count+'회</span>':'';
 }
 function _isNewShrineItem(item){
   return !!(item && (item.isNew === true || item.addedGroup));
@@ -8164,7 +8164,7 @@ function _renderPlaceDistanceRow(item, idx, order, kind, routeInfo, fallbackKm, 
   const distTxt=directTxt ? (roadTxt?roadTxt+(dur?' · '+dur:'')+' / 직선 '+directTxt:'직선 '+directTxt) : (kmVal==null?'':(isEst?'~'+kmVal.toFixed(1)+'km':'🚗'+kmVal.toFixed(1)+'km')+(dur?' · '+dur:''));
   const numExtra=(kind==='region')?'width:28px;height:28px;font-size:12px':'';
   const stacked=(kind==='nearby');
-  return `<div class="${rowClass}${stacked?' nearby-distance-stacked':''}" onclick="selectItem(${idx},{${clickFrom}:true})"><div class="nearby-num" style="background:${c}!important;${numExtra}">${order+1}</div><div class="nearby-info"><div class="nearby-name">${_placeText(item&&item.name||'')}${mode==='shrine'?_shrineNewBadgeHtml(item):''}</div><div class="nearby-addr">${_placeShort(item&&item.addr||'',26)}</div>${mode==='shrine'?_shrineVisitBadgeHtml(item,kind==='region'?'region':'nearby'):(mode==='parish'&&kind==='nearby'?_parishNearbyVisitHtml(item):'')}</div><div class="nearby-meta"><div class="nearby-type" style="background:${c}18!important;color:${c}!important">${_placeText(lbl)}</div>${!stacked&&distTxt?`<div class="nearby-dist" style="color:${isEst?'#aaa':c}!important">${distTxt}</div>`:''}</div>${stacked&&distTxt?`<div class="nearby-distance-bottom nearby-dist">${distTxt}</div>`:''}</div>`;
+  return `<div class="${rowClass}${stacked?' nearby-distance-stacked':''}" onclick="selectItem(${idx},{${clickFrom}:true})"><div class="nearby-num" style="background:${c}!important;${numExtra}">${order+1}</div><div class="nearby-info"><div class="nearby-name">${_placeText(item&&item.name||'')}${mode==='shrine'?_shrineNewBadgeHtml(item):''}</div><div class="nearby-addr">${_placeShort(item&&item.addr||'',26)}</div>${mode==='shrine'?_shrineVisitBadgeHtml(item,kind==='region'?'region':'nearby'):(mode==='parish'?_parishNearbyVisitHtml(item):'')}</div><div class="nearby-meta"><div class="nearby-type" style="background:${c}18!important;color:${c}!important">${_placeText(lbl)}</div>${!stacked&&distTxt?`<div class="nearby-dist" style="color:${isEst?'#aaa':c}!important">${distTxt}</div>`:''}</div>${stacked&&distTxt?`<div class="nearby-distance-bottom nearby-dist">${distTxt}</div>`:''}</div>`;
 }
 function _renderPlaceListRowHtml(item, idx, opts){
   opts=opts||{};
@@ -8174,7 +8174,7 @@ function _renderPlaceListRowHtml(item, idx, opts){
   const typeLabel = opts.label || (mode==='shrine' ? (item&&item.type||'성지') : (mode==='retreat' ? '피정의 집' : '성당'));
   const rowClass='list-item' + ((mode==='shrine'&&_isVisitedShrine(item))?' shrine-visited-card':'');
   const pilgrimBtn = mode==='shrine' ? `<button type="button" class="li-pilgrim-register" data-shrine-idx="${idx}">순례등록</button>` : '';
-  return `<div class="${rowClass}" onclick="selectItem(${idx})"><div class="li-dot" style="background:${dotColor}"></div><div class="li-info"><div class="li-name">${_placeText(item&&item.name||'')}${mode==='shrine'?_shrineNewBadgeHtml(item):''}</div><div class="li-sub">${_placeShort(item&&item.addr||'',28)}</div>${mode==='shrine'?_shrineVisitBadgeHtml(item,'list'):''}</div><div class="li-side"><span class="li-badge" style="background:${c}18!important;color:${c}!important">${_placeText(typeLabel)}</span>${pilgrimBtn}</div></div>`;
+  return `<div class="${rowClass}" onclick="selectItem(${idx})"><div class="li-dot" style="background:${dotColor}"></div><div class="li-info"><div class="li-name">${_placeText(item&&item.name||'')}${mode==='shrine'?_shrineNewBadgeHtml(item):''}</div><div class="li-sub">${_placeShort(item&&item.addr||'',28)}</div>${mode==='shrine'?_shrineVisitBadgeHtml(item,'list'):(mode==='parish'?_parishNearbyVisitHtml(item):'')}</div><div class="li-side"><span class="li-badge" style="background:${c}18!important;color:${c}!important">${_placeText(typeLabel)}</span>${pilgrimBtn}</div></div>`;
 }
 function _beginRegionLoad(){
   try{

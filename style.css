@@ -1045,15 +1045,7 @@ html.retreat-mode .region-search-btn {
   font-size: 13px;
   line-height: 1.4;
   font-weight: 800;
-  color: #1d4ed8 !important;
-}
-#nearby-body .nearby-distance-stacked .parish-visited-nearby {
-  display: block;
-  margin-top: 5px;
-  font-size: 12px;
-  font-weight: 800;
-  color: #111 !important;
-  line-height: 1.35;
+  color: var(--mode-dist-color, #b07a3d) !important;
 }
 
 
