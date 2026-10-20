@@ -2599,6 +2599,59 @@ function _updateShrineVisitCardsButtonUI(){
 }
 // Transfer hints only: real map/GPS activity blocks photo network traffic.
 // Native work is never started by this helper; active photo viewers are not maps.
+// On supported native builds only: event-driven quiet windows. No polling.
+let _oaiIdleMapVisible=false,_oaiIdleMapQuiet=false,_oaiIdleStampQuiet=false;
+let _oaiIdleMapTimer=null,_oaiIdleStampTimer=null;
+function _oaiIdleBridge(){const n=window.GildongmuNative||window.Android;return n&&typeof n.setVisitPhotoUiActivity==='function'?n:null;}
+function _oaiSendIdleFlag(kind,value){
+  const n=_oaiIdleBridge();if(!n)return;
+  try{n.setVisitPhotoUiActivity(kind,!!value);}catch(_e){}
+}
+function _oaiReportIdleUiVisibility(visible){
+  if(_oaiIdleMapVisible===visible)return;
+  _oaiIdleMapVisible=visible;
+  _oaiSendIdleFlag('map-visible',visible);
+  if(!visible){if(_oaiIdleMapTimer)clearTimeout(_oaiIdleMapTimer);_oaiIdleMapTimer=null;_oaiIdleMapQuiet=false;}
+  else _oaiMapInteractionEnded();
+}
+function _oaiMapInteractionStarted(){
+  if(!_oaiIdleBridge()||!_oaiIdleMapVisible)return;
+  if(_oaiIdleMapTimer)clearTimeout(_oaiIdleMapTimer);
+  _oaiIdleMapTimer=null;
+  if(_oaiIdleMapQuiet){_oaiIdleMapQuiet=false;_oaiSendIdleFlag('map-quiet',false);}
+}
+function _oaiMapInteractionEnded(){
+  if(!_oaiIdleBridge()||!_oaiIdleMapVisible)return;
+  if(_oaiIdleMapTimer)clearTimeout(_oaiIdleMapTimer);
+  _oaiIdleMapTimer=setTimeout(function(){
+    _oaiIdleMapTimer=null;
+    if(!_oaiIdleMapVisible||_oaiIdleMapQuiet)return;
+    _oaiIdleMapQuiet=true;_oaiSendIdleFlag('map-quiet',true);
+  },5000);
+}
+function _oaiStampInteractionStarted(){
+  if(!_oaiIdleBridge())return;
+  if(_oaiIdleStampTimer)clearTimeout(_oaiIdleStampTimer);
+  _oaiIdleStampTimer=null;
+  if(_oaiIdleStampQuiet){_oaiIdleStampQuiet=false;_oaiSendIdleFlag('stamp-quiet',false);}
+}
+function _oaiStampInteractionEnded(){
+  if(!_oaiIdleBridge())return;
+  if(_oaiIdleStampTimer)clearTimeout(_oaiIdleStampTimer);
+  _oaiIdleStampTimer=setTimeout(function(){
+    _oaiIdleStampTimer=null;
+    const a=document.getElementById('shrine-visit-cards-modal'),b=document.getElementById('parish-visit-book');
+    if(!((a&&a.classList.contains('show'))||(b&&b.classList.contains('show'))))return;
+    _oaiIdleStampQuiet=true;_oaiSendIdleFlag('stamp-quiet',true);
+  },3000);
+}
+// Capture scrolling on either stampbook without recurring timers.
+document.addEventListener('scroll',function(e){
+  const node=e.target;if(!node||!node.closest)return;
+  if(node.closest('#shrine-visit-cards-modal, #parish-visit-book')){
+    _oaiStampInteractionStarted();_oaiStampInteractionEnded();
+  }
+},true);
 let _oaiPhotoGpsRequests=0, _oaiPhotoLocationLast=null, _oaiRequestedStampDetailLast=null;
 function _oaiNotifyPhotoLocationActivity(){
   try{
@@ -2608,7 +2661,11 @@ function _oaiNotifyPhotoLocationActivity(){
     const photoOverlay=showing('shrine-visit-cards-modal')||showing('parish-visit-book')||
       showing('shrine-visit-detail-view')||showing('parish-visit-detail');
     const mapUsed=typeof _screen!=='undefined'&&_screen==='map'&&!photoOverlay;
-    const active=mapUsed||_oaiPhotoGpsRequests>0;
+    // v380+ separates map UI activity from GPS. On production v371,
+    // preserve the original conservative location/map blocking behavior.
+    const supportsIdlePolicy=typeof bridge.setVisitPhotoUiActivity==='function';
+    const active=(supportsIdlePolicy?_oaiPhotoGpsRequests>0:mapUsed||_oaiPhotoGpsRequests>0);
+    if(supportsIdlePolicy)_oaiReportIdleUiVisibility(mapUsed);
     if(_oaiPhotoLocationLast!==active){
       bridge.setVisitPhotoTransferActivity('location',active);
       _oaiPhotoLocationLast=active;
@@ -2635,6 +2692,10 @@ function _oaiNotifyStampListVisibility(){
     const parish=document.getElementById('parish-visit-book');
     const visible=!!((shrine&&shrine.classList.contains('show'))||(parish&&parish.classList.contains('show')));
     bridge.setVisitPhotoTransferActivity('stamp-list',visible);
+    if(typeof bridge.setVisitPhotoUiActivity==='function'){
+      _oaiStampInteractionStarted();
+      if(visible)_oaiStampInteractionEnded();
+    }
     _oaiNotifyPhotoLocationActivity();
   }catch(_e){}
 }
@@ -3174,6 +3235,9 @@ function _oaiAddPhotos(kind){if(!(_oaiJournalDeveloperEnabled()))return;
   if(Object.keys(_oaiVisitPhotoPending).length){_oaiVisitToast('사진 등록이 진행 중입니다. 완료 후 다시 시도해 주세요.');return;}
   const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const visit=_oaiGetVisitByDate(kind,ctx.item,ctx.date),photos=_oaiNormalizePhotos(visit),limit=_oaiVisitPhotoLimit(kind,ctx.item),remaining=Math.max(0,limit-photos.length);if(!remaining){_oaiVisitToast('등록할 수 있는 사진 수를 모두 사용했습니다.');return;}
   const bridge=_oaiVisitNative();if(!bridge||typeof bridge.pickVisitPhotos!=='function'){_oaiVisitToast('사진 등록은 Android 앱에서 사용할 수 있습니다.');return;}
+  // Keep the existing gallery; it cannot always enforce a native selection cap.
+  // The Android result is validated before any decoding or local registration.
+  if(typeof bridge.pickVisitPhotosWithNames==='function')_oaiVisitToast('갤러리에서 최대 '+remaining+'장까지 선택해 주세요.');
   const req=_oaiVisitRequestId('photo');_oaiVisitPhotoPending[req]=ctx;
   try{
     const names=photos.map(function(p){return String(p.originalFileName||(p.name!=='방문사진.jpg'?p.name:'')||'').trim();}).filter(Boolean);
@@ -9076,6 +9140,12 @@ function _onMapReady(){
   if(!_map){
     _map=new kakao.maps.Map(mapEl,{ center:new _LL(36.2,127.9),level:8 });
     window.__OAI_MAIN_MAP_CLICK_BOUND__=false;
+    // Only v380+ understands this optional idle UI bridge.
+    if(_oaiIdleBridge()){
+      kakao.maps.event.addListener(_map,'dragstart',_oaiMapInteractionStarted);
+      kakao.maps.event.addListener(_map,'dragend',_oaiMapInteractionEnded);
+      kakao.maps.event.addListener(_map,'zoom_changed',function(){_oaiMapInteractionStarted();_oaiMapInteractionEnded();});
+    }
   }else{
     try{
       if(typeof _map.relayout==='function') _map.relayout();
