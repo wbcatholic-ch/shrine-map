@@ -16743,11 +16743,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }catch(_e){}
   }
   let oaiPhotoManifestStarted=false;
+  let oaiPhotoManifestSignature='';
+  let oaiPhotoManifestRunning=false;
   function oaiQueuePhotoRestoreManifest(){
-    if(oaiPhotoManifestStarted||!oaiPhotoRestoreAllowed())return;
+    if(oaiPhotoManifestRunning)return;
+    if(!oaiPhotoRestoreAllowed())return;
     const native=window.GildongmuNative||window.Android;
     if(!native||typeof native.enqueueVisitPhotoRestoreManifest!=='function')return;
-    oaiPhotoManifestStarted=true;
+    oaiPhotoManifestRunning=true;
     const idle=fn=>typeof window.requestIdleCallback==='function'?requestIdleCallback(fn):setTimeout(fn,0);
     idle(function(){
       try{
@@ -16781,7 +16784,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         // The first app launch may run before imported journals exist. A blank
         // inventory is not a completed registration: allow the successful import
         // callback (or a later startup) to submit the restored records.
-        if(!photos.length){oaiPhotoManifestStarted=false;return;}
+        if(!photos.length){oaiPhotoManifestStarted=false;oaiPhotoManifestSignature='';oaiPhotoManifestRunning=false;return;}
+        // Reconcile changed journals without repeatedly enqueuing an unchanged inventory.
+        const signature=JSON.stringify(photos);
+        if(oaiPhotoManifestStarted && signature===oaiPhotoManifestSignature){
+          oaiPhotoManifestRunning=false;return;
+        }
         let offset=0;
         function sendBatch(){
           try{
@@ -16789,12 +16797,21 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
             native.enqueueVisitPhotoRestoreManifest(JSON.stringify(photos.slice(offset,offset+100)));
             offset+=100;
             if(offset<photos.length)idle(sendBatch);
-          }catch(_e){oaiPhotoManifestStarted=false;}
+            else {oaiPhotoManifestSignature=signature;oaiPhotoManifestStarted=true;oaiPhotoManifestRunning=false;}
+          }catch(_e){oaiPhotoManifestStarted=false;oaiPhotoManifestRunning=false;}
         }
         sendBatch();
-      }catch(_e){oaiPhotoManifestStarted=false;}
+      }catch(_e){oaiPhotoManifestStarted=false;oaiPhotoManifestRunning=false;}
     });
   }
+  // Journals may become available after the initial startup snapshot. A foreground
+  // reconciliation detects changed inventories; SQLite keeps existing photo states.
+  setInterval(function(){
+    if(document.visibilityState==='visible')oaiQueuePhotoRestoreManifest();
+  },120000);
+  document.addEventListener('visibilitychange',function(){
+    if(document.visibilityState==='visible')oaiQueuePhotoRestoreManifest();
+  });
   function refreshVisitPhotoNetworkSelector(){
     const wifi=document.getElementById('oai-visit-photo-network');
     const value=wifi&&wifi.value==='any'?'any':'wifi';
@@ -17309,6 +17326,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           // Journal data has just changed. Any earlier manifest snapshot (including
           // an empty one from startup) is stale; rebuild from these imported records.
           oaiPhotoManifestStarted=false;
+          oaiPhotoManifestSignature='';
           // A restored diocese already satisfies first-run parish setup.
           if(configuredDiocese())localStorage.setItem('oai_onboarding_done_v1','1');
           localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'1');localStorage.setItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY,'1');oaiDriveReady=true;
