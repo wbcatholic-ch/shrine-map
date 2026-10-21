@@ -3480,10 +3480,13 @@ function _oaiEnsurePhotoViewer(){
   panel.addEventListener('touchcancel',function(){gestureActive=false;z.pinchDist=0;z.multitouch=false;z.moved=false;});
   return m;
 }
-function _oaiPreparePhotoViewer(kind,index,ctx,total){const m=_oaiEnsurePhotoViewer(),img=document.getElementById('oai-visit-photo-viewer-img'),count=document.getElementById('oai-visit-photo-viewer-count');_oaiVisitPhotoViewerState={kind:kind,index:index,ctx:ctx};if(img){_oaiResetVisitViewerZoom();img.removeAttribute('src');img.classList.add('loading');}if(count)count.textContent=(index+1)+' / '+Number(total||0);m.classList.add('show');m.setAttribute('aria-hidden','false');const prev=m.querySelector('[data-oai-photo-prev]'),next=m.querySelector('[data-oai-photo-next]');if(prev)prev.disabled=index<=0;if(next)next.disabled=index>=Number(total||0)-1;try{document.documentElement.classList.add('oai-visit-photo-open');}catch(_e){}}
-function _oaiShowPhotoViewer(kind,index,dataUri){const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const visit=_oaiGetVisitByDate(kind,ctx.item,ctx.date),photos=_oaiNormalizePhotos(visit);if(!photos[index])return;const m=_oaiEnsurePhotoViewer(),img=document.getElementById('oai-visit-photo-viewer-img'),count=document.getElementById('oai-visit-photo-viewer-count');_oaiVisitPhotoViewerState={kind:kind,index:index,ctx:ctx};if(img){img.src=dataUri;img.classList.remove('loading');}if(count)count.textContent=(index+1)+' / '+photos.length;m.classList.add('show');m.setAttribute('aria-hidden','false');const prev=m.querySelector('[data-oai-photo-prev]'),next=m.querySelector('[data-oai-photo-next]');if(prev)prev.disabled=index<=0;if(next)next.disabled=index>=photos.length-1;try{document.documentElement.classList.add('oai-visit-photo-open');}catch(_e){}
+function _oaiPhotoViewerOrientation(open){
+  try{if(window.GildongmuNative&&typeof window.GildongmuNative.setPhotoViewerRotation==='function')window.GildongmuNative.setPhotoViewerRotation(!!open);}catch(_e){}
 }
-function _oaiClosePhotoViewer(){const m=document.getElementById('oai-visit-photo-viewer');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}const img=document.getElementById('oai-visit-photo-viewer-img');if(img)img.removeAttribute('src');_oaiResetVisitViewerZoom();_oaiVisitPhotoViewerState=null;try{document.documentElement.classList.remove('oai-visit-photo-open');}catch(_e){} }
+function _oaiPreparePhotoViewer(kind,index,ctx,total){const m=_oaiEnsurePhotoViewer(),img=document.getElementById('oai-visit-photo-viewer-img'),count=document.getElementById('oai-visit-photo-viewer-count');_oaiVisitPhotoViewerState={kind:kind,index:index,ctx:ctx};if(img){_oaiResetVisitViewerZoom();img.removeAttribute('src');img.classList.add('loading');}if(count)count.textContent=(index+1)+' / '+Number(total||0);m.classList.add('show');m.setAttribute('aria-hidden','false');_oaiPhotoViewerOrientation(true);const prev=m.querySelector('[data-oai-photo-prev]'),next=m.querySelector('[data-oai-photo-next]');if(prev)prev.disabled=index<=0;if(next)next.disabled=index>=Number(total||0)-1;try{document.documentElement.classList.add('oai-visit-photo-open');}catch(_e){}}
+function _oaiShowPhotoViewer(kind,index,dataUri){const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const visit=_oaiGetVisitByDate(kind,ctx.item,ctx.date),photos=_oaiNormalizePhotos(visit);if(!photos[index])return;const m=_oaiEnsurePhotoViewer(),img=document.getElementById('oai-visit-photo-viewer-img'),count=document.getElementById('oai-visit-photo-viewer-count');_oaiVisitPhotoViewerState={kind:kind,index:index,ctx:ctx};if(img){img.src=dataUri;img.classList.remove('loading');}if(count)count.textContent=(index+1)+' / '+photos.length;m.classList.add('show');m.setAttribute('aria-hidden','false');_oaiPhotoViewerOrientation(true);const prev=m.querySelector('[data-oai-photo-prev]'),next=m.querySelector('[data-oai-photo-next]');if(prev)prev.disabled=index<=0;if(next)next.disabled=index>=photos.length-1;try{document.documentElement.classList.add('oai-visit-photo-open');}catch(_e){}
+}
+function _oaiClosePhotoViewer(){_oaiPhotoViewerOrientation(false);const m=document.getElementById('oai-visit-photo-viewer');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}const img=document.getElementById('oai-visit-photo-viewer-img');if(img)img.removeAttribute('src');_oaiResetVisitViewerZoom();_oaiVisitPhotoViewerState=null;try{document.documentElement.classList.remove('oai-visit-photo-open');}catch(_e){} }
 try{window._oaiClosePhotoViewer=_oaiClosePhotoViewer;}catch(_e){}
 function _oaiMovePhotoViewer(delta){const st=_oaiVisitPhotoViewerState;if(!st)return;const visit=_oaiGetVisitByDate(st.kind,st.ctx.item,st.ctx.date),photos=_oaiNormalizePhotos(visit),next=Math.max(0,Math.min(photos.length-1,st.index+Number(delta||0)));if(next===st.index)return;_oaiOpenPhoto(st.kind,next);}
 window.oaiVisitPhotoLoaded=function(requestId,ok,mimeType,payload,message){
@@ -6621,10 +6624,10 @@ function _openMyeongryePhotoViewer(){
   var modal=document.getElementById('myeongrye-materials-modal'), viewer=modal&&modal.querySelector('.myeongrye-photo-viewer');
   if(!viewer) return;
   _myeongryeManualPause=true; clearTimeout(_myeongryeSlideTimer); _myeongryeSlideTimer=0;
-  _renderMyeongryePhotoViewer(); viewer.classList.add('open'); viewer.setAttribute('aria-hidden','false');
+  _renderMyeongryePhotoViewer(); viewer.classList.add('open'); viewer.setAttribute('aria-hidden','false');_oaiPhotoViewerOrientation(true);
   var close=viewer.querySelector('.myeongrye-viewer-close'); if(close) close.focus();
 }
-function _closeMyeongryePhotoViewer(){
+function _closeMyeongryePhotoViewer(){_oaiPhotoViewerOrientation(false);
   var modal=document.getElementById('myeongrye-materials-modal'), viewer=modal&&modal.querySelector('.myeongrye-photo-viewer');
   if(viewer){ _setMyeongryeViewerZoom(1); viewer.classList.remove('open'); viewer.setAttribute('aria-hidden','true'); }
 }
@@ -16984,6 +16987,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
             window.__OAI_PARISH_JOURNAL_DATE__=date;
             _renderParishVisitDetail();
           }
+          // 알림에서 사진이 있는 순례지를 선택하면 해당 날짜의 첫 사진을 바로 연다.
+          // 메모만 있는 경우에는 기존 기록 상세를 유지한다.
+          if(entry.photos)_oaiOpenPhoto(entry.kind,0);
         });card.appendChild(button);
       }else{
         const stamp=document.createElement('div');stamp.textContent='✓ 그날의 방문 스탬프가 기록되어 있습니다.';stamp.style.cssText='font-size:14px;color:#34465c;font-weight:650';card.appendChild(stamp);
@@ -16992,6 +16998,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     });
   }
   window.addEventListener('oai-anniversary-notification-open',e=>oaiAnniversaryPreview(String(e.detail&&e.detail.date||'')));
+  window.__oaiAnniversaryHandlerReady=true;
+  function oaiReceivePendingAnniversary(){
+    try{if(window.GildongmuNative&&typeof window.GildongmuNative.consumePendingAnniversaryDate==='function'){
+      const date=window.GildongmuNative.consumePendingAnniversaryDate();
+      if(date)oaiAnniversaryPreview(String(date));
+    }}catch(_e){}
+  }
+  if(document.readyState==='complete')oaiReceivePendingAnniversary();
+  else window.addEventListener('load',oaiReceivePendingAnniversary,{once:true});
   function oaiDevStatus(value){const el=document.getElementById('oai-dev-status');if(el)el.textContent=value||'';}
   window.oaiDevPhotoBackupResult=function(state,message){
     const el=document.getElementById('oai-dev-five-photo-status');
