@@ -18602,16 +18602,49 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     modal.addEventListener('click',e=>{
       if(e.target===modal||e.target.closest('[data-daily-failure-close]')){_dailyFailureClose();return;}
       if(e.target.closest('[data-daily-failure-register]')){
+        const failedDate=modal.dataset.date;
         _dailyFailureClose();
-        _historyStart(true); // 기존 녹색 버튼과 동일한 GPS 미등록 코스 등록 흐름
+        _dailyOpenFailedDate(failedDate);
       }
     });
     return modal;
   }
-  function _dailyShowFailure(date){
+  // A historical failure is not proof that a registrable pilgrimage exists.
+  // Reconcile only after place catalogs are ready; never delete GPS stamps/courses.
+  async function _dailyReconcileFailure(date){
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(String(date||'')))return false;
+    const state=_dailyState();
+    if(!state.failures[date])return false;
+    try{
+      if(typeof _ensureShrineDataLoaded==='function')await _ensureShrineDataLoaded();
+      if(!Array.isArray(SHRINES)||!SHRINES.length)return false;
+      if(_dailyRawGpsEvents(date).some(ev=>ev.kind==='parish')){
+        if(typeof _ensureAllParishDiocesesLoaded!=='function')return false;
+        await _ensureAllParishDiocesesLoaded({silent:true});
+        if(typeof _areAllParishDiocesesReady==='function'&&!_areAllParishDiocesesReady())return false;
+      }
+      const eligible=_dailyUnregisteredEvents(date,_dailyGpsEvents(date),loadCourses());
+      if(_dailyAutoEligible(eligible))return true;
+      const current=_dailyState();
+      if(current.failures[date]){
+        delete current.failures[date];
+        _saveDailyState(current);
+      }
+      // A stale failure is not a pending registration. Leave visit records intact.
+      const shown=document.getElementById('oai-daily-register-failure');
+      if(shown&&!shown.hidden&&shown.dataset.date===date)_dailyFailureClose();
+      _dailyUpdateRetryButton();
+      return false;
+    }catch(e){
+      console.warn('[코스 실패 기록 검증 보류]',date,e);
+      return false;
+    }
+  }
+  async function _dailyShowFailure(date){
+    if(!(await _dailyReconcileFailure(date)))return;
     console.warn('[성지순례 등록 보류] '+date+' — GPS 스탬프는 그대로 보존됩니다.');
     _dailyUpdateRetryButton();
-    if(document.hidden||dailyFailureNotified.has(date))return;
+    if(document.hidden||dailyFailureNotified.has(date)||!_dailyState().failures[date])return;
     const modal=_dailyFailureModal();
     if(!modal.hidden)return;
     dailyFailureNotified.add(date);
@@ -18621,20 +18654,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     modal.querySelector('#oai-daily-failure-text').textContent=Number(date.slice(5,7))+'월 '+Number(date.slice(8,10))+'일 순례코스를 자동으로 등록하지 못했습니다.';
     modal.hidden=false;
   }
-  function _dailyNotifyStoredFailures(){
+  async function _dailyNotifyStoredFailures(){
     if(document.hidden)return;
     try{
       const state=_dailyState();
-      const completed=_dailyStoredCourses();
-      const first=Object.keys(state.failures||{}).filter(function(d){
-        if(d>=_dailyIso(Date.now()))return false;
-        // Do not show a stale failure for a date that has already been
-        // registered. Preserve the journal; this is a read-only display guard.
-        if(state.auto[d]&&state.auto[d].done)return false;
-        return !completed.some(function(c){return c&&c.autoGps&&c.sourceDate===d
-          &&_courseCompletionList(c).some(function(x){return _dailyIso(x.completedAt)===d;});});
-      }).sort()[0];
-      if(first)_dailyShowFailure(first);
+      const dates=Object.keys(state.failures||{}).filter(d=>/^\d{4}-\d{2}-\d{2}$/.test(d)&&d<_dailyIso(Date.now())).sort();
+      for(const date of dates){
+        if(await _dailyReconcileFailure(date)){
+          await _dailyShowFailure(date);
+          break;
+        }
+      }
     }catch(e){console.warn('[코스 등록 실패 안내 확인]',e);}
   }
   async function _dailyRegisterPrevious(date,manualRetry){
@@ -18747,9 +18777,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     try{
       const state=_dailyState();
       const courses=loadCourses();
-      failurePending=Object.keys(state.failures||{}).some(date=>
-        /^\d{4}-\d{2}-\d{2}$/.test(date)&&date<_dailyIso(Date.now())&&
-        _dailyRawGpsEvents(date).length>0);
+      // A GPS stamp alone is not an unregistered course. Only a remaining
+      // unregistered shrine can make a historical failure actionable.
+      failurePending=Object.keys(state.failures||{}).some(date=>{
+        if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||date>=_dailyIso(Date.now()))return false;
+        return _dailyAutoEligible(_dailyUnregisteredEvents(date,_dailyGpsEvents(date),courses));
+      });
     }catch(e){console.warn('[미등록 코스 실패 상태 검증 보류]',e);}
     let remaining=[];
     try{remaining=_historyUnregisteredDates();}
@@ -18819,6 +18852,31 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       renderCourseList();
       await _historyShowNext(false,false);
     }catch(e){console.warn('[과거 코스 등록] 등록 실패',e);window.alert(date+' 코스 등록 실패. GPS 스탬프는 보존되어 있습니다. 다시 등록 버튼으로 시도해 주세요.');button.disabled=false;}
+  }
+  async function _dailyOpenFailedDate(date){
+    if(historyDialogOpen)return;
+    if(!(await _dailyReconcileFailure(date))){
+      _dailyUpdateRetryButton();
+      return;
+    }
+    // Keep the date shown in the failure dialog, not a different date from
+    // the general historical queue.
+    historyDatesCache=null;historyDatesSignature=null;
+    historyCurrentDate=date;
+    try{
+      if(typeof _ensureShrineDataLoaded==='function')await _ensureShrineDataLoaded();
+      if(typeof _ensureAllParishDiocesesLoaded==='function')await _ensureAllParishDiocesesLoaded({silent:true});
+      const events=_dailyUnregisteredEvents(date,_dailyGpsEvents(date),loadCourses());
+      if(!_dailyAutoEligible(events))return;
+      historyPreviewEvents=events.map(ev=>Object.assign({},ev));
+      const el=_historyEnsureDialog();
+      el.querySelector('#oai-history-title').textContent='미등록 순례코스 다시 등록';
+      el.querySelector('#oai-history-message').textContent=date+' · 방문 '+events.length+'곳 — 이 날짜의 GPS 기록을 등록하시겠습니까?';
+      const list=el.querySelector('#oai-history-locations');list.replaceChildren();
+      events.forEach(ev=>{const item=document.createElement('div');item.textContent=new Date(ev.at).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit'})+'  '+ev.name;list.appendChild(item);});
+      el.querySelector('#oai-history-confirm').disabled=false;
+      historyDialogOpen=true;el.hidden=false;
+    }catch(e){console.warn('[실패 날짜 재등록 준비 보류]',date,e);}
   }
   function _historyStart(fromButton){
     if(historyDialogOpen)return;
@@ -19863,15 +19921,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const courseRows=completion&&course&&_courseHasGpsLockedCompletion(course)?_manualMerged(course).map(x=>x.point):loadPlan();
       const points=courseRows.map((x,i)=>({name:String(x&&x.name||''),lat:Number(x&&x.lat),lng:Number(x&&x.lng),order:i+1})).filter(x=>_validGpsPair(x.lat,x.lng));
       if(!points.length){_oaiShowNavigationNotice('지도 안내','표시할 경유지 좌표가 없습니다.',function(){});return;}
-      // This read-only map can be opened before the main map screen has loaded
-      // the Kakao SDK. Use the existing shared SDK loader instead of failing.
-      if(!(window.kakao&&kakao.maps&&kakao.maps.Map&&kakao.maps.LatLng)){
-        _ensureKakaoServicesReady().then(function(ready){
-          if(ready&&window.kakao&&kakao.maps&&kakao.maps.Map&&kakao.maps.LatLng)showWaypointsMap();
-          else _oaiShowNavigationNotice('지도 안내','지도를 불러오지 못했습니다. 네트워크를 확인하고 다시 시도해 주세요.',function(){});
-        });
-        return;
-      }
+      if(!(window.kakao&&kakao.maps)){_oaiShowNavigationNotice('지도 안내','지도가 아직 준비되지 않았습니다. 잠시 후 다시 시도해 주세요.',function(){});return;}
       closePilgrimagePlaceInfo();
       let layer=document.getElementById('oai-pilgrimage-waypoints-readonly');
       if(!layer){
