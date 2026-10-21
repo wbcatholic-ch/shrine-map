@@ -9279,6 +9279,43 @@ function goToCover(){
 
 
 let _kakaoMapSdkLoading = false;
+// All auxiliary maps wait for the same SDK script used by the main route map.
+// No polling loops, duplicate SDK injections, or artificial fixed delays.
+function _withReadyKakaoMap(onReady,onFailure){
+  let settled=false;
+  const scriptId='oai-kakao-map-sdk';
+  let script=null;
+  let timer=null;
+  const finish=(ok,error)=>{
+    if(settled)return;
+    settled=true;
+    if(timer)clearTimeout(timer);
+    if(script){script.removeEventListener('load',loaded);script.removeEventListener('error',failed);}
+    if(ok)onReady();else if(typeof onFailure==='function')onFailure(error||'지도 SDK 준비 실패');
+  };
+  function loaded(){
+    try{
+      if(window.kakao&&kakao.maps&&typeof kakao.maps.load==='function'){
+        kakao.maps.load(()=>finish(true));
+      }else finish(false,'지도 SDK가 준비되지 않았습니다.');
+    }catch(e){finish(false,e&&e.message);}
+  }
+  function failed(){finish(false,'카카오 지도 SDK를 불러오지 못했습니다.');}
+  if(window.kakao&&kakao.maps&&typeof kakao.maps.load==='function'){loaded();return;}
+  script=document.getElementById(scriptId);
+  if(!script){
+    // Keep the existing main-map SDK loading/timeout/error lifecycle authoritative.
+    _loadMap();
+    script=document.getElementById(scriptId);
+  }
+  if(!script){finish(false,'지도 SDK 요청에 실패했습니다.');return;}
+  script.addEventListener('load',loaded);
+  script.addEventListener('error',failed);
+  // SDK script may have finished between the first check and listener registration.
+  if(window.kakao&&kakao.maps&&typeof kakao.maps.load==='function')loaded();
+  timer=setTimeout(()=>finish(false,'지도 SDK 응답 시간이 초과되었습니다.'),20000);
+}
+
 function _loadMap(){
   const wrap=$('map');
   _ensureMapLoading(wrap, '지도를 불러오는 중...');
@@ -10368,7 +10405,9 @@ function _oaiRenderDistributedMaterials(item,modal){
 }
 let _oaiDistWatchId=null,_oaiDistMap=null,_oaiDistUserMarker=null,_oaiDistActiveInfo=null,_oaiDistResizeCleanup=null;
 window._oaiCloseDistributedMapFromBack=function(){if(!document.getElementById('oai-distributed-modal'))return false;_oaiCloseDistributedMap();return true;};
+let _oaiDistFitFrame=0;
 function _oaiCloseDistributedMap(){
+ if(_oaiDistFitFrame){cancelAnimationFrame(_oaiDistFitFrame);_oaiDistFitFrame=0;}
  if(_oaiDistResizeCleanup){_oaiDistResizeCleanup();_oaiDistResizeCleanup=null;}
  if(_oaiDistWatchId!==null){try{navigator.geolocation.clearWatch(_oaiDistWatchId);}catch(_e){}_oaiDistWatchId=null;}
  const modal=document.getElementById('oai-distributed-modal');if(modal){modal.remove();}
@@ -10376,6 +10415,11 @@ function _oaiCloseDistributedMap(){
  _oaiDistMap=null;_oaiDistUserMarker=null;
 }
 function _oaiOpenDistributedMap(item,guide){
+  _withReadyKakaoMap(()=>_oaiRenderDistributedMap(item,guide),message=>{
+    _oaiShowNavigationNotice('지도 안내',message,function(){});
+  });
+}
+function _oaiRenderDistributedMap(item,guide){
  _oaiCloseDistributedMap();
  const modal=document.createElement('div');modal.id='oai-distributed-modal';modal.className='oai-distributed-modal';modal.setAttribute('role','dialog');modal.setAttribute('aria-modal','true');
  modal.innerHTML='<div class="oai-distributed-panel"><header><strong></strong><button type="button" class="oai-distributed-close" aria-label="순례 지도 닫기">×</button></header><div class="oai-distributed-map"></div><div class="oai-distributed-list-frame"><div class="oai-distributed-points"></div><div class="oai-dist-scroll-mark is-top" hidden></div><div class="oai-dist-scroll-mark is-bottom" hidden></div></div></div>';
@@ -10423,7 +10467,7 @@ function _oaiOpenDistributedMap(item,guide){
   }
  }
 
- const fit=()=>{if(_oaiDistMap&&found>0){try{_oaiDistMap.relayout();_oaiDistMap.setBounds(bounds); }catch(_e){}}};
+ const fit=()=>{if(modal.isConnected&&_oaiDistMap&&found>0){try{_oaiDistMap.relayout();_oaiDistMap.setBounds(bounds); }catch(_e){}}};
  function showPoint(point,index,lat,lng){
   if(!modal.isConnected||plotted.has(index)||!Number.isFinite(lat)||!Number.isFinite(lng))return;
   plotted.add(index);
@@ -10433,7 +10477,9 @@ function _oaiOpenDistributedMap(item,guide){
   const info=new kakao.maps.InfoWindow({content:'<div style="padding:6px 9px;font-size:12px;white-space:nowrap">'+String(index+1)+'. '+String(point[0]).replace(/[<>&"']/g,'')+'</div>'});
   markerEntries.set(index,{marker,info,row});
   kakao.maps.event.addListener(marker,'click',()=>selectPoint(index,false));
-  bounds.extend(ll);found++;fit();
+  bounds.extend(ll);found++;
+  if(_oaiDistFitFrame)cancelAnimationFrame(_oaiDistFitFrame);
+  _oaiDistFitFrame=requestAnimationFrame(()=>{_oaiDistFitFrame=0;fit();});
   if(row){const link=row.querySelector('.oai-dist-direction');link.hidden=false;link.onclick=()=>{const url='https://map.kakao.com/link/to/'+encodeURIComponent(point[0])+','+lat+','+lng;openCoreExternalUrl(url,{source:'distributed-shrine-route'});};}
  }
  guide.points.forEach((point,i)=>{
@@ -10478,7 +10524,7 @@ function _oaiOpenDistributedMap(item,guide){
  setTimeout(()=>_oaiSyncScrollAffordance(list),250);
  requestAnimationFrame(syncDistributedScrollMarks);
  setTimeout(syncDistributedScrollMarks,150);
- if(_oaiDistMap){setTimeout(fit,100);}
+ if(_oaiDistMap&&found>0)fit();
  if(navigator.geolocation&&_oaiDistMap){
   const locationButton=document.createElement('button');locationButton.type='button';locationButton.className='oai-distributed-locate';locationButton.textContent='내 위치';mapBox.appendChild(locationButton);
   locationButton.onclick=function(){if(_oaiDistUserMarker){_oaiDistMap.panTo(_oaiDistUserMarker.getPosition());}};
@@ -19921,7 +19967,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const courseRows=completion&&course&&_courseHasGpsLockedCompletion(course)?_manualMerged(course).map(x=>x.point):loadPlan();
       const points=courseRows.map((x,i)=>({name:String(x&&x.name||''),lat:Number(x&&x.lat),lng:Number(x&&x.lng),order:i+1})).filter(x=>_validGpsPair(x.lat,x.lng));
       if(!points.length){_oaiShowNavigationNotice('지도 안내','표시할 경유지 좌표가 없습니다.',function(){});return;}
-      if(!(window.kakao&&kakao.maps)){_oaiShowNavigationNotice('지도 안내','지도가 아직 준비되지 않았습니다. 잠시 후 다시 시도해 주세요.',function(){});return;}
       closePilgrimagePlaceInfo();
       // Each opening owns one map and one layout observer. A closed dialog must
       // never resize or reposition a map belonging to a later opening.
@@ -19937,9 +19982,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       document.body.appendChild(layer);
       layer.classList.add('open');
       const mapEl=layer.querySelector('#oai-pilgrimage-waypoints-map');
-      let map=null,observer=null,frame=0,closed=false;
-      const bounds=new kakao.maps.LatLngBounds();
-      points.forEach(point=>bounds.extend(new kakao.maps.LatLng(point.lat,point.lng)));
+      let map=null,observer=null,frame=0,closed=false,initialized=false;
+      let bounds=null;
       function fitWaypoints(){
         if(closed||!map||!mapEl.isConnected||mapEl.clientWidth<=0||mapEl.clientHeight<=0)return;
         map.relayout();
@@ -19947,7 +19991,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         else {map.setCenter(new kakao.maps.LatLng(points[0].lat,points[0].lng));map.setLevel(5);}
       }
       function scheduleFit(){
-        if(closed||frame)return;
+        if(closed||frame||!map)return;
         frame=requestAnimationFrame(()=>{frame=0;fitWaypoints();});
       }
       function closeWaypointMap(){
@@ -19966,10 +20010,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       function initialize(){
         frame=0;
         if(closed)return;
-        if(mapEl.clientWidth<=0||mapEl.clientHeight<=0){
-          frame=requestAnimationFrame(initialize);
-          return;
-        }
+        if(initialized||mapEl.clientWidth<=0||mapEl.clientHeight<=0)return;
+        initialized=true;
+        bounds=new kakao.maps.LatLngBounds();
+        points.forEach(point=>bounds.extend(new kakao.maps.LatLng(point.lat,point.lng)));
         map=new kakao.maps.Map(mapEl,{center:new kakao.maps.LatLng(points[0].lat,points[0].lng),level:7});
         points.forEach(point=>{
           const pos=new kakao.maps.LatLng(point.lat,point.lng);
@@ -19978,12 +20022,32 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           kakao.maps.event.addListener(marker,'click',()=>info.open(map,marker));
         });
         if(typeof ResizeObserver==='function'){
-          observer=new ResizeObserver(scheduleFit);
+          let width=mapEl.clientWidth,height=mapEl.clientHeight;
+          observer=new ResizeObserver(()=>{
+            const w=mapEl.clientWidth,h=mapEl.clientHeight;
+            if(w>0&&h>0&&(w!==width||h!==height)){
+              width=w;height=h;scheduleFit();
+            }
+          });
           observer.observe(mapEl);
         }
         scheduleFit();
       }
-      frame=requestAnimationFrame(initialize);
+      // SDK completion and dialog layout are both required; no perpetual RAF polling.
+      _withReadyKakaoMap(()=>{
+        if(closed)return;
+        if(mapEl.clientWidth>0&&mapEl.clientHeight>0){initialize();return;}
+        if(typeof ResizeObserver==='function'){
+          observer=new ResizeObserver(()=>{
+            if(mapEl.clientWidth>0&&mapEl.clientHeight>0){
+              observer.disconnect();observer=null;initialize();
+            }
+          });
+          observer.observe(mapEl);
+        }else frame=requestAnimationFrame(initialize);
+      },message=>{
+        if(!closed){closeWaypointMap();_oaiShowNavigationNotice('지도 안내',message,function(){});}
+      });
     }
     let overlay=document.getElementById('oai-pilgrimage-place-info-overlay');
     if(!overlay){
