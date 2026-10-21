@@ -21073,6 +21073,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 
   window._oaiPilgrimageBackHandle=function(){
     try{
+      // 읽기 전용 경유지 지도는 순례완료 상세 위에 놓이는 최상위 화면이다.
+      // 시스템 뒤로가기에서 아래 상세/목록을 먼저 전환하지 않도록 지도부터 닫는다.
+      const waypointsMap=document.getElementById('oai-pilgrimage-waypoints-readonly');
+      if(waypointsMap&&waypointsMap.classList.contains('open')){
+        waypointsMap.remove();
+        return true;
+      }
       const startConfirm=followStartModal();
       if(startConfirm&&startConfirm.classList.contains('show')){
         closeFollowStartConfirm();
