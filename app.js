@@ -20579,7 +20579,20 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         document.documentElement.classList.remove('parish-mode','retreat-mode');
       }catch(_e){}
       const {mapWrap,mapEl}=_preparePilgrimageMainMapSurface();
-      if(!_map&&typeof _loadMap==='function'){window._noAutoNearby=true;_loadMap();}
+      if(!_map&&typeof _loadMap==='function'){
+        window._noAutoNearby=true;
+        _loadMap();
+      }else if(_map){
+        /* 지도에서 추가/보기는 기존 메인 지도 객체를 재사용한다.
+           새 지도 생성용 로딩 레이어가 이전 화면에서 남아 있어도
+           실제 표시 영역이 준비된 지도에는 로딩 레이어를 유지하지 않는다. */
+        requestAnimationFrame(function(){
+          if(_screen!=='map'||!_map||!mapEl||!mapEl.isConnected)return;
+          if(!mapEl.clientWidth||!mapEl.clientHeight)return;
+          try{if(typeof _map.relayout==='function')_map.relayout();}catch(e){console.warn('[가톨릭길동무] 순례 지도 크기 갱신 실패',e);return;}
+          _completeCategoryMapSurface();
+        });
+      }
       try{resetRoute({fresh:true});}catch(_e){}
       if(!_activeTab||_activeTab!=='route')openTab('route');else _enterRouteMode();
       try{
