@@ -19923,24 +19923,67 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(!points.length){_oaiShowNavigationNotice('지도 안내','표시할 경유지 좌표가 없습니다.',function(){});return;}
       if(!(window.kakao&&kakao.maps)){_oaiShowNavigationNotice('지도 안내','지도가 아직 준비되지 않았습니다. 잠시 후 다시 시도해 주세요.',function(){});return;}
       closePilgrimagePlaceInfo();
-      let layer=document.getElementById('oai-pilgrimage-waypoints-readonly');
-      if(!layer){
-        layer=document.createElement('div');layer.id='oai-pilgrimage-waypoints-readonly';layer.className='oai-pilgrimage-waypoints-readonly';
-        layer.innerHTML='<section role="dialog" aria-modal="true" aria-label="순례 경유지 지도"><header><strong>경유지 지도 · 보기 전용</strong><button type="button" data-waypoint-map-close aria-label="닫기">×</button></header><div class="oai-pilgrimage-waypoints-map" id="oai-pilgrimage-waypoints-map"></div><p>경유지 전체를 표시합니다. 출발지·도착지는 지도 범위에서 제외합니다.</p></section>';
-        layer.addEventListener('click',e=>{if(e.target===layer||e.target.closest('[data-waypoint-map-close]')){layer.classList.remove('open');layer.replaceChildren();layer.remove();}});
-        document.body.appendChild(layer);
+      // Each opening owns one map and one layout observer. A closed dialog must
+      // never resize or reposition a map belonging to a later opening.
+      const previous=document.getElementById('oai-pilgrimage-waypoints-readonly');
+      if(previous){
+        if(typeof previous._disposeWaypointMap==='function')previous._disposeWaypointMap();
+        previous.remove();
       }
+      const layer=document.createElement('div');
+      layer.id='oai-pilgrimage-waypoints-readonly';
+      layer.className='oai-pilgrimage-waypoints-readonly';
+      layer.innerHTML='<section role="dialog" aria-modal="true" aria-label="순례 경유지 지도"><header><strong>경유지 지도 · 보기 전용</strong><button type="button" data-waypoint-map-close aria-label="닫기">×</button></header><div class="oai-pilgrimage-waypoints-map" id="oai-pilgrimage-waypoints-map"></div><p>경유지 전체를 표시합니다. 출발지·도착지는 지도 범위에서 제외합니다.</p></section>';
+      document.body.appendChild(layer);
       layer.classList.add('open');
       const mapEl=layer.querySelector('#oai-pilgrimage-waypoints-map');
-      const map=new kakao.maps.Map(mapEl,{center:new kakao.maps.LatLng(points[0].lat,points[0].lng),level:7});
+      let map=null,observer=null,frame=0,closed=false;
       const bounds=new kakao.maps.LatLngBounds();
-      points.forEach(point=>{
-        const pos=new kakao.maps.LatLng(point.lat,point.lng);bounds.extend(pos);
-        const marker=new kakao.maps.Marker({map,position:pos,title:point.order+'. '+point.name,image:_mkrImgRoute(point.order===index+1?'#c18b12':'#1969aa',String(point.order)),zIndex:point.order===index+1?1000:100});
-        const info=new kakao.maps.InfoWindow({content:'<div style="padding:7px 10px;font-size:13px;white-space:nowrap;">'+esc(point.order+'. '+point.name)+'</div>'});
-        kakao.maps.event.addListener(marker,'click',()=>info.open(map,marker));
+      points.forEach(point=>bounds.extend(new kakao.maps.LatLng(point.lat,point.lng)));
+      function fitWaypoints(){
+        if(closed||!map||!mapEl.isConnected||mapEl.clientWidth<=0||mapEl.clientHeight<=0)return;
+        map.relayout();
+        if(points.length>1)map.setBounds(bounds,65,35,65,35);
+        else {map.setCenter(new kakao.maps.LatLng(points[0].lat,points[0].lng));map.setLevel(5);}
+      }
+      function scheduleFit(){
+        if(closed||frame)return;
+        frame=requestAnimationFrame(()=>{frame=0;fitWaypoints();});
+      }
+      function closeWaypointMap(){
+        if(closed)return;
+        closed=true;
+        if(observer)observer.disconnect();
+        if(frame)cancelAnimationFrame(frame);
+        layer.remove();
+      }
+      layer._disposeWaypointMap=closeWaypointMap;
+      layer.addEventListener('click',e=>{
+        if(e.target===layer||e.target.closest('[data-waypoint-map-close]'))closeWaypointMap();
       });
-      requestAnimationFrame(()=>{map.relayout();if(points.length>1)map.setBounds(bounds,65,35,65,35);else map.setLevel(5);});
+      // Initialize only after the visible dialog has measurable dimensions.
+      // Observe real layout changes rather than relying on arbitrary delays.
+      function initialize(){
+        frame=0;
+        if(closed)return;
+        if(mapEl.clientWidth<=0||mapEl.clientHeight<=0){
+          frame=requestAnimationFrame(initialize);
+          return;
+        }
+        map=new kakao.maps.Map(mapEl,{center:new kakao.maps.LatLng(points[0].lat,points[0].lng),level:7});
+        points.forEach(point=>{
+          const pos=new kakao.maps.LatLng(point.lat,point.lng);
+          const marker=new kakao.maps.Marker({map,position:pos,title:point.order+'. '+point.name,image:_mkrImgRoute(point.order===index+1?'#c18b12':'#1969aa',String(point.order)),zIndex:point.order===index+1?1000:100});
+          const info=new kakao.maps.InfoWindow({content:'<div style="padding:7px 10px;font-size:13px;white-space:nowrap;">'+esc(point.order+'. '+point.name)+'</div>'});
+          kakao.maps.event.addListener(marker,'click',()=>info.open(map,marker));
+        });
+        if(typeof ResizeObserver==='function'){
+          observer=new ResizeObserver(scheduleFit);
+          observer.observe(mapEl);
+        }
+        scheduleFit();
+      }
+      frame=requestAnimationFrame(initialize);
     }
     let overlay=document.getElementById('oai-pilgrimage-place-info-overlay');
     if(!overlay){
