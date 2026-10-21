@@ -16743,14 +16743,21 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }catch(_e){}
   }
   let oaiPhotoManifestStarted=false;
-  let oaiPhotoManifestSignature='';
-  let oaiPhotoManifestRunning=false;
+  let oaiPhotoManifestInProgress=false;
+  let oaiPhotoManifestConfirmedSignature='';
+  let oaiPhotoManifestAwaiting=null;
+  window.oaiPhotoManifestAck=function(requestId,ok){
+    const waiting=oaiPhotoManifestAwaiting;
+    if(!waiting||waiting.id!==requestId)return;
+    oaiPhotoManifestAwaiting=null;
+    clearTimeout(waiting.timer);
+    waiting.done(!!ok);
+  };
   function oaiQueuePhotoRestoreManifest(){
-    if(oaiPhotoManifestRunning)return;
-    if(!oaiPhotoRestoreAllowed())return;
+    if(oaiPhotoManifestInProgress||!oaiPhotoRestoreAllowed())return;
     const native=window.GildongmuNative||window.Android;
     if(!native||typeof native.enqueueVisitPhotoRestoreManifest!=='function')return;
-    oaiPhotoManifestRunning=true;
+    oaiPhotoManifestInProgress=true;
     const idle=fn=>typeof window.requestIdleCallback==='function'?requestIdleCallback(fn):setTimeout(fn,0);
     idle(function(){
       try{
@@ -16784,31 +16791,50 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         // The first app launch may run before imported journals exist. A blank
         // inventory is not a completed registration: allow the successful import
         // callback (or a later startup) to submit the restored records.
-        if(!photos.length){oaiPhotoManifestStarted=false;oaiPhotoManifestSignature='';oaiPhotoManifestRunning=false;return;}
-        // Reconcile changed journals without repeatedly enqueuing an unchanged inventory.
+        if(!photos.length){oaiPhotoManifestInProgress=false;return;}
         const signature=JSON.stringify(photos);
-        if(oaiPhotoManifestStarted && signature===oaiPhotoManifestSignature){
-          oaiPhotoManifestRunning=false;return;
-        }
+        if(oaiPhotoManifestStarted&&signature===oaiPhotoManifestConfirmedSignature){oaiPhotoManifestInProgress=false;return;}
         let offset=0;
+        function fail(){oaiPhotoManifestInProgress=false;oaiPhotoManifestStarted=false;}
         function sendBatch(){
           try{
-            if(offset>=photos.length)return;
-            native.enqueueVisitPhotoRestoreManifest(JSON.stringify(photos.slice(offset,offset+100)));
-            offset+=100;
-            if(offset<photos.length)idle(sendBatch);
-            else {oaiPhotoManifestSignature=signature;oaiPhotoManifestStarted=true;oaiPhotoManifestRunning=false;}
-          }catch(_e){oaiPhotoManifestStarted=false;oaiPhotoManifestRunning=false;}
+            if(offset>=photos.length){
+              oaiPhotoManifestConfirmedSignature=signature;
+              oaiPhotoManifestStarted=true;
+              oaiPhotoManifestInProgress=false;
+              return;
+            }
+            const batch=JSON.stringify(photos.slice(offset,offset+100));
+            if(typeof native.enqueueVisitPhotoRestoreManifestAck==='function'){
+              const id='m'+Date.now()+'_'+offset;
+              const done=ok=>{
+                if(!ok){fail();return;}
+                offset+=100;
+                idle(sendBatch);
+              };
+              const timer=setTimeout(()=>{
+                if(oaiPhotoManifestAwaiting&&oaiPhotoManifestAwaiting.id===id){
+                  oaiPhotoManifestAwaiting=null;
+                  fail();
+                }
+              },30000);
+              oaiPhotoManifestAwaiting={id,timer,done};
+              native.enqueueVisitPhotoRestoreManifestAck(batch,id);
+            }else{
+              // Older production Android versions have no acknowledgement API.
+              // Preserve their original batching behavior without claiming confirmation.
+              native.enqueueVisitPhotoRestoreManifest(batch);
+              offset+=100;
+              if(offset<photos.length)idle(sendBatch);
+              else {oaiPhotoManifestInProgress=false;oaiPhotoManifestStarted=true;}
+            }
+          }catch(_e){fail();}
         }
         sendBatch();
-      }catch(_e){oaiPhotoManifestStarted=false;oaiPhotoManifestRunning=false;}
+      }catch(_e){oaiPhotoManifestInProgress=false;oaiPhotoManifestStarted=false;}
     });
   }
-  // Journals may become available after the initial startup snapshot. A foreground
-  // reconciliation detects changed inventories; SQLite keeps existing photo states.
-  setInterval(function(){
-    if(document.visibilityState==='visible')oaiQueuePhotoRestoreManifest();
-  },120000);
+  // A new foreground session may contain newly imported journal entries.
   document.addEventListener('visibilitychange',function(){
     if(document.visibilityState==='visible')oaiQueuePhotoRestoreManifest();
   });
@@ -17326,7 +17352,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           // Journal data has just changed. Any earlier manifest snapshot (including
           // an empty one from startup) is stale; rebuild from these imported records.
           oaiPhotoManifestStarted=false;
-          oaiPhotoManifestSignature='';
           // A restored diocese already satisfies first-run parish setup.
           if(configuredDiocese())localStorage.setItem('oai_onboarding_done_v1','1');
           localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'1');localStorage.setItem(OAI_GOOGLE_DRIVE_CONNECTED_KEY,'1');oaiDriveReady=true;
