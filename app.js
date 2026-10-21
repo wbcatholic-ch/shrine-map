@@ -18625,7 +18625,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(document.hidden)return;
     try{
       const state=_dailyState();
-      const first=Object.keys(state.failures||{}).filter(d=>d<_dailyIso(Date.now())).sort()[0];
+      const completed=_dailyStoredCourses();
+      const first=Object.keys(state.failures||{}).filter(function(d){
+        if(d>=_dailyIso(Date.now()))return false;
+        // Do not show a stale failure for a date that has already been
+        // registered. Preserve the journal; this is a read-only display guard.
+        if(state.auto[d]&&state.auto[d].done)return false;
+        return !completed.some(function(c){return c&&c.autoGps&&c.sourceDate===d
+          &&_courseCompletionList(c).some(function(x){return _dailyIso(x.completedAt)===d;});});
+      }).sort()[0];
       if(first)_dailyShowFailure(first);
     }catch(e){console.warn('[코스 등록 실패 안내 확인]',e);}
   }
@@ -19855,7 +19863,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const courseRows=completion&&course&&_courseHasGpsLockedCompletion(course)?_manualMerged(course).map(x=>x.point):loadPlan();
       const points=courseRows.map((x,i)=>({name:String(x&&x.name||''),lat:Number(x&&x.lat),lng:Number(x&&x.lng),order:i+1})).filter(x=>_validGpsPair(x.lat,x.lng));
       if(!points.length){_oaiShowNavigationNotice('지도 안내','표시할 경유지 좌표가 없습니다.',function(){});return;}
-      if(!(window.kakao&&kakao.maps)){_oaiShowNavigationNotice('지도 안내','지도가 아직 준비되지 않았습니다. 잠시 후 다시 시도해 주세요.',function(){});return;}
+      // This read-only map can be opened before the main map screen has loaded
+      // the Kakao SDK. Use the existing shared SDK loader instead of failing.
+      if(!(window.kakao&&kakao.maps&&kakao.maps.Map&&kakao.maps.LatLng)){
+        _ensureKakaoServicesReady().then(function(ready){
+          if(ready&&window.kakao&&kakao.maps&&kakao.maps.Map&&kakao.maps.LatLng)showWaypointsMap();
+          else _oaiShowNavigationNotice('지도 안내','지도를 불러오지 못했습니다. 네트워크를 확인하고 다시 시도해 주세요.',function(){});
+        });
+        return;
+      }
       closePilgrimagePlaceInfo();
       let layer=document.getElementById('oai-pilgrimage-waypoints-readonly');
       if(!layer){
