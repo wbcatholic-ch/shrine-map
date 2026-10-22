@@ -3151,10 +3151,10 @@ function _oaiJournalSelectedDate(kind,visits){
 function _oaiVisitDatePickerHtml(kind,visits){
   if(!visits.length)return '';
   const selected=_oaiJournalSelectedDate(kind,visits);
-  const options='<option value="all"'+(selected==='all'?' selected':'')+'>전체 방문 기록</option>'+visits.map(function(v){
+  const options='<option value="all"'+(selected==='all'?' selected':'')+'>전체</option>'+visits.map(function(v){
     const d=String(v.date||'');return '<option value="'+_visitHtmlEsc(d)+'"'+(selected===d?' selected':'')+'>'+_visitHtmlEsc(_formatVisitDate(d))+'</option>';
   }).join('');
-  return '<label class="oai-stamp-visit-filter"><span>방문 날짜</span><select data-oai-visit-date-filter="'+_visitHtmlEsc(kind)+'" aria-label="방문 날짜 선택">'+options+'</select></label>';
+  return '<label class="oai-stamp-visit-filter"><span>사진</span><select data-oai-visit-date-filter="'+_visitHtmlEsc(kind)+'" aria-label="사진 날짜 선택">'+options+'</select></label>';
 }
 function _oaiJournalDeveloperEnabled(){
   // Release gate: existing production Android versions must not expose the new
