@@ -1916,8 +1916,10 @@ function _oaiQueueGpsCourseDate(date,method){
     if(!a.includes(date)){a.push(date);a.sort();localStorage.setItem(OAI_GPS_PENDING_DATES_KEY,JSON.stringify(a));}
   }catch(e){console.warn('[GPS 코스 날짜] 저장 실패',e);}
 }
-function _newVisitEntry(date,method){
-  return {date:String(date),method:method||'manual',savedAt:new Date().toISOString()};
+function _newVisitEntry(date,method,measuredAt){
+  const time=Number(measuredAt),measuredDate=Number.isFinite(time)&&time>0?new Date(time):null;
+  const sameDay=measuredDate&&_todayISODate.call(null)===String(date);
+  return {date:String(date),method:method||'manual',savedAt:(String(method)==='gps'&&sameDay)?measuredDate.toISOString():new Date().toISOString()};
 }
 function _getShrineVisitKey(item){
   if(!item) return '';
@@ -2034,7 +2036,7 @@ function _isVisitedShrine(item){ return _getShrineVisitCount(item)>0; }
 function _hasShrineVisitOnDate(item,date){
   return _hasVisitDate(_getShrineVisitDates(item),date);
 }
-function _addShrineVisit(item,date,method){
+function _addShrineVisit(item,date,method,measuredAt){
   const key=_getShrineVisitKey(item);
   if(!key) return false;
   date=String(date||'').trim();
@@ -2049,7 +2051,7 @@ function _addShrineVisit(item,date,method){
   if(_hasVisitDate(rec.visits,date)) return false;
   if(!rec.placeId)rec.placeId=_oaiPlaceCanonicalId('shrine',item);
   _clearManualVisitDeletion('shrine',key,date);
-  rec.visits.push(_newVisitEntry(date,method));
+  rec.visits.push(_newVisitEntry(date,method,measuredAt));
   rec.visits.sort(function(a,b){return _compareShrineVisits(_normalizeVisitEntry(a),_normalizeVisitEntry(b));});
   data[key]=rec;
   _saveShrineVisits(data);
@@ -4463,20 +4465,20 @@ function _oaiNotifyActiveCourseGpsVisit(){
   // 저장 완료 후 기존 순례코스 조회 함수가 기록을 재대조한다.
   try{setTimeout(function(){if(typeof window._oaiSyncActivePilgrimageFromVisits==='function')window._oaiSyncActivePilgrimageFromVisits();},0);}catch(_e){}
 }
-function _registerGpsPlaceVisit(kind,item,date){
+function _registerGpsPlaceVisit(kind,item,date,measuredAt){
   try{
     if(!item)return {added:false,already:false,kind:String(kind||'')};
     const visitDate=String(date||_todayISODate());
     if(kind==='shrine'){
       const already=_hasShrineVisitOnDate(item,visitDate);
-      const added=!already&&!!_addShrineVisit(item,visitDate,'gps');
+      const added=!already&&!!_addShrineVisit(item,visitDate,'gps',measuredAt);
       if(already||added)_oaiJointStampCounterpart('shrine',item,visitDate);
       if(added)_oaiNotifyActiveCourseGpsVisit();
       return {added:added,already:already,kind:'shrine',item:item};
     }
     if(kind==='parish'){
       const already=_hasVisitDate(_parishVisits(item),visitDate);
-      const added=!already&&!!_addParishVisit(item,visitDate,'gps');
+      const added=!already&&!!_addParishVisit(item,visitDate,'gps',measuredAt);
       if(already||added)_oaiJointStampCounterpart('parish',item,visitDate);
       if(added)_oaiNotifyActiveCourseGpsVisit();
       return {added:added,already:already,kind:'parish',item:item};
@@ -4631,7 +4633,7 @@ function _loadParishVisits(){try{const v=localStorage.getItem(OAI_PARISH_VISITS_
 function _saveParishVisits(d){try{localStorage.setItem(OAI_PARISH_VISITS_KEY,JSON.stringify(d||{}))}catch(_e){}}
 function _parishVisits(p){const d=_loadParishVisits(),r=d[_parishVisitStoredKey(p,d)]||{},a=Array.isArray(r.visits)?r.visits:[];return a.map(_normalizeVisitEntry).filter(function(v){return v&&v.date;}).sort(_compareShrineVisits);}
 function _parishVisitCount(p){return _parishVisits(p).length;}
-function _addParishVisit(p,date,method){const d=_loadParishVisits(),key=_parishVisitStoredKey(p,d);if(!key||!_isVisitDate(date))return false;const r=d[key]&&typeof d[key]==='object'?d[key]:{name:p.name||'',diocese:p.diocese||'',addr:p.addr||'',visits:[]};r.visits=Array.isArray(r.visits)?r.visits:[];if(_hasVisitDate(r.visits,date))return false;_clearManualVisitDeletion('parish',key,date);r.visits.push(_newVisitEntry(date,method));r.visits.sort(_compareShrineVisits);if(!r.placeId)r.placeId=_oaiPlaceCanonicalId('parish',p);d[key]=r;_saveParishVisits(d);try{const persisted=_loadParishVisits()[key];if(!persisted||!_hasVisitDate(persisted.visits,date))return false;}catch(e){console.warn('[성당 기록 저장 검증 실패]',e);return false;}_oaiQueueGpsCourseDate(date,method);return true;}
+function _addParishVisit(p,date,method,measuredAt){const d=_loadParishVisits(),key=_parishVisitStoredKey(p,d);if(!key||!_isVisitDate(date))return false;const r=d[key]&&typeof d[key]==='object'?d[key]:{name:p.name||'',diocese:p.diocese||'',addr:p.addr||'',visits:[]};r.visits=Array.isArray(r.visits)?r.visits:[];if(_hasVisitDate(r.visits,date))return false;_clearManualVisitDeletion('parish',key,date);r.visits.push(_newVisitEntry(date,method,measuredAt));r.visits.sort(_compareShrineVisits);if(!r.placeId)r.placeId=_oaiPlaceCanonicalId('parish',p);d[key]=r;_saveParishVisits(d);try{const persisted=_loadParishVisits()[key];if(!persisted||!_hasVisitDate(persisted.visits,date))return false;}catch(e){console.warn('[성당 기록 저장 검증 실패]',e);return false;}_oaiQueueGpsCourseDate(date,method);return true;}
 function _deleteParishVisit(p,i){const d=_loadParishVisits(),key=_parishVisitStoredKey(p,d),r=d[key];if(!r||!Array.isArray(r.visits)||i<0||i>=r.visits.length||String(r.visits[i].method||'')==='gps')return false;_recordManualVisitDeletion('parish',key,r.visits[i]);r.visits.splice(i,1);if(r.visits.length)d[key]=r;else delete d[key];_saveParishVisits(d);return true;}
 function _parishEntries(){const a=[];(PARISHES||[]).forEach(function(p,i){if(!p||p.diocese==='군종교구')return;const v=_parishVisits(p);if(v.length)a.push({p:p,i:i,v:v,n:v.length});});return a.sort(function(a,b){return _compareShrineVisits(a.v[0],b.v[0])||String(a.p.name).localeCompare(String(b.p.name),'ko')});}
 function _parishUnvisitedEntries(){const saved=_loadParishVisits();return (PARISHES||[]).map(function(p,i){const r=saved[_parishVisitStoredKey(p,saved)],v=r&&Array.isArray(r.visits)?r.visits:[];return {p:p,i:i,v:v};}).filter(function(x){return x.p&&x.p.diocese!=='군종교구'&&!x.v.length;}).sort(function(a,b){return String(a.p.name||'').localeCompare(String(b.p.name||''),'ko');});}
@@ -18296,8 +18298,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
   }
   function _courseAllPlacesDone(places){return Array.isArray(places)&&places.length>0&&places.every(x=>!!(x&&x.done));}
-  // 도보 지도 및 Android 위치 서비스가 준비될 때까지 사용자 선택은 비공개.
-  const WALK_FOLLOW_ENABLED=false;
+  // 도보 선택은 해당 서비스 브리지를 탑재한 Android 내부 테스트 빌드에서만 연다.
+  // 운영 중인 구형 Android 및 일반 웹 이용자에게는 기존 자동차 동작을 유지한다.
+  const WALK_FOLLOW_ENABLED=(()=>{
+    try{return !!(window.GildongmuNative&&
+      typeof window.GildongmuNative.isWalkingPilgrimageSupported==='function'&&
+      window.GildongmuNative.isWalkingPilgrimageSupported());}
+    catch(_e){return false;}
+  })();
   function _followTravelMode(mode){return mode==='walk'?'walk':'car';}
   function _readActiveFollowRaw(){
     try{
@@ -18310,6 +18318,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const cur=_readActiveFollowRaw();
       if(!courseId||!cur||cur.courseId===String(courseId)){
         if(cur)_endDailyFollowSession(cur);
+        if(cur&&cur.travelMode==='walk')_walkingNativeStop();
         localStorage.removeItem(ACTIVE_FOLLOW_KEY);
       }
     }catch(_e){}
@@ -18326,6 +18335,42 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(_courseCompletionList(c).some(x=>_dailyIso(x.completedAt)===_dailyIso(s.startedAt))){_clearActiveFollow(s.courseId);return null;}
     return {courseId:s.courseId,startedAt:s.startedAt,travelMode:s.travelMode,course:c,remainingMs:Math.max(0,new Date(new Date(now).getFullYear(),new Date(now).getMonth(),new Date(now).getDate()+1).getTime()-now)};
   }
+  function _walkingNative(){
+    try{return window.GildongmuNative||null;}catch(_e){return null;}
+  }
+  function _walkingNativeStop(){
+    const native=_walkingNative();
+    if(native&&typeof native.stopWalkingPilgrimage==='function'){
+      try{native.stopWalkingPilgrimage();}catch(e){console.warn('[도보 순례] 서비스 종료 요청 실패',e);}
+    }
+  }
+  function _walkingNativeCoursePoints(active){
+    const places=Array.isArray(active&&active.course&&active.course.places)?active.course.places:[];
+    return JSON.stringify(places.filter(x=>x&&_validGpsPair(x.lat,x.lng)).map(x=>({
+      lat:Number(x.lat),lng:Number(x.lng),name:String(x.name||''),done:!!x.done
+    })).slice(0,100));
+  }
+  function _walkingNativeStart(active){
+    if(!active||active.travelMode!=='walk')return;
+    const native=_walkingNative();
+    if(!native||typeof native.startWalkingPilgrimage!=='function')return;
+    const places=Array.isArray(active.course&&active.course.places)?active.course.places:[];
+    const visited=places.filter(x=>x&&x.done).length;
+    const next=places.find(x=>x&&!x.done);
+    try{native.startWalkingPilgrimage(active.startedAt,visited,places.length,next?String(next.name||''):'','거리 확인 중',_walkingNativeCoursePoints(active));}
+    catch(e){console.warn('[도보 순례] 서비스 시작 요청 실패',e);}
+  }
+  function _walkingNativeRefresh(active){
+    if(!active||active.travelMode!=='walk')return;
+    const native=_walkingNative();
+    if(!native||typeof native.updateWalkingPilgrimage!=='function')return;
+    const places=Array.isArray(active.course&&active.course.places)?active.course.places:[];
+    const visited=places.filter(x=>x&&x.done).length;
+    const next=places.find(x=>x&&!x.done);
+    try{native.updateWalkingPilgrimage(active.startedAt,visited,places.length,
+      next?String(next.name||''):'','거리 확인 중',_walkingNativeCoursePoints(active));}
+    catch(e){console.warn('[도보 순례] 상태창 갱신 실패',e);}
+  }
   function _activateFollowCourse(id,travelMode){
     const requestedId=String(id||'');
     const existing=_activeFollowState();
@@ -18333,14 +18378,29 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     let a=loadCourses(),i=a.findIndex(function(x){return x.id===requestedId;});
     if(i<0)return null;
     if(existing&&existing.courseId===requestedId)return a[i];
+    // Never persist an unusable walking session when native location permission is absent.
+    if(travelMode==='walk'){
+      const native=_walkingNative();
+      if(!WALK_FOLLOW_ENABLED||!native||
+         typeof native.hasWalkingLocationPermission!=='function'){
+        window.alert('현재 앱에서는 도보 순례 GPS 추적을 사용할 수 없습니다.');return null;
+      }
+      try{
+        if(!native.hasWalkingLocationPermission()){
+          window.alert('도보 순례를 시작하려면 먼저 앱의 위치 권한을 허용해 주세요.');return null;
+        }
+      }catch(_e){window.alert('위치 권한을 확인할 수 없습니다.');return null;}
+    }
     const now=Date.now();
     if(now>=_dailyDayEnd(_dailyIso(now))){window.alert('날짜가 변경되었습니다. 새 날짜의 순례하기를 시작해 주세요.');return null;}
     const c=Object.assign({},a[i],{lastStartedAt:now,updatedAt:now});
     a[i]=c;
-    try{localStorage.setItem(ACTIVE_FOLLOW_KEY,JSON.stringify({courseId:c.id,startedAt:now,travelMode:_followTravelMode(travelMode)}));}catch(_e){}
-    _recordDailyFollowSession(c,now);
     if(!saveCourses(a))return null;
+    try{localStorage.setItem(ACTIVE_FOLLOW_KEY,JSON.stringify({courseId:c.id,startedAt:now,travelMode:_followTravelMode(travelMode)}));}
+    catch(_e){window.alert('순례 진행 상태를 저장할 수 없습니다.');return null;}
+    _recordDailyFollowSession(c,now);
     _recordActiveCourseGpsFromVisits();
+    _walkingNativeStart(_activeFollowState());
     return loadCourses().find(function(x){return x.id===requestedId;})||c;
   }
   function _isActiveFollowCourse(id){
@@ -19372,7 +19432,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const routeOnlyDestination=places.length===0?_pilgrimageRegisteredDestination(prev.end):null;
       const routeOnlyEndReached=!!(routeOnlyDestination&&_dailyRecordedVisitAt(prev.end,_dailyIso(Date.now())));
       if(routeOnlyEndReached)changed=true;
-      if(!changed)return false;
+      if(!changed){_walkingNativeRefresh(active);return false;}
       const now=Date.now(),isDone=routeOnlyEndReached||(places.length>0&&places.every(x=>x&&x.done&&x.doneMethod==='gps'));
       const next=Object.assign({},prev,{places:places,updatedAt:now,gpsSettled:isDone||!!prev.gpsSettled});
       const completions=_courseCompletionList(prev).slice();
@@ -19397,6 +19457,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(!verified||!_dailySameOrderedPlaces(verified.places,places))throw new Error('순례코스 저장 재확인 실패');
       if(currentCourseId===next.id){savePlan(places,true);saveMeta({name:next.name||'새 순례계획',start:next.start||null,end:next.end||null},true);}
       if(isDone){_clearActiveFollow(next.id);_clearRepeatEditGuard(next.id);}
+      else _walkingNativeRefresh(_activeFollowState());
       if(isDone&&justCompleted){
         setTimeout(()=>{const msg='순례를 축하합니다!\n계획하신 순례코스가 완료되어 순례완료 목록에 저장되었습니다.';if(typeof window.oaiPilgrimageCongratulation==='function')window.oaiPilgrimageCongratulation(msg);},120);
       }
@@ -19406,6 +19467,103 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       return true;
     }catch(e){console.warn('[가톨릭길동무] 활성 순례코스 GPS 연동 실패',e);return false;}
   }
+  // Native service journals timestamps; web alone persists stamps through existing stores.
+  let _walkingReplayBusy=false;
+  function _reconcileWalkingNativeFix(){
+    if(_walkingReplayBusy)return;
+    const active=_activeFollowState(),native=_walkingNative();
+    if(!active||active.travelMode!=='walk'||!native||
+       typeof native.consumeWalkingPilgrimageFixes!=='function')return;
+    _walkingReplayBusy=true;
+    try{
+      const raw=String(native.consumeWalkingPilgrimageFixes(active.startedAt)||'');
+      const now=Date.now(),date=_dailyIso(now);
+      const fixes=raw.split('\n').map(function(line){
+        const p=line.split(',').map(Number);
+        if(p.length!==4||p.some(x=>!Number.isFinite(x)))return null;
+        const [lat,lng,accuracy,at]=p;
+        if(at>now+5000||at<active.startedAt||accuracy<0||accuracy>100||
+           !_validGpsPair(lat,lng))return null;
+        return {lat,lng,at};
+      }).filter(Boolean).sort((x,y)=>x.at-y.at);
+      if(!fixes.length)return;
+      // Do not consume historical GPS while place data is incomplete or across midnight.
+      if(!Array.isArray(SHRINES)||!SHRINES.length||!Array.isArray(PARISHES)||!PARISHES.length)return;
+      let through=0;
+      for(const fix of fixes){
+        if(_dailyIso(fix.at)!==date)break;
+        const entry=_nearestShrineWithinAutoVisitRadius(fix.lat,fix.lng,date);
+        if(entry&&entry.item&&(! _oaiIsRestrictedPlace('shrine',entry.item)||
+            _oaiAllowRestrictedGpsVisit('shrine',entry.item,_getShrineVisitDates(entry.item)))){
+          const result=_registerGpsPlaceVisit('shrine',entry.item,date,fix.at);
+          if(!result.added&&!result.already)break;
+        }
+        let best=null,bestM=Infinity;
+        PARISHES.forEach(function(place){
+          if(!place||place.diocese==='군종교구'||!_validGpsPair(place.lat,place.lng))return;
+          const meters=calcDist(fix.lat,fix.lng,place.lat,place.lng)*1000;
+          if(meters<=OAI_PARISH_AUTO_VISIT_RADIUS_M&&meters<bestM){best=place;bestM=meters;}
+        });
+        if(best){
+          const visits=_parishVisits(best),restricted=_oaiIsRestrictedPlace('parish',best)||
+            (_isSameParish(best,_configuredMyParish())&&_isMyParishAutoVisitEnabled());
+          if(!restricted||_oaiAllowRestrictedGpsVisit('parish',best,visits)){
+            const result=_registerGpsPlaceVisit('parish',best,date,fix.at);
+            if(!result.added&&!result.already)break;
+          }
+        }
+        through=fix.at;
+      }
+      if(through>0){
+        // Native acknowledgement only after each corresponding save was verified.
+        if(typeof native.acknowledgeWalkingPilgrimageFixes==='function')
+          native.acknowledgeWalkingPilgrimageFixes(active.startedAt,through);
+        _recordActiveCourseGpsFromVisits();
+      }
+    }catch(e){console.warn('[도보 순례] GPS 방문 재확인 보류',e);}
+    finally{_walkingReplayBusy=false;}
+  }
+  document.addEventListener('visibilitychange',function(){
+    if(!document.hidden){
+      const active=_activeFollowState();
+      if(active&&active.travelMode==='walk'){
+        _reconcileWalkingNativeFix();
+        _walkingNativeRefresh(active);
+      }
+    }
+  });
+  // On a cold launch the document may start visible, so visibilitychange never fires.
+  // Only reconcile an existing walking session; do not start a new pilgrimage.
+  window.addEventListener('pageshow',function(){
+    setTimeout(function(){
+      const active=_activeFollowState();
+      if(active&&active.travelMode==='walk'){
+        _reconcileWalkingNativeFix();
+        _walkingNativeRefresh(active);
+      }
+    },1200);
+  });
+  window._oaiOpenWalkingFromNotification=function(){
+    const native=_walkingNative(),active=_activeFollowState();
+    if(!native||!active||active.travelMode!=='walk'||
+       typeof native.consumeWalkingReturnRequest!=='function')return false;
+    try{
+      if(!native.consumeWalkingReturnRequest())return false;
+      const display=function(){
+        try{openPlanner();openFollow(true);_reconcileWalkingNativeFix();}
+        catch(e){console.warn('[도보 순례] 상태창 복귀 실패',e);}
+      };
+      if(coverVisible()&&typeof hideCoverAndRun==='function')hideCoverAndRun(display);
+      else display();
+      return true;
+    }catch(e){console.warn('[도보 순례] 상태창 이동 오류',e);return false;}
+  };
+  document.addEventListener('visibilitychange',function(){
+    if(!document.hidden)window._oaiOpenWalkingFromNotification();
+  });
+  window.addEventListener('pageshow',function(){
+    setTimeout(function(){window._oaiOpenWalkingFromNotification();},1700);
+  });
   window._oaiSyncActivePilgrimageFromVisits=_recordActiveCourseGpsFromVisits;
   window._oaiValidateActivePilgrimageFollow=function(){return _activeFollowState();};
 
