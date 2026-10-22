@@ -18261,7 +18261,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 
       const af=_readActiveFollowRaw();
       if(af&&af.courseId===g.courseId){
-        localStorage.setItem(ACTIVE_FOLLOW_KEY,JSON.stringify({courseId:newId,startedAt:af.startedAt||now}));
+        localStorage.setItem(ACTIVE_FOLLOW_KEY,JSON.stringify({courseId:newId,startedAt:af.startedAt||now,travelMode:_followTravelMode(af.travelMode)}));
       }
       localStorage.removeItem(REPEAT_EDIT_GUARD_KEY);
       saveCourses(a);
