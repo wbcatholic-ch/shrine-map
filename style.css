@@ -7931,6 +7931,9 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
   grid-template-columns:1fr 1fr!important;
   gap:8px!important;
 }
+#oai-pilgrimage-detail-view.is-active-follow .oai-pilgrimage-detail-actions{
+  grid-template-columns:minmax(0,1fr)!important;
+}
 #oai-pilgrimage-detail-view:not(.is-completion-view) .oai-pilgrimage-detail-actions .oai-pilgrimage-save,
 #oai-pilgrimage-detail-view:not(.is-completion-view) .oai-pilgrimage-detail-actions .oai-pilgrimage-follow{
   width:100%!important;
@@ -7996,6 +7999,7 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
   display:flex!important;
   align-items:center!important;
   justify-content:flex-end!important;
+  flex-wrap:wrap!important;
   gap:8px!important;
   min-height:54px!important;
   margin:0!important;
@@ -8032,22 +8036,8 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
   color:#155f9e!important;
   width:100%!important;
   max-width:100%!important;
-  box-sizing:border-box!important;
   margin-left:0!important;
-}
-#oai-pilgrimage-list-view .oai-pilgrimage-course-plan-actions:has(>.oai-pilgrimage-course-follow-btn.is-active){
-  display:flex!important;
-  flex-wrap:wrap!important;
-}
-#oai-pilgrimage-list-view .oai-pilgrimage-course-plan-actions>.oai-pilgrimage-course-follow-btn.is-active{
-  flex:0 0 100%!important;
-}
-#oai-pilgrimage-list-view .oai-pilgrimage-course-complete>.oai-pilgrimage-course-repeat.is-active{
-  display:block!important;
-  width:100%!important;
-  max-width:100%!important;
   box-sizing:border-box!important;
-  margin-left:0!important;
 }
 .oai-pilgrimage-following-badge{
   margin-right:auto!important;
@@ -8059,6 +8049,13 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 }
 .oai-pilgrimage-course-complete .oai-pilgrimage-course-repeat{
   align-self:center!important;
+}
+.oai-pilgrimage-course-complete .oai-pilgrimage-course-repeat.is-active{
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  margin-left:0!important;
+  box-sizing:border-box!important;
 }
 
 @media(max-width:390px){

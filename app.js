@@ -19759,7 +19759,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const hasDone=_courseCompletionList(c).length>0,isFollowing=!!(activeFollow&&activeFollow.courseId===c.id);
       const canFollow=!!((Array.isArray(c.places)&&c.places.length)||_pilgrimageDestinationCanFollow(c.end));
       const followLabel=isFollowing?'■ 순례 종료':'▶ 순례하기';
-      const followHtml=pilgrimageCourseTab==='plan'?'<div class="oai-pilgrimage-course-plan-actions">'+(isFollowing?'<span class="oai-pilgrimage-following-badge">진행 중</span>':'<span></span>')+'<button type="button" class="oai-pilgrimage-course-follow-btn'+(isFollowing?' is-active':'')+(!canFollow?' is-disabled':'')+'" data-course-follow="'+esc(c.id)+'"'+(canFollow?'':' disabled aria-disabled="true"')+'>'+followLabel+'</button></div>':'';
+      const followHtml=pilgrimageCourseTab==='plan'?'<div class="oai-pilgrimage-course-plan-actions">'+(isFollowing?'':'<span></span>')+'<button type="button" class="oai-pilgrimage-course-follow-btn'+(isFollowing?' is-active':'')+(!canFollow?' is-disabled':'')+'" data-course-follow="'+esc(c.id)+'"'+(canFollow?'':' disabled aria-disabled="true"')+'>'+followLabel+'</button></div>':'';
       const completed=pilgrimageCourseTab==='complete'?_courseCompletionMetaHtml(c,isFollowing):{header:'',footer:''};
       const heading=pilgrimageCourseTab==='complete'?completed.header:'<div class="oai-pilgrimage-course-meta"><span class="oai-pilgrimage-course-plan-label">순례계획</span></div>';
       const rawName=String(c.name||'').trim()||autoCourseNameFromPlaces(c.places);
