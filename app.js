@@ -16997,12 +16997,49 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       panel.appendChild(card);
     });
   }
-  window.addEventListener('oai-anniversary-notification-open',e=>oaiAnniversaryPreview(String(e.detail&&e.detail.date||'')));
+  // Cold-start notification: the page load event does not mean the lazy shrine and
+  // parish catalogs are ready. Resolve both before matching persisted GPS records.
+  // A failed catalog load must never be presented as 'no GPS records'.
+  let oaiAnniversaryOpening=null;
+  function oaiOpenAnniversaryWhenReady(date){
+    if(date!=='2026-10-09')return Promise.resolve();
+    if(oaiAnniversaryOpening)return oaiAnniversaryOpening;
+    const loading=document.createElement('div');
+    loading.id='oai-anniversary-opening';
+    loading.style.cssText='position:fixed;inset:0;z-index:2147483001;background:rgba(16,28,48,.68);display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box';
+    const status=document.createElement('div');
+    status.style.cssText='background:#fff;color:#213149;border-radius:14px;padding:22px;text-align:center;max-width:350px;width:100%;line-height:1.6';
+    status.textContent='그날의 순례 기록을 불러오는 중입니다…';
+    loading.appendChild(status);
+    document.body.appendChild(loading);
+    oaiAnniversaryOpening=Promise.all([
+      _ensureShrineDataLoaded(),
+      _ensureAllParishDiocesesLoaded({silent:true})
+    ]).then(function(){
+      loading.remove();
+      oaiAnniversaryPreview(date);
+    }).catch(function(err){
+      console.warn('[그날의 순례] 장소 데이터 준비 실패',err);
+      status.textContent='순례 자료를 불러오지 못했습니다. 인터넷 연결을 확인하고 다시 시도해 주세요.';
+      const retry=document.createElement('button');
+      retry.type='button';retry.textContent='다시 불러오기';
+      retry.style.cssText='display:block;margin:14px auto 0;padding:10px 18px;background:#1d2b4d;color:white;border:0;border-radius:8px';
+      retry.addEventListener('click',function(){loading.remove();oaiAnniversaryOpening=null;oaiOpenAnniversaryWhenReady(date);});
+      status.appendChild(retry);
+      const close=document.createElement('button');
+      close.type='button';close.textContent='닫기';
+      close.style.cssText='display:block;margin:10px auto 0;padding:8px 18px;background:white;color:#213149;border:1px solid #cbd5e1;border-radius:8px';
+      close.addEventListener('click',function(){loading.remove();});
+      status.appendChild(close);
+    }).finally(function(){oaiAnniversaryOpening=null;});
+    return oaiAnniversaryOpening;
+  }
+  window.addEventListener('oai-anniversary-notification-open',e=>oaiOpenAnniversaryWhenReady(String(e.detail&&e.detail.date||'')));
   window.__oaiAnniversaryHandlerReady=true;
   function oaiReceivePendingAnniversary(){
     try{if(window.GildongmuNative&&typeof window.GildongmuNative.consumePendingAnniversaryDate==='function'){
       const date=window.GildongmuNative.consumePendingAnniversaryDate();
-      if(date)oaiAnniversaryPreview(String(date));
+      if(date)oaiOpenAnniversaryWhenReady(String(date));
     }}catch(_e){}
   }
   if(document.readyState==='complete')oaiReceivePendingAnniversary();
