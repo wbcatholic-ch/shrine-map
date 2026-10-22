@@ -10399,6 +10399,12 @@ html.oai-font-global .shrine-visit-card-badge strong,html:not(.ios-device).oai-s
 .oai-walk-map-preview header strong{font-size:16px}.oai-walk-map-preview header span{margin-left:auto;font-size:13px}
 .oai-walk-map-preview button{border:1px solid #ccd2d7;background:#fff;border-radius:10px;padding:9px 12px;color:#18252e}
 .oai-walk-map-preview .oai-walk-map-canvas{display:block;position:relative;flex:1 1 0%;height:100%;min-height:180px;width:100%;overflow:hidden}
-.oai-walk-map-preview .oai-walk-map-controls{position:absolute;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;box-shadow:0 2px 10px #0002;border-radius:10px}
-.oai-walk-map-preview .oai-walk-map-controls button{font-size:13px;font-weight:800;min-height:42px}
+.oai-walk-map-preview .oai-walk-map-controls{position:absolute!important;right:12px!important;bottom:calc(14px + env(safe-area-inset-bottom,0px))!important;z-index:10000!important;display:flex!important;visibility:visible!important;opacity:1!important;flex-direction:column;align-items:flex-end;gap:7px;pointer-events:auto}
+.oai-walk-map-preview .oai-walk-route-legend{box-sizing:border-box;max-width:min(90vw,340px);padding:7px 10px;border-radius:8px;background:rgba(255,255,255,.96);color:#34465d;font-size:11px;font-weight:800;line-height:1.35;box-shadow:0 2px 8px #0002;text-align:right}
+.oai-walk-map-preview .oai-walk-control-buttons{display:flex!important;visibility:visible!important;gap:8px;align-items:center;padding:0;border-radius:10px;box-shadow:0 2px 10px #0002}
+.oai-walk-map-preview .oai-walk-control-buttons button{display:inline-flex!important;align-items:center;justify-content:center;visibility:visible!important;opacity:1!important;position:static!important;min-height:44px!important;padding:9px 14px!important;font-size:13px;font-weight:900;white-space:nowrap;background:#fff!important;color:#18252e!important;border:1.5px solid #8c9aa7!important;border-radius:10px!important;pointer-events:auto!important}
 
+/* 도보 지도: 상태 메시지와 도보 길찾기 버튼을 작은 화면에서도 안정적으로 배치 */
+.oai-walk-map-controls .oai-walk-route-legend{min-width:0;overflow-wrap:anywhere;line-height:1.35}
+.oai-walk-map-controls .oai-walk-control-buttons{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px}
+.oai-walk-map-controls [data-walk-kakao-route]{font-weight:850;border-color:#19885b;color:#157448}
