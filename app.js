@@ -18332,14 +18332,16 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(existing&&existing.courseId&&String(existing.courseId)!==requestedId)return null;
     let a=loadCourses(),i=a.findIndex(function(x){return x.id===requestedId;});
     if(i<0)return null;
+    if(existing&&existing.courseId===requestedId)return a[i];
     const now=Date.now();
     if(now>=_dailyDayEnd(_dailyIso(now))){window.alert('날짜가 변경되었습니다. 새 날짜의 순례하기를 시작해 주세요.');return null;}
     const c=Object.assign({},a[i],{lastStartedAt:now,updatedAt:now});
     a[i]=c;
     try{localStorage.setItem(ACTIVE_FOLLOW_KEY,JSON.stringify({courseId:c.id,startedAt:now,travelMode:_followTravelMode(travelMode)}));}catch(_e){}
     _recordDailyFollowSession(c,now);
-    saveCourses(a);
-    return c;
+    if(!saveCourses(a))return null;
+    _recordActiveCourseGpsFromVisits();
+    return loadCourses().find(function(x){return x.id===requestedId;})||c;
   }
   function _isActiveFollowCourse(id){
     const s=_activeFollowState();
