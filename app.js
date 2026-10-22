@@ -20479,7 +20479,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       mapAddBtn.hidden=!showMapButton;
       mapAddBtn.style.display=showMapButton?'':'none';
       mapAddBtn.setAttribute('aria-hidden',showMapButton?'false':'true');
-      mapAddBtn.innerHTML='<span aria-hidden="true">🗺</span> '+(showCourseMap?'지도에서 코스보기':'지도에서 추가');
+      mapAddBtn.innerHTML='<span aria-hidden="true">🗺</span> '+(showCourseMap?(activeForEditControls.travelMode==='walk'?'도보순례로 돌아가기':'지도에서 코스보기'):'지도에서 추가');
     }
     if(addBtn){
       const showAdd=!editingActive&&((list.length>0&&!isCompletionView)||(isCompletionView&&gpsProtected));
@@ -21474,6 +21474,45 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(session.walkRouteLine)session.walkRouteLine.setMap(null);
     session.layer.remove();
   }
+  function showWalkMapExitConfirm(destination){
+    const session=walkMapSession;
+    if(!session||session.closed)return false;
+    const modal=session.layer.querySelector('[data-walk-exit-confirm]');
+    if(!modal)return false;
+    if(modal.hidden===false)return true;
+    session.exitDestination=destination==='cover'?'cover':'follow';
+    const title=modal.querySelector('[data-walk-exit-title]');
+    const message=modal.querySelector('[data-walk-exit-message]');
+    if(title)title.textContent=session.exitDestination==='cover'?'다른 메뉴로 이동할까요?':'순례하기로 돌아갈까요?';
+    if(message)message.textContent='지도를 닫아도 도보 순례와 GPS 기록은 계속 진행됩니다.';
+    modal.hidden=false;
+    return true;
+  }
+  function dismissWalkMapExitConfirm(){
+    const session=walkMapSession;
+    if(!session||session.closed)return false;
+    const modal=session.layer.querySelector('[data-walk-exit-confirm]');
+    if(!modal||modal.hidden)return false;
+    modal.hidden=true;
+    session.exitDestination=null;
+    return true;
+  }
+  function confirmWalkMapExit(){
+    const session=walkMapSession;
+    if(!session||session.closed)return;
+    const destination=session.exitDestination;
+    closeWalkMap();
+    if(destination==='cover'){
+      const m=planner();
+      if(m)_setPilgrimageLayerVisible(m,false);
+      if(typeof goToCover==='function')goToCover();
+    }else{
+      openPlanner({returnFromSearch:true});
+      pilgrimageDetailMode='plan';
+      setView('detail');
+      renderDetail();
+    }
+  }
   function openWalkMapPreview(){
     closeWalkMap();
     const active=_activeFollowState();
@@ -21487,13 +21526,16 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const layer=document.createElement('section');
     layer.id='oai-walk-map-preview';layer.className='oai-walk-map-preview';
     layer.setAttribute('aria-label','도보 순례 지도');
-    layer.innerHTML='<header><strong>도보 순례 · 지도</strong><span data-walk-progress></span><button type="button" data-walk-close>다른 메뉴</button></header><div class="oai-walk-map-canvas"></div><div class="oai-walk-map-controls"><div class="oai-walk-route-legend" data-walk-route-status aria-live="polite">현재 위치 확인 중 · 점선은 순례 순서 안내</div><div class="oai-walk-control-buttons"><button type="button" data-walk-kakao-route>카카오맵 도보길</button><button type="button" data-walk-overview>전체 보기</button><button type="button" data-walk-recenter>내 위치</button></div></div>';
+    layer.innerHTML='<header><strong>도보 순례 · 지도</strong><span data-walk-progress></span><button type="button" class="oai-walk-close" data-walk-close aria-label="순례하기로 돌아가기">×</button></header><div class="oai-walk-map-canvas"></div><button type="button" class="oai-walk-menu" data-walk-menu>다른 메뉴로 가기</button><div class="oai-walk-map-controls"><div class="oai-walk-route-legend" data-walk-route-status aria-live="polite">현재 위치 확인 중 · 점선은 순례 순서 안내</div><div class="oai-walk-control-buttons"><button type="button" data-walk-kakao-route>카카오맵 도보길</button><button type="button" data-walk-overview>전체 보기</button><button type="button" data-walk-recenter>내 위치</button></div></div><div class="oai-walk-exit-overlay" data-walk-exit-confirm hidden><div class="oai-walk-exit-dialog" role="dialog" aria-modal="true" aria-labelledby="oai-walk-exit-title"><h3 id="oai-walk-exit-title" data-walk-exit-title></h3><p data-walk-exit-message></p><div class="oai-walk-exit-actions"><button type="button" data-walk-exit-cancel>지도 계속 보기</button><button type="button" data-walk-exit-accept>이동하기</button></div></div></div>';
     document.body.appendChild(layer);
     const session={layer,closed:false,watchId:null,resizeObserver:null,map:null,myMarker:null,routeLine:null,walkRouteLine:null,
       walkRequest:null,lastWalkRouteAt:0,lastWalkRoutePoint:null,lastWalkRouteTarget:'',walkRouteBusy:false,startMarker:null,
       viewMode:'overview',lastPosition:null,firstPosition:null,lastFollowPosition:null,lastFollowAt:0};
     walkMapSession=session;
-    layer.querySelector('[data-walk-close]').addEventListener('click',closeWalkMap);
+    layer.querySelector('[data-walk-close]').addEventListener('click',()=>showWalkMapExitConfirm('follow'));
+    layer.querySelector('[data-walk-menu]').addEventListener('click',()=>showWalkMapExitConfirm('cover'));
+    layer.querySelector('[data-walk-exit-cancel]').addEventListener('click',dismissWalkMapExitConfirm);
+    layer.querySelector('[data-walk-exit-accept]').addEventListener('click',confirmWalkMapExit);
     const progress=layer.querySelector('[data-walk-progress]');
     function updateProgress(){
       const list=loadPlan();
@@ -21951,6 +21993,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 
   window._oaiPilgrimageBackHandle=function(){
     try{
+      // Walking map is the uppermost pilgrimage screen; Android/system back needs confirmation.
+      if(walkMapSession&&!walkMapSession.closed){
+        if(!dismissWalkMapExitConfirm())showWalkMapExitConfirm('follow');
+        return true;
+      }
       // 읽기 전용 경유지 지도는 순례완료 상세 위에 놓이는 최상위 화면이다.
       // 시스템 뒤로가기에서 아래 상세/목록을 먼저 전환하지 않도록 지도부터 닫는다.
       const waypointsMap=document.getElementById('oai-pilgrimage-waypoints-readonly');

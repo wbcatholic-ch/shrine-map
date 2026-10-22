@@ -10404,6 +10404,18 @@ html.oai-font-global .shrine-visit-card-badge strong,html:not(.ios-device).oai-s
 .oai-walk-map-preview .oai-walk-control-buttons{display:flex!important;visibility:visible!important;gap:8px;align-items:center;padding:0;border-radius:10px;box-shadow:0 2px 10px #0002}
 .oai-walk-map-preview .oai-walk-control-buttons button{display:inline-flex!important;align-items:center;justify-content:center;visibility:visible!important;opacity:1!important;position:static!important;min-height:44px!important;padding:9px 14px!important;font-size:13px;font-weight:900;white-space:nowrap;background:#fff!important;color:#18252e!important;border:1.5px solid #8c9aa7!important;border-radius:10px!important;pointer-events:auto!important}
 
+/* 도보 지도 이동: 화면 종료와 도보순례 종료는 별개의 동작이다. */
+.oai-walk-map-preview header .oai-walk-close{flex:none;width:42px;height:42px;padding:0;border:1.5px solid #adbac9;border-radius:12px;font-size:29px;line-height:1;font-weight:500;background:#fff;color:#17213a}
+.oai-walk-map-preview .oai-walk-menu{position:absolute;left:12px;top:calc(76px + env(safe-area-inset-top,0px));z-index:10001;min-height:44px;background:#17365f;color:#fff;border:1px solid #17365f;border-radius:11px;padding:9px 13px;font-size:13px;font-weight:850;box-shadow:0 2px 10px #0003}
+.oai-walk-map-preview .oai-walk-exit-overlay{position:absolute;inset:0;z-index:10010;display:flex;align-items:center;justify-content:center;padding:18px;box-sizing:border-box;background:rgba(13,24,40,.62)}
+.oai-walk-map-preview .oai-walk-exit-overlay[hidden]{display:none!important}
+.oai-walk-map-preview .oai-walk-exit-dialog{box-sizing:border-box;width:min(100%,390px);padding:23px 19px 19px;background:#fff;border-radius:18px;box-shadow:0 12px 44px #0005;color:#17213a}
+.oai-walk-map-preview .oai-walk-exit-dialog h3{margin:0 0 12px;font-size:20px;line-height:1.35;font-weight:900}
+.oai-walk-map-preview .oai-walk-exit-dialog p{margin:0 0 20px;color:#44566b;font-size:15px;font-weight:650;line-height:1.6;word-break:keep-all}
+.oai-walk-map-preview .oai-walk-exit-actions{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.oai-walk-map-preview .oai-walk-exit-actions button{min-height:48px;padding:8px 7px;font-size:14px;font-weight:850}
+.oai-walk-map-preview .oai-walk-exit-actions [data-walk-exit-accept]{background:#17365f;color:#fff;border-color:#17365f}
+
 /* 도보 지도: 상태 메시지와 도보 길찾기 버튼을 작은 화면에서도 안정적으로 배치 */
 .oai-walk-map-controls .oai-walk-route-legend{min-width:0;overflow-wrap:anywhere;line-height:1.35}
 .oai-walk-map-controls .oai-walk-control-buttons{display:flex;flex-wrap:wrap;justify-content:flex-end;gap:6px}
