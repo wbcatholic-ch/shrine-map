@@ -9906,6 +9906,7 @@ html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(17px * va
 .oai-visit-journal-date{border:1px solid #d7e1e8!important;background:#fff!important;color:#425664!important;border-radius:8px!important;padding:7px 10px!important}
 .oai-visit-journal-date.active{border-color:#6ca5c9!important;background:#eaf5fc!important;color:#155b87!important;box-shadow:none!important}
 .oai-visit-journal-block{padding:14px 0!important;border:0!important;border-radius:0!important;background:#fff!important}
+.oai-visit-journal-block.oai-visit-photo-block{padding-top:6px!important}
 .oai-visit-journal-block+.oai-visit-journal-block{margin-top:0!important;border-top:1px solid #e2e9ee!important}
 .oai-visit-journal-row b{color:#192a35!important;font-size:15px!important}.oai-visit-journal-row small{color:#7a8993!important}
 .oai-visit-journal-row>button{min-height:36px!important;border:1px solid #9fc3da!important;border-radius:8px!important;background:#f8fcff!important;color:#1f648f!important;box-shadow:none!important}
