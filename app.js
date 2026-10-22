@@ -3155,7 +3155,7 @@ function _oaiVisitDatePickerHtml(kind,item,visits){
     const d=String(v.date||''),n=_oaiNormalizePhotos(_oaiGetVisitByDate(kind,item,d)||v).length;
     return '<option value="'+_visitHtmlEsc(d)+'"'+(selected===d?' selected':'')+'>'+_visitHtmlEsc(_formatVisitDate(d))+' · '+(n?'사진 '+n+'장':'사진 없음')+'</option>';
   }).join('');
-  return '<label class="oai-stamp-visit-filter"><span>사진</span><select data-oai-visit-date-filter="'+_visitHtmlEsc(kind)+'" aria-label="사진 날짜 선택">'+options+'</select></label>';
+  return '<label class="oai-stamp-visit-filter"><select data-oai-visit-date-filter="'+_visitHtmlEsc(kind)+'" aria-label="사진 날짜 선택">'+options+'</select></label>';
 }
 function _oaiAllVisitPhotos(kind,item,visits){
   const entries=[];
