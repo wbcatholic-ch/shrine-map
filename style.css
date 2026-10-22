@@ -9954,14 +9954,15 @@ html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(17px * va
 .oai-visit-journal-head .oai-journal-add-photo{flex:none;min-height:40px;padding:0 12px;border:1.5px solid #9ab8ca;border-radius:10px;background:#fff;color:#205f8a;font:900 14px/1.2 inherit;cursor:pointer;}
 .oai-photo-add-date-dialog{display:none;position:fixed;inset:0;z-index:2147483201;align-items:center;justify-content:center;padding:20px;box-sizing:border-box;}
 .oai-photo-add-date-dialog.show{display:flex;}
-.oai-photo-add-date-backdrop{position:absolute;inset:0;background:rgba(15,24,42,.55);}
-.oai-photo-add-date-panel{position:relative;width:min(100%,420px);max-height:80vh;overflow:auto;background:#fff;border-radius:18px;padding:20px;box-sizing:border-box;box-shadow:0 16px 40px #0003;}
-.oai-photo-add-date-panel h3{margin:0 0 16px;color:#172a35;font-size:20px;font-weight:900;}
-.oai-photo-add-date-list{display:grid;gap:8px;}
-.oai-photo-add-date-list button{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:52px;padding:10px 12px;border:1.5px solid #b6ccda;border-radius:10px;background:#f8fbfd;color:#183d56;font:850 16px/1.3 inherit;}
-.oai-photo-add-date-list button small{font-size:12px;color:#627887;white-space:nowrap;}
-.oai-photo-add-date-list button:disabled{opacity:.48;}
-.oai-photo-add-date-cancel{margin-top:16px;width:100%;height:44px;border:1px solid #bdc9d2;border-radius:10px;background:#fff;color:#344854;font:850 15px/1 inherit;}
+.oai-photo-add-date-backdrop{position:absolute;inset:0;background:rgba(13,27,44,.72);}
+.oai-photo-add-date-panel{position:relative;width:min(100%,420px);max-height:80vh;overflow:auto;background:#fff;border:2px solid #d0dde5;border-radius:18px;padding:22px;box-sizing:border-box;box-shadow:0 20px 56px rgba(0,0,0,.38);}
+.oai-photo-add-date-panel h3{margin:0 0 18px;color:#11283a;font-size:21px;line-height:1.35;font-weight:900;}
+.oai-photo-add-date-list{display:grid;gap:10px;}
+.oai-photo-add-date-list button{display:flex;align-items:center;justify-content:space-between;gap:10px;min-height:60px;padding:12px 14px;border:2px solid #7f9caf;border-radius:12px;background:#f5faff;color:#14354b;font:850 16px/1.3 inherit;text-align:left;}
+.oai-photo-add-date-list button small{font-size:13px;color:#34576e;font-weight:800;white-space:nowrap;}
+.oai-photo-add-date-list button:disabled{opacity:1;background:#f2f3f5;border-color:#c5cbd1;color:#77828c;}
+.oai-photo-add-date-list button:disabled small{color:#87919a;}
+.oai-photo-add-date-cancel{margin-top:20px;width:100%;height:49px;border:2px solid #829aac;border-radius:12px;background:#fff;color:#1c394e;font:850 16px/1 inherit;}
 
 .oai-visit-journal-date-section{margin:0 -16px!important;padding:13px 16px 15px!important;background:#f5f8fa!important;border-bottom:1px solid #dde6eb!important}
 .oai-visit-subsection-label{margin-bottom:8px!important;color:#405965!important;font-size:13px!important;font-weight:900!important}

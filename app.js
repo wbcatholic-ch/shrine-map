@@ -3261,6 +3261,13 @@ function _oaiCloseMemoModal(){const m=document.getElementById('oai-visit-memo-mo
 try{window._oaiCloseMemoModal=_oaiCloseMemoModal;}catch(_e){}
 function _oaiOpenMemo(kind){if(!(_oaiJournalDeveloperEnabled()))return;const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const v=_oaiGetVisitByDate(kind,ctx.item,ctx.date),m=_oaiEnsureMemoModal(),memo=String(v&&v.memo||'');window.__OAI_MEMO_CONTEXT__=ctx;document.getElementById('oai-visit-memo-date').textContent=_formatVisitDate(ctx.date);document.getElementById('oai-visit-memo-text').value=memo;const del=m.querySelector('[data-oai-memo-delete-modal]'),actions=m.querySelector('.oai-visit-memo-actions'),hasMemo=!!memo.trim();if(del)del.style.display=hasMemo?'':'none';if(actions)actions.classList.toggle('has-delete',hasMemo);m.classList.add('show');m.setAttribute('aria-hidden','false');_oaiInstallMemoViewportGuard();_oaiMemoFitViewport();setTimeout(_oaiMemoFitViewport,240);setTimeout(_oaiMemoFitViewport,500);}
 function _oaiDeleteMemo(kind,fromModal){const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const v=_oaiGetVisitByDate(kind,ctx.item,ctx.date);if(!String(v&&v.memo||'').trim()){if(fromModal)_oaiCloseMemoModal();return;}_oaiVisitConfirm('이 방문의 메모를 삭제할까요?',function(){const ok=ctx.kind==='parish'?_oaiUpdateParishVisitExtras(ctx.item,ctx.date,{memo:''}):_oaiUpdateShrineVisitExtras(ctx.item,ctx.date,{memo:''});if(!ok){_oaiVisitToast('메모를 삭제하지 못했습니다.');return;}if(fromModal)_oaiCloseMemoModal();_oaiRerenderJournal(ctx.kind);_oaiVisitToast('메모를 삭제했습니다.');});}
+function _oaiClosePhotoAddDate(){
+  const modal=document.getElementById('oai-photo-add-date-dialog');
+  if(!modal||!modal.classList.contains('show'))return false;
+  modal.classList.remove('show');modal.setAttribute('aria-hidden','true');
+  return true;
+}
+window._oaiPhotoAddDateBackHandle=_oaiClosePhotoAddDate;
 function _oaiChoosePhotoAddDate(kind){
   if(!_oaiJournalDeveloperEnabled())return;
   const ctx=_oaiCurrentJournalContext(kind);
@@ -3272,12 +3279,12 @@ function _oaiChoosePhotoAddDate(kind){
     modal.innerHTML='<div class="oai-photo-add-date-backdrop" data-oai-add-date-close="1"></div><section class="oai-photo-add-date-panel" role="dialog" aria-modal="true" aria-labelledby="oai-photo-add-date-title"><h3 id="oai-photo-add-date-title">사진을 추가할 방문 날짜</h3><div class="oai-photo-add-date-list"></div><button type="button" class="oai-photo-add-date-cancel" data-oai-add-date-close="1">취소</button></section>';
     document.body.appendChild(modal);
     modal.addEventListener('click',function(e){
-      if(e.target.closest('[data-oai-add-date-close]')){modal.classList.remove('show');modal.setAttribute('aria-hidden','true');return;}
+      if(e.target.closest('[data-oai-add-date-close]')){_oaiClosePhotoAddDate();return;}
       const chosen=e.target.closest('[data-oai-add-date-value]');if(!chosen)return;
       const k=modal.dataset.kind,d=chosen.getAttribute('data-oai-add-date-value');
       const current=_oaiCurrentJournalContext(k);
       if(!current||!current.visits.some(function(v){return String(v.date||'')===d;}))return;
-      modal.classList.remove('show');modal.setAttribute('aria-hidden','true');
+      _oaiClosePhotoAddDate();
       window[k==='parish'?'__OAI_PARISH_JOURNAL_DATE__':'__OAI_SHRINE_JOURNAL_DATE__']=d;
       _oaiPhotoSelectionClear();_oaiRerenderJournal(k);
       _oaiAddPhotos(k);
