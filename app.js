@@ -20582,6 +20582,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     applyCourse(c);
     try{localStorage.setItem(ACTIVE_FOLLOW_KEY,JSON.stringify({courseId:c.id,startedAt:now,travelMode:_followTravelMode(travelMode)}));}catch(_e){}
     _recordDailyFollowSession(c,now);
+    if(travelMode==='walk')_walkingNativeStart(_activeFollowState());
     try{renderCourseList();}catch(_e){}
     // 완료 목록의 '다시 순례하기'에서 시작했다면
     // 버튼만 '순례 종료'로 바꾸고 목록에 머무르지 말고
@@ -20589,11 +20590,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(plannerView==='list'){
       setView('detail');
       renderDetail();
+      if(travelMode==='walk')openWalkMapPreview();
       return;
     }
     if(plannerView==='detail'){
       setView('detail');
       renderDetail();
+      if(travelMode==='walk')openWalkMapPreview();
     }
   }
   let pendingCourseDeleteId='';
@@ -21673,6 +21676,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       renderCourseList();
       setView('detail');
       renderDetail();
+      if(travelMode==='walk')openWalkMapPreview();
       return true;
     }
     startFollowFromCourse(id,true,travelMode);
@@ -21780,6 +21784,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
        목록에 머물지 않고 반드시 현재 활성 순례 상세로 이동한다. */
     setView('detail');
     renderDetail();
+    if(travelMode==='walk')openWalkMapPreview();
   }
   function toggleFollowFromDetail(){
     if(!currentCourseId)return;
