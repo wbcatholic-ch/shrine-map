@@ -7934,6 +7934,9 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 #oai-pilgrimage-detail-view.is-active-follow .oai-pilgrimage-detail-actions{
   grid-template-columns:minmax(0,1fr)!important;
 }
+#oai-pilgrimage-detail-view.is-active-follow .oai-pilgrimage-detail-actions .oai-pilgrimage-follow{
+  grid-column:1/-1!important;
+}
 #oai-pilgrimage-detail-view:not(.is-completion-view) .oai-pilgrimage-detail-actions .oai-pilgrimage-save,
 #oai-pilgrimage-detail-view:not(.is-completion-view) .oai-pilgrimage-detail-actions .oai-pilgrimage-follow{
   width:100%!important;
@@ -8683,7 +8686,7 @@ html.oai-map-split-wide #oai-pilgrimage-detail-view{
   --oai-pilgrimage-wide-col-gap:8px;
 }
 html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-add-row,
-html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-detail-actions,
+html.oai-map-split-wide #oai-pilgrimage-detail-view:not(.is-active-follow) .oai-pilgrimage-detail-actions,
 html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-total-actions{
   grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
   column-gap:var(--oai-pilgrimage-wide-col-gap)!important;

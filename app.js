@@ -6627,9 +6627,14 @@ function _openMyeongryePhotoViewer(){
   _renderMyeongryePhotoViewer(); viewer.classList.add('open'); viewer.setAttribute('aria-hidden','false');_oaiPhotoViewerOrientation(true);
   var close=viewer.querySelector('.myeongrye-viewer-close'); if(close) close.focus();
 }
-function _closeMyeongryePhotoViewer(){_oaiPhotoViewerOrientation(false);
+function _closeMyeongryePhotoViewer(){
   var modal=document.getElementById('myeongrye-materials-modal'), viewer=modal&&modal.querySelector('.myeongrye-photo-viewer');
-  if(viewer){ _setMyeongryeViewerZoom(1); viewer.classList.remove('open'); viewer.setAttribute('aria-hidden','true'); }
+  // 일반 성지 자료 닫기에서는 사진 확대창이 열려 있지 않다.
+  // 그 경우 네이티브 화면 회전 호출과 확대 상태 재설정을 실행하지 않는다.
+  if(!viewer||!viewer.classList.contains('open'))return;
+  _oaiPhotoViewerOrientation(false);
+  _setMyeongryeViewerZoom(1);
+  viewer.classList.remove('open');viewer.setAttribute('aria-hidden','true');
 }
 function _moveMyeongryeViewer(delta){
   var photos=_getMyeongryePhotos(); if(!photos.length) return;
@@ -6721,11 +6726,22 @@ function _closeMyeongryeMaterials(){
   var modal=document.getElementById('myeongrye-materials-modal'); clearTimeout(_myeongryeSlideTimer); _myeongryeSlideTimer=0;
   clearTimeout(_myeongryeResumeTimer); _myeongryeResumeTimer=0; _myeongryeWasOpenBeforeBackground=false; _myeongryeRenderedSlideIndex=-1;
   var returnToPlace=!!(modal&&modal._returnToPilgrimagePlaceInfo&&modal.classList.contains('open'));
-  if(modal){ modal._returnToPilgrimagePlaceInfo=false; _closeMyeongryePhotoViewer(); modal.classList.remove('open'); modal.setAttribute('aria-hidden','true'); } document.body.style.overflow=_myeongryeBodyOverflow;
-  if(returnToPlace){
-    var previous=document.getElementById('oai-pilgrimage-place-info-overlay');
-    if(previous){ previous.classList.add('open'); previous.setAttribute('aria-hidden','false'); var back=previous.querySelector('[data-pilgrimage-info-close]'); if(back)back.focus(); }
+  if(modal){
+    modal._returnToPilgrimagePlaceInfo=false;
+    _closeMyeongryePhotoViewer();
+    modal.classList.remove('open');
+    modal.setAttribute('aria-hidden','true');
   }
+  var previous=returnToPlace?document.getElementById('oai-pilgrimage-place-info-overlay'):null;
+  if(previous){
+    // The planner dialog already has its content and listeners. Restore that same
+    // instance without rebuilding it or forcing a focus/scroll layout pass.
+    previous.classList.add('open');
+    previous.setAttribute('aria-hidden','false');
+  }
+  // Unlock scrolling only after the destination dialog is visible; otherwise
+  // the intermediate unlocked page can jump and require an extra layout pass.
+  document.body.style.overflow=_myeongryeBodyOverflow;
 }
 
 /* 자료창·큰 사진창도 앱의 백그라운드 복귀 수명주기에 함께 참여한다. */
@@ -20092,6 +20108,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(observer)observer.disconnect();
         if(frame)cancelAnimationFrame(frame);
         layer.remove();
+        const previousInfo=document.getElementById('oai-pilgrimage-place-info-overlay');
+        if(previousInfo){previousInfo.classList.add('open');previousInfo.setAttribute('aria-hidden','false');}
       }
       layer._disposeWaypointMap=closeWaypointMap;
       layer.addEventListener('click',e=>{
@@ -21504,7 +21522,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       // 시스템 뒤로가기에서 아래 상세/목록을 먼저 전환하지 않도록 지도부터 닫는다.
       const waypointsMap=document.getElementById('oai-pilgrimage-waypoints-readonly');
       if(waypointsMap&&waypointsMap.classList.contains('open')){
-        waypointsMap.remove();
+        if(typeof waypointsMap._disposeWaypointMap==='function')waypointsMap._disposeWaypointMap();
+        else waypointsMap.remove();
         return true;
       }
       const startConfirm=followStartModal();
