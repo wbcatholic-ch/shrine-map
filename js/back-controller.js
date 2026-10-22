@@ -302,6 +302,9 @@
       return true;
     }}catch(e){ console.warn('[가톨릭길동무]',e); }
 
+    /* 명례성지 자료/확대 사진은 아래 정보카드보다 먼저 한 단계씩 닫는다. */
+    try{ if(typeof window._oaiMyeongryeBackHandle==='function' && window._oaiMyeongryeBackHandle()) return true; }catch(e){ console.warn('[가톨릭길동무]',e); }
+
     /* 성지순례 계획의 선택창/하위 화면은 순례계획 안에서 한 단계씩 뒤로 간다. */
     try{ if(typeof window._oaiPilgrimageBackHandle==='function' && window._oaiPilgrimageBackHandle()) return true; }catch(e){ console.warn('[가톨릭길동무]',e); }
 
@@ -315,9 +318,6 @@
       if(typeof window.closeOaiPilgrimageFollowStopConfirm==='function')window.closeOaiPilgrimageFollowStopConfirm();
       return true;
     }}catch(e){ console.warn('[가톨릭길동무]',e); }
-
-    /* 명례성지 자료/확대 사진은 아래 정보카드보다 먼저 한 단계씩 닫는다. */
-    try{ if(typeof window._oaiMyeongryeBackHandle==='function' && window._oaiMyeongryeBackHandle()) return true; }catch(e){ console.warn('[가톨릭길동무]',e); }
 
     /* 성당·성지 공통 선택창은 목록 화면을 닫기 전에 먼저 닫는다. */
     el = $b('oai-visit-picker-dialog');
