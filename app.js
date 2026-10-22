@@ -3486,7 +3486,7 @@ function _oaiPhotoViewerOrientation(open){
 function _oaiPreparePhotoViewer(kind,index,ctx,total){const m=_oaiEnsurePhotoViewer(),img=document.getElementById('oai-visit-photo-viewer-img'),count=document.getElementById('oai-visit-photo-viewer-count');_oaiVisitPhotoViewerState={kind:kind,index:index,ctx:ctx};if(img){_oaiResetVisitViewerZoom();img.removeAttribute('src');img.classList.add('loading');}if(count)count.textContent=(index+1)+' / '+Number(total||0);m.classList.add('show');m.setAttribute('aria-hidden','false');_oaiPhotoViewerOrientation(true);const prev=m.querySelector('[data-oai-photo-prev]'),next=m.querySelector('[data-oai-photo-next]');if(prev)prev.disabled=index<=0;if(next)next.disabled=index>=Number(total||0)-1;try{document.documentElement.classList.add('oai-visit-photo-open');}catch(_e){}}
 function _oaiShowPhotoViewer(kind,index,dataUri){const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const visit=_oaiGetVisitByDate(kind,ctx.item,ctx.date),photos=_oaiNormalizePhotos(visit);if(!photos[index])return;const m=_oaiEnsurePhotoViewer(),img=document.getElementById('oai-visit-photo-viewer-img'),count=document.getElementById('oai-visit-photo-viewer-count');_oaiVisitPhotoViewerState={kind:kind,index:index,ctx:ctx};if(img){img.src=dataUri;img.classList.remove('loading');}if(count)count.textContent=(index+1)+' / '+photos.length;m.classList.add('show');m.setAttribute('aria-hidden','false');_oaiPhotoViewerOrientation(true);const prev=m.querySelector('[data-oai-photo-prev]'),next=m.querySelector('[data-oai-photo-next]');if(prev)prev.disabled=index<=0;if(next)next.disabled=index>=photos.length-1;try{document.documentElement.classList.add('oai-visit-photo-open');}catch(_e){}
 }
-function _oaiClosePhotoViewer(){_oaiPhotoViewerOrientation(false);const m=document.getElementById('oai-visit-photo-viewer');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}const img=document.getElementById('oai-visit-photo-viewer-img');if(img)img.removeAttribute('src');_oaiResetVisitViewerZoom();_oaiVisitPhotoViewerState=null;try{document.documentElement.classList.remove('oai-visit-photo-open');}catch(_e){} }
+function _oaiClosePhotoViewer(){_oaiPhotoViewerOrientation(false);const m=document.getElementById('oai-visit-photo-viewer');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}const img=document.getElementById('oai-visit-photo-viewer-img');if(img)img.removeAttribute('src');_oaiResetVisitViewerZoom();_oaiVisitPhotoViewerState=null;try{document.documentElement.classList.remove('oai-visit-photo-open');}catch(_e){} if(typeof window._oaiAnniversaryPhotoClosed==='function')window._oaiAnniversaryPhotoClosed(); }
 try{window._oaiClosePhotoViewer=_oaiClosePhotoViewer;}catch(_e){}
 function _oaiMovePhotoViewer(delta){const st=_oaiVisitPhotoViewerState;if(!st)return;const visit=_oaiGetVisitByDate(st.kind,st.ctx.item,st.ctx.date),photos=_oaiNormalizePhotos(visit),next=Math.max(0,Math.min(photos.length-1,st.index+Number(delta||0)));if(next===st.index)return;_oaiOpenPhoto(st.kind,next);}
 window.oaiVisitPhotoLoaded=function(requestId,ok,mimeType,payload,message){
@@ -16915,6 +16915,40 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // 개발자 도구의 화면 노출은 실행 중 10회 탭으로만 해제한다. 저장된 사용 권한과 분리한다.
   let oaiDevPanelUnlocked=false;
   function oaiDevEnabled(){return window.__OAI_DEV_RUNTIME_ACTIVE__===true;}
+  // 알림 사진과 안내창의 복귀 순서는 알림 화면이 소유한다.
+  let oaiAnniversaryPhotoReturn=null;
+  function oaiAnniversaryCloseToCover(){
+    const layer=document.getElementById('oai-anniversary-preview');
+    if(layer)layer.remove();
+    oaiAnniversaryPhotoReturn=null;
+    if(document.getElementById('oai-visit-photo-viewer')?.classList.contains('show'))_oaiClosePhotoViewer();
+    _closeShrineVisitDetail({fromPopstate:true,noReturnCards:true});
+    _closeParishVisitDetail({noResume:true,fromCover:true});
+    goToCover();
+  }
+  function oaiAnniversaryRestoreFromPhoto(){
+    if(!oaiAnniversaryPhotoReturn)return false;
+    const layer=document.getElementById('oai-anniversary-preview');
+    oaiAnniversaryPhotoReturn=null;
+    if(!layer)return false;
+    _closeShrineVisitDetail({fromPopstate:true,noReturnCards:true});
+    _closeParishVisitDetail({noResume:true});
+    layer.style.display='flex';
+    return true;
+  }
+  window._oaiAnniversaryPhotoClosed=oaiAnniversaryRestoreFromPhoto;
+  window._oaiAnniversaryBackHandle=function(){
+    const layer=document.getElementById('oai-anniversary-preview');
+    if(!layer)return false;
+    if(oaiAnniversaryPhotoReturn){
+      const viewer=document.getElementById('oai-visit-photo-viewer');
+      if(viewer&&viewer.classList.contains('show'))_oaiClosePhotoViewer();
+      else oaiAnniversaryRestoreFromPhoto();
+      return true;
+    }
+    oaiAnniversaryCloseToCover();
+    return true;
+  };
   // 기념일은 실제 GPS 스탬프가 있는 날짜만 사용한다. 저장 데이터는 읽기 전용이다.
   function oaiAnniversaryPreview(date){
     if(date!=='2026-10-09')return;
@@ -16960,7 +16994,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       layer.style.cssText='position:fixed;inset:0;z-index:2147483000;background:rgba(16,28,48,.68);display:flex;align-items:center;justify-content:center;padding:18px;box-sizing:border-box';
       const panel=document.createElement('section');panel.style.cssText='background:#fff;border-radius:17px;width:min(100%,430px);max-height:85dvh;overflow:auto;padding:20px;color:#213149;box-sizing:border-box';
       layer.appendChild(panel);document.body.appendChild(layer);
-      layer.addEventListener('click',e=>{if(e.target===layer||e.target.closest('[data-anniversary-close]'))layer.remove();});
+      layer.addEventListener('click',e=>{if(e.target===layer||e.target.closest('[data-anniversary-close]'))oaiAnniversaryCloseToCover();});
     }
     const panel=layer.firstElementChild;panel.replaceChildren();
     const header=document.createElement('div');header.style.cssText='display:flex;justify-content:space-between;align-items:start;gap:12px;border-bottom:1px solid #a0a8b3;padding-bottom:14px;margin-bottom:12px';
@@ -16977,7 +17011,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         const button=document.createElement('button');button.type='button';button.textContent=entry.photos&&entry.memo?'그날의 사진 · 메모 보기':entry.photos?'그날의 사진 보기':'그날의 메모 보기';
         button.style.cssText='background:#1d2b4d;color:white;border:0;border-radius:9px;padding:11px;width:100%;font-weight:700';
         button.addEventListener('click',()=>{
-          layer.remove();
+          oaiAnniversaryPhotoReturn=entry.photos?{date:date,kind:entry.kind}:null;
+          if(entry.photos)layer.style.display='none';
+          else layer.remove();
           if(entry.kind==='shrine'){
             _openShrineVisitDetail(SHRINES.indexOf(entry.item));
             window.__OAI_SHRINE_JOURNAL_DATE__=date;
