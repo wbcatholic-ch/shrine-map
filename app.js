@@ -16969,7 +16969,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     header.append(title,close);panel.appendChild(header);
     const intro=document.createElement('p');intro.textContent=unique.length?'GPS 스탬프가 확인된 '+unique.length+'곳의 순례 기록입니다.':'이 날짜에 연결 가능한 GPS 스탬프 기록이 없습니다.';panel.appendChild(intro);
     unique.forEach((entry,i)=>{
-      const card=document.createElement('article');card.style.cssText='border:1px solid #cbd5e1;border-radius:12px;padding:14px;margin:10px 0';
+      const card=document.createElement('article');card.style.cssText='background:#e8eef5;border:1px solid #aebdd0;border-radius:12px;padding:14px;margin:10px 0';
       const h=document.createElement('strong');h.textContent=(i+1)+'. '+entry.item.name;h.style.cssText='display:block;font-size:18px;margin-bottom:8px';card.appendChild(h);
       const note=document.createElement('div');note.textContent='GPS 순례 스탬프 · '+date;note.style.cssText='font-size:13px;color:#64748b;margin-bottom:10px';card.appendChild(note);
       if(entry.photos||entry.memo){
