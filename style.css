@@ -7082,6 +7082,9 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 #oai-pilgrimage-detail-view.is-empty-plan .oai-pilgrimage-map-add{
   grid-column:1/-1;
 }
+#oai-pilgrimage-detail-view.is-active-follow .oai-pilgrimage-map-add{
+  grid-column:1/-1;
+}
 #oai-pilgrimage-detail-view .oai-pilgrimage-total-card{
   display:grid!important;
   grid-template-columns:1fr 1fr!important;
@@ -7165,6 +7168,8 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
   box-shadow:inset 0 0 0 1px rgba(210,59,53,.08)!important;
 }
 .oai-pilgrimage-total-actions{grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:7px;margin-top:2px;}
+#oai-pilgrimage-detail-view .oai-pilgrimage-total-actions.is-single-action{grid-template-columns:minmax(0,1fr)!important;}
+#oai-pilgrimage-detail-view .oai-pilgrimage-course-map[hidden]{display:none!important;}
 .oai-pilgrimage-total-actions .oai-pilgrimage-course-map{grid-column:auto!important;margin:0!important;}
 .oai-pilgrimage-current-check{width:100%;min-height:48px;border:1.5px solid #176fc0;border-radius:13px;background:#176fc0;color:#fff;font-family:inherit;font-size:calc(14px * var(--app-font-scale,1));font-weight:950;box-shadow:0 2px 6px rgba(23,111,192,.10);}
 .oai-pilgrimage-current-check:active{transform:scale(.99);background:#125fa6;}
@@ -8754,7 +8759,7 @@ html.oai-map-split-wide #oai-pilgrimage-detail-view{
 }
 html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-add-row,
 html.oai-map-split-wide #oai-pilgrimage-detail-view:not(.is-active-follow) .oai-pilgrimage-detail-actions,
-html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-total-actions{
+html.oai-map-split-wide #oai-pilgrimage-detail-view .oai-pilgrimage-total-actions:not(.is-single-action){
   grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
   column-gap:var(--oai-pilgrimage-wide-col-gap)!important;
 }
@@ -10369,10 +10374,10 @@ html.oai-font-global .shrine-visit-card-badge strong,html:not(.ios-device).oai-s
 .oai-restricted-match{display:block;box-sizing:border-box;width:100%;text-align:left;border:0;border-bottom:1px solid #eef1f5;background:#fff;color:#243b53;padding:12px 8px;font-size:calc(14px * var(--app-font-scale,1));line-height:1.4;}
 
 /* 도보 지도 검증용 독립 레이어: 기존 지도/길찾기 스타일에 영향 없음 */
-.oai-walk-map-preview{position:fixed;inset:0;z-index:2147482500;background:#fff;display:flex;flex-direction:column;color:#18252e;overflow:hidden}
+.oai-walk-map-preview{position:fixed;inset:0;z-index:2147482500;background:#fff;display:flex;flex-direction:column;width:100%;height:100%;height:100dvh;min-height:0;color:#18252e;overflow:hidden}
 .oai-walk-map-preview header{display:flex;align-items:center;gap:10px;padding:calc(12px + env(safe-area-inset-top,0px)) 12px 12px;background:#fff;flex-shrink:0}
 .oai-walk-map-preview header strong{font-size:16px}.oai-walk-map-preview header span{margin-left:auto;font-size:13px}
 .oai-walk-map-preview button{border:1px solid #ccd2d7;background:#fff;border-radius:10px;padding:9px 12px;color:#18252e}
-.oai-walk-map-preview .oai-walk-map-canvas{flex:1;min-height:0;width:100%}
+.oai-walk-map-preview .oai-walk-map-canvas{display:block;position:relative;flex:1 1 0%;height:100%;min-height:180px;width:100%;overflow:hidden}
 .oai-walk-map-preview .oai-walk-map-controls{position:absolute;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;box-shadow:0 2px 10px #0002;border-radius:10px}
 .oai-walk-map-preview .oai-walk-map-controls button{font-size:13px;font-weight:800;min-height:42px}
