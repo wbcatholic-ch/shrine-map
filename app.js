@@ -3145,8 +3145,16 @@ function _oaiGetVisitByDate(kind,item,date){
 }
 function _oaiJournalSelectedDate(kind,visits){
   const prop=kind==='parish'?'__OAI_PARISH_JOURNAL_DATE__':'__OAI_SHRINE_JOURNAL_DATE__';
-  let d=String(window[prop]||'');if(!visits.some(function(v){return String(v.date||'')===d;}))d=visits.length?String(visits[0].date||''):'';
+  let d=String(window[prop]||'all');if(d!=='all'&&!visits.some(function(v){return String(v.date||'')===d;}))d='all';
   window[prop]=d;return d;
+}
+function _oaiVisitDatePickerHtml(kind,visits){
+  if(!visits.length)return '';
+  const selected=_oaiJournalSelectedDate(kind,visits);
+  const options='<option value="all"'+(selected==='all'?' selected':'')+'>전체 방문 기록</option>'+visits.map(function(v){
+    const d=String(v.date||'');return '<option value="'+_visitHtmlEsc(d)+'"'+(selected===d?' selected':'')+'>'+_visitHtmlEsc(_formatVisitDate(d))+'</option>';
+  }).join('');
+  return '<label class="oai-stamp-visit-filter"><span>방문 날짜</span><select data-oai-visit-date-filter="'+_visitHtmlEsc(kind)+'" aria-label="방문 날짜 선택">'+options+'</select></label>';
 }
 function _oaiJournalDeveloperEnabled(){
   // Release gate: existing production Android versions must not expose the new
@@ -3159,17 +3167,26 @@ function _oaiVisitJournalHtml(kind,item,visits){
   // Personal visit journal is available for all users with existing visits; do not touch saved data.
   try{if(!_oaiJournalDeveloperEnabled())return '';}catch(_e){return '';}
   if(!visits||!visits.length)return '';
-  const date=_oaiJournalSelectedDate(kind,visits),baseVisit=visits.find(function(v){return String(v.date||'')===date;})||visits[0],visit=_oaiGetVisitByDate(kind,item,date)||baseVisit;
+  const date=_oaiJournalSelectedDate(kind,visits);
+  if(date==='all'){
+    const compact=visits.map(function(v){
+      const d=String(v.date||''),record=_oaiGetVisitByDate(kind,item,d)||v;
+      const photos=_oaiNormalizePhotos(record).length,memo=String(record&&record.memo||'').trim();
+      return '<button type="button" class="oai-stamp-visit-summary" data-oai-journal-date="'+_visitHtmlEsc(kind)+'" data-oai-journal-value="'+_visitHtmlEsc(d)+'"><span><b>'+_visitHtmlEsc(_formatVisitDate(d))+'</b><small>사진 '+photos+'장 · 메모 '+(memo?'있음':'없음')+'</small></span><span aria-hidden="true">›</span></button>';
+    }).join('');
+    const photoTotal=visits.reduce(function(n,v){return n+_oaiNormalizePhotos(_oaiGetVisitByDate(kind,item,String(v.date||''))||v).length;},0);
+    return '<section class="oai-visit-journal" data-oai-journal-kind="'+_visitHtmlEsc(kind)+'"><div class="oai-visit-journal-head"><div class="shrine-visit-detail-section-title">나의 기록 <button type="button" class="cgm-help-icon cgm-visit-section-help" data-cgm-help="visit_photo" aria-label="내가 올린 사진 보관 도움말">?</button></div><strong>전체</strong></div><div class="oai-stamp-visit-overview"><div class="oai-stamp-visit-overview-count">'+visits.length+'회 방문 · 사진 '+photoTotal+'장</div><div class="oai-stamp-visit-overview-hint">날짜를 선택하면 해당 방문의 사진과 메모를 확인하거나 수정할 수 있습니다.</div>'+compact+'</div></section>';
+  }
+  const baseVisit=visits.find(function(v){return String(v.date||'')===date;})||visits[0],visit=_oaiGetVisitByDate(kind,item,date)||baseVisit;
   const limit=_oaiVisitPhotoLimit(kind,item);
   const photos=_oaiNormalizePhotos(visit),memo=String(visit&&visit.memo||'').trim();
-  const dateBtns=visits.map(function(v){const d=String(v.date||'');return '<button type="button" class="oai-visit-journal-date'+(d===date?' active':'')+'" data-oai-journal-date="'+_visitHtmlEsc(kind)+'" data-oai-journal-value="'+_visitHtmlEsc(d)+'">'+_visitHtmlEsc(_formatVisitDate(d))+'</button>';}).join('');
   const selecting=!!(_oaiPhotoSelection&&_oaiPhotoSelection.kind===kind&&_oaiPhotoSelection.date===date);
   const chosen=selecting?_oaiPhotoSelection.ids:new Set();
   const photoGrid=photos.length?'<div class="oai-visit-photo-grid'+(selecting?' selecting':'')+'" data-oai-photo-grid="'+_visitHtmlEsc(kind)+'">'+photos.map(function(ph,i){const id=_oaiPhotoIdentity(ph),status=String(ph&&ph.syncStatus||''),pending=false,label=status==='waiting'?'동기화 대기':'저장 중',checked=chosen.has(id);return '<div class="oai-visit-photo-item'+(checked?' selected':'')+'"><button type="button" class="oai-visit-photo-thumb" data-oai-photo-open="'+_visitHtmlEsc(kind)+'" data-oai-photo-index="'+i+'" data-oai-photo-file="'+_visitHtmlEsc(id)+'" data-oai-photo-drive="'+_visitHtmlEsc(String(ph&&ph.driveFileId||''))+'" aria-label="방문 사진 '+(i+1)+(selecting?' 선택':' 보기')+'"><span class="oai-visit-photo-placeholder" aria-hidden="true">사진</span><img alt="" loading="eager">'+(pending?'<span class="oai-visit-photo-sync">'+label+'</span>':'')+(selecting?'<span class="oai-photo-selection-check" aria-hidden="true">'+(checked?'✓':'')+'</span>':'')+'</button></div>';}).join('')+'</div>':'<div class="oai-visit-journal-empty">아직 등록한 사진이 없습니다.</div>';
   const photoActions=photos.length?'<div class="oai-photo-select-actions">'+(selecting?'<button type="button" data-oai-photo-all="'+_visitHtmlEsc(kind)+'">'+(chosen.size===photos.length?'전체해제':'전체선택')+'</button><button type="button" data-oai-photo-cancel="'+_visitHtmlEsc(kind)+'">취소</button>':'')+'</div>':'';
   const photoDeleteActions=selecting?'<button type="button" class="oai-photo-delete-selected" data-oai-photo-delete-selected="'+_visitHtmlEsc(kind)+'"'+(!chosen.size?' disabled':'')+'>선택한 '+chosen.size+'장 삭제</button>':'';
   const memoHtml=memo?'<div class="oai-visit-memo-preview">'+_visitHtmlEsc(memo).replace(/\n/g,'<br>')+'</div>':'<div class="oai-visit-journal-empty">아직 작성한 메모가 없습니다.</div>';
-  return '<section class="oai-visit-journal" data-oai-journal-kind="'+_visitHtmlEsc(kind)+'"><div class="oai-visit-journal-head"><div class="shrine-visit-detail-section-title">나의 기록 <button type="button" class="cgm-help-icon cgm-visit-section-help" data-cgm-help="visit_photo" aria-label="내가 올린 사진 보관 도움말">?</button></div><strong>'+_visitHtmlEsc(_formatVisitDate(date))+'</strong></div>'+(visits.length>1?'<div class="oai-visit-journal-date-section"><div class="oai-visit-subsection-label">방문 날짜</div><div class="oai-visit-journal-dates">'+dateBtns+'</div></div>':'')+'<div class="oai-visit-journal-block oai-visit-photo-block"><div class="oai-visit-journal-row"><div><b>사진</b><small>'+photos.length+' / '+limit+'장</small></div><button type="button" data-oai-photo-add="'+_visitHtmlEsc(kind)+'"'+(photos.length>=limit?' disabled':'')+'>＋ 사진 추가</button></div>'+photoActions+photoGrid+photoDeleteActions+'</div><div class="oai-visit-journal-block oai-visit-memo-block"><div class="oai-visit-journal-row"><div><b>메모</b><small>'+(memo?'작성됨':'미작성')+'</small></div><div class="oai-visit-journal-actions">'+(memo?'<button type="button" class="oai-visit-memo-delete-inline" data-oai-memo-delete="'+_visitHtmlEsc(kind)+'">삭제</button>':'')+'<button type="button" data-oai-memo-edit="'+_visitHtmlEsc(kind)+'">'+(memo?'수정':'작성')+'</button></div></div>'+memoHtml+'</div></section>';
+  return '<section class="oai-visit-journal" data-oai-journal-kind="'+_visitHtmlEsc(kind)+'"><div class="oai-visit-journal-head"><div class="shrine-visit-detail-section-title">나의 기록 <button type="button" class="cgm-help-icon cgm-visit-section-help" data-cgm-help="visit_photo" aria-label="내가 올린 사진 보관 도움말">?</button></div><strong>'+_visitHtmlEsc(_formatVisitDate(date))+'</strong></div>'+'<div class="oai-visit-journal-block oai-visit-photo-block"><div class="oai-visit-journal-row"><div><b>사진</b><small>'+photos.length+' / '+limit+'장</small></div><button type="button" data-oai-photo-add="'+_visitHtmlEsc(kind)+'"'+(photos.length>=limit?' disabled':'')+'>＋ 사진 추가</button></div>'+photoActions+photoGrid+photoDeleteActions+'</div><div class="oai-visit-journal-block oai-visit-memo-block"><div class="oai-visit-journal-row"><div><b>메모</b><small>'+(memo?'작성됨':'미작성')+'</small></div><div class="oai-visit-journal-actions">'+(memo?'<button type="button" class="oai-visit-memo-delete-inline" data-oai-memo-delete="'+_visitHtmlEsc(kind)+'">삭제</button>':'')+'<button type="button" data-oai-memo-edit="'+_visitHtmlEsc(kind)+'">'+(memo?'수정':'작성')+'</button></div></div>'+memoHtml+'</div></section>';
 }
 function _oaiCurrentJournalContext(kind){
   if(kind==='parish'){
@@ -3569,6 +3586,13 @@ window.oaiVisitPhotoDeleteResult=function(requestId,ok,message){
   const p=_oaiVisitPhotoDeletePending[requestId];delete _oaiVisitPhotoDeletePending[requestId];if(!p)return;
   if(!ok)_oaiVisitToast(message||'사진은 기록에서 삭제했습니다. 저장소 정리는 나중에 다시 시도합니다.');
 };
+function _oaiHandleVisitDateChange(e){
+  const select=e.target&&e.target.closest&&e.target.closest('[data-oai-visit-date-filter]');if(!select)return;
+  const kind=select.getAttribute('data-oai-visit-date-filter');if(kind!=='shrine'&&kind!=='parish')return;
+  _oaiPhotoSelectionClear();
+  window[kind==='parish'?'__OAI_PARISH_JOURNAL_DATE__':'__OAI_SHRINE_JOURNAL_DATE__']=select.value;
+  _oaiRerenderJournal(kind);
+}
 function _oaiHandleJournalClick(e){
   try{if(!_oaiJournalDeveloperEnabled())return false;}catch(_e){return false;}
   const date=e.target.closest&&e.target.closest('[data-oai-journal-date]');if(date){const kind=date.getAttribute('data-oai-journal-date'),value=date.getAttribute('data-oai-journal-value')||'';_oaiPhotoSelectionClear();window[kind==='parish'?'__OAI_PARISH_JOURNAL_DATE__':'__OAI_SHRINE_JOURNAL_DATE__']=value;_oaiRerenderJournal(kind);return true;}
@@ -3594,6 +3618,7 @@ function _ensureShrineVisitDetailView(){
   view.querySelectorAll('#shrine-visit-detail-back,#shrine-visit-detail-x').forEach(function(el){
     el.addEventListener('click', function(e){ e.preventDefault(); e.stopPropagation(); _closeShrineVisitDetail(); });
   });
+  view.addEventListener('change',_oaiHandleVisitDateChange);
   view.addEventListener('click', function(e){
     if(_oaiHandleJournalClick(e)){e.preventDefault();e.stopPropagation();return;}
     const register=e.target&&e.target.closest&&e.target.closest('[data-shrine-detail-register]');
@@ -3691,7 +3716,6 @@ function _renderShrineVisitDetail(idx){
   const headTitle=document.querySelector('#shrine-visit-detail-view .shrine-visit-detail-head-title');
   if(headTitle&&headTitle.firstChild)headTitle.firstChild.nodeValue=String(item.name||'');
   const recent=count?_formatVisitDate(visits[0].date):'—';
-  const dateHtml=count?visits.map(function(v){ return '<span class="shrine-visit-detail-date-chip">'+_visitHtmlEsc(_formatVisitDate(v.date))+'</span>'; }).join(''):'<span class="shrine-visit-detail-empty-date">아직 등록된 날짜가 없습니다.</span>';
   const journalHtml=count?_oaiVisitJournalHtml('shrine',item,visits):'';
   const hpUrl=_getShrineHomepageUrl(item);
   const guideUrl=_getShrineGuideUrl(item);
@@ -3710,7 +3734,7 @@ function _renderShrineVisitDetail(idx){
   const primaryRow='<div class="shrine-visit-detail-action-row detail-primary-row">'+telBtn+routeBtn+'</div>';
   const linkRow=isMyeongrye?'<div class="shrine-visit-detail-action-row detail-link-row">'+materialsBtn+'</div>':((hpBtn||guideBtn)?'<div class="shrine-visit-detail-action-row detail-link-row">'+hpBtn+guideBtn+'</div>':'');
   const kakaoRow='<div class="shrine-visit-detail-action-row detail-kakao-row">'+(isMyeongrye?'':goodnewsBtn)+kakaoBtn+'</div>';
-  body.innerHTML='<section class="shrine-visit-detail-hero"><div class="shrine-visit-detail-hero-head"><div class="shrine-visit-detail-kicker">순례 기록 <button type="button" class="cgm-help-icon cgm-visit-section-help" data-cgm-help="shrine_detail" aria-label="순례 기록 도움말">?</button></div><button type="button" class="shrine-visit-detail-register" data-shrine-detail-register="1" aria-label="순례등록">순례등록</button></div><div class="shrine-visit-detail-count">순례 '+count+'회</div><div class="shrine-visit-detail-recent">최근 순례일 '+_visitHtmlEsc(recent)+'</div><div class="shrine-visit-detail-date-title">순례 날짜</div><div class="shrine-visit-detail-date-list">'+dateHtml+'</div></section>'+journalHtml;
+  body.innerHTML='<section class="shrine-visit-detail-hero"><div class="shrine-visit-detail-hero-head"><div class="shrine-visit-detail-kicker">순례 기록 <button type="button" class="cgm-help-icon cgm-visit-section-help" data-cgm-help="shrine_detail" aria-label="순례 기록 도움말">?</button></div><button type="button" class="shrine-visit-detail-register" data-shrine-detail-register="1" aria-label="순례등록">순례등록</button></div><div class="shrine-visit-detail-count">순례 '+count+'회</div><div class="shrine-visit-detail-recent">최근 순례일 '+_visitHtmlEsc(recent)+'</div>'+_oaiVisitDatePickerHtml('shrine',visits)+'</section>'+journalHtml;
   setTimeout(function(){_oaiHydrateVisibleVisitThumbnails('shrine');},0);
 }
 /* V8-1-14-679: 순례 상세의 '지도에서 보기'는 카드 데이터와 지도 중심을 하나의 pending target으로 함께 적용한다. */
@@ -4729,7 +4753,7 @@ function _ensureParishVisitDetail(){
   let v=document.getElementById('parish-visit-detail');if(v)return v;
   v=document.createElement('div');v.id='parish-visit-detail';v.className='shrine-visit-detail-view parish-visit-detail';v.setAttribute('aria-hidden','true');
   v.innerHTML='<div class="shrine-visit-detail-head"><div class="shrine-visit-detail-head-title">성당명</div><button type="button" class="shrine-visit-detail-x" data-pvd-close="1" aria-label="닫기">×</button></div><div id="parish-visit-detail-body" class="shrine-visit-detail-body"></div>';
-  document.body.appendChild(v);v.addEventListener('click',function(e){
+  document.body.appendChild(v);v.addEventListener('change',_oaiHandleVisitDateChange);v.addEventListener('click',function(e){
     if(_oaiHandleJournalClick(e)){e.preventDefault();e.stopPropagation();return;}
     if(e.target.closest&&e.target.closest('[data-pvd-close]')){_closeParishVisitDetail();return;}
     const register=e.target.closest&&e.target.closest('[data-pvd-register]');if(register&&window.__OAI_PV_DETAIL_ITEM__)_openParishVisitEditor(window.__OAI_PV_DETAIL_ITEM__);
@@ -4740,12 +4764,11 @@ function _renderParishVisitDetail(){
   const p=window.__OAI_PV_DETAIL_ITEM__,b=document.getElementById('parish-visit-detail-body');if(!p||!b)return;
   const visits=_parishVisits(p),n=visits.length,recent=n?_formatVisitDate(visits[0].date):'—';
   const headTitle=document.querySelector('#parish-visit-detail .shrine-visit-detail-head-title');if(headTitle&&headTitle.firstChild)headTitle.firstChild.nodeValue=String(p.name||'');
-  const dates=visits.length?visits.map(function(v){return '<span class="shrine-visit-detail-date-chip">'+_visitHtmlEsc(_formatVisitDate(v.date))+'</span>';}).join(''):'<span class="shrine-visit-detail-empty-date">아직 등록된 방문 날짜가 없습니다.</span>';
   const journalHtml=n?_oaiVisitJournalHtml('parish',p,visits):'';
   const tel=p.tel?'<a class="shrine-visit-detail-action detail-tel" href="tel:'+_visitHtmlEsc(String(p.tel).replace(/[^0-9+]/g,''))+'">📞 '+_visitHtmlEsc(p.tel)+'</a>':'';
   const hp=p.hp?'<a class="shrine-visit-detail-action detail-home" href="'+_visitHtmlEsc(p.hp)+'" target="_blank" rel="noopener">홈페이지</a>':'';
   const guide=p.url?'<a class="shrine-visit-detail-action detail-guide" href="'+_visitHtmlEsc(p.url)+'" target="_blank" rel="noopener">교구 성당 안내</a>':'';
-  b.innerHTML='<section class="shrine-visit-detail-hero"><div class="shrine-visit-detail-hero-head"><div class="shrine-visit-detail-kicker">성당 방문 기록 <button type="button" class="cgm-help-icon cgm-visit-section-help" data-cgm-help="parish_detail" aria-label="성당 방문기록 도움말">?</button></div><button type="button" class="shrine-visit-detail-register" data-pvd-register="1">방문등록</button></div><div class="shrine-visit-detail-count">방문 '+n+'회</div><div class="shrine-visit-detail-recent">최근 방문일 '+_visitHtmlEsc(recent)+'</div><div class="shrine-visit-detail-date-title">방문 날짜</div><div class="shrine-visit-detail-date-list">'+dates+'</div></section>'+journalHtml;
+  b.innerHTML='<section class="shrine-visit-detail-hero"><div class="shrine-visit-detail-hero-head"><div class="shrine-visit-detail-kicker">성당 방문 기록 <button type="button" class="cgm-help-icon cgm-visit-section-help" data-cgm-help="parish_detail" aria-label="성당 방문기록 도움말">?</button></div><button type="button" class="shrine-visit-detail-register" data-pvd-register="1">방문등록</button></div><div class="shrine-visit-detail-count">방문 '+n+'회</div><div class="shrine-visit-detail-recent">최근 방문일 '+_visitHtmlEsc(recent)+'</div>'+_oaiVisitDatePickerHtml('parish',visits)+'</section>'+journalHtml;
   setTimeout(function(){_oaiHydrateVisibleVisitThumbnails('parish');},0);
 }
 function _openParishVisitDetail(p){

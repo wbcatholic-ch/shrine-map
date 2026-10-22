@@ -4254,6 +4254,19 @@ html:not(.ios-device).oai-screen-compact-short .shrine-visit-detail-action{min-h
 .shrine-auto-visit-kicker{font-size:12px;font-weight:900;color:#8b6914;margin-bottom:8px}.shrine-auto-visit-title{font-size:18px;font-weight:900;color:#111;line-height:1.5;word-break:keep-all}.shrine-auto-visit-name{margin-top:8px;font-size:20px;font-weight:900;color:#111;line-height:1.28;word-break:keep-all}.shrine-auto-visit-dist{margin-top:5px;font-size:13px;font-weight:850;color:#4b5563}.shrine-auto-visit-actions{display:flex;justify-content:center;gap:9px;margin-top:18px}.shrine-auto-visit-actions button{width:min(220px,100%);height:48px;border-radius:13px;font-size:15px;font-weight:900;font-family:inherit}.shrine-auto-visit-save{border:2px solid #000;background:#111;color:#f6d58a;box-shadow:0 2px 8px rgba(17,17,17,.16)}.shrine-auto-visit-later{border:2px solid #8b6914;background:#fffaf0;color:#5b3c00;box-shadow:0 2px 8px rgba(91,60,0,.08)}
 html.oai-font-global .shrine-auto-visit-title{font-size:calc(16px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-auto-visit-name{font-size:calc(20px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-auto-visit-dist{font-size:calc(13px * var(--app-inner-font-scale,1))!important}
 
+/* Stamp visit history: one compact date selector, without stacked date chips. */
+.shrine-visit-detail-hero .oai-stamp-visit-filter{display:flex;align-items:center;gap:12px;margin-top:14px;color:#425763;font-weight:850;font-size:14px;}
+.shrine-visit-detail-hero .oai-stamp-visit-filter>span{flex:none;}
+.shrine-visit-detail-hero .oai-stamp-visit-filter select{flex:1;min-width:0;max-width:100%;height:44px;padding:0 32px 0 12px;background:#fff;border:1.5px solid #96b8cc;border-radius:10px;color:#17394f;font-size:15px;font-weight:800;line-height:1.2;font-family:inherit;}
+.oai-stamp-visit-overview{padding:12px 16px 16px;background:#fff;}
+.oai-stamp-visit-overview-count{font-weight:900;color:#273c4c;font-size:15px;margin-bottom:5px;}
+.oai-stamp-visit-overview-hint{font-size:13px;color:#60717e;line-height:1.45;margin-bottom:12px;word-break:keep-all;}
+.oai-stamp-visit-summary{display:flex;align-items:center;justify-content:space-between;width:100%;padding:11px 12px;margin-top:7px;border:1px solid #dce5ea;border-radius:9px;background:#f8fafc;color:#243d4b;font:inherit;text-align:left;}
+.oai-stamp-visit-summary b,.oai-stamp-visit-summary small{display:block;}
+.oai-stamp-visit-summary b{font-size:14px;}
+.oai-stamp-visit-summary small{margin-top:3px;font-size:12px;color:#647887;}
+.oai-stamp-visit-summary>span:last-child{font-size:24px;color:#427d9f;}
+
 .shrine-visit-detail-view{position:fixed;inset:0;z-index:10045;display:none;flex-direction:column;background:#f1f3ee!important;color:#17201b!important;padding-top:var(--oai-stampbook-top-safe);padding-bottom:max(14px, env(safe-area-inset-bottom, 0px))}
 .shrine-visit-detail-view.show{display:flex}
 .shrine-visit-detail-head{height:56px;min-height:56px;display:flex;align-items:center;gap:10px;padding:0 12px;background:#ffffff!important;border-bottom:1px solid rgba(31,41,51,.10)!important;box-shadow:0 2px 16px rgba(31,41,51,.06)!important}
@@ -10381,3 +10394,4 @@ html.oai-font-global .shrine-visit-card-badge strong,html:not(.ios-device).oai-s
 .oai-walk-map-preview .oai-walk-map-canvas{display:block;position:relative;flex:1 1 0%;height:100%;min-height:180px;width:100%;overflow:hidden}
 .oai-walk-map-preview .oai-walk-map-controls{position:absolute;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;box-shadow:0 2px 10px #0002;border-radius:10px}
 .oai-walk-map-preview .oai-walk-map-controls button{font-size:13px;font-weight:800;min-height:42px}
+
