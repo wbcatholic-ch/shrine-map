@@ -18280,10 +18280,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
   }
   function _courseAllPlacesDone(places){return Array.isArray(places)&&places.length>0&&places.every(x=>!!(x&&x.done));}
+  // 도보 지도 및 Android 위치 서비스가 준비될 때까지 사용자 선택은 비공개.
+  const WALK_FOLLOW_ENABLED=false;
+  function _followTravelMode(mode){return WALK_FOLLOW_ENABLED&&mode==='walk'?'walk':'car';}
   function _readActiveFollowRaw(){
     try{
       const x=JSON.parse(localStorage.getItem(ACTIVE_FOLLOW_KEY)||'null');
-      return x&&x.courseId&&Number(x.startedAt)>0?{courseId:String(x.courseId),startedAt:Number(x.startedAt)}:null;
+      return x&&x.courseId&&Number(x.startedAt)>0?{courseId:String(x.courseId),startedAt:Number(x.startedAt),travelMode:_followTravelMode(x.travelMode)}:null;
     }catch(_e){return null;}
   }
   function _clearActiveFollow(courseId){
@@ -18305,9 +18308,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const c=loadCourses().find(function(x){return x.id===s.courseId;});
     if(!c){_clearActiveFollow(s.courseId);return null;}
     if(_courseCompletionList(c).some(x=>_dailyIso(x.completedAt)===_dailyIso(s.startedAt))){_clearActiveFollow(s.courseId);return null;}
-    return {courseId:s.courseId,startedAt:s.startedAt,course:c,remainingMs:Math.max(0,new Date(new Date(now).getFullYear(),new Date(now).getMonth(),new Date(now).getDate()+1).getTime()-now)};
+    return {courseId:s.courseId,startedAt:s.startedAt,travelMode:s.travelMode,course:c,remainingMs:Math.max(0,new Date(new Date(now).getFullYear(),new Date(now).getMonth(),new Date(now).getDate()+1).getTime()-now)};
   }
-  function _activateFollowCourse(id){
+  function _activateFollowCourse(id,travelMode){
     const requestedId=String(id||'');
     const existing=_activeFollowState();
     if(existing&&existing.courseId&&String(existing.courseId)!==requestedId)return null;
@@ -18317,7 +18320,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(now>=_dailyDayEnd(_dailyIso(now))){window.alert('날짜가 변경되었습니다. 새 날짜의 순례하기를 시작해 주세요.');return null;}
     const c=Object.assign({},a[i],{lastStartedAt:now,updatedAt:now});
     a[i]=c;
-    try{localStorage.setItem(ACTIVE_FOLLOW_KEY,JSON.stringify({courseId:c.id,startedAt:now}));}catch(_e){}
+    try{localStorage.setItem(ACTIVE_FOLLOW_KEY,JSON.stringify({courseId:c.id,startedAt:now,travelMode:_followTravelMode(travelMode)}));}catch(_e){}
     _recordDailyFollowSession(c,now);
     saveCourses(a);
     return c;
@@ -20329,7 +20332,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     setView('detail');
     renderDetail();
   }
-  function repeatCourse(id,confirmed){
+  function repeatCourse(id,confirmed,travelMode){
     const targetId=String(id||'');
     const active=_activeFollowState();
     if(active&&active.courseId===targetId){stopActiveFollow(targetId);return;}
@@ -20344,7 +20347,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     c.lastStartedAt=now;c.updatedAt=now;c.completionArmed=true;a[i]=c;saveCourses(a);
     pilgrimageDetailMode='plan';
     applyCourse(c);
-    try{localStorage.setItem(ACTIVE_FOLLOW_KEY,JSON.stringify({courseId:c.id,startedAt:now}));}catch(_e){}
+    try{localStorage.setItem(ACTIVE_FOLLOW_KEY,JSON.stringify({courseId:c.id,startedAt:now,travelMode:_followTravelMode(travelMode)}));}catch(_e){}
     _recordDailyFollowSession(c,now);
     try{renderCourseList();}catch(_e){}
     // 완료 목록의 '다시 순례하기'에서 시작했다면
@@ -21249,6 +21252,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   let pendingFollowConfirmCourseId='';
   let pendingFollowConfirmMode='';
+  let pendingFollowTravelMode='car';
   function followStartModal(){return document.getElementById('oai-pilgrimage-follow-start-modal');}
   function openFollowStartConfirm(id,mode){
     const targetId=String(id||'');
@@ -21257,6 +21261,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 
     pendingFollowConfirmCourseId=targetId;
     pendingFollowConfirmMode=String(mode||'start');
+    pendingFollowTravelMode='car';
+    const choices=document.getElementById('oai-pilgrimage-travel-modes');
+    if(choices){choices.hidden=!WALK_FOLLOW_ENABLED;const car=choices.querySelector('input[value=car]');if(car)car.checked=true;}
 
     const title=document.getElementById('oai-pilgrimage-follow-start-title');
     const msg=document.getElementById('oai-pilgrimage-follow-start-message');
@@ -21278,19 +21285,22 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     _setPilgrimageLayerVisible(m,false);
     pendingFollowConfirmCourseId='';
     pendingFollowConfirmMode='';
+    pendingFollowTravelMode='car';
   }
   function confirmFollowStart(){
     const id=pendingFollowConfirmCourseId;
     const mode=pendingFollowConfirmMode;
+    const choice=document.querySelector('#oai-pilgrimage-travel-modes input[name=pilgrimage-travel-mode]:checked');
+    const travelMode=_followTravelMode(choice?choice.value:pendingFollowTravelMode);
     if(!id){closeFollowStartConfirm();return false;}
     closeFollowStartConfirm();
 
     if(mode==='repeat'||mode==='repeat-detail'){
-      repeatCourse(id,true);
+      repeatCourse(id,true,travelMode);
       return true;
     }
     if(mode==='follow'){
-      const c=_activateFollowCourse(id);
+      const c=_activateFollowCourse(id,travelMode);
       if(!c)return false;
       applyCourse(c);
       pilgrimageDetailMode='plan';
@@ -21299,7 +21309,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       renderDetail();
       return true;
     }
-    startFollowFromCourse(id,true);
+    startFollowFromCourse(id,true,travelMode);
     return true;
   }
 
@@ -21377,8 +21387,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 
     if(nextId){
       setTimeout(function(){
-        if(nextMode==='repeat')repeatCourse(nextId,true);
-        else startFollowFromCourse(nextId,true);
+        openFollowStartConfirm(nextId,nextMode==='repeat'?'repeat':'start');
       },30);
       return true;
     }
@@ -21389,7 +21398,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function stopActiveFollow(id){
     return openFollowStopConfirm(id);
   }
-  function startFollowFromCourse(id,confirmed){
+  function startFollowFromCourse(id,confirmed,travelMode){
     const targetId=String(id||'');
     const active=_activeFollowState();
     if(active&&active.courseId===targetId){stopActiveFollow(targetId);return;}
@@ -21397,7 +21406,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!confirmed){openFollowStartConfirm(targetId,'start');return;}
 
     pilgrimageDetailMode='plan';
-    const c=_activateFollowCourse(targetId);if(!c)return;
+    const c=_activateFollowCourse(targetId,travelMode);if(!c)return;
     applyCourse(c);
     renderCourseList();
 
