@@ -18282,7 +18282,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function _courseAllPlacesDone(places){return Array.isArray(places)&&places.length>0&&places.every(x=>!!(x&&x.done));}
   // 도보 지도 및 Android 위치 서비스가 준비될 때까지 사용자 선택은 비공개.
   const WALK_FOLLOW_ENABLED=false;
-  function _followTravelMode(mode){return WALK_FOLLOW_ENABLED&&mode==='walk'?'walk':'car';}
+  function _followTravelMode(mode){return mode==='walk'?'walk':'car';}
   function _readActiveFollowRaw(){
     try{
       const x=JSON.parse(localStorage.getItem(ACTIVE_FOLLOW_KEY)||'null');
@@ -19273,7 +19273,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const next=Object.assign({},prev,d,{updatedAt:now});
     const activeNow=_readActiveFollowRaw();
     /* 날짜·장소 기준 원칙: 순례하기 시작 전이라도 같은 날의 GPS 스탬프는 인정한다. */
-    const gpsCompletedAll=!!(activeNow&&activeNow.courseId===prev.id&&d.places.length>0&&normalizePoint(d.end))&&d.places.every(x=>x&&x.done&&String(x.doneMethod||'')==='gps')&&d.places.every(x=>!!_dailyRecordedVisitAt(x,_dailyIso(now)));
+    const gpsCompletedAll=!!(activeNow&&activeNow.courseId===prev.id&&d.places.length>0)&&d.places.every(x=>x&&x.done&&String(x.doneMethod||'')==='gps')&&d.places.every(x=>!!_dailyRecordedVisitAt(x,_dailyIso(now)));
     const prevCompletions=_courseCompletionList(prev);
     if(isDone&&gpsCompletedAll&&((!wasDone&&prev.completionArmed!==false)||!prevCompletions.length)){
       const completions=prevCompletions.slice(),today=_courseDateInputValue(now);
@@ -19355,7 +19355,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const routeOnlyEndReached=!!(routeOnlyDestination&&_dailyRecordedVisitAt(prev.end,_dailyIso(Date.now())));
       if(routeOnlyEndReached)changed=true;
       if(!changed)return false;
-      const now=Date.now(),isDone=!!normalizePoint(prev.end)&&(routeOnlyEndReached||(places.length>0&&places.every(x=>x&&x.done&&x.doneMethod==='gps')));
+      const now=Date.now(),isDone=routeOnlyEndReached||(places.length>0&&places.every(x=>x&&x.done&&x.doneMethod==='gps'));
       const next=Object.assign({},prev,{places:places,updatedAt:now,gpsSettled:isDone||!!prev.gpsSettled});
       const completions=_courseCompletionList(prev).slice();
       let justCompleted=false;
