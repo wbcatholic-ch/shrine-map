@@ -21394,7 +21394,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const layer=document.createElement('section');
     layer.id='oai-walk-map-preview';layer.className='oai-walk-map-preview';
     layer.setAttribute('aria-label','도보 순례 지도');
-    layer.innerHTML='<header><strong>도보 순례 · 지도</strong><span data-walk-progress></span><button type="button" data-walk-close>다른 메뉴</button></header><div class="oai-walk-map-canvas"></div><div class="oai-walk-map-controls"><button type="button" data-walk-overview>전체 보기</button><button type="button" data-walk-recenter>내 위치</button></div><p class="oai-walk-map-hint">지도를 닫아도 순례는 계속됩니다. 종료는 순례하기에서 진행하세요.</p>';
+    layer.innerHTML='<header><strong>도보 순례 · 지도</strong><span data-walk-progress></span><button type="button" data-walk-close>다른 메뉴</button></header><div class="oai-walk-map-canvas"></div><div class="oai-walk-map-controls"><button type="button" data-walk-overview>전체 보기</button><button type="button" data-walk-recenter>내 위치</button></div>';
     document.body.appendChild(layer);
     const session={layer,closed:false,watchId:null,resizeObserver:null,map:null,myMarker:null,
       viewMode:'overview',lastPosition:null,firstPosition:null,lastFollowPosition:null,lastFollowAt:0};

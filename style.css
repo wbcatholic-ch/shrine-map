@@ -10374,6 +10374,5 @@ html.oai-font-global .shrine-visit-card-badge strong,html:not(.ios-device).oai-s
 .oai-walk-map-preview header strong{font-size:16px}.oai-walk-map-preview header span{margin-left:auto;font-size:13px}
 .oai-walk-map-preview button{border:1px solid #ccd2d7;background:#fff;border-radius:10px;padding:9px 12px;color:#18252e}
 .oai-walk-map-preview .oai-walk-map-canvas{flex:1;min-height:0;width:100%}
-.oai-walk-map-preview .oai-walk-map-controls{position:absolute;right:14px;bottom:calc(64px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;box-shadow:0 2px 10px #0002;border-radius:10px}
+.oai-walk-map-preview .oai-walk-map-controls{position:absolute;right:14px;bottom:calc(14px + env(safe-area-inset-bottom,0px));display:flex;gap:8px;box-shadow:0 2px 10px #0002;border-radius:10px}
 .oai-walk-map-preview .oai-walk-map-controls button{font-size:13px;font-weight:800;min-height:42px}
-.oai-walk-map-preview .oai-walk-map-hint{font-size:12px;padding:12px;margin:0;background:#fff;text-align:center;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
