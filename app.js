@@ -19269,7 +19269,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     // 실제 차이가 없으면 updatedAt 변경, 전체 목록 재렌더링, 백업 예약을 생략한다.
     if(JSON.stringify({name:prev.name,start:prev.start,end:prev.end,places:prev.places})===
        JSON.stringify({name:d.name,start:d.start,end:d.end,places:d.places})) return;
-    const hasDestination=!!normalizePoint(d.end),wasDone=_courseAllPlacesDone(prev.places)&&!!normalizePoint(prev.end),isDone=_courseAllPlacesDone(d.places)&&hasDestination,now=Date.now();
+    const wasDone=Array.isArray(prev.places)&&prev.places.length>0&&_courseAllPlacesDone(prev.places),isDone=Array.isArray(d.places)&&d.places.length>0&&_courseAllPlacesDone(d.places),now=Date.now();
     const next=Object.assign({},prev,d,{updatedAt:now});
     const activeNow=_readActiveFollowRaw();
     /* 날짜·장소 기준 원칙: 순례하기 시작 전이라도 같은 날의 GPS 스탬프는 인정한다. */
