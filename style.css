@@ -4255,7 +4255,7 @@ html:not(.ios-device).oai-screen-compact-short .shrine-visit-detail-action{min-h
 html.oai-font-global .shrine-auto-visit-title{font-size:calc(16px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-auto-visit-name{font-size:calc(20px * var(--app-inner-font-scale,1))!important}html.oai-font-global .shrine-auto-visit-dist{font-size:calc(13px * var(--app-inner-font-scale,1))!important}
 
 /* Stamp visit history: one compact date selector, without stacked date chips. */
-.oai-visit-photo-block .oai-stamp-visit-filter{display:flex;align-items:center;gap:12px;margin-top:14px;color:#425763;font-weight:850;font-size:14px;}
+.oai-visit-photo-block .oai-stamp-visit-filter{display:flex;align-items:center;gap:12px;margin:14px 0 8px;color:#425763;font-weight:850;font-size:14px;}
 .oai-visit-photo-block .oai-stamp-visit-filter>span{flex:none;}
 .oai-visit-photo-block .oai-stamp-visit-filter select{flex:1;min-width:0;max-width:100%;height:44px;padding:0 32px 0 12px;background:#fff;border:1.5px solid #96b8cc;border-radius:10px;color:#17394f;font-size:15px;font-weight:800;line-height:1.2;font-family:inherit;}
 
@@ -9955,7 +9955,7 @@ html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(17px * va
 .oai-visit-journal-dates{margin:0!important;padding:0!important}
 .oai-visit-journal-date{border:1px solid #d5e0e7!important;border-radius:8px!important;background:#fff!important;color:#425763!important}
 .oai-visit-journal-date.active{border-color:#6ca9cb!important;background:#eaf5fb!important;color:#155f8a!important}
-.oai-visit-journal-block{margin:16px 0 0!important;padding:0!important;background:#fff!important;border:1px solid #d8e2e8!important;border-radius:12px!important;overflow:hidden!important}
+.oai-visit-journal-block:not(.oai-visit-photo-block){margin:16px 0 0!important;padding:0!important;background:#fff!important;border:1px solid #d8e2e8!important;border-radius:12px!important;overflow:hidden!important}
 .oai-visit-journal-block+.oai-visit-journal-block{margin-top:16px!important;border-top:1px solid #d8e2e8!important}
 .oai-visit-journal-row{min-height:52px!important;margin:0!important;padding:11px 12px!important;background:#edf5f9!important;border:0!important;border-left:6px solid #2f82ad!important;border-bottom:1px solid #d8e3e9!important}
 .oai-visit-memo-block .oai-visit-journal-row{background:#f1f4f6!important;border-left-color:#667a87!important}
