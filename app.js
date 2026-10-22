@@ -21371,7 +21371,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function fmtRoad(distance,duration){return {km:(Number(distance)/1000).toFixed(1)+' km',time:typeof _fmtTime==='function'?_fmtTime(Number(duration)):Math.round(Number(duration)/60)+'분'};}
   function currentPosition(cb,fail){const ok=(lat,lng)=>{lat=Number(lat);lng=Number(lng);if(!_validGpsPair(lat,lng)){if(fail)fail();return;}try{_myLat=lat;_myLng=lng;}catch(_e){}cb(lat,lng);};if(typeof _refreshFreshLocationThen==='function')_refreshFreshLocationThen(ok,()=>{if(fail)fail();});else if(fail)fail();}
   async function calcFollowDistance(){const t=targetInfo(),km=document.getElementById('oai-pilgrimage-follow-km'),tm=document.getElementById('oai-pilgrimage-follow-time'),note=document.getElementById('oai-pilgrimage-follow-note');if(!t){if(km)km.textContent='완료';if(tm)tm.textContent='-';if(note)note.textContent='모든 순례 장소를 완료했습니다.';return;}if(km)km.textContent='계산 중…';if(tm)tm.textContent='-';if(note)note.textContent='현재 위치를 확인하고 있습니다.';currentPosition(async(lat,lng)=>{try{if(note)note.textContent='자동차 경로를 계산하고 있습니다.';const res=await _kakaoDirectionsFetch(lng+','+lat,t.item.lng+','+t.item.lat,9000);if(!res.ok)throw new Error(String(res.status));const data=await res.json(),route=data&&data.routes&&data.routes[0];if(!route||route.result_code!==0)throw new Error('no route');const f=fmtRoad(route.summary.distance,route.summary.duration);if(km)km.textContent=f.km;if(tm)tm.textContent=f.time;if(note)note.textContent='현재 위치에서 다음 목적지까지 자동차 기준입니다.';}catch(e){const d=calcDist(lat,lng,t.item.lat,t.item.lng)*1.4;if(km)km.textContent=d.toFixed(1)+' km';if(tm)tm.textContent=_fmtTime(d/70*3600);if(note)note.textContent='도로 경로를 불러오지 못해 추정값을 표시합니다.';}},()=>{if(km)km.textContent='위치 확인 필요';if(note)note.textContent='위치 권한을 확인한 뒤 다시 계산해 주세요.';});}
-  // 도보 지도: 기존 길찾기 _map과 별개의 읽기 전용 지도. 내부 검증 전용 진입점.
+  // 도보 전용 지도: 처음에는 전체 일정, 이동하면 현위치와 다음 미방문 순례지를 추적한다.
+  // 지도 표시와 기존 GPS 스탬프 판정은 분리한다. 보행 경로 API 없이 경로선을 추정해 그리지 않는다.
   let walkMapSession=null;
   function closeWalkMap(){
     const session=walkMapSession;if(!session)return;
@@ -21381,45 +21382,89 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     session.layer.remove();
   }
   function openWalkMapPreview(){
-    // 백그라운드 서비스와 GPS 스탬프 연동 전까지 일반 사용자에게 노출하지 않는다.
     closeWalkMap();
     const active=_activeFollowState();
-    if(!active){return false;}
-    const rows=loadPlan().map((item,i)=>({
-      item,index:i,lat:Number(item.lat),lng:Number(item.lng)
-    })).filter(p=>_validGpsPair(p.lat,p.lng));
+    if(!active||active.travelMode!=='walk')return false;
+    const plan=loadPlan(),meta=loadMeta();
+    const rows=plan.map((item,i)=>({item,index:i,lat:Number(item.lat),lng:Number(item.lng)}))
+      .filter(p=>_validGpsPair(p.lat,p.lng));
     if(!rows.length)return false;
+    const startPoint=meta.start&&_validGpsPair(meta.start.lat,meta.start.lng)?meta.start:null;
+    const endPoint=meta.end&&_validGpsPair(meta.end.lat,meta.end.lng)?meta.end:null;
     const layer=document.createElement('section');
     layer.id='oai-walk-map-preview';layer.className='oai-walk-map-preview';
     layer.setAttribute('aria-label','도보 순례 지도');
-    layer.innerHTML='<header><strong>도보 순례 · 지도</strong><span data-walk-progress></span><button type="button" data-walk-close>다른 메뉴</button></header><div class="oai-walk-map-canvas"></div><button type="button" class="oai-walk-recenter" data-walk-recenter>내 위치</button><p class="oai-walk-map-hint">지도는 보기 전용입니다. 순례 종료는 기존 순례하기 상세에서 진행하세요.</p>';
+    layer.innerHTML='<header><strong>도보 순례 · 지도</strong><span data-walk-progress></span><button type="button" data-walk-close>다른 메뉴</button></header><div class="oai-walk-map-canvas"></div><div class="oai-walk-map-controls"><button type="button" data-walk-overview>전체 보기</button><button type="button" data-walk-recenter>내 위치</button></div><p class="oai-walk-map-hint">지도를 닫아도 순례는 계속됩니다. 종료는 순례하기에서 진행하세요.</p>';
     document.body.appendChild(layer);
-    const session={layer,closed:false,watchId:null,resizeObserver:null,map:null,myMarker:null,follow:true,lastPosition:null};
+    const session={layer,closed:false,watchId:null,resizeObserver:null,map:null,myMarker:null,
+      viewMode:'overview',lastPosition:null,firstPosition:null,lastFollowPosition:null,lastFollowAt:0};
     walkMapSession=session;
     layer.querySelector('[data-walk-close]').addEventListener('click',closeWalkMap);
-    layer.querySelector('[data-walk-recenter]').addEventListener('click',()=>{
-      session.follow=true;
-      if(session.lastPosition&&session.map)session.map.setCenter(session.lastPosition);
-    });
-    const count=layer.querySelector('[data-walk-progress]');
-    count.textContent=rows.filter(p=>p.item.done).length+' / '+rows.length+' 방문';
+    const progress=layer.querySelector('[data-walk-progress]');
+    function updateProgress(){
+      const list=loadPlan();
+      progress.textContent=list.filter(p=>p.done).length+' / '+list.length+' 방문';
+    }
+    updateProgress();
     _withReadyKakaoMap(()=>{
       if(session.closed)return;
       const canvas=layer.querySelector('.oai-walk-map-canvas');
-      const bounds=new kakao.maps.LatLngBounds();
-      rows.forEach(p=>bounds.extend(new kakao.maps.LatLng(p.lat,p.lng)));
       const map=new kakao.maps.Map(canvas,{center:new kakao.maps.LatLng(rows[0].lat,rows[0].lng),level:6});
       session.map=map;
+      function pointLatLng(point){return new kakao.maps.LatLng(Number(point.lat),Number(point.lng));}
+      function showOverview(){
+        if(session.closed)return;
+        session.viewMode='overview';
+        const bounds=new kakao.maps.LatLngBounds();
+        rows.forEach(p=>bounds.extend(pointLatLng(p)));
+        if(startPoint)bounds.extend(startPoint.dynamicCurrent&&session.lastPosition?session.lastPosition:pointLatLng(startPoint));
+        if(endPoint)bounds.extend(pointLatLng(endPoint));
+        // 전체 보기의 위치는 사용자가 이동 중일 때도 함께 포함한다.
+        if(session.lastPosition)bounds.extend(session.lastPosition);
+        map.setBounds(bounds,72,35,72,35);
+      }
+      function showNextTarget(){
+        if(session.closed||!session.lastPosition)return;
+        const remaining=loadPlan();
+        const next=remaining.find(p=>!p.done&&_validGpsPair(p.lat,p.lng));
+        const target=next||(endPoint&&endPoint.dynamicCurrent?null:endPoint);
+        session.viewMode='follow';
+        if(target){
+          const bounds=new kakao.maps.LatLngBounds();
+          bounds.extend(session.lastPosition);
+          bounds.extend(pointLatLng(target));
+          map.setBounds(bounds,115,45,100,45);
+        }else{
+          map.setCenter(session.lastPosition);
+          map.setLevel(4);
+        }
+        session.lastFollowPosition=session.lastPosition;
+        session.lastFollowAt=Date.now();
+      }
+      if(startPoint&&!startPoint.dynamicCurrent){
+        new kakao.maps.Marker({map,position:pointLatLng(startPoint),title:'출발지 · '+startPoint.name,
+          image:_mkrImgRoute('#236ea8','출발')});
+      }
       rows.forEach(p=>{
-        const position=new kakao.maps.LatLng(p.lat,p.lng);
-        const marker=new kakao.maps.Marker({map,position,title:p.item.name,image:_mkrImgRoute(p.item.done?'#21845b':'#65788b',p.item.done?'✓':String(p.index+1))});
+        const position=pointLatLng(p);
+        const marker=new kakao.maps.Marker({map,position,title:p.item.name,
+          image:_mkrImgRoute(p.item.done?'#21845b':'#65788b',p.item.done?'✓':String(p.index+1))});
         const info=new kakao.maps.InfoWindow({content:'<div style="padding:7px 9px;font-size:13px">'+esc(p.item.name)+(p.item.done?' · 순례 완료':' · 미방문')+'</div>'});
         kakao.maps.event.addListener(marker,'click',()=>info.open(map,marker));
       });
-      if(rows.length>1)map.setBounds(bounds,65,35,65,35);
-      kakao.maps.event.addListener(map,'dragstart',()=>{session.follow=false;});
+      if(endPoint&&!endPoint.dynamicCurrent){
+        new kakao.maps.Marker({map,position:pointLatLng(endPoint),title:'도착지 · '+endPoint.name,
+          image:_mkrImgRoute('#c9403d','도착')});
+      }
+      showOverview();
+      layer.querySelector('[data-walk-overview]').addEventListener('click',showOverview);
+      layer.querySelector('[data-walk-recenter]').addEventListener('click',()=>{
+        if(session.lastPosition)showNextTarget();
+        else session.viewMode='follow';
+      });
+      kakao.maps.event.addListener(map,'dragstart',()=>{session.viewMode='manual';});
       if(typeof ResizeObserver==='function'){
-        session.resizeObserver=new ResizeObserver(()=>{if(!session.closed){map.relayout();}});
+        session.resizeObserver=new ResizeObserver(()=>{if(!session.closed)map.relayout();});
         session.resizeObserver.observe(canvas);
       }
       if(navigator.geolocation){
@@ -21427,16 +21472,31 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           if(session.closed)return;
           const lat=Number(pos.coords.latitude),lng=Number(pos.coords.longitude);
           if(!_validGpsPair(lat,lng))return;
-          const ll=new kakao.maps.LatLng(lat,lng);session.lastPosition=ll;
+          const ll=new kakao.maps.LatLng(lat,lng);
+          session.lastPosition=ll;
           if(!session.myMarker)session.myMarker=new kakao.maps.Marker({map,position:ll,title:'내 위치',zIndex:2000});
           else session.myMarker.setPosition(ll);
-          if(session.follow)map.setCenter(ll);
+          updateProgress();
+          if(!session.firstPosition){
+            session.firstPosition=ll;
+            if(session.viewMode==='overview')showOverview();
+            else if(session.viewMode==='follow')showNextTarget();
+            return;
+          }
+          // 초반 전체 일정은 유지한다. 실제 이동을 감지하면 다음 순례지 중심으로 전환한다.
+          if(session.viewMode==='overview'){
+            const moved=calcDist(session.firstPosition.getLat(),session.firstPosition.getLng(),lat,lng)*1000;
+            if(moved>=40)showNextTarget();
+          }else if(session.viewMode==='follow'){
+            const prev=session.lastFollowPosition;
+            const moved=prev?calcDist(prev.getLat(),prev.getLng(),lat,lng)*1000:Infinity;
+            if(moved>=35||Date.now()-session.lastFollowAt>=30000)showNextTarget();
+          }
         },()=>{}, {enableHighAccuracy:true,maximumAge:5000,timeout:15000});
       }
     },()=>{closeWalkMap();});
     return true;
   }
-  // 테스트 전용: 공개 도보 진입 및 Android 서비스가 준비되면 정상 흐름으로 통합한다.
   window._oaiPreviewWalkMap=openWalkMapPreview;
   function renderFollowProgress(){
     const list=loadPlan(),done=list.filter(x=>x.done).length,meta=loadMeta(),routeOnlyEnd=!list.length?_pilgrimageRegisteredDestination(meta.end):null;
