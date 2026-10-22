@@ -7812,7 +7812,10 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
   color:#a83430!important;
 }
 #oai-pilgrimage-follow-view .oai-pilgrimage-follow-stop{
+  display:block;
   width:100%;
+  max-width:100%;
+  box-sizing:border-box;
   min-height:44px;
   margin-top:9px;
   border:1.5px solid #c35a54;
@@ -7878,6 +7881,10 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 #oai-pilgrimage-detail-view .oai-pilgrimage-follow{
   display:block!important;
   width:100%!important;
+  max-width:100%!important;
+  min-width:0!important;
+  box-sizing:border-box!important;
+  justify-self:stretch!important;
   min-height:52px!important;
   border:0!important;
   border-radius:14px!important;
@@ -8023,6 +8030,24 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 .oai-pilgrimage-course-follow-btn.is-active{
   background:#eef7ff!important;
   color:#155f9e!important;
+  width:100%!important;
+  max-width:100%!important;
+  box-sizing:border-box!important;
+  margin-left:0!important;
+}
+#oai-pilgrimage-list-view .oai-pilgrimage-course-plan-actions:has(>.oai-pilgrimage-course-follow-btn.is-active){
+  display:flex!important;
+  flex-wrap:wrap!important;
+}
+#oai-pilgrimage-list-view .oai-pilgrimage-course-plan-actions>.oai-pilgrimage-course-follow-btn.is-active{
+  flex:0 0 100%!important;
+}
+#oai-pilgrimage-list-view .oai-pilgrimage-course-complete>.oai-pilgrimage-course-repeat.is-active{
+  display:block!important;
+  width:100%!important;
+  max-width:100%!important;
+  box-sizing:border-box!important;
+  margin-left:0!important;
 }
 .oai-pilgrimage-following-badge{
   margin-right:auto!important;
