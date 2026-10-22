@@ -21188,6 +21188,73 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function fmtRoad(distance,duration){return {km:(Number(distance)/1000).toFixed(1)+' km',time:typeof _fmtTime==='function'?_fmtTime(Number(duration)):Math.round(Number(duration)/60)+'분'};}
   function currentPosition(cb,fail){const ok=(lat,lng)=>{lat=Number(lat);lng=Number(lng);if(!_validGpsPair(lat,lng)){if(fail)fail();return;}try{_myLat=lat;_myLng=lng;}catch(_e){}cb(lat,lng);};if(typeof _refreshFreshLocationThen==='function')_refreshFreshLocationThen(ok,()=>{if(fail)fail();});else if(fail)fail();}
   async function calcFollowDistance(){const t=targetInfo(),km=document.getElementById('oai-pilgrimage-follow-km'),tm=document.getElementById('oai-pilgrimage-follow-time'),note=document.getElementById('oai-pilgrimage-follow-note');if(!t){if(km)km.textContent='완료';if(tm)tm.textContent='-';if(note)note.textContent='모든 순례 장소를 완료했습니다.';return;}if(km)km.textContent='계산 중…';if(tm)tm.textContent='-';if(note)note.textContent='현재 위치를 확인하고 있습니다.';currentPosition(async(lat,lng)=>{try{if(note)note.textContent='자동차 경로를 계산하고 있습니다.';const res=await _kakaoDirectionsFetch(lng+','+lat,t.item.lng+','+t.item.lat,9000);if(!res.ok)throw new Error(String(res.status));const data=await res.json(),route=data&&data.routes&&data.routes[0];if(!route||route.result_code!==0)throw new Error('no route');const f=fmtRoad(route.summary.distance,route.summary.duration);if(km)km.textContent=f.km;if(tm)tm.textContent=f.time;if(note)note.textContent='현재 위치에서 다음 목적지까지 자동차 기준입니다.';}catch(e){const d=calcDist(lat,lng,t.item.lat,t.item.lng)*1.4;if(km)km.textContent=d.toFixed(1)+' km';if(tm)tm.textContent=_fmtTime(d/70*3600);if(note)note.textContent='도로 경로를 불러오지 못해 추정값을 표시합니다.';}},()=>{if(km)km.textContent='위치 확인 필요';if(note)note.textContent='위치 권한을 확인한 뒤 다시 계산해 주세요.';});}
+  // 도보 지도: 기존 길찾기 _map과 별개의 읽기 전용 지도. 내부 검증 전용 진입점.
+  let walkMapSession=null;
+  function closeWalkMap(){
+    const session=walkMapSession;if(!session)return;
+    walkMapSession=null;session.closed=true;
+    if(session.watchId!==null)navigator.geolocation.clearWatch(session.watchId);
+    if(session.resizeObserver)session.resizeObserver.disconnect();
+    session.layer.remove();
+  }
+  function openWalkMapPreview(){
+    // 백그라운드 서비스와 GPS 스탬프 연동 전까지 일반 사용자에게 노출하지 않는다.
+    closeWalkMap();
+    const active=_activeFollowState();
+    if(!active){return false;}
+    const rows=loadPlan().map((item,i)=>({
+      item,index:i,lat:Number(item.lat),lng:Number(item.lng)
+    })).filter(p=>_validGpsPair(p.lat,p.lng));
+    if(!rows.length)return false;
+    const layer=document.createElement('section');
+    layer.id='oai-walk-map-preview';layer.className='oai-walk-map-preview';
+    layer.setAttribute('aria-label','도보 순례 지도');
+    layer.innerHTML='<header><strong>도보 순례 · 지도</strong><span data-walk-progress></span><button type="button" data-walk-close>다른 메뉴</button></header><div class="oai-walk-map-canvas"></div><button type="button" class="oai-walk-recenter" data-walk-recenter>내 위치</button><p class="oai-walk-map-hint">지도는 보기 전용입니다. 순례 종료는 기존 순례하기 상세에서 진행하세요.</p>';
+    document.body.appendChild(layer);
+    const session={layer,closed:false,watchId:null,resizeObserver:null,map:null,myMarker:null,follow:true,lastPosition:null};
+    walkMapSession=session;
+    layer.querySelector('[data-walk-close]').addEventListener('click',closeWalkMap);
+    layer.querySelector('[data-walk-recenter]').addEventListener('click',()=>{
+      session.follow=true;
+      if(session.lastPosition&&session.map)session.map.setCenter(session.lastPosition);
+    });
+    const count=layer.querySelector('[data-walk-progress]');
+    count.textContent=rows.filter(p=>p.item.done).length+' / '+rows.length+' 방문';
+    _withReadyKakaoMap(()=>{
+      if(session.closed)return;
+      const canvas=layer.querySelector('.oai-walk-map-canvas');
+      const bounds=new kakao.maps.LatLngBounds();
+      rows.forEach(p=>bounds.extend(new kakao.maps.LatLng(p.lat,p.lng)));
+      const map=new kakao.maps.Map(canvas,{center:new kakao.maps.LatLng(rows[0].lat,rows[0].lng),level:6});
+      session.map=map;
+      rows.forEach(p=>{
+        const position=new kakao.maps.LatLng(p.lat,p.lng);
+        const marker=new kakao.maps.Marker({map,position,title:p.item.name,image:_mkrImgRoute(p.item.done?'#21845b':'#65788b',p.item.done?'✓':String(p.index+1))});
+        const info=new kakao.maps.InfoWindow({content:'<div style="padding:7px 9px;font-size:13px">'+esc(p.item.name)+(p.item.done?' · 순례 완료':' · 미방문')+'</div>'});
+        kakao.maps.event.addListener(marker,'click',()=>info.open(map,marker));
+      });
+      if(rows.length>1)map.setBounds(bounds,65,35,65,35);
+      kakao.maps.event.addListener(map,'dragstart',()=>{session.follow=false;});
+      if(typeof ResizeObserver==='function'){
+        session.resizeObserver=new ResizeObserver(()=>{if(!session.closed){map.relayout();}});
+        session.resizeObserver.observe(canvas);
+      }
+      if(navigator.geolocation){
+        session.watchId=navigator.geolocation.watchPosition(pos=>{
+          if(session.closed)return;
+          const lat=Number(pos.coords.latitude),lng=Number(pos.coords.longitude);
+          if(!_validGpsPair(lat,lng))return;
+          const ll=new kakao.maps.LatLng(lat,lng);session.lastPosition=ll;
+          if(!session.myMarker)session.myMarker=new kakao.maps.Marker({map,position:ll,title:'내 위치',zIndex:2000});
+          else session.myMarker.setPosition(ll);
+          if(session.follow)map.setCenter(ll);
+        },()=>{}, {enableHighAccuracy:true,maximumAge:5000,timeout:15000});
+      }
+    },()=>{closeWalkMap();});
+    return true;
+  }
+  // 테스트 전용: 공개 도보 진입 및 Android 서비스가 준비되면 정상 흐름으로 통합한다.
+  window._oaiPreviewWalkMap=openWalkMapPreview;
   function renderFollowProgress(){
     const list=loadPlan(),done=list.filter(x=>x.done).length,meta=loadMeta(),routeOnlyEnd=!list.length?_pilgrimageRegisteredDestination(meta.end):null;
     const count=document.getElementById('oai-pilgrimage-follow-progress-count');

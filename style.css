@@ -10275,3 +10275,12 @@ html.oai-font-global .shrine-visit-card-badge strong,html:not(.ios-device).oai-s
 .oai-restricted-place-row button{border:1px solid #cbd5e1;border-radius:8px;background:#fff;color:#475569;padding:7px 11px;font-size:13px;flex:none;}
 #oai-restricted-place-results{max-height:185px;overflow-y:auto;}
 .oai-restricted-match{display:block;box-sizing:border-box;width:100%;text-align:left;border:0;border-bottom:1px solid #eef1f5;background:#fff;color:#243b53;padding:12px 8px;font-size:calc(14px * var(--app-font-scale,1));line-height:1.4;}
+
+/* 도보 지도 검증용 독립 레이어: 기존 지도/길찾기 스타일에 영향 없음 */
+.oai-walk-map-preview{position:fixed;inset:0;z-index:2147482500;background:#fff;display:flex;flex-direction:column;color:#18252e;overflow:hidden}
+.oai-walk-map-preview header{display:flex;align-items:center;gap:10px;padding:calc(12px + env(safe-area-inset-top,0px)) 12px 12px;background:#fff;flex-shrink:0}
+.oai-walk-map-preview header strong{font-size:16px}.oai-walk-map-preview header span{margin-left:auto;font-size:13px}
+.oai-walk-map-preview button{border:1px solid #ccd2d7;background:#fff;border-radius:10px;padding:9px 12px;color:#18252e}
+.oai-walk-map-preview .oai-walk-map-canvas{flex:1;min-height:0;width:100%}
+.oai-walk-map-preview .oai-walk-recenter{position:absolute;right:14px;bottom:calc(64px + env(safe-area-inset-bottom,0px));box-shadow:0 2px 10px #0002}
+.oai-walk-map-preview .oai-walk-map-hint{font-size:12px;padding:12px;margin:0;background:#fff;text-align:center;padding-bottom:calc(12px + env(safe-area-inset-bottom,0px))}
