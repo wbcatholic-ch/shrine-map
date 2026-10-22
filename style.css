@@ -8649,6 +8649,7 @@ html:not(.oai-map-split-wide).oai-pilgrimage-route-direct #app #sheet-route.rout
   grid-template-columns:1fr!important;
   gap:10px!important;
 }
+#oai-pilgrimage-follow-start-modal .oai-pilgrimage-travel-modes[hidden]{display:none!important;}
 #oai-pilgrimage-follow-start-modal .oai-pilgrimage-travel-modes legend{
   padding:0 6px!important;
   color:#5f4f31!important;

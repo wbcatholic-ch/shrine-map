@@ -20527,6 +20527,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     applyCourse(c);
     try{localStorage.setItem(ACTIVE_FOLLOW_KEY,JSON.stringify({courseId:c.id,startedAt:now,travelMode:_followTravelMode(travelMode)}));}catch(_e){}
     _recordDailyFollowSession(c,now);
+    if(travelMode==='walk')_walkingNativeStart(_activeFollowState());
     try{renderCourseList();}catch(_e){}
     // 완료 목록의 '다시 순례하기'에서 시작했다면
     // 버튼만 '순례 종료'로 바꾸고 목록에 머무르지 말고
@@ -20534,12 +20535,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(plannerView==='list'){
       setView('detail');
       renderDetail();
-      return;
-    }
-    if(plannerView==='detail'){
+    }else if(plannerView==='detail'){
       setView('detail');
       renderDetail();
     }
+    if(travelMode==='walk')openWalkMapPreview();
   }
   let pendingCourseDeleteId='';
   function deleteCourse(id){
@@ -21379,7 +21379,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     // 백그라운드 서비스와 GPS 스탬프 연동 전까지 일반 사용자에게 노출하지 않는다.
     closeWalkMap();
     const active=_activeFollowState();
-    if(!active){return false;}
+    if(!active||active.travelMode!=='walk'){return false;}
     const rows=loadPlan().map((item,i)=>({
       item,index:i,lat:Number(item.lat),lng:Number(item.lng)
     })).filter(p=>_validGpsPair(p.lat,p.lng));
@@ -21552,6 +21552,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       renderCourseList();
       setView('detail');
       renderDetail();
+      if(travelMode==='walk')openWalkMapPreview();
       return true;
     }
     startFollowFromCourse(id,true,travelMode);
@@ -21621,6 +21622,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const nextMode=pendingFollowStartMode;
     const active=_activeFollowState();
     if(!active||!active.courseId||!id||String(active.courseId)!==String(id)){closeFollowStopConfirm();return false;}
+    closeWalkMap();
     _clearActiveFollow(active.courseId);
     pendingFollowStopCourseId='';
     pendingFollowStartCourseId='';
@@ -21659,6 +21661,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
        목록에 머물지 않고 반드시 현재 활성 순례 상세로 이동한다. */
     setView('detail');
     renderDetail();
+    if(travelMode==='walk')openWalkMapPreview();
   }
   function toggleFollowFromDetail(){
     if(!currentCourseId)return;
@@ -21678,6 +21681,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 
   window._oaiPilgrimageBackHandle=function(){
     try{
+      if(walkMapSession){closeWalkMap();return true;}
       // 읽기 전용 경유지 지도는 순례완료 상세 위에 놓이는 최상위 화면이다.
       // 시스템 뒤로가기에서 아래 상세/목록을 먼저 전환하지 않도록 지도부터 닫는다.
       const waypointsMap=document.getElementById('oai-pilgrimage-waypoints-readonly');
