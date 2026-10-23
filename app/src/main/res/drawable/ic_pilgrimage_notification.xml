@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- White monochrome wide cathedral silhouette for Android status/pilgrimage notifications.
+     Optimized for the very small status-bar icon: no frame, broad horizontal massing. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <path
+        android:fillColor="#FFFFFFFF"
+        android:pathData="M2,18 L2,20.2 L22,20.2 L22,18 L20.2,18 L20.2,10.4 L18.6,10.4 L18.6,8.4 L16.6,6.6 L14.8,8.4 L14.8,10.2 L13.3,10.2 L13.3,7.8 L12,6 L10.7,7.8 L10.7,10.2 L9.2,10.2 L9.2,8.4 L7.4,6.6 L5.4,8.4 L5.4,10.4 L3.8,10.4 L3.8,18 Z M7.2,12.2 L9.0,12.2 L9.0,18 L7.2,18 Z M10.6,12 L13.4,12 L13.4,18 L10.6,18 Z M15.0,12.2 L16.8,12.2 L16.8,18 L15.0,18 Z" />
+</vector>
