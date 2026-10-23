@@ -7019,6 +7019,39 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 #oai-pilgrimage-detail-view .oai-pilgrimage-endpoint i{
   font-size:24px!important;
 }
+/* 출발지·도착지는 경유지 번호 열에 종류를, 이름 열에 장소명을 배치한다. */
+#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint{
+  justify-content:flex-start!important;
+  gap:8px!important;
+  padding:10px 19px!important;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint-role{
+  display:flex;flex:0 0 64px;align-items:center;justify-content:center;
+  font-size:calc(13px * var(--app-font-scale,1));font-weight:950;
+  white-space:nowrap;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint.start .oai-pilgrimage-endpoint-role{color:#0b68c7;}
+#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint.end .oai-pilgrimage-endpoint-role{color:#c92f2a;}
+#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint-main{flex:1 1 auto;min-width:0;}
+#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint-main>b{margin-top:0!important;}
+#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint-metric{
+  display:block;margin-top:5px;overflow:hidden;text-overflow:ellipsis;
+  white-space:nowrap;color:var(--plan-muted);
+  font-size:calc(11.5px * var(--app-font-scale,1));font-weight:750;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint-metric b{
+  display:inline!important;margin:0!important;color:inherit!important;
+  font-size:inherit!important;font-weight:750!important;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-calculation-note{
+  position:absolute!important;width:1px!important;height:1px!important;
+  overflow:hidden!important;clip-path:inset(50%)!important;
+  white-space:nowrap!important;padding:0!important;margin:0!important;border:0!important;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-total-card{
+  display:block!important;padding:0!important;border:0!important;
+  margin-top:10px!important;background:transparent!important;
+}
 #oai-pilgrimage-detail-view .oai-pilgrimage-plan-list{
   display:block!important;
   padding:0 13px!important;

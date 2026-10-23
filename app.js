@@ -22020,9 +22020,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const list=loadPlan(),meta=loadMeta();
     const active=_activeFollowState();
     const running=pilgrimageDetailMode!=='complete'&&!!(active&&currentCourseId&&String(active.courseId)===String(currentCourseId));
-    const labels=card.querySelectorAll('small');
-    if(labels[0])labels[0].textContent=running?'총 남은 거리':'총 이동 거리';
-    if(labels[1])labels[1].textContent=running?'남은 예상 시간':'예상 시간';
+    // The cumulative calculation values live beneath the destination name.
+    const endMetric=document.querySelector('#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint-metric');
+    if(endMetric)endMetric.firstChild.textContent=running?'남은 ':'누적 ';
     const stops=running?_pilgrimageRemainingPoints(list,meta):list.concat(meta.end?[meta.end]:[]);
     if(!stops.length){
       kmEl.textContent=running?'0.0 km':'-';timeEl.textContent=running?'0분':'-';
