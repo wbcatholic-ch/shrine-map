@@ -10418,6 +10418,11 @@ html.oai-font-global .shrine-visit-card-badge strong,html:not(.ios-device).oai-s
 
 /* 도보 지도 검증용 독립 레이어: 기존 지도/길찾기 스타일에 영향 없음 */
 .oai-walk-map-preview{position:fixed;inset:0;z-index:2147482500;background:#fff;display:flex;flex-direction:column;width:100%;height:100%;height:100dvh;min-height:0;color:#18252e;overflow:hidden}
+/* Completed GPS walk playback uses the established walking-map shell. */
+.oai-walk-history-map .oai-walk-history-bottom{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:9px;padding:12px 14px calc(12px + env(safe-area-inset-bottom,0px));background:#fff;flex:0 0 auto}
+.oai-walk-history-map .oai-walk-history-bottom select{font:700 14px inherit;padding:10px;border:1px solid #9ba8b8;border-radius:9px;max-width:48%;background:#fff;color:#17213a}
+.oai-walk-history-map .oai-walk-history-legend{font-size:12px;color:#526071}
+#oai-pilgrimage-detail-view [data-oai-walk-history]{grid-column:1/-1;width:100%;background:#e8f1ec;color:#21603f;border:1.5px solid #579377;border-radius:11px;min-height:49px;font-weight:850}
 .oai-walk-map-preview header{display:flex;align-items:center;gap:10px;padding:calc(12px + env(safe-area-inset-top,0px)) 12px 12px;background:#fff;flex-shrink:0}
 .oai-walk-map-preview header strong{font-size:16px}.oai-walk-map-preview header span{margin-left:auto;font-size:13px}
 .oai-walk-map-preview button{border:1px solid #ccd2d7;background:#fff;border-radius:10px;padding:9px 12px;color:#18252e}
