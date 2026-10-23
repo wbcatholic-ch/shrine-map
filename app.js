@@ -3490,7 +3490,7 @@ function _oaiResetVisitViewerZoom(){
 function _oaiEnsurePhotoViewer(){
   let m=document.getElementById('oai-visit-photo-viewer');if(m)return m;
   m=document.createElement('div');m.id='oai-visit-photo-viewer';m.className='oai-visit-photo-viewer';m.setAttribute('aria-hidden','true');
-  m.innerHTML='<div class="oai-visit-photo-viewer-bg"></div><div class="oai-visit-photo-viewer-panel"><div class="oai-visit-photo-viewer-top"><span id="oai-visit-photo-viewer-count"></span><button type="button" data-oai-photo-viewer-close="1" aria-label="사진 닫기">×</button></div><button type="button" class="oai-visit-photo-nav prev" data-oai-photo-prev="1" aria-label="이전 사진">‹</button><img id="oai-visit-photo-viewer-img" alt="방문 사진" draggable="false"><button type="button" class="oai-visit-photo-nav next" data-oai-photo-next="1" aria-label="다음 사진">›</button></div>';
+  m.innerHTML='<div class="oai-visit-photo-viewer-bg"></div><div class="oai-visit-photo-viewer-top"><span id="oai-visit-photo-viewer-count"></span><button type="button" data-oai-photo-viewer-close="1" aria-label="사진 닫기">×</button></div><div class="oai-visit-photo-viewer-panel"><button type="button" class="oai-visit-photo-nav prev" data-oai-photo-prev="1" aria-label="이전 사진">‹</button><img id="oai-visit-photo-viewer-img" alt="방문 사진" draggable="false"><button type="button" class="oai-visit-photo-nav next" data-oai-photo-next="1" aria-label="다음 사진">›</button></div>';
   document.body.appendChild(m);
   m.addEventListener('click',function(e){
     if(e.target.closest&&e.target.closest('[data-oai-photo-viewer-close]')){_oaiClosePhotoViewer();return;}
