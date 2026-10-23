@@ -10436,5 +10436,6 @@ html.oai-font-global .shrine-visit-card-badge strong,html:not(.ios-device).oai-s
 /* Persistent 1 cm-square pilgrimage return control: shared by walking and driving.
    The navigation element is placed on body so that it survives switching categories. */
 #oai-walk-cover-badge[hidden]{display:none!important}
-#oai-walk-cover-badge{position:fixed;left:10px;top:calc(env(safe-area-inset-top,0px) + 10px);z-index:2147480000;display:flex;align-items:center;justify-content:center;box-sizing:border-box;width:76px;height:76px;min-width:76px;min-height:76px;padding:0;border-radius:12px;border:1px solid #a79b88;background:#eae5db;color:#514532;box-shadow:0 2px 8px #0003;cursor:pointer;font:inherit}
-#oai-walk-cover-badge .oai-walk-cover-icon{font-size:42px;line-height:1}
+#oai-walk-cover-badge{position:fixed;left:10px;top:calc(env(safe-area-inset-top,0px) + 104px);z-index:2147480000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px;box-sizing:border-box;width:76px;height:76px;min-width:76px;min-height:76px;padding:5px 3px;border-radius:12px;border:2px solid #32916a;background:#d9f3e6;color:#164b35;box-shadow:0 3px 12px rgba(24,92,61,.22);cursor:grab;touch-action:none;user-select:none;-webkit-user-select:none;font:inherit}
+#oai-walk-cover-badge .oai-walk-cover-icon{font-size:35px;line-height:1.05}
+#oai-walk-cover-badge .oai-walk-cover-label{font-size:13px;font-weight:900;line-height:1.15;letter-spacing:.2px;white-space:nowrap;color:#164b35}
