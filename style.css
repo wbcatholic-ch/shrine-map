@@ -7091,6 +7091,10 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
   background:#1767B5!important;
   border:1px solid #1767B5!important;
   color:#FFFFFF!important;
+  font-family:inherit!important;
+  font-size:calc(14px * var(--app-font-scale,1))!important;
+  font-weight:950!important;
+  line-height:1.25!important;
 }
 #oai-pilgrimage-detail-view.is-empty-plan .oai-pilgrimage-map-add{
   grid-column:1/-1;
