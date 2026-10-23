@@ -21048,13 +21048,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(actions)actions.classList.add('is-integrated-pilgrimage');
     calcPilgrimageTotalRoute();
     if(isCompletionView){
-      try{
-        if(detailRoot)detailRoot.classList.remove('gps-ready');
-        list.forEach(function(_item,i){
-          const el=document.querySelector('[data-plan-metric="'+i+'"]');
-          if(el)el.textContent='순례 완료';
-        });
-      }catch(_e){}
+      // Completion metrics are rendered directly from the original GPS stamp.
+      // Do not overwrite the per-place visit date/time with a fixed label.
+      if(detailRoot)detailRoot.classList.remove('gps-ready');
     }else{
       calcDetailItemMetrics();
     }
