@@ -19702,6 +19702,56 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       return true;
     }catch(e){console.warn('[가톨릭길동무] 활성 순례코스 GPS 연동 실패',e);return false;}
   }
+  // Actual GPS trail belongs to a walking session, not to the transient map overlay.
+  // Persist coordinates only; rendering them as a grey path must never alter GPS stamps.
+  function _walkTrailKey(active){
+    return 'oai-walk-trail-v1:'+encodeURIComponent(String(active.courseId))+':'+Number(active.startedAt);
+  }
+  function _walkTrailLoad(active){
+    if(!active||active.travelMode!=='walk')return [];
+    try{
+      const points=JSON.parse(localStorage.getItem(_walkTrailKey(active))||'[]');
+      return Array.isArray(points)?points.filter(p=>Array.isArray(p)&&p.length===3&&
+        _validGpsPair(p[0],p[1])&&Number.isFinite(Number(p[2]))).map(p=>[Number(p[0]),Number(p[1]),Number(p[2])]):[];
+    }catch(_e){return [];}
+  }
+  function _walkTrailAdd(active,fix,forceSave){
+    if(!active||active.travelMode!=='walk'||!fix||!_validGpsPair(fix.lat,fix.lng))return false;
+    const at=Number(fix.at)||Date.now(), accuracy=Number(fix.accuracy);
+    if(at<Number(active.startedAt)||at>Date.now()+5000||
+      (Number.isFinite(accuracy)&&(accuracy<0||accuracy>60)))return true;
+    const key=_walkTrailKey(active),lat=Number(fix.lat),lng=Number(fix.lng);
+    let list=_walkTrailLoad(active);
+    if(list.some(p=>p[2]===at&&Math.abs(p[0]-lat)<0.0000002&&Math.abs(p[1]-lng)<0.0000002))return true;
+    // Background fixes may arrive after later foreground fixes: inspect timestamp neighbors.
+    const insertAt=list.findIndex(p=>p[2]>at);
+    const atIndex=insertAt<0?list.length:insertAt;
+    const previous=atIndex>0?list[atIndex-1]:null;
+    const following=atIndex<list.length?list[atIndex]:null;
+    if(previous){
+      const meters=calcDist(previous[0],previous[1],lat,lng)*1000;
+      const dt=(at-previous[2])/1000;
+      if(meters<5&&dt<600)return true;
+      if(dt>0&&meters/dt>17&&meters>70)return true;
+    }
+    if(following){
+      const meters=calcDist(following[0],following[1],lat,lng)*1000;
+      const dt=(following[2]-at)/1000;
+      if(meters<5&&dt<600)return true;
+      if(dt>0&&meters/dt>17&&meters>70)return true;
+    }
+    list.push([lat,lng,at]);
+    list.sort((x,y)=>x[2]-y[2]);
+    if(list.length>5000){
+      // Retain the complete trajectory shape rather than dropping the oldest points.
+      list=list.filter((_,i)=>i===0||i===list.length-1||i%2===0);
+    }
+    try{
+      localStorage.setItem(key,JSON.stringify(list));
+      if(typeof _updateLiveWalkTrail==='function')_updateLiveWalkTrail(active,list);
+      return true;
+    }catch(e){console.warn('[도보 순례] 이동 기록 저장 실패',e);return false;}
+  }
   // Native service journals timestamps; web alone persists stamps through existing stores.
   let _walkingReplayBusy=false;
   function _reconcileWalkingNativeFix(){
@@ -19719,7 +19769,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         const [lat,lng,accuracy,at]=p;
         if(at>now+5000||at<active.startedAt||accuracy<0||accuracy>100||
            !_validGpsPair(lat,lng))return null;
-        return {lat,lng,at};
+        return {lat,lng,accuracy,at};
       }).filter(Boolean).sort((x,y)=>x.at-y.at);
       if(!fixes.length)return;
       // Do not consume historical GPS while place data is incomplete or across midnight.
@@ -19727,6 +19777,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       let through=0;
       for(const fix of fixes){
         if(_dailyIso(fix.at)!==date)break;
+        // Do not acknowledge native fixes until the walked path is durably saved.
+        if(!_walkTrailAdd(active,fix,true))break;
         const entry=_nearestShrineWithinAutoVisitRadius(fix.lat,fix.lng,date);
         if(entry&&entry.item&&(! _oaiIsRestrictedPlace('shrine',entry.item)||
             _oaiAllowRestrictedGpsVisit('shrine',entry.item,_getShrineVisitDates(entry.item)))){
@@ -21654,13 +21706,27 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // 지도 표시와 GPS 인증은 분리한다. 실제 보행 길찾기 데이터가 없으므로
   // 순서 안내선은 점선으로만 그리고 실제 도보 경로라고 표시하지 않는다.
   let walkMapSession=null;
+  function _updateLiveWalkTrail(active,points){
+    const session=walkMapSession;
+    if(!session||session.closed||!session.map||!session.active||
+      String(session.active.courseId)!==String(active.courseId)||
+      Number(session.active.startedAt)!==Number(active.startedAt))return;
+    const rows=points||_walkTrailLoad(active);
+    if(rows.length<2)return;
+    const path=rows.map(p=>new kakao.maps.LatLng(p[0],p[1]));
+    if(session.pastTrailLine)session.pastTrailLine.setPath(path);
+    else session.pastTrailLine=new kakao.maps.Polyline({map:session.map,path,
+      strokeWeight:6,strokeColor:'#747A83',strokeOpacity:0.90,zIndex:6});
+  }
   function closeWalkMap(){
     const session=walkMapSession;if(!session)return;
     walkMapSession=null;session.closed=true;
     if(session.watchId!==null)navigator.geolocation.clearWatch(session.watchId);
+    if(session.cameraTimer)clearInterval(session.cameraTimer);
     if(session.resizeObserver)session.resizeObserver.disconnect();
     if(session.walkRequest)session.walkRequest.abort();
     if(session.walkRouteLine)session.walkRouteLine.setMap(null);
+    if(session.pastTrailLine)session.pastTrailLine.setMap(null);
     session.layer.remove();
     _refreshWalkingCoverBadge();
   }
@@ -21718,9 +21784,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     layer.setAttribute('aria-label','도보 순례 지도');
     layer.innerHTML='<header><strong>도보 순례 · 지도</strong><span data-walk-progress></span><button type="button" class="oai-walk-close" data-walk-close aria-label="순례하기로 돌아가기">×</button></header><div class="oai-walk-map-canvas"></div><button type="button" class="oai-walk-menu" data-walk-menu>커버로 가기</button><div class="oai-walk-map-controls"><div class="oai-walk-route-legend" data-walk-route-status aria-live="polite">현재 위치 확인 중 · 도보 경로 준비 중</div><div class="oai-walk-control-buttons"><button type="button" data-walk-kakao-route>카카오맵 도보길</button><button type="button" data-walk-overview>전체 보기</button><button type="button" data-walk-recenter>내 위치</button></div></div><div class="oai-walk-exit-overlay" data-walk-exit-confirm hidden><div class="oai-walk-exit-dialog" role="dialog" aria-modal="true" aria-labelledby="oai-walk-exit-title"><h3 id="oai-walk-exit-title" data-walk-exit-title></h3><p data-walk-exit-message></p><div class="oai-walk-exit-actions"><button type="button" data-walk-exit-cancel>지도 계속 보기</button><button type="button" data-walk-exit-accept>돌아가기</button></div></div></div>';
     document.body.appendChild(layer);
-    const session={layer,closed:false,watchId:null,resizeObserver:null,map:null,myMarker:null,walkRouteLine:null,
+    const session={layer,active,closed:false,watchId:null,resizeObserver:null,map:null,myMarker:null,walkRouteLine:null,pastTrailLine:null,
       walkRequest:null,lastWalkRouteAt:0,lastWalkRoutePoint:null,lastWalkRouteTarget:'',walkRouteBusy:false,startMarker:null,
-      viewMode:'overview',lastPosition:null,firstPosition:null,lastFollowPosition:null,lastFollowAt:0};
+      viewMode:'overview',lastPosition:null,firstPosition:null,lastFollowPosition:null,lastFollowAt:0,
+      cameraTimer:null,manualUntil:0,programmaticCameraUntil:0,lastMoveAt:0,motionAnchor:null};
     walkMapSession=session;
     _refreshWalkingCoverBadge();
     layer.querySelector('[data-walk-close]').addEventListener('click',()=>showWalkMapExitConfirm('follow'));
@@ -21739,6 +21806,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       // Kakao Maps needs a measured canvas. A zero-height flex child creates a blank map.
       const map=new kakao.maps.Map(canvas,{center:new kakao.maps.LatLng(rows[0].lat,rows[0].lng),level:6});
       session.map=map;
+      _updateLiveWalkTrail(active);
       requestAnimationFrame(()=>{
         if(session.closed)return;
         map.relayout();
@@ -21828,6 +21896,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       function showOverview(){
         if(session.closed)return;
         session.viewMode='overview';
+        session.programmaticCameraUntil=Date.now()+1500;
         const bounds=new kakao.maps.LatLngBounds();
         rows.forEach(p=>bounds.extend(pointLatLng(p)));
         if(startPoint)bounds.extend(startPoint.dynamicCurrent&&session.lastPosition?session.lastPosition:pointLatLng(startPoint));
@@ -21842,6 +21911,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         const next=remaining.find(p=>!p.done&&_validGpsPair(p.lat,p.lng));
         const target=next||(endPoint&&endPoint.dynamicCurrent?null:endPoint);
         session.viewMode='follow';
+        session.programmaticCameraUntil=Date.now()+1500;
         if(target){
           const bounds=new kakao.maps.LatLngBounds();
           bounds.extend(session.lastPosition);
@@ -21875,7 +21945,29 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(session.lastPosition)showNextTarget();
         else session.viewMode='follow';
       });
-      kakao.maps.event.addListener(map,'dragstart',()=>{session.viewMode='manual';});
+      // A deliberate pan or zoom pauses auto camera for ten seconds. Programmatic
+      // bounds/zoom updates do not count as a user gesture.
+      function pauseCameraForUser(){
+        if(session.closed||Date.now()<session.programmaticCameraUntil)return;
+        session.viewMode='manual';
+        session.manualUntil=Date.now()+10000;
+      }
+      kakao.maps.event.addListener(map,'dragstart',pauseCameraForUser);
+      kakao.maps.event.addListener(map,'zoom_changed',pauseCameraForUser);
+      // While moving, follow current position + the next unvisited shrine.
+      // Ten seconds without meaningful displacement returns to the full course.
+      // Run only while the walking map is open; never create background GPS polling.
+      session.cameraTimer=setInterval(()=>{
+        if(session.closed||!session.lastPosition||document.hidden)return;
+        const now=Date.now();
+        if(session.viewMode==='manual'){
+          if(now<session.manualUntil)return;
+          if(session.lastMoveAt&&now-session.lastMoveAt<10000)showNextTarget();
+          else showOverview();
+        }else if(session.viewMode==='follow'&&session.lastMoveAt&&now-session.lastMoveAt>=10000){
+          showOverview();
+        }
+      },1000);
       if(typeof ResizeObserver==='function'){
         session.resizeObserver=new ResizeObserver(()=>{if(!session.closed)map.relayout();});
         session.resizeObserver.observe(canvas);
@@ -21886,7 +21978,21 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           const lat=Number(pos.coords.latitude),lng=Number(pos.coords.longitude);
           if(!_validGpsPair(lat,lng))return;
           const ll=new kakao.maps.LatLng(lat,lng);
+          _walkTrailAdd(active,{lat,lng,accuracy:Number(pos.coords.accuracy),at:Number(pos.timestamp)||Date.now()},true);
           session.lastPosition=ll;
+          const fixAccuracy=Number(pos.coords.accuracy);
+          // Discard GPS jitter when deciding whether the pilgrim is moving.
+          // Poor GPS fixes still update the position but not camera movement.
+          if(!session.motionAnchor){
+            session.motionAnchor=ll;
+            session.lastMoveAt=Date.now();
+          }else if(!Number.isFinite(fixAccuracy)||fixAccuracy<=50){
+            const displacement=calcDist(session.motionAnchor.getLat(),session.motionAnchor.getLng(),lat,lng)*1000;
+            if(displacement>=Math.max(12,Number.isFinite(fixAccuracy)?fixAccuracy:12)){
+              session.motionAnchor=ll;
+              session.lastMoveAt=Date.now();
+            }
+          }
           refreshWalkingRoute(false);
           if(!session.myMarker)session.myMarker=new kakao.maps.Marker({map,position:ll,title:'내 위치',zIndex:2000});
           else session.myMarker.setPosition(ll);
@@ -21897,14 +22003,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
             else if(session.viewMode==='follow')showNextTarget();
             return;
           }
-          // 초반 전체 일정은 유지한다. 실제 이동을 감지하면 다음 순례지 중심으로 전환한다.
+          // Follow only meaningful movement, not GPS noise. A manual gesture
+          // remains respected until its ten-second pause expires.
           if(session.viewMode==='overview'){
-            const moved=calcDist(session.firstPosition.getLat(),session.firstPosition.getLng(),lat,lng)*1000;
-            if(moved>=40)showNextTarget();
+            if(session.lastMoveAt&&Date.now()-session.lastMoveAt<3000&&
+              calcDist(session.firstPosition.getLat(),session.firstPosition.getLng(),lat,lng)*1000>=12)showNextTarget();
           }else if(session.viewMode==='follow'){
             const prev=session.lastFollowPosition;
             const moved=prev?calcDist(prev.getLat(),prev.getLng(),lat,lng)*1000:Infinity;
-            if(moved>=35||Date.now()-session.lastFollowAt>=30000)showNextTarget();
+            if(moved>=20||Date.now()-session.lastFollowAt>=15000)showNextTarget();
           }
         },()=>{}, {enableHighAccuracy:true,maximumAge:5000,timeout:15000});
       }
