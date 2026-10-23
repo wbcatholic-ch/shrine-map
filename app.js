@@ -2658,7 +2658,7 @@ document.addEventListener('scroll',function(e){
 let _oaiPhotoGpsRequests=0, _oaiPhotoLocationLast=null, _oaiRequestedStampDetailLast=null;
 function _oaiNotifyPhotoLocationActivity(){
   try{
-    const bridge=window.GildongmuNative||window.Android;
+    const bridge=window.GildongmuNative||window.Android||window.NativeBridge;
     if(!bridge||typeof bridge.setVisitPhotoTransferActivity!=='function')return;
     const showing=function(id){const x=document.getElementById(id);return !!(x&&x.classList.contains('show'));};
     const photoOverlay=showing('shrine-visit-cards-modal')||showing('parish-visit-book')||
@@ -2689,7 +2689,7 @@ function _oaiNotifyPhotoLocationActivity(){
 // Native transfer hint only; never starts transfers or changes visit records.
 function _oaiNotifyStampListVisibility(){
   try{
-    const bridge=window.GildongmuNative||window.Android;
+    const bridge=window.GildongmuNative||window.Android||window.NativeBridge;
     if(!bridge||typeof bridge.setVisitPhotoTransferActivity!=='function')return;
     const shrine=document.getElementById('shrine-visit-cards-modal');
     const parish=document.getElementById('parish-visit-book');
@@ -4188,6 +4188,17 @@ function _registerAutoShrineVisit(entry){
     return true;
   }catch(e){ console.warn('[가톨릭길동무]', e); return false; }
 }
+// Speak only after the shared GPS registration pipeline reports a NEW visit.
+// The Android ringer mode is authoritative; this never overrides silent/vibrate.
+function _oaiSpeakNewGpsStamp(kind,name){
+  try{
+    const bridge=window.GildongmuNative||window.Android||window.NativeBridge;
+    if(!bridge||typeof bridge.speakGpsStamp!=='function')return;
+    const place=String(name||'').trim().slice(0,80);
+    if(!place)return;
+    bridge.speakGpsStamp(kind==='shrine'?'축하합니다. '+place+' 순례 스탬프를 획득하셨습니다.':'축하합니다. '+place+' 방문 스탬프를 획득하셨습니다.');
+  }catch(_e){}
+}
 function _maybePromptAutoShrineVisit(lat,lng){
   try{
     if(!lat||!lng) return;
@@ -4204,6 +4215,7 @@ function _maybePromptAutoShrineVisit(lat,lng){
       if(!registered){window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__=false;return;}
       // 동일 GPS 방문으로 등록된 명시적 성지·성당 쌍에 한해서만 성당 안내를 생략한다.
       _oaiLastGpsShrineNotice={id:_oaiPlaceCanonicalId('shrine',entry.item),date:date,timestamp:Date.now()};
+      _oaiSpeakNewGpsStamp('shrine',entry.item.name);
       _queueDeferredVisitNotice('shrine',entry);
       window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__=false;
     },700);
@@ -4878,6 +4890,7 @@ function _maybeAutoParishVisit(lat,lng){
   if(previousVisits.some(function(v){return v.date===_todayISODate();}))return;
   const visitResult=_registerGpsPlaceVisit('parish',best,_todayISODate());
   if(!visitResult.added)return;
+  _oaiSpeakNewGpsStamp('parish',best.name);
 
   // 성지·성당 방문기록은 각각 독립 등록한다. 같은 GPS 방문에서 실제 성지 등록이
   // 성공한 명시적 쌍에만 성지 축하창 1회를 적용한다. 성지 저장 실패시 성당 축하창은 보인다.
@@ -18565,9 +18578,63 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   };
   const walkingCoverBadge=document.getElementById('oai-walk-cover-badge');
   if(walkingCoverBadge){
-    // The control must stay visible in every other category, not just on the cover.
+    // The same movable return control is used by both walking and car pilgrimages.
     if(walkingCoverBadge.parentNode!==document.body)document.body.appendChild(walkingCoverBadge);
-    walkingCoverBadge.addEventListener('click',function(){window._oaiResumeWalkingFromCover();});
+    const badgePositionKey='oai-pilgrimage-return-badge-position-session-v1';
+    const clampBadgePosition=function(x,y){
+      const rect=walkingCoverBadge.getBoundingClientRect();
+      const width=rect.width||76,height=rect.height||76;
+      return {x:Math.max(0,Math.min(window.innerWidth-width,Math.round(x))),
+        y:Math.max(0,Math.min(window.innerHeight-height,Math.round(y)))};
+    };
+    const placeBadge=function(x,y){
+      const pt=clampBadgePosition(x,y);
+      walkingCoverBadge.style.left=pt.x+'px';
+      walkingCoverBadge.style.top=pt.y+'px';
+      walkingCoverBadge.style.right='auto';
+      walkingCoverBadge.style.bottom='auto';
+      return pt;
+    };
+    try{
+      const saved=JSON.parse(sessionStorage.getItem(badgePositionKey)||'null');
+      if(saved&&Number.isFinite(saved.x)&&Number.isFinite(saved.y))placeBadge(saved.x,saved.y);
+    }catch(_e){}
+    let pointerDrag=null,suppressBadgeClick=false;
+    walkingCoverBadge.addEventListener('pointerdown',function(event){
+      if(event.button!==0&&event.pointerType==='mouse')return;
+      const rect=walkingCoverBadge.getBoundingClientRect();
+      pointerDrag={id:event.pointerId,startX:event.clientX,startY:event.clientY,left:rect.left,top:rect.top,moved:false};
+      try{walkingCoverBadge.setPointerCapture(event.pointerId);}catch(_e){}
+    });
+    walkingCoverBadge.addEventListener('pointermove',function(event){
+      if(!pointerDrag||pointerDrag.id!==event.pointerId)return;
+      const dx=event.clientX-pointerDrag.startX,dy=event.clientY-pointerDrag.startY;
+      if(!pointerDrag.moved&&Math.hypot(dx,dy)<8)return;
+      pointerDrag.moved=true;
+      placeBadge(pointerDrag.left+dx,pointerDrag.top+dy);
+      event.preventDefault();
+    });
+    function finishBadgeDrag(event){
+      if(!pointerDrag||pointerDrag.id!==event.pointerId)return;
+      if(pointerDrag.moved){
+        suppressBadgeClick=true;
+        const rect=walkingCoverBadge.getBoundingClientRect();
+        const pt=placeBadge(rect.left,rect.top);
+        try{sessionStorage.setItem(badgePositionKey,JSON.stringify(pt));}catch(_e){}
+      }
+      pointerDrag=null;
+    }
+    walkingCoverBadge.addEventListener('pointerup',finishBadgeDrag);
+    walkingCoverBadge.addEventListener('pointercancel',finishBadgeDrag);
+    walkingCoverBadge.addEventListener('click',function(event){
+      if(suppressBadgeClick){suppressBadgeClick=false;event.preventDefault();return;}
+      window._oaiResumeWalkingFromCover();
+    });
+    window.addEventListener('resize',function(){
+      if(!walkingCoverBadge.style.left)return;
+      const rect=walkingCoverBadge.getBoundingClientRect();
+      placeBadge(rect.left,rect.top);
+    });
   }
   _refreshWalkingCoverBadge();
   document.addEventListener('visibilitychange',function(){if(!document.hidden)_refreshWalkingCoverBadge();});
@@ -18584,6 +18651,21 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       lat:Number(x.lat),lng:Number(x.lng),name:String(x.name||''),done:!!x.done
     })).slice(0,100));
   }
+  // Real walking route estimates are created by the walking-route API, never by
+  // multiplying a straight-line GPS distance. Cache only within this app session.
+  let walkingRouteNotice=null;
+  function _walkingNativeDistanceNotice(active){
+    if(!active||!walkingRouteNotice||walkingRouteNotice.startedAt!==active.startedAt)return '도보 경로 확인 중';
+    if(Date.now()-walkingRouteNotice.at>300000)return '도보 경로 재확인 필요';
+    return walkingRouteNotice.label;
+  }
+  function _walkingPublishRouteNotice(active,nextName,nextMeters,totalMeters){
+    if(!active||active.travelMode!=='walk'||!Number.isFinite(nextMeters)||!Number.isFinite(totalMeters))return;
+    const fmt=function(m){return m<1000?Math.round(m)+'m':(m/1000).toFixed(1)+'km';};
+    walkingRouteNotice={startedAt:active.startedAt,at:Date.now(),
+      label:'다음 도보 '+fmt(nextMeters)+' · 총 남은 도보 '+fmt(totalMeters)};
+    _walkingNativeRefresh(active);
+  }
   function _walkingNativeStart(active){
     if(!active||active.travelMode!=='walk')return;
     const native=_walkingNative();
@@ -18591,7 +18673,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const places=Array.isArray(active.course&&active.course.places)?active.course.places:[];
     const visited=places.filter(x=>x&&x.done).length;
     const next=places.find(x=>x&&!x.done);
-    try{native.startWalkingPilgrimage(active.startedAt,visited,places.length,next?String(next.name||''):'','거리 확인 중',_walkingNativeCoursePoints(active));}
+    try{native.startWalkingPilgrimage(active.startedAt,visited,places.length,next?String(next.name||''):'',_walkingNativeDistanceNotice(active),_walkingNativeCoursePoints(active));}
     catch(e){console.warn('[도보 순례] 서비스 시작 요청 실패',e);}
   }
   function _walkingNativeRefresh(active){
@@ -18602,7 +18684,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const visited=places.filter(x=>x&&x.done).length;
     const next=places.find(x=>x&&!x.done);
     try{native.updateWalkingPilgrimage(active.startedAt,visited,places.length,
-      next?String(next.name||''):'','거리 확인 중',_walkingNativeCoursePoints(active));}
+      next?String(next.name||''):'',_walkingNativeDistanceNotice(active),_walkingNativeCoursePoints(active));}
     catch(e){console.warn('[도보 순례] 상태창 갱신 실패',e);}
   }
   function _activateFollowCourse(id,travelMode){
@@ -21795,7 +21877,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     layer.innerHTML='<header><strong>도보 순례 · 지도</strong><span data-walk-progress></span><button type="button" class="oai-walk-close" data-walk-close aria-label="순례하기로 돌아가기">×</button></header><div class="oai-walk-map-canvas"></div><button type="button" class="oai-walk-menu" data-walk-menu>커버로 가기</button><div class="oai-walk-map-controls"><div class="oai-walk-route-legend" data-walk-route-status aria-live="polite">현재 위치 확인 중 · 도보 경로 준비 중</div><div class="oai-walk-control-buttons"><button type="button" data-walk-kakao-route>카카오맵 도보길</button><button type="button" data-walk-overview>전체 보기</button><button type="button" data-walk-recenter>내 위치</button></div></div><div class="oai-walk-exit-overlay" data-walk-exit-confirm hidden><div class="oai-walk-exit-dialog" role="dialog" aria-modal="true" aria-labelledby="oai-walk-exit-title"><h3 id="oai-walk-exit-title" data-walk-exit-title></h3><p data-walk-exit-message></p><div class="oai-walk-exit-actions"><button type="button" data-walk-exit-cancel>지도 계속 보기</button><button type="button" data-walk-exit-accept>돌아가기</button></div></div></div>';
     document.body.appendChild(layer);
     const session={layer,active,closed:false,watchId:null,resizeObserver:null,map:null,myMarker:null,walkRouteLine:null,pastTrailLine:null,
-      walkRequest:null,lastWalkRouteAt:0,lastWalkRoutePoint:null,lastWalkRouteTarget:'',walkRouteBusy:false,startMarker:null,
+      walkRequest:null,lastWalkRouteAt:0,lastWalkRoutePoint:null,lastWalkRouteTarget:'',walkRouteBusy:false,routeLegCache:new Map(),startMarker:null,
       viewMode:'overview',lastPosition:null,firstPosition:null,lastFollowPosition:null,lastFollowAt:0,
       cameraTimer:null,manualUntil:0,programmaticCameraUntil:0,lastMoveAt:0,motionAnchor:null};
     walkMapSession=session;
@@ -21893,6 +21975,42 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           }else{session.walkRouteLine.setPath(points);session.walkRouteLine.setMap(map);}
           const props=data.route.properties||{};
           const distance=Number(props.totalDistance),duration=Number(props.totalTime);
+          // Calculate the remaining route in planned order through the final destination.
+          // This runs only after a confirmed route response, never while hidden.
+          if(Number.isFinite(distance)&&distance>=0&&typeof _walkingPublishRouteNotice==='function'){
+            const rest=loadPlan().filter(p=>!p.done&&_validGpsPair(p.lat,p.lng));
+            if(!rest.length&&endPoint&&!endPoint.dynamicCurrent)rest.push(endPoint);
+            else if(endPoint&&!endPoint.dynamicCurrent&&_validGpsPair(endPoint.lat,endPoint.lng)){
+              const last=rest[rest.length-1];
+              if(!last||Number(last.lat)!==Number(endPoint.lat)||Number(last.lng)!==Number(endPoint.lng))rest.push(endPoint);
+            }
+            const planned=[target].concat(rest.filter(p=>Number(p.lat)!==Number(target.lat)||Number(p.lng)!==Number(target.lng)));
+            (async function(){
+              let totalMeters=distance;
+              for(let i=0;i<planned.length-1;i++){
+                if(session.closed||document.hidden)return;
+                const a=planned[i],b=planned[i+1];
+                const url=_kakaoRestProxyUrl('walk',{start_x:String(a.lng),start_y:String(a.lat),end_x:String(b.lng),end_y:String(b.lat),route_mode:'BROAD_FIRST'});
+                if(!url)return;
+                const segmentKey=[a.lat,a.lng,b.lat,b.lng].map(Number).join(',');
+                let meters=session.routeLegCache.get(segmentKey);
+                if(!Number.isFinite(meters)){
+                  const result=await fetch(url,{credentials:'omit',cache:'no-store'});
+                  if(!result.ok)return;
+                  const payload=await result.json();
+                  meters=Number(payload&&payload.route&&payload.route.properties&&payload.route.properties.totalDistance);
+                  if(payload.status!=='OK'||!Number.isFinite(meters)||meters<0)return;
+                  session.routeLegCache.set(segmentKey,meters);
+                }
+                totalMeters+=meters;
+              }
+              const current=_activeFollowState();
+              if(!session.closed&&current&&current.startedAt===active.startedAt&&
+                 nextWalkingTarget()&&Number(nextWalkingTarget().lat)===Number(target.lat)&&Number(nextWalkingTarget().lng)===Number(target.lng)){
+                _walkingPublishRouteNotice(current,String(target.name||''),distance,totalMeters);
+              }
+            })().catch(e=>console.warn('[도보 상태창] 남은 경로 조회 실패',e));
+          }
           routeStatus.textContent='실제 도보 경로 · '+(Number.isFinite(distance)?
             (distance<1000?Math.round(distance)+'m':(distance/1000).toFixed(1)+'km'):'거리 확인 중')+
             (Number.isFinite(duration)?' · 약 '+Math.max(1,Math.round(duration/60))+'분':'');
@@ -21923,13 +22041,25 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         session.viewMode='follow';
         session.programmaticCameraUntil=Date.now()+1500;
         if(target){
-          const bounds=new kakao.maps.LatLngBounds();
-          bounds.extend(session.lastPosition);
-          bounds.extend(pointLatLng(target));
-          map.setBounds(bounds,115,45,100,45);
+          const distanceMeters=calcDist(session.lastPosition.getLat(),session.lastPosition.getLng(),
+            Number(target.lat),Number(target.lng))*1000;
+          if(distanceMeters>700){
+            // A distant next stop must not keep the map zoomed out while walking.
+            // Center on the walker; the planned stop remains visible as a marker
+            // when the user selects '전체 보기'.
+            map.setCenter(session.lastPosition);
+            if(map.getLevel()!==5)map.setLevel(5);
+          }else{
+            const bounds=new kakao.maps.LatLngBounds();
+            bounds.extend(session.lastPosition);
+            bounds.extend(pointLatLng(target));
+            map.setBounds(bounds,115,45,100,45);
+            // Keep a practical walking zoom even as the target approaches.
+            if(map.getLevel()>5){map.setLevel(5);map.setCenter(session.lastPosition);}
+          }
         }else{
           map.setCenter(session.lastPosition);
-          map.setLevel(4);
+          if(map.getLevel()!==4)map.setLevel(4);
         }
         session.lastFollowPosition=session.lastPosition;
         session.lastFollowAt=Date.now();
@@ -21955,17 +22085,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(session.lastPosition)showNextTarget();
         else session.viewMode='follow';
       });
-      // A deliberate pan or zoom pauses auto camera for ten seconds. Programmatic
-      // bounds/zoom updates do not count as a user gesture.
+      // A deliberate pan or zoom holds the exact user-selected camera for 20 seconds.
+      // GPS updates may continue recording, but must not change the map camera.
       function pauseCameraForUser(){
         if(session.closed||Date.now()<session.programmaticCameraUntil)return;
         session.viewMode='manual';
-        session.manualUntil=Date.now()+10000;
+        session.manualUntil=Date.now()+20000;
       }
       kakao.maps.event.addListener(map,'dragstart',pauseCameraForUser);
       kakao.maps.event.addListener(map,'zoom_changed',pauseCameraForUser);
       // While moving, follow current position + the next unvisited shrine.
-      // Ten seconds without meaningful displacement returns to the full course.
+      // After the 20-second manual hold, restore follow zoom if moving; otherwise overview.
       // Run only while the walking map is open; never create background GPS polling.
       session.cameraTimer=setInterval(()=>{
         if(session.closed||!session.lastPosition||document.hidden)return;
@@ -22006,14 +22136,21 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           const fixAccuracy=Number(pos.coords.accuracy);
           // Discard GPS jitter when deciding whether the pilgrim is moving.
           // Poor GPS fixes still update the position but not camera movement.
+          let meaningfulMovement=false;
           if(!session.motionAnchor){
             session.motionAnchor=ll;
             session.lastMoveAt=Date.now();
-          }else if(!Number.isFinite(fixAccuracy)||fixAccuracy<=50){
+          }else if(!Number.isFinite(fixAccuracy)||fixAccuracy<=60){
             const displacement=calcDist(session.motionAnchor.getLat(),session.motionAnchor.getLng(),lat,lng)*1000;
-            if(displacement>=Math.max(12,Number.isFinite(fixAccuracy)?fixAccuracy:12)){
+            // Accuracy is a radius, not the minimum distance a user must walk.
+            // The old >=accuracy condition could keep follow mode disabled
+            // throughout a real walk with ordinary 15-40 m GPS accuracy.
+            const movementThreshold=Number.isFinite(fixAccuracy)?
+              Math.max(12,Math.min(24,fixAccuracy*0.6)):12;
+            if(displacement>=movementThreshold){
               session.motionAnchor=ll;
               session.lastMoveAt=Date.now();
+              meaningfulMovement=true;
             }
           }
           refreshWalkingRoute(false);
@@ -22027,14 +22164,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
             return;
           }
           // Follow only meaningful movement, not GPS noise. A manual gesture
-          // remains respected until its ten-second pause expires.
+          // remains respected until its twenty-second pause expires.
           if(session.viewMode==='overview'){
-            if(session.lastMoveAt&&Date.now()-session.lastMoveAt<3000&&
-              calcDist(session.firstPosition.getLat(),session.firstPosition.getLng(),lat,lng)*1000>=12)showNextTarget();
+            // Enter follow when real movement is detected, regardless of how
+            // long GPS acquisition took after the preview was first opened.
+            if(meaningfulMovement)showNextTarget();
           }else if(session.viewMode==='follow'){
             const prev=session.lastFollowPosition;
             const moved=prev?calcDist(prev.getLat(),prev.getLng(),lat,lng)*1000:Infinity;
-            if(moved>=20||Date.now()-session.lastFollowAt>=15000)showNextTarget();
+            if(meaningfulMovement&&(moved>=12||Date.now()-session.lastFollowAt>=10000))showNextTarget();
           }
         },()=>{}, {enableHighAccuracy:true,maximumAge:5000,timeout:15000});
       }
