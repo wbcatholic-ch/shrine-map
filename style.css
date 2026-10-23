@@ -6466,6 +6466,10 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 .oai-pilgrimage-action-sheet>strong{display:block;margin:0 2px 13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#111827;font-size:calc(18px * var(--app-font-scale,1));font-weight:950;}
 .oai-pilgrimage-action-sheet>div{display:grid;gap:9px;}
 .oai-pilgrimage-action-sheet button[data-oai-action]{min-height:52px;border:1.5px solid #9ba8b8;border-radius:14px;background:#f8fafc;color:#111827;font:900 calc(15px * var(--app-font-scale,1))/1.1 inherit;}
+.oai-pilgrimage-action-sheet button[data-oai-action="walk-start"]{border-color:#2f71bb;background:#e9f3ff;color:#15518c;}
+.oai-pilgrimage-action-sheet button[data-oai-action="walk-end"]{border-color:#bc8a36;background:#fff3db;color:#7e5110;}
+.oai-pilgrimage-action-sheet button[data-oai-action="walk-clear"]{border-color:#a6a4a1;background:#f0efed;color:#40434a;}
+.oai-pilgrimage-action-sheet .oai-walk-clear-message{margin:0 0 5px;color:#49566b;font-size:calc(14px * var(--app-font-scale,1));font-weight:700;line-height:1.5;word-break:keep-all;}
 .oai-pilgrimage-action-sheet button[data-oai-action].danger{border-color:#e36c62;background:#a93630;color:#fff;}
 
 /* V8-1-14-893: 앱 사용법 가독성 정리 */
@@ -7870,9 +7874,6 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
   color:#fff!important;
 }
 
-#oai-pilgrimage-detail-view:not(.is-completion-view) .oai-pilgrimage-detail-actions .oai-pilgrimage-save:not([hidden]) + .oai-pilgrimage-follow{
-  margin-top:0!important;
-}
 
 #oai-pilgrimage-detail-view.is-completion-view .oai-pilgrimage-follow{
   display:block!important;
