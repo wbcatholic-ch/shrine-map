@@ -20857,11 +20857,29 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     overlay.classList.add('open');overlay.setAttribute('aria-hidden','false');
     overlay.querySelector('button[data-pilgrimage-info-close]').focus();
   }
+  // Completed-course labels come from the original GPS stamp, never the
+  // course completion time (which may be generated at midnight).
+  function _completionPlaceVisitLabel(point,completion){
+    if(!point||point.routeOnly||!completion)return '방문 날짜·시간 기록 없음';
+    const day=_courseDateInputValue(completion.completedAt);
+    if(!day)return '방문 날짜·시간 기록 없음';
+    try{
+      const stampAt=_dailyRecordedVisitAt(point,day);
+      if(!stampAt)return '방문 날짜·시간 기록 없음';
+      const d=new Date(stampAt);
+      if(!Number.isFinite(d.getTime()))return '방문 날짜·시간 기록 없음';
+      return _courseCompletionDate(stampAt)+' '+String(d.getHours()).padStart(2,'0')+':'+String(d.getMinutes()).padStart(2,'0');
+    }catch(e){
+      console.warn('[가톨릭길동무] 완료 순례지 GPS 방문 시각 확인 실패',e);
+      return '방문 날짜·시간 확인 불가';
+    }
+  }
   function renderDetail(){
     const list=loadPlan(),m=loadMeta(),isCompletionView=pilgrimageDetailMode==='complete',isManualCreate=pilgrimageManualCreateMode,next=isCompletionView?-1:nextIndex(list);
     const gpsAutoCompletion=isCompletionView&&!!loadCourses().find(c=>c.id===currentCourseId&&c.autoGps===true);
     const manualCourse=isCompletionView&&currentCourseId?loadCourses().find(c=>c.id===currentCourseId):null;
     const gpsProtected=!!(manualCourse&&_courseHasGpsLockedCompletion(manualCourse));
+    const displayedCompletion=isCompletionView&&manualCourse?_courseCompletionList(manualCourse)[0]:null;
     const displayItems=gpsProtected?_manualMerged(manualCourse):list.map((point,i)=>({point,gps:true,gpsIndex:i}));
     const gpsMissingEndpoint=gpsAutoCompletion&&(!normalizePoint(m.start)||!normalizePoint(m.end));
     const walkSeg=m.walkSegment,walkOk=_walkSegmentBounds(walkSeg,list,m);
@@ -20902,7 +20920,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         const segBounds=_walkSegmentBounds(m.walkSegment,list,m);
         const inWalkSegment=!!(segBounds&&row.gps&&i>=segBounds.start&&i<=segBounds.end);
         const cls='oai-pilgrimage-item'+(done?' is-done':'')+(isCompletionView&&!row.gps?' is-manual-completion':'')+(inWalkSegment?' is-planned-walk':'');
-        const metric=item.routeOnly?'이동 경유지 · 스탬프 없음':isCompletionView&&!row.gps?'':(done?'순례 완료':'GPS 확인 중…');
+        const metric=item.routeOnly?'이동 경유지 · 스탬프 없음':isCompletionView?(!row.gps?'':_completionPlaceVisitLabel(item,displayedCompletion)):(done?'순례 완료':'GPS 확인 중…');
         const statusHtml=!item.routeOnly&&done&&(!isCompletionView||row.gps)?'<span class="oai-pilgrimage-waypoint-chip is-done">✓ 순례완료</span>':'';
         const walkOrigin=!!(m.walkSegment&&m.walkSegment.startRef&&_walkPointIndex(m.walkSegment.startRef,list,m)===i);
         const walkDestination=!!(m.walkSegment&&m.walkSegment.endRef&&_walkPointIndex(m.walkSegment.endRef,list,m)===i);
