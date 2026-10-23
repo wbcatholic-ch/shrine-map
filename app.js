@@ -21410,53 +21410,73 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   window._oaiReturnFromPilgrimageCourseMap=returnFromPilgrimageCourseMap;
 
+  // Sum the legs in the *saved course order*.  Do not reorder by proximity.
+  // Both the detail footer and the active-follow summary use this same calculation.
+  async function _pilgrimageOrderedRoadTotals(points){
+    let km=0,dur=0,estimated=false;
+    for(let i=1;i<points.length;i++){
+      const a=points[i-1],b=points[i];
+      if(!_validGpsPair(a.lat,a.lng)||!_validGpsPair(b.lat,b.lng))throw new Error('invalid pilgrimage waypoint');
+      let leg=null;
+      try{leg=await _navFetch(Number(a.lng)+','+Number(a.lat),Number(b.lng)+','+Number(b.lat));}catch(_e){}
+      if(leg&&Number.isFinite(Number(leg.km))&&Number.isFinite(Number(leg.dur))&&Number(leg.km)>=0&&Number(leg.km)<1000){
+        km+=Number(leg.km);dur+=Number(leg.dur);
+      }else{
+        const d=calcDist(Number(a.lat),Number(a.lng),Number(b.lat),Number(b.lng))*1.4;
+        if(!Number.isFinite(d))throw new Error('invalid pilgrimage distance');
+        km+=d;dur+=d/70*3600;estimated=true;
+      }
+    }
+    return {km:km,dur:dur,estimated:estimated};
+  }
+  function _pilgrimageRemainingPoints(list,meta){
+    const points=list.filter(p=>!p.done);
+    if(meta.end&&_validGpsPair(meta.end.lat,meta.end.lng))points.push(meta.end);
+    return points;
+  }
+  function _pilgrimageCurrentPosition(){
+    return new Promise(resolve=>currentPosition((lat,lng)=>resolve({lat:Number(lat),lng:Number(lng)}),()=>resolve(null)));
+  }
   async function calcPilgrimageTotalRoute(startOverride){
     const seq=++pilgrimageTotalCalcSeq;
     const kmEl=document.getElementById('oai-pilgrimage-total-km');
     const timeEl=document.getElementById('oai-pilgrimage-total-time');
     const noteEl=document.getElementById('oai-pilgrimage-total-note');
-    if(!kmEl||!timeEl||!noteEl) return;
+    const card=document.querySelector('.oai-pilgrimage-detail-view .oai-pilgrimage-total-card');
+    if(!kmEl||!timeEl||!noteEl||!card)return;
     const list=loadPlan(),meta=loadMeta();
-    if(!meta.start||!meta.end||!list.length){
-      kmEl.textContent='-';timeEl.textContent='-';
-      noteEl.textContent=!list.length?'순례 장소를 추가하면 총 이동 거리를 계산합니다.':'출발지와 도착지를 설정하면 총 이동 거리를 계산합니다.';
+    const active=_activeFollowState();
+    const running=pilgrimageDetailMode!=='complete'&&!!(active&&currentCourseId&&String(active.courseId)===String(currentCourseId));
+    const labels=card.querySelectorAll('small');
+    if(labels[0])labels[0].textContent=running?'총 남은 거리':'총 이동 거리';
+    if(labels[1])labels[1].textContent=running?'남은 예상 시간':'예상 시간';
+    const stops=running?_pilgrimageRemainingPoints(list,meta):list.concat(meta.end?[meta.end]:[]);
+    if(!stops.length){
+      kmEl.textContent=running?'0.0 km':'-';timeEl.textContent=running?'0분':'-';
+      noteEl.textContent=running?'남은 경유지와 도착지가 없습니다.':'순례 장소 또는 도착지를 지정하면 코스 순서대로 계산합니다.';
       return;
     }
-    kmEl.textContent='계산 중…';timeEl.textContent='-';noteEl.textContent='전체 자동차 경로를 계산하고 있습니다.';
-    let start=(startOverride&&_validGpsPair(startOverride.lat,startOverride.lng))
-      ? {name:'현재 위치',lat:Number(startOverride.lat),lng:Number(startOverride.lng),dynamicCurrent:true}
-      : meta.start;
-    if(start.dynamicCurrent && !(startOverride&&_validGpsPair(startOverride.lat,startOverride.lng))){
-      start=await new Promise(resolve=>currentPosition((lat,lng)=>resolve(Object.assign({},start,{lat,lng})),()=>resolve(null)));
-      if(seq!==pilgrimageTotalCalcSeq) return;
-      if(!start){kmEl.textContent='위치 확인 필요';timeEl.textContent='-';noteEl.textContent='현재 위치를 확인한 뒤 다시 계산합니다.';return;}
-    }
-    const points=[start].concat(list).concat([meta.end]);
-    const legs=[];
-    for(let i=0;i<points.length-1;i++){
-      const a=points[i],b=points[i+1];
-      legs.push((async()=>{
-        try{
-          const val=await _navFetch(a.lng+','+a.lat,b.lng+','+b.lat);
-          if(val&&Number.isFinite(Number(val.km))&&Number.isFinite(Number(val.dur))) return {km:Number(val.km),dur:Number(val.dur),estimated:false};
-        }catch(_e){}
-        const d=calcDist(a.lat,a.lng,b.lat,b.lng)*1.4;
-        return {km:d,dur:d/70*3600,estimated:true};
-      })());
-    }
-    const result=await Promise.all(legs);
-    if(seq!==pilgrimageTotalCalcSeq) return;
-    const totalKm=result.reduce((s,x)=>s+(Number(x.km)||0),0);
-    const totalDur=result.reduce((s,x)=>s+(Number(x.dur)||0),0);
-    const estimated=result.some(x=>x.estimated);
-    kmEl.textContent=totalKm.toFixed(1)+' km';
-    timeEl.textContent=typeof _fmtTime==='function'?_fmtTime(totalDur):Math.round(totalDur/60)+'분';
-    noteEl.textContent=estimated?'일부 구간은 도로 경로를 불러오지 못해 추정값이 포함됩니다.':'출발지 → 순례지 → 도착지 전체 자동차 기준입니다.';
+    kmEl.textContent='계산 중…';timeEl.textContent='-';
+    const explicitStart=!!(meta.start&&!meta.start.dynamicCurrent&&_validGpsPair(meta.start.lat,meta.start.lng));
+    noteEl.textContent=(running?'현재 위치에서 남은':(explicitStart?'지정한 출발지에서':'현재 위치에서')+' 계획된')+' 순례지를 코스 순서대로 경유'+(meta.end?'하여 도착지까지':'')+' 계산 중입니다.';
+    let start=running?null:(explicitStart?meta.start:null);
+    if(startOverride&&_validGpsPair(startOverride.lat,startOverride.lng))start={lat:Number(startOverride.lat),lng:Number(startOverride.lng)};
+    if(!start)start=await _pilgrimageCurrentPosition();
+    if(seq!==pilgrimageTotalCalcSeq)return;
+    if(!start){kmEl.textContent='위치 확인 필요';timeEl.textContent='-';noteEl.textContent='현재 위치를 확인한 뒤 다시 계산해 주세요.';return;}
+    try{
+      const result=await _pilgrimageOrderedRoadTotals([start].concat(stops));
+      if(seq!==pilgrimageTotalCalcSeq)return;
+      kmEl.textContent=(result.estimated?'약 ':'')+result.km.toFixed(1)+' km';
+      timeEl.textContent=(result.estimated?'약 ':'')+(typeof _fmtTime==='function'?_fmtTime(result.dur):Math.round(result.dur/60)+'분');
+      const basis=running?'현재 위치':(startOverride?'현재 위치':explicitStart?'지정한 출발지':'현재 위치');
+      noteEl.textContent=basis+'에서 '+(running?'남은 ':'')+'순례지를 코스 순서대로 경유'+(meta.end?'하여 도착지까지':'')+' 계산한 자동차 거리와 주행 시간입니다.'+(result.estimated?' 일부 구간은 추정값입니다.':'');
+    }catch(_e){if(seq!==pilgrimageTotalCalcSeq)return;kmEl.textContent='계산 불가';timeEl.textContent='-';noteEl.textContent='코스 좌표를 확인해 주세요.';}
   }
 
   function _validGpsPair(lat,lng){return Number.isFinite(Number(lat))&&Number.isFinite(Number(lng))&&Math.abs(Number(lat))<=90&&Math.abs(Number(lng))<=180;}
   function calcDetailItemMetrics(startOverride){
-    const seq=++detailMetricSeq,list=loadPlan(),meta=loadMeta(),view=document.getElementById('oai-pilgrimage-detail-view');
+    const seq=++detailMetricSeq,list=loadPlan(),meta=loadMeta(),active=_activeFollowState(),running=pilgrimageDetailMode!=='complete'&&!!(active&&currentCourseId&&String(active.courseId)===String(currentCourseId)),view=document.getElementById('oai-pilgrimage-detail-view');
     const setMetric=(i,text)=>{const el=document.querySelector('[data-plan-metric="'+i+'"]');if(el)el.textContent=text;};
     if(view){view.classList.remove('gps-ready');view.querySelectorAll('.oai-pilgrimage-item.is-next').forEach(el=>el.classList.remove('is-next'));}
     list.forEach((item,i)=>setMetric(i,item.done?'순례 완료':'누적거리 계산 중…'));
@@ -21472,6 +21492,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       let prev={lat:Number(startPoint.lat),lng:Number(startPoint.lng)},cumKm=0,cumDur=0,anyEstimated=false;
       for(let i=0;i<list.length;i++){
         const item=list[i];
+        if(running&&item.done)continue;
         if(!_validGpsPair(item.lat,item.lng)){setMetric(i,'위치 정보 확인 필요');continue;}
         let km=0,dur=0,estimated=false;
         try{
@@ -21485,13 +21506,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(seq!==detailMetricSeq)return;
         if(!Number.isFinite(km)||km<0||km>1000){setMetric(i,'거리 확인 필요');prev={lat:Number(item.lat),lng:Number(item.lng)};continue;}
         cumKm+=km;cumDur+=dur;anyEstimated=anyEstimated||estimated;
-        setMetric(i,(anyEstimated?'약 ':'')+'누적 '+cumKm.toFixed(1)+' km · '+(typeof _fmtTime==='function'?_fmtTime(cumDur):Math.round(cumDur/60)+'분'));
+        setMetric(i,(anyEstimated?'약 ':'')+(running?'남은 누적 ':'누적 ')+cumKm.toFixed(1)+' km · '+(typeof _fmtTime==='function'?_fmtTime(cumDur):Math.round(cumDur/60)+'분'));
         prev={lat:Number(item.lat),lng:Number(item.lng)};
       }
     };
 
     const override=(startOverride&&_validGpsPair(startOverride.lat,startOverride.lng))?{lat:Number(startOverride.lat),lng:Number(startOverride.lng)}:null;
     if(override){run(override);return;}
+    if(running){currentPosition((lat,lng)=>run({lat,lng}),()=>{if(seq!==detailMetricSeq)return;list.forEach((item,i)=>{if(!item.done)setMetric(i,'GPS 확인 필요');});});return;}
     const start=meta&&meta.start;
     if(start&&start.dynamicCurrent){
       currentPosition((lat,lng)=>run({lat,lng}),()=>{
@@ -21511,7 +21533,28 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function targetInfo(){const list=loadPlan(),i=nextIndex(list);if(i>=0)return {item:list[i],index:i,final:false};const e=loadMeta().end;if(e)return {item:e,index:-1,final:true};return null;}
   function fmtRoad(distance,duration){return {km:(Number(distance)/1000).toFixed(1)+' km',time:typeof _fmtTime==='function'?_fmtTime(Number(duration)):Math.round(Number(duration)/60)+'분'};}
   function currentPosition(cb,fail){const ok=(lat,lng)=>{lat=Number(lat);lng=Number(lng);if(!_validGpsPair(lat,lng)){if(fail)fail();return;}try{_myLat=lat;_myLng=lng;}catch(_e){}cb(lat,lng);};if(typeof _refreshFreshLocationThen==='function')_refreshFreshLocationThen(ok,()=>{if(fail)fail();});else if(fail)fail();}
-  async function calcFollowDistance(){const t=targetInfo(),km=document.getElementById('oai-pilgrimage-follow-km'),tm=document.getElementById('oai-pilgrimage-follow-time'),note=document.getElementById('oai-pilgrimage-follow-note');if(!t){if(km)km.textContent='완료';if(tm)tm.textContent='-';if(note)note.textContent='모든 순례 장소를 완료했습니다.';return;}if(km)km.textContent='계산 중…';if(tm)tm.textContent='-';if(note)note.textContent='현재 위치를 확인하고 있습니다.';currentPosition(async(lat,lng)=>{try{if(note)note.textContent='자동차 경로를 계산하고 있습니다.';const res=await _kakaoDirectionsFetch(lng+','+lat,t.item.lng+','+t.item.lat,9000);if(!res.ok)throw new Error(String(res.status));const data=await res.json(),route=data&&data.routes&&data.routes[0];if(!route||route.result_code!==0)throw new Error('no route');const f=fmtRoad(route.summary.distance,route.summary.duration);if(km)km.textContent=f.km;if(tm)tm.textContent=f.time;if(note)note.textContent='현재 위치에서 다음 목적지까지 자동차 기준입니다.';}catch(e){const d=calcDist(lat,lng,t.item.lat,t.item.lng)*1.4;if(km)km.textContent=d.toFixed(1)+' km';if(tm)tm.textContent=_fmtTime(d/70*3600);if(note)note.textContent='도로 경로를 불러오지 못해 추정값을 표시합니다.';}},()=>{if(km)km.textContent='위치 확인 필요';if(note)note.textContent='위치 권한을 확인한 뒤 다시 계산해 주세요.';});}
+  let pilgrimageFollowDistanceSeq=0;
+  async function calcFollowDistance(){
+    const seq=++pilgrimageFollowDistanceSeq,meta=loadMeta(),list=loadPlan();
+    const km=document.getElementById('oai-pilgrimage-follow-km');
+    const tm=document.getElementById('oai-pilgrimage-follow-time');
+    const note=document.getElementById('oai-pilgrimage-follow-note');
+    const stops=_pilgrimageRemainingPoints(list,meta);
+    if(!stops.length){if(km)km.textContent='0.0 km';if(tm)tm.textContent='0분';if(note)note.textContent='남은 경유지와 도착지가 없습니다.';return;}
+    if(km)km.textContent='계산 중…';if(tm)tm.textContent='-';
+    if(note)note.textContent='현재 위치에서 남은 순례지를 코스 순서대로 경유'+(meta.end?'하여 도착지까지':'')+' 계산 중입니다.';
+    const start=await _pilgrimageCurrentPosition();
+    if(seq!==pilgrimageFollowDistanceSeq)return;
+    if(!start){if(km)km.textContent='위치 확인 필요';if(tm)tm.textContent='-';if(note)note.textContent='위치 권한을 확인한 뒤 다시 계산해 주세요.';return;}
+    try{
+      const total=await _pilgrimageOrderedRoadTotals([start].concat(stops));
+      if(seq!==pilgrimageFollowDistanceSeq)return;
+      if(km)km.textContent=(total.estimated?'약 ':'')+total.km.toFixed(1)+' km';
+      if(tm)tm.textContent=(total.estimated?'약 ':'')+(typeof _fmtTime==='function'?_fmtTime(total.dur):Math.round(total.dur/60)+'분');
+      if(note)note.textContent='현재 위치에서 남은 순례지를 코스 순서대로 경유'+(meta.end?'하여 도착지까지':'')+' 계산한 자동차 거리와 주행 시간입니다.'+(total.estimated?' 일부 구간은 추정값입니다.':'');
+    }catch(_e){if(seq!==pilgrimageFollowDistanceSeq)return;if(km)km.textContent='계산 불가';if(tm)tm.textContent='-';if(note)note.textContent='순례코스 좌표를 확인해 주세요.';}
+  }
+
   // 도보 전용 지도: 처음에는 전체 일정, 이동하면 현위치와 다음 미방문 순례지를 추적한다.
   // 지도 표시와 GPS 인증은 분리한다. 실제 보행 길찾기 데이터가 없으므로
   // 순서 안내선은 점선으로만 그리고 실제 도보 경로라고 표시하지 않는다.
