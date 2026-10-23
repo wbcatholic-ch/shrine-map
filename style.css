@@ -10476,3 +10476,6 @@ html.oai-font-global .shrine-visit-card-badge strong,html:not(.ios-device).oai-s
 #oai-pilgrimage-detail-view .oai-pilgrimage-endpoint.is-walk-destination small::after{content:" · 도보 도착";color:#267348;font-weight:800;}
 
 .oai-pilgrimage-completion-walk-label{color:#267348;font-weight:800;}
+
+#oai-pilgrimage-detail-view .oai-pilgrimage-reverse{display:block;width:100%;min-height:44px;margin:8px 0 0;border:1px solid #94a3b8;border-radius:11px;background:#f3f6f9;color:#334155;font:800 calc(14px * var(--app-font-scale,1))/1.2 inherit;}
+#oai-pilgrimage-detail-view .oai-pilgrimage-reverse[hidden]{display:none!important;}
