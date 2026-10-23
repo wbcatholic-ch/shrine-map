@@ -6463,8 +6463,10 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 .oai-pilgrimage-action-menu.show{display:flex;}
 .oai-pilgrimage-action-backdrop{position:absolute;inset:0;border:0;background:rgba(7,16,34,.68);}
 .oai-pilgrimage-action-sheet{position:relative;z-index:1;width:min(92vw,520px);padding:18px;border:2px solid #26364f;border-radius:22px;background:#fff;box-shadow:0 18px 42px rgba(7,16,34,.32);}
-.oai-pilgrimage-action-sheet>strong{display:block;margin:0 2px 13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#111827;font-size:calc(18px * var(--app-font-scale,1));font-weight:950;}
-.oai-pilgrimage-action-sheet>div{display:grid;gap:9px;}
+.oai-pilgrimage-action-head{display:flex;align-items:center;gap:12px;margin:0 2px 13px;}
+.oai-pilgrimage-action-head>strong{display:block;flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;color:#111827;font-size:calc(18px * var(--app-font-scale,1));font-weight:950;}
+.oai-pilgrimage-action-x{flex:0 0 auto;width:42px;height:42px;border:1.5px solid #cbd5e1;border-radius:999px;background:#f8fafc;color:#1f2937;font-size:28px;font-weight:800;line-height:1;display:inline-flex;align-items:center;justify-content:center;padding:0;}
+.oai-pilgrimage-action-sheet>div:last-child{display:grid;gap:9px;}
 .oai-pilgrimage-action-sheet button[data-oai-action]{min-height:52px;border:1.5px solid #9ba8b8;border-radius:14px;background:#f8fafc;color:#111827;font:900 calc(15px * var(--app-font-scale,1))/1.1 inherit;}
 .oai-pilgrimage-action-sheet button[data-oai-action="walk-start"]{border-color:#2f71bb;background:#e9f3ff;color:#15518c;}
 .oai-pilgrimage-action-sheet button[data-oai-action="walk-end"]{border-color:#bc8a36;background:#fff3db;color:#7e5110;}
@@ -10457,7 +10459,7 @@ html.oai-font-global .shrine-visit-card-badge strong,html:not(.ios-device).oai-s
 #oai-pilgrimage-detail-view [data-oai-mixed-walk]{grid-column:1/-1;background:#E9F1EB;border:1px solid #52936B;color:#21623F;font-weight:800;border-radius:9px;padding:10px;}
 
 /* Planned walking segment and walk-mode activation controls. */
-#oai-pilgrimage-detail-view .oai-pilgrimage-item.is-planned-walk{border-left:3px solid #267348;}
+#oai-pilgrimage-detail-view:not(.is-completion-view) .oai-pilgrimage-item.is-planned-walk:not(.is-next){border-left:3px solid #267348;background:#EDF0F2!important;}
 .oai-pilgrimage-planned-walk-label{display:inline-block;color:#267348;font-size:11px;font-weight:700;margin-left:5px;white-space:nowrap;}
 #oai-pilgrimage-walk-segment-hint{font-size:12px;color:#267348;font-weight:700;padding:3px 8px;}
 #oai-pilgrimage-detail-view .oai-pilgrimage-endpoint.is-walk-origin small::after{content:" · 도보 출발";color:#267348;font-weight:800;}

@@ -22733,7 +22733,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(m)return m;
     m=document.createElement('div');
     m.id='oai-pilgrimage-action-menu';m.className='oai-pilgrimage-action-menu';m.setAttribute('aria-hidden','true');
-    m.innerHTML='<button type="button" class="oai-pilgrimage-action-backdrop" data-oai-pilgrimage-action-close aria-label="닫기"></button><section class="oai-pilgrimage-action-sheet" role="dialog" aria-modal="true"><strong id="oai-pilgrimage-action-title"></strong><div id="oai-pilgrimage-action-buttons"></div></section>';
+    m.innerHTML='<button type="button" class="oai-pilgrimage-action-backdrop" data-oai-pilgrimage-action-close aria-label="닫기"></button><section class="oai-pilgrimage-action-sheet" role="dialog" aria-modal="true"><div class="oai-pilgrimage-action-head"><strong id="oai-pilgrimage-action-title"></strong><button type="button" class="oai-pilgrimage-action-x" data-oai-pilgrimage-action-close aria-label="닫기">×</button></div><div id="oai-pilgrimage-action-buttons"></div></section>';
     document.body.appendChild(m);return m;
   }
   function closeActionMenu(){const m=document.getElementById('oai-pilgrimage-action-menu');_setPilgrimageLayerVisible(m,false);actionContext=null;actionClearConfirm=false;}
@@ -22769,7 +22769,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }else{
       const item=loadPlan()[ctx.index];if(!item)return;
       const meta=loadMeta(),hasWalk=!!(meta.walkSegment&&(meta.walkSegment.startRef||meta.walkSegment.endRef));
-      title.textContent=item.name;buttons.innerHTML='<button type="button" data-oai-action="walk-start">👣 도보 출발로 지정</button><button type="button" data-oai-action="walk-end">🏁 도보 도착으로 지정</button>'+(hasWalk?'<button type="button" data-oai-action="walk-clear">도보 지정 전체 해제</button>':'')+'<button type="button" data-oai-action="visit">'+(item.done?'순례 취소':'순례')+'</button><button type="button" class="danger" data-oai-action="delete-place">삭제</button>';
+      title.textContent=item.name;buttons.innerHTML='<button type="button" data-oai-action="walk-start">👣 도보 출발로 지정</button><button type="button" data-oai-action="walk-end">🏁 도보 도착으로 지정</button>'+(hasWalk?'<button type="button" data-oai-action="walk-clear">도보 지정 전체 해제</button>':'')+'<button type="button" class="danger" data-oai-action="delete-place">삭제</button>';
     }
     _setPilgrimageLayerVisible(m,true);vibrate(20);
   }
