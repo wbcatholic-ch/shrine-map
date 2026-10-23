@@ -4100,7 +4100,7 @@ function _nearestShrineWithinAutoVisitRadius(lat,lng,unvisitedOnDate){
 /* 방문 안내는 GPS 저장 성공 후 큐에 넣는다. 다른 방문이 발생해도 앞선 안내를 덮지 않는다. */
 var _oaiDeferredVisitNotices=[];
 var _oaiDeferredVisitNoticeTimer=0;
-function _oaiVisitNoticeBlocked(){try{if(document.visibilityState==='hidden')return true;if(window.oaiIsBackgroundReturnUiBlocked&&window.oaiIsBackgroundReturnUiBlocked())return true;if(window.oaiHasCriticalModalOpen&&window.oaiHasCriticalModalOpen())return true;if(_isAnyVisitModalOpen())return true;const courseNotice=document.getElementById('oai-cgm-congrats');if(courseNotice&&!courseNotice.hidden)return true;const parishNotice=document.getElementById('parish-auto-visit-notice');if(parishNotice&&parishNotice.classList.contains('show'))return true;}catch(_e){}return false;}
+function _oaiVisitNoticeBlocked(){try{if(document.visibilityState==='hidden')return true;/* 방문 축하창은 이미 화면이 보일 때 과거 백그라운드 복귀 플래그로 무기한 차단하지 않는다. 실제 열린 창만 확인한다. */if(window.oaiHasCriticalModalOpen&&window.oaiHasCriticalModalOpen())return true;if(_isAnyVisitModalOpen())return true;const courseNotice=document.getElementById('oai-cgm-congrats');if(courseNotice&&!courseNotice.hidden)return true;const parishNotice=document.getElementById('parish-auto-visit-notice');if(parishNotice&&parishNotice.classList.contains('show'))return true;}catch(_e){}return false;}
 function _scheduleDeferredVisitNoticeFlush(){clearTimeout(_oaiDeferredVisitNoticeTimer);if(_oaiDeferredVisitNotices.length)_oaiDeferredVisitNoticeTimer=setTimeout(_flushDeferredVisitNotices,500);}
 function _queueDeferredVisitNotice(kind,place){if(!place)return;const id=typeof _oaiPlaceCanonicalId==='function'?_oaiPlaceCanonicalId(kind,kind==='shrine'&&place.item?place.item:place):'';if(_oaiDeferredVisitNotices.some(x=>x.kind===kind&&((id&&x.id===id)||x.place===place)))return;_oaiDeferredVisitNotices.push({kind,place,id});_scheduleDeferredVisitNoticeFlush();}
 function _flushDeferredVisitNotices(){
@@ -4127,6 +4127,9 @@ function _flushDeferredVisitNotices(){
 document.addEventListener('click',function(){if(_oaiDeferredVisitNotices.length)setTimeout(_flushDeferredVisitNotices,120);},true);
 window.addEventListener('oai-short-background-return',function(){setTimeout(_flushDeferredVisitNotices,900);},{passive:true});
 window.addEventListener('oai-long-background-return',function(){setTimeout(_flushDeferredVisitNotices,900);},{passive:true});
+/* 화면 복귀가 기존 짧은/긴 복귀 이벤트를 발생시키지 않아도 보류 방문 안내를 재확인한다. */
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'&&_oaiDeferredVisitNotices.length)_flushDeferredVisitNotices();});
+window.addEventListener('pageshow',function(){if(_oaiDeferredVisitNotices.length)_flushDeferredVisitNotices();});
 
 function _ensureShrineAutoVisitModal(){
   let modal=document.getElementById('shrine-auto-visit-modal');
