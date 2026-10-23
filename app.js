@@ -11439,7 +11439,34 @@ function _setRouteMarkerZ(idx, role){
   }catch(e){ console.warn("[가톨릭길동무]", e); }
 }
 
+let _pilgrimageRouteWaypointLabels=[];
+function _clearPilgrimageRouteWaypointLabels(){
+  _pilgrimageRouteWaypointLabels.forEach(function(overlay){try{overlay.setMap(null);}catch(_e){}});
+  _pilgrimageRouteWaypointLabels=[];
+}
+function _syncPilgrimageRouteWaypointLabels(){
+  _clearPilgrimageRouteWaypointLabels();
+  if(!window.__OAI_PILGRIMAGE_ROUTE_EDIT__||!_map||_activeTab!=='route'||!kakao||!kakao.maps||!kakao.maps.CustomOverlay)return;
+  OAI_ROUTE_WAYPOINT_CONFIGS.forEach(function(cfg){
+    const point=_getRoutePointByRole(cfg.role);
+    if(!point||!Number.isFinite(Number(point.lat))||!Number.isFinite(Number(point.lng))||!String(point.name||'').trim())return;
+    const label=document.createElement('span');
+    label.className='oai-route-waypoint-name-label';
+    label.textContent=String(point.name).trim();
+    label.title=label.textContent;
+    label.setAttribute('aria-hidden','true');
+    try{
+      const overlay=new kakao.maps.CustomOverlay({
+        position:new _LL(Number(point.lat),Number(point.lng)),
+        content:label,xAnchor:0.5,yAnchor:1,zIndex:450
+      });
+      overlay.setMap(_map);
+      _pilgrimageRouteWaypointLabels.push(overlay);
+    }catch(_e){}
+  });
+}
 function _clearRouteTmpMarkers(){
+  _clearPilgrimageRouteWaypointLabels();
   if(_startTmpMkr){ _startTmpMkr.setMap(null); _startTmpMkr=null; }
   if(_endTmpMkr){ _endTmpMkr.setMap(null); _endTmpMkr=null; }
   OAI_ROUTE_WAYPOINT_CONFIGS.forEach(function(cfg){
@@ -11497,6 +11524,7 @@ function _refreshRouteTmpMarkers(){
     kakao.maps.event.addListener(_endTmpMkr,'click',function(){ _openRoutePointCancelChoice('end'); });
     _endTmpMkr.setMap(_map);
   }
+  _syncPilgrimageRouteWaypointLabels();
 }
 
 function _typeColor(t){return t==='성지'?'#c0392b':t==='순례지'?'#1565c0':'#1b7a3e';}
