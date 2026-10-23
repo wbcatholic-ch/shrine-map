@@ -7070,7 +7070,7 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
   background:#fff!important;
 }
 #oai-pilgrimage-detail-view .oai-pilgrimage-add,
-#oai-pilgrimage-detail-view .oai-pilgrimage-map-add{
+#oai-pilgrimage-detail-view .oai-pilgrimage-map-add:not(.is-walk-return){
   min-height:44px!important;
   border-radius:11px!important;
   background:#fff!important;
@@ -7081,9 +7081,16 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
   border:1px solid #d9c88f!important;
   color:#6b531a!important;
 }
-#oai-pilgrimage-detail-view .oai-pilgrimage-map-add{
+#oai-pilgrimage-detail-view .oai-pilgrimage-map-add:not(.is-walk-return){
   border:1px solid #8db7da!important;
   color:#176fc0!important;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-map-add.is-walk-return{
+  min-height:44px!important;
+  border-radius:11px!important;
+  background:#1767B5!important;
+  border:1px solid #1767B5!important;
+  color:#FFFFFF!important;
 }
 #oai-pilgrimage-detail-view.is-empty-plan .oai-pilgrimage-map-add{
   grid-column:1/-1;
