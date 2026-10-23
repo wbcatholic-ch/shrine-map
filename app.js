@@ -14570,6 +14570,23 @@ function _schedulePilgrimageRouteResult(label,focusPoint){
       running=true;
       attempts++;
       stabilize();
+      // A read-only course map is usable as soon as the shared Kakao map and
+      // waypoint markers are ready. Do not keep its loading state coupled to
+      // the slower multi-leg driving directions API, or start seven duplicate
+      // calculations while a network request is pending.
+      if(_isPilgrimageCourseViewReadOnly()){
+        done=true;
+        try{_refreshRouteTmpMarkers();}catch(_e){}
+        try{_completeCategoryMapSurface();}catch(_e){}
+        try{if(typeof oaiHideCategoryEntryVeil==='function')oaiHideCategoryEntryVeil();}catch(_e){}
+        try{
+          await _calcRoute();
+        }catch(e){
+          console.warn('[가톨릭길동무] 순례코스 읽기 전용 경로 계산 실패',e);
+        }
+        finally{running=false;}
+        return;
+      }
       await _calcRoute();
 
       if(resultReady()){
@@ -21509,7 +21526,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       // A map entry must never strand the user behind a loading veil. Keep the
       // recovery scoped to this entry so other map/category flows are untouched.
       const entryFailureTimer=setTimeout(function(){
-        if(entryReady||entryFailed||window.__OAI_PILGRIMAGE_MAP_ENTRY_TOKEN__!==mapEntryToken||_screen!=='map'||_mode!=='shrine')return;
+        if(entryReady||entryFailed||window.__OAI_PILGRIMAGE_MAP_ENTRY_TOKEN__!==mapEntryToken)return;
         entryFailed=true;
         releaseEntryWatch();
         window.__OAI_PILGRIMAGE_ROUTE_EDIT__=null;
@@ -21517,8 +21534,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__=false;
         try{_completeCategoryMapSurface();}catch(_e){}
         try{if(typeof oaiHideCategoryEntryVeil==='function')oaiHideCategoryEntryVeil();}catch(_e){}
-        try{openPlanner({returnFromSearch:true});setView('detail');renderDetail();}catch(e){console.warn('[가톨릭길동무] 순례 지도 진입 복귀 실패',e);}
-        alert('지도를 준비하지 못했습니다. 인터넷 연결을 확인한 뒤 다시 시도해 주세요. 순례계획은 그대로 유지됩니다.');
+        if(_screen==='map'&&_mode==='shrine'){
+          try{openPlanner({returnFromSearch:true});setView('detail');renderDetail();}catch(e){console.warn('[가톨릭길동무] 순례 지도 진입 복귀 실패',e);}
+          alert('지도를 준비하지 못했습니다. 인터넷 연결을 확인한 뒤 다시 시도해 주세요. 순례계획은 그대로 유지됩니다.');
+        }
       },12000);
       function releaseEntryWatch(){
         clearTimeout(entryFailureTimer);
@@ -21526,9 +21545,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(entryObserver){entryObserver.disconnect();entryObserver=null;}
       }
       function finishPilgrimageMapEntry(){
-        if(entryReady||entryFailed||window.__OAI_PILGRIMAGE_MAP_ENTRY_TOKEN__!==mapEntryToken||_screen!=='map'||_mode!=='shrine'){
+        if(entryReady||entryFailed||window.__OAI_PILGRIMAGE_MAP_ENTRY_TOKEN__!==mapEntryToken){
           releaseEntryWatch();return;
         }
+        // Fold / route-panel transitions may temporarily swap visible screens.
+        // Keep observing until the map itself is measurable or entry times out.
+        if(_screen!=='map'||_mode!=='shrine')return;
         if(!_map||!mapEl||!mapEl.isConnected||mapEl.clientWidth<=0||mapEl.clientHeight<=0)return;
         try{_map.relayout();}catch(e){console.warn('[가톨릭길동무] 순례 지도 갱신 실패',e);return;}
         entryReady=true;

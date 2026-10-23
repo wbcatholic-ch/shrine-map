@@ -7022,11 +7022,11 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 /* 출발지·도착지는 경유지 번호 열에 종류를, 이름 열에 장소명을 배치한다. */
 #oai-pilgrimage-detail-view .oai-pilgrimage-endpoint{
   justify-content:flex-start!important;
-  gap:8px!important;
-  padding:10px 19px!important;
+  gap:12px!important;
+  padding:10px 14px 10px 8px!important;
 }
 #oai-pilgrimage-detail-view .oai-pilgrimage-endpoint-role{
-  display:flex;flex:0 0 64px;align-items:center;justify-content:center;
+  display:flex;flex:0 0 36px;align-items:center;justify-content:center;
   font-size:calc(13px * var(--app-font-scale,1));font-weight:950;
   white-space:nowrap;
 }
@@ -9466,6 +9466,8 @@ html.oai-pilgrimage-route-direct #sheet-route #rs-pilgrimage-return-btn{
 }
 
 @media(max-width:390px){
+  #oai-pilgrimage-detail-view .oai-pilgrimage-endpoint{gap:9px!important;}
+  #oai-pilgrimage-detail-view .oai-pilgrimage-endpoint-role{flex-basis:34px;}
   #oai-pilgrimage-detail-view .oai-pilgrimage-item{
     grid-template-columns:34px minmax(0,1fr)!important;
     column-gap:9px!important;
