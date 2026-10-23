@@ -9876,6 +9876,7 @@ function zoomCategoryMap(delta){
    뒤로가기 등으로 길찾기 UI를 벗어난 뒤 남아 있던 _routeMode/route-tab-active 상태 때문에
    일반 지도 마커가 다시 길찾기로 동작하던 문제를 막는다. */
 function _isRouteSelectionModeActive(){
+  if(_pilgrimageMapMode()==='place-info-view')return false;
   try{
     var root = document.documentElement;
     var routeSheet = $('sheet-route');
@@ -11456,6 +11457,7 @@ function _shouldShowRouteStartMarker(){
 }
 function _refreshRouteTmpMarkers(){
   if(!_map) return;
+  if(_pilgrimageMapMode()==='place-info-view'){_clearRouteTmpMarkers();return;}
   _clearRouteTmpMarkers();
   _refreshExistingRoutePointMarkerImages();
   const routeResultShowing = !!_polyline;
@@ -15464,6 +15466,7 @@ function _ensureRoutePilgrimagePlanButton(){
 }
 
 async function _calcRoute(){
+  if(_pilgrimageMapMode()==='place-info-view')return;
   if(!_rS||!_rE) return;
   _hideRouteGuide();
   $('rs-km').textContent='…';
@@ -15555,6 +15558,7 @@ function _isSelectedRouteItemIndex(index){
 }
 
 function _drawLine(s1,s2,path,opts){
+  if(_pilgrimageMapMode()==='place-info-view')return;
   opts = opts || {};
   const waypoints = Array.isArray(opts.waypoints)
     ? opts.waypoints.filter(p=>p&&p.lat&&p.lng)
@@ -21510,25 +21514,22 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         _refreshRoutePilgrimageButtonMode();
         _updateSearchBtn();
         _syncPilgrimageRouteReturnButton();
-        if(readOnly||normalRoute){
+        if(readOnly&&_pilgrimageCourseViewKind()==='place-info'){
+          // 성지 안내창에서 열면 길찾기 계산·경로선·전체 구간 fitBounds를 실행하지 않는다.
+          // 전국 성지 마커는 그대로 살려 클릭 시 기존 정보카드를 열 수 있게 한다.
+          try{if(_polyline){_polyline.setMap(null);_polyline=null;}}catch(_e){}
+          try{if(typeof _restoreAllCategoryMarkersForSelection==='function')_restoreAllCategoryMarkersForSelection();}catch(_e){}
+          const focused=options.focusPoint;
+          if(focused&&_validGpsPair(focused.lat,focused.lng)&&_map){
+            _setPilgrimageMapCenterForBottomCard(focused,OAI_PILGRIMAGE_PLACE_INFO_FOCUS_LEVEL,{repeat:false});
+          }
+        }else if(readOnly||normalRoute){
           setTimeout(function(){
             try{
               _syncRouteWaypointBoxes();
-              _schedulePilgrimageRouteResult(readOnly?'순례코스 보기':'순례하기 코스 보기',options.focusPoint);
+              _schedulePilgrimageRouteResult(readOnly?'순례코스 보기':'순례하기 코스 보기',null);
             }catch(_e){}
           },60);
-          // 장소 안내창의 '지도에서 보기'는 경로 전체가 아니라 선택한 경유지를
-          // 첫 화면 중심으로 보여준다. 경유지 복원/길찾기 경로 fitBounds와
-          // 길찾기 카드 크기 확정이 비동기로 끝나므로 그 뒤에 마지막으로 보정한다.
-          if(readOnly && options.focusPoint && _validGpsPair(options.focusPoint.lat,options.focusPoint.lng)){
-            const selectedFocus={lat:Number(options.focusPoint.lat),lng:Number(options.focusPoint.lng)};
-            [400,1100].forEach(function(delay){setTimeout(function(){
-              if(window.__OAI_PILGRIMAGE_MAP_ENTRY_TOKEN__!==mapEntryToken ||
-                 !_isPilgrimageCourseViewReadOnly() || _pilgrimageCourseViewKind()!=='place-info' ||
-                 _screen!=='map' || !_map)return;
-              _setPilgrimageMapCenterForBottomCard(selectedFocus,OAI_PILGRIMAGE_PLACE_INFO_FOCUS_LEVEL,{repeat:false});
-            },delay);});
-          }
         }
         try{_refreshRouteTmpMarkers();}catch(_e){}
         // 경유지 복원이 끝난 실제 길찾기 패널 크기에서 마지막 순례지를 중앙에 놓는다.
@@ -21546,6 +21547,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         const initial=_pilgrimageMapInitialPoint(entryRole);
         if(_map&&mapEl&&mapEl.clientWidth>0&&mapEl.clientHeight>0&&typeof _map.relayout==='function')_map.relayout();
         if(typeof _syncMapPanelUI==='function')_syncMapPanelUI(normalRoute?'route':'pilgrimage-route-edit');
+        if(readOnly&&_pilgrimageCourseViewKind()==='place-info'&&_map&&options.focusPoint&&_validGpsPair(options.focusPoint.lat,options.focusPoint.lng)){
+          _setPilgrimageMapCenterForBottomCard(options.focusPoint,OAI_PILGRIMAGE_PLACE_INFO_FOCUS_LEVEL,{repeat:false});
+        }
         // Map center is applied by finishPilgrimageMapEntry after the map is measurable.
       }catch(err){console.warn('[가톨릭길동무] 순례계획 길찾기 편집 준비 실패',err);}},120);
     }catch(e){window.__OAI_PILGRIMAGE_ROUTE_EDIT__=null;window.__OAI_PILGRIMAGE_INITIAL_CENTER__=null;window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__=false;console.warn('[가톨릭길동무] 순례 지도 진입 실패',e);openPlanner({returnFromSearch:true});setView('detail');renderDetail();}};
