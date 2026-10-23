@@ -18481,6 +18481,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(cur)_endDailyFollowSession(cur);
         if(cur&&cur.travelMode==='walk')_walkingNativeStop();
         localStorage.removeItem(ACTIVE_FOLLOW_KEY);
+        _syncCarPilgrimageNotice(null);
+        queueMicrotask(_refreshWalkingCoverBadge);
       }
     }catch(_e){}
   }
@@ -18505,41 +18507,77 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       try{native.stopWalkingPilgrimage();}catch(e){console.warn('[도보 순례] 서비스 종료 요청 실패',e);}
     }
   }
-  // Cover's compact walking status is derived from the active session; never writes course data.
+  // Automobile pilgrimage uses a passive status notification (no extra GPS service).
+  let lastCarNoticeSignature='';
+  function _syncCarPilgrimageNotice(active){
+    const native=_walkingNative();
+    if(!native)return;
+    if(!active||active.travelMode!=='car'){
+      if(lastCarNoticeSignature&&typeof native.stopCarPilgrimage==='function'){
+        try{native.stopCarPilgrimage();}catch(_e){}
+      }
+      lastCarNoticeSignature='';
+      return;
+    }
+    if(typeof native.updateCarPilgrimage!=='function')return;
+    const places=Array.isArray(active.course&&active.course.places)?active.course.places:[];
+    const visited=places.filter(x=>x&&x.done).length;
+    const next=places.find(x=>x&&!x.done);
+    const name=next?String(next.name||''):'';
+    const signature=[active.startedAt,visited,places.length,name].join('|');
+    if(signature===lastCarNoticeSignature)return;
+    try{native.updateCarPilgrimage(active.startedAt,visited,places.length,name);lastCarNoticeSignature=signature;}
+    catch(e){console.warn('[자동차 순례] 상태창 표시 실패',e);}
+  }
+  window._oaiOpenCarFromNotification=function(){
+    const native=_walkingNative(),active=_activeFollowState();
+    if(!native||!active||active.travelMode!=='car'||typeof native.consumeCarPilgrimageReturn!=='function')return false;
+    try{if(!native.consumeCarPilgrimageReturn())return false;}catch(_e){return false;}
+    return !!(window._oaiReturnToActivePilgrimage&&window._oaiReturnToActivePilgrimage());
+  };
+  // One small return control for either active pilgrimage, across all menu screens.
+  // It must not appear on the original pilgrimage screens or over the walking map.
   function _refreshWalkingCoverBadge(){
     const badge=document.getElementById('oai-walk-cover-badge');
     if(!badge)return;
     const active=_activeFollowState();
-    const visible=!!(active&&active.travelMode==='walk');
+    const plannerLayer=planner();
+    const onPilgrimage=!!(plannerLayer&&plannerLayer.classList.contains('show'));
+    const onWalkMap=!!document.getElementById('oai-walk-map-preview');
+    const visible=!!active&&!onPilgrimage&&!onWalkMap;
+    _syncCarPilgrimageNotice(active);
     badge.hidden=!visible;
     if(!visible)return;
-    const places=Array.isArray(active.course&&active.course.places)?active.course.places:[];
-    const visited=places.filter(x=>x&&x.done).length;
-    const elapsed=Math.max(0,Math.floor((Date.now()-active.startedAt)/60000));
-    const count=badge.querySelector('[data-walk-cover-progress]');
-    if(count)count.textContent='방문 '+visited+'/'+places.length+'곳 · '+Math.floor(elapsed/60)+'시간 '+String(elapsed%60).padStart(2,'0')+'분';
+    const walking=active.travelMode==='walk';
+    badge.setAttribute('aria-label',walking?'진행 중인 도보 순례 지도로 돌아가기':'진행 중인 자동차 순례로 돌아가기');
+    badge.title=walking?'도보 순례 지도로 돌아가기':'자동차 순례로 돌아가기';
+    const icon=badge.querySelector('.oai-walk-cover-icon');
+    if(icon)icon.textContent=walking?'👣':'🚗';
   }
   window._oaiRefreshWalkingCoverBadge=_refreshWalkingCoverBadge;
   window._oaiResumeWalkingFromCover=function(){
     const active=_activeFollowState();
-    if(!active||active.travelMode!=='walk')return false;
+    if(!active)return false;
     if(typeof window._oaiReturnToActivePilgrimage!=='function'||!window._oaiReturnToActivePilgrimage())return false;
-    // Resume the existing session; entering/leaving the map is not pilgrimage termination.
-    openWalkMapPreview();
+    if(active.travelMode==='walk')openWalkMapPreview();
+    _refreshWalkingCoverBadge();
     return true;
   };
   const walkingCoverBadge=document.getElementById('oai-walk-cover-badge');
   if(walkingCoverBadge){
+    // The control must stay visible in every other category, not just on the cover.
+    if(walkingCoverBadge.parentNode!==document.body)document.body.appendChild(walkingCoverBadge);
     walkingCoverBadge.addEventListener('click',function(){window._oaiResumeWalkingFromCover();});
   }
   _refreshWalkingCoverBadge();
   document.addEventListener('visibilitychange',function(){if(!document.hidden)_refreshWalkingCoverBadge();});
-  window.addEventListener('pageshow',_refreshWalkingCoverBadge);
-  // Update elapsed time only while visible: no background GPS or timer is started here.
-  setInterval(function(){
-    if(!document.hidden&&document.getElementById('cover')&&
-       !document.documentElement.classList.contains('app-active'))_refreshWalkingCoverBadge();
-  },60000);
+  window.addEventListener('pageshow',function(){_refreshWalkingCoverBadge();setTimeout(window._oaiOpenCarFromNotification,650);});
+  // Watch only meaningful navigation surfaces; no GPS or background polling added.
+  const pilgrimageBadgeObserver=new MutationObserver(_refreshWalkingCoverBadge);
+  const pilgrimageBadgePlanner=planner();
+  if(pilgrimageBadgePlanner)pilgrimageBadgeObserver.observe(pilgrimageBadgePlanner,{attributes:true,attributeFilter:['class','style','aria-hidden']});
+  pilgrimageBadgeObserver.observe(document.body,{childList:true});
+  setInterval(function(){if(!document.hidden)_refreshWalkingCoverBadge();},60000);
   function _walkingNativeCoursePoints(active){
     const places=Array.isArray(active&&active.course&&active.course.places)?active.course.places:[];
     return JSON.stringify(places.filter(x=>x&&_validGpsPair(x.lat,x.lng)).map(x=>({
@@ -20697,6 +20735,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     try{localStorage.setItem(ACTIVE_FOLLOW_KEY,JSON.stringify({courseId:c.id,startedAt:now,travelMode:_followTravelMode(travelMode)}));}catch(_e){}
     _recordDailyFollowSession(c,now);
     if(travelMode==='walk')_walkingNativeStart(_activeFollowState());
+    _refreshWalkingCoverBadge();
     try{renderCourseList();}catch(_e){}
     // 완료 목록의 '다시 순례하기'에서 시작했다면
     // 버튼만 '순례 종료'로 바꾸고 목록에 머무르지 말고
@@ -21623,6 +21662,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(session.walkRequest)session.walkRequest.abort();
     if(session.walkRouteLine)session.walkRouteLine.setMap(null);
     session.layer.remove();
+    _refreshWalkingCoverBadge();
   }
   function showWalkMapExitConfirm(destination){
     const session=walkMapSession;
@@ -21633,7 +21673,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     session.exitDestination=destination==='cover'?'cover':'follow';
     const title=modal.querySelector('[data-walk-exit-title]');
     const message=modal.querySelector('[data-walk-exit-message]');
-    if(title)title.textContent=session.exitDestination==='cover'?'다른 메뉴로 이동할까요?':'순례하기로 돌아갈까요?';
+    if(title)title.textContent=session.exitDestination==='cover'?'앱 첫화면으로 돌아갈까요?':'순례 상세페이지로 돌아갈까요?';
     if(message)message.textContent='지도를 닫아도 도보 순례와 GPS 기록은 계속 진행됩니다.';
     modal.hidden=false;
     return true;
@@ -21676,12 +21716,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const layer=document.createElement('section');
     layer.id='oai-walk-map-preview';layer.className='oai-walk-map-preview';
     layer.setAttribute('aria-label','도보 순례 지도');
-    layer.innerHTML='<header><strong>도보 순례 · 지도</strong><span data-walk-progress></span><button type="button" class="oai-walk-close" data-walk-close aria-label="순례하기로 돌아가기">×</button></header><div class="oai-walk-map-canvas"></div><button type="button" class="oai-walk-menu" data-walk-menu>다른 메뉴로 가기</button><div class="oai-walk-map-controls"><div class="oai-walk-route-legend" data-walk-route-status aria-live="polite">현재 위치 확인 중 · 도보 경로 준비 중</div><div class="oai-walk-control-buttons"><button type="button" data-walk-kakao-route>카카오맵 도보길</button><button type="button" data-walk-overview>전체 보기</button><button type="button" data-walk-recenter>내 위치</button></div></div><div class="oai-walk-exit-overlay" data-walk-exit-confirm hidden><div class="oai-walk-exit-dialog" role="dialog" aria-modal="true" aria-labelledby="oai-walk-exit-title"><h3 id="oai-walk-exit-title" data-walk-exit-title></h3><p data-walk-exit-message></p><div class="oai-walk-exit-actions"><button type="button" data-walk-exit-cancel>지도 계속 보기</button><button type="button" data-walk-exit-accept>이동하기</button></div></div></div>';
+    layer.innerHTML='<header><strong>도보 순례 · 지도</strong><span data-walk-progress></span><button type="button" class="oai-walk-close" data-walk-close aria-label="순례하기로 돌아가기">×</button></header><div class="oai-walk-map-canvas"></div><button type="button" class="oai-walk-menu" data-walk-menu>커버로 가기</button><div class="oai-walk-map-controls"><div class="oai-walk-route-legend" data-walk-route-status aria-live="polite">현재 위치 확인 중 · 도보 경로 준비 중</div><div class="oai-walk-control-buttons"><button type="button" data-walk-kakao-route>카카오맵 도보길</button><button type="button" data-walk-overview>전체 보기</button><button type="button" data-walk-recenter>내 위치</button></div></div><div class="oai-walk-exit-overlay" data-walk-exit-confirm hidden><div class="oai-walk-exit-dialog" role="dialog" aria-modal="true" aria-labelledby="oai-walk-exit-title"><h3 id="oai-walk-exit-title" data-walk-exit-title></h3><p data-walk-exit-message></p><div class="oai-walk-exit-actions"><button type="button" data-walk-exit-cancel>지도 계속 보기</button><button type="button" data-walk-exit-accept>돌아가기</button></div></div></div>';
     document.body.appendChild(layer);
     const session={layer,closed:false,watchId:null,resizeObserver:null,map:null,myMarker:null,walkRouteLine:null,
       walkRequest:null,lastWalkRouteAt:0,lastWalkRoutePoint:null,lastWalkRouteTarget:'',walkRouteBusy:false,startMarker:null,
       viewMode:'overview',lastPosition:null,firstPosition:null,lastFollowPosition:null,lastFollowAt:0};
     walkMapSession=session;
+    _refreshWalkingCoverBadge();
     layer.querySelector('[data-walk-close]').addEventListener('click',()=>showWalkMapExitConfirm('follow'));
     layer.querySelector('[data-walk-menu]').addEventListener('click',()=>showWalkMapExitConfirm('cover'));
     layer.querySelector('[data-walk-exit-cancel]').addEventListener('click',dismissWalkMapExitConfirm);
