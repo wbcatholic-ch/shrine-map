@@ -9353,6 +9353,7 @@ function goToCover(){
   try{ _clearParishNearbyMarkers(); }catch(e){ console.warn('[가톨릭길동무]',e); }
   if(_myMkr){try{_myMkr.setMap(null);}catch(e){ console.warn("[가톨릭길동무]", e); } _myMkr=null;}
   _screen='cover';
+  try{if(typeof window._oaiRefreshWalkingCoverBadge==='function')window._oaiRefreshWalkingCoverBadge();}catch(_e){}
   _oaiNotifyPhotoLocationActivity();
   try{ _updateShrineVisitMapFilterUI(); _updateShrineVisitCardsButtonUI(); }catch(e){ console.warn('[가톨릭길동무]', e); }
   if(typeof oaiSetMainMapLayerHidden==='function') oaiSetMainMapLayerHidden(false);
@@ -18504,6 +18505,41 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       try{native.stopWalkingPilgrimage();}catch(e){console.warn('[도보 순례] 서비스 종료 요청 실패',e);}
     }
   }
+  // Cover's compact walking status is derived from the active session; never writes course data.
+  function _refreshWalkingCoverBadge(){
+    const badge=document.getElementById('oai-walk-cover-badge');
+    if(!badge)return;
+    const active=_activeFollowState();
+    const visible=!!(active&&active.travelMode==='walk');
+    badge.hidden=!visible;
+    if(!visible)return;
+    const places=Array.isArray(active.course&&active.course.places)?active.course.places:[];
+    const visited=places.filter(x=>x&&x.done).length;
+    const elapsed=Math.max(0,Math.floor((Date.now()-active.startedAt)/60000));
+    const count=badge.querySelector('[data-walk-cover-progress]');
+    if(count)count.textContent='방문 '+visited+'/'+places.length+'곳 · '+Math.floor(elapsed/60)+'시간 '+String(elapsed%60).padStart(2,'0')+'분';
+  }
+  window._oaiRefreshWalkingCoverBadge=_refreshWalkingCoverBadge;
+  window._oaiResumeWalkingFromCover=function(){
+    const active=_activeFollowState();
+    if(!active||active.travelMode!=='walk')return false;
+    if(typeof window._oaiReturnToActivePilgrimage!=='function'||!window._oaiReturnToActivePilgrimage())return false;
+    // Resume the existing session; entering/leaving the map is not pilgrimage termination.
+    openWalkMapPreview();
+    return true;
+  };
+  const walkingCoverBadge=document.getElementById('oai-walk-cover-badge');
+  if(walkingCoverBadge){
+    walkingCoverBadge.addEventListener('click',function(){window._oaiResumeWalkingFromCover();});
+  }
+  _refreshWalkingCoverBadge();
+  document.addEventListener('visibilitychange',function(){if(!document.hidden)_refreshWalkingCoverBadge();});
+  window.addEventListener('pageshow',_refreshWalkingCoverBadge);
+  // Update elapsed time only while visible: no background GPS or timer is started here.
+  setInterval(function(){
+    if(!document.hidden&&document.getElementById('cover')&&
+       !document.documentElement.classList.contains('app-active'))_refreshWalkingCoverBadge();
+  },60000);
   function _walkingNativeCoursePoints(active){
     const places=Array.isArray(active&&active.course&&active.course.places)?active.course.places:[];
     return JSON.stringify(places.filter(x=>x&&_validGpsPair(x.lat,x.lng)).map(x=>({
@@ -18561,6 +18597,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     _recordDailyFollowSession(c,now);
     _recordActiveCourseGpsFromVisits();
     _walkingNativeStart(_activeFollowState());
+    _refreshWalkingCoverBadge();
     return loadCourses().find(function(x){return x.id===requestedId;})||c;
   }
   function _isActiveFollowCourse(id){
@@ -19688,8 +19725,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const active=_activeFollowState();
       if(active&&active.travelMode==='walk'){
         _reconcileWalkingNativeFix();
-        _walkingNativeRefresh(active);
+        const native=_walkingNative();
+        let nativeRunning=false;
+        try{
+          const status=native&&typeof native.getWalkingPilgrimageStatus==='function'?
+            JSON.parse(native.getWalkingPilgrimageStatus()||'{}'):null;
+          nativeRunning=!!(status&&Number(status.startedAt)===Number(active.startedAt));
+        }catch(_e){}
+        if(nativeRunning)_walkingNativeRefresh(active);
+        else _walkingNativeStart(active);
       }
+      _refreshWalkingCoverBadge();
     }
   });
   // On a cold launch the document may start visible, so visibilitychange never fires.
@@ -19699,8 +19745,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const active=_activeFollowState();
       if(active&&active.travelMode==='walk'){
         _reconcileWalkingNativeFix();
-        _walkingNativeRefresh(active);
+        const native=_walkingNative();
+        let nativeRunning=false;
+        try{
+          const status=native&&typeof native.getWalkingPilgrimageStatus==='function'?
+            JSON.parse(native.getWalkingPilgrimageStatus()||'{}'):null;
+          nativeRunning=!!(status&&Number(status.startedAt)===Number(active.startedAt));
+        }catch(_e){}
+        if(nativeRunning)_walkingNativeRefresh(active);
+        else _walkingNativeStart(active);
       }
+      _refreshWalkingCoverBadge();
     },1200);
   });
   window._oaiOpenWalkingFromNotification=function(){
@@ -19967,6 +20022,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         const cover=document.getElementById('cover');
         if(cover){cover.style.display='';cover.style.opacity='';cover.setAttribute('aria-hidden','false');}
         document.documentElement.classList.remove('app-active');
+        _refreshWalkingCoverBadge();
         _resetCoverExitState();
         if(typeof window._resetCoverBackTrap==='function')window._resetCoverBackTrap('pilgrimage-cover-return');
       }catch(_e){}
