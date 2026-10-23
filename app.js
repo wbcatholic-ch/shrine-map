@@ -9452,8 +9452,13 @@ function _onMapReady(){
   const mapBuildToken = _currentMainMapBuildToken();
   const mapMode = _mode;
   const mapEl=$('map');
+  const pilgrimageEntryCenter=(_isPilgrimageRouteEditMode()&&window.__OAI_PILGRIMAGE_INITIAL_CENTER__&&
+    _validGpsPair(window.__OAI_PILGRIMAGE_INITIAL_CENTER__.lat,window.__OAI_PILGRIMAGE_INITIAL_CENTER__.lng))
+    ? window.__OAI_PILGRIMAGE_INITIAL_CENTER__ : null;
   if(!_map){
-    _map=new kakao.maps.Map(mapEl,{ center:new _LL(36.2,127.9),level:8 });
+    _map=new kakao.maps.Map(mapEl,{ center:pilgrimageEntryCenter
+      ? new _LL(Number(pilgrimageEntryCenter.lat),Number(pilgrimageEntryCenter.lng))
+      : new _LL(36.2,127.9),level:pilgrimageEntryCenter?OAI_PILGRIMAGE_MAP_PICK_VIEW_LEVEL:8 });
     window.__OAI_MAIN_MAP_CLICK_BOUND__=false;
     // Only v380+ understands this optional idle UI bridge.
     if(_oaiIdleBridge()){
@@ -9464,8 +9469,10 @@ function _onMapReady(){
   }else{
     try{
       if(typeof _map.relayout==='function') _map.relayout();
-      if(typeof _map.setLevel==='function') _map.setLevel(8);
-      if(typeof _map.setCenter==='function') _map.setCenter(new _LL(36.2,127.9));
+      if(typeof _map.setLevel==='function') _map.setLevel(pilgrimageEntryCenter?OAI_PILGRIMAGE_MAP_PICK_VIEW_LEVEL:8);
+      if(typeof _map.setCenter==='function') _map.setCenter(pilgrimageEntryCenter
+        ?new _LL(Number(pilgrimageEntryCenter.lat),Number(pilgrimageEntryCenter.lng))
+        :new _LL(36.2,127.9));
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
   if(!window.__OAI_MAIN_MAP_CLICK_BOUND__){
@@ -9761,7 +9768,7 @@ function closeRouteSheetByX(){
   try{document.documentElement.classList.remove('oai-pilgrimage-route-direct');}catch(_e){}
   window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__=false;
   _applyPilgrimageCourseViewReadOnlyState();
-  if(returnToPilgrimageEdit) window.__OAI_PILGRIMAGE_ROUTE_EDIT__=null;
+  if(returnToPilgrimageEdit){window.__OAI_PILGRIMAGE_ROUTE_EDIT__=null;window.__OAI_PILGRIMAGE_INITIAL_CENTER__=null;}
   _blurAll && _blurAll();
   _closeSheetOnly('route');
   if(_activeTab==='route') _activeTab=null;
@@ -10140,7 +10147,7 @@ function _nearbyMyLocationDefaultLevel(mode){
 }
 function _restoreNearbyMyLocationPlain(reason, opts){
   opts = opts || {};
-  if(_isShrineMapTargetCenterLocked()) return false;
+  if(_isShrineMapTargetCenterLocked()||_isPilgrimageRouteEditMode()) return false;
   if(!_map || !_myLat || !_myLng || typeof _LL==='undefined') return false;
   if(!(_mode==='shrine' || _mode==='parish' || _mode==='retreat')) return false;
   try{
@@ -10369,7 +10376,7 @@ window.oaiNormalizeMainMapAfterViewport = function(reason, captured){
     }
     var hasInfo = false;
     try{ var info=document.getElementById('info-card'); hasInfo=!!(info&&info.classList.contains('open')); }catch(_e){}
-    if(!hasInfo && _myLat && _myLng && (_activeTab==='nearby' || reason && /viewport|resize|fold|orientation/.test(String(reason)))){
+    if(!_isPilgrimageRouteEditMode()&&!hasInfo && _myLat && _myLng && (_activeTab==='nearby' || reason && /viewport|resize|fold|orientation/.test(String(reason)))){
       _map.setCenter(new _LL(_myLat,_myLng));
     }
   }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -11116,6 +11123,7 @@ function _prepareRouteCancelUI(role){
   if(cancel) cancel.style.display='none';
 }
 function _openRoutePointCancelChoice(role){
+  if(_isPilgrimageCourseViewReadOnly())return;
   const dlg=$('route-choice-modal');
   if(!dlg){ clearRoute(role); return; }
   _prepareRouteCancelUI(role);
@@ -11143,7 +11151,7 @@ function _handleRouteChoiceWaypoint(){
   _setInfoRouteWaypoint();
 }
 function _openInfoRouteChoice(){
-  if(window.__oaiPilgrimageRouteReturn===true) return;
+  if(_isPilgrimageCourseViewReadOnly()||window.__oaiPilgrimageRouteReturn===true) return;
   if(!_curInfoItem) return;
   const dlg=$('route-choice-modal');
   if(!dlg){ openInAppRoute(); return; }
@@ -11166,7 +11174,7 @@ function _closeInfoRouteChoice(){
   _syncMapPanelUI('close-route-choice');
 }
 function _openRouteMarkerChoice(item,idx){
-  if(window.__oaiPilgrimageRouteReturn===true) return;
+  if(_isPilgrimageCourseViewReadOnly()||window.__oaiPilgrimageRouteReturn===true) return;
   if(!item) return;
   const dlg=$('route-choice-modal');
   if(!dlg){ _setRoutePointFromItem(_routeHasVisibleStart()?'end':'start',item,idx); return; }
@@ -11180,6 +11188,7 @@ function _openRouteMarkerChoice(item,idx){
 }
 try{ window._closeInfoRouteChoice=_closeInfoRouteChoice; window._openRoutePointCancelChoice=_openRoutePointCancelChoice; }catch(e){ console.warn('[가톨릭길동무]', e); }
 function _setInfoRouteStart(){
+  if(_isPilgrimageCourseViewReadOnly())return;
   const info=_getRouteChoicePendingInfo();
   if(!info || !info.item) return;
   const item=info.item, idx=info.idx;
@@ -11189,6 +11198,7 @@ function _setInfoRouteStart(){
   _setRoutePointFromItem('start',item,idx);
 }
 function _setInfoRouteWaypoint(){
+  if(_isPilgrimageCourseViewReadOnly())return;
   const info=_getRouteChoicePendingInfo();
   if(!info || !info.item) return;
   const role=_nextAvailableWaypointRole();
@@ -11222,6 +11232,7 @@ function _runInfoRouteToEndWithStart(startObj,item,idx,opts){
   return _setInfoRouteDestination(item,idx,opts);
 }
 function _setInfoRouteEnd(opts){
+  if(_isPilgrimageCourseViewReadOnly())return;
   opts=opts||{};
   const info=_getRouteChoicePendingInfo();
   if(!info || !info.item) return;
@@ -12428,7 +12439,8 @@ function _getFreshGeoPosition(success, fail){
 
 function _autoLocate(opts){
   opts=opts||{};
-  const preserveMapCenter=opts.preserveMapCenter===true||_isShrineMapTargetCenterLocked();
+  const preserveMapCenter=opts.preserveMapCenter===true||_isShrineMapTargetCenterLocked()||
+    (_isPilgrimageRouteEditMode()&&!!window.__OAI_PILGRIMAGE_INITIAL_CENTER__);
   function apply(lat,lng,fromCache){
     try{
       if(!fromCache) _setMyLoc(lat,lng);
@@ -14440,8 +14452,8 @@ function _setRouteLabel(role,name){
    읽기 전용 보기 및 도보 GPS 지도 전환은 별도 검증 단계에서 적용한다. */
 function _pilgrimageMapMode(){
   if(window.__OAI_PILGRIMAGE_COURSE_VIEW__===true){
-    return String(window.__OAI_PILGRIMAGE_COURSE_VIEW_KIND__||'')==='complete'
-      ? 'completed-view' : 'active-course-view';
+    const kind=String(window.__OAI_PILGRIMAGE_COURSE_VIEW_KIND__||'');
+    return kind==='place-info'?'place-info-view':kind==='complete'?'completed-view':'active-course-view';
   }
   if(window.__OAI_PILGRIMAGE_ROUTE_EDIT__)return 'plan-edit';
   if(window.__OAI_PILGRIMAGE_PLACE_PICK__===true || window.__OAI_PILGRIMAGE_MAP_PICK__)return 'place-pick';
@@ -14451,16 +14463,15 @@ function _pilgrimageMapPermissions(){
   const mode=_pilgrimageMapMode();
   return {
     mode:mode,
-    isCourseView:mode==='completed-view'||mode==='active-course-view',
-    // 현재 화면 동작과의 호환성: 완료된 코스만 기존 읽기 전용 제약 적용.
-    // 추후 순례 중 읽기 전용 보기와 코스 편집 화면을 분리한다.
-    readOnly:mode==='completed-view',
-    canEditRoute:mode==='route'||mode==='plan-edit'||mode==='active-course-view'
+    isCourseView:mode==='completed-view'||mode==='active-course-view'||mode==='place-info-view',
+    // 순례 중 '코스보기'와 성지 안내창의 '지도에서 보기'는 모두 편집 불가.
+    readOnly:mode==='completed-view'||mode==='active-course-view'||mode==='place-info-view',
+    canEditRoute:mode==='route'||mode==='plan-edit'
   };
 }
 function _pilgrimageCourseViewKind(){
   const mode=_pilgrimageMapMode();
-  return mode==='completed-view'?'complete':mode==='active-course-view'?'active':'';
+  return mode==='place-info-view'?'place-info':mode==='completed-view'?'complete':mode==='active-course-view'?'active':'';
 }
 function _isPilgrimageCourseViewReadOnly(){
   return _pilgrimageMapPermissions().readOnly;
@@ -14471,7 +14482,7 @@ function _isActivePilgrimageCourseRouteView(){
 function _isAnyPilgrimageCourseView(){
   return _pilgrimageMapPermissions().isCourseView;
 }
-function _schedulePilgrimageRouteResult(label){
+function _schedulePilgrimageRouteResult(label,focusPoint){
   let done=false;
   let running=false;
   let attempts=0;
@@ -14518,6 +14529,12 @@ function _schedulePilgrimageRouteResult(label){
         done=true;
         stabilize();
         [100,360].forEach(function(delay){setTimeout(stabilize,delay);});
+        if(focusPoint&&_validGpsPair(focusPoint.lat,focusPoint.lng)){
+          [140,420].forEach(function(delay){setTimeout(function(){
+            if(_pilgrimageCourseViewKind()==='place-info'&&_map)
+              _setPilgrimageMapCenterForBottomCard(focusPoint,OAI_PILGRIMAGE_MAP_PICK_VIEW_LEVEL,{repeat:false});
+          },delay);});
+        }
       }
     }catch(e){
       console.warn('[가톨릭길동무] '+String(label||'순례 길찾기')+' 결과 재시도 '+attempts,e);
@@ -14547,6 +14564,18 @@ function _applyPilgrimageCourseViewReadOnlyState(){
       sheet.classList.toggle('oai-course-route-view',on);
       sheet.classList.toggle('oai-course-active-route',_isActivePilgrimageCourseRouteView());
       sheet.setAttribute('aria-readonly',readOnly?'true':'false');
+      let notice=sheet.querySelector('#oai-pilgrimage-readonly-note');
+      if(readOnly&&_pilgrimageCourseViewKind()==='place-info'){
+        if(!notice){
+          notice=document.createElement('p');
+          notice.id='oai-pilgrimage-readonly-note';
+          notice.textContent='읽기 전용 · 성지 정보는 확인할 수 있지만 순례코스는 수정할 수 없습니다.';
+          const routeTop=sheet.querySelector('#rs-top');
+          if(routeTop)routeTop.insertBefore(notice,routeTop.firstChild);
+          else sheet.insertBefore(notice,sheet.firstChild);
+        }
+        notice.hidden=false;
+      }else if(notice)notice.hidden=true;
     }
   }catch(_e){}
 }
@@ -14568,7 +14597,7 @@ function _syncPilgrimageRouteReturnButton(){
     const resultShowing=!!(result&&result.style.display!=='none');
     if(courseView){
       const kind=_pilgrimageCourseViewKind();
-      btn.textContent=kind==='complete'?'↩ 순례완료로 돌아가기':'↩ 순례하기로 돌아가기';
+      btn.textContent=kind==='place-info'?'↩ 성지 안내로 돌아가기':kind==='complete'?'↩ 순례완료로 돌아가기':'↩ 순례하기로 돌아가기';
       if(resultShowing || _isPilgrimageCourseViewReadOnly()){
         const resultBox=document.querySelector('#rs-result .rs-result')||result;
         if(resultBox&&btn.parentNode!==resultBox)resultBox.appendChild(btn);
@@ -15337,13 +15366,21 @@ function _finishPilgrimageRouteEdit(){
       alert('경유지는 최대 '+OAI_MAX_ROUTE_WAYPOINTS+'곳까지 저장할 수 있습니다.');
       return false;
     }
-    if(typeof window.applyOaiPilgrimageRouteEdit!=='function')return false;
-    const result=window.applyOaiPilgrimageRouteEdit(draft);
-    if(!result||result.saved!==true){
-      alert('순례계획을 저장하지 못했습니다. 현재 지도는 그대로 두고 다시 시도해 주세요.');
-      return false;
+    // 경유지를 한 곳도 바꾸지 않고 돌아왔다면 기존 초안을 다시 쓰지 않는다.
+    // 길찾기 마커 복원 과정의 주소/현위치 속성 정규화 차이가 저장 버튼을
+    // 잘못 활성화할 수 있으므로 실제 사용자 변경이 있을 때만 저장한다.
+    const edit=window.__OAI_PILGRIMAGE_ROUTE_EDIT__;
+    if(!edit||!edit.initialSignature)return false;
+    if(_pilgrimageRouteEditChanged()){
+      if(typeof window.applyOaiPilgrimageRouteEdit!=='function')return false;
+      const result=window.applyOaiPilgrimageRouteEdit(draft);
+      if(!result||result.saved!==true){
+        alert('순례계획을 저장하지 못했습니다. 현재 지도는 그대로 두고 다시 시도해 주세요.');
+        return false;
+      }
     }
     window.__OAI_PILGRIMAGE_ROUTE_EDIT__=null;
+    window.__OAI_PILGRIMAGE_INITIAL_CENTER__=null;
     
     const sheet=$('sheet-route');
     if(sheet){sheet.classList.remove('open','from-right','from-left','exit-left','exit-right');sheet.style.display='none';}
@@ -20366,94 +20403,19 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         }).catch(()=>_oaiShowNavigationNotice('길찾기 안내','목적지를 확인하지 못했습니다. 다시 시도해 주세요.',function(){}));
       },()=>_oaiShowNavigationNotice('위치 확인 필요','현재 GPS 위치를 확인하지 못했습니다. 위치 서비스를 확인하고 다시 눌러 주세요.',function(){}));
     }
-    // 전체 경유지만 지도에 표시하는 독립 읽기 전용 화면. 기존 길찾기 상태는 건드리지 않는다.
+    // 같은 길찾기 지도를 보기 전용으로 사용한다. 원래 안내창을 제거하지 않고
+    // 뒤로가기 시 동일 DOM 인스턴스를 복원한다(성지자료 버튼/선택 장소 보존).
     function showWaypointsMap(){
       const courseRows=completion&&course&&_courseHasGpsLockedCompletion(course)?_manualMerged(course).map(x=>x.point):loadPlan();
-      const points=courseRows.map((x,i)=>({name:String(x&&x.name||''),lat:Number(x&&x.lat),lng:Number(x&&x.lng),order:i+1})).filter(x=>_validGpsPair(x.lat,x.lng));
-      if(!points.length){_oaiShowNavigationNotice('지도 안내','표시할 경유지 좌표가 없습니다.',function(){});return;}
-      closePilgrimagePlaceInfo();
-      // Each opening owns one map and one layout observer. A closed dialog must
-      // never resize or reposition a map belonging to a later opening.
-      const previous=document.getElementById('oai-pilgrimage-waypoints-readonly');
-      if(previous){
-        if(typeof previous._disposeWaypointMap==='function')previous._disposeWaypointMap();
-        previous.remove();
+      const points=courseRows.map(normalizePoint).filter(Boolean);
+      if(!points.length){_oaiShowNavigationNotice('지도 안내','표시할 순례 장소가 없습니다.',function(){});return;}
+      if(points.length>OAI_MAX_ROUTE_WAYPOINTS){
+        _oaiShowNavigationNotice('지도 안내','이 코스는 순례 장소가 '+points.length+'곳으로 길찾기 지도의 경유지 제한('+OAI_MAX_ROUTE_WAYPOINTS+'곳)을 초과합니다. 일부 장소만 표시하지 않도록 현재 안내창을 유지합니다.',function(){});
+        return;
       }
-      const layer=document.createElement('div');
-      layer.id='oai-pilgrimage-waypoints-readonly';
-      layer.className='oai-pilgrimage-waypoints-readonly';
-      layer.innerHTML='<section role="dialog" aria-modal="true" aria-label="순례 경유지 지도"><header><strong>경유지 지도 · 보기 전용</strong><button type="button" data-waypoint-map-close aria-label="닫기">×</button></header><div class="oai-pilgrimage-waypoints-map" id="oai-pilgrimage-waypoints-map"></div><p>경유지 전체를 표시합니다. 출발지·도착지는 지도 범위에서 제외합니다.</p></section>';
-      document.body.appendChild(layer);
-      layer.classList.add('open');
-      const mapEl=layer.querySelector('#oai-pilgrimage-waypoints-map');
-      let map=null,observer=null,frame=0,closed=false,initialized=false;
-      let bounds=null;
-      function fitWaypoints(){
-        if(closed||!map||!mapEl.isConnected||mapEl.clientWidth<=0||mapEl.clientHeight<=0)return;
-        map.relayout();
-        if(points.length>1)map.setBounds(bounds,65,35,65,35);
-        else {map.setCenter(new kakao.maps.LatLng(points[0].lat,points[0].lng));map.setLevel(5);}
-      }
-      function scheduleFit(){
-        if(closed||frame||!map)return;
-        frame=requestAnimationFrame(()=>{frame=0;fitWaypoints();});
-      }
-      function closeWaypointMap(){
-        if(closed)return;
-        closed=true;
-        if(observer)observer.disconnect();
-        if(frame)cancelAnimationFrame(frame);
-        layer.remove();
-        const previousInfo=document.getElementById('oai-pilgrimage-place-info-overlay');
-        if(previousInfo){previousInfo.classList.add('open');previousInfo.setAttribute('aria-hidden','false');}
-      }
-      layer._disposeWaypointMap=closeWaypointMap;
-      layer.addEventListener('click',e=>{
-        if(e.target===layer||e.target.closest('[data-waypoint-map-close]'))closeWaypointMap();
-      });
-      // Initialize only after the visible dialog has measurable dimensions.
-      // Observe real layout changes rather than relying on arbitrary delays.
-      function initialize(){
-        frame=0;
-        if(closed)return;
-        if(initialized||mapEl.clientWidth<=0||mapEl.clientHeight<=0)return;
-        initialized=true;
-        bounds=new kakao.maps.LatLngBounds();
-        points.forEach(point=>bounds.extend(new kakao.maps.LatLng(point.lat,point.lng)));
-        map=new kakao.maps.Map(mapEl,{center:new kakao.maps.LatLng(points[0].lat,points[0].lng),level:7});
-        points.forEach(point=>{
-          const pos=new kakao.maps.LatLng(point.lat,point.lng);
-          const marker=new kakao.maps.Marker({map,position:pos,title:point.order+'. '+point.name,image:_mkrImgRoute(point.order===index+1?'#c18b12':'#1969aa',String(point.order)),zIndex:point.order===index+1?1000:100});
-          const info=new kakao.maps.InfoWindow({content:'<div style="padding:7px 10px;font-size:13px;white-space:nowrap;">'+esc(point.order+'. '+point.name)+'</div>'});
-          kakao.maps.event.addListener(marker,'click',()=>info.open(map,marker));
-        });
-        if(typeof ResizeObserver==='function'){
-          let width=mapEl.clientWidth,height=mapEl.clientHeight;
-          observer=new ResizeObserver(()=>{
-            const w=mapEl.clientWidth,h=mapEl.clientHeight;
-            if(w>0&&h>0&&(w!==width||h!==height)){
-              width=w;height=h;scheduleFit();
-            }
-          });
-          observer.observe(mapEl);
-        }
-        scheduleFit();
-      }
-      // SDK completion and dialog layout are both required; no perpetual RAF polling.
-      _withReadyKakaoMap(()=>{
-        if(closed)return;
-        if(mapEl.clientWidth>0&&mapEl.clientHeight>0){initialize();return;}
-        if(typeof ResizeObserver==='function'){
-          observer=new ResizeObserver(()=>{
-            if(mapEl.clientWidth>0&&mapEl.clientHeight>0){
-              observer.disconnect();observer=null;initialize();
-            }
-          });
-          observer.observe(mapEl);
-        }else frame=requestAnimationFrame(initialize);
-      },message=>{
-        if(!closed){closeWaypointMap();_oaiShowNavigationNotice('지도 안내',message,function(){});}
-      });
+      const selected=normalizePoint(place);
+      // 실제 화면 전환이 성공한 뒤 안내창을 숨기므로 실패 시 접근성을 유지한다.
+      openPilgrimageCourseMap({fromPlaceInfo:true,focusPoint:selected,coursePlaces:points});
     }
     let overlay=document.getElementById('oai-pilgrimage-place-info-overlay');
     if(!overlay){
@@ -20969,7 +20931,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(entryRole==='start') return normalizePoint(meta.start);
     if(entryRole==='end') return normalizePoint(meta.end);
     if(list.length) return normalizePoint(list[list.length-1]);
-    return normalizePoint(meta.end)||normalizePoint(meta.start);
+    // 새 순례계획은 과거에 남은 출발/도착지보다 현재 GPS를 우선한다.
+    if(_validGpsPair(_myLat,_myLng))return {lat:Number(_myLat),lng:Number(_myLng)};
+    return null;
   }
   function _openUnifiedPilgrimageMapAdd(entryRole,options){
     options=options||{};
@@ -20992,6 +20956,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     window.__OAI_PILGRIMAGE_ROUTE_EDIT__=(readOnly||normalRoute)
       ? null
       : {entryRole:String(entryRole||'plan')};
+    // 지도가 다시 생성되어도 마지막 순례지 중심을 잃지 않도록 진입 목표를 보존한다.
+    window.__OAI_PILGRIMAGE_INITIAL_CENTER__=!readOnly&&!normalRoute
+      ? _pilgrimageMapInitialPoint(entryRole):null;
     const run=()=>{try{
       try{
         /* 순례계획의 '지도에서 추가'는 직전에 사용한 성당/피정 모드를 물려받지 않는다.
@@ -21025,7 +20992,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         try{
           if(typeof _restoreAllCategoryMarkersForSelection==='function')_restoreAllCategoryMarkersForSelection();
           if(typeof _refreshRouteTmpMarkers==='function')_refreshRouteTmpMarkers();
-          const focus=_pilgrimageMapInitialPoint(entryRole);
+          const focus=options.focusPoint&&_validGpsPair(options.focusPoint.lat,options.focusPoint.lng)?options.focusPoint:_pilgrimageMapInitialPoint(entryRole);
           if(focus&&_validGpsPair(focus.lat,focus.lng))
             _setPilgrimageMapCenterForBottomCard({lat:Number(focus.lat),lng:Number(focus.lng)},OAI_PILGRIMAGE_MAP_PICK_VIEW_LEVEL,{repeat:false});
         }catch(e){console.warn('[가톨릭길동무] 순례 지도 위치 복원 실패',e);}
@@ -21088,11 +21055,19 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           setTimeout(function(){
             try{
               _syncRouteWaypointBoxes();
-              _schedulePilgrimageRouteResult(readOnly?'순례완료 코스 보기':'순례하기 코스 보기');
+              _schedulePilgrimageRouteResult(readOnly?'순례코스 보기':'순례하기 코스 보기',options.focusPoint);
             }catch(_e){}
           },60);
         }
         try{_refreshRouteTmpMarkers();}catch(_e){}
+        // 경유지 복원이 끝난 실제 길찾기 패널 크기에서 마지막 순례지를 중앙에 놓는다.
+        // 초기 지도 SDK 중심(전국 중앙)이나 비동기 현위치 응답에 덮이지 않도록 한다.
+        if(!readOnly&&!normalRoute&&window.__OAI_PILGRIMAGE_ROUTE_EDIT__){
+          const focus=window.__OAI_PILGRIMAGE_INITIAL_CENTER__;
+          if(focus&&_validGpsPair(focus.lat,focus.lng)&&_map){
+            _setPilgrimageMapCenterForBottomCard(focus,OAI_PILGRIMAGE_MAP_PICK_VIEW_LEVEL,{repeat:false});
+          }
+        }
         if(!readOnly){
           setTimeout(function(){try{if(window.__OAI_PILGRIMAGE_ROUTE_EDIT__)_refreshRouteTmpMarkers();}catch(_e){}},360);
           setTimeout(function(){try{if(window.__OAI_PILGRIMAGE_ROUTE_EDIT__)_refreshRouteTmpMarkers();}catch(_e){}},980);
@@ -21102,7 +21077,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(typeof _syncMapPanelUI==='function')_syncMapPanelUI(normalRoute?'route':'pilgrimage-route-edit');
         // Map center is applied by finishPilgrimageMapEntry after the map is measurable.
       }catch(err){console.warn('[가톨릭길동무] 순례계획 길찾기 편집 준비 실패',err);}},120);
-    }catch(e){window.__OAI_PILGRIMAGE_ROUTE_EDIT__=null;window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__=false;console.warn('[가톨릭길동무] 순례 지도 진입 실패',e);openPlanner({returnFromSearch:true});setView('detail');renderDetail();}};
+    }catch(e){window.__OAI_PILGRIMAGE_ROUTE_EDIT__=null;window.__OAI_PILGRIMAGE_INITIAL_CENTER__=null;window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__=false;console.warn('[가톨릭길동무] 순례 지도 진입 실패',e);openPlanner({returnFromSearch:true});setView('detail');renderDetail();}};
     if(typeof hideCoverAndRun==='function')hideCoverAndRun(run);else run();
   }
   // The endpoint picker uses the same main Kakao map as the ordinary shrine view.
@@ -21356,6 +21331,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
 
   let pilgrimageCourseMapPolyline=null;
+  let pilgrimageCourseReturnToPlaceInfo=false;
   let pilgrimageCourseMapMarkers=[];
   let pilgrimageCourseMapSeq=0;
   function clearPilgrimageCourseMap(){
@@ -21366,6 +21342,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     window.__OAI_PILGRIMAGE_COURSE_VIEW__=false;
     window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__=false;
     window.__OAI_PILGRIMAGE_COURSE_VIEW_KIND__='';
+    pilgrimageCourseReturnToPlaceInfo=false;
     window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__=false;
     
     _applyPilgrimageCourseViewReadOnlyState();
@@ -21382,46 +21359,52 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(meta.end&&_validGpsPair(meta.end.lat,meta.end.lng))out.push(Object.assign({role:'end'},meta.end));
     return out;
   }
-  async function openPilgrimageCourseMap(){
+  async function openPilgrimageCourseMap(options){
+    options=options||{};
+    const fromPlaceInfo=options.fromPlaceInfo===true;
     const pts=_pilgrimageCoursePoints();
-    if(!pts.length){alert('지도에 표시할 순례 코스가 없습니다.');return;}
-    /* V8-1-14-1090
-       순례코스 보기는 진입 출처별 역할을 완전히 분리한다.
-       1) 순례하기 -> 경로검색 완료 상태로 열고 이후 일반 길찾기와 동일하게 편집/재검색 가능.
-       2) 순례완료 -> 경로검색 완료 상태의 읽기 전용 보기. 거리/시간/카카오내비/복귀만 사용. */
+    const coursePlaces=fromPlaceInfo&&Array.isArray(options.coursePlaces)
+      ? options.coursePlaces : pts.filter(p=>p.role==='waypoint');
+    if(!coursePlaces.length){alert('지도에 표시할 순례 장소가 없습니다.');return;}
     const fromCompleted=pilgrimageDetailMode==='complete';
-    // 지도 경유지 제한을 넘는 경우 일부 장소를 누락한 결과를 완료 코스로 오인하지 않게 한다.
-    const coursePlaces=pts.filter(p=>p.role==='waypoint');
-    if(fromCompleted&&coursePlaces.length>OAI_MAX_ROUTE_WAYPOINTS){
-      alert('이 코스는 순례 장소가 '+coursePlaces.length+'곳입니다. 현재 길찾기 지도는 경유지 '+OAI_MAX_ROUTE_WAYPOINTS+'곳까지만 표시할 수 있어, 일부 장소가 누락된 지도를 열지 않습니다. 상세 목록에서는 전체 장소를 확인할 수 있습니다.');
+    // 제한을 넘으면 누락된 장소를 완전한 코스로 오인할 위험이 있어 열지 않는다.
+    if(coursePlaces.length>OAI_MAX_ROUTE_WAYPOINTS){
+      alert('이 코스는 순례 장소가 '+coursePlaces.length+'곳입니다. 길찾기 지도는 최대 '+OAI_MAX_ROUTE_WAYPOINTS+'곳까지 표시할 수 있어 일부만 표시하지 않습니다.');
       return;
     }
     try{
+      pilgrimageCourseReturnToPlaceInfo=fromPlaceInfo;
       window.__OAI_PILGRIMAGE_COURSE_VIEW__=true;
-      window.__OAI_PILGRIMAGE_COURSE_VIEW_KIND__=fromCompleted?'complete':'active';
-      window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__=fromCompleted;
+      window.__OAI_PILGRIMAGE_COURSE_VIEW_KIND__=fromPlaceInfo?'place-info':fromCompleted?'complete':'active';
+      window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__=true;
       _applyPilgrimageCourseViewReadOnlyState();
       _openUnifiedPilgrimageMapAdd('plan',{
-        readOnly:fromCompleted,
-        normalRoute:!fromCompleted,
-        coursePlaces:fromCompleted?coursePlaces:null
+        readOnly:true,
+        normalRoute:false,
+        coursePlaces:coursePlaces,
+        focusPoint:fromPlaceInfo?options.focusPoint:null
       });
+      if(fromPlaceInfo)closePilgrimagePlaceInfo();
     }catch(e){
-      window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__=false;
-      window.__OAI_PILGRIMAGE_COURSE_VIEW_KIND__='';
       console.warn('[가톨릭길동무] 순례 코스 지도 표시 실패',e);
-      try{openPlanner({returnFromSearch:true});setView('detail');renderDetail();}catch(_e){}
+      clearPilgrimageCourseMap();
+      if(!fromPlaceInfo){try{openPlanner({returnFromSearch:true});setView('detail');renderDetail();}catch(_e){}}
     }
   }
   function returnFromPilgrimageCourseMap(){
     if(!window.__OAI_PILGRIMAGE_COURSE_VIEW__)return false;
     const kind=_pilgrimageCourseViewKind();
+    const restoreInfo=pilgrimageCourseReturnToPlaceInfo;
     clearPilgrimageCourseMap();
     try{
-      pilgrimageDetailMode=kind==='complete'?'complete':'plan';
+      pilgrimageDetailMode=kind==='complete'?'complete':pilgrimageDetailMode;
       openPlanner({returnFromSearch:true});
       setView('detail');
       renderDetail();
+      if(restoreInfo){
+        const info=document.getElementById('oai-pilgrimage-place-info-overlay');
+        if(info){info.classList.add('open');info.setAttribute('aria-hidden','false');}
+      }
     }catch(_e){}
     return true;
   }
@@ -21594,9 +21577,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const layer=document.createElement('section');
     layer.id='oai-walk-map-preview';layer.className='oai-walk-map-preview';
     layer.setAttribute('aria-label','도보 순례 지도');
-    layer.innerHTML='<header><strong>도보 순례 · 지도</strong><span data-walk-progress></span><button type="button" class="oai-walk-close" data-walk-close aria-label="순례하기로 돌아가기">×</button></header><div class="oai-walk-map-canvas"></div><button type="button" class="oai-walk-menu" data-walk-menu>다른 메뉴로 가기</button><div class="oai-walk-map-controls"><div class="oai-walk-route-legend" data-walk-route-status aria-live="polite">현재 위치 확인 중 · 점선은 순례 순서 안내</div><div class="oai-walk-control-buttons"><button type="button" data-walk-kakao-route>카카오맵 도보길</button><button type="button" data-walk-overview>전체 보기</button><button type="button" data-walk-recenter>내 위치</button></div></div><div class="oai-walk-exit-overlay" data-walk-exit-confirm hidden><div class="oai-walk-exit-dialog" role="dialog" aria-modal="true" aria-labelledby="oai-walk-exit-title"><h3 id="oai-walk-exit-title" data-walk-exit-title></h3><p data-walk-exit-message></p><div class="oai-walk-exit-actions"><button type="button" data-walk-exit-cancel>지도 계속 보기</button><button type="button" data-walk-exit-accept>이동하기</button></div></div></div>';
+    layer.innerHTML='<header><strong>도보 순례 · 지도</strong><span data-walk-progress></span><button type="button" class="oai-walk-close" data-walk-close aria-label="순례하기로 돌아가기">×</button></header><div class="oai-walk-map-canvas"></div><button type="button" class="oai-walk-menu" data-walk-menu>다른 메뉴로 가기</button><div class="oai-walk-map-controls"><div class="oai-walk-route-legend" data-walk-route-status aria-live="polite">현재 위치 확인 중 · 도보 경로 준비 중</div><div class="oai-walk-control-buttons"><button type="button" data-walk-kakao-route>카카오맵 도보길</button><button type="button" data-walk-overview>전체 보기</button><button type="button" data-walk-recenter>내 위치</button></div></div><div class="oai-walk-exit-overlay" data-walk-exit-confirm hidden><div class="oai-walk-exit-dialog" role="dialog" aria-modal="true" aria-labelledby="oai-walk-exit-title"><h3 id="oai-walk-exit-title" data-walk-exit-title></h3><p data-walk-exit-message></p><div class="oai-walk-exit-actions"><button type="button" data-walk-exit-cancel>지도 계속 보기</button><button type="button" data-walk-exit-accept>이동하기</button></div></div></div>';
     document.body.appendChild(layer);
-    const session={layer,closed:false,watchId:null,resizeObserver:null,map:null,myMarker:null,routeLine:null,walkRouteLine:null,
+    const session={layer,closed:false,watchId:null,resizeObserver:null,map:null,myMarker:null,walkRouteLine:null,
       walkRequest:null,lastWalkRouteAt:0,lastWalkRoutePoint:null,lastWalkRouteTarget:'',walkRouteBusy:false,startMarker:null,
       viewMode:'overview',lastPosition:null,firstPosition:null,lastFollowPosition:null,lastFollowAt:0};
     walkMapSession=session;
@@ -21622,22 +21605,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(session.viewMode==='overview')showOverview();
       });
       function pointLatLng(point){return new kakao.maps.LatLng(Number(point.lat),Number(point.lng));}
-      function updateSequenceLine(){
-        if(session.closed)return;
-        const points=[];
-        if(startPoint){
-          if(startPoint.dynamicCurrent){
-            if(session.firstPosition)points.push(session.firstPosition);
-          }else points.push(pointLatLng(startPoint));
-        }
-        rows.forEach(p=>points.push(pointLatLng(p)));
-        if(endPoint&&!endPoint.dynamicCurrent)points.push(pointLatLng(endPoint));
-        if(points.length<2){if(session.routeLine)session.routeLine.setMap(null);return;}
-        if(!session.routeLine){
-          session.routeLine=new kakao.maps.Polyline({map,path:points,strokeWeight:4,
-            strokeColor:'#245C91',strokeOpacity:0.85,strokeStyle:'shortdash',zIndex:1});
-        }else session.routeLine.setPath(points);
-      }
       // The walking route is retrieved through the configured server proxy.
       // Never put a Kakao REST key in browser source, or treat a straight line as a real footpath.
       const routeStatus=layer.querySelector('[data-walk-route-status]');
@@ -21762,7 +21729,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         new kakao.maps.Marker({map,position:pointLatLng(endPoint),title:'도착지 · '+endPoint.name,
           image:_mkrImgRoute('#c9403d','도착')});
       }
-      updateSequenceLine();
       showOverview();
       layer.querySelector('[data-walk-overview]').addEventListener('click',showOverview);
       layer.querySelector('[data-walk-recenter]').addEventListener('click',()=>{
@@ -21787,7 +21753,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           updateProgress();
           if(!session.firstPosition){
             session.firstPosition=ll;
-            updateSequenceLine();
             if(session.viewMode==='overview')showOverview();
             else if(session.viewMode==='follow')showNextTarget();
             return;
@@ -22064,14 +22029,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       // Walking map is the uppermost pilgrimage screen; Android/system back needs confirmation.
       if(walkMapSession&&!walkMapSession.closed){
         if(!dismissWalkMapExitConfirm())showWalkMapExitConfirm('follow');
-        return true;
-      }
-      // 읽기 전용 경유지 지도는 순례완료 상세 위에 놓이는 최상위 화면이다.
-      // 시스템 뒤로가기에서 아래 상세/목록을 먼저 전환하지 않도록 지도부터 닫는다.
-      const waypointsMap=document.getElementById('oai-pilgrimage-waypoints-readonly');
-      if(waypointsMap&&waypointsMap.classList.contains('open')){
-        if(typeof waypointsMap._disposeWaypointMap==='function')waypointsMap._disposeWaypointMap();
-        else waypointsMap.remove();
         return true;
       }
       const startConfirm=followStartModal();
