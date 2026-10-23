@@ -22114,7 +22114,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const layer=document.createElement('section');
     layer.id='oai-walk-history-map';layer.className='oai-walk-map-preview oai-walk-history-map';
     layer.setAttribute('role','dialog');layer.setAttribute('aria-modal','true');
-    layer.innerHTML='<header><strong>지난 도보순례 경로</strong><span></span><button type="button" class="oai-walk-close" aria-label="닫기">×</button></header><div class="oai-walk-map-canvas"></div><div class="oai-walk-history-bottom"><select aria-label="완료 날짜 선택"></select><span class="oai-walk-history-legend">회색 선: 실제 기록한 GPS 경로</span></div>';
+    layer.innerHTML='<header><strong>지난 도보순례 경로</strong><span></span><button type="button" class="oai-walk-close" aria-label="닫기">×</button></header><div class="oai-walk-map-canvas"></div><div class="oai-walk-history-metrics" aria-live="polite"><div><small>GPS 기록 거리</small><strong data-walk-history-distance>—</strong></div><div><small>기록 시간</small><strong data-walk-history-duration>—</strong></div></div><div class="oai-walk-history-bottom"><select aria-label="완료 날짜 선택"></select><span class="oai-walk-history-legend">회색 선: 실제 기록한 GPS 경로 · 시간은 휴식 포함</span></div>';
     document.body.appendChild(layer);walkHistoryOverlay=layer;
     layer.querySelector('.oai-walk-close').addEventListener('click',closeWalkHistory);
     layer.addEventListener('keydown',e=>{if(e.key==='Escape'){e.preventDefault();closeWalkHistory();}});
@@ -22128,6 +22128,18 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       let line=null,markers=[],info=null;
       const dateLabel=layer.querySelector('header span');
       function draw(item){
+        // Use the GPS trail itself, not the planned road distance or course duration.
+        // The stored third coordinate is the fix timestamp in milliseconds.
+        let meters=0;
+        for(let i=1;i<item.points.length;i++){
+          const prev=item.points[i-1],next=item.points[i];
+          if(next[2]<=prev[2])continue;
+          meters+=calcDist(prev[0],prev[1],next[0],next[1])*1000;
+        }
+        const durationMs=Math.max(0,item.points[item.points.length-1][2]-item.points[0][2]);
+        const durationMin=Math.floor(durationMs/60000);
+        layer.querySelector('[data-walk-history-distance]').textContent=meters<1000?Math.round(meters)+' m':(meters/1000).toFixed(2)+' km';
+        layer.querySelector('[data-walk-history-duration]').textContent=durationMin>=60?Math.floor(durationMin/60)+'시간 '+(durationMin%60)+'분':durationMin+'분';
         if(line)line.setMap(null);
         markers.forEach(m=>m.setMap(null));markers=[];
         if(info)info.close();
