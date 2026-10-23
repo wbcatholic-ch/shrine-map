@@ -14546,7 +14546,7 @@ function _schedulePilgrimageRouteResult(label,focusPoint){
         if(focusPoint&&_validGpsPair(focusPoint.lat,focusPoint.lng)){
           [140,420].forEach(function(delay){setTimeout(function(){
             if(_pilgrimageCourseViewKind()==='place-info'&&_map)
-              _setPilgrimageMapCenterForBottomCard(focusPoint,OAI_PILGRIMAGE_ENDPOINT_MAP_LEVEL,{repeat:false});
+              _setPilgrimageMapCenterForBottomCard(focusPoint,OAI_PILGRIMAGE_PLACE_INFO_FOCUS_LEVEL,{repeat:false});
           },delay);});
         }
       }
@@ -21369,7 +21369,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           if(typeof _refreshRouteTmpMarkers==='function')_refreshRouteTmpMarkers();
           const focus=options.focusPoint&&_validGpsPair(options.focusPoint.lat,options.focusPoint.lng)?options.focusPoint:_pilgrimageMapInitialPoint(entryRole);
           if(focus&&_validGpsPair(focus.lat,focus.lng))
-            _setPilgrimageMapCenterForBottomCard({lat:Number(focus.lat),lng:Number(focus.lng)},OAI_PILGRIMAGE_MAP_PICK_VIEW_LEVEL,{repeat:false});
+            _setPilgrimageMapCenterForBottomCard({lat:Number(focus.lat),lng:Number(focus.lng)},readOnly&&options.focusPoint?OAI_PILGRIMAGE_PLACE_INFO_FOCUS_LEVEL:OAI_PILGRIMAGE_MAP_PICK_VIEW_LEVEL,{repeat:false});
         }catch(e){console.warn('[가톨릭길동무] 순례 지도 위치 복원 실패',e);}
       }
       document.addEventListener('oai-main-map-ready',finishPilgrimageMapEntry);
@@ -21442,7 +21442,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
               if(window.__OAI_PILGRIMAGE_MAP_ENTRY_TOKEN__!==mapEntryToken ||
                  !_isPilgrimageCourseViewReadOnly() || _pilgrimageCourseViewKind()!=='place-info' ||
                  _screen!=='map' || !_map)return;
-              _setPilgrimageMapCenterForBottomCard(selectedFocus,OAI_PILGRIMAGE_ENDPOINT_MAP_LEVEL,{repeat:false});
+              _setPilgrimageMapCenterForBottomCard(selectedFocus,OAI_PILGRIMAGE_PLACE_INFO_FOCUS_LEVEL,{repeat:false});
             },delay);});
           }
         }
@@ -21586,6 +21586,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   let pilgrimageMapPickBuildSeq=0;
   const OAI_PILGRIMAGE_MAP_PICK_VIEW_LEVEL=9;
   const OAI_PILGRIMAGE_ENDPOINT_MAP_LEVEL=7;
+  // 성지 안내창의 지도에서 보기만 선택한 경유지를 가까이 보여준다.
+  const OAI_PILGRIMAGE_PLACE_INFO_FOCUS_LEVEL=4;
   const OAI_PILGRIMAGE_PLAN_MARKER_COLOR='#ec4899';
   const OAI_PILGRIMAGE_FOCUS_MARKER_COLOR='#f4c430';
   function clearPilgrimageMapPickMarkers(){
