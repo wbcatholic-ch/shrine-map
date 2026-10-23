@@ -18758,12 +18758,16 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       return;
     }
     if(raw.mixedPhase!=='walking'||raw.travelMode!=='walk')return;
-    if(metersToStart>=130&&!raw.mixedLeftStart){
+    // For a loop returning to the same place, require a meaningful excursion:
+    // at least 500 m from the origin and at least 5 minutes of walking.
+    // Do not impose this threshold on distinct, potentially short walking legs.
+    const isReturnToOrigin=calcDist(origin.lat,origin.lng,destination.lat,destination.lng)*1000<=60;
+    const requiredDepartureMeters=isReturnToOrigin?500:130;
+    const requiredElapsedMs=isReturnToOrigin?5*60*1000:90000;
+    if(metersToStart>=requiredDepartureMeters&&!raw.mixedLeftStart){
       raw.mixedLeftStart=true;localStorage.setItem(ACTIVE_FOLLOW_KEY,JSON.stringify(raw));
     }
-    // Never treat the starting fix as arrival when a walking loop ends at the
-    // same parking location. A walk must first leave the origin and last >=90s.
-    if(!raw.mixedLeftStart||at-Number(raw.walkStartedAt||0)<90000)return;
+    if(!raw.mixedLeftStart||at-Number(raw.walkStartedAt||0)<requiredElapsedMs)return;
     if(metersToEnd<=60){
       if(!raw.mixedSeenEndAt){raw.mixedSeenEndAt=at;localStorage.setItem(ACTIVE_FOLLOW_KEY,JSON.stringify(raw));}
       else if(at-raw.mixedSeenEndAt>=3000){_setMixedWalkTracking(false,true);}
