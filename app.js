@@ -21331,8 +21331,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       ? _pilgrimageMapInitialPoint(entryRole):null;
     const run=()=>{try{
       try{
-        /* 순례계획의 '지도에서 추가'는 직전에 사용한 성당/피정 모드를 물려받지 않는다.
-           항상 성지 지도를 기준으로 연다. */
+        /* 성당·피정 화면에서 순례 상세의 지도 보기로 들어와도 기존 마커가
+           재사용된 공통 지도 위에 남지 않게 정리한다. 이 진입의 기본은 성지 지도다. */
+        if(_mode==='parish'||_mode==='retreat'){
+          try{_clearParishNearbyMarkers();}catch(_e){}
+          try{_hideAllParishDioMkrs();}catch(_e){}
+          try{(_retreatMarkers||[]).forEach(function(o){if(o&&o.marker)_setMarkerMapIfChanged(o.marker,null);});}catch(_e){}
+        }
         _mode='shrine';
         _filterDio='all';
         _listSrch='';
@@ -21383,7 +21388,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(typeof _clearParishNearbyMarkers==='function')_clearParishNearbyMarkers();
         if(typeof _hideAllParishDioMkrs==='function')_hideAllParishDioMkrs();
         try{(_retreatMarkers||[]).forEach(function(o){if(o&&o.marker)_setMarkerMapIfChanged(o.marker,null);});}catch(_e){}
-        if((!_markers||_markers.length!==SHRINES.length)&&typeof _buildShrineMarkers==='function')_buildShrineMarkers();
+        if((!_markers||_markers.length!==SHRINES.length||!_markers.some(Boolean))&&typeof _buildShrineMarkers==='function')_buildShrineMarkers();
         if(typeof _restoreAllCategoryMarkersForSelection==='function')_restoreAllCategoryMarkersForSelection();
       }catch(_e){}
       setTimeout(function(){try{
