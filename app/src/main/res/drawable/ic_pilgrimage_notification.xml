@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Monochrome notification silhouette derived from the existing risen-Christ-and-wooden-cross app motif.
+     Android tints the small status-bar icon; the full-color launcher art is used as the large notification icon. -->
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp" android:height="24dp"
+    android:viewportWidth="24" android:viewportHeight="24">
+    <path android:fillColor="#FFFFFFFF" android:pathData="M11,1 L13,1 L13,23 L11,23 Z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M3,6 L21,6 L21,8 L3,8 Z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M12,4.25 A1.75,1.75 0,1 1,12,7.75 A1.75,1.75 0,1 1,12,4.25 Z" />
+    <path android:fillColor="#FFFFFFFF" android:pathData="M10.5,9.2 L13.5,9.2 L15.2,13 L14.2,20.7 L9.8,20.7 L8.8,13 Z" />
+    <path android:fillColor="#00000000" android:strokeColor="#FFFFFFFF" android:strokeWidth="2.2"
+        android:strokeLineCap="round" android:strokeLineJoin="round"
+        android:pathData="M10.7,10 L7.3,8.9 L4.2,4.1 M13.3,10 L16.7,8.9 L19.8,4.1" />
+</vector>
