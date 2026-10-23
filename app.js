@@ -19707,12 +19707,20 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function _walkTrailKey(active){
     return 'oai-walk-trail-v1:'+encodeURIComponent(String(active.courseId))+':'+Number(active.startedAt);
   }
+  // Maintain one in-memory copy of the active walk. Each accepted fix is still
+  // persisted before native acknowledgement; avoid decoding the full JSON trail
+  // again on every foreground GPS callback or background replayed fix.
+  let _walkTrailCacheKey='',_walkTrailCachePoints=null;
   function _walkTrailLoad(active){
     if(!active||active.travelMode!=='walk')return [];
+    const key=_walkTrailKey(active);
+    if(key===_walkTrailCacheKey&&_walkTrailCachePoints)return _walkTrailCachePoints.slice();
     try{
-      const points=JSON.parse(localStorage.getItem(_walkTrailKey(active))||'[]');
-      return Array.isArray(points)?points.filter(p=>Array.isArray(p)&&p.length===3&&
+      const points=JSON.parse(localStorage.getItem(key)||'[]');
+      const list=Array.isArray(points)?points.filter(p=>Array.isArray(p)&&p.length===3&&
         _validGpsPair(p[0],p[1])&&Number.isFinite(Number(p[2]))).map(p=>[Number(p[0]),Number(p[1]),Number(p[2])]):[];
+      _walkTrailCacheKey=key;_walkTrailCachePoints=list;
+      return list.slice();
     }catch(_e){return [];}
   }
   function _walkTrailAdd(active,fix,forceSave){
@@ -19748,7 +19756,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     try{
       localStorage.setItem(key,JSON.stringify(list));
-      if(typeof _updateLiveWalkTrail==='function')_updateLiveWalkTrail(active,list);
+      _walkTrailCacheKey=key;_walkTrailCachePoints=list;
+      if(typeof _updateLiveWalkTrail==='function'&&!document.hidden)_updateLiveWalkTrail(active,list);
       return true;
     }catch(e){console.warn('[도보 순례] 이동 기록 저장 실패',e);return false;}
   }
@@ -21722,6 +21731,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const session=walkMapSession;if(!session)return;
     walkMapSession=null;session.closed=true;
     if(session.watchId!==null)navigator.geolocation.clearWatch(session.watchId);
+    if(session.visibilityHandler)document.removeEventListener('visibilitychange',session.visibilityHandler);
     if(session.cameraTimer)clearInterval(session.cameraTimer);
     if(session.resizeObserver)session.resizeObserver.disconnect();
     if(session.walkRequest)session.walkRequest.abort();
@@ -21967,12 +21977,25 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         }else if(session.viewMode==='follow'&&session.lastMoveAt&&now-session.lastMoveAt>=10000){
           showOverview();
         }
-      },1000);
+      },2000);
       if(typeof ResizeObserver==='function'){
         session.resizeObserver=new ResizeObserver(()=>{if(!session.closed)map.relayout();});
         session.resizeObserver.observe(canvas);
       }
-      if(navigator.geolocation){
+      // Native foreground service owns location collection while the app is hidden.
+      // Stop the browser's high-accuracy map watcher to avoid a second request;
+      // reconcile native fixes when the page becomes visible again.
+      function syncWalkingVisibleWatch(){
+        if(session.closed||!navigator.geolocation)return;
+        // A browser-only/PWA session has no native journal, so retain its
+        // original browser location behavior rather than silently losing fixes.
+        const native=_walkingNative();
+        const nativeCanJournal=!!(native&&typeof native.consumeWalkingPilgrimageFixes==='function');
+        if(document.hidden&&nativeCanJournal){
+          if(session.watchId!==null){navigator.geolocation.clearWatch(session.watchId);session.watchId=null;}
+          return;
+        }
+        if(session.watchId!==null)return;
         session.watchId=navigator.geolocation.watchPosition(pos=>{
           if(session.closed)return;
           const lat=Number(pos.coords.latitude),lng=Number(pos.coords.longitude);
@@ -22015,6 +22038,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           }
         },()=>{}, {enableHighAccuracy:true,maximumAge:5000,timeout:15000});
       }
+      session.visibilityHandler=syncWalkingVisibleWatch;
+      document.addEventListener('visibilitychange',session.visibilityHandler);
+      syncWalkingVisibleWatch();
     },()=>{closeWalkMap();});
     return true;
   }
