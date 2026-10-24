@@ -18365,7 +18365,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     return before!==next;
   }
   function _manualMerged(course){
-    const places=course.places.map((point,i)=>({point:point,gps:true,gpsIndex:i}));
+    const completion=_courseCompletionList(course)[0];
+    const source=completion&&Array.isArray(completion.stampPlaces)?completion.stampPlaces:course.places;
+    const places=source.map((point,i)=>({point:point,gps:true,gpsIndex:i}));
     const additions=_manualPointsFor(course.id).slice().sort((a,b)=>Number(a.position)-Number(b.position)||Number(a.seq)-Number(b.seq));
     const merged=[];
     for(let gap=0;gap<=places.length;gap++){
@@ -18439,6 +18441,40 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       return normalized;
     }catch(e){console.error('[순례코스 읽기]',e);throw e;}
   }
+  // V1530: 개발자 전용 진단. GPS 스탬프와 완료 기록은 이 경로에서 읽기 전용이다.
+  function _completionGpsAuditPreview(){
+    const courses=loadCourses(), cache=new Map(), rows=[];
+    for(const course of courses){
+      for(const entry of (course.completions||[])){
+        if(!entry||entry.method!=='gps')continue;
+        const date=_dailyIso(Number(entry.completedAt));
+        if(!date){rows.push({course:course.name,date:'?',status:'확인 불가'});continue;}
+        if(!cache.has(date))cache.set(date,_dailyGpsEvents(date));
+        const stamps=cache.get(date), source=Array.isArray(entry.stampPlaces)?entry.stampPlaces:course.places;
+        if(!stamps.length||!Array.isArray(source)){
+          rows.push({course:course.name,date,status:'스탬프 없음 / 판정 보류'});continue;
+        }
+        const missing=source.filter(p=>!stamps.some(ev=>_dailySamePlace(p,ev)||_dailyLinkedGpsPair(p,ev)));
+        rows.push({course:course.name,date,status:missing.length?'불일치 의심':'일치',total:source.length,unmatched:missing.map(p=>p.name||p.placeId||'?')});
+      }
+    }
+    return rows;
+  }
+  function _scheduleCompletionGpsAudit(once){
+    // 개발자 시험 중 자동 검사/복구는 금지한다. 배포용 일괄 검사와 분리.
+    return;
+  }
+  document.addEventListener('click',function(e){
+    const btn=e.target.closest('#oai-dev-completion-audit');
+    if(!btn||window.__OAI_DEV_RUNTIME_ACTIVE__!==true)return;
+    const out=document.getElementById('oai-dev-completion-audit-report');
+    if(!out)return;
+    out.hidden=false;
+    try{
+      const rows=_completionGpsAuditPreview();
+      out.textContent='읽기 전용 진단 ('+rows.length+'건)\n'+rows.map(x=>x.date+' | '+x.course+' | '+x.status+(x.unmatched&&x.unmatched.length?' | 불일치: '+x.unmatched.join(', '):'')).join('\n');
+    }catch(err){out.textContent='검사 실패: '+String(err&&err.message||err);}
+  });
   function saveCourses(a){
     if(!Array.isArray(a))return false;
     const serialized=JSON.stringify(a);
@@ -18446,7 +18482,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(localStorage.getItem(COURSES_KEY)!==serialized)localStorage.setItem(COURSES_KEY,serialized);
       if(localStorage.getItem(COURSES_KEY)!==serialized)throw new Error('저장 후 재조회 불일치');
     }catch(e){console.warn('[순례코스 저장]',e);return false;}
-    renderCourseList();return true;
+    renderCourseList();
+    return true;
   }
   function _dailyStoredCourses(){
     const value=JSON.parse(localStorage.getItem(COURSES_KEY)||'[]');
@@ -18956,7 +18993,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     return (Array.isArray(c&&c.completions)?c.completions:[]).map(function(x){
       if(!x)return null;
       const at=Number(x.completedAt)||0,count=Number(x.placeCount)||places.length;
-      return at>0?{completedAt:at,placeCount:Math.max(0,count),method:String(x.method||''),locked:!!x.locked,travelMode:(x.travelMode==='walk'?'walk':x.travelMode==='car'?'car':''),walkPerformed:x.walkPerformed===true,walkStartedAt:Number(x.walkStartedAt)||0,walkTrailStartAt:Number(x.walkTrailStartAt)||0}:null;
+      return at>0?{completedAt:at,placeCount:Math.max(0,count),stampPlaces:Array.isArray(x.stampPlaces)?x.stampPlaces.map(normalizePlace).filter(Boolean):null,method:String(x.method||''),locked:!!x.locked,travelMode:(x.travelMode==='walk'?'walk':x.travelMode==='car'?'car':''),walkPerformed:x.walkPerformed===true,walkStartedAt:Number(x.walkStartedAt)||0,walkTrailStartAt:Number(x.walkTrailStartAt)||0}:null;
     }).filter(Boolean).sort(function(a,b){return Number(b.completedAt)-Number(a.completedAt);});
   }
   function _courseRefreshCompletionState(course){
@@ -19157,7 +19194,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // 이미 완료한 코스의 같은 날짜·같은 장소만 제외한다. 다른 코스의 미등록 성지는 남긴다.
   function _dailyUnregisteredEvents(date,events,courses){
     const completed=(courses||_dailyStoredCourses()).filter(c=>_courseCompletionList(c).some(x=>_dailyIso(x.completedAt)===date));
-    return _dailyAutoEvents(events).filter(ev=>!completed.some(c=>(c.places||[]).some(p=>_dailyCompletedPlaceMatches(p,ev))));
+    return _dailyAutoEvents(events).filter(ev=>!completed.some(c=>_courseCompletionList(c).some(entry=>
+      _dailyIso(entry.completedAt)===date &&
+      (Array.isArray(entry.stampPlaces)?entry.stampPlaces:(c.places||[])).some(p=>_dailyCompletedPlaceMatches(p,ev)))));
   }
   function _dailyAutoCourseName(date,events){
     const names=events.map(ev=>String(ev.name||'').trim()).filter(Boolean);
@@ -19187,13 +19226,21 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(visited.length&&_dailyAutoEligible(_dailyAutoEvents(_dailyGpsEvents(date).filter(ev=>visited.some(x=>_dailySamePlace(x.place,ev)||_dailyLinkedGpsPair(x.place,ev)))))){
       const at=_dailyDayEnd(date)-1; // 종료는 다음 날 00:00, 완료 날짜는 전날 유지
       const places=visited.map(x=>x.place);
+      const prior=_courseCompletionList(course);
+      const separate=prior.length>0;
       const next=_courseRefreshCompletionState(Object.assign({},course,{
-        places,completions:_courseCompletionList(course).concat([{completedAt:at,placeCount:places.length,method:'gps',locked:true}]),
+        id:separate?('gps_follow_'+date.replace(/-/g,'')+'_'+course.id):course.id,
+        places,completions:separate?[]:prior,
         gpsSettled:true,completionArmed:false,lateCompletionPending:date,updatedAt:Date.now()
       }));
-      courses[i]=next;
+      next.completions=_courseCompletionList(next).concat([{completedAt:at,placeCount:places.length,stampPlaces:places.map(x=>Object.assign({},x)),method:'gps',locked:true}]);
+      _courseRefreshCompletionState(next);
+      if(separate){
+        if(courses.some(c=>c.id===next.id))throw new Error('완료 코스 ID 중복');
+        courses.unshift(next);
+      }else courses[i]=next;
       if(!saveCourses(courses))throw new Error('자정 순례코스 저장 실패');
-      const persisted=_dailyStoredCourses().find(c=>c.id===course.id);
+      const persisted=_dailyStoredCourses().find(c=>c.id===next.id);
       if(!persisted||!_dailySameOrderedPlaces(persisted.places,places)||
           !_courseCompletionList(persisted).some(x=>_dailyIso(x.completedAt)===date&&x.placeCount===places.length))
         throw new Error('자정 완료 기록 재조회 불일치');
@@ -19216,7 +19263,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const at=_dailyDayEnd(date)-1;
     return _courseRefreshCompletionState({id,name:_dailyAutoCourseName(date,eligible),autoGps:true,sourceDate:date,start:null,end:null,
       places:eligible.map(ev=>({name:ev.name,addr:ev.addr,lat:ev.lat,lng:ev.lng,placeId:ev.placeId,diocese:ev.diocese,done:true,doneMethod:'gps'})),
-      completions:[{completedAt:at,placeCount:eligible.length,method:'gps',locked:true}],gpsSettled:true,
+      completions:[{completedAt:at,placeCount:eligible.length,stampPlaces:eligible.map(ev=>({name:ev.name,addr:ev.addr,lat:ev.lat,lng:ev.lng,placeId:ev.placeId,diocese:ev.diocese,done:true,doneMethod:'gps'})),method:'gps',locked:true}],gpsSettled:true,
       completionArmed:false,lastStartedAt:0,updatedAt:Date.now(),lastCompletedAt:at});
   }
   function _dailyRegisterOnce(date,events,result){
@@ -19248,6 +19295,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const course=_dailyBuildAutoCourse(date,eligible,id);
       courses.unshift(course);
       if(!saveCourses(courses))throw new Error('자동 코스 저장 실패');
+      _scheduleCompletionGpsAudit(false);
       const persisted=_dailyStoredCourses().find(c=>c.id===id);
       if(!persisted||persisted.start||persisted.end||!persisted.autoGps||!_dailySameOrderedPlaces(persisted.places,eligible)||
           !_courseCompletionList(persisted).some(x=>_dailyIso(x.completedAt)===date&&x.placeCount===eligible.length))
@@ -19895,7 +19943,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const alreadyToday=completions.some(function(x){return _courseDateInputValue(x.completedAt)===today;});
       const gpsCompleted=stampPlaces.length>0&&stampPlaces.every(function(x){return x&&x.done&&String(x.doneMethod||'')==='gps';});
       if(!alreadyToday){
-        completions.push({completedAt:now,placeCount:stampPlaces.length,method:gpsCompleted?'gps':'manual',locked:gpsCompleted,travelMode:activeNow.travelMode,walkPerformed:activeNow.walkPerformed===true,walkStartedAt:Number(activeNow.walkStartedAt)||0,walkTrailStartAt:Number(activeNow.startedAt)||0});
+        completions.push({completedAt:now,placeCount:stampPlaces.length,stampPlaces:stampPlaces.map(x=>Object.assign({},x)),method:gpsCompleted?'gps':'manual',locked:gpsCompleted,travelMode:activeNow.travelMode,walkPerformed:activeNow.walkPerformed===true,walkStartedAt:Number(activeNow.walkStartedAt)||0,walkTrailStartAt:Number(activeNow.startedAt)||0});
         next.completions=completions;
         next.lastCompletedAt=now;
         try{vibrate(34);}catch(_e){}
@@ -19980,7 +20028,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         const today=_courseDateInputValue(now),alreadyToday=completions.some(function(x){return _courseDateInputValue(x.completedAt)===today;});
         const gpsCompleted=routeOnlyEndReached||(stampPlaces.length>0&&stampPlaces.every(function(x){return x&&x.done&&String(x.doneMethod||'')==='gps';}));
         if(!alreadyToday){
-          completions.push({completedAt:now,placeCount:routeOnlyEndReached?1:stampPlaces.length,method:gpsCompleted?'gps':'manual',locked:gpsCompleted,travelMode:active.travelMode,walkPerformed:active.walkPerformed===true,walkStartedAt:Number(active.walkStartedAt)||0,walkTrailStartAt:Number(active.startedAt)||0});
+          completions.push({completedAt:now,placeCount:routeOnlyEndReached?1:stampPlaces.length,stampPlaces:routeOnlyEndReached?[Object.assign({},prev.end)]:stampPlaces.map(x=>Object.assign({},x)),method:gpsCompleted?'gps':'manual',locked:gpsCompleted,travelMode:active.travelMode,walkPerformed:active.walkPerformed===true,walkStartedAt:Number(active.walkStartedAt)||0,walkTrailStartAt:Number(active.startedAt)||0});
           justCompleted=true;
           next.completions=completions;
           next.lastCompletedAt=now;
@@ -19992,6 +20040,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       }
       a[i]=next;
       if(!saveCourses(a))throw new Error('순례완료 코스 저장 실패');
+      _scheduleCompletionGpsAudit(false);
       const verified=loadCourses().find(c=>c.id===next.id);
       if(!verified||!_dailySameOrderedPlaces(verified.places,places))throw new Error('순례코스 저장 재확인 실패');
       if(currentCourseId===next.id){savePlan(places,true);saveMeta({name:next.name||'새 순례계획',start:next.start||null,end:next.end||null},true);}
@@ -23511,6 +23560,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // 스와이프 등록은 데이터 초기화보다 앞에 둔다. 초기화 예외가 제스처를 막지 않는다.
   // 자동 등록 초기화는 목록 렌더링·개발자 패널 표시 실패와 독립적으로 실행한다.
   _initializeDailyPilgrimageSettlement();
+  _scheduleCompletionGpsAudit(true);
   refreshDev(); renderCourseList();
 })();
 
