@@ -3230,7 +3230,7 @@ function _oaiVisitToast(message){
 }
 function _oaiVisitConfirm(message,onConfirm,options){
   let m=document.getElementById('oai-visit-confirm');if(!m){m=document.createElement('div');m.id='oai-visit-confirm';m.className='oai-visit-confirm';m.setAttribute('aria-hidden','true');m.innerHTML='<div class="oai-visit-confirm-bg" data-oai-confirm-cancel="1"></div><section class="oai-visit-confirm-panel" role="dialog" aria-modal="true" aria-labelledby="oai-visit-confirm-heading"><div class="oai-visit-confirm-symbol" aria-hidden="true">!</div><h3 class="oai-visit-confirm-heading" id="oai-visit-confirm-heading">기록 삭제 확인</h3><div class="oai-visit-confirm-message" id="oai-visit-confirm-message"></div><div class="oai-visit-confirm-actions"><button type="button" data-oai-confirm-cancel="1">취소</button><button type="button" data-oai-confirm-ok="1">삭제</button></div></section>';document.body.appendChild(m);m.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('[data-oai-confirm-cancel]')){_oaiCloseVisitConfirm();return;}if(e.target.closest&&e.target.closest('[data-oai-confirm-ok]')){const fn=window.__OAI_VISIT_CONFIRM_FN__;_oaiCloseVisitConfirm();if(typeof fn==='function')fn();}});}
-  const confOptions=options||{};const heading=document.getElementById('oai-visit-confirm-heading'),okBtn=m.querySelector('[data-oai-confirm-ok]');if(heading)heading.textContent=confOptions.title||'기록 삭제 확인';if(okBtn)okBtn.textContent=confOptions.confirmLabel||'삭제';const msg=document.getElementById('oai-visit-confirm-message');if(msg)msg.textContent=String(message||'');window.__OAI_VISIT_CONFIRM_FN__=onConfirm;m.classList.add('show');m.setAttribute('aria-hidden','false');
+  const confOptions=options||{};const heading=document.getElementById('oai-visit-confirm-heading'),okBtn=m.querySelector('[data-oai-confirm-ok]');if(heading)heading.textContent=confOptions.title||'기록 삭제 확인';if(okBtn)okBtn.textContent=confOptions.confirmLabel||'삭제';m.classList.toggle('oai-course-reverse-confirm',confOptions.variant==='course-reverse');const msg=document.getElementById('oai-visit-confirm-message');if(msg)msg.textContent=String(message||'');window.__OAI_VISIT_CONFIRM_FN__=onConfirm;m.classList.add('show');m.setAttribute('aria-hidden','false');
 }
 function _oaiCloseVisitConfirm(){const m=document.getElementById('oai-visit-confirm');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}window.__OAI_VISIT_CONFIRM_FN__=null;}
 try{window._oaiCloseVisitConfirm=_oaiCloseVisitConfirm;}catch(_e){}
@@ -23223,7 +23223,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(course&&_courseCompletionList(course).length){alert('완료 기록이 있는 코스는 역방향으로 수정할 수 없습니다. 새 순례계획으로 만들어 주세요.');return;}
     const places=loadPlan(),meta=loadMeta();
     if(!places.length)return;
-    if(!confirm('출발지와 도착지를 바꾸고 순례지 순서를 거꾸로 배치할까요?\n도보 구간 지정도 반대로 전환됩니다. 변경한 코스는 저장 버튼을 눌러야 적용됩니다.'))return;
+    _oaiVisitConfirm('출발지와 도착지를 바꾸고 순례지 순서를 반대로 변경합니다.\n도보 구간도 함께 반전되며, 저장 버튼을 눌러야 적용됩니다.',function(){
     const reversed=places.slice().reverse();
     const nextMeta=Object.assign({},meta,{start:meta.end||null,end:meta.start||null});
     const seg=meta.walkSegment;
@@ -23246,6 +23246,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     savePlan(reversed,true);
     saveMeta(nextMeta,true);
     renderDetail();
+    },{title:'코스 역방향 변경',confirmLabel:'변경',variant:'course-reverse'});
   }
   function reorder(from,to){const list=loadPlan();if(from<0||to<0||from>=list.length||to>=list.length)return false;if(from===to)return false;const moved=list.splice(from,1)[0];list.splice(to,0,moved);savePlan(list,true);renderDetail();setTimeout(()=>{const card=document.querySelector('#oai-pilgrimage-plan-list [data-plan-index="'+to+'"]');if(card){card.classList.add('is-drop-confirmed');setTimeout(()=>card.classList.remove('is-drop-confirmed'),650);}},30);return true;}
   let drag=null;

@@ -10134,6 +10134,8 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
 .oai-visit-confirm-actions button{height:46px!important;border-radius:12px!important;font-size:15px!important}
 .oai-visit-confirm-actions button:first-child{background:#fff!important;border:1px solid #cddce5!important;color:#3e5d70!important}
 .oai-visit-confirm-actions button:last-child{background:#b44e4a!important;border:1px solid #b44e4a!important;color:#fff!important}
+.oai-visit-confirm.oai-course-reverse-confirm .oai-visit-confirm-symbol{background:#eaf3ff;color:#1762a2;border-color:#cfe3f7}
+.oai-visit-confirm.oai-course-reverse-confirm .oai-visit-confirm-actions button:last-child{background:#1762a2!important;border-color:#1762a2!important}
 
 /* V1196: 완료 상세는 순례계획과 동일한 두 추가 버튼을 사용한다.
    표시 가능 여부는 renderDetail()에서 GPS 완료 코스를 기준으로 제어한다. */
