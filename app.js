@@ -3272,6 +3272,22 @@ function _oaiChoosePhotoAddDate(kind){
   if(!_oaiJournalDeveloperEnabled())return;
   const ctx=_oaiCurrentJournalContext(kind);
   if(!ctx||!ctx.visits||!ctx.visits.length)return;
+  // 사진을 추가할 수 있는 방문 날짜가 하나뿐이면 날짜 선택을 생략한다.
+  // 실제 방문 날짜별 메타데이터 장수를 사용하며, 기존 기록·사진은 변경하지 않는다.
+  const limit=_oaiVisitPhotoLimit(kind,ctx.item);
+  const dateOptions=ctx.visits.map(function(v){
+    const date=String(v.date||'');
+    const photos=_oaiNormalizePhotos(_oaiGetVisitByDate(kind,ctx.item,date)||v);
+    return {date:date,count:photos.length,full:photos.length>=limit};
+  }).filter(function(o){return !!o.date;});
+  const available=dateOptions.filter(function(o){return !o.full;});
+  if(!available.length){_oaiVisitToast('모든 방문 날짜의 사진 등록 수량을 사용했습니다.');return;}
+  if(available.length===1){
+    window[kind==='parish'?'__OAI_PARISH_JOURNAL_DATE__':'__OAI_SHRINE_JOURNAL_DATE__']=available[0].date;
+    _oaiPhotoSelectionClear();_oaiRerenderJournal(kind);
+    _oaiAddPhotos(kind);
+    return;
+  }
   let modal=document.getElementById('oai-photo-add-date-dialog');
   if(!modal){
     modal=document.createElement('div');modal.id='oai-photo-add-date-dialog';
@@ -3292,9 +3308,8 @@ function _oaiChoosePhotoAddDate(kind){
   }
   modal.dataset.kind=kind;
   const list=modal.querySelector('.oai-photo-add-date-list');
-  list.innerHTML=ctx.visits.map(function(v){
-    const d=String(v.date||''),ph=_oaiNormalizePhotos(_oaiGetVisitByDate(kind,ctx.item,d)||v),limit=_oaiVisitPhotoLimit(kind,ctx.item),full=ph.length>=limit;
-    return '<button type="button" data-oai-add-date-value="'+_visitHtmlEsc(d)+'"'+(full?' disabled':'')+'><span>'+_visitHtmlEsc(_formatVisitDate(d))+'</span><small>'+ph.length+' / '+limit+'장'+(full?' · 등록 완료':'')+'</small></button>';
+  list.innerHTML=dateOptions.map(function(o){
+    return '<button type="button" data-oai-add-date-value="'+_visitHtmlEsc(o.date)+'"'+(o.full?' disabled':'')+'><span>'+_visitHtmlEsc(_formatVisitDate(o.date))+'</span><small>'+o.count+' / '+limit+'장'+(o.full?' · 등록 완료':'')+'</small></button>';
   }).join('');
   modal.classList.add('show');modal.setAttribute('aria-hidden','false');
 }
@@ -20743,6 +20758,46 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!saved)return true;
     return _routeStructureSignature(draftSnapshot())!==_routeStructureSignature(saved);
   }
+  // Editing the order of an in-progress route must not switch course identity or
+  // reset the active GPS/session journal. Preserve completed visits by matching
+  // stable place identity, and keep previous course/completion metadata intact.
+  function _saveActiveCourseOrder(){
+    const active=_readActiveFollowRaw();
+    if(!active||!currentCourseId||active.courseId!==String(currentCourseId))return false;
+    const courses=loadCourses(),index=courses.findIndex(c=>c.id===active.courseId);
+    if(index<0)return false;
+    const previous=courses[index];
+    if(_courseCompletionList(previous).length){alert('완료 기록이 있는 코스는 진행 중에 순서를 변경할 수 없습니다.');return false;}
+    const draft=draftSnapshot();
+    if(!_pilgrimageStructureIsDirty())return false;
+    if(draft.walkSegment&&!_walkSegmentBounds(draft.walkSegment,draft.places,draft)){
+      alert('도보 출발·도착 지점이 변경된 순서에 맞지 않습니다. 도보 지정을 확인해 주세요.');return false;
+    }
+    if(!confirm('변경한 경유지 순서를 현재 진행 중인 순례에 저장할까요?\n기존 GPS 방문 기록과 도보 이동 기록은 유지됩니다.'))return false;
+    const remaining=(Array.isArray(previous.places)?previous.places:[]).slice();
+    const places=(Array.isArray(draft.places)?draft.places:[]).map(p=>{
+      const sig=_routePointSignature(p);
+      const idx=remaining.findIndex(old=>JSON.stringify(_routePointSignature(old))===JSON.stringify(sig));
+      const prior=idx>=0?remaining.splice(idx,1)[0]:null;
+      return Object.assign({},p,{done:!!((prior&&prior.done)||p.done),doneMethod:String((prior&&prior.doneMethod)||p.doneMethod||'')});
+    });
+    const revised=Object.assign({},previous,{start:draft.start,end:draft.end,places:places,
+      walkSegment:draft.walkSegment||null,updatedAt:Date.now()});
+    courses[index]=revised;
+    if(!saveCourses(courses)){
+      alert('변경한 순례코스를 저장하지 못했습니다. 다시 시도해 주세요.');return false;
+    }
+    const verified=loadCourses().find(c=>c.id===active.courseId);
+    if(!verified||_routeStructureSignature(verified)!==_routeStructureSignature(revised)){
+      alert('순례코스 저장 검증에 실패했습니다. 화면을 확인해 주세요.');return false;
+    }
+    savePlan(places,true);
+    saveMeta({name:revised.name,start:revised.start,end:revised.end,walkSegment:revised.walkSegment},true);
+    _syncMixedCarGpsWatch();
+    renderDetail();
+    flashSaved();
+    return true;
+  }
   function _saveActiveEditedDraftAsNewCourse(){
     try{
       const activeRaw=_readActiveFollowRaw();
@@ -21059,9 +21114,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const active=_activeFollowState(),isActive=!!(active&&currentCourseId&&active.courseId===currentCourseId);
     if(detailRoot)detailRoot.classList.toggle('is-active-follow',isActive);
     if(saveBtn){
-      const dirty=_pilgrimageDraftIsDirty(),saveable=!!(list.length||(normalizePoint(m.start)&&normalizePoint(m.end))),enabled=!isCompletionView&&saveable&&dirty;
-      saveBtn.hidden=isCompletionView||isActive;
-      saveBtn.style.display=(isCompletionView||isActive)?'none':'';
+      const dirty=isActive?_pilgrimageStructureIsDirty():_pilgrimageDraftIsDirty(),saveable=!!(list.length||(normalizePoint(m.start)&&normalizePoint(m.end))),enabled=!isCompletionView&&saveable&&dirty;
+      saveBtn.hidden=isCompletionView;
+      saveBtn.style.display=isCompletionView?'none':'';
       saveBtn.disabled=!enabled;
       saveBtn.setAttribute('aria-disabled',enabled?'false':'true');
       saveBtn.classList.toggle('is-dirty',enabled);
@@ -21287,10 +21342,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       openSaveModal(false);
       return;
     }
+    if(_readActiveFollowRaw()&&_readActiveFollowRaw().courseId===String(currentCourseId)){
+      if(_pilgrimageStructureIsDirty())_saveActiveCourseOrder();
+      return;
+    }
     if(!_pilgrimageDraftIsDirty())return;
     pendingAfterSave='';
     if(!currentCourseId){openSaveModal(false);return;}
-    if(_saveActiveEditedDraftAsNewCourse())return;
     updateCurrentCourseProgress();
     renderDetail();
     flashSaved();
@@ -22568,7 +22626,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         }else if(session.viewMode==='follow'&&session.lastMoveAt&&now-session.lastMoveAt>=10000){
           showOverview();
         }
-      },2000);
+      },5000);
       if(typeof ResizeObserver==='function'){
         session.resizeObserver=new ResizeObserver(()=>{if(!session.closed)map.relayout();});
         session.resizeObserver.observe(canvas);
