@@ -17401,7 +17401,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(payload.format!=='cgm-manual-full'||payload.schema!==1||!payload.data||typeof payload.data!=='object'||Array.isArray(payload.data))throw Error('전체 수동 백업 코드만 복원할 수 있습니다. 과거 일부 기록용 CGM1은 복원할 수 없습니다.');
     const entries=Object.entries(payload.data);
     if(!entries.length||entries.some(([key,value])=>!oaiTransferAllowedKey(key)||typeof value!=='string'))throw Error('백업 내용이나 저장 키가 올바르지 않습니다.');
-    for(const [key,value] of entries){if(value.length>0&&/visit|course|plan|settlement/i.test(key)){try{JSON.parse(value);}catch(_e){throw Error('기록 데이터가 손상되었습니다: '+key);}}}
+    for(const [key,value] of entries){if(value.length>0&&/^(?:oai_shrine_visits_v1|oai_parish_visits_v1|oai_pilgrimage_courses_v1|oai_pilgrimage_plan_v1|oai_pilgrimage_daily_settlement_v2)$/.test(key)){try{JSON.parse(value);}catch(_e){throw Error('기록 데이터가 손상되었습니다: '+key);}}}
     const required=['oai_shrine_visits_v1','oai_parish_visits_v1','oai_pilgrimage_courses_v1'];
     if(required.some(key=>!Object.prototype.hasOwnProperty.call(payload.data,key)))throw Error('방문·완료코스 필수 데이터가 없는 부분 백업입니다.');
     oaiDevPendingRestore=payload;
