@@ -18418,7 +18418,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     // 완료 화면의 GPS 항목은 실제 당일 스탬프 장소별 1회만 표시한다.
     // 기존 저장 기록은 변경하지 않고, 계획상 반복 경유지는 그대로 유지한다.
     const places=_uniqueCompletionStampPlaces(source).map((point,i)=>({point:point,gps:true,gpsIndex:i}));
-    const additions=_manualPointsFor(course.id).slice().sort((a,b)=>Number(a.position)-Number(b.position)||Number(a.seq)-Number(b.seq));
+    const additions=(completion&&completion.method==='gps'?[]:_manualPointsFor(course.id)).slice().sort((a,b)=>Number(a.position)-Number(b.position)||Number(a.seq)-Number(b.seq));
     const merged=[];
     for(let gap=0;gap<=places.length;gap++){
       for(const item of additions){
@@ -18515,60 +18515,51 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     return rows;
   }
-  // 순례완료 기록 정정은 사용자가 명시적으로 확인할 때만 실행한다.
-  // 같은 날짜의 GPS가 확인된 장소는 보존하며, 다른 날짜에만 GPS가 확인된 장소와
-  // 중복 장소만 후보로 삼는다. 불명확한 기록은 수정하지 않는다.
-  const COMPLETION_REPAIR_BACKUP_KEY='oai_completion_repair_v1558_backup';
+  // GPS 스탬프 장소·날짜·시각만으로 기존 GPS 순례완료 장소를 정리한다.
+  // 개발자 명시 확인 전에는 읽기 전용이며 원본 스탬프·계획은 변경하지 않는다.
+  const COMPLETION_REPAIR_BACKUP_KEY='oai_completion_repair_v1559_backup';
   function _completionRepairPreview(){
-    const courses=_dailyStoredCourses(),dates=new Set(),changes=[];
-    courses.forEach(c=>(c.completions||[]).forEach(e=>{
-      if(e&&Array.isArray(e.stampPlaces)&&e.stampPlaces.length){const d=_dailyIso(Number(e.completedAt));if(d)dates.add(d);}
-    }));
-    const stampDates=new Map(),cache=new Map();
-    // 전체 방문일을 읽되, 다른 날짜의 GPS 존재는 삭제의 단독 근거로 사용하지 않는다.
-    ['oai_shrine_visits_v1','oai_parish_visits_v1'].forEach(key=>{
-      const raw=localStorage.getItem(key);if(!raw)return;
-      const data=JSON.parse(raw);
-      if(!data||typeof data!=='object'||Array.isArray(data))throw new Error('스탬프 구조 오류: '+key);
-      Object.values(data).forEach(rec=>{
-        if(!rec||!Array.isArray(rec.visits))throw new Error('스탬프 방문정보 오류');
-        rec.visits.forEach(v=>{if(v&&v.method==='gps'&&/^\d{4}-\d{2}-\d{2}$/.test(String(v.date||'')))stampDates.set(v.date,true);});
-      });
-    });
-    dates.forEach(d=>{if(stampDates.has(d))cache.set(d,_dailyGpsEvents(d));});
+    const courses=_dailyStoredCourses(),cache=new Map(),changes=[];
     courses.forEach((c,ci)=>(c.completions||[]).forEach((e,ei)=>{
-      if(!e||!Array.isArray(e.stampPlaces)||!e.stampPlaces.length)return;
-      const date=_dailyIso(Number(e.completedAt)),events=cache.get(date);
-      if(!events||!events.length)return; // 방문 정보가 없거나 자료가 불완전하면 그대로 보존
-      const seen=[],kept=[],removed=[];
-      e.stampPlaces.forEach(p=>{
-        if(!p||p.routeOnly){kept.push(p);return;}
-        const duplicate=seen.some(x=>_dailySamePlace(x,p)||_dailyLinkedGpsPair(x,p));
-        if(duplicate){removed.push({name:p.name||'?',reason:'중복'});return;}
-        seen.push(p);
-        // 같은 날 확인된 GPS 장소는 절대 제거하지 않는다.
-        if(events.some(ev=>_dailyCompletedPlaceMatches(p,ev))){kept.push(p);return;}
-        // 다른 날 방문했는지 여부만으로는 오등록이라고 확정할 수 없다.
-        kept.push(p);
+      if(!e||e.method!=='gps'||!Array.isArray(e.stampPlaces))return;
+      const date=_dailyIso(Number(e.completedAt));
+      if(!date)throw new Error('완료 날짜 확인 실패: '+c.name);
+      if(!cache.has(date))cache.set(date,_dailyGpsEvents(date));
+      const events=cache.get(date);
+      // 기존 완료 장소 가운데 당일 GPS가 확인된 장소만 유지한다.
+      // 동일 장소는 GPS 최초 시각으로 정렬하고 한 번만 남긴다.
+      const matched=[];
+      e.stampPlaces.forEach(place=>{
+        if(!place||place.routeOnly)return;
+        const ev=events.find(row=>_dailyCompletedPlaceMatches(place,row));
+        if(!ev)return;
+        if(matched.some(row=>_dailySamePlace(row.ev,ev)||_dailyLinkedGpsPair(row.ev,ev)))return;
+        matched.push({place,ev});
       });
-      if(removed.length)changes.push({ci,ei,course:c.name,date,kept,removed});
+      matched.sort((x,y)=>x.ev.at-y.ev.at||x.ev.name.localeCompare(y.ev.name,'ko'));
+      const kept=matched.map(row=>Object.assign({},row.place,{name:row.ev.name,placeId:row.ev.placeId||row.place.placeId,kind:row.ev.kind,diocese:row.ev.diocese}));
+      const old=e.stampPlaces.filter(p=>p&&!p.routeOnly);
+      const unchanged=old.length===kept.length&&old.every((p,i)=>_dailyCompletedPlaceMatches(p,matched[i].ev));
+      if(!unchanged||Number(e.placeCount)!==kept.length){
+        changes.push({ci,ei,course:c.name,date,kept,oldCount:old.length,items:matched.map(row=>row.ev.name+' '+new Date(row.ev.at).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',hour12:false}))});
+      }
     }));
     return {courses,changes};
   }
   function _completionRepairConfirmed(){
     const preview=_completionRepairPreview();
-    if(!preview.changes.length)return '확실한 중복 장소가 없습니다. 날짜 불일치 의심 항목은 안전을 위해 보존했습니다.';
-    const details=preview.changes.map(x=>x.date+' | '+x.course+' | '+x.removed.map(r=>r.name+'('+r.reason+')').join(', ')).join('\n');
-    if(!window.confirm('다음 순례완료 기록의 중복 장소만 정정할까요?\nGPS 스탬프와 순례계획은 변경하지 않습니다.\n\n'+details))return '사용자가 취소했습니다.';
+    if(!preview.changes.length)return 'GPS 스탬프 기준으로 변경할 순례완료 기록이 없습니다.';
+    const details=preview.changes.map(x=>x.date+' | '+x.course+' | '+x.oldCount+'곳 → '+x.kept.length+'곳\n'+x.items.join(', ')).join('\n\n');
+    if(!window.confirm('GPS 스탬프의 장소·날짜·시간만으로 다음 순례완료 기록을 정리할까요?\nGPS 스탬프·순례계획·사진·메모는 변경하지 않습니다.\n\n'+details))return '사용자가 취소했습니다.';
     const original=localStorage.getItem(COURSES_KEY)||'[]';
     if(!Array.isArray(JSON.parse(original)))throw new Error('원본 순례코스 구조 오류');
-    // 별도 원본 백업에 실패하면 완료 기록을 변경하지 않는다.
+    // 백업 공간 부족 또는 읽기 실패 시 절대 수정하지 않는다.
     if(!localStorage.getItem(COMPLETION_REPAIR_BACKUP_KEY)){
       localStorage.setItem(COMPLETION_REPAIR_BACKUP_KEY,original);
       if(localStorage.getItem(COMPLETION_REPAIR_BACKUP_KEY)!==original)throw new Error('원본 백업 실패');
     }
     const latest=_completionRepairPreview();
-    if(localStorage.getItem(COURSES_KEY)!==original)throw new Error('점검 도중 기록 변경: 중단');
+    if(localStorage.getItem(COURSES_KEY)!==original)throw new Error('검사 중 순례코스 변경: 정정 중단');
     const updated=JSON.parse(original);
     latest.changes.forEach(x=>{
       const entry=updated[x.ci].completions[x.ei];
@@ -18576,10 +18567,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       entry.placeCount=x.kept.length;
     });
     const serialized=JSON.stringify(updated);
-    localStorage.setItem(COURSES_KEY,serialized);
-    if(localStorage.getItem(COURSES_KEY)!==serialized)throw new Error('저장 검증 실패');
-    renderCourseList();
-    return latest.changes.length+'개 완료 기록에서 중복 장소 정정 완료. 날짜 불일치 의심 항목은 보존했습니다.';
+    try{
+      localStorage.setItem(COURSES_KEY,serialized);
+      if(localStorage.getItem(COURSES_KEY)!==serialized)throw new Error('저장 확인 실패');
+      renderCourseList();
+    }catch(err){
+      try{localStorage.setItem(COURSES_KEY,original);}catch(restoreError){throw new Error('저장 실패 및 복구 실패: '+restoreError.message);}
+      throw err;
+    }
+    return latest.changes.length+'개 순례완료 기록을 GPS 스탬프 기준으로 정리했습니다. 원본 스탬프는 유지했습니다.';
   }
   function _scheduleCompletionGpsAudit(once){
     // 기록 자동 삭제/수정 금지. 과거 기록은 명시적 확인 뒤 중복만 정정한다.
@@ -18589,7 +18585,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!btn||window.__OAI_DEV_RUNTIME_ACTIVE__!==true)return;
     const out=document.getElementById('oai-dev-completion-audit-report');
     try{const msg=_completionRepairConfirmed();if(out){out.hidden=false;out.textContent=msg;}}
-    catch(err){if(out){out.hidden=false;out.textContent='정정 보류: '+String(err&&err.message||err);}console.warn('[순례완료 중복 정정 보류]',err);}
+    catch(err){if(out){out.hidden=false;out.textContent='정정 보류: '+String(err&&err.message||err);}console.warn('[순례완료 GPS 정정 보류]',err);}
   });
   document.addEventListener('click',function(e){
     const btn=e.target.closest('#oai-dev-completion-audit');
