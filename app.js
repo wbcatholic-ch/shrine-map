@@ -19129,6 +19129,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     return true;
   }
+  // 완료 기록의 스탬프 장소만 중복 제거한다. 계획의 경유지 순서는 변경하지 않는다.
+  // 고유 ID가 서로 다른 장소는 이름이 같아도 합치지 않는다.
+  function _uniqueCompletionStampPlaces(places){
+    const unique=[];
+    (Array.isArray(places)?places:[]).forEach(function(place){
+      if(!place||place.routeOnly)return;
+      if(!unique.some(function(existing){return _dailySamePlace(existing,place)||_dailyLinkedGpsPair(existing,place);}))
+        unique.push(Object.assign({},place));
+    });
+    return unique;
+  }
   function _dailySameOrderedPlaces(planned,actual){
     return Array.isArray(planned)&&planned.length===actual.length&&planned.every((p,i)=>_dailySamePlace(p,actual[i]));
   }
@@ -19303,7 +19314,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         places,completions:separate?[]:prior,
         gpsSettled:true,completionArmed:false,lateCompletionPending:date,updatedAt:Date.now()
       }));
-      next.completions=_courseCompletionList(next).concat([{completedAt:at,placeCount:places.length,stampPlaces:places.map(x=>Object.assign({},x)),method:'gps',locked:true}]);
+      next.completions=_courseCompletionList(next).concat([{completedAt:at,placeCount:_uniqueCompletionStampPlaces(places).length,stampPlaces:_uniqueCompletionStampPlaces(places),method:'gps',locked:true}]);
       _courseRefreshCompletionState(next);
       if(separate){
         if(courses.some(c=>c.id===next.id))throw new Error('완료 코스 ID 중복');
@@ -19312,7 +19323,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(!saveCourses(courses))throw new Error('자정 순례코스 저장 실패');
       const persisted=_dailyStoredCourses().find(c=>c.id===next.id);
       if(!persisted||!_dailySameOrderedPlaces(persisted.places,places)||
-          !_courseCompletionList(persisted).some(x=>_dailyIso(x.completedAt)===date&&x.placeCount===places.length))
+          !_courseCompletionList(persisted).some(x=>_dailyIso(x.completedAt)===date&&x.placeCount===_uniqueCompletionStampPlaces(places).length))
         throw new Error('자정 완료 기록 재조회 불일치');
       _dailyQueueLateCongratulations({courseId:course.id,date,places:places.length});
     }
@@ -20013,7 +20024,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const alreadyToday=completions.some(function(x){return _courseDateInputValue(x.completedAt)===today;});
       const gpsCompleted=stampPlaces.length>0&&stampPlaces.every(function(x){return x&&x.done&&String(x.doneMethod||'')==='gps';});
       if(!alreadyToday){
-        completions.push({completedAt:now,placeCount:stampPlaces.length,stampPlaces:stampPlaces.map(x=>Object.assign({},x)),method:gpsCompleted?'gps':'manual',locked:gpsCompleted,travelMode:activeNow.travelMode,walkPerformed:activeNow.walkPerformed===true,walkStartedAt:Number(activeNow.walkStartedAt)||0,walkTrailStartAt:Number(activeNow.startedAt)||0});
+        completions.push({completedAt:now,placeCount:_uniqueCompletionStampPlaces(stampPlaces).length,stampPlaces:_uniqueCompletionStampPlaces(stampPlaces),method:gpsCompleted?'gps':'manual',locked:gpsCompleted,travelMode:activeNow.travelMode,walkPerformed:activeNow.walkPerformed===true,walkStartedAt:Number(activeNow.walkStartedAt)||0,walkTrailStartAt:Number(activeNow.startedAt)||0});
         next.completions=completions;
         next.lastCompletedAt=now;
         try{vibrate(34);}catch(_e){}
@@ -20098,7 +20109,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         const today=_courseDateInputValue(now),alreadyToday=completions.some(function(x){return _courseDateInputValue(x.completedAt)===today;});
         const gpsCompleted=routeOnlyEndReached||(stampPlaces.length>0&&stampPlaces.every(function(x){return x&&x.done&&String(x.doneMethod||'')==='gps';}));
         if(!alreadyToday){
-          completions.push({completedAt:now,placeCount:routeOnlyEndReached?1:stampPlaces.length,stampPlaces:routeOnlyEndReached?[Object.assign({},prev.end)]:stampPlaces.map(x=>Object.assign({},x)),method:gpsCompleted?'gps':'manual',locked:gpsCompleted,travelMode:active.travelMode,walkPerformed:active.walkPerformed===true,walkStartedAt:Number(active.walkStartedAt)||0,walkTrailStartAt:Number(active.startedAt)||0});
+          completions.push({completedAt:now,placeCount:routeOnlyEndReached?1:_uniqueCompletionStampPlaces(stampPlaces).length,stampPlaces:routeOnlyEndReached?[Object.assign({},prev.end)]:_uniqueCompletionStampPlaces(stampPlaces),method:gpsCompleted?'gps':'manual',locked:gpsCompleted,travelMode:active.travelMode,walkPerformed:active.walkPerformed===true,walkStartedAt:Number(active.walkStartedAt)||0,walkTrailStartAt:Number(active.startedAt)||0});
           justCompleted=true;
           next.completions=completions;
           next.lastCompletedAt=now;
