@@ -19488,10 +19488,43 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       return (!parish.diocese||!ev.diocese||String(parish.diocese)===String(ev.diocese))&&calcDist(Number(parish.lat),Number(parish.lng),Number(ev.lat),Number(ev.lng))<=0.08;
     return false;
   }
-  function _dailyAutoEvents(events){return events.filter(ev=>ev.kind==='shrine'||!_dailyIsMyParish(ev));}
-  // 성지 한 곳 이상, 또는 일반 성당 두 곳 이상일 때만 날짜별 코스를 만든다.
-  // 성지/성당 양쪽에 등록된 같은 장소는 _dailyGpsEvents에서 성지 우선으로 1회 합쳐진다.
-  function _dailyAutoEligible(events){return events.some(ev=>ev.kind==='shrine');}
+  // 자동 코스 등록 여부는 원본 GPS 스탬프의 방문 날짜와 확정된 공통화 명부로만 판단한다.
+  // 스탬프 저장 여부와 코스 등록 여부는 서로 독립적이다.
+  function _dailyIsSharedParish(ev){
+    if(!ev||ev.kind!=='parish')return false;
+    return OAI_SHARED_VISIT_JOURNAL_GROUPS.some(g=>
+      _normPilgrimageName(g.parishName)===_normPilgrimageName(ev.name)&&
+      (!ev.diocese||String(g.parishDiocese||'')===String(ev.diocese)));
+  }
+  function _dailyCourseRegistrationDecisions(rawEvents){
+    if(!Array.isArray(rawEvents))throw new Error('GPS 코스 판정 입력 오류');
+    if(!rawEvents.length)return [];
+    const events=rawEvents.slice();
+    const dates=new Set(events.map(ev=>{
+      if(!ev||!['shrine','parish'].includes(ev.kind))throw new Error('GPS 코스 판정 장소 종류 오류');
+      const date=ev.date||_dailyIso(ev.at);
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(String(date))||
+          (Number.isFinite(Number(ev.at))&&_dailyIso(Number(ev.at))!==date))
+        throw new Error('GPS 코스 판정 날짜 오류');
+      return date;
+    }));
+    if(dates.size!==1)throw new Error('GPS 코스 판정 날짜 혼합');
+    const hasPilgrimage=events.some(ev=>ev.kind==='shrine'||_dailyIsSharedParish(ev));
+    return events.map(ev=>{
+      const linkedShrine=ev.kind==='parish'&&events.some(other=>other.kind==='shrine'&&_dailyLinkedGpsPair(ev,other));
+      const excluded=ev.kind==='parish'&&_dailyIsMyParish(ev);
+      const register=hasPilgrimage&&!linkedShrine&&!excluded;
+      return {event:ev,courseRegistration:register?'등록':'등록안함',
+        reason:linkedShrine?'같은 장소의 성지 스탬프 우선':excluded?'자동 코스 제외 장소':
+          !hasPilgrimage?'성지 또는 공통화 성당 방문 없음':'코스 포함'};
+    });
+  }
+  function _dailyAutoEvents(events){
+    return _dailyCourseRegistrationDecisions(events).filter(x=>x.courseRegistration==='등록').map(x=>x.event);
+  }
+  // 성지 또는 성지와 공통화된 성당이 단독으로 확인되면 코스 생성 가능.
+  // 일반 성당만 방문한 날에는 자동 코스를 생성하지 않는다.
+  function _dailyAutoEligible(events){return events.some(ev=>ev.kind==='shrine'||_dailyIsSharedParish(ev));}
   // 과거 완료 코스에는 placeId가 없거나 GPS 인증 지점과 다른 대표 좌표가 저장될 수 있다.
   // 완료 코스 대조에서만 고유 ID 또는 이름+교구를 사용한다. 다른 장소의 동명이인
   // 오인 방지를 위해 고유 ID가 서로 다르면 절대로 이름으로 합치지 않는다.
