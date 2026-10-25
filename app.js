@@ -18689,7 +18689,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     const c=loadCourses().find(function(x){return x.id===s.courseId;});
     if(!c){_clearActiveFollow(s.courseId);return null;}
-    if(_courseCompletionList(c).some(x=>_dailyIso(x.completedAt)===_dailyIso(s.startedAt))){_clearActiveFollow(s.courseId);return null;}
+    // 혼합코스는 모든 스탬프가 먼저 완료되어도 남은 도보 GPS 구간을 끝까지 기록한다.
+    if(_courseCompletionList(c).some(x=>_dailyIso(x.completedAt)===_dailyIso(s.startedAt))&&!(s.mixedPhase&&s.mixedPhase!=='done')){_clearActiveFollow(s.courseId);return null;}
     return {courseId:s.courseId,startedAt:s.startedAt,travelMode:s.travelMode,walkPerformed:s.walkPerformed===true,walkStartedAt:s.walkStartedAt||0,mixedPhase:s.mixedPhase,mixedLeftStart:s.mixedLeftStart,course:c,remainingMs:Math.max(0,new Date(new Date(now).getFullYear(),new Date(now).getMonth(),new Date(now).getDate()+1).getTime()-now)};
   }
   function _walkingNative(){
@@ -20019,7 +20020,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const stampPlaces=_pilgrimageStampPlaces(d.places);
     const gpsCompletedAll=!!(activeNow&&activeNow.courseId===prev.id&&stampPlaces.length>0)&&stampPlaces.every(x=>x&&x.done&&String(x.doneMethod||'')==='gps')&&stampPlaces.every(x=>!!_dailyRecordedVisitAt(x,_dailyIso(now)));
     const prevCompletions=_courseCompletionList(prev);
-    if(isDone&&gpsCompletedAll&&!(activeNow&&activeNow.mixedPhase&&activeNow.mixedPhase!=='done')&&((!wasDone&&prev.completionArmed!==false)||!prevCompletions.length)){
+    if(isDone&&gpsCompletedAll&&((!wasDone&&prev.completionArmed!==false)||!prevCompletions.length)){
       const completions=prevCompletions.slice(),today=_courseDateInputValue(now);
       const alreadyToday=completions.some(function(x){return _courseDateInputValue(x.completedAt)===today;});
       const gpsCompleted=stampPlaces.length>0&&stampPlaces.every(function(x){return x&&x.done&&String(x.doneMethod||'')==='gps';});
@@ -20101,7 +20102,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(routeOnlyEndReached)changed=true;
       if(!changed&&!forceMixedCompletion){_walkingNativeRefresh(active);return false;}
       const now=Date.now(),mixedWaiting=!!(active.mixedPhase&&active.mixedPhase!=='done');
-      const isDone=!mixedWaiting&&(routeOnlyEndReached||(stampPlaces.length>0&&stampPlaces.every(x=>x&&x.done&&x.doneMethod==='gps')));
+      // 순례지 GPS 스탬프가 모두 등록되면 도착지 및 도보 구간 종료와 무관하게 코스를 완료한다.
+      // 혼합코스의 GPS 추적 세션은 도보 구간이 끝날 때까지 별도로 유지한다.
+      const isDone=routeOnlyEndReached||(stampPlaces.length>0&&stampPlaces.every(x=>x&&x.done&&x.doneMethod==='gps'));
       const next=Object.assign({},prev,{places:places,updatedAt:now,gpsSettled:isDone||!!prev.gpsSettled});
       const completions=_courseCompletionList(prev).slice();
       let justCompleted=false;
@@ -20125,7 +20128,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const verified=loadCourses().find(c=>c.id===next.id);
       if(!verified||!_dailySameOrderedPlaces(verified.places,places))throw new Error('순례코스 저장 재확인 실패');
       if(currentCourseId===next.id){savePlan(places,true);saveMeta({name:next.name||'새 순례계획',start:next.start||null,end:next.end||null},true);}
-      if(isDone){_clearActiveFollow(next.id);_clearRepeatEditGuard(next.id);}
+      if(isDone&&!mixedWaiting){_clearActiveFollow(next.id);_clearRepeatEditGuard(next.id);}
       else _walkingNativeRefresh(_activeFollowState());
       if(isDone&&justCompleted){
         setTimeout(()=>{const msg='순례를 축하합니다!\n계획하신 순례코스가 완료되어 순례완료 목록에 저장되었습니다.';if(typeof window.oaiPilgrimageCongratulation==='function')window.oaiPilgrimageCongratulation(msg);},120);
