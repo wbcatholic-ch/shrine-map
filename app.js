@@ -20243,7 +20243,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           native.acknowledgeWalkingPilgrimageFixes(sessionStart,through);
         _recordActiveCourseGpsFromVisits();
         const latest=fixes.filter(f=>f.at<=through);
-        latest.forEach(f=>{const a=_activeFollowState();if(a&&a.travelMode==='walk')_mixedWalkObserveFix(a,f);});
+        // On foreground return, reuse recently journaled car fixes for the
+        // planned mixed-course walking start. Never trigger a mode switch from
+        // old background positions or replayed positions from another session.
+        const recentCutoff=Date.now()-30000;
+        for(const f of latest){
+          const a=_activeFollowState();
+          if(!a||a.courseId!==active.courseId||a.startedAt!==active.startedAt)break;
+          if(a.travelMode==='walk')_mixedWalkObserveFix(a,f);
+          else if(!document.hidden&&a.travelMode==='car'&&a.mixedPhase==='to-start'&&f.at>=recentCutoff)
+            _mixedWalkObserveFix(a,f);
+        }
       }
     }catch(e){console.warn('[도보 순례] GPS 방문 재확인 보류',e);}
     finally{_walkingReplayBusy=false;}
