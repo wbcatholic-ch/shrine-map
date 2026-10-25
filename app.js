@@ -17445,6 +17445,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const date=new Date().toISOString().slice(0,10).replace(/-/g,'');
     const name='gildongmu-backup-'+date+'.json';
+    if(window.GildongmuNative && typeof window.GildongmuNative.saveDeveloperBackup==='function'){
+      oaiDevStatus('Android 파일 저장 위치를 선택해 주세요.');
+      window.GildongmuNative.saveDeveloperBackup(name,JSON.stringify(payload));
+      return;
+    }
     // On Android WebView a blob download can be ignored by the host. Prefer the
     // OS share sheet when file sharing is supported; never report success blindly.
     if(typeof navigator.share==='function' && typeof navigator.canShare==='function' && typeof File==='function'){
@@ -17466,6 +17471,21 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }catch(err){oaiDevStatus('파일 저장 요청 실패: '+(err.message||'다운로드를 시작하지 못했습니다.'));}
     finally{link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);}
   }
+  window.oaiDevNativeBackupResult=function(action,ok,encoded,message){
+    if(!oaiDevEnabled()||!oaiDevPanelUnlocked)return;
+    if(!ok){oaiDevStatus(message||'파일 작업이 취소되었거나 실패했습니다.');return;}
+    if(action==='save'){oaiDevStatus('백업 JSON 파일이 선택한 위치에 저장되었습니다.');return;}
+    if(action==='open'){
+      try{
+        const raw=atob(encoded||'');
+        const bytes=Uint8Array.from(raw,c=>c.charCodeAt(0));
+        const json=new TextDecoder('utf-8',{fatal:true}).decode(bytes);
+        const payload=oaiDevParseBackupFile(json);
+        oaiDevPreview(payload);
+        const el=document.getElementById('oai-dev-selected-file');if(el)el.textContent='Android에서 선택한 백업 파일';
+      }catch(err){oaiDevStatus('백업 파일 검사 실패: '+(err.message||'잘못된 JSON'));}
+    }
+  };
   async function oaiDevLoadBackupFile(file){
     oaiDevPendingRestore=null;
     const preview=document.getElementById('oai-dev-restore-preview');if(preview)preview.hidden=true;
@@ -17573,6 +17593,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         oaiDevPendingRestore=null;
         document.getElementById('oai-dev-import-view').hidden=false;
         document.getElementById('oai-dev-restore-preview').hidden=true;
+        if(window.GildongmuNative && typeof window.GildongmuNative.openDeveloperBackup==='function'){
+          oaiDevStatus('Android에서 복원할 JSON 파일을 선택해 주세요.');
+          window.GildongmuNative.openDeveloperBackup();
+          return;
+        }
         const fileInput=document.getElementById('oai-dev-import-file');
         if(fileInput){fileInput.value='';oaiDevStatus('아래 파일 선택 버튼을 눌러 JSON 백업 파일을 선택하세요.');}
         else oaiDevStatus('파일 선택 요소를 찾지 못했습니다.');
