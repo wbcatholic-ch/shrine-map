@@ -14521,6 +14521,23 @@ function _pilgrimageMapMode(){
   if(window.__OAI_PILGRIMAGE_PLACE_PICK__===true || window.__OAI_PILGRIMAGE_MAP_PICK__)return 'place-pick';
   return 'route';
 }
+function _fitPilgrimagePlaceInfoWaypoints(points){
+  if(_pilgrimageCourseViewKind()!=='place-info'||!_map||!window.kakao||!kakao.maps)return false;
+  const valid=(points||_getRouteWaypoints()).filter(p=>p&&_validGpsPair(p.lat,p.lng));
+  if(!valid.length)return false;
+  try{
+    _map.relayout();
+    if(valid.length===1){_setPilgrimageMapCenterForBottomCard(valid[0],5,{repeat:false});return true;}
+    const bounds=new kakao.maps.LatLngBounds();
+    valid.forEach(p=>bounds.extend(new kakao.maps.LatLng(Number(p.lat),Number(p.lng))));
+    const sheet=document.getElementById('sheet-route');
+    const mapEl=document.getElementById('map-wrap')||document.getElementById('map');
+    const mr=mapEl&&mapEl.getBoundingClientRect(),sr=sheet&&sheet.classList.contains('open')&&sheet.getBoundingClientRect();
+    const overlap=mr&&sr?Math.max(0,Math.min(mr.bottom,sr.bottom)-Math.max(mr.top,sr.top)):0;
+    _map.setBounds(bounds,48,42,Math.round(overlap+48),42);
+    return true;
+  }catch(e){console.warn('[가톨릭길동무] 경유지 전체 보기 실패',e);return false;}
+}
 function _pilgrimageMapPermissions(){
   const mode=_pilgrimageMapMode();
   return {
@@ -21667,8 +21684,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           if(typeof _restoreAllCategoryMarkersForSelection==='function')_restoreAllCategoryMarkersForSelection();
           if(typeof _refreshRouteTmpMarkers==='function')_refreshRouteTmpMarkers();
           const focus=options.focusPoint&&_validGpsPair(options.focusPoint.lat,options.focusPoint.lng)?options.focusPoint:_pilgrimageMapInitialPoint(entryRole);
-          if(focus&&_validGpsPair(focus.lat,focus.lng))
-            _setPilgrimageMapCenterForBottomCard({lat:Number(focus.lat),lng:Number(focus.lng)},readOnly&&options.focusPoint?OAI_PILGRIMAGE_PLACE_INFO_FOCUS_LEVEL:OAI_PILGRIMAGE_MAP_PICK_VIEW_LEVEL,{repeat:false});
+          if(focus&&_validGpsPair(focus.lat,focus.lng)&&!(readOnly&&options.focusPoint))
+            _setPilgrimageMapCenterForBottomCard({lat:Number(focus.lat),lng:Number(focus.lng)},OAI_PILGRIMAGE_MAP_PICK_VIEW_LEVEL,{repeat:false});
         }catch(e){console.warn('[가톨릭길동무] 순례 지도 위치 복원 실패',e);}
       }
       document.addEventListener('oai-main-map-ready',finishPilgrimageMapEntry);
@@ -21734,9 +21751,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           try{if(_polyline){_polyline.setMap(null);_polyline=null;}}catch(_e){}
           try{if(typeof _restoreAllCategoryMarkersForSelection==='function')_restoreAllCategoryMarkersForSelection();}catch(_e){}
           const focused=options.focusPoint;
-          if(focused&&_validGpsPair(focused.lat,focused.lng)&&_map){
-            _setPilgrimageMapCenterForBottomCard(focused,OAI_PILGRIMAGE_PLACE_INFO_FOCUS_LEVEL,{repeat:false});
-          }
+          if(_map)_fitPilgrimagePlaceInfoWaypoints(plan);
         }else if(readOnly||normalRoute){
           setTimeout(function(){
             try{
@@ -21761,8 +21776,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         const initial=_pilgrimageMapInitialPoint(entryRole);
         if(_map&&mapEl&&mapEl.clientWidth>0&&mapEl.clientHeight>0&&typeof _map.relayout==='function')_map.relayout();
         if(typeof _syncMapPanelUI==='function')_syncMapPanelUI(normalRoute?'route':'pilgrimage-route-edit');
-        if(readOnly&&_pilgrimageCourseViewKind()==='place-info'&&_map&&options.focusPoint&&_validGpsPair(options.focusPoint.lat,options.focusPoint.lng)){
-          _setPilgrimageMapCenterForBottomCard(options.focusPoint,OAI_PILGRIMAGE_PLACE_INFO_FOCUS_LEVEL,{repeat:false});
+        if(readOnly&&_pilgrimageCourseViewKind()==='place-info'&&_map){
+          _fitPilgrimagePlaceInfoWaypoints(plan);
+          requestAnimationFrame(function(){_fitPilgrimagePlaceInfoWaypoints(plan);});
         }
         // Map center is applied by finishPilgrimageMapEntry after the map is measurable.
       }catch(err){console.warn('[가톨릭길동무] 순례계획 길찾기 편집 준비 실패',err);}},120);
