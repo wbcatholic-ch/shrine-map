@@ -1967,7 +1967,13 @@ function _mergeShrineVisitRecords(target,source,item){
       // 동일 장소의 동일 날짜는 방문 방법·저장 시각과 무관하게 1회만 유지.
       // 기존 원본의 메타데이터를 임의로 덮어쓰지 않는다.
       if(!_isVisitDate(obj.date))return;
-      if(!_hasVisitDate(target.visits,obj.date))target.visits.push(v);
+      const existingIndex=target.visits.findIndex(function(cur){return _visitDateOf(cur)===String(obj.date);});
+      if(existingIndex<0){target.visits.push(v);return;}
+      // 같은 날 병합에서 원본 GPS 인증을 수동 기록으로 덮지 않는다.
+      // 기존 GPS가 있으면 그대로 두고, 수동만 있을 때 GPS 원본을 우선한다.
+      const existing=_normalizeVisitEntry(target.visits[existingIndex]);
+      if(String(existing&&existing.method||'manual').toLowerCase()!=='gps' &&
+         String(obj.method||'manual').toLowerCase()==='gps')target.visits[existingIndex]=v;
     });
   }
   target.name=item&&item.name||target.name||'';
@@ -1980,15 +1986,23 @@ function _migrateShrineVisitRecord(item,data){
   if(!key||!data||typeof data!=='object') return {key:key,changed:false};
   let rec=data[key]&&typeof data[key]==='object'?data[key]:null;
   let changed=false;
-  _getShrineVisitLegacyKeys(item).forEach(function(legacyKey){
-    if(!legacyKey||legacyKey===key||!data[legacyKey]) return;
-    rec=_mergeShrineVisitRecords(rec,data[legacyKey],item);
-    delete data[legacyKey];
-    changed=true;
-  });
-  if(rec){
+  const legacyKeys=_getShrineVisitLegacyKeys(item).filter(function(k){return k&&k!==key&&data[k];});
+  if(legacyKeys.length){
+    const staged=Object.assign({},data);
+    // 원본 객체를 직접 변형하지 않고 임시 객체에 병합한다.
+    rec=rec?Object.assign({},rec,{visits:Array.isArray(rec.visits)?rec.visits.slice():[]}):null;
+    legacyKeys.forEach(function(legacyKey){
+      rec=_mergeShrineVisitRecords(rec,staged[legacyKey],item);
+      delete staged[legacyKey];
+    });
+    staged[key]=_mergeShrineVisitRecords(rec,null,item);
+    if(_saveShrineVisits(staged)){
+      Object.keys(data).forEach(function(k){delete data[k];});
+      Object.assign(data,staged);
+      changed=true;
+    }
+  }else if(rec){
     data[key]=_mergeShrineVisitRecords(rec,null,item);
-    if(changed) _saveShrineVisits(data);
   }
   return {key:key,changed:changed};
 }
@@ -2000,8 +2014,11 @@ function _loadShrineVisits(){
   }catch(e){ console.warn('[가톨릭길동무]', e); return {}; }
 }
 function _saveShrineVisits(data){
-  try{ localStorage.setItem(OAI_SHRINE_VISITS_KEY, JSON.stringify(data||{})); }
-  catch(e){ console.warn('[가톨릭길동무]', e); }
+  try{
+    const json=JSON.stringify(data||{});
+    localStorage.setItem(OAI_SHRINE_VISITS_KEY,json);
+    return localStorage.getItem(OAI_SHRINE_VISITS_KEY)===json;
+  }catch(e){console.warn('[가톨릭길동무]',e);return false;}
 }
 function _getShrineVisitRecord(item){
   const data=_loadShrineVisits();
@@ -2064,13 +2081,13 @@ function _addShrineVisit(item,date,method,measuredAt){
   rec.seq=item.seq||rec.seq||'';
   if(!_appendVisitOnce(rec,date,method,measuredAt))return false;
   if(!rec.placeId)rec.placeId=_oaiPlaceCanonicalId('shrine',item);
-  _clearManualVisitDeletion('shrine',key,date);
   data[key]=rec;
-  _saveShrineVisits(data);
+  if(!_saveShrineVisits(data))return false;
   try{
     const verified=_loadShrineVisits()[key];
     if(!verified||!_hasVisitDate(verified.visits,date))return false;
   }catch(e){console.warn('[성지 기록 저장 검증 실패]',e);return false;}
+  _clearManualVisitDeletion('shrine',key,date);
   _oaiQueueGpsCourseDate(date,method);
   try{ document.documentElement.classList.add('has-shrine-visits'); }catch(_e){}
   return true;
@@ -2098,11 +2115,11 @@ function _deleteShrineVisitAt(item,idx){
   if(idx<0||idx>=rec.visits.length) return false;
   var target=rec.visits[idx];
   if(target && typeof target==='object' && String(target.method||'').toLowerCase()==='gps') return false;
-  _recordManualVisitDeletion('shrine',key,target);
   rec.visits.splice(idx,1);
   if(rec.visits.length) data[key]=rec;
   else delete data[key];
-  _saveShrineVisits(data);
+  if(!_saveShrineVisits(data))return false;
+  _recordManualVisitDeletion('shrine',key,target);
   return true;
 }
 
@@ -4787,11 +4804,11 @@ function _parishVisitStoredKey(p,data){
   return candidate||current;
 }
 function _loadParishVisits(){try{const v=localStorage.getItem(OAI_PARISH_VISITS_KEY);const d=v?JSON.parse(v):{};return d&&typeof d==='object'?d:{}}catch(_e){return {}}}
-function _saveParishVisits(d){try{localStorage.setItem(OAI_PARISH_VISITS_KEY,JSON.stringify(d||{}))}catch(_e){}}
+function _saveParishVisits(d){try{const json=JSON.stringify(d||{});localStorage.setItem(OAI_PARISH_VISITS_KEY,json);return localStorage.getItem(OAI_PARISH_VISITS_KEY)===json;}catch(e){console.warn('[성당 기록 저장 실패]',e);return false;}}
 function _parishVisits(p){const d=_loadParishVisits(),r=d[_parishVisitStoredKey(p,d)]||{},a=Array.isArray(r.visits)?r.visits:[];return a.map(_normalizeVisitEntry).filter(function(v){return v&&_isVisitDate(v.date);}).sort(_compareShrineVisits);}
 function _parishVisitCount(p){return _parishVisits(p).length;}
-function _addParishVisit(p,date,method,measuredAt){const d=_loadParishVisits(),key=_parishVisitStoredKey(p,d);if(!key||!_isVisitDate(date))return false;const r=d[key]&&typeof d[key]==='object'?d[key]:{name:p.name||'',diocese:p.diocese||'',addr:p.addr||'',visits:[]};r.visits=Array.isArray(r.visits)?r.visits:[];if(!_appendVisitOnce(r,date,method,measuredAt))return false;_clearManualVisitDeletion('parish',key,date);if(!r.placeId)r.placeId=_oaiPlaceCanonicalId('parish',p);d[key]=r;_saveParishVisits(d);try{const persisted=_loadParishVisits()[key];if(!persisted||!_hasVisitDate(persisted.visits,date))return false;}catch(e){console.warn('[성당 기록 저장 검증 실패]',e);return false;}_oaiQueueGpsCourseDate(date,method);return true;}
-function _deleteParishVisit(p,i){const d=_loadParishVisits(),key=_parishVisitStoredKey(p,d),r=d[key];if(!r||!Array.isArray(r.visits)||i<0||i>=r.visits.length||String(r.visits[i].method||'')==='gps')return false;_recordManualVisitDeletion('parish',key,r.visits[i]);r.visits.splice(i,1);if(r.visits.length)d[key]=r;else delete d[key];_saveParishVisits(d);return true;}
+function _addParishVisit(p,date,method,measuredAt){const d=_loadParishVisits(),key=_parishVisitStoredKey(p,d);if(!key||!_isVisitDate(date))return false;const r=d[key]&&typeof d[key]==='object'?d[key]:{name:p.name||'',diocese:p.diocese||'',addr:p.addr||'',visits:[]};r.visits=Array.isArray(r.visits)?r.visits:[];if(!_appendVisitOnce(r,date,method,measuredAt))return false;if(!r.placeId)r.placeId=_oaiPlaceCanonicalId('parish',p);d[key]=r;if(!_saveParishVisits(d))return false;try{const persisted=_loadParishVisits()[key];if(!persisted||!_hasVisitDate(persisted.visits,date))return false;}catch(e){console.warn('[성당 기록 저장 검증 실패]',e);return false;}_clearManualVisitDeletion('parish',key,date);_oaiQueueGpsCourseDate(date,method);return true;}
+function _deleteParishVisit(p,i){const d=_loadParishVisits(),key=_parishVisitStoredKey(p,d),r=d[key];if(!r||!Array.isArray(r.visits)||i<0||i>=r.visits.length||String(r.visits[i].method||'')==='gps')return false;const removed=r.visits[i];r.visits.splice(i,1);if(r.visits.length)d[key]=r;else delete d[key];if(!_saveParishVisits(d))return false;_recordManualVisitDeletion('parish',key,removed);return true;}
 function _parishEntries(){const a=[];(PARISHES||[]).forEach(function(p,i){if(!p||p.diocese==='군종교구')return;const v=_parishVisits(p);if(v.length)a.push({p:p,i:i,v:v,n:v.length});});return a.sort(function(a,b){return _compareShrineVisits(a.v[0],b.v[0])||String(a.p.name).localeCompare(String(b.p.name),'ko')});}
 function _parishUnvisitedEntries(){const saved=_loadParishVisits();return (PARISHES||[]).map(function(p,i){const r=saved[_parishVisitStoredKey(p,saved)],v=r&&Array.isArray(r.visits)?r.visits:[];return {p:p,i:i,v:v};}).filter(function(x){return x.p&&x.p.diocese!=='군종교구'&&!x.v.length;}).sort(function(a,b){return String(a.p.name||'').localeCompare(String(b.p.name||''),'ko');});}
 function _parishDios(){const s={};(PARISHES||[]).forEach(function(p){if(p&&p.diocese&&p.diocese!=='군종교구')s[p.diocese]=1;});const ordered=(typeof _DIOS!=='undefined'?_DIOS:[]).slice(1).map(function(x){return x[0]}).filter(function(d){return !!s[d]});const extra=Object.keys(s).filter(function(d){return ordered.indexOf(d)<0}).sort(function(a,b){return a.localeCompare(b,'ko')});return ordered.concat(extra);}
