@@ -1904,7 +1904,11 @@ function _hasVisitDate(visits,date){
   return Array.isArray(visits)&&visits.some(function(v){return _visitDateOf(v)===String(date);});
 }
 function _isVisitDate(date){
-  return /^\d{4}-\d{2}-\d{2}$/.test(String(date||''));
+  const m=/^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(date||''));
+  if(!m)return false;
+  const y=Number(m[1]),mo=Number(m[2]),day=Number(m[3]);
+  const d=new Date(Date.UTC(y,mo-1,day));
+  return y>=1900&&d.getUTCFullYear()===y&&d.getUTCMonth()===mo-1&&d.getUTCDate()===day;
 }
 /* 성지·성당 공통: 동일 날짜 방문은 저장소 종류와 무관하게 1회만 추가한다.
    과거 기록은 이 함수에서 수정하거나 제거하지 않는다. */
@@ -1959,11 +1963,10 @@ function _mergeShrineVisitRecords(target,source,item){
     source.visits.forEach(function(v){
       const obj=typeof v==='string'?{date:v,method:'manual'}:v;
       if(!obj||!obj.date) return;
-      const exists=target.visits.some(function(cur){
-        const c=typeof cur==='string'?{date:cur,method:'manual'}:cur;
-        return String(c&&c.date||'')===String(obj.date||'') && String(c&&c.method||'manual')===String(obj.method||'manual') && String(c&&c.savedAt||'')===String(obj.savedAt||'');
-      });
-      if(!exists) target.visits.push(v);
+      // 동일 장소의 동일 날짜는 방문 방법·저장 시각과 무관하게 1회만 유지.
+      // 기존 원본의 메타데이터를 임의로 덮어쓰지 않는다.
+      if(!_isVisitDate(obj.date))return;
+      if(!_hasVisitDate(target.visits,obj.date))target.visits.push(v);
     });
   }
   target.name=item&&item.name||target.name||'';
@@ -18665,7 +18668,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       lines.push(pair[1]+' | 장소 '+places+' / 원본 '+stamps+' / 날짜 중복 '+duplicates+' / 문자열 구형 '+legacy+' / 날짜·구조 오류 '+invalid+' / 인증 방법 불명 '+unknown+' / 부가정보 포함 '+withExtras);
       if(details.length)lines.push(details.slice(0,40).map(x=>'  '+x).join('\n')+(details.length>40?'\n  외 '+(details.length-40)+'건':''));
     });
-    // V1584: 과거 장소 키 중복 진단. 원본 데이터는 절대 변경하지 않는다.
+    // V1585: 과거 장소 키 중복 진단. 원본 데이터는 절대 변경하지 않는다.
     // 이름만 같은 항목은 확정 중복으로 취급하지 않고 검토 후보로 표시한다.
     [['oai_shrine_visits_v1','성지'],['oai_parish_visits_v1','성당']].forEach(function(pair){
       let data;
