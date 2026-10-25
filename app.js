@@ -17569,9 +17569,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       }
     }catch(err){oaiDevStatus(err.message||'요청을 처리할 수 없습니다.');}
   },true);
-  document.getElementById('oai-dev-import-file').addEventListener('change',async function(){
+  document.addEventListener('change',async function(event){
+    if(!event.target||event.target.id!=='oai-dev-import-file')return;
     if(!oaiDevEnabled()||!oaiDevPanelUnlocked)return;
-    try{await oaiDevLoadBackupFile(this.files&&this.files[0]);}
+    try{await oaiDevLoadBackupFile(event.target.files&&event.target.files[0]);}
     catch(err){oaiDevPendingRestore=null;document.getElementById('oai-dev-restore-preview').hidden=true;oaiDevStatus('파일 검사 실패: '+(err.message||'올바른 백업 파일이 아닙니다.'));}
   });
   setTimeout(oaiRefreshDeveloperPanel,0);
