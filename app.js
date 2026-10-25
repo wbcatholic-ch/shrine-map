@@ -18537,6 +18537,36 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }));
     return {courses,rows,changes,skipped};
   }
+  // V1562: 완료 화면의 원천과 정정 제외 원인을 원본 저장값 기준으로만 진단한다.
+  // 어떠한 로컬 저장값도 수정하지 않는다.
+  function _completionStorageDiagnostic(){
+    const dates=new Set(['2026-08-29','2026-10-24','2026-10-09','2026-07-25']);
+    const courses=_dailyStoredCourses(),lines=[];
+    courses.forEach(course=>(course.completions||[]).forEach((entry,index)=>{
+      const date=_dailyIso(Number(entry&&entry.completedAt));
+      if(!dates.has(date))return;
+      const stamped=Array.isArray(entry.stampPlaces);
+      const source=stamped?entry.stampPlaces:course.places;
+      const manual=_manualPointsFor(course.id);
+      lines.push(date+' | '+course.name+' | method='+String(entry.method||'(없음)')+
+        ' | locked='+String(entry.locked===true)+' | stampPlaces='+(stamped?entry.stampPlaces.length:'없음')+
+        ' | places='+course.places.length+' | 화면원천='+(stamped?'stampPlaces':'places 대체')+
+        ' | 수동추가='+manual.length+' | 완료인덱스='+index);
+      lines.push('  표시 장소: '+(source||[]).map(x=>String(x&&x.name||'?')).join(' / '));
+      try{
+        const events=_dailyGpsEvents(date);
+        lines.push('  당일 GPS('+events.length+'): '+events.map(x=>x.name+' '+new Date(x.at).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',hour12:false})).join(' / '));
+      }catch(err){lines.push('  GPS 조회 보류: '+String(err&&err.message||err));}
+    }));
+    return lines.length?lines.join('\n'):'진단 대상 날짜의 저장된 완료 기록이 없습니다.';
+  }
+  document.addEventListener('click',function(e){
+    if(!e.target.closest('#oai-dev-completion-storage-diagnostic')||window.__OAI_DEV_RUNTIME_ACTIVE__!==true)return;
+    const out=document.getElementById('oai-dev-completion-audit-report');if(!out)return;
+    out.hidden=false;
+    try{out.textContent=_completionStorageDiagnostic();}
+    catch(err){out.textContent='읽기 전용 진단 보류: '+String(err&&err.message||err);}
+  });
   function _completionGpsAuditPreview(){return _completionGpsComparison().rows;}
   const COMPLETION_REPAIR_BACKUP_KEY='oai_completion_repair_v1561_backup';
   function _completionRepairPreview(){return _completionGpsComparison();}
