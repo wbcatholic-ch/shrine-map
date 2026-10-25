@@ -4554,9 +4554,12 @@ function _oaiJointStampAddParish(parish,date,sourceKind,sourceItem){
   entry.sourcePlaceId=_oaiPlaceCanonicalId(sourceKind,sourceItem);
   if(!r.placeId)r.placeId=_oaiPlaceCanonicalId('parish',parish);
   data[state.key]=r;
-  localStorage.setItem(OAI_PARISH_VISITS_KEY,JSON.stringify(data));
+  if(!_saveParishVisits(data))return false;
   if(!_hasVisitDate((_loadParishVisits()[state.key]||{}).visits,date)){
-    if(raw===null)localStorage.removeItem(OAI_PARISH_VISITS_KEY);else localStorage.setItem(OAI_PARISH_VISITS_KEY,raw);
+    try{
+      if(raw===null)localStorage.removeItem(OAI_PARISH_VISITS_KEY);
+      else localStorage.setItem(OAI_PARISH_VISITS_KEY,raw);
+    }catch(e){console.warn('[공통 성당 기록 복구 실패]',e);}
     return false;
   }
   return true;
@@ -4808,7 +4811,7 @@ function _saveParishVisits(d){try{const json=JSON.stringify(d||{});localStorage.
 function _parishVisits(p){const d=_loadParishVisits(),r=d[_parishVisitStoredKey(p,d)]||{},a=Array.isArray(r.visits)?r.visits:[];return a.map(_normalizeVisitEntry).filter(function(v){return v&&_isVisitDate(v.date);}).sort(_compareShrineVisits);}
 function _parishVisitCount(p){return _parishVisits(p).length;}
 function _addParishVisit(p,date,method,measuredAt){const d=_loadParishVisits(),key=_parishVisitStoredKey(p,d);if(!key||!_isVisitDate(date))return false;const r=d[key]&&typeof d[key]==='object'?d[key]:{name:p.name||'',diocese:p.diocese||'',addr:p.addr||'',visits:[]};r.visits=Array.isArray(r.visits)?r.visits:[];if(!_appendVisitOnce(r,date,method,measuredAt))return false;if(!r.placeId)r.placeId=_oaiPlaceCanonicalId('parish',p);d[key]=r;if(!_saveParishVisits(d))return false;try{const persisted=_loadParishVisits()[key];if(!persisted||!_hasVisitDate(persisted.visits,date))return false;}catch(e){console.warn('[성당 기록 저장 검증 실패]',e);return false;}_clearManualVisitDeletion('parish',key,date);_oaiQueueGpsCourseDate(date,method);return true;}
-function _deleteParishVisit(p,i){const d=_loadParishVisits(),key=_parishVisitStoredKey(p,d),r=d[key];if(!r||!Array.isArray(r.visits)||i<0||i>=r.visits.length||String(r.visits[i].method||'')==='gps')return false;const removed=r.visits[i];r.visits.splice(i,1);if(r.visits.length)d[key]=r;else delete d[key];if(!_saveParishVisits(d))return false;_recordManualVisitDeletion('parish',key,removed);return true;}
+function _deleteParishVisit(p,i){const d=_loadParishVisits(),key=_parishVisitStoredKey(p,d),r=d[key];if(!r||!Array.isArray(r.visits)||i<0||i>=r.visits.length||String((_normalizeVisitEntry(r.visits[i])||{}).method||'')==='gps')return false;const removed=_normalizeVisitEntry(r.visits[i]);r.visits.splice(i,1);if(r.visits.length)d[key]=r;else delete d[key];if(!_saveParishVisits(d))return false;_recordManualVisitDeletion('parish',key,removed);return true;}
 function _parishEntries(){const a=[];(PARISHES||[]).forEach(function(p,i){if(!p||p.diocese==='군종교구')return;const v=_parishVisits(p);if(v.length)a.push({p:p,i:i,v:v,n:v.length});});return a.sort(function(a,b){return _compareShrineVisits(a.v[0],b.v[0])||String(a.p.name).localeCompare(String(b.p.name),'ko')});}
 function _parishUnvisitedEntries(){const saved=_loadParishVisits();return (PARISHES||[]).map(function(p,i){const r=saved[_parishVisitStoredKey(p,saved)],v=r&&Array.isArray(r.visits)?r.visits:[];return {p:p,i:i,v:v};}).filter(function(x){return x.p&&x.p.diocese!=='군종교구'&&!x.v.length;}).sort(function(a,b){return String(a.p.name||'').localeCompare(String(b.p.name||''),'ko');});}
 function _parishDios(){const s={};(PARISHES||[]).forEach(function(p){if(p&&p.diocese&&p.diocese!=='군종교구')s[p.diocese]=1;});const ordered=(typeof _DIOS!=='undefined'?_DIOS:[]).slice(1).map(function(x){return x[0]}).filter(function(d){return !!s[d]});const extra=Object.keys(s).filter(function(d){return ordered.indexOf(d)<0}).sort(function(a,b){return a.localeCompare(b,'ko')});return ordered.concat(extra);}
@@ -17880,6 +17883,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
               if(typeof visit==='string')continue; // 과거 문자열 기록은 그대로 보존
               if(!visit||typeof visit!=='object'||Array.isArray(visit))
                 throw Error('방문일자 기록 구조가 올바르지 않습니다: '+key);
+              // 과거 비표준 날짜도 삭제하거나 변조하지 않는다. 진단 단계에서 별도 확인한다.
+              if(typeof visit.date!=='string')
+                throw Error('방문일자 필드 형식이 올바르지 않습니다: '+key);
             }
           }
         }
