@@ -18637,6 +18637,155 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }));
     return {courses,rows,changes,skipped};
   }
+  // V1576: 개발자 모드 전용, GPS 기준 완료 코스 재구성 미리보기.
+  // 기존 완료 코스, GPS 스탬프 및 로컬 저장소를 절대 수정하지 않는다.
+  function _completionGpsRebuildPreview(){
+    const courses=_dailyStoredCourses(),byDate=new Map(),lines=[];
+    courses.forEach(course=>(course.completions||[]).forEach(entry=>{
+      if(!entry||entry.method!=='gps')return;
+      const date=_dailyIso(Number(entry.completedAt));
+      if(!date){lines.push('보류 | '+course.name+' | 완료 날짜 확인 실패');return;}
+      if(!byDate.has(date))byDate.set(date,[]);
+      byDate.get(date).push({course,entry});
+    }));
+    const sorted=Array.from(byDate.keys()).sort().reverse();
+    sorted.forEach(date=>{
+      const entries=byDate.get(date);
+      if(entries.length!==1){lines.push(date+' | 보류 | GPS 완료 코스 '+entries.length+'개: 방문지 소유권 확인 필요');return;}
+      const {course,entry}=entries[0];
+      try{
+        const raw=_dailyRawGpsEvents(date);
+        if(!raw.length){lines.push(date+' | 보류 | 원본 GPS 스탬프 없음');return;}
+        const events=_dailyGpsEvents(date);
+        // 공통화 장소는 성지 대표로 1곳만 남긴 뒤 V1570 판정 함수를 사용한다.
+        const decisions=_dailyCourseRegistrationDecisions(events);
+        const expected=decisions.filter(x=>x.courseRegistration==='등록').map(x=>x.event);
+        if(!expected.length){lines.push(date+' | 보류 | 코스 등록 대상 없음 (GPS '+raw.length+'개)');return;}
+        const old=Array.isArray(entry.stampPlaces)?entry.stampPlaces:course.places;
+        if(!Array.isArray(old))throw new Error('기존 완료 장소 구조 오류');
+        const previous=_uniqueCompletionStampPlaces(old);
+        const missing=expected.filter(ev=>!previous.some(p=>_dailyCompletedPlaceMatches(p,ev)));
+        const extra=previous.filter(p=>!expected.some(ev=>_dailyCompletedPlaceMatches(p,ev)));
+        // 장소 식별이 여러 항목에 동시에 대응하면 임의 복구를 금지한다.
+        const ambiguous=expected.some(ev=>previous.filter(p=>_dailyCompletedPlaceMatches(p,ev)).length>1)||
+          previous.some(p=>expected.filter(ev=>_dailyCompletedPlaceMatches(p,ev)).length>1);
+        const status=ambiguous?'보류':missing.length||extra.length?'차이 발견':'장소 일치';
+        lines.push(date+' | '+course.name+' | '+status+' | 기존 '+previous.length+'곳 / GPS 기준 '+expected.length+'곳 / 원본 스탬프 '+raw.length+'개');
+        if(missing.length)lines.push('  누락 후보: '+missing.map(x=>x.name).join(' / '));
+        if(extra.length)lines.push('  기존에만 있음: '+extra.map(x=>x.name).join(' / '));
+        if(ambiguous)lines.push('  보류 이유: 장소가 여러 항목에 일치');
+        lines.push('  GPS 기준: '+expected.map(x=>x.name).join(' → '));
+        if(!Array.isArray(entry.stampPlaces))lines.push('  참고: 구형 완료 기록(stampPlaces 없음)으로 계획 장소와 비교함');
+        if(date==='2026-08-29')lines.push('  보호: 8월 29일 정상 거리 기록은 변경하지 않음');
+      }catch(err){lines.push(date+' | '+course.name+' | 보류 | '+String(err&&err.message||err));}
+    });
+    return 'GPS 기준 순례완료 재구성 미리보기 (읽기 전용)\n'+
+      '기존 기록·GPS 스탬프·거리·사진·메모 변경 없음\n'+
+      (lines.length?lines.join('\n'):'GPS 자동 순례완료 기록 없음');
+  }
+  document.addEventListener('click',function(e){
+    if(!e.target.closest('#oai-dev-completion-rebuild-preview')||window.__OAI_DEV_RUNTIME_ACTIVE__!==true)return;
+    const out=document.getElementById('oai-dev-completion-audit-report');if(!out)return;
+    out.hidden=false;
+    try{out.textContent=_completionGpsRebuildPreview();}
+    catch(err){out.textContent='읽기 전용 재구성 검사 보류: '+String(err&&err.message||err);}
+  });
+  // V1577: 개발자 명시 승인에 한하여 자동 생성 완료 코스만 일회성 재구성.
+  // 계획/진행 중 코스, 수동 완료, 스탬프, 사진, 메모, 출발/도착은 변경하지 않는다.
+  const COMPLETION_REBUILD_ONCE_KEY='oai_completion_rebuild_once_v1577';
+  const COMPLETION_REBUILD_SOURCE_KEY='oai_completion_rebuild_once_v1577_source';
+  function _completionRebuildOncePrepare(){
+    const courses=_dailyStoredCourses(),active=_readActiveFollowRaw(),byDate=new Map(),candidates=[],skipped=[];
+    courses.forEach((c,i)=>{
+      if(!c.autoGps)return;
+      const completions=c.completions||[];
+      const date=String(c.sourceDate||'');
+      if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||completions.length!==1||completions[0].method!=='gps'||
+         _dailyIso(Number(completions[0].completedAt))!==date||String(c.id)===(active&&String(active.courseId))){
+        skipped.push((date||'?')+' '+c.name+': 자동 완료 단일 기록 확인 불가 또는 진행 중');return;
+      }
+      if(!byDate.has(date))byDate.set(date,[]);
+      byDate.get(date).push({c,i,entry:completions[0]});
+    });
+    byDate.forEach((items,date)=>{
+      // 같은 날짜에 수동/순례하기 완료 기록이 있으면 GPS 방문 소유권이 모호하다.
+      const owners=courses.filter(c=>(c.completions||[]).some(e=>_dailyIso(Number(e&&e.completedAt))===date));
+      if(items.length!==1||owners.length!==1){skipped.push(date+': 같은 날짜에 완료 코스가 여러 개 있어 보류');return;}
+      const {c,i,entry}=items[0];
+      try{
+        const raw=_dailyRawGpsEvents(date);
+        if(!raw.length)throw new Error('원본 GPS 스탬프 없음');
+        const expected=_dailyAutoEvents(_dailyGpsEvents(date));
+        if(!expected.length||!_dailyAutoEligible(expected))throw new Error('GPS 자동 등록 대상 없음');
+        if(expected.some(ev=>!ev||!ev.name||!Number.isFinite(Number(ev.lat))||!Number.isFinite(Number(ev.lng))))throw new Error('GPS 장소 정보 불완전');
+        const places=_dailyBuildAutoCourse(date,expected,'preview_'+date).places;
+        if(places.length!==expected.length)throw new Error('공통화 장소 식별 모호');
+        const old=Array.isArray(entry.stampPlaces)?entry.stampPlaces:c.places;
+        if(!Array.isArray(old))throw new Error('기존 완료 장소 형식 오류');
+        const missing=expected.filter(ev=>!old.some(p=>_dailyCompletedPlaceMatches(p,ev)));
+        const extra=old.filter(p=>!expected.some(ev=>_dailyCompletedPlaceMatches(p,ev)));
+        const ambiguous=expected.some(ev=>old.filter(p=>_dailyCompletedPlaceMatches(p,ev)).length>1)||
+          old.some(p=>expected.filter(ev=>_dailyCompletedPlaceMatches(p,ev)).length>1);
+        if(ambiguous)throw new Error('기존 장소와 GPS 일대일 식별 불가');
+        // 동일한 완료 기록은 불필요하게 다시 쓰지 않는다. 8/29 정상 기록도 보존.
+        const same=!missing.length&&!extra.length&&old.length===places.length&&
+          old.every((p,j)=>_dailyCompletedPlaceMatches(p,expected[j]))&&Number(entry.placeCount)===places.length;
+        if(!same)candidates.push({i,date,courseId:c.id,name:c.name,places,oldCount:old.length,
+          missing:missing.map(x=>x.name),extra:extra.map(x=>x.name),start:c.start,end:c.end});
+      }catch(err){skipped.push(date+' '+c.name+': '+String(err&&err.message||err));}
+    });
+    return {courses,candidates,skipped};
+  }
+  function _completionRebuildOnceRun(){
+    if(window.__OAI_DEV_RUNTIME_ACTIVE__!==true||!oaiDevEnabled())throw new Error('개발자 모드에서만 실행할 수 있습니다');
+    if(localStorage.getItem(COMPLETION_REBUILD_ONCE_KEY)!==null)throw new Error('이미 일회성 재구성을 실행했습니다. 다시 실행하지 않습니다');
+    const prepared=_completionRebuildOncePrepare();
+    if(!prepared.candidates.length)return '재구성할 자동 완료 기록이 없습니다. 보류 '+prepared.skipped.length+'건\n'+prepared.skipped.join('\n');
+    const summary=prepared.candidates.map(x=>x.date+' '+x.name+' '+x.oldCount+'곳 → '+x.places.length+'곳'+
+      (x.missing.length?' / 추가: '+x.missing.join(', '):'')).join('\n');
+    if(!confirm('자동 생성 순례완료만 한 번 새로 구성합니다.\n순례계획·진행 중 코스·스탬프·사진·메모는 변경하지 않습니다.\n기존 출발지·도착지는 유지합니다.\n\n'+summary+'\n\n보류 '+prepared.skipped.length+'건. 실행할까요?'))return '사용자가 취소했습니다.';
+    const original=localStorage.getItem(COURSES_KEY)||'[]';
+    if(localStorage.getItem(COMPLETION_REBUILD_SOURCE_KEY)!==null)throw new Error('이전 재구성 원본이 있어 중단합니다');
+    if(JSON.stringify(prepared.courses)!==JSON.stringify(JSON.parse(original)))throw new Error('검사 이후 코스 변경 감지');
+    // 기존 자동 완료 코스 전체 원본을 먼저 별도 보존하고 저장 확인.
+    localStorage.setItem(COMPLETION_REBUILD_SOURCE_KEY,original);
+    if(localStorage.getItem(COMPLETION_REBUILD_SOURCE_KEY)!==original)throw new Error('재구성 원본 보관 실패');
+    const next=JSON.parse(original);
+    prepared.candidates.forEach(x=>{
+      const c=next[x.i];
+      if(c.id!==x.courseId||!c.autoGps||c.completions.length!==1)throw new Error('완료 코스 식별 변경');
+      c.places=x.places;
+      c.completions[0].stampPlaces=x.places.map(p=>Object.assign({},p));
+      c.completions[0].placeCount=x.places.length;
+      // start/end, course id, date, completion timestamp, other metadata preserved.
+    });
+    const serialized=JSON.stringify(next);
+    if(localStorage.getItem(COURSES_KEY)!==original)throw new Error('저장 직전 코스 변경 감지');
+    try{
+      localStorage.setItem(COURSES_KEY,serialized);
+      if(localStorage.getItem(COURSES_KEY)!==serialized)throw new Error('완료 코스 저장 검증 실패');
+      const verified=_dailyStoredCourses();
+      for(const x of prepared.candidates){
+        const before=prepared.courses[x.i],after=verified[x.i];
+        if(!after||after.id!==before.id||JSON.stringify(after.start)!==JSON.stringify(before.start)||
+          JSON.stringify(after.end)!==JSON.stringify(before.end)||after.completions[0].placeCount!==x.places.length||
+          JSON.stringify(after.completions[0].stampPlaces)!==JSON.stringify(x.places))throw new Error('저장 후 출발/도착/완료 장소 검증 실패');
+      }
+      localStorage.setItem(COMPLETION_REBUILD_ONCE_KEY,JSON.stringify({at:Date.now(),count:prepared.candidates.length}));
+      if(!localStorage.getItem(COMPLETION_REBUILD_ONCE_KEY))throw new Error('일회성 완료 상태 저장 실패');
+      renderCourseList();
+      return '일회성 재구성 완료: '+prepared.candidates.length+'건. 보류 '+prepared.skipped.length+'건.\n'+summary;
+    }catch(err){
+      try{localStorage.setItem(COURSES_KEY,original);}catch(rollback){throw new Error('저장 실패 및 원본 되돌리기 실패: '+rollback.message);}
+      throw err;
+    }
+  }
+  document.addEventListener('click',function(e){
+    if(!e.target.closest('#oai-dev-completion-rebuild-once')||window.__OAI_DEV_RUNTIME_ACTIVE__!==true)return;
+    const out=document.getElementById('oai-dev-completion-audit-report');if(!out)return;
+    out.hidden=false;
+    try{out.textContent=_completionRebuildOnceRun();}catch(err){out.textContent='일회성 재구성 중단: '+String(err&&err.message||err);}
+  });
   // V1562: 완료 화면의 원천과 정정 제외 원인을 원본 저장값 기준으로만 진단한다.
   // 어떠한 로컬 저장값도 수정하지 않는다.
   function _completionStorageDiagnostic(){
@@ -18774,7 +18923,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         const result=_completionGpsComparison();
         // 자동 정정은 명백하게 검증된 GPS 완료 기록만 대상으로 한다.
         // 불일치 장소나 모호한 항목이 있으면 원본을 보존한다.
-        const repaired=_completionGpsAutoRepair(result);
+        const repaired=0; // V1577: 과거 완료 코스 자동 재수정 금지. 개발자 명시 승인 1회만 허용.
         _completionAuditResult={checked:result.rows.length,changes:result.changes.length,
           skipped:result.skipped.length,repaired:repaired,at:Date.now()};
         if(result.changes.length||result.skipped.length)
@@ -18789,7 +18938,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const btn=e.target.closest('#oai-dev-completion-repair');
     if(!btn||window.__OAI_DEV_RUNTIME_ACTIVE__!==true)return;
     const out=document.getElementById('oai-dev-completion-audit-report');
-    try{const msg=_completionRepairConfirmed();if(out){out.hidden=false;out.textContent=msg;}}
+    try{if(out){out.hidden=false;out.textContent='구형 부분 정정은 비활성화되었습니다. 일회성 재구성 기능을 사용하세요.';}}
     catch(err){if(out){out.hidden=false;out.textContent='정정 보류: '+String(err&&err.message||err);}console.warn('[순례완료 GPS 정정 보류]',err);}
   });
   document.addEventListener('click',function(e){
