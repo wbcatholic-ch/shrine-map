@@ -1906,6 +1906,16 @@ function _hasVisitDate(visits,date){
 function _isVisitDate(date){
   return /^\d{4}-\d{2}-\d{2}$/.test(String(date||''));
 }
+/* 성지·성당 공통: 동일 날짜 방문은 저장소 종류와 무관하게 1회만 추가한다.
+   과거 기록은 이 함수에서 수정하거나 제거하지 않는다. */
+function _appendVisitOnce(record,date,method,measuredAt){
+  if(!record||!_isVisitDate(date))return false;
+  if(!Array.isArray(record.visits))record.visits=[];
+  if(_hasVisitDate(record.visits,date))return false;
+  record.visits.push(_newVisitEntry(date,method,measuredAt));
+  record.visits.sort(function(a,b){return _compareShrineVisits(_normalizeVisitEntry(a),_normalizeVisitEntry(b));});
+  return true;
+}
 /* 신규 GPS 방문 날짜만 작게 보관한다. 기존 방문기록 전체는 앱 실행 때 검색하지 않는다. */
 const OAI_GPS_PENDING_DATES_KEY='oai_pilgrimage_gps_pending_dates_v1173';
 function _oaiQueueGpsCourseDate(date,method){
@@ -2048,11 +2058,9 @@ function _addShrineVisit(item,date,method,measuredAt){
   rec.name=item.name||rec.name||'';
   rec.diocese=item.diocese||rec.diocese||'';
   rec.seq=item.seq||rec.seq||'';
-  if(_hasVisitDate(rec.visits,date)) return false;
+  if(!_appendVisitOnce(rec,date,method,measuredAt))return false;
   if(!rec.placeId)rec.placeId=_oaiPlaceCanonicalId('shrine',item);
   _clearManualVisitDeletion('shrine',key,date);
-  rec.visits.push(_newVisitEntry(date,method,measuredAt));
-  rec.visits.sort(function(a,b){return _compareShrineVisits(_normalizeVisitEntry(a),_normalizeVisitEntry(b));});
   data[key]=rec;
   _saveShrineVisits(data);
   try{
@@ -4753,7 +4761,7 @@ function _loadParishVisits(){try{const v=localStorage.getItem(OAI_PARISH_VISITS_
 function _saveParishVisits(d){try{localStorage.setItem(OAI_PARISH_VISITS_KEY,JSON.stringify(d||{}))}catch(_e){}}
 function _parishVisits(p){const d=_loadParishVisits(),r=d[_parishVisitStoredKey(p,d)]||{},a=Array.isArray(r.visits)?r.visits:[];return a.map(_normalizeVisitEntry).filter(function(v){return v&&v.date;}).sort(_compareShrineVisits);}
 function _parishVisitCount(p){return _parishVisits(p).length;}
-function _addParishVisit(p,date,method,measuredAt){const d=_loadParishVisits(),key=_parishVisitStoredKey(p,d);if(!key||!_isVisitDate(date))return false;const r=d[key]&&typeof d[key]==='object'?d[key]:{name:p.name||'',diocese:p.diocese||'',addr:p.addr||'',visits:[]};r.visits=Array.isArray(r.visits)?r.visits:[];if(_hasVisitDate(r.visits,date))return false;_clearManualVisitDeletion('parish',key,date);r.visits.push(_newVisitEntry(date,method,measuredAt));r.visits.sort(_compareShrineVisits);if(!r.placeId)r.placeId=_oaiPlaceCanonicalId('parish',p);d[key]=r;_saveParishVisits(d);try{const persisted=_loadParishVisits()[key];if(!persisted||!_hasVisitDate(persisted.visits,date))return false;}catch(e){console.warn('[성당 기록 저장 검증 실패]',e);return false;}_oaiQueueGpsCourseDate(date,method);return true;}
+function _addParishVisit(p,date,method,measuredAt){const d=_loadParishVisits(),key=_parishVisitStoredKey(p,d);if(!key||!_isVisitDate(date))return false;const r=d[key]&&typeof d[key]==='object'?d[key]:{name:p.name||'',diocese:p.diocese||'',addr:p.addr||'',visits:[]};r.visits=Array.isArray(r.visits)?r.visits:[];if(!_appendVisitOnce(r,date,method,measuredAt))return false;_clearManualVisitDeletion('parish',key,date);if(!r.placeId)r.placeId=_oaiPlaceCanonicalId('parish',p);d[key]=r;_saveParishVisits(d);try{const persisted=_loadParishVisits()[key];if(!persisted||!_hasVisitDate(persisted.visits,date))return false;}catch(e){console.warn('[성당 기록 저장 검증 실패]',e);return false;}_oaiQueueGpsCourseDate(date,method);return true;}
 function _deleteParishVisit(p,i){const d=_loadParishVisits(),key=_parishVisitStoredKey(p,d),r=d[key];if(!r||!Array.isArray(r.visits)||i<0||i>=r.visits.length||String(r.visits[i].method||'')==='gps')return false;_recordManualVisitDeletion('parish',key,r.visits[i]);r.visits.splice(i,1);if(r.visits.length)d[key]=r;else delete d[key];_saveParishVisits(d);return true;}
 function _parishEntries(){const a=[];(PARISHES||[]).forEach(function(p,i){if(!p||p.diocese==='군종교구')return;const v=_parishVisits(p);if(v.length)a.push({p:p,i:i,v:v,n:v.length});});return a.sort(function(a,b){return _compareShrineVisits(a.v[0],b.v[0])||String(a.p.name).localeCompare(String(b.p.name),'ko')});}
 function _parishUnvisitedEntries(){const saved=_loadParishVisits();return (PARISHES||[]).map(function(p,i){const r=saved[_parishVisitStoredKey(p,saved)],v=r&&Array.isArray(r.visits)?r.visits:[];return {p:p,i:i,v:v};}).filter(function(x){return x.p&&x.p.diocese!=='군종교구'&&!x.v.length;}).sort(function(a,b){return String(a.p.name||'').localeCompare(String(b.p.name||''),'ko');});}
