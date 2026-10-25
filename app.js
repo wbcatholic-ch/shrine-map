@@ -4529,9 +4529,12 @@ function _oaiJointStampAddParish(parish,date,sourceKind,sourceItem){
   const state=_oaiJointParishState(parish,date,data);
   if(state.unsafe||state.exists||!state.key)return false;
   const r=data[state.key]||{name:parish.name||'',diocese:parish.diocese||'',addr:parish.addr||'',visits:[]};
-  const entry=_newVisitEntry(date,'manual');entry.source='joint-stamp-backfill';entry.sourceKind=sourceKind;
+  // 공통 성당 보완 기록도 일반 성지·성당과 동일한 하루 1회 저장 경로를 사용한다.
+  if(!_appendVisitOnce(r,date,'manual'))return false;
+  const entry=r.visits.find(function(v){return v&&v.date===date;});
+  if(!entry)return false;
+  entry.source='joint-stamp-backfill';entry.sourceKind=sourceKind;
   entry.sourcePlaceId=_oaiPlaceCanonicalId(sourceKind,sourceItem);
-  r.visits.push(entry);r.visits.sort(_compareShrineVisits);
   if(!r.placeId)r.placeId=_oaiPlaceCanonicalId('parish',parish);
   data[state.key]=r;
   localStorage.setItem(OAI_PARISH_VISITS_KEY,JSON.stringify(data));
