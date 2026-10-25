@@ -16982,12 +16982,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     /* V8-1-14-863: 설정 진입은 명시적인 사용자 foreground 동작이다.
        새 문서 첫 resume의 오래된 native 복귀값과 충돌하지 않도록 시각만 기록한다. */
     try{ window.__OAI_LAST_FOREGROUND_UI_ACTION_AT__=Date.now(); }catch(_e){}
-    enforceCoverSettingsLabel();
-    refresh();
-    refreshGoogleDriveButton();
+    // Show the settings modal before updating its optional content. A failure in
+    // a settings widget must never prevent the user from entering Settings.
     m.classList.add('show');m.setAttribute('aria-hidden','false');
     m.dataset.fromParishBook=opts&&opts.fromParishBook?'1':'';
     m.dataset.returnToCover=opts&&opts.returnToCover?'1':'';
+    enforceCoverSettingsLabel();
+    try{refresh();}catch(err){console.error('[가톨릭길동무] 설정 내용 갱신 실패',err);}
+    try{refreshGoogleDriveButton();}catch(err){console.error('[가톨릭길동무] Drive 설정 갱신 실패',err);}
     try{
       const panel=m.querySelector('.oai-settings-panel');
       if(panel){
