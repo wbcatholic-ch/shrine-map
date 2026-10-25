@@ -18515,54 +18515,57 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     return rows;
   }
-  // 완료 기록은 GPS 스탬프가 원본이다. 화면의 수동 보완 및 순례계획은 검사 대상이 아니다.
-  // 과거 기록은 1회, 새 GPS 완료 등록은 저장 이후 느린 비동기 대조를 수행한다.
-  const COMPLETION_AUDIT_ONCE_KEY='oai_completion_gps_audit_v1552_once';
-  const COMPLETION_AUDIT_BACKUP_KEY='oai_completion_gps_audit_v1552_backup';
+  // 완료 기록의 GPS 항목만 검증한다. 수동 추가 장소와 순례계획은 별도 보존한다.
+  // GPS 출처가 명확하고 같은 날짜의 실제 GPS 스탬프가 확인될 때에만 정정한다.
+  const COMPLETION_AUDIT_ONCE_KEY='oai_completion_gps_audit_v1554_once';
+  const COMPLETION_AUDIT_BACKUP_KEY='oai_completion_gps_audit_v1554_backup';
   let completionAuditTimer=0,completionAuditRunning=false,completionAuditPending=false;
   function _completionGpsAuditEntry(entry,course,events){
-    if(!entry||String(entry.method||'')!=='gps'||!Array.isArray(entry.stampPlaces))return null;
-    const source=entry.stampPlaces;
-    if(!source.length||!events.length)return null; // 원본을 검증할 수 없으면 보류
-    const verified=[];
+    if(!entry||!Array.isArray(entry.stampPlaces)||!entry.stampPlaces.length)return {fixed:null,deferred:false};
+    // 순례완료의 stampPlaces는 등록된 GPS 스탬프만으로 구성한다.
+    // 완료 방식(method)과 무관하게 모든 완료 기록의 장소 목록을 대조한다.
+    // 해당 날짜의 GPS 이벤트가 비어 있으면 카탈로그 로딩/기록 누락 가능성을 고려해 보류한다.
+    if(!events.length)return {fixed:null,deferred:true};
+    const source=entry.stampPlaces,verified=[];
     for(const point of source){
       if(!point||point.routeOnly)continue;
       if(!events.some(ev=>_dailyCompletedPlaceMatches(point,ev)))continue;
-      if(verified.some(other=>_dailySamePlace(other,point)||_dailyLinkedGpsPair(other,point)))continue;
+      if(verified.some(other=>_dailySamePlace(other,point)||_dailyLinkedGpsPair(other,point)||events.some(ev=>_dailyCompletedPlaceMatches(other,ev)&&_dailyCompletedPlaceMatches(point,ev))))continue;
       verified.push(point);
     }
-    // 해당 날짜의 실제 스탬프와 일치하는 항목이 하나도 없으면 자동 정정하지 않는다.
-    if(!verified.length)return null;
-    if(verified.length===source.length&&Number(entry.placeCount)===verified.length)return null;
-    return Object.assign({},entry,{stampPlaces:verified,placeCount:verified.length});
+    // 전부 불일치해도 완료 기록 자체는 삭제하지 않고 GPS 방문 장소 목록만 비운다.
+    // 이 경우는 GPS 이벤트가 해당 날짜에 실제 존재함을 위에서 확인했다.
+
+    if(verified.length===source.length&&Number(entry.placeCount)===verified.length)return {fixed:null,deferred:false};
+    return {fixed:Object.assign({},entry,{stampPlaces:verified,placeCount:verified.length}),deferred:false};
   }
   function _completionGpsAuditPass(done){
     const original=localStorage.getItem(COURSES_KEY)||'[]';
     const courses=_dailyStoredCourses(),cache=new Map(),corrected=courses.slice();
-    let index=0,changed=false;
+    let index=0,changed=false,deferred=false;
     function step(){
       if(document.hidden){setTimeout(step,5000);return;}
       try{
-        // 1회에 코스 한 건만 검사하여 UI를 오래 점유하지 않는다.
         if(index<courses.length){
           const course=courses[index],at=index++;
           let touched=false;
           const completions=course.completions.map(entry=>{
-            if(!entry||String(entry.method||'')!=='gps')return entry;
+            if(!entry||!Array.isArray(entry.stampPlaces))return entry;
             const date=_dailyIso(Number(entry.completedAt));
-            if(!date)return entry;
+            if(!date){deferred=true;return entry;}
             if(!cache.has(date))cache.set(date,_dailyGpsEvents(date));
-            const fixed=_completionGpsAuditEntry(entry,course,cache.get(date));
-            if(fixed){touched=true;changed=true;return fixed;}
+            const result=_completionGpsAuditEntry(entry,course,cache.get(date));
+            if(result.deferred)deferred=true;
+            if(result.fixed){touched=true;changed=true;return result.fixed;}
             return entry;
           });
           if(touched)corrected[at]=Object.assign({},course,{completions});
-          setTimeout(step,80);
+          setTimeout(step,100);
           return;
         }
-        if(!changed){done(true);return;}
-        if((localStorage.getItem(COURSES_KEY)||'[]')!==original){done(false);return;}
-        // 원본 전체 백업이 불가능하면 자동 정정하지 않는다.
+        if(!changed){done(true,deferred);return;}
+        if((localStorage.getItem(COURSES_KEY)||'[]')!==original){done(false,true);return;}
+        // 첫 정정 전 전체 원본 백업. 백업 실패 시 어떠한 기록도 변경하지 않는다.
         if(!localStorage.getItem(COMPLETION_AUDIT_BACKUP_KEY)){
           localStorage.setItem(COMPLETION_AUDIT_BACKUP_KEY,original);
           if(localStorage.getItem(COMPLETION_AUDIT_BACKUP_KEY)!==original)throw new Error('순례완료 원본 백업 실패');
@@ -18571,10 +18574,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         localStorage.setItem(COURSES_KEY,updated);
         if(localStorage.getItem(COURSES_KEY)!==updated)throw new Error('순례완료 정정 저장 확인 실패');
         renderCourseList();
-        done(true);
-      }catch(err){done(false,err);}
+        done(true,deferred);
+      }catch(err){done(false,true,err);}
     }
-    setTimeout(step,80);
+    setTimeout(step,100);
   }
   function _scheduleCompletionGpsAudit(once){
     if(once&&localStorage.getItem(COMPLETION_AUDIT_ONCE_KEY)==='done')return;
@@ -18584,16 +18587,18 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       completionAuditTimer=0;
       if(completionAuditRunning||!completionAuditPending)return;
       if(document.hidden){completionAuditTimer=setTimeout(run,5000);return;}
+      // 카탈로그 준비 전에는 잘못된 장소로 판정하지 않는다.
+      if(!Array.isArray(SHRINES)||!SHRINES.length || (typeof _areAllParishDiocesesReady==='function'&&!_areAllParishDiocesesReady())){
+        completionAuditTimer=setTimeout(run,5000);return;
+      }
       completionAuditPending=false;completionAuditRunning=true;
       try{
-        _completionGpsAuditPass(function(ok,err){
+        _completionGpsAuditPass(function(ok,deferred,err){
           completionAuditRunning=false;
-          if(ok){
+          if(ok&&!deferred){
             try{localStorage.setItem(COMPLETION_AUDIT_ONCE_KEY,'done');}catch(_e){}
-          }else{
-            if(err)console.warn('[순례완료 GPS 대조 보류]',err);
-            // 실패한 데이터는 그대로 보존하고 다음 앱 진입 또는 완료 저장 때 재검사한다.
-          }
+          }else if(err){console.warn('[순례완료 GPS 대조 보류]',err);}
+          // 불명확한 과거 자료는 유지하고 다음 앱 실행 시 다시 확인한다.
           if(completionAuditPending&&!completionAuditTimer)completionAuditTimer=setTimeout(run,5000);
         });
       }catch(err){completionAuditRunning=false;console.warn('[순례완료 GPS 대조 보류]',err);}
