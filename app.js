@@ -4153,7 +4153,7 @@ function _ensureShrineAutoVisitModal(){
   modal.id='shrine-auto-visit-modal';
   modal.className='shrine-auto-visit-modal';
   modal.setAttribute('aria-hidden','true');
-  modal.innerHTML='<div class="shrine-auto-visit-backdrop"></div><div class="shrine-auto-visit-panel" role="dialog" aria-modal="true" aria-label="GPS 순례등록 완료"><div class="shrine-auto-visit-kicker">GPS 자동 순례등록</div><div id="shrine-auto-visit-title" class="shrine-auto-visit-title"></div><div class="shrine-auto-visit-actions"><button type="button" id="shrine-auto-visit-ok" class="shrine-auto-visit-save">확인</button></div></div>';
+  modal.innerHTML='<div class="shrine-auto-visit-backdrop"></div><div class="shrine-auto-visit-panel" role="dialog" aria-modal="true" aria-label="GPS 순례등록 완료"><div class="shrine-auto-visit-kicker">GPS 자동 순례등록</div><div id="shrine-auto-visit-title" class="shrine-auto-visit-title"></div><div id="shrine-auto-visit-radius" class="shrine-auto-visit-dist" hidden></div><div class="shrine-auto-visit-actions"><button type="button" id="shrine-auto-visit-ok" class="shrine-auto-visit-save">확인</button></div></div>';
   document.body.appendChild(modal);
   const ok=modal.querySelector('#shrine-auto-visit-ok');
   if(ok) ok.addEventListener('click', function(e){
@@ -4161,6 +4161,18 @@ function _ensureShrineAutoVisitModal(){
     _closeShrineAutoVisitModal();
   });
   return modal;
+}
+function _oaiSetGpsVisitRadiusNotice(radius,manual){
+  const label=document.getElementById('shrine-auto-visit-radius');
+  if(!label)return;
+  let walking=false;
+  try{
+    const active=JSON.parse(localStorage.getItem('oai_pilgrimage_active_follow_v1')||'null');
+    walking=!!(active&&active.travelMode==='walk'&&Number(active.startedAt)>0);
+  }catch(_e){}
+  const meters=Number(radius);
+  label.hidden=!!manual||!walking||!Number.isFinite(meters)||meters<=0;
+  label.textContent=label.hidden?'':'인증 반경 '+Math.round(meters)+'m 이내에서 GPS 스탬프가 등록되었습니다.';
 }
 function _openShrineAutoVisitModal(entry,opts){
   if(!entry||!entry.item) return;
@@ -4172,6 +4184,7 @@ function _openShrineAutoVisitModal(entry,opts){
   const placeName=entry.item.name||'성지';
   if(kicker) kicker.textContent=opts.method==='manual'?'순례등록 완료':'GPS 자동 순례등록';
   if(title) title.textContent='축하합니다. '+placeName+' 순례등록이 되었습니다.';
+  _oaiSetGpsVisitRadiusNotice(entry.item.gpsRadiusM||OAI_SHRINE_AUTO_VISIT_RADIUS_M,opts.method==='manual');
   modal.classList.add('show');
   modal.setAttribute('aria-hidden','false');
   try{
@@ -4596,7 +4609,7 @@ function _registerGpsPlaceVisit(kind,item,date,measuredAt){
 
 /* V8-1-14-751: 성당 방문 기록. 성지 순례와 저장소 및 화면을 분리한다. */
 const OAI_PARISH_VISITS_KEY='oai_parish_visits_v1';
-const OAI_PARISH_AUTO_VISIT_RADIUS_M=100;
+const OAI_PARISH_AUTO_VISIT_RADIUS_M=150;
 const OAI_PARISH_AUTO_VISIT_ENABLED_KEY='oai_parish_auto_visit_enabled_v1';
 let _parishVisitTab='visited',_parishVisitDio='all',_parishVisitSort='recent',_parishUnvisitedLimit=80;
 const OAI_SETTINGS_MY_PARISH_KEY='oai_settings_my_parish_v1';
@@ -4934,6 +4947,7 @@ function _showParishAutoVisitNotice(place){
   const title=modal.querySelector('#shrine-auto-visit-title');
   if(kicker)kicker.textContent='GPS 자동 방문등록';
   if(title)title.textContent='축하합니다. '+String(place.name||'성당')+' 방문이 등록되었습니다.';
+  _oaiSetGpsVisitRadiusNotice(OAI_PARISH_AUTO_VISIT_RADIUS_M,false);
   window.__OAI_SHRINE_AUTO_VISIT_ENTRY__=null;
   modal.classList.add('show');
   modal.setAttribute('aria-hidden','false');
