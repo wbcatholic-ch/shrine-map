@@ -18698,6 +18698,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(lastCarNoticeSignature&&typeof native.stopCarPilgrimage==='function'){
         try{native.stopCarPilgrimage();}catch(_e){}
       }
+      if(lastCarNoticeSignature&&typeof native.startCarPilgrimageTracking==='function'&&
+         typeof native.getWalkingPilgrimageStatus==='function'){
+        try{const status=JSON.parse(native.getWalkingPilgrimageStatus()||'{}');
+          if(status.travelMode==='car'&&typeof native.stopWalkingPilgrimage==='function'){
+            _reconcileWalkingNativeFix();
+            if(!String(native.consumeWalkingPilgrimageFixes(status.startedAt)||'').trim())native.stopWalkingPilgrimage();
+          }
+        }catch(_e){}
+      }
       lastCarNoticeSignature='';
       return;
     }
@@ -18707,6 +18716,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const next=places.find(x=>x&&!x.routeOnly&&!x.done);
     const name=next?String(next.name||''):'';
     const signature=[active.startedAt,visited,_pilgrimageStampPlaces(places).length,name].join('|');
+    const tracking=typeof native.startCarPilgrimageTracking==='function';
+    if(tracking){
+      try{
+        const status=typeof native.getWalkingPilgrimageStatus==='function'?JSON.parse(native.getWalkingPilgrimageStatus()||'{}'):{};
+        const args=[active.startedAt,visited,_pilgrimageStampPlaces(places).length,name,_walkingNativeCoursePoints(active)];
+        if(Number(status.startedAt)!==Number(active.startedAt)||status.travelMode!=='car')native.startCarPilgrimageTracking(...args);
+        else if(signature!==lastCarNoticeSignature&&typeof native.updateCarPilgrimageTracking==='function')native.updateCarPilgrimageTracking(...args);
+        lastCarNoticeSignature=signature;
+      }catch(e){console.warn('[자동차 순례] GPS 서비스 연결 실패',e);}
+      return;
+    }
     if(signature===lastCarNoticeSignature)return;
     try{native.updateCarPilgrimage(active.startedAt,visited,_pilgrimageStampPlaces(places).length,name);lastCarNoticeSignature=signature;}
     catch(e){console.warn('[자동차 순례] 상태창 표시 실패',e);}
@@ -18813,7 +18833,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   const pilgrimageBadgePlanner=planner();
   if(pilgrimageBadgePlanner)pilgrimageBadgeObserver.observe(pilgrimageBadgePlanner,{attributes:true,attributeFilter:['class','style','aria-hidden']});
   pilgrimageBadgeObserver.observe(document.body,{childList:true});
-  setInterval(function(){if(!document.hidden)_refreshWalkingCoverBadge();},60000);
+  setInterval(function(){if(!document.hidden){const active=_activeFollowState();if(active&&active.travelMode==='car')_reconcileWalkingNativeFix();_refreshWalkingCoverBadge();}},5000);
   function _walkingNativeCoursePoints(active){
     const places=Array.isArray(active&&active.course&&active.course.places)?active.course.places:[];
     return JSON.stringify(places.filter(x=>x&&!x.routeOnly&&_validGpsPair(x.lat,x.lng)).map(x=>({
@@ -18933,6 +18953,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         return;
       }
       if(!automatic&&!confirm('선택한 도보 구간을 지금 시작할까요? GPS로 실제 걸어온 길을 기록합니다.'))return;
+      // Never switch native sessions while the car fix journal remains unacknowledged.
+      if(typeof native.consumeWalkingPilgrimageFixes==='function'&&typeof native.startCarPilgrimageTracking==='function'){
+        _reconcileWalkingNativeFix();
+        try{if(String(native.consumeWalkingPilgrimageFixes(raw.startedAt)||'').trim()){
+          if(!automatic)alert('자동차 GPS 방문 기록 저장이 끝나지 않아 도보 전환을 보류합니다.');return;
+        }}catch(_e){if(!automatic)alert('자동차 GPS 기록을 확인할 수 없어 도보 전환을 보류합니다.');return;}
+      }
       const payload=JSON.parse(localStorage.getItem(ACTIVE_FOLLOW_KEY)||'null');if(!payload||payload.courseId!==raw.courseId)return;
       payload.travelMode='walk';payload.walkStartedAt=Date.now();payload.mixedPhase='walking';payload.mixedLeftStart=false;payload.mixedSeenEndAt=0;
       localStorage.setItem(ACTIVE_FOLLOW_KEY,JSON.stringify(payload));
@@ -20161,11 +20188,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function _reconcileWalkingNativeFix(){
     if(_walkingReplayBusy)return;
     const active=_activeFollowState(),native=_walkingNative();
-    if(!active||active.travelMode!=='walk'||!native||
+    if(!active||!['walk','car'].includes(active.travelMode)||!native||
        typeof native.consumeWalkingPilgrimageFixes!=='function')return;
     _walkingReplayBusy=true;
     try{
-      const raw=String(native.consumeWalkingPilgrimageFixes(active.walkStartedAt||active.startedAt)||'');
+      const sessionStart=active.travelMode==='walk'?(active.walkStartedAt||active.startedAt):active.startedAt;
+      const raw=String(native.consumeWalkingPilgrimageFixes(sessionStart)||'');
       const now=Date.now(),date=_dailyIso(now);
       const fixes=raw.split('\n').map(function(line){
         const p=line.split(',').map(Number);
@@ -20182,7 +20210,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       for(const fix of fixes){
         if(_dailyIso(fix.at)!==date)break;
         // Do not acknowledge native fixes until the walked path is durably saved.
-        if(!_walkTrailAdd(active,fix,true))break;
+        if(active.travelMode==='walk'&&!_walkTrailAdd(active,fix,true))break;
         const entry=_nearestShrineWithinAutoVisitRadius(fix.lat,fix.lng,date);
         if(entry&&entry.item&&(! _oaiIsRestrictedPlace('shrine',entry.item)||
             _oaiAllowRestrictedGpsVisit('shrine',entry.item,_getShrineVisitDates(entry.item)))){
@@ -20208,7 +20236,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(through>0){
         // Native acknowledgement only after each corresponding save was verified.
         if(typeof native.acknowledgeWalkingPilgrimageFixes==='function')
-          native.acknowledgeWalkingPilgrimageFixes(active.walkStartedAt||active.startedAt,through);
+          native.acknowledgeWalkingPilgrimageFixes(sessionStart,through);
         _recordActiveCourseGpsFromVisits();
         const latest=fixes.filter(f=>f.at<=through);
         latest.forEach(f=>{const a=_activeFollowState();if(a&&a.travelMode==='walk')_mixedWalkObserveFix(a,f);});
@@ -20219,7 +20247,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   document.addEventListener('visibilitychange',function(){
     if(!document.hidden){
       const active=_activeFollowState();
-      if(active&&active.travelMode==='walk'){
+      if(active&&['walk','car'].includes(active.travelMode)){
         _reconcileWalkingNativeFix();
         const native=_walkingNative();
         let nativeRunning=false;
@@ -20228,8 +20256,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
             JSON.parse(native.getWalkingPilgrimageStatus()||'{}'):null;
           nativeRunning=!!(status&&Number(status.startedAt)===Number(active.walkStartedAt||active.startedAt));
         }catch(_e){}
-        if(nativeRunning)_walkingNativeRefresh(active);
-        else _walkingNativeStart(active);
+        if(active.travelMode==='walk'){if(nativeRunning)_walkingNativeRefresh(active);else _walkingNativeStart(active);}
       }
       _refreshWalkingCoverBadge();
     }
@@ -20239,7 +20266,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   window.addEventListener('pageshow',function(){
     setTimeout(function(){
       const active=_activeFollowState();
-      if(active&&active.travelMode==='walk'){
+      if(active&&['walk','car'].includes(active.travelMode)){
         _reconcileWalkingNativeFix();
         const native=_walkingNative();
         let nativeRunning=false;
@@ -20248,8 +20275,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
             JSON.parse(native.getWalkingPilgrimageStatus()||'{}'):null;
           nativeRunning=!!(status&&Number(status.startedAt)===Number(active.walkStartedAt||active.startedAt));
         }catch(_e){}
-        if(nativeRunning)_walkingNativeRefresh(active);
-        else _walkingNativeStart(active);
+        if(active.travelMode==='walk'){if(nativeRunning)_walkingNativeRefresh(active);else _walkingNativeStart(active);}
       }
       _refreshWalkingCoverBadge();
     },1200);
