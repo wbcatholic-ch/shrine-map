@@ -18737,7 +18737,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     return {courses,candidates,skipped};
   }
   function _completionRebuildOnceRun(){
-    if(window.__OAI_DEV_RUNTIME_ACTIVE__!==true||!oaiDevEnabled())throw new Error('개발자 모드에서만 실행할 수 있습니다');
+    if(window.__OAI_DEV_RUNTIME_ACTIVE__!==true)throw new Error('개발자 모드에서만 실행할 수 있습니다');
     if(localStorage.getItem(COMPLETION_REBUILD_ONCE_KEY)!==null)throw new Error('이미 일회성 재구성을 실행했습니다. 다시 실행하지 않습니다');
     const prepared=_completionRebuildOncePrepare();
     if(!prepared.candidates.length)return '재구성할 자동 완료 기록이 없습니다. 보류 '+prepared.skipped.length+'건\n'+prepared.skipped.join('\n');
