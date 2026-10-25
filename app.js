@@ -18387,12 +18387,16 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     return v;
   }
   function _manualPointsFor(id){const a=_manualPointsRead()[id];return Array.isArray(a)?a:[];}
+  // 완료 코스의 수동 추가/삭제/순서 변경은 기존대로 즉시 안전 저장한다.
+  // 저장 버튼은 해당 변경의 영구 저장 여부를 다시 확인하고 확인 상태를 표시한다.
+  const _manualCompletionUnconfirmed=new Set();
   function _manualPointsWrite(id,entries){
     const state=_manualPointsRead(),before=localStorage.getItem(OAI_MANUAL_COMPLETION_POINTS);
     state[id]=entries;
     const next=JSON.stringify(state);
     localStorage.setItem(OAI_MANUAL_COMPLETION_POINTS,next);
     if(localStorage.getItem(OAI_MANUAL_COMPLETION_POINTS)!==next)throw new Error('수동 순례지 저장 확인 실패');
+    if(before!==next)_manualCompletionUnconfirmed.add(String(id));
     return before!==next;
   }
   function _manualMerged(course){
@@ -21220,9 +21224,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const active=_activeFollowState(),isActive=!!(active&&currentCourseId&&active.courseId===currentCourseId);
     if(detailRoot)detailRoot.classList.toggle('is-active-follow',isActive);
     if(saveBtn){
-      const dirty=isActive?_pilgrimageStructureIsDirty():_pilgrimageDraftIsDirty(),saveable=!!(list.length||(normalizePoint(m.start)&&normalizePoint(m.end))),enabled=!isCompletionView&&saveable&&dirty;
-      saveBtn.hidden=isCompletionView;
-      saveBtn.style.display=isCompletionView?'none':'';
+      const dirty=isActive?_pilgrimageStructureIsDirty():_pilgrimageDraftIsDirty(),saveable=!!(list.length||(normalizePoint(m.start)&&normalizePoint(m.end)));
+      const manualPending=isCompletionView&&gpsProtected&&_manualCompletionUnconfirmed.has(String(currentCourseId));
+      const enabled=isCompletionView?manualPending:(saveable&&dirty);
+      saveBtn.hidden=isCompletionView&&!gpsProtected;
+      saveBtn.style.display=(isCompletionView&&!gpsProtected)?'none':'';
       saveBtn.disabled=!enabled;
       saveBtn.setAttribute('aria-disabled',enabled?'false':'true');
       saveBtn.classList.toggle('is-dirty',enabled);
@@ -21424,6 +21430,19 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       a[i]=Object.assign({},a[i],d,{updatedAt:Date.now()});
     }else currentCourseId='';}if(!currentCourseId){currentCourseId='course_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);a.unshift(Object.assign({id:currentCourseId,updatedAt:Date.now(),lastStartedAt:Date.now(),completionArmed:true,completions:[]},d));}saveCourses(a);closeSaveModal();renderDetail();flashSaved();const next=pendingAfterSave;pendingAfterSave='';if(next==='follow')setTimeout(()=>openFollow(),120);}
   function saveCurrent(){
+    if(pilgrimageDetailMode==='complete'){
+      const course=_manualCompletionCourse();
+      if(!course)return;
+      if(!_manualCompletionUnconfirmed.has(String(course.id)))return;
+      try{
+        const persisted=_manualPointsFor(course.id);
+        if(!Array.isArray(persisted))throw new Error('수동 장소 데이터 확인 실패');
+        _manualCompletionUnconfirmed.delete(String(course.id));
+        renderDetail();
+        flashSaved();
+      }catch(e){console.warn('[완료 코스 수동 장소 확인 실패]',e);alert('수동 장소 저장 상태를 확인하지 못했습니다. 다시 확인해 주세요.');}
+      return;
+    }
     const list=loadPlan(),meta=loadMeta();
     if(meta.walkSegment&&!_walkSegmentBounds(meta.walkSegment,list,meta)){alert('도보 출발·도착 지점을 순서대로 지정한 뒤 저장해 주세요.');return;}
     if(!list.length&&!pilgrimageManualCreateMode&&!(normalizePoint(meta.start)&&normalizePoint(meta.end))){

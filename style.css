@@ -7956,7 +7956,7 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 }
 #oai-pilgrimage-detail-view.is-completion-view .oai-pilgrimage-detail-actions{
   display:grid!important;
-  grid-template-columns:minmax(0,1fr)!important;
+  grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
   row-gap:12px!important;
   margin:10px 0 0!important;
 }
@@ -9393,7 +9393,7 @@ html.oai-pilgrimage-route-direct #sheet-route #rs-pilgrimage-return-btn{
   background:var(--oai-complete-dark)!important;
 }
 /* V8-1-14-1058: 새 순례계획은 빈 상태에서도 저장/순례하기 자리를 유지 */
-#oai-pilgrimage-detail-view:not(.is-manual-complete-create):not(.is-active-follow) .oai-pilgrimage-detail-actions{
+#oai-pilgrimage-detail-view:not(.is-completion-view):not(.is-manual-complete-create):not(.is-active-follow) .oai-pilgrimage-detail-actions{
   grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;
 }
 #oai-pilgrimage-detail-view:not(.is-manual-complete-create) .oai-pilgrimage-follow[disabled]{
