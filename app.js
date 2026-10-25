@@ -18665,39 +18665,47 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       lines.push(pair[1]+' | 장소 '+places+' / 원본 '+stamps+' / 날짜 중복 '+duplicates+' / 문자열 구형 '+legacy+' / 날짜·구조 오류 '+invalid+' / 인증 방법 불명 '+unknown+' / 부가정보 포함 '+withExtras);
       if(details.length)lines.push(details.slice(0,40).map(x=>'  '+x).join('\n')+(details.length>40?'\n  외 '+(details.length-40)+'건':''));
     });
-    // V1583: 같은 저장소 안에서 과거 키가 갈라진 동일 장소 후보를 읽기 전용으로 식별한다.
-    // 이름만 같다는 이유로 데이터를 자동 병합하지 않는다.
+    // V1584: 과거 장소 키 중복 진단. 원본 데이터는 절대 변경하지 않는다.
+    // 이름만 같은 항목은 확정 중복으로 취급하지 않고 검토 후보로 표시한다.
     [['oai_shrine_visits_v1','성지'],['oai_parish_visits_v1','성당']].forEach(function(pair){
       let data;
       try{data=JSON.parse(localStorage.getItem(pair[0])||'{}');}
-      catch(_){return;}
+      catch(_){lines.push(pair[1]+' | 저장소 JSON 오류: 과거 키 검사 보류');return;}
       if(!data||typeof data!=='object'||Array.isArray(data))return;
-      const byName=new Map(),suspects=[];
+      const byName=new Map(),byId=new Map();
       Object.keys(data).forEach(function(key){
         const rec=data[key];
         if(!rec||typeof rec!=='object'||!Array.isArray(rec.visits))return;
-        const name=String(rec.name||'').normalize('NFKC').replace(/\\s+/g,'').toLowerCase();
-        if(!name)return;
-        if(!byName.has(name))byName.set(name,[]);
-        byName.get(name).push({key:key,rec:rec});
+        const row={key:key,rec:rec};
+        const name=String(rec.name||'').normalize('NFKC').replace(/\s+/g,'').toLowerCase();
+        const id=String(rec.placeId||'').trim();
+        if(name){if(!byName.has(name))byName.set(name,[]);byName.get(name).push(row);}
+        if(id){if(!byId.has(id))byId.set(id,[]);byId.get(id).push(row);}
+      });
+      const overlapping=function(group){
+        const dates=new Map();
+        group.forEach(function(row){row.rec.visits.forEach(function(v){
+          const date=typeof v==='string'?v:String(v&&v.date||'');
+          if(!/^\d{4}-\d{2}-\d{2}$/.test(date))return;
+          if(!dates.has(date))dates.set(date,new Set());dates.get(date).add(row.key);
+        });});
+        return Array.from(dates.entries()).filter(function(entry){return entry[1].size>1;}).map(function(entry){return entry[0];});
+      };
+      const idMatches=[],nameCandidates=[];
+      byId.forEach(function(group,id){
+        if(group.length<2)return;
+        const dates=overlapping(group);
+        if(dates.length)idMatches.push('ID '+id+' / '+dates.join(', ')+' / '+group.map(function(row){return row.key;}).join(' | '));
       });
       byName.forEach(function(group,name){
         if(group.length<2)return;
-        const dateKeys=new Map();
-        group.forEach(function(row){
-          row.rec.visits.forEach(function(v){
-            const date=typeof v==='string'?v:String(v&&v.date||'');
-            if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(date))return;
-            if(!dateKeys.has(date))dateKeys.set(date,new Set());
-            dateKeys.get(date).add(row.key);
-          });
-        });
-        const shared=Array.from(dateKeys.entries()).filter(function(entry){return entry[1].size>1;});
-        if(shared.length)suspects.push(group[0].rec.name+' | 같은 날짜 '+shared.map(function(x){return x[0];}).join(', ')+' | 서로 다른 키 '+group.map(function(x){return x.key;}).join(' / '));
+        const dates=overlapping(group);
+        if(dates.length)nameCandidates.push((group[0].rec.name||name)+' / '+dates.join(', ')+' / '+group.map(function(row){return row.key;}).join(' | '));
       });
-      lines.push(pair[1]+' | 서로 다른 저장 키의 동일 이름·날짜 중복 후보 '+suspects.length+'건');
-      suspects.slice(0,30).forEach(function(x){lines.push('  확인 필요: '+x);});
-      if(suspects.length>30)lines.push('  외 '+(suspects.length-30)+'건');
+      lines.push(pair[1]+' | 동일 장소 ID·날짜 중복 후보 '+idMatches.length+'건 / 동일 이름·날짜 검토 후보 '+nameCandidates.length+'건');
+      idMatches.slice(0,20).forEach(function(row){lines.push('  ID 확인: '+row);});
+      nameCandidates.slice(0,20).forEach(function(row){lines.push('  이름 확인: '+row);});
+      if(idMatches.length>20||nameCandidates.length>20)lines.push('  추가 후보 있음: 원본 백업을 통해 전체 검토 필요');
     });
     lines.push('주의: 서로 다른 이름이나 ID로 저장된 동일 장소까지 확정한 검사는 아닙니다. 중복 후보는 자동 삭제·병합하지 않습니다.');
     return lines.join('\n');
