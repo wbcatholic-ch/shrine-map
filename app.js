@@ -1904,7 +1904,7 @@ function _hasVisitDate(visits,date){
   return Array.isArray(visits)&&visits.some(function(v){return _visitDateOf(v)===String(date);});
 }
 function _isVisitDate(date){
-  const m=/^(\\d{4})-(\\d{2})-(\\d{2})$/.exec(String(date||''));
+  const m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(String(date||''));
   if(!m)return false;
   const y=Number(m[1]),mo=Number(m[2]),day=Number(m[3]);
   const d=new Date(Date.UTC(y,mo-1,day));
