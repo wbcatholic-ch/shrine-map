@@ -7148,14 +7148,14 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
   grid-template-columns:1fr 1fr!important;
   gap:0!important;
   margin:10px 0 7px!important;
-  padding:10px 12px 12px!important;
-  
-  border-radius:15px!important;
-  background:#fff!important;
+  padding:0!important;
+  border:0!important;
+  border-radius:0!important;
+  background:transparent!important;
   box-shadow:none!important;
 }
 #oai-pilgrimage-detail-view .oai-pilgrimage-total-card>div{
-  padding:4px 10px!important;
+  padding:0!important;
   border:0!important;
   border-radius:0!important;
   background:transparent!important;
@@ -7240,9 +7240,7 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 #oai-pilgrimage-detail-view .oai-pilgrimage-route-box{
   border:1.6px solid #aeb9c6!important;
 }
-#oai-pilgrimage-detail-view .oai-pilgrimage-total-card{
-  border:1.6px solid #aeb9c6!important;
-}
+/* Keep the course-list frame; footer controls have no enclosing frame. */
 
 
 /* V8-1-14-947: 순례계획 목록 상단 순서/가독성 조정
@@ -8815,9 +8813,9 @@ html:not(.oai-map-split-wide).oai-pilgrimage-route-direct #app #sheet-route.rout
   width:100%!important;
   min-width:0!important;
   max-width:none!important;
-  height:44px!important;
-  min-height:44px!important;
-  max-height:44px!important;
+  height:52px!important;
+  min-height:52px!important;
+  max-height:52px!important;
   margin:0!important;
   align-self:stretch!important;
   box-sizing:border-box!important;
@@ -9826,9 +9824,9 @@ html.oai-pilgrimage-course-view-readonly #sheet-route #rs-pilgrimage-return-btn{
   width:100%!important;
   min-width:0!important;
   max-width:100%!important;
-  height:44px!important;
-  min-height:44px!important;
-  max-height:44px!important;
+  height:52px!important;
+  min-height:52px!important;
+  max-height:52px!important;
   box-sizing:border-box!important;
 }
 
@@ -10546,7 +10544,7 @@ html.oai-font-global .shrine-visit-card-badge strong,html:not(.ios-device).oai-s
 
 .oai-pilgrimage-completion-walk-label{color:#267348;font-weight:800;}
 
-#oai-pilgrimage-detail-view .oai-pilgrimage-reverse{display:block;width:100%;min-height:44px;margin:8px 0 0;border:1px solid #94a3b8;border-radius:11px;background:#f3f6f9;color:#334155;font:800 calc(14px * var(--app-font-scale,1))/1.2 inherit;}
+#oai-pilgrimage-detail-view .oai-pilgrimage-reverse{display:block;box-sizing:border-box;width:calc(100% - 24px);height:44px;min-height:44px;margin:10px 12px 12px;padding:0 12px;border:1px solid #94a3b8;border-radius:11px;background:#f3f6f9;color:#334155;font:800 calc(14px * var(--app-font-scale,1))/1.2 inherit;}
 #oai-pilgrimage-detail-view .oai-pilgrimage-reverse[hidden]{display:none!important;}
 
 /* V1532: 코스 지도 공통 상단 도움말과 닫기 버튼 */
