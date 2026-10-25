@@ -8194,8 +8194,9 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 
 /* 진행 중 상태는 전체 박스를 노랗게 만들지 않고 다음 순례지만 강조 */
 #oai-pilgrimage-detail-view.is-active-follow .oai-pilgrimage-route-box,
-#oai-pilgrimage-detail-view.is-active-follow .oai-pilgrimage-total-card{border-color:#b8c4cf!important;background:#fff!important;box-shadow:none!important;}
-#oai-pilgrimage-detail-view.is-active-follow .oai-pilgrimage-detail-actions{display:grid!important;grid-template-columns:minmax(0,2fr) minmax(0,3fr)!important;gap:8px!important;padding:0!important;background:transparent!important;box-shadow:none!important;border-radius:0!important;}
+#oai-pilgrimage-detail-view.is-active-follow .oai-pilgrimage-total-card{border:0!important;padding:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;}
+#oai-pilgrimage-detail-view.is-active-follow .oai-pilgrimage-detail-actions{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:8px!important;padding:0!important;background:transparent!important;box-shadow:none!important;border-radius:0!important;}
+#oai-pilgrimage-detail-view.is-active-follow .oai-pilgrimage-detail-actions .oai-pilgrimage-next-route{grid-column:1/-1!important;}
 #oai-pilgrimage-detail-view.is-active-follow .oai-pilgrimage-save{background:#d9d3c6!important;border-color:#d9d3c6!important;color:#fff!important;}
 #oai-pilgrimage-detail-view.is-active-follow .oai-pilgrimage-save.is-dirty{background:#fff!important;border:1.5px solid #b9a87c!important;color:#5e4b1e!important;}
 #oai-pilgrimage-detail-view.is-active-follow .oai-pilgrimage-follow.is-stop{border:1.5px solid #c3443e!important;background:#fff0ef!important;color:#b5332e!important;}
