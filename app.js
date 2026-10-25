@@ -1900,6 +1900,33 @@ function _visitDateOf(v){
   const rec=_normalizeVisitEntry(v);
   return String((rec&&rec.date)||'');
 }
+/* 같은 날짜의 인증을 합칠 때 GPS 원본 인증 정보는 우선하고,
+   수동 기록의 사진/메모 및 비충돌 필드는 버리지 않는다. */
+function _mergeVisitEntryPreservingData(a,b){
+  const first=_normalizeVisitEntry(a),second=_normalizeVisitEntry(b);
+  if(!first||typeof first!=='object'||!second||typeof second!=='object')return a;
+  const firstGps=String(first.method||'').toLowerCase()==='gps';
+  const secondGps=String(second.method||'').toLowerCase()==='gps';
+  const preferred=secondGps&&!firstGps?second:first;
+  const secondary=preferred===first?second:first;
+  const out=Object.assign({},secondary,preferred);
+  Object.keys(secondary).forEach(function(k){
+    const primary=preferred[k],fallback=secondary[k];
+    if(Array.isArray(primary)&&Array.isArray(fallback)){
+      const unique=primary.slice();
+      fallback.forEach(function(x){if(!unique.some(function(y){return JSON.stringify(x)===JSON.stringify(y);}))unique.push(x);});
+      out[k]=unique;
+    }else if(primary&&fallback&&typeof primary==='object'&&typeof fallback==='object'&&!Array.isArray(primary)&&!Array.isArray(fallback)){
+      out[k]=Object.assign({},fallback,primary);
+    }else if((primary===null||primary===undefined||primary==='')&&fallback!==null&&fallback!==undefined&&fallback!==''){
+      if(k!=='method'&&k!=='savedAt'&&k!=='date')out[k]=fallback;
+    }
+  });
+  // 인증 방법/시각은 우선한 원본 그대로 유지한다.
+  out.method=preferred.method;
+  if(Object.prototype.hasOwnProperty.call(preferred,'savedAt'))out.savedAt=preferred.savedAt;
+  return out;
+}
 function _hasVisitDate(visits,date){
   return Array.isArray(visits)&&visits.some(function(v){return _visitDateOf(v)===String(date);});
 }
@@ -1963,7 +1990,10 @@ function _mergeShrineVisitRecords(target,source,item){
   if(source&&Array.isArray(source.visits)){
     source.visits.forEach(function(v){
       const obj=typeof v==='string'?{date:v,method:'manual'}:v;
-      if(!obj||!obj.date) return;
+      if(!obj||!obj.date){
+        if(!target.visits.some(function(cur){return JSON.stringify(cur)===JSON.stringify(v);}))target.visits.push(v);
+        return;
+      }
       // 동일 장소의 동일 날짜는 방문 방법·저장 시각과 무관하게 1회만 유지.
       // 기존 원본의 메타데이터를 임의로 덮어쓰지 않는다.
       if(!_isVisitDate(obj.date)){
@@ -1976,10 +2006,7 @@ function _mergeShrineVisitRecords(target,source,item){
       // 같은 날 병합에서 원본 GPS 인증을 수동 기록으로 덮지 않는다.
       // 기존 GPS가 있으면 그대로 두고, 수동만 있을 때 GPS 원본을 우선한다.
       const existing=_normalizeVisitEntry(target.visits[existingIndex]);
-      if(String(existing&&existing.method||'manual').toLowerCase()!=='gps' &&
-         String(obj.method||'manual').toLowerCase()==='gps'){
-        target.visits[existingIndex]=Object.assign({},existing||{},obj);
-      }
+      target.visits[existingIndex]=_mergeVisitEntryPreservingData(target.visits[existingIndex],v);
     });
   }
   target.name=item&&item.name||target.name||'';
@@ -17900,9 +17927,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const mergeImportedVisits=function(key,incoming){
         if(key!==OAI_SHRINE_VISITS_KEY&&key!==OAI_PARISH_VISITS_KEY)return incoming;
         const localRaw=localStorage.getItem(key);
-        if(!localRaw)return incoming;
+        // 원격 기록만 있어도 공통 병합 검증/중복 규칙을 적용한다.
+        // 로컬 기록이 없으면 빈 맵을 사용하고 복원 원본은 변경하지 않는다.
         let local,remote;
-        try{local=JSON.parse(localRaw);remote=JSON.parse(incoming);}
+        try{local=localRaw?JSON.parse(localRaw):{};remote=JSON.parse(incoming);}
         catch(_e){throw Error('기존 방문기록을 읽을 수 없어 복원을 중단했습니다: '+key);}
         if(!local||typeof local!=='object'||Array.isArray(local)||!remote||typeof remote!=='object'||Array.isArray(remote))
           throw Error('방문기록 병합 구조 오류: '+key);
@@ -17921,9 +17949,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         validateMap(local,'기존');
         validateMap(remote,'복원');
         const result=Object.assign({},local);
-        Object.keys(remote).forEach(function(place){
-          const old=result[place],fresh=remote[place];
-          if(!fresh||typeof fresh!=='object'||Array.isArray(fresh)||!Array.isArray(fresh.visits))
+        // Reconcile dates in local-only records as well as remotely present places.
+        // No record is removed from storage until the entire import succeeds.
+        const allPlaces=new Set(Object.keys(local).concat(Object.keys(remote)));
+        allPlaces.forEach(function(place){
+          const old=local[place],fresh=remote[place];
+          if(fresh&&(!fresh||typeof fresh!=='object'||Array.isArray(fresh)||!Array.isArray(fresh.visits)))
             throw Error('복원 방문기록 오류: '+place);
           if(old&&(!old||typeof old!=='object'||Array.isArray(old)||!Array.isArray(old.visits)))
             throw Error('기존 방문기록 오류: '+place);
@@ -17938,19 +17969,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
             }
             const i=combined.findIndex(function(x){return _visitDateOf(x)===date;});
             if(i<0){combined.push(v);return;}
-            const a=_normalizeVisitEntry(combined[i]),b=_normalizeVisitEntry(v);
-            const aGps=String(a&&a.method||'').toLowerCase()==='gps';
-            const bGps=String(b&&b.method||'').toLowerCase()==='gps';
-            // GPS 인증 원본을 우선하지만, 양쪽의 비충돌 메타데이터는 보존한다.
-            const preferred=bGps&&!aGps?b:a;
-            const secondary=bGps&&!aGps?a:b;
-            if(preferred&&typeof preferred==='object'&&secondary&&typeof secondary==='object')
-              combined[i]=Object.assign({},secondary,preferred);
-            else combined[i]=preferred===a?combined[i]:v;
+            combined[i]=_mergeVisitEntryPreservingData(combined[i],v);
           };
           (old&&old.visits||[]).forEach(addVisit);
-          fresh.visits.forEach(addVisit);
-          result[place]=Object.assign({},fresh,old||{},{visits:combined});
+          (fresh&&fresh.visits||[]).forEach(addVisit);
+          result[place]=Object.assign({},fresh||{},old||{},{visits:combined});
         });
         return JSON.stringify(result);
       };
