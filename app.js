@@ -18894,7 +18894,22 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(!expected.length){lines.push('  등록 대상 없음: '+decisions.map(x=>x.event.name+'('+x.reason+')').join(' / '));return;}
         lines.push('  GPS 등록 장소: '+expected.map(x=>x.name).join(' → '));
         if(!entries.length){lines.push('  확인 필요: GPS 완료 코스가 없는 날짜 (새 코스 후보, 자동 생성하지 않음)');return;}
-        if(entries.length>1)lines.push('  주의: 같은 날짜의 완료 코스 '+entries.length+'개를 각각 유지해야 함. GPS 소유권 미확정');
+        if(entries.length>1){
+          lines.push('  주의: 같은 날짜의 완료 코스 '+entries.length+'개를 각각 유지해야 함. GPS 소유권 미확정');
+          // 실제 GPS 장소가 어느 기존 완료 코스에 속하는지 읽기 전용으로 검증한다.
+          // 0개/2개 이상 일치하는 GPS는 자동 배정하거나 삭제하지 않는다.
+          const unresolved=[];
+          expected.forEach(function(ev){
+            const owners=entries.filter(function(pair){
+              const places=Array.isArray(pair.entry.stampPlaces)?pair.entry.stampPlaces:null;
+              return places&&places.some(function(place){return _dailyCompletedPlaceMatches(place,ev);});
+            });
+            if(owners.length!==1)unresolved.push(ev.name+' ('+(owners.length?'복수 코스 '+owners.length+'개':'소유 코스 없음')+')');
+          });
+          lines.push(unresolved.length
+            ?'  GPS 소유권 보류 '+unresolved.length+'곳: '+unresolved.join(' / ')
+            :'  GPS 소유권: 기존 완료 장소 기준 각 1개 코스에만 대응 (추가 검증 전 수정 금지)');
+        }
         entries.forEach(({course,entry},index)=>{
           const old=Array.isArray(entry.stampPlaces)?entry.stampPlaces:course.places;
           if(!Array.isArray(old)){lines.push('  '+(index+1)+'. '+course.name+' | 보류: 기존 장소 구조 오류');return;}
