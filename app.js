@@ -18631,8 +18631,29 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(stillChanged.length)throw new Error('저장 후 재검사에서 '+stillChanged.length+'건이 여전히 불일치합니다. 원본 백업을 보존했습니다.');
     return latest.changes.length+'개 순례완료 기록을 GPS 스탬프 기준으로 정리했습니다. 보류 '+latest.skipped.length+'건. 원본 스탬프는 유지했습니다.';
   }
+  let _completionAuditQueued=false;
+  let _completionAuditRunning=false;
+  let _completionAuditResult=null;
   function _scheduleCompletionGpsAudit(once){
-    // 기록 자동 삭제/수정 금지. 과거 기록은 명시적 확인 뒤 중복만 정정한다.
+    // 모든 사용자 공통 읽기 전용 검증. 저장/삭제는 절대 수행하지 않는다.
+    // 코스 저장 중 재진입하지 않도록 다음 작업에서 검사한다.
+    if(_completionAuditQueued||_completionAuditRunning)return;
+    _completionAuditQueued=true;
+    Promise.resolve().then(function(){
+      _completionAuditQueued=false;
+      if(_completionAuditRunning)return;
+      _completionAuditRunning=true;
+      try{
+        const result=_completionGpsComparison();
+        _completionAuditResult={checked:result.rows.length,changes:result.changes.length,
+          skipped:result.skipped.length,at:Date.now()};
+        if(result.changes.length||result.skipped.length)
+          console.warn('[순례완료 GPS 자동 검증] 정정 후보 '+result.changes.length+'건, 보류 '+result.skipped.length+'건. 원본 기록 유지.');
+      }catch(err){
+        _completionAuditResult={error:String(err&&err.message||err),at:Date.now()};
+        console.warn('[순례완료 GPS 자동 검증 보류] 원본 기록 유지',err);
+      }finally{_completionAuditRunning=false;}
+    });
   }
   document.addEventListener('click',function(e){
     const btn=e.target.closest('#oai-dev-completion-repair');
