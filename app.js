@@ -22393,9 +22393,57 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(walkHistoryOverlay!==layer)return;
       const first=selected.points[0];
       const map=new kakao.maps.Map(layer.querySelector('.oai-walk-map-canvas'),{center:new kakao.maps.LatLng(first[0],first[1]),level:6});
-      let line=null,markers=[],info=null;
+      let line=null,markers=[],info=null,carLines=[],drawSequence=0;
       const dateLabel=layer.querySelector('header span');
+      // Mixed pilgrimage: walking is the recorded GPS trace; driving legs are
+      // calculated on demand from the existing directions service, never saved
+      // or presented as the actual driven route. No additional GPS collection.
+      async function drawMixedCarLegs(item,bounds,sequence){
+        if(!bounds||!(item.entry.walkPerformed===true))return;
+        const stops=[];
+        if(course.start&&_validGpsPair(course.start.lat,course.start.lng))stops.push({index:-1,point:course.start});
+        (course.places||[]).forEach((p,i)=>{if(p&&_validGpsPair(p.lat,p.lng))stops.push({index:i,point:p});});
+        if(course.end&&_validGpsPair(course.end.lat,course.end.lng))stops.push({index:(course.places||[]).length,point:course.end});
+        // Never bridge the designated walking section with a car route.
+        const legs=[];
+        for(let i=1;i<stops.length;i++){
+          const a=stops[i-1],b=stops[i];
+          if(!(b.index<=bounds.start||a.index>=bounds.end))continue;
+          legs.push([a.point,b.point]);
+        }
+        const paths=[];
+        for(const [a,b] of legs){
+          if(walkHistoryOverlay!==layer||sequence!==drawSequence)return;
+          try{
+            const response=await _kakaoDirectionsFetch(a.lng+','+a.lat,b.lng+','+b.lat,9000);
+            if(!response.ok)continue;
+            const data=await response.json(),route=data.routes&&data.routes[0];
+            if(!route||route.result_code!==0)continue;
+            const coords=[];
+            (route.sections||[]).forEach(section=>(section.roads||[]).forEach(road=>{
+              const vertices=road.vertexes||[];
+              for(let k=0;k+1<vertices.length;k+=2)coords.push(new kakao.maps.LatLng(vertices[k+1],vertices[k]));
+            }));
+            if(coords.length>=2)paths.push(coords);
+          }catch(_e){/* Missing car directions are omitted, not drawn as straight lines. */}
+        }
+        if(walkHistoryOverlay!==layer||sequence!==drawSequence)return;
+        paths.forEach(path=>carLines.push(new kakao.maps.Polyline({map,path,strokeWeight:5,
+          strokeColor:'#2563EB',strokeOpacity:.8,zIndex:4})));
+        if(paths.length){
+          const legend=layer.querySelector('.oai-walk-history-legend');
+          if(legend)legend.textContent='회색: 실제 도보 GPS · 파란색: 계산된 자동차 예상 경로 (실제 주행 기록 아님)';
+          const viewBounds=new kakao.maps.LatLngBounds();
+          item.points.forEach(p=>viewBounds.extend(new kakao.maps.LatLng(p[0],p[1])));
+          paths.forEach(path=>path.forEach(pos=>viewBounds.extend(pos)));
+          map.setBounds(viewBounds);
+        }
+      }
       function draw(item){
+        const sequence=++drawSequence;
+        carLines.forEach(p=>p.setMap(null));carLines=[];
+        const legend=layer.querySelector('.oai-walk-history-legend');
+        if(legend)legend.textContent='회색 선: 실제 기록한 GPS 경로 · 시간은 휴식 포함';
         // Use the GPS trail itself, not the planned road distance or course duration.
         // The stored third coordinate is the fix timestamp in milliseconds.
         let meters=0;
@@ -22433,6 +22481,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           });
         });
         map.relayout();map.setBounds(bounds);
+        if(seg&&item.entry.walkPerformed===true)void drawMixedCarLegs(item,seg,sequence);
       }
       draw(selected);
       dateSelect.addEventListener('change',()=>{const next=history.find(x=>String(x.startedAt)===dateSelect.value);if(next)draw(next);});
