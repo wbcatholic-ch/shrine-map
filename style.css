@@ -7110,6 +7110,19 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
   border-top:1px solid var(--plan-line)!important;
   background:#fff!important;
 }
+#oai-pilgrimage-detail-view .oai-pilgrimage-missing-add{
+  grid-column:1/-1;min-height:44px;border:1px solid #d9c88f;border-radius:11px;
+  background:#fff;color:#6b531a;font-size:calc(14px * var(--app-font-scale,1));font-weight:700;font-family:inherit;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-missing-options{
+  grid-column:1/-1;display:grid;grid-template-columns:1fr 1fr;gap:8px;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-missing-options[hidden],
+#oai-pilgrimage-detail-view .oai-pilgrimage-missing-add[hidden]{display:none!important;}
+#oai-pilgrimage-detail-view .oai-pilgrimage-missing-options button{
+  min-width:0;min-height:44px;border:1px solid #8db7da;border-radius:11px;
+  background:#fff;color:#176fc0;font-size:calc(14px * var(--app-font-scale,1));font-weight:700;font-family:inherit;
+}
 #oai-pilgrimage-detail-view .oai-pilgrimage-add,
 #oai-pilgrimage-detail-view .oai-pilgrimage-map-add:not(.is-walk-return){
   min-height:44px!important;

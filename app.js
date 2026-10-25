@@ -4252,10 +4252,6 @@ function _maybePromptAutoShrineVisit(lat,lng){
     setTimeout(function(){
       const registered=_registerAutoShrineVisit(entry);
       if(!registered){window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__=false;return;}
-      // 동일 GPS 방문으로 등록된 명시적 성지·성당 쌍에 한해서만 성당 안내를 생략한다.
-      _oaiLastGpsShrineNotice={id:_oaiPlaceCanonicalId('shrine',entry.item),date:date,timestamp:Date.now()};
-      _oaiSpeakNewGpsStamp('shrine',entry.item.name);
-      _queueDeferredVisitNotice('shrine',entry);
       window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__=false;
     },700);
   }catch(e){ console.warn('[가톨릭길동무]', e); window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__=false; }
@@ -4593,6 +4589,30 @@ function _oaiNotifyActiveCourseGpsVisit(){
   // 저장 완료 후 기존 순례코스 조회 함수가 기록을 재대조한다.
   try{setTimeout(function(){if(typeof window._oaiSyncActivePilgrimageFromVisits==='function')window._oaiSyncActivePilgrimageFromVisits();},0);}catch(_e){}
 }
+/* 신규 GPS 스탬프의 축하 안내는 등록 함수가 한 번만 책임진다.
+   일반 위치 수신·순례하기·Android GPS 기록 복귀는 모두 이 경로를 공유한다. */
+function _oaiNotifyNewGpsStamp(kind,item,date){
+  if(kind==='shrine'){
+    _oaiLastGpsShrineNotice={id:_oaiPlaceCanonicalId('shrine',item),date:date,timestamp:Date.now()};
+    _oaiSpeakNewGpsStamp('shrine',item.name);
+    _queueDeferredVisitNotice('shrine',{item:item,idx:Array.isArray(SHRINES)?SHRINES.indexOf(item):-1});
+    return;
+  }
+  if(kind!=='parish')return;
+  _oaiSpeakNewGpsStamp('parish',item.name);
+  // 공동 인증된 성지의 축하창이 있으면 성당 축하창은 반복하지 않는다.
+  // 성당 GPS 수신이 먼저 들어온 경우에도 잠시 기다려 성지 안내를 우선한다.
+  const linked=_oaiJointStampPair('parish',item);
+  const shrine=linked?_oaiSharedGroupShrine(linked):null;
+  if(shrine){
+    const shrineId=_oaiPlaceCanonicalId('shrine',shrine);
+    setTimeout(function(){
+      const last=_oaiLastGpsShrineNotice;
+      const same=last&&last.id===shrineId&&last.date===date&&Date.now()-last.timestamp<3500;
+      if(!same)_queueDeferredVisitNotice('parish',item);
+    },1000);
+  }else _queueDeferredVisitNotice('parish',item);
+}
 function _registerGpsPlaceVisit(kind,item,date,measuredAt){
   try{
     if(!item)return {added:false,already:false,kind:String(kind||'')};
@@ -4601,14 +4621,14 @@ function _registerGpsPlaceVisit(kind,item,date,measuredAt){
       const already=_hasShrineVisitOnDate(item,visitDate);
       const added=!already&&!!_addShrineVisit(item,visitDate,'gps',measuredAt);
       if(already||added)_oaiJointStampCounterpart('shrine',item,visitDate);
-      if(added)_oaiNotifyActiveCourseGpsVisit();
+      if(added){_oaiNotifyActiveCourseGpsVisit();_oaiNotifyNewGpsStamp('shrine',item,visitDate);}
       return {added:added,already:already,kind:'shrine',item:item};
     }
     if(kind==='parish'){
       const already=_hasVisitDate(_parishVisits(item),visitDate);
       const added=!already&&!!_addParishVisit(item,visitDate,'gps',measuredAt);
       if(already||added)_oaiJointStampCounterpart('parish',item,visitDate);
-      if(added)_oaiNotifyActiveCourseGpsVisit();
+      if(added){_oaiNotifyActiveCourseGpsVisit();_oaiNotifyNewGpsStamp('parish',item,visitDate);}
       return {added:added,already:already,kind:'parish',item:item};
     }
   }catch(e){console.warn('[가톨릭길동무] GPS 방문 기록 실패',e);}
@@ -4929,21 +4949,6 @@ function _maybeAutoParishVisit(lat,lng){
   if(previousVisits.some(function(v){return v.date===_todayISODate();}))return;
   const visitResult=_registerGpsPlaceVisit('parish',best,_todayISODate());
   if(!visitResult.added)return;
-  _oaiSpeakNewGpsStamp('parish',best.name);
-
-  // 성지·성당 방문기록은 각각 독립 등록한다. 같은 GPS 방문에서 실제 성지 등록이
-  // 성공한 명시적 쌍에만 성지 축하창 1회를 적용한다. 성지 저장 실패시 성당 축하창은 보인다.
-  const linkedShrine=_oaiGpsLinkedShrineForParish(best,Number(lat),Number(lng));
-  if(linkedShrine){
-    const shrineId=_oaiPlaceCanonicalId('shrine',linkedShrine),today=_todayISODate();
-    setTimeout(function(){
-      const last=_oaiLastGpsShrineNotice;
-      const same=last&&last.id===shrineId&&last.date===today&&Date.now()-last.timestamp<3500;
-      if(!same)_queueDeferredVisitNotice('parish',best);
-    },1000);
-  }else{
-    _queueDeferredVisitNotice('parish',best);
-  }
   if(_curInfoItem&&_curInfoItem.item===best)_renderInfoCardParishVisit(best);
 }
 function _showParishAutoVisitNotice(place){
@@ -18410,7 +18415,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function _manualMerged(course){
     const completion=_courseCompletionList(course)[0];
     const source=completion&&Array.isArray(completion.stampPlaces)?completion.stampPlaces:course.places;
-    const places=source.map((point,i)=>({point:point,gps:true,gpsIndex:i}));
+    // 완료 화면의 GPS 항목은 실제 당일 스탬프 장소별 1회만 표시한다.
+    // 기존 저장 기록은 변경하지 않고, 계획상 반복 경유지는 그대로 유지한다.
+    const places=_uniqueCompletionStampPlaces(source).map((point,i)=>({point:point,gps:true,gpsIndex:i}));
     const additions=_manualPointsFor(course.id).slice().sort((a,b)=>Number(a.position)-Number(b.position)||Number(a.seq)-Number(b.seq));
     const merged=[];
     for(let gap=0;gap<=places.length;gap++){
@@ -18498,7 +18505,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           rows.push({course:course.name,date,status:'스탬프 없음 / 판정 보류'});continue;
         }
         const missing=source.filter(p=>!stamps.some(ev=>_dailySamePlace(p,ev)||_dailyLinkedGpsPair(p,ev)));
-        rows.push({course:course.name,date,status:missing.length?'불일치 의심':'일치',total:source.length,unmatched:missing.map(p=>p.name||p.placeId||'?')});
+        const seen=[];const duplicates=[];
+        source.forEach(p=>{
+          if(seen.some(x=>_dailySamePlace(x,p)||_dailyLinkedGpsPair(x,p)))duplicates.push(p.name||p.placeId||'?');
+          else seen.push(p);
+        });
+        rows.push({course:course.name,date,status:missing.length||duplicates.length?'불일치 의심':'일치',total:source.length,unmatched:missing.map(p=>p.name||p.placeId||'?'),duplicates});
       }
     }
     return rows;
@@ -18515,7 +18527,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     out.hidden=false;
     try{
       const rows=_completionGpsAuditPreview();
-      out.textContent='읽기 전용 진단 ('+rows.length+'건)\n'+rows.map(x=>x.date+' | '+x.course+' | '+x.status+(x.unmatched&&x.unmatched.length?' | 불일치: '+x.unmatched.join(', '):'')).join('\n');
+      out.textContent='읽기 전용 진단 ('+rows.length+'건)\n'+rows.map(x=>x.date+' | '+x.course+' | '+x.status+(x.unmatched&&x.unmatched.length?' | 스탬프 불일치: '+x.unmatched.join(', '):'')+(x.duplicates&&x.duplicates.length?' | 중복: '+x.duplicates.join(', '):'')).join('\n');
     }catch(err){out.textContent='검사 실패: '+String(err&&err.message||err);}
   });
   function saveCourses(a){
@@ -19307,7 +19319,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }).filter(Boolean).sort((a,b)=>a.at-b.at);
     if(visited.length&&_dailyAutoEligible(_dailyAutoEvents(_dailyGpsEvents(date).filter(ev=>visited.some(x=>_dailySamePlace(x.place,ev)||_dailyLinkedGpsPair(x.place,ev)))))){
       const at=_dailyDayEnd(date)-1; // 종료는 다음 날 00:00, 완료 날짜는 전날 유지
-      const places=visited.map(x=>x.place);
+      const places=_uniqueCompletionStampPlaces(visited.map(x=>x.place));
       const prior=_courseCompletionList(course);
       const separate=prior.length>0;
       const next=_courseRefreshCompletionState(Object.assign({},course,{
@@ -19343,9 +19355,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // 실제 자동 등록과 임시 시험에 동일하게 사용하는 코스 생성 규칙. 이 함수에는 저장 동작이 없다.
   function _dailyBuildAutoCourse(date,eligible,id){
     const at=_dailyDayEnd(date)-1;
-    return _courseRefreshCompletionState({id,name:_dailyAutoCourseName(date,eligible),autoGps:true,sourceDate:date,start:null,end:null,
-      places:eligible.map(ev=>({name:ev.name,addr:ev.addr,lat:ev.lat,lng:ev.lng,placeId:ev.placeId,diocese:ev.diocese,done:true,doneMethod:'gps'})),
-      completions:[{completedAt:at,placeCount:eligible.length,stampPlaces:eligible.map(ev=>({name:ev.name,addr:ev.addr,lat:ev.lat,lng:ev.lng,placeId:ev.placeId,diocese:ev.diocese,done:true,doneMethod:'gps'})),method:'gps',locked:true}],gpsSettled:true,
+    // GPS 이벤트에 같은 장소가 중복 포함되어도 완료 코스에는 당일 1회만 기록한다.
+    const unique=_uniqueCompletionStampPlaces(eligible);
+    const places=unique.map(ev=>({name:ev.name,addr:ev.addr,lat:ev.lat,lng:ev.lng,placeId:ev.placeId,diocese:ev.diocese,done:true,doneMethod:'gps'}));
+    return _courseRefreshCompletionState({id,name:_dailyAutoCourseName(date,unique),autoGps:true,sourceDate:date,start:null,end:null,
+      places:places,
+      completions:[{completedAt:at,placeCount:places.length,stampPlaces:places.map(p=>Object.assign({},p)),method:'gps',locked:true}],gpsSettled:true,
       completionArmed:false,lastStartedAt:0,updatedAt:Date.now(),lastCompletedAt:at});
   }
   function _dailyRegisterOnce(date,events,result){
@@ -19375,12 +19390,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       while(courses.some(c=>c.id===id))id=baseId+'_'+sequence++;
       // 실제 등록과 개발자 메모리 시험이 공유하는 단일 코스 생성 함수.
       const course=_dailyBuildAutoCourse(date,eligible,id);
+      const expectedCount=course.completions[0].placeCount;
       courses.unshift(course);
       if(!saveCourses(courses))throw new Error('자동 코스 저장 실패');
       _scheduleCompletionGpsAudit(false);
       const persisted=_dailyStoredCourses().find(c=>c.id===id);
       if(!persisted||persisted.start||persisted.end||!persisted.autoGps||!_dailySameOrderedPlaces(persisted.places,eligible)||
-          !_courseCompletionList(persisted).some(x=>_dailyIso(x.completedAt)===date&&x.placeCount===eligible.length))
+          !_courseCompletionList(persisted).some(x=>_dailyIso(x.completedAt)===date&&x.placeCount===expectedCount))
         throw new Error('자동 코스 저장 후 재조회 불일치');
       state.auto[date]={done:true,source:'auto',existingId:id,gpsSignature};
       report('created','새 자동 완료 코스 생성 및 저장 검증 완료');
