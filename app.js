@@ -18697,9 +18697,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function _completionRebuildOncePrepare(){
     const courses=_dailyStoredCourses(),active=_readActiveFollowRaw(),byDate=new Map(),candidates=[],skipped=[];
     courses.forEach((c,i)=>{
-      if(!c.autoGps)return;
       const completions=c.completions||[];
-      const date=String(c.sourceDate||'');
+      // 구형 GPS 자동 완료에는 autoGps/sourceDate가 없을 수 있다.
+      // 수동/계획 기록은 보호: GPS 완료 1건 + 자동 등록 흔적이 있어야 한다.
+      const legacyGps=!c.autoGps&&c.gpsSettled===true&&completions.length===1&&
+        completions[0]&&completions[0].method==='gps'&&completions[0].locked===true;
+      if(!c.autoGps&&!legacyGps)return;
+      const date=String(c.sourceDate||_dailyIso(Number(completions[0]&&completions[0].completedAt))||'');
       if(!/^\d{4}-\d{2}-\d{2}$/.test(date)||completions.length!==1||completions[0].method!=='gps'||
          _dailyIso(Number(completions[0].completedAt))!==date||String(c.id)===(active&&String(active.courseId))){
         skipped.push((date||'?')+' '+c.name+': 자동 완료 단일 기록 확인 불가 또는 진행 중');return;
@@ -18708,19 +18712,26 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       byDate.get(date).push({c,i,entry:completions[0]});
     });
     byDate.forEach((items,date)=>{
-      // 같은 날짜에 수동/순례하기 완료 기록이 있으면 GPS 방문 소유권이 모호하다.
-      const owners=courses.filter(c=>(c.completions||[]).some(e=>_dailyIso(Number(e&&e.completedAt))===date));
-      if(items.length!==1||owners.length!==1){skipped.push(date+': 같은 날짜에 완료 코스가 여러 개 있어 보류');return;}
-      const {c,i,entry}=items[0];
+      // 같은 날 여러 코스는 합치지 않는다. 원본 stampPlaces로 각 코스의 소유권을 분리한다.
+      items.forEach(({c,i,entry})=>{
       try{
         const raw=_dailyRawGpsEvents(date);
         if(!raw.length)throw new Error('원본 GPS 스탬프 없음');
-        const expected=_dailyAutoEvents(_dailyGpsEvents(date));
+        const dayEvents=_dailyAutoEvents(_dailyGpsEvents(date));
+        const old=Array.isArray(entry.stampPlaces)?entry.stampPlaces:c.places;
+        if(!Array.isArray(old)||!old.length)throw new Error('기존 완료 장소 식별 불가');
+        // 여러 완료 코스가 있는 날은 코스별 GPS 방문만 추출한다.
+        // 장소 소유권이 겹치거나 구형 목록이 없으면 자동 교체하지 않는다.
+        const expected=items.length===1?dayEvents:dayEvents.filter(ev=>old.some(p=>_dailyCompletedPlaceMatches(p,ev)));
+        if(items.length>1){
+          if(!Array.isArray(entry.stampPlaces))throw new Error('같은 날짜 여러 코스: 원본 stampPlaces 없음');
+          if(expected.some(ev=>items.filter(it=>(it.entry.stampPlaces||[]).some(p=>_dailyCompletedPlaceMatches(p,ev))).length!==1))
+            throw new Error('같은 날짜 여러 코스: GPS 방문 소유권 중복');
+        }
         if(!expected.length||!_dailyAutoEligible(expected))throw new Error('GPS 자동 등록 대상 없음');
         if(expected.some(ev=>!ev||!ev.name||!Number.isFinite(Number(ev.lat))||!Number.isFinite(Number(ev.lng))))throw new Error('GPS 장소 정보 불완전');
         const places=_dailyBuildAutoCourse(date,expected,'preview_'+date).places;
         if(places.length!==expected.length)throw new Error('공통화 장소 식별 모호');
-        const old=Array.isArray(entry.stampPlaces)?entry.stampPlaces:c.places;
         if(!Array.isArray(old))throw new Error('기존 완료 장소 형식 오류');
         const missing=expected.filter(ev=>!old.some(p=>_dailyCompletedPlaceMatches(p,ev)));
         const extra=old.filter(p=>!expected.some(ev=>_dailyCompletedPlaceMatches(p,ev)));
@@ -18733,6 +18744,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(!same)candidates.push({i,date,courseId:c.id,name:c.name,places,oldCount:old.length,
           missing:missing.map(x=>x.name),extra:extra.map(x=>x.name),start:c.start,end:c.end});
       }catch(err){skipped.push(date+' '+c.name+': '+String(err&&err.message||err));}
+      });
     });
     return {courses,candidates,skipped};
   }
@@ -18753,7 +18765,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const next=JSON.parse(original);
     prepared.candidates.forEach(x=>{
       const c=next[x.i];
-      if(c.id!==x.courseId||!c.autoGps||c.completions.length!==1)throw new Error('완료 코스 식별 변경');
+      if(c.id!==x.courseId||c.completions.length!==1||c.completions[0].method!=='gps')throw new Error('완료 코스 식별 변경');
       c.places=x.places;
       c.completions[0].stampPlaces=x.places.map(p=>Object.assign({},p));
       c.completions[0].placeCount=x.places.length;
