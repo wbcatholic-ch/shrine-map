@@ -8196,7 +8196,7 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
 #oai-pilgrimage-detail-view.is-active-follow .oai-pilgrimage-route-box{border:1.6px solid #aeb9c6!important;background:#fff!important;box-shadow:none!important;}
 #oai-pilgrimage-detail-view.is-active-follow .oai-pilgrimage-total-card{border:0!important;padding:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important;}
 #oai-pilgrimage-detail-view.is-active-follow .oai-pilgrimage-total-actions{grid-column:1/-1!important;grid-template-columns:minmax(0,1fr)!important;width:100%!important;gap:0!important;margin:0!important;padding:0!important;border:0!important;background:transparent!important;box-shadow:none!important;}
-#oai-pilgrimage-detail-view.is-active-follow .oai-pilgrimage-total-actions > .oai-pilgrimage-current-check{grid-column:1/-1!important;width:100%!important;min-height:52px!important;height:52px!important;max-height:52px!important;margin:0!important;border-radius:13px!important;}
+#oai-pilgrimage-detail-view.is-active-follow .oai-pilgrimage-total-actions > .oai-pilgrimage-current-check{grid-column:1/-1!important;width:100%!important;min-height:58px!important;height:58px!important;max-height:58px!important;margin:0!important;border-radius:13px!important;}
 #oai-pilgrimage-detail-view.is-active-follow .oai-pilgrimage-detail-actions{display:grid!important;grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important;gap:8px!important;padding:0!important;background:transparent!important;box-shadow:none!important;border-radius:0!important;}
 #oai-pilgrimage-detail-view.is-active-follow .oai-pilgrimage-detail-actions .oai-pilgrimage-next-route{grid-column:1/-1!important;}
 #oai-pilgrimage-detail-view.is-active-follow .oai-pilgrimage-save{background:#d9d3c6!important;border-color:#d9d3c6!important;color:#fff!important;}
@@ -9803,14 +9803,32 @@ html.oai-pilgrimage-course-view-readonly #sheet-route #rs-pilgrimage-return-btn{
 
 /* 순례완료 상세에서는 '내 위치에서 다시 거리 계산'이 숨겨지므로
    순례코스 보기 버튼이 빈 두 번째 칸을 남기지 않고 한 줄 전체를 사용한다. */
+/* Completed course: show a single course-map button, without a second enclosing frame.
+   Match the 44px add buttons directly above; preserve the course-list border. */
+#oai-pilgrimage-detail-view.is-completion-view .oai-pilgrimage-total-card{
+  border:0!important;
+  padding:0!important;
+  border-radius:0!important;
+  background:transparent!important;
+  box-shadow:none!important;
+  margin:10px 0 0!important;
+}
 #oai-pilgrimage-detail-view.is-completion-view .oai-pilgrimage-total-actions{
   grid-template-columns:minmax(0,1fr)!important;
+  grid-column:1/-1!important;
+  padding:0!important;
+  border:0!important;
+  margin:0!important;
+  background:transparent!important;
 }
 #oai-pilgrimage-detail-view.is-completion-view .oai-pilgrimage-total-actions > .oai-pilgrimage-course-map{
   grid-column:1 / -1!important;
   width:100%!important;
   min-width:0!important;
   max-width:100%!important;
+  height:44px!important;
+  min-height:44px!important;
+  max-height:44px!important;
   box-sizing:border-box!important;
 }
 
