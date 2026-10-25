@@ -17426,12 +17426,38 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const remoteCheck=document.getElementById('oai-dev-missing-photo-drive');
     if(remoteCheck)remoteCheck.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.checkMissingVisitPhotosInDrive==='function');
     const anniversaryTest=document.getElementById('oai-dev-anniversary-test');if(anniversaryTest)anniversaryTest.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.sendPilgrimageAnniversaryTestNotification==='function');
-    if(!oaiDevEnabled()){oaiDevPendingRestore=null;for(const id of ['oai-dev-export-view','oai-dev-import-view','oai-dev-restore-preview']){const el=document.getElementById(id);if(el)el.hidden=true;}}
+    if(!oaiDevEnabled()){oaiDevPendingRestore=null;for(const id of ['oai-dev-import-view','oai-dev-restore-preview']){const el=document.getElementById(id);if(el)el.hidden=true;}}
   }
-  function oaiEncodeCgm1(value){return 'CGM1.'+btoa(Array.from(new TextEncoder().encode(JSON.stringify(value)),v=>String.fromCharCode(v)).join(''));}
-  function oaiDecodeCgm1(value){
-    const raw=String(value||'').trim().replace(/\s+/g,'');if(!raw.startsWith('CGM1.'))throw Error('CGM1 코드가 아닙니다.');
-    const bytes=Uint8Array.from(atob(raw.slice(5)),v=>v.charCodeAt(0));return JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes));
+  function oaiDevParseBackupFile(text){
+    const raw=String(text||'').trim();
+    if(!raw)throw Error('백업 파일이 비어 있습니다.');
+    // Earlier CGM1 exports remain readable if the user saved the text as a file.
+    if(raw.startsWith('CGM1.')){
+      const bytes=Uint8Array.from(atob(raw.slice(5).replace(/\s+/g,'')),v=>v.charCodeAt(0));
+      return JSON.parse(new TextDecoder('utf-8',{fatal:true}).decode(bytes));
+    }
+    return JSON.parse(raw);
+  }
+  function oaiDevSaveBackupFile(){
+    const payload=oaiDevSnapshot();
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json;charset=utf-8'});
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement('a');
+    const date=new Date().toISOString().slice(0,10).replace(/-/g,'');
+    link.href=url;link.download='gildongmu-backup-'+date+'.json';
+    document.body.appendChild(link);
+    try{link.click();oaiDevStatus('백업 파일 저장을 요청했습니다. 다운로드 폴더에서 파일이 있는지 확인하세요.');}
+    finally{link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);}
+  }
+  async function oaiDevLoadBackupFile(file){
+    oaiDevPendingRestore=null;
+    const preview=document.getElementById('oai-dev-restore-preview');if(preview)preview.hidden=true;
+    const check=document.getElementById('oai-dev-restore-check');if(check)check.checked=false;
+    if(!file)return;
+    if(file.size>30*1024*1024)throw Error('파일이 30MB를 초과합니다.');
+    const payload=oaiDevParseBackupFile(await file.text());
+    oaiDevPreview(payload);
+    document.getElementById('oai-dev-selected-file').textContent='선택한 파일: '+file.name;
   }
   function oaiDevSnapshot(){
     const data=JSON.parse(oaiTransferSnapshot()).data;
@@ -17439,10 +17465,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!Object.prototype.hasOwnProperty.call(data,'oai_pilgrimage_courses_v1'))data.oai_pilgrimage_courses_v1='[]';
     return {format:'cgm-manual-full',schema:1,createdAt:new Date().toISOString(),data};
   }
-  function oaiDevPreview(){
+  function oaiDevPreview(payload){
     oaiDevPendingRestore=null;const check=document.getElementById('oai-dev-restore-check');if(check)check.checked=false;
     document.getElementById('oai-dev-restore-preview').hidden=true;
-    const payload=oaiDecodeCgm1(document.getElementById('oai-dev-import-code').value);
+    if(!payload||typeof payload!=='object')throw Error('백업 파일 형식이 올바르지 않습니다.');
     // Never allow a partial historical backup to erase present-day pilgrimage or parish records.
     if(payload.format!=='cgm-manual-full'||payload.schema!==1||!payload.data||typeof payload.data!=='object'||Array.isArray(payload.data))throw Error('전체 수동 백업 코드만 복원할 수 있습니다. 과거 일부 기록용 CGM1은 복원할 수 없습니다.');
     const entries=Object.entries(payload.data);
@@ -17479,7 +17505,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }finally{oaiApplyingRestore=false;}
   }
   document.addEventListener('click',function(event){
-    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-copy],[data-oai-dev-preview],[data-oai-dev-apply],[data-oai-dev-failure-preview],[data-oai-dev-daily-results],[data-oai-dev-five-photo-backup],[data-oai-dev-five-photo-verify],[data-oai-dev-photo-download-diagnose],[data-oai-dev-photo-download-copy],[data-oai-dev-missing-photo-drive],[data-oai-dev-missing-photo-drive-copy],[data-oai-dev-anniversary-test]');if(!button)return;
+    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-apply],[data-oai-dev-failure-preview],[data-oai-dev-daily-results],[data-oai-dev-five-photo-backup],[data-oai-dev-five-photo-verify],[data-oai-dev-photo-download-diagnose],[data-oai-dev-photo-download-copy],[data-oai-dev-missing-photo-drive],[data-oai-dev-missing-photo-drive-copy],[data-oai-dev-anniversary-test]');if(!button)return;
     if(button.id==='oai-settings-version-label'){
       oaiDevTapCount++;
       if(oaiDevTapCount>=10){oaiDevTapCount=0;const next=!(oaiDevEnabled()&&oaiDevPanelUnlocked);oaiDevPanelUnlocked=next;window.__OAI_DEV_RUNTIME_ACTIVE__=next;oaiRefreshDeveloperPanel();const detail=document.getElementById('parish-visit-detail');if(detail&&detail.classList.contains('show'))_renderParishVisitDetail();if(_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null)_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);if(next){oaiDevStatus('개발자 모드가 열렸습니다.');document.getElementById('oai-developer-section').scrollIntoView({block:'nearest',behavior:'smooth'});} }
@@ -17523,17 +17549,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         window.oaiDevPhotoBackupResult('working','Google Drive 연결 및 사진 백업을 시작합니다.');
         window.GildongmuNative.testBackupFiveVisitPhotos();
       }else if(button.hasAttribute('data-oai-dev-export')){
-        document.getElementById('oai-dev-import-view').hidden=true;
-        const output=document.getElementById('oai-dev-export-code');output.value=oaiEncodeCgm1(oaiDevSnapshot());
-        document.getElementById('oai-dev-export-view').hidden=false;oaiDevStatus('백업 코드를 생성했습니다. 복사해서 안전하게 보관하세요.');
+        if(!oaiDevPanelUnlocked)return;
+        oaiDevSaveBackupFile();
       }else if(button.hasAttribute('data-oai-dev-import')){
-        document.getElementById('oai-dev-export-view').hidden=true;document.getElementById('oai-dev-import-view').hidden=false;
-        document.getElementById('oai-dev-restore-preview').hidden=true;oaiDevPendingRestore=null;oaiDevStatus('전체 수동 백업 CGM1 코드를 입력하세요.');
-      }else if(button.hasAttribute('data-oai-dev-copy')){
-        const input=document.getElementById('oai-dev-export-code');input.focus();input.select();
-        if(navigator.clipboard&&navigator.clipboard.writeText)navigator.clipboard.writeText(input.value).then(()=>oaiDevStatus('코드를 복사했습니다.')).catch(()=>oaiDevStatus('복사 권한이 없으면 선택된 코드를 직접 복사하세요.'));
-        else oaiDevStatus('선택된 코드를 길게 눌러 복사하세요.');
-      }else if(button.hasAttribute('data-oai-dev-preview'))oaiDevPreview();
+        if(!oaiDevPanelUnlocked)return;
+        oaiDevPendingRestore=null;
+        document.getElementById('oai-dev-import-view').hidden=false;
+        document.getElementById('oai-dev-restore-preview').hidden=true;
+        const fileInput=document.getElementById('oai-dev-import-file');fileInput.value='';fileInput.click();
+      }
       else if(button.hasAttribute('data-oai-dev-apply'))oaiDevApplyRestore();
       else if(button.hasAttribute('data-oai-dev-daily-results')){
         if(!oaiDevPanelUnlocked)return;
@@ -17543,6 +17567,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       }
     }catch(err){oaiDevStatus(err.message||'요청을 처리할 수 없습니다.');}
   },true);
+  document.getElementById('oai-dev-import-file').addEventListener('change',async function(){
+    if(!oaiDevEnabled()||!oaiDevPanelUnlocked)return;
+    try{await oaiDevLoadBackupFile(this.files&&this.files[0]);}
+    catch(err){oaiDevPendingRestore=null;document.getElementById('oai-dev-restore-preview').hidden=true;oaiDevStatus('파일 검사 실패: '+(err.message||'올바른 백업 파일이 아닙니다.'));}
+  });
   setTimeout(oaiRefreshDeveloperPanel,0);
   function oaiTransferSnapshot(){
     const data={};for(let i=0;i<localStorage.length;i++){const key=localStorage.key(i);if(oaiTransferAllowedKey(key))data[key]=localStorage.getItem(key);}
