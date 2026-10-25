@@ -1931,9 +1931,10 @@ function _oaiQueueGpsCourseDate(date,method){
   }catch(e){console.warn('[GPS 코스 날짜] 저장 실패',e);}
 }
 function _newVisitEntry(date,method,measuredAt){
+  const normalizedMethod=String(method||'manual').trim().toLowerCase()==='gps'?'gps':'manual';
   const time=Number(measuredAt),measuredDate=Number.isFinite(time)&&time>0?new Date(time):null;
   const sameDay=measuredDate&&_todayISODate.call(null)===String(date);
-  return {date:String(date),method:method||'manual',savedAt:(String(method)==='gps'&&sameDay)?measuredDate.toISOString():new Date().toISOString()};
+  return {date:String(date),method:normalizedMethod,savedAt:(normalizedMethod==='gps'&&sameDay)?measuredDate.toISOString():new Date().toISOString()};
 }
 function _getShrineVisitKey(item){
   if(!item) return '';
@@ -2040,7 +2041,7 @@ function _compareShrineVisits(a,b){
 }
 function _getShrineVisitDates(item){
   const rec=_getShrineVisitRecord(item);
-  const arr=(rec&&Array.isArray(rec.visits)?rec.visits:[]).map(_normalizeVisitEntry).filter(function(v){return v&&v.date;});
+  const arr=(rec&&Array.isArray(rec.visits)?rec.visits:[]).map(_normalizeVisitEntry).filter(function(v){return v&&_isVisitDate(v.date);});
   arr.sort(_compareShrineVisits);
   return arr;
 }
@@ -4784,7 +4785,7 @@ function _parishVisitStoredKey(p,data){
 }
 function _loadParishVisits(){try{const v=localStorage.getItem(OAI_PARISH_VISITS_KEY);const d=v?JSON.parse(v):{};return d&&typeof d==='object'?d:{}}catch(_e){return {}}}
 function _saveParishVisits(d){try{localStorage.setItem(OAI_PARISH_VISITS_KEY,JSON.stringify(d||{}))}catch(_e){}}
-function _parishVisits(p){const d=_loadParishVisits(),r=d[_parishVisitStoredKey(p,d)]||{},a=Array.isArray(r.visits)?r.visits:[];return a.map(_normalizeVisitEntry).filter(function(v){return v&&v.date;}).sort(_compareShrineVisits);}
+function _parishVisits(p){const d=_loadParishVisits(),r=d[_parishVisitStoredKey(p,d)]||{},a=Array.isArray(r.visits)?r.visits:[];return a.map(_normalizeVisitEntry).filter(function(v){return v&&_isVisitDate(v.date);}).sort(_compareShrineVisits);}
 function _parishVisitCount(p){return _parishVisits(p).length;}
 function _addParishVisit(p,date,method,measuredAt){const d=_loadParishVisits(),key=_parishVisitStoredKey(p,d);if(!key||!_isVisitDate(date))return false;const r=d[key]&&typeof d[key]==='object'?d[key]:{name:p.name||'',diocese:p.diocese||'',addr:p.addr||'',visits:[]};r.visits=Array.isArray(r.visits)?r.visits:[];if(!_appendVisitOnce(r,date,method,measuredAt))return false;_clearManualVisitDeletion('parish',key,date);if(!r.placeId)r.placeId=_oaiPlaceCanonicalId('parish',p);d[key]=r;_saveParishVisits(d);try{const persisted=_loadParishVisits()[key];if(!persisted||!_hasVisitDate(persisted.visits,date))return false;}catch(e){console.warn('[성당 기록 저장 검증 실패]',e);return false;}_oaiQueueGpsCourseDate(date,method);return true;}
 function _deleteParishVisit(p,i){const d=_loadParishVisits(),key=_parishVisitStoredKey(p,d),r=d[key];if(!r||!Array.isArray(r.visits)||i<0||i>=r.visits.length||String(r.visits[i].method||'')==='gps')return false;_recordManualVisitDeletion('parish',key,r.visits[i]);r.visits.splice(i,1);if(r.visits.length)d[key]=r;else delete d[key];_saveParishVisits(d);return true;}
