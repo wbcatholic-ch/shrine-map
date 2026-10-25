@@ -21218,8 +21218,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       followBtn.textContent=isActive?'■ 순례 종료':(isCompletionView?'▶ 다시 순례하기':'▶ 순례하기');
     }
     if(totalCard){
-      totalCard.hidden=false;
-      totalCard.style.display='grid';
+      // A completed walk with a recorded GPS track already has its route playback button.
+      // Keep the original course map for older completions without a recorded track.
+      const hasWalkHistory=isCompletionView&&_walkHistoryEntries(manualCourse).length>0;
+      totalCard.hidden=hasWalkHistory;
+      totalCard.style.display=hasWalkHistory?'none':'grid';
     }
     if(actions)actions.classList.add('is-integrated-pilgrimage');
     calcPilgrimageTotalRoute();
