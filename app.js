@@ -18494,27 +18494,37 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // 개발자 읽기 전용 진단과 수동 정정은 반드시 동일한 GPS 대조 결과를 사용한다.
   // 장소/날짜/시각이 확인되지 않으면 저장하지 않는다.
   function _completionGpsComparison(){
-    const courses=_dailyStoredCourses(),cache=new Map(),rows=[],changes=[];
+    const courses=_dailyStoredCourses(),cache=new Map(),rows=[],changes=[],skipped=[];
     courses.forEach((course,ci)=>(course.completions||[]).forEach((entry,ei)=>{
       if(!entry||entry.method!=='gps')return;
       const date=_dailyIso(Number(entry.completedAt));
-      if(!date)throw new Error('순례완료 날짜 확인 실패: '+course.name);
-      if(!cache.has(date))cache.set(date,_dailyGpsEvents(date));
-      const events=cache.get(date);
+      if(!date){skipped.push({course:course.name,date:'날짜 없음',reason:'완료 날짜 확인 실패'});return;}
+      if(!cache.has(date)){
+        try{cache.set(date,{events:_dailyGpsEvents(date)});}
+        catch(err){cache.set(date,{error:String(err&&err.message||err)});}
+      }
+      const cached=cache.get(date);
+      if(cached.error){skipped.push({course:course.name,date,reason:cached.error});return;}
+      const events=cached.events;
       // 기록이 없는 날짜는 데이터 손실 방지를 위해 정정을 중단한다.
-      if(!events.length)throw new Error(date+' GPS 스탬프가 없습니다. 정정을 중단합니다.');
+      if(!events.length){skipped.push({course:course.name,date,reason:'GPS 스탬프 없음'});return;}
       const source=Array.isArray(entry.stampPlaces)?entry.stampPlaces:course.places;
-      if(!Array.isArray(source))throw new Error(date+' 완료 장소 구조 확인 실패');
-      const matched=[],unmatched=[],duplicates=[];
+      if(!Array.isArray(source)){skipped.push({course:course.name,date,reason:'완료 장소 구조 확인 실패'});return;}
+      const matched=[],unmatched=[],duplicates=[],ambiguous=[];
       source.forEach(place=>{
         if(!place||place.routeOnly)return;
         const candidates=events.filter(ev=>_dailyCompletedPlaceMatches(place,ev));
-        if(candidates.length>1)throw new Error(date+' 장소가 여러 GPS 스탬프와 일치합니다: '+String(place.name||'?'));
-        if(!candidates.length){unmatched.push(String(place.name||place.placeId||'?'));return;}
-        const ev=candidates[0];
+        // 같은 장소의 중복 스탬프는 한 번만 인정한다. 서로 다른 장소가
+        // 동시에 일치한다면 해당 완료 기록만 보류하고 다른 날짜는 계속 검사한다.
+        const distinct=[];
+        candidates.forEach(ev=>{if(!distinct.some(x=>_dailySamePlace(x,ev)||_dailyLinkedGpsPair(x,ev)))distinct.push(ev);});
+        if(distinct.length>1){ambiguous.push(String(place.name||place.placeId||'?'));return;}
+        if(!distinct.length){unmatched.push(String(place.name||place.placeId||'?'));return;}
+        const ev=distinct[0];
         if(matched.some(x=>_dailySamePlace(x.ev,ev)||_dailyLinkedGpsPair(x.ev,ev))){duplicates.push(String(place.name||'?'));return;}
         matched.push({place,ev});
       });
+      if(ambiguous.length){skipped.push({course:course.name,date,reason:'장소 식별 모호: '+ambiguous.join(', ')});return;}
       matched.sort((x,y)=>x.ev.at-y.ev.at||x.ev.name.localeCompare(y.ev.name,'ko'));
       const kept=matched.map(x=>Object.assign({},x.place,{name:x.ev.name,placeId:x.ev.placeId||x.place.placeId,kind:x.ev.kind,diocese:x.ev.diocese}));
       const previous=source.filter(x=>x&&!x.routeOnly);
@@ -18525,17 +18535,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(changed)changes.push({ci,ei,course:course.name,date,kept,oldCount:previous.length,
         unmatched,duplicates,items:matched.map(x=>x.ev.name+' '+new Date(x.ev.at).toLocaleTimeString('ko-KR',{hour:'2-digit',minute:'2-digit',hour12:false}))});
     }));
-    return {courses,rows,changes};
+    return {courses,rows,changes,skipped};
   }
   function _completionGpsAuditPreview(){return _completionGpsComparison().rows;}
-  const COMPLETION_REPAIR_BACKUP_KEY='oai_completion_repair_v1560_backup';
+  const COMPLETION_REPAIR_BACKUP_KEY='oai_completion_repair_v1561_backup';
   function _completionRepairPreview(){return _completionGpsComparison();}
   function _completionRepairConfirmed(){
     const preview=_completionRepairPreview();
-    if(!preview.changes.length)return 'GPS 스탬프 기준으로 변경할 순례완료 기록이 없습니다.';
+    if(!preview.changes.length)return '변경할 순례완료 기록이 없습니다. 보류: '+preview.skipped.map(x=>x.date+' '+x.course+' ('+x.reason+')').join('; ');
     const details=preview.changes.map(x=>x.date+' | '+x.course+' | '+x.oldCount+'곳 → '+x.kept.length+'곳'+
       (x.unmatched.length?'\n제외: '+x.unmatched.join(', '):'')+'\n유지: '+x.items.join(', ')).join('\n\n');
-    if(!window.confirm('GPS 스탬프 장소·날짜·시간을 기준으로 완료 기록을 정리할까요?\nGPS 스탬프·순례계획·사진·메모는 변경하지 않습니다.\n\n'+details))return '사용자가 취소했습니다.';
+    if(!window.confirm('GPS 스탬프 장소·날짜·시간을 기준으로 완료 기록을 정리할까요?\nGPS 스탬프·순례계획·사진·메모는 변경하지 않습니다.\n\n'+details+'\n\n보류 기록: '+preview.skipped.map(x=>x.date+' '+x.course+' ('+x.reason+')').join('; ')))return '사용자가 취소했습니다.';
     const original=localStorage.getItem(COURSES_KEY)||'[]';
     if(!Array.isArray(JSON.parse(original)))throw new Error('원본 순례코스 구조 오류');
     // 새 백업이 존재한다면 원본을 덮어쓰지 않는다. 저장공간이 부족하면 중단한다.
@@ -18560,7 +18570,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       try{localStorage.setItem(COURSES_KEY,original);}catch(restoreError){throw new Error('저장 실패 및 복구 실패: '+restoreError.message);}
       throw err;
     }
-    return latest.changes.length+'개 순례완료 기록을 GPS 스탬프 기준으로 정리했습니다. 원본 스탬프는 유지했습니다.';
+    const verified=_completionRepairPreview();
+    const stillChanged=verified.changes.filter(x=>latest.changes.some(y=>y.ci===x.ci&&y.ei===x.ei));
+    if(stillChanged.length)throw new Error('저장 후 재검사에서 '+stillChanged.length+'건이 여전히 불일치합니다. 원본 백업을 보존했습니다.');
+    return latest.changes.length+'개 순례완료 기록을 GPS 스탬프 기준으로 정리했습니다. 보류 '+latest.skipped.length+'건. 원본 스탬프는 유지했습니다.';
   }
   function _scheduleCompletionGpsAudit(once){
     // 기록 자동 삭제/수정 금지. 과거 기록은 명시적 확인 뒤 중복만 정정한다.
@@ -18580,7 +18593,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     out.hidden=false;
     try{
       const rows=_completionGpsAuditPreview();
-      out.textContent='읽기 전용 진단 ('+rows.length+'건)\n'+rows.map(x=>x.date+' | '+x.course+' | '+x.status+(x.unmatched&&x.unmatched.length?' | 스탬프 불일치: '+x.unmatched.join(', '):'')+(x.duplicates&&x.duplicates.length?' | 중복: '+x.duplicates.join(', '):'')).join('\n');
+      const skipped=_completionGpsComparison().skipped;
+      out.textContent='읽기 전용 진단 ('+rows.length+'건)\n'+rows.map(x=>x.date+' | '+x.course+' | '+x.status+(x.unmatched&&x.unmatched.length?' | 스탬프 불일치: '+x.unmatched.join(', '):'')+(x.duplicates&&x.duplicates.length?' | 중복: '+x.duplicates.join(', '):'')).join('\n')+(skipped.length?'\n보류 ('+skipped.length+'건): '+skipped.map(x=>x.date+' '+x.course+' ('+x.reason+')').join('; '):'');
     }catch(err){out.textContent='검사 실패: '+String(err&&err.message||err);}
   });
   function saveCourses(a){
