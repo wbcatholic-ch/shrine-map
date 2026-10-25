@@ -18418,7 +18418,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function _manualCompletionCourse(){
     if(pilgrimageDetailMode!=='complete'||!currentCourseId)return null;
     const c=loadCourses().find(x=>x.id===currentCourseId);
-    return c&&_courseCompletionList(c).some(x=>x.method==='gps'||x.locked===true)?c:null;
+    return c&&_courseCompletionList(c).length>0?c:null;
   }
   function _manualOrderFromMerged(merged){
     // 기존 GPS 항목의 상대 순서를 건드리지 않고, 수동 항목의 위치만 재색인한다.
@@ -20975,7 +20975,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function openPilgrimagePlaceInfo(index){
     const completion=pilgrimageDetailMode==='complete';
     const course=completion&&currentCourseId?loadCourses().find(c=>c.id===currentCourseId):null;
-    const rows=completion&&course&&_courseHasGpsLockedCompletion(course)?_manualMerged(course):loadPlan().map(p=>({point:p}));
+    const rows=completion&&course&&_courseCompletionList(course).length?_manualMerged(course):loadPlan().map(p=>({point:p}));
     const row=rows[index],place=row&&row.point;
     if(!place)return;
     const name=String(place.name||'').trim();
@@ -21030,7 +21030,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     // 같은 길찾기 지도를 보기 전용으로 사용한다. 원래 안내창을 제거하지 않고
     // 뒤로가기 시 동일 DOM 인스턴스를 복원한다(성지자료 버튼/선택 장소 보존).
     function showWaypointsMap(){
-      const courseRows=completion&&course&&_courseHasGpsLockedCompletion(course)?_manualMerged(course).map(x=>x.point):loadPlan();
+      const courseRows=completion&&course&&_courseCompletionList(course).length?_manualMerged(course).map(x=>x.point):loadPlan();
       const points=courseRows.map(normalizePoint).filter(Boolean);
       if(!points.length){_oaiShowNavigationNotice('지도 안내','표시할 순례 장소가 없습니다.',function(){});return;}
       if(points.length>OAI_MAX_ROUTE_WAYPOINTS){
@@ -21094,7 +21094,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const manualCourse=isCompletionView&&currentCourseId?loadCourses().find(c=>c.id===currentCourseId):null;
     const gpsProtected=!!(manualCourse&&_courseHasGpsLockedCompletion(manualCourse));
     const displayedCompletion=isCompletionView&&manualCourse?_courseCompletionList(manualCourse)[0]:null;
-    const displayItems=gpsProtected?_manualMerged(manualCourse):list.map((point,i)=>({point,gps:true,gpsIndex:i}));
+    const canSupplementCompletion=!!(isCompletionView&&manualCourse&&_courseCompletionList(manualCourse).length);
+    const displayItems=canSupplementCompletion?_manualMerged(manualCourse):list.map((point,i)=>({point,gps:true,gpsIndex:i}));
     const gpsMissingEndpoint=gpsAutoCompletion&&(!normalizePoint(m.start)||!normalizePoint(m.end));
     const walkSeg=m.walkSegment,walkOk=_walkSegmentBounds(walkSeg,list,m);
     const walkInfo=document.getElementById('oai-pilgrimage-walk-segment-hint');
@@ -21179,7 +21180,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     // Completed GPS-protected courses use one entry for the existing search/map pickers.
     // Manual or locked completion records retain their existing edit restrictions.
-    const allowMissingAdd=isCompletionView&&gpsProtected&&!editingActive;
+    const allowMissingAdd=canSupplementCompletion&&!editingActive;
     if(missingAddBtn){missingAddBtn.hidden=!allowMissingAdd;missingAddBtn.style.display=allowMissingAdd?'block':'none';missingAddBtn.setAttribute('aria-expanded','false');}
     if(missingOptions)missingOptions.hidden=true;
     const historyActions=document.querySelector('#oai-pilgrimage-detail-view .oai-pilgrimage-detail-actions');
@@ -21233,10 +21234,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(detailRoot)detailRoot.classList.toggle('is-active-follow',isActive);
     if(saveBtn){
       const dirty=isActive?_pilgrimageStructureIsDirty():_pilgrimageDraftIsDirty(),saveable=!!(list.length||(normalizePoint(m.start)&&normalizePoint(m.end)));
-      const manualPending=isCompletionView&&gpsProtected&&_manualCompletionUnconfirmed.has(String(currentCourseId));
+      const manualPending=canSupplementCompletion&&_manualCompletionUnconfirmed.has(String(currentCourseId));
       const enabled=isCompletionView?manualPending:(saveable&&dirty);
-      saveBtn.hidden=isCompletionView&&!gpsProtected;
-      saveBtn.style.display=(isCompletionView&&!gpsProtected)?'none':'';
+      saveBtn.hidden=isCompletionView&&!canSupplementCompletion;
+      saveBtn.style.display=(isCompletionView&&!canSupplementCompletion)?'none':'';
       saveBtn.disabled=!enabled;
       saveBtn.setAttribute('aria-disabled',enabled?'false':'true');
       saveBtn.classList.toggle('is-dirty',enabled);
@@ -22139,7 +22140,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const meta=loadMeta();
     const completed=pilgrimageDetailMode==='complete' && currentCourseId
       ? loadCourses().find(c=>c.id===currentCourseId) : null;
-    const list=completed && _courseHasGpsLockedCompletion(completed)
+    const list=completed && _courseCompletionList(completed).length
       ? _manualMerged(completed).map(x=>x.point) : loadPlan();
     const out=[];
     if(meta.start&&_validGpsPair(meta.start.lat,meta.start.lng))out.push(Object.assign({role:'start'},meta.start));
