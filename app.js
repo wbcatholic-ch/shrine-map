@@ -18631,11 +18631,64 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(stillChanged.length)throw new Error('저장 후 재검사에서 '+stillChanged.length+'건이 여전히 불일치합니다. 원본 백업을 보존했습니다.');
     return latest.changes.length+'개 순례완료 기록을 GPS 스탬프 기준으로 정리했습니다. 보류 '+latest.skipped.length+'건. 원본 스탬프는 유지했습니다.';
   }
+  // V1568: 모든 사용자 공통, 엄격한 조건에서만 GPS 완료 장소를 정정한다.
+  // 계획의 방문하지 않은 장소는 구형 완료기록에만 존재할 수 있으므로,
+  // 당일 GPS 코스 방문지가 모두 계획과 일대일로 확인된 경우에만 복원한다.
+  // GPS 스탬프, 계획 장소, 사진 및 메모는 절대로 수정하지 않는다.
+  const COMPLETION_AUTO_BACKUP_KEY='oai_completion_auto_repair_v1568_backup';
+  function _completionGpsAutoRepair(result){
+    if(!result||!Array.isArray(result.changes)||!result.changes.length)return 0;
+    const original=localStorage.getItem(COURSES_KEY);
+    if(!original||localStorage.getItem(COMPLETION_AUTO_BACKUP_KEY)!==null)return 0;
+    const candidates=[];
+    result.changes.forEach(change=>{
+      if(change.unmatched.length||change.duplicates.length||!change.kept.length)return;
+      const course=result.courses[change.ci],entry=course&&course.completions&&course.completions[change.ei];
+      if(!entry||entry.method!=='gps'||entry.locked!==true)return;
+      const dayCourses=result.courses.filter(c=>(c.completions||[]).some(e=>e&&e.method==='gps'&&_dailyIso(Number(e.completedAt))===change.date));
+      if(dayCourses.length!==1)return; // 동일 날짜의 다른 코스가 있으면 소유권 모호
+      const source=Array.isArray(entry.stampPlaces)?entry.stampPlaces:course.places;
+      if(!Array.isArray(source))return;
+      // 저장된 완료 스탬프가 있는 경우 하나라도 제외되면 자동 수정 금지.
+      if(Array.isArray(entry.stampPlaces)&&source.filter(p=>p&&!p.routeOnly).length!==change.kept.length)return;
+      let events;
+      try{events=_dailyGpsEvents(change.date);}catch(_e){return;}
+      // 모든 GPS 방문지가 해당 완료 코스의 장소와 연결되어야 한다.
+      if(events.length!==change.kept.length)return;
+      if(!events.every(ev=>change.kept.some(p=>_dailyCompletedPlaceMatches(p,ev))))return;
+      if(!change.kept.every(p=>events.some(ev=>_dailyCompletedPlaceMatches(p,ev))))return;
+      candidates.push(change);
+    });
+    if(!candidates.length)return 0;
+    // 원본 1회 백업이 실패하거나 저장 중 변경되면 절대 진행하지 않는다.
+    const parsed=JSON.parse(original);
+    if(!Array.isArray(parsed)||parsed.length!==result.courses.length)return 0;
+    const backup=JSON.stringify({createdAt:Date.now(),source:original});
+    localStorage.setItem(COMPLETION_AUTO_BACKUP_KEY,backup);
+    if(localStorage.getItem(COMPLETION_AUTO_BACKUP_KEY)!==backup)return 0;
+    if(localStorage.getItem(COURSES_KEY)!==original)return 0;
+    candidates.forEach(change=>{
+      const entry=parsed[change.ci].completions[change.ei];
+      entry.stampPlaces=change.kept;
+      entry.placeCount=change.kept.length;
+    });
+    const next=JSON.stringify(parsed);
+    try{
+      localStorage.setItem(COURSES_KEY,next);
+      if(localStorage.getItem(COURSES_KEY)!==next)throw new Error('저장 검증 실패');
+      console.info('[순례완료 GPS 자동 정정] 확인된 '+candidates.length+'건 정정. 원본 백업 보존.');
+      return candidates.length;
+    }catch(err){
+      try{localStorage.setItem(COURSES_KEY,original);}catch(restoreErr){console.error('[순례완료 복구 실패]',restoreErr);}
+      console.error('[순례완료 자동 정정 보류]',err);
+      return 0;
+    }
+  }
   let _completionAuditQueued=false;
   let _completionAuditRunning=false;
   let _completionAuditResult=null;
   function _scheduleCompletionGpsAudit(once){
-    // 모든 사용자 공통 읽기 전용 검증. 저장/삭제는 절대 수행하지 않는다.
+    // 모든 사용자 공통 검증. GPS 근거가 완전한 경우에만 백업 후 완료 항목을 정정한다.
     // 코스 저장 중 재진입하지 않도록 다음 작업에서 검사한다.
     if(_completionAuditQueued||_completionAuditRunning)return;
     _completionAuditQueued=true;
@@ -18645,8 +18698,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       _completionAuditRunning=true;
       try{
         const result=_completionGpsComparison();
+        // 자동 정정은 명백하게 검증된 GPS 완료 기록만 대상으로 한다.
+        // 불일치 장소나 모호한 항목이 있으면 원본을 보존한다.
+        const repaired=_completionGpsAutoRepair(result);
         _completionAuditResult={checked:result.rows.length,changes:result.changes.length,
-          skipped:result.skipped.length,at:Date.now()};
+          skipped:result.skipped.length,repaired:repaired,at:Date.now()};
         if(result.changes.length||result.skipped.length)
           console.warn('[순례완료 GPS 자동 검증] 정정 후보 '+result.changes.length+'건, 보류 '+result.skipped.length+'건. 원본 기록 유지.');
       }catch(err){
