@@ -4782,6 +4782,67 @@ function _saveParishVisits(d){try{localStorage.setItem(OAI_PARISH_VISITS_KEY,JSO
 function _parishVisits(p){const d=_loadParishVisits(),r=d[_parishVisitStoredKey(p,d)]||{},a=Array.isArray(r.visits)?r.visits:[];return a.map(_normalizeVisitEntry).filter(function(v){return v&&v.date;}).sort(_compareShrineVisits);}
 function _parishVisitCount(p){return _parishVisits(p).length;}
 function _addParishVisit(p,date,method,measuredAt){const d=_loadParishVisits(),key=_parishVisitStoredKey(p,d);if(!key||!_isVisitDate(date))return false;const r=d[key]&&typeof d[key]==='object'?d[key]:{name:p.name||'',diocese:p.diocese||'',addr:p.addr||'',visits:[]};r.visits=Array.isArray(r.visits)?r.visits:[];if(!_appendVisitOnce(r,date,method,measuredAt))return false;_clearManualVisitDeletion('parish',key,date);if(!r.placeId)r.placeId=_oaiPlaceCanonicalId('parish',p);d[key]=r;_saveParishVisits(d);try{const persisted=_loadParishVisits()[key];if(!persisted||!_hasVisitDate(persisted.visits,date))return false;}catch(e){console.warn('[성당 기록 저장 검증 실패]',e);return false;}_oaiQueueGpsCourseDate(date,method);return true;}
+/* 사용자 요청: 개발자 모드에서만 명시적으로 실행하는 2026년 누락 성당 스탬프 6건 복구.
+   전 사용자 자동 실행 금지. 방문 날짜의 실제 위치 수신 로그를 재구성한 것이 아니라
+   사용자가 확인한 과거 방문을 기존 GPS 스탬프 형식으로 복원한 것임을 기록한다. */
+function _oaiRestoreSixConfirmedParishStamps(){
+  if(window.__OAI_DEV_RUNTIME_ACTIVE__!==true)throw new Error('개발자 모드에서만 실행할 수 있습니다');
+  const targets=[
+    ['2026-08-04','12:00','함열성당','전주교구'],
+    ['2026-08-04','12:10','홍산성당','대전교구'],
+    ['2026-08-04','16:30','금사리성당','대전교구'],
+    ['2026-08-04','18:50','부여성당','대전교구'],
+    ['2026-08-29','08:30','문산성당','마산교구'],
+    ['2026-08-29','14:10','진영성당','마산교구']
+  ];
+  if(!Array.isArray(PARISHES)||!PARISHES.length)throw new Error('성당 자료를 아직 읽지 못했습니다');
+  const catalog=targets.map(([date,time,name,diocese])=>{
+    const matches=PARISHES.filter(p=>p&&p.name===name&&p.diocese===diocese);
+    if(matches.length!==1)throw new Error(name+' ('+diocese+') 장소 확인 실패: '+matches.length+'건');
+    const ms=Date.parse(date+'T'+time+':00+09:00');
+    if(!Number.isFinite(ms))throw new Error(name+' 방문 시각 오류');
+    return {date,time,name,diocese,place:matches[0],savedAt:new Date(ms).toISOString()};
+  });
+  const storageKey=OAI_PARISH_VISITS_KEY;
+  const before=localStorage.getItem(storageKey);
+  const data=before?JSON.parse(before):{};
+  if(!data||typeof data!=='object'||Array.isArray(data))throw new Error('성당 스탬프 저장소 구조 오류');
+  const added=[],skipped=[];
+  catalog.forEach(t=>{
+    const p=t.place,key=_parishVisitStoredKey(p,data);
+    if(!key)throw new Error(t.name+' 저장 키 오류');
+    const existing=data[key];
+    const rec=existing&&typeof existing==='object'&&!Array.isArray(existing)?existing:{name:p.name||'',diocese:p.diocese||'',addr:p.addr||'',visits:[]};
+    if(!Array.isArray(rec.visits))throw new Error(t.name+' 방문 이력 구조 오류');
+    if(_hasVisitDate(rec.visits,t.date)){skipped.push(t.name+' ('+t.date+')');return;}
+    rec.visits.push({date:t.date,method:'gps',savedAt:t.savedAt,recovered:true,recoverySource:'user_confirmed_historical_visit'});
+    rec.visits.sort((a,b)=>_compareShrineVisits(_normalizeVisitEntry(a),_normalizeVisitEntry(b)));
+    if(!rec.placeId)rec.placeId=_oaiPlaceCanonicalId('parish',p);
+    data[key]=rec;added.push(t.name+' ('+t.date+' '+t.time+')');
+  });
+  if(!added.length)return {added,skipped};
+  const updated=JSON.stringify(data);
+  if(localStorage.getItem(storageKey)!==before)throw new Error('복구 도중 성당 스탬프가 변경되었습니다. 다시 시도해 주세요');
+  try{
+    localStorage.setItem(storageKey,updated);
+    if(localStorage.getItem(storageKey)!==updated)throw new Error('저장 후 원본 대조 실패');
+    catalog.forEach(t=>{if(!_hasVisitDate(_parishVisits(t.place),t.date))throw new Error(t.name+' 저장 재확인 실패');});
+  }catch(err){
+    try{if(before===null)localStorage.removeItem(storageKey);else localStorage.setItem(storageKey,before);}catch(rollbackErr){console.error('[성당 스탬프 복구 원본 복원 실패]',rollbackErr);}
+    throw err;
+  }
+  return {added,skipped};
+}
+document.addEventListener('click',function(e){
+  const btn=e.target&&e.target.closest&&e.target.closest('#oai-dev-restore-six-parishes');
+  if(!btn||window.__OAI_DEV_RUNTIME_ACTIVE__!==true)return;
+  const out=document.getElementById('oai-dev-restore-six-parishes-report');
+  if(!window.confirm('본인 기기의 2026년 8월 4일/29일 누락 성당 스탬프 6건을 복구할까요?\n기존 방문 기록은 덮어쓰지 않으며 순례완료 코스는 수정하지 않습니다.'))return;
+  try{
+    const result=_oaiRestoreSixConfirmedParishStamps();
+    if(out){out.hidden=false;out.textContent='신규 복구 '+result.added.length+'건\n'+result.added.join('\n')+'\n이미 등록되어 건너뜀 '+result.skipped.length+'건\n'+result.skipped.join('\n');}
+  }catch(err){if(out){out.hidden=false;out.textContent='복구 중단: '+String(err&&err.message||err);}console.warn('[6개 성당 스탬프 복구 중단]',err);}
+});
 function _deleteParishVisit(p,i){const d=_loadParishVisits(),key=_parishVisitStoredKey(p,d),r=d[key];if(!r||!Array.isArray(r.visits)||i<0||i>=r.visits.length||String(r.visits[i].method||'')==='gps')return false;_recordManualVisitDeletion('parish',key,r.visits[i]);r.visits.splice(i,1);if(r.visits.length)d[key]=r;else delete d[key];_saveParishVisits(d);return true;}
 function _parishEntries(){const a=[];(PARISHES||[]).forEach(function(p,i){if(!p||p.diocese==='군종교구')return;const v=_parishVisits(p);if(v.length)a.push({p:p,i:i,v:v,n:v.length});});return a.sort(function(a,b){return _compareShrineVisits(a.v[0],b.v[0])||String(a.p.name).localeCompare(String(b.p.name),'ko')});}
 function _parishUnvisitedEntries(){const saved=_loadParishVisits();return (PARISHES||[]).map(function(p,i){const r=saved[_parishVisitStoredKey(p,saved)],v=r&&Array.isArray(r.visits)?r.visits:[];return {p:p,i:i,v:v};}).filter(function(x){return x.p&&x.p.diocese!=='군종교구'&&!x.v.length;}).sort(function(a,b){return String(a.p.name||'').localeCompare(String(b.p.name||''),'ko');});}
@@ -18580,6 +18641,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     setTimeout(step,100);
   }
   function _scheduleCompletionGpsAudit(once){
+    // 과거 성당 스탬프 누락이 확인되어 완료 기록 자동 삭제형 정정은 안전성 재검증까지 중지.
+    return;
     if(once&&localStorage.getItem(COMPLETION_AUDIT_ONCE_KEY)==='done')return;
     completionAuditPending=true;
     if(completionAuditTimer||completionAuditRunning)return;
