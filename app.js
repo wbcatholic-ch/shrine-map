@@ -19371,15 +19371,34 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     });
     return unique;
   }
+  // GPS 원본은 _dailyRawGpsEvents에 독립 보존하고 코스 이벤트만 공통 방문지로 계산한다.
   // 공동 인증의 중복 코스 판정은 명시적 성지·성당 연결 명부만 사용한다.
   // 사진/메모의 주소 자동 공통화나 단순 거리 근접은 GPS 코스 병합 근거가 아니다.
   function _dailyLinkedGpsPair(a,b){
-    if(!a||!b||a.kind===b.kind)return false;
-    const shrine=a.kind==='shrine'?a:b,parish=a.kind==='parish'?a:b;
+    if(!a||!b)return false;
+    // 순례계획·구형 완료기록은 normalizePoint 과정에서 kind/diocese가 빠진다.
+    // 따라서 이름만 비교하거나 두 항목을 같은 스탬프로 취급하지 않고,
+    // 확정된 성지↔성당 명부의 양쪽 항목에 각각 연결되는지만 확인한다.
+    if(a.kind&&b.kind&&String(a.kind)===String(b.kind))return false;
+    const aName=_normPilgrimageName(a.name),bName=_normPilgrimageName(b.name);
+    if(!aName||!bName)return false;
     return OAI_SHARED_VISIT_JOURNAL_GROUPS.some(function(g){
-      return _normPilgrimageName(shrine.name)===_normPilgrimageName(g.shrineName)&&
-        _normPilgrimageName(parish.name)===_normPilgrimageName(g.parishName)&&
-        String(parish.diocese||'')===String(g.parishDiocese||'');
+      const shrineName=_normPilgrimageName(g.shrineName),parishName=_normPilgrimageName(g.parishName);
+      const isSide=function(item,name,kind){
+        if(_normPilgrimageName(item.name)!==name)return false;
+        if(item.kind&&String(item.kind)!==kind)return false;
+        if(kind==='parish'&&item.diocese&&String(item.diocese)!==String(g.parishDiocese||''))return false;
+        return true;
+      };
+      // 이름이 동일한 그룹도 원본 스탬프 종류가 명확하면 서로 다른 카테고리로만 연결한다.
+      if(shrineName===parishName&&(!a.kind||!b.kind)){
+        const aId=String(a.placeId||''),bId=String(b.placeId||'');
+        if(a.kind||b.kind){
+          if(aId&&bId&&aId===bId)return false;
+        }else if(!aId||!bId||aId===bId)return false;
+      }
+      return (isSide(a,shrineName,'shrine')&&isSide(b,parishName,'parish'))||
+             (isSide(b,shrineName,'shrine')&&isSide(a,parishName,'parish'));
     });
   }
   function _dailyIsMyParish(ev){
