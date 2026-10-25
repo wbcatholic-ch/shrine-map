@@ -17865,6 +17865,25 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       // Import is only applied after the user's explicit approval. When real
       // local records differ, disclose replacement; never treat this as failure.
       let localConflict=oaiImportHasLocalConflict();
+      // 복원 전 성지·성당 기록의 기본 구조를 검증한다. 오류가 있으면 기존 저장소를 건드리지 않는다.
+      const validateVisitImport=function(){
+        for(const [key,raw] of entries){
+          if(key!==OAI_SHRINE_VISITS_KEY&&key!==OAI_PARISH_VISITS_KEY)continue;
+          let map;
+          try{map=JSON.parse(raw);}catch(_e){throw Error('방문기록 JSON 형식이 올바르지 않습니다: '+key);}
+          if(!map||typeof map!=='object'||Array.isArray(map))throw Error('방문기록 저장 구조가 올바르지 않습니다: '+key);
+          for(const placeKey of Object.keys(map)){
+            const record=map[placeKey];
+            if(!record||typeof record!=='object'||Array.isArray(record)||!Array.isArray(record.visits))
+              throw Error('장소별 방문기록 구조가 올바르지 않습니다: '+key);
+            for(const visit of record.visits){
+              if(typeof visit==='string')continue; // 과거 문자열 기록은 그대로 보존
+              if(!visit||typeof visit!=='object'||Array.isArray(visit))
+                throw Error('방문일자 기록 구조가 올바르지 않습니다: '+key);
+            }
+          }
+        }
+      };
       const applyImportedRecords=function(){
         // If the local data changed after the warning was shown, require a
         // fresh confirmation rather than silently replacing the newer state.
@@ -17875,11 +17894,19 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         }
         oaiApplyingRestore=true;
         try{
+          validateVisitImport();
           const firstRunNetwork=localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)==='1'
             ?(localStorage.getItem(OAI_PHOTO_WIFI_ONLY_KEY)==='0'?'any':'wifi'):'';
           const previous=entries.map(([key])=>[key,localStorage.getItem(key)]);
-          try{for(const [key,value] of entries)localStorage.setItem(key,value);}
-          catch(e){for(const [key,value] of previous){try{if(value===null)localStorage.removeItem(key);else localStorage.setItem(key,value);}catch(_e){}}throw Error('기록 저장에 실패했습니다.');}
+          try{
+            for(const [key,value] of entries){
+              localStorage.setItem(key,value);
+              if(localStorage.getItem(key)!==value)throw Error('기록 저장 확인 실패');
+            }
+          }catch(e){
+            for(const [key,value] of previous){try{if(value===null)localStorage.removeItem(key);else localStorage.setItem(key,value);}catch(_e){}}
+            throw Error('기록 저장에 실패했습니다.');
+          }
           // Do not let older Drive data overwrite the network choice just made here.
           if(firstRunNetwork){
             localStorage.setItem(OAI_PHOTO_WIFI_ONLY_KEY,firstRunNetwork==='any'?'0':'1');
