@@ -18412,9 +18412,33 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(before!==next)_manualCompletionUnconfirmed.add(String(id));
     return before!==next;
   }
+  // V1563: 구형 GPS 완료기록에 stampPlaces가 없을 때 계획 장소를 완료로 오인하지 않는다.
+  // 당일 원본 GPS와 장소를 확인할 수 있는 항목만 화면에 표시한다. 저장 데이터는 수정하지 않는다.
+  function _legacyCompletionDisplayStamps(course,completion){
+    const date=_dailyIso(Number(completion&&completion.completedAt));
+    if(!date)return [];
+    let events;
+    try{events=_dailyGpsEvents(date);}catch(err){console.warn('[순례완료] 구형 GPS 표시 보류',err);return [];}
+    const matched=[];
+    (Array.isArray(course.places)?course.places:[]).forEach(place=>{
+      if(!place||place.routeOnly)return;
+      const candidates=events.filter(ev=>_dailyCompletedPlaceMatches(place,ev));
+      const distinct=[];
+      candidates.forEach(ev=>{
+        if(!distinct.some(x=>_dailySamePlace(x,ev)||_dailyLinkedGpsPair(x,ev)))distinct.push(ev);
+      });
+      if(distinct.length!==1)return; // 모호한 장소는 완료 표시 금지
+      const ev=distinct[0];
+      if(matched.some(x=>_dailySamePlace(x.ev,ev)||_dailyLinkedGpsPair(x.ev,ev)))return;
+      matched.push({ev,place});
+    });
+    matched.sort((a,b)=>a.ev.at-b.ev.at);
+    return matched.map(x=>Object.assign({},x.place,{name:x.ev.name,placeId:x.ev.placeId||x.place.placeId,kind:x.ev.kind,diocese:x.ev.diocese}));
+  }
   function _manualMerged(course){
     const completion=_courseCompletionList(course)[0];
-    const source=completion&&Array.isArray(completion.stampPlaces)?completion.stampPlaces:course.places;
+    const source=completion&&Array.isArray(completion.stampPlaces)?completion.stampPlaces:
+      (completion&&completion.method==='gps'?_legacyCompletionDisplayStamps(course,completion):course.places);
     // 완료 화면의 GPS 항목은 실제 당일 스탬프 장소별 1회만 표시한다.
     // 기존 저장 기록은 변경하지 않고, 계획상 반복 경유지는 그대로 유지한다.
     const places=_uniqueCompletionStampPlaces(source).map((point,i)=>({point:point,gps:true,gpsIndex:i}));
@@ -22393,6 +22417,35 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const card=document.querySelector('.oai-pilgrimage-detail-view .oai-pilgrimage-total-card');
     if(!kmEl||!timeEl||!noteEl||!card)return;
     const list=loadPlan(),meta=loadMeta();
+    // V1564: 완료 상세의 거리/주행시간은 과거 계획이 아닌 해당 완료 회차의
+    // GPS 스탬프 장소만 사용한다. 현재 GPS 위치를 과거 순례 출발지로 사용하지 않는다.
+    if(pilgrimageDetailMode==='complete'){
+      const course=currentCourseId?loadCourses().find(c=>String(c.id)===String(currentCourseId)):null;
+      const completion=course?_courseCompletionList(course)[0]:null;
+      const rows=course&&completion?_manualMerged(course).filter(row=>row.gps&&!row.point.routeOnly):[];
+      const stops=rows.map(row=>normalizePoint(row.point)).filter(Boolean);
+      const start=course&&normalizePoint(course.start);
+      const end=course&&normalizePoint(course.end);
+      const endMetric=document.querySelector('#oai-pilgrimage-detail-view .oai-pilgrimage-endpoint-metric');
+      if(endMetric&&endMetric.firstChild)endMetric.firstChild.textContent='누적 ';
+      if(!completion||!stops.length){kmEl.textContent='-';timeEl.textContent='-';noteEl.textContent='완료 날짜의 GPS 스탬프 장소를 확인할 수 없습니다.';return;}
+      if(!start||!end||!_validGpsPair(start.lat,start.lng)||!_validGpsPair(end.lat,end.lng)||stops.some(p=>!_validGpsPair(p.lat,p.lng))){
+        kmEl.textContent='계산 불가';timeEl.textContent='-';noteEl.textContent='완료 당시 출발지·도착지 또는 GPS 스탬프 장소의 좌표가 없어 과거 거리를 계산하지 않습니다.';return;
+      }
+      kmEl.textContent='계산 중…';timeEl.textContent='-';
+      noteEl.textContent='완료 당시 출발지 → GPS 스탬프 장소 '+stops.length+'곳 → 도착지의 자동차 경로를 계산 중입니다.';
+      try{
+        const result=await _pilgrimageOrderedRoadTotals([start].concat(stops,[end]));
+        if(seq!==pilgrimageTotalCalcSeq||pilgrimageDetailMode!=='complete'||String(currentCourseId)!==String(course.id))return;
+        kmEl.textContent=(result.estimated?'약 ':'')+result.km.toFixed(1)+' km';
+        timeEl.textContent=(result.estimated?'약 ':'')+(typeof _fmtTime==='function'?_fmtTime(result.dur):Math.round(result.dur/60)+'분');
+        noteEl.textContent='완료 당시 출발지와 GPS 스탬프 '+stops.length+'곳, 도착지를 기준으로 계산한 자동차 거리·예상 주행시간입니다.'+(result.estimated?' 일부 구간은 추정값입니다.':'');
+      }catch(_e){
+        if(seq!==pilgrimageTotalCalcSeq)return;
+        kmEl.textContent='계산 불가';timeEl.textContent='-';noteEl.textContent='완료 GPS 장소의 자동차 경로를 계산하지 못했습니다.';
+      }
+      return;
+    }
     const active=_activeFollowState();
     const running=pilgrimageDetailMode!=='complete'&&!!(active&&currentCourseId&&String(active.courseId)===String(currentCourseId));
     // The cumulative calculation values live beneath the destination name.
