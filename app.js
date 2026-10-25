@@ -1966,14 +1966,20 @@ function _mergeShrineVisitRecords(target,source,item){
       if(!obj||!obj.date) return;
       // 동일 장소의 동일 날짜는 방문 방법·저장 시각과 무관하게 1회만 유지.
       // 기존 원본의 메타데이터를 임의로 덮어쓰지 않는다.
-      if(!_isVisitDate(obj.date))return;
+      if(!_isVisitDate(obj.date)){
+        // 원본 날짜가 비표준이어도 이관 과정에서 기록 자체를 잃지 않는다.
+        if(!target.visits.some(function(cur){return JSON.stringify(cur)===JSON.stringify(v);}))target.visits.push(v);
+        return;
+      }
       const existingIndex=target.visits.findIndex(function(cur){return _visitDateOf(cur)===String(obj.date);});
       if(existingIndex<0){target.visits.push(v);return;}
       // 같은 날 병합에서 원본 GPS 인증을 수동 기록으로 덮지 않는다.
       // 기존 GPS가 있으면 그대로 두고, 수동만 있을 때 GPS 원본을 우선한다.
       const existing=_normalizeVisitEntry(target.visits[existingIndex]);
       if(String(existing&&existing.method||'manual').toLowerCase()!=='gps' &&
-         String(obj.method||'manual').toLowerCase()==='gps')target.visits[existingIndex]=v;
+         String(obj.method||'manual').toLowerCase()==='gps'){
+        target.visits[existingIndex]=Object.assign({},existing||{},obj);
+      }
     });
   }
   target.name=item&&item.name||target.name||'';
@@ -17900,6 +17906,20 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         catch(_e){throw Error('기존 방문기록을 읽을 수 없어 복원을 중단했습니다: '+key);}
         if(!local||typeof local!=='object'||Array.isArray(local)||!remote||typeof remote!=='object'||Array.isArray(remote))
           throw Error('방문기록 병합 구조 오류: '+key);
+        const validateMap=function(map,origin){
+          Object.keys(map).forEach(function(place){
+            const rec=map[place];
+            if(!rec||typeof rec!=='object'||Array.isArray(rec)||!Array.isArray(rec.visits))
+              throw Error(origin+' 방문기록 구조 오류: '+place);
+            rec.visits.forEach(function(v){
+              if(typeof v==='string')return;
+              if(!v||typeof v!=='object'||Array.isArray(v)||typeof v.date!=='string')
+                throw Error(origin+' 방문 날짜 구조 오류: '+place);
+            });
+          });
+        };
+        validateMap(local,'기존');
+        validateMap(remote,'복원');
         const result=Object.assign({},local);
         Object.keys(remote).forEach(function(place){
           const old=result[place],fresh=remote[place];
