@@ -17440,15 +17440,30 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     return JSON.parse(raw);
   }
-  function oaiDevSaveBackupFile(){
+  async function oaiDevSaveBackupFile(){
     const payload=oaiDevSnapshot();
-    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json;charset=utf-8'});
-    const url=URL.createObjectURL(blob);
-    const link=document.createElement('a');
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const date=new Date().toISOString().slice(0,10).replace(/-/g,'');
-    link.href=url;link.download='gildongmu-backup-'+date+'.json';
+    const name='gildongmu-backup-'+date+'.json';
+    // On Android WebView a blob download can be ignored by the host. Prefer the
+    // OS share sheet when file sharing is supported; never report success blindly.
+    if(typeof navigator.share==='function' && typeof navigator.canShare==='function' && typeof File==='function'){
+      const file=new File([blob],name,{type:'application/json'});
+      if(navigator.canShare({files:[file]})){
+        try{
+          await navigator.share({files:[file],title:'가톨릭길동무 기록 백업'});
+          oaiDevStatus('공유가 완료되었습니다. 선택한 앱에서 백업 파일을 확인하세요.');
+        }catch(err){oaiDevStatus(err&&err.name==='AbortError'?'파일 공유가 취소되었습니다.':'파일 공유 실패: '+(err.message||'지원되지 않는 방식입니다.'));}
+        return;
+      }
+    }
+    const url=URL.createObjectURL(blob);
+    const link=document.createElement('a');link.href=url;link.download=name;
     document.body.appendChild(link);
-    try{link.click();oaiDevStatus('백업 파일 저장을 요청했습니다. 다운로드 폴더에서 파일이 있는지 확인하세요.');}
+    try{
+      link.click();
+      oaiDevStatus('다운로드를 요청했습니다. 파일이 없다면 현재 Android 앱에서 웹 파일 다운로드를 지원하지 않는 것입니다.');
+    }catch(err){oaiDevStatus('파일 저장 요청 실패: '+(err.message||'다운로드를 시작하지 못했습니다.'));}
     finally{link.remove();setTimeout(()=>URL.revokeObjectURL(url),60000);}
   }
   async function oaiDevLoadBackupFile(file){
@@ -17552,13 +17567,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         window.GildongmuNative.testBackupFiveVisitPhotos();
       }else if(button.hasAttribute('data-oai-dev-export')){
         if(!oaiDevPanelUnlocked)return;
-        oaiDevSaveBackupFile();
+        oaiDevSaveBackupFile().catch(err=>oaiDevStatus('백업 파일 생성 실패: '+(err.message||'알 수 없는 오류')));
       }else if(button.hasAttribute('data-oai-dev-import')){
         if(!oaiDevPanelUnlocked)return;
         oaiDevPendingRestore=null;
         document.getElementById('oai-dev-import-view').hidden=false;
         document.getElementById('oai-dev-restore-preview').hidden=true;
-        const fileInput=document.getElementById('oai-dev-import-file');fileInput.value='';fileInput.click();
+        const fileInput=document.getElementById('oai-dev-import-file');
+        if(fileInput){fileInput.value='';oaiDevStatus('아래 파일 선택 버튼을 눌러 JSON 백업 파일을 선택하세요.');}
+        else oaiDevStatus('파일 선택 요소를 찾지 못했습니다.');
       }
       else if(button.hasAttribute('data-oai-dev-apply'))oaiDevApplyRestore();
       else if(button.hasAttribute('data-oai-dev-daily-results')){
