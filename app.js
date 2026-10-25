@@ -18665,7 +18665,41 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       lines.push(pair[1]+' | 장소 '+places+' / 원본 '+stamps+' / 날짜 중복 '+duplicates+' / 문자열 구형 '+legacy+' / 날짜·구조 오류 '+invalid+' / 인증 방법 불명 '+unknown+' / 부가정보 포함 '+withExtras);
       if(details.length)lines.push(details.slice(0,40).map(x=>'  '+x).join('\n')+(details.length>40?'\n  외 '+(details.length-40)+'건':''));
     });
-    lines.push('주의: 이 진단은 저장소 내부의 동일 키/날짜 중복만 집계합니다. 서로 다른 과거 장소 키의 중복은 별도 식별 검증이 필요합니다.');
+    // V1583: 같은 저장소 안에서 과거 키가 갈라진 동일 장소 후보를 읽기 전용으로 식별한다.
+    // 이름만 같다는 이유로 데이터를 자동 병합하지 않는다.
+    [['oai_shrine_visits_v1','성지'],['oai_parish_visits_v1','성당']].forEach(function(pair){
+      let data;
+      try{data=JSON.parse(localStorage.getItem(pair[0])||'{}');}
+      catch(_){return;}
+      if(!data||typeof data!=='object'||Array.isArray(data))return;
+      const byName=new Map(),suspects=[];
+      Object.keys(data).forEach(function(key){
+        const rec=data[key];
+        if(!rec||typeof rec!=='object'||!Array.isArray(rec.visits))return;
+        const name=String(rec.name||'').normalize('NFKC').replace(/\\s+/g,'').toLowerCase();
+        if(!name)return;
+        if(!byName.has(name))byName.set(name,[]);
+        byName.get(name).push({key:key,rec:rec});
+      });
+      byName.forEach(function(group,name){
+        if(group.length<2)return;
+        const dateKeys=new Map();
+        group.forEach(function(row){
+          row.rec.visits.forEach(function(v){
+            const date=typeof v==='string'?v:String(v&&v.date||'');
+            if(!/^\\d{4}-\\d{2}-\\d{2}$/.test(date))return;
+            if(!dateKeys.has(date))dateKeys.set(date,new Set());
+            dateKeys.get(date).add(row.key);
+          });
+        });
+        const shared=Array.from(dateKeys.entries()).filter(function(entry){return entry[1].size>1;});
+        if(shared.length)suspects.push(group[0].rec.name+' | 같은 날짜 '+shared.map(function(x){return x[0];}).join(', ')+' | 서로 다른 키 '+group.map(function(x){return x.key;}).join(' / '));
+      });
+      lines.push(pair[1]+' | 서로 다른 저장 키의 동일 이름·날짜 중복 후보 '+suspects.length+'건');
+      suspects.slice(0,30).forEach(function(x){lines.push('  확인 필요: '+x);});
+      if(suspects.length>30)lines.push('  외 '+(suspects.length-30)+'건');
+    });
+    lines.push('주의: 서로 다른 이름이나 ID로 저장된 동일 장소까지 확정한 검사는 아닙니다. 중복 후보는 자동 삭제·병합하지 않습니다.');
     return lines.join('\n');
   }
   document.addEventListener('click',function(e){
