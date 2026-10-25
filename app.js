@@ -17890,6 +17890,50 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           }
         }
       };
+      // 방문기록만 보존형 병합한다. 순례계획·코스·메모 등은 기존 승인 복원 규칙 유지.
+      const mergeImportedVisits=function(key,incoming){
+        if(key!==OAI_SHRINE_VISITS_KEY&&key!==OAI_PARISH_VISITS_KEY)return incoming;
+        const localRaw=localStorage.getItem(key);
+        if(!localRaw)return incoming;
+        let local,remote;
+        try{local=JSON.parse(localRaw);remote=JSON.parse(incoming);}
+        catch(_e){throw Error('기존 방문기록을 읽을 수 없어 복원을 중단했습니다: '+key);}
+        if(!local||typeof local!=='object'||Array.isArray(local)||!remote||typeof remote!=='object'||Array.isArray(remote))
+          throw Error('방문기록 병합 구조 오류: '+key);
+        const result=Object.assign({},local);
+        Object.keys(remote).forEach(function(place){
+          const old=result[place],fresh=remote[place];
+          if(!fresh||typeof fresh!=='object'||Array.isArray(fresh)||!Array.isArray(fresh.visits))
+            throw Error('복원 방문기록 오류: '+place);
+          if(old&&(!old||typeof old!=='object'||Array.isArray(old)||!Array.isArray(old.visits)))
+            throw Error('기존 방문기록 오류: '+place);
+          // 장소의 추가 필드는 양쪽에서 보존하고, 기존 값이 있으면 우선한다.
+          // 방문 날짜의 병합은 신규 복원·기존 기록 모두 동일한 규칙을 적용한다.
+          const combined=[];
+          const addVisit=function(v){
+            const date=_visitDateOf(v);
+            if(!_isVisitDate(date)){
+              if(!combined.some(function(x){return JSON.stringify(x)===JSON.stringify(v);}))combined.push(v);
+              return;
+            }
+            const i=combined.findIndex(function(x){return _visitDateOf(x)===date;});
+            if(i<0){combined.push(v);return;}
+            const a=_normalizeVisitEntry(combined[i]),b=_normalizeVisitEntry(v);
+            const aGps=String(a&&a.method||'').toLowerCase()==='gps';
+            const bGps=String(b&&b.method||'').toLowerCase()==='gps';
+            // GPS 인증 원본을 우선하지만, 양쪽의 비충돌 메타데이터는 보존한다.
+            const preferred=bGps&&!aGps?b:a;
+            const secondary=bGps&&!aGps?a:b;
+            if(preferred&&typeof preferred==='object'&&secondary&&typeof secondary==='object')
+              combined[i]=Object.assign({},secondary,preferred);
+            else combined[i]=preferred===a?combined[i]:v;
+          };
+          (old&&old.visits||[]).forEach(addVisit);
+          fresh.visits.forEach(addVisit);
+          result[place]=Object.assign({},fresh,old||{},{visits:combined});
+        });
+        return JSON.stringify(result);
+      };
       const applyImportedRecords=function(){
         // If the local data changed after the warning was shown, require a
         // fresh confirmation rather than silently replacing the newer state.
@@ -17904,10 +17948,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           const firstRunNetwork=localStorage.getItem(OAI_PHOTO_CHOICE_RELEASE_KEY)==='1'
             ?(localStorage.getItem(OAI_PHOTO_WIFI_ONLY_KEY)==='0'?'any':'wifi'):'';
           const previous=entries.map(([key])=>[key,localStorage.getItem(key)]);
+          // 모든 방문기록 병합을 쓰기 전에 계산·검증하여 부분 복원을 방지한다.
+          const prepared=entries.map(function(pair){return [pair[0],mergeImportedVisits(pair[0],pair[1])];});
           try{
-            for(const [key,value] of entries){
-              localStorage.setItem(key,value);
-              if(localStorage.getItem(key)!==value)throw Error('기록 저장 확인 실패');
+            for(const [key,stored] of prepared){
+              localStorage.setItem(key,stored);
+              if(localStorage.getItem(key)!==stored)throw Error('기록 저장 확인 실패');
             }
           }catch(e){
             for(const [key,value] of previous){try{if(value===null)localStorage.removeItem(key);else localStorage.setItem(key,value);}catch(_e){}}
