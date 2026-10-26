@@ -18005,8 +18005,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         // fresh confirmation rather than silently replacing the newer state.
         if(!localConflict && oaiImportHasLocalConflict()){
           localConflict=true;
-          oaiConfirmDriveImport(entries,applyImportedRecords,true);
-          return;
+          if(mode!=='initial-connect'){
+            oaiConfirmDriveImport(entries,applyImportedRecords,true);
+            return;
+          }
         }
         oaiApplyingRestore=true;
         try{
@@ -18059,12 +18061,19 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           // handing off the full-photo inventory. Native SQLite deduplicates IDs.
           oaiNotifyNativePhotoCloudSettings(true);
           oaiQueuePhotoRestoreManifest();
-          if(mode==='manual-load'){
-            oaiFirstRunParishIfNeeded();
-            if(typeof window._oaiRebuildCompletionsAfterDriveRestore==='function')
-              Promise.resolve(window._oaiRebuildCompletionsAfterDriveRestore()).catch(function(err){console.warn('[복원 완료 후 GPS 순례완료 보류]',err);});
-          }
-          if(mode==='initial-load'||mode==='initial-connect'||mode==='settings-connect')setTimeout(function(){location.reload();},500);
+          // 모든 가져오기 경로는 기록 저장 이후 같은 GPS 완료 재구성 함수를 실행한다.
+          // 최초 연결에서도 재구성 작업을 기다린 후 화면을 갱신한다.
+          const refreshAfterRestore=(mode==='initial-load'||mode==='initial-connect'||mode==='settings-connect');
+          const rebuild=typeof window._oaiRebuildCompletionsAfterDriveRestore==='function'
+            ?Promise.resolve().then(function(){return window._oaiRebuildCompletionsAfterDriveRestore();})
+            :Promise.reject(new Error('GPS 완료 재구성 함수를 찾을 수 없습니다'));
+          rebuild.then(function(){
+            if(refreshAfterRestore)location.reload();
+            else oaiFirstRunParishIfNeeded();
+          }).catch(function(err){
+            console.error('[Drive 복원 후 순례완료 생성 실패]',err);
+            oaiTransferStatus('방문기록은 복원됐지만 순례완료 생성에 실패했습니다: '+String(err&&err.message||err));
+          });
         }catch(err){
           oaiTransferStatus('가져오기 실패: '+err.message);
           if(mode==='initial-connect'){
@@ -18079,10 +18088,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       // restore. Do not ask for the same consent again after account selection.
       // Keep the confirmation for ordinary/manual imports and new-user flows.
       if(mode==='initial-connect'){
+        // 기존 사용자의 계정 선택 후 Drive 기록은 바로 병합·복원한다.
+        // mergeImportedVisits에서 로컬/원격 기록을 합친 뒤 검증하고 저장한다.
         oaiFirstRunImportConflict=localConflict;
-        // The payload is validated and kept in memory; it is not applied until
-        // the user's single post-account 'import' approval.
-        oaiFirstRunRemoteChoice('found',applyImportedRecords);
+        applyImportedRecords();
       }else oaiConfirmDriveImport(entries,applyImportedRecords,localConflict);
     }catch(err){
       oaiTransferStatus('가져오기 실패: '+err.message);
