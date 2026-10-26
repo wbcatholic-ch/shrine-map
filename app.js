@@ -19182,7 +19182,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const marker=localStorage.getItem(COMPLETION_REBUILD_ONCE_KEY);
       if(!marker)return false;
       const info=JSON.parse(marker);
-      return !!(info&&info.outputFingerprint===_completionRebuildFingerprint(current)&&
+      return !!(info&&!info.partial&&info.outputFingerprint===_completionRebuildFingerprint(current)&&
         info.gpsFingerprint===_completionRebuildGpsFingerprint());
     }
     if(!activeSourceKey.startsWith(COMPLETION_REBUILD_SOURCE_KEY+'_'))
@@ -19193,7 +19193,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(expected!==null&&current===expected){
       // 저장값이 트랜잭션의 완성본과 정확히 일치할 때만 완료로 확정한다.
       localStorage.setItem(COMPLETION_REBUILD_ONCE_KEY,JSON.stringify({at:Date.now(),recovered:true,
-        outputFingerprint:_completionRebuildFingerprint(current),gpsFingerprint:_completionRebuildGpsFingerprint()}));
+        outputFingerprint:_completionRebuildFingerprint(current),gpsFingerprint:_completionRebuildGpsFingerprint(),partial:true}));
       if(!localStorage.getItem(COMPLETION_REBUILD_ONCE_KEY))throw Error('완료 재구성 복구 상태 확인 실패');
       localStorage.removeItem(COMPLETION_REBUILD_EXPECTED_KEY);
       localStorage.removeItem(COMPLETION_REBUILD_ACTIVE_SOURCE_KEY);
@@ -19274,9 +19274,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       throw Error('Google Drive 기존 기록 복원 확인 전에는 순례완료를 재구성하지 않습니다');
     if(_recoverInterruptedCompletionRebuild())return '이미 검증된 재구성 결과입니다.';
     const prepared=_completionRebuildOncePrepare();
-    // 한 날짜라도 불명확하면 완료 기록 전체를 교체하지 않는다.
-    if(prepared.issues.length)
+    // 이미 완료 코스가 남아 있다면 불명확한 날짜 하나 때문에 기존 완료를 삭제하지 않는다.
+    // V1617에서 완료 장부가 이미 빈 사용자만 확실히 검증된 날짜를 우선 기록한다.
+    // 보류 날짜는 절대로 '등록 완료'로 표시하지 않고 매 실행마다 재검증한다.
+    if(prepared.issues.length&&(prepared.removed>0||!prepared.rebuilt.length))
       return '전체 재구성 보류 ('+prepared.issues.length+'건):\n'+prepared.issues.join('\n');
+    const unresolvedDates=prepared.issues.slice();
     const stampJob=_prepareStampMigrationV1604();
     if(stampJob.changes.length)throw Error('스탬프 통합을 먼저 완료해야 합니다');
     if(!prepared.rebuilt.length&&!prepared.removed)return '등록 대상 GPS 완료 코스가 없습니다.';
@@ -19324,12 +19327,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const verified=_dailyStoredCourses();
       if(JSON.stringify(verified)!==serialized)throw Error('재조회 검증 불일치');
       localStorage.setItem(COMPLETION_REBUILD_ONCE_KEY,JSON.stringify({
-        at:Date.now(),count:prepared.rebuilt.length,outputFingerprint:_completionRebuildFingerprint(serialized),
+        at:Date.now(),count:prepared.rebuilt.length,partial:unresolvedDates.length>0,outputFingerprint:_completionRebuildFingerprint(serialized),
         gpsFingerprint:_completionRebuildGpsFingerprint()}));
       if(!localStorage.getItem(COMPLETION_REBUILD_ONCE_KEY))throw Error('완료 표시 저장 실패');
       localStorage.removeItem(COMPLETION_REBUILD_EXPECTED_KEY);
       localStorage.removeItem(COMPLETION_REBUILD_ACTIVE_SOURCE_KEY);
       renderCourseList();
+      if(unresolvedDates.length){
+        // 정상 날짜의 신규 코스를 보여 주되 다른 날짜가 미등록이라는 사실은 숨기지 않는다.
+        console.warn('[GPS 순례완료 일부 날짜 미해결; 원본 GPS 보존]',unresolvedDates);
+        return '부분 재구성 ('+unresolvedDates.length+'개 날짜 보류):\n'+unresolvedDates.join('\n');
+      }
       return '전체 재구성 저장·검증 완료: '+summary;
     }catch(err){
       try{
@@ -19359,7 +19367,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       _runStampMigrationV1604(false);
       if(_prepareStampMigrationV1604().changes.length)throw Error('스탬프 통합 검증 불일치');
       const result=_completionRebuildOnceRun(false);
-      if(String(result).startsWith('전체 재구성 보류'))throw Error(result);
+      if(String(result).startsWith('전체 재구성 보류')||String(result).startsWith('부분 재구성'))
+        throw Error(result);
       completionGpsBootReady=true;
       return result;
     })().catch(function(err){
