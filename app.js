@@ -19176,10 +19176,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   });
   // V1577: 개발자 명시 승인에 한하여 자동 생성 완료 코스만 일회성 재구성.
   // 계획/진행 중 코스, 수동 완료, 스탬프, 사진, 메모, 출발/도착은 변경하지 않는다.
-  const COMPLETION_REBUILD_ONCE_KEY='oai_completion_rebuild_once_v1610';
-  const COMPLETION_REBUILD_SOURCE_KEY='oai_completion_rebuild_once_v1610_source';
-  const COMPLETION_REBUILD_EXPECTED_KEY='oai_completion_rebuild_once_v1610_expected';
-  const COMPLETION_REBUILD_ACTIVE_SOURCE_KEY='oai_completion_rebuild_once_v1610_active_source';
+  const COMPLETION_REBUILD_ONCE_KEY='oai_completion_rebuild_once_v1618';
+  const COMPLETION_REBUILD_SOURCE_KEY='oai_completion_rebuild_once_v1618_source';
+  const COMPLETION_REBUILD_EXPECTED_KEY='oai_completion_rebuild_once_v1618_expected';
+  const COMPLETION_REBUILD_ACTIVE_SOURCE_KEY='oai_completion_rebuild_once_v1618_active_source';
   function _completionRebuildFingerprint(raw){
     return String(raw.length)+'_'+_oaiPlaceHash(raw);
   }
@@ -19253,108 +19253,55 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(completedAt>=midnight&&completedAt<=midnight+180000)return sourceDate;
     throw Error('자동 완료 코스 방문일·완료 시각 불일치: '+String(course.name||''));
   }
+  // V1618: 완료 코스의 방문 장소는 과거 완료 장부를 참조하지 않는다.
+  // 통일된 실제 GPS 스탬프만으로 날짜별 완료 코스를 처음부터 생성한다.
   function _completionRebuildOncePrepare(){
-    const courses=_dailyStoredCourses(),active=_readActiveFollowRaw(),byDate=new Map(),dates=new Set(),issues=[];
-    const kept=courses.filter(c=>!c.completions.length),rebuilt=[],preserved=[],ids=new Set(courses.map(c=>String(c.id)));
-    const completed=courses.filter(c=>c.completions.length);
-    const newId=base=>{let id=base,n=2;while(ids.has(id))id=base+'_'+n++;ids.add(id);return id;};
-    // GPS 스탬프에 등장하는 모든 날짜를 검사한다. 완료 장부의 날짜만 검사하면 누락된다.
-    ['oai_shrine_visits_v1','oai_parish_visits_v1'].forEach(key=>{
+    const courses=_dailyStoredCourses(),active=_readActiveFollowRaw(),dates=new Set(),issues=[];
+    const kept=courses.filter(c=>!c.completions.length),rebuilt=[];
+    const removed=courses.filter(c=>c.completions.length);
+    if(active&&removed.some(c=>String(c.id)===String(active.courseId)))
+      issues.push('진행 중인 코스에 완료 기록이 연결되어 있음');
+    const ids=new Set(courses.map(c=>String(c.id)));
+    [['oai_shrine_visits_v1','shrine'],['oai_parish_visits_v1','parish']].forEach(([key])=>{
       const raw=localStorage.getItem(key),data=raw===null?{}:JSON.parse(raw);
-      if(!data||Array.isArray(data)||typeof data!=='object')throw Error('GPS 저장소 손상: '+key);
+      if(!data||typeof data!=='object'||Array.isArray(data))throw Error('GPS 저장 형식 오류: '+key);
       Object.values(data).forEach(rec=>{
-        if(!rec||!Array.isArray(rec.visits))throw Error('방문 배열 손상: '+key);
+        if(!rec||!Array.isArray(rec.visits))throw Error('GPS 방문 배열 오류: '+key);
         rec.visits.forEach(v=>{
           if(v&&String(v.method||'').toLowerCase()==='gps'){
-            if(!_isVisitDate(v.date))throw Error('GPS 날짜 오류: '+key);
+            if(!_isVisitDate(v.date))throw Error('GPS 인증 날짜 오류: '+key);
             dates.add(v.date);
           }
         });
       });
     });
-    completed.forEach(course=>{
-      if(active&&String(active.courseId)===String(course.id))
-        issues.push(course.name+': 진행 중인 코스와 완료 기록이 겹침');
-      course.completions.forEach((entry,index)=>{
-        const date=_completionVisitDate(course,entry);
-        if(!date){issues.push(course.name+': 기존 완료 날짜 확인 실패');return;}
-        dates.add(date);
-        if(!byDate.has(date))byDate.set(date,[]);
-        byDate.get(date).push({course,entry,index,events:[]});
-      });
-    });
+    const today=_dailyIso(Date.now());
     for(const date of [...dates].sort()){
+      if(date>=today)continue; // 오늘 진행 중인 방문은 자정 이후 기존 자동 등록 절차에 맡긴다.
       try{
-        const events=_dailyGpsEvents(date),originalOwners=byDate.get(date)||[];
-        if(date>=_dailyIso(Date.now())&&!originalOwners.length)continue; // 진행 중인 오늘 방문은 완료로 조기 등록하지 않는다.
-        const automatic=_dailyAutoEvents(events);
-        // 구형 수동 완료 자체는 방문 증거가 아니다. 다만 같은 날짜의 실제 GPS와
-        // 장소가 대응되면 그 코스의 출발·도착·완료 시각을 그대로 이관한다.
-        const owners=originalOwners.filter(o=>{
-          if(!o.entry.method||String(o.entry.method).toLowerCase()==='gps')return true;
-          return Array.isArray(o.entry.stampPlaces)?o.entry.stampPlaces.some(p=>
-            events.some(ev=>_dailyCompletedPlaceMatches(p,ev))):
-            originalOwners.length===1&&_dailyAutoEligible(automatic);
-        });
-        if(owners.length&&!events.length)throw Error('완료 기록에 대응하는 GPS 스탬프 없음');
-        const unknown=owners.filter(o=>!Array.isArray(o.entry.stampPlaces));
-        if(unknown.length&&(owners.length!==1||unknown.length!==1))
-          throw Error('동일 날짜의 여러 코스 소유권을 구분할 기록 없음');
-        for(const ev of events){
-          const matched=owners.filter(o=>Array.isArray(o.entry.stampPlaces)&&
-            o.entry.stampPlaces.some(p=>_dailyCompletedPlaceMatches(p,ev)));
-          if(matched.length>1)throw Error('여러 코스에서 동일 GPS 사용: '+ev.name);
-          if(matched.length===1)matched[0].events.push(ev);
-        }
-        // 같은 날짜에 완료 코스가 하나라면 낡은 장소 목록을 믿지 않고
-        // 해당 날짜에 인증된 모든 자동 등록 대상 GPS로 다시 구성한다.
-        if(owners.length===1)owners[0].events=automatic.slice();
-        else if(unknown.length)throw Error('여러 완료 코스의 구형 GPS 소유권 불명확');
-        for(const owner of owners)
-          if(!owner.events.length)throw Error(owner.course.name+': 소유권이 확인된 GPS 방문 증거 없음');
-        const assigned=owners.flatMap(o=>o.events);
-        const unassigned=automatic.filter(ev=>!assigned.some(x=>_dailySamePlace(x,ev)||_dailyLinkedGpsPair(x,ev)));
-        owners.forEach(o=>{
-          const id=o.index===0?String(o.course.id):newId(String(o.course.id)+'_gps_'+date.replace(/-/g,''));
-          const course=_dailyBuildAutoCourse(date,o.events,id);
-          if(course.places.length!==o.events.length)throw Error(o.course.name+': 재구성 장소 중복');
-          course.name=o.course.name;course.start=o.course.start;course.end=o.course.end;
-          course.updatedAt=o.course.updatedAt;course.lastStartedAt=o.course.lastStartedAt;
-          course.walkSegment=o.course.walkSegment||null;
-          course.completions[0]=Object.assign({},o.entry,{completedAt:Number(o.entry.completedAt),
-            method:'gps',locked:true,stampPlaces:course.places.map(p=>Object.assign({},p)),
-            placeCount:course.places.length});
-          course.lastCompletedAt=Number(o.entry.completedAt);
-          rebuilt.push(course);
-          preserved.push({sourceId:String(o.course.id),sourceIndex:o.index,targetId:id});
-        });
-        if(unassigned.length){
-          // 남은 GPS가 일반 성당이라는 이유로 유효 방문을 조용히 버리지 않는다.
-          // 소유 코스가 여러 개면 어느 코스에 속하는지 알 수 없어 전체 교체를 보류한다.
-          if(owners.length>1)throw Error('기존 복수 코스에서 미배정 GPS 장소 소유권 불명확: '+unassigned.map(e=>e.name).join(', '));
-          if(owners.length===1)throw Error('기존 완료 코스의 GPS 방문 누락: '+unassigned.map(e=>e.name).join(', '));
-          if(_dailyAutoEligible(automatic)){
-            const id=newId('gps_daily_'+date.replace(/-/g,''));
-            rebuilt.push(_dailyBuildAutoCourse(date,unassigned,id));
-          }
-        }
+        const events=_dailyGpsEvents(date);
+        const eligible=_dailyAutoEvents(events);
+        if(!_dailyAutoEligible(eligible))continue; // 일반 성당만 방문한 날은 자동 코스 생성 대상이 아님
+        if(!eligible.length)throw Error('GPS 대상 장소 없음');
+        let id='gps_daily_'+date.replace(/-/g,'');
+        for(let n=2;ids.has(id);n++)id='gps_daily_'+date.replace(/-/g,'')+'_'+n;
+        ids.add(id);
+        const course=_dailyBuildAutoCourse(date,eligible,id);
+        const actual=_uniqueCompletionStampPlaces(eligible);
+        if(course.places.length!==actual.length||!course.completions.length||
+           course.completions[0].stampPlaces.length!==actual.length)
+          throw Error('GPS 장소 생성 개수 불일치');
+        if(actual.some(ev=>!course.places.some(p=>_dailySamePlace(p,ev)||_dailyLinkedGpsPair(p,ev))))
+          throw Error('GPS 방문 장소가 완료 코스에서 누락됨');
+        rebuilt.push(course);
       }catch(err){issues.push(date+': '+String(err&&err.message||err));}
     }
-    // 완료 회차를 나누면 종전 ID에 연결된 수동 보완 장소의 소유권이 불분명해진다.
-    const manual=_manualPointsRead();
-    completed.forEach(c=>{
-      if(c.completions.length>1&&Array.isArray(manual[c.id])&&manual[c.id].length)
-        issues.push(c.name+': 여러 회차의 수동 보완 장소 구분 불가');
-    });
     const replacement=kept.concat(rebuilt);
     if(new Set(replacement.map(c=>String(c.id))).size!==replacement.length)
-      issues.push('재구성 코스 ID 충돌');
-    return {courses,replacement,rebuilt,preserved,kept,issues,dates:dates.size,removed:completed.length};
+      issues.push('순례완료 코스 ID 충돌');
+    return {courses,replacement,rebuilt,preserved:[],kept,issues,dates:dates.size,removed:removed.length};
   }
   function _completionRebuildOnceRun(requireConfirmation){
-    return 'V1617 완료 기록 삭제 전용: 재생성 중지';
-    if(requireConfirmation!==false&&window.__OAI_DEV_RUNTIME_ACTIVE__!==true)
-      throw Error('개발자 모드에서만 실행할 수 있습니다');
     if(localStorage.getItem('oai_google_drive_connected_v1')==='1'&&
        localStorage.getItem('oai_restore_checked_v1')!=='1')
       throw Error('Google Drive 기존 기록 복원 확인 전에는 순례완료를 재구성하지 않습니다');
@@ -19365,7 +19312,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       return '전체 재구성 보류 ('+prepared.issues.length+'건):\n'+prepared.issues.join('\n');
     const stampJob=_prepareStampMigrationV1604();
     if(stampJob.changes.length)throw Error('스탬프 통합을 먼저 완료해야 합니다');
-    if(!prepared.rebuilt.length&&!prepared.removed)return '재구성할 과거 GPS 완료 코스가 없습니다.';
+    if(!prepared.rebuilt.length&&!prepared.removed)return '등록 대상 GPS 완료 코스가 없습니다.';
     const original=localStorage.getItem(COURSES_KEY)||'[]';
     if(JSON.stringify(prepared.courses)!==JSON.stringify(JSON.parse(original)))
       throw Error('검사 중 원본 코스 변경 감지');
@@ -24947,10 +24894,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     // 모호한 기록·저장 공간 문제에는 기존 GPS/계획/완료 기록을 그대로 둔다.
     console.error('[스탬프 통합 보류] GPS 자동 코스 등록을 시작하지 않습니다',err);
   }
-  // 기존 완료 기록 삭제 외에 GPS 스탬프·순례계획·진행 중 코스는 변경하지 않는다.
-  try{_clearCompletedCoursesV1617();}
-  catch(err){console.error('[순례완료 삭제 보류] 원본 유지',err);}
-  // 삭제 전용 단계에서는 과거 순례완료 자동 재구성/과거 날짜 자동 등록을 실행하지 않는다.
+  // V1618: 정규화 완료 후 과거 완료 코스를 GPS 기준으로 새로 만든다.
+  // 원본 완료 데이터는 일단 보존하며 새 결과를 검증한 다음에만 한 번에 교체한다.
+  if(pilgrimageStorageReady){
+    try{_completionRebuildOnceRun(false);}
+    catch(err){console.error('[순례완료 GPS 신규 생성 보류] 기존 기록 유지',err);}
+  }
   refreshDev(); renderCourseList();
 })();
 
