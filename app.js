@@ -19182,8 +19182,21 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const marker=localStorage.getItem(COMPLETION_REBUILD_ONCE_KEY);
       if(!marker)return false;
       const info=JSON.parse(marker);
-      return !!(info&&!info.partial&&info.outputFingerprint===_completionRebuildFingerprint(current)&&
-        info.gpsFingerprint===_completionRebuildGpsFingerprint());
+      if(!(info&&!info.partial&&info.outputFingerprint===_completionRebuildFingerprint(current)&&
+        info.gpsFingerprint===_completionRebuildGpsFingerprint()))return false;
+      // 완료 마커가 있어도 저장 코스가 비어 있거나 GPS와 실제 완료 장소가
+      // 불일치한다면 재생성을 막지 않는다. 완료 마커는 데이터 진실의 원천이 아니다.
+      const candidate=_completionRebuildOncePrepare();
+      if(candidate.issues.length)return false;
+      const saved=_dailyStoredCourses().filter(c=>c.completions.length);
+      if(saved.length!==candidate.rebuilt.length)return false;
+      return candidate.rebuilt.every(expected=>saved.some(c=>
+        String(c.sourceDate||'')===String(expected.sourceDate||'')&&
+        c.completions.length===1&&c.completions[0].method==='gps'&&
+        Array.isArray(c.completions[0].stampPlaces)&&
+        c.completions[0].stampPlaces.length===expected.completions[0].stampPlaces.length&&
+        expected.completions[0].stampPlaces.every(p=>c.completions[0].stampPlaces.some(q=>
+          _dailySamePlace(p,q)||_dailyLinkedGpsPair(p,q)))));
     }
     if(!activeSourceKey.startsWith(COMPLETION_REBUILD_SOURCE_KEY+'_'))
       throw Error('완료 재구성 원본 경로 확인 실패');
@@ -19269,9 +19282,16 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     return {courses,replacement,rebuilt,preserved:[],kept,issues,dates:dates.size,removed:removed.length};
   }
   function _completionRebuildOnceRun(requireConfirmation){
+    // 기기 내 GPS 기록이 존재한다면 Drive 복원 확인 플래그 때문에
+    // 로컬 완료 코스 생성까지 영구 차단하지 않는다. GPS 원본을 변경하지 않는다.
+    // 단, 기록이 전혀 없고 복원이 미확인이라면 빈 완료 장부를 생성하지 않는다.
     if(localStorage.getItem('oai_google_drive_connected_v1')==='1'&&
-       localStorage.getItem('oai_restore_checked_v1')!=='1')
-      throw Error('Google Drive 기존 기록 복원 확인 전에는 순례완료를 재구성하지 않습니다');
+       localStorage.getItem('oai_restore_checked_v1')!=='1'){
+      const shrine=_loadShrineVisits(),parish=_loadParishVisits();
+      const hasGps=[shrine,parish].some(data=>Object.values(data||{}).some(r=>
+        r&&Array.isArray(r.visits)&&r.visits.some(v=>v&&String(v.method||'').toLowerCase()==='gps')));
+      if(!hasGps)throw Error('Google Drive 복원 확인 및 GPS 기록 확인 전에는 순례완료를 재구성하지 않습니다');
+    }
     if(_recoverInterruptedCompletionRebuild())return '이미 검증된 재구성 결과입니다.';
     const prepared=_completionRebuildOncePrepare();
     // 이미 완료 코스가 남아 있다면 불명확한 날짜 하나 때문에 기존 완료를 삭제하지 않는다.
@@ -19367,9 +19387,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       _runStampMigrationV1604(false);
       if(_prepareStampMigrationV1604().changes.length)throw Error('스탬프 통합 검증 불일치');
       const result=_completionRebuildOnceRun(false);
-      if(String(result).startsWith('전체 재구성 보류')||String(result).startsWith('부분 재구성'))
-        throw Error(result);
+      if(String(result).startsWith('전체 재구성 보류'))throw Error(result);
+      // 부분 성공은 성공한 날짜를 표시하되 실패 날짜의 재검사 상태를 유지한다.
       completionGpsBootReady=true;
+      if(String(result).startsWith('부분 재구성'))console.warn('[GPS 완료 미해결 날짜]',result);
       return result;
     })().catch(function(err){
       console.error('[GPS 순례완료 생성 실패: 원본 보존]',err);
