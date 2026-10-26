@@ -18702,7 +18702,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     // 완료 화면의 GPS 항목은 실제 당일 스탬프 장소별 1회만 표시한다.
     // 기존 저장 기록은 변경하지 않고, 계획상 반복 경유지는 그대로 유지한다.
     const places=_uniqueCompletionStampPlaces(source).map((point,i)=>({point:point,gps:true,gpsIndex:i}));
-    const additions=(completion&&completion.method==='gps'?[]:_manualPointsFor(course.id)).slice().sort((a,b)=>Number(a.position)-Number(b.position)||Number(a.seq)-Number(b.seq));
+    const additions=_manualPointsFor(course.id).slice().sort((a,b)=>Number(a.position)-Number(b.position)||Number(a.seq)-Number(b.seq));
     const merged=[];
     for(let gap=0;gap<=places.length;gap++){
       for(const item of additions){
@@ -19324,6 +19324,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     return {courses,replacement,rebuilt,preserved:[],kept,issues,dates:dates.size,removed:removed.length};
   }
   function _completionRebuildOnceRun(requireConfirmation){
+    // V1640: 기존 코스의 수동 추가·출발·도착 보존이 보장되지 않아 전체 교체 잠금.
+    return '안전 중지: 기존 순례완료 보존 검증 전에는 전체 재구성을 실행하지 않습니다.';
     if(developerCompletionClearThisSession&&requireConfirmation===false)return '개발자 삭제 후 이번 실행의 자동 재생성 중지';
     // 기기 내 GPS 기록이 존재한다면 Drive 복원 확인 플래그 때문에
     // 로컬 완료 코스 생성까지 영구 차단하지 않는다. GPS 원본을 변경하지 않는다.
@@ -19442,14 +19444,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           throw Error('GPS 인증 성당 목록을 모두 불러오지 못했습니다');
       }
       if(developerCompletionClearThisSession)return '개발자 삭제 후 자동 생성 중지';
-      _runStampMigrationV1604(false);
-      if(_prepareStampMigrationV1604().changes.length)throw Error('스탬프 통합 검증 불일치');
-      const result=_completionRebuildOnceRun(false);
-      if(String(result).startsWith('전체 재구성 보류'))throw Error(result);
-      // 부분 성공은 성공한 날짜를 표시하되 실패 날짜의 재검사 상태를 유지한다.
+      // V1640 긴급 안전 조치: 기존 완료 코스 전체 재구성은 수동 추가/출도
+      // 보존 검증이 구현되기 전까지 자동 실행하지 않는다. GPS 원본도 변경하지 않는다.
+      // 날짜별 신규 GPS 코스 등록 로직은 아래 준비 상태를 통해 기존대로 유지한다.
       completionGpsBootReady=true;
-      if(String(result).startsWith('부분 재구성'))console.warn('[GPS 완료 미해결 날짜]',result);
-      return result;
+      return '기존 완료 코스 보존: 위험한 자동 전체 재구성 일시 중지';
     })().catch(function(err){
       console.error('[GPS 순례완료 생성 실패: 원본 보존]',err);
       throw err;
