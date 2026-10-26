@@ -20367,7 +20367,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const rawGpsRows=_dailyRawGpsEvents(date);
     const events=[];
     function collect(data,catalog,kind){
-      Object.values(data||{}).forEach(r=>{
+      Object.entries(data||{}).forEach(([storageKey,r])=>{
         if(!r||!Array.isArray(r.visits))return;
         const relevant=r.visits.filter(v=>v&&String(v.method||'').toLowerCase()==='gps'&&String(v.date||'')===date);
         if(!relevant.length)return;
@@ -20377,6 +20377,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         const id=String(r.placeId||'');
         let matches=id?available.filter(item=>item&&item.placeId===id):[];
         if(!matches.length&&kind==='shrine'&&r.seq)matches=available.filter(item=>item&&String(item.seq||'')===String(r.seq));
+        // 구형 성지 스탬프는 record.seq가 없어도 저장 키 seq:공식순번을 보존한다.
+        // 저장 키가 정확한 공식순번 형식일 때만 유일한 성지 카탈로그 항목에 연결한다.
+        if(!matches.length&&kind==='shrine'&&/^seq:[0-9]+$/.test(storageKey)){
+          const keySeq=storageKey.slice(4);
+          matches=available.filter(item=>item&&String(item.seq||'')===keySeq);
+        }
         if(!matches.length)matches=available.filter(item=>item&&_normPilgrimageName(item.name)===name&&(!diocese||!item.diocese||normalDiocese(item.diocese)===normalDiocese(diocese)));
         if(matches.length>1)throw new Error(date+' GPS 방문 장소가 중복되어 확인이 필요합니다: '+String(r.name));
         const p=matches[0];
