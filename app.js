@@ -18554,6 +18554,43 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   const PLAN_KEY='oai_pilgrimage_plan_v1';
   const DRAFT_META_KEY='oai_pilgrimage_draft_meta_v2';
   const COURSES_KEY='oai_pilgrimage_courses_v1';
+
+  // V1617: 기존 순례완료 제거 전용. 순례계획 및 진행 중인 코스는 원본 그대로 보존한다.
+  // 완료 이력은 이번 버전에서 재생성하지 않는다.
+  const COMPLETION_CLEAR_BACKUP_KEY='oai_completed_courses_before_clear_v1617';
+  function _clearCompletedCoursesV1617(){
+    const original=localStorage.getItem(COURSES_KEY);
+    if(original===null)return 0;
+    const courses=JSON.parse(original);
+    if(!Array.isArray(courses)||courses.some(c=>!c||!Array.isArray(c.completions)||!c.id))
+      throw Error('순례코스 저장 형식 오류: 삭제하지 않음');
+    const activeRaw=localStorage.getItem(ACTIVE_FOLLOW_KEY);
+    const active=activeRaw?JSON.parse(activeRaw):null;
+    const activeId=active&&active.courseId!=null?String(active.courseId):'';
+    // 진행 중 코스에 과거 완료 회차가 함께 있으면 안전하게 전체 삭제를 보류한다.
+    if(activeId&&courses.some(c=>String(c.id)===activeId&&c.completions.length))
+      throw Error('진행 중 코스에 완료 회차가 있어 삭제 보류');
+    const retained=courses.filter(c=>c.completions.length===0);
+    const removed=courses.length-retained.length;
+    if(!removed)return 0;
+    if(localStorage.getItem(COMPLETION_CLEAR_BACKUP_KEY)===null)
+      localStorage.setItem(COMPLETION_CLEAR_BACKUP_KEY,original);
+    if(!localStorage.getItem(COMPLETION_CLEAR_BACKUP_KEY))throw Error('순례완료 원본 보관 실패');
+    if(localStorage.getItem(COURSES_KEY)!==original)throw Error('순례코스 동시 변경: 삭제 중단');
+    const next=JSON.stringify(retained);
+    try{
+      localStorage.setItem(COURSES_KEY,next);
+      if(localStorage.getItem(COURSES_KEY)!==next)throw Error('삭제 저장 확인 실패');
+      const check=JSON.parse(localStorage.getItem(COURSES_KEY));
+      if(check.length!==retained.length||check.some(c=>c.completions.length)||
+         JSON.stringify(check)!==next)throw Error('순례계획 보존 검증 실패');
+    }catch(err){
+      if(localStorage.getItem(COURSES_KEY)===next)localStorage.setItem(COURSES_KEY,original);
+      throw err;
+    }
+    return removed;
+  }
+
   const ACTIVE_FOLLOW_KEY='oai_pilgrimage_active_follow_v1';
   const REPEAT_EDIT_GUARD_KEY='oai_pilgrimage_repeat_edit_guard_v1';
   const DAILY_SETTLEMENT_START='2026-10-01';
@@ -19315,6 +19352,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     return {courses,replacement,rebuilt,preserved,kept,issues,dates:dates.size,removed:completed.length};
   }
   function _completionRebuildOnceRun(requireConfirmation){
+    return 'V1617 완료 기록 삭제 전용: 재생성 중지';
     if(requireConfirmation!==false&&window.__OAI_DEV_RUNTIME_ACTIVE__!==true)
       throw Error('개발자 모드에서만 실행할 수 있습니다');
     if(localStorage.getItem('oai_google_drive_connected_v1')==='1'&&
@@ -19395,7 +19433,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   window._oaiRebuildCompletionsAfterDriveRestore=function(){
     localStorage.removeItem(COMPLETION_REBUILD_ONCE_KEY);
-    return _completionRebuildOnceRun(false);
+    return '기존 순례완료 삭제 전용 버전: 재생성 중지';
   };
   document.addEventListener('click',function(e){
     if(!e.target.closest('#oai-dev-completion-rebuild-once')||window.__OAI_DEV_RUNTIME_ACTIVE__!==true)return;
@@ -20685,6 +20723,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }catch(e){console.warn('[코스 등록 실패 안내 확인]',e);}
   }
   async function _dailyRegisterPrevious(date,manualRetry){
+    return; // V1617: 완료 기록 삭제 전용, 과거 자동 코스 재생성 금지
     // 방문일 다음 날 00:01:30 이전에는 등록을 시작하지 않는다.
     if(date===_dailyPreviousDate(Date.now())){
       const today=_dailyIso(Date.now());
@@ -24908,17 +24947,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     // 모호한 기록·저장 공간 문제에는 기존 GPS/계획/완료 기록을 그대로 둔다.
     console.error('[스탬프 통합 보류] GPS 자동 코스 등록을 시작하지 않습니다',err);
   }
-  if(pilgrimageStorageReady){
-    // 모든 기존 사용자에게 새 완료 규격을 한 번 적용한다. 모호하면 원본 그대로 보류한다.
-    const driveImportPending=localStorage.getItem('oai_google_drive_connected_v1')==='1'&&
-      localStorage.getItem('oai_restore_checked_v1')!=='1';
-    if(!driveImportPending){
-      try{_completionRebuildOnceRun(false);}
-      catch(err){console.warn('[순례완료 통합 보류] 완료 원본을 유지합니다',err);}
-    }
-    _initializeDailyPilgrimageSettlement();
-    _scheduleCompletionGpsAudit(true);
-  }
+  // 기존 완료 기록 삭제 외에 GPS 스탬프·순례계획·진행 중 코스는 변경하지 않는다.
+  try{_clearCompletedCoursesV1617();}
+  catch(err){console.error('[순례완료 삭제 보류] 원본 유지',err);}
+  // 삭제 전용 단계에서는 과거 순례완료 자동 재구성/과거 날짜 자동 등록을 실행하지 않는다.
   refreshDev(); renderCourseList();
 })();
 
