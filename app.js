@@ -3053,6 +3053,8 @@ function _oaiIsSeparateJournalPair(kind,item){
 const OAI_SHARED_VISIT_JOURNAL_GROUPS=[
   // 성지 목록과 성당 목록에 각각 존재하는 동일한 공세리성당: 스탬프는 별도, 코스 경유지는 1곳.
   {id:'g20190017',shrineSeq:'20190017',shrineName:'공세리 성당',parishDiocese:'DJ',parishName:'공세리성당'},
+  {id:'g20190025',shrineSeq:'20190025',shrineName:'신리 성지',parishDiocese:'DJ',parishName:'신리성지성당'},
+  {id:'g20190026',shrineSeq:'20190026',shrineName:'여사울 성지',parishDiocese:'DJ',parishName:'여사울성지성당'},
   {id:'g20190001',shrineSeq:'20190001',shrineName:'명동 대성당(명동 주교좌 성지 성당)',parishDiocese:'SE',parishName:'명동대성당'},
   {id:'g20190113',shrineSeq:'20190113',shrineName:'가회동 성당',parishDiocese:'SE',parishName:'가회동성당'},
   {id:'g20190122',shrineSeq:'20190122',shrineName:'종로 성당',parishDiocese:'SE',parishName:'종로성당'},
