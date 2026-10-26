@@ -19278,6 +19278,40 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         for(let n=2;ids.has(id);n++)id='gps_daily_'+date.replace(/-/g,'')+'_'+n;
         ids.add(id);
         const course=_dailyBuildAutoCourse(date,eligible,id);
+        // 기존 완료 장부는 장소 선정에 이용하지 않는다. 출발·도착·완료 시각만
+        // 원본 백업에서 날짜와 값이 명백하게 일치할 때에 한해 보존한다.
+        const originals=removed.slice();
+        for(let i=0;i<localStorage.length;i++){
+          const key=localStorage.key(i);
+          if(!key||!key.startsWith(COMPLETION_REBUILD_SOURCE_KEY+'_'))continue;
+          try{
+            const rows=JSON.parse(localStorage.getItem(key));
+            if(Array.isArray(rows))originals.push(...rows);
+          }catch(_e){/* 손상 백업은 복원 근거로 사용하지 않는다. */}
+        }
+        const history=[];
+        originals.forEach(oldCourse=>{
+          (Array.isArray(oldCourse&&oldCourse.completions)?oldCourse.completions:[]).forEach(entry=>{
+            const completed=Number(entry&&entry.completedAt);
+            const completedDate=_dailyIso(completed);
+            const visitDate=oldCourse.autoGps&&_isVisitDate(String(oldCourse.sourceDate||''))?
+              String(oldCourse.sourceDate):completedDate;
+            if(visitDate===date&&Number.isFinite(completed))history.push({
+              start:normalizePoint(oldCourse.start),end:normalizePoint(oldCourse.end),completedAt:completed});
+          });
+        });
+        if(history.length){
+          // 날짜가 같아도 서로 다른 원본 정보가 있으면 추측하지 않는다.
+          const signature=x=>JSON.stringify([x.start,x.end,x.completedAt]);
+          const variants=[...new Map(history.map(x=>[signature(x),x])).values()];
+          if(variants.length===1){
+            const original=variants[0];
+            if(original.start)course.start=original.start;
+            if(original.end)course.end=original.end;
+            course.completions[0].completedAt=original.completedAt;
+            course.lastCompletedAt=original.completedAt;
+          }
+        }
         const actual=_uniqueCompletionStampPlaces(eligible);
         if(course.places.length!==actual.length||!course.completions.length||
            course.completions[0].stampPlaces.length!==actual.length)
@@ -20249,7 +20283,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         rec.visits.forEach(v=>{
           if(!v||String(v.method||'').toLowerCase()!=='gps'||String(v.date||'')!==date)return;
           const at=Date.parse(String(v.savedAt||''));
-          if(!Number.isFinite(at)||_dailyIso(at)!==date)throw new Error(date+' GPS 방문 시각 확인 실패: '+String(rec.name||key));
+          if(!Number.isFinite(at))throw new Error(date+' GPS 방문 시각 확인 실패: '+String(rec.name||key));
           rows.push({key:pair[1]+'|'+key,kind:pair[1],name:String(rec.name||''),diocese:String(rec.diocese||''),placeId:String(rec.placeId||''),at});
         });
       });
@@ -20506,7 +20540,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const at=_dailyDayEnd(date)-1;
     // GPS 이벤트에 같은 장소가 중복 포함되어도 완료 코스에는 당일 1회만 기록한다.
     const unique=_uniqueCompletionStampPlaces(eligible);
-    const places=unique.map(ev=>({name:ev.name,addr:ev.addr,lat:ev.lat,lng:ev.lng,placeId:ev.placeId,diocese:ev.diocese,done:true,doneMethod:'gps'}));
+    const places=unique.map(ev=>{
+      // 공통화 성당 스탬프만 남아 있는 경우에도 완료 코스 대표 명칭은 성지 명칭이다.
+      // 원본 GPS 스탬프와 그 장소 ID는 변경하지 않는다.
+      const group=ev.kind==='parish'?OAI_SHARED_VISIT_JOURNAL_GROUPS.find(g=>
+        _normPilgrimageName(g.parishName)===_normPilgrimageName(ev.name)&&
+        (!ev.diocese||String(g.parishDiocese||'')===String(ev.diocese))):null;
+      return {name:group?group.shrineName:ev.name,addr:ev.addr,lat:ev.lat,lng:ev.lng,
+        placeId:ev.placeId,diocese:ev.diocese,done:true,doneMethod:'gps'};
+    });
     return _courseRefreshCompletionState({id,name:_dailyAutoCourseName(date,unique),autoGps:true,sourceDate:date,start:null,end:null,
       places:places,
       completions:[{completedAt:at,placeCount:places.length,stampPlaces:places.map(p=>Object.assign({},p)),method:'gps',locked:true}],gpsSettled:true,
