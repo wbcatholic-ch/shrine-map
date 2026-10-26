@@ -19465,7 +19465,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   };
   // 개발자 명시 조작에 한해 완료 코스만 비운다. GPS 재생성·Drive 가져오기를 수행하지 않는다.
   function _developerClearAllCompletedCourses(){
-    if(window.__OAI_DEV_RUNTIME_ACTIVE__!==true||!oaiDevEnabled()||!oaiDevPanelUnlocked)
+    if(window.__OAI_DEV_RUNTIME_ACTIVE__!==true)
       throw Error('개발자 모드에서만 실행할 수 있습니다');
     const original=localStorage.getItem(COURSES_KEY);
     const courses=_dailyStoredCourses();
