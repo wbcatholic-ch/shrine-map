@@ -3164,9 +3164,7 @@ function _oaiWriteSharedJournalExtras(kind,item,date,patch,opts){
   const data=_loadShrineVisits();_migrateShrineVisitRecord(shrine,data);const key=_getShrineVisitKey(shrine);if(!key)return false;
   const rec=data[key]&&typeof data[key]==='object'?data[key]:{name:shrine.name||'',diocese:shrine.diocese||'',seq:shrine.seq||'',visits:[]};
   if(!Array.isArray(rec.visits))rec.visits=[];if(!rec.sharedJournalByDate||typeof rec.sharedJournalByDate!=='object')rec.sharedJournalByDate={};
-  const seed=_oaiReadSharedJournalExtras(group,date)||{},oldJournal=rec.sharedJournalByDate[date]||{},next=Object.assign({},seed,oldJournal,patch||{});next.updatedAt=new Date().toISOString();if(patch&&Object.prototype.hasOwnProperty.call(patch,'memo')){next.memoUpdatedAt=next.updatedAt;next.memoRevision=Math.max(Number(seed.memoRevision||0),Number(oldJournal.memoRevision||0))+1;}rec.sharedJournalByDate[date]=next;data[key]=rec;_saveShrineVisits(data);
-  
-  return true;
+  const seed=_oaiReadSharedJournalExtras(group,date)||{},oldJournal=rec.sharedJournalByDate[date]||{},next=Object.assign({},seed,oldJournal,patch||{});next.updatedAt=new Date().toISOString();if(patch&&Object.prototype.hasOwnProperty.call(patch,'memo')){next.memoUpdatedAt=next.updatedAt;next.memoRevision=Math.max(Number(seed.memoRevision||0),Number(oldJournal.memoRevision||0))+1;}rec.sharedJournalByDate[date]=next;data[key]=rec;return _saveShrineVisits(data);
 }
 function _oaiVisitPhotoLimit(kind,item){return _oaiSharedJournalGroup(kind,item)?OAI_VISIT_PHOTO_LIMIT_SHRINE:(kind==='parish'?OAI_VISIT_PHOTO_LIMIT_PARISH:OAI_VISIT_PHOTO_LIMIT_SHRINE);}
 
@@ -3205,18 +3203,14 @@ function _oaiUpdateShrineVisitExtras(item,date,patch,opts){
   const key=_getShrineVisitKey(item),data=_loadShrineVisits();if(!key||!data[key]||!Array.isArray(data[key].visits))return false;
   const idx=_oaiFindVisitIndexByDate(data[key].visits,date);if(idx<0)return false;
   let rec=_normalizeVisitEntry(data[key].visits[idx]);if(!rec||typeof rec!=='object')rec={date:String(date),method:'manual'};
-  Object.keys(patch||{}).forEach(function(k){rec[k]=patch[k];});rec.updatedAt=new Date().toISOString();if(patch&&Object.prototype.hasOwnProperty.call(patch,'memo')){rec.memoUpdatedAt=rec.updatedAt;rec.memoRevision=Number(rec.memoRevision||0)+1;}data[key].visits[idx]=rec;_saveShrineVisits(data);
-  
-  return true;
+  Object.keys(patch||{}).forEach(function(k){rec[k]=patch[k];});rec.updatedAt=new Date().toISOString();if(patch&&Object.prototype.hasOwnProperty.call(patch,'memo')){rec.memoUpdatedAt=rec.updatedAt;rec.memoRevision=Number(rec.memoRevision||0)+1;}data[key].visits[idx]=rec;return _saveShrineVisits(data);
 }
 function _oaiUpdateParishVisitExtras(item,date,patch,opts){
   if(_oaiSharedJournalGroup('parish',item))return _oaiWriteSharedJournalExtras('parish',item,date,patch,opts);
   const data=_loadParishVisits(),key=_parishVisitStoredKey(item,data);if(!key||!data[key]||!Array.isArray(data[key].visits))return false;
   const idx=_oaiFindVisitIndexByDate(data[key].visits,date);if(idx<0)return false;
   let rec=_normalizeVisitEntry(data[key].visits[idx]);if(!rec||typeof rec!=='object')rec={date:String(date),method:'manual'};
-  Object.keys(patch||{}).forEach(function(k){rec[k]=patch[k];});rec.updatedAt=new Date().toISOString();if(patch&&Object.prototype.hasOwnProperty.call(patch,'memo')){rec.memoUpdatedAt=rec.updatedAt;rec.memoRevision=Number(rec.memoRevision||0)+1;}data[key].visits[idx]=rec;_saveParishVisits(data);
-  
-  return true;
+  Object.keys(patch||{}).forEach(function(k){rec[k]=patch[k];});rec.updatedAt=new Date().toISOString();if(patch&&Object.prototype.hasOwnProperty.call(patch,'memo')){rec.memoUpdatedAt=rec.updatedAt;rec.memoRevision=Number(rec.memoRevision||0)+1;}data[key].visits[idx]=rec;return _saveParishVisits(data);
 }
 function _oaiGetVisitByDate(kind,item,date){
   const base=_oaiDirectVisitByDate(kind,item,date),group=_oaiSharedJournalGroup(kind,item);
