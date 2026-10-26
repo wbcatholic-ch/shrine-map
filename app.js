@@ -20292,7 +20292,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     // 순례코스의 공통 방문 판정은 별도 확정 명부 함수에서만 수행한다.
     if(a.kind&&b.kind&&String(a.kind)!==String(b.kind))return false;
     if(aId&&bId)return aId===bId;
-    if(a.diocese&&b.diocese&&String(a.diocese)!==String(b.diocese))return false;
+    if(a.diocese&&b.diocese&&String((_DIO&&_DIO[a.diocese])||a.diocese)!==String((_DIO&&_DIO[b.diocese])||b.diocese))return false;
     const aName=_normPilgrimageName(a.name),bName=_normPilgrimageName(b.name);
     if(!aName||aName!==bName)return false;
     const ay=Number(a.lat),ax=Number(a.lng),by=Number(b.lat),bx=Number(b.lng);
@@ -20348,7 +20348,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const norm=_normPilgrimageName(item&&item.name),id=String(item&&item.placeId||'');
     return _dailyRawGpsEvents(date).filter(e=>{
       const sameId=!!(id&&e.placeId&&String(e.placeId)===id);
-      const sameLegacy=(!id||!e.placeId)&&_normPilgrimageName(e.name)===norm&&(!item.diocese||!e.diocese||String(e.diocese)===String(item.diocese));
+      const sameLegacy=(!id||!e.placeId)&&_normPilgrimageName(e.name)===norm&&(!item.diocese||!e.diocese||String((_DIO&&_DIO[e.diocese])||e.diocese)===String((_DIO&&_DIO[item.diocese])||item.diocese));
       return (sameId||sameLegacy)&&(!notBefore||e.at>=Number(notBefore)-2000);
     }).map(e=>e.at).sort((a,b)=>a-b)[0]||0;
   }
@@ -20424,7 +20424,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const isSide=function(item,name,kind){
         if(_normPilgrimageName(item.name)!==name)return false;
         if(item.kind&&String(item.kind)!==kind)return false;
-        if(kind==='parish'&&item.diocese&&String(item.diocese)!==String(g.parishDiocese||''))return false;
+        if(kind==='parish'&&item.diocese&&String((_DIO&&_DIO[item.diocese])||item.diocese)!==String((_DIO&&_DIO[g.parishDiocese])||g.parishDiocese||''))return false;
         return true;
       };
       // 이름이 동일한 그룹도 원본 스탬프 종류가 명확하면 서로 다른 카테고리로만 연결한다.
@@ -20454,7 +20454,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!ev||ev.kind!=='parish')return false;
     return OAI_SHARED_VISIT_JOURNAL_GROUPS.some(g=>
       _normPilgrimageName(g.parishName)===_normPilgrimageName(ev.name)&&
-      (!ev.diocese||String(g.parishDiocese||'')===String(ev.diocese)));
+      (!ev.diocese||String((_DIO&&_DIO[g.parishDiocese])||g.parishDiocese||'')===String((_DIO&&_DIO[ev.diocese])||ev.diocese)));
   }
   function _dailyCourseRegistrationDecisions(rawEvents){
     if(!Array.isArray(rawEvents))throw new Error('GPS 코스 판정 입력 오류');
@@ -20509,7 +20509,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const aName=_normPilgrimageName(place.name),bName=_normPilgrimageName(ev.name);
     if(!aName||aName!==bName)return false;
     const aD=String(place.diocese||'').trim(),bD=String(ev.diocese||'').trim();
-    if(aD&&bD&&aD!==bD)return false;
+    if(aD&&bD&&String((_DIO&&_DIO[aD])||aD)!==String((_DIO&&_DIO[bD])||bD))return false;
     // 서로 다른 고정 ID는 이름이 같아도 동일 장소로 취급하지 않는다.
     // 명시적 성지·성당 공통화 여부는 위의 _dailyLinkedGpsPair만 판정한다.
     if(aId&&bId)return false;
@@ -20534,7 +20534,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     // 성지 목록이 아직 로딩되지 않았으면 성당 ID를 성지명과 섞어 저장하지 않는다.
     const group=ev&&ev.kind==='parish'?OAI_SHARED_VISIT_JOURNAL_GROUPS.find(g=>
       _normPilgrimageName(g.parishName)===_normPilgrimageName(ev.name)&&
-      (!ev.diocese||String(g.parishDiocese||'')===String(ev.diocese))):null;
+      (!ev.diocese||String((_DIO&&_DIO[g.parishDiocese])||g.parishDiocese||'')===String((_DIO&&_DIO[ev.diocese])||ev.diocese))):null;
     const shrine=group?_oaiSharedGroupShrine(group):null;
     if(group&&!shrine)throw new Error('공통화 성지 데이터 로딩 전 순례완료 생성 차단: '+String(ev.name));
     const source=shrine||ev;
