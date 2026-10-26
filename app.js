@@ -19194,10 +19194,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       return candidate.rebuilt.every(expected=>saved.some(c=>
         String(c.sourceDate||'')===String(expected.sourceDate||'')&&
         c.completions.length===1&&c.completions[0].method==='gps'&&
+        c.name===expected.name&&
+        Array.isArray(c.places)&&c.places.length===expected.places.length&&
+        expected.places.every((p,i)=>_dailySamePlace(p,c.places[i])&&p.name===c.places[i].name&&
+          String(p.placeId||'')===String(c.places[i].placeId||''))&&
         Array.isArray(c.completions[0].stampPlaces)&&
         c.completions[0].stampPlaces.length===expected.completions[0].stampPlaces.length&&
-        expected.completions[0].stampPlaces.every(p=>c.completions[0].stampPlaces.some(q=>
-          _dailySamePlace(p,q)||_dailyLinkedGpsPair(p,q)))));
+        expected.completions[0].stampPlaces.every((p,i)=>{
+          const q=c.completions[0].stampPlaces[i];
+          return _dailySamePlace(p,q)&&p.name===q.name&&
+            String(p.placeId||'')===String(q.placeId||'');
+        })));
     }
     if(!activeSourceKey.startsWith(COMPLETION_REBUILD_SOURCE_KEY+'_'))
       throw Error('완료 재구성 원본 경로 확인 실패');
@@ -19306,7 +19313,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(course.places.length!==actual.length||!course.completions.length||
            course.completions[0].stampPlaces.length!==actual.length)
           throw Error('GPS 장소 생성 개수 불일치');
-        if(actual.map(_dailyCompletionDisplayPlace).some(ev=>!course.places.some(p=>_dailySamePlace(p,ev))))
+        if(actual.map(_dailyCompletionDisplayPlace).some(ev=>!course.places.some(p=>_dailySamePlace(p,ev)&&p.name===ev.name&&String(p.placeId||'')===String(ev.placeId||''))))
           throw Error('GPS 방문 장소가 완료 코스에서 누락됨');
         rebuilt.push(course);
       }catch(err){issues.push(date+': '+String(err&&err.message||err));}
@@ -20383,7 +20390,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           // 저장 시각은 실제 인증 시각이고, 방문 날짜는 인증 당시 저장된 v.date가 원본이다.
           // 과거 데이터의 저장 시각이 날짜 경계를 넘더라도 유효 GPS 방문을 버리지 않는다.
           if(!Number.isFinite(at))throw new Error(date+' GPS 방문시간을 확인하지 못했습니다: '+String(r.name||'이름 없음'));
-          events.push({name:point.name,addr:point.addr,lat:point.lat,lng:point.lng,diocese:String(p.diocese||diocese||''),placeId:String(p.placeId||''),at:at,date:date,kind:kind});
+          events.push({name:point.name,addr:point.addr,lat:point.lat,lng:point.lng,diocese:String(p.diocese||diocese||''),placeId:String(_oaiPlaceCanonicalId(kind,p)||''),at:at,date:date,kind:kind});
         });
       });
     }
