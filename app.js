@@ -19327,6 +19327,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     return {courses,replacement,rebuilt,preserved:[],kept,issues,dates:dates.size,removed:removed.length};
   }
   function _completionRebuildOnceRun(requireConfirmation){
+    if(developerCompletionClearThisSession)return '개발자 삭제 후 이번 실행의 자동 재생성 중지';
     // 기기 내 GPS 기록이 존재한다면 Drive 복원 확인 플래그 때문에
     // 로컬 완료 코스 생성까지 영구 차단하지 않는다. GPS 원본을 변경하지 않는다.
     // 단, 기록이 전혀 없고 복원이 미확인이라면 빈 완료 장부를 생성하지 않는다.
@@ -19422,7 +19423,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // 필요한 성당 카탈로그가 로드되기 전에는 완료 장부를 변경하지 않는다.
   let completionBuildPending=null;
   let completionGpsBootReady=false;
+  // 개발자 삭제 이후 같은 실행에서 예약된 자동 등록이 삭제 결과를 되돌리지 못하게 한다.
+  let developerCompletionClearThisSession=false;
   function _rebuildCompletionFromGps(){
+    if(developerCompletionClearThisSession)return Promise.resolve('개발자 삭제 후 재실행까지 자동 생성 중지');
     if(completionBuildPending)return completionBuildPending;
     completionBuildPending=(async function(){
       await _ensureShrineDataLoaded();
@@ -19440,6 +19444,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(!_areAllParishDiocesesReady()||!Array.isArray(PARISHES)||!PARISHES.length)
           throw Error('GPS 인증 성당 목록을 모두 불러오지 못했습니다');
       }
+      if(developerCompletionClearThisSession)return '개발자 삭제 후 자동 생성 중지';
       _runStampMigrationV1604(false);
       if(_prepareStampMigrationV1604().changes.length)throw Error('스탬프 통합 검증 불일치');
       const result=_completionRebuildOnceRun(false);
@@ -19479,6 +19484,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     localStorage.setItem(backupKey,source);
     if(localStorage.getItem(backupKey)!==source)throw Error('완료 코스 원본 백업 실패');
     if((localStorage.getItem(COURSES_KEY)||'[]')!==source)throw Error('삭제 전 코스 기록이 변경되어 중단');
+    developerCompletionClearThisSession=true;
     try{
       localStorage.setItem(COURSES_KEY,next);
       if(localStorage.getItem(COURSES_KEY)!==next)throw Error('삭제 저장 확인 실패');
@@ -19486,6 +19492,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(JSON.stringify(verified)!==next||verified.some(c=>c.completions.length>0)||
          JSON.stringify(verified)!==JSON.stringify(kept))throw Error('완료 코스 삭제/계획 보존 검증 실패');
     }catch(err){
+      developerCompletionClearThisSession=false;
       if(localStorage.getItem(COURSES_KEY)===next){
         localStorage.setItem(COURSES_KEY,source);
         if(localStorage.getItem(COURSES_KEY)!==source)throw Error('원본 복구 실패: 백업 '+backupKey);
@@ -19493,7 +19500,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       throw err;
     }
     renderCourseList();
-    return '순례완료 '+completed.length+'개 삭제 확인 · 순례계획 '+kept.length+'개 유지\n원본 백업 키: '+backupKey;
+    return '순례완료 '+completed.length+'개 삭제 확인 · 순례계획 '+kept.length+'개 유지\n현재 실행에서는 자동 재생성 중지. 앱을 완전히 재실행하면 자동 복원/재생성이 다시 실행됩니다.\n원본 백업 키: '+backupKey;
   }
   document.addEventListener('click',function(e){
     if(e.target.closest('#oai-dev-completion-clear-all')){
@@ -20802,6 +20809,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }catch(e){console.warn('[코스 등록 실패 안내 확인]',e);}
   }
   async function _dailyRegisterPrevious(date,manualRetry){
+    if(developerCompletionClearThisSession)return;
     if(!completionGpsBootReady)return; // 최초 GPS 전체 생성 이전의 날짜별 쓰기 경쟁 방지
     // 방문일 다음 날 00:01:30 이전에는 등록을 시작하지 않는다.
     if(date===_dailyPreviousDate(Date.now())){
@@ -21116,6 +21124,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     else{window.alert(message);acknowledge();}
   }
   function _dailyRegisterPendingDate(){
+    if(developerCompletionClearThisSession)return;
     if(dailyRegisterBusy||document.hidden)return;
     try{
       const a=JSON.parse(localStorage.getItem(OAI_GPS_PENDING_DATES_KEY)||'[]');
