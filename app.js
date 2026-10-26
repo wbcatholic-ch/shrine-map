@@ -19146,6 +19146,28 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function _completionRebuildFingerprint(raw){
     return String(raw.length)+'_'+_oaiPlaceHash(raw);
   }
+  // 순례완료가 바뀌지 않았더라도 Drive 복원·늦은 GPS 스탬프 등록은 재구성 근거를 바꾼다.
+  // 사진/메모 등 다른 방문정보를 포함하지 않고 GPS 증거만 안정적으로 비교한다.
+  function _completionRebuildGpsFingerprint(){
+    const stamps=[];
+    [['oai_shrine_visits_v1','shrine'],['oai_parish_visits_v1','parish']].forEach(([key,kind])=>{
+      const raw=localStorage.getItem(key);
+      const data=raw===null?{}:JSON.parse(raw);
+      if(!data||Array.isArray(data)||typeof data!=='object')throw Error('GPS 지문 저장소 형식 오류: '+key);
+      Object.entries(data).forEach(([storageKey,rec])=>{
+        if(!rec||!Array.isArray(rec.visits))throw Error('GPS 지문 방문 배열 오류: '+key+'/'+storageKey);
+        rec.visits.forEach(v=>{
+          if(v&&String(v.method||'').toLowerCase()==='gps'){
+            if(!_isVisitDate(v.date))throw Error('GPS 지문 날짜 오류: '+key+'/'+storageKey);
+            stamps.push([kind,storageKey,String(rec.placeId||''),String(rec.seq||''),String(rec.name||''),
+              String(v.date),String(v.savedAt||'')]);
+          }
+        });
+      });
+    });
+    stamps.sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b)));
+    return _completionRebuildFingerprint(JSON.stringify(stamps));
+  }
   function _completionRebuildSourceKey(raw){
     return COMPLETION_REBUILD_SOURCE_KEY+'_'+_completionRebuildFingerprint(raw);
   }
@@ -19156,7 +19178,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const marker=localStorage.getItem(COMPLETION_REBUILD_ONCE_KEY);
       if(!marker)return false;
       const info=JSON.parse(marker);
-      return !!(info&&info.outputFingerprint===_completionRebuildFingerprint(current));
+      return !!(info&&info.outputFingerprint===_completionRebuildFingerprint(current)&&
+        info.gpsFingerprint===_completionRebuildGpsFingerprint());
     }
     if(!activeSourceKey.startsWith(COMPLETION_REBUILD_SOURCE_KEY+'_'))
       throw Error('완료 재구성 원본 경로 확인 실패');
@@ -19166,7 +19189,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(expected!==null&&current===expected){
       // 저장값이 트랜잭션의 완성본과 정확히 일치할 때만 완료로 확정한다.
       localStorage.setItem(COMPLETION_REBUILD_ONCE_KEY,JSON.stringify({at:Date.now(),recovered:true,
-        outputFingerprint:_completionRebuildFingerprint(current)}));
+        outputFingerprint:_completionRebuildFingerprint(current),gpsFingerprint:_completionRebuildGpsFingerprint()}));
       if(!localStorage.getItem(COMPLETION_REBUILD_ONCE_KEY))throw Error('완료 재구성 복구 상태 확인 실패');
       localStorage.removeItem(COMPLETION_REBUILD_EXPECTED_KEY);
       localStorage.removeItem(COMPLETION_REBUILD_ACTIVE_SOURCE_KEY);
@@ -19343,7 +19366,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const verified=_dailyStoredCourses();
       if(JSON.stringify(verified)!==serialized)throw Error('재조회 검증 불일치');
       localStorage.setItem(COMPLETION_REBUILD_ONCE_KEY,JSON.stringify({
-        at:Date.now(),count:prepared.rebuilt.length,outputFingerprint:_completionRebuildFingerprint(serialized)}));
+        at:Date.now(),count:prepared.rebuilt.length,outputFingerprint:_completionRebuildFingerprint(serialized),
+        gpsFingerprint:_completionRebuildGpsFingerprint()}));
       if(!localStorage.getItem(COMPLETION_REBUILD_ONCE_KEY))throw Error('완료 표시 저장 실패');
       localStorage.removeItem(COMPLETION_REBUILD_EXPECTED_KEY);
       localStorage.removeItem(COMPLETION_REBUILD_ACTIVE_SOURCE_KEY);
