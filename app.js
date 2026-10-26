@@ -4641,7 +4641,7 @@ function _oaiJointStampRepair(){
     pairs.forEach(function(g){
       const shrine=_oaiSharedGroupShrine(g),parish=_oaiJointParish(g);
       if(!shrine||!parish)return;
-      const sdates=_getShrineVisitDates(shrine).map(function(v){return v.date;}).filter(_isVisitDate);
+      const sdates=_getShrineVisitDates(shrine).filter(function(v){return v&&String(v.method||'').toLowerCase()==='gps'&&_isVisitDate(v.date);}).map(function(v){return v.date;});
       sdates.forEach(function(date){_oaiJointStampAddParish(parish,date,'shrine',shrine);});
       // 과거 성당 독립 방문은 보존하되 성지 인증으로 역전파하지 않는다.
     });
@@ -4686,7 +4686,8 @@ function _registerGpsPlaceVisit(kind,item,date,measuredAt){
     if(kind==='shrine'){
       const already=_hasShrineVisitOnDate(item,visitDate);
       const added=!already&&!!_addShrineVisit(item,visitDate,'gps',measuredAt);
-      if(already||added)_oaiJointStampCounterpart('shrine',item,visitDate);
+      // 이미 저장된 수동 스탬프는 GPS 인증으로 간주하지 않고 공통 성당도 생성하지 않는다.
+      if(added||(already&&_getShrineVisitDates(item).some(function(v){return v&&v.date===visitDate&&String(v.method||'').toLowerCase()==='gps';})))_oaiJointStampCounterpart('shrine',item,visitDate);
       if(added){_oaiNotifyActiveCourseGpsVisit();_oaiNotifyNewGpsStamp('shrine',item,visitDate);}
       return {added:added,already:already,kind:'shrine',item:item};
     }
@@ -19681,16 +19682,27 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     // 해당 날짜 완료 코스가 정확히 하나인 경우에만 해당 날짜의 GPS 전부로 대조한다.
     const next=target.sort((x,y)=>x.at-y.at).map(_dailyCompletionDisplayPlace);
     if(!next.length)return null;
-    // 계획형 완료 코스는 경유지/수동 추가를 포함할 수 있어 자동으로 places를 변경하지 않는다.
-    // 자동 GPS 코스도 원본 places와 완료 스탬프가 정확히 대응할 때만 두 목록을 함께 정정한다.
-    if(!course.autoGps||String(course.sourceDate||'')!==date||!Array.isArray(course.places)||
-       course.places.length!==entry.stampPlaces.length||
-       course.places.some((p,i)=>!_dailyCompletedPlaceMatches(p,entry.stampPlaces[i])))return null;
+    // 계획형 완료는 방문 순서/출도/수동 장소를 별도로 보존한다. GPS 완료 목록만 수정한다.
+    // 추가되는 GPS 방문지까지 이미 이 계획에 속했음을 일대일로 확인하지 못하면 보류한다.
+    if(!Array.isArray(course.places))return null;
     const manual=_manualPointsFor(course.id);
-    if(Array.isArray(manual)&&manual.length)return null;
-    const unchanged=JSON.stringify(entry.stampPlaces)===JSON.stringify(next)&&
-      JSON.stringify(course.places)===JSON.stringify(next)&&Number(entry.placeCount)===next.length;
-    return unchanged?null:{stampPlaces:next,places:next};
+    if(course.autoGps){
+      // 자동 생성 코스에 수동 추가가 있으면 장소 재배열이 수동 항목 위치를 바꿀 수 있다.
+      if(String(course.sourceDate||'')!==date||!Array.isArray(course.places)||
+         course.places.length!==entry.stampPlaces.length||
+         course.places.some((p,i)=>!_dailyCompletedPlaceMatches(p,entry.stampPlaces[i]))||
+         (Array.isArray(manual)&&manual.length))return null;
+      const unchanged=JSON.stringify(entry.stampPlaces)===JSON.stringify(next)&&
+        JSON.stringify(course.places)===JSON.stringify(next)&&Number(entry.placeCount)===next.length;
+      return unchanged?null:{stampPlaces:next,places:next};
+    }
+    // 계획형 코스: 각 GPS 장소가 기존 계획에 하나의 명확한 장소로 대응해야 한다.
+    // 계획 경유지는 그대로 유지하고 완료 GPS 목록과 개수만 정정한다.
+    const planned=course.places.filter(p=>p&&!p.routeOnly);
+    if(next.some(gps=>planned.filter(p=>_dailyCompletedPlaceMatches(p,gps)).length!==1))return null;
+    if(planned.some(p=>next.filter(gps=>_dailyCompletedPlaceMatches(p,gps)).length>1))return null;
+    const unchanged=JSON.stringify(entry.stampPlaces)===JSON.stringify(next)&&Number(entry.placeCount)===next.length;
+    return unchanged?null:{stampPlaces:next,places:null};
   }
   function _runCompletionSafeGpsAudit(all,ids){
     const onceDone=localStorage.getItem(COMPLETION_AUDIT_ONCE_KEY)!==null;
@@ -19709,7 +19721,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(!day){skipped++;return;}
       try{
         const next=_completionSafeGpsFix(course,entry,day,list);
-        if(next)edits.push({id:String(course.id),ei,next});
+        if(next)edits.push({id:String(course.id),ei,next,
+          // 수정 대상으로 판단한 시점의 원본을 함께 보존해 저장 전 재확인한다.
+          beforeEntry:JSON.stringify(entry),beforePlaces:JSON.stringify(course.places),
+          beforeName:String(course.name)});
       }catch(err){skipped++;console.warn('[GPS 완료 검사 보류]',course.id,err);}
     }));
     if(edits.length){
@@ -19725,13 +19740,23 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       edits.forEach(edit=>{
         const target=updated.find(c=>String(c.id)===edit.id);
         if(!target||!target.completions[edit.ei])throw Error('완료 회차 변경 감지');
-        if(!target.autoGps||!Array.isArray(edit.next.stampPlaces)||!Array.isArray(edit.next.places))
-          throw Error('자동 GPS 완료 코스 검증 불일치');
+        // 동일 ID 중복이나 스냅샷 불일치 시 다른 코스를 수정하지 않는다.
+        if(updated.filter(c=>String(c.id)===edit.id).length!==1||
+           JSON.stringify(target.completions[edit.ei])!==edit.beforeEntry||
+           JSON.stringify(target.places)!==edit.beforePlaces||
+           String(target.name)!==edit.beforeName)
+          throw Error('완료 기록 원본이 검사 결과와 다릅니다: 저장 중단');
+        if(!Array.isArray(edit.next.stampPlaces)||!edit.next.stampPlaces.length||
+           (target.autoGps&&!Array.isArray(edit.next.places))||
+           (!target.autoGps&&edit.next.places!==null))
+          throw Error('GPS 완료 코스 검증 불일치');
         target.completions[edit.ei].stampPlaces=edit.next.stampPlaces;
         target.completions[edit.ei].placeCount=edit.next.stampPlaces.length;
-        target.places=edit.next.places;
-        // 제목과 방문 장소가 서로 다른 과거 표시 오류를 방지한다.
-        target.name=String(target.sourceDate).replace(/-/g,'.')+' '+edit.next.places.map(p=>p.name).join(' → ');
+        if(edit.next.places!==null){
+          target.places=edit.next.places;
+          // 자동 GPS 코스만 완료 방문지로 제목을 갱신한다.
+          target.name=String(target.sourceDate).replace(/-/g,'.')+' '+edit.next.places.map(p=>p.name).join(' → ');
+        }
       });
       const next=JSON.stringify(updated);
       if(localStorage.getItem(COURSES_KEY)!==original)throw Error('저장 직전 코스 변경: 중단');
@@ -19739,10 +19764,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         localStorage.setItem(COURSES_KEY,next);
         if(localStorage.getItem(COURSES_KEY)!==next)throw Error('순례완료 저장 확인 실패');
         const verified=JSON.parse(localStorage.getItem(COURSES_KEY));
+        if(verified.length!==updated.length||JSON.stringify(verified)!==next)
+          throw Error('완료 코스 전체 저장 재검증 실패');
         edits.forEach(edit=>{
           const c=verified.find(x=>String(x.id)===edit.id),e=c&&c.completions&&c.completions[edit.ei];
           if(!e||JSON.stringify(e.stampPlaces)!==JSON.stringify(edit.next.stampPlaces)||
-             JSON.stringify(c.places)!==JSON.stringify(edit.next.places)||
+             (edit.next.places!==null&&JSON.stringify(c.places)!==JSON.stringify(edit.next.places))||
              e.placeCount!==edit.next.stampPlaces.length)throw Error('완료 장소 저장 재검증 실패');
         });
       }catch(err){
