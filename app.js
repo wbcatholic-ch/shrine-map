@@ -19456,8 +19456,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     return completionBuildPending;
   }
   window._oaiRebuildCompletionsAfterDriveRestore=function(){
-    // 재가져오기 뒤 변경된 GPS 지문을 재검증하며, 기존 코스를 선삭제하지 않는다.
-    return _rebuildCompletionFromGps();
+    // 복원 뒤 스탬프 및 완료 코스가 저장된 상태에서 미완료 검사만 다시 예약한다.
+    return _rebuildCompletionFromGps().then(function(result){
+      setTimeout(function(){
+        if(localStorage.getItem(COMPLETION_AUDIT_ONCE_KEY)===null ||
+           _completionAuditAllPending || _completionAuditCourseIds.size)
+          _scheduleCompletionGpsAudit(localStorage.getItem(COMPLETION_AUDIT_ONCE_KEY)===null);
+      },1600);
+      return result;
+    });
   };
   // 개발자 명시 조작에 한해 완료 코스만 비운다. GPS 재생성·Drive 가져오기를 수행하지 않는다.
   function _developerClearAllCompletedCourses(){
@@ -19633,32 +19640,145 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       return 0;
     }
   }
+  // V1641: 사용자별 최초 1회 GPS 완료 검사와 새 완료 코스만의 비동기 검사.
+  // 전체 코스 재작성과 기존 스탬프 삭제는 사용하지 않는다.
+  const COMPLETION_AUDIT_ONCE_KEY='oai_completion_gps_audit_v1641_once';
+  const COMPLETION_AUDIT_BACKUP_KEY='oai_completion_gps_audit_v1641_source';
   let _completionAuditQueued=false;
   let _completionAuditRunning=false;
+  let _completionAuditRestoreRetries=0;
   let _completionAuditResult=null;
-  function _scheduleCompletionGpsAudit(once){
-    // 모든 사용자 공통 검증. GPS 근거가 완전한 경우에만 백업 후 완료 항목을 정정한다.
-    // 코스 저장 중 재진입하지 않도록 다음 작업에서 검사한다.
+  let _completionAuditAllPending=false;
+  const _completionAuditCourseIds=new Set();
+  function _completionSafeGpsFix(course,entry,date,allCourses){
+    // 과거 계획 목록은 미방문지·수동 추가가 섞일 수 있다. 실제 GPS 완료 목록만 자동 수정.
+    if(!entry||entry.method!=='gps'||!Array.isArray(entry.stampPlaces)||!entry.stampPlaces.length)return null;
+    if(allCourses.filter(c=>(c.completions||[]).some(e=>e&&_dailyIso(Number(e.completedAt))===date)).length!==1)return null;
+    // 원본 방문은 읽기 전용. 원본 GPS 증거와 그날 등록 대상 장소를 모두 확인한다.
+    const raw=_dailyRawGpsEvents(date);
+    const eligible=_dailyAutoEvents(raw);
+    if(!eligible.length)return null;
+    const canonical=_dailyGpsEvents(date);
+    const target=[];
+    eligible.forEach(ev=>{
+      const normalized=canonical.find(x=>_dailySamePlace(x,ev)||_dailyLinkedGpsPair(x,ev));
+      if(!normalized)throw new Error('GPS 대표 장소 확인 실패');
+      if(!target.some(x=>_dailySamePlace(x,normalized)||_dailyLinkedGpsPair(x,normalized)))target.push(normalized);
+    });
+    // 이 회차의 모든 기존 장소는 당일 실제 GPS 기록과 일치해야 한다.
+    // 미확인 수동 완료/구형 데이터가 있으면 이 코스 전체를 건드리지 않는다.
+    const matched=[];
+    for(const place of entry.stampPlaces){
+      if(!place||place.routeOnly)return null;
+      const candidates=target.filter(ev=>_dailyCompletedPlaceMatches(place,ev));
+      if(!candidates.length)return null;
+      const unique=[];
+      candidates.forEach(ev=>{if(!unique.some(x=>_dailySamePlace(x,ev)||_dailyLinkedGpsPair(x,ev)))unique.push(ev);});
+      if(unique.length!==1)return null;
+      matched.push(unique[0]);
+    }
+    // 추가 GPS가 다른 회차의 것일 가능성을 배제할 수 없으면 수정하지 않는다.
+    // 해당 날짜 완료 코스가 정확히 하나인 경우에만 해당 날짜의 GPS 전부로 대조한다.
+    const next=target.sort((x,y)=>x.at-y.at).map(_dailyCompletionDisplayPlace);
+    if(!next.length)return null;
+    // 구조를 바꾸지 않고 완료 장소만 변경. 코스 ID/출도/계획/수동 추가/완료 시각은 그대로.
+    return JSON.stringify(entry.stampPlaces)===JSON.stringify(next)&&Number(entry.placeCount)===next.length?null:next;
+  }
+  function _runCompletionSafeGpsAudit(all,ids){
+    const onceDone=localStorage.getItem(COMPLETION_AUDIT_ONCE_KEY)!==null;
+    if(all&&onceDone)return {checked:0,repaired:0,skipped:0};
+    // 기존 스탬프 통일 함수만 사용하며, 실패 시 완료 코스는 절대 수정하지 않는다.
+    if(localStorage.getItem(STAMP_MIGRATION_KEY)===null)_runStampMigrationV1604(false);
+    if(localStorage.getItem(STAMP_MIGRATION_KEY)===null)throw Error('스탬프 통일 완료 확인 실패');
+    const original=localStorage.getItem(COURSES_KEY);
+    const list=_dailyStoredCourses();
+    const selected=all?list:list.filter(c=>ids.has(String(c.id)));
+    const edits=[];let checked=0,skipped=0;
+    selected.forEach(course=>(course.completions||[]).forEach((entry,ei)=>{
+      if(!entry||entry.method!=='gps')return;
+      checked++;
+      const day=_dailyIso(Number(entry.completedAt));
+      if(!day){skipped++;return;}
+      try{
+        const next=_completionSafeGpsFix(course,entry,day,list);
+        if(next)edits.push({id:String(course.id),ei,next});
+      }catch(err){skipped++;console.warn('[GPS 완료 검사 보류]',course.id,err);}
+    }));
+    if(edits.length){
+      if(original===null)throw Error('순례완료 원본 없음: 쓰기 중단');
+      // 로컬 복구 사본은 최초 1회 보관하며 자동 삭제하지 않는다.
+      const backup=localStorage.getItem(COMPLETION_AUDIT_BACKUP_KEY);
+      if(backup===null){
+        localStorage.setItem(COMPLETION_AUDIT_BACKUP_KEY,original);
+        if(localStorage.getItem(COMPLETION_AUDIT_BACKUP_KEY)!==original)throw Error('원본 보존 실패');
+      }
+      if(localStorage.getItem(COURSES_KEY)!==original)throw Error('검사 중 코스 변경: 저장 중단');
+      const updated=JSON.parse(original);
+      edits.forEach(edit=>{
+        const target=updated.find(c=>String(c.id)===edit.id);
+        if(!target||!target.completions[edit.ei])throw Error('완료 회차 변경 감지');
+        target.completions[edit.ei].stampPlaces=edit.next;
+        target.completions[edit.ei].placeCount=edit.next.length;
+      });
+      const next=JSON.stringify(updated);
+      if(localStorage.getItem(COURSES_KEY)!==original)throw Error('저장 직전 코스 변경: 중단');
+      try{
+        localStorage.setItem(COURSES_KEY,next);
+        if(localStorage.getItem(COURSES_KEY)!==next)throw Error('순례완료 저장 확인 실패');
+      }catch(err){
+        if(localStorage.getItem(COURSES_KEY)===next)localStorage.setItem(COURSES_KEY,original);
+        throw err;
+      }
+      renderCourseList();
+    }
+    if(all){
+      // 최초 전수조사 자체는 1회 완료 표시하되, 보류된 코스까지 정정 완료라고 표시하지 않는다.
+      // 보류 내역은 로컬 결과에 남기고, 이후 신규 완료 코스만 별도 검사한다.
+      const marker=JSON.stringify({at:Date.now(),checked,repaired:edits.length,skipped,status:skipped?'partial':'reviewed',schema:1642});
+      localStorage.setItem(COMPLETION_AUDIT_ONCE_KEY,marker);
+      if(localStorage.getItem(COMPLETION_AUDIT_ONCE_KEY)!==marker)throw Error('최초 검사 완료 상태 저장 실패');
+    }
+    return {checked,repaired:edits.length,skipped};
+  }
+  function _scheduleCompletionGpsAudit(once,courseId){
+    if(once)_completionAuditAllPending=true;
+    if(courseId)_completionAuditCourseIds.add(String(courseId));
+    if(!once&&!courseId)return; // 일반 앱 시작에서는 전체 검사를 반복하지 않는다.
     if(_completionAuditQueued||_completionAuditRunning)return;
     _completionAuditQueued=true;
-    Promise.resolve().then(function(){
+    setTimeout(function(){
       _completionAuditQueued=false;
       if(_completionAuditRunning)return;
       _completionAuditRunning=true;
+      const all=_completionAuditAllPending;
+      const ids=new Set(_completionAuditCourseIds);
+      _completionAuditAllPending=false;_completionAuditCourseIds.clear();
       try{
-        const result=_completionGpsComparison();
-        // 자동 정정은 명백하게 검증된 GPS 완료 기록만 대상으로 한다.
-        // 불일치 장소나 모호한 항목이 있으면 원본을 보존한다.
-        const repaired=0; // V1577: 과거 완료 코스 자동 재수정 금지. 개발자 명시 승인 1회만 허용.
-        _completionAuditResult={checked:result.rows.length,changes:result.changes.length,
-          skipped:result.skipped.length,repaired:repaired,at:Date.now()};
-        if(result.changes.length||result.skipped.length)
-          console.warn('[순례완료 GPS 자동 검증] 정정 후보 '+result.changes.length+'건, 보류 '+result.skipped.length+'건. 원본 기록 유지.');
+        // 기존 사용자 복원 확인 전에 백그라운드 변경을 시작하지 않는다.
+        if(oaiApplyingRestore||oaiTransferBusy||oaiRestoreDecisionPending){
+          _completionAuditAllPending=_completionAuditAllPending||all;
+          ids.forEach(id=>_completionAuditCourseIds.add(id));
+          // 복원 대기 중에는 완료 마커를 남기지 않는다. 제한된 횟수만 재확인한다.
+          if(++_completionAuditRestoreRetries<=12){
+            setTimeout(function(){
+              if(_completionAuditAllPending||_completionAuditCourseIds.size)
+                _scheduleCompletionGpsAudit(_completionAuditAllPending);
+            },2000);
+          }
+          return;
+        }
+        _completionAuditRestoreRetries=0;
+        _completionAuditResult=Object.assign({at:Date.now()},_runCompletionSafeGpsAudit(all,ids));
       }catch(err){
         _completionAuditResult={error:String(err&&err.message||err),at:Date.now()};
-        console.warn('[순례완료 GPS 자동 검증 보류] 원본 기록 유지',err);
-      }finally{_completionAuditRunning=false;}
-    });
+        console.warn('[GPS 완료 자동 검사 보류: 기존 기록 유지]',err);
+      }finally{
+        _completionAuditRunning=false;
+        if(_completionAuditAllPending||_completionAuditCourseIds.size){
+          // 다음 정상 앱 진입/저장 시 재예약; 현재 세션에서 무한 재시도하지 않는다.
+        }
+      }
+    },400);
   }
   document.addEventListener('click',function(e){
     const btn=e.target.closest('#oai-dev-completion-repair');
@@ -19692,8 +19812,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     try{
       const previous=JSON.parse(typeof beforeCourses==='string'?beforeCourses:'[]');
       const fingerprint=list=>JSON.stringify((Array.isArray(list)?list:[]).map(c=>[c.id,c.completions]));
-      if(fingerprint(previous)!==fingerprint(a))_scheduleCompletionGpsAudit(false);
-    }catch(_e){_scheduleCompletionGpsAudit(false);}
+      if(fingerprint(previous)!==fingerprint(a)){
+        const previousById=new Map(previous.map(c=>[String(c.id),JSON.stringify(c.completions||[])]));
+        a.forEach(c=>{if(c&&Array.isArray(c.completions)&&c.completions.length&&
+          previousById.get(String(c.id))!==JSON.stringify(c.completions))_scheduleCompletionGpsAudit(false,c.id);});
+      }
+    }catch(_e){/* 감사 예약 실패 시 저장값은 유지한다. */}
     return true;
   }
   function _dailyStoredCourses(){
@@ -25033,7 +25157,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // 자동 등록 초기화는 목록 렌더링·개발자 패널 표시 실패와 독립적으로 실행한다.
   // 최초 실행: 카탈로그 로드 → 스탬프 통일 → GPS 날짜별 완료 생성 → 화면 갱신.
   // 실행 실패 시 계획·완료·스탬프 원본을 유지한다. 오류를 빈 완료 목록으로 간주하지 않는다.
-  _rebuildCompletionFromGps().then(function(){renderCourseList();setTimeout(_dailyRegisterPendingDate,250);})
+  _rebuildCompletionFromGps().then(function(){renderCourseList();setTimeout(_dailyRegisterPendingDate,250);setTimeout(function(){_scheduleCompletionGpsAudit(true);},1200);})
     .catch(function(err){console.error('[최초 GPS 완료 생성 보류]',err);});
   refreshDev(); renderCourseList();
 })();
