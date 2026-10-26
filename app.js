@@ -20507,12 +20507,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!aName||aName!==bName)return false;
     const aD=String(place.diocese||'').trim(),bD=String(ev.diocese||'').trim();
     if(aD&&bD&&aD!==bD)return false;
-    // 고유 ID가 다를 때는 동일 종류·교구 및 카탈로그 내 유일한 이름만 허용한다.
-    if(aId&&bId){
-      if(!place.kind||!ev.kind||String(place.kind)!==String(ev.kind)||!aD||!bD)return false;
-      const catalog=ev.kind==='parish'?(typeof PARISHES!=='undefined'?PARISHES:[]):(typeof SHRINES!=='undefined'?SHRINES:[]);
-      return Array.isArray(catalog)&&catalog.filter(x=>x&&_normPilgrimageName(x.name)===bName&&String(x.diocese||'')===bD).length===1;
-    }
+    // 서로 다른 고정 ID는 이름이 같아도 동일 장소로 취급하지 않는다.
+    // 명시적 성지·성당 공통화 여부는 위의 _dailyLinkedGpsPair만 판정한다.
+    if(aId&&bId)return false;
     // 한쪽에 교구 정보가 없다면 동일 이름의 별도 성지를 합치지 않는다.
     if(!aD||!bD){
       const catalog=(ev.kind==='parish'?(typeof PARISHES!=='undefined'?PARISHES:[]):(typeof SHRINES!=='undefined'?SHRINES:[]));
