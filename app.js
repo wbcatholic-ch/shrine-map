@@ -19174,9 +19174,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     stamps.sort((a,b)=>JSON.stringify(a).localeCompare(JSON.stringify(b)));
     return _completionRebuildFingerprint(JSON.stringify(stamps));
   }
-  function _completionRebuildSourceKey(raw){
-    return COMPLETION_REBUILD_SOURCE_KEY+'_'+_completionRebuildFingerprint(raw);
-  }
   function _recoverInterruptedCompletionRebuild(){
     const current=localStorage.getItem(COURSES_KEY)||'[]';
     const activeSourceKey=localStorage.getItem(COMPLETION_REBUILD_ACTIVE_SOURCE_KEY);
@@ -19324,101 +19321,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       issues.push('순례완료 코스 ID 충돌');
     return {courses,replacement,rebuilt,preserved:[],kept,issues,dates:dates.size,removed:removed.length};
   }
-  function _completionRebuildOnceRun(requireConfirmation){
-    // V1640: 기존 코스의 수동 추가·출발·도착 보존이 보장되지 않아 전체 교체 잠금.
-    return '안전 중지: 기존 순례완료 보존 검증 전에는 전체 재구성을 실행하지 않습니다.';
-    if(developerCompletionClearThisSession&&requireConfirmation===false)return '개발자 삭제 후 이번 실행의 자동 재생성 중지';
-    // 기기 내 GPS 기록이 존재한다면 Drive 복원 확인 플래그 때문에
-    // 로컬 완료 코스 생성까지 영구 차단하지 않는다. GPS 원본을 변경하지 않는다.
-    // 단, 기록이 전혀 없고 복원이 미확인이라면 빈 완료 장부를 생성하지 않는다.
-    if(localStorage.getItem('oai_google_drive_connected_v1')==='1'&&
-       localStorage.getItem('oai_restore_checked_v1')!=='1'){
-      const shrine=_loadShrineVisits(),parish=_loadParishVisits();
-      const hasGps=[shrine,parish].some(data=>Object.values(data||{}).some(r=>
-        r&&Array.isArray(r.visits)&&r.visits.some(v=>v&&String(v.method||'').toLowerCase()==='gps')));
-      if(!hasGps)throw Error('Google Drive 복원 확인 및 GPS 기록 확인 전에는 순례완료를 재구성하지 않습니다');
-    }
-    if(_recoverInterruptedCompletionRebuild())return '이미 검증된 재구성 결과입니다.';
-    const prepared=_completionRebuildOncePrepare();
-    // 이미 완료 코스가 남아 있다면 불명확한 날짜 하나 때문에 기존 완료를 삭제하지 않는다.
-    // V1617에서 완료 장부가 이미 빈 사용자만 확실히 검증된 날짜를 우선 기록한다.
-    // 보류 날짜는 절대로 '등록 완료'로 표시하지 않고 매 실행마다 재검증한다.
-    if(prepared.issues.length&&(prepared.removed>0||!prepared.rebuilt.length))
-      return '전체 재구성 보류 ('+prepared.issues.length+'건):\n'+prepared.issues.join('\n');
-    const unresolvedDates=prepared.issues.slice();
-    const stampJob=_prepareStampMigrationV1604();
-    if(stampJob.changes.length)throw Error('스탬프 통합을 먼저 완료해야 합니다');
-    if(!prepared.rebuilt.length&&!prepared.removed)return '등록 대상 GPS 완료 코스가 없습니다.';
-    const original=localStorage.getItem(COURSES_KEY)||'[]';
-    if(JSON.stringify(prepared.courses)!==JSON.stringify(JSON.parse(original)))
-      throw Error('검사 중 원본 코스 변경 감지');
-    const next=prepared.replacement;
-    const raw=JSON.parse(original);
-    // 완료되지 않은 계획은 순서와 모든 필드까지 동일해야 한다.
-    if(JSON.stringify(raw.filter(c=>!c.completions.length))!==
-       JSON.stringify(next.filter(c=>!c.completions.length)))
-      throw Error('순례계획 원본 불일치');
-    if(next.filter(c=>c.completions.length).some(c=>c.completions.length!==1||
-        c.completions[0].method!=='gps'||!c.completions[0].stampPlaces.length||
-        c.completions[0].stampPlaces.length!==c.completions[0].placeCount))
-      throw Error('재구성 완료 형식 검증 실패');
-    for(const mapped of prepared.preserved){
-        const oldCourse=raw.find(c=>String(c.id)===mapped.sourceId);
-        const target=next.find(c=>String(c.id)===mapped.targetId);
-        if(!target)throw Error(oldCourse.name+': 기존 완료 회차 ID 대응 실패');
-        const source=oldCourse.completions[mapped.sourceIndex],done=target.completions[0];
-        if(JSON.stringify(target.start)!==JSON.stringify(oldCourse.start)||
-           JSON.stringify(target.end)!==JSON.stringify(oldCourse.end)||
-           done.completedAt!==Number(source.completedAt))
-          throw Error(oldCourse.name+': 출발/도착/완료 시각 변경 감지');
-    }
-    const summary='기존 완료 코스 '+prepared.removed+'개 → GPS 재구성 완료 코스 '+
-      prepared.rebuilt.length+'개 / 확인 날짜 '+prepared.dates+'일 / 순례계획 '+prepared.kept.length+'개 불변';
-    if(requireConfirmation!==false&&!confirm('기존 순례완료 전체를 GPS 기준으로 재작성합니다.\n'+
-      '순례계획·진행 중 기록·스탬프·사진·메모는 변경하지 않습니다.\n\n'+summary+'\n\n실행할까요?'))
-      return '사용자가 취소했습니다.';
-    const serialized=JSON.stringify(next),sourceKey=_completionRebuildSourceKey(original);
-    const backup=localStorage.getItem(sourceKey);
-    if(backup!==null&&backup!==original)throw Error('기존 원본 백업 충돌');
-    if(backup===null)localStorage.setItem(sourceKey,original);
-    if(localStorage.getItem(sourceKey)!==original)throw Error('순례완료 원본 백업 검증 실패');
-    if(localStorage.getItem(COURSES_KEY)!==original)throw Error('저장 직전 원본 변경');
-    localStorage.setItem(COMPLETION_REBUILD_EXPECTED_KEY,serialized);
-    if(localStorage.getItem(COMPLETION_REBUILD_EXPECTED_KEY)!==serialized)throw Error('예상 결과 보관 실패');
-    localStorage.setItem(COMPLETION_REBUILD_ACTIVE_SOURCE_KEY,sourceKey);
-    if(localStorage.getItem(COMPLETION_REBUILD_ACTIVE_SOURCE_KEY)!==sourceKey)throw Error('재구성 진행 상태 보관 실패');
-    try{
-      localStorage.setItem(COURSES_KEY,serialized);
-      if(localStorage.getItem(COURSES_KEY)!==serialized)throw Error('재구성 저장값 불일치');
-      const verified=_dailyStoredCourses();
-      if(JSON.stringify(verified)!==serialized)throw Error('재조회 검증 불일치');
-      localStorage.setItem(COMPLETION_REBUILD_ONCE_KEY,JSON.stringify({
-        at:Date.now(),count:prepared.rebuilt.length,partial:unresolvedDates.length>0,outputFingerprint:_completionRebuildFingerprint(serialized),
-        gpsFingerprint:_completionRebuildGpsFingerprint()}));
-      if(!localStorage.getItem(COMPLETION_REBUILD_ONCE_KEY))throw Error('완료 표시 저장 실패');
-      localStorage.removeItem(COMPLETION_REBUILD_EXPECTED_KEY);
-      localStorage.removeItem(COMPLETION_REBUILD_ACTIVE_SOURCE_KEY);
-      renderCourseList();
-      if(unresolvedDates.length){
-        // 정상 날짜의 신규 코스를 보여 주되 다른 날짜가 미등록이라는 사실은 숨기지 않는다.
-        console.warn('[GPS 순례완료 일부 날짜 미해결; 원본 GPS 보존]',unresolvedDates);
-        return '부분 재구성 ('+unresolvedDates.length+'개 날짜 보류):\n'+unresolvedDates.join('\n');
-      }
-      return '전체 재구성 저장·검증 완료: '+summary;
-    }catch(err){
-      try{
-        // 다른 쓰기 주체가 데이터를 바꿨다면 자동 복원도 금지한다.
-        const current=localStorage.getItem(COURSES_KEY);
-        if(current!==serialized&&current!==original)throw Error('경합 변경 감지');
-        if(current===serialized)localStorage.setItem(COURSES_KEY,original);
-        if(localStorage.getItem(COURSES_KEY)!==original)throw Error('원본 복구 확인 실패');
-        localStorage.removeItem(COMPLETION_REBUILD_ONCE_KEY);
-        localStorage.removeItem(COMPLETION_REBUILD_EXPECTED_KEY);
-        localStorage.removeItem(COMPLETION_REBUILD_ACTIVE_SOURCE_KEY);
-      }catch(rollback){throw Error('복구 실패: '+rollback.message+' / 원본 백업 보존');}
-      throw err;
-    }
-  }
   // 최초 실행과 Drive 가져오기는 동일한 GPS 규격/코스 생성 경로를 사용한다.
   // 필요한 성당 카탈로그가 로드되기 전에는 완료 장부를 변경하지 않는다.
   let completionBuildPending=null;
@@ -19515,10 +19417,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       catch(err){if(out)out.textContent='순례완료 삭제 중단: '+String(err&&err.message||err);}
       return;
     }
-    if(!e.target.closest('#oai-dev-completion-rebuild-once')||window.__OAI_DEV_RUNTIME_ACTIVE__!==true)return;
-    const out=document.getElementById('oai-dev-completion-audit-report');if(!out)return;
-    out.hidden=false;
-    try{out.textContent=_completionRebuildOnceRun(true);}catch(err){out.textContent='일회성 재구성 중단: '+String(err&&err.message||err);}
   });
   // V1562: 완료 화면의 원천과 정정 제외 원인을 원본 저장값 기준으로만 진단한다.
   // 어떠한 로컬 저장값도 수정하지 않는다.
