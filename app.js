@@ -17861,8 +17861,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           // Drive 가져온 기록은 이전 기기의 순례완료 검사표시와 무관하게 다시 구성한다.
           // 기존 완료 원본을 먼저 보존하는 공통 재구성 경로만 호출한다.
           if(typeof window._oaiRebuildCompletionsAfterDriveRestore==='function'){
-            try{window._oaiRebuildCompletionsAfterDriveRestore();}
-            catch(rebuildErr){console.warn('[Drive 복원 후 순례완료 재구성 보류]',rebuildErr);}
+            Promise.resolve(window._oaiRebuildCompletionsAfterDriveRestore()).catch(function(rebuildErr){console.warn('[Drive 복원 후 순례완료 재구성 보류]',rebuildErr);});
           }
           localStorage.setItem(OAI_GOOGLE_DRIVE_AUTO_BACKUP_KEY,'1');
           oaiClearDriveOffReminder();
@@ -18060,7 +18059,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           // handing off the full-photo inventory. Native SQLite deduplicates IDs.
           oaiNotifyNativePhotoCloudSettings(true);
           oaiQueuePhotoRestoreManifest();
-          if(mode==='manual-load')oaiFirstRunParishIfNeeded();
+          if(mode==='manual-load'){
+            oaiFirstRunParishIfNeeded();
+            if(typeof window._oaiRebuildCompletionsAfterDriveRestore==='function')
+              Promise.resolve(window._oaiRebuildCompletionsAfterDriveRestore()).catch(function(err){console.warn('[복원 완료 후 GPS 순례완료 보류]',err);});
+          }
           if(mode==='initial-load'||mode==='initial-connect'||mode==='settings-connect')setTimeout(function(){location.reload();},500);
         }catch(err){
           oaiTransferStatus('가져오기 실패: '+err.message);
@@ -18554,42 +18557,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   const PLAN_KEY='oai_pilgrimage_plan_v1';
   const DRAFT_META_KEY='oai_pilgrimage_draft_meta_v2';
   const COURSES_KEY='oai_pilgrimage_courses_v1';
-
-  // V1617: 기존 순례완료 제거 전용. 순례계획 및 진행 중인 코스는 원본 그대로 보존한다.
-  // 완료 이력은 이번 버전에서 재생성하지 않는다.
-  const COMPLETION_CLEAR_BACKUP_KEY='oai_completed_courses_before_clear_v1617';
-  function _clearCompletedCoursesV1617(){
-    const original=localStorage.getItem(COURSES_KEY);
-    if(original===null)return 0;
-    const courses=JSON.parse(original);
-    if(!Array.isArray(courses)||courses.some(c=>!c||!Array.isArray(c.completions)||!c.id))
-      throw Error('순례코스 저장 형식 오류: 삭제하지 않음');
-    const activeRaw=localStorage.getItem(ACTIVE_FOLLOW_KEY);
-    const active=activeRaw?JSON.parse(activeRaw):null;
-    const activeId=active&&active.courseId!=null?String(active.courseId):'';
-    // 진행 중 코스에 과거 완료 회차가 함께 있으면 안전하게 전체 삭제를 보류한다.
-    if(activeId&&courses.some(c=>String(c.id)===activeId&&c.completions.length))
-      throw Error('진행 중 코스에 완료 회차가 있어 삭제 보류');
-    const retained=courses.filter(c=>c.completions.length===0);
-    const removed=courses.length-retained.length;
-    if(!removed)return 0;
-    if(localStorage.getItem(COMPLETION_CLEAR_BACKUP_KEY)===null)
-      localStorage.setItem(COMPLETION_CLEAR_BACKUP_KEY,original);
-    if(!localStorage.getItem(COMPLETION_CLEAR_BACKUP_KEY))throw Error('순례완료 원본 보관 실패');
-    if(localStorage.getItem(COURSES_KEY)!==original)throw Error('순례코스 동시 변경: 삭제 중단');
-    const next=JSON.stringify(retained);
-    try{
-      localStorage.setItem(COURSES_KEY,next);
-      if(localStorage.getItem(COURSES_KEY)!==next)throw Error('삭제 저장 확인 실패');
-      const check=JSON.parse(localStorage.getItem(COURSES_KEY));
-      if(check.length!==retained.length||check.some(c=>c.completions.length)||
-         JSON.stringify(check)!==next)throw Error('순례계획 보존 검증 실패');
-    }catch(err){
-      if(localStorage.getItem(COURSES_KEY)===next)localStorage.setItem(COURSES_KEY,original);
-      throw err;
-    }
-    return removed;
-  }
 
   const ACTIVE_FOLLOW_KEY='oai_pilgrimage_active_follow_v1';
   const REPEAT_EDIT_GUARD_KEY='oai_pilgrimage_repeat_edit_guard_v1';
@@ -19378,9 +19345,32 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       throw err;
     }
   }
+  // 최초 실행과 Drive 가져오기는 동일한 GPS 규격/코스 생성 경로를 사용한다.
+  // 필요한 성당 카탈로그가 로드되기 전에는 완료 장부를 변경하지 않는다.
+  let completionBuildPending=null;
+  let completionGpsBootReady=false;
+  function _rebuildCompletionFromGps(){
+    if(completionBuildPending)return completionBuildPending;
+    completionBuildPending=(async function(){
+      if(typeof _ensureShrineDataLoaded==='function')await _ensureShrineDataLoaded();
+      if(typeof _ensureAllParishDiocesesLoaded==='function')await _ensureAllParishDiocesesLoaded({silent:true});
+      if(!Array.isArray(SHRINES)||!SHRINES.length||!Array.isArray(PARISHES)||!PARISHES.length)
+        throw Error('성지·성당 목록을 모두 불러오지 못했습니다');
+      _runStampMigrationV1604(false);
+      if(_prepareStampMigrationV1604().changes.length)throw Error('스탬프 통합 검증 불일치');
+      const result=_completionRebuildOnceRun(false);
+      if(String(result).startsWith('전체 재구성 보류'))throw Error(result);
+      completionGpsBootReady=true;
+      return result;
+    })().catch(function(err){
+      console.error('[GPS 순례완료 생성 실패: 원본 보존]',err);
+      throw err;
+    }).finally(function(){completionBuildPending=null;});
+    return completionBuildPending;
+  }
   window._oaiRebuildCompletionsAfterDriveRestore=function(){
-    localStorage.removeItem(COMPLETION_REBUILD_ONCE_KEY);
-    return '기존 순례완료 삭제 전용 버전: 재생성 중지';
+    // 재가져오기 뒤 변경된 GPS 지문을 재검증하며, 기존 코스를 선삭제하지 않는다.
+    return _rebuildCompletionFromGps();
   };
   document.addEventListener('click',function(e){
     if(!e.target.closest('#oai-dev-completion-rebuild-once')||window.__OAI_DEV_RUNTIME_ACTIVE__!==true)return;
@@ -20670,7 +20660,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }catch(e){console.warn('[코스 등록 실패 안내 확인]',e);}
   }
   async function _dailyRegisterPrevious(date,manualRetry){
-    return; // V1617: 완료 기록 삭제 전용, 과거 자동 코스 재생성 금지
+    if(!completionGpsBootReady)return; // 최초 GPS 전체 생성 이전의 날짜별 쓰기 경쟁 방지
     // 방문일 다음 날 00:01:30 이전에는 등록을 시작하지 않는다.
     if(date===_dailyPreviousDate(Date.now())){
       const today=_dailyIso(Date.now());
@@ -24884,22 +24874,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   })();
   // 스와이프 등록은 데이터 초기화보다 앞에 둔다. 초기화 예외가 제스처를 막지 않는다.
   // 자동 등록 초기화는 목록 렌더링·개발자 패널 표시 실패와 독립적으로 실행한다.
-  let pilgrimageStorageReady=false;
-  try{
-    // 기존 사용자도 첫 실행에서 동일한 방문 규격으로 전환한 뒤 GPS 자동 코스를 계산한다.
-    _runStampMigrationV1604(false);
-    if(_prepareStampMigrationV1604().changes.length)throw Error('스탬프 통합 검증 불일치');
-    pilgrimageStorageReady=true;
-  }catch(err){
-    // 모호한 기록·저장 공간 문제에는 기존 GPS/계획/완료 기록을 그대로 둔다.
-    console.error('[스탬프 통합 보류] GPS 자동 코스 등록을 시작하지 않습니다',err);
-  }
-  // V1618: 정규화 완료 후 과거 완료 코스를 GPS 기준으로 새로 만든다.
-  // 원본 완료 데이터는 일단 보존하며 새 결과를 검증한 다음에만 한 번에 교체한다.
-  if(pilgrimageStorageReady){
-    try{_completionRebuildOnceRun(false);}
-    catch(err){console.error('[순례완료 GPS 신규 생성 보류] 기존 기록 유지',err);}
-  }
+  // 최초 실행: 카탈로그 로드 → 스탬프 통일 → GPS 날짜별 완료 생성 → 화면 갱신.
+  // 실행 실패 시 계획·완료·스탬프 원본을 유지한다. 오류를 빈 완료 목록으로 간주하지 않는다.
+  _rebuildCompletionFromGps().then(function(){renderCourseList();setTimeout(_dailyRegisterPendingDate,250);})
+    .catch(function(err){console.error('[최초 GPS 완료 생성 보류]',err);});
   refreshDev(); renderCourseList();
 })();
 
