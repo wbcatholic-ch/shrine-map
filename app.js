@@ -20298,8 +20298,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(!point)throw new Error(date+' GPS 방문 장소를 연결하지 못했습니다: '+String(r.name||'이름 없음'));
         relevant.forEach(v=>{
           const at=Date.parse(String(v.savedAt||''));
-          if(!Number.isFinite(at)||_dailyIso(at)!==date)throw new Error(date+' GPS 방문시간을 확인하지 못했습니다: '+String(r.name||'이름 없음'));
-          events.push({name:point.name,addr:point.addr,lat:point.lat,lng:point.lng,diocese:String(p.diocese||diocese||''),placeId:String(p.placeId||''),at:at,kind:kind});
+          // 저장 시각은 실제 인증 시각이고, 방문 날짜는 인증 당시 저장된 v.date가 원본이다.
+          // 과거 데이터의 저장 시각이 날짜 경계를 넘더라도 유효 GPS 방문을 버리지 않는다.
+          if(!Number.isFinite(at))throw new Error(date+' GPS 방문시간을 확인하지 못했습니다: '+String(r.name||'이름 없음'));
+          events.push({name:point.name,addr:point.addr,lat:point.lat,lng:point.lng,diocese:String(p.diocese||diocese||''),placeId:String(p.placeId||''),at:at,date:date,kind:kind});
         });
       });
     }
@@ -20372,8 +20374,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const dates=new Set(events.map(ev=>{
       if(!ev||!['shrine','parish'].includes(ev.kind))throw new Error('GPS 코스 판정 장소 종류 오류');
       const date=ev.date||_dailyIso(ev.at);
-      if(!/^\d{4}-\d{2}-\d{2}$/.test(String(date))||
-          (Number.isFinite(Number(ev.at))&&_dailyIso(Number(ev.at))!==date))
+      // GPS 방문 날짜가 명시된 기록은 그 원본 날짜를 기준으로 코스에 귀속한다.
+      // 저장 시각(savedAt)은 정렬·표시에 사용하며 다른 날로 옮기는 근거가 아니다.
+      if(!_isVisitDate(String(date))||!Number.isFinite(Number(ev.at)))
         throw new Error('GPS 코스 판정 날짜 오류');
       return date;
     }));
