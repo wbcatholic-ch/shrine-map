@@ -19327,7 +19327,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     return {courses,replacement,rebuilt,preserved:[],kept,issues,dates:dates.size,removed:removed.length};
   }
   function _completionRebuildOnceRun(requireConfirmation){
-    if(developerCompletionClearThisSession)return '개발자 삭제 후 이번 실행의 자동 재생성 중지';
+    if(developerCompletionClearThisSession&&requireConfirmation===false)return '개발자 삭제 후 이번 실행의 자동 재생성 중지';
     // 기기 내 GPS 기록이 존재한다면 Drive 복원 확인 플래그 때문에
     // 로컬 완료 코스 생성까지 영구 차단하지 않는다. GPS 원본을 변경하지 않는다.
     // 단, 기록이 전혀 없고 복원이 미확인이라면 빈 완료 장부를 생성하지 않는다.
