@@ -19291,9 +19291,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           rebuilt.push(course);
           preserved.push({sourceId:String(o.course.id),sourceIndex:o.index,targetId:id});
         });
-        if(_dailyAutoEligible(unassigned)){
-          const id=newId('gps_daily_'+date.replace(/-/g,''));
-          rebuilt.push(_dailyBuildAutoCourse(date,unassigned,id));
+        if(unassigned.length){
+          // 남은 GPS가 일반 성당이라는 이유로 유효 방문을 조용히 버리지 않는다.
+          // 소유 코스가 여러 개면 어느 코스에 속하는지 알 수 없어 전체 교체를 보류한다.
+          if(owners.length>1)throw Error('기존 복수 코스에서 미배정 GPS 장소 소유권 불명확: '+unassigned.map(e=>e.name).join(', '));
+          if(owners.length===1)throw Error('기존 완료 코스의 GPS 방문 누락: '+unassigned.map(e=>e.name).join(', '));
+          if(_dailyAutoEligible(automatic)){
+            const id=newId('gps_daily_'+date.replace(/-/g,''));
+            rebuilt.push(_dailyBuildAutoCourse(date,unassigned,id));
+          }
         }
       }catch(err){issues.push(date+': '+String(err&&err.message||err));}
     }
@@ -20172,8 +20178,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     // 양쪽 고유 ID가 있으면 ID만 비교한다. 다른 ID는 이름·좌표가 같아도 별도 장소다.
     // ID가 없는 과거 GPS 기록에 한해서만 기존 이름·교구·좌표 호환 판정을 허용한다.
     const aId=String(a.placeId||'').trim(),bId=String(b.placeId||'').trim();
-    if(aId&&bId)return aId===bId;
+    // 스탬프 종류가 다르면 ID가 같아도 독립된 성지·성당이다.
+    // 순례코스의 공통 방문 판정은 별도 확정 명부 함수에서만 수행한다.
     if(a.kind&&b.kind&&String(a.kind)!==String(b.kind))return false;
+    if(aId&&bId)return aId===bId;
     if(a.diocese&&b.diocese&&String(a.diocese)!==String(b.diocese))return false;
     const aName=_normPilgrimageName(a.name),bName=_normPilgrimageName(b.name);
     if(!aName||aName!==bName)return false;
@@ -20376,8 +20384,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(_dailySamePlace(place,ev)||_dailyLinkedGpsPair(place,ev))return true;
     if(!place||!ev)return false;
     const aId=String(place.placeId||'').trim(),bId=String(ev.placeId||'').trim();
-    // 구형 완료 코스의 placeId가 바뀐 경우에도 같은 종류·교구·유일한 이름만 허용한다.
-    if(aId&&bId&&place.kind&&ev.kind&&String(place.kind)!==String(ev.kind))return false;
+    // 종류가 확정된 서로 다른 성지·성당을 이름 일치만으로 연결하지 않는다.
+    // 확정된 공통화 관계는 앞의 _dailyLinkedGpsPair 에서만 인정한다.
+    if(place.kind&&ev.kind&&String(place.kind)!==String(ev.kind))return false;
     const aName=_normPilgrimageName(place.name),bName=_normPilgrimageName(ev.name);
     if(!aName||aName!==bName)return false;
     const aD=String(place.diocese||'').trim(),bD=String(ev.diocese||'').trim();
