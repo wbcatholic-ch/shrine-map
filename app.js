@@ -19458,7 +19458,52 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     // 재가져오기 뒤 변경된 GPS 지문을 재검증하며, 기존 코스를 선삭제하지 않는다.
     return _rebuildCompletionFromGps();
   };
+  // 개발자 명시 조작에 한해 완료 코스만 비운다. GPS 재생성·Drive 가져오기를 수행하지 않는다.
+  function _developerClearAllCompletedCourses(){
+    if(window.__OAI_DEV_RUNTIME_ACTIVE__!==true||!oaiDevEnabled()||!oaiDevPanelUnlocked)
+      throw Error('개발자 모드에서만 실행할 수 있습니다');
+    const original=localStorage.getItem(COURSES_KEY);
+    const courses=_dailyStoredCourses();
+    const active=_readActiveFollowRaw();
+    const activeId=active?String(active.courseId):'';
+    const completed=courses.filter(c=>c.completions.length>0);
+    if(activeId&&completed.some(c=>String(c.id)===activeId))
+      throw Error('진행 중 코스에 완료 회차가 있어 안전하게 삭제할 수 없습니다');
+    if(!completed.length)return '삭제할 순례완료 코스가 없습니다. 순례계획은 유지됩니다.';
+    const kept=courses.filter(c=>c.completions.length===0);
+    if(!confirm('순례완료 코스 '+completed.length+'개를 모두 지울까요?\n순례계획·진행 중 코스·GPS 스탬프·사진·메모는 삭제하지 않습니다.\n\n로컬 원본을 보관하지만 Google Drive의 기존 기록은 이 버튼으로 변경하지 않습니다.'))
+      return '삭제를 취소했습니다.';
+    const backupKey='oai_dev_completed_clear_backup_'+Date.now();
+    const source=original===null?'[]':original;
+    const next=JSON.stringify(kept);
+    localStorage.setItem(backupKey,source);
+    if(localStorage.getItem(backupKey)!==source)throw Error('완료 코스 원본 백업 실패');
+    if((localStorage.getItem(COURSES_KEY)||'[]')!==source)throw Error('삭제 전 코스 기록이 변경되어 중단');
+    try{
+      localStorage.setItem(COURSES_KEY,next);
+      if(localStorage.getItem(COURSES_KEY)!==next)throw Error('삭제 저장 확인 실패');
+      const verified=_dailyStoredCourses();
+      if(JSON.stringify(verified)!==next||verified.some(c=>c.completions.length>0)||
+         JSON.stringify(verified)!==JSON.stringify(kept))throw Error('완료 코스 삭제/계획 보존 검증 실패');
+    }catch(err){
+      if(localStorage.getItem(COURSES_KEY)===next){
+        localStorage.setItem(COURSES_KEY,source);
+        if(localStorage.getItem(COURSES_KEY)!==source)throw Error('원본 복구 실패: 백업 '+backupKey);
+      }
+      throw err;
+    }
+    renderCourseList();
+    return '순례완료 '+completed.length+'개 삭제 확인 · 순례계획 '+kept.length+'개 유지\n원본 백업 키: '+backupKey;
+  }
   document.addEventListener('click',function(e){
+    if(e.target.closest('#oai-dev-completion-clear-all')){
+      if(window.__OAI_DEV_RUNTIME_ACTIVE__!==true)return;
+      const out=document.getElementById('oai-dev-completion-audit-report');
+      if(out)out.hidden=false;
+      try{const message=_developerClearAllCompletedCourses();if(out)out.textContent=message;}
+      catch(err){if(out)out.textContent='순례완료 삭제 중단: '+String(err&&err.message||err);}
+      return;
+    }
     if(!e.target.closest('#oai-dev-completion-rebuild-once')||window.__OAI_DEV_RUNTIME_ACTIVE__!==true)return;
     const out=document.getElementById('oai-dev-completion-audit-report');if(!out)return;
     out.hidden=false;
