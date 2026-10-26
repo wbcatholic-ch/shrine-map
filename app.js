@@ -19380,10 +19380,21 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function _rebuildCompletionFromGps(){
     if(completionBuildPending)return completionBuildPending;
     completionBuildPending=(async function(){
-      if(typeof _ensureShrineDataLoaded==='function')await _ensureShrineDataLoaded();
-      if(typeof _ensureAllParishDiocesesLoaded==='function')await _ensureAllParishDiocesesLoaded({silent:true});
-      if(!Array.isArray(SHRINES)||!SHRINES.length||!Array.isArray(PARISHES)||!PARISHES.length)
-        throw Error('성지·성당 목록을 모두 불러오지 못했습니다');
+      await _ensureShrineDataLoaded();
+      if(!Array.isArray(SHRINES)||!SHRINES.length)
+        throw Error('성지 목록을 불러오지 못했습니다');
+      // 성당 GPS 방문이 있을 때만 전국 성당 자료가 필요하다.
+      // 성지 기록만 있는 사용자도 성당 서버 오류 때문에 완료 생성이 중단되어서는 안 된다.
+      const parishVisits=_loadParishVisits();
+      const hasParishGps=Object.values(parishVisits).some(rec=>{
+        if(!rec||!Array.isArray(rec.visits))throw Error('성당 GPS 기록 구조 오류');
+        return rec.visits.some(v=>v&&String(v.method||'').toLowerCase()==='gps');
+      });
+      if(hasParishGps){
+        await _ensureAllParishDiocesesLoaded({silent:true});
+        if(!_areAllParishDiocesesReady()||!Array.isArray(PARISHES)||!PARISHES.length)
+          throw Error('GPS 인증 성당 목록을 모두 불러오지 못했습니다');
+      }
       _runStampMigrationV1604(false);
       if(_prepareStampMigrationV1604().changes.length)throw Error('스탬프 통합 검증 불일치');
       const result=_completionRebuildOnceRun(false);
