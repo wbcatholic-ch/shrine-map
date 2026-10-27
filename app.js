@@ -12898,46 +12898,32 @@ function _isMyLocFresh(maxAgeMs){
   }catch(e){}
   return false;
 }
+/* V1675: 현재 위치 표시에는 오래된 좌표를 성공으로 취급하지 않는다.
+   GPS 품질이 불충분하면 1.6km 같은 잘못된 거리를 확정하지 않는다. */
 function _getFreshGeoPosition(success, fail){
   if(!_GEO){ if(fail) fail({code:0}); return; }
   let done=false;
-  let fastStarted=Date.now ? Date.now() : new Date().getTime();
-  function warmAccurateLocation(){
-    try{
-      setTimeout(function(){
-        try{
-          _GEO.getCurrentPosition(function(pp){
-            try{ _setMyLoc(pp.coords.latitude, pp.coords.longitude); }catch(_e){}
-          },function(){},_GO_ACCURATE_FRESH);
-        }catch(_e){}
-      }, 1000);
-    }catch(_e){}
+  function acceptable(p){
+    if(!p||!p.coords) return false;
+    const c=p.coords, age=Date.now()-Number(p.timestamp);
+    return Number.isFinite(c.latitude)&&Number.isFinite(c.longitude)&&
+      Number.isFinite(c.accuracy)&&c.accuracy>=0&&c.accuracy<=150&&
+      Number.isFinite(age)&&age>=-5000&&age<=15000;
   }
   function ok(p){
     if(done) return;
+    if(!acceptable(p)){ fallback({code:2,message:'현재 위치의 정확도가 부족합니다.'}); return; }
     done=true;
-    success && success(p);
-    warmAccurateLocation();
+    if(success) success(p);
   }
-  function fallback(e1){
-    if(done) return;
-    try{
-      _GEO.getCurrentPosition(ok,function(e2){ if(done) return; done=true; fail && fail(e2 || e1); },_GO_ACCURATE_FRESH);
-    }catch(e){ if(!done){ done=true; fail && fail(e1 || e); } }
+  function bad(e){ if(done)return; done=true; if(fail)fail(e); }
+  function fallback(e){
+    if(done)return;
+    try{ _GEO.getCurrentPosition(ok,bad,{enableHighAccuracy:true,timeout:12000,maximumAge:0}); }
+    catch(_e){bad(e||_e);}
   }
-  try{
-    _GEO.getCurrentPosition(ok,function(e){
-      var elapsed=(Date.now ? Date.now() : new Date().getTime())-fastStarted;
-      if(elapsed < 300) setTimeout(function(){ fallback(e); }, 150);
-      else {
-        done=true;
-        if(fail) fail(e);
-        /* V8-1-14-621: 빠른 위치가 실패했을 때도 UI를 오래 잡아두지 않고,
-           정확 위치는 뒤에서 짧게 한 번 더 시도해 다음 위치 요청을 준비한다. */
-        warmAccurateLocation();
-      }
-    },_GO_FAST_FRESH);
-  }catch(e){ fallback(e); }
+  try{ _GEO.getCurrentPosition(ok,fallback,{enableHighAccuracy:true,timeout:6500,maximumAge:0}); }
+  catch(e){fallback(e);}
 }
 
 function _autoLocate(opts){
@@ -12960,7 +12946,6 @@ function _autoLocate(opts){
       }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
-  const usedCache=_useStoredLocationIfAny(apply,OAI_LOCATION_CACHE_MAX_MS);
   if(!_GEO) return;
   _refreshFreshLocationThen(apply,function(){});
 }
