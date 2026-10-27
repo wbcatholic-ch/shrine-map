@@ -22506,9 +22506,18 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       pilgrimageCourseFilterState.month='all';
       pilgrimageCourseFilterState.sort=pilgrimageCourseTab==='complete'?'completed':'updated';
       setView('list');
-      renderCourseList();
+      // V1666: 먼저 화면 전환을 그린 후 목록 집계 시작.
+      // 커버 클릭 이벤트 안에서 대량 완료/방문 비교로 첫 페인트를 막지 않는다.
       const panel=m.querySelector('.oai-pilgrimage-planner-panel');
       if(panel)panel.scrollTop=0;
+      const courseList=document.getElementById('oai-pilgrimage-course-list');
+      if(courseList)courseList.innerHTML='<div class="oai-pilgrimage-saved-empty">순례코스를 불러오는 중입니다.</div>';
+      const entryTab=pilgrimageCourseTab;
+      requestAnimationFrame(function(){setTimeout(function(){
+        // 그 사이 사용자가 닫거나 다른 탭으로 이동했으면 덮어쓰지 않는다.
+        if(!m.classList.contains('show')||plannerView!=='list'||pilgrimageCourseTab!==entryTab)return;
+        renderCourseList();
+      },0);});
       return;
     }
 
@@ -22695,7 +22704,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     // 정렬/필터 적용 전 전체 완료 목록으로 중복 관계를 판별한다. 원본은 전혀 변경하지 않는다.
     const completedGroups=pilgrimageCourseTab==='complete'?_completedCourseGroupsV1657(a.filter(c=>_courseCompletionList(c).length)):[];
     // 집계/표시가 같은 완료 그룹을 사용하도록 한 번만 구성한다.
-    const effectiveCompletedCount=pilgrimageCourseTab==='complete'?_effectiveCompletionCountV1659(a):0;
+    // 같은 목록 입력으로 중복 그룹을 재계산하지 않는다 (이전에는 2회 실행).
+    const effectiveCompletedCount=completedGroups.length;
     body.dataset.effectiveCompletedCount=String(effectiveCompletedCount);
     const groupByCourseId=new Map();
     completedGroups.forEach(group=>group.forEach(c=>groupByCourseId.set(String(c.id),group)));
