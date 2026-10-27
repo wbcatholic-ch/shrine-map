@@ -5342,14 +5342,25 @@ function _oaiGpsLinkedShrineForParish(parish,lat,lng){
   return shrine;
 }
 function _maybeAutoParishVisit(lat,lng){
-  if(!lat||!lng)return;let best=null,bestM=Infinity;
+  if(!Number.isFinite(Number(lat))||!Number.isFinite(Number(lng)))return;
+  // 현재 GPS 주변 교구가 아직 로드되지 않았다면 데이터 로드 후 같은 수신 좌표를 재검사한다.
+  // 성지와 주소가 같지만 독립인 성당 역시 일반 성당 GPS 대상으로 남아야 한다.
+  const nearCode=_nearestDioCode(Number(lat),Number(lng));
+  if(nearCode&&!_isParishDioceseReady(nearCode)){
+    _ensureParishDioceseDataLoaded(nearCode).then(function(){
+      if(_isParishDioceseReady(nearCode))_maybeAutoParishVisit(lat,lng);
+    }).catch(function(err){console.warn('[성당 GPS] 교구 데이터 로드 실패',err);});
+    return;
+  }
+  let best=null,bestM=Infinity;
   (PARISHES||[]).forEach(function(p){if(!p||p.diocese==='군종교구'||!p.lat||!p.lng||_oaiJointStampPair('parish',p))return;const m=calcDist(lat,lng,p.lat,p.lng)*1000;if(m<=OAI_PARISH_AUTO_VISIT_RADIUS_M&&m<bestM){best=p;bestM=m;}});
   if(!best)return;const myParish=_configuredMyParish(),isMyParish=_isSameParish(best,myParish),previousVisits=_parishVisits(best);
   // 내 본당 기록 제한이 켜져 있을 때만 과거 전체 방문기록으로 재등록을 제한한다.
   // 제한이 꺼졌거나 내 본당 지정이 해제되면 일반 성당처럼 당일 중복만 검사한다.
   const limited=(isMyParish&&_isMyParishAutoVisitEnabled())||_oaiIsRestrictedPlace('parish',best);
   if(limited&&!_oaiAllowRestrictedGpsVisit('parish',best,previousVisits))return;
-  if(previousVisits.some(function(v){return v.date===_todayISODate();}))return;
+  // 같은 날 수동 방문은 GPS 성공 시 승격해야 하므로 사전 중복 차단하지 않는다.
+  // _registerGpsPlaceVisit가 GPS 중복과 수동→GPS 승격을 단일 판정한다.
   const visitResult=_registerGpsPlaceVisit('parish',best,_todayISODate());
   if(!visitResult.added)return;
   if(_curInfoItem&&_curInfoItem.item===best)_renderInfoCardParishVisit(best);
