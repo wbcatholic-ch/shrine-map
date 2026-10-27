@@ -25837,9 +25837,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(!g||g.id!==id||!isOpen())return;
       const dx=x-g.x,dy=y-g.y,now=Date.now();
       if(Math.abs(dx)<48||Math.abs(dx)<Math.abs(dy)*1.25||now-lastSwitch<250)return;
-      // 왼쪽: 완료→계획, 오른쪽: 계획→완료. 끝 탭에서는 그대로 둔다.
-      const next=dx<0?'plan':'complete';
-      if(next===pilgrimageCourseTab)return;
+      // 두 탭은 양방향 순환: 어느 방향으로 밀어도 반대 탭으로 이동한다.
+      // 예: 완료 → 계획 → 완료 → 계획 (왼쪽/오른쪽 모두 가능).
+      const next=pilgrimageCourseTab==='complete'?'plan':'complete';
       lastSwitch=now;suppressClickUntil=now+550;
       pilgrimageCourseTab=next;
       rememberPilgrimageTab(next);
