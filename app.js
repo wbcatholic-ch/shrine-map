@@ -20466,7 +20466,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // Coalesce rapid DOM mutations into one badge refresh per animation frame.
   let pilgrimageBadgeRefreshPending=false;
   const pilgrimageBadgeObserver=new MutationObserver(function(){
-    if(pilgrimageBadgeRefreshPending)return;
+    // No ongoing pilgrimage means no return badge to update. Avoid work on
+    // unrelated DOM changes, including the intro and normal app navigation.
+    if(pilgrimageBadgeRefreshPending||!_readActiveFollowRaw())return;
     pilgrimageBadgeRefreshPending=true;
     requestAnimationFrame(function(){pilgrimageBadgeRefreshPending=false;_refreshWalkingCoverBadge();});
   });
