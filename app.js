@@ -21903,7 +21903,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const sortSel=document.getElementById('oai-pilgrimage-filter-sort');
     if(!yearSel||!monthSel||!sortSel) return;
     const years=[];
-    (Array.isArray(courses)?courses:[]).forEach(function(c){
+    if(pilgrimageCourseTab==='complete') (Array.isArray(courses)?courses:[]).forEach(function(c){
       _courseCompletionList(c).forEach(function(entry){
         const d=new Date(Number(entry.completedAt)), y=Number.isFinite(d.getTime())?d.getFullYear():0;
         if(y&&!years.includes(y)) years.push(y);
@@ -22711,28 +22711,32 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const a=loadCourses();
     _renderCourseFilters(a);
     if(!a.length){body.innerHTML='<div class="oai-pilgrimage-saved-empty">저장한 순례계획이 없습니다.<br><b>순례계획 세우기</b>로 첫 코스를 만들어 보세요.</div>';return;}
+    // V1668: 계획 탭은 완료 중복 판정 자체가 필요 없다. 완료 지문 계산·원본 점수화는 완료 탭에서만 수행한다.
+    const isCompleteTab=pilgrimageCourseTab==='complete';
     const matching=a.filter(function(c){return _courseMatchesFilters(c,pilgrimageCourseFilterState);});
-    // 정렬/필터 적용 전 전체 완료 목록으로 중복 관계를 판별한다. 원본은 전혀 변경하지 않는다.
-    const completedGroups=pilgrimageCourseTab==='complete'?_completedCourseGroupsV1657(a.filter(c=>_courseCompletionList(c).length)):[];
-    // 집계/표시가 같은 완료 그룹을 사용하도록 한 번만 구성한다.
-    // 같은 목록 입력으로 중복 그룹을 재계산하지 않는다 (이전에는 2회 실행).
-    const effectiveCompletedCount=completedGroups.length;
-    body.dataset.effectiveCompletedCount=String(effectiveCompletedCount);
-    const groupByCourseId=new Map();
-    completedGroups.forEach(group=>group.forEach(c=>groupByCourseId.set(String(c.id),group)));
-    const visibleGroups=[],seenGroups=new Set();
-    matching.forEach(c=>{
-      const group=groupByCourseId.get(String(c.id))||[c];
-      if(seenGroups.has(group))return;
-      seenGroups.add(group);
-      visibleGroups.push(group.filter(x=>matching.includes(x)));
-    });
+    let completedGroups=[], effectiveCompletedCount=0, display=matching;
     const primaryToGroup=new Map();
-    const display=visibleGroups.map(group=>{
-      const primary=_completionGroupPrimaryV1657(group);
-      primaryToGroup.set(String(primary.id),group);
-      return primary;
-    });
+    if(isCompleteTab){
+      completedGroups=_completedCourseGroupsV1657(a.filter(c=>_courseCompletionList(c).length>0));
+      effectiveCompletedCount=completedGroups.length;
+      const matchingIds=new Set(matching.map(c=>String(c.id)));
+      const groupByCourseId=new Map();
+      completedGroups.forEach(group=>group.forEach(c=>groupByCourseId.set(String(c.id),group)));
+      const visibleGroups=[],seenGroups=new Set();
+      matching.forEach(c=>{
+        const group=groupByCourseId.get(String(c.id))||[c];
+        if(seenGroups.has(group))return;
+        seenGroups.add(group);
+        const visible=group.filter(x=>matchingIds.has(String(x.id)));
+        if(visible.length)visibleGroups.push(visible);
+      });
+      display=visibleGroups.map(group=>{
+        const primary=_completionGroupPrimaryV1657(group);
+        primaryToGroup.set(String(primary.id),group);
+        return primary;
+      });
+    }
+    body.dataset.effectiveCompletedCount=String(effectiveCompletedCount);
     const filtered=_sortPilgrimageCourses(display,pilgrimageCourseFilterState.sort);
     // V1660: the completed count is derived from precisely the same grouped records
     // used by the visible list, not the raw number of saved courses. Filters are
