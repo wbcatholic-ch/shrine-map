@@ -11906,7 +11906,7 @@ function _clearPilgrimageRouteWaypointLabels(){
 }
 function _syncPilgrimageRouteWaypointLabels(){
   _clearPilgrimageRouteWaypointLabels();
-  if(!(window.__OAI_PILGRIMAGE_ROUTE_EDIT__||_pilgrimageCourseViewKind()==='place-info')||!_map||_activeTab!=='route'||!kakao||!kakao.maps||!kakao.maps.CustomOverlay)return;
+  if(!(window.__OAI_PILGRIMAGE_ROUTE_EDIT__||_pilgrimageCourseViewKind()==='place-info'||_pilgrimageCourseViewKind()==='complete')||!_map||_activeTab!=='route'||!kakao||!kakao.maps||!kakao.maps.CustomOverlay)return;
   OAI_ROUTE_WAYPOINT_CONFIGS.forEach(function(cfg){
     const point=_getRoutePointByRole(cfg.role);
     if(!point||!Number.isFinite(Number(point.lat))||!Number.isFinite(Number(point.lng))||!String(point.name||'').trim())return;
@@ -11951,8 +11951,9 @@ function _refreshRouteTmpMarkers(){
   _clearRouteTmpMarkers();
   _refreshExistingRoutePointMarkerImages();
   const routeResultShowing = !!_polyline;
-  const needStart = !!(_rS && !_rS.isRegionStart && (routeResultShowing || _shouldShowRouteStartMarker()) && (_mode!=='shrine' || _rS.idx<0 || !_markers[_rS.idx] || routeResultShowing));
-  const needEnd = !!(_rE && (_mode!=='shrine' || _rE.idx<0 || !_markers[_rE.idx]));
+  const completedMap=_pilgrimageCourseViewKind()==='complete';
+  const needStart = !!(_rS && !_rS.isRegionStart && (completedMap || routeResultShowing || _shouldShowRouteStartMarker()) && (_mode!=='shrine' || _rS.idx<0 || !_markers[_rS.idx] || routeResultShowing));
+  const needEnd = !!(_rE && (completedMap || _mode!=='shrine' || _rE.idx<0 || !_markers[_rE.idx]));
   if(needStart){
     _startTmpMkr = new _MM({
       position:new _LL(_rS.lat,_rS.lng),
@@ -11964,7 +11965,7 @@ function _refreshRouteTmpMarkers(){
   }
   OAI_ROUTE_WAYPOINT_CONFIGS.forEach(function(cfg){
     const point=_getRoutePointByRole(cfg.role);
-    const needMarker=!!(point && (_mode!=='shrine' || point.idx<0 || !_markers[point.idx] || routeResultShowing));
+    const needMarker=!!(point && (completedMap || _mode!=='shrine' || point.idx<0 || !_markers[point.idx] || routeResultShowing));
     if(!needMarker) return;
     const marker=new _MM({
       position:new _LL(point.lat,point.lng),
@@ -12004,7 +12005,7 @@ function _buildShrineMarkers(){
     position:new _LL(s.lat,s.lng),
     image:_mkrImg(_shrineMarkerColor(s),false),title:s.name
    });
-   const showNow=!_shouldDeferFullCategoryMarkers();
+   const showNow=_pilgrimageCourseViewKind()!=='complete'&&!_shouldDeferFullCategoryMarkers();
    if(showNow) mk.setMap(_map);
    mk.__oaiMapTarget=showNow?_map:null;
    mk.__oaiImgKey='shrine:'+_shrineMarkerColor(s)+':0';
@@ -12110,6 +12111,7 @@ function _restoreMapMarkers(opts){
 
 function _restoreAllCategoryMarkersForSelection(){
   if(!_map) return;
+  if(_pilgrimageCourseViewKind()==='complete'){_clearShrineMarkers();return;}
   if(_mode==='shrine'){
     _markers.forEach(m=>{
       if(!m||!m.marker) return;
@@ -14959,6 +14961,19 @@ function _pilgrimageMapMode(){
   if(window.__OAI_PILGRIMAGE_PLACE_PICK__===true || window.__OAI_PILGRIMAGE_MAP_PICK__)return 'place-pick';
   return 'route';
 }
+function _fitCompletedPilgrimageWaypoints(points){
+  if(_pilgrimageCourseViewKind()!=='complete'||!_map||!window.kakao||!kakao.maps)return false;
+  const valid=(points||[]).filter(p=>p&&_validGpsPair(p.lat,p.lng));
+  if(!valid.length)return false;
+  try{
+    _map.relayout();
+    if(valid.length===1){_map.setCenter(new _LL(Number(valid[0].lat),Number(valid[0].lng)));_map.setLevel(5);return true;}
+    const bounds=new kakao.maps.LatLngBounds();
+    valid.forEach(p=>bounds.extend(new _LL(Number(p.lat),Number(p.lng))));
+    _map.setBounds(bounds,64,38,64,38);
+    return true;
+  }catch(e){console.warn('[가톨릭길동무] 완료 코스 경유지 확대 실패',e);return false;}
+}
 function _fitPilgrimagePlaceInfoWaypoints(points){
   if(_pilgrimageCourseViewKind()!=='place-info'||!_map||!window.kakao||!kakao.maps)return false;
   const valid=(points||_getRouteWaypoints()).filter(p=>p&&_validGpsPair(p.lat,p.lng));
@@ -15054,7 +15069,12 @@ function _schedulePilgrimageRouteResult(label,focusPoint){
         }catch(e){
           console.warn('[가톨릭길동무] 순례코스 읽기 전용 경로 계산 실패',e);
         }
-        finally{running=false;}
+        finally{
+          running=false;
+          if(_pilgrimageCourseViewKind()==='complete'){
+            try{_setMapPanelCollapsed(true,'completed-route-ready');_fitCompletedPilgrimageWaypoints(_getRouteWaypoints());}catch(_e){}
+          }
+        }
         return;
       }
       await _calcRoute();
@@ -15089,6 +15109,7 @@ function _applyPilgrimageCourseViewReadOnlyState(){
   try{
     document.documentElement.classList.toggle('oai-pilgrimage-course-view-readonly',readOnly);
     document.documentElement.classList.toggle('oai-pilgrimage-course-route-view',on);
+    document.documentElement.classList.toggle('oai-pilgrimage-completed-map',_pilgrimageCourseViewKind()==='complete');
     document.documentElement.classList.toggle('oai-pilgrimage-course-active-route',_isActivePilgrimageCourseRouteView());
   }catch(_e){}
   try{
@@ -23865,7 +23886,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const modal=planner();
     _setPilgrimageLayerVisible(modal,false);
     plannerView='detail';
-    const meta=loadMeta(),plan=(readOnly&&Array.isArray(options.coursePlaces))
+    const completedCourse=readOnly&&_pilgrimageCourseViewKind()==='complete'&&currentCourseId
+      ?loadCourses().find(c=>String(c.id)===String(currentCourseId)):null;
+    const meta=completedCourse?{start:normalizePoint(completedCourse.start),end:normalizePoint(completedCourse.end)}:loadMeta(),plan=(readOnly&&Array.isArray(options.coursePlaces))
       ? options.coursePlaces.map(normalizePoint).filter(Boolean) : loadPlan();
     window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__=false;
     window.__OAI_PILGRIMAGE_ROUTE_EDIT__=(readOnly||normalRoute)
@@ -24027,6 +24050,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         const initial=_pilgrimageMapInitialPoint(entryRole);
         if(_map&&mapEl&&mapEl.clientWidth>0&&mapEl.clientHeight>0&&typeof _map.relayout==='function')_map.relayout();
         if(typeof _syncMapPanelUI==='function')_syncMapPanelUI(normalRoute?'route':'pilgrimage-route-edit');
+        if(readOnly&&_pilgrimageCourseViewKind()==='complete'){
+          _clearShrineMarkers();
+          _setMapPanelCollapsed(true,'completed-course-map');
+          _fitCompletedPilgrimageWaypoints(plan);
+        }
         if(readOnly&&_pilgrimageCourseViewKind()==='place-info'&&_map){
           const selected=options.focusPoint;
           const showSelected=function(){
@@ -24324,9 +24352,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     _applyPilgrimageCourseViewReadOnlyState();
   }
   function _pilgrimageCoursePoints(){
-    const meta=loadMeta();
     const completed=pilgrimageDetailMode==='complete' && currentCourseId
-      ? loadCourses().find(c=>c.id===currentCourseId) : null;
+      ? loadCourses().find(c=>String(c.id)===String(currentCourseId)) : null;
+    const meta=completed?{start:normalizePoint(completed.start),end:normalizePoint(completed.end)}:loadMeta();
     const list=completed && _courseCompletionList(completed).length
       ? _manualMerged(completed).map(x=>x.point) : loadPlan();
     const out=[];
@@ -24351,7 +24379,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     try{
       pilgrimageCourseReturnToPlaceInfo=fromPlaceInfo;
       window.__OAI_PILGRIMAGE_COURSE_VIEW__=true;
-      window.__OAI_PILGRIMAGE_COURSE_VIEW_KIND__=fromPlaceInfo?'place-info':fromCompleted?'complete':'active';
+      window.__OAI_PILGRIMAGE_COURSE_VIEW_KIND__=fromCompleted?'complete':fromPlaceInfo?'place-info':'active';
       window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__=true;
       _applyPilgrimageCourseViewReadOnlyState();
       _openUnifiedPilgrimageMapAdd('plan',{
