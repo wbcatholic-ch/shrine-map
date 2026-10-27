@@ -21582,15 +21582,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         });
       });
     });
-    const result=Array.from(dates).sort().filter(date=>{
-      try{return _dailyEligibleRemaining(date,_dailyUnregisteredEvents(date,_dailyGpsEvents(date),loadCourses()),loadCourses());}
-      catch(e){
-        // 장소 연결 실패/자료 미로딩은 '등록할 코스가 있다'는 증거가 아니다.
-        // 원본 스탬프/실패 장부는 보존하며, 데이터가 준비된 다음 다시 검증한다.
-        console.warn('[과거 GPS 후보 검증 보류: 버튼 미표시]',date,e);
-        return false;
-      }
-    });
+    // V1669: 이 함수는 GPS 방문 날짜만 수집한다. 코스 읽기 및 실제
+    // 미등록 판정은 _historyUnregisteredDates에서 날짜당 단 한 번 수행한다.
+    // 기존 구현은 날짜마다 loadCourses() 두 번과 GPS 미등록 검사를 중복 실행했다.
+    const result=Array.from(dates).sort();
     if(!includeToday)historyDatesCache=result;return result;
   }
   function _historyUnregisteredDates(includeToday){
@@ -21939,8 +21934,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(newBtn) newBtn.hidden=pilgrimageCourseTab!=='plan';
     const manualBtn=document.getElementById('oai-pilgrimage-manual-register-btn');
     if(manualBtn) manualBtn.hidden=pilgrimageCourseTab!=='complete';
+    // V1669: _dailyUpdateRetryButton() 역시 _historyUpdateButton()을 호출한다.
+    // 완료 버튼 검사를 한 렌더에서 두 번 수행하지 않는다.
+    const legacyRetry=document.getElementById('oai-pilgrimage-retry-btn');
+    if(legacyRetry)legacyRetry.hidden=true;
     _historyUpdateButton();
-    _dailyUpdateRetryButton();
   }
   function _courseMatchesFilters(c,filters){
     const f=filters||pilgrimageCourseFilterState||{};
