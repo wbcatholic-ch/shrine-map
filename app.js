@@ -21413,7 +21413,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     // 실패 복구는 기존 녹색 「미등록된 순례코스 등록하기」 버튼만 사용한다.
     const old=document.getElementById('oai-pilgrimage-retry-btn');
     if(old)old.hidden=true;
-    if(typeof _historyUpdateButton==='function')_historyUpdateButton();
+    if(typeof _scheduleHistoryButtonCheckV1671==='function')_scheduleHistoryButtonCheckV1671();
   }
   function _dailyMarkUnresolved(date,error){
     try{const state=_dailyState();state.failures[date]={failedAt:Date.now(),message:String(error&&error.message||error)};_saveDailyState(state);}
@@ -21600,6 +21600,36 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       }
       return true;
     });
+  }
+  // 순례 탭을 열거나 좌우 스와이프할 때 GPS 과거 이력 검사가
+  // 메인 스레드를 막지 않도록, 버튼 검사는 화면 렌더 후 한 번만 예약한다.
+  let _historyButtonCheckTimerV1671=null;
+  let _historyButtonIdleHandleV1671=null;
+  let _historyButtonCheckSerialV1671=0;
+  function _scheduleHistoryButtonCheckV1671(){
+    const serial=++_historyButtonCheckSerialV1671;
+    if(_historyButtonCheckTimerV1671!==null){clearTimeout(_historyButtonCheckTimerV1671);_historyButtonCheckTimerV1671=null;}
+    if(_historyButtonIdleHandleV1671!==null&&typeof window.cancelIdleCallback==='function'){
+      window.cancelIdleCallback(_historyButtonIdleHandleV1671);_historyButtonIdleHandleV1671=null;
+    }
+    const b=document.getElementById('oai-pilgrimage-history-btn');
+    if(pilgrimageCourseTab!=='complete'){
+      if(b)b.hidden=true;
+      return;
+    }
+    // 스와이프 / 연속 탭으로 이전 화면의 오래된 작업이 실행되지 않게 한다.
+    _historyButtonCheckTimerV1671=setTimeout(function(){
+      _historyButtonCheckTimerV1671=null;
+      if(serial!==_historyButtonCheckSerialV1671)return;
+      const run=function(){
+        _historyButtonIdleHandleV1671=null;
+        if(serial!==_historyButtonCheckSerialV1671||pilgrimageCourseTab!=='complete')return;
+        _historyUpdateButton();
+      };
+      if(typeof window.requestIdleCallback==='function'){
+        _historyButtonIdleHandleV1671=window.requestIdleCallback(run,{timeout:1800});
+      }else setTimeout(run,0);
+    },180);
   }
   function _historyUpdateButton(){
     const b=document.getElementById('oai-pilgrimage-history-btn');if(!b)return;
@@ -21938,7 +21968,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     // 완료 버튼 검사를 한 렌더에서 두 번 수행하지 않는다.
     const legacyRetry=document.getElementById('oai-pilgrimage-retry-btn');
     if(legacyRetry)legacyRetry.hidden=true;
-    _historyUpdateButton();
+    // 과거 GPS 전수조사는 목록·스와이프 렌더링 중 실행하지 않는다.
+    _scheduleHistoryButtonCheckV1671();
   }
   function _courseMatchesFilters(c,filters){
     const f=filters||pilgrimageCourseFilterState||{};
