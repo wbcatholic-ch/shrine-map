@@ -23411,9 +23411,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     setView('detail');
     renderDetail();
   }
-  function openCourse(id){
+  function openCourse(id,preloadedCourse){
     pilgrimageManualCreateMode=false;pilgrimageManualDraftCourse=null;
-    const c=loadCourses().find(x=>x.id===id);if(!c)return;
+    const c=preloadedCourse&&String(preloadedCourse.id)===String(id)?preloadedCourse:loadCourses().find(x=>String(x.id)===String(id));if(!c)return;
     const active=_activeFollowState();
     const isCurrentActive=!!(active&&active.courseId===String(id||''));
     // 진행 중인 코스는 어느 탭에서 열더라도 '과거 완료기록'보다
@@ -23428,7 +23428,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function _swipeSavedCourseDetail(step){
     const modal=planner(),detail=document.getElementById('oai-pilgrimage-detail-view');
     if(!modal||!modal.classList.contains('show')||plannerView!=='detail'||!detail||detail.hidden)return false;
-    if(!currentCourseId||pilgrimageManualCreateMode||pilgrimageManualDraftCourse||_activeFollowState())return false;
+    if(!currentCourseId||pilgrimageManualCreateMode||pilgrimageManualDraftCourse||_isActiveFollowCourse(currentCourseId))return false;
     if(document.querySelector('.oai-pilgrimage-point-modal.show, .oai-pilgrimage-save-modal.show, .oai-pilgrimage-delete-modal.show, .oai-pilgrimage-completion-modal.show'))return false;
     const courses=loadCourses(),current=courses.find(c=>String(c.id)===String(currentCourseId));
     if(!current)return false;
@@ -23447,16 +23447,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(index<0)return false; // Old grouped original / filtered-out course: do not jump unexpectedly.
     const next=ids[(index+step+ids.length)%ids.length];
     if(next===String(currentCourseId))return false;
-    openCourse(next);
+    openCourse(next,courses.find(c=>String(c.id)===next));
     return true;
   }
   (function(){
     let gesture=null,last=0;
-    const selector='#oai-pilgrimage-detail-view';
     function validTarget(target){
       const detail=document.getElementById('oai-pilgrimage-detail-view');
       return !!(detail&&!detail.hidden&&target&&detail.contains(target)&&
-        !(target.closest&&target.closest('button,a,input,textarea,select,[contenteditable],.swiper,.swiper-container,[data-plan-drag],[data-manual-drag],[data-oai-pilgrimage-drag]')));
+        !(target.closest&&target.closest('input,textarea,select,[contenteditable],.swiper,.swiper-container,[data-plan-drag],[data-manual-drag],[data-oai-pilgrimage-drag]')));
     }
     document.addEventListener('touchstart',function(e){
       gesture=null;
@@ -23469,7 +23468,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(!g||e.changedTouches.length!==1)return;
       const t=e.changedTouches[0];if(t.identifier!==g.id)return;
       const dx=t.clientX-g.x,dy=t.clientY-g.y,now=Date.now();
-      if(Math.abs(dx)<75||Math.abs(dx)<Math.abs(dy)*1.6||now-last<350)return;
+      if(Math.abs(dx)<48||Math.abs(dx)<Math.abs(dy)*1.25||now-last<250)return;
       if(_swipeSavedCourseDetail(dx<0?1:-1)){
         last=now;
         if(e.cancelable)e.preventDefault();
