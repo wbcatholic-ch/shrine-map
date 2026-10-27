@@ -16806,8 +16806,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   on('cc-2', 'click', function() { if (typeof startApp === 'function') startApp('parish'); });
   on('cc-3', 'click', function() { if (typeof startApp === 'function') startApp('shrine'); });
   on('cc-pilgrimage', 'click', function() {
-    if(typeof window.openOaiPilgrimagePlannerFromCover==='function')window.openOaiPilgrimagePlannerFromCover();
-    else if(typeof window.openOaiPilgrimagePlanner==='function')window.openOaiPilgrimagePlanner({publicCoverEntry:true});
+    // Other cover cards reveal the destination before expensive list work starts.
+    // Preserve publicCoverEntry so the close button still returns to the cover.
+    hideCoverAndRun(function(){
+      if(typeof window.openOaiPilgrimagePlannerFromCover==='function')window.openOaiPilgrimagePlannerFromCover();
+      else if(typeof window.openOaiPilgrimagePlanner==='function')window.openOaiPilgrimagePlanner({publicCoverEntry:true});
+    });
   });
   on('cc-4', 'click', function() { if (typeof startApp === 'function') startApp('retreat'); });
   on('cc-5', 'click', function() { hideCoverAndRun(function() { if (typeof openTrailView === 'function') openTrailView(); }); });
@@ -23419,6 +23423,60 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     setView('detail');
     renderDetail();
   }
+  // V1673: a single, read-only detail swipe for saved courses. Reuse the
+  // existing list DOM order; no re-grouping or GPS/stamp scanning per gesture.
+  function _swipeSavedCourseDetail(step){
+    const modal=planner(),detail=document.getElementById('oai-pilgrimage-detail-view');
+    if(!modal||!modal.classList.contains('show')||plannerView!=='detail'||!detail||detail.hidden)return false;
+    if(!currentCourseId||pilgrimageManualCreateMode||pilgrimageManualDraftCourse||_activeFollowState())return false;
+    if(document.querySelector('.oai-pilgrimage-point-modal.show, .oai-pilgrimage-save-modal.show, .oai-pilgrimage-delete-modal.show, .oai-pilgrimage-completion-modal.show'))return false;
+    const courses=loadCourses(),current=courses.find(c=>String(c.id)===String(currentCourseId));
+    if(!current)return false;
+    // Never abandon an edited plan. Completed details are read-only.
+    if(pilgrimageDetailMode!=='complete'){
+      const draft=draftSnapshot();
+      if(String(draft.name||'')!==String(current.name||'')||
+        _routeStructureSignature(draft)!==_routeStructureSignature(current))return false;
+    }
+    const list=document.getElementById('oai-pilgrimage-course-list');
+    if(!list)return false;
+    const ids=Array.from(list.querySelectorAll('.oai-pilgrimage-course-card > [data-course-open]'))
+      .map(el=>el.getAttribute('data-course-open')).filter(Boolean);
+    if(ids.length<2)return false;
+    const index=ids.indexOf(String(currentCourseId));
+    if(index<0)return false; // Old grouped original / filtered-out course: do not jump unexpectedly.
+    const next=ids[(index+step+ids.length)%ids.length];
+    if(next===String(currentCourseId))return false;
+    openCourse(next);
+    return true;
+  }
+  (function(){
+    let gesture=null,last=0;
+    const selector='#oai-pilgrimage-detail-view';
+    function validTarget(target){
+      const detail=document.getElementById('oai-pilgrimage-detail-view');
+      return !!(detail&&!detail.hidden&&target&&detail.contains(target)&&
+        !(target.closest&&target.closest('button,a,input,textarea,select,[contenteditable],.swiper,.swiper-container,[data-plan-drag],[data-manual-drag],[data-oai-pilgrimage-drag]')));
+    }
+    document.addEventListener('touchstart',function(e){
+      gesture=null;
+      if(e.touches.length!==1||!validTarget(e.target))return;
+      const t=e.touches[0];gesture={x:t.clientX,y:t.clientY,id:t.identifier};
+    },{capture:true,passive:true});
+    document.addEventListener('touchcancel',function(){gesture=null;},{capture:true,passive:true});
+    document.addEventListener('touchend',function(e){
+      const g=gesture;gesture=null;
+      if(!g||e.changedTouches.length!==1)return;
+      const t=e.changedTouches[0];if(t.identifier!==g.id)return;
+      const dx=t.clientX-g.x,dy=t.clientY-g.y,now=Date.now();
+      if(Math.abs(dx)<75||Math.abs(dx)<Math.abs(dy)*1.6||now-last<350)return;
+      if(_swipeSavedCourseDetail(dx<0?1:-1)){
+        last=now;
+        if(e.cancelable)e.preventDefault();
+      }
+    },{capture:true,passive:false});
+  })();
+
   function repeatCourse(id,confirmed,travelMode){
     const targetId=String(id||'');
     const active=_activeFollowState();
