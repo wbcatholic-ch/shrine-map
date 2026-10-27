@@ -20126,8 +20126,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!Array.isArray(a))return false;
     const serialized=JSON.stringify(a);
     const beforeCourses=localStorage.getItem(COURSES_KEY)||'[]';
+    // Unchanged course data needs neither a storage write nor a full list rebuild.
+    if(beforeCourses===serialized)return true;
     try{
-      if(localStorage.getItem(COURSES_KEY)!==serialized)localStorage.setItem(COURSES_KEY,serialized);
+      localStorage.setItem(COURSES_KEY,serialized);
       if(localStorage.getItem(COURSES_KEY)!==serialized)throw new Error('저장 후 재조회 불일치');
     }catch(e){console.warn('[순례코스 저장]',e);return false;}
     renderCourseList();
@@ -23226,19 +23228,22 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(courseMapButton)courseMapButton.hidden=!isCompletionView;
     const totalActions=document.querySelector('#oai-pilgrimage-detail-view .oai-pilgrimage-total-actions');
     if(totalActions)totalActions.classList.toggle('is-single-action',!isCompletionView);
+    // Calculate walking segment boundaries once per detail render, not once per place.
+    const detailWalkBounds=_walkSegmentBounds(m.walkSegment,list,m);
+    const detailWalkOrigin=detailWalkBounds&&m.walkSegment&&m.walkSegment.startRef?_walkPointIndex(m.walkSegment.startRef,list,m):-99;
+    const detailWalkDestination=detailWalkBounds&&m.walkSegment&&m.walkSegment.endRef?_walkPointIndex(m.walkSegment.endRef,list,m):-99;
     const body=document.getElementById('oai-pilgrimage-plan-list');
     if(body){
       if(!displayItems.length) body.innerHTML='<button type="button" class="oai-pilgrimage-empty oai-pilgrimage-empty-action" data-oai-pilgrimage-add="1"><b>＋ 먼저 순례 장소를 추가하세요</b><small>여기를 눌러 성지·성당을 검색합니다.</small></button>';
       else body.innerHTML=displayItems.map((row,i)=>{
         const item=row.point;
         const done=isCompletionView?!item.routeOnly:!!item.done;
-        const segBounds=_walkSegmentBounds(m.walkSegment,list,m);
-        const inWalkSegment=!!(segBounds&&row.gps&&i>=segBounds.start&&i<=segBounds.end);
+        const inWalkSegment=!!(detailWalkBounds&&row.gps&&i>=detailWalkBounds.start&&i<=detailWalkBounds.end);
         const cls='oai-pilgrimage-item'+(done?' is-done':'')+(isCompletionView&&!row.gps?' is-manual-completion':'')+(inWalkSegment?' is-planned-walk':'');
         const metric=item.routeOnly?'이동 경유지 · 스탬프 없음':isCompletionView?(!row.gps?'':_completionPlaceVisitLabel(item,displayedCompletion)):(done?'순례 완료':'GPS 확인 중…');
         const statusHtml=!item.routeOnly&&done&&(!isCompletionView||row.gps)?'<span class="oai-pilgrimage-waypoint-chip is-done">✓ 순례완료</span>':'';
-        const walkOrigin=!!(m.walkSegment&&m.walkSegment.startRef&&_walkPointIndex(m.walkSegment.startRef,list,m)===i);
-        const walkDestination=!!(m.walkSegment&&m.walkSegment.endRef&&_walkPointIndex(m.walkSegment.endRef,list,m)===i);
+        const walkOrigin=!!(m.walkSegment&&m.walkSegment.startRef&&detailWalkOrigin===i);
+        const walkDestination=!!(m.walkSegment&&m.walkSegment.endRef&&detailWalkDestination===i);
         const walkLabel=isCompletionView?'':(walkOrigin?'<span class="oai-pilgrimage-planned-walk-label">👣 도보 출발</span>':walkDestination?'<span class="oai-pilgrimage-planned-walk-label">👣 도보 도착</span>':inWalkSegment?'<span class="oai-pilgrimage-planned-walk-label">👣 도보 구간</span>':'');
         const nextLabel=(isActiveFollowForDetail&&i===next)?'<span class="oai-pilgrimage-next-label" aria-label="다음 순례지"><b>다음</b><b>순례지</b></span>':'';
         const holdAttr=isCompletionView?'':' data-plan-hold="'+i+'"';
