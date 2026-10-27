@@ -3093,7 +3093,25 @@ const OAI_SHARED_VISIT_JOURNAL_GROUPS=[
   {id:'g20190035',shrineSeq:'20190035',shrineName:'진무영 순교 성지',parishDiocese:'IC',parishName:'강화성당'},
   {id:'g20190011',shrineSeq:'20190011',shrineName:'죽림동 순교 성지 (교구 순교자 묘역)',parishDiocese:'CC',parishName:'주교좌 죽림동 예수성심'},
   {id:'g20190042',shrineSeq:'20190042',shrineName:'미리내 성지',parishDiocese:'SW',parishName:'미리내성당'},
-  {id:'g20190137',shrineSeq:'20190137',shrineName:'홍천 성당',parishDiocese:'CC',parishName:'홍천 원죄없이잉태되신복되신동정마리아'}
+  {id:'g20190137',shrineSeq:'20190137',shrineName:'홍천 성당',parishDiocese:'CC',parishName:'홍천 원죄없이잉태되신복되신동정마리아'},
+  {id:'g20190004',shrineName:'당고개(용산) 순교 성지',parishDiocese:'SE',parishName:'당고개순교성지',shrineSeq:'20190004'},
+  {id:'g20190006',shrineName:'새남터 순교 성지',parishDiocese:'SE',parishName:'순교성지새남터기념성당',shrineSeq:'20190006'},
+  {id:'g20190117',shrineName:'용산 성직자 묘지',parishDiocese:'SE',parishName:'용산성당',shrineSeq:'20190117'},
+  {id:'g20190009',shrineName:'왜고개 성지',parishDiocese:'ML',parishName:'천주교 국군중앙주교좌성당',shrineSeq:'20190009'},
+  {id:'g20190130',shrineName:'묵호 성당 (순교자 라 파트리치오 신부)',parishDiocese:'CC',parishName:'묵호 바다의 별 본당',shrineSeq:'20190130'},
+  {id:'g20190131',shrineName:'소양로 성당 (순교자 고 안토니오 신부)',parishDiocese:'CC',parishName:'소양로 성파트리치오',shrineSeq:'20190131'},
+  {id:'g20190015',shrineName:'양양 성지 (순교자 이광재 티모테오 신부)',parishDiocese:'CC',parishName:'양양 아기예수의성녀데레사',shrineSeq:'20190015'},
+  {id:'g20190133',shrineName:'임당동 성당 (순교자 심능석 스테파노)',parishDiocese:'CC',parishName:'임당동 성골롬바노',shrineSeq:'20190133'},
+  {id:'g20190016',shrineName:'갈매못 순교 성지',parishDiocese:'DJ',parishName:'갈매못순교성지성당',shrineSeq:'20190016'},
+  {id:'gname강경성당',shrineName:'강경 성당',parishDiocese:'DJ',parishName:'강경성당'},
+  {id:'g20190145',shrineName:'성체 순례 성지',parishDiocese:'IC',parishName:'김포성당',shrineSeq:'20190145'},
+  {id:'g20190178',shrineName:'수원 화성 순교 성지',parishDiocese:'SW',parishName:'북수동성당',shrineSeq:'20190178'},
+  {id:'g20190053',shrineName:'배론 성지',parishDiocese:'WJ',parishName:'배론성당',shrineSeq:'20190053'},
+  {id:'g20190152',shrineName:'성내동 성당(전 야고보 신부 순교 터)',parishDiocese:'WJ',parishName:'성내동성당',shrineSeq:'20190152'},
+  {id:'g20190056',shrineName:'마재 성가정 성지',parishDiocese:'UJ',parishName:'마재성지',shrineSeq:'20190056'},
+  {id:'g20190155',shrineName:'신암리 성당',parishDiocese:'UJ',parishName:'신암리성당',shrineSeq:'20190155'},
+  {id:'g20190058',shrineName:'양주 순교 성지',parishDiocese:'UJ',parishName:'양주순교성지',shrineSeq:'20190058'},
+  {id:'g20190157',shrineName:'행주 성당',parishDiocese:'UJ',parishName:'행주성당',shrineSeq:'20190157'}
 ];
 function _oaiVisitAddressKey(addr){
   let s=String(addr||'').trim();
@@ -20588,11 +20606,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     return true;
   }
-  // V1648: 과거 GPS 완료만 2026-10-26까지 정리한다. 현재 GPS 등록/수동 기록은 변경하지 않는다.
-  const HISTORICAL_CUTOFF_V1648='2026-10-26';
-  const HISTORICAL_DONE_KEY_V1648='oai_historical_shared_completion_v1648_once';
-  const HISTORICAL_BACKUP_KEY_V1648='oai_historical_shared_completion_v1648_original';
-  function _historicalPlaceKeyV1648(p){
+  // V1649: 과거 GPS 완료만 2026-10-26까지 정리한다. 현재 GPS 등록/수동 기록은 변경하지 않는다.
+  const HISTORICAL_CUTOFF_V1649='2026-10-26';
+  const HISTORICAL_DONE_KEY_V1649='oai_historical_shared_completion_v1649_once';
+  const HISTORICAL_BACKUP_KEY_V1649='oai_historical_shared_completion_v1649_original';
+  function _historicalPlaceKeyV1649(p){
     if(!p||!p.name)return '';
     const n=_normPilgrimageName(p.name), id=String(p.placeId||'');
     const groups=OAI_SHARED_VISIT_JOURNAL_GROUPS.filter(g=>{
@@ -20613,10 +20631,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(groups.length>1)return 'ambiguous:'+id+':'+n;
     return id?'id:'+id:'name:'+n+':'+Number(p.lat).toFixed(5)+':'+Number(p.lng).toFixed(5);
   }
-  function _historicalDedupPlacesV1648(places){
+  function _historicalDedupPlacesV1649(places){
     const seen=new Map(),result=[];
     for(const p of places){
-      const key=_historicalPlaceKeyV1648(p);
+      const key=_historicalPlaceKeyV1649(p);
       if(!key)throw Error('과거 완료 장소 식별 불가');
       const previous=seen.get(key);
       if(previous===undefined){seen.set(key,result.length);result.push(p);continue;}
@@ -20625,9 +20643,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     return result;
   }
-  function _historicalNormalizeDateV1648(e){return _dailyIso(Number(e&&e.completedAt));}
-  function _runHistoricalCompletionCleanupV1648(){
-    if(localStorage.getItem(HISTORICAL_DONE_KEY_V1648)!==null)return;
+  function _historicalNormalizeDateV1649(e){return _dailyIso(Number(e&&e.completedAt));}
+  function _runHistoricalCompletionCleanupV1649(){
+    if(localStorage.getItem(HISTORICAL_DONE_KEY_V1649)!==null)return;
     if(localStorage.getItem(STAMP_MIGRATION_KEY)===null)_runStampMigrationV1604(false);
     if(localStorage.getItem(STAMP_MIGRATION_KEY)===null)return;
     if(typeof oaiApplyingRestore!=='undefined'&&oaiApplyingRestore)return;
@@ -20641,15 +20659,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(!Array.isArray(c.completions))continue;
       const manual=_manualPointsFor(c.id);
       for(const e of c.completions){
-        const date=_historicalNormalizeDateV1648(e);
-        if(!date||date>HISTORICAL_CUTOFF_V1648||e.method!=='gps'||!Array.isArray(e.stampPlaces)||!e.stampPlaces.length)continue;
+        const date=_historicalNormalizeDateV1649(e);
+        if(!date||date>HISTORICAL_CUTOFF_V1649||e.method!=='gps'||!Array.isArray(e.stampPlaces)||!e.stampPlaces.length)continue;
         if(manual.length){skipped++;continue;}
-        const unique=_historicalDedupPlacesV1648(e.stampPlaces);
+        const unique=_historicalDedupPlacesV1649(e.stampPlaces);
         if(unique.length===e.stampPlaces.length)continue;
         e.stampPlaces=unique;e.placeCount=unique.length;changed++;
         // 자동 GPS 코스의 places만 동일한 실방문 배열인 경우 업데이트.
         if(c.autoGps&&Array.isArray(c.places)&&c.places.length>=unique.length&&
-          c.places.every(p=>e.stampPlaces.some(x=>_dailyCompletedPlaceMatches(p,x)||_historicalPlaceKeyV1648(p)===_historicalPlaceKeyV1648(x)))){
+          c.places.every(p=>e.stampPlaces.some(x=>_dailyCompletedPlaceMatches(p,x)||_historicalPlaceKeyV1649(p)===_historicalPlaceKeyV1649(x)))){
           c.places=unique.map(p=>Object.assign({},p));
         }
       }
@@ -20659,9 +20677,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     for(const c of next){
       if(!c||!Array.isArray(c.completions)||c.completions.length!==1||
          _manualPointsFor(c.id).length)continue;
-      const e=c.completions[0],date=_historicalNormalizeDateV1648(e);
-      if(!date||date>HISTORICAL_CUTOFF_V1648||e.method!=='gps'||!Array.isArray(e.stampPlaces)||!e.stampPlaces.length)continue;
-      const keys=e.stampPlaces.map(_historicalPlaceKeyV1648);
+      const e=c.completions[0],date=_historicalNormalizeDateV1649(e);
+      if(!date||date>HISTORICAL_CUTOFF_V1649||e.method!=='gps'||!Array.isArray(e.stampPlaces)||!e.stampPlaces.length)continue;
+      const keys=e.stampPlaces.map(_historicalPlaceKeyV1649);
       if(keys.some(k=>!k||k.startsWith('ambiguous:')))continue;
       const signature=date+'|'+JSON.stringify(keys.slice().sort());
       const previous=seen.get(signature);
@@ -20678,9 +20696,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const filtered=next.filter(c=>!removeIds.has(String(c.id)));
     // 원본을 불변 백업으로 먼저 보존한다.
     if(changed||removed){
-      if(localStorage.getItem(HISTORICAL_BACKUP_KEY_V1648)===null){
-        localStorage.setItem(HISTORICAL_BACKUP_KEY_V1648,original);
-        if(localStorage.getItem(HISTORICAL_BACKUP_KEY_V1648)!==original)throw Error('과거 원본 백업 실패');
+      if(localStorage.getItem(HISTORICAL_BACKUP_KEY_V1649)===null){
+        localStorage.setItem(HISTORICAL_BACKUP_KEY_V1649,original);
+        if(localStorage.getItem(HISTORICAL_BACKUP_KEY_V1649)!==original)throw Error('과거 원본 백업 실패');
       }
       if(localStorage.getItem(COURSES_KEY)!==original)throw Error('검사 중 원본 변경');
       const serialized=JSON.stringify(filtered);
@@ -20689,8 +20707,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(localStorage.getItem(COURSES_KEY)!==serialized)throw Error('정리 결과 저장 실패');
       }catch(err){if(localStorage.getItem(COURSES_KEY)===serialized)localStorage.setItem(COURSES_KEY,original);throw err;}
     }
-    localStorage.setItem(HISTORICAL_DONE_KEY_V1648,JSON.stringify({cutoff:HISTORICAL_CUTOFF_V1648,changed,removed,skipped,at:Date.now()}));
-    if(localStorage.getItem(HISTORICAL_DONE_KEY_V1648)===null)throw Error('정리 마커 저장 실패');
+    localStorage.setItem(HISTORICAL_DONE_KEY_V1649,JSON.stringify({cutoff:HISTORICAL_CUTOFF_V1649,changed,removed,skipped,at:Date.now()}));
+    if(localStorage.getItem(HISTORICAL_DONE_KEY_V1649)===null)throw Error('정리 마커 저장 실패');
     if(changed||removed)renderCourseList();
   }
   // 이미 완료한 코스의 같은 날짜·같은 장소만 제외한다. 다른 코스의 미등록 성지는 남긴다.
@@ -25207,7 +25225,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // 자동 등록 초기화는 목록 렌더링·개발자 패널 표시 실패와 독립적으로 실행한다.
   // 최초 실행: 카탈로그 로드 → 스탬프 통일 → GPS 날짜별 완료 생성 → 화면 갱신.
   // 실행 실패 시 계획·완료·스탬프 원본을 유지한다. 오류를 빈 완료 목록으로 간주하지 않는다.
-  _rebuildCompletionFromGps().then(function(){try{_runHistoricalCompletionCleanupV1648();}catch(e){console.warn("[과거 완료 안전 정리 보류]",e);}renderCourseList();setTimeout(_dailyRegisterPendingDate,250);setTimeout(function(){_scheduleCompletionGpsAudit(true);},1200);})
+  _rebuildCompletionFromGps().then(function(){try{_runHistoricalCompletionCleanupV1649();}catch(e){console.warn("[과거 완료 안전 정리 보류]",e);}renderCourseList();setTimeout(_dailyRegisterPendingDate,250);setTimeout(function(){_scheduleCompletionGpsAudit(true);},1200);})
     .catch(function(err){console.error('[최초 GPS 완료 생성 보류]',err);});
   refreshDev(); renderCourseList();
 })();
