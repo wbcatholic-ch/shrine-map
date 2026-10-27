@@ -20474,7 +20474,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   });
   const pilgrimageBadgePlanner=planner();
   if(pilgrimageBadgePlanner)pilgrimageBadgeObserver.observe(pilgrimageBadgePlanner,{attributes:true,attributeFilter:['class','style','aria-hidden']});
-  pilgrimageBadgeObserver.observe(document.body,{childList:true});
+  // Do not observe the entire document: unrelated cover/intro DOM changes
+  // must never trigger pilgrimage badge recalculation. Planner state is observed above.
   // Only reconcile a live car pilgrimage; do not poll course storage on idle screens.
   setInterval(function(){if(document.hidden||!_readActiveFollowRaw())return;const active=_activeFollowState();if(active&&active.travelMode==='car'){_reconcileWalkingNativeFix();_refreshWalkingCoverBadge();}},5000);
   function _walkingNativeCoursePoints(active){
