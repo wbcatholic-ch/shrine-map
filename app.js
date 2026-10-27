@@ -25774,10 +25774,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
   },true);
   document.addEventListener('keydown',e=>{if(e.key==='Enter'&&saveModal()&&saveModal().classList.contains('show')&&e.target&&e.target.id==='oai-pilgrimage-save-name'){e.preventDefault();confirmSave();}},true);
+  // 순례완료 ↔ 순례계획: 목록 영역의 한 손가락 가로 스와이프만 처리한다.
+  // 터치/포인터 이벤트를 동시에 중복 등록하지 않는다.
   (function(){
     let gesture=null, lastSwitch=0, suppressClickUntil=0;
-    // app.js is loaded before the planner DOM in index.html. Resolve nodes at event time,
-    // not during script evaluation, when both elements are still absent.
     function isOpen(){
       const modal=document.getElementById('oai-pilgrimage-planner-modal');
       const list=document.getElementById('oai-pilgrimage-list-view');
@@ -25786,30 +25786,30 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         &&document.getElementById('oai-pilgrimage-follow-view')?.hidden);
     }
     function eligible(target){
-      const modal=document.getElementById('oai-pilgrimage-planner-modal');
-      const panel=modal&&modal.querySelector('.oai-pilgrimage-planner-panel');
-      return !!(target&&panel&&panel.contains(target)
-        &&!(target.closest&&target.closest('input,select,textarea,a,[data-plan-drag],[data-manual-drag],[data-oai-pilgrimage-drag],.oai-pilgrimage-planner-panel > header')));
+      const list=document.getElementById('oai-pilgrimage-list-view');
+      return !!(target&&list&&list.contains(target)
+        &&!(target.closest&&target.closest('input,select,textarea,a,[data-plan-drag],[data-manual-drag],[data-oai-pilgrimage-drag]')));
     }
     function start(target,x,y,id){
       gesture=null;
-      if(isOpen()&&eligible(target))gesture={x,y,lastX:x,lastY:y,id,axis:null};
+      if(isOpen()&&eligible(target))gesture={x:x,y:y,id:id,axis:null};
     }
     function move(x,y,id,event){
       const g=gesture;if(!g||g.id!==id)return;
-      g.lastX=x;g.lastY=y;
       const dx=x-g.x,dy=y-g.y;
       if(!g.axis&&(Math.abs(dx)>12||Math.abs(dy)>12))g.axis=Math.abs(dx)>Math.abs(dy)*1.25?'horizontal':'vertical';
+      if(g.axis==='vertical'){gesture=null;return;}
       if(g.axis==='horizontal'&&event&&event.cancelable)event.preventDefault();
-      if(g.axis==='vertical')gesture=null;
     }
     function end(x,y,id){
       const g=gesture;gesture=null;
       if(!g||g.id!==id||!isOpen())return;
       const dx=x-g.x,dy=y-g.y,now=Date.now();
       if(Math.abs(dx)<48||Math.abs(dx)<Math.abs(dy)*1.25||now-lastSwitch<250)return;
+      // 왼쪽: 완료→계획, 오른쪽: 계획→완료. 끝 탭에서는 그대로 둔다.
+      const next=dx<0?'plan':'complete';
+      if(next===pilgrimageCourseTab)return;
       lastSwitch=now;suppressClickUntil=now+550;
-      const next=pilgrimageCourseTab==='complete'?'plan':'complete';
       pilgrimageCourseTab=next;
       rememberPilgrimageTab(next);
       pilgrimageCourseFilterState.year='all';pilgrimageCourseFilterState.month='all';
@@ -25821,6 +25821,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         e.preventDefault();e.stopImmediatePropagation();suppressClickUntil=0;
       }
     },true);
+    // Android WebView의 터치 이벤트를 우선 사용한다. 포인터 이벤트는 터치 미지원 환경의 대체 수단.
     if('ontouchstart' in window || navigator.maxTouchPoints>0){
       document.addEventListener('touchstart',function(e){
         if(e.touches.length!==1){gesture=null;return;}
