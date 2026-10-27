@@ -21684,8 +21684,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     try{
       if(typeof _ensureShrineDataLoaded==='function')await _ensureShrineDataLoaded();
       if(typeof _ensureAllParishDiocesesLoaded==='function')await _ensureAllParishDiocesesLoaded({silent:true});
-      const events=_dailyUnregisteredEvents(date,_dailyGpsEvents(date),loadCourses());
-      if(!_dailyEligibleRemaining(date,events,loadCourses())){
+      // Reuse one immutable snapshot of the saved courses for this registration preview.
+      // No registration or stamp decision rules are changed.
+      const previewCourses=loadCourses();
+      const events=_dailyUnregisteredEvents(date,_dailyGpsEvents(date),previewCourses);
+      if(!_dailyEligibleRemaining(date,events,previewCourses)){
         // 실시간 GPS 스탬프 변경 등으로 후보가 유효하지 않으면 빈 등록창을 띄우지 않는다.
         historyDatesCache=null;historyDatesSignature=null;_historyClose();_historyUpdateButton();return;
       }
