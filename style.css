@@ -10568,3 +10568,9 @@ html.oai-pilgrimage-course-view-readonly #sheet-route > .route-sheet-x{display:i
 /* V1689: completed-course map only. Keep the shared shrine map close control; hide the duplicate route close. */
 html.oai-pilgrimage-completed-map #sheet-route .route-sheet-x{display:none!important;}
 html.oai-pilgrimage-completed-map #map-category-close-btn{display:flex!important;}
+
+/* V1692: nonblocking progress for pilgrimage course directions only */
+#oai-course-route-loading{position:fixed;top:calc(env(safe-area-inset-top,0px) + 74px);left:50%;transform:translateX(-50%);z-index:2200;display:flex;align-items:center;gap:9px;padding:11px 15px;border-radius:24px;background:rgba(28,39,57,.92);color:white;font-size:13px;font-weight:650;box-shadow:0 3px 15px rgba(0,0,0,.2);pointer-events:none;white-space:nowrap}
+.oai-course-route-spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:oaiCourseRouteSpin .8s linear infinite}
+@keyframes oaiCourseRouteSpin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.oai-course-route-spinner{animation:none;border-top-color:#fff}}
