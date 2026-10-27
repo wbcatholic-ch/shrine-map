@@ -12898,7 +12898,7 @@ function _isMyLocFresh(maxAgeMs){
   }catch(e){}
   return false;
 }
-/* V1675: 현재 위치 표시에는 오래된 좌표를 성공으로 취급하지 않는다.
+/* V1676: 현재 위치 표시에는 오래된 좌표를 성공으로 취급하지 않는다.
    GPS 품질이 불충분하면 1.6km 같은 잘못된 거리를 확정하지 않는다. */
 function _getFreshGeoPosition(success, fail){
   if(!_GEO){ if(fail) fail({code:0}); return; }
@@ -20457,7 +20457,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   document.addEventListener('visibilitychange',function(){if(!document.hidden)_refreshWalkingCoverBadge();});
   window.addEventListener('pageshow',function(){_refreshWalkingCoverBadge();setTimeout(window._oaiOpenCarFromNotification,650);});
   // Watch only meaningful navigation surfaces; no GPS or background polling added.
-  const pilgrimageBadgeObserver=new MutationObserver(_refreshWalkingCoverBadge);
+  // Coalesce rapid DOM mutations into one badge refresh per animation frame.
+  let pilgrimageBadgeRefreshPending=false;
+  const pilgrimageBadgeObserver=new MutationObserver(function(){
+    if(pilgrimageBadgeRefreshPending)return;
+    pilgrimageBadgeRefreshPending=true;
+    requestAnimationFrame(function(){pilgrimageBadgeRefreshPending=false;_refreshWalkingCoverBadge();});
+  });
   const pilgrimageBadgePlanner=planner();
   if(pilgrimageBadgePlanner)pilgrimageBadgeObserver.observe(pilgrimageBadgePlanner,{attributes:true,attributeFilter:['class','style','aria-hidden']});
   pilgrimageBadgeObserver.observe(document.body,{childList:true});
@@ -23182,8 +23188,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function renderDetail(){
     const list=loadPlan(),m=loadMeta(),isCompletionView=pilgrimageDetailMode==='complete',isManualCreate=pilgrimageManualCreateMode,next=isCompletionView?-1:nextIndex(list);
-    const gpsAutoCompletion=isCompletionView&&!!loadCourses().find(c=>c.id===currentCourseId&&c.autoGps===true);
-    const manualCourse=isCompletionView&&currentCourseId?loadCourses().find(c=>c.id===currentCourseId):null;
+    // One storage read/normalization per detail render, shared by its controls.
+    const savedDetailCourse=currentCourseId?loadCourses().find(c=>String(c.id)===String(currentCourseId)):null;
+    const gpsAutoCompletion=isCompletionView&&!!(savedDetailCourse&&savedDetailCourse.autoGps===true);
+    const manualCourse=isCompletionView?savedDetailCourse:null;
     const gpsProtected=!!(manualCourse&&_courseHasGpsLockedCompletion(manualCourse));
     const displayedCompletion=isCompletionView&&manualCourse?_courseCompletionList(manualCourse)[0]:null;
     const canSupplementCompletion=!!(isCompletionView&&manualCourse&&_courseCompletionList(manualCourse).length);
@@ -23306,7 +23314,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const actions=document.querySelector('.oai-pilgrimage-detail-view .oai-pilgrimage-detail-actions');
     const reverseButton=document.querySelector('#oai-pilgrimage-detail-view [data-oai-pilgrimage-reverse]');
     if(reverseButton){
-      const savedCourse=currentCourseId&&loadCourses().find(c=>String(c.id)===String(currentCourseId));
+      const savedCourse=savedDetailCourse;
       const canReverse=!isCompletionView&&!isManualCreate&&!isActiveFollowForDetail&&list.length>0&&!(savedCourse&&_courseCompletionList(savedCourse).length);
       reverseButton.hidden=!canReverse;
       reverseButton.style.display=canReverse?'':'none';
