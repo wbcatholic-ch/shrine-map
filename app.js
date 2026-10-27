@@ -2673,7 +2673,8 @@ function _bindShrineVisitFloatingListButtonWatchers(){
     });
     window.__OAI_SHRINE_VISIT_FLOATING_MO__=mo;
   }catch(_e){}
-  setInterval(function(){ try{ if(_mode==='shrine') _updateShrineVisitFloatingListButtonUI(); }catch(_e){} }, 350);
+  // Navigation/focus/mutation watchers above refresh this UI when it changes.
+  // Avoid continuous DOM reads/writes while the cover and pilgrimage screens are idle.
 }
 try{ _bindShrineVisitFloatingListButtonWatchers(); }catch(_e){}
 
@@ -5379,7 +5380,10 @@ function _showParishAutoVisitNotice(place){
   modal.classList.add('show');
   modal.setAttribute('aria-hidden','false');
 }
-try{setInterval(function(){_updateParishVisitButton();},400);}catch(_e){}
+try{
+  ['click','focusin','focusout','change'].forEach(function(ev){document.addEventListener(ev,function(){requestAnimationFrame(_updateParishVisitButton);},true);});
+  ['pageshow','resize'].forEach(function(ev){window.addEventListener(ev,_updateParishVisitButton,{passive:true});});
+}catch(_e){}
 try{document.addEventListener('change',function(e){const t=e.target;if(!t||!t.matches||!t.matches('#parish-visit-book [data-pv-select]'))return;const kind=t.getAttribute('data-pv-select'),value=t.value;if(kind==='sort')_parishVisitSort=value==='oldest'?'oldest':'recent';else if(kind==='dio'){_parishVisitDio=value||'all';_parishUnvisitedLimit=80;}_renderParishVisitBook();});}catch(_e){}
 try{window.addEventListener('oai-short-background-return',function(){setTimeout(function(){_updateParishVisitButton();},120);try{if(typeof window._oaiValidateActivePilgrimageFollow==='function')window._oaiValidateActivePilgrimageFollow();}catch(_e){}},{passive:true});}catch(_e){}
 
@@ -20469,7 +20473,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   const pilgrimageBadgePlanner=planner();
   if(pilgrimageBadgePlanner)pilgrimageBadgeObserver.observe(pilgrimageBadgePlanner,{attributes:true,attributeFilter:['class','style','aria-hidden']});
   pilgrimageBadgeObserver.observe(document.body,{childList:true});
-  setInterval(function(){if(!document.hidden){const active=_activeFollowState();if(active&&active.travelMode==='car')_reconcileWalkingNativeFix();_refreshWalkingCoverBadge();}},5000);
+  // Only reconcile a live car pilgrimage; do not poll course storage on idle screens.
+  setInterval(function(){if(document.hidden)return;const active=_activeFollowState();if(active&&active.travelMode==='car'){_reconcileWalkingNativeFix();_refreshWalkingCoverBadge();}},5000);
   function _walkingNativeCoursePoints(active){
     const places=Array.isArray(active&&active.course&&active.course.places)?active.course.places:[];
     return JSON.stringify(places.filter(x=>x&&!x.routeOnly&&_validGpsPair(x.lat,x.lng)).map(x=>({
