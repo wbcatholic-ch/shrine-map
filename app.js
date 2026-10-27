@@ -21590,8 +21590,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const result=Array.from(dates).sort();
     if(!includeToday)historyDatesCache=result;return result;
   }
-  function _historyUnregisteredDates(includeToday){
-    const state=_dailyState(),courses=loadCourses();
+  function _historyUnregisteredDates(includeToday,preloadedCourses){
+    const state=_dailyState(),courses=preloadedCourses||loadCourses();
     return _historyCandidateDates(includeToday).filter(date=>{
       // 날짜가 아닌 실제 GPS 장소별로 미등록 여부를 확인한다.
       if(!_dailyEligibleRemaining(date,_dailyUnregisteredEvents(date,_dailyGpsEvents(date),courses),courses))return false;
@@ -21642,9 +21642,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     // GPS 자동 등록이 실패한 날짜는 후보 자료 로딩이 늦더라도 복구 버튼을 숨기지 않는다.
     // GPS 원본이 없거나 이미 완료된 날짜는 버튼 활성화 대상이 아니다.
     let failurePending=false;
+    let courses=null;
     try{
       const state=_dailyState();
-      const courses=loadCourses();
+      courses=loadCourses();
       // A GPS stamp alone is not an unregistered course. Only a remaining
       // unregistered shrine can make a historical failure actionable.
       failurePending=Object.keys(state.failures||{}).some(date=>{
@@ -21653,7 +21654,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       });
     }catch(e){console.warn('[미등록 코스 실패 상태 검증 보류]',e);}
     let remaining=[];
-    try{remaining=_historyUnregisteredDates();}
+    try{remaining=_historyUnregisteredDates(false,courses);}
     catch(e){console.warn('[미등록 GPS 버튼 확인 보류]',e);}
     b.hidden=!failurePending&&remaining.length===0;
     b.textContent='미등록된 순례코스 등록하기';
