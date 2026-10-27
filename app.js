@@ -20476,7 +20476,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   if(pilgrimageBadgePlanner)pilgrimageBadgeObserver.observe(pilgrimageBadgePlanner,{attributes:true,attributeFilter:['class','style','aria-hidden']});
   pilgrimageBadgeObserver.observe(document.body,{childList:true});
   // Only reconcile a live car pilgrimage; do not poll course storage on idle screens.
-  setInterval(function(){if(document.hidden)return;const active=_activeFollowState();if(active&&active.travelMode==='car'){_reconcileWalkingNativeFix();_refreshWalkingCoverBadge();}},5000);
+  setInterval(function(){if(document.hidden||!_readActiveFollowRaw())return;const active=_activeFollowState();if(active&&active.travelMode==='car'){_reconcileWalkingNativeFix();_refreshWalkingCoverBadge();}},5000);
   function _walkingNativeCoursePoints(active){
     const places=Array.isArray(active&&active.course&&active.course.places)?active.course.places:[];
     return JSON.stringify(places.filter(x=>x&&!x.routeOnly&&_validGpsPair(x.lat,x.lng)).map(x=>({
