@@ -14091,6 +14091,14 @@ const OAI_SCROLL_AFFORDANCE_SELECTOR=[
 function _oaiScrollAffordanceVisible(el){
   try{
     if(!el||!el.isConnected)return false;
+    /* 순례코스 모달이 열리면 그 내부의 실제 스크롤 패널 하나만 안내한다.
+       공통 안내막대는 body에 붙는 fixed 요소라 뒤쪽 화면의 막대가
+       모달 위로 비쳐 보이는 현상을 차단한다. */
+    const pilgrimageModal=document.getElementById('oai-pilgrimage-planner-modal');
+    if(pilgrimageModal&&pilgrimageModal.classList.contains('show')){
+      if(!el.classList||!el.classList.contains('oai-pilgrimage-planner-panel')||
+         !pilgrimageModal.contains(el))return false;
+    }
     const routeQuick=$('route-quick-modal');
     if(routeQuick && routeQuick.classList.contains('show'))return false;
     const openVisitDetail=document.querySelector('.shrine-visit-detail-view.show');
