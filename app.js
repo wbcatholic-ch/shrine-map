@@ -1945,13 +1945,23 @@ function _isVisitDate(date){
   const d=new Date(Date.UTC(y,mo-1,day));
   return y>=1900&&d.getUTCFullYear()===y&&d.getUTCMonth()===mo-1&&d.getUTCDate()===day;
 }
-/* 성지·성당 공통: 동일 날짜 방문은 저장소 종류와 무관하게 1회만 추가한다.
-   과거 기록은 이 함수에서 수정하거나 제거하지 않는다. */
+/* 신규 성지·성당 저장의 유일한 날짜별 우선순위: GPS > 수동.
+   같은 날 수동 뒤에 실제 GPS 인증이 오면 방문 객체의 부가정보를 보존한 채 GPS로 승격한다.
+   기존 GPS나 같은 날 수동의 중복 등록은 차단한다. 과거 전체 기록 일괄 정리는 별도 절차다. */
 function _appendVisitOnce(record,date,method,measuredAt){
   if(!record||!_isVisitDate(date))return false;
   if(!Array.isArray(record.visits))record.visits=[];
-  if(_hasVisitDate(record.visits,date))return false;
-  record.visits.push(_newVisitEntry(date,method,measuredAt));
+  const gps=String(method||'').toLowerCase()==='gps';
+  const existing=record.visits.find(function(v){return _visitDateOf(v)===String(date);});
+  if(existing!==undefined){
+    if(!gps||String(existing&&existing.method||'manual').toLowerCase()==='gps')return false;
+    // 기존 사용자 입력 및 부가 필드 보존. GPS 관측값으로 인증 방법·시각만 갱신한다.
+    const upgraded=Object.assign({},typeof existing==='object'&&existing!==null?existing:{date:String(date)});
+    upgraded.date=String(date);upgraded.method='gps';
+    upgraded.savedAt=_newVisitEntry(date,'gps',measuredAt).savedAt;
+    delete upgraded.source;delete upgraded.sourceKind;delete upgraded.sourcePlaceId;
+    record.visits[record.visits.indexOf(existing)]=upgraded;
+  }else record.visits.push(_newVisitEntry(date,method,measuredAt));
   record.visits.sort(function(a,b){return _compareShrineVisits(_normalizeVisitEntry(a),_normalizeVisitEntry(b));});
   return true;
 }
@@ -4568,10 +4578,9 @@ function _renderInfoCardShrineVisit(item){
 /* V1304: 성지·성당 공동 스탬프는 사진/메모 주소 공유와 독립된 명시적 쌍만 사용한다.
    미리내/배론은 별개의 장소이며 기존 성지 GPS 다중 좌표를 변경하지 않는다. */
 function _oaiJointStampPairs(){
-  return OAI_SHARED_VISIT_JOURNAL_GROUPS.filter(function(g){
-    return !((g.shrineSeq==='20190042'&&g.parishName==='미리내성당')||
-             (g.parishName==='배론성당'));
-  });
+  // 60쌍 단일 명부: 스탬프 연결에서 특정 장소를 별도 제외하지 않는다.
+  // 주소가 같아도 독립된 두 장소는 _oaiIsSeparateJournalPair에서 분리한다.
+  return OAI_SHARED_VISIT_JOURNAL_GROUPS;
 }
 function _oaiJointStampPair(kind,item){
   if(!item)return null;
@@ -4702,21 +4711,24 @@ function _registerGpsPlaceVisit(kind,item,date,measuredAt){
     if(!item)return {added:false,already:false,kind:String(kind||'')};
     const visitDate=String(date||_todayISODate());
     if(kind==='shrine'){
-      const already=_hasShrineVisitOnDate(item,visitDate);
-      const added=!already&&!!_addShrineVisit(item,visitDate,'gps',measuredAt);
-      // 이미 저장된 수동 스탬프는 GPS 인증으로 간주하지 않고 공통 성당도 생성하지 않는다.
-      if(added||(already&&_getShrineVisitDates(item).some(function(v){return v&&v.date===visitDate&&String(v.method||'').toLowerCase()==='gps';})))_oaiJointStampCounterpart('shrine',item,visitDate);
+      const before=_getShrineVisitDates(item).find(function(v){return v.date===visitDate;});
+      const already=!!before;
+      const upgraded=already&&String(before.method||'manual').toLowerCase()!=='gps';
+      const added=(!already||upgraded)&&!!_addShrineVisit(item,visitDate,'gps',measuredAt);
+      if(added||(already&&!upgraded))_oaiJointStampCounterpart('shrine',item,visitDate);
       if(added){_oaiNotifyActiveCourseGpsVisit();_oaiNotifyNewGpsStamp('shrine',item,visitDate);}
-      return {added:added,already:already,kind:'shrine',item:item};
+      return {added:added,upgraded:upgraded&&added,already:already,kind:'shrine',item:item};
     }
     if(kind==='parish'){
       // 공통화 성당은 독립 GPS 대상이 아니다. 성지 GPS 저장 성공 후 성당 스탬프만 보완한다.
       if(_oaiJointStampPair('parish',item))return {added:false,already:_hasVisitDate(_parishVisits(item),visitDate),skippedSharedParish:true,kind:'parish',item:item};
-      const already=_hasVisitDate(_parishVisits(item),visitDate);
-      const added=!already&&!!_addParishVisit(item,visitDate,'gps',measuredAt);
+      const before=_parishVisits(item).find(function(v){return v.date===visitDate;});
+      const already=!!before;
+      const upgraded=already&&String(before.method||'manual').toLowerCase()!=='gps';
+      const added=(!already||upgraded)&&!!_addParishVisit(item,visitDate,'gps',measuredAt);
       if(already||added)_oaiJointStampCounterpart('parish',item,visitDate);
       if(added){_oaiNotifyActiveCourseGpsVisit();_oaiNotifyNewGpsStamp('parish',item,visitDate);}
-      return {added:added,already:already,kind:'parish',item:item};
+      return {added:added,upgraded:upgraded&&added,already:already,kind:'parish',item:item};
     }
   }catch(e){console.warn('[가톨릭길동무] GPS 방문 기록 실패',e);}
   return {added:false,already:false,kind:String(kind||''),item:item||null};
