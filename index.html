@@ -1465,7 +1465,6 @@ window.APP_CONFIG = {
         </div>
         <button type="button" id="oai-pilgrimage-history-btn" class="oai-pilgrimage-manual-register-btn" hidden>미등록된 순례코스 등록하기</button>
         <button type="button" id="oai-pilgrimage-manual-register-btn" class="oai-pilgrimage-manual-register-btn" data-oai-pilgrimage-manual-register="1">수동으로 코스등록하기</button>
-        <div id="oai-pilgrimage-effective-completion-count" role="status" aria-live="polite" hidden style="padding:8px 14px 2px;font-size:13px;color:var(--text-muted,#667085);font-weight:600;"></div>
         <div id="oai-pilgrimage-course-list" class="oai-pilgrimage-course-list"></div>
       </section>
 
@@ -1767,9 +1766,9 @@ window.APP_CONFIG = {
   <section class="oai-first-run-panel" role="dialog" aria-modal="true" aria-label="위치 권한 안내">
     <button type="button" class="oai-first-run-x" data-location-action="later" aria-label="닫기">×</button>
     <div class="oai-first-run-symbol" aria-hidden="true">📍</div>
-    <h2>위치 권한이 필요합니다</h2>
-    <p>내 주변 성지·성당을 찾고 방문을 자동으로 등록하려면 위치 권한이 필요합니다.<br>Android 권한창에서 <b>앱 사용 중에만 허용</b> 또는 <b>이번에만 허용</b>을 선택해 주세요.</p>
-    <button type="button" class="oai-first-run-connect" data-location-action="allow">위치 권한 허용하기</button>
+    <h2>정확한 위치를 켜주세요</h2>
+    <p>성지·성당 GPS 방문 인증에 정확한 위치가 필요합니다.<br>설정 화면의 <b>정확한 위치 사용</b>을 켜주세요.<br><small>권한창을 표시할 수 있으면 먼저 권한창이 열립니다.</small></p>
+    <button type="button" class="oai-first-run-connect" data-location-action="allow">정확한 위치 설정하기</button>
     <button type="button" class="oai-first-run-later" data-location-action="later">나중에</button>
   </section>
 </div>
