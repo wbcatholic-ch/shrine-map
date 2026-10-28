@@ -24122,6 +24122,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     try{if(typeof _hideRouteGuide==='function')_hideRouteGuide();}catch(_e){}
     closePointPicker();
     const modal=planner();
+    // Capture plan waypoints BEFORE the route sheet resets its form state.
+    // Completed courses already use their own immutable GPS/manual list.
+    const completedForPick=_manualCompletionCourse();
+    const planForPick=completedForPick?_manualMerged(completedForPick).map(x=>x.point):loadPlan();
+    const waypointsForPick=planForPick.map(normalizePoint).filter(p=>p&&_validGpsPair(p.lat,p.lng));
     _setPilgrimageLayerVisible(modal,false);
     plannerView='detail';
     window.__OAI_PILGRIMAGE_PLACE_PICK__=true;
@@ -24169,17 +24174,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         // The existing map can be ready while the category loading veil remains visible.
         _completeCategoryMapSurface();
         _openPilgrimagePickList();
-        const completed=pilgrimageDetailMode==='complete'&&currentCourseId
-          ?loadCourses().find(c=>c.id===currentCourseId):null;
-        const selected=completed?_manualMerged(completed).map(x=>x.point):loadPlan();
-        const points=selected.map(normalizePoint).filter(p=>p&&_validGpsPair(p.lat,p.lng));
+        // Read the captured waypoints, not a route-sheet-mutated draft.
+        const points=waypointsForPick;
         // Fit immediately; do not wait for the asynchronous build of all shrine markers.
         _fitPilgrimageWaypointBounds(points,92);
         // The route drawer may finish its layout on the following frame.
         // A single bounded refit prevents its relayout from restoring GPS focus.
         requestAnimationFrame(function(){
-          if(window.__OAI_PILGRIMAGE_PLACE_PICK__&&_screen==='map'&&_map)
-            _fitPilgrimageWaypointBounds(points,92);
+          requestAnimationFrame(function(){
+            if(window.__OAI_PILGRIMAGE_PLACE_PICK__&&_screen==='map'&&_map)
+              _fitPilgrimageWaypointBounds(points,92);
+          });
         });
         // Build markers once; do not repeatedly recenter while data is loading.
         Promise.resolve(_preparePilgrimageMapPickMarkers()).then(()=>{
