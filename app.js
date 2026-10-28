@@ -13125,25 +13125,50 @@ function _isNearbyLoadCurrent(mode, token, body){
   }
 }
 
+// Location permission UX: exact permission is needed for GPS visits.
+// The dialog remains optional and never changes the device permission itself.
 function oaiNearbyLocationPermissionGate(){
   const native=window.GildongmuNative;
-  if(!native||typeof native.isNearbyLocationPermissionGranted!=='function')return false;
-  try{if(native.isNearbyLocationPermissionGranted())return false;}catch(_e){return false;}
-  const dialog=document.getElementById('oai-location-permission-dialog');
-  if(!dialog)return false;
-  dialog.hidden=false;dialog.setAttribute('aria-hidden','false');
-  const allow=dialog.querySelector('[data-location-action="allow"]');
-  if(allow)allow.textContent='위치 권한 다시 요청하기';
+  if(!native)return false;
+  try{
+    if(typeof native.isPreciseLocationPermissionGranted==='function'){
+      if(native.isPreciseLocationPermissionGranted())return false;
+    }else if(typeof native.isNearbyLocationPermissionGranted==='function'){
+      // Older Android builds cannot distinguish approximate permission.
+      // Do not block working location on an unsupported bridge.
+      if(native.isNearbyLocationPermissionGranted())return false;
+    }else return false;
+  }catch(_e){return false;}
+  oaiNearbyPermissionHelp();
   return true;
 }
 function oaiNearbyPermissionHelp(){
   const dialog=document.getElementById('oai-location-permission-dialog');
-  if(dialog){dialog.hidden=false;dialog.setAttribute('aria-hidden','false');}
+  if(!dialog)return;
+  if(!dialog.hidden)return; // One dialog at a time.
+  dialog.hidden=false;dialog.setAttribute('aria-hidden','false');
 }
 function oaiCloseNearbyPermissionDialog(){
   const dialog=document.getElementById('oai-location-permission-dialog');
   if(dialog){dialog.hidden=true;dialog.setAttribute('aria-hidden','true');}
 }
+function oaiOnLocationSettingsReturn(){
+  // Called by Android only when returning from app permission settings.
+  oaiCloseNearbyPermissionDialog();
+  const native=window.GildongmuNative;
+  try{
+    if(native&&typeof native.isPreciseLocationPermissionGranted==='function'&&
+       native.isPreciseLocationPermissionGranted()&& _screen==='map' &&
+       document.getElementById('nearby-body')){
+      _loadNearby(); // Fresh GPS fix, not cached coordinates.
+    }
+  }catch(_e){}
+}
+document.addEventListener('keydown',function(e){
+  if(e.key!=='Escape'&&e.key!=='Backspace')return;
+  const dialog=document.getElementById('oai-location-permission-dialog');
+  if(dialog&&!dialog.hidden){e.preventDefault();e.stopPropagation();oaiCloseNearbyPermissionDialog();}
+},true);
 document.addEventListener('click',function(e){
   const dialog=document.getElementById('oai-location-permission-dialog');
   if(!dialog||dialog.hidden)return;
@@ -13151,15 +13176,20 @@ document.addEventListener('click',function(e){
   if(!button)return;
   e.preventDefault();e.stopPropagation();
   const action=button.getAttribute('data-location-action');
-  oaiCloseNearbyPermissionDialog();
+  oaiCloseNearbyPermissionDialog(); // Always close before entering system UI.
   if(action!=='allow')return;
+  const native=window.GildongmuNative;
   try{
-    const native=window.GildongmuNative;
-    if(native&&typeof native.requestNearbyLocationPermission==='function'&&native.requestNearbyLocationPermission())return;
-    // A request already in flight, or Android suppressed a repeated denial.
-    // We cannot grant system location permission from HTML.
-    oaiNearbyPermissionHelp();
-  }catch(_e){}
+    if(native&&typeof native.requestPreciseLocationPermissionOrSettings==='function'){
+      native.requestPreciseLocationPermissionOrSettings();
+      return;
+    }
+    if(native&&typeof native.requestNearbyLocationPermission==='function' &&
+       native.requestNearbyLocationPermission())return;
+    if(native&&typeof native.openAppLocationSettings==='function')native.openAppLocationSettings();
+  }catch(_e){
+    try{if(native&&typeof native.openAppLocationSettings==='function')native.openAppLocationSettings();}catch(_ignored){}
+  }
 },true);
 function _loadNearby(){
   const body=$('nearby-body');
@@ -19673,11 +19703,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   window._oaiRebuildCompletionsAfterDriveRestore=function(){
     // 복원 뒤 스탬프 및 완료 코스가 저장된 상태에서 미완료 검사만 다시 예약한다.
     return _rebuildCompletionFromGps().then(function(result){
-      setTimeout(function(){
-        if(localStorage.getItem(COMPLETION_AUDIT_ONCE_KEY)===null ||
-           _completionAuditAllPending || _completionAuditCourseIds.size)
-          _scheduleCompletionGpsAudit(localStorage.getItem(COMPLETION_AUDIT_ONCE_KEY)===null);
-      },1600);
+      // 기존 백업 복원 뒤에는 이전 성공 항목만 새 원본 대상으로 다시 검토한다.
+      setTimeout(function(){_startHistoricalBackgroundV1659(true);},1600);
       return result;
     });
   };
@@ -19988,10 +20015,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       }
       renderCourseList();
     }
-    if(all){
-      // 최초 전수조사 자체는 1회 완료 표시하되, 보류된 코스까지 정정 완료라고 표시하지 않는다.
-      // 보류 내역은 로컬 결과에 남기고, 이후 신규 완료 코스만 별도 검사한다.
-      const marker=JSON.stringify({at:Date.now(),checked,repaired:edits.length,skipped,status:skipped?'partial':'reviewed',schema:1642});
+    if(all&&!skipped){
+      // 보류 기록이 있으면 완료 표시하지 않는다. 전체 시도는 V1659에서 3회로 제한한다.
+      const marker=JSON.stringify({at:Date.now(),checked,repaired:edits.length,skipped,status:'reviewed',schema:1659});
       localStorage.setItem(COMPLETION_AUDIT_ONCE_KEY,marker);
       if(localStorage.getItem(COMPLETION_AUDIT_ONCE_KEY)!==marker)throw Error('최초 검사 완료 상태 저장 실패');
     }
@@ -25726,9 +25752,121 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // 자동 등록 초기화는 목록 렌더링·개발자 패널 표시 실패와 독립적으로 실행한다.
   // 최초 실행: 카탈로그 로드 → 스탬프 통일 → GPS 날짜별 완료 생성 → 화면 갱신.
   // 실행 실패 시 계획·완료·스탬프 원본을 유지한다. 오류를 빈 완료 목록으로 간주하지 않는다.
-  try{if(localStorage.getItem(STAMP_MIGRATION_KEY)===null)_runStampMigrationV1604(false);const r=_runHistoricalSharedGpsEvidenceV1651();if(r.status==='recovered')console.info('[V1651 성지 GPS 증거 복구]',r.recovered);const d=_runHistoricalStampDateDedupV1652();if(d.status==='updated')console.info('[V1652 과거 날짜 중복 정리]',d.changed);const linked=_runHistoricalLinkedStampV1653();if(linked.status==='updated')console.info('[V1653 공통화 연결 스탬프 정리]',linked.changed);const direct=_runHistoricalSharedDirectV1654();if(direct.status==='updated')console.info('[V1654 직접 수동 중복 재분류]',direct.changes);}catch(e){console.warn('[V1651 과거 GPS 증거 보류]',e);}
-  _rebuildCompletionFromGps().then(function(){try{_runHistoricalCompletionCleanupV1649();const r=_runHistoricalAutoDuplicateV1655();if(r.status==='updated')console.info('[V1655 동일 날짜 자동 완료 중복 정리]',r.removed);const newer=_runHistoricalGpsCompletionV1658();if(newer.status==='updated')console.info('[V1658 과거 GPS 완료 정리]',newer.updated,newer.removed);}catch(e){console.warn("[과거 완료 안전 정리 보류]",e);}renderCourseList();setTimeout(_dailyRegisterPendingDate,250);setTimeout(function(){_scheduleCompletionGpsAudit(true);},1200);})
-    .catch(function(err){console.error('[최초 GPS 완료 생성 보류]',err);});
+  // V1659: 과거 장부 검사는 인트로/화면 초기화와 분리한다.
+  // 기존 검사·보존 함수는 그대로 사용하고, 작업별 성공 확인 후 1회만 종료한다.
+  const HIST_BG_V1659='oai_historical_background_v1659_';
+  let historicBgScheduled=false;
+  let historicBgGeneration=0;
+  let historicLastInteraction=Date.now();
+  let historicBgPauses=0;
+  ['pointerdown','keydown','touchstart','wheel'].forEach(function(event){
+    document.addEventListener(event,function(){historicLastInteraction=Date.now();},{passive:true,capture:true});
+  });
+  const historicalTasks=[
+    ['stamp-schema',function(){if(localStorage.getItem(STAMP_MIGRATION_KEY)!==null)return {status:'done'};_runStampMigrationV1604(false);return {status:localStorage.getItem(STAMP_MIGRATION_KEY)!==null?'done':'failed'};}],
+    ['gps-evidence',_runHistoricalSharedGpsEvidenceV1651],
+    ['date-dedup',_runHistoricalStampDateDedupV1652],
+    ['linked-stamp',_runHistoricalLinkedStampV1653],
+    ['shared-direct',_runHistoricalSharedDirectV1654],
+    ['completion-cleanup',function(){_runHistoricalCompletionCleanupV1649();return {status:localStorage.getItem(HISTORICAL_DONE_KEY_V1649)!==null?'done':'pending'};}],
+    ['auto-duplicate',_runHistoricalAutoDuplicateV1655],
+    ['gps-completion',_runHistoricalGpsCompletionV1658],
+    ['gps-audit',function(){
+      if(localStorage.getItem(COMPLETION_AUDIT_ONCE_KEY)!==null)return {status:'done'};
+      const result=_runCompletionSafeGpsAudit(true,new Set());
+      return {status:result.skipped?'failed':'done'};
+    }]
+  ];
+  function _historicalBgIdle(callback){
+    if(typeof window.requestIdleCallback==='function')window.requestIdleCallback(callback);
+    else setTimeout(callback,350);
+  }
+  function _historicalBgBusy(){
+    return document.hidden||oaiApplyingRestore||oaiTransferBusy||oaiRestoreDecisionPending||
+      !!_activeFollowState()||Date.now()-historicLastInteraction<2400;
+  }
+  function _historicalBgState(key){
+    try{return JSON.parse(localStorage.getItem(HIST_BG_V1659+key)||'null')||{attempts:0};}
+    catch(_e){return {attempts:3,status:'failed'};}
+  }
+  function _historicalBgRun(index,generation){
+    if(generation!==historicBgGeneration||index>=historicalTasks.length){historicBgScheduled=false;return;}
+    if(_historicalBgBusy()){
+      // 현재 세션에서는 대기 자체도 최대 4회만 수행한다. 순례 중이면 다음 실행으로 넘긴다.
+      if(++historicBgPauses<=4&&!document.hidden&&!_activeFollowState())
+        setTimeout(function(){_historicalBgIdle(function(){_historicalBgRun(index,generation);});},4500);
+      else historicBgScheduled=false;
+      return;
+    }
+    historicBgPauses=0;
+    const task=historicalTasks[index],key=task[0],state=_historicalBgState(key);
+    if(state.attempts>=3&&state.status!=='done'){
+      // 총 3회 실패한 경우 후속 정리도 중단한다. 원본은 보존한다.
+      historicBgScheduled=false;
+      return;
+    }
+    if(state.status==='done'){
+      setTimeout(function(){_historicalBgIdle(function(){_historicalBgRun(index+1,generation);});},300);
+      return;
+    }
+    let result;
+    try{result=task[1]()||{status:'done'};}
+    catch(err){result={status:'failed',reason:String(err&&err.message||err)};}
+    const status=String(result.status||'done');
+    const paused=['restoring','restore','restore-busy','transferring','transfer','pending','catalog-pending','catalog-not-ready','migration-pending','source-changed','changed','empty'].includes(status);
+    // 보류 사유가 해결되기 전에는 시도 횟수를 소모하지 않는다. 다음 실행/복원에서 재확인.
+    if(paused){
+      // 선행 자료가 준비되지 않았다면 다음 보정 단계도 실행하지 않는다.
+      historicBgScheduled=false;
+      if(['catalog-pending','catalog-not-ready'].includes(status)){
+        _ensureAllParishDiocesesLoaded({silent:true}).then(function(){
+          // 자료 로드만 완료되면 동일 작업부터 순서대로 재개 (시도 횟수 소모 없음).
+          if(generation!==historicBgGeneration||historicBgScheduled)return;
+          historicBgScheduled=true;
+          setTimeout(function(){_historicalBgIdle(function(){_historicalBgRun(index,generation);});},2400);
+        }).catch(function(err){console.warn('[과거 공통화 자료 로딩 보류]',err);});
+      }
+      return;
+    }
+    if(!paused){
+      const success=['done','unchanged','updated','recovered','verified'].includes(status);
+      const next={status:success?'done':'failed',attempts:state.attempts+1,at:Date.now(),result:status};
+      try{localStorage.setItem(HIST_BG_V1659+key,JSON.stringify(next));}
+      catch(err){console.warn('[과거 검사 상태 저장 보류]',err);}
+      if(!success){
+        console.warn('[과거 검사 보류]',key,status,'시도',next.attempts);
+        // 선행 정리가 실패했다면 후속 보정도 실행하지 않고 다음 앱 실행에 맡긴다.
+        historicBgScheduled=false;
+        return;
+      }
+    }
+    // 각 성공 단계 사이에는 화면이 다시 반응할 여유를 둔다.
+    setTimeout(function(){_historicalBgIdle(function(){_historicalBgRun(index+1,generation);});},850);
+  }
+  function _startHistoricalBackgroundV1659(fromRestore){
+    if(fromRestore){
+      // 복원된 데이터는 신규 원본이므로 성공 상태만 재점검 대상으로 재개한다.
+      historicalTasks.forEach(function(task){
+        const key=HIST_BG_V1659+task[0],state=_historicalBgState(task[0]);
+        if(state.status==='done')try{localStorage.removeItem(key);}catch(_e){}
+      });
+    }
+    if(historicBgScheduled)return;
+    historicBgScheduled=true;
+    const generation=++historicBgGeneration;
+    setTimeout(function(){_historicalBgIdle(function(){_historicalBgRun(0,generation);});},5000);
+  }
+  // 신규 완료 등록 시의 필수 GPS 중복 판정은 기존처럼 즉시 수행한다.
+  // 초기 카탈로그 준비도 첫 화면 표시 이후로 넘긴다.
+  setTimeout(function(){
+    _historicalBgIdle(function(){
+      if(document.hidden||_activeFollowState())return;
+      _rebuildCompletionFromGps().then(function(){
+        setTimeout(_dailyRegisterPendingDate,250);
+        _startHistoricalBackgroundV1659(false);
+      }).catch(function(err){console.error('[최초 GPS 완료 준비 보류]',err);});
+    });
+  },4500);
   refreshDev(); renderCourseList();
 })();
 
