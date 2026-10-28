@@ -10564,3 +10564,12 @@ html.oai-font-global .shrine-visit-card-badge strong,html:not(.ios-device).oai-s
 html.oai-pilgrimage-course-route-view #sheet-route > .cgm-route-help,
 html.oai-pilgrimage-course-view-readonly #sheet-route > .cgm-route-help{display:inline-flex!important;right:55px!important;top:12px!important;}
 html.oai-pilgrimage-course-view-readonly #sheet-route > .route-sheet-x{display:inline-flex!important;z-index:26!important;}
+
+/* V1661: completed/read-only course maps have one close X, never overlapping tabs. */
+html.oai-pilgrimage-course-view-readonly #shrine-visit-map-filter{display:none!important}
+html.oai-pilgrimage-course-view-readonly #sheet-route .route-sheet-x{display:none!important}
+html.oai-pilgrimage-course-view-readonly #map-category-close-btn{display:inline-flex!important}
+#oai-course-route-loading{position:fixed;top:calc(env(safe-area-inset-top,0px) + 78px);left:50%;transform:translateX(-50%);z-index:2200;display:flex;align-items:center;gap:9px;padding:10px 14px;border-radius:24px;background:rgba(28,39,57,.92);color:#fff;font-size:13px;font-weight:650;box-shadow:0 3px 15px rgba(0,0,0,.2);pointer-events:none;white-space:nowrap}
+.oai-course-route-spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.35);border-top-color:#fff;border-radius:50%;animation:oaiCourseRouteSpin .8s linear infinite}
+@keyframes oaiCourseRouteSpin{to{transform:rotate(360deg)}}
+@media(prefers-reduced-motion:reduce){.oai-course-route-spinner{animation:none}}
