@@ -4395,12 +4395,6 @@ body > .shrine-visit-action-layer .shrine-visit-floating-list-btn,
 #map-wrap > .shrine-visit-action-layer .shrine-visit-floating-list-btn{
   width:min(calc(100% - 28px),390px)!important;
 }
-html.parish-mode #app #map-wrap #loc-btn,
-html.retreat-mode #app #map-wrap #loc-btn,
-html:not(.ios-device).parish-mode #app #map-wrap #loc-btn,
-html:not(.ios-device).retreat-mode #app #map-wrap #loc-btn{
-  bottom:calc(var(--oai-android-bottom-gap, env(safe-area-inset-bottom, 0px)) + 36px)!important;
-}
 
 .shrine-visit-cards-head.module-bar{
   display:flex!important;
@@ -5521,10 +5515,6 @@ html:not(.ios-device).oai-screen-compact-short #app #loc-btn{
   opacity:1!important;
   visibility:visible!important;
   pointer-events:auto!important;
-}
-html:not(.ios-device).oai-screen-compact-short.parish-mode #app #loc-btn,
-html:not(.ios-device).oai-screen-compact-short.retreat-mode #app #loc-btn{
-  bottom:calc(var(--oai-android-bottom-gap, 10px) + 36px)!important;
 }
 
 html:not(.ios-device).oai-screen-compact-short .faith-bottom-nav{

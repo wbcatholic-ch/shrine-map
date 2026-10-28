@@ -23484,6 +23484,53 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     setView('detail');
     renderDetail();
   }
+  // Completed details swipe only among completed courses; planned details only among plans.
+  // The active pilgrimage and an unsaved draft must never navigate on a swipe.
+  function swipePilgrimageDetail(direction){
+    if(plannerView!=='detail'||!currentCourseId||pilgrimageManualCreateMode)return false;
+    const active=_activeFollowState();
+    if(active&&active.courseId===String(currentCourseId))return false;
+    const mode=pilgrimageDetailMode;
+    if(mode!=='complete'&&mode!=='plan')return false;
+    const all=loadCourses();
+    const eligible=all.filter(function(c){
+      const completed=_courseCompletionList(c).length>0;
+      return mode==='complete'?completed:!completed;
+    });
+    const sorted=_sortPilgrimageCourses(eligible,mode==='complete'?'completed':
+      (pilgrimageCourseFilterState.sort==='name'?'name':'updated'));
+    const index=sorted.findIndex(function(c){return String(c.id)===String(currentCourseId);});
+    const next=index+(direction==='left'?1:-1);
+    if(index<0||next<0||next>=sorted.length)return false;
+    pilgrimageCourseTab=mode;
+    openCourse(sorted[next].id);
+    return true;
+  }
+  (function(){
+    let start=null, consumedAt=0;
+    const root=function(){return document.getElementById('oai-pilgrimage-detail-view');};
+    function allowed(target){
+      const area=root(),modal=planner();
+      if(!area||area.hidden||!modal||!modal.classList.contains('show')||!area.contains(target))return false;
+      if(target.closest('button,a,input,textarea,select,[contenteditable],.oai-pilgrimage-drag-handle,[data-plan-drag],[data-manual-drag],[data-oai-pilgrimage-drag]'))return false;
+      if(document.getElementById('oai-pilgrimage-place-info-overlay')?.classList.contains('open'))return false;
+      return true;
+    }
+    document.addEventListener('touchstart',function(e){
+      start=null;
+      if(e.touches.length!==1||!allowed(e.target))return;
+      const t=e.touches[0];start={x:t.clientX,y:t.clientY,id:t.identifier};
+    },{passive:true});
+    document.addEventListener('touchend',function(e){
+      const first=start;start=null;
+      if(!first||e.changedTouches.length!==1)return;
+      const t=e.changedTouches[0];if(t.identifier!==first.id)return;
+      const dx=t.clientX-first.x,dy=t.clientY-first.y;
+      if(Math.abs(dx)<75||Math.abs(dx)<Math.abs(dy)*1.7||Date.now()-consumedAt<400)return;
+      if(swipePilgrimageDetail(dx<0?'left':'right'))consumedAt=Date.now();
+    },{passive:true});
+    document.addEventListener('touchcancel',function(){start=null;},{passive:true});
+  })();
   function repeatCourse(id,confirmed,travelMode){
     const targetId=String(id||'');
     const active=_activeFollowState();
