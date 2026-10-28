@@ -13144,6 +13144,20 @@ function oaiNearbyLocationPermissionGate(){
   oaiNearbyPermissionHelp();
   return true;
 }
+// Ask once per app load after the intro. No repeated polling or GPS request.
+// A disabled precise-location permission was previously only checked in "Nearby".
+window.addEventListener('load',function(){
+  setTimeout(function(){
+    try{
+      if(!window.GildongmuNative ||
+         typeof window.GildongmuNative.isPreciseLocationPermissionGranted!=='function') return;
+      const startup=document.getElementById('oai-first-run-dialog');
+      if(startup && !startup.hidden) return; // Never cover account/restore onboarding.
+      if(window.GildongmuNative.isPreciseLocationPermissionGranted()) return;
+      oaiNearbyPermissionHelp();
+    }catch(_e){}
+  },2800);
+},{once:true});
 function oaiNearbyPermissionHelp(){
   const dialog=document.getElementById('oai-location-permission-dialog');
   if(!dialog)return;
