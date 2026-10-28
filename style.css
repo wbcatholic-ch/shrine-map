@@ -10588,3 +10588,9 @@ html.oai-pilgrimage-course-view-readonly #map-category-close-btn{display:inline-
 /* 방문 사진 전체 보기 아래 메모 작성 진입 버튼 */
 .oai-visit-photo-block .oai-journal-add-memo{display:block;width:calc(100% - 24px);min-height:48px;margin:16px 12px 4px;padding:10px 14px;border:1.5px solid #9ab8ca;border-radius:12px;background:#f6fbff;color:#205f8a;font-size:16px;font-weight:850;line-height:1.25;cursor:pointer;}
 .oai-visit-photo-block .oai-journal-add-memo:active{background:#e7f3fa;}
+
+/* V1686: Show saved visit memos by date on the all-dates journal view. */
+.oai-visit-memo-entry{margin:10px 12px;padding:12px;border:1px solid #dce7ed;border-radius:12px;background:#fff}
+.oai-visit-memo-entry-head{display:flex;justify-content:space-between;align-items:center;gap:10px;color:#234a61;font-size:14px}
+.oai-visit-memo-entry-head button{padding:7px 12px;border:1px solid #a5c3d4;border-radius:9px;color:#235f84;background:#f7fbfe;font-weight:800}
+.oai-visit-memo-block .oai-journal-add-memo{display:block;width:calc(100% - 24px);min-height:48px;margin:16px 12px 8px;padding:10px 14px;border:1.5px solid #9ab8ca;border-radius:12px;background:#f6fbff;color:#205f8a;font-size:16px;font-weight:850}

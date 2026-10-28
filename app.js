@@ -3282,6 +3282,18 @@ function _oaiJournalDeveloperEnabled(){
   const match=String(navigator.userAgent||'').match(/GildongmuAndroid\/(\d+)/i);
   return !!match && Number(match[1])>=350;
 }
+function _oaiAllVisitMemoHtml(kind,item,visits){
+  // Read the same date-specific journal records used by the memo editor.
+  const records=visits.map(function(v){
+    const date=String(v&&v.date||'');
+    const memo=String((_oaiGetVisitByDate(kind,item,date)||{}).memo||'').trim();
+    return {date:date,memo:memo};
+  }).filter(function(v){return v.date&&v.memo;});
+  if(!records.length)return '<div class="oai-visit-journal-empty">등록된 메모가 없습니다.</div>';
+  return records.map(function(v){
+    return '<div class="oai-visit-memo-entry"><div class="oai-visit-memo-entry-head"><b>'+_visitHtmlEsc(_formatVisitDate(v.date))+'</b><button type="button" data-oai-memo-open-date="'+_visitHtmlEsc(kind)+'" data-oai-memo-date="'+_visitHtmlEsc(v.date)+'">수정</button></div><div class="oai-visit-memo-preview">'+_visitHtmlEsc(v.memo).replace(/\n/g,'<br>')+'</div></div>';
+  }).join('');
+}
 function _oaiVisitJournalHtml(kind,item,visits){
   // Personal visit journal is available for all users with existing visits; do not touch saved data.
   try{if(!_oaiJournalDeveloperEnabled())return '';}catch(_e){return '';}
@@ -3290,7 +3302,7 @@ function _oaiVisitJournalHtml(kind,item,visits){
   if(date==='all'){
     const entries=_oaiAllVisitPhotos(kind,item,visits);
     const grid=entries.length?'<div class="oai-visit-photo-grid" data-oai-photo-grid="'+_visitHtmlEsc(kind)+'">'+entries.map(function(x,i){return _oaiJournalPhotoThumbHtml(kind,x,i);}).join('')+'</div>':'<div class="oai-visit-journal-empty">등록된 사진이 없습니다. 복원 중인 사진은 내려받기가 완료되면 나타납니다.</div>';
-    return '<section class="oai-visit-journal" data-oai-journal-kind="'+_visitHtmlEsc(kind)+'"><div class="oai-visit-journal-head"><div class="shrine-visit-detail-section-title">나의 기록 <button type="button" class="cgm-help-icon cgm-visit-section-help" data-cgm-help="visit_photo" aria-label="내가 올린 사진 보관 도움말">?</button></div><button type="button" class="oai-journal-add-photo" data-oai-photo-add-date="'+_visitHtmlEsc(kind)+'">＋ 사진 추가</button></div><div class="oai-visit-journal-block oai-visit-photo-block">'+_oaiVisitDatePickerHtml(kind,item,visits)+grid+'<button type="button" class="oai-journal-add-memo" data-oai-memo-add-date="'+_visitHtmlEsc(kind)+'">＋ 메모 추가</button><div class="oai-visit-journal-empty">사진 추가·삭제와 메모 수정은 날짜를 선택해 주세요.</div></div></section>';
+    return '<section class="oai-visit-journal" data-oai-journal-kind="'+_visitHtmlEsc(kind)+'"><div class="oai-visit-journal-head"><div class="shrine-visit-detail-section-title">나의 기록 <button type="button" class="cgm-help-icon cgm-visit-section-help" data-cgm-help="visit_photo" aria-label="내가 올린 사진 보관 도움말">?</button></div><button type="button" class="oai-journal-add-photo" data-oai-photo-add-date="'+_visitHtmlEsc(kind)+'">＋ 사진 추가</button></div><div class="oai-visit-journal-block oai-visit-photo-block">'+_oaiVisitDatePickerHtml(kind,item,visits)+grid+'</div><div class="oai-visit-journal-block oai-visit-memo-block"><div class="oai-visit-journal-row"><b>메모 · 전체</b></div>'+_oaiAllVisitMemoHtml(kind,item,visits)+'<button type="button" class="oai-journal-add-memo" data-oai-memo-add-date="'+_visitHtmlEsc(kind)+'">＋ 메모 추가</button></div></section>';
   }
   const baseVisit=visits.find(function(v){return String(v.date||'')===date;})||visits[0],visit=_oaiGetVisitByDate(kind,item,date)||baseVisit;
   const limit=_oaiVisitPhotoLimit(kind,item);
@@ -3346,7 +3358,7 @@ function _oaiEnsureMemoModal(){
   m=document.createElement('div');m.id='oai-visit-memo-modal';m.className='oai-visit-memo-modal';m.setAttribute('aria-hidden','true');
   m.innerHTML='<div class="oai-visit-memo-backdrop" data-oai-memo-close="1"></div><section class="oai-visit-memo-panel" role="dialog" aria-modal="true" aria-label="방문 메모"><div class="oai-visit-memo-head"><div><b>나의 메모</b><small id="oai-visit-memo-date"></small></div><button type="button" data-oai-memo-close="1" aria-label="닫기">×</button></div><textarea id="oai-visit-memo-text" maxlength="2000" placeholder="이 방문에서 기억하고 싶은 내용을 적어보세요."></textarea><div class="oai-visit-memo-actions"><button type="button" data-oai-memo-delete-modal="1">삭제</button><button type="button" data-oai-memo-save="1">저장</button><button type="button" data-oai-memo-close="1">취소</button></div></section>';
   document.body.appendChild(m);
-  m.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('[data-oai-memo-close]')){_oaiCloseMemoModal();return;}if(e.target.closest&&e.target.closest('[data-oai-memo-delete-modal]')){const ctx=window.__OAI_MEMO_CONTEXT__;if(ctx)_oaiDeleteMemo(ctx.kind,true);return;}if(e.target.closest&&e.target.closest('[data-oai-memo-save]')){const ctx=window.__OAI_MEMO_CONTEXT__;if(!ctx)return;const memo=String((document.getElementById('oai-visit-memo-text')||{}).value||'').trim();const ok=ctx.kind==='parish'?_oaiUpdateParishVisitExtras(ctx.item,ctx.date,{memo:memo}):_oaiUpdateShrineVisitExtras(ctx.item,ctx.date,{memo:memo});if(ok){_oaiCloseMemoModal();_oaiRerenderJournal(ctx.kind);_oaiVisitToast(memo?'메모를 저장했습니다.':'메모를 삭제했습니다.');}else _oaiVisitToast('메모를 저장하지 못했습니다.');}});
+  m.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('[data-oai-memo-close]')){_oaiCloseMemoModal();return;}if(e.target.closest&&e.target.closest('[data-oai-memo-delete-modal]')){const ctx=window.__OAI_MEMO_CONTEXT__;if(ctx)_oaiDeleteMemo(ctx.kind,true);return;}if(e.target.closest&&e.target.closest('[data-oai-memo-save]')){const ctx=window.__OAI_MEMO_CONTEXT__;if(!ctx)return;const memo=String((document.getElementById('oai-visit-memo-text')||{}).value||'').trim();const ok=ctx.kind==='parish'?_oaiUpdateParishVisitExtras(ctx.item,ctx.date,{memo:memo}):_oaiUpdateShrineVisitExtras(ctx.item,ctx.date,{memo:memo});const stored=ok?_oaiGetVisitByDate(ctx.kind,ctx.item,ctx.date):null;const verified=!!ok&&String(stored&&stored.memo||'').trim()===memo;if(verified){_oaiCloseMemoModal();_oaiRerenderJournal(ctx.kind);_oaiVisitToast(memo?'메모를 저장했습니다.':'메모를 삭제했습니다.');}else _oaiVisitToast('메모 저장을 확인하지 못했습니다. 입력 내용은 그대로 유지됩니다.');}});
   return m;
 }
 function _oaiMemoFitViewport(){
@@ -3773,6 +3785,7 @@ function _oaiHandleVisitDateChange(e){
 function _oaiHandleJournalClick(e){
   try{if(!_oaiJournalDeveloperEnabled())return false;}catch(_e){return false;}
   const memoDel=e.target.closest&&e.target.closest('[data-oai-memo-delete]');if(memoDel){_oaiDeleteMemo(memoDel.getAttribute('data-oai-memo-delete'),false);return true;}
+  const memoDate=e.target.closest&&e.target.closest('[data-oai-memo-open-date]');if(memoDate){const kind=memoDate.getAttribute('data-oai-memo-open-date'),date=memoDate.getAttribute('data-oai-memo-date');window[kind==='parish'?'__OAI_PARISH_JOURNAL_DATE__':'__OAI_SHRINE_JOURNAL_DATE__']=date;_oaiRerenderJournal(kind);_oaiOpenMemo(kind);return true;}
   const memoAdd=e.target.closest&&e.target.closest('[data-oai-memo-add-date]');if(memoAdd){_oaiChoosePhotoAddDate(memoAdd.getAttribute('data-oai-memo-add-date'),'memo');return true;}
   const memo=e.target.closest&&e.target.closest('[data-oai-memo-edit]');if(memo){_oaiOpenMemo(memo.getAttribute('data-oai-memo-edit'));return true;}
   const add=e.target.closest&&e.target.closest('[data-oai-photo-add-date]');if(add){_oaiChoosePhotoAddDate(add.getAttribute('data-oai-photo-add-date'));return true;}
