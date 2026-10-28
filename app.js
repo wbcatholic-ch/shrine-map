@@ -3352,7 +3352,7 @@ function _oaiVisitToast(message){
 }
 function _oaiVisitConfirm(message,onConfirm,options){
   let m=document.getElementById('oai-visit-confirm');if(!m){m=document.createElement('div');m.id='oai-visit-confirm';m.className='oai-visit-confirm';m.setAttribute('aria-hidden','true');m.innerHTML='<div class="oai-visit-confirm-bg" data-oai-confirm-cancel="1"></div><section class="oai-visit-confirm-panel" role="dialog" aria-modal="true" aria-labelledby="oai-visit-confirm-heading"><div class="oai-visit-confirm-symbol" aria-hidden="true">!</div><h3 class="oai-visit-confirm-heading" id="oai-visit-confirm-heading">기록 삭제 확인</h3><div class="oai-visit-confirm-message" id="oai-visit-confirm-message"></div><div class="oai-visit-confirm-actions"><button type="button" data-oai-confirm-cancel="1">취소</button><button type="button" data-oai-confirm-ok="1">삭제</button></div></section>';document.body.appendChild(m);m.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('[data-oai-confirm-cancel]')){_oaiCloseVisitConfirm();return;}if(e.target.closest&&e.target.closest('[data-oai-confirm-ok]')){const fn=window.__OAI_VISIT_CONFIRM_FN__;_oaiCloseVisitConfirm();if(typeof fn==='function')fn();}});}
-  const confOptions=options||{};const heading=document.getElementById('oai-visit-confirm-heading'),okBtn=m.querySelector('[data-oai-confirm-ok]');if(heading)heading.textContent=confOptions.title||'기록 삭제 확인';if(okBtn)okBtn.textContent=confOptions.confirmLabel||'삭제';m.classList.toggle('oai-course-reverse-confirm',confOptions.variant==='course-reverse');const msg=document.getElementById('oai-visit-confirm-message');if(msg)msg.textContent=String(message||'');window.__OAI_VISIT_CONFIRM_FN__=onConfirm;m.classList.add('show');m.setAttribute('aria-hidden','false');
+  const confOptions=options||{};const heading=document.getElementById('oai-visit-confirm-heading'),okBtn=m.querySelector('[data-oai-confirm-ok]');if(heading)heading.textContent=confOptions.title||'기록 삭제 확인';if(okBtn)okBtn.textContent=confOptions.confirmLabel||'삭제';const cancelBtn=m.querySelector('.oai-visit-confirm-actions [data-oai-confirm-cancel]');if(cancelBtn)cancelBtn.textContent=confOptions.cancelLabel||'취소';m.classList.toggle('oai-course-reverse-confirm',confOptions.variant==='course-reverse');m.classList.toggle('oai-route-exit-confirm',confOptions.variant==='route-exit');const msg=document.getElementById('oai-visit-confirm-message');if(msg)msg.textContent=String(message||'');window.__OAI_VISIT_CONFIRM_FN__=onConfirm;m.classList.add('show');m.setAttribute('aria-hidden','false');
 }
 function _oaiCloseVisitConfirm(){const m=document.getElementById('oai-visit-confirm');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}window.__OAI_VISIT_CONFIRM_FN__=null;}
 try{window._oaiCloseVisitConfirm=_oaiCloseVisitConfirm;}catch(_e){}
@@ -3360,12 +3360,12 @@ document.addEventListener('keydown',function(e){if((e.key==='Escape'||e.key==='B
 function _oaiEnsureMemoModal(){
   let m=document.getElementById('oai-visit-memo-modal');if(m)return m;
   m=document.createElement('div');m.id='oai-visit-memo-modal';m.className='oai-visit-memo-modal';m.setAttribute('aria-hidden','true');
-  m.innerHTML='<div class="oai-visit-memo-backdrop" data-oai-memo-close="1"></div><section class="oai-visit-memo-panel" role="dialog" aria-modal="true" aria-label="방문 메모"><div class="oai-visit-memo-head"><div><b>나의 메모</b><small id="oai-visit-memo-date"></small></div><button type="button" data-oai-memo-close="1" aria-label="닫기">×</button></div><textarea id="oai-visit-memo-text" maxlength="2000" placeholder="이 방문에서 기억하고 싶은 내용을 적어보세요."></textarea><div class="oai-visit-memo-actions"><button type="button" data-oai-memo-delete-modal="1">삭제</button><button type="button" data-oai-memo-save="1">저장</button><button type="button" data-oai-memo-close="1">취소</button></div></section>';
+  m.innerHTML='<div class="oai-visit-memo-backdrop" data-oai-memo-close="1"></div><section class="oai-visit-memo-panel" role="dialog" aria-modal="true" aria-label="방문 메모"><div class="oai-visit-memo-head"><div><b>나의 메모</b><small id="oai-visit-memo-date"></small></div><button type="button" data-oai-memo-close="1" aria-label="닫기">×</button></div><textarea id="oai-visit-memo-text" maxlength="2000" placeholder="이 방문에서 기억하고 싶은 내용을 적어보세요."></textarea><div class="oai-visit-memo-actions"><button type="button" data-oai-memo-delete-modal="1">삭제</button><button type="button" data-oai-memo-close="1">취소</button><button type="button" data-oai-memo-save="1">저장</button></div></section>';
   document.body.appendChild(m);
   // Save on the initial touch, before Android dismisses the keyboard and shifts the dialog.
   // This avoids a first tap that only closes the keyboard instead of saving.
   function saveMemo(){
-    const ctx=window.__OAI_MEMO_CONTEXT__;if(!ctx||m.dataset.oaiSaving==='1')return;
+    const ctx=window.__OAI_MEMO_CONTEXT__;if(!ctx||m.dataset.oaiSaving==='1'||m.dataset.oaiSaved==='1')return;
     const field=m.querySelector('#oai-visit-memo-text');
     const memo=String(field&&field.value||'').trim();
     m.dataset.oaiSaving='1';
@@ -3373,7 +3373,19 @@ function _oaiEnsureMemoModal(){
       const ok=ctx.kind==='parish'?_oaiUpdateParishVisitExtras(ctx.item,ctx.date,{memo:memo}):_oaiUpdateShrineVisitExtras(ctx.item,ctx.date,{memo:memo});
       const stored=ok?_oaiGetVisitByDate(ctx.kind,ctx.item,ctx.date):null;
       const verified=!!ok&&String(stored&&stored.memo||'').trim()===memo;
-      if(verified){_oaiCloseMemoModal();_oaiRerenderJournal(ctx.kind);_oaiVisitToast(memo?'메모를 저장했습니다.':'메모를 삭제했습니다.');}
+      if(verified){
+        m.dataset.oaiSaved='1';
+        // Saving is immediate, but keep the success state visible before closing.
+        const btn=m.querySelector('[data-oai-memo-save]');
+        if(btn){btn.textContent='✓ 저장되었습니다';btn.disabled=true;}
+        const savedCtx=ctx;
+        clearTimeout(m._oaiMemoSuccessTimer);
+        m._oaiMemoSuccessTimer=setTimeout(function(){
+          if(window.__OAI_MEMO_CONTEXT__===savedCtx && m.classList.contains('show')){
+            _oaiCloseMemoModal();_oaiRerenderJournal(savedCtx.kind);
+          }
+        },1100);
+      }
       else _oaiVisitToast('메모 저장을 확인하지 못했습니다. 입력 내용은 그대로 유지됩니다.');
     }finally{delete m.dataset.oaiSaving;}
   }
@@ -3403,9 +3415,9 @@ function _oaiMemoFitViewport(){
   if(field)field.style.setProperty('height',Math.max(78,Math.min(170,Math.floor(vh*.25)))+'px','important');
 }
 function _oaiInstallMemoViewportGuard(){if(window.__OAI_MEMO_VV_GUARD__)return;window.__OAI_MEMO_VV_GUARD__=true;const vv=window.visualViewport;if(vv){vv.addEventListener('resize',_oaiMemoFitViewport,{passive:true});}window.addEventListener('resize',_oaiMemoFitViewport,{passive:true});}
-function _oaiCloseMemoModal(){const m=document.getElementById('oai-visit-memo-modal');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');m.style.removeProperty('--oai-memo-vh');const p=m.querySelector('.oai-visit-memo-panel');if(p){p.style.removeProperty('max-height');p.style.height='';p.style.removeProperty('top');const field=p.querySelector('textarea');if(field)field.style.removeProperty('height');}const actions=m.querySelector('.oai-visit-memo-actions');if(actions)actions.classList.remove('has-delete');}window.__OAI_MEMO_CONTEXT__=null;}
+function _oaiCloseMemoModal(){const m=document.getElementById('oai-visit-memo-modal');if(m){clearTimeout(m._oaiMemoSuccessTimer);delete m.dataset.oaiSaved;const b=m.querySelector('[data-oai-memo-save]');if(b){b.textContent='저장';b.disabled=false;} m.classList.remove('show');m.setAttribute('aria-hidden','true');m.style.removeProperty('--oai-memo-vh');const p=m.querySelector('.oai-visit-memo-panel');if(p){p.style.removeProperty('max-height');p.style.height='';p.style.removeProperty('top');const field=p.querySelector('textarea');if(field)field.style.removeProperty('height');}const actions=m.querySelector('.oai-visit-memo-actions');if(actions)actions.classList.remove('has-delete');}window.__OAI_MEMO_CONTEXT__=null;}
 try{window._oaiCloseMemoModal=_oaiCloseMemoModal;}catch(_e){}
-function _oaiOpenMemo(kind){if(!(_oaiJournalDeveloperEnabled()))return;const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const v=_oaiGetVisitByDate(kind,ctx.item,ctx.date),m=_oaiEnsureMemoModal(),memo=String(v&&v.memo||'');window.__OAI_MEMO_CONTEXT__=ctx;document.getElementById('oai-visit-memo-date').textContent=_formatVisitDate(ctx.date);document.getElementById('oai-visit-memo-text').value=memo;const del=m.querySelector('[data-oai-memo-delete-modal]'),actions=m.querySelector('.oai-visit-memo-actions'),hasMemo=!!memo.trim();if(del)del.style.display=hasMemo?'':'none';if(actions)actions.classList.toggle('has-delete',hasMemo);m.classList.add('show');m.setAttribute('aria-hidden','false');_oaiInstallMemoViewportGuard();_oaiMemoFitViewport();setTimeout(_oaiMemoFitViewport,240);setTimeout(_oaiMemoFitViewport,500);}
+function _oaiOpenMemo(kind){if(!(_oaiJournalDeveloperEnabled()))return;const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const v=_oaiGetVisitByDate(kind,ctx.item,ctx.date),m=_oaiEnsureMemoModal(),memo=String(v&&v.memo||'');clearTimeout(m._oaiMemoSuccessTimer);delete m.dataset.oaiSaved;const saveBtn=m.querySelector('[data-oai-memo-save]');if(saveBtn){saveBtn.textContent='저장';saveBtn.disabled=false;}window.__OAI_MEMO_CONTEXT__=ctx;document.getElementById('oai-visit-memo-date').textContent=_formatVisitDate(ctx.date);document.getElementById('oai-visit-memo-text').value=memo;const del=m.querySelector('[data-oai-memo-delete-modal]'),actions=m.querySelector('.oai-visit-memo-actions'),hasMemo=!!memo.trim();if(del)del.style.display=hasMemo?'':'none';if(actions)actions.classList.toggle('has-delete',hasMemo);m.classList.add('show');m.setAttribute('aria-hidden','false');_oaiInstallMemoViewportGuard();_oaiMemoFitViewport();setTimeout(_oaiMemoFitViewport,240);setTimeout(_oaiMemoFitViewport,500);}
 function _oaiDeleteMemo(kind,fromModal){const ctx=(fromModal&&window.__OAI_MEMO_CONTEXT__&&window.__OAI_MEMO_CONTEXT__.kind===kind)?window.__OAI_MEMO_CONTEXT__:_oaiCurrentJournalContext(kind);if(!ctx)return;const v=_oaiGetVisitByDate(kind,ctx.item,ctx.date);if(!String(v&&v.memo||'').trim()){if(fromModal)_oaiCloseMemoModal();return;}_oaiVisitConfirm('이 방문의 메모를 삭제할까요?',function(){const ok=ctx.kind==='parish'?_oaiUpdateParishVisitExtras(ctx.item,ctx.date,{memo:''}):_oaiUpdateShrineVisitExtras(ctx.item,ctx.date,{memo:''});const saved=ok?_oaiGetVisitByDate(ctx.kind,ctx.item,ctx.date):null;if(!ok||!saved||String(saved.memo||'').trim()){_oaiVisitToast('메모 삭제를 확인하지 못했습니다.');return;}if(fromModal)_oaiCloseMemoModal();_oaiRerenderJournal(ctx.kind);_oaiVisitToast('메모를 삭제했습니다.');});}
 function _oaiClosePhotoAddDate(){
   const modal=document.getElementById('oai-photo-add-date-dialog');
@@ -10258,7 +10270,18 @@ function closeSheetPanelOnly(name){
   }
 }
 
-function closeRouteSheetByX(){
+function closeRouteSheetByX(confirmed){
+  // Guard user-initiated exit from a populated ordinary directions route.
+  // The confirmation runs before any route state or map overlay is cleared.
+  if(confirmed!==true && !window.__OAI_PILGRIMAGE_PLACE_PICK__ &&
+     !window.__OAI_PILGRIMAGE_COURSE_VIEW__ && !window.__OAI_PILGRIMAGE_ROUTE_EDIT__ &&
+     (_rS||_rE||_polyline)){
+    if(document.getElementById('oai-visit-confirm')?.classList.contains('show'))return;
+    _oaiVisitConfirm('현재 경로가 삭제됩니다. 정말 나가시겠습니까?',
+      function(){closeRouteSheetByX(true);},
+      {title:'경로 안내를 종료할까요?',cancelLabel:'계속 보기',confirmLabel:'나가기',variant:'route-exit'});
+    return;
+  }
   if(window.__OAI_PILGRIMAGE_PLACE_PICK__&&typeof window._oaiReturnFromPilgrimageMapPick==='function'){
     window._oaiReturnFromPilgrimageMapPick();return;
   }
