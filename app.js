@@ -24558,15 +24558,57 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   window._oaiReturnFromPilgrimageCourseMap=returnFromPilgrimageCourseMap;
 
+  // Only pilgrimage-detail road-leg results are persisted. Ordinary map routing
+  // and live GPS location tracking retain their existing behavior.
+  const PILGRIMAGE_LEG_CACHE_KEY='oai_pilgrimage_detail_legs_v1';
+  function _pilgrimageRoadLegKey(a,b){
+    if(!a||!b||!_validGpsPair(a.lat,a.lng)||!_validGpsPair(b.lat,b.lng))return null;
+    return [a,b].map(p=>Number(p.lat).toFixed(6)+','+Number(p.lng).toFixed(6)).join('>');
+  }
+  function _pilgrimageReadRoadLeg(key){
+    if(!key)return null;
+    try{
+      const records=JSON.parse(localStorage.getItem(PILGRIMAGE_LEG_CACHE_KEY)||'[]');
+      if(!Array.isArray(records))return null;
+      const row=records.find(item=>item&&item.key===key);
+      if(!row||!Number.isFinite(row.km)||!Number.isFinite(row.dur)||row.km<0||row.km>=1000||row.dur<0)return null;
+      return {km:row.km,dur:row.dur};
+    }catch(_e){return null;}
+  }
+  function _pilgrimageSaveRoadLeg(key,value){
+    if(!key||!value||!Number.isFinite(value.km)||!Number.isFinite(value.dur)||value.km<0||value.km>=1000||value.dur<0)return;
+    try{
+      const old=JSON.parse(localStorage.getItem(PILGRIMAGE_LEG_CACHE_KEY)||'[]');
+      const rows=(Array.isArray(old)?old:[]).filter(item=>item&&item.key!==key);
+      rows.unshift({key:key,km:value.km,dur:value.dur});
+      if(rows.length>450)rows.length=450;
+      localStorage.setItem(PILGRIMAGE_LEG_CACHE_KEY,JSON.stringify(rows));
+    }catch(_e){/* Storage unavailable: keep calculating normally, without changing user records. */}
+  }
+  async function _pilgrimageFetchRoadLeg(a,b,persist){
+    const key=persist?_pilgrimageRoadLegKey(a,b):null;
+    const cached=_pilgrimageReadRoadLeg(key);
+    if(cached)return cached;
+    const result=await _navFetch(Number(a.lng)+','+Number(a.lat),Number(b.lng)+','+Number(b.lat));
+    if(result&&Number.isFinite(Number(result.km))&&Number.isFinite(Number(result.dur))&&Number(result.km)>=0&&Number(result.km)<1000){
+      const valid={km:Number(result.km),dur:Number(result.dur)};
+      if(persist)_pilgrimageSaveRoadLeg(key,valid);
+      return valid;
+    }
+    return null;
+  }
+
   // Sum the legs in the *saved course order*.  Do not reorder by proximity.
   // Both the detail footer and the active-follow summary use this same calculation.
-  async function _pilgrimageOrderedRoadTotals(points){
+  async function _pilgrimageOrderedRoadTotals(points,movingStart){
     let km=0,dur=0,estimated=false;
     for(let i=1;i<points.length;i++){
       const a=points[i-1],b=points[i];
       if(!_validGpsPair(a.lat,a.lng)||!_validGpsPair(b.lat,b.lng))throw new Error('invalid pilgrimage waypoint');
       let leg=null;
-      try{leg=await _navFetch(Number(a.lng)+','+Number(a.lat),Number(b.lng)+','+Number(b.lat));}catch(_e){}
+      // A moving GPS start is never persisted. Fixed pilgrimage legs are reused
+      // even after the app is closed and reopened.
+      try{leg=await _pilgrimageFetchRoadLeg(a,b,!(i===1&&movingStart===true));}catch(_e){}
       if(leg&&Number.isFinite(Number(leg.km))&&Number.isFinite(Number(leg.dur))&&Number(leg.km)>=0&&Number(leg.km)<1000){
         km+=Number(leg.km);dur+=Number(leg.dur);
       }else{
@@ -24642,7 +24684,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(seq!==pilgrimageTotalCalcSeq)return;
     if(!start){kmEl.textContent='위치 확인 필요';timeEl.textContent='-';noteEl.textContent='현재 위치를 확인한 뒤 다시 계산해 주세요.';return;}
     try{
-      const result=await _pilgrimageOrderedRoadTotals([start].concat(stops));
+      const result=await _pilgrimageOrderedRoadTotals([start].concat(stops),running||!!startOverride||!explicitStart);
       if(seq!==pilgrimageTotalCalcSeq)return;
       kmEl.textContent=(result.estimated?'약 ':'')+result.km.toFixed(1)+' km';
       timeEl.textContent=(result.estimated?'약 ':'')+(typeof _fmtTime==='function'?_fmtTime(result.dur):Math.round(result.dur/60)+'분');
@@ -24673,7 +24715,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(!_validGpsPair(item.lat,item.lng)){setMetric(i,'위치 정보 확인 필요');continue;}
         let km=0,dur=0,estimated=false;
         try{
-          const val=await _navFetch(Number(prev.lng)+','+Number(prev.lat),Number(item.lng)+','+Number(item.lat));
+          const val=await _pilgrimageFetchRoadLeg(prev,item,!(i===0&&(running||!!startOverride||!!meta.start?.dynamicCurrent||!_validGpsPair(meta.start?.lat,meta.start?.lng))));
           if(val&&Number.isFinite(Number(val.km))&&Number.isFinite(Number(val.dur))&&Number(val.km)<1000){km=Number(val.km);dur=Number(val.dur);}
           else throw new Error('invalid route');
         }catch(_e){
@@ -24726,7 +24768,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(seq!==pilgrimageFollowDistanceSeq)return;
     if(!start){if(km)km.textContent='위치 확인 필요';if(tm)tm.textContent='-';if(note)note.textContent='위치 권한을 확인한 뒤 다시 계산해 주세요.';return;}
     try{
-      const total=await _pilgrimageOrderedRoadTotals([start].concat(stops));
+      const total=await _pilgrimageOrderedRoadTotals([start].concat(stops),true);
       if(seq!==pilgrimageFollowDistanceSeq)return;
       if(km)km.textContent=(total.estimated?'약 ':'')+total.km.toFixed(1)+' km';
       if(tm)tm.textContent=(total.estimated?'약 ':'')+(typeof _fmtTime==='function'?_fmtTime(total.dur):Math.round(total.dur/60)+'분');
