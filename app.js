@@ -15075,6 +15075,18 @@ function _schedulePilgrimageRouteResult(label,focusPoint){
 
       running=true;
       attempts++;
+      // Paint the progress indicator before route-card updates and route calculations.
+      // This is scoped to the read-only pilgrimage maps only.
+      if(_isPilgrimageCourseViewReadOnly()){
+        _oaiCourseRouteLoading(true,loadingToken);
+        await new Promise(function(resolve){
+          requestAnimationFrame(function(){requestAnimationFrame(resolve);});
+        });
+        if(window.__OAI_COURSE_LOADING_TOKEN__!==loadingToken || !_isPilgrimageCourseViewReadOnly()){
+          _oaiCourseRouteLoading(false,loadingToken);
+          done=true;running=false;return;
+        }
+      }
       stabilize();
       // A read-only course map is usable as soon as the shared Kakao map and
       // waypoint markers are ready. Do not keep its loading state coupled to
@@ -15082,7 +15094,6 @@ function _schedulePilgrimageRouteResult(label,focusPoint){
       // calculations while a network request is pending.
       if(_isPilgrimageCourseViewReadOnly()){
         done=true;
-        _oaiCourseRouteLoading(true,loadingToken);
         try{_refreshRouteTmpMarkers();}catch(_e){}
         try{_completeCategoryMapSurface();}catch(_e){}
         try{if(typeof oaiHideCategoryEntryVeil==='function')oaiHideCategoryEntryVeil();}catch(_e){}
