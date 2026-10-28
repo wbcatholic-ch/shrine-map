@@ -10574,12 +10574,3 @@ html.oai-pilgrimage-course-view-readonly #map-category-close-btn{display:inline-
 @keyframes oaiCourseRouteSpin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.oai-course-route-spinner{animation:none}}
 
-/* 순례계획/완료 공통 지도에서 추가: 하단 안내와 공통 접기 손잡이 */
-#app #sheet-pilgrimage-pick.open{top:auto;bottom:0;left:0;right:0;height:auto;max-height:46vh;min-height:146px;padding:22px 20px calc(18px + var(--oai-android-bottom-gap,env(safe-area-inset-bottom,0px)));gap:10px;box-sizing:border-box;border-radius:18px 18px 0 0;box-shadow:0 -3px 16px rgba(16,35,58,.13);z-index:800;transform:translateY(0)!important;overflow:auto;}
-#app #sheet-pilgrimage-pick strong{font-size:17px;color:#243047;}
-#app #sheet-pilgrimage-pick p{margin:0;line-height:1.5;font-size:13px;color:#536075;}
-#app #sheet-pilgrimage-pick .oai-pilgrimage-pick-count{font-weight:700;color:#745425;}
-#app #sheet-pilgrimage-pick .oai-pilgrimage-pick-return{width:100%;min-height:42px;border:1px solid #c8ad78;border-radius:10px;background:#fffdf8;font-size:14px;font-weight:700;color:#514020;}
-html:not(.oai-map-split-wide).oai-map-panel-collapsed #app #sheet-pilgrimage-pick.open{transform:translateY(calc(100% + 28px))!important;pointer-events:none!important;}
-html.oai-map-split-wide #app #sheet-pilgrimage-pick.open{top:var(--oai-map-top-h);left:0;right:auto;bottom:0;width:var(--oai-map-side-panel-w);height:auto;max-height:none;border-radius:0;border-right:1px solid var(--oai-map-panel-divider);padding-top:34px;}
-html.oai-map-split-wide.oai-map-panel-collapsed #app #sheet-pilgrimage-pick.open{transform:translateX(-100%)!important;pointer-events:none!important;}
