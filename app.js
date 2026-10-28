@@ -20396,7 +20396,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       out.textContent='읽기 전용 진단 ('+rows.length+'건)\n'+rows.map(x=>x.date+' | '+x.course+' | '+x.status+(x.unmatched&&x.unmatched.length?' | 스탬프 불일치: '+x.unmatched.join(', '):'')+(x.duplicates&&x.duplicates.length?' | 중복: '+x.duplicates.join(', '):'')).join('\n')+(skipped.length?'\n보류 ('+skipped.length+'건): '+skipped.map(x=>x.date+' '+x.course+' ('+x.reason+')').join('; '):'');
     }catch(err){out.textContent='검사 실패: '+String(err&&err.message||err);}
   });
-  function saveCourses(a){
+  function saveCourses(a,skipListRender){
     if(!Array.isArray(a))return false;
     const serialized=JSON.stringify(a);
     const beforeCourses=localStorage.getItem(COURSES_KEY)||'[]';
@@ -20404,7 +20404,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(localStorage.getItem(COURSES_KEY)!==serialized)localStorage.setItem(COURSES_KEY,serialized);
       if(localStorage.getItem(COURSES_KEY)!==serialized)throw new Error('저장 후 재조회 불일치');
     }catch(e){console.warn('[순례코스 저장]',e);return false;}
-    renderCourseList();
+    if(!skipListRender)renderCourseList();
     // 완료 기록이 추가·변경된 저장에서만 비동기 GPS 대조를 예약한다.
     try{
       const previous=JSON.parse(typeof beforeCourses==='string'?beforeCourses:'[]');
@@ -20525,7 +20525,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         localStorage.setItem(ACTIVE_FOLLOW_KEY,JSON.stringify({courseId:newId,startedAt:af.startedAt||now,travelMode:_followTravelMode(af.travelMode)}));
       }
       localStorage.removeItem(REPEAT_EDIT_GUARD_KEY);
-      saveCourses(a);
+      if(!saveCourses(a))return false;
       return true;
     }catch(e){console.warn('[가톨릭길동무] 다시 따라가기 코스 분리 실패',e);return false;}
   }
@@ -22350,7 +22350,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       next.completionArmed=false;
     }
     a[i]=next;
-    saveCourses(a);
+    if(!saveCourses(a))return;
     if(isDone&&gpsCompletedAll&&!(activeNow&&activeNow.mixedPhase&&activeNow.mixedPhase!=='done')){_clearActiveFollow(currentCourseId);_clearRepeatEditGuard(currentCourseId);}
   }
 
@@ -23169,7 +23169,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       _courseRefreshCompletionState(next);
       const a=loadCourses();
       a.unshift(next);
-      saveCourses(a);
+      if(!saveCourses(a,true)){alert('순례완료 저장에 실패했습니다. 다시 시도해 주세요.');return;}
       pilgrimageManualCreateMode=false;
       pilgrimageManualDraftCourse=null;
       currentCourseId='';
@@ -23191,7 +23191,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     next.updatedAt=Date.now();
     _courseRefreshCompletionState(next);
     a[i]=next;
-    saveCourses(a);
+    if(!saveCourses(a,true)){alert('순례완료 저장에 실패했습니다. 다시 시도해 주세요.');return;}
     const hasCompletion=_courseCompletionList(next).length>0;
     if(hasCompletion&&pilgrimageCourseTab==='plan'){
       pilgrimageCourseTab='complete';
@@ -23791,7 +23791,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       }
       const courses=loadCourses();
       courses.unshift(manualCourse);
-      saveCourses(courses);
+      if(!saveCourses(courses,true)){alert('순례완료 저장에 실패했습니다. 다시 시도해 주세요.');return;}
       closeSaveModal();
       pilgrimageManualCreateMode=false;
       pilgrimageManualDraftCourse=null;
@@ -23813,7 +23813,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         return;
       }
       a[i]=Object.assign({},a[i],d,{updatedAt:Date.now()});
-    }else currentCourseId='';}if(!currentCourseId){currentCourseId='course_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);a.unshift(Object.assign({id:currentCourseId,updatedAt:Date.now(),lastStartedAt:Date.now(),completionArmed:true,completions:[]},d));}saveCourses(a);closeSaveModal();renderDetail();flashSaved();const next=pendingAfterSave;pendingAfterSave='';if(next==='follow')setTimeout(()=>openFollow(),120);}
+    }else currentCourseId='';}if(!currentCourseId){currentCourseId='course_'+Date.now()+'_'+Math.random().toString(36).slice(2,7);a.unshift(Object.assign({id:currentCourseId,updatedAt:Date.now(),lastStartedAt:Date.now(),completionArmed:true,completions:[]},d));}if(!saveCourses(a)){alert('순례계획 저장에 실패했습니다. 다시 시도해 주세요.');return;}closeSaveModal();renderDetail();flashSaved();const next=pendingAfterSave;pendingAfterSave='';if(next==='follow')setTimeout(()=>openFollow(),120);}
   function saveCurrent(){
     if(pilgrimageDetailMode==='complete'){
       const course=_manualCompletionCourse();
