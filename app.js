@@ -20534,14 +20534,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       }
     }catch(_e){}
   }
-  function _activeFollowState(){
+  function _activeFollowState(knownCourses){
     const s=_readActiveFollowRaw();
     if(!s)return null;
     const now=Date.now();
     if(_courseDateInputValue(now)!==_courseDateInputValue(s.startedAt)||now>=_dailyDayEnd(_dailyIso(s.startedAt))){
       try{_dailyCloseFollowWithRetry(_courseDateInputValue(s.startedAt));}catch(e){console.warn('[순례 종료] 강제종료 실패',e);_dailyMarkUnresolved(_dailyIso(s.startedAt),e);}return null;
     }
-    const c=loadCourses().find(function(x){return x.id===s.courseId;});
+    const c=(Array.isArray(knownCourses)?knownCourses:loadCourses()).find(function(x){return x.id===s.courseId;});
     if(!c){_clearActiveFollow(s.courseId);return null;}
     // 혼합코스는 모든 스탬프가 먼저 완료되어도 남은 도보 GPS 구간을 끝까지 기록한다.
     if(_courseCompletionList(c).some(x=>_dailyIso(x.completedAt)===_dailyIso(s.startedAt))&&!(s.mixedPhase&&s.mixedPhase!=='done')){_clearActiveFollow(s.courseId);return null;}
@@ -20609,6 +20609,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function _refreshWalkingCoverBadge(){
     const badge=document.getElementById('oai-walk-cover-badge');
     if(!badge)return;
+    // Most screens have no active pilgrimage. Avoid loading/parsing every
+    // stored course whenever unrelated DOM changes trigger this badge update.
+    const raw=_readActiveFollowRaw();
+    if(!raw){
+      badge.hidden=true;
+      if(lastCarNoticeSignature)_syncCarPilgrimageNotice(null);
+      return;
+    }
     const active=_activeFollowState();
     const plannerLayer=planner();
     const onPilgrimage=!!(plannerLayer&&plannerLayer.classList.contains('show'));
@@ -20700,7 +20708,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   const pilgrimageBadgePlanner=planner();
   if(pilgrimageBadgePlanner)pilgrimageBadgeObserver.observe(pilgrimageBadgePlanner,{attributes:true,attributeFilter:['class','style','aria-hidden']});
   pilgrimageBadgeObserver.observe(document.body,{childList:true});
-  setInterval(function(){if(!document.hidden){const active=_activeFollowState();if(active&&active.travelMode==='car')_reconcileWalkingNativeFix();_refreshWalkingCoverBadge();}},5000);
+  setInterval(function(){
+    if(document.hidden||!_readActiveFollowRaw())return;
+    const active=_activeFollowState();
+    if(active&&active.travelMode==='car')_reconcileWalkingNativeFix();
+    _refreshWalkingCoverBadge();
+  },5000);
   function _walkingNativeCoursePoints(active){
     const places=Array.isArray(active&&active.course&&active.course.places)?active.course.places:[];
     return JSON.stringify(places.filter(x=>x&&!x.routeOnly&&_validGpsPair(x.lat,x.lng)).map(x=>({
@@ -22983,7 +22996,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!a.length){body.innerHTML='<div class="oai-pilgrimage-saved-empty">저장한 순례계획이 없습니다.<br><b>순례계획 세우기</b>로 첫 코스를 만들어 보세요.</div>';return;}
     const filtered=_sortPilgrimageCourses(a.filter(function(c){return _courseMatchesFilters(c,pilgrimageCourseFilterState);}),pilgrimageCourseFilterState.sort);
     if(!filtered.length){body.innerHTML=pilgrimageCourseTab==='complete'?'<div class="oai-pilgrimage-saved-empty">조건에 맞는 순례완료 기록이 없습니다.<br><b>년·월</b> 조건을 바꿔 보세요.</div>':'<div class="oai-pilgrimage-saved-empty">진행할 순례계획이 없습니다.<br><b>순례계획 세우기</b>로 새 코스를 만들어 보세요.</div>';return;}
-    const activeFollow=_activeFollowState();
+    const activeFollow=_activeFollowState(a);
     body.innerHTML=filtered.map(function(c){
       const doneList=_courseCompletionList(c),hasDone=doneList.length>0,isFollowing=!!(activeFollow&&activeFollow.courseId===c.id);
       const latestWalkCompleted=pilgrimageCourseTab==='complete'&&doneList.length>0&&(doneList[0].travelMode==='walk'||doneList[0].walkPerformed===true);
@@ -23604,43 +23617,49 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     setView('detail');
     renderDetail();
   }
-  function openCourse(id){
+  function openCourse(id,knownCourses,knownActive){
     pilgrimageManualCreateMode=false;pilgrimageManualDraftCourse=null;
-    const c=loadCourses().find(x=>x.id===id);if(!c)return;
-    const active=_activeFollowState();
+    // 상세 스와이프에서는 이미 읽은 코스 목록을 다시 파싱하지 않는다.
+    const courses=Array.isArray(knownCourses)?knownCourses:loadCourses();
+    const c=courses.find(x=>x.id===id);if(!c)return;
+    const active=knownActive===undefined?_activeFollowState(courses):knownActive;
     const isCurrentActive=!!(active&&active.courseId===String(id||''));
-    // 진행 중인 코스는 어느 탭에서 열더라도 '과거 완료기록'보다
-    // 이번 순례의 현재 진행상태를 우선해서 보여준다.
     pilgrimageDetailMode=isCurrentActive?'plan':(pilgrimageCourseTab==='complete'?'complete':'plan');
     applyCourse(isCurrentActive?active.course:c);
     setView('detail');
     renderDetail();
   }
-  // Completed details swipe only among completed courses; planned details only among plans.
-  // The active pilgrimage and an unsaved draft must never navigate on a swipe.
+  // 목록 원본이 달라질 때만 완료/계획 분류 및 정렬을 갱신한다.
+  // GPS 진행상태와 현재 활성 코스 제외는 매 전환마다 별도로 확인한다.
+  let detailSwipeCacheRaw=null,detailSwipeCacheCourses=null,detailSwipeCacheSort='',detailSwipeCacheLists=null;
+  function _detailSwipeOrderedCourses(mode,sortMode){
+    const raw=localStorage.getItem(COURSES_KEY)||'[]';
+    const sort=mode==='complete'?'completed':(sortMode==='name'?'name':'updated');
+    if(raw!==detailSwipeCacheRaw||sort!==detailSwipeCacheSort||!detailSwipeCacheLists){
+      const courses=loadCourses();
+      detailSwipeCacheRaw=raw;
+      detailSwipeCacheCourses=courses;
+      detailSwipeCacheSort=sort;
+      detailSwipeCacheLists={
+        complete:_sortPilgrimageCourses(courses.filter(c=>_courseCompletionList(c).length>0),'completed'),
+        plan:_sortPilgrimageCourses(courses.filter(c=>!_courseCompletionList(c).length),sortMode==='name'?'name':'updated')
+      };
+    }
+    return {courses:detailSwipeCacheCourses,ordered:detailSwipeCacheLists[mode]};
+  }
   function swipePilgrimageDetail(direction){
     if(plannerView!=='detail'||!currentCourseId||pilgrimageManualCreateMode)return false;
-    const active=_activeFollowState();
-    if(active&&active.courseId===String(currentCourseId))return false;
     const mode=pilgrimageDetailMode;
     if(mode!=='complete'&&mode!=='plan')return false;
-    const all=loadCourses();
-    const eligible=all.filter(function(c){
-      const completed=_courseCompletionList(c).length>0;
-      return mode==='complete'?completed:!completed;
-    });
-    const sorted=_sortPilgrimageCourses(eligible,mode==='complete'?'completed':
-      (pilgrimageCourseFilterState.sort==='name'?'name':'updated'));
-    // 순례완료는 완료끼리, 순례계획은 계획끼리 양 끝에서 이어서 순환한다.
-    // 진행 중인 순례는 스와이프 대상에서 제외한다.
-    const navigable=sorted.filter(function(c){
-      return !(active&&String(active.courseId)===String(c.id));
-    });
-    const index=navigable.findIndex(function(c){return String(c.id)===String(currentCourseId);});
+    const snapshot=_detailSwipeOrderedCourses(mode,pilgrimageCourseFilterState.sort);
+    const active=_activeFollowState(snapshot.courses);
+    if(active&&active.courseId===String(currentCourseId))return false;
+    const navigable=snapshot.ordered.filter(c=>!(active&&String(active.courseId)===String(c.id)));
+    const index=navigable.findIndex(c=>String(c.id)===String(currentCourseId));
     if(index<0||navigable.length<2)return false;
     const next=(index+(direction==='left'?1:-1)+navigable.length)%navigable.length;
     pilgrimageCourseTab=mode;
-    openCourse(navigable[next].id);
+    openCourse(navigable[next].id,snapshot.courses,active);
     return true;
   }
   (function(){
@@ -24731,6 +24750,35 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function _pilgrimageCurrentPosition(){
     return new Promise(resolve=>currentPosition((lat,lng)=>resolve({lat:Number(lat),lng:Number(lng)}),()=>resolve(null)));
   }
+  // Persistent display snapshots for unchanged pilgrimage courses. The source
+  // course/stamp records remain untouched. Dynamic GPS tracking is never cached.
+  const PILGRIMAGE_DISPLAY_CACHE_KEY='oai_pilgrimage_course_display_v1';
+  let pilgrimageDisplayMemo=null;
+  function _pilgrimageDisplayStore(){
+    if(pilgrimageDisplayMemo)return pilgrimageDisplayMemo;
+    try{const x=JSON.parse(localStorage.getItem(PILGRIMAGE_DISPLAY_CACHE_KEY)||'{}');pilgrimageDisplayMemo=x&&typeof x==='object'&&!Array.isArray(x)?x:{};}
+    catch(_e){pilgrimageDisplayMemo={};}
+    return pilgrimageDisplayMemo;
+  }
+  function _pilgrimageDisplaySignature(mode,kind,points,dynamic){
+    if(!currentCourseId||!Array.isArray(points)||!points.length||points.some(p=>!p||!_validGpsPair(p.lat,p.lng)))return null;
+    return JSON.stringify([String(currentCourseId),mode,kind,dynamic?'initial-current-position':'fixed',points.map(p=>[Number(p.lat).toFixed(6),Number(p.lng).toFixed(6),!!p.done])]);
+  }
+  function _pilgrimageDisplayGet(key){
+    if(!key)return null;
+    const row=_pilgrimageDisplayStore()[key];
+    return row&&typeof row==='object'?row:null;
+  }
+  function _pilgrimageDisplayPut(key,value){
+    if(!key||!value)return;
+    try{
+      const store=_pilgrimageDisplayStore();
+      store[key]=Object.assign({savedAt:Date.now()},value);
+      const keys=Object.keys(store);
+      if(keys.length>100){keys.sort((a,b)=>(store[b].savedAt||0)-(store[a].savedAt||0));keys.slice(100).forEach(k=>delete store[k]);}
+      localStorage.setItem(PILGRIMAGE_DISPLAY_CACHE_KEY,JSON.stringify(store));
+    }catch(_e){/* Storage failure cannot affect original course or stamps. */}
+  }
   async function calcPilgrimageTotalRoute(startOverride){
     const seq=++pilgrimageTotalCalcSeq;
     const kmEl=document.getElementById('oai-pilgrimage-total-km');
@@ -24754,6 +24802,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(!start||!end||!_validGpsPair(start.lat,start.lng)||!_validGpsPair(end.lat,end.lng)||stops.some(p=>!_validGpsPair(p.lat,p.lng))){
         kmEl.textContent='계산 불가';timeEl.textContent='-';noteEl.textContent='완료 당시 출발지·도착지 또는 GPS 스탬프 장소의 좌표가 없어 과거 거리를 계산하지 않습니다.';return;
       }
+      const displayKey=_pilgrimageDisplaySignature('complete','total',[start].concat(stops,[end]),false);
+      const saved=_pilgrimageDisplayGet(displayKey);
+      if(saved&&typeof saved.km==='string'&&typeof saved.time==='string'&&typeof saved.note==='string'){
+        kmEl.textContent=saved.km;timeEl.textContent=saved.time;noteEl.textContent=saved.note;return;
+      }
       kmEl.textContent='계산 중…';timeEl.textContent='-';
       noteEl.textContent='완료 당시 출발지 → GPS 스탬프 장소 '+stops.length+'곳 → 도착지의 자동차 경로를 계산 중입니다.';
       try{
@@ -24762,6 +24815,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         kmEl.textContent=(result.estimated?'약 ':'')+result.km.toFixed(1)+' km';
         timeEl.textContent=(result.estimated?'약 ':'')+(typeof _fmtTime==='function'?_fmtTime(result.dur):Math.round(result.dur/60)+'분');
         noteEl.textContent='완료 당시 출발지와 GPS 스탬프 '+stops.length+'곳, 도착지를 기준으로 계산한 자동차 거리·예상 주행시간입니다.'+(result.estimated?' 일부 구간은 추정값입니다.':'');
+        _pilgrimageDisplayPut(displayKey,{km:kmEl.textContent,time:timeEl.textContent,note:noteEl.textContent});
       }catch(_e){
         if(seq!==pilgrimageTotalCalcSeq)return;
         kmEl.textContent='계산 불가';timeEl.textContent='-';noteEl.textContent='완료 GPS 장소의 자동차 경로를 계산하지 못했습니다.';
@@ -24779,8 +24833,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       noteEl.textContent=running?'남은 경유지와 도착지가 없습니다.':'순례 장소 또는 도착지를 지정하면 코스 순서대로 계산합니다.';
       return;
     }
-    kmEl.textContent='계산 중…';timeEl.textContent='-';
     const explicitStart=!!(meta.start&&!meta.start.dynamicCurrent&&_validGpsPair(meta.start.lat,meta.start.lng));
+    const plannedPoints=explicitStart?[meta.start].concat(stops):stops;
+    const displayKey=(!running&&!startOverride)?_pilgrimageDisplaySignature('plan','total',plannedPoints,!explicitStart):null;
+    const saved=_pilgrimageDisplayGet(displayKey);
+    if(saved&&typeof saved.km==='string'&&typeof saved.time==='string'&&typeof saved.note==='string'){
+      kmEl.textContent=saved.km;timeEl.textContent=saved.time;noteEl.textContent=saved.note;return;
+    }
+    kmEl.textContent='계산 중…';timeEl.textContent='-';
     noteEl.textContent=(running?'현재 위치에서 남은':(explicitStart?'지정한 출발지에서':'현재 위치에서')+' 계획된')+' 순례지를 코스 순서대로 경유'+(meta.end?'하여 도착지까지':'')+' 계산 중입니다.';
     let start=running?null:(explicitStart?meta.start:null);
     if(startOverride&&_validGpsPair(startOverride.lat,startOverride.lng))start={lat:Number(startOverride.lat),lng:Number(startOverride.lng)};
@@ -24793,7 +24853,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       kmEl.textContent=(result.estimated?'약 ':'')+result.km.toFixed(1)+' km';
       timeEl.textContent=(result.estimated?'약 ':'')+(typeof _fmtTime==='function'?_fmtTime(result.dur):Math.round(result.dur/60)+'분');
       const basis=running?'현재 위치':(startOverride?'현재 위치':explicitStart?'지정한 출발지':'현재 위치');
-      noteEl.textContent=basis+'에서 '+(running?'남은 ':'')+'순례지를 코스 순서대로 경유'+(meta.end?'하여 도착지까지':'')+' 계산한 자동차 거리와 주행 시간입니다.'+(result.estimated?' 일부 구간은 추정값입니다.':'');
+      noteEl.textContent=(displayKey&&!explicitStart?'최초 계산 당시 위치':basis)+'에서 '+(running?'남은 ':'')+'순례지를 코스 순서대로 경유'+(meta.end?'하여 도착지까지':'')+' 계산한 자동차 거리와 주행 시간입니다.'+(result.estimated?' 일부 구간은 추정값입니다.':'');
+      _pilgrimageDisplayPut(displayKey,{km:kmEl.textContent,time:timeEl.textContent,note:noteEl.textContent});
     }catch(_e){if(seq!==pilgrimageTotalCalcSeq)return;kmEl.textContent='계산 불가';timeEl.textContent='-';noteEl.textContent='코스 좌표를 확인해 주세요.';}
   }
 
@@ -24802,6 +24863,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const seq=++detailMetricSeq,list=loadPlan(),meta=loadMeta(),active=_activeFollowState(),running=pilgrimageDetailMode!=='complete'&&!!(active&&currentCourseId&&String(active.courseId)===String(currentCourseId)),view=document.getElementById('oai-pilgrimage-detail-view');
     const setMetric=(i,text)=>{const el=document.querySelector('[data-plan-metric="'+i+'"]');if(el)el.textContent=text;};
     if(view){view.classList.remove('gps-ready');view.querySelectorAll('.oai-pilgrimage-item.is-next').forEach(el=>el.classList.remove('is-next'));}
+    const fixedStart=meta.start&&!meta.start.dynamicCurrent&&_validGpsPair(meta.start.lat,meta.start.lng);
+    const metricKey=(!running&&!startOverride&&pilgrimageDetailMode!=='complete')?
+      _pilgrimageDisplaySignature('plan','items',fixedStart?[meta.start].concat(list):list,!fixedStart):null;
+    const storedMetrics=_pilgrimageDisplayGet(metricKey);
+    if(storedMetrics&&Array.isArray(storedMetrics.rows)&&storedMetrics.rows.length===list.length){
+      storedMetrics.rows.forEach((v,i)=>setMetric(i,v));return;
+    }
     list.forEach((item,i)=>setMetric(i,item.done?'순례 완료':'누적거리 계산 중…'));
     if(!list.length)return;
 
@@ -24831,6 +24899,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         cumKm+=km;cumDur+=dur;anyEstimated=anyEstimated||estimated;
         setMetric(i,(anyEstimated?'약 ':'')+(running?'남은 누적 ':'누적 ')+cumKm.toFixed(1)+' km · '+(typeof _fmtTime==='function'?_fmtTime(cumDur):Math.round(cumDur/60)+'분'));
         prev={lat:Number(item.lat),lng:Number(item.lng)};
+      }
+      if(seq===detailMetricSeq&&metricKey){
+        const rows=list.map((_,i)=>{const el=document.querySelector('[data-plan-metric="'+i+'"]');return el?el.textContent:'';});
+        if(rows.every(v=>v&&!v.includes('계산 중')&&!v.includes('확인 필요')))_pilgrimageDisplayPut(metricKey,{rows:rows});
       }
     };
 
@@ -26338,6 +26410,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       });
     }
     if(historicBgScheduled)return;
+    // All historical tasks completed: do not schedule idle work on every boot.
+    if(historicalTasks.every(function(task){return _historicalBgState(task[0]).status==='done';}))return;
     historicBgScheduled=true;
     const generation=++historicBgGeneration;
     setTimeout(function(){_historicalBgIdle(function(){_historicalBgRun(0,generation);});},5000);
