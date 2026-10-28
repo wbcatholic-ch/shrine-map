@@ -23384,7 +23384,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       mapAddBtn.style.display=showMapButton?'':'none';
       mapAddBtn.setAttribute('aria-hidden',showMapButton?'false':'true');
       mapAddBtn.classList.toggle('is-walk-return',!!(showCourseMap&&activeForEditControls.travelMode==='walk'));
-      mapAddBtn.innerHTML='<span aria-hidden="true">🗺</span> '+(showCourseMap?(activeForEditControls.travelMode==='walk'?'도보순례로 돌아가기':'지도에서 코스보기'):'지도에서 추가');
+      mapAddBtn.classList.toggle('is-course-map',!!(showCourseMap&&activeForEditControls.travelMode!=='walk'));
+      mapAddBtn.innerHTML='<span aria-hidden="true">🗺</span> '+(showCourseMap?(activeForEditControls.travelMode==='walk'?'도보순례로 돌아가기':'순례코스 보기'):'지도에서 추가');
     }
     if(addBtn){
       const showAdd=!editingActive&&list.length>0&&!isCompletionView;

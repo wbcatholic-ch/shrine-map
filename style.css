@@ -7113,7 +7113,7 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
   background:#fff;color:#176fc0;font-size:calc(14px * var(--app-font-scale,1));font-weight:700;font-family:inherit;
 }
 #oai-pilgrimage-detail-view .oai-pilgrimage-add,
-#oai-pilgrimage-detail-view .oai-pilgrimage-map-add:not(.is-walk-return){
+#oai-pilgrimage-detail-view .oai-pilgrimage-map-add:not(.is-walk-return):not(.is-course-map){
   min-height:44px!important;
   border-radius:11px!important;
   background:#fff!important;
@@ -7124,9 +7124,21 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
   border:1px solid #d9c88f!important;
   color:#6b531a!important;
 }
-#oai-pilgrimage-detail-view .oai-pilgrimage-map-add:not(.is-walk-return){
+#oai-pilgrimage-detail-view .oai-pilgrimage-map-add:not(.is-walk-return):not(.is-course-map){
   border:1px solid #8db7da!important;
   color:#176fc0!important;
+}
+#oai-pilgrimage-detail-view .oai-pilgrimage-map-add.is-course-map{
+  min-height:52px!important;
+  border-radius:11px!important;
+  background:#17365f!important;
+  border:2px solid #17365f!important;
+  color:#fff!important;
+  box-shadow:0 3px 8px rgba(23,54,95,.18)!important;
+  font-family:inherit!important;
+  font-size:calc(16px * var(--app-font-scale,1))!important;
+  font-weight:900!important;
+  line-height:1.25!important;
 }
 #oai-pilgrimage-detail-view .oai-pilgrimage-map-add.is-walk-return{
   min-height:44px!important;
