@@ -3358,7 +3358,31 @@ function _oaiEnsureMemoModal(){
   m=document.createElement('div');m.id='oai-visit-memo-modal';m.className='oai-visit-memo-modal';m.setAttribute('aria-hidden','true');
   m.innerHTML='<div class="oai-visit-memo-backdrop" data-oai-memo-close="1"></div><section class="oai-visit-memo-panel" role="dialog" aria-modal="true" aria-label="방문 메모"><div class="oai-visit-memo-head"><div><b>나의 메모</b><small id="oai-visit-memo-date"></small></div><button type="button" data-oai-memo-close="1" aria-label="닫기">×</button></div><textarea id="oai-visit-memo-text" maxlength="2000" placeholder="이 방문에서 기억하고 싶은 내용을 적어보세요."></textarea><div class="oai-visit-memo-actions"><button type="button" data-oai-memo-delete-modal="1">삭제</button><button type="button" data-oai-memo-save="1">저장</button><button type="button" data-oai-memo-close="1">취소</button></div></section>';
   document.body.appendChild(m);
-  m.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('[data-oai-memo-close]')){_oaiCloseMemoModal();return;}if(e.target.closest&&e.target.closest('[data-oai-memo-delete-modal]')){const ctx=window.__OAI_MEMO_CONTEXT__;if(ctx)_oaiDeleteMemo(ctx.kind,true);return;}if(e.target.closest&&e.target.closest('[data-oai-memo-save]')){const ctx=window.__OAI_MEMO_CONTEXT__;if(!ctx)return;const memo=String((document.getElementById('oai-visit-memo-text')||{}).value||'').trim();const ok=ctx.kind==='parish'?_oaiUpdateParishVisitExtras(ctx.item,ctx.date,{memo:memo}):_oaiUpdateShrineVisitExtras(ctx.item,ctx.date,{memo:memo});const stored=ok?_oaiGetVisitByDate(ctx.kind,ctx.item,ctx.date):null;const verified=!!ok&&String(stored&&stored.memo||'').trim()===memo;if(verified){_oaiCloseMemoModal();_oaiRerenderJournal(ctx.kind);_oaiVisitToast(memo?'메모를 저장했습니다.':'메모를 삭제했습니다.');}else _oaiVisitToast('메모 저장을 확인하지 못했습니다. 입력 내용은 그대로 유지됩니다.');}});
+  // Save on the initial touch, before Android dismisses the keyboard and shifts the dialog.
+  // This avoids a first tap that only closes the keyboard instead of saving.
+  function saveMemo(){
+    const ctx=window.__OAI_MEMO_CONTEXT__;if(!ctx||m.dataset.oaiSaving==='1')return;
+    const field=m.querySelector('#oai-visit-memo-text');
+    const memo=String(field&&field.value||'').trim();
+    m.dataset.oaiSaving='1';
+    try{
+      const ok=ctx.kind==='parish'?_oaiUpdateParishVisitExtras(ctx.item,ctx.date,{memo:memo}):_oaiUpdateShrineVisitExtras(ctx.item,ctx.date,{memo:memo});
+      const stored=ok?_oaiGetVisitByDate(ctx.kind,ctx.item,ctx.date):null;
+      const verified=!!ok&&String(stored&&stored.memo||'').trim()===memo;
+      if(verified){_oaiCloseMemoModal();_oaiRerenderJournal(ctx.kind);_oaiVisitToast(memo?'메모를 저장했습니다.':'메모를 삭제했습니다.');}
+      else _oaiVisitToast('메모 저장을 확인하지 못했습니다. 입력 내용은 그대로 유지됩니다.');
+    }finally{delete m.dataset.oaiSaving;}
+  }
+  const saveButton=m.querySelector('[data-oai-memo-save]');
+  if(saveButton)saveButton.addEventListener('touchstart',function(e){
+    if(!m.classList.contains('show'))return;
+    e.preventDefault();e.stopPropagation();saveMemo();
+  },{passive:false});
+  m.addEventListener('click',function(e){
+    if(e.target.closest&&e.target.closest('[data-oai-memo-save]')){saveMemo();return;}
+    if(e.target.closest&&e.target.closest('[data-oai-memo-close]')){_oaiCloseMemoModal();return;}
+    if(e.target.closest&&e.target.closest('[data-oai-memo-delete-modal]')){const ctx=window.__OAI_MEMO_CONTEXT__;if(ctx)_oaiDeleteMemo(ctx.kind,true);}
+  });
   return m;
 }
 function _oaiMemoFitViewport(){
@@ -3374,7 +3398,7 @@ function _oaiMemoFitViewport(){
   const field=p.querySelector('textarea');
   if(field)field.style.setProperty('height',Math.max(78,Math.min(170,Math.floor(vh*.25)))+'px','important');
 }
-function _oaiInstallMemoViewportGuard(){if(window.__OAI_MEMO_VV_GUARD__)return;window.__OAI_MEMO_VV_GUARD__=true;const vv=window.visualViewport;if(vv){vv.addEventListener('resize',_oaiMemoFitViewport,{passive:true});vv.addEventListener('scroll',_oaiMemoFitViewport,{passive:true});}window.addEventListener('resize',_oaiMemoFitViewport,{passive:true});}
+function _oaiInstallMemoViewportGuard(){if(window.__OAI_MEMO_VV_GUARD__)return;window.__OAI_MEMO_VV_GUARD__=true;const vv=window.visualViewport;if(vv){vv.addEventListener('resize',_oaiMemoFitViewport,{passive:true});}window.addEventListener('resize',_oaiMemoFitViewport,{passive:true});}
 function _oaiCloseMemoModal(){const m=document.getElementById('oai-visit-memo-modal');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');m.style.removeProperty('--oai-memo-vh');const p=m.querySelector('.oai-visit-memo-panel');if(p){p.style.removeProperty('max-height');p.style.height='';p.style.removeProperty('top');const field=p.querySelector('textarea');if(field)field.style.removeProperty('height');}const actions=m.querySelector('.oai-visit-memo-actions');if(actions)actions.classList.remove('has-delete');}window.__OAI_MEMO_CONTEXT__=null;}
 try{window._oaiCloseMemoModal=_oaiCloseMemoModal;}catch(_e){}
 function _oaiOpenMemo(kind){if(!(_oaiJournalDeveloperEnabled()))return;const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const v=_oaiGetVisitByDate(kind,ctx.item,ctx.date),m=_oaiEnsureMemoModal(),memo=String(v&&v.memo||'');window.__OAI_MEMO_CONTEXT__=ctx;document.getElementById('oai-visit-memo-date').textContent=_formatVisitDate(ctx.date);document.getElementById('oai-visit-memo-text').value=memo;const del=m.querySelector('[data-oai-memo-delete-modal]'),actions=m.querySelector('.oai-visit-memo-actions'),hasMemo=!!memo.trim();if(del)del.style.display=hasMemo?'':'none';if(actions)actions.classList.toggle('has-delete',hasMemo);m.classList.add('show');m.setAttribute('aria-hidden','false');_oaiInstallMemoViewportGuard();_oaiMemoFitViewport();setTimeout(_oaiMemoFitViewport,240);setTimeout(_oaiMemoFitViewport,500);}
