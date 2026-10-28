@@ -16134,6 +16134,57 @@ async function _calcRoute(){
   // Bind loading completion to this route request, not a later entry's overlay.
   const courseLoadingToken=window.__OAI_COURSE_LOADING_TOKEN__;
   const waypoints = _getRouteWaypoints();
+  // Reuse successful pilgrimage directions while start, ordered stops and end stay unchanged.
+  // Never cache general routing or the live, in-progress pilgrimage.
+  const cacheEligible=(_isPilgrimageRouteEditMode() ||
+    ['completed-view','completed-place-info-view','place-info-view'].includes(_pilgrimageMapMode()));
+  const cacheKey='oai_pilgrimage_directions_v1';
+  const routeSignature=cacheEligible?JSON.stringify({
+    mode:'driving',
+    points:[_rS].concat(waypoints,[navDest]).map(function(p){
+      return [Number(p.lat).toFixed(6),Number(p.lng).toFixed(6)];
+    }),
+    parking:isJuk
+  }):null;
+  function savedRoute(){
+    if(!routeSignature)return null;
+    try{
+      const records=JSON.parse(localStorage.getItem(cacheKey)||'[]');
+      const record=Array.isArray(records)?records.find(function(x){return x&&x.sig===routeSignature;}):null;
+      if(!record||!Array.isArray(record.points)||!Number.isFinite(record.distance)||!Number.isFinite(record.duration))return null;
+      if(record.points.length<2||record.points.length>30000)return null;
+      const valid=record.points.every(function(p){return Array.isArray(p)&&p.length===2&&Number.isFinite(p[0])&&Number.isFinite(p[1]);});
+      return valid?record:null;
+    }catch(_e){return null;}
+  }
+  function saveRoute(distance,duration,path){
+    if(!routeSignature||!Array.isArray(path)||path.length<2)return;
+    try{
+      // Preserve the original road geometry rather than showing a straight-line approximation.
+      const coords=path.map(function(point){return [Number(point.getLat().toFixed(6)),Number(point.getLng().toFixed(6))];});
+      const item={sig:routeSignature,distance:distance,duration:duration,points:coords};
+      const serialized=JSON.stringify(item);
+      if(serialized.length>650000)return; // Never fill storage with an oversized route.
+      const old=JSON.parse(localStorage.getItem(cacheKey)||'[]');
+      const list=Array.isArray(old)?old.filter(function(x){return x&&x.sig!==routeSignature;}):[];
+      list.unshift(item);
+      while(list.length>6||JSON.stringify(list).length>1250000)list.pop();
+      localStorage.setItem(cacheKey,JSON.stringify(list));
+    }catch(_e){ /* Full/blocked storage must not break route drawing. */ }
+  }
+  const previous=savedRoute();
+  if(previous){
+    $('rs-km').textContent=(previous.distance/1000).toFixed(1);
+    $('rs-time').textContent=_fmtTime(previous.duration);
+    const cachedPath=previous.points.map(function(p){return new _LL(p[0],p[1]);});
+    _drawLine(_rS,navDest,cachedPath,{
+      fit:_pilgrimageMapMode()!=='completed-place-info-view',waypoints:waypoints
+    });
+    if(!isJuk)setRouteNote('',false);
+    if(window.__OAI_COURSE_LOADING_TOKEN__===courseLoadingToken)
+      _oaiCourseRouteLoading(false,courseLoadingToken);
+    return;
+  }
   _drawLine(_rS, navDest, null, {fit:false, waypoints:waypoints});
 
   async function fetchLeg(a,b){
@@ -16181,6 +16232,7 @@ async function _calcRoute(){
       $('rs-km').textContent=(distance/1000).toFixed(1);
       $('rs-time').textContent=_fmtTime(duration);
       _drawLine(_rS, navDest, path.length>1?path:null, {fit:_pilgrimageMapMode()!=='completed-place-info-view',waypoints:waypoints});
+      if(path.length>1)saveRoute(distance,duration,path);
       // The completed course is visible now: do not leave its spinner up until unrelated UI cleanup.
       if(_pilgrimageMapMode()==='completed-view' && window.__OAI_COURSE_LOADING_TOKEN__===courseLoadingToken)
         _oaiCourseRouteLoading(false,courseLoadingToken);
@@ -16191,6 +16243,7 @@ async function _calcRoute(){
     $('rs-km').textContent=(leg.distance/1000).toFixed(1);
     $('rs-time').textContent=_fmtTime(leg.duration);
     _drawLine(_rS, navDest, leg.path.length>1?leg.path:null, {fit:_pilgrimageMapMode()!=='completed-place-info-view'});
+    if(leg.path.length>1)saveRoute(leg.distance,leg.duration,leg.path);
     if(_pilgrimageMapMode()==='completed-view' && window.__OAI_COURSE_LOADING_TOKEN__===courseLoadingToken)
       _oaiCourseRouteLoading(false,courseLoadingToken);
     if(!isJuk) setRouteNote('', false);
@@ -23499,11 +23552,16 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     });
     const sorted=_sortPilgrimageCourses(eligible,mode==='complete'?'completed':
       (pilgrimageCourseFilterState.sort==='name'?'name':'updated'));
-    const index=sorted.findIndex(function(c){return String(c.id)===String(currentCourseId);});
-    const next=index+(direction==='left'?1:-1);
-    if(index<0||next<0||next>=sorted.length)return false;
+    // 순례완료는 완료끼리, 순례계획은 계획끼리 양 끝에서 이어서 순환한다.
+    // 진행 중인 순례는 스와이프 대상에서 제외한다.
+    const navigable=sorted.filter(function(c){
+      return !(active&&String(active.courseId)===String(c.id));
+    });
+    const index=navigable.findIndex(function(c){return String(c.id)===String(currentCourseId);});
+    if(index<0||navigable.length<2)return false;
+    const next=(index+(direction==='left'?1:-1)+navigable.length)%navigable.length;
     pilgrimageCourseTab=mode;
-    openCourse(sorted[next].id);
+    openCourse(navigable[next].id);
     return true;
   }
   (function(){

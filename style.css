@@ -9830,6 +9830,15 @@ html.oai-pilgrimage-course-view-readonly #sheet-route #rs-pilgrimage-return-btn{
   min-height:52px!important;
   max-height:52px!important;
   box-sizing:border-box!important;
+  background:#17365f!important;
+  border:2px solid #17365f!important;
+  color:#fff!important;
+  box-shadow:0 3px 8px rgba(23,54,95,.18)!important;
+  font-size:calc(16px * var(--app-font-scale,1))!important;
+  font-weight:900!important;
+}
+#oai-pilgrimage-detail-view.is-completion-view .oai-pilgrimage-total-actions > .oai-pilgrimage-course-map:active{
+  background:#245283!important;
 }
 
 /* GPS 자동 순례코스: 출발/도착 수동 보완 안내. 순례지와 스탬프는 읽기 전용입니다. */
