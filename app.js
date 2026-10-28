@@ -23404,10 +23404,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       return '방문 날짜·시간 확인 불가';
     }
   }
-  function renderDetail(){
+  function renderDetail(knownCourse,knownActive){
     const list=loadPlan(),m=loadMeta(),isCompletionView=pilgrimageDetailMode==='complete',isManualCreate=pilgrimageManualCreateMode,next=isCompletionView?-1:nextIndex(list);
     // Read/normalize persisted courses once per completed-detail render.
-    const manualCourse=isCompletionView&&currentCourseId?loadCourses().find(c=>c.id===currentCourseId):null;
+    const manualCourse=isCompletionView&&currentCourseId?(knownCourse&&String(knownCourse.id)===String(currentCourseId)?knownCourse:loadCourses().find(c=>c.id===currentCourseId)):null;
     const gpsAutoCompletion=!!(manualCourse&&manualCourse.autoGps===true);
     const gpsProtected=!!(manualCourse&&_courseHasGpsLockedCompletion(manualCourse));
     const displayedCompletion=isCompletionView&&manualCourse?_courseCompletionList(manualCourse)[0]:null;
@@ -23430,8 +23430,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         btn.classList.toggle('is-walk-destination',!!(m.walkSegment&&m.walkSegment.endRef&&m.walkSegment.endRef.role===r));
       }
     });
-    const isActiveFollowForDetail=!isCompletionView&&!!(currentCourseId&&_isActiveFollowCourse(currentCourseId));
-    const state=_activeFollowState();
+    const state=knownActive===undefined?_activeFollowState():knownActive;
+    const isActiveFollowForDetail=!isCompletionView&&!!(currentCourseId&&state&&String(state.courseId)===String(currentCourseId));
     const isWalkingFollowDetail=!!(isActiveFollowForDetail&&state&&state.travelMode==='walk');
     // Use one map entry in the main course details: the top map button changes
     // from adding places during planning to viewing the route during pilgrimage.
@@ -23449,7 +23449,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       else body.innerHTML=displayItems.map((row,i)=>{
         const item=row.point;
         const done=isCompletionView?!item.routeOnly:!!item.done;
-        const segBounds=_walkSegmentBounds(m.walkSegment,list,m);
+        const segBounds=walkOk;
         const inWalkSegment=!!(segBounds&&row.gps&&i>=segBounds.start&&i<=segBounds.end);
         const cls='oai-pilgrimage-item'+(done?' is-done':'')+(isCompletionView&&!row.gps?' is-manual-completion':'')+(inWalkSegment?' is-planned-walk':'');
         const metric=item.routeOnly?'이동 경유지 · 스탬프 없음':isCompletionView?(!row.gps?'':_completionPlaceVisitLabel(item,displayedCompletion)):(done?'순례 완료':'GPS 확인 중…');
@@ -23470,7 +23470,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const missingAddBtn=document.querySelector('#oai-pilgrimage-detail-view [data-oai-pilgrimage-missing-add]');
     const missingOptions=document.querySelector('#oai-pilgrimage-detail-view .oai-pilgrimage-missing-options');
     // 순례 진행 중에는 코스 편집용 추가 버튼을 숨긴다. GPS 방문 등록에는 영향이 없다.
-    const activeForEditControls=_activeFollowState();
+    const activeForEditControls=state;
     const editingActive=!!(activeForEditControls&&currentCourseId&&String(activeForEditControls.courseId)===String(currentCourseId));
     if(mapAddBtn){
       const canAdd=!editingActive&&(!isCompletionView||gpsProtected);
@@ -23501,10 +23501,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const allowMissingAdd=canSupplementCompletion&&!editingActive;
     if(missingAddBtn){missingAddBtn.hidden=!allowMissingAdd;missingAddBtn.style.display=allowMissingAdd?'block':'none';missingAddBtn.setAttribute('aria-expanded','false');}
     if(missingOptions)missingOptions.hidden=true;
+    const completedWalkHistory=isCompletionView?_walkHistoryEntries(manualCourse):[];
     const historyActions=document.querySelector('#oai-pilgrimage-detail-view .oai-pilgrimage-detail-actions');
     if(historyActions){
       let historyButton=historyActions.querySelector('[data-oai-walk-history]');
-      const historyItems=isCompletionView?_walkHistoryEntries(manualCourse):[];
+      const historyItems=completedWalkHistory;
       if(historyItems.length){
         if(!historyButton){historyButton=document.createElement('button');historyButton.type='button';historyButton.setAttribute('data-oai-walk-history','1');historyActions.appendChild(historyButton);}
         historyButton.hidden=false;historyButton.textContent='👣 지난 도보순례 경로보기';
@@ -23532,7 +23533,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const actions=document.querySelector('.oai-pilgrimage-detail-view .oai-pilgrimage-detail-actions');
     const reverseButton=document.querySelector('#oai-pilgrimage-detail-view [data-oai-pilgrimage-reverse]');
     if(reverseButton){
-      const savedCourse=currentCourseId&&loadCourses().find(c=>String(c.id)===String(currentCourseId));
+      const savedCourse=currentCourseId&&(knownCourse&&String(knownCourse.id)===String(currentCourseId)?knownCourse:loadCourses().find(c=>String(c.id)===String(currentCourseId)));
       const canReverse=!isCompletionView&&!isManualCreate&&!isActiveFollowForDetail&&list.length>0&&!(savedCourse&&_courseCompletionList(savedCourse).length);
       reverseButton.hidden=!canReverse;
       reverseButton.style.display=canReverse?'':'none';
@@ -23548,10 +23549,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       detailView.dataset.planSaved=isSaved?'1':'0';
       detailView.dataset.detailMode=pilgrimageDetailMode;
     }
-    const active=_activeFollowState(),isActive=!!(active&&currentCourseId&&active.courseId===currentCourseId);
+    const active=state,isActive=!!(active&&currentCourseId&&active.courseId===currentCourseId);
     if(detailRoot)detailRoot.classList.toggle('is-active-follow',isActive);
     if(saveBtn){
-      const dirty=isActive?_pilgrimageStructureIsDirty():_pilgrimageDraftIsDirty(),saveable=!!(list.length||(normalizePoint(m.start)&&normalizePoint(m.end)));
+      const dirty=(knownCourse&&String(knownCourse.id)===String(currentCourseId))?(isActive?_routeStructureSignature(draftSnapshot())!==_routeStructureSignature(knownCourse):JSON.stringify(_pilgrimageComparableSnapshot(draftSnapshot()))!==JSON.stringify(_pilgrimageComparableSnapshot(knownCourse))):(isActive?_pilgrimageStructureIsDirty():_pilgrimageDraftIsDirty()),saveable=!!(list.length||(normalizePoint(m.start)&&normalizePoint(m.end)));
       const manualPending=canSupplementCompletion&&_manualCompletionUnconfirmed.has(String(currentCourseId));
       const enabled=isCompletionView?manualPending:(saveable&&dirty);
       saveBtn.hidden=isCompletionView&&!canSupplementCompletion;
@@ -23593,12 +23594,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(totalCard){
       // A completed walk with a recorded GPS track already has its route playback button.
       // Keep the original course map for older completions without a recorded track.
-      const hasWalkHistory=isCompletionView&&_walkHistoryEntries(manualCourse).length>0;
+      const hasWalkHistory=completedWalkHistory.length>0;
       totalCard.hidden=hasWalkHistory;
       totalCard.style.display=hasWalkHistory?'none':'grid';
     }
     if(actions)actions.classList.add('is-integrated-pilgrimage');
-    calcPilgrimageTotalRoute();
+    calcPilgrimageTotalRoute(undefined,manualCourse);
     if(isCompletionView){
       // Completion metrics are rendered directly from the original GPS stamp.
       // Do not overwrite the per-place visit date/time with a fixed label.
@@ -23630,9 +23631,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const active=knownActive===undefined?_activeFollowState(courses):knownActive;
     const isCurrentActive=!!(active&&active.courseId===String(id||''));
     pilgrimageDetailMode=isCurrentActive?'plan':(pilgrimageCourseTab==='complete'?'complete':'plan');
-    applyCourse(isCurrentActive?active.course:c);
+    const displayedCourse=isCurrentActive?active.course:c;
+    applyCourse(displayedCourse);
     setView('detail');
-    renderDetail();
+    renderDetail(displayedCourse,active);
   }
   // 목록 원본이 달라질 때만 완료/계획 분류 및 정렬을 갱신한다.
   // GPS 진행상태와 현재 활성 코스 제외는 매 전환마다 별도로 확인한다.
@@ -24779,7 +24781,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       localStorage.setItem(PILGRIMAGE_DISPLAY_CACHE_KEY,JSON.stringify(store));
     }catch(_e){/* Storage failure cannot affect original course or stamps. */}
   }
-  async function calcPilgrimageTotalRoute(startOverride){
+  async function calcPilgrimageTotalRoute(startOverride,knownCompletionCourse){
     const seq=++pilgrimageTotalCalcSeq;
     const kmEl=document.getElementById('oai-pilgrimage-total-km');
     const timeEl=document.getElementById('oai-pilgrimage-total-time');
@@ -24790,7 +24792,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     // V1564: 완료 상세의 거리/주행시간은 과거 계획이 아닌 해당 완료 회차의
     // GPS 스탬프 장소만 사용한다. 현재 GPS 위치를 과거 순례 출발지로 사용하지 않는다.
     if(pilgrimageDetailMode==='complete'){
-      const course=currentCourseId?loadCourses().find(c=>String(c.id)===String(currentCourseId)):null;
+      const course=currentCourseId?(knownCompletionCourse&&String(knownCompletionCourse.id)===String(currentCourseId)?knownCompletionCourse:loadCourses().find(c=>String(c.id)===String(currentCourseId))):null;
       const completion=course?_courseCompletionList(course)[0]:null;
       const rows=course&&completion?_manualMerged(course).filter(row=>row.gps&&!row.point.routeOnly):[];
       const stops=rows.map(row=>normalizePoint(row.point)).filter(Boolean);
