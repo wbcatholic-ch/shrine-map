@@ -1871,7 +1871,11 @@ function openMissa(){
 
 const OAI_SHRINE_VISITS_KEY = 'oai_shrine_visits_v1';
 const OAI_SHRINE_AUTO_VISIT_PROMPT_KEY = 'oai_shrine_auto_visit_prompt_v1';
-const OAI_SHRINE_AUTO_VISIT_RADIUS_M = 500;
+// 모든 성지는 shrines.js의 개별 gpsRadiusM만 사용한다. 미지정 시 GPS 인증 불가.
+function _oaiShrineGpsRadiusM(shrine){
+  const radius=Number(shrine&&shrine.gpsRadiusM);
+  return Number.isFinite(radius)&&radius>0?radius:0;
+}
 let _shrineVisitMapFilter = 'all';
 let _shrineVisitCardsTab = 'visited';
 let _shrineVisitCardsDiocese = 'all';
@@ -4198,7 +4202,7 @@ function _nearestShrineWithinAutoVisitRadius(lat,lng,unvisitedOnDate){
   SHRINES.forEach(function(s,idx){
     if(!s) return;
     if(unvisitedOnDate&&_hasShrineVisitOnDate(s,unvisitedOnDate))return;
-    const radius=(Number(s.gpsRadiusM)>0)?Number(s.gpsRadiusM):OAI_SHRINE_AUTO_VISIT_RADIUS_M;
+    const radius=_oaiShrineGpsRadiusM(s);
     let points=[];
     if(Array.isArray(s.gpsPoints)&&s.gpsPoints.length){
       points=s.gpsPoints.filter(function(p){ return p&&Number(p.lat)&&Number(p.lng); });
@@ -4286,7 +4290,7 @@ function _openShrineAutoVisitModal(entry,opts){
   const placeName=entry.item.name||'성지';
   if(kicker) kicker.textContent=opts.method==='manual'?'순례등록 완료':'GPS 자동 순례등록';
   if(title) title.textContent='축하합니다. '+placeName+' 순례등록이 되었습니다.';
-  _oaiSetGpsVisitRadiusNotice(entry.item.gpsRadiusM||OAI_SHRINE_AUTO_VISIT_RADIUS_M,opts.method==='manual');
+  _oaiSetGpsVisitRadiusNotice(_oaiShrineGpsRadiusM(entry.item),opts.method==='manual');
   modal.classList.add('show');
   modal.setAttribute('aria-hidden','false');
   try{
@@ -4620,7 +4624,7 @@ function _oaiJointStampAddParish(parish,date,sourceKind,sourceItem){
   if(!_appendVisitOnce(r,date,'manual'))return false;
   const entry=r.visits.find(function(v){return v&&v.date===date;});
   if(!entry)return false;
-  entry.source='joint-stamp-backfill';entry.sourceKind=sourceKind;
+  entry.method='linked';entry.source='shared-shrine-gps-linked';entry.sourceKind=sourceKind;
   entry.sourcePlaceId=_oaiPlaceCanonicalId(sourceKind,sourceItem);
   if(!r.placeId)r.placeId=_oaiPlaceCanonicalId('parish',parish);
   data[state.key]=r;
@@ -5302,7 +5306,7 @@ function _oaiGpsLinkedShrineForParish(parish,lat,lng){
   if(!group)return null;
   const shrine=_oaiSharedGroupShrine(group);
   if(!shrine)return null;
-  const radius=Number(shrine.gpsRadiusM)>0?Number(shrine.gpsRadiusM):OAI_SHRINE_AUTO_VISIT_RADIUS_M;
+  const radius=_oaiShrineGpsRadiusM(shrine);
   const pts=Array.isArray(shrine.gpsPoints)&&shrine.gpsPoints.length?shrine.gpsPoints:[{lat:shrine.lat,lng:shrine.lng}];
   if(!pts.some(function(pt){return Number.isFinite(Number(pt.lat))&&Number.isFinite(Number(pt.lng))&&calcDist(lat,lng,Number(pt.lat),Number(pt.lng))*1000<=radius;}))return null;
   return shrine;
@@ -21895,7 +21899,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
             });
           }
           if(!Number.isFinite(meters)&&_validGpsPair(shrine.lat,shrine.lng))meters=calcDist(myLat,myLng,Number(shrine.lat),Number(shrine.lng))*1000;
-          const radius=Number(shrine.gpsRadiusM)>0?Number(shrine.gpsRadiusM):(typeof OAI_SHRINE_AUTO_VISIT_RADIUS_M!=='undefined'?Number(OAI_SHRINE_AUTO_VISIT_RADIUS_M):150);
+          const radius=_oaiShrineGpsRadiusM(shrine);
           return meters<=radius;
         }
       }
@@ -23364,7 +23368,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(Array.isArray(SHRINES)){
         let best=null,bestD=Infinity;
         SHRINES.forEach(function(s){if(!s||!_validGpsPair(s.lat,s.lng))return;const same=qn&&_normPilgrimageName(s.name)===qn;const d=calcDist(q.lat,q.lng,Number(s.lat),Number(s.lng));if((same||d<=0.20)&&d<bestD){best=s;bestD=d;}});
-        if(best)hit={type:'shrine',item:best,radius:(Number(best.gpsRadiusM)>0?Number(best.gpsRadiusM):OAI_SHRINE_AUTO_VISIT_RADIUS_M)};
+        if(best)hit={type:'shrine',item:best,radius:_oaiShrineGpsRadiusM(best)};
       }
     }catch(_e){}
     if(hit)return hit;
