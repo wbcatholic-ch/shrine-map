@@ -428,7 +428,9 @@
     el = $b('sheet-route');
     try{
       if((el && el.classList.contains('open')) || _routeMode || _rS || _rE){
-        if((window.__oaiPilgrimageRouteReturn===true || window.__OAI_PILGRIMAGE_ROUTE_EDIT__) && typeof window.closeRouteSheetByX==='function'){
+        // The Android/system Back action must use the same route-exit confirmation
+        // as the route sheet X button. Do not clear the route before confirmation.
+        if(typeof window.closeRouteSheetByX==='function'){
           window.closeRouteSheetByX();
           return true;
         }
