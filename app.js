@@ -16245,7 +16245,7 @@ async function _calcRoute(){
     $('rs-time').textContent=_fmtTime(previous.duration);
     const cachedPath=previous.points.map(function(p){return new _LL(p[0],p[1]);});
     _drawLine(_rS,navDest,cachedPath,{
-      fit:_pilgrimageMapMode()!=='completed-place-info-view',waypoints:waypoints
+      fit:!['completed-place-info-view','place-info-view'].includes(_pilgrimageMapMode()),waypoints:waypoints
     });
     if(!isJuk)setRouteNote('',false);
     if(window.__OAI_COURSE_LOADING_TOKEN__===courseLoadingToken)
@@ -16306,7 +16306,7 @@ async function _calcRoute(){
       }
       $('rs-km').textContent=(distance/1000).toFixed(1);
       $('rs-time').textContent=_fmtTime(duration);
-      _drawLine(_rS, navDest, path.length>1?path:null, {fit:_pilgrimageMapMode()!=='completed-place-info-view',waypoints:waypoints});
+      _drawLine(_rS, navDest, path.length>1?path:null, {fit:!['completed-place-info-view','place-info-view'].includes(_pilgrimageMapMode()),waypoints:waypoints});
       if(path.length>1)saveRoute(distance,duration,path);
       // The completed course is visible now: do not leave its spinner up until unrelated UI cleanup.
       if(_pilgrimageMapMode()==='completed-view' && window.__OAI_COURSE_LOADING_TOKEN__===courseLoadingToken)
@@ -16317,7 +16317,7 @@ async function _calcRoute(){
     const leg=await fetchLeg(_rS, navDest);
     $('rs-km').textContent=(leg.distance/1000).toFixed(1);
     $('rs-time').textContent=_fmtTime(leg.duration);
-    _drawLine(_rS, navDest, leg.path.length>1?leg.path:null, {fit:_pilgrimageMapMode()!=='completed-place-info-view'});
+    _drawLine(_rS, navDest, leg.path.length>1?leg.path:null, {fit:!['completed-place-info-view','place-info-view'].includes(_pilgrimageMapMode())});
     if(leg.path.length>1)saveRoute(leg.distance,leg.duration,leg.path);
     if(_pilgrimageMapMode()==='completed-view' && window.__OAI_COURSE_LOADING_TOKEN__===courseLoadingToken)
       _oaiCourseRouteLoading(false,courseLoadingToken);
@@ -16334,7 +16334,7 @@ async function _calcRoute(){
     $('rs-km').textContent=d.toFixed(1);
     $('rs-time').textContent=_fmtTime(d/70*3600);
     if(!isJuk) setRouteNote('* 직선거리 기반 추정값', false);
-    _drawLine(_rS, navDest, null, {fit:_pilgrimageMapMode()!=='completed-place-info-view', waypoints:waypoints});
+    _drawLine(_rS, navDest, null, {fit:!['completed-place-info-view','place-info-view'].includes(_pilgrimageMapMode()), waypoints:waypoints});
     if(_pilgrimageMapMode()==='completed-view' && window.__OAI_COURSE_LOADING_TOKEN__===courseLoadingToken)
       _oaiCourseRouteLoading(false,courseLoadingToken);
   }
@@ -24243,19 +24243,22 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(typeof _syncMapPanelUI==='function')_syncMapPanelUI(normalRoute?'route':'pilgrimage-route-edit');
         if(readOnly&&(_pilgrimageCourseViewKind()==='place-info'||_pilgrimageCourseViewKind()==='complete-place-info')){
           _setMapPanelCollapsed(true,'pilgrimage-detail-initial');
-          // Saved waypoints are the sole framing source for either detail map.
-          // Do this after the route sheet, waypoint markers and map layout settle.
-          // Plan and completion use the same post-layout waypoint fit. The
-          // first paint can precede the route sheet's final dimensions.
+          // Both plan and completion detail views use the same saved-waypoints
+          // bounds, never the selected place or the live GPS position. The
+          // bottom sheet may finish resizing after the first two frames.
+          // Restore once when the shared map settles, with an entry-token guard;
+          // do not leave a permanent resize/idle listener running.
           const detailKind=_pilgrimageCourseViewKind();
           const expectedEntryToken=mapEntryToken;
-          requestAnimationFrame(function(){
-            requestAnimationFrame(function(){
-              if(window.__OAI_PILGRIMAGE_MAP_ENTRY_TOKEN__!==expectedEntryToken ||
-                  _pilgrimageCourseViewKind()!==detailKind || _screen!=='map')return;
-              _fitPilgrimagePlaceInfoWaypoints(plan);
-            });
-          });
+          const restoreDetailBounds=function(){
+            if(window.__OAI_PILGRIMAGE_MAP_ENTRY_TOKEN__!==expectedEntryToken ||
+                _pilgrimageCourseViewKind()!==detailKind || _screen!=='map')return;
+            _fitPilgrimagePlaceInfoWaypoints(plan);
+          };
+          requestAnimationFrame(function(){requestAnimationFrame(restoreDetailBounds);});
+          // A single bounded follow-up accommodates a slow route sheet/layout
+          // transition on Android. No interval or repeated recalculation.
+          setTimeout(restoreDetailBounds,320);
         }else if(readOnly&&_pilgrimageCourseViewKind()==='complete'){
           _setMapPanelCollapsed(false,'completed-course-initial');
           _hidePilgrimageDetailCategoryMarkers();
