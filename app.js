@@ -3368,23 +3368,18 @@ function _oaiEnsureMemoModal(){
     const ctx=window.__OAI_MEMO_CONTEXT__;if(!ctx||m.dataset.oaiSaving==='1'||m.dataset.oaiSaved==='1')return;
     const field=m.querySelector('#oai-visit-memo-text');
     const memo=String(field&&field.value||'').trim();
+    if(!memo){_oaiVisitToast('메모 내용을 입력해주세요.');return;}
     m.dataset.oaiSaving='1';
     try{
       const ok=ctx.kind==='parish'?_oaiUpdateParishVisitExtras(ctx.item,ctx.date,{memo:memo}):_oaiUpdateShrineVisitExtras(ctx.item,ctx.date,{memo:memo});
       const stored=ok?_oaiGetVisitByDate(ctx.kind,ctx.item,ctx.date):null;
       const verified=!!ok&&String(stored&&stored.memo||'').trim()===memo;
       if(verified){
-        m.dataset.oaiSaved='1';
-        // Saving is immediate, but keep the success state visible before closing.
-        const btn=m.querySelector('[data-oai-memo-save]');
-        if(btn){btn.textContent='✓ 저장되었습니다';btn.disabled=true;}
-        const savedCtx=ctx;
-        clearTimeout(m._oaiMemoSuccessTimer);
-        m._oaiMemoSuccessTimer=setTimeout(function(){
-          if(window.__OAI_MEMO_CONTEXT__===savedCtx && m.classList.contains('show')){
-            _oaiCloseMemoModal();_oaiRerenderJournal(savedCtx.kind);
-          }
-        },1100);
+        // Same as other save actions: close immediately after confirmed persistence.
+        // Show feedback in the journal, not by replacing or disabling the Save button.
+        _oaiCloseMemoModal();
+        _oaiRerenderJournal(ctx.kind);
+        _oaiVisitToast('메모를 저장했습니다.');
       }
       else _oaiVisitToast('메모 저장을 확인하지 못했습니다. 입력 내용은 그대로 유지됩니다.');
     }finally{delete m.dataset.oaiSaving;}
