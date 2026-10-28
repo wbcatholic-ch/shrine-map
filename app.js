@@ -24071,11 +24071,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         try{
           if(readOnly&&['place-info','complete-place-info'].includes(_pilgrimageCourseViewKind())){
             _setMapPanelCollapsed(true,'detail-map-ready');
-            _fitPilgrimagePlaceInfoWaypoints(plan);
           }
           if(typeof _restoreAllCategoryMarkersForSelection==='function')_restoreAllCategoryMarkersForSelection();
           if(typeof _refreshRouteTmpMarkers==='function')_refreshRouteTmpMarkers();
           if(readOnly&&['place-info','complete-place-info','complete'].includes(_pilgrimageCourseViewKind()))_hidePilgrimageDetailCategoryMarkers();
+          // Both planned and completed place-info maps fit ONLY their saved
+          // waypoints, after the shared map and marker surfaces have settled.
+          if(readOnly&&['place-info','complete-place-info'].includes(_pilgrimageCourseViewKind())){
+            _fitPilgrimagePlaceInfoWaypoints(plan);
+          }
           const focus=options.focusPoint&&_validGpsPair(options.focusPoint.lat,options.focusPoint.lng)?options.focusPoint:_pilgrimageMapInitialPoint(entryRole);
           if(focus&&_validGpsPair(focus.lat,focus.lng)&&!readOnly)
             _setPilgrimageMapCenterForBottomCard({lat:Number(focus.lat),lng:Number(focus.lng)},OAI_PILGRIMAGE_MAP_PICK_VIEW_LEVEL,{repeat:false});
@@ -24181,7 +24185,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           _setMapPanelCollapsed(true,'pilgrimage-detail-initial');
           // Saved waypoints are the sole framing source for either detail map.
           // Do this after the route sheet, waypoint markers and map layout settle.
-          _fitPilgrimagePlaceInfoWaypoints(plan);
+          // Plan and completion use the same post-layout waypoint fit. The
+          // first paint can precede the route sheet's final dimensions.
+          const detailKind=_pilgrimageCourseViewKind();
+          const expectedEntryToken=mapEntryToken;
+          requestAnimationFrame(function(){
+            requestAnimationFrame(function(){
+              if(window.__OAI_PILGRIMAGE_MAP_ENTRY_TOKEN__!==expectedEntryToken ||
+                  _pilgrimageCourseViewKind()!==detailKind || _screen!=='map')return;
+              _fitPilgrimagePlaceInfoWaypoints(plan);
+            });
+          });
         }else if(readOnly&&_pilgrimageCourseViewKind()==='complete'){
           _setMapPanelCollapsed(false,'completed-course-initial');
           _hidePilgrimageDetailCategoryMarkers();
