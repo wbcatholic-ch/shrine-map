@@ -3290,7 +3290,7 @@ function _oaiVisitJournalHtml(kind,item,visits){
   if(date==='all'){
     const entries=_oaiAllVisitPhotos(kind,item,visits);
     const grid=entries.length?'<div class="oai-visit-photo-grid" data-oai-photo-grid="'+_visitHtmlEsc(kind)+'">'+entries.map(function(x,i){return _oaiJournalPhotoThumbHtml(kind,x,i);}).join('')+'</div>':'<div class="oai-visit-journal-empty">등록된 사진이 없습니다. 복원 중인 사진은 내려받기가 완료되면 나타납니다.</div>';
-    return '<section class="oai-visit-journal" data-oai-journal-kind="'+_visitHtmlEsc(kind)+'"><div class="oai-visit-journal-head"><div class="shrine-visit-detail-section-title">나의 기록 <button type="button" class="cgm-help-icon cgm-visit-section-help" data-cgm-help="visit_photo" aria-label="내가 올린 사진 보관 도움말">?</button></div><button type="button" class="oai-journal-add-photo" data-oai-photo-add-date="'+_visitHtmlEsc(kind)+'">＋ 사진 추가</button></div><div class="oai-visit-journal-block oai-visit-photo-block">'+_oaiVisitDatePickerHtml(kind,item,visits)+grid+'<div class="oai-visit-journal-empty">사진 추가·삭제와 메모 수정은 날짜를 선택해 주세요.</div></div></section>';
+    return '<section class="oai-visit-journal" data-oai-journal-kind="'+_visitHtmlEsc(kind)+'"><div class="oai-visit-journal-head"><div class="shrine-visit-detail-section-title">나의 기록 <button type="button" class="cgm-help-icon cgm-visit-section-help" data-cgm-help="visit_photo" aria-label="내가 올린 사진 보관 도움말">?</button></div><button type="button" class="oai-journal-add-photo" data-oai-photo-add-date="'+_visitHtmlEsc(kind)+'">＋ 사진 추가</button></div><div class="oai-visit-journal-block oai-visit-photo-block">'+_oaiVisitDatePickerHtml(kind,item,visits)+grid+'<button type="button" class="oai-journal-add-memo" data-oai-memo-add-date="'+_visitHtmlEsc(kind)+'">＋ 메모 추가</button><div class="oai-visit-journal-empty">사진 추가·삭제와 메모 수정은 날짜를 선택해 주세요.</div></div></section>';
   }
   const baseVisit=visits.find(function(v){return String(v.date||'')===date;})||visits[0],visit=_oaiGetVisitByDate(kind,item,date)||baseVisit;
   const limit=_oaiVisitPhotoLimit(kind,item);
@@ -3374,7 +3374,8 @@ function _oaiClosePhotoAddDate(){
   return true;
 }
 window._oaiPhotoAddDateBackHandle=_oaiClosePhotoAddDate;
-function _oaiChoosePhotoAddDate(kind){
+function _oaiChoosePhotoAddDate(kind,mode){
+  const memoMode=mode==='memo';
   if(!_oaiJournalDeveloperEnabled())return;
   const ctx=_oaiCurrentJournalContext(kind);
   if(!ctx||!ctx.visits||!ctx.visits.length)return;
@@ -3386,12 +3387,12 @@ function _oaiChoosePhotoAddDate(kind){
     const photos=_oaiNormalizePhotos(_oaiGetVisitByDate(kind,ctx.item,date)||v);
     return {date:date,count:photos.length,full:photos.length>=limit};
   }).filter(function(o){return !!o.date;});
-  const available=dateOptions.filter(function(o){return !o.full;});
+  const available=memoMode?dateOptions:dateOptions.filter(function(o){return !o.full;});
   if(!available.length){_oaiVisitToast('모든 방문 날짜의 사진 등록 수량을 사용했습니다.');return;}
   if(available.length===1){
     window[kind==='parish'?'__OAI_PARISH_JOURNAL_DATE__':'__OAI_SHRINE_JOURNAL_DATE__']=available[0].date;
     _oaiPhotoSelectionClear();_oaiRerenderJournal(kind);
-    _oaiAddPhotos(kind);
+    if(memoMode)_oaiOpenMemo(kind);else _oaiAddPhotos(kind);
     return;
   }
   let modal=document.getElementById('oai-photo-add-date-dialog');
@@ -3409,13 +3410,15 @@ function _oaiChoosePhotoAddDate(kind){
       _oaiClosePhotoAddDate();
       window[k==='parish'?'__OAI_PARISH_JOURNAL_DATE__':'__OAI_SHRINE_JOURNAL_DATE__']=d;
       _oaiPhotoSelectionClear();_oaiRerenderJournal(k);
-      _oaiAddPhotos(k);
+      if(modal.dataset.mode==='memo')_oaiOpenMemo(k);else _oaiAddPhotos(k);
     });
   }
-  modal.dataset.kind=kind;
+  modal.dataset.kind=kind;modal.dataset.mode=memoMode?'memo':'photo';
+  const title=modal.querySelector('#oai-photo-add-date-title');if(title)title.textContent=memoMode?'메모를 작성할 방문 날짜':'사진을 추가할 방문 날짜';
   const list=modal.querySelector('.oai-photo-add-date-list');
   list.innerHTML=dateOptions.map(function(o){
-    return '<button type="button" data-oai-add-date-value="'+_visitHtmlEsc(o.date)+'"'+(o.full?' disabled':'')+'><span>'+_visitHtmlEsc(_formatVisitDate(o.date))+'</span><small>'+o.count+' / '+limit+'장'+(o.full?' · 등록 완료':'')+'</small></button>';
+    const visit=_oaiGetVisitByDate(kind,ctx.item,o.date);
+    return '<button type="button" data-oai-add-date-value="'+_visitHtmlEsc(o.date)+'"'+(!memoMode&&o.full?' disabled':'')+'><span>'+_visitHtmlEsc(_formatVisitDate(o.date))+'</span><small>'+(memoMode?(String(visit&&visit.memo||'').trim()?'메모 수정':'메모 추가'):(o.count+' / '+limit+'장'+(o.full?' · 등록 완료':'')))+'</small></button>';
   }).join('');
   modal.classList.add('show');modal.setAttribute('aria-hidden','false');
 }
@@ -3770,6 +3773,7 @@ function _oaiHandleVisitDateChange(e){
 function _oaiHandleJournalClick(e){
   try{if(!_oaiJournalDeveloperEnabled())return false;}catch(_e){return false;}
   const memoDel=e.target.closest&&e.target.closest('[data-oai-memo-delete]');if(memoDel){_oaiDeleteMemo(memoDel.getAttribute('data-oai-memo-delete'),false);return true;}
+  const memoAdd=e.target.closest&&e.target.closest('[data-oai-memo-add-date]');if(memoAdd){_oaiChoosePhotoAddDate(memoAdd.getAttribute('data-oai-memo-add-date'),'memo');return true;}
   const memo=e.target.closest&&e.target.closest('[data-oai-memo-edit]');if(memo){_oaiOpenMemo(memo.getAttribute('data-oai-memo-edit'));return true;}
   const add=e.target.closest&&e.target.closest('[data-oai-photo-add-date]');if(add){_oaiChoosePhotoAddDate(add.getAttribute('data-oai-photo-add-date'));return true;}
   const cancel=e.target.closest&&e.target.closest('[data-oai-photo-cancel]');if(cancel){const kind=cancel.getAttribute('data-oai-photo-cancel');_oaiPhotoSelectionClear();_oaiRerenderJournal(kind);return true;}

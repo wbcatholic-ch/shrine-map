@@ -10584,3 +10584,7 @@ html.oai-pilgrimage-course-view-readonly #map-category-close-btn{display:inline-
 @keyframes oaiCourseRouteSpin{to{transform:rotate(360deg)}}
 @media(prefers-reduced-motion:reduce){.oai-course-route-spinner{animation:none}}
 
+
+/* 방문 사진 전체 보기 아래 메모 작성 진입 버튼 */
+.oai-visit-photo-block .oai-journal-add-memo{display:block;width:calc(100% - 24px);min-height:48px;margin:16px 12px 4px;padding:10px 14px;border:1.5px solid #9ab8ca;border-radius:12px;background:#f6fbff;color:#205f8a;font-size:16px;font-weight:850;line-height:1.25;cursor:pointer;}
+.oai-visit-photo-block .oai-journal-add-memo:active{background:#e7f3fa;}
