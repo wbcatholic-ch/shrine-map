@@ -16104,6 +16104,8 @@ async function _calcRoute(){
     setRouteNote('', false);
   }
 
+  // Bind loading completion to this route request, not a later entry's overlay.
+  const courseLoadingToken=window.__OAI_COURSE_LOADING_TOKEN__;
   const waypoints = _getRouteWaypoints();
   _drawLine(_rS, navDest, null, {fit:false, waypoints:waypoints});
 
@@ -16152,6 +16154,9 @@ async function _calcRoute(){
       $('rs-km').textContent=(distance/1000).toFixed(1);
       $('rs-time').textContent=_fmtTime(duration);
       _drawLine(_rS, navDest, path.length>1?path:null, {fit:_pilgrimageMapMode()!=='completed-place-info-view',waypoints:waypoints});
+      // The completed course is visible now: do not leave its spinner up until unrelated UI cleanup.
+      if(_pilgrimageMapMode()==='completed-view' && window.__OAI_COURSE_LOADING_TOKEN__===courseLoadingToken)
+        _oaiCourseRouteLoading(false,courseLoadingToken);
       if(!isJuk) setRouteNote('', false);
       return;
     }
@@ -16159,6 +16164,8 @@ async function _calcRoute(){
     $('rs-km').textContent=(leg.distance/1000).toFixed(1);
     $('rs-time').textContent=_fmtTime(leg.duration);
     _drawLine(_rS, navDest, leg.path.length>1?leg.path:null, {fit:_pilgrimageMapMode()!=='completed-place-info-view'});
+    if(_pilgrimageMapMode()==='completed-view' && window.__OAI_COURSE_LOADING_TOKEN__===courseLoadingToken)
+      _oaiCourseRouteLoading(false,courseLoadingToken);
     if(!isJuk) setRouteNote('', false);
   } catch(e){
     const routePoints=[_rS].concat(waypoints,[navDest]);
@@ -16171,6 +16178,8 @@ async function _calcRoute(){
     $('rs-time').textContent=_fmtTime(d/70*3600);
     if(!isJuk) setRouteNote('* 직선거리 기반 추정값', false);
     _drawLine(_rS, navDest, null, {fit:_pilgrimageMapMode()!=='completed-place-info-view', waypoints:waypoints});
+    if(_pilgrimageMapMode()==='completed-view' && window.__OAI_COURSE_LOADING_TOKEN__===courseLoadingToken)
+      _oaiCourseRouteLoading(false,courseLoadingToken);
   }
 }
 
