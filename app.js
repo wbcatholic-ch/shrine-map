@@ -24257,15 +24257,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   window._oaiReturnFromPilgrimageMapPick=returnFromPilgrimageMapPick;
 
   function startPlaceMapPick(){
-    // 순례계획: 기존 길찾기 편집기를 재사용해 여러 장소를 연속 선택한다.
-    // 수동 완료 기록은 원래의 개별 장소 선택 흐름을 보존한다.
-    if(pilgrimageDetailMode==='complete'){
-      _openPilgrimageEndpointMapAdd('waypoint');
-      return;
-    }
-    window.__OAI_PILGRIMAGE_PLACE_PICK__=false;
-    clearPilgrimageMapPickMarkers();
-    _openUnifiedPilgrimageMapAdd('plan');
+    // 계획·완료의 '지도에서 추가'는 동일한 장소 선택 지도를 사용한다.
+    // 코스 읽기 전용 지도와 진행 중 순례의 길찾기 화면은 별도로 유지한다.
+    _openPilgrimageEndpointMapAdd('waypoint');
   }
 
   let pilgrimageCourseMapPolyline=null;
