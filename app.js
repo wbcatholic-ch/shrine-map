@@ -9909,10 +9909,14 @@ function _onMapReady(){
   }else{
     try{
       if(typeof _map.relayout==='function') _map.relayout();
-      if(typeof _map.setLevel==='function') _map.setLevel(pilgrimageEntryCenter?OAI_PILGRIMAGE_MAP_PICK_VIEW_LEVEL:8);
-      if(typeof _map.setCenter==='function') _map.setCenter(pilgrimageEntryCenter
-        ?new _LL(Number(pilgrimageEntryCenter.lat),Number(pilgrimageEntryCenter.lng))
-        :new _LL(36.2,127.9));
+      // A returning/late SDK map-ready callback must not discard a pilgrimage
+      // course's waypoint viewport. The course entry handles its own framing.
+      if(window.__OAI_PILGRIMAGE_COURSE_VIEW__!==true && window.__OAI_PILGRIMAGE_PLACE_PICK__!==true){
+        if(typeof _map.setLevel==='function') _map.setLevel(pilgrimageEntryCenter?OAI_PILGRIMAGE_MAP_PICK_VIEW_LEVEL:8);
+        if(typeof _map.setCenter==='function') _map.setCenter(pilgrimageEntryCenter
+          ?new _LL(Number(pilgrimageEntryCenter.lat),Number(pilgrimageEntryCenter.lng))
+          :new _LL(36.2,127.9));
+      }
     }catch(e){ console.warn('[가톨릭길동무]', e); }
   }
   if(!window.__OAI_MAIN_MAP_CLICK_BOUND__){
@@ -10058,7 +10062,12 @@ function _relayoutMainMapForPanel(){
         _map.relayout();
         const current=_getVisibleInfoCardFocusItem();
         if(window.__OAI_PILGRIMAGE_COURSE_VIEW__===true||window.__OAI_PILGRIMAGE_PLACE_PICK__===true){
-          // Preserve the waypoint/whole-route viewport while the read-only sheet changes size.
+          // A panel resize changes the usable map area. Restore the saved
+          // waypoint-only bounds for detail maps rather than retaining a stale
+          // GPS/default center. Whole-course maps retain their own fit policy.
+          if(['completed-place-info-view','place-info-view'].includes(_pilgrimageMapMode())){
+            _fitPilgrimagePlaceInfoWaypoints();
+          }
           return;
         }
         if(focusItem&&current===focusItem){
