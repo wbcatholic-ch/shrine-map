@@ -15202,7 +15202,7 @@ function _schedulePilgrimageRouteResult(label,focusPoint){
       if(_isPilgrimageCourseViewReadOnly()){
         done=true;
         try{_refreshRouteTmpMarkers();}catch(_e){}
-        if(_pilgrimageMapMode()==='completed-place-info-view'){
+        if(['place-info-view','completed-place-info-view'].includes(_pilgrimageMapMode())){
           // The waypoint map is ready before the optional road geometry finishes.
           // Never block its loading indicator on every remote directions leg.
           _oaiCourseRouteLoading(false,loadingToken);
@@ -15217,8 +15217,8 @@ function _schedulePilgrimageRouteResult(label,focusPoint){
         finally{
           running=false;
           if(window.__OAI_COURSE_LOADING_TOKEN__===loadingToken){
-            if(_pilgrimageMapMode()==='completed-place-info-view'){
-              _setMapPanelCollapsed(true,'completed-detail-route-ready');
+            if(['place-info-view','completed-place-info-view'].includes(_pilgrimageMapMode())){
+              _setMapPanelCollapsed(true,'pilgrimage-detail-route-ready');
               _fitPilgrimagePlaceInfoWaypoints();
             }else if(_pilgrimageMapMode()==='completed-view'){
               _hidePilgrimageDetailCategoryMarkers();
@@ -16169,7 +16169,7 @@ function _ensureRoutePilgrimagePlanButton(){
 }
 
 async function _calcRoute(){
-  if(_pilgrimageMapMode()==='place-info-view')return;
+  // Plan, active and completed place-info maps share the same read-only road-route calculation.
   if(!_rS||!_rE) return;
   _hideRouteGuide();
   $('rs-km').textContent='…';
@@ -24225,14 +24225,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         _refreshRoutePilgrimageButtonMode();
         _updateSearchBtn();
         _syncPilgrimageRouteReturnButton();
-        if(readOnly&&_pilgrimageCourseViewKind()==='place-info'){
-          // 순례계획 상세는 완료 상세와 동일한 코스 전용 지도이되 경로선·경로 계산은 제외한다.
-          try{if(_polyline){_polyline.setMap(null);_polyline=null;}}catch(_e){}
-          _setMapPanelCollapsed(true,'planned-detail-waypoints');
-          _hidePilgrimageDetailCategoryMarkers();
-        }else if(readOnly||normalRoute){
-          if(readOnly&&_pilgrimageCourseViewKind()==='complete-place-info'){
-            _setMapPanelCollapsed(true,'completed-detail-waypoints');
+        if(readOnly||normalRoute){
+          if(readOnly&&['place-info','complete-place-info'].includes(_pilgrimageCourseViewKind())){
+            _setMapPanelCollapsed(true,'pilgrimage-detail-waypoints');
           }else if(readOnly&&_pilgrimageCourseViewKind()==='complete'){
             _hidePilgrimageDetailCategoryMarkers();
           }
