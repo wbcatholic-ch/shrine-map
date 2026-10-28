@@ -14985,6 +14985,12 @@ function _hidePilgrimageDetailCategoryMarkers(){
   try{_hideAllParishDioMkrs();}catch(_e){}
   try{(_retreatMarkers||[]).forEach(function(o){if(o&&o.marker)_setMarkerMapIfChanged(o.marker,null);});}catch(_e){}
 }
+// Shared coordinate check: used by both map helpers and pilgrimage details.
+// It must be available outside the pilgrimage planner's private scope.
+function _validGpsPair(lat,lng){
+  const y=Number(lat),x=Number(lng);
+  return Number.isFinite(y)&&Number.isFinite(x)&&Math.abs(y)<=90&&Math.abs(x)<=180;
+}
 function _fitPilgrimageWaypointBounds(points, bottomPadding){
   if(!_map||!window.kakao||!kakao.maps||!Array.isArray(points))return false;
   const valid=points.filter(p=>p&&_validGpsPair(p.lat,p.lng));
@@ -24484,7 +24490,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }catch(_e){if(seq!==pilgrimageTotalCalcSeq)return;kmEl.textContent='계산 불가';timeEl.textContent='-';noteEl.textContent='코스 좌표를 확인해 주세요.';}
   }
 
-  function _validGpsPair(lat,lng){return Number.isFinite(Number(lat))&&Number.isFinite(Number(lng))&&Math.abs(Number(lat))<=90&&Math.abs(Number(lng))<=180;}
+
   function calcDetailItemMetrics(startOverride){
     const seq=++detailMetricSeq,list=loadPlan(),meta=loadMeta(),active=_activeFollowState(),running=pilgrimageDetailMode!=='complete'&&!!(active&&currentCourseId&&String(active.courseId)===String(currentCourseId)),view=document.getElementById('oai-pilgrimage-detail-view');
     const setMetric=(i,text)=>{const el=document.querySelector('[data-plan-metric="'+i+'"]');if(el)el.textContent=text;};
