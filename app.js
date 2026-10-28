@@ -14443,10 +14443,13 @@ function _oaiRefreshScrollAffordances(root){
 }
 let _oaiScrollRefreshTimer=0;
 function _oaiScheduleScrollAffordanceRefresh(){
-  try{
-    clearTimeout(_oaiScrollRefreshTimer);
-    _oaiScrollRefreshTimer=setTimeout(function(){_oaiRefreshScrollAffordances(document);},0);
-  }catch(_e){}
+  // Batch DOM mutations into one refresh instead of re-scanning the whole page
+  // on every class/style change while pilgrimage lists and maps render.
+  if(_oaiScrollRefreshTimer)return;
+  _oaiScrollRefreshTimer=setTimeout(function(){
+    _oaiScrollRefreshTimer=0;
+    _oaiRefreshScrollAffordances(document);
+  },80);
 }
 try{
   window.addEventListener('resize',_oaiScheduleScrollAffordanceRefresh,{passive:true});
@@ -14454,7 +14457,21 @@ try{
   document.addEventListener('click',function(){setTimeout(_oaiScheduleScrollAffordanceRefresh,80);},true);
   document.addEventListener('transitionend',_oaiScheduleScrollAffordanceRefresh,true);
   if(typeof MutationObserver!=='undefined'){
-    const obs=new MutationObserver(_oaiScheduleScrollAffordanceRefresh);
+    const obs=new MutationObserver(function(changes){
+      // Structural insertions/removals still refresh scroll hints. Attribute
+      // mutations on unrelated map markers, GPS badges and list rows do not.
+      for(const change of changes){
+        if(change.type==='childList'){
+          if(change.addedNodes.length||change.removedNodes.length){_oaiScheduleScrollAffordanceRefresh();return;}
+        }else if(change.type==='attributes'){
+          const target=change.target;
+          if(target===document.documentElement||target===document.body||
+            (target.matches&&target.matches(OAI_SCROLL_AFFORDANCE_SELECTOR))){
+            _oaiScheduleScrollAffordanceRefresh();return;
+          }
+        }
+      }
+    });
     obs.observe(document.documentElement,{childList:true,subtree:true,attributes:true,attributeFilter:['class','style','hidden']});
   }
   setTimeout(function(){_oaiRefreshScrollAffordances(document);},100);
@@ -16253,7 +16270,15 @@ async function _calcRoute(){
   }
 
   try{
-    const routePoints=[_rS].concat(waypoints,[navDest]);
+    const routePoints=[_rS].concat(waypoints,[navDest]).filter(function(p,i,all){
+      return i===0||Number(p.lat)!==Number(all[i-1].lat)||Number(p.lng)!==Number(all[i-1].lng);
+    });
+    if(routePoints.length<2){
+      _drawLine(_rS,navDest,null,{fit:false,waypoints:waypoints});
+      $('rs-km').textContent='0.0';
+      $('rs-time').textContent='0분';
+      return;
+    }
     if(waypoints.length){
       let distance=0, duration=0, path=[];
       if(_isPilgrimageCourseViewReadOnly()){
@@ -16298,7 +16323,9 @@ async function _calcRoute(){
       _oaiCourseRouteLoading(false,courseLoadingToken);
     if(!isJuk) setRouteNote('', false);
   } catch(e){
-    const routePoints=[_rS].concat(waypoints,[navDest]);
+    const routePoints=[_rS].concat(waypoints,[navDest]).filter(function(p,i,all){
+      return i===0||Number(p.lat)!==Number(all[i-1].lat)||Number(p.lng)!==Number(all[i-1].lng);
+    });
     let d=0;
     for(let i=0;i<routePoints.length-1;i++){
       d += calcDist(routePoints[i].lat,routePoints[i].lng,routePoints[i+1].lat,routePoints[i+1].lng);
@@ -23361,8 +23388,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function renderDetail(){
     const list=loadPlan(),m=loadMeta(),isCompletionView=pilgrimageDetailMode==='complete',isManualCreate=pilgrimageManualCreateMode,next=isCompletionView?-1:nextIndex(list);
-    const gpsAutoCompletion=isCompletionView&&!!loadCourses().find(c=>c.id===currentCourseId&&c.autoGps===true);
+    // Read/normalize persisted courses once per completed-detail render.
     const manualCourse=isCompletionView&&currentCourseId?loadCourses().find(c=>c.id===currentCourseId):null;
+    const gpsAutoCompletion=!!(manualCourse&&manualCourse.autoGps===true);
     const gpsProtected=!!(manualCourse&&_courseHasGpsLockedCompletion(manualCourse));
     const displayedCompletion=isCompletionView&&manualCourse?_courseCompletionList(manualCourse)[0]:null;
     const canSupplementCompletion=!!(isCompletionView&&manualCourse&&_courseCompletionList(manualCourse).length);
@@ -24134,9 +24162,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       setTimeout(function(){try{
         _mode='shrine';
         document.documentElement.classList.remove('parish-mode','retreat-mode');
-        if(meta.start&&_validGpsPair(meta.start.lat,meta.start.lng)) _setRoutePointFromItem('start',meta.start,_pilgrimageRouteShrineIndex(meta.start));
+        // In a pilgrimage place-info map the saved route may have no explicit
+        // start/end. Draw the driving path between its first and last shrine
+        // without changing the course's saved start/end or its numbered pins.
+        const detailPathFallback=readOnly&&options.fromPlaceInfo===true;
+        const firstStop=plan.find(p=>p&&_validGpsPair(p.lat,p.lng));
+        const lastStop=plan.slice().reverse().find(p=>p&&_validGpsPair(p.lat,p.lng));
+        const routeStart=meta.start&&_validGpsPair(meta.start.lat,meta.start.lng)?meta.start:(detailPathFallback?firstStop:null);
+        const routeEnd=meta.end&&_validGpsPair(meta.end.lat,meta.end.lng)?meta.end:(detailPathFallback?lastStop:null);
+        if(routeStart)_setRoutePointFromItem('start',routeStart,_pilgrimageRouteShrineIndex(routeStart));
         plan.slice(0,OAI_MAX_ROUTE_WAYPOINTS).forEach(function(item,i){const cfg=OAI_ROUTE_WAYPOINT_CONFIGS[i];if(cfg)_setRoutePointFromItem(cfg.role,item,_pilgrimageRouteShrineIndex(item));});
-        if(meta.end&&_validGpsPair(meta.end.lat,meta.end.lng)) _setRoutePointFromItem('end',meta.end,_pilgrimageRouteShrineIndex(meta.end));
+        if(routeEnd)_setRoutePointFromItem('end',routeEnd,_pilgrimageRouteShrineIndex(routeEnd));
         window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__=true;
         finishPilgrimageMapEntry();
         if(readOnly&&(!meta.start||!meta.end||!_validGpsPair(meta.start.lat,meta.start.lng)||!_validGpsPair(meta.end.lat,meta.end.lng))){
@@ -24594,6 +24630,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         readOnly:true,
         normalRoute:false,
         coursePlaces:coursePlaces,
+        fromPlaceInfo:fromPlaceInfo,
         focusPoint:fromPlaceInfo?options.focusPoint:null
       });
       if(fromPlaceInfo)closePilgrimagePlaceInfo();
