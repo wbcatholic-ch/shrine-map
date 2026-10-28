@@ -22785,6 +22785,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function coverVisible(){try{const c=document.getElementById('cover');return !!(c&&getComputedStyle(c).display!=='none'&&!document.documentElement.classList.contains('app-active'));}catch(_e){return false;}}
   function settingsReturnToCover(){const m=document.getElementById('oai-settings-modal');return !!(m&&m.dataset.returnToCover==='1');}
   function setView(v){
+    if(v!=='detail'){
+      ++pilgrimageDetailRenderSeq;
+      ++pilgrimageTotalCalcSeq;
+      ++detailMetricSeq;
+      if(pilgrimageDetailMetricsFrame){cancelAnimationFrame(pilgrimageDetailMetricsFrame);pilgrimageDetailMetricsFrame=0;}
+      if(pilgrimageDetailMetricsTimer){clearTimeout(pilgrimageDetailMetricsTimer);pilgrimageDetailMetricsTimer=0;}
+    }
     plannerView=v;
     const plannerModal=planner();
     if(plannerModal)plannerModal.classList.toggle('oai-pilgrimage-list-mode',v==='list');
@@ -23404,7 +23411,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       return '방문 날짜·시간 확인 불가';
     }
   }
+  // Invalidate asynchronous distance updates before replacing the course-detail DOM.
+  // The previous course must never write measurements into the newly swiped-to course.
+  let pilgrimageDetailMetricsFrame=0,pilgrimageDetailMetricsTimer=0,pilgrimageDetailRenderSeq=0;
   function renderDetail(knownCourse,knownActive){
+    const detailRenderSeq=++pilgrimageDetailRenderSeq;
+    ++pilgrimageTotalCalcSeq;
+    ++detailMetricSeq;
+    if(pilgrimageDetailMetricsFrame){cancelAnimationFrame(pilgrimageDetailMetricsFrame);pilgrimageDetailMetricsFrame=0;}
+    if(pilgrimageDetailMetricsTimer){clearTimeout(pilgrimageDetailMetricsTimer);pilgrimageDetailMetricsTimer=0;}
     const list=loadPlan(),m=loadMeta(),isCompletionView=pilgrimageDetailMode==='complete',isManualCreate=pilgrimageManualCreateMode,next=isCompletionView?-1:nextIndex(list);
     // Read/normalize persisted courses once per completed-detail render.
     const manualCourse=isCompletionView&&currentCourseId?(knownCourse&&String(knownCourse.id)===String(currentCourseId)?knownCourse:loadCourses().find(c=>c.id===currentCourseId)):null;
@@ -23599,14 +23614,25 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       totalCard.style.display=hasWalkHistory?'none':'grid';
     }
     if(actions)actions.classList.add('is-integrated-pilgrimage');
-    calcPilgrimageTotalRoute(undefined,manualCourse);
     if(isCompletionView){
       // Completion metrics are rendered directly from the original GPS stamp.
       // Do not overwrite the per-place visit date/time with a fixed label.
       if(detailRoot)detailRoot.classList.remove('gps-ready');
-    }else{
-      calcDetailItemMetrics();
     }
+    // Paint the new detail first. Avoid competing with the swipe transition and
+    // prevent superseded route calculations from updating the next course's DOM.
+    const renderedCourseId=String(currentCourseId||'');
+    const renderedMode=pilgrimageDetailMode;
+    pilgrimageDetailMetricsFrame=requestAnimationFrame(()=>{
+      pilgrimageDetailMetricsFrame=0;
+      pilgrimageDetailMetricsTimer=setTimeout(()=>{
+        pilgrimageDetailMetricsTimer=0;
+        if(detailRenderSeq!==pilgrimageDetailRenderSeq||plannerView!=='detail'||
+           String(currentCourseId||'')!==renderedCourseId||pilgrimageDetailMode!==renderedMode)return;
+        calcPilgrimageTotalRoute(undefined,manualCourse);
+        if(!isCompletionView)calcDetailItemMetrics();
+      },0);
+    });
   }
 
 
