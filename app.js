@@ -2677,7 +2677,11 @@ function _bindShrineVisitFloatingListButtonWatchers(){
     });
     window.__OAI_SHRINE_VISIT_FLOATING_MO__=mo;
   }catch(_e){}
-  setInterval(function(){ try{ if(_mode==='shrine') _updateShrineVisitFloatingListButtonUI(); }catch(_e){} }, 350);
+  // 화면 이벤트가 주 갱신 경로다. 보조 확인은 성지 지도 노출 시에만 느리게 실행한다.
+  setInterval(function(){
+    if(document.hidden || _mode!=='shrine' || _screen!=='map')return;
+    try{_updateShrineVisitFloatingListButtonUI();}catch(_e){}
+  }, 1500);
 }
 try{ _bindShrineVisitFloatingListButtonWatchers(); }catch(_e){}
 
@@ -5387,7 +5391,8 @@ function _showParishAutoVisitNotice(place){
   modal.classList.add('show');
   modal.setAttribute('aria-hidden','false');
 }
-try{setInterval(function(){_updateParishVisitButton();},400);}catch(_e){}
+// 방문 버튼 상태는 기존 화면 이벤트가 즉시 갱신하며, 타이머는 저빈도 안전망으로만 사용.
+try{setInterval(function(){if(!document.hidden)_updateParishVisitButton();},1500);}catch(_e){}
 try{document.addEventListener('change',function(e){const t=e.target;if(!t||!t.matches||!t.matches('#parish-visit-book [data-pv-select]'))return;const kind=t.getAttribute('data-pv-select'),value=t.value;if(kind==='sort')_parishVisitSort=value==='oldest'?'oldest':'recent';else if(kind==='dio'){_parishVisitDio=value||'all';_parishUnvisitedLimit=80;}_renderParishVisitBook();});}catch(_e){}
 try{window.addEventListener('oai-short-background-return',function(){setTimeout(function(){_updateParishVisitButton();},120);try{if(typeof window._oaiValidateActivePilgrimageFollow==='function')window._oaiValidateActivePilgrimageFollow();}catch(_e){}},{passive:true});}catch(_e){}
 
