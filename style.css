@@ -5776,7 +5776,7 @@ html:not(.oai-map-split-wide) #map-panel-toggle-btn .map-panel-toggle-icon{
   background:currentColor;
 }
 html:not(.oai-map-split-wide) #map-panel-toggle-btn[data-panel-kind="nearby"],
-html:not(.oai-map-split-wide) #map-panel-toggle-btn[data-panel-kind="list"],
+html:not(.oai-map-split-wide):not(.oai-pilgrimage-pick-map) #map-panel-toggle-btn[data-panel-kind="list"],
 html:not(.oai-map-split-wide) #map-panel-toggle-btn[data-panel-kind="region"]{display:none!important;}
 html:not(.oai-map-split-wide).oai-map-panel-collapsed #map-panel-toggle-btn{
   top:auto!important;
@@ -5795,6 +5795,36 @@ html:not(.oai-map-split-wide).oai-map-panel-collapsed #app #sheet-route.open{
 html.oai-map-split-wide #app #sheet-route.open{transform:translateX(0)!important;}
 html.oai-map-split-wide.oai-map-panel-collapsed #app #sheet-route.open{transform:translateX(-100%)!important;}
 html:not(.oai-map-split-wide).oai-map-panel-collapsed #app #sheet-route.open{transform:translateY(calc(100% + 28px))!important;}
+/* 코스 지도에서 추가: 일반 '찾기 목록' 전체 화면은 표시하지 않고,
+   기존 하단 시트/손잡이를 짧은 장소 선택 안내로만 활용한다. */
+html.oai-pilgrimage-pick-map:not(.oai-map-split-wide) #app #sheet-list.open{
+  top:auto!important;
+  bottom:0!important;
+  height:132px!important;
+  max-height:132px!important;
+  min-height:0!important;
+  border-radius:20px 20px 0 0!important;
+  box-shadow:0 -3px 14px rgba(23,35,63,.16)!important;
+}
+html.oai-pilgrimage-pick-map #sheet-list .srch-bar,
+html.oai-pilgrimage-pick-map #sheet-list .sheet-body,
+html.oai-pilgrimage-pick-map #sheet-list .category-source-note,
+html.oai-pilgrimage-pick-map #sheet-list .cgm-sheet-help,
+html.oai-pilgrimage-pick-map #sheet-list > :not(.sheet-hd){display:none!important;}
+html.oai-pilgrimage-pick-map #sheet-list::after{
+  content:'지도에서 성지 마커를 눌러 추가하세요. 여러 곳을 계속 추가할 수 있습니다.';
+  display:block;
+  padding:13px 20px;
+  line-height:1.45;
+  color:#293957;
+  font-size:14px;
+  background:#fffaf0;
+}
+html.oai-pilgrimage-pick-map:not(.oai-map-split-wide).oai-map-panel-collapsed #app #sheet-list.open{
+  transform:translateY(calc(100% + 28px))!important;
+  pointer-events:none!important;
+}
+
 
 /* V8-1-14-563: 인트로 종료(revealing) 때 십자가 사진 확대 애니메이션을 재시작하지 않는다.
    booting 단계에서만 .84→1로 커지고, revealing 단계는 최종 크기에서 opacity만 사라진다. */

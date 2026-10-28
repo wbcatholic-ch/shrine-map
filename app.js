@@ -17126,7 +17126,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   on('tab-btn-route',  'click', function() { toggleTab('route'); });
 
   on('nearby-close-btn', 'click', function(e) { e.stopPropagation(); closeSheetPanelOnly('nearby'); });
-  on('list-close-btn',   'click', function(e) { e.stopPropagation(); closeSheetPanelOnly('list'); });
+  on('list-close-btn',   'click', function(e) { e.stopPropagation(); if(window.__OAI_PILGRIMAGE_PLACE_PICK__&&typeof window._oaiReturnFromPilgrimageMapPick==='function'&&window._oaiReturnFromPilgrimageMapPick())return; closeSheetPanelOnly('list'); });
   on('region-close-btn', 'click', function(e) { e.stopPropagation(); closeSheetPanelOnly('region'); });
   on('route-close-btn',  'click', function(e) { e.stopPropagation(); closeRouteSheetByX(); });
   on('map-category-close-btn', 'click', function(e) { e.stopPropagation(); if(window.__OAI_PILGRIMAGE_COURSE_VIEW__&&typeof window._oaiReturnFromPilgrimageCourseMap==='function'&&window._oaiReturnFromPilgrimageCourseMap()) return; if(window.__OAI_PILGRIMAGE_PLACE_PICK__&&typeof window._oaiReturnFromPilgrimageMapPick==='function'&&window._oaiReturnFromPilgrimageMapPick()) return; closeCategoryToCoverFromMap(); });
@@ -24033,20 +24033,29 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }catch(e){_oaiCourseRouteLoading(false,routeLoadingToken);window.__OAI_PILGRIMAGE_ROUTE_EDIT__=null;window.__OAI_PILGRIMAGE_INITIAL_CENTER__=null;window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__=false;console.warn('[가톨릭길동무] 순례 지도 진입 실패',e);openPlanner({returnFromSearch:true});setView('detail');renderDetail();}};
     if(typeof hideCoverAndRun==='function')hideCoverAndRun(run);else run();
   }
-  // 장소 선택 지도는 기존 찾기 목록 패널과 접기 손잡이를 그대로 사용한다.
-  // 별도 안내 시트를 생성하지 않으며, 추가 후에도 지도에 남아 연속 선택한다.
+  // 지도에서 추가는 전체 찾기 목록을 열지 않는다. 기존 지도 하단 패널과
+  // 접기 손잡이만 이용하며, 성지 선택은 지도 마커에서 계속할 수 있다.
   function _openPilgrimagePickList(){
     const panel=document.getElementById('sheet-list');
     if(!panel)return;
+    const title=document.getElementById('list-sheet-title');
+    if(title&&!title.dataset.pilgrimageOriginalTitle)title.dataset.pilgrimageOriginalTitle=title.textContent;
+    if(title)title.textContent='지도에서 순례지 추가';
+    document.documentElement.classList.add('oai-pilgrimage-pick-map');
     panel.hidden=false;
     panel.style.display='';
     panel.classList.add('open');
-    try{if(typeof renderList==='function')renderList();}catch(e){console.warn('[가톨릭길동무]',e);}
-    _setMapPanelCollapsed(false,'pilgrimage-pick-list');
+    _setMapPanelCollapsed(false,'pilgrimage-pick-guide');
   }
   function _closePilgrimagePickList(){
     const panel=document.getElementById('sheet-list');
     if(panel)panel.classList.remove('open');
+    document.documentElement.classList.remove('oai-pilgrimage-pick-map');
+    const title=document.getElementById('list-sheet-title');
+    if(title&&title.dataset.pilgrimageOriginalTitle){
+      title.textContent=title.dataset.pilgrimageOriginalTitle;
+      delete title.dataset.pilgrimageOriginalTitle;
+    }
     _syncMapPanelUI('pilgrimage-pick-close');
   }
   // The endpoint picker uses the same main Kakao map as the ordinary shrine view.
