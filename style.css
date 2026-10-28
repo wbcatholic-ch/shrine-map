@@ -10602,5 +10602,5 @@ html.oai-pilgrimage-course-view-readonly #map-category-close-btn{display:inline-
 /* Memo save feedback: only fade the confirmed-success dialog, never delay persistence. */
 .oai-visit-memo-modal.show{opacity:1;transition:opacity .26s ease-out}
 .oai-visit-memo-modal.show.oai-memo-closing{opacity:0;pointer-events:none}
-.oai-visit-memo-actions [data-oai-memo-save]:disabled{background:#27775d!important;border-color:#27775d!important;color:#fff!important}
+.oai-visit-memo-actions [data-oai-memo-save].oai-memo-saved{background:#27775d!important;border-color:#27775d!important;color:#fff!important}
 @media(prefers-reduced-motion:reduce){.oai-visit-memo-modal.show{transition:none}}
