@@ -3406,7 +3406,7 @@ function _oaiInstallMemoViewportGuard(){if(window.__OAI_MEMO_VV_GUARD__)return;w
 function _oaiCloseMemoModal(){const m=document.getElementById('oai-visit-memo-modal');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');m.style.removeProperty('--oai-memo-vh');const p=m.querySelector('.oai-visit-memo-panel');if(p){p.style.removeProperty('max-height');p.style.height='';p.style.removeProperty('top');const field=p.querySelector('textarea');if(field)field.style.removeProperty('height');}const actions=m.querySelector('.oai-visit-memo-actions');if(actions)actions.classList.remove('has-delete');}window.__OAI_MEMO_CONTEXT__=null;}
 try{window._oaiCloseMemoModal=_oaiCloseMemoModal;}catch(_e){}
 function _oaiOpenMemo(kind){if(!(_oaiJournalDeveloperEnabled()))return;const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const v=_oaiGetVisitByDate(kind,ctx.item,ctx.date),m=_oaiEnsureMemoModal(),memo=String(v&&v.memo||'');window.__OAI_MEMO_CONTEXT__=ctx;document.getElementById('oai-visit-memo-date').textContent=_formatVisitDate(ctx.date);document.getElementById('oai-visit-memo-text').value=memo;const del=m.querySelector('[data-oai-memo-delete-modal]'),actions=m.querySelector('.oai-visit-memo-actions'),hasMemo=!!memo.trim();if(del)del.style.display=hasMemo?'':'none';if(actions)actions.classList.toggle('has-delete',hasMemo);m.classList.add('show');m.setAttribute('aria-hidden','false');_oaiInstallMemoViewportGuard();_oaiMemoFitViewport();setTimeout(_oaiMemoFitViewport,240);setTimeout(_oaiMemoFitViewport,500);}
-function _oaiDeleteMemo(kind,fromModal){const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const v=_oaiGetVisitByDate(kind,ctx.item,ctx.date);if(!String(v&&v.memo||'').trim()){if(fromModal)_oaiCloseMemoModal();return;}_oaiVisitConfirm('이 방문의 메모를 삭제할까요?',function(){const ok=ctx.kind==='parish'?_oaiUpdateParishVisitExtras(ctx.item,ctx.date,{memo:''}):_oaiUpdateShrineVisitExtras(ctx.item,ctx.date,{memo:''});if(!ok){_oaiVisitToast('메모를 삭제하지 못했습니다.');return;}if(fromModal)_oaiCloseMemoModal();_oaiRerenderJournal(ctx.kind);_oaiVisitToast('메모를 삭제했습니다.');});}
+function _oaiDeleteMemo(kind,fromModal){const ctx=(fromModal&&window.__OAI_MEMO_CONTEXT__&&window.__OAI_MEMO_CONTEXT__.kind===kind)?window.__OAI_MEMO_CONTEXT__:_oaiCurrentJournalContext(kind);if(!ctx)return;const v=_oaiGetVisitByDate(kind,ctx.item,ctx.date);if(!String(v&&v.memo||'').trim()){if(fromModal)_oaiCloseMemoModal();return;}_oaiVisitConfirm('이 방문의 메모를 삭제할까요?',function(){const ok=ctx.kind==='parish'?_oaiUpdateParishVisitExtras(ctx.item,ctx.date,{memo:''}):_oaiUpdateShrineVisitExtras(ctx.item,ctx.date,{memo:''});const saved=ok?_oaiGetVisitByDate(ctx.kind,ctx.item,ctx.date):null;if(!ok||!saved||String(saved.memo||'').trim()){_oaiVisitToast('메모 삭제를 확인하지 못했습니다.');return;}if(fromModal)_oaiCloseMemoModal();_oaiRerenderJournal(ctx.kind);_oaiVisitToast('메모를 삭제했습니다.');});}
 function _oaiClosePhotoAddDate(){
   const modal=document.getElementById('oai-photo-add-date-dialog');
   if(!modal||!modal.classList.contains('show'))return false;
@@ -23662,64 +23662,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     setView('detail');
     renderDetail(displayedCourse,active);
   }
-  // 목록 원본이 달라질 때만 완료/계획 분류 및 정렬을 갱신한다.
-  // GPS 진행상태와 현재 활성 코스 제외는 매 전환마다 별도로 확인한다.
-  let detailSwipeCacheRaw=null,detailSwipeCacheCourses=null,detailSwipeCacheSort='',detailSwipeCacheLists=null;
-  function _detailSwipeOrderedCourses(mode,sortMode){
-    const raw=localStorage.getItem(COURSES_KEY)||'[]';
-    const sort=mode==='complete'?'completed':(sortMode==='name'?'name':'updated');
-    if(raw!==detailSwipeCacheRaw||sort!==detailSwipeCacheSort||!detailSwipeCacheLists){
-      const courses=loadCourses();
-      detailSwipeCacheRaw=raw;
-      detailSwipeCacheCourses=courses;
-      detailSwipeCacheSort=sort;
-      detailSwipeCacheLists={
-        complete:_sortPilgrimageCourses(courses.filter(c=>_courseCompletionList(c).length>0),'completed'),
-        plan:_sortPilgrimageCourses(courses.filter(c=>!_courseCompletionList(c).length),sortMode==='name'?'name':'updated')
-      };
-    }
-    return {courses:detailSwipeCacheCourses,ordered:detailSwipeCacheLists[mode]};
-  }
-  function swipePilgrimageDetail(direction){
-    if(plannerView!=='detail'||!currentCourseId||pilgrimageManualCreateMode)return false;
-    const mode=pilgrimageDetailMode;
-    if(mode!=='complete'&&mode!=='plan')return false;
-    const snapshot=_detailSwipeOrderedCourses(mode,pilgrimageCourseFilterState.sort);
-    const active=_activeFollowState(snapshot.courses);
-    if(active&&active.courseId===String(currentCourseId))return false;
-    const navigable=snapshot.ordered.filter(c=>!(active&&String(active.courseId)===String(c.id)));
-    const index=navigable.findIndex(c=>String(c.id)===String(currentCourseId));
-    if(index<0||navigable.length<2)return false;
-    const next=(index+(direction==='left'?1:-1)+navigable.length)%navigable.length;
-    pilgrimageCourseTab=mode;
-    openCourse(navigable[next].id,snapshot.courses,active);
-    return true;
-  }
-  (function(){
-    let start=null, consumedAt=0;
-    const root=function(){return document.getElementById('oai-pilgrimage-detail-view');};
-    function allowed(target){
-      const area=root(),modal=planner();
-      if(!area||area.hidden||!modal||!modal.classList.contains('show')||!area.contains(target))return false;
-      if(target.closest('button,a,input,textarea,select,[contenteditable],.oai-pilgrimage-drag-handle,[data-plan-drag],[data-manual-drag],[data-oai-pilgrimage-drag]'))return false;
-      if(document.getElementById('oai-pilgrimage-place-info-overlay')?.classList.contains('open'))return false;
-      return true;
-    }
-    document.addEventListener('touchstart',function(e){
-      start=null;
-      if(e.touches.length!==1||!allowed(e.target))return;
-      const t=e.touches[0];start={x:t.clientX,y:t.clientY,id:t.identifier};
-    },{passive:true});
-    document.addEventListener('touchend',function(e){
-      const first=start;start=null;
-      if(!first||e.changedTouches.length!==1)return;
-      const t=e.changedTouches[0];if(t.identifier!==first.id)return;
-      const dx=t.clientX-first.x,dy=t.clientY-first.y;
-      if(Math.abs(dx)<75||Math.abs(dx)<Math.abs(dy)*1.7||Date.now()-consumedAt<400)return;
-      if(swipePilgrimageDetail(dx<0?'left':'right'))consumedAt=Date.now();
-    },{passive:true});
-    document.addEventListener('touchcancel',function(){start=null;},{passive:true});
-  })();
   function repeatCourse(id,confirmed,travelMode){
     const targetId=String(id||'');
     const active=_activeFollowState();
@@ -24839,11 +24781,18 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       noteEl.textContent='완료 당시 출발지 → GPS 스탬프 장소 '+stops.length+'곳 → 도착지의 자동차 경로를 계산 중입니다.';
       try{
         const result=await _pilgrimageOrderedRoadTotals([start].concat(stops,[end]));
+        // Store by the immutable course-point signature even if the user has
+        // already switched details. Only the current detail may update the DOM.
+        const completedDisplay={
+          km:(result.estimated?'약 ':'')+result.km.toFixed(1)+' km',
+          time:(result.estimated?'약 ':'')+(typeof _fmtTime==='function'?_fmtTime(result.dur):Math.round(result.dur/60)+'분'),
+          note:'완료 당시 출발지와 GPS 스탬프 '+stops.length+'곳, 도착지를 기준으로 계산한 자동차 거리·예상 주행시간입니다.'+(result.estimated?' 일부 구간은 추정값입니다.':'')
+        };
+        _pilgrimageDisplayPut(displayKey,completedDisplay);
         if(seq!==pilgrimageTotalCalcSeq||pilgrimageDetailMode!=='complete'||String(currentCourseId)!==String(course.id))return;
-        kmEl.textContent=(result.estimated?'약 ':'')+result.km.toFixed(1)+' km';
-        timeEl.textContent=(result.estimated?'약 ':'')+(typeof _fmtTime==='function'?_fmtTime(result.dur):Math.round(result.dur/60)+'분');
-        noteEl.textContent='완료 당시 출발지와 GPS 스탬프 '+stops.length+'곳, 도착지를 기준으로 계산한 자동차 거리·예상 주행시간입니다.'+(result.estimated?' 일부 구간은 추정값입니다.':'');
-        _pilgrimageDisplayPut(displayKey,{km:kmEl.textContent,time:timeEl.textContent,note:noteEl.textContent});
+        kmEl.textContent=completedDisplay.km;
+        timeEl.textContent=completedDisplay.time;
+        noteEl.textContent=completedDisplay.note;
       }catch(_e){
         if(seq!==pilgrimageTotalCalcSeq)return;
         kmEl.textContent='계산 불가';timeEl.textContent='-';noteEl.textContent='완료 GPS 장소의 자동차 경로를 계산하지 못했습니다.';
@@ -24877,12 +24826,19 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!start){kmEl.textContent='위치 확인 필요';timeEl.textContent='-';noteEl.textContent='현재 위치를 확인한 뒤 다시 계산해 주세요.';return;}
     try{
       const result=await _pilgrimageOrderedRoadTotals([start].concat(stops),running||!!startOverride||!explicitStart);
-      if(seq!==pilgrimageTotalCalcSeq)return;
-      kmEl.textContent=(result.estimated?'약 ':'')+result.km.toFixed(1)+' km';
-      timeEl.textContent=(result.estimated?'약 ':'')+(typeof _fmtTime==='function'?_fmtTime(result.dur):Math.round(result.dur/60)+'분');
       const basis=running?'현재 위치':(startOverride?'현재 위치':explicitStart?'지정한 출발지':'현재 위치');
-      noteEl.textContent=(displayKey&&!explicitStart?'최초 계산 당시 위치':basis)+'에서 '+(running?'남은 ':'')+'순례지를 코스 순서대로 경유'+(meta.end?'하여 도착지까지':'')+' 계산한 자동차 거리와 주행 시간입니다.'+(result.estimated?' 일부 구간은 추정값입니다.':'');
-      _pilgrimageDisplayPut(displayKey,{km:kmEl.textContent,time:timeEl.textContent,note:noteEl.textContent});
+      const planDisplay={
+        km:(result.estimated?'약 ':'')+result.km.toFixed(1)+' km',
+        time:(result.estimated?'약 ':'')+(typeof _fmtTime==='function'?_fmtTime(result.dur):Math.round(result.dur/60)+'분'),
+        note:(displayKey&&!explicitStart?'최초 계산 당시 위치':basis)+'에서 '+(running?'남은 ':'')+'순례지를 코스 순서대로 경유'+(meta.end?'하여 도착지까지':'')+' 계산한 자동차 거리와 주행 시간입니다.'+(result.estimated?' 일부 구간은 추정값입니다.':'')
+      };
+      // Never cache live tracking, but persist fixed-plan results regardless of
+      // whether its detail DOM was replaced while the network request ran.
+      _pilgrimageDisplayPut(displayKey,planDisplay);
+      if(seq!==pilgrimageTotalCalcSeq)return;
+      kmEl.textContent=planDisplay.km;
+      timeEl.textContent=planDisplay.time;
+      noteEl.textContent=planDisplay.note;
     }catch(_e){if(seq!==pilgrimageTotalCalcSeq)return;kmEl.textContent='계산 불가';timeEl.textContent='-';noteEl.textContent='코스 좌표를 확인해 주세요.';}
   }
 

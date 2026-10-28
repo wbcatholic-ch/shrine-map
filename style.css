@@ -10175,7 +10175,7 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
 #parish-visit-editor .shrine-visit-list,#shrine-visit-modal .shrine-visit-list{border-top-color:#dce6ec!important}
 #parish-visit-editor .shrine-visit-date-row,#shrine-visit-modal .shrine-visit-date-row{border-bottom-color:#e3eaef!important}
 #parish-visit-editor .shrine-visit-date-row button,#shrine-visit-modal .shrine-visit-date-row button{border:1px solid #d6a4a4!important;color:#ac4141!important;background:#fff9f9!important;box-shadow:none!important}
-.oai-visit-confirm{z-index:2147483000!important}
+.oai-visit-confirm{z-index:2147483500!important}
 .oai-visit-confirm-bg{background:rgba(13,28,39,.46)!important;backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px)}
 .oai-visit-confirm-panel{width:min(calc(100vw - 48px),360px)!important;border-radius:22px!important;padding:23px 20px 20px!important;background:#fff!important;border:1px solid #d9e4eb!important;box-shadow:0 22px 65px rgba(11,36,51,.26)!important;text-align:center}
 .oai-visit-confirm-symbol{display:grid;place-items:center;margin:0 auto 12px;width:49px;height:49px;border-radius:50%;background:#fff2ed;color:#b94b42;font-size:27px;font-weight:950;border:1px solid #f3d6cf}
