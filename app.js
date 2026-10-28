@@ -3375,11 +3375,20 @@ function _oaiEnsureMemoModal(){
       const stored=ok?_oaiGetVisitByDate(ctx.kind,ctx.item,ctx.date):null;
       const verified=!!ok&&String(stored&&stored.memo||'').trim()===memo;
       if(verified){
-        // Same as other save actions: close immediately after confirmed persistence.
-        // Show feedback in the journal, not by replacing or disabling the Save button.
-        _oaiCloseMemoModal();
+        // Keep the dialog visible briefly so the user can see a completed save.
+        // Persisted data has already been verified; only the visual exit is delayed.
+        m.dataset.oaiSaved='1';
+        const button=m.querySelector('[data-oai-memo-save]');
+        if(button){button.textContent='✓ 저장 완료';button.disabled=true;}
         _oaiRerenderJournal(ctx.kind);
-        _oaiVisitToast('메모를 저장했습니다.');
+        clearTimeout(m._oaiMemoSuccessTimer);
+        m._oaiMemoSuccessTimer=setTimeout(function(){
+          if(!m.classList.contains('show')||m.dataset.oaiSaved!=='1')return;
+          m.classList.add('oai-memo-closing');
+          m._oaiMemoSuccessTimer=setTimeout(function(){
+            _oaiCloseMemoModal();
+          },260);
+        },850);
       }
       else _oaiVisitToast('메모 저장을 확인하지 못했습니다. 입력 내용은 그대로 유지됩니다.');
     }finally{delete m.dataset.oaiSaving;}
@@ -3410,9 +3419,9 @@ function _oaiMemoFitViewport(){
   if(field)field.style.setProperty('height',Math.max(78,Math.min(170,Math.floor(vh*.25)))+'px','important');
 }
 function _oaiInstallMemoViewportGuard(){if(window.__OAI_MEMO_VV_GUARD__)return;window.__OAI_MEMO_VV_GUARD__=true;const vv=window.visualViewport;if(vv){vv.addEventListener('resize',_oaiMemoFitViewport,{passive:true});}window.addEventListener('resize',_oaiMemoFitViewport,{passive:true});}
-function _oaiCloseMemoModal(){const m=document.getElementById('oai-visit-memo-modal');if(m){clearTimeout(m._oaiMemoSuccessTimer);delete m.dataset.oaiSaved;const b=m.querySelector('[data-oai-memo-save]');if(b){b.textContent='저장';b.disabled=false;} m.classList.remove('show');m.setAttribute('aria-hidden','true');m.style.removeProperty('--oai-memo-vh');const p=m.querySelector('.oai-visit-memo-panel');if(p){p.style.removeProperty('max-height');p.style.height='';p.style.removeProperty('top');const field=p.querySelector('textarea');if(field)field.style.removeProperty('height');}const actions=m.querySelector('.oai-visit-memo-actions');if(actions)actions.classList.remove('has-delete');}window.__OAI_MEMO_CONTEXT__=null;}
+function _oaiCloseMemoModal(){const m=document.getElementById('oai-visit-memo-modal');if(m){clearTimeout(m._oaiMemoSuccessTimer);delete m.dataset.oaiSaved;m.classList.remove('oai-memo-closing');const b=m.querySelector('[data-oai-memo-save]');if(b){b.textContent='저장';b.disabled=false;} m.classList.remove('show');m.setAttribute('aria-hidden','true');m.style.removeProperty('--oai-memo-vh');const p=m.querySelector('.oai-visit-memo-panel');if(p){p.style.removeProperty('max-height');p.style.height='';p.style.removeProperty('top');const field=p.querySelector('textarea');if(field)field.style.removeProperty('height');}const actions=m.querySelector('.oai-visit-memo-actions');if(actions)actions.classList.remove('has-delete');}window.__OAI_MEMO_CONTEXT__=null;}
 try{window._oaiCloseMemoModal=_oaiCloseMemoModal;}catch(_e){}
-function _oaiOpenMemo(kind){if(!(_oaiJournalDeveloperEnabled()))return;const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const v=_oaiGetVisitByDate(kind,ctx.item,ctx.date),m=_oaiEnsureMemoModal(),memo=String(v&&v.memo||'');clearTimeout(m._oaiMemoSuccessTimer);delete m.dataset.oaiSaved;const saveBtn=m.querySelector('[data-oai-memo-save]');if(saveBtn){saveBtn.textContent='저장';saveBtn.disabled=false;}window.__OAI_MEMO_CONTEXT__=ctx;document.getElementById('oai-visit-memo-date').textContent=_formatVisitDate(ctx.date);document.getElementById('oai-visit-memo-text').value=memo;const del=m.querySelector('[data-oai-memo-delete-modal]'),actions=m.querySelector('.oai-visit-memo-actions'),hasMemo=!!memo.trim();if(del)del.style.display=hasMemo?'':'none';if(actions)actions.classList.toggle('has-delete',hasMemo);m.classList.add('show');m.setAttribute('aria-hidden','false');_oaiInstallMemoViewportGuard();_oaiMemoFitViewport();setTimeout(_oaiMemoFitViewport,240);setTimeout(_oaiMemoFitViewport,500);}
+function _oaiOpenMemo(kind){if(!(_oaiJournalDeveloperEnabled()))return;const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const v=_oaiGetVisitByDate(kind,ctx.item,ctx.date),m=_oaiEnsureMemoModal(),memo=String(v&&v.memo||'');clearTimeout(m._oaiMemoSuccessTimer);delete m.dataset.oaiSaved;m.classList.remove('oai-memo-closing');const saveBtn=m.querySelector('[data-oai-memo-save]');if(saveBtn){saveBtn.textContent='저장';saveBtn.disabled=false;}window.__OAI_MEMO_CONTEXT__=ctx;document.getElementById('oai-visit-memo-date').textContent=_formatVisitDate(ctx.date);document.getElementById('oai-visit-memo-text').value=memo;const del=m.querySelector('[data-oai-memo-delete-modal]'),actions=m.querySelector('.oai-visit-memo-actions'),hasMemo=!!memo.trim();if(del)del.style.display=hasMemo?'':'none';if(actions)actions.classList.toggle('has-delete',hasMemo);m.classList.add('show');m.setAttribute('aria-hidden','false');_oaiInstallMemoViewportGuard();_oaiMemoFitViewport();setTimeout(_oaiMemoFitViewport,240);setTimeout(_oaiMemoFitViewport,500);}
 function _oaiDeleteMemo(kind,fromModal){const ctx=(fromModal&&window.__OAI_MEMO_CONTEXT__&&window.__OAI_MEMO_CONTEXT__.kind===kind)?window.__OAI_MEMO_CONTEXT__:_oaiCurrentJournalContext(kind);if(!ctx)return;const v=_oaiGetVisitByDate(kind,ctx.item,ctx.date);if(!String(v&&v.memo||'').trim()){if(fromModal)_oaiCloseMemoModal();return;}_oaiVisitConfirm('이 방문의 메모를 삭제할까요?',function(){const ok=ctx.kind==='parish'?_oaiUpdateParishVisitExtras(ctx.item,ctx.date,{memo:''}):_oaiUpdateShrineVisitExtras(ctx.item,ctx.date,{memo:''});const saved=ok?_oaiGetVisitByDate(ctx.kind,ctx.item,ctx.date):null;if(!ok||!saved||String(saved.memo||'').trim()){_oaiVisitToast('메모 삭제를 확인하지 못했습니다.');return;}if(fromModal)_oaiCloseMemoModal();_oaiRerenderJournal(ctx.kind);_oaiVisitToast('메모를 삭제했습니다.');});}
 function _oaiClosePhotoAddDate(){
   const modal=document.getElementById('oai-photo-add-date-dialog');

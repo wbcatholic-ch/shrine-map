@@ -10598,3 +10598,9 @@ html.oai-pilgrimage-course-view-readonly #map-category-close-btn{display:inline-
 .oai-visit-memo-entry-head{display:flex;justify-content:space-between;align-items:center;gap:10px;color:#234a61;font-size:14px}
 .oai-visit-memo-entry-head button{padding:7px 12px;border:1px solid #a5c3d4;border-radius:9px;color:#235f84;background:#f7fbfe;font-weight:800}
 .oai-visit-memo-block .oai-journal-add-memo{display:block;width:calc(100% - 24px);min-height:48px;margin:16px 12px 8px;padding:10px 14px;border:1.5px solid #9ab8ca;border-radius:12px;background:#f6fbff;color:#205f8a;font-size:16px;font-weight:850}
+
+/* Memo save feedback: only fade the confirmed-success dialog, never delay persistence. */
+.oai-visit-memo-modal.show{opacity:1;transition:opacity .26s ease-out}
+.oai-visit-memo-modal.show.oai-memo-closing{opacity:0;pointer-events:none}
+.oai-visit-memo-actions [data-oai-memo-save]:disabled{background:#27775d!important;border-color:#27775d!important;color:#fff!important}
+@media(prefers-reduced-motion:reduce){.oai-visit-memo-modal.show{transition:none}}
