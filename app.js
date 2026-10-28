@@ -15026,7 +15026,7 @@ function _setRouteLabel(role,name){
 function _pilgrimageMapMode(){
   if(window.__OAI_PILGRIMAGE_COURSE_VIEW__===true){
     const kind=String(window.__OAI_PILGRIMAGE_COURSE_VIEW_KIND__||'');
-    return kind==='complete-place-info'?'completed-place-info-view':kind==='place-info'?'place-info-view':kind==='complete'?'completed-view':'active-course-view';
+    return (kind==='complete-place-info'||kind==='active-place-info')?'completed-place-info-view':kind==='place-info'?'place-info-view':kind==='complete'?'completed-view':'active-course-view';
   }
   if(window.__OAI_PILGRIMAGE_ROUTE_EDIT__)return 'plan-edit';
   if(window.__OAI_PILGRIMAGE_PLACE_PICK__===true || window.__OAI_PILGRIMAGE_MAP_PICK__)return 'place-pick';
@@ -24587,7 +24587,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     try{
       pilgrimageCourseReturnToPlaceInfo=fromPlaceInfo;
       window.__OAI_PILGRIMAGE_COURSE_VIEW__=true;
-      window.__OAI_PILGRIMAGE_COURSE_VIEW_KIND__=fromCompleted?(fromPlaceInfo?'complete-place-info':'complete'):fromPlaceInfo?'place-info':'active';
+      window.__OAI_PILGRIMAGE_COURSE_VIEW_KIND__=fromCompleted?(fromPlaceInfo?'complete-place-info':'complete'):fromPlaceInfo?'active-place-info':'active';
       window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__=true;
       _applyPilgrimageCourseViewReadOnlyState();
       _openUnifiedPilgrimageMapAdd('plan',{
