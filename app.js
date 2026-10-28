@@ -14988,7 +14988,8 @@ function _fitPilgrimagePlaceInfoWaypoints(points){
     const mapEl=document.getElementById('map-wrap')||document.getElementById('map');
     const mr=mapEl&&mapEl.getBoundingClientRect(),sr=sheet&&sheet.classList.contains('open')&&sheet.getBoundingClientRect();
     const overlap=mr&&sr?Math.max(0,Math.min(mr.bottom,sr.bottom)-Math.max(mr.top,sr.top)):0;
-    _map.setBounds(bounds,48,42,Math.round(overlap+48),42);
+    const bottomPad=Math.min(Math.round(overlap+48),mr?Math.round(mr.height*0.48):220);
+    _map.setBounds(bounds,48,42,bottomPad,42);
     return true;
   }catch(e){console.warn('[가톨릭길동무] 경유지 전체 보기 실패',e);return false;}
 }
@@ -15120,6 +15121,10 @@ function _schedulePilgrimageRouteResult(label,focusPoint){
             if(_pilgrimageMapMode()==='completed-place-info-view'){
               _setMapPanelCollapsed(true,'completed-detail-route-ready');
               _fitPilgrimagePlaceInfoWaypoints();
+              requestAnimationFrame(function(){
+                if(window.__OAI_COURSE_LOADING_TOKEN__===loadingToken&&_pilgrimageMapMode()==='completed-place-info-view')
+                  _fitPilgrimagePlaceInfoWaypoints();
+              });
             }else if(_pilgrimageMapMode()==='completed-view'){
               _fitCompletedPilgrimageWholeCourse();
             }
@@ -16106,11 +16111,28 @@ async function _calcRoute(){
     const routePoints=[_rS].concat(waypoints,[navDest]);
     if(waypoints.length){
       let distance=0, duration=0, path=[];
-      for(let i=0;i<routePoints.length-1;i++){
-        const leg=await fetchLeg(routePoints[i], routePoints[i+1]);
-        distance+=(leg.distance||0);
-        duration+=(leg.duration||0);
-        path=path.concat(leg.path||[]);
+      if(_isPilgrimageCourseViewReadOnly()){
+        // Read-only maps do not depend on previous legs: request up to three
+        // segments at a time, then concatenate in the original route order.
+        // This avoids N serial network waits without flooding the proxy.
+        for(let i=0;i<routePoints.length-1;i+=3){
+          const batch=[];
+          for(let j=i;j<Math.min(i+3,routePoints.length-1);j++)
+            batch.push(fetchLeg(routePoints[j],routePoints[j+1]));
+          const legs=await Promise.all(batch);
+          legs.forEach(function(leg){
+            distance+=(leg.distance||0);
+            duration+=(leg.duration||0);
+            path=path.concat(leg.path||[]);
+          });
+        }
+      }else{
+        for(let i=0;i<routePoints.length-1;i++){
+          const leg=await fetchLeg(routePoints[i], routePoints[i+1]);
+          distance+=(leg.distance||0);
+          duration+=(leg.duration||0);
+          path=path.concat(leg.path||[]);
+        }
       }
       $('rs-km').textContent=(distance/1000).toFixed(1);
       $('rs-time').textContent=_fmtTime(duration);
@@ -16121,7 +16143,7 @@ async function _calcRoute(){
     const leg=await fetchLeg(_rS, navDest);
     $('rs-km').textContent=(leg.distance/1000).toFixed(1);
     $('rs-time').textContent=_fmtTime(leg.duration);
-    _drawLine(_rS, navDest, leg.path.length>1?leg.path:null);
+    _drawLine(_rS, navDest, leg.path.length>1?leg.path:null, {fit:_pilgrimageMapMode()!=='completed-place-info-view'});
     if(!isJuk) setRouteNote('', false);
   } catch(e){
     const routePoints=[_rS].concat(waypoints,[navDest]);
@@ -23849,7 +23871,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           if(typeof _restoreAllCategoryMarkersForSelection==='function')_restoreAllCategoryMarkersForSelection();
           if(typeof _refreshRouteTmpMarkers==='function')_refreshRouteTmpMarkers();
           const focus=options.focusPoint&&_validGpsPair(options.focusPoint.lat,options.focusPoint.lng)?options.focusPoint:_pilgrimageMapInitialPoint(entryRole);
-          if(focus&&_validGpsPair(focus.lat,focus.lng)&&!(readOnly&&options.focusPoint))
+          if(focus&&_validGpsPair(focus.lat,focus.lng)&&!readOnly)
             _setPilgrimageMapCenterForBottomCard({lat:Number(focus.lat),lng:Number(focus.lng)},OAI_PILGRIMAGE_MAP_PICK_VIEW_LEVEL,{repeat:false});
         }catch(e){console.warn('[가톨릭길동무] 순례 지도 위치 복원 실패',e);}
       }
