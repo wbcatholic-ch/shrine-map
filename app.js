@@ -21750,37 +21750,16 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(_readActiveFollowRaw())throw new Error('기존 완료 코스 종료 상태 저장 실패');
       return true;
     }
-    // 해당 방문 날짜에 이미 획득한 GPS 스탬프는 순례하기 시작 전이라도 인정한다.
-    // 장소 고유 ID를 먼저 조회하므로 동일 명칭의 다른 장소를 잘못 완료하지 않는다.
-    const visited=(Array.isArray(course.places)?course.places:[]).map(place=>{
-      const at=_dailyRecordedVisitAt(place,date);
-      if(!at||at>=_dailyDayEnd(date))return null;
-      return {place:Object.assign({},place,{done:true,doneMethod:'gps'}),at};
-    }).filter(Boolean).sort((a,b)=>a.at-b.at);
-    if(visited.length&&_dailyAutoEligible(_dailyAutoEvents(_dailyGpsEvents(date).filter(ev=>visited.some(x=>_dailySamePlace(x.place,ev)||_dailyLinkedGpsPair(x.place,ev)))))){
-      const at=_dailyDayEnd(date)-1; // 종료는 다음 날 00:00, 완료 날짜는 전날 유지
-      const places=_uniqueCompletionStampPlaces(visited.map(x=>x.place));
-      const prior=_courseCompletionList(course);
-      const separate=prior.length>0;
-      const next=_courseRefreshCompletionState(Object.assign({},course,{
-        id:separate?('gps_follow_'+date.replace(/-/g,'')+'_'+course.id):course.id,
-        places,completions:separate?[]:prior,
-        gpsSettled:true,completionArmed:false,lateCompletionPending:date,updatedAt:Date.now()
-      }));
-      next.completions=_courseCompletionList(next).concat([{completedAt:at,placeCount:_uniqueCompletionStampPlaces(places).length,stampPlaces:_uniqueCompletionStampPlaces(places),method:'gps',locked:true}]);
-      _courseRefreshCompletionState(next);
-      if(separate){
-        if(courses.some(c=>c.id===next.id))throw new Error('완료 코스 ID 중복');
-        courses.unshift(next);
-      }else courses[i]=next;
-      if(!saveCourses(courses))throw new Error('자정 순례코스 저장 실패');
-      const persisted=_dailyStoredCourses().find(c=>c.id===next.id);
-      if(!persisted||!_dailySameOrderedPlaces(persisted.places,places)||
-          !_courseCompletionList(persisted).some(x=>_dailyIso(x.completedAt)===date&&x.placeCount===_uniqueCompletionStampPlaces(places).length))
-        throw new Error('자정 완료 기록 재조회 불일치');
-      _dailyQueueLateCongratulations({courseId:course.id,date,places:places.length});
+    // 미완주 순례는 계획 코스를 부분 완료 코스로 바꾸지 않는다.
+    // 당일 GPS 스탬프는 순례하기 실행 여부와 무관하게 날짜별 공통 등록기에서
+    // 한 번에 처리한다. 그래야 중단 전후 방문지가 서로 다른 코스로 갈라지지 않는다.
+    if(_dailyRawGpsEvents(date).length){
+      _oaiQueueGpsCourseDate(date,'gps');
+      _clearActiveFollow(active.courseId);
+      if(_readActiveFollowRaw())throw new Error('미완주 순례 종료 상태 저장 실패');
+      return true;
     }
-    // 저장과 대기 안내를 확인한 다음에만 진행 상태를 정리한다.
+    // 해당 날짜에 GPS 스탬프가 없으면 완료 기록 없이 진행 상태만 종료한다.
     _clearActiveFollow(active.courseId);
     if(_readActiveFollowRaw())throw new Error('강제종료 상태 저장 실패');
     return true;
@@ -25897,6 +25876,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const nextMode=pendingFollowStartMode;
     const active=_activeFollowState();
     if(!active||!active.courseId||!id||String(active.courseId)!==String(id)){closeFollowStopConfirm();return false;}
+    // 순례 중단 시 스탬프를 새로 만들거나 완료 판정을 중복 실행하지 않는다.
+    // 이미 받은 GPS 날짜만 보관해 익일 공통 자동 등록에 맡긴다.
+    const visitDate=_dailyIso(active.startedAt);
+    try{
+      if(_dailyRawGpsEvents(visitDate).length)_oaiQueueGpsCourseDate(visitDate,'gps');
+    }catch(e){console.warn('[순례 중단] GPS 날짜 확인 보류; 스탬프 원본 유지',e);}
     _clearActiveFollow(active.courseId);
     pendingFollowStopCourseId='';
     pendingFollowStartCourseId='';
