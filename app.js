@@ -17492,7 +17492,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   on('nearby-close-btn', 'click', function(e) { e.stopPropagation(); closeSheetPanelOnly('nearby'); });
   on('list-close-btn',   'click', function(e) { e.stopPropagation(); if(window.__OAI_PILGRIMAGE_PLACE_PICK__&&typeof window._oaiReturnFromPilgrimageMapPick==='function'&&window._oaiReturnFromPilgrimageMapPick())return; closeSheetPanelOnly('list'); });
   on('region-close-btn', 'click', function(e) { e.stopPropagation(); closeSheetPanelOnly('region'); });
-  on('route-close-btn',  'click', function(e) { e.stopPropagation(); closeRouteSheetByX(); });
+  // 경로 닫기는 아래 캡처 click 핸들러 한 곳에서만 처리한다.
   on('map-category-close-btn', 'click', function(e) { e.stopPropagation(); if(window.__OAI_PILGRIMAGE_COURSE_VIEW__&&typeof window._oaiReturnFromPilgrimageCourseMap==='function'&&window._oaiReturnFromPilgrimageCourseMap()) return; if(window.__OAI_PILGRIMAGE_PLACE_PICK__&&typeof window._oaiReturnFromPilgrimageMapPick==='function'&&window._oaiReturnFromPilgrimageMapPick()) return; closeCategoryToCoverFromMap(); });
 
   on('loc-btn', 'click', function() { goMyLoc(); });
@@ -17615,8 +17615,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // X 버튼 터치 보강: 경로/인포카드 위에 다른 레이어가 있어도 닫힘이 먼저 실행되도록 캡처 단계에서도 한 번 더 묶는다.
   ['click','pointerup','touchend'].forEach(function(ev){
     on('ic-close-btn', ev, function(e){ if(e){ e.preventDefault(); e.stopPropagation(); } closeInfoCard({keepMap:true}); }, true);
-    on('route-close-btn', ev, function(e){ if(e){ e.preventDefault(); e.stopPropagation(); } closeRouteSheetByX(); }, true);
   });
+  // touchend/pointerup/click 연속 발생 시 경로 종료가 중복 실행되지 않게 click 한 번만 처리한다.
+  on('route-close-btn', 'click', function(e){
+    if(e){ e.preventDefault(); e.stopImmediatePropagation(); }
+    closeRouteSheetByX();
+  }, true);
 
   on('sm-close-btn', 'click', function() { closeSearchModal(); });
   on('sm-map-select-btn', 'click', function() { selectMapFromSearchModal(); });
