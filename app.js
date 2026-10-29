@@ -24271,7 +24271,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const modal=planner();
     _setPilgrimageLayerVisible(modal,false);
     plannerView='detail';
-    const meta=loadMeta(),plan=(readOnly&&Array.isArray(options.coursePlaces))
+    const meta=options.courseEndpoints || loadMeta(),plan=(readOnly&&Array.isArray(options.coursePlaces))
       ? options.coursePlaces.map(normalizePoint).filter(Boolean) : loadPlan();
     window.__OAI_PILGRIMAGE_VIEW_WAYPOINTS__=readOnly?plan.slice():null;
     window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__=false;
@@ -24847,9 +24847,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     _applyPilgrimageCourseViewReadOnlyState();
   }
   function _pilgrimageCoursePoints(){
-    const meta=loadMeta();
     const completed=pilgrimageDetailMode==='complete' && currentCourseId
       ? loadCourses().find(c=>c.id===currentCourseId) : null;
+    // Completed detail must use its own saved course endpoints, not the mutable
+    // draft restored by a previous pilgrimage / route entry.
+    const meta=completed ? {start:completed.start,end:completed.end} : loadMeta();
     const list=completed && _courseCompletionList(completed).length
       ? _manualMerged(completed).map(x=>x.point) : loadPlan();
     const out=[];
@@ -24885,6 +24887,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         readOnly:true,
         normalRoute:false,
         coursePlaces:coursePlaces,
+        courseEndpoints:fromCompleted?{
+          start:pts.find(p=>p.role==='start')||null,
+          end:pts.find(p=>p.role==='end')||null
+        }:null,
         fromPlaceInfo:fromPlaceInfo,
         focusPoint:fromPlaceInfo?options.focusPoint:null
       });
