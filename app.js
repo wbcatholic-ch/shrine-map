@@ -23605,12 +23605,23 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   // Completed-course labels come from the original GPS stamp, never the
   // course completion time (which may be generated at midnight).
-  function _completionPlaceVisitLabel(point,completion){
+  function _completionPlaceVisitLabel(point,completion,gpsRowsByDate){
     if(!point||point.routeOnly||!completion)return '방문 날짜·시간 기록 없음';
     const day=_courseDateInputValue(completion.completedAt);
     if(!day)return '방문 날짜·시간 기록 없음';
     try{
-      const stampAt=_dailyRecordedVisitAt(point,day);
+      // 상세 스와이프 한 번에 날짜별 GPS 원본을 한 번만 읽는다.
+      let rows;
+      if(gpsRowsByDate){
+        if(!gpsRowsByDate.has(day)){
+          try{gpsRowsByDate.set(day,{rows:_dailyRawGpsEvents(day)});}
+          catch(error){gpsRowsByDate.set(day,{error});}
+        }
+        const cached=gpsRowsByDate.get(day);
+        if(cached.error)throw cached.error;
+        rows=cached.rows;
+      }
+      const stampAt=_dailyRecordedVisitAt(point,day,0,rows);
       if(!stampAt)return '방문 날짜·시간 기록 없음';
       const d=new Date(stampAt);
       if(!Number.isFinite(d.getTime()))return '방문 날짜·시간 기록 없음';
@@ -23635,6 +23646,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const gpsAutoCompletion=!!(manualCourse&&manualCourse.autoGps===true);
     const gpsProtected=!!(manualCourse&&_courseHasGpsLockedCompletion(manualCourse));
     const displayedCompletion=isCompletionView&&manualCourse?_courseCompletionList(manualCourse)[0]:null;
+    const detailGpsRowsByDate=isCompletionView?new Map():null;
     const canSupplementCompletion=!!(isCompletionView&&manualCourse&&_courseCompletionList(manualCourse).length);
     const displayItems=canSupplementCompletion?_manualMerged(manualCourse):list.map((point,i)=>({point,gps:true,gpsIndex:i}));
     const gpsMissingEndpoint=gpsAutoCompletion&&(!normalizePoint(m.start)||!normalizePoint(m.end));
@@ -23676,7 +23688,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         const segBounds=walkOk;
         const inWalkSegment=!!(segBounds&&row.gps&&i>=segBounds.start&&i<=segBounds.end);
         const cls='oai-pilgrimage-item'+(done?' is-done':'')+(isCompletionView&&!row.gps?' is-manual-completion':'')+(inWalkSegment?' is-planned-walk':'');
-        const metric=item.routeOnly?'이동 경유지 · 스탬프 없음':isCompletionView?(!row.gps?'':_completionPlaceVisitLabel(item,displayedCompletion)):(done?'순례 완료':'GPS 확인 중…');
+        const metric=item.routeOnly?'이동 경유지 · 스탬프 없음':isCompletionView?(!row.gps?'':_completionPlaceVisitLabel(item,displayedCompletion,detailGpsRowsByDate)):(done?'순례 완료':'GPS 확인 중…');
         const statusHtml=!item.routeOnly&&done&&(!isCompletionView||row.gps)?'<span class="oai-pilgrimage-waypoint-chip is-done">✓ 순례완료</span>':'';
         const walkOrigin=!!(m.walkSegment&&m.walkSegment.startRef&&_walkPointIndex(m.walkSegment.startRef,list,m)===i);
         const walkDestination=!!(m.walkSegment&&m.walkSegment.endRef&&_walkPointIndex(m.walkSegment.endRef,list,m)===i);
@@ -26478,7 +26490,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     function start(target,x,y,id){
       gesture=null;
       const mode=isOpen()?'list':isDetailOpen()?'detail':'';
-      if(mode&&eligible(target)&&!(mode==='detail'&&target.closest&&target.closest('button,[role="button"]')))
+      // 순례지 이름도 버튼이므로 버튼 시작 터치를 일괄 차단하면
+      // 상세 화면 대부분에서 스와이프가 작동하지 않는다.
+      // 실제 클릭은 수평 스와이프가 확정된 경우에만 아래에서 막는다.
+      if(mode&&eligible(target))
         gesture={x,y,lastX:x,lastY:y,id,axis:null,mode};
     }
     function move(x,y,id,event){
@@ -26507,7 +26522,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       renderCourseList();
     }
     document.addEventListener('click',function(e){
-      if(Date.now()<suppressClickUntil&&e.target.closest&&e.target.closest('[data-course-open],[data-oai-pilgrimage-course-tab]')){
+      const modal=document.getElementById('oai-pilgrimage-planner-modal');
+      if(Date.now()<suppressClickUntil&&modal&&modal.contains(e.target)&&
+         e.target.closest&&e.target.closest('button,a,[role="button"],[data-course-open],[data-oai-pilgrimage-course-tab]')){
         e.preventDefault();e.stopImmediatePropagation();suppressClickUntil=0;
       }
     },true);
