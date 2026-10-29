@@ -26263,15 +26263,42 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         &&document.getElementById('oai-pilgrimage-detail-view')?.hidden
         &&document.getElementById('oai-pilgrimage-follow-view')?.hidden);
     }
+    function isDetailOpen(){
+      const modal=document.getElementById('oai-pilgrimage-planner-modal');
+      const detail=document.getElementById('oai-pilgrimage-detail-view');
+      if(!modal||!modal.classList.contains('show')||!detail||detail.hidden||plannerView!=='detail'||
+         !currentCourseId||pilgrimageManualCreateMode)return false;
+      // 진행 중인 순례는 손짓으로 다른 코스에 이동시키지 않는다.
+      return !_readActiveFollowRaw();
+    }
     function eligible(target){
       const modal=document.getElementById('oai-pilgrimage-planner-modal');
       const panel=modal&&modal.querySelector('.oai-pilgrimage-planner-panel');
       return !!(target&&panel&&panel.contains(target)
-        &&!(target.closest&&target.closest('input,select,textarea,a,[data-plan-drag],[data-manual-drag],[data-oai-pilgrimage-drag],.oai-pilgrimage-planner-panel > header')));
+        &&!(target.closest&&target.closest('input,select,textarea,a,[data-plan-drag],[data-manual-drag],[data-oai-pilgrimage-drag],.oai-pilgrimage-planner-panel > header,iframe,.leaflet-container,.swiper,[role="slider"]')));
+    }
+    function switchDetail(dx){
+      if(!isDetailOpen())return false;
+      const courses=loadCourses();
+      const mode=pilgrimageDetailMode==='complete'?'complete':'plan';
+      const filtered=_sortPilgrimageCourses(courses.filter(c=>{
+        const completed=_courseCompletionList(c).length>0;
+        if(mode==='plan')return !completed;
+        return completed&&((pilgrimageCourseFilterState.year==='all'&&pilgrimageCourseFilterState.month==='all')||
+          _courseCompletionMatches(c,pilgrimageCourseFilterState.year,pilgrimageCourseFilterState.month));
+      }),pilgrimageCourseFilterState.sort);
+      if(filtered.length<2)return false;
+      const index=filtered.findIndex(c=>String(c.id)===String(currentCourseId));
+      if(index<0)return false;
+      const next=filtered[(index+(dx<0?1:-1)+filtered.length)%filtered.length];
+      openCourse(next.id,courses,null);
+      return true;
     }
     function start(target,x,y,id){
       gesture=null;
-      if(isOpen()&&eligible(target))gesture={x,y,lastX:x,lastY:y,id,axis:null};
+      const mode=isOpen()?'list':isDetailOpen()?'detail':'';
+      if(mode&&eligible(target)&&!(mode==='detail'&&target.closest&&target.closest('button,[role="button"]')))
+        gesture={x,y,lastX:x,lastY:y,id,axis:null,mode};
     }
     function move(x,y,id,event){
       const g=gesture;if(!g||g.id!==id)return;
@@ -26283,9 +26310,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     function end(x,y,id){
       const g=gesture;gesture=null;
-      if(!g||g.id!==id||!isOpen())return;
+      if(!g||g.id!==id||(g.mode==='list'?!isOpen():!isDetailOpen()))return;
       const dx=x-g.x,dy=y-g.y,now=Date.now();
       if(Math.abs(dx)<48||Math.abs(dx)<Math.abs(dy)*1.25||now-lastSwitch<250)return;
+      if(g.mode==='detail'){
+        if(switchDetail(dx)){lastSwitch=now;suppressClickUntil=now+550;}
+        return;
+      }
       lastSwitch=now;suppressClickUntil=now+550;
       const next=pilgrimageCourseTab==='complete'?'plan':'complete';
       pilgrimageCourseTab=next;
