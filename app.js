@@ -2128,6 +2128,13 @@ function _isVisitedShrine(item){ return _getShrineVisitCount(item)>0; }
 function _hasShrineVisitOnDate(item,date){
   return _hasVisitDate(_getShrineVisitDates(item),date);
 }
+// GPS 후보에서는 기존 수동 기록을 제외하지 않는다. 실제 위치 인증이 오면 같은 날짜의
+// 기존 수동 스탬프를 _appendVisitOnce가 GPS로 승격하고 사진·메모를 보존한다.
+function _hasShrineGpsVisitOnDate(item,date){
+  return _getShrineVisitDates(item).some(function(v){
+    return _visitDateOf(v)===String(date)&&String(v.method||'manual').toLowerCase()==='gps';
+  });
+}
 function _addShrineVisit(item,date,method,measuredAt){
   const key=_getShrineVisitKey(item);
   if(!key) return false;
@@ -4265,7 +4272,7 @@ function _nearestShrineWithinAutoVisitRadius(lat,lng,unvisitedOnDate){
   let best=null,bestM=Infinity;
   SHRINES.forEach(function(s,idx){
     if(!s) return;
-    if(unvisitedOnDate&&_hasShrineVisitOnDate(s,unvisitedOnDate))return;
+    if(unvisitedOnDate&&_hasShrineGpsVisitOnDate(s,unvisitedOnDate))return;
     const radius=_oaiShrineGpsRadiusM(s);
     let points=[];
     if(Array.isArray(s.gpsPoints)&&s.gpsPoints.length){
@@ -4409,7 +4416,7 @@ function _maybePromptAutoShrineVisit(lat,lng){
     const entry=_nearestShrineWithinAutoVisitRadius(lat,lng,date);
     if(!entry||!entry.item) return;
     if(_oaiIsRestrictedPlace('shrine',entry.item)&&!_oaiAllowRestrictedGpsVisit('shrine',entry.item,_getShrineVisitDates(entry.item)))return;
-    if(_hasShrineVisitOnDate(entry.item,date)) return;
+    if(_hasShrineGpsVisitOnDate(entry.item,date)) return;
     window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__=true;
     setTimeout(function(){
       const registered=_registerAutoShrineVisit(entry);
