@@ -10450,9 +10450,19 @@ function closeSheetPanelOnly(name){
 function closeRouteSheetByX(confirmed){
   // Guard user-initiated exit from a populated ordinary directions route.
   // The confirmation runs before any route state or map overlay is cleared.
-  if(confirmed!==true && !window.__OAI_PILGRIMAGE_PLACE_PICK__ &&
-     !window.__OAI_PILGRIMAGE_COURSE_VIEW__ && !window.__OAI_PILGRIMAGE_ROUTE_EDIT__ &&
-     (_rS||_rE||_polyline)){
+  // Only the visible ordinary directions sheet may request route-exit confirmation.
+  // Historical route endpoints may remain after a pilgrimage map returns to its detail/cover.
+  var routeSheetForExit = document.getElementById('sheet-route');
+  var ordinaryRouteVisible = _screen === 'map' &&
+    document.documentElement.classList.contains('app-active') &&
+    _activeTab === 'route' && !!routeSheetForExit &&
+    routeSheetForExit.classList.contains('open') &&
+    !routeSheetForExit.hidden && routeSheetForExit.style.display !== 'none' &&
+    !window.__oaiPilgrimageRouteReturn &&
+    !window.__OAI_PILGRIMAGE_PLACE_PICK__ &&
+    !window.__OAI_PILGRIMAGE_COURSE_VIEW__ &&
+    !window.__OAI_PILGRIMAGE_ROUTE_EDIT__;
+  if(confirmed!==true && ordinaryRouteVisible && (_rS||_rE||_polyline)){
     if(document.getElementById('oai-visit-confirm')?.classList.contains('show'))return;
     _oaiVisitConfirm('현재 경로가 삭제됩니다. 정말 나가시겠습니까?',
       function(){closeRouteSheetByX(true);},
