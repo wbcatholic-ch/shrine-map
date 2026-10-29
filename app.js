@@ -24544,6 +24544,26 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const completedForPick=_manualCompletionCourse();
     const planForPick=completedForPick?_manualMerged(completedForPick).map(x=>x.point):loadPlan();
     const waypointsForPick=planForPick.map(normalizePoint).filter(p=>p&&_validGpsPair(p.lat,p.lng));
+    // 출발·도착 수정은 지정된 해당 장소(없으면 현재 위치)만을 중심으로 연다.
+    const endpointFocus=(entryRole==='start'||entryRole==='end')
+      ? _pilgrimageMapInitialPoint(entryRole) : null;
+    const endpointFocusMode=entryRole==='start'||entryRole==='end';
+    let endpointLocationRequested=false;
+    const focusEndpointMap=()=>{
+      if(!endpointFocusMode||!_map||_screen!=='map'||!window.__OAI_PILGRIMAGE_PLACE_PICK__)return;
+      const focus=endpointFocus&&_validGpsPair(endpointFocus.lat,endpointFocus.lng)
+        ? endpointFocus
+        : (_validGpsPair(_myLat,_myLng)?{lat:Number(_myLat),lng:Number(_myLng)}:null);
+      if(focus){_setPilgrimageMapCenterForBottomCard(focus,8,{repeat:false});return;}
+      // 현재 위치가 아직 없으면 위치 확인 성공 시 1회만 적용한다.
+      if(!endpointLocationRequested&&typeof _refreshFreshLocationThen==='function'){
+        endpointLocationRequested=true;
+        _refreshFreshLocationThen((lat,lng)=>{
+          if(window.__OAI_PILGRIMAGE_PLACE_PICK__&&_screen==='map')
+            _setPilgrimageMapCenterForBottomCard({lat:Number(lat),lng:Number(lng)},8,{repeat:false});
+        },()=>{});
+      }
+    };
     _setPilgrimageLayerVisible(modal,false);
     plannerView='detail';
     window.__OAI_PILGRIMAGE_PLACE_PICK__=true;
@@ -24594,13 +24614,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         // Read the captured waypoints, not a route-sheet-mutated draft.
         const points=waypointsForPick;
         // Fit immediately; do not wait for the asynchronous build of all shrine markers.
-        _fitPilgrimageWaypointBounds(points,92);
+        if(endpointFocusMode)focusEndpointMap();else _fitPilgrimageWaypointBounds(points,92);
         // The route drawer may finish its layout on the following frame.
         // A single bounded refit prevents its relayout from restoring GPS focus.
         requestAnimationFrame(function(){
           requestAnimationFrame(function(){
             if(window.__OAI_PILGRIMAGE_PLACE_PICK__&&_screen==='map'&&_map)
-              _fitPilgrimageWaypointBounds(points,92);
+              if(endpointFocusMode)focusEndpointMap();else _fitPilgrimageWaypointBounds(points,92);
           });
         });
         // Build markers once; do not repeatedly recenter while data is loading.
@@ -24610,7 +24630,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
             if(typeof _map.relayout==='function')_map.relayout();
             // The initial fit may precede bottom-sheet layout and marker loading.
             // Refit once the selection map is ready, using the saved waypoints only.
-            _fitPilgrimageWaypointBounds(points,92);
+            if(endpointFocusMode)focusEndpointMap();else _fitPilgrimageWaypointBounds(points,92);
           }catch(err){console.warn('[가톨릭길동무] 순례 장소선택 지도 갱신 실패',err);}
         }).catch(err=>console.warn('[가톨릭길동무] 순례 장소선택 마커 실패',err));
       }
@@ -24702,6 +24722,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     return list.some(x=>Math.abs(Number(x.lat)-q.lat)+Math.abs(Number(x.lng)-q.lng)<.00002);
   }
   function _pilgrimageMapPickMarkerImage(item,selected,focused){
+    if(Array.isArray(SHRINES)&&SHRINES.indexOf(item)>=0&&
+       typeof _isVisitedShrine==='function'&&_isVisitedShrine(item))
+      return _mkrImg('#111111',false);
     if(focused){try{return _mkrImg(OAI_PILGRIMAGE_FOCUS_MARKER_COLOR,false);}catch(_e){return null;}}
     if(selected){try{return _mkrImg(OAI_PILGRIMAGE_PLAN_MARKER_COLOR,false);}catch(_e){return null;}}
     const isParish=Array.isArray(PARISHES)&&PARISHES.indexOf(item)>=0;
@@ -24712,6 +24735,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       else if(isShrine)c=_typeColor(item&&item.type);
       else if(item&&item.type)c=_typeColor(item.type);
     }catch(_e){}
+    // 기존 성지 지도와 동일하게 방문 성지는 검정색을 유지한다.
+    if(isShrine&&typeof _isVisitedShrine==='function'&&_isVisitedShrine(item))c='#111111';
     try{return _mkrImg(c,false);}catch(_e){return null;}
   }
   function _refreshPilgrimageMapPickMarkers(){
