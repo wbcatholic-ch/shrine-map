@@ -20787,17 +20787,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const next=places.find(x=>x&&!x.routeOnly&&!x.done);
     const name=next?String(next.name||''):'';
     const signature=[active.startedAt,visited,_pilgrimageStampPlaces(places).length,name].join('|');
-    const tracking=typeof native.startCarPilgrimageTracking==='function';
-    if(tracking){
-      try{
-        const status=typeof native.getWalkingPilgrimageStatus==='function'?JSON.parse(native.getWalkingPilgrimageStatus()||'{}'):{};
-        const args=[active.startedAt,visited,_pilgrimageStampPlaces(places).length,name,_walkingNativeCoursePoints(active)];
-        if(Number(status.startedAt)!==Number(active.startedAt)||status.travelMode!=='car')native.startCarPilgrimageTracking(...args);
-        else if(signature!==lastCarNoticeSignature&&typeof native.updateCarPilgrimageTracking==='function')native.updateCarPilgrimageTracking(...args);
-        lastCarNoticeSignature=signature;
-      }catch(e){console.warn('[자동차 순례] GPS 서비스 연결 실패',e);}
-      return;
-    }
+    // Automobile pilgrimages never start a second location service, including
+    // when a future internal-test Android build enables walking GPS tracking.
     if(signature===lastCarNoticeSignature)return;
     try{native.updateCarPilgrimage(active.startedAt,visited,_pilgrimageStampPlaces(places).length,name);lastCarNoticeSignature=signature;}
     catch(e){console.warn('[자동차 순례] 상태창 표시 실패',e);}
@@ -20914,10 +20905,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   pilgrimageBadgeObserver.observe(document.body,{childList:true});
   setInterval(function(){
     if(document.hidden||!_readActiveFollowRaw())return;
-    const active=_activeFollowState();
-    if(active&&active.travelMode==='car')_reconcileWalkingNativeFix();
     _refreshWalkingCoverBadge();
-  },5000);
+  },30000);
   function _walkingNativeCoursePoints(active){
     const places=Array.isArray(active&&active.course&&active.course.places)?active.course.places:[];
     return JSON.stringify(places.filter(x=>x&&!x.routeOnly&&_validGpsPair(x.lat,x.lng)).map(x=>({
@@ -24263,6 +24252,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           try{_hideAllParishDioMkrs();}catch(_e){}
           try{(_retreatMarkers||[]).forEach(function(o){if(o&&o.marker)_setMarkerMapIfChanged(o.marker,null);});}catch(_e){}
         }
+        // Diocese names are independent CustomOverlays, not ordinary parish markers.
+        // Hide them when reusing the parish map for pilgrimage route viewing.
+        try{_hideDioOverlays();}catch(_e){}
         _mode='shrine';
         _filterDio='all';
         _listSrch='';
@@ -24316,6 +24308,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
             _setMapPanelCollapsed(true,'detail-map-ready');
           }
           if(typeof _restoreAllCategoryMarkersForSelection==='function')_restoreAllCategoryMarkersForSelection();
+          try{_hideDioOverlays();}catch(_e){}
           if(typeof _refreshRouteTmpMarkers==='function')_refreshRouteTmpMarkers();
           if(readOnly&&['place-info','complete-place-info','complete'].includes(_pilgrimageCourseViewKind()))_hidePilgrimageDetailCategoryMarkers();
           // Both planned and completed place-info maps fit ONLY their saved
