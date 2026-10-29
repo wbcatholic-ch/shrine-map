@@ -15294,15 +15294,8 @@ function _fitPilgrimagePlaceInfoWaypoints(points){
 }
 function _fitCompletedPilgrimageWholeCourse(){
   if(_pilgrimageMapMode()!=='completed-view'||!_map||!window.kakao||!kakao.maps)return false;
-  const points=[_rS].concat(_getRouteWaypoints(),[_rE]).filter(p=>p&&_validGpsPair(p.lat,p.lng));
-  if(!points.length)return false;
-  try{
-    _map.relayout();
-    if(points.length===1){_map.setCenter(new kakao.maps.LatLng(Number(points[0].lat),Number(points[0].lng)));return true;}
-    const bounds=new kakao.maps.LatLngBounds();
-    points.forEach(p=>bounds.extend(new kakao.maps.LatLng(Number(p.lat),Number(p.lng))));
-    return _fitRouteBounds(bounds,{repeat:false});
-  }catch(e){console.warn('[가톨릭길동무] 완료 코스 전체 확대 실패',e);return false;}
+  // 출발지·도착지는 표시하되 줌 범위는 순례지(경유지)만 사용한다.
+  return _fitPilgrimageWaypointBounds(window.__OAI_PILGRIMAGE_VIEW_WAYPOINTS__||_getRouteWaypoints(),56);
 }
 function _pilgrimageMapPermissions(){
   const mode=_pilgrimageMapMode();
@@ -15430,6 +15423,8 @@ function _schedulePilgrimageRouteResult(label,focusPoint){
               _refreshRouteTmpMarkers();
               _setMapPanelCollapsed(false,'completed-course-route-ready');
               _fitCompletedPilgrimageWholeCourse();
+            }else if(_pilgrimageMapMode()==='active-course-view'){
+              _fitPilgrimageWaypointBounds(window.__OAI_PILGRIMAGE_VIEW_WAYPOINTS__||_getRouteWaypoints(),56);
             }
           }
           _oaiCourseRouteLoading(false,loadingToken);
@@ -24327,6 +24322,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           // waypoints, after the shared map and marker surfaces have settled.
           if(readOnly&&['place-info','complete-place-info'].includes(_pilgrimageCourseViewKind())){
             _fitPilgrimagePlaceInfoWaypoints(plan);
+          }else if(readOnly&&['active','complete'].includes(_pilgrimageCourseViewKind())){
+            // 계획과 완료의 전체 지도도 출발지·도착지를 제외한 경유지로 맞춘다.
+            _fitPilgrimageWaypointBounds(plan,56);
           }
           const focus=options.focusPoint&&_validGpsPair(options.focusPoint.lat,options.focusPoint.lng)?options.focusPoint:_pilgrimageMapInitialPoint(entryRole);
           if(focus&&_validGpsPair(focus.lat,focus.lng)&&!readOnly)
