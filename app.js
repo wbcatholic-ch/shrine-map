@@ -2140,6 +2140,11 @@ function _addShrineVisit(item,date,method,measuredAt){
   if(!key) return false;
   date=String(date||'').trim();
   if(!_isVisitDate(date)) return false;
+  // 손상된 기존 저장소를 빈 방문기록으로 간주해 덮어쓰지 않는다.
+  try{
+    const raw=localStorage.getItem(OAI_SHRINE_VISITS_KEY);
+    if(raw!==null){const source=JSON.parse(raw);if(!source||typeof source!=='object'||Array.isArray(source))return false;}
+  }catch(e){console.warn('[성지 스탬프 원본 손상: 신규 저장 보류]',e);return false;}
   const data=_loadShrineVisits();
   _migrateShrineVisitRecord(item,data);
   const rec=data[key]&&typeof data[key]==='object'?data[key]:{name:item.name||'',diocese:item.diocese||'',seq:item.seq||'',visits:[]};
@@ -4272,7 +4277,6 @@ function _nearestShrineWithinAutoVisitRadius(lat,lng,unvisitedOnDate){
   let best=null,bestM=Infinity;
   SHRINES.forEach(function(s,idx){
     if(!s) return;
-    if(unvisitedOnDate&&_hasShrineGpsVisitOnDate(s,unvisitedOnDate))return;
     const radius=_oaiShrineGpsRadiusM(s);
     let points=[];
     if(Array.isArray(s.gpsPoints)&&s.gpsPoints.length){
@@ -4282,6 +4286,9 @@ function _nearestShrineWithinAutoVisitRadius(lat,lng,unvisitedOnDate){
     points.forEach(function(p){
       const m=calcDist(lat,lng,Number(p.lat),Number(p.lng))*1000;
       if(m<=radius && m<bestM){
+        // 가까운 후보에만 기존 스탬프를 조회한다. 전국 모든 성지에 대해
+        // 동일 저장소를 반복 해석하던 GPS 수신 경로를 제거한다.
+        if(unvisitedOnDate&&_hasShrineGpsVisitOnDate(s,unvisitedOnDate))return;
         bestM=m;
         best={item:s,idx:idx,meters:m,gpsPointName:p.name||''};
       }
@@ -4738,6 +4745,67 @@ function _oaiJointStampCounterpart(kind,item,date){
     return false;
   }catch(e){console.warn('[공통 스탬프 보완 실패]',e);return false;}
 }
+/* V1711: 성지 GPS 저장 성공 후 연결 성당 저장이 실패한 소수의 날짜만 보류한다.
+   전수 반복 검사는 하지 않으며, 원본 GPS가 확인되고 해당 교구 명부가 준비된
+   경우에만 최대 3번 시도한다. 성공/실패는 그대로 보존한다. */
+const OAI_JOINT_PENDING_V1711='oai_joint_stamp_pending_v1711';
+let _oaiJointPendingScheduled=false;
+function _oaiJointPendingRead(){
+  try{const value=JSON.parse(localStorage.getItem(OAI_JOINT_PENDING_V1711)||'[]');return Array.isArray(value)?value:[];}
+  catch(e){console.warn('[연결 스탬프 대기 장부 손상]',e);return null;}
+}
+function _oaiJointPendingWrite(items){
+  const value=JSON.stringify(items);
+  localStorage.setItem(OAI_JOINT_PENDING_V1711,value);
+  if(localStorage.getItem(OAI_JOINT_PENDING_V1711)!==value)throw Error('연결 스탬프 대기 저장 실패');
+}
+function _oaiJointPendingAdd(item,date){
+  const group=_oaiJointStampPair('shrine',item);if(!group||!_isVisitDate(date))return;
+  try{
+    const list=_oaiJointPendingRead();if(!list)return;
+    if(!list.some(x=>x.groupId===group.id&&x.date===date)){
+      list.push({groupId:group.id,date,attempts:0,status:'pending'});
+      _oaiJointPendingWrite(list);
+    }
+    _oaiJointPendingSchedule();
+  }catch(e){console.warn('[연결 스탬프 보류 기록 실패]',e);}
+}
+function _oaiJointPendingSchedule(){
+  if(_oaiJointPendingScheduled)return;
+  const list=_oaiJointPendingRead();
+  if(!list||!list.some(x=>x&&x.status==='pending'&&Number(x.attempts)<3))return;
+  _oaiJointPendingScheduled=true;
+  setTimeout(function(){
+    _oaiJointPendingScheduled=false;
+    if(document.hidden)return;
+    const current=_oaiJointPendingRead();if(!current)return;
+    const target=current.find(x=>x&&x.status==='pending'&&Number(x.attempts)<3);
+    if(!target)return;
+    const group=OAI_SHARED_VISIT_JOURNAL_GROUPS.find(g=>g.id===target.groupId);
+    const shrine=group&&_oaiSharedGroupShrine(group),parish=group&&_oaiJointParish(group);
+    if(!shrine||!parish)return; // 교구가 로드될 때 _afterParishDataLoaded에서 재개
+    try{
+      // 원본 성지 GPS가 없다면 성당 연결을 생성하지 않고 안전하게 보류한다.
+      if(!_hasShrineGpsVisitOnDate(shrine,target.date)){
+        target.status='no-gps-evidence';_oaiJointPendingWrite(current);return;
+      }
+      const data=_loadParishVisits(),state=_oaiJointParishState(parish,target.date,data);
+      if(state.unsafe){target.status='ambiguous';_oaiJointPendingWrite(current);return;}
+      const entry=data[state.key]&&Array.isArray(data[state.key].visits)?data[state.key].visits.find(v=>_visitDateOf(v)===target.date):null;
+      const already=entry&&['linked','gps'].includes(String(entry.method||''));
+      if(already||_oaiJointStampAddParish(parish,target.date,'shrine',shrine))target.status='done';
+      else{target.attempts=Number(target.attempts||0)+1;if(target.attempts>=3)target.status='failed';}
+      _oaiJointPendingWrite(current);
+    }catch(e){
+      target.attempts=Number(target.attempts||0)+1;
+      if(target.attempts>=3)target.status='failed';
+      try{_oaiJointPendingWrite(current);}catch(_e){}
+      console.warn('[공통 성당 연결 보류]',e);
+    }
+    // 한 번에 한 곳만. 다음 작업은 저부하로 지연 실행한다.
+    _oaiJointPendingSchedule();
+  },1800);
+}
 /* 사용자별 기록 검사. 데이터가 없거나 아직 성당 명부가 로딩되지 않았으면 다음 로딩에서 재검사한다.
    검사를 완료했다는 플래그로 미래의 드라이브 복원 데이터를 누락시키지 않는다. */
 let _oaiJointStampRepairBusy=false;
@@ -5146,7 +5214,9 @@ function _registerGpsPlaceVisit(kind,item,date,measuredAt){
       const already=!!before;
       const upgraded=already&&String(before.method||'manual').toLowerCase()!=='gps';
       const added=(!already||upgraded)&&!!_addShrineVisit(item,visitDate,'gps',measuredAt);
-      if(added||(already&&!upgraded))_oaiJointStampCounterpart('shrine',item,visitDate);
+      if(added||(already&&!upgraded)){
+        if(!_oaiJointStampCounterpart('shrine',item,visitDate))_oaiJointPendingAdd(item,visitDate);
+      }
       if(added){_oaiNotifyActiveCourseGpsVisit();_oaiNotifyNewGpsStamp('shrine',item,visitDate);}
       return {added:added,upgraded:upgraded&&added,already:already,kind:'shrine',item:item};
     }
@@ -5311,7 +5381,20 @@ function _loadParishVisits(){try{const v=localStorage.getItem(OAI_PARISH_VISITS_
 function _saveParishVisits(d){try{const json=JSON.stringify(d||{});localStorage.setItem(OAI_PARISH_VISITS_KEY,json);return localStorage.getItem(OAI_PARISH_VISITS_KEY)===json;}catch(e){console.warn('[성당 기록 저장 실패]',e);return false;}}
 function _parishVisits(p){const d=_loadParishVisits(),r=d[_parishVisitStoredKey(p,d)]||{},a=Array.isArray(r.visits)?r.visits:[];return a.map(_normalizeVisitEntry).filter(function(v){return v&&_isVisitDate(v.date);}).sort(_compareShrineVisits);}
 function _parishVisitCount(p){return _parishVisits(p).length;}
-function _addParishVisit(p,date,method,measuredAt){const d=_loadParishVisits(),key=_parishVisitStoredKey(p,d);if(!key||!_isVisitDate(date))return false;const r=d[key]&&typeof d[key]==='object'?d[key]:{name:p.name||'',diocese:p.diocese||'',addr:p.addr||'',visits:[]};r.visits=Array.isArray(r.visits)?r.visits:[];if(!_appendVisitOnce(r,date,method,measuredAt))return false;if(!r.placeId)r.placeId=_oaiPlaceCanonicalId('parish',p);d[key]=r;if(!_saveParishVisits(d))return false;try{const persisted=_loadParishVisits()[key];if(!persisted||!_hasVisitDate(persisted.visits,date))return false;}catch(e){console.warn('[성당 기록 저장 검증 실패]',e);return false;}_clearManualVisitDeletion('parish',key,date);_oaiQueueGpsCourseDate(date,method);return true;}
+function _addParishVisit(p,date,method,measuredAt){
+  // 읽기 실패를 빈 저장소로 바꾸어 과거 성당 스탬프를 지우는 사고를 방지한다.
+  try{const raw=localStorage.getItem(OAI_PARISH_VISITS_KEY);if(raw!==null){const source=JSON.parse(raw);if(!source||typeof source!=='object'||Array.isArray(source))return false;}}
+  catch(e){console.warn('[성당 스탬프 원본 손상: 신규 저장 보류]',e);return false;}
+  const d=_loadParishVisits(),key=_parishVisitStoredKey(p,d);if(!key||!_isVisitDate(date))return false;
+  const r=d[key]&&typeof d[key]==='object'?d[key]:{name:p.name||'',diocese:p.diocese||'',addr:p.addr||'',visits:[]};
+  r.visits=Array.isArray(r.visits)?r.visits:[];
+  if(!_appendVisitOnce(r,date,method,measuredAt))return false;
+  if(!r.placeId)r.placeId=_oaiPlaceCanonicalId('parish',p);d[key]=r;
+  if(!_saveParishVisits(d))return false;
+  try{const persisted=_loadParishVisits()[key];if(!persisted||!_hasVisitDate(persisted.visits,date))return false;}
+  catch(e){console.warn('[성당 기록 저장 검증 실패]',e);return false;}
+  _clearManualVisitDeletion('parish',key,date);_oaiQueueGpsCourseDate(date,method);return true;
+}
 function _deleteParishVisit(p,i){const d=_loadParishVisits(),key=_parishVisitStoredKey(p,d),r=d[key];if(!r||!Array.isArray(r.visits)||i<0||i>=r.visits.length||['gps','linked'].includes(String((_normalizeVisitEntry(r.visits[i])||{}).method||'')))return false;const removed=_normalizeVisitEntry(r.visits[i]);r.visits.splice(i,1);if(r.visits.length)d[key]=r;else delete d[key];if(!_saveParishVisits(d))return false;_recordManualVisitDeletion('parish',key,removed);return true;}
 function _parishEntries(){const a=[];(PARISHES||[]).forEach(function(p,i){if(!p||p.diocese==='군종교구')return;const v=_parishVisits(p);if(v.length)a.push({p:p,i:i,v:v,n:v.length});});return a.sort(function(a,b){return _compareShrineVisits(a.v[0],b.v[0])||String(a.p.name).localeCompare(String(b.p.name),'ko')});}
 function _parishUnvisitedEntries(){const saved=_loadParishVisits();return (PARISHES||[]).map(function(p,i){const r=saved[_parishVisitStoredKey(p,saved)],v=r&&Array.isArray(r.visits)?r.visits:[];return {p:p,i:i,v:v};}).filter(function(x){return x.p&&x.p.diocese!=='군종교구'&&!x.v.length;}).sort(function(a,b){return String(a.p.name||'').localeCompare(String(b.p.name||''),'ko');});}
@@ -8144,6 +8227,8 @@ function _showParishDataLoadingMessage(msg){
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 function _afterParishDataLoaded(){
+  // 연결 실패 대기 기록이 있을 때만 다음 처리를 예약한다.
+  try{if(typeof _oaiJointPendingSchedule==='function')_oaiJointPendingSchedule();}catch(_e){}
   try{
     if(_mode==='parish'){
       if(_activeTab==='list') renderList();
@@ -20092,6 +20177,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       // 보존 검증이 구현되기 전까지 자동 실행하지 않는다. GPS 원본도 변경하지 않는다.
       // 날짜별 신규 GPS 코스 등록 로직은 아래 준비 상태를 통해 기존대로 유지한다.
       completionGpsBootReady=true;
+      // V1711: 날짜별 정리 초기화는 준비 완료 후 정확히 한 번만 실행한다.
+      // 별도로 예약된 신규 GPS 대기 날짜와 자정 등록 타이머를 중복 시작하지 않는다.
+      if(!dailySettlementInitialized)_initializeDailyPilgrimageSettlement();
+      _oaiJointPendingSchedule();
       return '기존 완료 코스 보존: 위험한 자동 전체 재구성 일시 중지';
     })().catch(function(err){
       console.error('[GPS 순례완료 생성 실패: 원본 보존]',err);
@@ -21162,9 +21251,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     // 구버전 완료 장부의 GPS 지문 형식은 고정한다. 새 placeId는 비교/조회에만 사용한다.
     return JSON.stringify(_dailyRawGpsEvents(date).map(e=>({key:e.key,kind:e.kind,name:e.name,diocese:e.diocese,at:e.at})));
   }
-  function _dailyRecordedVisitAt(item,date,notBefore){
+  function _dailyRecordedVisitAt(item,date,notBefore,preloadedGpsRows){
     const norm=_normPilgrimageName(item&&item.name),id=String(item&&item.placeId||'');
-    return _dailyRawGpsEvents(date).filter(e=>{
+    return (preloadedGpsRows||_dailyRawGpsEvents(date)).filter(e=>{
       const sameId=!!(id&&e.placeId&&String(e.placeId)===id);
       const sameLegacy=(!id||!e.placeId)&&_normPilgrimageName(e.name)===norm&&(!item.diocese||!e.diocese||String((_DIO&&_DIO[e.diocese])||e.diocese)===String((_DIO&&_DIO[item.diocese])||item.diocese));
       return (sameId||sameLegacy)&&(!notBefore||e.at>=Number(notBefore)-2000);
@@ -22009,9 +22098,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function _historyCandidateDates(includeToday){
     const rawShrines=localStorage.getItem('oai_shrine_visits_v1')||'';
     const rawParishes=localStorage.getItem('oai_parish_visits_v1')||'';
-    const signature=rawShrines+'\u001f'+rawParishes;
-    // 장소 자료 로딩 상태가 바뀌어도 버튼을 재평가해야 하므로 후보 캐시를 재사용하지 않는다.
-    historyDatesSignature=signature;
+    // 스탬프·완료 코스·목록 준비 상태가 그대로면 화면 재렌더링 때 전 날짜를
+    // 다시 검색하지 않는다. 원본이 바뀌면 즉시 캐시를 무효화한다.
+    const signature=JSON.stringify([rawShrines,rawParishes,localStorage.getItem(COURSES_KEY)||'',
+      Array.isArray(SHRINES)?SHRINES.length:0,Array.isArray(PARISHES)?PARISHES.length:0,
+      typeof _areAllParishDiocesesReady==='function'&&_areAllParishDiocesesReady(),_dailyIso(Date.now())]);
+    if(!includeToday&&historyDatesSignature===signature&&Array.isArray(historyDatesCache))return historyDatesCache.slice();
     const dates=new Set(),today=_dailyIso(Date.now());
     [_loadShrineVisits(),_loadParishVisits()].forEach(data=>{
       Object.values(data||{}).forEach(r=>{
@@ -22030,13 +22122,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         return false;
       }
     });
-    if(!includeToday)historyDatesCache=result;return result;
+    // 성공적으로 확인한 결과에 대해서만 캐시 상태를 확정한다.
+    if(!includeToday){historyDatesSignature=signature;historyDatesCache=result;}
+    return result;
   }
   function _historyUnregisteredDates(includeToday){
-    const state=_dailyState(),courses=loadCourses();
+    const state=_dailyState();
     return _historyCandidateDates(includeToday).filter(date=>{
-      // 날짜가 아닌 실제 GPS 장소별로 미등록 여부를 확인한다.
-      if(!_dailyEligibleRemaining(date,_dailyUnregisteredEvents(date,_dailyGpsEvents(date),courses),courses))return false;
+      // 후보 생성 과정에서 이미 실제 미등록 장소를 검증했다.
       const logged=state.auto[date];
       if(logged&&logged.done&&logged.source==='none'){
         // 단독 성당 등 '코스 대상 아님'이 확정된 같은 GPS 원본은 재노출하지 않는다.
@@ -22173,7 +22266,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function _historyOnPlannerOpened(){
     historyDatesCache=null;
-    _historyUpdateButton();
+    // 실패 버튼 갱신에서 미등록 코스 버튼도 갱신하므로 중복 전수 검사를 피한다.
     _dailyUpdateRetryButton();
     // 과거 GPS 코스 확인은 실제 미등록 대상이 있는 경우 버튼을 눌렀을 때만 실행한다.
     // 화면 진입 시 자동 등록 대화상자를 띄우지 않는다.
@@ -22487,17 +22580,18 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       let a=loadCourses(),i=a.findIndex(function(c){return c.id===active.courseId;});
       if(i<0){_clearActiveFollow(active.courseId);return false;}
       const prev=a[i],places=(Array.isArray(prev.places)?prev.places:[]).map(function(x){return Object.assign({},x);});
+      const today=_dailyIso(Date.now()),gpsRows=_dailyRawGpsEvents(today);
       let changed=false;
       places.forEach(function(item){
         if(!item||item.routeOnly||(item.done&&item.doneMethod==='gps'))return;
-        const visitedAt=_dailyRecordedVisitAt(item,_dailyIso(Date.now()));
+        const visitedAt=_dailyRecordedVisitAt(item,today,0,gpsRows);
         if(visitedAt){
           item.done=true;item.doneMethod='gps';item.gpsVisitAt=visitedAt;changed=true;
         }
       });
       const stampPlaces=_pilgrimageStampPlaces(places);
       const routeOnlyDestination=stampPlaces.length===0?_pilgrimageRegisteredDestination(prev.end):null;
-      const routeOnlyEndReached=!!(routeOnlyDestination&&_dailyRecordedVisitAt(prev.end,_dailyIso(Date.now())));
+      const routeOnlyEndReached=!!(routeOnlyDestination&&_dailyRecordedVisitAt(prev.end,today,0,gpsRows));
       if(routeOnlyEndReached)changed=true;
       if(!changed&&!forceMixedCompletion){_walkingNativeRefresh(active);return false;}
       const now=Date.now(),mixedWaiting=!!(active.mixedPhase&&active.mixedPhase!=='done');
@@ -26555,7 +26649,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     _historicalBgIdle(function(){
       if(document.hidden||_activeFollowState())return;
       _rebuildCompletionFromGps().then(function(){
-        setTimeout(_dailyRegisterPendingDate,250);
         _startHistoricalBackgroundV1659(false);
       }).catch(function(err){console.error('[최초 GPS 완료 준비 보류]',err);});
     });
