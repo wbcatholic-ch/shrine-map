@@ -15306,8 +15306,15 @@ function _fitPilgrimagePlaceInfoWaypoints(points){
 }
 function _fitCompletedPilgrimageWholeCourse(){
   if(_pilgrimageMapMode()!=='completed-view'||!_map||!window.kakao||!kakao.maps)return false;
-  // 출발지·도착지는 표시하되 줌 범위는 순례지(경유지)만 사용한다.
-  return _fitPilgrimageWaypointBounds(window.__OAI_PILGRIMAGE_VIEW_WAYPOINTS__||_getRouteWaypoints(),56);
+  return _fitPilgrimageWholeCourseBounds();
+}
+function _fitPilgrimageWholeCourseBounds(){
+  // '순례코스 보기'는 출발·경유·도착 모두 포함한다. 성지 상세의
+  // '지도에서 보기'는 별도로 경유지 줌만 유지한다.
+  const pts=(window.__OAI_PILGRIMAGE_VIEW_WAYPOINTS__||_getRouteWaypoints()).slice();
+  if(_rS&&_validGpsPair(_rS.lat,_rS.lng)&&!_rS.isImplicitCurrentLocation)pts.unshift(_rS);
+  if(_rE&&_validGpsPair(_rE.lat,_rE.lng))pts.push(_rE);
+  return _fitPilgrimageWaypointBounds(pts,56);
 }
 function _pilgrimageMapPermissions(){
   const mode=_pilgrimageMapMode();
@@ -15436,7 +15443,7 @@ function _schedulePilgrimageRouteResult(label,focusPoint){
               _setMapPanelCollapsed(false,'completed-course-route-ready');
               _fitCompletedPilgrimageWholeCourse();
             }else if(_pilgrimageMapMode()==='active-course-view'){
-              _fitPilgrimageWaypointBounds(window.__OAI_PILGRIMAGE_VIEW_WAYPOINTS__||_getRouteWaypoints(),56);
+              _fitPilgrimageWholeCourseBounds();
             }
           }
           _oaiCourseRouteLoading(false,loadingToken);
@@ -19423,6 +19430,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     el.setAttribute('aria-hidden',visible?'false':'true');
   }
   function _preparePilgrimageMainMapSurface(){
+    // Every pilgrimage map enters the shared Kakao map in shrine mode.
+    // Diocese-name overlays are independent of parish markers and must
+    // not survive a transition from the parish map.
+    try{
+      _mode='shrine';
+      document.documentElement.classList.remove('parish-mode','retreat-mode');
+      _hideDioOverlays();
+      _hideAllParishDioMkrs();
+      _clearParishNearbyMarkers();
+      (_retreatMarkers||[]).forEach(o=>{if(o&&o.marker)_setMarkerMapIfChanged(o.marker,null);});
+    }catch(_e){}
     try{document.documentElement.classList.add('app-active');}catch(_e){}
     try{if(typeof oaiSetMainMapLayerHidden==='function')oaiSetMainMapLayerHidden(false);else document.documentElement.classList.remove('oai-hide-main-map-layer');}catch(_e){}
     try{_screen='map';}catch(_e){}
@@ -24331,8 +24349,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           if(readOnly&&['place-info','complete-place-info'].includes(_pilgrimageCourseViewKind())){
             _fitPilgrimagePlaceInfoWaypoints(plan);
           }else if(readOnly&&['active','complete'].includes(_pilgrimageCourseViewKind())){
-            // 계획과 완료의 전체 지도도 출발지·도착지를 제외한 경유지로 맞춘다.
-            _fitPilgrimageWaypointBounds(plan,56);
+            _fitPilgrimageWholeCourseBounds();
           }
           const focus=options.focusPoint&&_validGpsPair(options.focusPoint.lat,options.focusPoint.lng)?options.focusPoint:_pilgrimageMapInitialPoint(entryRole);
           if(focus&&_validGpsPair(focus.lat,focus.lng)&&!readOnly)
