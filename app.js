@@ -23679,7 +23679,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     setView('detail');
     renderDetail();
   }
-  function openCourse(id,knownCourses,knownActive){
+  function openCourse(id,knownCourses,knownActive,fromDetailSwipe){
     pilgrimageManualCreateMode=false;pilgrimageManualDraftCourse=null;
     // 상세 스와이프에서는 이미 읽은 코스 목록을 다시 파싱하지 않는다.
     const courses=Array.isArray(knownCourses)?knownCourses:loadCourses();
@@ -23689,7 +23689,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     pilgrimageDetailMode=isCurrentActive?'plan':(pilgrimageCourseTab==='complete'?'complete':'plan');
     const displayedCourse=isCurrentActive?active.course:c;
     applyCourse(displayedCourse);
-    setView('detail');
+    // 같은 상세 화면에서 넘길 때는 이미 열린 화면을 다시 전환하지 않는다.
+    // setView의 스크롤/크기 재측정 및 예약 작업을 매 스와이프마다 반복하지 않는다.
+    if(!fromDetailSwipe||plannerView!=='detail')setView('detail');
     renderDetail(displayedCourse,active);
   }
   function repeatCourse(id,confirmed,travelMode){
@@ -26291,7 +26293,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const index=filtered.findIndex(c=>String(c.id)===String(currentCourseId));
       if(index<0)return false;
       const next=filtered[(index+(dx<0?1:-1)+filtered.length)%filtered.length];
-      openCourse(next.id,courses,null);
+      openCourse(next.id,courses,null,true);
       return true;
     }
     function start(target,x,y,id){
