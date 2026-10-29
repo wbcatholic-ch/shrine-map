@@ -427,7 +427,14 @@
 
     el = $b('sheet-route');
     try{
-      if((el && el.classList.contains('open')) || _routeMode || _rS || _rE){
+      // A residual route endpoint is not evidence that directions are still open.
+      // Never invoke ordinary route-exit confirmation from pilgrimage or cover navigation.
+      if(el && el.classList.contains('open') && !el.hidden &&
+         el.style.display !== 'none' && _activeTab === 'route' &&
+         !window.__oaiPilgrimageRouteReturn &&
+         !window.__OAI_PILGRIMAGE_PLACE_PICK__ &&
+         !window.__OAI_PILGRIMAGE_COURSE_VIEW__ &&
+         !window.__OAI_PILGRIMAGE_ROUTE_EDIT__){
         // The Android/system Back action must use the same route-exit confirmation
         // as the route sheet X button. Do not clear the route before confirmation.
         if(typeof window.closeRouteSheetByX==='function'){
