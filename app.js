@@ -5028,6 +5028,84 @@ function _runHistoricalSharedDirectV1654(){
   }
 }
 
+/* V1710: 기존 완료 표시 때문에 빠졌을 수 있는 공통화 60쌍만 한 번 더 확인한다.
+   확인 가능한 동일 저장 장소·날짜 중복만 병합하며, 성지와 성당 사이의 독립
+   스탬프는 절대 합치지 않는다. 충돌 기록은 그대로 보존하고 결과에 남긴다. */
+const OAI_SHARED_STAMP_RECHECK_V1710='oai_shared_stamp_recheck_v1710';
+const OAI_SHARED_STAMP_BACKUP_V1710='oai_shared_stamp_recheck_v1710_original';
+function _runSharedStampRecheckV1710(){
+  if(localStorage.getItem(OAI_SHARED_STAMP_RECHECK_V1710)!==null)return {status:'done'};
+  if(!Array.isArray(SHRINES)||!Array.isArray(PARISHES)||!SHRINES.length||!PARISHES.length)return {status:'catalog-pending'};
+  const keys=[OAI_SHRINE_VISITS_KEY,OAI_PARISH_VISITS_KEY];
+  const raw=keys.map(k=>localStorage.getItem(k));
+  let stores;
+  try{
+    stores=raw.map(s=>JSON.parse(s||'{}'));
+    if(stores.some(s=>!s||Array.isArray(s)||typeof s!=='object'))throw Error('invalid store');
+  }catch(e){return {status:'invalid-source'};}
+  let changed=0,unresolved=0,checked=0;
+  const changedByStore=[0,0];
+  const touched=[new Set(),new Set()];
+  OAI_SHARED_VISIT_JOURNAL_GROUPS.forEach(function(group){
+    const shrine=_oaiSharedGroupShrine(group),parish=_oaiJointParish(group);
+    if(!shrine||!parish){unresolved++;return;}
+    const definitions=[
+      {store:stores[0],index:0,key:_getShrineVisitKey(shrine),seq:String(shrine.seq||'')},
+      {store:stores[1],index:1,key:_parishVisitKey(parish),name:String(parish.name||''),diocese:String(parish.diocese||'')}
+    ];
+    definitions.forEach(function(def){
+      const matches=Object.keys(def.store).filter(function(k){
+        const r=def.store[k];if(!r||typeof r!=='object')return false;
+        if(k===def.key)return true;
+        if(def.index===0)return !!def.seq&&String(r.seq||'')===def.seq;
+        const parts=k.split('|');
+        return String(r.diocese||parts[0]||'')===def.diocese&&String(r.name||parts[1]||'')===def.name;
+      });
+      if(matches.length>1){unresolved++;return;}
+      if(!matches.length)return;
+      const key=matches[0];
+      if(touched[def.index].has(key))return;
+      touched[def.index].add(key);
+      const rec=def.store[key];
+      if(!Array.isArray(rec.visits)){unresolved++;return;}
+      checked++;
+      const seen=new Map(),output=[];
+      rec.visits.forEach(function(v){
+        const date=_visitDateOf(v);
+        if(!_isVisitDate(date)||date>'2026-10-26'){output.push(v);return;}
+        if(!seen.has(date)){seen.set(date,output.length);output.push(v);return;}
+        const at=seen.get(date),old=output[at];
+        try{
+          _assertVisitMergePreservesJournal(old,v,key);
+          output[at]=_mergeVisitEntryPreservingData(old,v);
+          changed++;changedByStore[def.index]++;
+        }catch(e){output.push(v);unresolved++;}
+      });
+      if(output.length!==rec.visits.length)rec.visits=output;
+    });
+  });
+  const report={at:Date.now(),checked,merged:changed,unresolved};
+  if(!changed){
+    localStorage.setItem(OAI_SHARED_STAMP_RECHECK_V1710,JSON.stringify(report));
+    return {status:'verified',checked,unresolved};
+  }
+  const original=JSON.stringify(raw),backup=localStorage.getItem(OAI_SHARED_STAMP_BACKUP_V1710);
+  if(backup!==null&&backup!==original)return {status:'backup-conflict'};
+  if(keys.some((k,i)=>localStorage.getItem(k)!==raw[i]))return {status:'source-changed'};
+  const next=stores.map((s,i)=>changedByStore[i]?JSON.stringify(s):raw[i]);
+  try{
+    if(backup===null)localStorage.setItem(OAI_SHARED_STAMP_BACKUP_V1710,original);
+    if(localStorage.getItem(OAI_SHARED_STAMP_BACKUP_V1710)!==original)throw Error('backup verification');
+    keys.forEach((k,i)=>{if(next[i]!==raw[i]){localStorage.setItem(k,next[i]);if(localStorage.getItem(k)!==next[i])throw Error('save verification');}});
+    localStorage.setItem(OAI_SHARED_STAMP_RECHECK_V1710,JSON.stringify(report));
+    if(!localStorage.getItem(OAI_SHARED_STAMP_RECHECK_V1710))throw Error('status verification');
+    return {status:'updated',checked,merged:changed,unresolved};
+  }catch(e){
+    keys.forEach((k,i)=>{if(localStorage.getItem(k)===next[i]){if(raw[i]===null)localStorage.removeItem(k);else localStorage.setItem(k,raw[i]);}});
+    return {status:'failed'};
+  }
+}
+
 /* V8-1-14-1113: GPS 방문 기록 단일 진입점.
    성지/성당 GPS 등록 여부와 당일 중복 판정을 이 함수에서만 결정한다.
    UI 알림과 순례코스 진행 처리는 각 호출부가 담당한다. */
@@ -26380,6 +26458,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     ['date-dedup',_runHistoricalStampDateDedupV1652],
     ['linked-stamp',_runHistoricalLinkedStampV1653],
     ['shared-direct',_runHistoricalSharedDirectV1654],
+    ['shared-recheck-v1710',_runSharedStampRecheckV1710],
     ['completion-cleanup',function(){_runHistoricalCompletionCleanupV1649();return {status:localStorage.getItem(HISTORICAL_DONE_KEY_V1649)!==null?'done':'pending'};}],
     ['auto-duplicate',_runHistoricalAutoDuplicateV1655],
     ['gps-completion',_runHistoricalGpsCompletionV1658],
