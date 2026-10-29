@@ -10013,8 +10013,6 @@ window.oaiResetSearchStateForFreshStart=oaiResetSearchStateForFreshStart;
 })();
 
 function goToCover(){
-  // A directions-exit dialog cannot survive a navigation back to the cover.
-  try{_dismissStaleRouteExitConfirm();}catch(_e){}
   try{ _cancelNearbyLoad(); }catch(e){ console.warn('[가톨릭길동무]', e); }
   try{ if(typeof _clearDioceseReturnState === 'function') _clearDioceseReturnState('go-to-cover'); }catch(e){ console.warn('[가톨릭길동무]', e); }
   try{
@@ -10449,27 +10447,12 @@ function closeSheetPanelOnly(name){
   }
 }
 
-function _isPilgrimageRouteNavigation(){
-  return !!(window.__OAI_PILGRIMAGE_PLACE_PICK__||window.__OAI_PILGRIMAGE_MAP_PICK__||
-    window.__OAI_PILGRIMAGE_COURSE_VIEW__||window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__||
-    window.__OAI_PILGRIMAGE_ROUTE_EDIT__||window.__oaiPilgrimageRouteReturn||
-    document.documentElement.classList.contains('oai-pilgrimage-route-direct')||
-    document.documentElement.classList.contains('oai-pilgrimage-course-view-readonly'));
-}
-function _dismissStaleRouteExitConfirm(){
-  const dialog=document.getElementById('oai-visit-confirm');
-  if(dialog&&dialog.classList.contains('show')&&dialog.classList.contains('oai-route-exit-confirm'))
-    _oaiCloseVisitConfirm();
-}
-let _oaiRouteCloseGuardUntil=0;
 function closeRouteSheetByX(confirmed){
-  // Ignore a second touch/click/back action while the same route is closing.
-  if(confirmed!==true && Date.now()<_oaiRouteCloseGuardUntil)return;
   // Guard user-initiated exit from a populated ordinary directions route.
   // The confirmation runs before any route state or map overlay is cleared.
-  const pilgrimageNavigation=_isPilgrimageRouteNavigation();
-  if(pilgrimageNavigation)_dismissStaleRouteExitConfirm();
-  if(confirmed!==true && !pilgrimageNavigation && _screen==='map' && (_rS||_rE||_polyline)){
+  if(confirmed!==true && !window.__OAI_PILGRIMAGE_PLACE_PICK__ &&
+     !window.__OAI_PILGRIMAGE_COURSE_VIEW__ && !window.__OAI_PILGRIMAGE_ROUTE_EDIT__ &&
+     (_rS||_rE||_polyline)){
     if(document.getElementById('oai-visit-confirm')?.classList.contains('show'))return;
     _oaiVisitConfirm('현재 경로가 삭제됩니다. 정말 나가시겠습니까?',
       function(){closeRouteSheetByX(true);},
@@ -10480,8 +10463,6 @@ function closeRouteSheetByX(confirmed){
     window._oaiReturnFromPilgrimageMapPick();return;
   }
   if(_pilgrimageRouteEditChanged() && !confirm('수정한 순례계획을 저장하지 않고 돌아갈까요?\n변경 내용은 적용되지 않습니다.'))return;
-  _oaiRouteCloseGuardUntil=Date.now()+1200;
-  _dismissStaleRouteExitConfirm();
   _oaiCourseRouteLoading(false);
   window.__OAI_COURSE_LOADING_TOKEN__=(window.__OAI_COURSE_LOADING_TOKEN__||0)+1;
   var returnToPilgrimage = window.__oaiPilgrimageRouteReturn === true;
@@ -17499,7 +17480,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   on('nearby-close-btn', 'click', function(e) { e.stopPropagation(); closeSheetPanelOnly('nearby'); });
   on('list-close-btn',   'click', function(e) { e.stopPropagation(); if(window.__OAI_PILGRIMAGE_PLACE_PICK__&&typeof window._oaiReturnFromPilgrimageMapPick==='function'&&window._oaiReturnFromPilgrimageMapPick())return; closeSheetPanelOnly('list'); });
   on('region-close-btn', 'click', function(e) { e.stopPropagation(); closeSheetPanelOnly('region'); });
-  // 경로 닫기는 아래 캡처 click 핸들러 한 곳에서만 처리한다.
+  on('route-close-btn', 'click', function(e) { e.stopPropagation(); closeRouteSheetByX(); });
   on('map-category-close-btn', 'click', function(e) { e.stopPropagation(); if(window.__OAI_PILGRIMAGE_COURSE_VIEW__&&typeof window._oaiReturnFromPilgrimageCourseMap==='function'&&window._oaiReturnFromPilgrimageCourseMap()) return; if(window.__OAI_PILGRIMAGE_PLACE_PICK__&&typeof window._oaiReturnFromPilgrimageMapPick==='function'&&window._oaiReturnFromPilgrimageMapPick()) return; closeCategoryToCoverFromMap(); });
 
   on('loc-btn', 'click', function() { goMyLoc(); });
@@ -17623,11 +17604,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   ['click','pointerup','touchend'].forEach(function(ev){
     on('ic-close-btn', ev, function(e){ if(e){ e.preventDefault(); e.stopPropagation(); } closeInfoCard({keepMap:true}); }, true);
   });
-  // touchend/pointerup/click 연속 발생 시 경로 종료가 중복 실행되지 않게 click 한 번만 처리한다.
-  on('route-close-btn', 'click', function(e){
-    if(e){ e.preventDefault(); e.stopImmediatePropagation(); }
-    closeRouteSheetByX();
-  }, true);
 
   on('sm-close-btn', 'click', function() { closeSearchModal(); });
   on('sm-map-select-btn', 'click', function() { selectMapFromSearchModal(); });
@@ -24285,9 +24261,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     window.__OAI_PILGRIMAGE_INITIAL_CENTER__=!readOnly&&!normalRoute
       ? _pilgrimageMapInitialPoint(entryRole):null;
     const run=()=>{try{
-      // A previously queued ordinary-directions confirmation must not appear
-      // behind a pilgrimage map and surface later on the cover screen.
-      _dismissStaleRouteExitConfirm();
       try{
         /* 성당·피정 화면에서 순례 상세의 지도 보기로 들어와도 기존 마커가
            재사용된 공통 지도 위에 남지 않게 정리한다. 이 진입의 기본은 성지 지도다. */
@@ -24546,7 +24519,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // Keep its pending entry tied to actual map readiness, not a fixed timer.
   let pilgrimageEndpointMapEntryCleanup=null;
   function _openPilgrimageEndpointMapAdd(entryRole){
-    _dismissStaleRouteExitConfirm();
     if(pilgrimageEndpointMapEntryCleanup)pilgrimageEndpointMapEntryCleanup();
     clearPilgrimageCourseMap();
     clearPilgrimageMapPickMarkers();
@@ -24837,7 +24809,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     return out;
   }
   async function openPilgrimageCourseMap(options){
-    _dismissStaleRouteExitConfirm();
     options=options||{};
     const fromPlaceInfo=options.fromPlaceInfo===true;
     const pts=_pilgrimageCoursePoints();
