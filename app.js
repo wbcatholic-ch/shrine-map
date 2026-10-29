@@ -10302,6 +10302,8 @@ function _relayoutMainMapForPanel(){
           // GPS/default center. Whole-course maps retain their own fit policy.
           if(['completed-place-info-view','place-info-view'].includes(_pilgrimageMapMode())){
             _fitPilgrimagePlaceInfoWaypoints();
+          }else if(['completed-view','active-course-view'].includes(_pilgrimageMapMode())){
+            _fitPilgrimageWholeCourseBounds();
           }
           return;
         }
@@ -15291,7 +15293,7 @@ function _fitPilgrimageWaypointBounds(points, bottomPadding){
     }
     const bounds=new kakao.maps.LatLngBounds();
     valid.forEach(p=>bounds.extend(new kakao.maps.LatLng(Number(p.lat),Number(p.lng))));
-    _map.setBounds(bounds,48,42,Math.min(Math.round(bottomPadding||56),Math.round(mapEl.clientHeight*.4)),42);
+    _map.setBounds(bounds,48,42,Math.min(Math.round(bottomPadding||56),Math.round(mapEl.clientHeight*.72)),42);
     return true;
   }catch(e){console.warn('[가톨릭길동무] 경유지 범위 적용 실패',e);return false;}
 }
@@ -15309,10 +15311,22 @@ function _fitCompletedPilgrimageWholeCourse(){
 function _fitPilgrimageWholeCourseBounds(){
   // '순례코스 보기'는 출발·경유·도착 모두 포함한다. 성지 상세의
   // '지도에서 보기'는 별도로 경유지 줌만 유지한다.
-  const pts=(window.__OAI_PILGRIMAGE_VIEW_WAYPOINTS__||_getRouteWaypoints()).slice();
-  if(_rS&&_validGpsPair(_rS.lat,_rS.lng)&&!_rS.isImplicitCurrentLocation)pts.unshift(_rS);
-  if(_rE&&_validGpsPair(_rE.lat,_rE.lng))pts.push(_rE);
-  return _fitPilgrimageWaypointBounds(pts,56);
+  // Capture the saved course at entry: _rS/_rE may be cleared or replaced by
+  // the shared directions initializer and must never determine this viewport.
+  const stored=window.__OAI_PILGRIMAGE_VIEW_FULL_COURSE__;
+  const pts=Array.isArray(stored)&&stored.length ? stored :
+    (window.__OAI_PILGRIMAGE_VIEW_WAYPOINTS__||_getRouteWaypoints());
+  const mapEl=document.getElementById('map');
+  if(!mapEl||!mapEl.clientHeight)return false;
+  const sheet=document.getElementById('sheet-route');
+  let covered=0;
+  if(sheet&&sheet.classList.contains('open')){
+    const mapRect=mapEl.getBoundingClientRect(),sheetRect=sheet.getBoundingClientRect();
+    covered=Math.max(0,Math.min(mapRect.bottom,sheetRect.bottom)-Math.max(mapRect.top,sheetRect.top));
+  }
+  // Reserve actual obstructed space so departure/arrival pins remain visible.
+  const bottom=Math.min(Math.round(mapEl.clientHeight*.65),Math.ceil(covered)+28);
+  return _fitPilgrimageWaypointBounds(pts,Math.max(56,bottom));
 }
 function _pilgrimageMapPermissions(){
   const mode=_pilgrimageMapMode();
@@ -24829,6 +24843,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     pilgrimageCourseReturnToPlaceInfo=false;
     window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__=false;
     window.__OAI_PILGRIMAGE_VIEW_WAYPOINTS__=null;
+    window.__OAI_PILGRIMAGE_VIEW_FULL_COURSE__=null;
     _applyPilgrimageCourseViewReadOnlyState();
   }
   function _pilgrimageCoursePoints(){
@@ -24851,6 +24866,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       ? options.coursePlaces : pts.filter(p=>p.role==='waypoint');
     if(!coursePlaces.length){alert('지도에 표시할 순례 장소가 없습니다.');return;}
     const fromCompleted=pilgrimageDetailMode==='complete';
+    // Full route includes the explicitly saved start, every waypoint and end.
+    // Detail's '지도에서 보기' still uses its own waypoint-only snapshot.
+    const fullCoursePoints=pts.filter(p=>p&&_validGpsPair(p.lat,p.lng));
     // 제한을 넘으면 누락된 장소를 완전한 코스로 오인할 위험이 있어 열지 않는다.
     if(coursePlaces.length>OAI_MAX_ROUTE_WAYPOINTS){
       alert('이 코스는 순례 장소가 '+coursePlaces.length+'곳입니다. 길찾기 지도는 최대 '+OAI_MAX_ROUTE_WAYPOINTS+'곳까지 표시할 수 있어 일부만 표시하지 않습니다.');
@@ -24861,6 +24879,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       window.__OAI_PILGRIMAGE_COURSE_VIEW__=true;
       window.__OAI_PILGRIMAGE_COURSE_VIEW_KIND__=fromCompleted?(fromPlaceInfo?'complete-place-info':'complete'):fromPlaceInfo?'active-place-info':'active';
       window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__=true;
+      window.__OAI_PILGRIMAGE_VIEW_FULL_COURSE__=fromPlaceInfo?null:fullCoursePoints.slice();
       _applyPilgrimageCourseViewReadOnlyState();
       _openUnifiedPilgrimageMapAdd('plan',{
         readOnly:true,
