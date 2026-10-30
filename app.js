@@ -15545,7 +15545,7 @@ function _syncPilgrimageRouteReturnButton(){
     const editMode=_isPilgrimageMapEditReturnMode();
     const courseView=_isAnyPilgrimageCourseView();
     if(window.__OAI_PILGRIMAGE_PLACE_PICK__){
-      btn.textContent=pilgrimageDetailMode==='complete'?'↩ 순례완료로 돌아가기':'↩ 순례하기로 돌아가기';
+      btn.textContent=pilgrimageDetailMode==='complete'?'↩ 순례완료 상세로 돌아가기':'↩ 순례하기 상세로 돌아가기';
       const top=$('rs-top');
       if(top&&btn.parentNode!==top)top.appendChild(btn);
       btn.hidden=false;btn.style.display='flex';return;
@@ -15559,7 +15559,7 @@ function _syncPilgrimageRouteReturnButton(){
     const resultShowing=!!(result&&result.style.display!=='none');
     if(courseView){
       const kind=_pilgrimageCourseViewKind();
-      btn.textContent=kind==='place-info'?'↩ 성지 안내로 돌아가기':kind==='complete'?'↩ 순례완료로 돌아가기':'↩ 순례하기로 돌아가기';
+      btn.textContent=kind==='place-info'?'↩ 성지 안내로 돌아가기':kind==='complete'?'↩ 순례완료 상세로 돌아가기':'↩ 순례하기 상세로 돌아가기';
       if(resultShowing || _isPilgrimageCourseViewReadOnly()){
         const resultBox=document.querySelector('#rs-result .rs-result')||result;
         if(resultBox&&btn.parentNode!==resultBox)resultBox.appendChild(btn);
@@ -15574,7 +15574,7 @@ function _syncPilgrimageRouteReturnButton(){
       }
     }else{
       // 지도에서 추가는 순례 편집 화면이다. 결과를 검색했더라도 복귀 대상은 순례 상세다.
-      btn.textContent=pilgrimageDetailMode==='complete'?'↩ 순례완료로 돌아가기':'↩ 순례계획으로 돌아가기';
+      btn.textContent=pilgrimageDetailMode==='complete'?'↩ 순례완료 상세로 돌아가기':'↩ 순례계획 상세로 돌아가기';
       if(resultShowing){
         const resultBox=document.querySelector('#rs-result .rs-result')||result;
         if(resultBox&&btn.parentNode!==resultBox)resultBox.appendChild(btn);
