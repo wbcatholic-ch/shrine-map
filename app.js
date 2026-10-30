@@ -15288,7 +15288,12 @@ function _pilgrimageMapMode(){
   return 'route';
 }
 function _hidePilgrimageDetailCategoryMarkers(){
-  if(!['place-info-view','completed-place-info-view','completed-view'].includes(_pilgrimageMapMode())||!_map)return;
+  // Only pilgrimage route RESULTS hide ordinary shrine markers. The map-add
+  // selection surface must keep every available shrine and visited marker.
+  const mode=_pilgrimageMapMode();
+  const routeResult=mode==='completed-view'||mode==='active-course-view'||
+    (mode==='plan-edit'&&_isRouteResultShowing());
+  if(!routeResult||!_map)return;
   try{_markers.forEach(function(m){if(m&&m.marker)_setMarkerMapIfChanged(m.marker,null);});}catch(_e){}
   try{_hideAllParishDioMkrs();}catch(_e){}
   try{(_retreatMarkers||[]).forEach(function(o){if(o&&o.marker)_setMarkerMapIfChanged(o.marker,null);});}catch(_e){}
@@ -15460,7 +15465,7 @@ function _schedulePilgrimageRouteResult(label,focusPoint){
             // Route completion owns only route geometry / card state.
             // The entry-ready callback owns the initial viewport; a slow API
             // response must never re-zoom an already visible pilgrimage map.
-            if(_pilgrimageMapMode()==='completed-view'){
+            if(['completed-view','active-course-view'].includes(_pilgrimageMapMode())){
               _hidePilgrimageDetailCategoryMarkers();
               _refreshRouteTmpMarkers();
             }
@@ -16586,25 +16591,29 @@ function _drawLine(s1,s2,path,opts){
   _syncRouteWaypointBox();
   _refreshRouteTmpMarkers();
   _hideCategoryMarkersForRouteDisplay();
-  const isolatedCompletedCourse=['completed-place-info-view','completed-view'].includes(_pilgrimageMapMode());
-
-  if(path || isolatedCompletedCourse){
-  _markers.forEach((m,i)=>{
-   if(!m) return;
-   const isRoute=_isSelectedRouteItemIndex(i);
-   m.marker.setMap(isolatedCompletedCourse?null:(isRoute?_map:null));
-  });
-  if(_mode==='parish'){
-    _hideDioOverlays();
-    if(_activeDio) _hideParishDioMkrs(_activeDio);
-  } else if(_mode==='retreat'){
-    _retreatMarkers.forEach(o=>{
-      const isRoute=_isSelectedRouteItemIndex(o.index);
-      o.marker.setMap(isRoute?_map:null);
+  const pilgrimageRouteResult=['completed-view','active-course-view'].includes(_pilgrimageMapMode()) ||
+    (_pilgrimageMapMode()==='plan-edit'&&_isRouteResultShowing());
+  if(pilgrimageRouteResult){
+    // All five pilgrimage result entry paths use the same category-marker policy.
+    // Numbered stop and start/end markers are managed independently above.
+    _hidePilgrimageDetailCategoryMarkers();
+  }else if(path){
+    // Preserve existing non-pilgrimage directions behavior.
+    _markers.forEach((m,i)=>{
+      if(!m)return;
+      const isRoute=_isSelectedRouteItemIndex(i);
+      m.marker.setMap(isRoute?_map:null);
     });
+    if(_mode==='parish'){
+      _hideDioOverlays();
+      if(_activeDio)_hideParishDioMkrs(_activeDio);
+    }else if(_mode==='retreat'){
+      _retreatMarkers.forEach(o=>{
+        const isRoute=_isSelectedRouteItemIndex(o.index);
+        o.marker.setMap(isRoute?_map:null);
+      });
+    }
   }
-  }
-  if(isolatedCompletedCourse)_hidePilgrimageDetailCategoryMarkers();
 
   const bounds=new _LB();
   pts.forEach(p=>bounds.extend(p));
@@ -24362,7 +24371,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           if(typeof _restoreAllCategoryMarkersForSelection==='function')_restoreAllCategoryMarkersForSelection();
           try{_hideDioOverlays();}catch(_e){}
           if(typeof _refreshRouteTmpMarkers==='function')_refreshRouteTmpMarkers();
-          if(readOnly&&['place-info','complete-place-info','complete'].includes(_pilgrimageCourseViewKind()))_hidePilgrimageDetailCategoryMarkers();
+          if(readOnly&&['active','complete'].includes(_pilgrimageCourseViewKind()))_hidePilgrimageDetailCategoryMarkers();
           // Both planned and completed place-info maps fit ONLY their saved
           // waypoints, after the shared map and marker surfaces have settled.
           if(readOnly&&['place-info','complete-place-info'].includes(_pilgrimageCourseViewKind())){
@@ -24452,7 +24461,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(readOnly||normalRoute){
           if(readOnly&&['place-info','complete-place-info'].includes(_pilgrimageCourseViewKind())){
             _setMapPanelCollapsed(true,'pilgrimage-detail-waypoints');
-          }else if(readOnly&&_pilgrimageCourseViewKind()==='complete'){
+          }else if(readOnly&&['active','complete'].includes(_pilgrimageCourseViewKind())){
             _hidePilgrimageDetailCategoryMarkers();
           }
           // The route points are already restored. Start a single result job
@@ -24461,7 +24470,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           _schedulePilgrimageRouteResult(readOnly?'순례코스 보기':'순례하기 코스 보기',null);
         }
         try{_refreshRouteTmpMarkers();}catch(_e){}
-        if(readOnly&&['place-info','complete-place-info','complete'].includes(_pilgrimageCourseViewKind()))_hidePilgrimageDetailCategoryMarkers();
+        if(readOnly&&['active','complete'].includes(_pilgrimageCourseViewKind()))_hidePilgrimageDetailCategoryMarkers();
         // 경유지 복원이 끝난 실제 길찾기 패널 크기에서 마지막 순례지를 중앙에 놓는다.
         // 초기 지도 SDK 중심(전국 중앙)이나 비동기 현위치 응답에 덮이지 않도록 한다.
         if(!readOnly&&!normalRoute&&window.__OAI_PILGRIMAGE_ROUTE_EDIT__){
