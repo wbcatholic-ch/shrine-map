@@ -18389,11 +18389,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const pilgrimageTrial=document.getElementById('oai-dev-pilgrimage-v2');
     if(pilgrimageTrial){
       pilgrimageTrial.checked=oaiPilgrimageV2DevEnabled();
-      pilgrimageTrial.disabled=!(oaiDevEnabled()&&oaiDevPanelUnlocked);
+      pilgrimageTrial.disabled=true; // V1768: visible but unavailable until pilgrimage freeze is fixed
     }
     const pilgrimageStatus=document.getElementById('oai-dev-pilgrimage-v2-status');
     if(pilgrimageStatus)pilgrimageStatus.textContent=oaiPilgrimageV2DevEnabled()?
-      '신규 지도 시험 ON · 편집은 임시 적용, 닫으면 폐기 · 실제 기록 저장 안 함':'기존 순례 지도 사용 중 · 신규 지도 OFF';
+      '신규 지도 시험 ON · 편집은 임시 적용, 닫으면 폐기 · 실제 기록 저장 안 함':'신규 지도 시험 일시 중지 · 현재 ON 불가 · 기존 순례 지도 사용';
     const test=document.getElementById('oai-dev-five-photo-backup');
     if(test)test.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.testBackupFiveVisitPhotos==='function');
     const verify=document.getElementById('oai-dev-five-photo-verify');
