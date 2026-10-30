@@ -12172,7 +12172,6 @@ function _syncPilgrimageRouteWaypointLabels(){
     if(!point||!Number.isFinite(Number(point.lat))||!Number.isFinite(Number(point.lng))||!String(point.name||'').trim())return;
     const label=document.createElement('span');
     label.className='oai-route-waypoint-name-label';
-    label.style.cssText='display:block;max-width:132px;padding:3px 7px;border-radius:7px;background:#fff;border:1px solid #c8ad73;color:#332a1e;font-size:11px;font-weight:650;line-height:1.35;text-align:center;white-space:normal;overflow-wrap:anywhere;box-shadow:0 2px 5px #0002;pointer-events:none;';
     label.textContent=String(point.name).trim();
     label.title=label.textContent;
     label.setAttribute('aria-hidden','true');
@@ -23624,7 +23623,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         _oaiShowNavigationNotice('길찾기 안내','이 장소의 좌표가 없어 길찾기를 시작할 수 없습니다.',function(){});
         return;
       }
-      const destination={name:name,lat:Number(place.lat),lng:Number(place.lng),addr:addr};
+      const destination=Object.assign({},shrine||parish||{}, {name:name,lat:Number(place.lat),lng:Number(place.lng),addr:addr});
+      if(String(name||'').replace(/\s+/g,'')==='죽림굴'){
+        destination.lat=JUKRIMGUL_PARKING.lat;
+        destination.lng=JUKRIMGUL_PARKING.lng;
+        destination.__navResolved=true;
+      }
       Promise.resolve(_resolveNavigationDestinationItem(destination)).then(target=>{
         if(!_validGpsPair(target.lat,target.lng))throw new Error('invalid navigation destination');
         // '다음 순례지 길찾기'와 동일한 내장 지도·현재 GPS 출발지·경로 계산을 재사용한다.
