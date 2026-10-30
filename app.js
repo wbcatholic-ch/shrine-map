@@ -7944,6 +7944,22 @@ function _applySpecialNavigationPoint(item){
   }catch(e){ console.warn('[가톨릭길동무] 특수 내비 목적지 적용 실패',e); }
   return item;
 }
+function _drivingRoutePoint(point){
+  if(!point)return point;
+  const name=String(point.name||'').replace(/\s+/g,'');
+  if(name==='죽림굴')return Object.assign({},point,{lat:JUKRIMGUL_PARKING.lat,lng:JUKRIMGUL_PARKING.lng});
+  if(name==='복자성당'||String(point.seq||'')==='20190062')
+    return Object.assign({},point,{lat:OAI_SPECIAL_NAV_POINTS.BOKJA.lat,lng:OAI_SPECIAL_NAV_POINTS.BOKJA.lng});
+  const catalog=Array.isArray(SHRINES)?SHRINES.find(function(s){
+    return s&&String(s.name||'').replace(/\s+/g,'')===name&&s.navAddr;
+  }):null;
+  if(catalog&&catalog.navAddr)return Object.assign({},point,{navAddr:catalog.navAddr,navLat:catalog.navLat,navLng:catalog.navLng});
+  return point;
+}
+function _resolveDrivingRoutePoint(point){
+  const candidate=_drivingRoutePoint(point);
+  return candidate&&candidate.navAddr?_resolveNavigationDestinationItem(candidate):Promise.resolve(candidate);
+}
 
 /* 공통 장소 식별자 (V1231). 기존 방문 저장소 키·GPS 원본은 변경하지 않는다.
    성지는 공식 seq를 우선하며, 성당은 교구+명칭으로 결정적인 코드를 생성한다.
@@ -12212,7 +12228,7 @@ function _refreshRouteTmpMarkers(){
   const routeResultShowing = !!_polyline;
   const detailPlacesOnly = ['place-info-view','completed-place-info-view','completed-view'].includes(_pilgrimageMapMode());
   const needStart = !!(_rS && !_rS.isRegionStart && (detailPlacesOnly || routeResultShowing || _shouldShowRouteStartMarker()) && (detailPlacesOnly || _mode!=='shrine' || _rS.idx<0 || !_markers[_rS.idx] || routeResultShowing));
-  const needEnd = !!(_rE && (detailPlacesOnly || _mode!=='shrine' || _rE.idx<0 || !_markers[_rE.idx]));
+  const needEnd = !!(_rE && (detailPlacesOnly || _mode!=='shrine' || _rE.idx<0 || !_markers[_rE.idx] || routeResultShowing));
   if(needStart){
     _startTmpMkr = new _MM({
       position:new _LL(_rS.lat,_rS.lng),
@@ -13008,7 +13024,7 @@ function _ensureParishMarkerZoom(){
   }catch(e){ console.warn('[가톨릭길동무]',e); }
 }
 function _showParishDioMkrs(code){
-  if(_isParishRouteLineActive() || _isParishNearbyMapMode()){
+  if(_pilgrimageRouteResultMustHideOrdinaryMarkers() || _isParishRouteLineActive() || _isParishNearbyMapMode()){
     try{ _hideParishDioMkrs(code); }catch(e){ console.warn('[가톨릭길동무]',e); }
     if(_isParishNearbyMapMode()) try{ _syncParishDioLabels(); }catch(_e){}
     return;
@@ -15299,18 +15315,23 @@ function _pilgrimageMapMode(){
   return 'route';
 }
 function _pilgrimageRouteResultMustHideOrdinaryMarkers(){
-  // Only the PILGRIMAGE route result hides ordinary markers; selecting places
-  // still requires the full shrine layer. This also covers async marker batches.
+  // 모든 길찾기 결과에서는 출발·경유·도착 전용 마커만 남긴다.
+  // 장소 선택 중에는 일반 마커를 유지하고, 결과가 열리는 즉시 공통 규칙을 적용한다.
   const mode=_pilgrimageMapMode();
   return mode==='completed-view'||mode==='active-course-view'||
     mode==='completed-place-info-view'||mode==='place-info-view'||
-    (mode==='plan-edit'&&_screen==='map'&&!!(document.getElementById('rs-result') && document.getElementById('rs-result').style.display==='block'));
+    (_screen==='map'&&_activeTab==='route'&&!!(document.getElementById('rs-result') && document.getElementById('rs-result').style.display==='block'));
 }
 function _hidePilgrimageDetailCategoryMarkers(){
   if(!_pilgrimageRouteResultMustHideOrdinaryMarkers()||!_map)return;
   try{_markers.forEach(function(m){if(m&&m.marker)_setMarkerMapIfChanged(m.marker,null);});}catch(_e){}
+  try{_setParishNearbyMarkersMap(null,true);}catch(_e){}
   try{_hideAllParishDioMkrs();}catch(_e){}
+  try{_hideDioOverlays();}catch(_e){}
   try{(_retreatMarkers||[]).forEach(function(o){if(o&&o.marker)_setMarkerMapIfChanged(o.marker,null);});}catch(_e){}
+  try{(_regionResultMarkers||[]).forEach(function(m){_setMarkerMapIfChanged(m,null);});}catch(_e){}
+  try{if(_paSelMkr)_setMarkerMapIfChanged(_paSelMkr,null);}catch(_e){}
+  try{if(_regionMarker)_setMarkerMapIfChanged(_regionMarker,null);}catch(_e){}
 }
 // Shared coordinate check: used by both map helpers and pilgrimage details.
 // It must be available outside the pilgrimage planner's private scope.
@@ -16216,43 +16237,6 @@ function _selectRouteItem(idx){
   _openRouteMarkerChoice(s,idx);
 }
 
-function _hideParishMarkersForRouteDisplay(){
-  if(_mode!=='parish') return;
-  // 길찾기 결과 표시 중에는 내주변 성당 마커를 삭제하지 않고 잠시 숨긴다.
-  // 다시선택에서 동일 객체를 복원해야 하므로 완전 삭제는 탭/카테고리 전환에서만 수행한다.
-  try{
-    if(_isParishNearbyMapMode()) _setParishNearbyMarkersMap(null,true);
-    else _clearParishNearbyMarkers();
-  }catch(e){ console.warn('[가톨릭길동무]', e); }
-  try{ _hideDioOverlays(); }catch(e){ console.warn('[가톨릭길동무]', e); }
-  try{
-    Object.keys(_dioMkrs||{}).forEach(function(code){
-      (_dioMkrs[code]||[]).forEach(function(mk){
-        try{ _setMarkerMapIfChanged(mk,null); }catch(e){ console.warn('[가톨릭길동무]', e); }
-      });
-    });
-    if(_parishIdleListener){
-      try{ kakao.maps.event.removeListener(_parishIdleListener); }catch(e){ console.warn('[가톨릭길동무]', e); }
-      _parishIdleListener=null;
-    }
-  }catch(e){ console.warn('[가톨릭길동무]', e); }
-}
-
-function _hideRetreatMarkersForRouteDisplay(){
-  if(_mode!=='retreat') return;
-  try{
-    (_retreatMarkers||[]).forEach(function(o){
-      if(!o || !o.marker) return;
-      _setMarkerMapIfChanged(o.marker,null);
-    });
-  }catch(e){ console.warn('[가톨릭길동무]', e); }
-}
-
-function _hideCategoryMarkersForRouteDisplay(){
-  if(_mode==='parish') _hideParishMarkersForRouteDisplay();
-  else if(_mode==='retreat') _hideRetreatMarkersForRouteDisplay();
-}
-
 function _routePointForPilgrimage(point){
   if(!point || !Number.isFinite(Number(point.lat)) || !Number.isFinite(Number(point.lng))) return null;
   const rawName=String(point.name||'장소').trim()||'장소';
@@ -16456,16 +16440,17 @@ async function _calcRoute(){
   const sBtn=$('rs-search-btn');
   if(sBtn) sBtn.style.display='none';
   if(_polyline){_polyline.setMap(null);_polyline=null;}
-  const isJuk = _mode==='shrine' && _rE.idx === JUKRIMGUL_IDX && JUKRIMGUL_IDX >= 0;
-  const navDest = isJuk ? JUKRIMGUL_PARKING : _rE;
-  _showJukrimgulParkingMkr(isJuk);
+  const isJuk = String(_rE.name||'').replace(/\s+/g,'')==='죽림굴';
+  const hasJukStop=isJuk||_getRouteWaypoints().some(function(p){return String(p.name||'').replace(/\s+/g,'')==='죽림굴';});
+  const navDest = await _resolveDrivingRoutePoint(_rE);
+  _showJukrimgulParkingMkr(hasJukStop);
   const note=$('rs-note');
   function setRouteNote(txt, html){
     if(!note) return;
     if(html) note.innerHTML=txt; else note.textContent=txt;
     note.style.display=txt?'block':'none';
   }
-  if(isJuk){
+  if(hasJukStop){
     setRouteNote('⚠️ <b>죽림굴주차장</b>까지 경로 안내 · 자동차가 올라가지 못하는 구간이므로 주차장에서 도보로 이동하세요.', true);
   } else {
     setRouteNote('', false);
@@ -16473,7 +16458,9 @@ async function _calcRoute(){
 
   // Bind loading completion to this route request, not a later entry's overlay.
   const courseLoadingToken=window.__OAI_COURSE_LOADING_TOKEN__;
-  const waypoints = _getRouteWaypoints();
+  const waypoints = await Promise.all(_getRouteWaypoints().map(_resolveDrivingRoutePoint));
+  const navStart = await _resolveDrivingRoutePoint(_rS);
+  if(!routeStillCurrent())return;
   // Reuse successful pilgrimage directions while start, ordered stops and end stay unchanged.
   // Never cache general routing or the live, in-progress pilgrimage.
   const cacheEligible=(_isPilgrimageRouteEditMode() ||
@@ -16481,10 +16468,10 @@ async function _calcRoute(){
   const cacheKey='oai_pilgrimage_directions_v1';
   const routeSignature=cacheEligible?JSON.stringify({
     mode:'driving',
-    points:[_rS].concat(waypoints,[navDest]).map(function(p){
+    points:[navStart].concat(waypoints,[navDest]).map(function(p){
       return [Number(p.lat).toFixed(6),Number(p.lng).toFixed(6)];
     }),
-    parking:isJuk
+    parking:hasJukStop
   }):null;
   function savedRoute(){
     if(!routeSignature)return null;
@@ -16517,15 +16504,15 @@ async function _calcRoute(){
     $('rs-km').textContent=(previous.distance/1000).toFixed(1);
     $('rs-time').textContent=_fmtTime(previous.duration);
     const cachedPath=previous.points.map(function(p){return new _LL(p[0],p[1]);});
-    _drawLine(_rS,navDest,cachedPath,{
+    _drawLine(navStart,navDest,cachedPath,{
       fit:!_isPilgrimageCourseViewReadOnly(),waypoints:waypoints
     });
-    if(!isJuk)setRouteNote('',false);
+    if(!hasJukStop)setRouteNote('',false);
     if(window.__OAI_COURSE_LOADING_TOKEN__===courseLoadingToken)
       _oaiCourseRouteLoading(false,courseLoadingToken);
     return;
   }
-  _drawLine(_rS, navDest, null, {fit:false, waypoints:waypoints});
+  _drawLine(navStart, navDest, null, {fit:false, waypoints:waypoints});
 
   async function fetchLeg(a,b){
     const res=await _kakaoDirectionsFetch(`${a.lng},${a.lat}`, `${b.lng},${b.lat}`);
@@ -16543,11 +16530,11 @@ async function _calcRoute(){
   }
 
   try{
-    const routePoints=[_rS].concat(waypoints,[navDest]).filter(function(p,i,all){
+    const routePoints=[navStart].concat(waypoints,[navDest]).filter(function(p,i,all){
       return i===0||Number(p.lat)!==Number(all[i-1].lat)||Number(p.lng)!==Number(all[i-1].lng);
     });
     if(routePoints.length<2){
-      _drawLine(_rS,navDest,null,{fit:false,waypoints:waypoints});
+      _drawLine(navStart,navDest,null,{fit:false,waypoints:waypoints});
       $('rs-km').textContent='0.0';
       $('rs-time').textContent='0분';
       return;
@@ -16581,25 +16568,26 @@ async function _calcRoute(){
       if(!routeStillCurrent())return;
       $('rs-km').textContent=(distance/1000).toFixed(1);
       $('rs-time').textContent=_fmtTime(duration);
-      _drawLine(_rS,navDest,path.length>1?path:null,{fit:!_isPilgrimageCourseViewReadOnly(),waypoints:waypoints});
+      _drawLine(navStart,navDest,path.length>1?path:null,{fit:!_isPilgrimageCourseViewReadOnly(),waypoints:waypoints});
       if(!estimated&&path.length>1)saveRoute(distance,duration,path);
-      if(!isJuk)setRouteNote(estimated?'* 일부 구간은 직선거리 기반 추정값입니다. 실제 도로 경로와 다를 수 있습니다.':'',false);
+      if(estimated&&hasJukStop)setRouteNote('죽림굴은 주차장까지 안내합니다. 일부 구간은 도로 경로를 가져오지 못해 직선으로 표시되었습니다.',false);
+      else if(!hasJukStop)setRouteNote(estimated?'* 일부 구간은 직선거리 기반 추정값입니다. 실제 도로 경로와 다를 수 있습니다.':'',false);
       if(_pilgrimageMapMode()==='completed-view'&&window.__OAI_COURSE_LOADING_TOKEN__===courseLoadingToken)
         _oaiCourseRouteLoading(false,courseLoadingToken);
       return;
     }
-    const leg=await fetchLeg(_rS, navDest);
+    const leg=await fetchLeg(navStart, navDest);
     if(!routeStillCurrent())return;
     $('rs-km').textContent=(leg.distance/1000).toFixed(1);
     $('rs-time').textContent=_fmtTime(leg.duration);
-    _drawLine(_rS, navDest, leg.path.length>1?leg.path:null, {fit:!_isPilgrimageCourseViewReadOnly()});
+    _drawLine(navStart, navDest, leg.path.length>1?leg.path:null, {fit:!_isPilgrimageCourseViewReadOnly()});
     if(leg.path.length>1)saveRoute(leg.distance,leg.duration,leg.path);
     if(_pilgrimageMapMode()==='completed-view' && window.__OAI_COURSE_LOADING_TOKEN__===courseLoadingToken)
       _oaiCourseRouteLoading(false,courseLoadingToken);
-    if(!isJuk) setRouteNote('', false);
+    if(!hasJukStop) setRouteNote('', false);
   } catch(e){
     if(!routeStillCurrent())return;
-    const routePoints=[_rS].concat(waypoints,[navDest]).filter(function(p,i,all){
+    const routePoints=[navStart].concat(waypoints,[navDest]).filter(function(p,i,all){
       return i===0||Number(p.lat)!==Number(all[i-1].lat)||Number(p.lng)!==Number(all[i-1].lng);
     });
     let d=0;
@@ -16609,20 +16597,11 @@ async function _calcRoute(){
     d *= 1.4;
     $('rs-km').textContent=d.toFixed(1);
     $('rs-time').textContent=_fmtTime(d/70*3600);
-    if(!isJuk) setRouteNote('* 직선거리 기반 추정값', false);
-    _drawLine(_rS, navDest, null, {fit:!_isPilgrimageCourseViewReadOnly(), waypoints:waypoints});
+    setRouteNote(hasJukStop?'죽림굴은 주차장까지 안내합니다. 도로 경로를 가져오지 못해 직선으로 표시되었습니다.':'* 직선거리 기반 추정값',false);
+    _drawLine(navStart, navDest, null, {fit:!_isPilgrimageCourseViewReadOnly(), waypoints:waypoints});
     if(_pilgrimageMapMode()==='completed-view' && window.__OAI_COURSE_LOADING_TOKEN__===courseLoadingToken)
       _oaiCourseRouteLoading(false,courseLoadingToken);
   }
-}
-
-function _isSelectedRouteItemIndex(index){
-  if(_rS&&_rS.idx===index) return true;
-  if(_rE&&_rE.idx===index) return true;
-  return OAI_ROUTE_WAYPOINT_CONFIGS.some(function(cfg){
-    const point=_getRoutePointByRole(cfg.role);
-    return !!(point&&point.idx===index);
-  });
 }
 
 function _drawLine(s1,s2,path,opts){
@@ -16640,29 +16619,8 @@ function _drawLine(s1,s2,path,opts){
   _polyline.setMap(_map);
   _syncRouteWaypointBox();
   _refreshRouteTmpMarkers();
-  _hideCategoryMarkersForRouteDisplay();
   const pilgrimageRouteResult=_pilgrimageRouteResultMustHideOrdinaryMarkers();
-  if(pilgrimageRouteResult){
-    // All five pilgrimage result entry paths use the same category-marker policy.
-    // Numbered stop and start/end markers are managed independently above.
-    _hidePilgrimageDetailCategoryMarkers();
-  }else if(path){
-    // Preserve existing non-pilgrimage directions behavior.
-    _markers.forEach((m,i)=>{
-      if(!m)return;
-      const isRoute=_isSelectedRouteItemIndex(i);
-      m.marker.setMap(isRoute?_map:null);
-    });
-    if(_mode==='parish'){
-      _hideDioOverlays();
-      if(_activeDio)_hideParishDioMkrs(_activeDio);
-    }else if(_mode==='retreat'){
-      _retreatMarkers.forEach(o=>{
-        const isRoute=_isSelectedRouteItemIndex(o.index);
-        o.marker.setMap(isRoute?_map:null);
-      });
-    }
-  }
+  _hidePilgrimageDetailCategoryMarkers();
 
   const bounds=new _LB();
   pts.forEach(p=>bounds.extend(p));
@@ -23623,12 +23581,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         _oaiShowNavigationNotice('길찾기 안내','이 장소의 좌표가 없어 길찾기를 시작할 수 없습니다.',function(){});
         return;
       }
-      const destination=Object.assign({},shrine||parish||{}, {name:name,lat:Number(place.lat),lng:Number(place.lng),addr:addr});
-      if(String(name||'').replace(/\s+/g,'')==='죽림굴'){
-        destination.lat=JUKRIMGUL_PARKING.lat;
-        destination.lng=JUKRIMGUL_PARKING.lng;
-        destination.__navResolved=true;
-      }
+      const destination=_drivingRoutePoint(Object.assign({},shrine||parish||{}, {name:name,lat:Number(place.lat),lng:Number(place.lng),addr:addr}));
+      destination.__navResolved=true;
       Promise.resolve(_resolveNavigationDestinationItem(destination)).then(target=>{
         if(!_validGpsPair(target.lat,target.lng))throw new Error('invalid navigation destination');
         // '다음 순례지 길찾기'와 동일한 내장 지도·현재 GPS 출발지·경로 계산을 재사용한다.
@@ -26185,7 +26139,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(!_activeTab||_activeTab!=='route')openTab('route');else _enterRouteMode();
 
       const startObj={idx:-1,name:'현재 위치',lat:Number(lat),lng:Number(lng),isImplicitCurrentLocation:false,showStartMarker:true};
-      const exactTarget={
+      const exactTarget=_drivingRoutePoint({
         idx:-1,
         name:String(item.name||'다음 순례지'),
         addr:String(item.addr||item.address||''),
@@ -26193,7 +26147,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         lng:Number(item.lng),
         type:item.type||item.sourceType||'shrine',
         __navResolved:true
-      };
+      });
       // 지점 설정과 경로 계산을 분리해 첫 진입 시 중복 자동검색 경합을 막는다.
       Promise.resolve(_runInfoRouteToEndWithStart(startObj,exactTarget,-1,{autoSearch:false}))
         .then(function(){ _schedulePilgrimageRouteResult('다음 순례지 길찾기'); })

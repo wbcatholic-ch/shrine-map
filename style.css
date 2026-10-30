@@ -6449,7 +6449,7 @@ html.oai-font-global .oai-pilgrimage-list-intro b,html.oai-font-global .oai-pilg
 .oai-pilgrimage-item{grid-template-columns:42px minmax(0,1fr)!important;touch-action:pan-y;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none;}
 .oai-pilgrimage-side{display:none!important;}
 /* 순례계획 지도 편집: 경유지 번호 위에 표시하는 비차단 이름표 */
-.oai-route-waypoint-name-label{display:block;max-width:116px;padding:3px 6px;border:1px solid rgba(72,91,116,.48);border-radius:6px;background:rgba(255,255,255,.96);color:#182b41;font-size:calc(11px * var(--app-font-scale,1));font-weight:800;line-height:1.2;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;box-shadow:0 1px 4px rgba(0,0,0,.14);pointer-events:none;transform:translateY(-47px);}
+.oai-route-waypoint-name-label{display:block;width:max-content;max-width:116px;padding:3px 6px;border:1px solid rgba(72,91,116,.48);border-radius:6px;background:rgba(255,255,255,.96);color:#182b41;font-size:calc(11px * var(--app-font-scale,1));font-weight:800;line-height:1.2;white-space:nowrap;word-break:keep-all;overflow-wrap:normal;writing-mode:horizontal-tb;overflow:hidden;text-overflow:ellipsis;box-shadow:0 1px 4px rgba(0,0,0,.14);pointer-events:none;transform:translateY(-47px);}
 .oai-pilgrimage-action-menu{position:fixed;inset:0;z-index:2147483600;display:none;align-items:flex-end;justify-content:center;padding:18px 14px calc(env(safe-area-inset-bottom,0px) + 18px);}
 .oai-pilgrimage-action-menu.show{display:flex;}
 .oai-pilgrimage-action-backdrop{position:absolute;inset:0;border:0;background:rgba(7,16,34,.68);}
