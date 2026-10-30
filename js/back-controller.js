@@ -80,7 +80,8 @@
 
       if(includeAppState){
         try{ if(typeof _activeTab !== 'undefined' && _activeTab) return true; }catch(_e){}
-        try{ if(typeof _routeMode !== 'undefined' && (_routeMode || _rS || _rE)) return true; }catch(_e){}
+        // Route endpoint values may outlive a closed map; they are not an open UI layer.
+        try{ if(appActive() && typeof _routeMode !== 'undefined' && _routeMode) return true; }catch(_e){}
         var app=$b('app');
         if(app&&document.documentElement.classList.contains('app-active')) return true;
       }
@@ -429,7 +430,7 @@
     try{
       // A residual route endpoint is not evidence that directions are still open.
       // Never invoke ordinary route-exit confirmation from pilgrimage or cover navigation.
-      if(el && el.classList.contains('open') && !el.hidden &&
+      if(appActive() && el && el.classList.contains('open') && !el.hidden &&
          el.style.display !== 'none' && _activeTab === 'route' &&
          !window.__oaiPilgrimageRouteReturn &&
          !window.__OAI_PILGRIMAGE_PLACE_PICK__ &&
@@ -517,6 +518,15 @@
       return;
     }
 
+    // V2 pilgrimage overlay is higher than any underlying planner or map.
+    // Restore the shared history guard exactly as for other in-app back actions.
+    if(window.CatholicPilgrimageBridgeV2 && window.CatholicPilgrimageBridgeV2.getActiveKind()){
+      _restoring = true;
+      try{ history.go(1); }catch(e){ _restoring=false; console.warn('[순례지도 V2 뒤로가기]',e); }
+      window.CatholicPilgrimageBridgeV2.back();
+      return;
+    }
+
     try{
       var mqPopUntil = Number(window.__OAI_MQ_STATE_POPPING__ || 0);
       if(mqPopUntil && Date.now() < mqPopUntil){
@@ -595,6 +605,10 @@
   }, false);
 
   document.addEventListener('backbutton', function(){
+    if(window.CatholicPilgrimageBridgeV2 && window.CatholicPilgrimageBridgeV2.getActiveKind()){
+      window.CatholicPilgrimageBridgeV2.back();
+      return;
+    }
     try{ if(typeof window.oaiSuppressExternalReturnForUserBack === 'function') window.oaiSuppressExternalReturnForUserBack('hardware-first-back-after-external-return'); }catch(e){ console.warn('[가톨릭길동무]', e); }
     if(typeof window._oaiDailyFailureBackHandle==='function' && window._oaiDailyFailureBackHandle()) return;
     if(typeof window._oaiPhotoAddDateBackHandle === 'function' && window._oaiPhotoAddDateBackHandle()) return;

@@ -18183,6 +18183,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // 개발자 도구의 화면 노출은 실행 중 10회 탭으로만 해제한다. 저장된 사용 권한과 분리한다.
   let oaiDevPanelUnlocked=false;
   function oaiDevEnabled(){return window.__OAI_DEV_RUNTIME_ACTIVE__===true;}
+  // V1762: session-only developer trial. No persistent flag, so regular users
+  // and every new app launch use the original pilgrimage map by default.
+  window.__OAI_PILGRIMAGE_V2_DEV__=false;
+  function oaiPilgrimageV2DevEnabled(){
+    return oaiDevEnabled()&&oaiDevPanelUnlocked&&window.__OAI_PILGRIMAGE_V2_DEV__===true;
+  }
+
   // 알림 사진과 안내창의 복귀 순서는 알림 화면이 소유한다.
   let oaiAnniversaryPhotoReturn=null;
   function oaiAnniversaryCloseToCover(){
@@ -18379,6 +18386,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   };
   function oaiRefreshDeveloperPanel(){
     const section=document.getElementById('oai-developer-section');if(section)section.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked);
+    const pilgrimageTrial=document.getElementById('oai-dev-pilgrimage-v2');
+    if(pilgrimageTrial){
+      pilgrimageTrial.checked=oaiPilgrimageV2DevEnabled();
+      pilgrimageTrial.disabled=!(oaiDevEnabled()&&oaiDevPanelUnlocked);
+    }
+    const pilgrimageStatus=document.getElementById('oai-dev-pilgrimage-v2-status');
+    if(pilgrimageStatus)pilgrimageStatus.textContent=oaiPilgrimageV2DevEnabled()?
+      '신규 지도 시험 ON · 편집은 임시 적용, 닫으면 폐기 · 실제 기록 저장 안 함':'기존 순례 지도 사용 중 · 신규 지도 OFF';
     const test=document.getElementById('oai-dev-five-photo-backup');
     if(test)test.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.testBackupFiveVisitPhotos==='function');
     const verify=document.getElementById('oai-dev-five-photo-verify');
@@ -18390,6 +18405,23 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const anniversaryTest=document.getElementById('oai-dev-anniversary-test');if(anniversaryTest)anniversaryTest.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.sendPilgrimageAnniversaryTestNotification==='function');
     if(!oaiDevEnabled()){oaiDevPendingRestore=null;for(const id of ['oai-dev-import-view','oai-dev-restore-preview']){const el=document.getElementById(id);if(el)el.hidden=true;}}
   }
+  // Deliberate choice in the already-existing developer panel; never switch
+  // on merely because the ten-tap developer section was opened.
+  document.addEventListener('change',function(event){
+    if(!event.target||event.target.id!=='oai-dev-pilgrimage-v2')return;
+    const input=event.target;
+    if(!oaiDevEnabled()||!oaiDevPanelUnlocked){
+      window.__OAI_PILGRIMAGE_V2_DEV__=false;oaiRefreshDeveloperPanel();return;
+    }
+    const bridge=window.CatholicPilgrimageBridgeV2;
+    if(bridge&&bridge.getActiveKind&&bridge.getActiveKind()){
+      input.checked=oaiPilgrimageV2DevEnabled();
+      alert('순례 지도 시험 화면을 닫은 뒤 설정을 변경해 주세요. 시험 중 편집한 내용은 저장되지 않습니다.');
+      return;
+    }
+    window.__OAI_PILGRIMAGE_V2_DEV__=input.checked===true;
+    oaiRefreshDeveloperPanel();
+  });
   function oaiDevParseBackupFile(text){
     const raw=String(text||'').trim();
     if(!raw)throw Error('백업 파일이 비어 있습니다.');
@@ -18505,7 +18537,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-apply],[data-oai-dev-failure-preview],[data-oai-dev-daily-results],[data-oai-dev-five-photo-backup],[data-oai-dev-five-photo-verify],[data-oai-dev-photo-download-diagnose],[data-oai-dev-photo-download-copy],[data-oai-dev-missing-photo-drive],[data-oai-dev-missing-photo-drive-copy],[data-oai-dev-anniversary-test]');if(!button)return;
     if(button.id==='oai-settings-version-label'){
       oaiDevTapCount++;
-      if(oaiDevTapCount>=10){oaiDevTapCount=0;const next=!(oaiDevEnabled()&&oaiDevPanelUnlocked);oaiDevPanelUnlocked=next;window.__OAI_DEV_RUNTIME_ACTIVE__=next;oaiRefreshDeveloperPanel();const detail=document.getElementById('parish-visit-detail');if(detail&&detail.classList.contains('show'))_renderParishVisitDetail();if(_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null)_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);if(next){oaiDevStatus('개발자 모드가 열렸습니다.');document.getElementById('oai-developer-section').scrollIntoView({block:'nearest',behavior:'smooth'});} }
+      if(oaiDevTapCount>=10){oaiDevTapCount=0;const next=!(oaiDevEnabled()&&oaiDevPanelUnlocked);
+        if(!next&&window.CatholicPilgrimageBridgeV2?.getActiveKind?.()){alert('순례 지도 화면을 닫은 뒤 개발자 모드를 종료해 주세요.');return;}
+        oaiDevPanelUnlocked=next;window.__OAI_DEV_RUNTIME_ACTIVE__=next;
+        if(!next)window.__OAI_PILGRIMAGE_V2_DEV__=false;
+        oaiRefreshDeveloperPanel();const detail=document.getElementById('parish-visit-detail');if(detail&&detail.classList.contains('show'))_renderParishVisitDetail();if(_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null)_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);if(next){oaiDevStatus('개발자 모드가 열렸습니다.');document.getElementById('oai-developer-section').scrollIntoView({block:'nearest',behavior:'smooth'});} }
       return;
     }
     if(!oaiDevEnabled())return;
@@ -24583,7 +24619,175 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // The endpoint picker uses the same main Kakao map as the ordinary shrine view.
   // Keep its pending entry tied to actual map readiness, not a fixed timer.
   let pilgrimageEndpointMapEntryCleanup=null;
+  // V2 전용 지도 스냅샷: 기존 순례 기록의 GPS 스탬프 대상 여부를 버리지 않는다.
+  // 일반 검색 장소는 성지/성당 원본과 대조되기 전에는 GPS 스탬프 대상이 아니다.
+  function _pilgrimageV2Point(source){
+    const p=normalizePoint(source);
+    if(!p)return null;
+    const category=String(source&&source.sourceType||source&&source.kind||'').toLowerCase();
+    const matched=(category==='shrine'||category==='parish')?null:_routePointForPilgrimage(p);
+    const matchedType=matched&&matched.sourceType;
+    const kind=category==='shrine'||category==='parish'?category:
+      (matchedType==='shrine'||matchedType==='parish'?matchedType:'place');
+    return Object.assign({},p,{
+      kind,sourceType:kind==='place'?'custom':kind,
+      routeOnly:!!(source&&source.routeOnly)||kind==='place',
+      done:!!(source&&source.done),doneMethod:String(source&&source.doneMethod||'')
+    });
+  }
   function _openPilgrimageEndpointMapAdd(entryRole){
+    // V2 completed-course map: preserve every GPS-stamped waypoint exactly.
+    // Only the separate manual-completion list is eligible for modification.
+    if(entryRole==='waypoint' && pilgrimageDetailMode==='complete'
+      && oaiPilgrimageV2DevEnabled()
+      && window.CatholicPilgrimageBridgeV2 && window.CatholicPilgrimageServicesV2
+      && KAKAO_REST_PROXY_URL){
+      const completed=_manualCompletionCourse();
+      if(completed){
+        const originalRows=_manualMerged(completed);
+        const originalGps=originalRows.filter(row=>row.gps);
+        const samePlace=(a,b)=>!!a&&!!b&&String(a.name)===String(b.name)
+          &&Number(a.lat)===Number(b.lat)&&Number(a.lng)===Number(b.lng);
+        let draft={start:normalizePoint(completed.start),end:normalizePoint(completed.end),
+          waypoints:originalRows.map(row=>_pilgrimageV2Point(row.point)).filter(Boolean)};
+        function validateDraft(value){
+          if(!value||!Array.isArray(value.waypoints)||value.waypoints.length>OAI_MAX_ROUTE_WAYPOINTS)return false;
+          const normalized=value.waypoints.map(_pilgrimageV2Point);
+          if(normalized.some(p=>!p))return false;
+          if(!samePlace(value.start,completed.start)&&!!(value.start||completed.start))return false;
+          if(!samePlace(value.end,completed.end)&&!!(value.end||completed.end))return false;
+          // GPS-stamped points are immutable and retain their original relative order.
+          const gpsPositions=normalized.map(p=>originalGps.findIndex(row=>samePlace(row.point,p))).filter(i=>i>=0);
+          if(gpsPositions.length!==originalGps.length||gpsPositions.some((v,i)=>v!==i))return false;
+          draft={start:normalizePoint(completed.start),end:normalizePoint(completed.end),waypoints:normalized};
+          return draft;
+        }
+        // V1763: developer trial is strictly in-memory; never touch manual GPS/course storage.
+        if(draft.waypoints.length===originalRows.length && draft.waypoints.length<=OAI_MAX_ROUTE_WAYPOINTS){
+          const bridge=window.CatholicPilgrimageBridgeV2,services=window.CatholicPilgrimageServicesV2;
+          const catalog=Array.isArray(SHRINES)?SHRINES.map(normalizePoint).filter(Boolean):[];
+          const fetchLeg=services.routeProxy(KAKAO_REST_PROXY_URL);
+          const back=next=>{
+            if(next&&!validateDraft(next)){alert('GPS 방문기록은 삭제하거나 순서를 변경할 수 없습니다.');return false;}
+            // 시험 중 편집한 수동 경유지는 닫을 때 모두 폐기한다.
+            return true;
+          };
+          async function searchPlaces(query,signal){
+            const term=String(query||'').trim();if(!term)return [];
+            const local=catalog.filter(p=>p.name.includes(term)).slice(0,20);
+            try{
+              const remote=await services.searchKeyword(KAKAO_REST_PROXY_URL,term,signal);
+              remote.forEach(p=>{if(!local.some(q=>samePlace(q,p)))local.push(p);});
+            }catch(e){if(signal&&signal.aborted)throw e;}
+            return local.slice(0,20);
+          }
+          function pick(){
+            window.__OAI_PILGRIMAGE_V2_ADAPTER__={pick:{onBack:back,onChange:validateDraft,onRouteSearch:result,
+              searchPlaces,getFavorites:()=>_loadRouteFavorites().map(normalizePoint).filter(Boolean)}};
+            return bridge.open('pick',draft,{shrines:catalog,lockEndpoints:true,
+              isWaypointLocked:p=>originalGps.some(row=>samePlace(row.point,p)),
+              onError:e=>console.warn('[완료 지도 V2 선택]',e)});
+          }
+          function result(next){
+            if(!validateDraft(next))return false;
+            if(services.ordered(draft).length<2){alert('경로검색에 두 곳 이상 필요합니다.');return false;}
+            window.__OAI_PILGRIMAGE_V2_ADAPTER__={result:{onBack:back,fetchLeg,
+              onNavigate:({course})=>{const url=services.routeUrl(course);if(url)window.open(url,'_blank','noopener,noreferrer');},
+              onReselect:pick}};
+            return bridge.open('result',draft,{editable:true,onError:e=>console.warn('[완료 지도 V2 경로]',e)});
+          }
+          if(catalog.length&&pick())return;
+          window.__OAI_PILGRIMAGE_V2_ADAPTER__=null;
+        }
+      }
+    }
+    // The new picker is development-only and never replaces completed or active
+    // pilgrimage handling. Its changes are held in a local draft until the user
+    // explicitly returns to the planning detail.
+    if(entryRole==='waypoint' && oaiPilgrimageV2DevEnabled()
+      && pilgrimageDetailMode==='plan' && !pilgrimageManualCreateMode
+      && !(currentCourseId && _isActiveFollowCourse(currentCourseId))
+      && window.CatholicPilgrimageBridgeV2 && window.CatholicPilgrimageServicesV2
+      && KAKAO_REST_PROXY_URL){
+      const bridge=window.CatholicPilgrimageBridgeV2;
+      const services=window.CatholicPilgrimageServicesV2;
+      const originalMeta=loadMeta();
+      const originalPlaces=loadPlan();
+      let draft={start:normalizePoint(originalMeta.start),end:normalizePoint(originalMeta.end),
+        waypoints:originalPlaces.map(_pilgrimageV2Point).filter(Boolean)};
+      const samePlace=(a,b)=>a&&b&&Number(a.lat)===Number(b.lat)
+        && Number(a.lng)===Number(b.lng) && String(a.name)===String(b.name);
+      function acceptDraft(value){
+        if(!value||!Array.isArray(value.waypoints)||value.waypoints.length>OAI_MAX_ROUTE_WAYPOINTS)return false;
+        const normalize=p=>_pilgrimageV2Point(p);
+        const places=value.waypoints.map(normalize);
+        if(places.some(p=>!p))return false;
+        draft={start:normalize(value.start),end:normalize(value.end),waypoints:places};
+        return draft;
+      }
+      // V1763: this developer trial never saves or alters the real pilgrimage plan.
+      function returnToDetail(next){
+        if(next&&!acceptDraft(next)){alert('경유지 정보가 잘못되었습니다.');return false;}
+        // Keep edits only in this V2 session; dispose of draft when the screen closes.
+        return true;
+      }
+      const fetchLeg=services.routeProxy(KAKAO_REST_PROXY_URL);
+      const catalog=Array.isArray(SHRINES)?SHRINES.map(normalizePoint).filter(Boolean):[];
+      async function findPlaces(query,signal){
+        const term=String(query||'').trim();
+        if(!term)return [];
+        const all=catalog.concat(_loadRouteFavorites().map(normalizePoint).filter(Boolean));
+        const local=all.filter(p=>p.name.includes(term)).slice(0,20);
+        try{
+          const remote=await services.searchKeyword(KAKAO_REST_PROXY_URL,term,signal);
+          const output=local.slice();
+          remote.forEach(p=>{if(!output.some(q=>q.placeId===p.placeId&&q.placeId||samePlace(q,p)))output.push(p);});
+          return output.slice(0,20);
+        }catch(e){if(signal&&signal.aborted)throw e;return local;}
+      }
+      function openPickV2(){
+        window.__OAI_PILGRIMAGE_V2_ADAPTER__={pick:{
+          onBack:returnToDetail,
+          onChange:acceptDraft,
+          onRouteSearch:openResultV2,
+          searchPlaces:findPlaces,
+          getFavorites:()=>_loadRouteFavorites().map(normalizePoint).filter(Boolean)
+        }};
+        return bridge.open('pick',draft,{shrines:catalog,
+          currentLocation:_validGpsPair(_myLat,_myLng)?{lat:Number(_myLat),lng:Number(_myLng),name:'현위치'}:null,
+          onRequestLocation:cb=>{
+            if(typeof _refreshFreshLocationThen==='function')_refreshFreshLocationThen((lat,lng)=>cb({lat:Number(lat),lng:Number(lng),name:'현위치'}),()=>cb(null));
+            else cb(null);
+          },
+          onError:e=>console.warn('[순례 지도 V2 장소선택]',e)});
+      }
+      function openResultV2(next){
+        if(!acceptDraft(next))return false;
+        if(services.ordered(draft).length<2){
+          alert('경로검색은 출발지·경유지·도착지 중 2곳 이상 필요합니다.');
+          return false;
+        }
+        window.__OAI_PILGRIMAGE_V2_ADAPTER__={result:{
+          onBack:returnToDetail,fetchLeg,
+          onNavigate:({course})=>{
+            const url=services.routeUrl(course);
+            if(url)window.open(url,'_blank','noopener,noreferrer');
+          },
+          onReselect:()=>{openPickV2();}
+        }};
+        return bridge.open('result',draft,{editable:true,
+          onError:e=>console.warn('[순례 지도 V2 경로결과]',e)});
+      }
+      // Incomplete shrine catalogs are not allowed to replace the working picker.
+      if(catalog.length && openPickV2())return;
+      window.__OAI_PILGRIMAGE_V2_ADAPTER__=null;
+    }
+    // When a developer requests a V2 trial, never silently fall through to the
+    // legacy editor: that editor can modify the user's saved pilgrimage records.
+    if(oaiPilgrimageV2DevEnabled()){
+      alert('이 순례 지도 진입은 개발자 시험에서 아직 지원되지 않습니다. 기존 지도를 사용하려면 개발자 도구에서 신규 지도 시험을 OFF로 바꿔 주세요.');
+      return;
+    }
     if(pilgrimageEndpointMapEntryCleanup)pilgrimageEndpointMapEntryCleanup();
     clearPilgrimageCourseMap();
     clearPilgrimageMapPickMarkers();
@@ -24899,6 +25103,46 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     return out;
   }
   async function openPilgrimageCourseMap(options){
+    // Never bypass the original waypoint-limit and empty-course guards just
+    // because a developer selected V2. This snapshot is read-only.
+    const v2readOnlyPoints=oaiPilgrimageV2DevEnabled()?_pilgrimageCoursePoints():null;
+    // Development-only connection for READ-ONLY views. The legacy detail remains
+    // mounted behind the isolated V2 overlay: closing V2 reveals that same detail.
+    // No storage, planner or category-map operations are invoked by this adapter.
+    if(v2readOnlyPoints && v2readOnlyPoints.some(p=>p.role==='waypoint')
+      && v2readOnlyPoints.filter(p=>p.role==='waypoint').length<=OAI_MAX_ROUTE_WAYPOINTS
+      && window.CatholicPilgrimageBridgeV2 && window.CatholicPilgrimageServicesV2
+      && KAKAO_REST_PROXY_URL){
+      const v2points=v2readOnlyPoints.map(p=>Object.assign({},_pilgrimageV2Point(p),{role:p.role}));
+      const v2course={start:v2points.find(p=>p.role==='start')||null,
+        end:v2points.find(p=>p.role==='end')||null,
+        waypoints:v2points.filter(p=>p.role==='waypoint')};
+      const placeView=options?.fromPlaceInfo===true;
+      // Never substitute an inert adapter for editable operations.
+      const fetchLegV2=window.CatholicPilgrimageServicesV2.routeProxy(KAKAO_REST_PROXY_URL);
+      const returnToExistingDetail=()=>{
+        // The original detail/card has deliberately not been closed or re-rendered.
+        const detail=document.querySelector('.oai-pilgrimage-detail-view');
+        if(detail && typeof detail.focus==='function'){
+          try{detail.focus({preventScroll:true});}catch(_e){}
+        }
+      };
+      const v2actions={onBack:returnToExistingDetail,fetchLeg:fetchLegV2};
+      if(!placeView){
+        v2actions.onNavigate=({course})=>{
+          const url=window.CatholicPilgrimageServicesV2.routeUrl(course);
+          if(!url)throw Error('길찾기 경유지가 부족합니다.');
+          window.open(url,'_blank','noopener,noreferrer');
+        };
+      }
+      // The bridge is enabled only by a deliberate developer switch; the
+      // read-only adapter is scoped to this entry and no pick adapter is supplied.
+      window.__OAI_PILGRIMAGE_V2_ADAPTER__=placeView?{'place-view':v2actions}:{result:v2actions};
+      if(window.CatholicPilgrimageBridgeV2.open(placeView?'place-view':'result',v2course,{
+        editable:false,
+        onError:e=>console.warn('[pilgrimage V2 dev result]',e)
+      }))return;
+    }
     options=options||{};
     const fromPlaceInfo=options.fromPlaceInfo===true;
     const pts=_pilgrimageCoursePoints();
