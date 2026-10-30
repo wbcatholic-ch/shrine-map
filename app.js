@@ -16472,7 +16472,7 @@ async function _calcRoute(){
     $('rs-time').textContent=_fmtTime(previous.duration);
     const cachedPath=previous.points.map(function(p){return new _LL(p[0],p[1]);});
     _drawLine(_rS,navDest,cachedPath,{
-      fit:!['completed-place-info-view','place-info-view'].includes(_pilgrimageMapMode()),waypoints:waypoints
+      fit:!_isPilgrimageCourseViewReadOnly(),waypoints:waypoints
     });
     if(!isJuk)setRouteNote('',false);
     if(window.__OAI_COURSE_LOADING_TOKEN__===courseLoadingToken)
@@ -16533,7 +16533,7 @@ async function _calcRoute(){
       }
       $('rs-km').textContent=(distance/1000).toFixed(1);
       $('rs-time').textContent=_fmtTime(duration);
-      _drawLine(_rS, navDest, path.length>1?path:null, {fit:!['completed-place-info-view','place-info-view'].includes(_pilgrimageMapMode()),waypoints:waypoints});
+      _drawLine(_rS, navDest, path.length>1?path:null, {fit:!_isPilgrimageCourseViewReadOnly(),waypoints:waypoints});
       if(path.length>1)saveRoute(distance,duration,path);
       // The completed course is visible now: do not leave its spinner up until unrelated UI cleanup.
       if(_pilgrimageMapMode()==='completed-view' && window.__OAI_COURSE_LOADING_TOKEN__===courseLoadingToken)
@@ -16544,7 +16544,7 @@ async function _calcRoute(){
     const leg=await fetchLeg(_rS, navDest);
     $('rs-km').textContent=(leg.distance/1000).toFixed(1);
     $('rs-time').textContent=_fmtTime(leg.duration);
-    _drawLine(_rS, navDest, leg.path.length>1?leg.path:null, {fit:!['completed-place-info-view','place-info-view'].includes(_pilgrimageMapMode())});
+    _drawLine(_rS, navDest, leg.path.length>1?leg.path:null, {fit:!_isPilgrimageCourseViewReadOnly()});
     if(leg.path.length>1)saveRoute(leg.distance,leg.duration,leg.path);
     if(_pilgrimageMapMode()==='completed-view' && window.__OAI_COURSE_LOADING_TOKEN__===courseLoadingToken)
       _oaiCourseRouteLoading(false,courseLoadingToken);
@@ -16561,7 +16561,7 @@ async function _calcRoute(){
     $('rs-km').textContent=d.toFixed(1);
     $('rs-time').textContent=_fmtTime(d/70*3600);
     if(!isJuk) setRouteNote('* 직선거리 기반 추정값', false);
-    _drawLine(_rS, navDest, null, {fit:!['completed-place-info-view','place-info-view'].includes(_pilgrimageMapMode()), waypoints:waypoints});
+    _drawLine(_rS, navDest, null, {fit:!_isPilgrimageCourseViewReadOnly(), waypoints:waypoints});
     if(_pilgrimageMapMode()==='completed-view' && window.__OAI_COURSE_LOADING_TOKEN__===courseLoadingToken)
       _oaiCourseRouteLoading(false,courseLoadingToken);
   }
@@ -16625,7 +16625,9 @@ function _drawLine(s1,s2,path,opts){
     if(marker&&point) bounds.extend(new _LL(point.lat,point.lng));
   });
   if(_endTmpMkr) bounds.extend(new _LL(s2.lat,s2.lng));
-  if(opts.fit !== false){
+  // Pilgrimage read-only maps own their initial viewport independently.
+  // Directions completion must not override waypoint/whole-course zoom.
+  if(opts.fit !== false && !_isPilgrimageCourseViewReadOnly()){
     if(typeof _fitRouteBounds==='function') _fitRouteBounds(bounds, {repeat:false});
     else { try{_map.setBounds(bounds,80,52,190,52);}catch(e){ console.warn("[가톨릭길동무]", e); } }
   }
@@ -24412,7 +24414,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         plan.slice(0,OAI_MAX_ROUTE_WAYPOINTS).forEach(function(item,i){const cfg=OAI_ROUTE_WAYPOINT_CONFIGS[i];if(cfg)_setRoutePointFromItem(cfg.role,item,_pilgrimageRouteShrineIndex(item));});
         if(routeEnd)_setRoutePointFromItem('end',routeEnd,_pilgrimageRouteShrineIndex(routeEnd));
         window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__=true;
-        finishPilgrimageMapEntry();
         if(readOnly&&(!meta.start||!meta.end||!_validGpsPair(meta.start.lat,meta.start.lng)||!_validGpsPair(meta.end.lat,meta.end.lng))){
           _oaiCourseRouteLoading(false,routeLoadingToken);
         }
@@ -24450,12 +24451,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           }else if(readOnly&&_pilgrimageCourseViewKind()==='complete'){
             _hidePilgrimageDetailCategoryMarkers();
           }
-          setTimeout(function(){
-            try{
-              _syncRouteWaypointBoxes();
-              _schedulePilgrimageRouteResult(readOnly?'순례코스 보기':'순례하기 코스 보기',null);
-            }catch(_e){}
-          },60);
+          // The route points are already restored. Start a single result job
+          // from this entry, not from a second unrelated 60ms timer.
+          _syncRouteWaypointBoxes();
+          _schedulePilgrimageRouteResult(readOnly?'순례코스 보기':'순례하기 코스 보기',null);
         }
         try{_refreshRouteTmpMarkers();}catch(_e){}
         if(readOnly&&['place-info','complete-place-info','complete'].includes(_pilgrimageCourseViewKind()))_hidePilgrimageDetailCategoryMarkers();
@@ -24474,6 +24473,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         const initial=_pilgrimageMapInitialPoint(entryRole);
         if(_map&&mapEl&&mapEl.clientWidth>0&&mapEl.clientHeight>0&&typeof _map.relayout==='function')_map.relayout();
         if(typeof _syncMapPanelUI==='function')_syncMapPanelUI(normalRoute?'route':'pilgrimage-route-edit');
+        // Set the initial viewport after route points and the visible sheet
+        // have both settled; never fit the map against a half-built panel.
+        finishPilgrimageMapEntry();
         // All read-only pilgrimage maps receive their initial viewport from
         // finishPilgrimageMapEntry, after route points and panel are ready.
         // No later timer or route API callback may override that viewport.
