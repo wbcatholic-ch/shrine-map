@@ -155,10 +155,20 @@
     drawRouteSegments(segments){
       if(this.destroyed)return;
       this.lines.forEach(l=>l.setMap(null));this.lines=[];
-      (Array.isArray(segments)?segments:[]).forEach(segment=>{
-        const path=(Array.isArray(segment)?segment:[]).map(point).filter(Boolean).map(p=>this._latlng(p));
-        if(path.length<2)return;
-        this.lines.push(new this.maps.Polyline({map:this.map,path,strokeWeight:5,strokeColor:'#1C6CB3',strokeOpacity:0.9}));
+      const all=Array.isArray(segments)?segments:[];
+      const budget=Math.max(80,Math.floor(1200/Math.max(1,all.length)));
+      all.forEach(segment=>{
+        const raw=Array.isArray(segment)?segment:[];
+        if(raw.length<2)return;
+        // API distance/time is unchanged. Thin only visual geometry so a long
+        // route cannot monopolize the Fold's WebView with thousands of vertices.
+        const step=Math.max(1,Math.ceil((raw.length-1)/(budget-1)));
+        const picked=[];
+        for(let i=0;i<raw.length;i+=step){const p=point(raw[i]);if(p)picked.push(this._latlng(p));}
+        const end=point(raw[raw.length-1]);
+        if(end && ((raw.length-1)%step!==0))picked.push(this._latlng(end));
+        if(picked.length<2)return;
+        this.lines.push(new this.maps.Polyline({map:this.map,path:picked,strokeWeight:5,strokeColor:'#1C6CB3',strokeOpacity:0.9}));
       });
       // Route calculation must not overwrite the course-based zoom.
     }

@@ -16,6 +16,13 @@
    finally{
     session.host.remove();
     root.__OAI_PILGRIMAGE_V2_ADAPTER__=null;
+    // A trial is single-use. Never strand the rest of the pilgrimage UI in
+    // developer routing after leaving a map or navigating away from Settings.
+    root.__OAI_PILGRIMAGE_V2_DEV__=false;
+    const toggle=document.getElementById('oai-dev-pilgrimage-v2');
+    if(toggle)toggle.checked=false;
+    const status=document.getElementById('oai-dev-pilgrimage-v2-status');
+    if(status)status.textContent='기존 순례 지도 사용 중 · 신규 지도 OFF';
    }
    return true;
   },
@@ -70,6 +77,14 @@
      onBack
     });
     active={kind,instance,host,onBack};
+    // Always offer a local escape hatch even if Android Back/history is stuck.
+    // Closing a trial never persists its working copy.
+    const emergency=document.createElement('button');
+    emergency.type='button';emergency.className='pmv2-dev-exit';
+    emergency.textContent='시험 종료';
+    emergency.setAttribute('aria-label','신규 순례 지도 시험을 종료하고 기존 화면으로 돌아가기');
+    emergency.addEventListener('click',()=>api.close());
+    host.append(emergency);
     if(previous){
      try{previous.instance.destroy();}catch(error){console.warn('[순례지도 V2] 이전 화면 해제 오류',error);}
      finally{previous.host.remove();}

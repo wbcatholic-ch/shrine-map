@@ -18402,7 +18402,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(diag)diag.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.diagnoseVisitPhotoDownloads==='function');
     const remoteCheck=document.getElementById('oai-dev-missing-photo-drive');
     if(remoteCheck)remoteCheck.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.checkMissingVisitPhotosInDrive==='function');
-    const anniversaryTest=document.getElementById('oai-dev-anniversary-test');if(anniversaryTest)anniversaryTest.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.sendPilgrimageAnniversaryTestNotification==='function');
+    const anniversaryTest=document.getElementById('oai-dev-anniversary-test');if(anniversaryTest){anniversaryTest.disabled=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.sendPilgrimageAnniversaryTestNotification==='function');anniversaryTest.title=anniversaryTest.disabled?'Android 알림 시험 기능을 지원하는 앱에서만 실행할 수 있습니다.':'10월 9일 순례 추억 알림 1회 시험';}
     if(!oaiDevEnabled()){oaiDevPendingRestore=null;for(const id of ['oai-dev-import-view','oai-dev-restore-preview']){const el=document.getElementById(id);if(el)el.hidden=true;}}
   }
   // Deliberate choice in the already-existing developer panel; never switch
@@ -24698,6 +24698,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           }
           if(catalog.length&&pick())return;
           window.__OAI_PILGRIMAGE_V2_ADAPTER__=null;
+          window.__OAI_PILGRIMAGE_V2_DEV__=false;
         }
       }
     }
@@ -24781,12 +24782,18 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       // Incomplete shrine catalogs are not allowed to replace the working picker.
       if(catalog.length && openPickV2())return;
       window.__OAI_PILGRIMAGE_V2_ADAPTER__=null;
+      window.__OAI_PILGRIMAGE_V2_DEV__=false;
     }
-    // When a developer requests a V2 trial, never silently fall through to the
-    // legacy editor: that editor can modify the user's saved pilgrimage records.
+    // Unsupported V2 entry must NEVER block the existing pilgrimage map.
+    // End the one-shot trial before proceeding to the unchanged legacy path.
+    // This is then the regular editor, not a sandboxed V2 editing session.
     if(oaiPilgrimageV2DevEnabled()){
-      alert('이 순례 지도 진입은 개발자 시험에서 아직 지원되지 않습니다. 기존 지도를 사용하려면 개발자 도구에서 신규 지도 시험을 OFF로 바꿔 주세요.');
-      return;
+      window.__OAI_PILGRIMAGE_V2_DEV__=false;
+      window.__OAI_PILGRIMAGE_V2_ADAPTER__=null;
+      const trial=document.getElementById('oai-dev-pilgrimage-v2');
+      if(trial)trial.checked=false;
+      const status=document.getElementById('oai-dev-pilgrimage-v2-status');
+      if(status)status.textContent='시험 대상이 아닌 진입 경로 · 기존 순례 지도 사용 중';
     }
     if(pilgrimageEndpointMapEntryCleanup)pilgrimageEndpointMapEntryCleanup();
     clearPilgrimageCourseMap();
@@ -25142,6 +25149,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         editable:false,
         onError:e=>console.warn('[pilgrimage V2 dev result]',e)
       }))return;
+      window.__OAI_PILGRIMAGE_V2_ADAPTER__=null;
+      window.__OAI_PILGRIMAGE_V2_DEV__=false;
     }
     options=options||{};
     const fromPlaceInfo=options.fromPlaceInfo===true;

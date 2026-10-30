@@ -25,9 +25,27 @@ function create(opts){const o=opts||{}, api=o.engineApi||(typeof window!=='undef
 
  function clearBackground(){if(engine.maps.event&&engine.maps.event.removeListener){backgroundListeners.forEach(([marker,handler])=>engine.maps.event.removeListener(marker,'click',handler));}backgroundListeners=[];background.forEach(m=>m.setMap(null));background=[];}
  function drawBackground(){
-  // 선택한 성당 경유지만 표시한다. 일반 성당 전체를 지도에 불러오지 않는다.
+  // Only instantiate currently visible shrine markers; displaying 167+ Kakao
+  // marker objects on every edit makes the map costly on compact WebViews.
   engine.setShowParishWaypoints(mode==='selected'||mode==='hidden');
-  clearBackground();if(mode==='hidden')return;const selected=[course.start,...course.waypoints,course.end].filter(Boolean);for(const p of shrines){if(selected.some(x=>eq(x,p)))continue;const m=new engine.maps.Marker({map:engine.map,position:new engine.maps.LatLng(p.lat,p.lng),title:p.name||''});if(engine.maps.event&&engine.maps.event.addListener){const handler=()=>showPointChoice(p);engine.maps.event.addListener(m,'click',handler);backgroundListeners.push([m,handler]);}background.push(m);}}
+  clearBackground();if(mode==='hidden')return;
+  const selected=[course.start,...course.waypoints,course.end].filter(Boolean);
+  let box=null;
+  try{
+    const bounds=engine.map.getBounds&&engine.map.getBounds();
+    if(bounds&&bounds.getSouthWest&&bounds.getNorthEast){
+      const sw=bounds.getSouthWest(),ne=bounds.getNorthEast();
+      box={south:sw.getLat(),north:ne.getLat(),west:sw.getLng(),east:ne.getLng()};
+    }
+  }catch(_e){}
+  for(const p of shrines){
+    if(selected.some(x=>eq(x,p)))continue;
+    if(box&&(p.lat<box.south||p.lat>box.north||p.lng<box.west||p.lng>box.east))continue;
+    const m=new engine.maps.Marker({map:engine.map,position:new engine.maps.LatLng(p.lat,p.lng),title:p.name||''});
+    if(engine.maps.event&&engine.maps.event.addListener){const handler=()=>showPointChoice(p);engine.maps.event.addListener(m,'click',handler);backgroundListeners.push([m,handler]);}
+    background.push(m);
+  }
+ }
  function showChoices(p,items){dialog.replaceChildren();const heading=el('strong','',p.name||'선택한 장소');dialog.append(heading);for(const [label,fn] of items)dialog.append(button(label,fn));dialog.hidden=false;}
  function closeDialog(){dialog.hidden=true;dialog.replaceChildren();}
  function showPointChoice(p){
@@ -93,6 +111,10 @@ function create(opts){const o=opts||{}, api=o.engineApi||(typeof window!=='undef
  display.addEventListener('change',()=>{mode=display.value;drawBackground();});
  let searchAbort=null;
  search.addEventListener('input',async()=>{const query=search.value.trim(),token=++searchToken;searchItems.replaceChildren();if(searchAbort)searchAbort.abort();if(!query)return;searchAbort=new AbortController();try{const found=typeof o.searchPlaces==='function'?await o.searchPlaces(query,searchAbort.signal):shrines.filter(p=>(p.name||'').includes(query)).slice(0,10);if(destroyed||token!==searchToken)return;for(const p of (found||[]).slice(0,20))searchItems.append(button(p.name||'장소',()=>{search.value='';searchItems.replaceChildren();if(!o.lockEndpoints&&(selectedRole==='start'||selectedRole==='end')){const c=snapshot(course);c[selectedRole]=clone(p);change(c);}else showPointChoice(p);},'pmv2-pick-suggestion'));}catch(e){if(!searchAbort.signal.aborted)showMessage('검색 오류: '+e.message);}});
+ // Refresh viewport shrine markers when the user moves or zooms the map.
+ // This is a single listener per picker and is removed on destroy.
+ const mapIdle=()=>{if(!destroyed)drawBackground();};
+ if(engine.maps.event&&engine.maps.event.addListener)engine.maps.event.addListener(engine.map,'idle',mapIdle);
  // Explicit selection mode displays selected cathedral waypoints via course markers;
  // no broad diocese cathedral layer is ever fetched.
  render();
@@ -103,7 +125,7 @@ function create(opts){const o=opts||{}, api=o.engineApi||(typeof window!=='undef
     &&typeof o.onRequestLocation==='function'){
    o.onRequestLocation(place=>{if(!destroyed&&place)engine.setCurrentLocation(place);});
  }
- function destroy(){if(destroyed)return;destroyed=true;searchToken++;if(searchAbort)searchAbort.abort();closeDialog();clearBackground();engine.destroy();root.remove();}
+ function destroy(){if(destroyed)return;destroyed=true;searchToken++;if(searchAbort)searchAbort.abort();closeDialog();if(engine.maps.event&&engine.maps.event.removeListener)engine.maps.event.removeListener(engine.map,'idle',mapIdle);clearBackground();engine.destroy();root.remove();}
  return {root,engine,destroy,getCourse:()=>snapshot(course),setCourse:change,setDisplayMode:m=>{if(['shrines','selected','hidden'].includes(m)){mode=m;display.value=m;drawBackground();}},getDisplayMode:()=>mode};
 }
 return Object.freeze({create,MAX_WAYPOINTS,snapshot,eq,addWaypoint,removeWaypoint,moveWaypoint});
