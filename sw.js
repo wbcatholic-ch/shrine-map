@@ -1,4 +1,4 @@
-const ASSET_VERSION = 'V8-1-14-1765';
+const ASSET_VERSION = 'V8-1-14-1766';
 const CACHE_VERSION = 'catholic-way-' + ASSET_VERSION;
 
 /* V8-1-14-923: service worker cache strategy overview.
@@ -27,15 +27,6 @@ const APP_SHELL = [
   withVersion('./js/help-ui.js'),
   withVersion('./js/parish-fixed-ids.js'),
   withVersion('./app.js'),
-  withVersion('./pilgrimage-map/pilgrimage-engine.js'),
-  withVersion('./pilgrimage-map/pilgrimage-route.js'),
-  withVersion('./pilgrimage-map/pilgrimage-result.js'),
-  withVersion('./pilgrimage-map/pilgrimage-pick.js'),
-  withVersion('./pilgrimage-map/pilgrimage-place-view.js'),
-  withVersion('./pilgrimage-map/pilgrimage-services.js'),
-  withVersion('./pilgrimage-map/pilgrimage-contract.js'),
-  withVersion('./pilgrimage-map/pilgrimage-bridge.js'),
-  withVersion('./pilgrimage-map/pilgrimage-map.css'),
   withVersion('./js/cover-common.js'),
   withVersion('./js/touch-ux.js'),
   withVersion('./js/prayer-ui.js'),

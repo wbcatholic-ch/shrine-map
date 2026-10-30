@@ -518,15 +518,6 @@
       return;
     }
 
-    // V2 pilgrimage overlay is higher than any underlying planner or map.
-    // Restore the shared history guard exactly as for other in-app back actions.
-    if(window.CatholicPilgrimageBridgeV2 && window.CatholicPilgrimageBridgeV2.getActiveKind()){
-      _restoring = true;
-      try{ history.go(1); }catch(e){ _restoring=false; console.warn('[순례지도 V2 뒤로가기]',e); }
-      window.CatholicPilgrimageBridgeV2.back();
-      return;
-    }
-
     try{
       var mqPopUntil = Number(window.__OAI_MQ_STATE_POPPING__ || 0);
       if(mqPopUntil && Date.now() < mqPopUntil){
@@ -605,10 +596,6 @@
   }, false);
 
   document.addEventListener('backbutton', function(){
-    if(window.CatholicPilgrimageBridgeV2 && window.CatholicPilgrimageBridgeV2.getActiveKind()){
-      window.CatholicPilgrimageBridgeV2.back();
-      return;
-    }
     try{ if(typeof window.oaiSuppressExternalReturnForUserBack === 'function') window.oaiSuppressExternalReturnForUserBack('hardware-first-back-after-external-return'); }catch(e){ console.warn('[가톨릭길동무]', e); }
     if(typeof window._oaiDailyFailureBackHandle==='function' && window._oaiDailyFailureBackHandle()) return;
     if(typeof window._oaiPhotoAddDateBackHandle === 'function' && window._oaiPhotoAddDateBackHandle()) return;
