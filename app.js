@@ -655,6 +655,12 @@ function oaiClearExternalNavigationState(opts){
 
   function captureBackgroundMainMapView(){
     try{
+      // Only ordinary category maps own a background-restorable viewport.
+      // Pilgrimage course/edit/pick maps own their initial framing independently.
+      if(window.__OAI_PILGRIMAGE_COURSE_VIEW__===true ||
+         window.__OAI_PILGRIMAGE_PLACE_PICK__===true ||
+         window.__OAI_PILGRIMAGE_ROUTE_EDIT__ ||
+         window.__OAI_PILGRIMAGE_MAP_PICK__) return null;
       var m = window._map;
       if(!m) return null;
       return {
@@ -675,6 +681,11 @@ function oaiClearExternalNavigationState(opts){
   }
   function isMainPlaceMapActive(){
     try{
+      // A pilgrimage map also uses _mode='shrine': mode alone is insufficient.
+      if(window.__OAI_PILGRIMAGE_COURSE_VIEW__===true ||
+         window.__OAI_PILGRIMAGE_PLACE_PICK__===true ||
+         window.__OAI_PILGRIMAGE_ROUTE_EDIT__ ||
+         window.__OAI_PILGRIMAGE_MAP_PICK__) return false;
       var mode = String(window._mode || '');
       if(!/^(shrine|parish|retreat)$/.test(mode)) return false;
       if(!document.documentElement.classList.contains('app-active')) return false;
@@ -10146,7 +10157,10 @@ function _onMapReady(){
       if(typeof _map.relayout==='function') _map.relayout();
       // A returning/late SDK map-ready callback must not discard a pilgrimage
       // course's waypoint viewport. The course entry handles its own framing.
-      if(window.__OAI_PILGRIMAGE_COURSE_VIEW__!==true && window.__OAI_PILGRIMAGE_PLACE_PICK__!==true){
+      if(window.__OAI_PILGRIMAGE_COURSE_VIEW__!==true &&
+         window.__OAI_PILGRIMAGE_PLACE_PICK__!==true &&
+         !window.__OAI_PILGRIMAGE_ROUTE_EDIT__ &&
+         !window.__OAI_PILGRIMAGE_MAP_PICK__){
         if(typeof _map.setLevel==='function') _map.setLevel(pilgrimageEntryCenter?OAI_PILGRIMAGE_MAP_PICK_VIEW_LEVEL:8);
         if(typeof _map.setCenter==='function') _map.setCenter(pilgrimageEntryCenter
           ?new _LL(Number(pilgrimageEntryCenter.lat),Number(pilgrimageEntryCenter.lng))
