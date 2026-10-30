@@ -24267,8 +24267,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const modal=planner();
     _setPilgrimageLayerVisible(modal,false);
     plannerView='detail';
-    const meta=options.courseEndpoints || loadMeta(),plan=(readOnly&&Array.isArray(options.coursePlaces))
-      ? options.coursePlaces.map(normalizePoint).filter(Boolean) : loadPlan();
+    // A read-only map receives an immutable-by-convention snapshot of its own
+    // course. Never silently fall back to the editable draft after entry.
+    const meta=readOnly
+      ? {start:normalizePoint(options.courseEndpoints&&options.courseEndpoints.start),
+         end:normalizePoint(options.courseEndpoints&&options.courseEndpoints.end)}
+      : loadMeta();
+    const plan=readOnly
+      ? (Array.isArray(options.coursePlaces)?options.coursePlaces:[]).map(normalizePoint).filter(Boolean)
+      : loadPlan();
     window.__OAI_PILGRIMAGE_VIEW_WAYPOINTS__=readOnly?plan.slice():null;
     window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__=false;
     _oaiCourseRouteLoading(false);
@@ -24384,7 +24391,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if((!_markers||_markers.length!==SHRINES.length||!_markers.some(Boolean))&&typeof _buildShrineMarkers==='function')_buildShrineMarkers();
         if(typeof _restoreAllCategoryMarkersForSelection==='function')_restoreAllCategoryMarkersForSelection();
       }catch(_e){}
-      setTimeout(function(){try{
+      setTimeout(function(){
+        // A prior entry's deferred route restore must not mutate a newer map.
+        if(window.__OAI_PILGRIMAGE_MAP_ENTRY_TOKEN__!==mapEntryToken || entryFailed || _screen!=='map')return;
+        try{
         _mode='shrine';
         document.documentElement.classList.remove('parish-mode','retreat-mode');
         // In a pilgrimage place-info map the saved route may have no explicit
@@ -24831,8 +24841,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     // Completed detail must use its own saved course endpoints, not the mutable
     // draft restored by a previous pilgrimage / route entry.
     const meta=completed ? {start:completed.start,end:completed.end} : loadMeta();
-    const list=completed && _courseCompletionList(completed).length
-      ? _manualMerged(completed).map(x=>x.point) : loadPlan();
+    // A completed course must never inherit waypoints from a different
+    // editable plan, even if its saved completion list is empty.
+    const list=completed ? _manualMerged(completed).map(x=>x.point) : loadPlan();
     const out=[];
     if(meta.start&&_validGpsPair(meta.start.lat,meta.start.lng))out.push(Object.assign({role:'start'},meta.start));
     list.forEach((x,i)=>{if(x&&_validGpsPair(x.lat,x.lng))out.push(Object.assign({role:'waypoint',order:i+1},x));});
@@ -24866,10 +24877,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         readOnly:true,
         normalRoute:false,
         coursePlaces:coursePlaces,
-        courseEndpoints:fromCompleted?{
+        // All read-only routes, completed or planned, use exactly the
+        // endpoints captured alongside their saved waypoint snapshot.
+        courseEndpoints:{
           start:pts.find(p=>p.role==='start')||null,
           end:pts.find(p=>p.role==='end')||null
-        }:null,
+        },
         fromPlaceInfo:fromPlaceInfo,
         focusPoint:fromPlaceInfo?options.focusPoint:null
       });
