@@ -12264,7 +12264,7 @@ function _buildShrineMarkers(){
     position:new _LL(s.lat,s.lng),
     image:_mkrImg(_shrineMarkerColor(s),false),title:s.name
    });
-   const showNow=!_shouldDeferFullCategoryMarkers() && !['place-info-view','completed-place-info-view','completed-view'].includes(_pilgrimageMapMode());
+   const showNow=!_shouldDeferFullCategoryMarkers() && !_pilgrimageRouteResultMustHideOrdinaryMarkers();
    if(showNow) mk.setMap(_map);
    mk.__oaiMapTarget=showNow?_map:null;
    mk.__oaiImgKey='shrine:'+_shrineMarkerColor(s)+':0';
@@ -12370,6 +12370,12 @@ function _restoreMapMarkers(opts){
 
 function _restoreAllCategoryMarkersForSelection(){
   if(!_map) return;
+  // A delayed category restore must never resurrect unrelated map markers on
+  // a pilgrimage route result. Selection screens remain unaffected.
+  if(_pilgrimageRouteResultMustHideOrdinaryMarkers()){
+    _hidePilgrimageDetailCategoryMarkers();
+    return;
+  }
   if(_mode==='shrine'){
     _markers.forEach(m=>{
       if(!m||!m.marker) return;
@@ -15287,13 +15293,16 @@ function _pilgrimageMapMode(){
   if(window.__OAI_PILGRIMAGE_PLACE_PICK__===true || window.__OAI_PILGRIMAGE_MAP_PICK__)return 'place-pick';
   return 'route';
 }
-function _hidePilgrimageDetailCategoryMarkers(){
-  // Only pilgrimage route RESULTS hide ordinary shrine markers. The map-add
-  // selection surface must keep every available shrine and visited marker.
+function _pilgrimageRouteResultMustHideOrdinaryMarkers(){
+  // Only the PILGRIMAGE route result hides ordinary markers; selecting places
+  // still requires the full shrine layer. This also covers async marker batches.
   const mode=_pilgrimageMapMode();
-  const routeResult=mode==='completed-view'||mode==='active-course-view'||
-    (mode==='plan-edit'&&_isRouteResultShowing());
-  if(!routeResult||!_map)return;
+  return mode==='completed-view'||mode==='active-course-view'||
+    mode==='completed-place-info-view'||mode==='place-info-view'||
+    (mode==='plan-edit'&&!!(_polyline || (document.getElementById('rs-result') && document.getElementById('rs-result').style.display==='block')));
+}
+function _hidePilgrimageDetailCategoryMarkers(){
+  if(!_pilgrimageRouteResultMustHideOrdinaryMarkers()||!_map)return;
   try{_markers.forEach(function(m){if(m&&m.marker)_setMarkerMapIfChanged(m.marker,null);});}catch(_e){}
   try{_hideAllParishDioMkrs();}catch(_e){}
   try{(_retreatMarkers||[]).forEach(function(o){if(o&&o.marker)_setMarkerMapIfChanged(o.marker,null);});}catch(_e){}
@@ -16623,8 +16632,7 @@ function _drawLine(s1,s2,path,opts){
   _syncRouteWaypointBox();
   _refreshRouteTmpMarkers();
   _hideCategoryMarkersForRouteDisplay();
-  const pilgrimageRouteResult=['completed-view','active-course-view'].includes(_pilgrimageMapMode()) ||
-    (_pilgrimageMapMode()==='plan-edit'&&_isRouteResultShowing());
+  const pilgrimageRouteResult=_pilgrimageRouteResultMustHideOrdinaryMarkers();
   if(pilgrimageRouteResult){
     // All five pilgrimage result entry paths use the same category-marker policy.
     // Numbered stop and start/end markers are managed independently above.
@@ -20889,16 +20897,28 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const raw=_readActiveFollowRaw();
     if(!raw){
       badge.hidden=true;
+      badge.style.display='none';
       if(lastCarNoticeSignature)_syncCarPilgrimageNotice(null);
       return;
     }
     const active=_activeFollowState();
     const plannerLayer=planner();
-    const onPilgrimage=!!(plannerLayer&&plannerLayer.classList.contains('show'));
+    const onPilgrimage=!!(plannerLayer&&plannerLayer.classList.contains('show')) ||
+      _pilgrimageRelatedScreenActive();
     const onWalkMap=!!document.getElementById('oai-walk-map-preview');
-    const visible=!!active&&!onPilgrimage&&!onWalkMap;
+    // The return badge belongs outside pilgrimage screens. The planner is
+    // temporarily hidden while its shared Kakao route/map-pick surface opens;
+    // checking planner.show alone lets the badge leak onto that map, and it
+    // remains stuck there until another unrelated DOM update.
+    const onPilgrimageMap=window.__OAI_PILGRIMAGE_COURSE_VIEW__===true ||
+      window.__OAI_PILGRIMAGE_PLACE_PICK__===true ||
+      !!window.__OAI_PILGRIMAGE_ROUTE_EDIT__ ||
+      typeof window.__OAI_PILGRIMAGE_MAP_PICK__==='function';
+    const visible=!!active&&!onPilgrimage&&!onPilgrimageMap&&!onWalkMap;
     _syncCarPilgrimageNotice(active);
     badge.hidden=!visible;
+    // Explicit visibility also defeats existing CSS display rules after navigation.
+    badge.style.display=visible?'':'none';
     if(!visible)return;
     const walking=active.travelMode==='walk';
     badge.setAttribute('aria-label',walking?'진행 중인 도보 순례 지도로 돌아가기':'진행 중인 자동차 순례로 돌아가기');
@@ -24338,6 +24358,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     window.__OAI_PILGRIMAGE_ROUTE_EDIT__=(readOnly||normalRoute)
       ? null
       : {entryRole:String(entryRole||'plan')};
+    try{_refreshWalkingCoverBadge();}catch(_e){}
     // 지도가 다시 생성되어도 마지막 순례지 중심을 잃지 않도록 진입 목표를 보존한다.
     window.__OAI_PILGRIMAGE_INITIAL_CENTER__=!readOnly&&!normalRoute
       ? _pilgrimageMapInitialPoint(entryRole):null;
@@ -24412,7 +24433,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           if(typeof _restoreAllCategoryMarkersForSelection==='function')_restoreAllCategoryMarkersForSelection();
           try{_hideDioOverlays();}catch(_e){}
           if(typeof _refreshRouteTmpMarkers==='function')_refreshRouteTmpMarkers();
-          if(readOnly&&['active','complete'].includes(_pilgrimageCourseViewKind()))_hidePilgrimageDetailCategoryMarkers();
+          if(readOnly)_hidePilgrimageDetailCategoryMarkers();
           // Both planned and completed place-info maps fit ONLY their saved
           // waypoints, after the shared map and marker surfaces have settled.
           if(readOnly&&['place-info','complete-place-info'].includes(_pilgrimageCourseViewKind())){
@@ -24917,6 +24938,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     try{
       pilgrimageCourseReturnToPlaceInfo=fromPlaceInfo;
       window.__OAI_PILGRIMAGE_COURSE_VIEW__=true;
+      try{_refreshWalkingCoverBadge();}catch(_e){}
       window.__OAI_PILGRIMAGE_COURSE_VIEW_KIND__=fromCompleted?(fromPlaceInfo?'complete-place-info':'complete'):fromPlaceInfo?'active-place-info':'active';
       window.__OAI_PILGRIMAGE_COURSE_VIEW_DIRECT__=true;
       window.__OAI_PILGRIMAGE_VIEW_FULL_COURSE__=fromPlaceInfo?null:fullCoursePoints.slice();
