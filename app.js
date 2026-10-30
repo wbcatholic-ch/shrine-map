@@ -15470,6 +15470,23 @@ function _schedulePilgrimageRouteResult(label,focusPoint){
         }
       }
       stabilize();
+      // 경로 결과 카드가 실제로 펼쳐진 이후에만 읽기 전용 첫 범위를 계산한다.
+      // 출발/도착은 지도에서 보기의 줌 기준에 넣지 않는다.
+      // 이전 진입의 대기 중 작업은 토큰으로 무효화한다.
+      if(_isPilgrimageCourseViewReadOnly()){
+        const entryToken=window.__OAI_PILGRIMAGE_MAP_ENTRY_TOKEN__;
+        await new Promise(resolve=>requestAnimationFrame(()=>requestAnimationFrame(resolve)));
+        if(window.__OAI_COURSE_LOADING_TOKEN__!==loadingToken ||
+           window.__OAI_PILGRIMAGE_MAP_ENTRY_TOKEN__!==entryToken ||
+           _screen!=='map' || !_isPilgrimageCourseViewReadOnly()){
+          done=true;running=false;return;
+        }
+        const kind=_pilgrimageCourseViewKind();
+        if(kind==='place-info'||kind==='complete-place-info')
+          _fitPilgrimagePlaceInfoWaypoints(window.__OAI_PILGRIMAGE_VIEW_WAYPOINTS__);
+        else if(kind==='active'||kind==='complete')
+          _fitPilgrimageWholeCourseBounds();
+      }
       // A read-only course map is usable as soon as the shared Kakao map and
       // waypoint markers are ready. Do not keep its loading state coupled to
       // the slower multi-leg driving directions API, or start seven duplicate
@@ -24422,15 +24439,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           try{_hideDioOverlays();}catch(_e){}
           if(typeof _refreshRouteTmpMarkers==='function')_refreshRouteTmpMarkers();
           if(readOnly)_hidePilgrimageDetailCategoryMarkers();
-          // 패널 배치가 확정된 후 현재 진입의 첫 줌을 한 번만 계산한다.
-          // 이전 진입의 RAF 및 늦은 경로 응답은 다음 지도에 적용하지 않는다.
-          if(readOnly)requestAnimationFrame(function(){requestAnimationFrame(function(){
-            if(window.__OAI_PILGRIMAGE_MAP_ENTRY_TOKEN__!==mapEntryToken||_screen!=='map'||!_map)return;
-            if(['place-info','complete-place-info'].includes(_pilgrimageCourseViewKind()))
-              _fitPilgrimagePlaceInfoWaypoints(plan);
-            else if(['active','complete'].includes(_pilgrimageCourseViewKind()))
-              _fitPilgrimageWholeCourseBounds();
-          });});
+          // 읽기 전용 첫 줌은 경로 결과 패널의 최종 배치가 끝난 뒤
+          // _schedulePilgrimageRouteResult에서 한 번만 적용한다.
+          // 여기서 먼저 맞추면 첫 진입 때 숨겨진/이전 패널 크기를 기준으로 계산된다.
           const focus=options.focusPoint&&_validGpsPair(options.focusPoint.lat,options.focusPoint.lng)?options.focusPoint:_pilgrimageMapInitialPoint(entryRole);
           if(focus&&_validGpsPair(focus.lat,focus.lng)&&!readOnly)
             _setPilgrimageMapCenterForBottomCard({lat:Number(focus.lat),lng:Number(focus.lng)},OAI_PILGRIMAGE_MAP_PICK_VIEW_LEVEL,{repeat:false});
