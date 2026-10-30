@@ -24247,6 +24247,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(_validGpsPair(_myLat,_myLng))return {lat:Number(_myLat),lng:Number(_myLng)};
     return null;
   }
+  // A course snapshot is the sole normalized input for pilgrimage route entry.
+  // It does not touch the editable draft, stamp storage, or category maps.
+  function _pilgrimageRouteCourseSnapshot(source){
+    const data=source||{};
+    const endpoints=data.endpoints||{};
+    return {
+      start:normalizePoint(endpoints.start),
+      end:normalizePoint(endpoints.end),
+      places:(Array.isArray(data.places)?data.places:[]).map(normalizePoint).filter(Boolean)
+    };
+  }
   function _openUnifiedPilgrimageMapAdd(entryRole,options){
     options=options||{};
     const readOnly=options.readOnly===true;
@@ -24264,13 +24275,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     plannerView='detail';
     // A read-only map receives an immutable-by-convention snapshot of its own
     // course. Never silently fall back to the editable draft after entry.
-    const meta=readOnly
-      ? {start:normalizePoint(options.courseEndpoints&&options.courseEndpoints.start),
-         end:normalizePoint(options.courseEndpoints&&options.courseEndpoints.end)}
-      : loadMeta();
-    const plan=readOnly
-      ? (Array.isArray(options.coursePlaces)?options.coursePlaces:[]).map(normalizePoint).filter(Boolean)
-      : loadPlan();
+    const draftMeta=readOnly?null:loadMeta();
+    const courseSnapshot=_pilgrimageRouteCourseSnapshot({
+      endpoints:readOnly?options.courseEndpoints:draftMeta,
+      places:readOnly?options.coursePlaces:loadPlan()
+    });
+    const meta={start:courseSnapshot.start,end:courseSnapshot.end};
+    const plan=courseSnapshot.places;
     window.__OAI_PILGRIMAGE_VIEW_WAYPOINTS__=readOnly?plan.slice():null;
     window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__=false;
     _oaiCourseRouteLoading(false);
@@ -24834,10 +24845,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     // A completed course must never inherit waypoints from a different
     // editable plan, even if its saved completion list is empty.
     const list=completed ? _manualMerged(completed).map(x=>x.point) : loadPlan();
+    const snapshot=_pilgrimageRouteCourseSnapshot({endpoints:meta,places:list});
     const out=[];
-    if(meta.start&&_validGpsPair(meta.start.lat,meta.start.lng))out.push(Object.assign({role:'start'},meta.start));
-    list.forEach((x,i)=>{if(x&&_validGpsPair(x.lat,x.lng))out.push(Object.assign({role:'waypoint',order:i+1},x));});
-    if(meta.end&&_validGpsPair(meta.end.lat,meta.end.lng))out.push(Object.assign({role:'end'},meta.end));
+    if(snapshot.start&&_validGpsPair(snapshot.start.lat,snapshot.start.lng))out.push(Object.assign({role:'start'},snapshot.start));
+    snapshot.places.forEach((x,i)=>{if(_validGpsPair(x.lat,x.lng))out.push(Object.assign({role:'waypoint',order:i+1},x));});
+    if(snapshot.end&&_validGpsPair(snapshot.end.lat,snapshot.end.lng))out.push(Object.assign({role:'end'},snapshot.end));
     return out;
   }
   async function openPilgrimageCourseMap(options){
