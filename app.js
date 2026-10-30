@@ -15314,7 +15314,7 @@ function _pilgrimageRouteResultMustHideOrdinaryMarkers(){
   const mode=_pilgrimageMapMode();
   return mode==='completed-view'||mode==='active-course-view'||
     mode==='completed-place-info-view'||mode==='place-info-view'||
-    (_screen==='map'&&_activeTab==='route'&&!!(document.getElementById('rs-result') && document.getElementById('rs-result').style.display==='block'));
+    (_screen==='map'&&!!(document.getElementById('rs-result') && document.getElementById('rs-result').style.display==='block'));
 }
 function _hidePilgrimageDetailCategoryMarkers(){
   if(!_pilgrimageRouteResultMustHideOrdinaryMarkers()||!_map)return;
@@ -16420,6 +16420,9 @@ async function _calcRoute(){
   $('rs-km').textContent='…';
   $('rs-time').textContent='…';
   $('rs-result').style.display='block';
+  // The result sheet has become visible: remove ordinary markers immediately,
+  // including when the active tab state lags behind the visible route sheet.
+  _hidePilgrimageDetailCategoryMarkers();
   if(_isPilgrimageRouteEditMode() && _screen==='map'){
     _hidePilgrimageDetailCategoryMarkers();
     _fitPilgrimageWaypointBounds([_rS].concat(_getRouteWaypoints(),[_rE]),56);
@@ -16446,6 +16449,11 @@ async function _calcRoute(){
   const waypoints = await Promise.all(_getRouteWaypoints().map(_resolveDrivingRoutePoint));
   const navStart = await _resolveDrivingRoutePoint(_rS);
   if(!routeStillCurrent())return;
+  // Fit editable pilgrimage results from the actual driving endpoints, once,
+  // before the variable-latency road API returns. Read-only detail maps use
+  // their saved waypoint-only fit from the entry lifecycle.
+  if(_isPilgrimageRouteEditMode())
+    _fitPilgrimageWaypointBounds([navStart].concat(waypoints,[navDest]),56);
   _showJukrimgulParkingMkr(hasJukStop);
   if(hasJukStop){
     setRouteNote('⚠️ <b>죽림굴주차장</b>까지 경로 안내 · 자동차가 올라가지 못하는 구간이므로 주차 후 도보로 이동하세요.', true);
@@ -16629,8 +16637,8 @@ function _drawLine(s1,s2,path,opts){
   // Editable pilgrimage results fit once after the calculated route is drawn.
   if(opts.fit !== false && !_isPilgrimageCourseViewReadOnly()){
     if(pilgrimageRouteResult || _isPilgrimageRouteEditMode()){
-      // Route geometry may arrive long after initial fit or user gesture.
-      // Never change a pilgrimage viewport when an async response arrives.
+      // Pilgrimage viewport is fitted from its saved stops at entry/search.
+      // Do not perform a second fit when the road response arrives.
     }else if(typeof _fitRouteBounds==='function'){
       _fitRouteBounds(bounds);
     }else{
@@ -24524,7 +24532,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           setTimeout(function(){try{if(window.__OAI_PILGRIMAGE_ROUTE_EDIT__)_refreshRouteTmpMarkers();}catch(_e){}},360);
           setTimeout(function(){try{if(window.__OAI_PILGRIMAGE_ROUTE_EDIT__)_refreshRouteTmpMarkers();}catch(_e){}},980);
         }
-        if(_map&&mapEl&&mapEl.clientWidth>0&&mapEl.clientHeight>0&&typeof _map.relayout==='function')_map.relayout();
+        // Read-only entry already relayouts before its saved-course fit; do not
+        // relayout again after that fit has been scheduled.
+        if(!readOnly&&_map&&mapEl&&mapEl.clientWidth>0&&mapEl.clientHeight>0&&typeof _map.relayout==='function')_map.relayout();
         if(typeof _syncMapPanelUI==='function')_syncMapPanelUI(normalRoute?'route':'pilgrimage-route-edit');
         // Set the initial viewport after route points and the visible sheet
         // have both settled; never fit the map against a half-built panel.
