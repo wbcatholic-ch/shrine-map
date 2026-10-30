@@ -24468,8 +24468,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(readOnly||normalRoute){
           if(readOnly&&['place-info','complete-place-info'].includes(_pilgrimageCourseViewKind())){
             _setMapPanelCollapsed(true,'pilgrimage-detail-waypoints');
-          }else if(readOnly&&['active','complete'].includes(_pilgrimageCourseViewKind())){
-            _hidePilgrimageDetailCategoryMarkers();
           }
           // The route points are already restored. Start a single result job
           // from this entry, not from a second unrelated 60ms timer.
