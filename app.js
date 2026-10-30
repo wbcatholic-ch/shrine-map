@@ -16275,28 +16275,26 @@ function _buildPilgrimageDraftFromRoute(){
 function _isPilgrimageRouteEditMode(){
   return !!window.__OAI_PILGRIMAGE_ROUTE_EDIT__;
 }
+function _routeAllowsPilgrimagePlanButton(){
+  // 일반 길찾기에서만 새 순례코스를 만들 수 있다.
+  // 이미 순례 화면에서 연 길찾기 결과는 편집 여부와 관계없이 제외한다.
+  const returnButton=document.getElementById('rs-pilgrimage-return-btn');
+  return !(
+    _isAnyPilgrimageCourseView() ||
+    _isPilgrimageRouteEditMode() ||
+    window.__OAI_PILGRIMAGE_PLACE_PICK__ ||
+    window.__oaiPilgrimageRouteReturn===true ||
+    (returnButton && !returnButton.hidden && returnButton.style.display!=='none')
+  );
+}
 function _refreshRoutePilgrimageButtonMode(){
   try{
     const btn=document.getElementById('rs-pilgrimage-plan-btn');
-    if(!btn) return;
-    if(_isAnyPilgrimageCourseView()){
-      btn.hidden=true;
-      btn.style.display='none';
-      return;
-    }
-    if(_isPilgrimageRouteEditMode()){
-      btn.hidden=true;
-      btn.style.display='none';
-      return;
-    }
-    if(window.__oaiPilgrimageRouteReturn===true){
-      btn.hidden=true;
-      btn.style.display='none';
-      return;
-    }
-    btn.innerHTML='<span aria-hidden="true">✝</span> 순례코스로 만들기';
-    btn.hidden=false;
-    btn.style.display='flex';
+    if(!btn)return;
+    const visible=_routeAllowsPilgrimagePlanButton();
+    btn.hidden=!visible;
+    btn.style.display=visible?'flex':'none';
+    if(visible)btn.innerHTML='<span aria-hidden="true">✝</span> 순례코스로 만들기';
   }catch(_e){}
 }
 // 순례계획 지도 편집은 기존 초안과 분리되어 있다. 저장/닫기 전에 실제 변경 여부를 비교한다.
@@ -16372,38 +16370,27 @@ function _openPilgrimagePlannerFromRoute(){
 
 function _ensureRoutePilgrimagePlanButton(){
   try{
-    const existing=document.getElementById('rs-pilgrimage-plan-btn');
-    if(_isAnyPilgrimageCourseView()){
-      if(existing){existing.hidden=true;existing.style.display='none';}
-      return existing||null;
-    }
-    if(_isPilgrimageRouteEditMode()){
-      if(existing){existing.hidden=true;existing.style.display='none';}
-      _syncPilgrimageRouteReturnButton();
-      return existing||null;
-    }
-    if(window.__oaiPilgrimageRouteReturn===true){
-      if(existing){existing.hidden=true;existing.style.display='none';}
-      return existing||null;
-    }
     const result=document.querySelector('#rs-result .rs-result') || document.getElementById('rs-result');
-    if(!result) return null;
     let btn=document.getElementById('rs-pilgrimage-plan-btn');
+    // 버튼은 일반 길찾기에만 필요하다. 이미 존재한다면 상태만 동기화한다.
+    if(!_routeAllowsPilgrimagePlanButton()){
+      _refreshRoutePilgrimageButtonMode();
+      return btn||null;
+    }
+    if(!result)return null;
     if(!btn){
       btn=document.createElement('button');
       btn.id='rs-pilgrimage-plan-btn';
       btn.className='btn-route-pilgrimage';
       btn.type='button';
-      btn.innerHTML='<span aria-hidden="true">✝</span> 성지순례 계획으로 만들기';
       result.appendChild(btn);
     }
-    // 일반 길찾기의 '순례코스로 만들기'는 모든 결과 박스 뒤, 맨 아래에 둔다.
-    if(!_isPilgrimageRouteEditMode()&&btn.parentNode===result&&result.lastElementChild!==btn)result.appendChild(btn);
-    // HTML에 이미 존재하는 버튼도 클릭 동작이 반드시 연결되도록 한다.
-    _refreshRoutePilgrimageButtonMode();
+    // 일반 길찾기의 결과 카드 맨 아래에 한 번만 배치한다.
+    if(btn.parentNode===result&&result.lastElementChild!==btn)result.appendChild(btn);
     btn.onclick=_handleRoutePilgrimagePlanAction;
+    _refreshRoutePilgrimageButtonMode();
     return btn;
-  }catch(e){ console.warn('[가톨릭길동무] 순례계획 버튼 표시 실패',e); return null; }
+  }catch(e){console.warn('[가톨릭길동무] 순례계획 버튼 표시 실패',e);return null;}
 }
 
 async function _calcRoute(){
