@@ -26774,6 +26774,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     setTimeout(function(){_historicalBgIdle(function(){_historicalBgRun(index+1,generation);});},850);
   }
   function _startHistoricalBackgroundV1659(fromRestore){
+    // V1767 emergency isolation: suspend legacy one-time historical migrations on startup.
+    // Keep all records and migration logic intact. This is diagnostic, not a proven lag fix.
+    return;
     if(fromRestore){
       // 복원된 데이터는 신규 원본이므로 성공 상태만 재점검 대상으로 재개한다.
       historicalTasks.forEach(function(task){
