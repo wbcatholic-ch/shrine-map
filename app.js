@@ -16627,11 +16627,18 @@ function _drawLine(s1,s2,path,opts){
     if(marker&&point) bounds.extend(new _LL(point.lat,point.lng));
   });
   if(_endTmpMkr) bounds.extend(new _LL(s2.lat,s2.lng));
-  // Pilgrimage read-only maps own their initial viewport independently.
-  // Directions completion must not override waypoint/whole-course zoom.
+  // Pilgrimage result screens share the whole-course viewport calculation.
+  // The read-only views already fit their saved course at entry; an asynchronous
+  // directions result must not replace the user's current viewport later.
+  // Editable pilgrimage results fit once after the calculated route is drawn.
   if(opts.fit !== false && !_isPilgrimageCourseViewReadOnly()){
-    if(typeof _fitRouteBounds==='function') _fitRouteBounds(bounds);
-    else { try{_map.setBounds(bounds,80,52,190,52);}catch(e){ console.warn("[가톨릭길동무]", e); } }
+    if(pilgrimageRouteResult || _isPilgrimageRouteEditMode()){
+      _fitPilgrimageWaypointBounds([s1].concat(waypoints,[s2]),56);
+    }else if(typeof _fitRouteBounds==='function'){
+      _fitRouteBounds(bounds);
+    }else{
+      try{_map.setBounds(bounds,80,52,190,52);}catch(e){console.warn('[가톨릭길동무]',e);}
+    }
   }
 }
 
