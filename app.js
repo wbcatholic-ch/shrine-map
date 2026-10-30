@@ -24473,7 +24473,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           }
           // The route points are already restored. Start a single result job
           // from this entry, not from a second unrelated 60ms timer.
-          _syncRouteWaypointBoxes();
           _schedulePilgrimageRouteResult(readOnly?'순례코스 보기':'순례하기 코스 보기',null);
         }
         try{_refreshRouteTmpMarkers();}catch(_e){}
@@ -24490,7 +24489,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           setTimeout(function(){try{if(window.__OAI_PILGRIMAGE_ROUTE_EDIT__)_refreshRouteTmpMarkers();}catch(_e){}},360);
           setTimeout(function(){try{if(window.__OAI_PILGRIMAGE_ROUTE_EDIT__)_refreshRouteTmpMarkers();}catch(_e){}},980);
         }
-        const initial=_pilgrimageMapInitialPoint(entryRole);
         if(_map&&mapEl&&mapEl.clientWidth>0&&mapEl.clientHeight>0&&typeof _map.relayout==='function')_map.relayout();
         if(typeof _syncMapPanelUI==='function')_syncMapPanelUI(normalRoute?'route':'pilgrimage-route-edit');
         // Set the initial viewport after route points and the visible sheet
