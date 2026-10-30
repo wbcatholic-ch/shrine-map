@@ -11602,6 +11602,9 @@ function _restoreRouteSelectionMarkersAfterReset(opts){
     }else if(_regionLat && _regionLng && _regionMarker){
       _showRegionPlaceMarker(_regionLat,_regionLng,_regionPlaceName||_regionName||'검색지');
     }
+    // Restore the separate pilgrimage-selection layer after a route is cleared.
+    if(window.__OAI_PILGRIMAGE_PLACE_PICK__ && typeof window.__oaiRestorePilgrimageMapPickMarkers==='function')
+      window.__oaiRestorePilgrimageMapPickMarkers();
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 function _clearRouteVisualOnly(){
@@ -16442,6 +16445,10 @@ async function _calcRoute(){
   $('rs-km').textContent='…';
   $('rs-time').textContent='…';
   $('rs-result').style.display='block';
+  // Selection-map markers belong to a separate collection from ordinary category markers.
+  // End selection before drawing the route: cancel its pending marker build batches too.
+  if(window.__OAI_PILGRIMAGE_PLACE_PICK__ && typeof window.__oaiClearPilgrimageMapPickMarkers==='function')
+    window.__oaiClearPilgrimageMapPickMarkers();
   // The result sheet has become visible: remove ordinary markers immediately,
   // including when the active tab state lags behind the visible route sheet.
   _hidePilgrimageDetailCategoryMarkers();
@@ -24811,6 +24818,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function _refreshPilgrimageMapPickMarkers(){
     if(!window.__OAI_PILGRIMAGE_PLACE_PICK__||!_map||typeof _MM==='undefined'||typeof _LL==='undefined')return;
+    // The selection layer must never compete with the route-result layer.
+    if(_polyline || ($('rs-result') && $('rs-result').style.display==='block'))return;
     const seq=++pilgrimageMapPickBuildSeq;
     pilgrimageMapPickMarkers.forEach(m=>{try{m.setMap(null);}catch(_e){}});
     pilgrimageMapPickMarkers=[];
@@ -24829,7 +24838,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(focusPoint&&_validGpsPair(focusPoint.lat,focusPoint.lng)&&!items.some(y=>_pilgrimageMapPickIsSamePoint(y,focusPoint)))items.push(focusPoint);
     let i=0; const BATCH=48;
     (function batch(){
-      if(seq!==pilgrimageMapPickBuildSeq||!window.__OAI_PILGRIMAGE_PLACE_PICK__)return;
+      if(seq!==pilgrimageMapPickBuildSeq||!window.__OAI_PILGRIMAGE_PLACE_PICK__||
+         _polyline || ($('rs-result') && $('rs-result').style.display==='block'))return;
       const end=Math.min(i+BATCH,items.length);
       for(;i<end;i++){
         const item=items[i],order=selectedOrder(item),isSelected=order>0,isFocused=focusKey(item);
@@ -24850,6 +24860,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     })();
     try{if(typeof _hideRouteGuide==='function')_hideRouteGuide();}catch(_e){}
   }
+  window.__oaiRestorePilgrimageMapPickMarkers=_refreshPilgrimageMapPickMarkers;
   async function _preparePilgrimageMapPickMarkers(entryToken){
     clearPilgrimageMapPickMarkers();
     try{if(typeof _ensureShrineDataLoaded==='function')await _ensureShrineDataLoaded();}catch(_e){}
