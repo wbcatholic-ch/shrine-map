@@ -16402,9 +16402,30 @@ function _ensureRoutePilgrimagePlanButton(){
   }catch(e){console.warn('[가톨릭길동무] 순례계획 버튼 표시 실패',e);return null;}
 }
 
+let _pilgrimageDirectionsRevision=0;
 async function _calcRoute(){
   // Plan, active and completed place-info maps share the same read-only road-route calculation.
   if(!_rS||!_rE) return;
+  // A pilgrimage result belongs to the map entry and ordered course that started it.
+  // Late directions responses must never replace a newer result or another map screen.
+  const pilgrimageRequest=_pilgrimageMapMode()!=='route';
+  const requestRevision=pilgrimageRequest?++_pilgrimageDirectionsRevision:0;
+  const requestEntryToken=window.__OAI_COURSE_LOADING_TOKEN__;
+  const requestMode=_pilgrimageMapMode();
+  const requestStart=[Number(_rS.lat),Number(_rS.lng)];
+  const requestEnd=[Number(_rE.lat),Number(_rE.lng)];
+  const requestWaypoints=_getRouteWaypoints().map(p=>[Number(p.lat),Number(p.lng)]);
+  const routeStillCurrent=function(){
+    if(!pilgrimageRequest)return true; // Leave ordinary cathedral/shrine/retreat directions unchanged.
+    if(requestRevision!==_pilgrimageDirectionsRevision ||
+       requestEntryToken!==window.__OAI_COURSE_LOADING_TOKEN__ ||
+       requestMode!==_pilgrimageMapMode() || _screen!=='map' || !_rS || !_rE)return false;
+    if(Number(_rS.lat)!==requestStart[0]||Number(_rS.lng)!==requestStart[1]||
+       Number(_rE.lat)!==requestEnd[0]||Number(_rE.lng)!==requestEnd[1])return false;
+    const current=_getRouteWaypoints();
+    return current.length===requestWaypoints.length && current.every((p,i)=>
+      Number(p.lat)===requestWaypoints[i][0]&&Number(p.lng)===requestWaypoints[i][1]);
+  };
   _hideRouteGuide();
   $('rs-km').textContent='…';
   $('rs-time').textContent='…';
@@ -16518,14 +16539,17 @@ async function _calcRoute(){
       // A failed leg must not erase valid geometry from other legs.
       let distance=0, duration=0, path=[], estimated=false;
       for(let i=0;i<routePoints.length-1;i++){
+        if(!routeStillCurrent())return;
         const a=routePoints[i], b=routePoints[i+1];
         try{
           const leg=await fetchLeg(a,b);
+          if(!routeStillCurrent())return;
           distance+=(leg.distance||0);
           duration+=(leg.duration||0);
           if(leg.path&&leg.path.length>1)path=path.concat(leg.path);
           else throw new Error('empty directions geometry');
         }catch(err){
+          if(!routeStillCurrent())return;
           estimated=true;
           // Keep the segment visible as a straight connector, without claiming
           // that it is a road direction. Other successful legs remain visible.
@@ -16536,6 +16560,7 @@ async function _calcRoute(){
           console.warn('[가톨릭길동무] 경로 일부 구간 계산 실패',i+1,err);
         }
       }
+      if(!routeStillCurrent())return;
       $('rs-km').textContent=(distance/1000).toFixed(1);
       $('rs-time').textContent=_fmtTime(duration);
       _drawLine(_rS,navDest,path.length>1?path:null,{fit:!_isPilgrimageCourseViewReadOnly(),waypoints:waypoints});
@@ -16546,6 +16571,7 @@ async function _calcRoute(){
       return;
     }
     const leg=await fetchLeg(_rS, navDest);
+    if(!routeStillCurrent())return;
     $('rs-km').textContent=(leg.distance/1000).toFixed(1);
     $('rs-time').textContent=_fmtTime(leg.duration);
     _drawLine(_rS, navDest, leg.path.length>1?leg.path:null, {fit:!_isPilgrimageCourseViewReadOnly()});
@@ -16554,6 +16580,7 @@ async function _calcRoute(){
       _oaiCourseRouteLoading(false,courseLoadingToken);
     if(!isJuk) setRouteNote('', false);
   } catch(e){
+    if(!routeStillCurrent())return;
     const routePoints=[_rS].concat(waypoints,[navDest]).filter(function(p,i,all){
       return i===0||Number(p.lat)!==Number(all[i-1].lat)||Number(p.lng)!==Number(all[i-1].lng);
     });
