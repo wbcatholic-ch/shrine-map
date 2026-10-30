@@ -10327,14 +10327,8 @@ function _relayoutMainMapForPanel(){
         _map.relayout();
         const current=_getVisibleInfoCardFocusItem();
         if(window.__OAI_PILGRIMAGE_COURSE_VIEW__===true||window.__OAI_PILGRIMAGE_PLACE_PICK__===true){
-          // A panel resize changes the usable map area. Restore the saved
-          // waypoint-only bounds for detail maps rather than retaining a stale
-          // GPS/default center. Whole-course maps retain their own fit policy.
-          if(['completed-place-info-view','place-info-view'].includes(_pilgrimageMapMode())){
-            _fitPilgrimagePlaceInfoWaypoints();
-          }else if(['completed-view','active-course-view'].includes(_pilgrimageMapMode())){
-            _fitPilgrimageWholeCourseBounds();
-          }
+          // 최초 줌은 각 지도 진입 함수가 단 한 번 담당한다.
+          // 패널 변경·지연된 RAF가 사용자의 현재 줌을 덮어쓰지 않는다.
           return;
         }
         if(focusItem&&current===focusItem){
@@ -16406,15 +16400,13 @@ async function _calcRoute(){
   if(!_rS||!_rE) return;
   // A pilgrimage result belongs to the map entry and ordered course that started it.
   // Late directions responses must never replace a newer result or another map screen.
-  const pilgrimageRequest=_pilgrimageMapMode()!=='route';
-  const requestRevision=pilgrimageRequest?++_pilgrimageDirectionsRevision:0;
+  const requestRevision=++_pilgrimageDirectionsRevision;
   const requestEntryToken=window.__OAI_COURSE_LOADING_TOKEN__;
   const requestMode=_pilgrimageMapMode();
   const requestStart=[Number(_rS.lat),Number(_rS.lng)];
   const requestEnd=[Number(_rE.lat),Number(_rE.lng)];
   const requestWaypoints=_getRouteWaypoints().map(p=>[Number(p.lat),Number(p.lng)]);
   const routeStillCurrent=function(){
-    if(!pilgrimageRequest)return true; // Leave ordinary cathedral/shrine/retreat directions unchanged.
     if(requestRevision!==_pilgrimageDirectionsRevision ||
        requestEntryToken!==window.__OAI_COURSE_LOADING_TOKEN__ ||
        requestMode!==_pilgrimageMapMode() || _screen!=='map' || !_rS || !_rE)return false;
@@ -16443,24 +16435,21 @@ async function _calcRoute(){
   const isJuk = String(_rE.name||'').replace(/\s+/g,'')==='죽림굴';
   const hasJukStop=isJuk||_getRouteWaypoints().some(function(p){return String(p.name||'').replace(/\s+/g,'')==='죽림굴';});
   const navDest = await _resolveDrivingRoutePoint(_rE);
-  _showJukrimgulParkingMkr(hasJukStop);
   const note=$('rs-note');
   function setRouteNote(txt, html){
     if(!note) return;
     if(html) note.innerHTML=txt; else note.textContent=txt;
     note.style.display=txt?'block':'none';
   }
-  if(hasJukStop){
-    setRouteNote('⚠️ <b>죽림굴주차장</b>까지 경로 안내 · 자동차가 올라가지 못하는 구간이므로 주차장에서 도보로 이동하세요.', true);
-  } else {
-    setRouteNote('', false);
-  }
-
   // Bind loading completion to this route request, not a later entry's overlay.
   const courseLoadingToken=window.__OAI_COURSE_LOADING_TOKEN__;
   const waypoints = await Promise.all(_getRouteWaypoints().map(_resolveDrivingRoutePoint));
   const navStart = await _resolveDrivingRoutePoint(_rS);
   if(!routeStillCurrent())return;
+  _showJukrimgulParkingMkr(hasJukStop);
+  if(hasJukStop){
+    setRouteNote('⚠️ <b>죽림굴주차장</b>까지 경로 안내 · 자동차가 올라가지 못하는 구간이므로 주차 후 도보로 이동하세요.', true);
+  }else setRouteNote('',false);
   // Reuse successful pilgrimage directions while start, ordered stops and end stay unchanged.
   // Never cache general routing or the live, in-progress pilgrimage.
   const cacheEligible=(_isPilgrimageRouteEditMode() ||
@@ -24425,13 +24414,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           try{_hideDioOverlays();}catch(_e){}
           if(typeof _refreshRouteTmpMarkers==='function')_refreshRouteTmpMarkers();
           if(readOnly)_hidePilgrimageDetailCategoryMarkers();
-          // Both planned and completed place-info maps fit ONLY their saved
-          // waypoints, after the shared map and marker surfaces have settled.
-          if(readOnly&&['place-info','complete-place-info'].includes(_pilgrimageCourseViewKind())){
-            _fitPilgrimagePlaceInfoWaypoints(plan);
-          }else if(readOnly&&['active','complete'].includes(_pilgrimageCourseViewKind())){
-            _fitPilgrimageWholeCourseBounds();
-          }
+          // 패널 배치가 확정된 후 현재 진입의 첫 줌을 한 번만 계산한다.
+          // 이전 진입의 RAF 및 늦은 경로 응답은 다음 지도에 적용하지 않는다.
+          if(readOnly)requestAnimationFrame(function(){requestAnimationFrame(function(){
+            if(window.__OAI_PILGRIMAGE_MAP_ENTRY_TOKEN__!==mapEntryToken||_screen!=='map'||!_map)return;
+            if(['place-info','complete-place-info'].includes(_pilgrimageCourseViewKind()))
+              _fitPilgrimagePlaceInfoWaypoints(plan);
+            else if(['active','complete'].includes(_pilgrimageCourseViewKind()))
+              _fitPilgrimageWholeCourseBounds();
+          });});
           const focus=options.focusPoint&&_validGpsPair(options.focusPoint.lat,options.focusPoint.lng)?options.focusPoint:_pilgrimageMapInitialPoint(entryRole);
           if(focus&&_validGpsPair(focus.lat,focus.lng)&&!readOnly)
             _setPilgrimageMapCenterForBottomCard({lat:Number(focus.lat),lng:Number(focus.lng)},OAI_PILGRIMAGE_MAP_PICK_VIEW_LEVEL,{repeat:false});
@@ -24597,6 +24588,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   let pilgrimageEndpointMapEntryCleanup=null;
   function _openPilgrimageEndpointMapAdd(entryRole){
     if(pilgrimageEndpointMapEntryCleanup)pilgrimageEndpointMapEntryCleanup();
+    const pickEntryToken=(window.__OAI_PILGRIMAGE_MAP_ENTRY_TOKEN__||0)+1;
+    window.__OAI_PILGRIMAGE_MAP_ENTRY_TOKEN__=pickEntryToken;
     clearPilgrimageCourseMap();
     clearPilgrimageMapPickMarkers();
     try{if(_polyline){_polyline.setMap(null);_polyline=null;}}catch(_e){}
@@ -24617,7 +24610,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const endpointFocusMode=entryRole==='start'||entryRole==='end';
     let endpointLocationRequested=false;
     const focusEndpointMap=()=>{
-      if(!_map||_screen!=='map'||!window.__OAI_PILGRIMAGE_PLACE_PICK__)return;
+      if(!_map||_screen!=='map'||!window.__OAI_PILGRIMAGE_PLACE_PICK__||window.__OAI_PILGRIMAGE_MAP_ENTRY_TOKEN__!==pickEntryToken)return;
       const metaForFocus=loadMeta();
       const focus=endpointFocus&&_validGpsPair(endpointFocus.lat,endpointFocus.lng)
         ? endpointFocus
@@ -24628,7 +24621,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(!endpointLocationRequested&&typeof _refreshFreshLocationThen==='function'){
         endpointLocationRequested=true;
         _refreshFreshLocationThen((lat,lng)=>{
-          if(window.__OAI_PILGRIMAGE_PLACE_PICK__&&_screen==='map')
+          if(window.__OAI_PILGRIMAGE_PLACE_PICK__&&_screen==='map'&&window.__OAI_PILGRIMAGE_MAP_ENTRY_TOKEN__===pickEntryToken)
             _setPilgrimageMapCenterForBottomCard({lat:Number(lat),lng:Number(lng)},8,{repeat:false});
         },()=>{});
       }
@@ -24667,6 +24660,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       pilgrimageEndpointMapEntryCleanup=cleanup;
       function onMapReady(){
         if(disposed||finished)return;
+        if(window.__OAI_PILGRIMAGE_MAP_ENTRY_TOKEN__!==pickEntryToken){cleanup();return;}
         if(!window.__OAI_PILGRIMAGE_PLACE_PICK__||_screen!=='map'||_mode!=='shrine'){
           cleanup();return;
         }
@@ -24682,26 +24676,16 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         _openPilgrimagePickList();
         // Read the captured waypoints, not a route-sheet-mutated draft.
         const points=waypointsForPick;
-        // Fit immediately; do not wait for the asynchronous build of all shrine markers.
-        if(endpointFocusMode)focusEndpointMap();else if(!_fitPilgrimageWaypointBounds(points,92))focusEndpointMap();
-        // The route drawer may finish its layout on the following frame.
-        // A single bounded refit prevents its relayout from restoring GPS focus.
+        // 열린 경로 패널의 배치가 안정된 다음 현재 진입에서 단 한 번만 줌을 설정한다.
         requestAnimationFrame(function(){
           requestAnimationFrame(function(){
-            if(window.__OAI_PILGRIMAGE_PLACE_PICK__&&_screen==='map'&&_map)
+            if(window.__OAI_PILGRIMAGE_MAP_ENTRY_TOKEN__===pickEntryToken&&window.__OAI_PILGRIMAGE_PLACE_PICK__&&_screen==='map'&&_map)
               if(endpointFocusMode)focusEndpointMap();else if(!_fitPilgrimageWaypointBounds(points,92))focusEndpointMap();
           });
         });
-        // Build markers once; do not repeatedly recenter while data is loading.
-        Promise.resolve(_preparePilgrimageMapPickMarkers()).then(()=>{
-          if(!window.__OAI_PILGRIMAGE_PLACE_PICK__||_screen!=='map'||_map==null)return;
-          try{
-            if(typeof _map.relayout==='function')_map.relayout();
-            // The initial fit may precede bottom-sheet layout and marker loading.
-            // Refit once the selection map is ready, using the saved waypoints only.
-            if(endpointFocusMode)focusEndpointMap();else if(!_fitPilgrimageWaypointBounds(points,92))focusEndpointMap();
-          }catch(err){console.warn('[가톨릭길동무] 순례 장소선택 지도 갱신 실패',err);}
-        }).catch(err=>console.warn('[가톨릭길동무] 순례 장소선택 마커 실패',err));
+        // 마커 데이터 로딩이 뒤늦게 끝나도 이미 설정한 첫 줌을 변경하지 않는다.
+        Promise.resolve(_preparePilgrimageMapPickMarkers(pickEntryToken))
+          .catch(err=>console.warn('[가톨릭길동무] 순례 장소선택 마커 실패',err));
       }
       document.addEventListener('oai-main-map-ready',onMapReady);
       if(typeof ResizeObserver==='function'&&mapEl){
@@ -24849,10 +24833,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     })();
     try{if(typeof _hideRouteGuide==='function')_hideRouteGuide();}catch(_e){}
   }
-  async function _preparePilgrimageMapPickMarkers(){
+  async function _preparePilgrimageMapPickMarkers(entryToken){
     clearPilgrimageMapPickMarkers();
     try{if(typeof _ensureShrineDataLoaded==='function')await _ensureShrineDataLoaded();}catch(_e){}
-    if(!window.__OAI_PILGRIMAGE_PLACE_PICK__)return;
+    if(!window.__OAI_PILGRIMAGE_PLACE_PICK__||window.__OAI_PILGRIMAGE_MAP_ENTRY_TOKEN__!==entryToken)return;
     // 188개 안팎의 성지 마커를 한 번만 만들고, 지도 이동/확대 때 다시 생성하지 않는다.
     _refreshPilgrimageMapPickMarkers();
   }
