@@ -15550,7 +15550,7 @@ function _syncPilgrimageRouteReturnButton(){
     const editMode=_isPilgrimageMapEditReturnMode();
     const courseView=_isAnyPilgrimageCourseView();
     if(window.__OAI_PILGRIMAGE_PLACE_PICK__){
-      btn.textContent=pilgrimageDetailMode==='complete'?'↩ 순례완료 상세로 돌아가기':'↩ 순례하기 상세로 돌아가기';
+      btn.textContent=pilgrimageDetailMode==='complete'?'↩ 순례완료 상세로 돌아가기':'↩ 순례계획 상세로 돌아가기';
       const top=$('rs-top');
       if(top&&btn.parentNode!==top)top.appendChild(btn);
       btn.hidden=false;btn.style.display='flex';return;
@@ -23050,7 +23050,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     ['list','detail','follow'].forEach(n=>{const e=document.getElementById('oai-pilgrimage-'+n+'-view');if(e)e.hidden=n!==v;});
     const title=document.getElementById('oai-pilgrimage-planner-title'),sub=document.getElementById('oai-pilgrimage-planner-subtitle');
     if(title){
-      const nextLabel=v==='list'?'순례코스':v==='follow'?'따라가기':(pilgrimageManualCreateMode?'다녀온 순례 등록':(pilgrimageDetailMode==='complete'?'순례완료':'순례하기'));
+      const nextLabel=v==='list'?'순례코스':v==='follow'?'따라가기':(pilgrimageManualCreateMode?'다녀온 순례 등록':(pilgrimageDetailMode==='complete'?'순례완료':(currentCourseId&&_isActiveFollowCourse(currentCourseId)?'순례하기':'순례계획')));
       // 제목의 첫 텍스트 노드만 갱신한다. 안쪽의 도움말 버튼은 제거하지 않는다.
       const titleText=Array.from(title.childNodes).find(n=>n.nodeType===Node.TEXT_NODE);
       if(titleText)titleText.nodeValue=nextLabel+' ';else title.insertBefore(document.createTextNode(nextLabel+' '),title.firstChild);
@@ -24565,7 +24565,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const btn=$('rs-pilgrimage-return-btn');
     if(btn){
       const completed=pilgrimageDetailMode==='complete';
-      btn.textContent=completed?'↩ 순례완료로 돌아가기':'↩ 순례하기로 돌아가기';
+      btn.textContent=completed?'↩ 순례완료 상세로 돌아가기':'↩ 순례계획 상세로 돌아가기';
       const top=$('rs-top');
       if(top&&btn.parentNode!==top)top.appendChild(btn);
       btn.hidden=false;
