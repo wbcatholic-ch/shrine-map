@@ -16402,8 +16402,6 @@ function _ensureRoutePilgrimagePlanButton(){
     // HTML에 이미 존재하는 버튼도 클릭 동작이 반드시 연결되도록 한다.
     _refreshRoutePilgrimageButtonMode();
     btn.onclick=_handleRoutePilgrimagePlanAction;
-    btn.hidden=false;
-    btn.style.display='flex';
     return btn;
   }catch(e){ console.warn('[가톨릭길동무] 순례계획 버튼 표시 실패',e); return null; }
 }
