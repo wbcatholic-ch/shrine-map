@@ -10983,23 +10983,27 @@ function _setBoundsByInfoCardStandard(bounds, top, right, bottom, left){
   return false;
 }
 
+function _routeVisibleMapPadding(mapEl, baseBottom, topPadding){
+  const mapRect=mapEl.getBoundingClientRect();
+  const height=mapRect.height||mapEl.clientHeight||0;
+  const sheet=document.getElementById('sheet-route');
+  let overlap=0;
+  if(sheet&&sheet.classList.contains('open')&&height>0){
+    const rect=sheet.getBoundingClientRect();
+    // Only the area actually covering the map matters, not the full sheet height.
+    if(rect.width>0&&rect.right>mapRect.left&&rect.left<mapRect.right)
+      overlap=Math.max(0,Math.min(mapRect.bottom,rect.bottom)-Math.max(mapRect.top,rect.top));
+  }
+  const top=Math.max(0,Math.round(topPadding||48));
+  // Kakao needs a nonzero plotting area even on a short Fold cover screen.
+  const maxBottom=Math.max(0,Math.floor(height)-top-64);
+  return Math.min(maxBottom,Math.max(baseBottom||0,Math.ceil(overlap)+20));
+}
 function _getRouteBoundsPadding(){
-  const mapEl = $('map-wrap') || $('map');
-  const mapH = (mapEl && (mapEl.clientHeight || mapEl.offsetHeight)) || window.innerHeight || 700;
+  const mapEl = $('map') || $('map-wrap');
   const tabH = ($('tabbar') && $('tabbar').offsetHeight) || 54;
   if(_isMapSplitWideLayout()) return {top:tabH+12,right:42,bottom:42,left:42};
-  const sheet = $('sheet-route');
-  let sheetH = 0;
-  try{
-    if(sheet && sheet.classList.contains('open')){
-      const r = sheet.getBoundingClientRect ? sheet.getBoundingClientRect() : null;
-      sheetH = Math.ceil((r && r.height) || sheet.offsetHeight || 0);
-    }
-  }catch(e){ console.warn('[가톨릭길동무]', e); }
-  const bottomMin = 172;
-  const bottomMax = Math.max(210, Math.round(mapH * 0.62));
-  const bottom = Math.min(bottomMax, Math.max(bottomMin, sheetH + 28));
-  return { top: tabH + 12, right: 52, bottom: bottom, left: 52 };
+  return {top:tabH+12,right:52,bottom:mapEl?_routeVisibleMapPadding(mapEl,56,tabH+12):172,left:52};
 }
 function _fitRouteBounds(bounds, opts){
   if(!_map || !bounds) return false;
@@ -15311,7 +15315,7 @@ function _fitPilgrimageWaypointBounds(points, bottomPadding){
     }
     const bounds=new kakao.maps.LatLngBounds();
     valid.forEach(p=>bounds.extend(new kakao.maps.LatLng(Number(p.lat),Number(p.lng))));
-    _map.setBounds(bounds,48,42,Math.min(Math.round(bottomPadding||56),Math.round(mapEl.clientHeight*.72)),42);
+    _map.setBounds(bounds,48,42,_routeVisibleMapPadding(mapEl,Math.max(56,Number(bottomPadding)||56),48),42);
     return true;
   }catch(e){console.warn('[가톨릭길동무] 경유지 범위 적용 실패',e);return false;}
 }
@@ -15334,17 +15338,7 @@ function _fitPilgrimageWholeCourseBounds(){
   const stored=window.__OAI_PILGRIMAGE_VIEW_FULL_COURSE__;
   const pts=Array.isArray(stored)&&stored.length ? stored :
     (window.__OAI_PILGRIMAGE_VIEW_WAYPOINTS__||_getRouteWaypoints());
-  const mapEl=document.getElementById('map');
-  if(!mapEl||!mapEl.clientHeight)return false;
-  const sheet=document.getElementById('sheet-route');
-  let covered=0;
-  if(sheet&&sheet.classList.contains('open')){
-    const mapRect=mapEl.getBoundingClientRect(),sheetRect=sheet.getBoundingClientRect();
-    covered=Math.max(0,Math.min(mapRect.bottom,sheetRect.bottom)-Math.max(mapRect.top,sheetRect.top));
-  }
-  // Reserve actual obstructed space so departure/arrival pins remain visible.
-  const bottom=Math.min(Math.round(mapEl.clientHeight*.65),Math.ceil(covered)+28);
-  return _fitPilgrimageWaypointBounds(pts,Math.max(56,bottom));
+  return _fitPilgrimageWaypointBounds(pts,56);
 }
 function _pilgrimageMapPermissions(){
   const mode=_pilgrimageMapMode();
@@ -15575,7 +15569,8 @@ function _syncPilgrimageRouteReturnButton(){
         }
       }
     }else{
-      btn.textContent='↩ 순례하기로 돌아가기';
+      // 지도에서 추가는 순례 편집 화면이다. 결과를 검색했더라도 복귀 대상은 순례 상세다.
+      btn.textContent=pilgrimageDetailMode==='complete'?'↩ 순례완료로 돌아가기':'↩ 순례계획으로 돌아가기';
       if(resultShowing){
         const resultBox=document.querySelector('#rs-result .rs-result')||result;
         if(resultBox&&btn.parentNode!==resultBox)resultBox.appendChild(btn);
