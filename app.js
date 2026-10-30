@@ -24365,16 +24365,18 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(_screen!=='map'||_mode!=='shrine')return;
         if(!_map||!mapEl||!mapEl.isConnected||mapEl.clientWidth<=0||mapEl.clientHeight<=0)return;
         if(readOnly&&!window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__)return;
+        // Finalize the route panel before relayout/fit, so the first viewport
+        // uses the actual visible map area rather than the previous panel layout.
+        if(readOnly&&['place-info','complete-place-info'].includes(_pilgrimageCourseViewKind())){
+          _setMapPanelCollapsed(true,'detail-map-ready');
+        }else if(readOnly&&['active','complete'].includes(_pilgrimageCourseViewKind())){
+          _setMapPanelCollapsed(false,'whole-course-map-ready');
+        }
         try{_map.relayout();}catch(e){console.warn('[가톨릭길동무] 순례 지도 갱신 실패',e);return;}
         entryReady=true;
         releaseEntryWatch();
         _completeCategoryMapSurface();
         try{
-          if(readOnly&&['place-info','complete-place-info'].includes(_pilgrimageCourseViewKind())){
-            _setMapPanelCollapsed(true,'detail-map-ready');
-          }else if(readOnly&&['active','complete'].includes(_pilgrimageCourseViewKind())){
-            _setMapPanelCollapsed(false,'whole-course-map-ready');
-          }
           if(typeof _restoreAllCategoryMarkersForSelection==='function')_restoreAllCategoryMarkersForSelection();
           try{_hideDioOverlays();}catch(_e){}
           if(typeof _refreshRouteTmpMarkers==='function')_refreshRouteTmpMarkers();
