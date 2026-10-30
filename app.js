@@ -15446,16 +15446,12 @@ function _schedulePilgrimageRouteResult(label,focusPoint){
         finally{
           running=false;
           if(window.__OAI_COURSE_LOADING_TOKEN__===loadingToken){
-            if(['place-info-view','completed-place-info-view'].includes(_pilgrimageMapMode())){
-              _setMapPanelCollapsed(true,'pilgrimage-detail-route-ready');
-              _fitPilgrimagePlaceInfoWaypoints();
-            }else if(_pilgrimageMapMode()==='completed-view'){
+            // Route completion owns only route geometry / card state.
+            // The entry-ready callback owns the initial viewport; a slow API
+            // response must never re-zoom an already visible pilgrimage map.
+            if(_pilgrimageMapMode()==='completed-view'){
               _hidePilgrimageDetailCategoryMarkers();
               _refreshRouteTmpMarkers();
-              _setMapPanelCollapsed(false,'completed-course-route-ready');
-              _fitCompletedPilgrimageWholeCourse();
-            }else if(_pilgrimageMapMode()==='active-course-view'){
-              _fitPilgrimageWholeCourseBounds();
             }
           }
           _oaiCourseRouteLoading(false,loadingToken);
@@ -24347,6 +24343,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         try{
           if(readOnly&&['place-info','complete-place-info'].includes(_pilgrimageCourseViewKind())){
             _setMapPanelCollapsed(true,'detail-map-ready');
+          }else if(readOnly&&['active','complete'].includes(_pilgrimageCourseViewKind())){
+            _setMapPanelCollapsed(false,'whole-course-map-ready');
           }
           if(typeof _restoreAllCategoryMarkersForSelection==='function')_restoreAllCategoryMarkersForSelection();
           try{_hideDioOverlays();}catch(_e){}
@@ -24392,11 +24390,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         // In a pilgrimage place-info map the saved route may have no explicit
         // start/end. Draw the driving path between its first and last shrine
         // without changing the course's saved start/end or its numbered pins.
-        const detailPathFallback=readOnly&&options.fromPlaceInfo===true;
+        // Saved course coordinates are the single source for route geometry.
+        // If explicit endpoints are absent, display a road route between the
+        // first and last visited stops without modifying the saved course.
+        const fallbackStops=readOnly&&plan.length>1;
         const firstStop=plan.find(p=>p&&_validGpsPair(p.lat,p.lng));
         const lastStop=plan.slice().reverse().find(p=>p&&_validGpsPair(p.lat,p.lng));
-        const routeStart=meta.start&&_validGpsPair(meta.start.lat,meta.start.lng)?meta.start:(detailPathFallback?firstStop:null);
-        const routeEnd=meta.end&&_validGpsPair(meta.end.lat,meta.end.lng)?meta.end:(detailPathFallback?lastStop:null);
+        const routeStart=meta.start&&_validGpsPair(meta.start.lat,meta.start.lng)?meta.start:(fallbackStops?firstStop:null);
+        const routeEnd=meta.end&&_validGpsPair(meta.end.lat,meta.end.lng)?meta.end:(fallbackStops?lastStop:null);
         if(routeStart)_setRoutePointFromItem('start',routeStart,_pilgrimageRouteShrineIndex(routeStart));
         plan.slice(0,OAI_MAX_ROUTE_WAYPOINTS).forEach(function(item,i){const cfg=OAI_ROUTE_WAYPOINT_CONFIGS[i];if(cfg)_setRoutePointFromItem(cfg.role,item,_pilgrimageRouteShrineIndex(item));});
         if(routeEnd)_setRoutePointFromItem('end',routeEnd,_pilgrimageRouteShrineIndex(routeEnd));
@@ -24463,31 +24464,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         const initial=_pilgrimageMapInitialPoint(entryRole);
         if(_map&&mapEl&&mapEl.clientWidth>0&&mapEl.clientHeight>0&&typeof _map.relayout==='function')_map.relayout();
         if(typeof _syncMapPanelUI==='function')_syncMapPanelUI(normalRoute?'route':'pilgrimage-route-edit');
-        if(readOnly&&(_pilgrimageCourseViewKind()==='place-info'||_pilgrimageCourseViewKind()==='complete-place-info')){
-          _setMapPanelCollapsed(true,'pilgrimage-detail-initial');
-          // Both plan and completion detail views use the same saved-waypoints
-          // bounds, never the selected place or the live GPS position. The
-          // bottom sheet may finish resizing after the first two frames.
-          // Restore once when the shared map settles, with an entry-token guard;
-          // do not leave a permanent resize/idle listener running.
-          const detailKind=_pilgrimageCourseViewKind();
-          const expectedEntryToken=mapEntryToken;
-          const restoreDetailBounds=function(){
-            if(window.__OAI_PILGRIMAGE_MAP_ENTRY_TOKEN__!==expectedEntryToken ||
-                _pilgrimageCourseViewKind()!==detailKind || _screen!=='map')return;
-            _fitPilgrimagePlaceInfoWaypoints(plan);
-          };
-          requestAnimationFrame(function(){requestAnimationFrame(restoreDetailBounds);});
-          // A single bounded follow-up accommodates a slow route sheet/layout
-          // transition on Android. No interval or repeated recalculation.
-          setTimeout(restoreDetailBounds,320);
-        }else if(readOnly&&_pilgrimageCourseViewKind()==='complete'){
-          _setMapPanelCollapsed(false,'completed-course-initial');
-          _hidePilgrimageDetailCategoryMarkers();
-        }
-        // Only completed whole-course view fits start/waypoints/end here.
-        // Detail view was fitted from the saved waypoints at map-ready above.
-        if(readOnly&&_pilgrimageCourseViewKind()==='complete')_fitCompletedPilgrimageWholeCourse();
+        // All read-only pilgrimage maps receive their initial viewport from
+        // finishPilgrimageMapEntry, after route points and panel are ready.
+        // No later timer or route API callback may override that viewport.
       }catch(err){console.warn('[가톨릭길동무] 순례계획 길찾기 편집 준비 실패',err);}},120);
     }catch(e){_oaiCourseRouteLoading(false,routeLoadingToken);window.__OAI_PILGRIMAGE_ROUTE_EDIT__=null;window.__OAI_PILGRIMAGE_INITIAL_CENTER__=null;window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__=false;console.warn('[가톨릭길동무] 순례 지도 진입 실패',e);openPlanner({returnFromSearch:true});setView('detail');renderDetail();}};
     if(typeof hideCoverAndRun==='function')hideCoverAndRun(run);else run();
