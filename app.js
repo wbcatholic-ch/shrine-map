@@ -15419,9 +15419,10 @@ function _schedulePilgrimageRouteResult(label,focusPoint){
   }
 
   const run=async function(){
-    if(done||running)return;
+    // Ignore scheduled work belonging to a previous pilgrimage map entry.
+    if(done||running||window.__OAI_COURSE_LOADING_TOKEN__!==loadingToken||_screen!=='map')return;
     try{
-      if(_isPilgrimageCourseViewReadOnly() && window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__!==true)return;
+      if(window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__!==true)return;
       if(!(_rS&&_rS.lat&&_rS.lng&&_rE&&_rE.lat&&_rE.lng)){_oaiCourseRouteLoading(false,loadingToken);done=true;return;}
       if(!_map||typeof _LL!=='function'||typeof _PL!=='function')return;
 
@@ -15475,6 +15476,10 @@ function _schedulePilgrimageRouteResult(label,focusPoint){
         return;
       }
       await _calcRoute();
+      if(window.__OAI_COURSE_LOADING_TOKEN__!==loadingToken||_screen!=='map'){
+        done=true;
+        return;
+      }
 
       if(resultReady()){
         done=true;
@@ -24364,7 +24369,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         // Keep observing until the map itself is measurable or entry times out.
         if(_screen!=='map'||_mode!=='shrine')return;
         if(!_map||!mapEl||!mapEl.isConnected||mapEl.clientWidth<=0||mapEl.clientHeight<=0)return;
-        if(readOnly&&!window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__)return;
+        if(window.__OAI_PILGRIMAGE_ROUTE_POINTS_READY__!==true)return;
         // Finalize the route panel before relayout/fit, so the first viewport
         // uses the actual visible map area rather than the previous panel layout.
         if(readOnly&&['place-info','complete-place-info'].includes(_pilgrimageCourseViewKind())){
