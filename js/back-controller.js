@@ -87,7 +87,11 @@
     }catch(e){ console.warn('[가톨릭길동무]', e); }
     return false;
   }
-  function hasOpenAppSurface(){ return hasKnownOpenLayer(true); }
+  function hasOpenAppSurface(){
+    // On the cover, stale route state must not be interpreted as an open app.
+    // Visible modal/sheet layers still take priority.
+    return hasKnownOpenLayer(!coverVisible());
+  }
   function hasVisibleAppLayer(){ return hasKnownOpenLayer(false); }
 
   function isCoverOnlyVisible(){

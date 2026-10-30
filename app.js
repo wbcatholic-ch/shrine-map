@@ -15299,7 +15299,7 @@ function _pilgrimageRouteResultMustHideOrdinaryMarkers(){
   const mode=_pilgrimageMapMode();
   return mode==='completed-view'||mode==='active-course-view'||
     mode==='completed-place-info-view'||mode==='place-info-view'||
-    (mode==='plan-edit'&&!!(_polyline || (document.getElementById('rs-result') && document.getElementById('rs-result').style.display==='block')));
+    (mode==='plan-edit'&&_screen==='map'&&!!(document.getElementById('rs-result') && document.getElementById('rs-result').style.display==='block'));
 }
 function _hidePilgrimageDetailCategoryMarkers(){
   if(!_pilgrimageRouteResultMustHideOrdinaryMarkers()||!_map)return;
@@ -15512,9 +15512,9 @@ function _schedulePilgrimageRouteResult(label,focusPoint){
     // Read-only entry is started once after its route points become available.
     setTimeout(run,90);
   }else{
-    [90,240,520,900,1450,2200,3200].forEach(function(delay){
-      setTimeout(function(){if(!done)run();},delay);
-    });
+    // One attempt per entered result. A network request can be slow;
+    // stacking delayed retries causes concurrent map/card mutations.
+    setTimeout(run,90);
   }
   return run;
 }
@@ -16439,6 +16439,10 @@ async function _calcRoute(){
   $('rs-km').textContent='…';
   $('rs-time').textContent='…';
   $('rs-result').style.display='block';
+  if(_isPilgrimageRouteEditMode() && _screen==='map'){
+    _hidePilgrimageDetailCategoryMarkers();
+    _fitPilgrimageWaypointBounds([_rS].concat(_getRouteWaypoints(),[_rE]),56);
+  }
   _ensureRoutePilgrimagePlanButton();
   _syncPilgrimageRouteReturnButton();
   _setRouteResultTipVisible(true);
@@ -16673,7 +16677,8 @@ function _drawLine(s1,s2,path,opts){
   // Editable pilgrimage results fit once after the calculated route is drawn.
   if(opts.fit !== false && !_isPilgrimageCourseViewReadOnly()){
     if(pilgrimageRouteResult || _isPilgrimageRouteEditMode()){
-      _fitPilgrimageWaypointBounds([s1].concat(waypoints,[s2]),56);
+      // Route geometry may arrive long after initial fit or user gesture.
+      // Never change a pilgrimage viewport when an async response arrives.
     }else if(typeof _fitRouteBounds==='function'){
       _fitRouteBounds(bounds);
     }else{
