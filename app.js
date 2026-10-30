@@ -12294,6 +12294,11 @@ function _clearShrineMarkers(){
 
 function _restoreMapMarkers(opts){
   opts = opts || {};
+  // 순례 결과의 경로선이 표시되는 동안에는 지연된 일반 마커 복원을 허용하지 않는다.
+  if(_pilgrimageRouteResultMustHideOrdinaryMarkers()){
+    _hidePilgrimageDetailCategoryMarkers();
+    return;
+  }
   if(_mode==='parish'){
     if(opts.parishRouteReselect===true){
       const code=(AppState && AppState.nearbyParishDioCode) ||
@@ -16706,7 +16711,7 @@ function _showJukrimgulParkingMkr(show){
   title:'죽림굴주차장', zIndex:15
   });
   _jukrimgulParkMkr.setMap(_map);
-  if(JUKRIMGUL_IDX>=0 && _markers[JUKRIMGUL_IDX])
+  if(!_pilgrimageRouteResultMustHideOrdinaryMarkers() && JUKRIMGUL_IDX>=0 && _markers[JUKRIMGUL_IDX])
   _setMarkerMapIfChanged(_markers[JUKRIMGUL_IDX].marker,_map);
 }
 
