@@ -10984,41 +10984,40 @@ function _setBoundsByInfoCardStandard(bounds, top, right, bottom, left){
 }
 
 function _routeVisibleMapPadding(mapEl, baseBottom, topPadding){
-  const mapRect=mapEl.getBoundingClientRect();
-  const height=mapRect.height||mapEl.clientHeight||0;
+  // The map canvas fills the screen, while the route sheet covers its bottom.
+  // Derive the covered pixels from their intersection, not the sheet's total
+  // height. Always reserve an actual plotting area for Kakao setBounds.
+  if(!mapEl) return Math.max(0,Number(baseBottom)||0);
+  const rect=mapEl.getBoundingClientRect();
+  const height=rect.height||mapEl.clientHeight||0;
+  if(height<=0)return Math.max(0,Number(baseBottom)||0);
   const sheet=document.getElementById('sheet-route');
-  let overlap=0;
-  if(sheet&&sheet.classList.contains('open')&&height>0){
-    const rect=sheet.getBoundingClientRect();
-    // Only the area actually covering the map matters, not the full sheet height.
-    if(rect.width>0&&rect.right>mapRect.left&&rect.left<mapRect.right)
-      overlap=Math.max(0,Math.min(mapRect.bottom,rect.bottom)-Math.max(mapRect.top,rect.top));
+  let covered=0;
+  if(sheet&&sheet.classList.contains('open')){
+    const sr=sheet.getBoundingClientRect();
+    if(sr.width>0&&sr.right>rect.left&&sr.left<rect.right){
+      covered=Math.max(0,Math.min(rect.bottom,sr.bottom)-Math.max(rect.top,sr.top));
+    }
   }
-  const top=Math.max(0,Math.round(topPadding||48));
-  // Kakao needs a nonzero plotting area even on a short Fold cover screen.
-  const maxBottom=Math.max(0,Math.floor(height)-top-64);
-  return Math.min(maxBottom,Math.max(baseBottom||0,Math.ceil(overlap)+20));
+  const top=Math.max(0,Number(topPadding)||48);
+  const minVisible=Math.min(220,Math.max(100,Math.round(height*0.30)));
+  const maximum=Math.max(0,Math.floor(height-top-minVisible));
+  return Math.min(maximum,Math.max(Number(baseBottom)||0,Math.ceil(covered)+24));
 }
 function _getRouteBoundsPadding(){
-  const mapEl = $('map') || $('map-wrap');
-  const tabH = ($('tabbar') && $('tabbar').offsetHeight) || 54;
-  if(_isMapSplitWideLayout()) return {top:tabH+12,right:42,bottom:42,left:42};
-  return {top:tabH+12,right:52,bottom:mapEl?_routeVisibleMapPadding(mapEl,56,tabH+12):172,left:52};
+  const mapEl=$('map');
+  const tabH=($('tabbar')&&$('tabbar').offsetHeight)||54;
+  if(_isMapSplitWideLayout())return {top:tabH+12,right:42,bottom:42,left:42};
+  const top=48; // The tabbar is outside #map, not an overlay inside its bounds.
+  return {top:top,right:58,bottom:_routeVisibleMapPadding(mapEl,56,top),left:58};
 }
-function _fitRouteBounds(bounds, opts){
-  if(!_map || !bounds) return false;
-  const pad = _getRouteBoundsPadding();
+function _fitRouteBounds(bounds){
+  if(!_map||!bounds)return false;
+  const pad=_getRouteBoundsPadding();
   try{
-    _map.setBounds(bounds, pad.top, pad.right, pad.bottom, pad.left);
-    if(opts && opts.repeat){
-      setTimeout(function(){ try{ const p=_getRouteBoundsPadding(); _map.setBounds(bounds, p.top, p.right, p.bottom, p.left); }catch(e){ console.warn('[가톨릭길동무]', e); } }, 90);
-      setTimeout(function(){ try{ const p=_getRouteBoundsPadding(); _map.setBounds(bounds, p.top, p.right, p.bottom, p.left); }catch(e){ console.warn('[가톨릭길동무]', e); } }, 260);
-    }
+    _map.setBounds(bounds,pad.top,pad.right,pad.bottom,pad.left);
     return true;
-  }catch(e1){
-    try{ _map.setBounds(bounds); return true; }
-    catch(e2){ console.warn('[가톨릭길동무]', e2); }
-  }
+  }catch(e){console.warn('[가톨릭길동무] 경로 지도 범위 적용 실패',e);}
   return false;
 }
 
@@ -16622,7 +16621,7 @@ function _drawLine(s1,s2,path,opts){
   // Pilgrimage read-only maps own their initial viewport independently.
   // Directions completion must not override waypoint/whole-course zoom.
   if(opts.fit !== false && !_isPilgrimageCourseViewReadOnly()){
-    if(typeof _fitRouteBounds==='function') _fitRouteBounds(bounds, {repeat:false});
+    if(typeof _fitRouteBounds==='function') _fitRouteBounds(bounds);
     else { try{_map.setBounds(bounds,80,52,190,52);}catch(e){ console.warn("[가톨릭길동무]", e); } }
   }
 }
