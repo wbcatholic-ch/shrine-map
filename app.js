@@ -18183,13 +18183,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // 개발자 도구의 화면 노출은 실행 중 10회 탭으로만 해제한다. 저장된 사용 권한과 분리한다.
   let oaiDevPanelUnlocked=false;
   function oaiDevEnabled(){return window.__OAI_DEV_RUNTIME_ACTIVE__===true;}
-  // V1762: session-only developer trial. No persistent flag, so regular users
-  // and every new app launch use the original pilgrimage map by default.
-  window.__OAI_PILGRIMAGE_V2_DEV__=false;
-  function oaiPilgrimageV2DevEnabled(){
-    return false; // V1766 emergency: V2 routing disabled; legacy pilgrimage only
-  }
-
   // 알림 사진과 안내창의 복귀 순서는 알림 화면이 소유한다.
   let oaiAnniversaryPhotoReturn=null;
   function oaiAnniversaryCloseToCover(){
@@ -18386,14 +18379,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   };
   function oaiRefreshDeveloperPanel(){
     const section=document.getElementById('oai-developer-section');if(section)section.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked);
-    const pilgrimageTrial=document.getElementById('oai-dev-pilgrimage-v2');
-    if(pilgrimageTrial){
-      pilgrimageTrial.checked=oaiPilgrimageV2DevEnabled();
-      pilgrimageTrial.disabled=true; // V1768: visible but unavailable until pilgrimage freeze is fixed
-    }
-    const pilgrimageStatus=document.getElementById('oai-dev-pilgrimage-v2-status');
-    if(pilgrimageStatus)pilgrimageStatus.textContent=oaiPilgrimageV2DevEnabled()?
-      '신규 지도 시험 ON · 편집은 임시 적용, 닫으면 폐기 · 실제 기록 저장 안 함':'신규 지도 시험 일시 중지 · 현재 ON 불가 · 기존 순례 지도 사용';
     const test=document.getElementById('oai-dev-five-photo-backup');
     if(test)test.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.testBackupFiveVisitPhotos==='function');
     const verify=document.getElementById('oai-dev-five-photo-verify');
@@ -18402,26 +18387,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(diag)diag.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.diagnoseVisitPhotoDownloads==='function');
     const remoteCheck=document.getElementById('oai-dev-missing-photo-drive');
     if(remoteCheck)remoteCheck.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.checkMissingVisitPhotosInDrive==='function');
-    const anniversaryTest=document.getElementById('oai-dev-anniversary-test');if(anniversaryTest){anniversaryTest.disabled=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.sendPilgrimageAnniversaryTestNotification==='function');anniversaryTest.title=anniversaryTest.disabled?'Android 알림 시험 기능을 지원하는 앱에서만 실행할 수 있습니다.':'10월 9일 순례 추억 알림 1회 시험';}
+    const anniversaryTest=document.getElementById('oai-dev-anniversary-test');if(anniversaryTest)anniversaryTest.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.sendPilgrimageAnniversaryTestNotification==='function');
     if(!oaiDevEnabled()){oaiDevPendingRestore=null;for(const id of ['oai-dev-import-view','oai-dev-restore-preview']){const el=document.getElementById(id);if(el)el.hidden=true;}}
   }
-  // Deliberate choice in the already-existing developer panel; never switch
-  // on merely because the ten-tap developer section was opened.
-  document.addEventListener('change',function(event){
-    if(!event.target||event.target.id!=='oai-dev-pilgrimage-v2')return;
-    const input=event.target;
-    if(!oaiDevEnabled()||!oaiDevPanelUnlocked){
-      window.__OAI_PILGRIMAGE_V2_DEV__=false;oaiRefreshDeveloperPanel();return;
-    }
-    const bridge=window.CatholicPilgrimageBridgeV2;
-    if(bridge&&bridge.getActiveKind&&bridge.getActiveKind()){
-      input.checked=oaiPilgrimageV2DevEnabled();
-      alert('순례 지도 시험 화면을 닫은 뒤 설정을 변경해 주세요. 시험 중 편집한 내용은 저장되지 않습니다.');
-      return;
-    }
-    window.__OAI_PILGRIMAGE_V2_DEV__=false; input.checked=false;
-    oaiRefreshDeveloperPanel();
-  });
   function oaiDevParseBackupFile(text){
     const raw=String(text||'').trim();
     if(!raw)throw Error('백업 파일이 비어 있습니다.');
@@ -18537,11 +18505,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-apply],[data-oai-dev-failure-preview],[data-oai-dev-daily-results],[data-oai-dev-five-photo-backup],[data-oai-dev-five-photo-verify],[data-oai-dev-photo-download-diagnose],[data-oai-dev-photo-download-copy],[data-oai-dev-missing-photo-drive],[data-oai-dev-missing-photo-drive-copy],[data-oai-dev-anniversary-test]');if(!button)return;
     if(button.id==='oai-settings-version-label'){
       oaiDevTapCount++;
-      if(oaiDevTapCount>=10){oaiDevTapCount=0;const next=!(oaiDevEnabled()&&oaiDevPanelUnlocked);
-        if(!next&&window.CatholicPilgrimageBridgeV2?.getActiveKind?.()){alert('순례 지도 화면을 닫은 뒤 개발자 모드를 종료해 주세요.');return;}
-        oaiDevPanelUnlocked=next;window.__OAI_DEV_RUNTIME_ACTIVE__=next;
-        if(!next)window.__OAI_PILGRIMAGE_V2_DEV__=false;
-        oaiRefreshDeveloperPanel();const detail=document.getElementById('parish-visit-detail');if(detail&&detail.classList.contains('show'))_renderParishVisitDetail();if(_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null)_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);if(next){oaiDevStatus('개발자 모드가 열렸습니다.');document.getElementById('oai-developer-section').scrollIntoView({block:'nearest',behavior:'smooth'});} }
+      if(oaiDevTapCount>=10){oaiDevTapCount=0;const next=!(oaiDevEnabled()&&oaiDevPanelUnlocked);oaiDevPanelUnlocked=next;window.__OAI_DEV_RUNTIME_ACTIVE__=next;oaiRefreshDeveloperPanel();const detail=document.getElementById('parish-visit-detail');if(detail&&detail.classList.contains('show'))_renderParishVisitDetail();if(_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null)_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);if(next){oaiDevStatus('개발자 모드가 열렸습니다.');document.getElementById('oai-developer-section').scrollIntoView({block:'nearest',behavior:'smooth'});} }
       return;
     }
     if(!oaiDevEnabled())return;
@@ -26774,9 +26738,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     setTimeout(function(){_historicalBgIdle(function(){_historicalBgRun(index+1,generation);});},850);
   }
   function _startHistoricalBackgroundV1659(fromRestore){
-    // V1767 emergency isolation: suspend legacy one-time historical migrations on startup.
-    // Keep all records and migration logic intact. This is diagnostic, not a proven lag fix.
-    return;
     if(fromRestore){
       // 복원된 데이터는 신규 원본이므로 성공 상태만 재점검 대상으로 재개한다.
       historicalTasks.forEach(function(task){

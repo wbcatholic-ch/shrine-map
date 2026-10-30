@@ -80,8 +80,7 @@
 
       if(includeAppState){
         try{ if(typeof _activeTab !== 'undefined' && _activeTab) return true; }catch(_e){}
-        // Route endpoint values may outlive a closed map; they are not an open UI layer.
-        try{ if(appActive() && typeof _routeMode !== 'undefined' && _routeMode) return true; }catch(_e){}
+        try{ if(typeof _routeMode !== 'undefined' && (_routeMode || _rS || _rE)) return true; }catch(_e){}
         var app=$b('app');
         if(app&&document.documentElement.classList.contains('app-active')) return true;
       }
@@ -430,7 +429,7 @@
     try{
       // A residual route endpoint is not evidence that directions are still open.
       // Never invoke ordinary route-exit confirmation from pilgrimage or cover navigation.
-      if(appActive() && el && el.classList.contains('open') && !el.hidden &&
+      if(el && el.classList.contains('open') && !el.hidden &&
          el.style.display !== 'none' && _activeTab === 'route' &&
          !window.__oaiPilgrimageRouteReturn &&
          !window.__OAI_PILGRIMAGE_PLACE_PICK__ &&
