@@ -9198,6 +9198,9 @@ function _getMarkerActualMap(marker){
 }
 function _setMarkerMapIfChanged(marker, map){
   if(!marker) return;
+  // Ordinary category markers may not be restored while a route result is visible.
+  // Keep route start, numbered waypoints, destination, and current-location markers unaffected.
+  if(map && marker.__oaiOrdinaryCategoryMarker && _pilgrimageRouteResultMustHideOrdinaryMarkers()) map=null;
   try{
     const actual = _getMarkerActualMap(marker);
     if(actual !== undefined && actual === map){ marker.__oaiMapTarget = map; return; }
@@ -12274,6 +12277,7 @@ function _buildShrineMarkers(){
     position:new _LL(s.lat,s.lng),
     image:_mkrImg(_shrineMarkerColor(s),false),title:s.name
    });
+   mk.__oaiOrdinaryCategoryMarker=true;
    const showNow=!_shouldDeferFullCategoryMarkers() && !_pilgrimageRouteResultMustHideOrdinaryMarkers();
    if(showNow) mk.setMap(_map);
    mk.__oaiMapTarget=showNow?_map:null;
@@ -13116,7 +13120,8 @@ function _buildRetreatMarkers(){
           if(_isRouteSelectionModeActive()) _selectRouteItem(idx);
           else selectItem(idx,{fromNearby:false,fromRegion:_isRegionSearchActiveForItem(RETREATS[idx])});
         });})(i);
-        if(!_shouldDeferFullCategoryMarkers()) _setMarkerMapIfChanged(mk,_map);
+        mk.__oaiOrdinaryCategoryMarker=true;
+        if(!_shouldDeferFullCategoryMarkers() && !_pilgrimageRouteResultMustHideOrdinaryMarkers()) _setMarkerMapIfChanged(mk,_map);
         else mk.__oaiMapTarget=null;
         _retreatMarkers.push({marker:mk,item:p,index:i});
       }
@@ -15314,7 +15319,7 @@ function _pilgrimageRouteResultMustHideOrdinaryMarkers(){
   const mode=_pilgrimageMapMode();
   return mode==='completed-view'||mode==='active-course-view'||
     mode==='completed-place-info-view'||mode==='place-info-view'||
-    (_screen==='map'&&!!(document.getElementById('rs-result') && document.getElementById('rs-result').style.display==='block'));
+    (!!(_rS&&_rE) && !!document.getElementById('rs-result') && document.getElementById('rs-result').style.display!=='none' && document.getElementById('rs-result').getClientRects().length>0);
 }
 function _hidePilgrimageDetailCategoryMarkers(){
   if(!_pilgrimageRouteResultMustHideOrdinaryMarkers()||!_map)return;
