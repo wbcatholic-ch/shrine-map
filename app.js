@@ -16440,10 +16440,6 @@ async function _calcRoute(){
   // The result sheet has become visible: remove ordinary markers immediately,
   // including when the active tab state lags behind the visible route sheet.
   _hidePilgrimageDetailCategoryMarkers();
-  if(_isPilgrimageRouteEditMode() && _screen==='map'){
-    _hidePilgrimageDetailCategoryMarkers();
-    _fitPilgrimageWaypointBounds([_rS].concat(_getRouteWaypoints(),[_rE]),56);
-  }
   _ensureRoutePilgrimagePlanButton();
   _syncPilgrimageRouteReturnButton();
   _setRouteResultTipVisible(true);
@@ -16469,7 +16465,7 @@ async function _calcRoute(){
   // Fit editable pilgrimage results from the actual driving endpoints, once,
   // before the variable-latency road API returns. Read-only detail maps use
   // their saved waypoint-only fit from the entry lifecycle.
-  if(_isPilgrimageRouteEditMode())
+  if(!_isPilgrimageCourseViewReadOnly())
     _fitPilgrimageWaypointBounds([navStart].concat(waypoints,[navDest]),56);
   _showJukrimgulParkingMkr(hasJukStop);
   if(hasJukStop){
@@ -16633,7 +16629,6 @@ function _drawLine(s1,s2,path,opts){
   _polyline.setMap(_map);
   _syncRouteWaypointBox();
   _refreshRouteTmpMarkers();
-  const pilgrimageRouteResult=_pilgrimageRouteResultMustHideOrdinaryMarkers();
   _hidePilgrimageDetailCategoryMarkers();
 
   const bounds=new _LB();
@@ -16652,15 +16647,11 @@ function _drawLine(s1,s2,path,opts){
   // The read-only views already fit their saved course at entry; an asynchronous
   // directions result must not replace the user's current viewport later.
   // Editable pilgrimage results fit once after the calculated route is drawn.
-  if(opts.fit !== false && !_isPilgrimageCourseViewReadOnly()){
-    if(pilgrimageRouteResult || _isPilgrimageRouteEditMode()){
-      // Pilgrimage viewport is fitted from its saved stops at entry/search.
-      // Do not perform a second fit when the road response arrives.
-    }else if(typeof _fitRouteBounds==='function'){
-      _fitRouteBounds(bounds);
-    }else{
-      try{_map.setBounds(bounds,80,52,190,52);}catch(e){console.warn('[가톨릭길동무]',e);}
-    }
+  // The initial result viewport is fitted once from driving endpoints in _calcRoute.
+  // A late road response must not zoom again or overwrite a user's subsequent zoom.
+  if(opts.fit !== false && !_isPilgrimageCourseViewReadOnly() &&
+     !_pilgrimageRouteResultMustHideOrdinaryMarkers()){
+    _fitRouteBounds(bounds);
   }
 }
 
