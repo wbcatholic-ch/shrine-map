@@ -24640,20 +24640,20 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       ? _pilgrimageMapInitialPoint(entryRole) : null;
     const endpointFocusMode=entryRole==='start'||entryRole==='end';
     let endpointLocationRequested=false;
-    const focusEndpointMap=()=>{
+    const focusEndpointMap=(initialLevel=8)=>{
       if(!_map||_screen!=='map'||!window.__OAI_PILGRIMAGE_PLACE_PICK__||window.__OAI_PILGRIMAGE_MAP_ENTRY_TOKEN__!==pickEntryToken)return;
       const metaForFocus=loadMeta();
       const focus=endpointFocus&&_validGpsPair(endpointFocus.lat,endpointFocus.lng)
         ? endpointFocus
         : (normalizePoint(metaForFocus.start)||normalizePoint(metaForFocus.end)||
            (_validGpsPair(_myLat,_myLng)?{lat:Number(_myLat),lng:Number(_myLng)}:null));
-      if(focus){_setPilgrimageMapCenterForBottomCard(focus,8,{repeat:false});return;}
+      if(focus){_setPilgrimageMapCenterForBottomCard(focus,initialLevel,{repeat:false});return;}
       // 현재 위치가 아직 없으면 위치 확인 성공 시 1회만 적용한다.
       if(!endpointLocationRequested&&typeof _refreshFreshLocationThen==='function'){
         endpointLocationRequested=true;
         _refreshFreshLocationThen((lat,lng)=>{
           if(window.__OAI_PILGRIMAGE_PLACE_PICK__&&_screen==='map'&&window.__OAI_PILGRIMAGE_MAP_ENTRY_TOKEN__===pickEntryToken)
-            _setPilgrimageMapCenterForBottomCard({lat:Number(lat),lng:Number(lng)},8,{repeat:false});
+            _setPilgrimageMapCenterForBottomCard({lat:Number(lat),lng:Number(lng)},initialLevel,{repeat:false});
         },()=>{});
       }
     };
@@ -24724,7 +24724,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           // Only this entry owns the initial bounds. Captured course waypoints
           // cannot be overwritten by the route sheet's form reset.
           if(endpointFocusMode)focusEndpointMap();
-          else if(!_fitPilgrimageWaypointBounds(waypointsForPick,92))focusEndpointMap();
+          else if(!_fitPilgrimageWaypointBounds(waypointsForPick,92))focusEndpointMap(11);
           cleanup();
           Promise.resolve(_preparePilgrimageMapPickMarkers(pickEntryToken))
             .catch(err=>console.warn('[가톨릭길동무] 순례 장소선택 마커 실패',err));
