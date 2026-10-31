@@ -5584,7 +5584,7 @@ function _maybeAutoParishVisit(lat,lng,confirmation){
   }else{
     if(_oaiParishAutoCandidate&&_oaiParishAutoCandidate.id===id)return;
     if(_oaiParishAutoCandidate)clearTimeout(_oaiParishAutoCandidate.timer);
-    const candidate={id:id,started:Date.now(),timer:null};
+    const candidate={id:id,date:_todayISODate(),started:Date.now(),timer:null};
     _oaiParishAutoCandidate=candidate;
     candidate.timer=setTimeout(function(){
       if(_oaiParishAutoCandidate!==candidate)return;
@@ -5593,7 +5593,12 @@ function _maybeAutoParishVisit(lat,lng,confirmation){
       _GEO.getCurrentPosition(function(pos){
         if(_oaiParishAutoCandidate!==candidate)return;
         const coords=pos&&pos.coords;
-        if(!coords||!Number.isFinite(Number(coords.latitude))||!Number.isFinite(Number(coords.longitude))){_oaiParishAutoCandidate=null;return;}
+        if(!coords||!Number.isFinite(Number(coords.latitude))||!Number.isFinite(Number(coords.longitude))||
+           !Number.isFinite(Number(coords.accuracy))||Number(coords.accuracy)>100||
+           !pos.timestamp||Math.abs(Date.now()-Number(pos.timestamp))>10000||
+           candidate.date!==_todayISODate()){
+          _oaiParishAutoCandidate=null;return;
+        }
         _maybeAutoParishVisit(Number(coords.latitude),Number(coords.longitude),true);
         // 새 위치가 다른 성당이면 다음 일반 위치 갱신에서 별도로 판단한다.
         if(_oaiParishAutoCandidate===candidate)_oaiParishAutoCandidate=null;
@@ -22822,6 +22827,18 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(!fixes.length)return;
       // Do not consume historical GPS while place data is incomplete or across midnight.
       if(!Array.isArray(SHRINES)||!SHRINES.length||!Array.isArray(PARISHES)||!PARISHES.length)return;
+      // Native fixes are historical samples. Confirm the same parish with two
+      // independent timestamps >=10s apart rather than using a live timer.
+      // Persist only the pending candidate across acknowledged batches/restarts.
+      const parishPendingKey='oai_parish_native_pending_v1';
+      const sessionKey=String(active.courseId)+'|'+String(active.startedAt);
+      let parishPending=null;
+      try{
+        const saved=JSON.parse(localStorage.getItem(parishPendingKey)||'null');
+        if(saved&&saved.session===sessionKey&&saved.date===date&&
+           Number.isFinite(Number(saved.at))&&Number(saved.at)>=active.startedAt)
+          parishPending=saved;
+      }catch(_e){}
       let through=0;
       for(const fix of fixes){
         if(_dailyIso(fix.at)!==date)break;
@@ -22839,14 +22856,25 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           const meters=calcDist(fix.lat,fix.lng,place.lat,place.lng)*1000;
           if(meters<=OAI_PARISH_AUTO_VISIT_RADIUS_M&&meters<bestM){best=place;bestM=meters;}
         });
-        if(best){
+        const bestId=best?_oaiPlaceCanonicalId('parish',best):null;
+        if(!best){
+          parishPending=null;
+        }else if(!parishPending||parishPending.id!==bestId||fix.at<parishPending.at){
+          parishPending={session:sessionKey,date:date,id:bestId,at:fix.at};
+        }else if(fix.at-parishPending.at>=OAI_PARISH_AUTO_CONFIRM_MS){
           const visits=_parishVisits(best),restricted=_oaiIsRestrictedPlace('parish',best)||
             (_isSameParish(best,_configuredMyParish())&&_isMyParishAutoVisitEnabled());
           if(!restricted||_oaiAllowRestrictedGpsVisit('parish',best,visits)){
             const result=_registerGpsPlaceVisit('parish',best,date,fix.at);
             if(!result.added&&!result.already)break;
           }
+          parishPending=null;
         }
+        // Do not acknowledge a fix until its pending 10-second state is durable.
+        try{
+          if(parishPending)localStorage.setItem(parishPendingKey,JSON.stringify(parishPending));
+          else localStorage.removeItem(parishPendingKey);
+        }catch(err){console.warn('[성당 GPS] 대기상태 저장 실패',err);break;}
         through=fix.at;
       }
       if(through>0){
