@@ -23729,8 +23729,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const totalActions=document.querySelector('#oai-pilgrimage-detail-view .oai-pilgrimage-total-actions');
     if(totalActions)totalActions.classList.toggle('is-single-action',!isCompletionView);
     const body=document.getElementById('oai-pilgrimage-plan-list');
+    const addActions=document.querySelector('#oai-pilgrimage-detail-view .oai-pilgrimage-add-row');
+    const addActionsHome=document.querySelector('#oai-pilgrimage-detail-view .oai-pilgrimage-endpoints-after-list');
+    // 같은 버튼 노드를 재사용한다. 빈 안내창을 다시 그리기 전에 원래 위치로 복귀시킨다.
+    if(addActions&&addActionsHome&&addActions.parentElement!==addActionsHome.parentElement){
+      addActionsHome.insertAdjacentElement('afterend',addActions);
+    }
     if(body){
-      if(!displayItems.length) body.innerHTML='<div class="oai-pilgrimage-empty oai-pilgrimage-empty-hint"><b>경유지를 추가하세요</b><small>아래에서 추가 방법을 선택하세요.</small></div>';
+      if(!displayItems.length) body.innerHTML='<div class="oai-pilgrimage-empty oai-pilgrimage-empty-hint"><b>경유지를 추가하세요</b></div>';
       else body.innerHTML=displayItems.map((row,i)=>{
         const item=row.point;
         const done=isCompletionView?!item.routeOnly:!!item.done;
@@ -23779,6 +23785,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         addBtn.style.display='none';
         addBtn.setAttribute('aria-hidden','true');
       }
+    }
+    // 빈 순례계획일 때만 기존 두 버튼을 안내창 안으로 옮긴다(새 버튼·이벤트 생성 없음).
+    if(addActions&&body&&!displayItems.length&&!isCompletionView&&!editingActive){
+      const hint=body.querySelector('.oai-pilgrimage-empty-hint');
+      if(hint)hint.appendChild(addActions);
     }
     // Completed GPS-protected courses use one entry for the existing search/map pickers.
     // Manual or locked completion records retain their existing edit restrictions.

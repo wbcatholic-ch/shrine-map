@@ -10587,3 +10587,7 @@ html.oai-pilgrimage-course-view-readonly #map-category-close-btn{display:inline-
 .oai-visit-memo-modal.show.oai-memo-closing{opacity:0;pointer-events:none}
 .oai-visit-memo-actions [data-oai-memo-save].oai-memo-saved{background:#27775d!important;border-color:#27775d!important;color:#fff!important}
 @media(prefers-reduced-motion:reduce){.oai-visit-memo-modal.show{transition:none}}
+
+/* 빈 순례계획의 검색/지도 버튼은 기존 노드를 안내창 내부에 배치한다. */
+#oai-pilgrimage-detail-view.is-empty-plan:not(.is-completion-view) .oai-pilgrimage-empty-hint{gap:14px;min-height:112px;padding:18px 12px;}
+#oai-pilgrimage-detail-view.is-empty-plan:not(.is-completion-view) .oai-pilgrimage-empty-hint > .oai-pilgrimage-add-row{width:100%;padding:0!important;border-top:0!important;background:transparent!important;}
