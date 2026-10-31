@@ -5562,10 +5562,46 @@ function _oaiGpsLinkedShrineForParish(parish,lat,lng){
   if(!pts.some(function(pt){return Number.isFinite(Number(pt.lat))&&Number.isFinite(Number(pt.lng))&&calcDist(lat,lng,Number(pt.lat),Number(pt.lng))*1000<=radius;}))return null;
   return shrine;
 }
-function _maybeAutoParishVisit(lat,lng){
-  if(!lat||!lng)return;let best=null,bestM=Infinity;
+// 성당 자동 GPS 방문만 10초 뒤 새 위치로 재확인한다. 성지/순례 판정은 변경하지 않는다.
+const OAI_PARISH_AUTO_CONFIRM_MS=10000;
+let _oaiParishAutoCandidate=null;
+function _maybeAutoParishVisit(lat,lng,confirmation){
+  if(!Number.isFinite(Number(lat))||!Number.isFinite(Number(lng)))return;
+  let best=null,bestM=Infinity;
   (PARISHES||[]).forEach(function(p){if(!p||p.diocese==='군종교구'||!p.lat||!p.lng||_oaiJointStampPair('parish',p))return;const m=calcDist(lat,lng,p.lat,p.lng)*1000;if(m<=OAI_PARISH_AUTO_VISIT_RADIUS_M&&m<bestM){best=p;bestM=m;}});
-  if(!best)return;const myParish=_configuredMyParish(),isMyParish=_isSameParish(best,myParish),previousVisits=_parishVisits(best);
+  if(!best){
+    if(_oaiParishAutoCandidate){clearTimeout(_oaiParishAutoCandidate.timer);_oaiParishAutoCandidate=null;}
+    return;
+  }
+  const id=_oaiPlaceCanonicalId('parish',best);
+  if(!confirmation&&_parishVisits(best).some(function(v){return v.date===_todayISODate();})){
+    if(_oaiParishAutoCandidate){clearTimeout(_oaiParishAutoCandidate.timer);_oaiParishAutoCandidate=null;}
+    return;
+  }
+  if(confirmation){
+    if(!_oaiParishAutoCandidate||_oaiParishAutoCandidate.id!==id||Date.now()-_oaiParishAutoCandidate.started<OAI_PARISH_AUTO_CONFIRM_MS)return;
+    clearTimeout(_oaiParishAutoCandidate.timer);_oaiParishAutoCandidate=null;
+  }else{
+    if(_oaiParishAutoCandidate&&_oaiParishAutoCandidate.id===id)return;
+    if(_oaiParishAutoCandidate)clearTimeout(_oaiParishAutoCandidate.timer);
+    const candidate={id:id,started:Date.now(),timer:null};
+    _oaiParishAutoCandidate=candidate;
+    candidate.timer=setTimeout(function(){
+      if(_oaiParishAutoCandidate!==candidate)return;
+      // 10초 전 좌표를 재사용하지 않고 새 GPS 수신으로 재확인한다.
+      if(!_GEO){_oaiParishAutoCandidate=null;return;}
+      _GEO.getCurrentPosition(function(pos){
+        if(_oaiParishAutoCandidate!==candidate)return;
+        const coords=pos&&pos.coords;
+        if(!coords||!Number.isFinite(Number(coords.latitude))||!Number.isFinite(Number(coords.longitude))){_oaiParishAutoCandidate=null;return;}
+        _maybeAutoParishVisit(Number(coords.latitude),Number(coords.longitude),true);
+        // 새 위치가 다른 성당이면 다음 일반 위치 갱신에서 별도로 판단한다.
+        if(_oaiParishAutoCandidate===candidate)_oaiParishAutoCandidate=null;
+      },function(){if(_oaiParishAutoCandidate===candidate)_oaiParishAutoCandidate=null;},_GO_ACCURATE_FRESH);
+    },OAI_PARISH_AUTO_CONFIRM_MS);
+    return;
+  }
+  const myParish=_configuredMyParish(),isMyParish=_isSameParish(best,myParish),previousVisits=_parishVisits(best);
   // 내 본당 기록 제한이 켜져 있을 때만 과거 전체 방문기록으로 재등록을 제한한다.
   // 제한이 꺼졌거나 내 본당 지정이 해제되면 일반 성당처럼 당일 중복만 검사한다.
   const limited=(isMyParish&&_isMyParishAutoVisitEnabled())||_oaiIsRestrictedPlace('parish',best);
@@ -7841,7 +7877,18 @@ const _URL_T={'1':'http://cafe.daum.net/','2':'https://cafe.daum.net/','3':'http
 function _decUrl(u){if(!u)return '';const t=_URL_T[u.slice(0,2)];if(t)return t+u.slice(2);const t1=_URL_T[u[0]];return t1?t1+u.slice(1):u;}
 function _unpack(raw){return raw.map((r,i)=>({_idx:i,name:r[0],diocese:_DIO[r[1]]||r[1],addr:r[2],tel:r[3]||'',hp:_decUrl(r[4]||''),url:_decUrl(r[5]||''),lat:r[6],lng:r[7]}));}
 
-let PARISHES=[];
+// 해외 첫 GPS 성당 시험 장소. 국내 교구 파일과 분리하고 기존 성당 스탬프 엔진을 재사용한다.
+// 고정 placeId 및 이름/주소는 기존 방문 기록 식별을 위해 변경하지 않는다.
+const OAI_OVERSEAS_TEST_PARISH={
+  placeId:'P-VN-DAD-CATHEDRAL-01',
+  name:'다낭 대성당 (핑크성당)',
+  diocese:'베트남 다낭교구',
+  country:'VN',
+  addr:'156 Trần Phú, Hải Châu, Đà Nẵng, Vietnam',
+  lat:16.06668,lng:108.22306,
+  tel:'',hp:'',url:''
+};
+let PARISHES=[OAI_OVERSEAS_TEST_PARISH];
 let _parishRawLoaded=false;
 let _parishDioIndexReady=false;
 let _parishDataLoadPromise=null;
@@ -8004,7 +8051,7 @@ function _oaiAssignCatalogIds(items,kind){
 }
 function _buildParishList(raw){
   raw = Array.isArray(raw) ? raw : [];
-  return _oaiAssignCatalogIds(raw.map((r,i)=>_applySpecialNavigationPoint({
+  const domestic=raw.map((r,i)=>_applySpecialNavigationPoint({
     _idx:i,
     name:r[0],
     diocese:_DIO[r[1]]||r[1],
@@ -8014,7 +8061,9 @@ function _buildParishList(raw){
     url:_decUrl(r[5]||''),
     lat:r[6],
     lng:r[7]
-  })), 'parish');
+  }));
+  // 국내 교구 자료의 지연 로딩/재구축 후에도 해외 시험 성당을 유지한다.
+  return _oaiAssignCatalogIds(domestic.concat([OAI_OVERSEAS_TEST_PARISH]), 'parish');
 }
 function _setParishRawData(raw, loaded){
   raw = Array.isArray(raw) ? raw : [];
