@@ -557,6 +557,14 @@
       return;
     }
 
+    // Anniversary notification is an overlay over the cover. It must consume
+    // Back before the ordinary cover-exit path, without adding a second listener.
+    if(typeof window._oaiAnniversaryBackHandle==='function' && window._oaiAnniversaryBackHandle()){
+      _restoring=true;
+      try{ history.go(1); }catch(e){ _restoring=false; console.warn('[순례 추억 뒤로가기]',e); }
+      return;
+    }
+
     if(window.CGMHelp && window.CGMHelp.close()){
       // 도움말은 별도 history 항목을 만들지 않으므로 추가 이동을 수행하지 않는다.
       return;
