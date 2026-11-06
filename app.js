@@ -26969,8 +26969,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(t.hasAttribute('data-oai-completed-stamp')){
       if(pilgrimageDetailMode!=='complete'||plannerView!=='detail'||!planner()?.classList.contains('show'))return;
       e.preventDefault();e.stopPropagation();
-      if(t.dataset.oaiDevCompletedStamp==='parish')_openParishVisitBook({fromCompletion:true});
-      else if(t.dataset.oaiDevCompletedStamp==='shrine')_openShrineVisitCardsModal({fromCompletion:true});
+      if(t.dataset.oaiCompletedStamp==='parish')_openParishVisitBook({fromCompletion:true});
+      else if(t.dataset.oaiCompletedStamp==='shrine')_openShrineVisitCardsModal({fromCompletion:true});
       return;
     }
     if(t.hasAttribute('data-pilgrimage-info-index')){e.preventDefault();e.stopPropagation();openPilgrimagePlaceInfo(Number(t.getAttribute('data-pilgrimage-info-index')));return;}
