@@ -2089,7 +2089,7 @@ function _saveShrineVisits(data){
   try{
     const json=JSON.stringify(data||{});
     localStorage.setItem(OAI_SHRINE_VISITS_KEY,json);
-    return localStorage.getItem(OAI_SHRINE_VISITS_KEY)===json;
+    const ok=localStorage.getItem(OAI_SHRINE_VISITS_KEY)===json;if(ok&&typeof window.oaiScheduleMemoryIndexSync==='function')window.oaiScheduleMemoryIndexSync();return ok;
   }catch(e){console.warn('[가톨릭길동무]',e);return false;}
 }
 function _getShrineVisitRecord(item){
@@ -3773,10 +3773,10 @@ function _oaiEnsurePhotoViewer(){
 function _oaiPhotoViewerOrientation(open){
   try{if(window.GildongmuNative&&typeof window.GildongmuNative.setPhotoViewerRotation==='function')window.GildongmuNative.setPhotoViewerRotation(!!open);}catch(_e){}
 }
-function _oaiPreparePhotoViewer(kind,index,ctx,total){const m=_oaiEnsurePhotoViewer(),memoButton=m.querySelector('[data-oai-anniversary-viewer-memo]');if(memoButton)memoButton.hidden=!_oaiAnniversaryViewerContext;const img=document.getElementById('oai-visit-photo-viewer-img'),count=document.getElementById('oai-visit-photo-viewer-count');_oaiVisitPhotoViewerState={kind:kind,index:index,ctx:ctx};if(img){_oaiResetVisitViewerZoom();img.removeAttribute('src');img.classList.add('loading');}if(count)count.textContent=(index+1)+' / '+Number(total||0);m.classList.add('show');m.setAttribute('aria-hidden','false');_oaiPhotoViewerOrientation(true);const prev=m.querySelector('[data-oai-photo-prev]'),next=m.querySelector('[data-oai-photo-next]');if(prev)prev.disabled=index<=0;if(next)next.disabled=index>=Number(total||0)-1;try{document.documentElement.classList.add('oai-visit-photo-open');}catch(_e){}}
-function _oaiShowPhotoViewer(kind,index,dataUri){const st=_oaiVisitPhotoViewerState;if(!st||st.kind!==kind||st.index!==index)return;const ctx=st.ctx;if(!ctx||ctx.kind!==kind)return;const photos=ctx.date==='all'?_oaiAllVisitPhotos(kind,ctx.item,ctx.visits).map(function(e){return e.photo;}):_oaiNormalizePhotos(_oaiGetVisitByDate(kind,ctx.item,ctx.date));if(!photos[index])return;const m=_oaiEnsurePhotoViewer(),img=document.getElementById('oai-visit-photo-viewer-img'),count=document.getElementById('oai-visit-photo-viewer-count');_oaiVisitPhotoViewerState={kind:kind,index:index,ctx:ctx};if(img){img.src=dataUri;img.classList.remove('loading');}if(count)count.textContent=(index+1)+' / '+photos.length;m.classList.add('show');m.setAttribute('aria-hidden','false');_oaiPhotoViewerOrientation(true);const prev=m.querySelector('[data-oai-photo-prev]'),next=m.querySelector('[data-oai-photo-next]');if(prev)prev.disabled=index<=0;if(next)next.disabled=index>=photos.length-1;try{document.documentElement.classList.add('oai-visit-photo-open');}catch(_e){}
+function _oaiPreparePhotoViewer(kind,index,ctx,total){const m=_oaiEnsurePhotoViewer(),memoButton=m.querySelector('[data-oai-anniversary-viewer-memo]');if(memoButton){const c=_oaiAnniversaryViewerContext;const v=c&&_oaiGetVisitByDate(c.kind,c.item,c.date);memoButton.hidden=!c||!String(v&&v.memo||'').trim();}const img=document.getElementById('oai-visit-photo-viewer-img'),count=document.getElementById('oai-visit-photo-viewer-count');_oaiVisitPhotoViewerState={kind:kind,index:index,ctx:ctx};if(img){_oaiResetVisitViewerZoom();img.removeAttribute('src');img.classList.add('loading');}if(count)count.textContent=(index+1)+' / '+Number(total||0);m.classList.add('show');m.setAttribute('aria-hidden','false');_oaiPhotoViewerOrientation(true);const prev=m.querySelector('[data-oai-photo-prev]'),next=m.querySelector('[data-oai-photo-next]');if(prev)prev.disabled=index<=0;if(next)next.disabled=index>=Number(total||0)-1;try{document.documentElement.classList.add('oai-visit-photo-open');}catch(_e){}}
+function _oaiShowPhotoViewer(kind,index,dataUri){const st=_oaiVisitPhotoViewerState;if(!st||st.kind!==kind||st.index!==index)return;const ctx=st.ctx;if(!ctx||ctx.kind!==kind)return;const photos=ctx.date==='all'?_oaiAllVisitPhotos(kind,ctx.item,ctx.visits).map(function(e){return e.photo;}):_oaiNormalizePhotos(_oaiGetVisitByDate(kind,ctx.item,ctx.date));if(!photos[index])return;const m=_oaiEnsurePhotoViewer(),img=document.getElementById('oai-visit-photo-viewer-img'),count=document.getElementById('oai-visit-photo-viewer-count');_oaiVisitPhotoViewerState={kind:kind,index:index,ctx:ctx};if(img){img.src=dataUri;img.classList.remove('loading');}if(count)count.textContent=(index+1)+' / '+photos.length;const memoButton=m.querySelector('[data-oai-anniversary-viewer-memo]');if(memoButton){const c=_oaiAnniversaryViewerContext;const v=c&&_oaiGetVisitByDate(c.kind,c.item,c.date);memoButton.hidden=!c||!String(v&&v.memo||'').trim();}m.classList.add('show');m.setAttribute('aria-hidden','false');_oaiPhotoViewerOrientation(true);const prev=m.querySelector('[data-oai-photo-prev]'),next=m.querySelector('[data-oai-photo-next]');if(prev)prev.disabled=index<=0;if(next)next.disabled=index>=photos.length-1;try{document.documentElement.classList.add('oai-visit-photo-open');}catch(_e){}
 }
-function _oaiClosePhotoViewer(){_oaiPhotoViewerOrientation(false);_oaiAnniversaryViewerContext=null;const m=document.getElementById('oai-visit-photo-viewer');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}const img=document.getElementById('oai-visit-photo-viewer-img');if(img)img.removeAttribute('src');_oaiResetVisitViewerZoom();_oaiVisitPhotoViewerState=null;try{document.documentElement.classList.remove('oai-visit-photo-open');}catch(_e){} if(typeof window._oaiAnniversaryPhotoClosed==='function')window._oaiAnniversaryPhotoClosed(); }
+function _oaiClosePhotoViewer(){_oaiPhotoViewerOrientation(false);_oaiAnniversaryViewerContext=null;const m=document.getElementById('oai-visit-photo-viewer');if(m){const memoButton=m.querySelector('[data-oai-anniversary-viewer-memo]');if(memoButton)memoButton.hidden=true;m.classList.remove('show');m.setAttribute('aria-hidden','true');}const img=document.getElementById('oai-visit-photo-viewer-img');if(img)img.removeAttribute('src');_oaiResetVisitViewerZoom();_oaiVisitPhotoViewerState=null;try{document.documentElement.classList.remove('oai-visit-photo-open');}catch(_e){} if(typeof window._oaiAnniversaryPhotoClosed==='function')window._oaiAnniversaryPhotoClosed(); }
 try{window._oaiClosePhotoViewer=_oaiClosePhotoViewer;}catch(_e){}
 function _oaiMovePhotoViewer(delta){const st=_oaiVisitPhotoViewerState;if(!st)return;const photos=st.ctx.date==='all'?_oaiAllVisitPhotos(st.kind,st.ctx.item,st.ctx.visits).map(function(e){return e.photo;}):_oaiNormalizePhotos(_oaiGetVisitByDate(st.kind,st.ctx.item,st.ctx.date)),next=Math.max(0,Math.min(photos.length-1,st.index+Number(delta||0)));if(next===st.index)return;_oaiOpenPhoto(st.kind,next);}
 window.oaiVisitPhotoLoaded=function(requestId,ok,mimeType,payload,message){
@@ -5402,7 +5402,7 @@ function _parishVisitStoredKey(p,data){
   return candidate||current;
 }
 function _loadParishVisits(){try{const v=localStorage.getItem(OAI_PARISH_VISITS_KEY);const d=v?JSON.parse(v):{};return d&&typeof d==='object'?d:{}}catch(_e){return {}}}
-function _saveParishVisits(d){try{const json=JSON.stringify(d||{});localStorage.setItem(OAI_PARISH_VISITS_KEY,json);return localStorage.getItem(OAI_PARISH_VISITS_KEY)===json;}catch(e){console.warn('[성당 기록 저장 실패]',e);return false;}}
+function _saveParishVisits(d){try{const json=JSON.stringify(d||{});localStorage.setItem(OAI_PARISH_VISITS_KEY,json);const ok=localStorage.getItem(OAI_PARISH_VISITS_KEY)===json;if(ok&&typeof window.oaiScheduleMemoryIndexSync==='function')window.oaiScheduleMemoryIndexSync();return ok;}catch(e){console.warn('[성당 기록 저장 실패]',e);return false;}}
 function _parishVisits(p){const d=_loadParishVisits(),r=d[_parishVisitStoredKey(p,d)]||{},a=Array.isArray(r.visits)?r.visits:[];return a.map(_normalizeVisitEntry).filter(function(v){return v&&_isVisitDate(v.date);}).sort(_compareShrineVisits);}
 function _parishVisitCount(p){return _parishVisits(p).length;}
 function _addParishVisit(p,date,method,measuredAt){
@@ -18378,7 +18378,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // 기념일은 실제 GPS 스탬프가 있는 날짜만 사용한다. 저장 데이터는 읽기 전용이다.
   function oaiAnniversaryPreview(date,warm){
     oaiAnniversaryReturnToCover=!warm;
-    if(date!=='2026-10-09')return;
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(date))return;
     const shrineData=_loadShrineVisits(),parishData=_loadParishVisits(),all=[];
     function collect(kind,data,places){
       Object.entries(data||{}).forEach(([storedKey,record])=>{
@@ -18418,25 +18418,25 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     let layer=document.getElementById('oai-anniversary-preview');
     if(!layer){
       layer=document.createElement('div');layer.id='oai-anniversary-preview';
-      layer.style.cssText='position:fixed;inset:0;z-index:2147483000;background:rgba(14,27,48,.72);display:flex;align-items:center;justify-content:center;padding:14px;box-sizing:border-box';
-      const panel=document.createElement('section');panel.style.cssText='background:#fcfbf8;border-radius:20px;width:min(100%,470px);max-height:86dvh;overflow:auto;overscroll-behavior:contain;padding:16px;color:#213149;box-sizing:border-box;box-shadow:0 20px 60px rgba(0,0,0,.22)';
+      layer.style.cssText='position:fixed;inset:0;z-index:2147483000;background:rgba(40,44,45,.54);display:flex;align-items:center;justify-content:center;padding:14px;box-sizing:border-box';
+      const panel=document.createElement('section');panel.style.cssText='background:#faf8f2;border:1px solid #e7dccc;border-radius:22px;width:min(100%,470px);max-height:86dvh;overflow:auto;overscroll-behavior:contain;padding:18px;color:#35433e;box-sizing:border-box;box-shadow:0 16px 42px rgba(25,40,34,.16)';
       layer.appendChild(panel);document.body.appendChild(layer);
       layer.addEventListener('click',e=>{if(e.target===layer||e.target.closest('[data-anniversary-close]'))oaiAnniversaryClose();});
     }
     const panel=layer.firstElementChild;oaiAnniversaryMemoView=null;panel.replaceChildren();
-    const header=document.createElement('div');header.style.cssText='display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:2px solid #d7be89;padding:7px 2px 13px;margin-bottom:12px;position:sticky;top:-16px;background:#fcfbf8;z-index:1';
-    const title=document.createElement('div');title.innerHTML='<small style="color:#7a6337;font-weight:700;font-size:13px">2026년 10월 9일 · 순례의 추억</small><h2 style="margin:4px 0 0;font-size:24px;color:#172d4d">그날의 순례</h2>';
-    const close=document.createElement('button');close.type='button';close.textContent='✕';close.dataset.anniversaryClose='1';close.setAttribute('aria-label','추억 화면 닫기');close.style.cssText='background:#fff;border:1px solid #cbd5e1;border-radius:50%;width:40px;height:40px;color:#203957;font-size:19px;flex-shrink:0';
+    const header=document.createElement('div');header.style.cssText='display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:1px solid #ddcda9;padding:7px 2px 13px;margin-bottom:12px;position:sticky;top:-18px;background:#faf8f2;z-index:1';
+    const title=document.createElement('div');title.innerHTML='<small style="color:#7a6337;font-weight:700;font-size:13px">'+date.slice(0,4)+'년 '+Number(date.slice(5,7))+'월 '+Number(date.slice(8,10))+'일 · 순례의 추억</small><h2 style="margin:4px 0 0;font-size:23px;color:#365448">그날의 순례</h2>';
+    const close=document.createElement('button');close.type='button';close.textContent='✕';close.dataset.anniversaryClose='1';close.setAttribute('aria-label','추억 화면 닫기');close.style.cssText='background:#fff;border:1px solid #cbd5e1;border-radius:50%;width:40px;height:40px;color:#526c5e;font-size:19px;flex-shrink:0';
     header.append(title,close);panel.appendChild(header);
-    const intro=document.createElement('p');intro.textContent=unique.length?'이날 방문한 '+unique.length+'곳의 기록을 돌아보세요.':'이 날짜에 연결 가능한 GPS 스탬프 기록이 없습니다.';intro.style.cssText='font-size:14px;color:#596b80;margin:0 2px 12px;line-height:1.5';panel.appendChild(intro);
+    const intro=document.createElement('p');intro.textContent=unique.length?'이날 방문한 '+unique.length+'곳의 기록을 돌아보세요.':'이 날짜에 연결 가능한 GPS 스탬프 기록이 없습니다.';intro.style.cssText='font-size:14px;color:#68766c;margin:0 2px 12px;line-height:1.5';panel.appendChild(intro);
     unique.forEach((entry,i)=>{
-      const card=document.createElement('article');card.style.cssText='background:#fff;border:1px solid #d6e0e8;border-left:4px solid #b99b61;border-radius:12px;padding:12px 13px;margin:8px 0;box-shadow:0 2px 6px rgba(21,45,75,.05)';
-      const h=document.createElement('strong');h.textContent=(i+1)+'. '+entry.item.name;h.style.cssText='display:block;font-size:17px;line-height:1.4;color:#203756;margin-bottom:5px;overflow-wrap:anywhere';card.appendChild(h);
-      const note=document.createElement('div');note.textContent='GPS 방문 · '+date;note.style.cssText='font-size:12px;color:#77869a;margin-bottom:8px';card.appendChild(note);
+      const card=document.createElement('article');card.style.cssText='background:#fff;border:1px solid #e6e6dc;border-left:3px solid #b5a17d;border-radius:15px;padding:12px 13px;margin:9px 0;box-shadow:0 2px 8px rgba(46,62,49,.045)';
+      const h=document.createElement('strong');h.textContent=(i+1)+'. '+entry.item.name;h.style.cssText='display:block;font-size:17px;line-height:1.4;color:#394f45;margin-bottom:5px;overflow-wrap:anywhere';card.appendChild(h);
+      const note=document.createElement('div');note.textContent='GPS 방문 · '+date;note.style.cssText='font-size:12px;color:#879087;margin-bottom:7px';card.appendChild(note);
       if(entry.photos||entry.memo){
         const detail=document.createElement('div');detail.textContent=[entry.photos?'사진 '+entry.photos+'장':'',entry.memo?'메모 있음':''].filter(Boolean).join(' · ');detail.style.cssText='font-size:13px;color:#52647a;margin-bottom:8px';card.appendChild(detail);
-        const button=document.createElement('button');button.type='button';button.textContent=entry.photos&&entry.memo?'그날의 사진 · 메모 보기':entry.photos?'그날의 사진 보기':'그날의 메모 보기';
-        button.style.cssText='background:#203b60;color:white;border:0;border-radius:9px;min-height:42px;padding:8px 12px;width:100%;font-weight:700;font-size:14px';
+        const button=document.createElement('button');button.type='button';button.textContent=entry.photos?'그날의 사진 보기':'그날의 메모 보기';
+        button.style.cssText=(entry.photos?'background:#517fa7;color:#fff;border:1px solid #477295;':'background:#e2ecdf;color:#375e46;border:1px solid #acc8ad;')+'border-radius:11px;min-height:42px;padding:8px 12px;width:100%;font-weight:700;font-size:14px';
         button.addEventListener('click',()=>{
           // The preview may have been open while photos were deleted in another view.
           // Re-read the selected date before navigating; do not leave the preview
@@ -18451,7 +18451,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           }
           // A memo-only visit opens its actual date-specific memo, not merely
           // the visit detail (which made the button appear broken).
-          if(!photos.length&&hasMemo){oaiAnniversaryShowMemo(entry,date);return;}
+          if(!photos.length&&hasMemo){button.textContent='그날의 메모 보기';button.style.background='#e2ecdf';button.style.color='#375e46';button.style.border='1px solid #acc8ad';oaiAnniversaryShowMemo(entry,date);return;}
           // Use the existing full-screen personal photo viewer directly.
           // Only this recorded date is used; no stamp detail is opened.
           oaiAnniversaryPhotoReturn={date:date,kind:entry.kind,item:entry.item};
@@ -18472,7 +18472,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   let oaiAnniversaryOpening=null;
   let oaiAnniversaryOpeningCancelled=false;
   function oaiOpenAnniversaryWhenReady(date,warm){
-    if(date!=='2026-10-09')return Promise.resolve();
+    if(!/^\d{4}-\d{2}-\d{2}$/.test(date))return Promise.resolve();
     if(oaiAnniversaryOpening)return oaiAnniversaryOpening;
     oaiAnniversaryOpeningCancelled=false;
     const loading=document.createElement('div');
@@ -18518,6 +18518,49 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   if(document.readyState==='complete')oaiReceivePendingAnniversary();
   else window.addEventListener('load',oaiReceivePendingAnniversary,{once:true});
+  // Only already-saved GPS visits are used; this is a read-only reminder index.
+  // Legacy installations did not record first registration time. Their earliest
+  // completion date is the conservative eligibility anchor, never updated here.
+  const OAI_FIRST_COURSE_REGISTRATION='oai_first_course_registered_at_v1';
+  let oaiMemorySyncTimer=0;
+  function oaiScheduleMemoryIndexSync(){
+    if(oaiMemorySyncTimer)return;
+    oaiMemorySyncTimer=setTimeout(function(){
+      oaiMemorySyncTimer=0;
+      const native=window.GildongmuNative;
+      if(!native||typeof native.updatePilgrimageMemoryReminders!=='function')return;
+      try{
+        const courses=JSON.parse(localStorage.getItem('oai_pilgrimage_courses_v1')||'[]');
+        if(!Array.isArray(courses))return;
+        const completed=[];
+        courses.forEach(c=>{(Array.isArray(c&&c.completions)?c.completions:[]).forEach(x=>{
+          const ts=Number(x&&x.completedAt);if(Number.isFinite(ts)&&ts>0)completed.push(ts);
+        });});
+        if(!completed.length)return;
+        let first='';
+        const saved=Number(localStorage.getItem(OAI_FIRST_COURSE_REGISTRATION));
+        const firstTs=Number.isFinite(saved)&&saved>0?saved:Math.min(...completed);
+        const d=new Date(firstTs);
+        if(!Number.isFinite(d.getTime()))return;
+        const format=x=>x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');
+        first=format(d);
+        const dates=new Set();
+        [_loadShrineVisits(),_loadParishVisits()].forEach(records=>{
+          Object.values(records||{}).forEach(record=>{
+            (Array.isArray(record&&record.visits)?record.visits:[]).forEach(raw=>{
+              const visit=_normalizeVisitEntry(raw),date=visit&&_visitDateOf(visit);
+              if(visit&&String(visit.method||'').toLowerCase()==='gps'&&/^\d{4}-\d{2}-\d{2}$/.test(date))dates.add(date);
+            });
+          });
+        });
+        if(dates.size)native.updatePilgrimageMemoryReminders(first,JSON.stringify([...dates].sort()));
+      }catch(err){console.warn('[순례 추억 알림 예약 보류]',err);}
+    },2500);
+  }
+  // No heavy history migration at boot: one idle snapshot and debounced updates
+  // only after a successful visit or completion save.
+  window.oaiScheduleMemoryIndexSync=oaiScheduleMemoryIndexSync;
+  window.addEventListener('load',function(){oaiScheduleMemoryIndexSync();},{once:true});
   function oaiDevStatus(value){const el=document.getElementById('oai-dev-status');if(el)el.textContent=value||'';}
   window.oaiDevPhotoBackupResult=function(state,message){
     const el=document.getElementById('oai-dev-five-photo-status');
@@ -20828,6 +20871,16 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(localStorage.getItem(COURSES_KEY)!==serialized)localStorage.setItem(COURSES_KEY,serialized);
       if(localStorage.getItem(COURSES_KEY)!==serialized)throw new Error('저장 후 재조회 불일치');
     }catch(e){console.warn('[순례코스 저장]',e);return false;}
+    // Persist the first *actual registration* on new users; never rewrite it.
+    try{
+      if(!localStorage.getItem('oai_first_course_registered_at_v1')){
+        const old=JSON.parse(beforeCourses||'[]');
+        const had=(Array.isArray(old)?old:[]).some(c=>Array.isArray(c.completions)&&c.completions.length);
+        const has=a.some(c=>Array.isArray(c.completions)&&c.completions.length);
+        if(!had&&has)localStorage.setItem('oai_first_course_registered_at_v1',String(Date.now()));
+      }
+      if(typeof window.oaiScheduleMemoryIndexSync==='function')window.oaiScheduleMemoryIndexSync();
+    }catch(_e){}
     if(!skipListRender)renderCourseList();
     // 완료 기록이 추가·변경된 저장에서만 비동기 GPS 대조를 예약한다.
     try{
@@ -23382,6 +23435,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     m.classList.remove('show');m.setAttribute('aria-hidden','true');
     closePointPicker();closeCompletionModal();
     const ret=plannerReturnToCover, origin=plannerEntrySource;
+    if(completionNotificationNavigation){
+      const saved=completionNotificationNavigation;
+      if(saved.plannerOpen){_completionNotificationRestore();return;}
+      if(saved.warm){_completionNotificationRestore();return;}
+      completionNotificationNavigation=null;
+    }
     plannerEntrySource='unknown';
     /* 커버의 정식 '순례코스 계획 · 기록'에서 들어온 경우에는
        설정을 거치지 않고 커버로 바로 복귀한다. */
@@ -23424,7 +23483,36 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // Shared completion-notification entry: the live path accepts only yesterday;
   // the fixed 10/31 date remains exclusively for the developer test.
   let completionTrialOpening=false;
-  async function _openOct31CompletionTest(date,developerTrial){
+  let completionNotificationNavigation=null;
+  function _completionNotificationRestore(){
+    const saved=completionNotificationNavigation;completionNotificationNavigation=null;
+    if(!saved)return false;
+    plannerEntrySource=saved.entrySource;plannerReturnToCover=saved.returnToCover;
+    if(saved.plannerOpen){
+      const m=planner();if(m){m.classList.add('show');m.setAttribute('aria-hidden','false');}
+      pilgrimageCourseTab=saved.tab;
+      if(saved.view==='detail'&&saved.courseId){openCourse(saved.courseId,loadCourses());}
+      else if(saved.view==='follow'){setView('follow');refreshFollow();}
+      else{setView('list');renderCourseList();}
+      const panel=m&&m.querySelector('.oai-pilgrimage-planner-panel');if(panel)panel.scrollTop=saved.scroll;
+    }else{
+      const settings=document.getElementById('oai-settings-modal');
+      if(saved.settingsOpen&&settings){settings.classList.add('show');settings.setAttribute('aria-hidden','false');}
+      const cover=document.getElementById('cover');
+      if(cover){cover.style.display=saved.coverDisplay;cover.style.opacity=saved.coverOpacity;cover.setAttribute('aria-hidden',saved.coverAria);}
+      document.documentElement.classList.toggle('app-active',saved.appActive);
+    }
+    return true;
+  }
+  window._oaiCompletionNotificationBackHandle=function(){
+    if(!completionNotificationNavigation)return false;
+    const viewer=document.getElementById('oai-visit-photo-viewer');
+    if(viewer&&viewer.classList.contains('show')){_oaiClosePhotoViewer();return true;}
+    const m=planner();if(!m||!m.classList.contains('show')){_completionNotificationRestore();return true;}
+    return typeof window._oaiPilgrimageBackHandle==='function'?window._oaiPilgrimageBackHandle():plannerBackOrClose();
+  };
+
+  async function _openOct31CompletionTest(date,developerTrial,warm){
     const valid=developerTrial?date==='2026-10-31':date===_dailyPreviousDate(Date.now());
     if(!valid||completionTrialOpening)return false;
     completionTrialOpening=true;
@@ -23447,6 +23535,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         }else course=existingForDate();
       }
       const cover=document.getElementById('cover');
+      const plannerModal=planner();
+      const settings=document.getElementById('oai-settings-modal');
+      if(!completionNotificationNavigation){
+        completionNotificationNavigation={warm:!!warm,plannerOpen:!!(warm&&plannerModal&&plannerModal.classList.contains('show')),view:plannerView,courseId:currentCourseId,tab:pilgrimageCourseTab,entrySource:plannerEntrySource,returnToCover:plannerReturnToCover,scroll:(plannerModal&&plannerModal.querySelector('.oai-pilgrimage-planner-panel')||{}).scrollTop||0,settingsOpen:!!(warm&&settings&&settings.classList.contains('show')),coverDisplay:cover?cover.style.display:'',coverOpacity:cover?cover.style.opacity:'',coverAria:cover?cover.getAttribute('aria-hidden')||'false':'false',appActive:document.documentElement.classList.contains('app-active')};
+      }
       if(cover){cover.style.display='none';cover.style.opacity='0';cover.setAttribute('aria-hidden','true');}
       document.documentElement.classList.add('app-active');
       openPlanner({publicCoverEntry:true});
@@ -23464,7 +23557,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     finally{completionTrialOpening=false;}
   }
   window.addEventListener('oai-completion-test-open',e=>{void _openOct31CompletionTest(String(e.detail&&e.detail.date||''),true);});
-  window.addEventListener('oai-completion-notification-open',e=>{void _openOct31CompletionTest(String(e.detail&&e.detail.date||''),false);});
+  window.addEventListener('oai-completion-notification-open',e=>{void _openOct31CompletionTest(String(e.detail&&e.detail.date||''),false,!!(e.detail&&e.detail.warm));});
   window.__oaiCompletionTestHandlerReady=true;
   function _consumePendingCompletionTrial(){
     try{if(window.GildongmuNative){
@@ -23474,8 +23567,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(trial)void _openOct31CompletionTest(String(trial),true);
       }
       if(typeof native.consumePendingCompletionDate==='function'){
+        const warm=typeof native.pendingCompletionFromExistingApp==='function'&&native.pendingCompletionFromExistingApp();
         const date=native.consumePendingCompletionDate();
-        if(date)void _openOct31CompletionTest(String(date),false);
+        if(date)void _openOct31CompletionTest(String(date),false,warm);
       }
     }}catch(e){console.warn('[순례완료 알림 복귀]',e);}
   }
