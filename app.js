@@ -17992,6 +17992,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(parishRow) parishRow.hidden=hasDioceseAndParish;
     if(combinedSummary&&hasDioceseAndParish) combinedSummary.textContent=diocese+' · '+parish.name;
     if(input){ input.disabled=!parish; input.checked=parish ? _isMyParishAutoVisitEnabled() : false; }
+    const native=window.GildongmuNative;
+    [['oai-settings-completion-notice','isPilgrimageCompletionNoticeEnabled'],['oai-settings-memory-notice','isPilgrimageMemoryNoticeEnabled']].forEach(([id,method])=>{
+      const control=document.getElementById(id);if(!control)return;
+      control.disabled=!(native&&typeof native[method]==='function');
+      if(!control.disabled){try{control.checked=!!native[method]();}catch(_e){control.disabled=true;}}
+    });
     try{_renderRouteFrequentSettings();}catch(_e){}
     _oaiRenderRestrictedSettings();
   }
@@ -19576,6 +19582,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   },true);
   document.addEventListener('change',function(e){
     if(e.target&&e.target.id==='oai-settings-auto-visit'&&!e.target.disabled){_setParishAutoVisitEnabled(!!e.target.checked);}
+    const notice=e.target;
+    if(notice&&!notice.disabled&&(notice.id==='oai-settings-completion-notice'||notice.id==='oai-settings-memory-notice')){
+      const native=window.GildongmuNative;
+      const method=notice.id==='oai-settings-completion-notice'?'setPilgrimageCompletionNoticeEnabled':'setPilgrimageMemoryNoticeEnabled';
+      const read=notice.id==='oai-settings-completion-notice'?'isPilgrimageCompletionNoticeEnabled':'isPilgrimageMemoryNoticeEnabled';
+      if(native&&typeof native[method]==='function'&&typeof native[read]==='function'){
+        try{native[method](!!notice.checked);notice.checked=!!native[read]();}catch(_e){notice.checked=!notice.checked;}
+      }
+    }
   },true);
   document.addEventListener('input',function(e){
     if(e.target&&e.target.id==='oai-restricted-place-search'){_oaiRenderRestrictedMatches();return;}
