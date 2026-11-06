@@ -18562,7 +18562,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(button.hasAttribute('data-oai-dev-completion-test')){
         if(!oaiDevPanelUnlocked||!window.GildongmuNative||typeof window.GildongmuNative.sendPilgrimageCompletionTestNotification!=='function')return;
         window.GildongmuNative.sendPilgrimageCompletionTestNotification();
-        oaiDevStatus('10월 31일 순례완료 알림을 요청했습니다. 알림을 누르면 해당 날짜의 기존 완료 상세를 엽니다.');
+        oaiDevStatus('10월 31일 순례완료 알림을 요청했습니다. 알림을 누르면 10월 31일 코스를 확인하고 미등록 시 해당 날짜만 등록한 뒤 상세를 엽니다.');
       }else if(button.hasAttribute('data-oai-dev-anniversary-test')){
         if(!oaiDevPanelUnlocked||!window.GildongmuNative||typeof window.GildongmuNative.sendPilgrimageAnniversaryTestNotification!=='function')return;
         window.GildongmuNative.sendPilgrimageAnniversaryTestNotification();
@@ -23298,35 +23298,50 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     closePlanner();return true;
   }
-  // Native developer notification may arrive cold (after scripts load) or warm.
-  function _openOct31CompletionTest(date){
-    if(date!=='2026-10-31')return false;
-    // Android notification was requested only by the explicit developer test control.
-    window.__OAI_DEV_RUNTIME_ACTIVE__=true;
-    const courses=loadCourses();
-    const course=courses.find(c=>_courseCompletionList(c).some(x=>_dailyIso(x.completedAt)===date));
-    if(!course){
-      // Developer read-only trial: never create/modify a historic completed course.
+  // Developer-only notification: settle exactly the requested visit date before opening its detail.
+  // Reuse the normal one-day GPS registrar; never rebuild historical data or create duplicate courses.
+  let completionTrialOpening=false;
+  async function _openOct31CompletionTest(date){
+    if(date!=='2026-10-31'||completionTrialOpening)return false;
+    completionTrialOpening=true;
+    try{
+      window.__OAI_DEV_RUNTIME_ACTIVE__=true;
+      const existingForDate=()=>loadCourses().find(c=>_courseCompletionList(c).some(x=>_dailyIso(x.completedAt)===date));
+      let course=existingForDate();
+      if(!course){
+        // The boot-time GPS normalization must finish before the regular registrar writes.
+        // It never requires a full history reconstruction for this notification.
+        if(!completionGpsBootReady){
+          await _rebuildCompletionFromGps();
+        }
+        if(completionGpsBootReady&&!dailyRegisterBusy&&!developerCompletionClearThisSession){
+          await _dailyRegisterPrevious(date,false);
+          course=existingForDate();
+        }
+      }
+      const cover=document.getElementById('cover');
+      if(cover){cover.style.display='none';cover.style.opacity='0';cover.setAttribute('aria-hidden','true');}
+      document.documentElement.classList.add('app-active');
       openPlanner({publicCoverEntry:true});
-      pilgrimageCourseTab='complete';setView('list');renderCourseList();
+      pilgrimageCourseTab='complete';
+      if(course){openCourse(course.id,loadCourses());return true;}
+      setView('list');renderCourseList();
       const list=document.getElementById('oai-pilgrimage-course-list');
-      if(list){const message=document.createElement('p');message.className='oai-pilgrimage-list-intro';message.textContent='개발자 테스트: 10월 31일 순례완료 코스를 찾지 못했습니다. 기존 스탬프와 코스는 변경하지 않았습니다.';list.prepend(message);}
+      if(list){
+        const message=document.createElement('p');message.className='oai-pilgrimage-list-intro';
+        message.textContent='개발자 테스트: 10월 31일 완료 코스를 확인하지 못했습니다. GPS 기록이 없거나 등록 보류 상태일 수 있습니다. 원본 스탬프는 변경하지 않았습니다.';
+        list.prepend(message);
+      }
       return false;
-    }
-    const cover=document.getElementById('cover');
-    if(cover){cover.style.display='none';cover.style.opacity='0';cover.setAttribute('aria-hidden','true');}
-    document.documentElement.classList.add('app-active');
-    openPlanner({publicCoverEntry:true});
-    pilgrimageCourseTab='complete';
-    openCourse(course.id,courses);
-    return true;
+    }catch(e){console.warn('[10월 31일 완료 알림]',e);return false;}
+    finally{completionTrialOpening=false;}
   }
-  window.addEventListener('oai-completion-test-open',e=>_openOct31CompletionTest(String(e.detail&&e.detail.date||'')));
+  window.addEventListener('oai-completion-test-open',e=>{void _openOct31CompletionTest(String(e.detail&&e.detail.date||''));});
   window.__oaiCompletionTestHandlerReady=true;
   function _consumePendingCompletionTrial(){
     try{if(window.GildongmuNative&&typeof window.GildongmuNative.consumePendingCompletionTestDate==='function'){
       const date=window.GildongmuNative.consumePendingCompletionTestDate();
-      if(date)_openOct31CompletionTest(String(date));
+      if(date)void _openOct31CompletionTest(String(date));
     }}catch(e){console.warn('[10월 31일 테스트 알림 복귀]',e);}
   }
   if(document.readyState==='complete')_consumePendingCompletionTrial();
