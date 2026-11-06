@@ -4130,6 +4130,7 @@ function _closeShrineVisitDetail(opts){
   window.__OAI_SHRINE_VISIT_DETAIL_HISTORY__=false;
   window.__OAI_SHRINE_VISIT_DETAIL_CLOSING_BY_CODE__=false;
   if(shouldResumeCards) _resumeShrineVisitCardsFromDetail();
+  if(wasOpen&&typeof window._oaiAnniversaryDetailClosed==='function')window._oaiAnniversaryDetailClosed();
 }
 
 function _scrollShrineVisitDioceseTabIntoView(value, behavior){
@@ -5542,6 +5543,7 @@ function _closeParishVisitDetail(opts){
     _oaiNotifyStampListVisibility();
   }
   window.__OAI_PV_DETAIL_FROM_BOOK__=false;_updateParishVisitButton();_oaiNotifyPhotoLocationActivity();
+  if(typeof window._oaiAnniversaryDetailClosed==='function')window._oaiAnniversaryDetailClosed();
 }
 function _ensureParishVisitEditor(){let m=document.getElementById('parish-visit-editor');if(m)return m;m=document.createElement('div');m.id='parish-visit-editor';m.className='shrine-visit-modal';m.innerHTML='<div class="shrine-visit-backdrop" data-pve-close="1"></div><div class="shrine-visit-panel"><div class="shrine-visit-head"><div><div class="shrine-visit-kicker">방문한 성당</div><div id="pve-title" class="shrine-visit-title"></div></div><button type="button" class="shrine-visit-x" data-pve-close="1">×</button></div><label class="shrine-visit-label">방문 날짜<input id="pve-date" type="date"></label><div class="shrine-visit-actions"><button id="pve-save" type="button" class="shrine-visit-save">등록</button><button type="button" class="shrine-visit-cancel" data-pve-close="1">취소</button></div><div id="pve-list" class="shrine-visit-list"></div></div>';document.body.appendChild(m);m.addEventListener('click',function(e){if(e.target.closest&&e.target.closest('[data-pve-close]')){_closeParishVisitEditor();return;}const d=e.target.closest&&e.target.closest('[data-pve-del]');if(d&&window.__OAI_PV_ITEM__){const p=window.__OAI_PV_ITEM__,i=parseInt(d.getAttribute('data-pve-del'),10),v=_parishVisits(p)[i];if(!v||v.method==='gps'||v.method==='linked')return;_oaiVisitConfirm('방문일 '+_formatVisitDate(v.date)+' 기록을 삭제할까요? 삭제한 기록은 되돌릴 수 없습니다.',function(){if(!_deleteParishVisit(p,i)){_oaiVisitToast('삭제하지 못했습니다.');return;}_closeParishVisitEditor();_renderParishVisitDetail();_renderParishVisitBook();_renderInfoCardParishVisit(p);_oaiVisitToast('방문 기록을 삭제했습니다.');});}});m.querySelector('#pve-save').addEventListener('click',function(){const p=window.__OAI_PV_ITEM__,date=document.getElementById('pve-date').value;if(p&&_addParishVisit(p,date,'manual')){_renderParishVisitEditor();_renderParishVisitBook();_renderInfoCardParishVisit(p);}});return m;}
 function _renderParishVisitEditor(){const p=window.__OAI_PV_ITEM__,l=document.getElementById('pve-list');if(!p||!l)return;const a=_parishVisits(p);l.innerHTML=a.length?'<div class="shrine-visit-list-title">방문 날짜 '+a.length+'회</div>'+a.map(function(v,i){return '<div class="shrine-visit-date-row'+(v.method==='gps'?' gps':'')+'"><span>'+_formatVisitDate(v.date)+'</span>'+(v.method==='gps'?'<em class="shrine-visit-gps-lock">GPS 등록</em>':v.method==='linked'?'<em class="shrine-visit-gps-lock">성지 GPS 연결</em>':'<button type="button" data-pve-del="'+i+'">삭제</button>')+'</div>'}).join(''):'<div class="shrine-visit-empty">아직 등록된 방문 날짜가 없습니다.</div>';}
@@ -18235,42 +18237,74 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // 개발자 도구의 화면 노출은 실행 중 10회 탭으로만 해제한다. 저장된 사용 권한과 분리한다.
   let oaiDevPanelUnlocked=false;
   function oaiDevEnabled(){return window.__OAI_DEV_RUNTIME_ACTIVE__===true;}
-  // 알림 사진과 안내창의 복귀 순서는 알림 화면이 소유한다.
+  // Anniversary owns only its overlay and the visit detail that it opened.
+  // Do not reset the underlying screen when a notification arrives in an active app.
   let oaiAnniversaryPhotoReturn=null;
-  function oaiAnniversaryCloseToCover(){
+  let oaiAnniversaryReturnToCover=true;
+  let oaiAnniversaryDetailClosing=false;
+  function oaiAnniversaryClose(){
     const layer=document.getElementById('oai-anniversary-preview');
-    if(layer)layer.remove();
+    if(!layer)return false;
+    const toCover=oaiAnniversaryReturnToCover;
     oaiAnniversaryPhotoReturn=null;
-    if(document.getElementById('oai-visit-photo-viewer')?.classList.contains('show'))_oaiClosePhotoViewer();
-    _closeShrineVisitDetail({fromPopstate:true,noReturnCards:true});
-    _closeParishVisitDetail({noResume:true,fromCover:true});
-    goToCover();
+    layer.remove();
+    const viewer=document.getElementById('oai-visit-photo-viewer');
+    if(viewer&&viewer.classList.contains('show'))_oaiClosePhotoViewer();
+    // Only details entered through the anniversary are closed here.
+    if(!oaiAnniversaryDetailClosing){
+      oaiAnniversaryDetailClosing=true;
+      try{
+        if(document.getElementById('shrine-visit-detail-view')?.classList.contains('show'))
+          _closeShrineVisitDetail({fromPopstate:true,noReturnCards:true});
+        if(document.getElementById('parish-visit-detail')?.classList.contains('show'))
+          _closeParishVisitDetail({noResume:true,fromCover:true});
+      }finally{oaiAnniversaryDetailClosing=false;}
+    }
+    if(toCover)goToCover();
+    return true;
   }
   function oaiAnniversaryRestoreFromPhoto(){
     if(!oaiAnniversaryPhotoReturn)return false;
     const layer=document.getElementById('oai-anniversary-preview');
     oaiAnniversaryPhotoReturn=null;
     if(!layer)return false;
-    _closeShrineVisitDetail({fromPopstate:true,noReturnCards:true});
-    _closeParishVisitDetail({noResume:true});
+    oaiAnniversaryDetailClosing=true;
+    try{
+      if(document.getElementById('shrine-visit-detail-view')?.classList.contains('show'))
+        _closeShrineVisitDetail({fromPopstate:true,noReturnCards:true});
+      if(document.getElementById('parish-visit-detail')?.classList.contains('show'))
+        _closeParishVisitDetail({noResume:true});
+    }finally{oaiAnniversaryDetailClosing=false;}
     layer.style.display='flex';
     return true;
   }
   window._oaiAnniversaryPhotoClosed=oaiAnniversaryRestoreFromPhoto;
+  window._oaiAnniversaryDetailClosed=function(){
+    if(oaiAnniversaryDetailClosing||!oaiAnniversaryPhotoReturn)return false;
+    const viewer=document.getElementById('oai-visit-photo-viewer');
+    if(viewer&&viewer.classList.contains('show'))return false;
+    return oaiAnniversaryRestoreFromPhoto();
+  };
   window._oaiAnniversaryBackHandle=function(){
     const layer=document.getElementById('oai-anniversary-preview');
-    if(!layer)return false;
+    if(!layer){
+      const loading=document.getElementById('oai-anniversary-opening');
+      if(!loading)return false;
+      oaiAnniversaryOpeningCancelled=true;
+      loading.remove();
+      return true;
+    }
     if(oaiAnniversaryPhotoReturn){
       const viewer=document.getElementById('oai-visit-photo-viewer');
       if(viewer&&viewer.classList.contains('show'))_oaiClosePhotoViewer();
       else oaiAnniversaryRestoreFromPhoto();
       return true;
     }
-    oaiAnniversaryCloseToCover();
-    return true;
+    return oaiAnniversaryClose();
   };
   // 기념일은 실제 GPS 스탬프가 있는 날짜만 사용한다. 저장 데이터는 읽기 전용이다.
-  function oaiAnniversaryPreview(date){
+  function oaiAnniversaryPreview(date,warm){
+    oaiAnniversaryReturnToCover=!warm;
     if(date!=='2026-10-09')return;
     const shrineData=_loadShrineVisits(),parishData=_loadParishVisits(),all=[];
     function collect(kind,data,places){
@@ -18312,24 +18346,24 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!layer){
       layer=document.createElement('div');layer.id='oai-anniversary-preview';
       layer.style.cssText='position:fixed;inset:0;z-index:2147483000;background:rgba(16,28,48,.68);display:flex;align-items:center;justify-content:center;padding:18px;box-sizing:border-box';
-      const panel=document.createElement('section');panel.style.cssText='background:#fff;border-radius:17px;width:min(100%,430px);max-height:85dvh;overflow:auto;padding:20px;color:#213149;box-sizing:border-box';
+      const panel=document.createElement('section');panel.style.cssText='background:#fff;border-radius:17px;width:min(100%,430px);max-height:88dvh;overflow:auto;padding:16px;color:#213149;box-sizing:border-box';
       layer.appendChild(panel);document.body.appendChild(layer);
-      layer.addEventListener('click',e=>{if(e.target===layer||e.target.closest('[data-anniversary-close]'))oaiAnniversaryCloseToCover();});
+      layer.addEventListener('click',e=>{if(e.target===layer||e.target.closest('[data-anniversary-close]'))oaiAnniversaryClose();});
     }
     const panel=layer.firstElementChild;panel.replaceChildren();
-    const header=document.createElement('div');header.style.cssText='display:flex;justify-content:space-between;align-items:start;gap:12px;border-bottom:1px solid #a0a8b3;padding-bottom:14px;margin-bottom:12px';
+    const header=document.createElement('div');header.style.cssText='display:flex;justify-content:space-between;align-items:start;gap:12px;border-bottom:1px solid #a0a8b3;padding:5px 0 12px;margin-bottom:12px;position:sticky;top:-16px;background:#fff;z-index:1';
     const title=document.createElement('div');title.innerHTML='<small>2026년 10월 9일</small><h2 style="margin:3px 0;font-size:23px">그날의 순례</h2>';
     const close=document.createElement('button');close.type='button';close.textContent='✕';close.dataset.anniversaryClose='1';close.style.cssText='background:white;border:1px solid #cbd5e1;border-radius:50%;width:34px;height:34px';
     header.append(title,close);panel.appendChild(header);
     const intro=document.createElement('p');intro.textContent=unique.length?'GPS 스탬프가 확인된 '+unique.length+'곳의 순례 기록입니다.':'이 날짜에 연결 가능한 GPS 스탬프 기록이 없습니다.';panel.appendChild(intro);
     unique.forEach((entry,i)=>{
-      const card=document.createElement('article');card.style.cssText='background:#e8eef5;border:1px solid #aebdd0;border-radius:12px;padding:14px;margin:10px 0';
+      const card=document.createElement('article');card.style.cssText='background:#e8eef5;border:1px solid #aebdd0;border-radius:12px;padding:12px;margin:8px 0';
       const h=document.createElement('strong');h.textContent=(i+1)+'. '+entry.item.name;h.style.cssText='display:block;font-size:18px;margin-bottom:8px';card.appendChild(h);
       const note=document.createElement('div');note.textContent='GPS 순례 스탬프 · '+date;note.style.cssText='font-size:13px;color:#64748b;margin-bottom:10px';card.appendChild(note);
       if(entry.photos||entry.memo){
         const detail=document.createElement('div');detail.textContent=[entry.photos?'사진 '+entry.photos+'장':'',entry.memo?'메모 있음':''].filter(Boolean).join(' · ');detail.style.cssText='font-size:13px;color:#475569;margin-bottom:9px';card.appendChild(detail);
         const button=document.createElement('button');button.type='button';button.textContent=entry.photos&&entry.memo?'그날의 사진 · 메모 보기':entry.photos?'그날의 사진 보기':'그날의 메모 보기';
-        button.style.cssText='background:#1d2b4d;color:white;border:0;border-radius:9px;padding:11px;width:100%;font-weight:700';
+        button.style.cssText='background:#1d2b4d;color:white;border:0;border-radius:9px;padding:10px;width:100%;font-weight:700';
         button.addEventListener('click',()=>{
           // The preview may have been open while photos were deleted in another view.
           // Re-read the selected date before navigating; do not leave the preview
@@ -18367,9 +18401,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // parish catalogs are ready. Resolve both before matching persisted GPS records.
   // A failed catalog load must never be presented as 'no GPS records'.
   let oaiAnniversaryOpening=null;
-  function oaiOpenAnniversaryWhenReady(date){
+  let oaiAnniversaryOpeningCancelled=false;
+  function oaiOpenAnniversaryWhenReady(date,warm){
     if(date!=='2026-10-09')return Promise.resolve();
     if(oaiAnniversaryOpening)return oaiAnniversaryOpening;
+    oaiAnniversaryOpeningCancelled=false;
     const loading=document.createElement('div');
     loading.id='oai-anniversary-opening';
     loading.style.cssText='position:fixed;inset:0;z-index:2147483001;background:rgba(16,28,48,.68);display:flex;align-items:center;justify-content:center;padding:20px;box-sizing:border-box';
@@ -18382,15 +18418,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       _ensureShrineDataLoaded(),
       _ensureAllParishDiocesesLoaded({silent:true})
     ]).then(function(){
+      if(oaiAnniversaryOpeningCancelled)return;
       loading.remove();
-      oaiAnniversaryPreview(date);
+      oaiAnniversaryPreview(date,!!warm);
     }).catch(function(err){
+      if(oaiAnniversaryOpeningCancelled)return;
       console.warn('[그날의 순례] 장소 데이터 준비 실패',err);
       status.textContent='순례 자료를 불러오지 못했습니다. 인터넷 연결을 확인하고 다시 시도해 주세요.';
       const retry=document.createElement('button');
       retry.type='button';retry.textContent='다시 불러오기';
       retry.style.cssText='display:block;margin:14px auto 0;padding:10px 18px;background:#1d2b4d;color:white;border:0;border-radius:8px';
-      retry.addEventListener('click',function(){loading.remove();oaiAnniversaryOpening=null;oaiOpenAnniversaryWhenReady(date);});
+      retry.addEventListener('click',function(){loading.remove();oaiAnniversaryOpening=null;oaiOpenAnniversaryWhenReady(date,warm);});
       status.appendChild(retry);
       const close=document.createElement('button');
       close.type='button';close.textContent='닫기';
@@ -18400,12 +18438,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }).finally(function(){oaiAnniversaryOpening=null;});
     return oaiAnniversaryOpening;
   }
-  window.addEventListener('oai-anniversary-notification-open',e=>oaiOpenAnniversaryWhenReady(String(e.detail&&e.detail.date||'')));
+  window.addEventListener('oai-anniversary-notification-open',e=>oaiOpenAnniversaryWhenReady(String(e.detail&&e.detail.date||''),!!(e.detail&&e.detail.warm)));
   window.__oaiAnniversaryHandlerReady=true;
   function oaiReceivePendingAnniversary(){
     try{if(window.GildongmuNative&&typeof window.GildongmuNative.consumePendingAnniversaryDate==='function'){
+      const warm=typeof window.GildongmuNative.pendingAnniversaryFromExistingApp==='function' && window.GildongmuNative.pendingAnniversaryFromExistingApp();
       const date=window.GildongmuNative.consumePendingAnniversaryDate();
-      if(date)oaiOpenAnniversaryWhenReady(String(date));
+      if(date)oaiOpenAnniversaryWhenReady(String(date),warm);
     }}catch(_e){}
   }
   if(document.readyState==='complete')oaiReceivePendingAnniversary();
