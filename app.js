@@ -18602,6 +18602,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(remoteCheck)remoteCheck.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.checkMissingVisitPhotosInDrive==='function');
     const anniversaryTest=document.getElementById('oai-dev-anniversary-test');if(anniversaryTest)anniversaryTest.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.sendPilgrimageAnniversaryTestNotification==='function');
     const completionTest=document.getElementById('oai-dev-completion-test');if(completionTest)completionTest.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.sendPilgrimageCompletionTestNotification==='function');
+    for(const [id,method] of [['oai-dev-july4-completion','sendJuly4CompletionTestNotification'],['oai-dev-july4-memory','sendJuly4MemoryTestNotification']]){const test=document.getElementById(id);if(test)test.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative[method]==='function');}
     if(!oaiDevEnabled()){oaiDevPendingRestore=null;for(const id of ['oai-dev-import-view','oai-dev-restore-preview']){const el=document.getElementById(id);if(el)el.hidden=true;}}
   }
   function oaiDevParseBackupFile(text){
@@ -18716,7 +18717,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }finally{oaiApplyingRestore=false;}
   }
   document.addEventListener('click',function(event){
-    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-apply],[data-oai-dev-failure-preview],[data-oai-dev-daily-results],[data-oai-dev-five-photo-backup],[data-oai-dev-five-photo-verify],[data-oai-dev-photo-download-diagnose],[data-oai-dev-photo-download-copy],[data-oai-dev-missing-photo-drive],[data-oai-dev-missing-photo-drive-copy],[data-oai-dev-anniversary-test],[data-oai-dev-completion-test]');if(!button)return;
+    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-apply],[data-oai-dev-failure-preview],[data-oai-dev-daily-results],[data-oai-dev-five-photo-backup],[data-oai-dev-five-photo-verify],[data-oai-dev-photo-download-diagnose],[data-oai-dev-photo-download-copy],[data-oai-dev-missing-photo-drive],[data-oai-dev-missing-photo-drive-copy],[data-oai-dev-anniversary-test],[data-oai-dev-completion-test],[data-oai-dev-july4-completion],[data-oai-dev-july4-memory]');if(!button)return;
     if(button.id==='oai-settings-version-label'){
       oaiDevTapCount++;
       if(oaiDevTapCount>=10){oaiDevTapCount=0;const next=!(oaiDevEnabled()&&oaiDevPanelUnlocked);oaiDevPanelUnlocked=next;window.__OAI_DEV_RUNTIME_ACTIVE__=next;oaiRefreshDeveloperPanel();const detail=document.getElementById('parish-visit-detail');if(detail&&detail.classList.contains('show'))_renderParishVisitDetail();if(_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null)_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);if(next){oaiDevStatus('개발자 모드가 열렸습니다.');document.getElementById('oai-developer-section').scrollIntoView({block:'nearest',behavior:'smooth'});} }
@@ -18725,7 +18726,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!oaiDevEnabled())return;
     event.preventDefault();
     try{
-      if(button.hasAttribute('data-oai-dev-completion-test')){
+      if(button.hasAttribute('data-oai-dev-july4-completion')){
+        if(!oaiDevPanelUnlocked||!window.GildongmuNative||typeof window.GildongmuNative.sendJuly4CompletionTestNotification!=='function')return;
+        window.GildongmuNative.sendJuly4CompletionTestNotification();
+        oaiDevStatus('7월 4일 완료코스 1회 시험 알림을 요청했습니다. 알림을 눌러 기존 완료 상세를 확인합니다. 등록 데이터는 변경하지 않습니다.');
+      }else if(button.hasAttribute('data-oai-dev-july4-memory')){
+        if(!oaiDevPanelUnlocked||!window.GildongmuNative||typeof window.GildongmuNative.sendJuly4MemoryTestNotification!=='function')return;
+        window.GildongmuNative.sendJuly4MemoryTestNotification();
+        oaiDevStatus('7월 4일 추억 1회 시험 알림을 요청했습니다. 알림을 누르면 해당 날짜의 추억 화면을 엽니다.');
+      }else if(button.hasAttribute('data-oai-dev-completion-test')){
         if(!oaiDevPanelUnlocked||!window.GildongmuNative||typeof window.GildongmuNative.sendPilgrimageCompletionTestNotification!=='function')return;
         window.GildongmuNative.sendPilgrimageCompletionTestNotification();
         oaiDevStatus('10월 31일 순례완료 알림을 요청했습니다. 알림을 누르면 10월 31일 코스를 확인하고 미등록 시 해당 날짜만 등록한 뒤 상세를 엽니다.');
@@ -23513,14 +23522,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   };
 
   async function _openOct31CompletionTest(date,developerTrial,warm){
-    const valid=developerTrial?date==='2026-10-31':date===_dailyPreviousDate(Date.now());
+    const valid=developerTrial?['2026-10-31','2026-07-04'].includes(date):date===_dailyPreviousDate(Date.now());
     if(!valid||completionTrialOpening)return false;
     completionTrialOpening=true;
     try{
       if(developerTrial)window.__OAI_DEV_RUNTIME_ACTIVE__=true;
       const existingForDate=()=>loadCourses().find(c=>_courseCompletionList(c).some(x=>_dailyIso(x.completedAt)===date));
       let course=existingForDate();
-      if(!course){
+      if(!course && !(developerTrial&&date==='2026-07-04')){
         // The boot-time GPS normalization must finish before the regular registrar writes.
         // It never requires a full history reconstruction for this notification.
         if(!completionGpsBootReady){
@@ -23556,7 +23565,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }catch(e){console.warn('[10월 31일 완료 알림]',e);return false;}
     finally{completionTrialOpening=false;}
   }
-  window.addEventListener('oai-completion-test-open',e=>{void _openOct31CompletionTest(String(e.detail&&e.detail.date||''),true);});
+  window.addEventListener('oai-completion-test-open',e=>{void _openOct31CompletionTest(String(e.detail&&e.detail.date||''),true,!!(e.detail&&e.detail.warm));});
   window.addEventListener('oai-completion-notification-open',e=>{void _openOct31CompletionTest(String(e.detail&&e.detail.date||''),false,!!(e.detail&&e.detail.warm));});
   window.__oaiCompletionTestHandlerReady=true;
   function _consumePendingCompletionTrial(){
@@ -23564,7 +23573,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const native=window.GildongmuNative;
       if(typeof native.consumePendingCompletionTestDate==='function'){
         const trial=native.consumePendingCompletionTestDate();
-        if(trial)void _openOct31CompletionTest(String(trial),true);
+        if(trial)void _openOct31CompletionTest(String(trial),true,typeof native.pendingCompletionFromExistingApp==='function'&&native.pendingCompletionFromExistingApp());
       }
       if(typeof native.consumePendingCompletionDate==='function'){
         const warm=typeof native.pendingCompletionFromExistingApp==='function'&&native.pendingCompletionFromExistingApp();
