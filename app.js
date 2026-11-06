@@ -3672,9 +3672,15 @@ function _oaiHydrateVisibleVisitThumbnails(kind){
   pump();
 }
 function _oaiApplyLoadedVisitPhoto(meta,dataUri){if(!meta)return;if(meta.type==='thumb'){const btn=meta.button;if(!btn||!btn.isConnected){if(meta.onSettled)meta.onSettled();return;}const img=btn.querySelector('img');if(!img){if(meta.onSettled)meta.onSettled();return;}img.onload=function(){if(!btn.isConnected){if(meta.onSettled)meta.onSettled();return;}btn.classList.add('loaded');btn.classList.remove('load-error');btn.dataset.oaiLoading='0';if(meta.onSettled)meta.onSettled();};img.onerror=function(){try{img.removeAttribute('src');}catch(_e){}btn.classList.remove('loaded');btn.dataset.oaiLoading='0';if(!meta.forceFull&&!btn.dataset.oaiFullRetried){btn.dataset.oaiFullRetried='1';btn.dataset.oaiLoading='1';const id=btn.getAttribute('data-oai-photo-file')||'';if(id){_oaiLoadVisitPhotoData(id,{type:'thumb',button:btn,driveFileId:btn.getAttribute('data-oai-photo-drive')||'',forceFull:true,onSettled:meta.onSettled});return;}}btn.classList.add('load-error');if(meta.onSettled)meta.onSettled();const ph=btn.querySelector('.oai-visit-photo-placeholder');if(ph)ph.textContent='사진';};img.src=dataUri;return;}if(meta.type==='viewer'){_oaiShowPhotoViewer(meta.kind,meta.index,dataUri);}}
+// The anniversary may open its dated photo set without entering a stamp detail.
+let _oaiAnniversaryViewerContext=null;
+function _oaiViewerJournalContext(kind){
+  return _oaiAnniversaryViewerContext&&_oaiAnniversaryViewerContext.kind===kind
+    ?_oaiAnniversaryViewerContext:_oaiCurrentJournalContext(kind);
+}
 function _oaiOpenPhoto(kind,index){
   if(!_oaiJournalDeveloperEnabled())return;
-  const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;
+  const ctx=_oaiViewerJournalContext(kind);if(!ctx)return;
   const photos=ctx.date==='all'?_oaiAllVisitPhotos(kind,ctx.item,ctx.visits).map(function(e){return e.photo;}):_oaiNormalizePhotos(_oaiGetVisitByDate(kind,ctx.item,ctx.date));
   const ph=photos[index];if(!ph)return;
   _oaiPreparePhotoViewer(kind,index,ctx,photos.length);
@@ -3701,9 +3707,10 @@ function _oaiResetVisitViewerZoom(){
 function _oaiEnsurePhotoViewer(){
   let m=document.getElementById('oai-visit-photo-viewer');if(m)return m;
   m=document.createElement('div');m.id='oai-visit-photo-viewer';m.className='oai-visit-photo-viewer';m.setAttribute('aria-hidden','true');
-  m.innerHTML='<div class="oai-visit-photo-viewer-bg"></div><div class="oai-visit-photo-viewer-top"><span id="oai-visit-photo-viewer-count"></span><button type="button" data-oai-photo-viewer-close="1" aria-label="사진 닫기">×</button></div><div class="oai-visit-photo-viewer-panel"><button type="button" class="oai-visit-photo-nav prev" data-oai-photo-prev="1" aria-label="이전 사진">‹</button><img id="oai-visit-photo-viewer-img" alt="방문 사진" draggable="false"><button type="button" class="oai-visit-photo-nav next" data-oai-photo-next="1" aria-label="다음 사진">›</button></div>';
+  m.innerHTML='<div class="oai-visit-photo-viewer-bg"></div><div class="oai-visit-photo-viewer-top"><span id="oai-visit-photo-viewer-count"></span><button type="button" class="oai-anniversary-viewer-memo-button" data-oai-anniversary-viewer-memo="1" hidden>메모 보기</button><button type="button" data-oai-photo-viewer-close="1" aria-label="사진 닫기">×</button></div><div class="oai-visit-photo-viewer-panel"><button type="button" class="oai-visit-photo-nav prev" data-oai-photo-prev="1" aria-label="이전 사진">‹</button><img id="oai-visit-photo-viewer-img" alt="방문 사진" draggable="false"><button type="button" class="oai-visit-photo-nav next" data-oai-photo-next="1" aria-label="다음 사진">›</button></div>';
   document.body.appendChild(m);
   m.addEventListener('click',function(e){
+    if(e.target.closest&&e.target.closest('[data-oai-anniversary-viewer-memo]')){if(typeof window._oaiAnniversaryShowViewerMemo==='function')window._oaiAnniversaryShowViewerMemo();return;}
     if(e.target.closest&&e.target.closest('[data-oai-photo-viewer-close]')){_oaiClosePhotoViewer();return;}
     if(e.target.closest&&e.target.closest('[data-oai-photo-prev]')){_oaiMovePhotoViewer(-1);return;}
     if(e.target.closest&&e.target.closest('[data-oai-photo-next]')){_oaiMovePhotoViewer(1);return;}
@@ -3766,10 +3773,10 @@ function _oaiEnsurePhotoViewer(){
 function _oaiPhotoViewerOrientation(open){
   try{if(window.GildongmuNative&&typeof window.GildongmuNative.setPhotoViewerRotation==='function')window.GildongmuNative.setPhotoViewerRotation(!!open);}catch(_e){}
 }
-function _oaiPreparePhotoViewer(kind,index,ctx,total){const m=_oaiEnsurePhotoViewer(),img=document.getElementById('oai-visit-photo-viewer-img'),count=document.getElementById('oai-visit-photo-viewer-count');_oaiVisitPhotoViewerState={kind:kind,index:index,ctx:ctx};if(img){_oaiResetVisitViewerZoom();img.removeAttribute('src');img.classList.add('loading');}if(count)count.textContent=(index+1)+' / '+Number(total||0);m.classList.add('show');m.setAttribute('aria-hidden','false');_oaiPhotoViewerOrientation(true);const prev=m.querySelector('[data-oai-photo-prev]'),next=m.querySelector('[data-oai-photo-next]');if(prev)prev.disabled=index<=0;if(next)next.disabled=index>=Number(total||0)-1;try{document.documentElement.classList.add('oai-visit-photo-open');}catch(_e){}}
-function _oaiShowPhotoViewer(kind,index,dataUri){const ctx=_oaiCurrentJournalContext(kind);if(!ctx)return;const photos=ctx.date==='all'?_oaiAllVisitPhotos(kind,ctx.item,ctx.visits).map(function(e){return e.photo;}):_oaiNormalizePhotos(_oaiGetVisitByDate(kind,ctx.item,ctx.date));if(!photos[index])return;const m=_oaiEnsurePhotoViewer(),img=document.getElementById('oai-visit-photo-viewer-img'),count=document.getElementById('oai-visit-photo-viewer-count');_oaiVisitPhotoViewerState={kind:kind,index:index,ctx:ctx};if(img){img.src=dataUri;img.classList.remove('loading');}if(count)count.textContent=(index+1)+' / '+photos.length;m.classList.add('show');m.setAttribute('aria-hidden','false');_oaiPhotoViewerOrientation(true);const prev=m.querySelector('[data-oai-photo-prev]'),next=m.querySelector('[data-oai-photo-next]');if(prev)prev.disabled=index<=0;if(next)next.disabled=index>=photos.length-1;try{document.documentElement.classList.add('oai-visit-photo-open');}catch(_e){}
+function _oaiPreparePhotoViewer(kind,index,ctx,total){const m=_oaiEnsurePhotoViewer(),memoButton=m.querySelector('[data-oai-anniversary-viewer-memo]');if(memoButton)memoButton.hidden=!_oaiAnniversaryViewerContext;const img=document.getElementById('oai-visit-photo-viewer-img'),count=document.getElementById('oai-visit-photo-viewer-count');_oaiVisitPhotoViewerState={kind:kind,index:index,ctx:ctx};if(img){_oaiResetVisitViewerZoom();img.removeAttribute('src');img.classList.add('loading');}if(count)count.textContent=(index+1)+' / '+Number(total||0);m.classList.add('show');m.setAttribute('aria-hidden','false');_oaiPhotoViewerOrientation(true);const prev=m.querySelector('[data-oai-photo-prev]'),next=m.querySelector('[data-oai-photo-next]');if(prev)prev.disabled=index<=0;if(next)next.disabled=index>=Number(total||0)-1;try{document.documentElement.classList.add('oai-visit-photo-open');}catch(_e){}}
+function _oaiShowPhotoViewer(kind,index,dataUri){const st=_oaiVisitPhotoViewerState;if(!st||st.kind!==kind||st.index!==index)return;const ctx=st.ctx;if(!ctx||ctx.kind!==kind)return;const photos=ctx.date==='all'?_oaiAllVisitPhotos(kind,ctx.item,ctx.visits).map(function(e){return e.photo;}):_oaiNormalizePhotos(_oaiGetVisitByDate(kind,ctx.item,ctx.date));if(!photos[index])return;const m=_oaiEnsurePhotoViewer(),img=document.getElementById('oai-visit-photo-viewer-img'),count=document.getElementById('oai-visit-photo-viewer-count');_oaiVisitPhotoViewerState={kind:kind,index:index,ctx:ctx};if(img){img.src=dataUri;img.classList.remove('loading');}if(count)count.textContent=(index+1)+' / '+photos.length;m.classList.add('show');m.setAttribute('aria-hidden','false');_oaiPhotoViewerOrientation(true);const prev=m.querySelector('[data-oai-photo-prev]'),next=m.querySelector('[data-oai-photo-next]');if(prev)prev.disabled=index<=0;if(next)next.disabled=index>=photos.length-1;try{document.documentElement.classList.add('oai-visit-photo-open');}catch(_e){}
 }
-function _oaiClosePhotoViewer(){_oaiPhotoViewerOrientation(false);const m=document.getElementById('oai-visit-photo-viewer');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}const img=document.getElementById('oai-visit-photo-viewer-img');if(img)img.removeAttribute('src');_oaiResetVisitViewerZoom();_oaiVisitPhotoViewerState=null;try{document.documentElement.classList.remove('oai-visit-photo-open');}catch(_e){} if(typeof window._oaiAnniversaryPhotoClosed==='function')window._oaiAnniversaryPhotoClosed(); }
+function _oaiClosePhotoViewer(){_oaiPhotoViewerOrientation(false);_oaiAnniversaryViewerContext=null;const m=document.getElementById('oai-visit-photo-viewer');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}const img=document.getElementById('oai-visit-photo-viewer-img');if(img)img.removeAttribute('src');_oaiResetVisitViewerZoom();_oaiVisitPhotoViewerState=null;try{document.documentElement.classList.remove('oai-visit-photo-open');}catch(_e){} if(typeof window._oaiAnniversaryPhotoClosed==='function')window._oaiAnniversaryPhotoClosed(); }
 try{window._oaiClosePhotoViewer=_oaiClosePhotoViewer;}catch(_e){}
 function _oaiMovePhotoViewer(delta){const st=_oaiVisitPhotoViewerState;if(!st)return;const photos=st.ctx.date==='all'?_oaiAllVisitPhotos(st.kind,st.ctx.item,st.ctx.visits).map(function(e){return e.photo;}):_oaiNormalizePhotos(_oaiGetVisitByDate(st.kind,st.ctx.item,st.ctx.date)),next=Math.max(0,Math.min(photos.length-1,st.index+Number(delta||0)));if(next===st.index)return;_oaiOpenPhoto(st.kind,next);}
 window.oaiVisitPhotoLoaded=function(requestId,ok,mimeType,payload,message){
@@ -18242,24 +18249,92 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   let oaiAnniversaryPhotoReturn=null;
   let oaiAnniversaryReturnToCover=true;
   let oaiAnniversaryDetailClosing=false;
+  let oaiAnniversaryMemoView=null;
+  let oaiAnniversaryMemoScroll=0;
+  let oaiAnniversaryViewerMemo=null;
+  function oaiAnniversaryCloseMemo(){
+    if(!oaiAnniversaryMemoView)return false;
+    const panel=document.querySelector('#oai-anniversary-preview > section');
+    oaiAnniversaryMemoView.remove();
+    oaiAnniversaryMemoView=null;
+    if(panel){Array.from(panel.children).forEach(el=>{
+      if(el.dataset.oaiAnniversaryDisplay!==undefined){
+        const display=el.dataset.oaiAnniversaryDisplay;
+        if(display)el.style.setProperty('display',display);else el.style.removeProperty('display');
+        delete el.dataset.oaiAnniversaryDisplay;
+      }
+    });panel.scrollTop=oaiAnniversaryMemoScroll;}
+    return true;
+  }
+  function oaiAnniversaryShowMemo(entry,date){
+    const layer=document.getElementById('oai-anniversary-preview');
+    const panel=layer&&layer.firstElementChild;
+    const journal=_oaiGetVisitByDate(entry.kind,entry.item,date);
+    const memo=String(journal&&journal.memo||'').trim();
+    if(!panel||!memo)return false;
+    oaiAnniversaryCloseMemo();
+    oaiAnniversaryMemoScroll=panel.scrollTop;
+    Array.from(panel.children).forEach(el=>{el.dataset.oaiAnniversaryDisplay=el.style.display;el.style.setProperty('display','none','important');});
+    const view=document.createElement('div');view.className='oai-anniversary-memo-read';
+    view.style.cssText='display:flex;flex-direction:column;gap:14px;min-height:220px';
+    const head=document.createElement('div');head.style.cssText='display:flex;align-items:center;gap:12px';
+    const back=document.createElement('button');back.type='button';back.textContent='‹ 돌아가기';
+    back.style.cssText='border:1px solid #c8d4e0;background:#fff;border-radius:10px;padding:10px 14px;color:#1b365a;font-weight:750;font-size:15px';
+    back.addEventListener('click',oaiAnniversaryCloseMemo);
+    const heading=document.createElement('strong');heading.textContent='그날의 메모';heading.style.cssText='font-size:20px;color:#172c4a';
+    head.append(back,heading);view.appendChild(head);
+    const name=document.createElement('div');name.textContent=entry.item.name+' · '+date;
+    name.style.cssText='font-size:15px;color:#52627a';view.appendChild(name);
+    const body=document.createElement('div');body.textContent=memo;
+    body.style.cssText='white-space:pre-wrap;overflow-wrap:anywhere;background:#f4f7fa;border:1px solid #d3dfe9;border-radius:12px;padding:18px;font-size:17px;line-height:1.7;color:#253650';
+    view.appendChild(body);panel.appendChild(view);oaiAnniversaryMemoView=view;panel.scrollTop=0;
+    return true;
+  }
+  function oaiAnniversaryCloseViewerMemo(){
+    if(!oaiAnniversaryViewerMemo)return false;
+    oaiAnniversaryViewerMemo.remove();oaiAnniversaryViewerMemo=null;
+    return true;
+  }
+  function oaiAnniversaryUpdateViewerMemoButton(){
+    const viewer=document.getElementById('oai-visit-photo-viewer');
+    const button=viewer&&viewer.querySelector('[data-oai-anniversary-viewer-memo]');
+    if(!button)return;
+    const e=oaiAnniversaryPhotoReturn;
+    const rec=e&&_oaiGetVisitByDate(e.kind,e.item,e.date);
+    button.hidden=!e||!String(rec&&rec.memo||'').trim();
+  }
+  window._oaiAnniversaryShowViewerMemo=function(){
+    const e=oaiAnniversaryPhotoReturn;
+    const viewer=document.getElementById('oai-visit-photo-viewer');
+    if(!e||!viewer||!viewer.classList.contains('show'))return false;
+    const record=_oaiGetVisitByDate(e.kind,e.item,e.date);
+    const memo=String(record&&record.memo||'').trim();
+    if(!memo)return false;
+    if(oaiAnniversaryViewerMemo)return true;
+    const overlay=document.createElement('section');overlay.className='oai-anniversary-viewer-memo';
+    overlay.setAttribute('role','dialog');overlay.setAttribute('aria-label','그날의 메모');
+    const panel=document.createElement('div');panel.className='oai-anniversary-viewer-memo-panel';
+    const header=document.createElement('div');header.className='oai-anniversary-viewer-memo-header';
+    const title=document.createElement('strong');title.textContent='그날의 메모';
+    const back=document.createElement('button');back.type='button';back.textContent='‹ 사진으로 돌아가기';
+    back.addEventListener('click',oaiAnniversaryCloseViewerMemo);
+    header.append(title,back);
+    const label=document.createElement('p');label.textContent=e.item.name+' · '+e.date;
+    const content=document.createElement('div');content.className='oai-anniversary-viewer-memo-text';content.textContent=memo;
+    panel.append(header,label,content);overlay.appendChild(panel);viewer.appendChild(overlay);
+    oaiAnniversaryViewerMemo=overlay;return true;
+  };
   function oaiAnniversaryClose(){
     const layer=document.getElementById('oai-anniversary-preview');
     if(!layer)return false;
     const toCover=oaiAnniversaryReturnToCover;
+    oaiAnniversaryCloseMemo();
+    oaiAnniversaryCloseViewerMemo();
     oaiAnniversaryPhotoReturn=null;
+    _oaiAnniversaryViewerContext=null;
     layer.remove();
     const viewer=document.getElementById('oai-visit-photo-viewer');
     if(viewer&&viewer.classList.contains('show'))_oaiClosePhotoViewer();
-    // Only details entered through the anniversary are closed here.
-    if(!oaiAnniversaryDetailClosing){
-      oaiAnniversaryDetailClosing=true;
-      try{
-        if(document.getElementById('shrine-visit-detail-view')?.classList.contains('show'))
-          _closeShrineVisitDetail({fromPopstate:true,noReturnCards:true});
-        if(document.getElementById('parish-visit-detail')?.classList.contains('show'))
-          _closeParishVisitDetail({noResume:true,fromCover:true});
-      }finally{oaiAnniversaryDetailClosing=false;}
-    }
     if(toCover)goToCover();
     return true;
   }
@@ -18267,14 +18342,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!oaiAnniversaryPhotoReturn)return false;
     const layer=document.getElementById('oai-anniversary-preview');
     oaiAnniversaryPhotoReturn=null;
+    _oaiAnniversaryViewerContext=null;
+    oaiAnniversaryCloseViewerMemo();
+    const memoButton=document.querySelector('#oai-visit-photo-viewer [data-oai-anniversary-viewer-memo]');if(memoButton)memoButton.hidden=true;
     if(!layer)return false;
-    oaiAnniversaryDetailClosing=true;
-    try{
-      if(document.getElementById('shrine-visit-detail-view')?.classList.contains('show'))
-        _closeShrineVisitDetail({fromPopstate:true,noReturnCards:true});
-      if(document.getElementById('parish-visit-detail')?.classList.contains('show'))
-        _closeParishVisitDetail({noResume:true});
-    }finally{oaiAnniversaryDetailClosing=false;}
     layer.style.display='flex';
     return true;
   }
@@ -18294,6 +18365,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       loading.remove();
       return true;
     }
+    if(oaiAnniversaryMemoView)return oaiAnniversaryCloseMemo();
+    if(oaiAnniversaryViewerMemo)return oaiAnniversaryCloseViewerMemo();
     if(oaiAnniversaryPhotoReturn){
       const viewer=document.getElementById('oai-visit-photo-viewer');
       if(viewer&&viewer.classList.contains('show'))_oaiClosePhotoViewer();
@@ -18345,25 +18418,25 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     let layer=document.getElementById('oai-anniversary-preview');
     if(!layer){
       layer=document.createElement('div');layer.id='oai-anniversary-preview';
-      layer.style.cssText='position:fixed;inset:0;z-index:2147483000;background:rgba(16,28,48,.68);display:flex;align-items:center;justify-content:center;padding:18px;box-sizing:border-box';
-      const panel=document.createElement('section');panel.style.cssText='background:#fff;border-radius:17px;width:min(100%,430px);max-height:88dvh;overflow:auto;padding:16px;color:#213149;box-sizing:border-box';
+      layer.style.cssText='position:fixed;inset:0;z-index:2147483000;background:rgba(14,27,48,.72);display:flex;align-items:center;justify-content:center;padding:14px;box-sizing:border-box';
+      const panel=document.createElement('section');panel.style.cssText='background:#fcfbf8;border-radius:20px;width:min(100%,470px);max-height:86dvh;overflow:auto;overscroll-behavior:contain;padding:16px;color:#213149;box-sizing:border-box;box-shadow:0 20px 60px rgba(0,0,0,.22)';
       layer.appendChild(panel);document.body.appendChild(layer);
       layer.addEventListener('click',e=>{if(e.target===layer||e.target.closest('[data-anniversary-close]'))oaiAnniversaryClose();});
     }
-    const panel=layer.firstElementChild;panel.replaceChildren();
-    const header=document.createElement('div');header.style.cssText='display:flex;justify-content:space-between;align-items:start;gap:12px;border-bottom:1px solid #a0a8b3;padding:5px 0 12px;margin-bottom:12px;position:sticky;top:-16px;background:#fff;z-index:1';
-    const title=document.createElement('div');title.innerHTML='<small>2026년 10월 9일</small><h2 style="margin:3px 0;font-size:23px">그날의 순례</h2>';
-    const close=document.createElement('button');close.type='button';close.textContent='✕';close.dataset.anniversaryClose='1';close.style.cssText='background:white;border:1px solid #cbd5e1;border-radius:50%;width:34px;height:34px';
+    const panel=layer.firstElementChild;oaiAnniversaryMemoView=null;panel.replaceChildren();
+    const header=document.createElement('div');header.style.cssText='display:flex;justify-content:space-between;align-items:center;gap:12px;border-bottom:2px solid #d7be89;padding:7px 2px 13px;margin-bottom:12px;position:sticky;top:-16px;background:#fcfbf8;z-index:1';
+    const title=document.createElement('div');title.innerHTML='<small style="color:#7a6337;font-weight:700;font-size:13px">2026년 10월 9일 · 순례의 추억</small><h2 style="margin:4px 0 0;font-size:24px;color:#172d4d">그날의 순례</h2>';
+    const close=document.createElement('button');close.type='button';close.textContent='✕';close.dataset.anniversaryClose='1';close.setAttribute('aria-label','추억 화면 닫기');close.style.cssText='background:#fff;border:1px solid #cbd5e1;border-radius:50%;width:40px;height:40px;color:#203957;font-size:19px;flex-shrink:0';
     header.append(title,close);panel.appendChild(header);
-    const intro=document.createElement('p');intro.textContent=unique.length?'GPS 스탬프가 확인된 '+unique.length+'곳의 순례 기록입니다.':'이 날짜에 연결 가능한 GPS 스탬프 기록이 없습니다.';panel.appendChild(intro);
+    const intro=document.createElement('p');intro.textContent=unique.length?'이날 방문한 '+unique.length+'곳의 기록을 돌아보세요.':'이 날짜에 연결 가능한 GPS 스탬프 기록이 없습니다.';intro.style.cssText='font-size:14px;color:#596b80;margin:0 2px 12px;line-height:1.5';panel.appendChild(intro);
     unique.forEach((entry,i)=>{
-      const card=document.createElement('article');card.style.cssText='background:#e8eef5;border:1px solid #aebdd0;border-radius:12px;padding:12px;margin:8px 0';
-      const h=document.createElement('strong');h.textContent=(i+1)+'. '+entry.item.name;h.style.cssText='display:block;font-size:18px;margin-bottom:8px';card.appendChild(h);
-      const note=document.createElement('div');note.textContent='GPS 순례 스탬프 · '+date;note.style.cssText='font-size:13px;color:#64748b;margin-bottom:10px';card.appendChild(note);
+      const card=document.createElement('article');card.style.cssText='background:#fff;border:1px solid #d6e0e8;border-left:4px solid #b99b61;border-radius:12px;padding:12px 13px;margin:8px 0;box-shadow:0 2px 6px rgba(21,45,75,.05)';
+      const h=document.createElement('strong');h.textContent=(i+1)+'. '+entry.item.name;h.style.cssText='display:block;font-size:17px;line-height:1.4;color:#203756;margin-bottom:5px;overflow-wrap:anywhere';card.appendChild(h);
+      const note=document.createElement('div');note.textContent='GPS 방문 · '+date;note.style.cssText='font-size:12px;color:#77869a;margin-bottom:8px';card.appendChild(note);
       if(entry.photos||entry.memo){
-        const detail=document.createElement('div');detail.textContent=[entry.photos?'사진 '+entry.photos+'장':'',entry.memo?'메모 있음':''].filter(Boolean).join(' · ');detail.style.cssText='font-size:13px;color:#475569;margin-bottom:9px';card.appendChild(detail);
+        const detail=document.createElement('div');detail.textContent=[entry.photos?'사진 '+entry.photos+'장':'',entry.memo?'메모 있음':''].filter(Boolean).join(' · ');detail.style.cssText='font-size:13px;color:#52647a;margin-bottom:8px';card.appendChild(detail);
         const button=document.createElement('button');button.type='button';button.textContent=entry.photos&&entry.memo?'그날의 사진 · 메모 보기':entry.photos?'그날의 사진 보기':'그날의 메모 보기';
-        button.style.cssText='background:#1d2b4d;color:white;border:0;border-radius:9px;padding:10px;width:100%;font-weight:700';
+        button.style.cssText='background:#203b60;color:white;border:0;border-radius:9px;min-height:42px;padding:8px 12px;width:100%;font-weight:700;font-size:14px';
         button.addEventListener('click',()=>{
           // The preview may have been open while photos were deleted in another view.
           // Re-read the selected date before navigating; do not leave the preview
@@ -18376,23 +18449,19 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
             detail.textContent='그날의 사진과 메모가 없습니다.';
             return;
           }
-          oaiAnniversaryPhotoReturn={date:date,kind:entry.kind};
+          // A memo-only visit opens its actual date-specific memo, not merely
+          // the visit detail (which made the button appear broken).
+          if(!photos.length&&hasMemo){oaiAnniversaryShowMemo(entry,date);return;}
+          // Use the existing full-screen personal photo viewer directly.
+          // Only this recorded date is used; no stamp detail is opened.
+          oaiAnniversaryPhotoReturn={date:date,kind:entry.kind,item:entry.item};
+          _oaiAnniversaryViewerContext={kind:entry.kind,item:entry.item,date:date,visits:[]};
           layer.style.display='none';
-          if(entry.kind==='shrine'){
-            _openShrineVisitDetail(SHRINES.indexOf(entry.item));
-            window.__OAI_SHRINE_JOURNAL_DATE__=date;
-            _renderShrineVisitDetail(SHRINES.indexOf(entry.item));
-          }else{
-            _openParishVisitDetail(entry.item);
-            window.__OAI_PARISH_JOURNAL_DATE__=date;
-            _renderParishVisitDetail();
-          }
-          // Photo viewer is only opened when a live photo entry exists.
-          // Memo-only records remain in the date-specific detail view.
-          if(photos.length)_oaiOpenPhoto(entry.kind,0);
+          _oaiOpenPhoto(entry.kind,0);
+          oaiAnniversaryUpdateViewerMemoButton();
         });card.appendChild(button);
       }else{
-        const stamp=document.createElement('div');stamp.textContent='✓ 그날의 방문 스탬프가 기록되어 있습니다.';stamp.style.cssText='font-size:14px;color:#34465c;font-weight:650';card.appendChild(stamp);
+        const stamp=document.createElement('div');stamp.textContent='✓ 방문 스탬프 기록';stamp.style.cssText='font-size:13px;color:#536879;font-weight:650';card.appendChild(stamp);
       }
       panel.appendChild(card);
     });
