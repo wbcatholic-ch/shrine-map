@@ -18687,6 +18687,16 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     oaiDevPendingRestore=null;const check=document.getElementById('oai-dev-restore-check');if(check)check.checked=false;
     document.getElementById('oai-dev-restore-preview').hidden=true;
     if(!payload||typeof payload!=='object')throw Error('백업 파일 형식이 올바르지 않습니다.');
+    const missing=document.getElementById('oai-dev-stamp-missing-dates');
+    if(missing){missing.replaceChildren();missing.hidden=true;}
+    const agreement=document.getElementById('oai-dev-restore-agreement');
+    const applyButton=document.getElementById('oai-dev-restore-apply');
+    if(agreement)agreement.textContent='현재 기기의 개인 기록이 이 백업으로 교체된다는 점을 확인했습니다.';
+    if(applyButton){applyButton.textContent='전체 덮어쓰기 복원';applyButton.classList.add('oai-dev-danger');}
+    if(payload.format==='cgm-stamp-additive'){
+      oaiDevPreviewStampMerge(payload);
+      return;
+    }
     // Never allow a partial historical backup to erase present-day pilgrimage or parish records.
     if(payload.format!=='cgm-manual-full'||payload.schema!==1||!payload.data||typeof payload.data!=='object'||Array.isArray(payload.data))throw Error('전체 수동 백업 코드만 복원할 수 있습니다. 과거 일부 기록용 CGM1은 복원할 수 없습니다.');
     const entries=Object.entries(payload.data);
@@ -18700,8 +18710,130 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     document.getElementById('oai-dev-restore-preview').hidden=false;
     oaiDevStatus('복원 내용을 확인한 뒤 동의해 주세요.');
   }
+  /* 34곳만 추가하는 개발자 전용 복원. 전체 교체 백업 포맷과 절대 혼용하지 않는다.
+     수동 방문만 추가하고, 기존 사진/메모/GPS/완료코스/다른 날짜 기록은 그대로 둔다. */
+  const OAI_STAMP_MERGE_BATCH='friend-stamps-34-20261107';
+  function oaiDevPreviewStampMerge(payload){
+    if(payload.schema!==1||payload.batchId!==OAI_STAMP_MERGE_BATCH||
+       !Array.isArray(payload.entries)||payload.entries.length!==34)throw Error('34곳 전용 추가 복원 JSON이 아닙니다.');
+    const ids=new Set();let missingCount=0;
+    const holder=document.getElementById('oai-dev-stamp-missing-dates');
+    for(const [i,item] of payload.entries.entries()){
+      if(!item||!['shrine','parish'].includes(item.kind)||
+         typeof item.key!=='string'||!item.key||typeof item.name!=='string'||!item.name||
+         typeof item.diocese!=='string'||!item.diocese||typeof item.date!=='string')throw Error('복원 장소 정보가 올바르지 않습니다: '+(i+1));
+      const id=item.kind+'|'+item.key+'|'+item.date;
+      if(ids.has(id))throw Error('복원 목록에 중복 장소가 있습니다: '+item.name);
+      ids.add(id);
+      if(item.date && !_isVisitDate(item.date))throw Error('방문 날짜 오류: '+item.name);
+      if(!item.date){
+        if(item.kind!=='parish')throw Error('성지 날짜가 누락되었습니다: '+item.name);
+        missingCount++;
+        const label=document.createElement('label');
+        label.style.cssText='display:block;font-size:13px;font-weight:700;margin:8px 0 4px';
+        label.textContent=item.name+' 실제 방문일';
+        const input=document.createElement('input');input.type='date';input.required=true;
+        input.dataset.oaiStampDateIndex=String(i);
+        input.max=_todayISODate();input.style.cssText='display:block;width:100%;max-width:240px;padding:8px;margin:0 0 8px';
+        holder.append(label,input);
+      }
+    }
+    if(missingCount!==4)throw Error('날짜 미확인 성당이 정확히 네 곳이어야 합니다.');
+    holder.hidden=false;
+    const label=document.getElementById('oai-dev-restore-agreement');
+    if(label)label.textContent='기존 기록은 유지하고 누락된 수동 방문만 추가하는 것을 확인했습니다.';
+    const button=document.getElementById('oai-dev-restore-apply');
+    if(button){button.textContent='기존 기록 보존 · 34곳 추가';button.classList.remove('oai-dev-danger');}
+    document.getElementById('oai-dev-restore-details').textContent=
+      '추가 병합 전용 34곳(사진 30곳 + 별도 성당 4곳). 전체 덮어쓰기가 아닙니다. '+
+      '날짜가 없는 네 성당의 실제 방문일을 아래에 입력하세요. 기존 GPS·메모·사진·순례코스는 변경하지 않습니다.';
+    oaiDevPendingRestore=payload;
+    document.getElementById('oai-dev-restore-preview').hidden=false;
+    oaiDevStatus('34곳 추가 복원 파일 확인 완료. 네 성당의 방문 날짜를 입력해 주세요.');
+  }
+  function oaiDevReadStampStore(key){
+    const raw=localStorage.getItem(key);
+    if(raw===null)return {raw:null,data:{}};
+    const data=JSON.parse(raw);
+    if(!data||typeof data!=='object'||Array.isArray(data))throw Error('기존 저장소 형식이 손상되어 복원을 중지했습니다: '+key);
+    return {raw,data};
+  }
+  async function oaiDevApplyStampMerge(payload){
+    if(!oaiDevEnabled()||!oaiDevPanelUnlocked)throw Error('개발자 모드에서만 가능합니다.');
+    const entries=payload.entries.map((r,i)=>{
+      const item=Object.assign({},r);
+      if(!item.date){const field=document.querySelector('[data-oai-stamp-date-index="'+i+'"]');item.date=field&&field.value||'';}
+      if(!_isVisitDate(item.date)||item.date>_todayISODate())throw Error('실제 방문일을 확인해 주세요: '+item.name);
+      return item;
+    });
+    // 공식 명부와 일치하는 장소만 복원. 이름이 같아도 식별키가 다르면 보류.
+    await Promise.all([_ensureShrineDataLoaded(),_ensureParishDioceseDataLoaded('DG'),_ensureParishDioceseDataLoaded('DJ'),_ensureParishDioceseDataLoaded('JJ')]);
+    const resolved=entries.map(function(r){
+      const src=r.kind==='shrine'?(SHRINES||[]):(PARISHES||[]);
+      const matches=src.filter(function(p){
+        if(!p||String(p.name||'')!==r.name||String(p.diocese||'')!==r.diocese)return false;
+        return r.kind==='shrine'?_getShrineVisitKey(p)===r.key:_parishVisitKey(p)===r.key;
+      });
+      if(matches.length!==1)throw Error('장소 명부와 일치하지 않아 복원을 중지했습니다: '+r.name);
+      return {kind:r.kind,place:matches[0],date:r.date};
+    });
+    const shrine=oaiDevReadStampStore(OAI_SHRINE_VISITS_KEY),parish=oaiDevReadStampStore(OAI_PARISH_VISITS_KEY);
+    const deletedKey=OAI_DELETED_MANUAL_VISITS_KEY,deleted=oaiDevReadStampStore(deletedKey);
+    const originals={[OAI_SHRINE_VISITS_KEY]:shrine.raw,[OAI_PARISH_VISITS_KEY]:parish.raw,[deletedKey]:deleted.raw};
+    let added=0,skipped=0;const addedDates=[];
+    resolved.forEach(function(row){
+      const p=row.place,kind=row.kind,store=kind==='shrine'?shrine.data:parish.data;
+      const key=kind==='shrine'?_getShrineVisitKey(p):_parishVisitStoredKey(p,store);
+      if(!key)throw Error('장소 ID 누락: '+p.name);
+      // 보존을 위해 기존 키/별칭 후보가 여러 개면 병합을 거부한다.
+      const alternatives=Object.keys(store).filter(function(k){
+        const t=store[k];return k!==key&&t&&typeof t==='object'&&!Array.isArray(t)&&
+          (kind==='shrine'&&((p.seq&&String(t.seq||'')===String(p.seq))||
+             (String(t.diocese||'')===String(p.diocese||'')&&String(t.name||'')===String(p.name||'')))||
+           kind==='parish'&&String(t.diocese||'')===String(p.diocese||'')&&String(t.name||'')===String(p.name||''));
+      });
+      if(alternatives.length)throw Error('동일 장소 기록이 여러 키에 있어 병합을 보류합니다: '+p.name);
+      let rec=store[key];
+      if(rec!=null&&(!rec||typeof rec!=='object'||Array.isArray(rec)||!Array.isArray(rec.visits)))throw Error('기존 기록 형식이 달라 병합 불가: '+p.name);
+      if(!rec)rec={name:p.name||'',diocese:p.diocese||'',visits:[],...(kind==='shrine'?{seq:p.seq||''}:{addr:p.addr||''})};
+      if(_hasVisitDate(rec.visits,row.date)){skipped++;return;}
+      if(!_appendVisitOnce(rec,row.date,'manual'))throw Error('수동 방문 추가 실패: '+p.name);
+      if(!rec.placeId)rec.placeId=_oaiPlaceCanonicalId(kind,p);
+      store[key]=rec;added++;addedDates.push({kind:kind,key:key,date:row.date});
+    });
+    // 이전에 삭제된 수동기록의 동일 장소/날짜 삭제 표시는 신규 복원분만 해제.
+    addedDates.forEach(function(r){delete deleted.data[r.kind+'|'+encodeURIComponent(r.key)+'|'+r.date];});
+    const updates={};
+    if(addedDates.some(x=>x.kind==='shrine'))updates[OAI_SHRINE_VISITS_KEY]=JSON.stringify(shrine.data);
+    if(addedDates.some(x=>x.kind==='parish'))updates[OAI_PARISH_VISITS_KEY]=JSON.stringify(parish.data);
+    const deletedNext=JSON.stringify(deleted.data);
+    if(deleted.raw!==null && deletedNext!==deleted.raw)updates[deletedKey]=deletedNext;
+    // 쓰기 직전 다른 작업이 원본을 변경했는지 검증하고 충돌 시 취소.
+    for(const key of Object.keys(originals))if(localStorage.getItem(key)!==originals[key])throw Error('복원 중 다른 저장 작업이 발생했습니다. 다시 시도해 주세요.');
+    oaiApplyingRestore=true;
+    try{
+      for(const [key,value] of Object.entries(updates)){
+        localStorage.setItem(key,value);
+        if(localStorage.getItem(key)!==value)throw Error('저장 확인 실패: '+key);
+      }
+    }catch(error){
+      for(const key of Object.keys(updates)){
+        try{if(originals[key]===null)localStorage.removeItem(key);else localStorage.setItem(key,originals[key]);}catch(rollbackError){console.error('[추가 복원 롤백 실패]',key,rollbackError);}
+      }
+      throw error;
+    }finally{oaiApplyingRestore=false;}
+    oaiDevPendingRestore=null;
+    document.getElementById('oai-dev-restore-preview').hidden=true;
+    if(added) {oaiBackupDirty=true;oaiQueueBackup(1700);}
+    oaiDevStatus('수동 스탬프 복원 완료: 신규 '+added+'곳 / 이미 있어 유지 '+skipped+'곳. 기존 GPS·사진·메모·코스 보존. 스탬프북을 다시 열어 확인하세요.');
+  }
   function oaiDevApplyRestore(){
     if(!oaiDevEnabled()||!oaiDevPendingRestore||!document.getElementById('oai-dev-restore-check').checked){oaiDevStatus('복원 내용을 확인하고 동의란에 체크해 주세요.');return;}
+    if(oaiDevPendingRestore.format==='cgm-stamp-additive'){
+      const payload=oaiDevPendingRestore;
+      oaiDevApplyStampMerge(payload).catch(err=>oaiDevStatus('기존 기록은 유지했습니다. 복원 실패: '+(err.message||'알 수 없는 오류')));
+      return;
+    }
     const incoming=oaiDevPendingRestore.data;
     // Replace only personal data keys; never touch app files, media bytes or Cloud credentials.
     const prior={};const keys=[];
