@@ -18855,7 +18855,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }finally{oaiApplyingRestore=false;}
   }
   document.addEventListener('click',function(event){
-    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-apply],[data-oai-dev-failure-preview],[data-oai-dev-daily-results],[data-oai-dev-five-photo-backup],[data-oai-dev-five-photo-verify],[data-oai-dev-photo-download-diagnose],[data-oai-dev-photo-download-copy],[data-oai-dev-missing-photo-drive],[data-oai-dev-missing-photo-drive-copy],[data-oai-dev-anniversary-test],[data-oai-dev-completion-test],[data-oai-dev-july4-completion],[data-oai-dev-july4-memory]');if(!button)return;
+    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-paste-open],[data-oai-dev-paste-preview],[data-oai-dev-apply],[data-oai-dev-failure-preview],[data-oai-dev-daily-results],[data-oai-dev-five-photo-backup],[data-oai-dev-five-photo-verify],[data-oai-dev-photo-download-diagnose],[data-oai-dev-photo-download-copy],[data-oai-dev-missing-photo-drive],[data-oai-dev-missing-photo-drive-copy],[data-oai-dev-anniversary-test],[data-oai-dev-completion-test],[data-oai-dev-july4-completion],[data-oai-dev-july4-memory]');if(!button)return;
     if(button.id==='oai-settings-version-label'){
       oaiDevTapCount++;
       if(oaiDevTapCount>=10){oaiDevTapCount=0;const next=!(oaiDevEnabled()&&oaiDevPanelUnlocked);oaiDevPanelUnlocked=next;window.__OAI_DEV_RUNTIME_ACTIVE__=next;oaiRefreshDeveloperPanel();const detail=document.getElementById('parish-visit-detail');if(detail&&detail.classList.contains('show'))_renderParishVisitDetail();if(_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null)_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);if(next){oaiDevStatus('개발자 모드가 열렸습니다.');document.getElementById('oai-developer-section').scrollIntoView({block:'nearest',behavior:'smooth'});} }
@@ -18926,6 +18926,29 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         const fileInput=document.getElementById('oai-dev-import-file');
         if(fileInput){fileInput.value='';oaiDevStatus('아래 파일 선택 버튼을 눌러 JSON 백업 파일을 선택하세요.');}
         else oaiDevStatus('파일 선택 요소를 찾지 못했습니다.');
+      }
+      else if(button.hasAttribute('data-oai-dev-paste-open')){
+        if(!oaiDevPanelUnlocked)return;
+        oaiDevPendingRestore=null;
+        document.getElementById('oai-dev-import-view').hidden=false;
+        document.getElementById('oai-dev-restore-preview').hidden=true;
+        const field=document.getElementById('oai-dev-restore-paste');
+        if(field){field.value='';field.focus();}
+        oaiDevStatus('34곳 추가 복원 JSON을 붙여넣고 검사하기를 눌러 주세요. Android 파일 선택창을 열지 않습니다.');
+      }
+      else if(button.hasAttribute('data-oai-dev-paste-preview')){
+        if(!oaiDevPanelUnlocked)return;
+        const field=document.getElementById('oai-dev-restore-paste');
+        const raw=field&&field.value||'';
+        oaiDevPendingRestore=null;
+        document.getElementById('oai-dev-restore-preview').hidden=true;
+        if(!raw.trim())throw Error('복원 JSON 코드를 붙여넣어 주세요.');
+        if(raw.length>250000)throw Error('붙여넣기 크기가 너무 큽니다. 34곳 추가 복원 JSON만 지원합니다.');
+        const payload=oaiDevParseBackupFile(raw);
+        if(!payload||payload.format!=='cgm-stamp-additive')throw Error('붙여넣기는 34곳 추가 복원 JSON만 허용합니다. 전체 백업은 기존 파일 복원을 이용해 주세요.');
+        oaiDevPreview(payload);
+        const selected=document.getElementById('oai-dev-selected-file');
+        if(selected)selected.textContent='붙여넣은 34곳 추가 복원 JSON 검사를 완료했습니다.';
       }
       else if(button.hasAttribute('data-oai-dev-apply'))oaiDevApplyRestore();
       else if(button.hasAttribute('data-oai-dev-daily-results')){
