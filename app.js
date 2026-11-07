@@ -18710,12 +18710,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     document.getElementById('oai-dev-restore-preview').hidden=false;
     oaiDevStatus('복원 내용을 확인한 뒤 동의해 주세요.');
   }
-  /* 34곳만 추가하는 개발자 전용 복원. 전체 교체 백업 포맷과 절대 혼용하지 않는다.
+  /* 사진 30곳과 추가 4곳 및 확정 공통화 10곳 복원. 전체 교체 백업 포맷과 절대 혼용하지 않는다.
      수동 방문만 추가하고, 기존 사진/메모/GPS/완료코스/다른 날짜 기록은 그대로 둔다. */
-  const OAI_STAMP_MERGE_BATCH='friend-stamps-34-20261107';
+  const OAI_STAMP_MERGE_BATCH='friend-stamps-44-linked-20261107';
   function oaiDevPreviewStampMerge(payload){
     if(payload.schema!==1||payload.batchId!==OAI_STAMP_MERGE_BATCH||
-       !Array.isArray(payload.entries)||payload.entries.length!==34)throw Error('34곳 전용 추가 복원 JSON이 아닙니다.');
+       !Array.isArray(payload.entries)||payload.entries.length!==44)throw Error('공통화 포함 44개 스탬프 전용 추가 복원 JSON이 아닙니다.');
     const ids=new Set();let missingCount=0;
     const holder=document.getElementById('oai-dev-stamp-missing-dates');
     for(const [i,item] of payload.entries.entries()){
@@ -18744,14 +18744,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const label=document.getElementById('oai-dev-restore-agreement');
     if(label)label.textContent='기존 기록은 유지하고 누락된 수동 방문만 추가하는 것을 확인했습니다.';
     const button=document.getElementById('oai-dev-restore-apply');
-    if(button){button.textContent='기존 기록 보존 · 34곳 추가';button.classList.remove('oai-dev-danger');}
+    if(button){button.textContent='기존 기록 보존 · 최대 44개 스탬프 추가';button.classList.remove('oai-dev-danger');}
     document.getElementById('oai-dev-restore-details').textContent=
-      '추가 병합 전용 34곳(사진 30곳 + 별도 성당 4곳). 전체 덮어쓰기가 아닙니다. '+
+      '추가 병합 전용 원본 34곳 + 공통화 10곳 = 44개 스탬프. 전체 덮어쓰기가 아닙니다. '+
       (missingCount?'날짜가 없는 네 성당의 실제 방문일을 아래에 입력하세요. ':'네 성당의 방문 날짜와 시각이 입력되어 있습니다. ')+
       '기존 GPS·메모·사진·순례코스는 변경하지 않습니다.';
     oaiDevPendingRestore=payload;
     document.getElementById('oai-dev-restore-preview').hidden=false;
-    oaiDevStatus(missingCount?'34곳 추가 복원 파일 확인 완료. 네 성당의 방문 날짜를 입력해 주세요.':'34곳 추가 복원 파일 확인 완료. 방문 날짜와 시각을 검토한 뒤 복원해 주세요.');
+    oaiDevStatus(missingCount?'44개 스탬프 복원 파일 확인 완료. 미확인 방문 날짜를 입력해 주세요.':'44개 스탬프 복원 파일 확인 완료. 날짜·시각 및 공통화 쌍을 확인한 뒤 복원해 주세요.');
   }
   function oaiDevReadStampStore(key){
     const raw=localStorage.getItem(key);
@@ -18769,7 +18769,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       return item;
     });
     // 공식 명부와 일치하는 장소만 복원. 이름이 같아도 식별키가 다르면 보류.
-    await Promise.all([_ensureShrineDataLoaded(),_ensureParishDioceseDataLoaded('DG'),_ensureParishDioceseDataLoaded('DJ'),_ensureParishDioceseDataLoaded('JJ')]);
+    await Promise.all([_ensureShrineDataLoaded(),_ensureParishDioceseDataLoaded('DG'),_ensureParishDioceseDataLoaded('DJ'),_ensureParishDioceseDataLoaded('JJ'),_ensureParishDioceseDataLoaded('BS'),_ensureParishDioceseDataLoaded('CJ')]);
     const resolved=entries.map(function(r){
       const src=r.kind==='shrine'?(SHRINES||[]):(PARISHES||[]);
       const matches=src.filter(function(p){
@@ -18778,6 +18778,24 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       });
       if(matches.length!==1)throw Error('장소 명부와 일치하지 않아 복원을 중지했습니다: '+r.name);
       return {kind:r.kind,place:matches[0],date:r.date,time:r.time||''};
+    });
+    // 수동 복원에서도 확정된 성지·성당 공통화 쌍을 독립 기록으로 보존한다.
+    // 누락·날짜 불일치 시 저장 전 전체 중단한다(근접 위치/주소만으로 추정하지 않음).
+    resolved.forEach(function(row){
+      const group=OAI_SHARED_VISIT_JOURNAL_GROUPS.find(function(g){
+        return row.kind==='shrine' ?
+          (g.shrineSeq&&String(row.place.seq||'')===g.shrineSeq)||row.place.name===g.shrineName :
+          (row.place.name===g.parishName&&String(row.place.diocese||'')===String(_DIO[g.parishDiocese]||''));
+      });
+      if(!group)return;
+      const mate=resolved.filter(function(other){
+        if(other.kind===row.kind||other.date!==row.date)return false;
+        return row.kind==='shrine' ?
+          other.place.name===group.parishName&&other.place.diocese===_DIO[group.parishDiocese] :
+          (group.shrineSeq&&String(other.place.seq||'')===group.shrineSeq)||other.place.name===group.shrineName;
+      });
+      if(mate.length!==1)throw Error('공통화 성지·성당 쌍이 누락되었습니다: '+row.place.name);
+      if(row.time&&mate[0].time&&row.time!==mate[0].time)throw Error('공통화 방문 시각이 다릅니다: '+row.place.name);
     });
     const shrine=oaiDevReadStampStore(OAI_SHRINE_VISITS_KEY),parish=oaiDevReadStampStore(OAI_PARISH_VISITS_KEY);
     const deletedKey=OAI_DELETED_MANUAL_VISITS_KEY,deleted=oaiDevReadStampStore(deletedKey);
