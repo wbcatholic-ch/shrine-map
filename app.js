@@ -18726,6 +18726,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(ids.has(id))throw Error('복원 목록에 중복 장소가 있습니다: '+item.name);
       ids.add(id);
       if(item.date && !_isVisitDate(item.date))throw Error('방문 날짜 오류: '+item.name);
+      if(item.time!==undefined && (!/^([01]\d|2[0-3]):[0-5]\d$/.test(item.time)||!item.date))throw Error('방문 시각 오류: '+item.name);
       if(!item.date){
         if(item.kind!=='parish')throw Error('성지 날짜가 누락되었습니다: '+item.name);
         missingCount++;
@@ -18738,18 +18739,19 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         holder.append(label,input);
       }
     }
-    if(missingCount!==4)throw Error('날짜 미확인 성당이 정확히 네 곳이어야 합니다.');
-    holder.hidden=false;
+    if(missingCount!==0&&missingCount!==4)throw Error('복원 파일의 미확인 방문 날짜 수가 올바르지 않습니다.');
+    holder.hidden=missingCount===0;
     const label=document.getElementById('oai-dev-restore-agreement');
     if(label)label.textContent='기존 기록은 유지하고 누락된 수동 방문만 추가하는 것을 확인했습니다.';
     const button=document.getElementById('oai-dev-restore-apply');
     if(button){button.textContent='기존 기록 보존 · 34곳 추가';button.classList.remove('oai-dev-danger');}
     document.getElementById('oai-dev-restore-details').textContent=
       '추가 병합 전용 34곳(사진 30곳 + 별도 성당 4곳). 전체 덮어쓰기가 아닙니다. '+
-      '날짜가 없는 네 성당의 실제 방문일을 아래에 입력하세요. 기존 GPS·메모·사진·순례코스는 변경하지 않습니다.';
+      (missingCount?'날짜가 없는 네 성당의 실제 방문일을 아래에 입력하세요. ':'네 성당의 방문 날짜와 시각이 입력되어 있습니다. ')+
+      '기존 GPS·메모·사진·순례코스는 변경하지 않습니다.';
     oaiDevPendingRestore=payload;
     document.getElementById('oai-dev-restore-preview').hidden=false;
-    oaiDevStatus('34곳 추가 복원 파일 확인 완료. 네 성당의 방문 날짜를 입력해 주세요.');
+    oaiDevStatus(missingCount?'34곳 추가 복원 파일 확인 완료. 네 성당의 방문 날짜를 입력해 주세요.':'34곳 추가 복원 파일 확인 완료. 방문 날짜와 시각을 검토한 뒤 복원해 주세요.');
   }
   function oaiDevReadStampStore(key){
     const raw=localStorage.getItem(key);
@@ -18775,7 +18777,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         return r.kind==='shrine'?_getShrineVisitKey(p)===r.key:_parishVisitKey(p)===r.key;
       });
       if(matches.length!==1)throw Error('장소 명부와 일치하지 않아 복원을 중지했습니다: '+r.name);
-      return {kind:r.kind,place:matches[0],date:r.date};
+      return {kind:r.kind,place:matches[0],date:r.date,time:r.time||''};
     });
     const shrine=oaiDevReadStampStore(OAI_SHRINE_VISITS_KEY),parish=oaiDevReadStampStore(OAI_PARISH_VISITS_KEY);
     const deletedKey=OAI_DELETED_MANUAL_VISITS_KEY,deleted=oaiDevReadStampStore(deletedKey);
@@ -18798,6 +18800,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(!rec)rec={name:p.name||'',diocese:p.diocese||'',visits:[],...(kind==='shrine'?{seq:p.seq||''}:{addr:p.addr||''})};
       if(_hasVisitDate(rec.visits,row.date)){skipped++;return;}
       if(!_appendVisitOnce(rec,row.date,'manual'))throw Error('수동 방문 추가 실패: '+p.name);
+      // 사용자가 제공한 실제 방문 시각이 있을 때만 신규 수동 방문의 저장 시각으로 보존.
+      if(row.time){
+        const stamp=new Date(row.date+'T'+row.time+':00+09:00');
+        if(!Number.isFinite(stamp.getTime()))throw Error('방문 시각 오류: '+p.name);
+        const visit=rec.visits.find(v=>_visitDateOf(v)===row.date&&String(v.method||'manual').toLowerCase()==='manual');
+        if(!visit)throw Error('추가한 방문 기록을 찾지 못했습니다: '+p.name);
+        visit.savedAt=stamp.toISOString();
+      }
       if(!rec.placeId)rec.placeId=_oaiPlaceCanonicalId(kind,p);
       store[key]=rec;added++;addedDates.push({kind:kind,key:key,date:row.date});
     });
