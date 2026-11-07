@@ -4320,39 +4320,111 @@ function _nearestShrineWithinAutoVisitRadius(lat,lng,unvisitedOnDate){
   });
   return best;
 }
-/* 방문 안내는 GPS 저장 성공 후 큐에 넣는다. 다른 방문이 발생해도 앞선 안내를 덮지 않는다. */
+/* GPS 방문 안내는 저장과 분리한다. 백그라운드에서 WebView가 새로 로드되어도
+   아직 표시하지 않은 안내만 복구하며, 화면이 보일 때 축하창과 음성을 함께 실행한다.
+   기존 방문 저장소·GPS 중복 판정·순례 중 경로는 변경하지 않는다. */
+const OAI_PENDING_GPS_VISIT_NOTICES_KEY='oai_pending_gps_visit_notices_v1813';
+const OAI_PENDING_GPS_NOTICE_MAX_AGE_MS=6*60*60*1000;
 var _oaiDeferredVisitNotices=[];
 var _oaiDeferredVisitNoticeTimer=0;
-function _oaiVisitNoticeBlocked(){try{if(document.visibilityState==='hidden')return true;/* 방문 축하창은 이미 화면이 보일 때 과거 백그라운드 복귀 플래그로 무기한 차단하지 않는다. 실제 열린 창만 확인한다. */if(window.oaiHasCriticalModalOpen&&window.oaiHasCriticalModalOpen())return true;if(_isAnyVisitModalOpen())return true;const courseNotice=document.getElementById('oai-cgm-congrats');if(courseNotice&&!courseNotice.hidden)return true;const parishNotice=document.getElementById('parish-auto-visit-notice');if(parishNotice&&parishNotice.classList.contains('show'))return true;}catch(_e){}return false;}
-function _scheduleDeferredVisitNoticeFlush(){clearTimeout(_oaiDeferredVisitNoticeTimer);if(_oaiDeferredVisitNotices.length)_oaiDeferredVisitNoticeTimer=setTimeout(_flushDeferredVisitNotices,500);}
-function _queueDeferredVisitNotice(kind,place){if(!place)return;const id=typeof _oaiPlaceCanonicalId==='function'?_oaiPlaceCanonicalId(kind,kind==='shrine'&&place.item?place.item:place):'';if(_oaiDeferredVisitNotices.some(x=>x.kind===kind&&((id&&x.id===id)||x.place===place)))return;_oaiDeferredVisitNotices.push({kind,place,id});_scheduleDeferredVisitNoticeFlush();}
+function _oaiVisitNoticeId(kind,place){
+  try{return _oaiPlaceCanonicalId(kind,kind==='shrine'&&place.item?place.item:place)||'';}catch(_e){return '';}
+}
+function _oaiReadPendingVisitNotices(){
+  try{
+    const value=JSON.parse(localStorage.getItem(OAI_PENDING_GPS_VISIT_NOTICES_KEY)||'[]');
+    const now=Date.now();
+    return (Array.isArray(value)?value:[]).filter(function(x){
+      return x&&['shrine','parish'].includes(x.kind)&&typeof x.id==='string'&&x.id&&
+        Number.isFinite(Number(x.at))&&Number(x.at)<=now+60000&&now-Number(x.at)<=OAI_PENDING_GPS_NOTICE_MAX_AGE_MS&&
+        /^\d{4}-\d{2}-\d{2}$/.test(String(x.date||''));
+    }).slice(0,30);
+  }catch(_e){return [];}
+}
+function _oaiWritePendingVisitNotices(rows){
+  try{localStorage.setItem(OAI_PENDING_GPS_VISIT_NOTICES_KEY,JSON.stringify(rows.slice(0,30)));return true;}
+  catch(e){console.warn('[GPS 방문 안내] 대기 상태 저장 실패',e);return false;}
+}
+function _oaiRestorePendingVisitNotices(){
+  const rows=_oaiReadPendingVisitNotices();
+  const valid=[];
+  for(const x of rows){
+    const catalog=x.kind==='shrine'?(typeof SHRINES!=='undefined'?SHRINES:[]):(typeof PARISHES!=='undefined'?PARISHES:[]);
+    if(!Array.isArray(catalog)||!catalog.length){valid.push(x);continue;}
+    const item=catalog.find(function(z){return z&&_oaiVisitNoticeId(x.kind,z)===x.id;});
+    if(!item){console.warn('[GPS 방문 안내] 명부에 없는 대기 기록 제외',x.kind,x.id);continue;}
+    valid.push(x);
+    if(_oaiDeferredVisitNotices.some(y=>y.kind===x.kind&&y.id===x.id&&y.date===x.date))continue;
+    _oaiDeferredVisitNotices.push({kind:x.kind,place:x.kind==='shrine'?{item:item,idx:catalog.indexOf(item)}:item,id:x.id,date:x.date});
+  }
+  if(valid.length!==rows.length)_oaiWritePendingVisitNotices(valid);
+}
+function _oaiVisitNoticeBlocked(){try{
+  if(document.visibilityState==='hidden')return true;
+  // 짧은 복귀는 아래 visibility 딜레이로 안정화한다. 오래 남은 복귀 플래그로 안내를 무기한 차단하지 않는다.
+  if(window.oaiHasCriticalModalOpen&&window.oaiHasCriticalModalOpen())return true;
+  if(_isAnyVisitModalOpen())return true;
+  const courseNotice=document.getElementById('oai-cgm-congrats');
+  if(courseNotice&&!courseNotice.hidden)return true;
+  const parishNotice=document.getElementById('parish-auto-visit-notice');
+  if(parishNotice&&parishNotice.classList.contains('show'))return true;
+}catch(_e){}return false;}
+function _scheduleDeferredVisitNoticeFlush(){
+  clearTimeout(_oaiDeferredVisitNoticeTimer);
+  _oaiDeferredVisitNoticeTimer=0;
+  if(document.visibilityState==='hidden')return;
+  if(_oaiDeferredVisitNotices.length||_oaiReadPendingVisitNotices().length)
+    _oaiDeferredVisitNoticeTimer=setTimeout(_flushDeferredVisitNotices,900);
+}
+function _queueDeferredVisitNotice(kind,place,date){
+  if(!place)return;
+  const id=_oaiVisitNoticeId(kind,place),day=String(date||_todayISODate());
+  if(!id)return;
+  const rows=_oaiReadPendingVisitNotices();
+  if(!rows.some(x=>x.kind===kind&&x.id===id&&x.date===day)){
+    rows.push({kind:kind,id:id,date:day,at:Date.now()});
+    _oaiWritePendingVisitNotices(rows);
+  }
+  if(!_oaiDeferredVisitNotices.some(x=>x.kind===kind&&x.id===id&&x.date===day))
+    _oaiDeferredVisitNotices.push({kind:kind,place:place,id:id,date:day});
+  _scheduleDeferredVisitNoticeFlush();
+}
 function _flushDeferredVisitNotices(){
-  if(!_oaiDeferredVisitNotices.length)return;
+  if(document.visibilityState==='hidden')return;
+  if(!_oaiDeferredVisitNotices.length)_oaiRestorePendingVisitNotices();
+  if(!_oaiDeferredVisitNotices.length){
+    // 명부가 아직 로딩되지 않은 경우 사라지지 않게 다음에 다시 조회한다.
+    if(_oaiReadPendingVisitNotices().length)_scheduleDeferredVisitNoticeFlush();
+    return;
+  }
   if(_oaiVisitNoticeBlocked()){_scheduleDeferredVisitNoticeFlush();return;}
   const next=_oaiDeferredVisitNotices[0];
   try{
-    // 성지·성당은 같은 방문 축하창을 사용한다. 실제로 열린 경우에만 큐에서 제거한다.
     if(next.kind==='shrine')_openShrineAutoVisitModal(next.place);
     else if(next.kind==='parish')_showParishAutoVisitNotice(next.place);
     else {console.warn('[GPS 방문 안내] 알 수 없는 방문 유형',next.kind);_oaiDeferredVisitNotices.shift();}
     const shown=document.getElementById('shrine-auto-visit-modal');
     if(shown&&shown.classList.contains('show')&&shown.getAttribute('aria-hidden')==='false'){
+      // 화면이 실제 표시된 다음에만 큐를 제거하고 음성을 요청한다.
       _oaiDeferredVisitNotices.shift();
+      const rows=_oaiReadPendingVisitNotices().filter(x=>!(x.kind===next.kind&&x.id===next.id&&x.date===next.date));
+      _oaiWritePendingVisitNotices(rows);
+      const item=next.kind==='shrine'?next.place.item:next.place;
+      if(item)_oaiSpeakNewGpsStamp(next.kind,item.name);
     }else if(next===_oaiDeferredVisitNotices[0]){
-      // 다른 모달이 막았거나 표시 실패한 경우 안내를 삭제하지 않는다.
-      // 재시도는 기존 공통 대기열에서 수행하며 중복 창을 생성하지 않는다.
       console.warn('[GPS 방문 안내] 축하창 표시 대기',next.kind);
     }
   }catch(e){console.warn('[GPS 방문 안내] 축하창 표시 재시도 예정',e);}
-  if(_oaiDeferredVisitNotices.length)_scheduleDeferredVisitNoticeFlush();
+  if(_oaiDeferredVisitNotices.length||_oaiReadPendingVisitNotices().length)_scheduleDeferredVisitNoticeFlush();
   else if(typeof window._oaiFlushPilgrimageCongratulations==='function')setTimeout(window._oaiFlushPilgrimageCongratulations,120);
 }
+// 기존 공통 복귀 이벤트를 재사용한다. 새 위치 수신·GPS 워치나 이벤트 루프는 만들지 않는다.
 document.addEventListener('click',function(){if(_oaiDeferredVisitNotices.length)setTimeout(_flushDeferredVisitNotices,120);},true);
 window.addEventListener('oai-short-background-return',function(){setTimeout(_flushDeferredVisitNotices,900);},{passive:true});
 window.addEventListener('oai-long-background-return',function(){setTimeout(_flushDeferredVisitNotices,900);},{passive:true});
-/* 화면 복귀가 기존 짧은/긴 복귀 이벤트를 발생시키지 않아도 보류 방문 안내를 재확인한다. */
-document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible'&&_oaiDeferredVisitNotices.length)_flushDeferredVisitNotices();});
-window.addEventListener('pageshow',function(){if(_oaiDeferredVisitNotices.length)_flushDeferredVisitNotices();});
+document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')setTimeout(_flushDeferredVisitNotices,650);});
+window.addEventListener('pageshow',function(){if(document.visibilityState==='visible')setTimeout(_flushDeferredVisitNotices,650);});
+setTimeout(_flushDeferredVisitNotices,1600);
 
 function _ensureShrineAutoVisitModal(){
   let modal=document.getElementById('shrine-auto-visit-modal');
@@ -5210,12 +5282,10 @@ function _oaiNotifyActiveCourseGpsVisit(){
 function _oaiNotifyNewGpsStamp(kind,item,date){
   if(kind==='shrine'){
     _oaiLastGpsShrineNotice={id:_oaiPlaceCanonicalId('shrine',item),date:date,timestamp:Date.now()};
-    _oaiSpeakNewGpsStamp('shrine',item.name);
-    _queueDeferredVisitNotice('shrine',{item:item,idx:Array.isArray(SHRINES)?SHRINES.indexOf(item):-1});
+    _queueDeferredVisitNotice('shrine',{item:item,idx:Array.isArray(SHRINES)?SHRINES.indexOf(item):-1},date);
     return;
   }
   if(kind!=='parish')return;
-  _oaiSpeakNewGpsStamp('parish',item.name);
   // 공동 인증된 성지의 축하창이 있으면 성당 축하창은 반복하지 않는다.
   // 성당 GPS 수신이 먼저 들어온 경우에도 잠시 기다려 성지 안내를 우선한다.
   const linked=_oaiJointStampPair('parish',item);
@@ -5225,9 +5295,9 @@ function _oaiNotifyNewGpsStamp(kind,item,date){
     setTimeout(function(){
       const last=_oaiLastGpsShrineNotice;
       const same=last&&last.id===shrineId&&last.date===date&&Date.now()-last.timestamp<3500;
-      if(!same)_queueDeferredVisitNotice('parish',item);
+      if(!same)_queueDeferredVisitNotice('parish',item,date);
     },1000);
-  }else _queueDeferredVisitNotice('parish',item);
+  }else _queueDeferredVisitNotice('parish',item,date);
 }
 function _registerGpsPlaceVisit(kind,item,date,measuredAt){
   try{
