@@ -18854,8 +18854,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       oaiDevStatus('복원 실패: '+(err.message||'저장 공간 오류'));
     }finally{oaiApplyingRestore=false;}
   }
-  document.addEventListener('click',function(event){
-    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-paste-open],[data-oai-dev-paste-preview],[data-oai-dev-apply],[data-oai-dev-failure-preview],[data-oai-dev-daily-results],[data-oai-dev-five-photo-backup],[data-oai-dev-five-photo-verify],[data-oai-dev-photo-download-diagnose],[data-oai-dev-photo-download-copy],[data-oai-dev-missing-photo-drive],[data-oai-dev-missing-photo-drive-copy],[data-oai-dev-anniversary-test],[data-oai-dev-completion-test],[data-oai-dev-july4-completion],[data-oai-dev-july4-memory]');if(!button)return;
+  document.addEventListener('click',async function(event){
+    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-recovery34],[data-oai-dev-paste-open],[data-oai-dev-paste-preview],[data-oai-dev-apply],[data-oai-dev-failure-preview],[data-oai-dev-daily-results],[data-oai-dev-five-photo-backup],[data-oai-dev-five-photo-verify],[data-oai-dev-photo-download-diagnose],[data-oai-dev-photo-download-copy],[data-oai-dev-missing-photo-drive],[data-oai-dev-missing-photo-drive-copy],[data-oai-dev-anniversary-test],[data-oai-dev-completion-test],[data-oai-dev-july4-completion],[data-oai-dev-july4-memory]');if(!button)return;
     if(button.id==='oai-settings-version-label'){
       oaiDevTapCount++;
       if(oaiDevTapCount>=10){oaiDevTapCount=0;const next=!(oaiDevEnabled()&&oaiDevPanelUnlocked);oaiDevPanelUnlocked=next;window.__OAI_DEV_RUNTIME_ACTIVE__=next;oaiRefreshDeveloperPanel();const detail=document.getElementById('parish-visit-detail');if(detail&&detail.classList.contains('show'))_renderParishVisitDetail();if(_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null)_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);if(next){oaiDevStatus('개발자 모드가 열렸습니다.');document.getElementById('oai-developer-section').scrollIntoView({block:'nearest',behavior:'smooth'});} }
@@ -18926,6 +18926,23 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         const fileInput=document.getElementById('oai-dev-import-file');
         if(fileInput){fileInput.value='';oaiDevStatus('아래 파일 선택 버튼을 눌러 JSON 백업 파일을 선택하세요.');}
         else oaiDevStatus('파일 선택 요소를 찾지 못했습니다.');
+      }
+      else if(button.hasAttribute('data-oai-dev-recovery34')){
+        if(!oaiDevPanelUnlocked)return;
+        oaiDevPendingRestore=null;
+        document.getElementById('oai-dev-import-view').hidden=false;
+        document.getElementById('oai-dev-restore-preview').hidden=true;
+        const selected=document.getElementById('oai-dev-selected-file');
+        if(selected)selected.textContent='34곳 복원 JSON을 불러오고 있습니다.';
+        oaiDevStatus('34곳 스탬프 복원 파일을 읽어 검사합니다. 아직 저장하지 않습니다.');
+        const response=await fetch('./gildongmu-stamp-recovery-34.json',{cache:'no-store'});
+        if(!response.ok)throw Error('34곳 복원 JSON 불러오기 실패 (HTTP '+response.status+'). 웹 V1809 전체 파일이 배포되었는지 확인하세요.');
+        const raw=await response.text();
+        if(raw.length>250000)throw Error('복원 파일 크기가 예상과 다릅니다.');
+        const payload=oaiDevParseBackupFile(raw);
+        if(!payload||payload.format!=='cgm-stamp-additive'||payload.batchId!=='friend-stamps-34-20261107')throw Error('34곳 전용 JSON 형식이 아닙니다.');
+        oaiDevPreview(payload);
+        if(selected)selected.textContent='34곳 복원 파일 검사를 완료했습니다. 아래 복원 내용을 확인하세요.';
       }
       else if(button.hasAttribute('data-oai-dev-paste-open')){
         if(!oaiDevPanelUnlocked)return;
