@@ -18597,19 +18597,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(copy)copy.hidden=state==='working'||!message;
   };
   function oaiRefreshDeveloperPanel(){
-    const section=document.getElementById('oai-developer-section');if(section)section.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked);
-    const test=document.getElementById('oai-dev-five-photo-backup');
-    if(test)test.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.testBackupFiveVisitPhotos==='function');
-    const verify=document.getElementById('oai-dev-five-photo-verify');
-    if(verify)verify.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.verifyBackupFiveVisitPhotos==='function');
-    const diag=document.getElementById('oai-dev-photo-download-diagnose');
-    if(diag)diag.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.diagnoseVisitPhotoDownloads==='function');
-    const remoteCheck=document.getElementById('oai-dev-missing-photo-drive');
-    if(remoteCheck)remoteCheck.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.checkMissingVisitPhotosInDrive==='function');
-    const anniversaryTest=document.getElementById('oai-dev-anniversary-test');if(anniversaryTest)anniversaryTest.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.sendPilgrimageAnniversaryTestNotification==='function');
-    const completionTest=document.getElementById('oai-dev-completion-test');if(completionTest)completionTest.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.sendPilgrimageCompletionTestNotification==='function');
-    for(const [id,method] of [['oai-dev-july4-completion','sendJuly4CompletionTestNotification'],['oai-dev-july4-memory','sendJuly4MemoryTestNotification']]){const test=document.getElementById(id);if(test)test.hidden=!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative[method]==='function');}
-    if(!oaiDevEnabled()){oaiDevPendingRestore=null;for(const id of ['oai-dev-import-view','oai-dev-restore-preview']){const el=document.getElementById(id);if(el)el.hidden=true;}}
+    const enabled=oaiDevEnabled()&&oaiDevPanelUnlocked;
+    const section=document.getElementById('oai-developer-section');if(section)section.hidden=!enabled;
+    for(const [id,method] of [['oai-dev-july4-completion','sendJuly4CompletionTestNotification'],['oai-dev-july4-memory','sendJuly4MemoryTestNotification']]){
+      const el=document.getElementById(id);
+      if(el)el.hidden=!(enabled&&window.GildongmuNative&&typeof window.GildongmuNative[method]==='function');
+    }
+    if(!enabled){oaiDevPendingRestore=null;for(const id of ['oai-dev-import-view','oai-dev-restore-preview']){const el=document.getElementById(id);if(el)el.hidden=true;}}
   }
   function oaiDevParseBackupFile(text){
     const raw=String(text||'').trim();
@@ -18654,17 +18648,23 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   window.oaiDevNativeBackupResult=function(action,ok,encoded,message){
     if(!oaiDevEnabled()||!oaiDevPanelUnlocked)return;
+    if(action==='open'){
+      const view=document.getElementById('oai-dev-import-view');if(view)view.hidden=false;
+      const selected=document.getElementById('oai-dev-selected-file');
+      if(selected)selected.textContent=ok?'선택한 JSON 파일을 검사하고 있습니다.':'파일을 불러오지 못했습니다.';
+    }
     if(!ok){oaiDevStatus(message||'파일 작업이 취소되었거나 실패했습니다.');return;}
     if(action==='save'){oaiDevStatus('백업 JSON 파일이 선택한 위치에 저장되었습니다.');return;}
     if(action==='open'){
       try{
-        const raw=atob(encoded||'');
+        if(!encoded)throw Error('파일 데이터가 전달되지 않았습니다.');
+        const raw=atob(encoded);
         const bytes=Uint8Array.from(raw,c=>c.charCodeAt(0));
         const json=new TextDecoder('utf-8',{fatal:true}).decode(bytes);
         const payload=oaiDevParseBackupFile(json);
         oaiDevPreview(payload);
-        const el=document.getElementById('oai-dev-selected-file');if(el)el.textContent='Android에서 선택한 백업 파일';
-      }catch(err){oaiDevStatus('백업 파일 검사 실패: '+(err.message||'잘못된 JSON'));}
+        const el=document.getElementById('oai-dev-selected-file');if(el)el.textContent='JSON 파일을 받았습니다. 아래 검사 결과를 확인하세요.';
+      }catch(err){oaiDevPendingRestore=null;const preview=document.getElementById('oai-dev-restore-preview');if(preview)preview.hidden=true;oaiDevStatus('JSON 첨부/검사 실패: '+(err.message||'잘못된 JSON'));}
     }
   };
   async function oaiDevLoadBackupFile(file){
@@ -18855,7 +18855,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }finally{oaiApplyingRestore=false;}
   }
   document.addEventListener('click',async function(event){
-    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-recovery34],[data-oai-dev-paste-open],[data-oai-dev-paste-preview],[data-oai-dev-apply],[data-oai-dev-failure-preview],[data-oai-dev-daily-results],[data-oai-dev-five-photo-backup],[data-oai-dev-five-photo-verify],[data-oai-dev-photo-download-diagnose],[data-oai-dev-photo-download-copy],[data-oai-dev-missing-photo-drive],[data-oai-dev-missing-photo-drive-copy],[data-oai-dev-anniversary-test],[data-oai-dev-completion-test],[data-oai-dev-july4-completion],[data-oai-dev-july4-memory]');if(!button)return;
+    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-apply],[data-oai-dev-july4-completion],[data-oai-dev-july4-memory]');if(!button)return;
     if(button.id==='oai-settings-version-label'){
       oaiDevTapCount++;
       if(oaiDevTapCount>=10){oaiDevTapCount=0;const next=!(oaiDevEnabled()&&oaiDevPanelUnlocked);oaiDevPanelUnlocked=next;window.__OAI_DEV_RUNTIME_ACTIVE__=next;oaiRefreshDeveloperPanel();const detail=document.getElementById('parish-visit-detail');if(detail&&detail.classList.contains('show'))_renderParishVisitDetail();if(_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null)_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);if(next){oaiDevStatus('개발자 모드가 열렸습니다.');document.getElementById('oai-developer-section').scrollIntoView({block:'nearest',behavior:'smooth'});} }
@@ -18872,44 +18872,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(!oaiDevPanelUnlocked||!window.GildongmuNative||typeof window.GildongmuNative.sendJuly4MemoryTestNotification!=='function')return;
         window.GildongmuNative.sendJuly4MemoryTestNotification();
         oaiDevStatus('7월 4일 추억 1회 시험 알림을 요청했습니다. 알림을 누르면 해당 날짜의 추억 화면을 엽니다.');
-      }else if(button.hasAttribute('data-oai-dev-completion-test')){
-        if(!oaiDevPanelUnlocked||!window.GildongmuNative||typeof window.GildongmuNative.sendPilgrimageCompletionTestNotification!=='function')return;
-        window.GildongmuNative.sendPilgrimageCompletionTestNotification();
-        oaiDevStatus('10월 31일 순례완료 알림을 요청했습니다. 알림을 누르면 10월 31일 코스를 확인하고 미등록 시 해당 날짜만 등록한 뒤 상세를 엽니다.');
-      }else if(button.hasAttribute('data-oai-dev-anniversary-test')){
-        if(!oaiDevPanelUnlocked||!window.GildongmuNative||typeof window.GildongmuNative.sendPilgrimageAnniversaryTestNotification!=='function')return;
-        window.GildongmuNative.sendPilgrimageAnniversaryTestNotification();
-        oaiDevStatus('10월 9일 순례 추억 알림을 요청했습니다. 알림 권한을 허용한 뒤 상태표시줄을 확인해 주세요.');
-      }else if(button.hasAttribute('data-oai-dev-missing-photo-drive')){
-        if(!oaiDevPanelUnlocked||!window.GildongmuNative||typeof window.GildongmuNative.checkMissingVisitPhotosInDrive!=='function')return;
-        window.oaiDevMissingPhotoDriveCheckResult('working','미완료 사진의 Google Drive 파일을 읽기 전용으로 조회 중입니다.');
-        window.GildongmuNative.checkMissingVisitPhotosInDrive();
-      }else if(button.hasAttribute('data-oai-dev-missing-photo-drive-copy')){
-        const content=document.getElementById('oai-dev-missing-photo-drive-report');
-        if(!content||!content.textContent)return;
-        if(navigator.clipboard&&navigator.clipboard.writeText){
-          navigator.clipboard.writeText(content.textContent).then(()=>oaiDevStatus('Drive 확인 결과를 복사했습니다.'))
-            .catch(()=>oaiDevStatus('길게 눌러 복사해 주세요.'));
-        }else oaiDevStatus('길게 눌러 복사해 주세요.');
-      }else if(button.hasAttribute('data-oai-dev-photo-download-diagnose')){
-        if(!oaiDevPanelUnlocked||!window.GildongmuNative||typeof window.GildongmuNative.diagnoseVisitPhotoDownloads!=='function')return;
-        const diagBtn=document.getElementById('oai-dev-photo-download-diagnose');if(diagBtn)diagBtn.disabled=true;
-        window.oaiDevPhotoDownloadDiagnosisResult('working','휴대폰에 저장된 다운로드 상태를 읽는 중입니다.');
-        window.GildongmuNative.diagnoseVisitPhotoDownloads();
-      }else if(button.hasAttribute('data-oai-dev-photo-download-copy')){
-        const content=document.getElementById('oai-dev-photo-download-report');
-        if(!content||!content.textContent)return;
-        if(navigator.clipboard&&navigator.clipboard.writeText){
-          navigator.clipboard.writeText(content.textContent).then(()=>oaiDevStatus('진단 결과를 복사했습니다.')).catch(()=>oaiDevStatus('자동 복사가 차단됐습니다. 결과를 길게 눌러 복사해 주세요.'));
-        }else oaiDevStatus('결과를 길게 눌러 복사해 주세요.');
-      }else if(button.hasAttribute('data-oai-dev-five-photo-verify')){
-        if(!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.verifyBackupFiveVisitPhotos==='function'))return;
-        window.oaiDevPhotoVerifyResult('working','Google 백업 사진을 읽기 전용으로 확인합니다.');
-        window.GildongmuNative.verifyBackupFiveVisitPhotos();
-      }else if(button.hasAttribute('data-oai-dev-five-photo-backup')){
-        if(!(oaiDevEnabled()&&oaiDevPanelUnlocked&&window.GildongmuNative&&typeof window.GildongmuNative.testBackupFiveVisitPhotos==='function'))return;
-        window.oaiDevPhotoBackupResult('working','Google Drive 연결 및 사진 백업을 시작합니다.');
-        window.GildongmuNative.testBackupFiveVisitPhotos();
       }else if(button.hasAttribute('data-oai-dev-export')){
         if(!oaiDevPanelUnlocked)return;
         oaiDevSaveBackupFile().catch(err=>oaiDevStatus('백업 파일 생성 실패: '+(err.message||'알 수 없는 오류')));
@@ -18918,62 +18880,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         oaiDevPendingRestore=null;
         document.getElementById('oai-dev-import-view').hidden=false;
         document.getElementById('oai-dev-restore-preview').hidden=true;
+        const selected=document.getElementById('oai-dev-selected-file');if(selected)selected.textContent='';
         if(window.GildongmuNative && typeof window.GildongmuNative.openDeveloperBackup==='function'){
-          oaiDevStatus('Android에서 복원할 JSON 파일을 선택해 주세요.');
-          window.GildongmuNative.openDeveloperBackup();
-          return;
+          oaiDevStatus('Android JSON 선택창을 여는 중입니다. 선택한 파일은 검사 후 아래에 표시됩니다.');
+          try{window.GildongmuNative.openDeveloperBackup();}catch(err){oaiDevStatus('Android JSON 첨부 실행 실패: '+(err.message||String(err)));}
+        }else{
+          const fileInput=document.getElementById('oai-dev-import-file');
+          if(fileInput){fileInput.value='';fileInput.click();oaiDevStatus('JSON 파일을 선택하세요.');}
+          else oaiDevStatus('파일 선택 요소를 찾지 못했습니다.');
         }
-        const fileInput=document.getElementById('oai-dev-import-file');
-        if(fileInput){fileInput.value='';oaiDevStatus('아래 파일 선택 버튼을 눌러 JSON 백업 파일을 선택하세요.');}
-        else oaiDevStatus('파일 선택 요소를 찾지 못했습니다.');
-      }
-      else if(button.hasAttribute('data-oai-dev-recovery34')){
-        if(!oaiDevPanelUnlocked)return;
-        oaiDevPendingRestore=null;
-        document.getElementById('oai-dev-import-view').hidden=false;
-        document.getElementById('oai-dev-restore-preview').hidden=true;
-        const selected=document.getElementById('oai-dev-selected-file');
-        if(selected)selected.textContent='34곳 복원 JSON을 불러오고 있습니다.';
-        oaiDevStatus('34곳 스탬프 복원 파일을 읽어 검사합니다. 아직 저장하지 않습니다.');
-        const response=await fetch('./gildongmu-stamp-recovery-34.json',{cache:'no-store'});
-        if(!response.ok)throw Error('34곳 복원 JSON 불러오기 실패 (HTTP '+response.status+'). 웹 V1809 전체 파일이 배포되었는지 확인하세요.');
-        const raw=await response.text();
-        if(raw.length>250000)throw Error('복원 파일 크기가 예상과 다릅니다.');
-        const payload=oaiDevParseBackupFile(raw);
-        if(!payload||payload.format!=='cgm-stamp-additive'||payload.batchId!=='friend-stamps-34-20261107')throw Error('34곳 전용 JSON 형식이 아닙니다.');
-        oaiDevPreview(payload);
-        if(selected)selected.textContent='34곳 복원 파일 검사를 완료했습니다. 아래 복원 내용을 확인하세요.';
-      }
-      else if(button.hasAttribute('data-oai-dev-paste-open')){
-        if(!oaiDevPanelUnlocked)return;
-        oaiDevPendingRestore=null;
-        document.getElementById('oai-dev-import-view').hidden=false;
-        document.getElementById('oai-dev-restore-preview').hidden=true;
-        const field=document.getElementById('oai-dev-restore-paste');
-        if(field){field.value='';field.focus();}
-        oaiDevStatus('34곳 추가 복원 JSON을 붙여넣고 검사하기를 눌러 주세요. Android 파일 선택창을 열지 않습니다.');
-      }
-      else if(button.hasAttribute('data-oai-dev-paste-preview')){
-        if(!oaiDevPanelUnlocked)return;
-        const field=document.getElementById('oai-dev-restore-paste');
-        const raw=field&&field.value||'';
-        oaiDevPendingRestore=null;
-        document.getElementById('oai-dev-restore-preview').hidden=true;
-        if(!raw.trim())throw Error('복원 JSON 코드를 붙여넣어 주세요.');
-        if(raw.length>250000)throw Error('붙여넣기 크기가 너무 큽니다. 34곳 추가 복원 JSON만 지원합니다.');
-        const payload=oaiDevParseBackupFile(raw);
-        if(!payload||payload.format!=='cgm-stamp-additive')throw Error('붙여넣기는 34곳 추가 복원 JSON만 허용합니다. 전체 백업은 기존 파일 복원을 이용해 주세요.');
-        oaiDevPreview(payload);
-        const selected=document.getElementById('oai-dev-selected-file');
-        if(selected)selected.textContent='붙여넣은 34곳 추가 복원 JSON 검사를 완료했습니다.';
       }
       else if(button.hasAttribute('data-oai-dev-apply'))oaiDevApplyRestore();
-      else if(button.hasAttribute('data-oai-dev-daily-results')){
-        if(!oaiDevPanelUnlocked)return;
-        if(typeof window._oaiShowDailyRegisterDiagnostics==='function')window._oaiShowDailyRegisterDiagnostics();
-        else oaiDevStatus('자동 등록 기록을 조회할 수 없습니다.');
-
-      }
     }catch(err){oaiDevStatus(err.message||'요청을 처리할 수 없습니다.');}
   },true);
   document.addEventListener('change',async function(event){
