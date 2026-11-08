@@ -18063,10 +18063,27 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(combinedSummary&&hasDioceseAndParish) combinedSummary.textContent=diocese+' · '+parish.name;
     if(input){ input.disabled=!parish; input.checked=parish ? _isMyParishAutoVisitEnabled() : false; }
     const native=window.GildongmuNative;
-    [['oai-settings-completion-notice','isPilgrimageCompletionNoticeEnabled'],['oai-settings-memory-notice','isPilgrimageMemoryNoticeEnabled']].forEach(([id,method])=>{
+    // 알림 제어는 Android 예약도 함께 바꾸는 네이티브 메서드가 있어야 한다.
+    // v438에서는 웹만 스위치를 바꿔도 실제 예약이 취소되지 않으므로,
+    // 동작하지 않는 스위치를 표시하지 않고 명확한 호환 안내를 제공한다.
+    [['oai-settings-completion-notice','isPilgrimageCompletionNoticeEnabled','setPilgrimageCompletionNoticeEnabled'],['oai-settings-memory-notice','isPilgrimageMemoryNoticeEnabled','setPilgrimageMemoryNoticeEnabled']].forEach(([id,read,write])=>{
       const control=document.getElementById(id);if(!control)return;
-      control.disabled=!(native&&typeof native[method]==='function');
-      if(!control.disabled){try{control.checked=!!native[method]();}catch(_e){control.disabled=true;}}
+      const row=control.closest('.oai-settings-switch-row');
+      const toggle=control.closest('.oai-settings-switch');
+      let hint=row&&row.querySelector('.oai-settings-notice-compat');
+      let supported=!!(native&&typeof native[read]==='function'&&typeof native[write]==='function');
+      if(supported){try{control.checked=!!native[read]();}catch(_e){supported=false;}}
+      control.disabled=!supported;
+      if(toggle)toggle.hidden=!supported;
+      if(!supported){
+        if(row&&!hint){
+          hint=document.createElement('small');
+          hint.className='oai-settings-notice-compat';
+          hint.textContent='현재 설치된 앱에서는 개별 설정을 지원하지 않습니다. 다음 Android 업데이트 후 변경할 수 있습니다.';
+          row.appendChild(hint);
+        }
+        if(hint)hint.hidden=false;
+      }else if(hint){hint.hidden=true;}
     });
     try{_renderRouteFrequentSettings();}catch(_e){}
     _oaiRenderRestrictedSettings();
@@ -21248,7 +21265,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     try{
       const cur=_readActiveFollowRaw();
       if(!courseId||!cur||cur.courseId===String(courseId)){
-        if(cur)_endDailyFollowSession(cur);
         if(cur&&cur.travelMode==='walk')_walkingNativeStop();
         localStorage.removeItem(ACTIVE_FOLLOW_KEY);
         _syncCarPilgrimageNotice(null);
@@ -21631,7 +21647,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const mixed=!!(WALK_FOLLOW_ENABLED&&_walkSegmentBounds(c.walkSegment,c.places,{start:c.start,end:c.end}));
     try{localStorage.setItem(ACTIVE_FOLLOW_KEY,JSON.stringify({courseId:c.id,startedAt:now,travelMode:mixed?'car':_followTravelMode(travelMode),mixedPhase:mixed?'to-start':''}));}
     catch(_e){window.alert('순례 진행 상태를 저장할 수 없습니다.');return null;}
-    _recordDailyFollowSession(c,now);
     _recordActiveCourseGpsFromVisits();
     _walkingNativeStart(_activeFollowState());
     _syncMixedCarGpsWatch();
@@ -21701,10 +21716,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function _dailyPreviousDate(ts){
     const d=new Date(ts);return _dailyIso(new Date(d.getFullYear(),d.getMonth(),d.getDate()-1,12).getTime());
   }
-  function _recordDailyFollowSession(course,startedAt){
-    // 순례하기 실행 상태만 저장. 순례코스는 GPS 완료 또는 00:00 강제 종료에서 확정.
-  }
-  function _endDailyFollowSession(active){}
   function _dailySamePlace(a,b){
     if(!a||!b)return false;
     // 양쪽 고유 ID가 있으면 ID만 비교한다. 다른 ID는 이름·좌표가 같아도 별도 장소다.
@@ -24588,7 +24599,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     applyCourse(c);
     const mixed=!!(WALK_FOLLOW_ENABLED&&_walkSegmentBounds(c.walkSegment,c.places,{start:c.start,end:c.end}));
     try{localStorage.setItem(ACTIVE_FOLLOW_KEY,JSON.stringify({courseId:c.id,startedAt:now,travelMode:mixed?'car':_followTravelMode(travelMode),mixedPhase:mixed?'to-start':''}));}catch(_e){}
-    _recordDailyFollowSession(c,now);
     if(travelMode==='walk'&&!mixed)_walkingNativeStart(_activeFollowState());
     _syncMixedCarGpsWatch();
     _refreshWalkingCoverBadge();
