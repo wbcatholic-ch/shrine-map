@@ -4422,9 +4422,15 @@ function _flushDeferredVisitNotices(){
       const item=next.kind==='shrine'?next.place.item:next.place;
       if(item)_oaiSpeakNewGpsStamp(next.kind,item.name);
     }else if(next===_oaiDeferredVisitNotices[0]){
+      // 표시가 실패하면 다음 화면 이벤트를 기다리느라 안내가 누락되지 않도록 같은 큐를 재확인한다.
       console.warn('[GPS 방문 안내] 축하창 표시 대기',next.kind);
+      _scheduleDeferredVisitNoticeFlush();
     }
-  }catch(e){console.warn('[GPS 방문 안내] 축하창 표시 재시도 예정',e);}
+  }catch(e){
+    console.warn('[GPS 방문 안내] 축하창 표시 재시도 예정',e);
+    // 화면 생성 오류나 일시적인 DOM 준비 실패 시에도 저장된 안내를 그대로 보존한다.
+    _scheduleDeferredVisitNoticeFlush();
+  }
   // 현재 축하창이 열린 동안 추가 안내는 확인 버튼으로 이어서 표시한다.
   if(!_oaiDeferredVisitNotices.length&&!_oaiReadPendingVisitNotices().length&&
      typeof window._oaiFlushPilgrimageCongratulations==='function'){
