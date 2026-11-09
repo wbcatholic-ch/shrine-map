@@ -4537,12 +4537,11 @@ function _maybePromptAutoShrineVisit(lat,lng){
     if(!entry||!entry.item) return;
     if(_oaiIsRestrictedPlace('shrine',entry.item)&&!_oaiAllowRestrictedGpsVisit('shrine',entry.item,_getShrineVisitDates(entry.item)))return;
     if(_hasShrineGpsVisitOnDate(entry.item,date)) return;
+    // 후보가 확인되면 지연 타이머 없이 기존 공통 저장 경로로 즉시 등록한다.
+    // 10초 재확인이 필요한 성당과는 별개이며, 중복 진입 방지 플래그는 반드시 해제한다.
     window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__=true;
-    setTimeout(function(){
-      const registered=_registerAutoShrineVisit(entry);
-      if(!registered){window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__=false;return;}
-      window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__=false;
-    },700);
+    try{_registerAutoShrineVisit(entry);}
+    finally{window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__=false;}
   }catch(e){ console.warn('[가톨릭길동무]', e); window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__=false; }
 }
 
@@ -13461,8 +13460,15 @@ function _oaiHandleGpsArrival(lat,lng,opts){
   opts=opts||{};
   lat=Number(lat);lng=Number(lng);
   if(!Number.isFinite(lat)||!Number.isFinite(lng))return null;
-  if(!opts.skipShrine){try{setTimeout(function(){_maybePromptAutoShrineVisit(lat,lng);},Number(opts.shrineDelayMs)||180);}catch(_e){}}
-  if(!opts.skipParish){try{setTimeout(function(){_maybeAutoParishVisit(lat,lng);},Number(opts.parishDelayMs)||220);}catch(_e){}}
+  // 한 위치 수신에 대한 일반 인증은 한 번만 배포한다.
+  // UI 위치 갱신을 먼저 끝내도록 다음 작업으로 미루되, 성지·성당마다 타이머를 만들지 않는다.
+  // 성당의 10초 뒤 새 GPS 확인은 _maybeAutoParishVisit 내부에서 별도 유지한다.
+  if(!opts.skipShrine||!opts.skipParish){
+    setTimeout(function(){
+      if(!opts.skipShrine){try{_maybePromptAutoShrineVisit(lat,lng);}catch(e){console.warn('[GPS 성지 인증]',e);}}
+      if(!opts.skipParish){try{_maybeAutoParishVisit(lat,lng);}catch(e){console.warn('[GPS 성당 인증]',e);}}
+    },0);
+  }
   return null;
 }
 window._oaiHandleGpsArrival=_oaiHandleGpsArrival;
