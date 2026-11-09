@@ -4320,12 +4320,13 @@ function _nearestShrineWithinAutoVisitRadius(lat,lng,unvisitedOnDate){
   });
   return best;
 }
-/* GPS 방문 안내는 저장과 분리한다. 백그라운드에서 WebView가 새로 로드되어도
-   아직 표시하지 않은 안내만 복구하며, 화면이 보일 때 축하창과 음성을 함께 실행한다.
-   기존 방문 저장소·GPS 중복 판정·순례 중 경로는 변경하지 않는다. */
+/* GPS 저장 성공을 축하 안내의 단일 진입점으로 삼는다.
+   화면 표시가 가능하면 즉시 알리고, 숨김/다른 모달일 때만 1회 보관한다.
+   앱 재생성 시 미표시 안내를 복구하며 GPS 중복 판정과 저장 경로는 유지한다. */
 const OAI_PENDING_GPS_VISIT_NOTICES_KEY='oai_pending_gps_visit_notices_v1813';
 const OAI_PENDING_GPS_NOTICE_MAX_AGE_MS=6*60*60*1000;
 var _oaiDeferredVisitNotices=[];
+var _oaiShownVisitNoticeIds=new Set();
 var _oaiDeferredVisitNoticeTimer=0;
 function _oaiVisitNoticeId(kind,place){
   try{return _oaiPlaceCanonicalId(kind,kind==='shrine'&&place.item?place.item:place)||'';}catch(_e){return '';}
@@ -4370,16 +4371,19 @@ function _oaiVisitNoticeBlocked(){try{
   if(parishNotice&&parishNotice.classList.contains('show'))return true;
 }catch(_e){}return false;}
 function _scheduleDeferredVisitNoticeFlush(){
-  clearTimeout(_oaiDeferredVisitNoticeTimer);
-  _oaiDeferredVisitNoticeTimer=0;
-  if(document.visibilityState==='hidden')return;
-  if(_oaiDeferredVisitNotices.length||_oaiReadPendingVisitNotices().length)
-    _oaiDeferredVisitNoticeTimer=setTimeout(_flushDeferredVisitNotices,900);
+  // 다른 중요한 창에 막힌 경우에만 단일 재확인 타이머를 둔다.
+  if(document.visibilityState==='hidden'||_oaiDeferredVisitNoticeTimer)return;
+  if(_oaiDeferredVisitNotices.length||_oaiReadPendingVisitNotices().length){
+    _oaiDeferredVisitNoticeTimer=setTimeout(function(){
+      _oaiDeferredVisitNoticeTimer=0;
+      _flushDeferredVisitNotices();
+    },900);
+  }
 }
 function _queueDeferredVisitNotice(kind,place,date){
   if(!place)return;
   const id=_oaiVisitNoticeId(kind,place),day=String(date||_todayISODate());
-  if(!id)return;
+  if(!id||_oaiShownVisitNoticeIds.has(kind+'|'+id+'|'+day))return;
   const rows=_oaiReadPendingVisitNotices();
   if(!rows.some(x=>x.kind===kind&&x.id===id&&x.date===day)){
     rows.push({kind:kind,id:id,date:day,at:Date.now()});
@@ -4387,9 +4391,14 @@ function _queueDeferredVisitNotice(kind,place,date){
   }
   if(!_oaiDeferredVisitNotices.some(x=>x.kind===kind&&x.id===id&&x.date===day))
     _oaiDeferredVisitNotices.push({kind:kind,place:place,id:id,date:day});
-  _scheduleDeferredVisitNoticeFlush();
+  // GPS 신규 등록 직후 화면이 보이면 같은 호출 경로에서 바로 표시한다.
+  _flushDeferredVisitNotices();
 }
 function _flushDeferredVisitNotices(){
+  if(_oaiDeferredVisitNoticeTimer){
+    clearTimeout(_oaiDeferredVisitNoticeTimer);
+    _oaiDeferredVisitNoticeTimer=0;
+  }
   if(document.visibilityState==='hidden')return;
   if(!_oaiDeferredVisitNotices.length)_oaiRestorePendingVisitNotices();
   if(!_oaiDeferredVisitNotices.length){
@@ -4407,6 +4416,7 @@ function _flushDeferredVisitNotices(){
     if(shown&&shown.classList.contains('show')&&shown.getAttribute('aria-hidden')==='false'){
       // 화면이 실제 표시된 다음에만 큐를 제거하고 음성을 요청한다.
       _oaiDeferredVisitNotices.shift();
+      _oaiShownVisitNoticeIds.add(next.kind+'|'+next.id+'|'+next.date);
       const rows=_oaiReadPendingVisitNotices().filter(x=>!(x.kind===next.kind&&x.id===next.id&&x.date===next.date));
       _oaiWritePendingVisitNotices(rows);
       const item=next.kind==='shrine'?next.place.item:next.place;
@@ -4415,16 +4425,23 @@ function _flushDeferredVisitNotices(){
       console.warn('[GPS 방문 안내] 축하창 표시 대기',next.kind);
     }
   }catch(e){console.warn('[GPS 방문 안내] 축하창 표시 재시도 예정',e);}
-  if(_oaiDeferredVisitNotices.length||_oaiReadPendingVisitNotices().length)_scheduleDeferredVisitNoticeFlush();
-  else if(typeof window._oaiFlushPilgrimageCongratulations==='function')setTimeout(window._oaiFlushPilgrimageCongratulations,120);
+  // 현재 축하창이 열린 동안 추가 안내는 확인 버튼으로 이어서 표시한다.
+  if(!_oaiDeferredVisitNotices.length&&!_oaiReadPendingVisitNotices().length&&
+     typeof window._oaiFlushPilgrimageCongratulations==='function'){
+    setTimeout(window._oaiFlushPilgrimageCongratulations,120);
+  }
 }
-// 기존 공통 복귀 이벤트를 재사용한다. 새 위치 수신·GPS 워치나 이벤트 루프는 만들지 않는다.
-document.addEventListener('click',function(){if(_oaiDeferredVisitNotices.length)setTimeout(_flushDeferredVisitNotices,120);},true);
-window.addEventListener('oai-short-background-return',function(){setTimeout(_flushDeferredVisitNotices,900);},{passive:true});
-window.addEventListener('oai-long-background-return',function(){setTimeout(_flushDeferredVisitNotices,900);},{passive:true});
-document.addEventListener('visibilitychange',function(){if(document.visibilityState==='visible')setTimeout(_flushDeferredVisitNotices,650);});
-window.addEventListener('pageshow',function(){if(document.visibilityState==='visible')setTimeout(_flushDeferredVisitNotices,650);});
-setTimeout(_flushDeferredVisitNotices,1600);
+// 현재 화면으로 돌아오면 한 함수에서만 미표시 안내를 확인한다.
+// 백그라운드 GPS 수신이나 별도의 신규 위치 감시는 추가하지 않는다.
+function _resumePendingGpsVisitNotices(){
+  if(document.visibilityState!=='hidden')_flushDeferredVisitNotices();
+}
+window.addEventListener('oai-short-background-return',_resumePendingGpsVisitNotices,{passive:true});
+window.addEventListener('oai-long-background-return',_resumePendingGpsVisitNotices,{passive:true});
+document.addEventListener('visibilitychange',_resumePendingGpsVisitNotices);
+window.addEventListener('pageshow',_resumePendingGpsVisitNotices);
+// 초기 명부 로딩 이후 이전 화면에서 보류된 안내를 1회 복구한다.
+setTimeout(_resumePendingGpsVisitNotices,1600);
 
 function _ensureShrineAutoVisitModal(){
   let modal=document.getElementById('shrine-auto-visit-modal');
@@ -4476,7 +4493,7 @@ function _closeShrineAutoVisitModal(){
   const modal=document.getElementById('shrine-auto-visit-modal');
   if(modal){ modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); }
   window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__=false;
-  _scheduleDeferredVisitNoticeFlush();
+  _flushDeferredVisitNotices();
   if(typeof window._oaiFlushPilgrimageCongratulations==='function')setTimeout(window._oaiFlushPilgrimageCongratulations,120);
 }
 function _isAnyVisitModalOpen(){
@@ -5281,23 +5298,12 @@ function _oaiNotifyActiveCourseGpsVisit(){
    일반 위치 수신·순례하기·Android GPS 기록 복귀는 모두 이 경로를 공유한다. */
 function _oaiNotifyNewGpsStamp(kind,item,date){
   if(kind==='shrine'){
-    _oaiLastGpsShrineNotice={id:_oaiPlaceCanonicalId('shrine',item),date:date,timestamp:Date.now()};
     _queueDeferredVisitNotice('shrine',{item:item,idx:Array.isArray(SHRINES)?SHRINES.indexOf(item):-1},date);
-    return;
+  }else if(kind==='parish'){
+    // 연결 성당은 _registerGpsPlaceVisit에서 이미 독립 GPS 인증을 건너뛴다.
+    // 별도의 성지 축하창 확인용 1초 지연이나 중복 안내는 필요 없다.
+    _queueDeferredVisitNotice('parish',item,date);
   }
-  if(kind!=='parish')return;
-  // 공동 인증된 성지의 축하창이 있으면 성당 축하창은 반복하지 않는다.
-  // 성당 GPS 수신이 먼저 들어온 경우에도 잠시 기다려 성지 안내를 우선한다.
-  const linked=_oaiJointStampPair('parish',item);
-  const shrine=linked?_oaiSharedGroupShrine(linked):null;
-  if(shrine){
-    const shrineId=_oaiPlaceCanonicalId('shrine',shrine);
-    setTimeout(function(){
-      const last=_oaiLastGpsShrineNotice;
-      const same=last&&last.id===shrineId&&last.date===date&&Date.now()-last.timestamp<3500;
-      if(!same)_queueDeferredVisitNotice('parish',item,date);
-    },1000);
-  }else _queueDeferredVisitNotice('parish',item,date);
 }
 function _registerGpsPlaceVisit(kind,item,date,measuredAt){
   try{
@@ -5311,7 +5317,7 @@ function _registerGpsPlaceVisit(kind,item,date,measuredAt){
       if(added||(already&&!upgraded)){
         if(!_oaiJointStampCounterpart('shrine',item,visitDate))_oaiJointPendingAdd(item,visitDate);
       }
-      if(added){_oaiNotifyActiveCourseGpsVisit();_oaiNotifyNewGpsStamp('shrine',item,visitDate);}
+      if(added){_oaiNotifyNewGpsStamp('shrine',item,visitDate);_oaiNotifyActiveCourseGpsVisit();}
       return {added:added,upgraded:upgraded&&added,already:already,kind:'shrine',item:item};
     }
     if(kind==='parish'){
@@ -5322,7 +5328,7 @@ function _registerGpsPlaceVisit(kind,item,date,measuredAt){
       const upgraded=already&&String(before.method||'manual').toLowerCase()!=='gps';
       const added=(!already||upgraded)&&!!_addParishVisit(item,visitDate,'gps',measuredAt);
       if(already||added)_oaiJointStampCounterpart('parish',item,visitDate);
-      if(added){_oaiNotifyActiveCourseGpsVisit();_oaiNotifyNewGpsStamp('parish',item,visitDate);}
+      if(added){_oaiNotifyNewGpsStamp('parish',item,visitDate);_oaiNotifyActiveCourseGpsVisit();}
       return {added:added,upgraded:upgraded&&added,already:already,kind:'parish',item:item};
     }
   }catch(e){console.warn('[가톨릭길동무] GPS 방문 기록 실패',e);}
@@ -5635,7 +5641,6 @@ function _renderInfoCardParishVisit(p){const b=document.getElementById('ic-type'
 /* GPS 공동 인증 안내: 사진·메모의 주소 기반 공통화와 구분한다.
    명시적으로 확인된 성지·성당 쌍이 모두 각자의 인증 반경 안에 있을 때만
    같은 GPS 수신으로 판단한다. 좌표가 가까운 다른 장소는 병합하지 않는다. */
-var _oaiLastGpsShrineNotice=null;
 function _oaiGpsLinkedShrineForParish(parish,lat,lng){
   const group=OAI_SHARED_VISIT_JOURNAL_GROUPS.find(function(g){return String(g.parishDiocese)===String(parish.diocese||'')&&String(g.parishName)===String(parish.name||'');});
   if(!group)return null;
@@ -13438,23 +13443,14 @@ function _raiseMyLocationMarker(){
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 
-/* V8-1-14-1113: 위치 1회 갱신당 GPS 후처리를 한곳에서 순서대로 배포한다.
-   성지 → 성당 → 진행 중 순례 → 출발/도착 확인 순서를 유지한다. */
+/* 위치 수신 후 일반 GPS 인증만 배포한다. 순례코스 출발·도착은 독립된 스탬프 인증 경로가 아니다.
+   성지는 개별 반경, 성당은 새 GPS 10초 재확인, 공통화 성당은 성지 스탬프 연결만 사용한다. */
 function _oaiHandleGpsArrival(lat,lng,opts){
   opts=opts||{};
   lat=Number(lat);lng=Number(lng);
   if(!Number.isFinite(lat)||!Number.isFinite(lng))return null;
   if(!opts.skipShrine){try{setTimeout(function(){_maybePromptAutoShrineVisit(lat,lng);},Number(opts.shrineDelayMs)||180);}catch(_e){}}
   if(!opts.skipParish){try{setTimeout(function(){_maybeAutoParishVisit(lat,lng);},Number(opts.parishDelayMs)||220);}catch(_e){}}
-  // 순례코스는 좌표를 재판정하지 않는다. 저장된 성지·성당 GPS 방문 기록만 사용한다.
-  if(opts.endpointNow&&typeof window._oaiPilgrimageEndpointGpsCheck==='function'){
-    try{return window._oaiPilgrimageEndpointGpsCheck(lat,lng,{silent:opts.endpointSilent!==false});}catch(_e){return null;}
-  }
-  if(!opts.skipEndpoint){
-    try{setTimeout(function(){
-      if(typeof window._oaiPilgrimageEndpointGpsCheck==='function'&&typeof window.isOaiPilgrimagePlannerOpen==='function'&&window.isOaiPilgrimagePlannerOpen())window._oaiPilgrimageEndpointGpsCheck(lat,lng,{silent:true});
-    },Number(opts.endpointDelayMs)||280);}catch(_e){}
-  }
   return null;
 }
 window._oaiHandleGpsArrival=_oaiHandleGpsArrival;
@@ -24783,37 +24779,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function _pilgrimageDestinationCanFollow(point){
     return !!_pilgrimageRegisteredDestination(point);
   }
-  window._oaiPilgrimageEndpointGpsCheck=function(lat,lng,opts){
-    opts=opts||{};
-    if(!Number.isFinite(Number(lat))||!Number.isFinite(Number(lng)))return {registered:0,names:[]};
-    const meta=loadMeta(),date=_todayISODate(),seen={},names=[];
-    [meta.start,meta.end].forEach(function(point){
-      const hit=_pilgrimageFindRegisteredEndpoint(point);if(!hit||!hit.item)return;
-      // 출발/도착 지점이 '내 본당'이면 순례용 GPS 방문등록에서 제외한다.
-      // 대부분 내 본당에서 모여 출발하거나 해산하므로 코스 순례기록에 자동 방문으로 남기지 않는다.
-      if(hit.type==='parish'){
-        try{const myParish=_configuredMyParish();if(myParish&&_isSameParish(hit.item,myParish))return;}catch(_e){}
-      }
-      const key=hit.type+'|'+String(hit.item.diocese||'')+'|'+String(hit.item.name||'');if(seen[key])return;seen[key]=1;
-      let meters=Infinity;
-      if(hit.type==='shrine'&&Array.isArray(hit.item.gpsPoints)&&hit.item.gpsPoints.length){
-        hit.item.gpsPoints.forEach(function(gp){if(gp&&_validGpsPair(gp.lat,gp.lng)){const m=calcDist(Number(lat),Number(lng),Number(gp.lat),Number(gp.lng))*1000;if(m<meters)meters=m;}});
-      }
-      if(!Number.isFinite(meters)&&_validGpsPair(hit.item.lat,hit.item.lng))meters=calcDist(Number(lat),Number(lng),Number(hit.item.lat),Number(hit.item.lng))*1000;
-      if(meters>Number(hit.radius||150))return;
-      const visitResult=_registerGpsPlaceVisit(hit.type,hit.item,date);
-      if(visitResult.added)names.push(String(hit.item.name||''));
-    });
-    if(names.length){
-      try{_refreshShrineVisitMapState();}catch(_e){}
-      try{_updateParishVisitButton();}catch(_e){}
-    }
-    if(!opts.silent){
-      const note=document.getElementById('oai-pilgrimage-current-check-note');
-      if(note)note.textContent=names.length?('GPS 등록 완료: '+names.join(', ')):('현재 위치 확인 완료 · 출발/도착 GPS 등록 대상이 없거나 이미 오늘 등록되었습니다. 내 본당은 제외됩니다.');
-    }
-    return {registered:names.length,names:names};
-  };
   // 사용자 요청 갱신은 GPS 한 번만 받아 두 요약을 같은 위치에서 계산한다.
   // 페이지 최초 표시의 자동 계산/기존 GPS 인증 규칙과는 분리한다.
   let pilgrimageManualRecalcBusy=false;
@@ -24837,8 +24802,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         calcFollowDistance({lat:lat,lng:lng});
         calcFollowItemMetrics({lat:lat,lng:lng});
       }else{
-        // 상세 화면의 기존 '현재 위치 확인'에 딸린 GPS 방문 판정은 보존한다.
-        try{_oaiHandleGpsArrival(lat,lng,{endpointNow:true,endpointSilent:false,skipEndpoint:true});}catch(_e){}
+        // 현재 위치를 일반 GPS 인증에 전달한다. 출발·도착만으로 별도 스탬프를 만들지 않는다.
+        try{_oaiHandleGpsArrival(lat,lng);}catch(_e){}
+        if(note)note.textContent='현재 위치 확인 완료 · 스탬프는 성지·성당의 GPS 인증 조건 충족 시 자동 등록됩니다.';
         calcDetailItemMetrics({lat:lat,lng:lng});
         calcPilgrimageTotalRoute({lat:lat,lng:lng});
       }
