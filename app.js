@@ -5654,10 +5654,22 @@ function _oaiGpsLinkedShrineForParish(parish,lat,lng){
 // 성당 자동 GPS 방문만 10초 뒤 새 위치로 재확인한다. 성지/순례 판정은 변경하지 않는다.
 const OAI_PARISH_AUTO_CONFIRM_MS=10000;
 let _oaiParishAutoCandidate=null;
+/* 일반 GPS와 순례하기의 성당 후보 선택을 한 곳에서 처리한다.
+   공통화 성당은 성지 인증으로만 스탬프가 생성되므로 후보에서 제외한다.
+   10초 재확인의 신호 취득 방식은 각 호출 경로에서 그대로 유지한다. */
+function _oaiNearestStandaloneParishForGps(lat,lng){
+  let best=null,bestM=Infinity;
+  (PARISHES||[]).forEach(function(place){
+    if(!place||place.diocese==='군종교구'||!_validGpsPair(place.lat,place.lng)||
+       _oaiJointStampPair('parish',place))return;
+    const meters=calcDist(lat,lng,place.lat,place.lng)*1000;
+    if(meters<=OAI_PARISH_AUTO_VISIT_RADIUS_M&&meters<bestM){best=place;bestM=meters;}
+  });
+  return best;
+}
 function _maybeAutoParishVisit(lat,lng,confirmation){
   if(!Number.isFinite(Number(lat))||!Number.isFinite(Number(lng)))return;
-  let best=null,bestM=Infinity;
-  (PARISHES||[]).forEach(function(p){if(!p||p.diocese==='군종교구'||!p.lat||!p.lng||_oaiJointStampPair('parish',p))return;const m=calcDist(lat,lng,p.lat,p.lng)*1000;if(m<=OAI_PARISH_AUTO_VISIT_RADIUS_M&&m<bestM){best=p;bestM=m;}});
+  const best=_oaiNearestStandaloneParishForGps(lat,lng);
   if(!best){
     if(_oaiParishAutoCandidate){clearTimeout(_oaiParishAutoCandidate.timer);_oaiParishAutoCandidate=null;}
     return;
@@ -23301,12 +23313,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           const result=_registerGpsPlaceVisit('shrine',entry.item,date,fix.at);
           if(!result.added&&!result.already)break;
         }
-        let best=null,bestM=Infinity;
-        PARISHES.forEach(function(place){
-          if(!place||place.diocese==='군종교구'||!_validGpsPair(place.lat,place.lng)||_oaiJointStampPair('parish',place))return;
-          const meters=calcDist(fix.lat,fix.lng,place.lat,place.lng)*1000;
-          if(meters<=OAI_PARISH_AUTO_VISIT_RADIUS_M&&meters<bestM){best=place;bestM=meters;}
-        });
+        const best=_oaiNearestStandaloneParishForGps(fix.lat,fix.lng);
         const bestId=best?_oaiPlaceCanonicalId('parish',best):null;
         if(!best){
           parishPending=null;
