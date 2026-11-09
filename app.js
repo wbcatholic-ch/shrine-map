@@ -22361,8 +22361,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         Array.isArray(existing.completions)&&existing.completions.length===1&&
         existing.completions[0].method==='gps'&&
         !existing.completions[0].walkPerformed&&!existing.completions[0].walkStartedAt&&
-        !existing.completions[0].walkTrailStartAt&&!existing.walkTrail&&!existing.walkSegment&&
-        !existing.photos&&!existing.notes&&!existing.memo;
+        !existing.completions[0].walkTrailStartAt&&!existing.walkTrail&&!existing.walkSegment;
+      // 사진·메모·노트는 기존 코스 ID에 귀속된 부가정보다. 이를 이유로
+      // 같은 날짜의 두 번째 완료 코스를 생성하지 않고 원본 객체에 그대로 둔다.
+      // 출발·도착·도보 기록·수동 장소가 있는 코스는 여전히 자동 병합에서 제외한다.
       if(safeExisting){
         const old=existing.completions[0];
         const combined=_uniqueCompletionStampPlaces([...(old.stampPlaces||existing.places),...eligible.map(_dailyCompletionDisplayPlace)]);
@@ -22376,8 +22378,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           courses[index]=next;
           if(!saveCourses(courses))throw new Error('기존 GPS 완료 코스 보충 실패');
           const persisted=_dailyStoredCourses().find(c=>c.id===existing.id);
-          if(!persisted||!Array.isArray(persisted.completions)||persisted.completions[0].placeCount!==normalized.length)
-            throw new Error('기존 GPS 완료 코스 보충 검증 실패');
+          if(!persisted||!Array.isArray(persisted.completions)||persisted.completions[0].placeCount!==normalized.length||
+             !['photos','notes','memo'].every(key=>JSON.stringify(persisted[key])===JSON.stringify(existing[key])))
+            throw new Error('기존 GPS 완료 코스 보충·부가정보 보존 검증 실패');
         }
         state.auto[date]={done:true,source:'auto',existingId:existing.id,gpsSignature};
         report('updated','기존 당일 GPS 자동 코스에 신규 방문지만 보충');
