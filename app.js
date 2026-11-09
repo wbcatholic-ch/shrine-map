@@ -22542,61 +22542,52 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       }
     }catch(e){console.warn('[코스 등록 실패 안내 확인]',e);}
   }
-  // 날짜별 GPS 완료 등록 후, 미완료 계획을 실제 방문 날짜의 스탬프와 대조한다.
-  // 계획의 순서는 비교하지 않으며 원본 GPS 및 기존 일일 완료 코스는 수정하지 않는다.
-  function _dailyCompleteMatchingPlans(date,events){
+  // GPS 완료 코스가 저장된 뒤에만 기존 계획을 정리한다.
+  // 계획의 장소를 완료 코스에 복사하지 않고, 동일 방문일의 GPS 스탬프만 비교한다.
+  function _dailyRemoveMatchedPlan(date,events){
     if(!Array.isArray(events)||!events.length)return 0;
     const original=localStorage.getItem(COURSES_KEY);
     if(original===null)return 0;
-    const courses=loadCourses(),updates=[];
-    for(let i=0;i<courses.length;i++){
-      const course=courses[i];
+    const courses=_dailyStoredCourses();
+    // 성지 또는 공통화 성당이 있어 GPS 순례완료가 성립한 날짜만 계획 삭제 대상이다.
+    if(!_dailyAutoEligible(events)||!courses.some(c=>_courseCompletionList(c).some(x=>
+      x.method==='gps'&&_dailyIso(x.completedAt)===date)))return 0;
+    const active=_readActiveFollowRaw();
+    const candidates=[];
+    for(const course of courses){
       if(!course||course.autoGps||_courseCompletionList(course).length||course.completionArmed===false)continue;
-      const planned=_pilgrimageStampPlaces(course.places);
-      if(!planned.length||planned.some(p=>!p||p.routeOnly))continue;
-      // 새로 만든 계획을 과거 방문 기록으로 완료 처리하지 않는다.
-      // 기존 코스 ID에 저장된 최초 생성 시각만 사용하며 불명확하면 자동 처리 보류.
+      if(active&&String(active.courseId)===String(course.id))continue;
+      const planned=_uniqueCompletionStampPlaces(_pilgrimageStampPlaces(course.places));
+      if(!planned.length)continue;
+      // 계획을 만들기 전에 방문한 GPS 스탬프를 소급 적용하지 않는다.
       const idMatch=/^course_(\d{13})_/.exec(String(course.id));
-      const started=Number(course.lastStartedAt)||0;
-      const planBorn=idMatch?Number(idMatch[1]):started;
+      const planBorn=idMatch?Number(idMatch[1]):Number(course.lastStartedAt)||0;
       if(!Number.isFinite(planBorn)||planBorn<=0||planBorn>_dailyDayEnd(date))continue;
-      const available=events.slice(),matched=[];
-      let valid=true;
+      const available=events.filter(ev=>Number(ev.at)>=planBorn).slice();
+      let matched=0;
       for(const place of planned){
-        const candidates=available.map((ev,j)=>({ev,j})).filter(x=>
-          x.ev.at>=planBorn&&_dailyCompletedPlaceMatches(place,x.ev));
-        if(candidates.length!==1){valid=false;break;}
-        const found=candidates[0];matched.push(found.ev);available.splice(found.j,1);
+        const index=available.findIndex(ev=>_dailyCompletedPlaceMatches(place,ev));
+        if(index<0)continue;
+        matched++;
+        available.splice(index,1);
       }
-      if(!valid||matched.length!==planned.length)continue;
-      const completedAt=Math.max(...matched.map(x=>Number(x.at)||0));
-      if(!completedAt||_dailyIso(completedAt)!==date)continue;
-      const nextPlaces=course.places.map(place=>{
-        const found=matched.find(ev=>_dailyCompletedPlaceMatches(place,ev));
-        return found?Object.assign({},place,{done:true,doneMethod:'gps',gpsVisitAt:found.at}):place;
-      });
-      const next=Object.assign({},course,{places:nextPlaces,completionArmed:false,
-        gpsSettled:true,lastCompletedAt:completedAt,updatedAt:Date.now(),
-        completions:[{completedAt,placeCount:planned.length,stampPlaces:_uniqueCompletionStampPlaces(planned),
-          method:'gps',locked:true}]});
-      updates.push({index:i,id:course.id,next});
+      // 60% 이상: 5곳 중 3곳도 포함. 부동소수점 나눗셈 대신 정수로 비교한다.
+      if(matched>0&&matched*5>=planned.length*3)candidates.push(course.id);
     }
-    if(!updates.length)return 0;
-    // 완료 계획을 수정하기 전에 저장된 원본 코스를 별도로 보존한다.
+    // 두 개 이상의 계획이 같은 날 충족하면 어느 계획인지 알 수 없으므로 모두 보존한다.
+    if(candidates.length!==1)return 0;
+    const selected=candidates[0],remaining=courses.filter(c=>c.id!==selected);
+    if(remaining.length!==courses.length-1)throw new Error('삭제할 순례계획 식별 실패');
+    // 기존 계획 원본을 삭제 전에 별도 백업한다. GPS 스탬프와 완료 코스는 변경하지 않는다.
     const backupKey='oai_plan_gps_completion_backup_v1_'+date;
     if(localStorage.getItem(backupKey)===null){
       localStorage.setItem(backupKey,original);
-      if(localStorage.getItem(backupKey)!==original)throw new Error('계획 원본 백업 실패');
+      if(localStorage.getItem(backupKey)!==original)throw new Error('순례계획 원본 백업 실패');
     }
-    updates.forEach(x=>{courses[x.index]=x.next;});
-    if(!saveCourses(courses,true))throw new Error('GPS 계획 완료 저장 실패');
-    const confirmed=loadCourses();
-    if(!updates.every(x=>confirmed.some(c=>c.id===x.id&&
-        _courseCompletionList(c).some(y=>_dailyIso(y.completedAt)===date))))
-      throw new Error('GPS 계획 완료 재조회 실패');
-    // 현재 열려 있는 초안은 다른 계획일 수 있어 자동으로 덮어쓰지 않는다.
+    if(!saveCourses(remaining,true))throw new Error('일치한 순례계획 삭제 저장 실패');
+    if(_dailyStoredCourses().some(c=>c.id===selected))throw new Error('순례계획 삭제 재조회 실패');
     if(plannerView==='list'&&planner()&&planner().classList.contains('show'))renderCourseList();
-    return updates.length;
+    return 1;
   }
   async function _dailyRegisterPrevious(date,manualRetry){
     if(developerCompletionClearThisSession)return;
@@ -22633,8 +22624,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           const events=_dailyGpsEvents(date);
           const registerResult={};
           const completed=_dailyRegisterOnce(date,events,registerResult);
-          // 원래 날짜의 일일 GPS 완료 코스를 먼저 보존/확정한 뒤 계획을 연결한다.
-          _dailyCompleteMatchingPlans(date,events);
+          // GPS 완료 코스 저장이 확인된 뒤에만 60% 이상 일치하는 단일 계획을 삭제한다.
+          _dailyRemoveMatchedPlan(date,events);
           if(!completed){
             try{const q=JSON.parse(localStorage.getItem(OAI_GPS_PENDING_DATES_KEY)||'[]');if(Array.isArray(q))localStorage.setItem(OAI_GPS_PENDING_DATES_KEY,JSON.stringify(q.filter(x=>x!==date)));}catch(_e){}
           }
