@@ -5308,6 +5308,7 @@ function _registerGpsPlaceVisit(kind,item,date,measuredAt){
   try{
     if(!item)return {added:false,already:false,kind:String(kind||'')};
     const visitDate=String(date||_todayISODate());
+    let result;
     if(kind==='shrine'){
       const before=_getShrineVisitDates(item).find(function(v){return v.date===visitDate;});
       const already=!!before;
@@ -5316,8 +5317,7 @@ function _registerGpsPlaceVisit(kind,item,date,measuredAt){
       if(added||(already&&!upgraded)){
         if(!_oaiJointStampCounterpart('shrine',item,visitDate))_oaiJointPendingAdd(item,visitDate);
       }
-      if(added){_oaiNotifyNewGpsStamp('shrine',item,visitDate);_oaiNotifyActiveCourseGpsVisit();}
-      return {added:added,upgraded:upgraded&&added,already:already,kind:'shrine',item:item};
+      result={added:added,upgraded:upgraded&&added,already:already,kind:'shrine',item:item};
     }
     if(kind==='parish'){
       // 공통화 성당은 독립 GPS 대상이 아니다. 성지 GPS 저장 성공 후 성당 스탬프만 보완한다.
@@ -5326,9 +5326,13 @@ function _registerGpsPlaceVisit(kind,item,date,measuredAt){
       const already=!!before;
       const upgraded=already&&String(before.method||'manual').toLowerCase()!=='gps';
       const added=(!already||upgraded)&&!!_addParishVisit(item,visitDate,'gps',measuredAt);
-      if(already||added)_oaiJointStampCounterpart('parish',item,visitDate);
-      if(added){_oaiNotifyNewGpsStamp('parish',item,visitDate);_oaiNotifyActiveCourseGpsVisit();}
-      return {added:added,upgraded:upgraded&&added,already:already,kind:'parish',item:item};
+      // 공통화는 성지 GPS에서만 연결한다. 일반 성당의 역연결 호출은 불필요하다.
+      result={added:added,upgraded:upgraded&&added,already:already,kind:'parish',item:item};
+    }
+    // 성지·성당 모두 저장 성공을 확인한 뒤 동일한 축하·순례 진행 경로로 전달한다.
+    if(result){
+      if(result.added){_oaiNotifyNewGpsStamp(result.kind,item,visitDate);_oaiNotifyActiveCourseGpsVisit();}
+      return result;
     }
   }catch(e){console.warn('[가톨릭길동무] GPS 방문 기록 실패',e);}
   return {added:false,already:false,kind:String(kind||''),item:item||null};
