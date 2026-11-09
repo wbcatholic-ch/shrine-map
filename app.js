@@ -22256,12 +22256,14 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // 이미 완료한 코스의 같은 날짜·같은 장소만 제외한다. 다른 코스의 미등록 성지는 남긴다.
   function _dailyUnregisteredEvents(date,events,courses){
     const eligible=_dailyAutoEvents(events);
-    const completed=(courses||_dailyStoredCourses()).filter(c=>_courseCompletionList(c).some(x=>_dailyIso(x.completedAt)===date));
     const accounted=[];
-    completed.forEach(course=>_courseCompletionList(course).forEach(entry=>{
-      if(_dailyIso(entry.completedAt)!==date)return;
-      _dailyCompletionEvidencePlacesV1656(course,entry,date,events).forEach(place=>accounted.push(place));
-    }));
+    (courses||_dailyStoredCourses()).forEach(course=>{
+      // 코스별 완료 내역은 한 번만 읽고, 해당 날짜의 GPS 증거만 비교한다.
+      _courseCompletionList(course).forEach(entry=>{
+        if(_dailyIso(entry.completedAt)!==date)return;
+        _dailyCompletionEvidencePlacesV1656(course,entry,date,events).forEach(place=>accounted.push(place));
+      });
+    });
     return eligible.filter(ev=>!accounted.some(place=>_dailyCompletedPlaceMatches(place,ev)));
   }
   // GPS 원본의 종류/ID는 유지하고, 코스에 보여 줄 대표 이름만 공통 변환한다.
@@ -22337,19 +22339,21 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     const gpsCount=_dailyRawGpsEvents(date).length;
     if(gpsCount>0&&!events.length)throw new Error('GPS 스탬프 장소를 확인할 수 없습니다');
     const eligible=_dailyUnregisteredEvents(date,events,courses);
+    // 같은 등록 시도에서 미등록 장소 판정을 반복하지 않는다. 원본 GPS와 완료 코스는 변경하지 않는다.
+    const hasEligibleRemaining=_dailyEligibleRemaining(date,eligible,courses);
     const doneForDate=courses.filter(c=>_courseCompletionList(c).some(x=>_dailyIso(x.completedAt)===date));
     const existing=doneForDate.find(c=>c.autoGps&&c.sourceDate===date);
     const logged=state.auto[date];
     // GPS 원본은 변경하지 않는다. 이 날짜의 등록 결과·코스 ID·GPS 지문은 별도 장부에 보존한다.
-    if(logged&&logged.done&&logged.gpsSignature===gpsSignature&&!_dailyEligibleRemaining(date,eligible,courses)){
+    if(logged&&logged.done&&logged.gpsSignature===gpsSignature&&!hasEligibleRemaining){
       report('existing','이미 등록된 GPS 장소만 확인 (신규 저장 없음)');
       return !!doneForDate.length;
     }
-    if(existing&&!_dailyEligibleRemaining(date,eligible,courses)){
+    if(existing&&!hasEligibleRemaining){
       // 남은 성지가 없으면 완료 코스는 수정하지 않고 등록 장부만 확인한다.
       state.auto[date]={done:true,source:'auto',existingId:existing.id,gpsSignature};
       report('existing_auto','기존 자동 완료 코스 확인 (신규 저장 없음)');
-    }else if(_dailyEligibleRemaining(date,eligible,courses)){
+    }else if(hasEligibleRemaining){
       // 같은 날의 기존 자동 GPS 코스에는 신규 장소만 보충한다.
       // 수동 완료·도보·출발지·도착지·사용자 부가정보가 있으면 변경하지 않는다.
       const safeExisting=existing&&existing.autoGps&&existing.sourceDate===date&&
