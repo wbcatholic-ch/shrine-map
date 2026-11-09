@@ -4501,7 +4501,7 @@ function _openShrineAutoVisitModal(entry,opts){
 }
 function _closeShrineAutoVisitModal(){
   const modal=document.getElementById('shrine-auto-visit-modal');
-  if(modal){ modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); }
+  if(modal){ modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); delete modal.dataset.oaiDevGpsTest; }
   window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__=false;
   _oaiFlushCelebrationNotices();
 }
@@ -18713,6 +18713,82 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(btn)btn.disabled=(state==='working');
     if(copy)copy.hidden=state==='working'||!message;
   };
+  // 관리자 GPS 현장 시험: 실제 저장소, 성지 좌표, 공통화 원장에 접근하지 않는 메모리 세션.
+  // 제품 GPS 스탬프 처리 함수는 변경하거나 대체하지 않는다.
+  let oaiDevGpsTest={center:null,mode:'',busy:false,count:0};
+  function oaiDevGpsTestStatus(message){
+    const el=document.getElementById('oai-dev-gps-test-status');
+    if(el)el.textContent=message;
+  }
+  function oaiDevGpsTestReset(){
+    oaiDevGpsTest={center:null,mode:'',busy:false,count:0};
+    const button=document.getElementById('oai-dev-gps-test-run');if(button)button.disabled=false;
+    oaiDevGpsTestStatus('시험 기록을 초기화했습니다. 실제 스탬프 기록은 변경하지 않았습니다.');
+  }
+  function oaiDevGpsReadPosition(){
+    return new Promise(function(resolve,reject){
+      if(!_GEO||typeof _GEO.getCurrentPosition!=='function'){reject(Error('이 기기에서는 GPS 위치 수신을 사용할 수 없습니다.'));return;}
+      _GEO.getCurrentPosition(resolve,reject,{enableHighAccuracy:true,maximumAge:0,timeout:12000});
+    });
+  }
+  function oaiDevGpsWait(ms){return new Promise(function(resolve){setTimeout(resolve,ms);});}
+  function oaiDevGpsTestValidFix(pos){
+    const c=pos&&pos.coords;
+    if(!c||!Number.isFinite(c.latitude)||!Number.isFinite(c.longitude)||
+       !Number.isFinite(c.accuracy)||!Number.isFinite(Number(pos.timestamp))||
+       Math.abs(Date.now()-Number(pos.timestamp))>10000)throw Error('최신 GPS 위치를 받지 못했습니다. 위치 기능을 확인하고 다시 시험하세요.');
+    return {lat:c.latitude,lng:c.longitude,accuracy:c.accuracy,at:Number(pos.timestamp)};
+  }
+  async function oaiDevGpsTestRun(){
+    if(!oaiDevEnabled()||!oaiDevPanelUnlocked||oaiDevGpsTest.busy)return;
+    const select=document.getElementById('oai-dev-gps-test-mode');
+    const mode=select&&select.value;
+    if(!['shrine','parish','linked'].includes(mode))return;
+    if(mode!==oaiDevGpsTest.mode){oaiDevGpsTest.center=null;oaiDevGpsTest.count=0;oaiDevGpsTest.mode=mode;}
+    const button=document.getElementById('oai-dev-gps-test-run');
+    oaiDevGpsTest.busy=true;if(button)button.disabled=true;
+    const start=performance.now();
+    try{
+      oaiDevGpsTestStatus('GPS 신호를 확인하고 있습니다. 시험 중에는 실제 스탬프를 저장하지 않습니다.');
+      const first=oaiDevGpsTestValidFix(await oaiDevGpsReadPosition());
+      if(!oaiDevGpsTest.center)oaiDevGpsTest.center={lat:first.lat,lng:first.lng};
+      const center=oaiDevGpsTest.center;
+      const meters=calcDist(first.lat,first.lng,center.lat,center.lng)*1000;
+      const radius=mode==='parish'?OAI_PARISH_AUTO_VISIT_RADIUS_M:150;
+      if(meters>radius)throw Error('임시 기준점에서 '+Math.round(meters)+'m 떨어져 있습니다. 시험 초기화 후 다시 시작하세요.');
+      if(mode==='parish'){
+        if(first.accuracy>100)throw Error('첫 위치의 GPS 정확도가 '+Math.round(first.accuracy)+'m입니다. 정확도 100m 이하에서 재시험하세요.');
+        oaiDevGpsTestStatus('첫 신호 확인: '+Math.round(meters)+'m · 정확도 '+Math.round(first.accuracy)+'m. 10초 뒤 새 GPS 신호를 받습니다.');
+        await oaiDevGpsWait(OAI_PARISH_AUTO_CONFIRM_MS);
+        if(document.visibilityState==='hidden')throw Error('앱이 백그라운드에 있어 인증을 중지했습니다. 복귀 후 재시험하세요.');
+        const second=oaiDevGpsTestValidFix(await oaiDevGpsReadPosition());
+        const distance=calcDist(second.lat,second.lng,center.lat,center.lng)*1000;
+        if(second.at-first.at<OAI_PARISH_AUTO_CONFIRM_MS||second.accuracy>100||distance>OAI_PARISH_AUTO_VISIT_RADIUS_M)
+          throw Error('성당 재확인 실패: 신호 간격 '+Math.round((second.at-first.at)/1000)+'초 · 거리 '+Math.round(distance)+'m · 정확도 '+Math.round(second.accuracy)+'m');
+      }
+      if(!oaiDevEnabled()||!oaiDevPanelUnlocked||document.visibilityState==='hidden')throw Error('시험 중 화면이 닫혀 표시하지 않았습니다.');
+      // 실제 등록 함수/대기열/백업/오늘 방문 목록은 호출하지 않는다.
+      // 실제 축하 안내가 이미 표시 중이면 시험 화면으로 덮지 않는다.
+      const activeNotice=document.getElementById('shrine-auto-visit-modal');
+      if(activeNotice&&activeNotice.classList.contains('show'))
+        throw Error('실제 축하창이 열려 있습니다. 먼저 확인을 누른 뒤 다시 시험하세요.');
+      // 기존 제품 축하 화면과 음성 브리지만 사용한다.
+      const label=mode==='parish'?'[시험] 일반 성당':mode==='linked'?'[시험] 공통화 성지':'[시험] 일반 성지';
+      if(mode==='parish')_showParishAutoVisitNotice({name:label});
+      else _openShrineAutoVisitModal({item:{name:label}},{});
+      const testModal=document.getElementById('shrine-auto-visit-modal');
+      if(testModal)testModal.dataset.oaiDevGpsTest='1';
+      const title=document.getElementById('shrine-auto-visit-title');
+      if(title)title.textContent='GPS 시험 성공 · '+label+' (실제 스탬프 저장 안 함)';
+      const kicker=document.querySelector('#shrine-auto-visit-modal .shrine-auto-visit-kicker');
+      if(kicker)kicker.textContent='개발자 GPS 시험 · 실제 방문기록 아님';
+      const radiusLabel=document.getElementById('shrine-auto-visit-radius');if(radiusLabel)radiusLabel.hidden=true;
+      _oaiSpeakNewGpsStamp(mode==='parish'?'parish':'shrine',label);
+      oaiDevGpsTest.count++;
+      oaiDevGpsTestStatus('시험 '+oaiDevGpsTest.count+'회 성공 · '+Math.round(performance.now()-start)+'ms · 첫 GPS 정확도 '+Math.round(first.accuracy)+'m · '+(mode==='parish'?'10초 새 신호 확인':'GPS 한 번 확인')+' · '+(mode==='linked'?'성지·연결 성당 시험 기록 2개(메모리에서만 가정), 축하 1회':'시험 축하창 표시')+' · 실제 스탬프 저장 0건. 음성은 휴대폰 소리 모드에서 직접 확인하세요.');
+    }catch(err){oaiDevGpsTestStatus('GPS 시험 미통과: '+(err&&err.message||String(err))+' · 실제 스탬프 기록 변경 없음');}
+    finally{oaiDevGpsTest.busy=false;if(button)button.disabled=false;}
+  }
   function oaiRefreshDeveloperPanel(){
     const enabled=oaiDevEnabled()&&oaiDevPanelUnlocked;
     const section=document.getElementById('oai-developer-section');if(section)section.hidden=!enabled;
@@ -18720,7 +18796,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       const el=document.getElementById(id);
       if(el)el.hidden=!(enabled&&window.GildongmuNative&&typeof window.GildongmuNative[method]==='function');
     }
-    if(!enabled){oaiDevPendingRestore=null;for(const id of ['oai-dev-import-view','oai-dev-restore-preview']){const el=document.getElementById(id);if(el)el.hidden=true;}}
+    if(!enabled){oaiDevPendingRestore=null;oaiDevGpsTestReset();for(const id of ['oai-dev-import-view','oai-dev-restore-preview']){const el=document.getElementById(id);if(el)el.hidden=true;}}
   }
   function oaiDevParseBackupFile(text){
     const raw=String(text||'').trim();
@@ -19000,7 +19076,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }finally{oaiApplyingRestore=false;}
   }
   document.addEventListener('click',async function(event){
-    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-apply],[data-oai-dev-july4-completion],[data-oai-dev-july4-memory]');if(!button)return;
+    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-apply],[data-oai-dev-july4-completion],[data-oai-dev-july4-memory],[data-oai-dev-gps-test-run],[data-oai-dev-gps-test-reset]');if(!button)return;
     if(button.id==='oai-settings-version-label'){
       oaiDevTapCount++;
       if(oaiDevTapCount>=10){oaiDevTapCount=0;const next=!(oaiDevEnabled()&&oaiDevPanelUnlocked);oaiDevPanelUnlocked=next;window.__OAI_DEV_RUNTIME_ACTIVE__=next;oaiRefreshDeveloperPanel();const detail=document.getElementById('parish-visit-detail');if(detail&&detail.classList.contains('show'))_renderParishVisitDetail();if(_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null)_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);if(next){oaiDevStatus('개발자 모드가 열렸습니다.');document.getElementById('oai-developer-section').scrollIntoView({block:'nearest',behavior:'smooth'});} }
@@ -19009,7 +19085,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!oaiDevEnabled())return;
     event.preventDefault();
     try{
-      if(button.hasAttribute('data-oai-dev-july4-completion')){
+      if(button.hasAttribute('data-oai-dev-gps-test-run')){
+        if(!oaiDevPanelUnlocked)return;
+        oaiDevGpsTestRun();
+      }else if(button.hasAttribute('data-oai-dev-gps-test-reset')){
+        if(!oaiDevPanelUnlocked||oaiDevGpsTest.busy)return;
+        oaiDevGpsTestReset();
+      }else if(button.hasAttribute('data-oai-dev-july4-completion')){
         if(!oaiDevPanelUnlocked||!window.GildongmuNative||typeof window.GildongmuNative.sendJuly4CompletionTestNotification!=='function')return;
         window.GildongmuNative.sendJuly4CompletionTestNotification();
         oaiDevStatus('7월 4일 완료코스 1회 시험 알림을 요청했습니다. 알림을 눌러 기존 완료 상세를 확인합니다. 등록 데이터는 변경하지 않습니다.');

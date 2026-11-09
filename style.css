@@ -10161,6 +10161,15 @@ html.oai-font-global .oai-drive-last-saved{font-size:calc(12.5px * var(--app-fon
 .oai-dev-danger{border-color:#ad4a45;background:#a83f3b}
 .oai-dev-status{margin:12px 0 0;color:#285a4a;font-size:12.5px;line-height:1.6;word-break:keep-all;text-align:left}
 .oai-dev-status:empty{display:none}
+#shrine-auto-visit-modal[data-oai-dev-gps-test="1"]{z-index:100121}
+#oai-dev-gps-test{margin-bottom:16px}
+#oai-dev-gps-test select{width:100%;height:43px;border:1px solid #bdcfdf;border-radius:10px;background:#fff;color:#263a50;padding:0 10px;font:inherit}
+.oai-dev-gps-test-buttons{display:flex;gap:9px}
+.oai-dev-gps-test-buttons button{flex:1;min-height:43px;border:1px solid #9fb9ce;border-radius:10px;background:#edf4fa;color:#244566;font:700 13px/1.4 inherit}
+.oai-dev-gps-test-buttons button:first-child{background:#236da8;color:#fff;border-color:#236da8}
+.oai-dev-gps-test-buttons button:disabled{opacity:.55}
+#oai-dev-gps-test-status{margin:0;padding:9px;border-radius:9px;background:#fff;color:#284b65;font-size:12px;line-height:1.6;overflow-wrap:anywhere}
+#oai-dev-gps-test>small{font-size:11px;line-height:1.6;color:#758493}
 .oai-dev-footnote{margin:16px 0 0;padding-top:12px;border-top:1px solid #e6edf3;color:#788494;font-size:11.5px;line-height:1.6;word-break:keep-all}
 @media(max-width:350px){.oai-dev-content{padding:12px}.oai-dev-title{padding:13px}.oai-dev-pill{font-size:10px;padding:4px 6px}.oai-dev-action-text b{font-size:14px}}
 
