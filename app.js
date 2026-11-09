@@ -4370,13 +4370,21 @@ function _oaiVisitNoticeBlocked(){try{
   const parishNotice=document.getElementById('parish-auto-visit-notice');
   if(parishNotice&&parishNotice.classList.contains('show'))return true;
 }catch(_e){}return false;}
+// GPS 방문 안내와 순례완료 안내는 내용과 저장 방식은 다르지만
+// 화면 재진입·재시도 일정은 한 곳에서 관리한다.
+function _oaiFlushCelebrationNotices(){
+  _flushDeferredVisitNotices();
+  if(typeof window._oaiFlushPilgrimageCongratulations==='function')
+    window._oaiFlushPilgrimageCongratulations();
+}
 function _scheduleDeferredVisitNoticeFlush(){
-  // 다른 중요한 창에 막힌 경우에만 단일 재확인 타이머를 둔다.
   if(document.visibilityState==='hidden'||_oaiDeferredVisitNoticeTimer)return;
-  if(_oaiDeferredVisitNotices.length||_oaiReadPendingVisitNotices().length){
+  const coursePending=typeof window._oaiHasPendingPilgrimageCongratulations==='function'&&
+    window._oaiHasPendingPilgrimageCongratulations();
+  if(_oaiDeferredVisitNotices.length||_oaiReadPendingVisitNotices().length||coursePending){
     _oaiDeferredVisitNoticeTimer=setTimeout(function(){
       _oaiDeferredVisitNoticeTimer=0;
-      _flushDeferredVisitNotices();
+      _oaiFlushCelebrationNotices();
     },900);
   }
 }
@@ -4392,7 +4400,7 @@ function _queueDeferredVisitNotice(kind,place,date){
   if(!_oaiDeferredVisitNotices.some(x=>x.kind===kind&&x.id===id&&x.date===day))
     _oaiDeferredVisitNotices.push({kind:kind,place:place,id:id,date:day});
   // GPS 신규 등록 직후 화면이 보이면 같은 호출 경로에서 바로 표시한다.
-  _flushDeferredVisitNotices();
+  _oaiFlushCelebrationNotices();
 }
 function _flushDeferredVisitNotices(){
   if(_oaiDeferredVisitNoticeTimer){
@@ -4431,16 +4439,12 @@ function _flushDeferredVisitNotices(){
     // 화면 생성 오류나 일시적인 DOM 준비 실패 시에도 저장된 안내를 그대로 보존한다.
     _scheduleDeferredVisitNoticeFlush();
   }
-  // 현재 축하창이 열린 동안 추가 안내는 확인 버튼으로 이어서 표시한다.
-  if(!_oaiDeferredVisitNotices.length&&!_oaiReadPendingVisitNotices().length&&
-     typeof window._oaiFlushPilgrimageCongratulations==='function'){
-    setTimeout(window._oaiFlushPilgrimageCongratulations,120);
-  }
+  // 다음 안내는 공통 표시 조정자와 확인 버튼을 통해 이어서 표시한다.
 }
 // 현재 화면으로 돌아오면 한 함수에서만 미표시 안내를 확인한다.
 // 백그라운드 GPS 수신이나 별도의 신규 위치 감시는 추가하지 않는다.
 function _resumePendingGpsVisitNotices(){
-  if(document.visibilityState!=='hidden')_flushDeferredVisitNotices();
+  if(document.visibilityState!=='hidden')_oaiFlushCelebrationNotices();
 }
 window.addEventListener('oai-short-background-return',_resumePendingGpsVisitNotices,{passive:true});
 window.addEventListener('oai-long-background-return',_resumePendingGpsVisitNotices,{passive:true});
@@ -4499,8 +4503,7 @@ function _closeShrineAutoVisitModal(){
   const modal=document.getElementById('shrine-auto-visit-modal');
   if(modal){ modal.classList.remove('show'); modal.setAttribute('aria-hidden','true'); }
   window.__OAI_SHRINE_AUTO_VISIT_PROMPTING__=false;
-  _flushDeferredVisitNotices();
-  if(typeof window._oaiFlushPilgrimageCongratulations==='function')setTimeout(window._oaiFlushPilgrimageCongratulations,120);
+  _oaiFlushCelebrationNotices();
 }
 function _isAnyVisitModalOpen(){
   return !!(document.querySelector('#shrine-visit-modal.show,#shrine-visit-cards-modal.show,#shrine-auto-visit-modal.show,#shrine-visit-detail-view.show'));
@@ -27458,9 +27461,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
 /* 순례코스 완료 안내는 개별 GPS 방문 축하창이 닫힌 다음 순서대로 표시한다. */
 (function(){
   const pending=[];
-  let retryTimer=0;
+  // 구형 독립 500ms 폴링은 중지한다. 원래 구현은 V1825 원본 ZIP에 보존.
   function flush(){
-    clearTimeout(retryTimer);retryTimer=0;
     if(!pending.length||document.hidden)return;
     const visitModal=document.getElementById('shrine-auto-visit-modal');
     const courseModal=document.getElementById('oai-cgm-congrats');
@@ -27469,7 +27471,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       !!(typeof _oaiDeferredVisitNotices!=='undefined'&&_oaiDeferredVisitNotices.length)||
       !!(typeof window.oaiHasCriticalModalOpen==='function'&&window.oaiHasCriticalModalOpen())||
       !!(typeof window.oaiIsBackgroundReturnUiBlocked==='function'&&window.oaiIsBackgroundReturnUiBlocked());
-    if(blocked){retryTimer=setTimeout(flush,500);return;}
+    if(blocked){_scheduleDeferredVisitNoticeFlush();return;}
     const next=pending.shift();
     let overlay=courseModal;
     if(!overlay){
@@ -27479,8 +27481,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         overlay.hidden=true;
         const cb=overlay._onAcknowledge;overlay._onAcknowledge=null;
         if(typeof cb==='function')cb();
-        if(typeof _flushDeferredVisitNotices==='function')_flushDeferredVisitNotices();
-        flush();
+        _oaiFlushCelebrationNotices();
       });
       document.body.appendChild(overlay);
     }
@@ -27491,13 +27492,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     overlay.hidden=false;
   }
   window._oaiFlushPilgrimageCongratulations=flush;
+  window._oaiHasPendingPilgrimageCongratulations=function(){return pending.length>0;};
   window.oaiPilgrimageCongratulation=function(message,onAcknowledge){
     pending.push({message:String(message||''),onAcknowledge:typeof onAcknowledge==='function'?onAcknowledge:null});
-    flush();
+    _oaiFlushCelebrationNotices();
   };
-  document.addEventListener('visibilitychange',function(){if(!document.hidden)flush();});
-  window.addEventListener('oai-short-background-return',flush,{passive:true});
-  window.addEventListener('oai-long-background-return',flush,{passive:true});
+  // 별도의 복귀 이벤트 리스너는 등록하지 않고 위쪽 공통 경로를 사용한다.
 })();
 
 
