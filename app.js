@@ -10636,7 +10636,10 @@ function closeRouteSheetByX(confirmed){
     !window.__OAI_PILGRIMAGE_PLACE_PICK__ &&
     !window.__OAI_PILGRIMAGE_COURSE_VIEW__ &&
     !window.__OAI_PILGRIMAGE_ROUTE_EDIT__;
-  if(confirmed!==true && ordinaryRouteVisible && (_rS||_rE||_polyline)){
+  // Search opens the result panel; selecting a start/end alone is not a calculated route.
+  var routeResultForExit = document.getElementById('rs-result');
+  var hasSearchedRoute = !!routeResultForExit && routeResultForExit.style.display === 'block';
+  if(confirmed!==true && ordinaryRouteVisible && hasSearchedRoute){
     if(document.getElementById('oai-visit-confirm')?.classList.contains('show'))return;
     _oaiVisitConfirm('현재 경로가 삭제됩니다. 정말 나가시겠습니까?',
       function(){closeRouteSheetByX(true);},
