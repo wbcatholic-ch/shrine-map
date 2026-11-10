@@ -18659,24 +18659,38 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         courses.forEach(c=>{(Array.isArray(c&&c.completions)?c.completions:[]).forEach(x=>{
           const ts=Number(x&&x.completedAt);if(Number.isFinite(ts)&&ts>0)completed.push(ts);
         });});
-        if(!completed.length)return;
-        let first='';
         const saved=Number(localStorage.getItem(OAI_FIRST_COURSE_REGISTRATION));
+        if(!completed.length&&!(Number.isFinite(saved)&&saved>0))return;
         const firstTs=Number.isFinite(saved)&&saved>0?saved:Math.min(...completed);
         const d=new Date(firstTs);
         if(!Number.isFinite(d.getTime()))return;
         const format=x=>x.getFullYear()+'-'+String(x.getMonth()+1).padStart(2,'0')+'-'+String(x.getDate()).padStart(2,'0');
-        first=format(d);
-        const dates=new Set();
-        [_loadShrineVisits(),_loadParishVisits()].forEach(records=>{
-          Object.values(records||{}).forEach(record=>{
-            (Array.isArray(record&&record.visits)?record.visits:[]).forEach(raw=>{
-              const visit=_normalizeVisitEntry(raw),date=visit&&_visitDateOf(visit);
-              if(visit&&String(visit.method||'').toLowerCase()==='gps'&&/^\d{4}-\d{2}-\d{2}$/.test(date))dates.add(date);
-            });
+        const first=format(d);
+        // 추억 알림 예약은 실제 GPS 순례완료가 있는 방문일에만 적용한다.
+        // 다음 날 자동 등록된 코스는 등록 시각이 아닌 원래 방문일(sourceDate)을 사용한다.
+        const completedGpsDates=new Set();
+        courses.forEach(course=>{
+          (Array.isArray(course&&course.completions)?course.completions:[]).forEach(entry=>{
+            if(String(entry&&entry.method||'').toLowerCase()!=='gps')return;
+            const ts=Number(entry&&entry.completedAt);
+            if(!Number.isFinite(ts)||ts<=0)return;
+            const source=course&&course.autoGps===true?String(course.sourceDate||''):'';
+            const date=/^\d{4}-\d{2}-\d{2}$/.test(source)?source:format(new Date(ts));
+            completedGpsDates.add(date);
           });
         });
-        if(dates.size)native.updatePilgrimageMemoryReminders(first,JSON.stringify([...dates].sort()));
+        // 순례완료는 성지 GPS가 최소 한 곳 있어야 한다. 성당만 방문한 날은 제외한다.
+        // 추억 화면 자체는 방문일의 성지·성당 기록을 모두 보여주는 기존 동작을 유지한다.
+        const gpsShrineDates=new Set();
+        Object.values(_loadShrineVisits()||{}).forEach(record=>{
+          (Array.isArray(record&&record.visits)?record.visits:[]).forEach(raw=>{
+            const visit=_normalizeVisitEntry(raw),date=visit&&_visitDateOf(visit);
+            if(visit&&String(visit.method||'').toLowerCase()==='gps'&&/^\d{4}-\d{2}-\d{2}$/.test(date))gpsShrineDates.add(date);
+          });
+        });
+        const dates=[...completedGpsDates].filter(date=>gpsShrineDates.has(date)).sort();
+        // 빈 목록도 전달하여 과거의 잘못 예약된 성당 단독 알림을 취소한다.
+        native.updatePilgrimageMemoryReminders(first,JSON.stringify(dates));
       }catch(err){console.warn('[순례 추억 알림 예약 보류]',err);}
     },2500);
   }
