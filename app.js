@@ -1199,9 +1199,11 @@ function oaiClearExternalNavigationState(opts){
       }
       window.__OAI_NATIVE_LIFECYCLE_ACTIVE__=true;
 
-      /* A first native foreground in a newly opened document is not a
-         background return unless this document was hidden or has a stamp. */
-      var isFreshDocumentResume=!_nativeInitialResumeConsumed && !_nativeDocumentHasBeenHidden &&
+      /* Android issues a cycle ID only after recording a background stop.
+         Even in a freshly loaded WebView, such a cycle is a real return.
+         Only a legacy foreground event without a cycle can be treated as boot. */
+      var isFreshDocumentResume=!detail.cycleId && !forceCover &&
+        !_nativeInitialResumeConsumed && !_nativeDocumentHasBeenHidden &&
         !hasRuntimeBackgroundStamp() && (now()-_documentStartedAt)<30000;
       _nativeInitialResumeConsumed=true;
       if(isFreshDocumentResume){
