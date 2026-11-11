@@ -18903,14 +18903,30 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
     return JSON.parse(raw);
   }
+  // Stage19: use the capability delivered to this top-level page by Android v441+.
+  // On older installed Android builds, keep the pre-existing signatures until
+  // the staged web-first/native-second rollout has completed.
+  function oaiNativeBridgeToken(){
+    try{ return typeof window.__oaiNativeBridgeToken==='string' ? window.__oaiNativeBridgeToken : ''; }
+    catch(_e){ return ''; }
+  }
+  function oaiNativeBridgeRequiresToken(){
+    try{const m=String(navigator.userAgent||'').match(/GildongmuAndroid\/(\d+)/i);return !!(m&&Number(m[1])>=441);}
+    catch(_e){return false;}
+  }
   async function oaiDevSaveBackupFile(){
     const payload=oaiDevSnapshot();
     const blob=new Blob([JSON.stringify(payload,null,2)],{type:'application/json'});
     const date=new Date().toISOString().slice(0,10).replace(/-/g,'');
     const name='gildongmu-backup-'+date+'.json';
     if(window.GildongmuNative && typeof window.GildongmuNative.saveDeveloperBackup==='function'){
+      const token=oaiNativeBridgeToken();
+      if(!token && oaiNativeBridgeRequiresToken()){
+        oaiDevStatus('Android 보안 연결 준비 중입니다. 화면을 다시 열어 시도해 주세요.');return;
+      }
       oaiDevStatus('Android 파일 저장 위치를 선택해 주세요.');
-      window.GildongmuNative.saveDeveloperBackup(name,JSON.stringify(payload));
+      if(oaiNativeBridgeRequiresToken()) window.GildongmuNative.saveDeveloperBackup(name,JSON.stringify(payload),token);
+      else window.GildongmuNative.saveDeveloperBackup(name,JSON.stringify(payload));
       return;
     }
     // On Android WebView a blob download can be ignored by the host. Prefer the
@@ -19230,7 +19246,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         const selected=document.getElementById('oai-dev-selected-file');if(selected)selected.textContent='';
         if(window.GildongmuNative && typeof window.GildongmuNative.openDeveloperBackup==='function'){
           oaiDevStatus('Android JSON 선택창을 여는 중입니다. 선택한 파일은 검사 후 아래에 표시됩니다.');
-          try{window.GildongmuNative.openDeveloperBackup();}catch(err){oaiDevStatus('Android JSON 첨부 실행 실패: '+(err.message||String(err)));}
+          try{
+            const token=oaiNativeBridgeToken();
+            if(oaiNativeBridgeRequiresToken()){
+              if(token)window.GildongmuNative.openDeveloperBackup(token);
+              else oaiDevStatus('Android 보안 연결 준비 중입니다. 화면을 다시 열어 시도해 주세요.');
+            }else window.GildongmuNative.openDeveloperBackup();
+          }catch(err){oaiDevStatus('Android JSON 첨부 실행 실패: '+(err.message||String(err)));}
         }else{
           const fileInput=document.getElementById('oai-dev-import-file');
           if(fileInput){fileInput.value='';fileInput.click();oaiDevStatus('JSON 파일을 선택하세요.');}
@@ -19255,9 +19277,17 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(oaiTransferBusy)return false;
     const native=window.GildongmuNative||window.Android;
     if(!native||typeof native.transferVisitData!=='function'){oaiTransferStatus('Google Drive는 Android 앱에서 이용할 수 있습니다.');return false;}
+    const token=oaiNativeBridgeToken();
+    if(!token && oaiNativeBridgeRequiresToken()){
+      oaiTransferStatus('Android 보안 연결 준비 중입니다. 잠시 후 다시 시도해 주세요.');return false;
+    }
     oaiTransferBusy=true;oaiTransferPendingMode=mode||action;
     oaiTransferStatus(action==='load'?'Google Drive 기록을 확인하고 있습니다.':'변경된 기록을 자동 보관하고 있습니다.');
-    try{native.transferVisitData(action,action==='save'?oaiTransferSnapshot():'');}
+    try{
+      const payload=action==='save'?oaiTransferSnapshot():'';
+      if(oaiNativeBridgeRequiresToken())native.transferVisitData(action,payload,token);
+      else native.transferVisitData(action,payload);
+    }
     catch(err){oaiTransferBusy=false;oaiTransferPendingMode='';oaiTransferStatus('Google Drive 연결을 시작하지 못했습니다.');return false;}
     return true;
   }
