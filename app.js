@@ -2815,7 +2815,7 @@ function _oaiNotifyStampListVisibility(){
     if(!bridge||typeof bridge.setVisitPhotoTransferActivity!=='function')return;
     const shrine=document.getElementById('shrine-visit-cards-modal');
     const parish=document.getElementById('parish-visit-book');
-    const visible=!!((shrine&&shrine.classList.contains('show'))||(parish&&parish.classList.contains('show')));
+    const visible=!!((shrine&&shrine.classList.contains('show')&&!shrine.classList.contains('detail-covered'))||(parish&&parish.classList.contains('show')&&!parish.classList.contains('detail-covered')));
     bridge.setVisitPhotoTransferActivity('stamp-list',visible);
     if(typeof bridge.setVisitPhotoUiActivity==='function'){
       _oaiStampInteractionStarted();
@@ -2979,7 +2979,7 @@ function _bindShrineVisitCardsSwipe(modal){
 }
 function _isShrineVisitCardsModalOpen(){
   const modal=document.getElementById('shrine-visit-cards-modal');
-  return !!(modal&&modal.classList.contains('show'));
+  return !!(modal&&modal.classList.contains('show')&&!modal.classList.contains('detail-covered'));
 }
 
 function _syncShrineVisitCardsViewportHeight(){
@@ -3017,8 +3017,10 @@ function _suspendShrineVisitCardsForDetail(){
     const modal=document.getElementById('shrine-visit-cards-modal');
     const body=document.getElementById('shrine-visit-cards-body');
     _shrineVisitCardsReturnScroll=body?body.scrollTop:0;
+    // Keep the original list mounted and laid out while the detail is open.
+    // display:none or rebuilding the cards resets scroll position in Android WebView.
     if(modal){
-      modal.classList.remove('show','detail-covered');
+      modal.classList.add('detail-covered');
       modal.setAttribute('aria-hidden','true');
     }
     _oaiNotifyStampListVisibility();
@@ -3030,21 +3032,13 @@ function _resumeShrineVisitCardsFromDetail(){
     const modal=_ensureShrineVisitCardsModal();
     _syncShrineVisitCardsViewportHeight();
     _setShrineVisitDetailFromCardsActive(false);
-    // Restore the list while it has a measurable viewport. Rendering inside
-    // display:none discards the old scroll range on some Android WebViews.
+    // The card DOM was kept alive: reveal it without rebuilding or resetting scroll.
     modal.classList.remove('detail-covered');
     modal.classList.add('show');
     modal.setAttribute('aria-hidden','false');
-    _renderShrineVisitCardsModal();
     const body=document.getElementById('shrine-visit-cards-body');
-    if(body){
-      const savedTop=_shrineVisitCardsReturnScroll;
-      body.scrollTop=savedTop;
-      requestAnimationFrame(function(){
-        if(modal.classList.contains('show') && !_isShrineVisitDetailOpen() && body.scrollTop===0 && savedTop>0){
-          body.scrollTop=savedTop;
-        }
-      });
+    if(body && body.scrollTop!==_shrineVisitCardsReturnScroll){
+      body.scrollTop=_shrineVisitCardsReturnScroll;
     }
     _oaiNotifyStampListVisibility();
   }catch(e){ console.warn('[가톨릭길동무]', e); }
@@ -4143,7 +4137,8 @@ function _closeShrineVisitDetail(opts){
   opts=opts||{};_oaiPhotoSelectionClear();
   const view=document.getElementById('shrine-visit-detail-view');
   const wasOpen=!!(view&&view.classList.contains('show'));
-  const shouldResumeCards=wasOpen && window.__OAI_SHRINE_VISIT_DETAIL_FROM_CARDS__===true && window.__OAI_SHRINE_VISIT_RETURN_TO_CARDS__===true && !opts.fromPopstate && !opts.noReturnCards;
+  const fromCards=wasOpen && window.__OAI_SHRINE_VISIT_DETAIL_FROM_CARDS__===true;
+  const shouldResumeCards=fromCards && window.__OAI_SHRINE_VISIT_RETURN_TO_CARDS__===true && !opts.fromPopstate && !opts.noReturnCards;
   if(view){ view.classList.remove('show'); view.setAttribute('aria-hidden','true'); }
   _oaiNotifyPhotoLocationActivity();
   window.__OAI_SHRINE_VISIT_DETAIL_FROM_CARDS__=false;
@@ -4152,6 +4147,7 @@ function _closeShrineVisitDetail(opts){
   window.__OAI_SHRINE_VISIT_DETAIL_HISTORY__=false;
   window.__OAI_SHRINE_VISIT_DETAIL_CLOSING_BY_CODE__=false;
   if(shouldResumeCards) _resumeShrineVisitCardsFromDetail();
+  else if(fromCards) _closeShrineVisitCardsModal();
   if(wasOpen&&typeof window._oaiAnniversaryDetailClosed==='function')window._oaiAnniversaryDetailClosed();
 }
 
@@ -5543,7 +5539,7 @@ function _ensureParishVisitButton(){
   const host=document.getElementById('app')||document.body;if(host&&layer.parentNode!==host)host.appendChild(layer);
   const b=document.getElementById('parish-visit-floating-list-btn');if(b&&!b.__bound){b.__bound=true;b.addEventListener('click',function(e){e.preventDefault();e.stopPropagation();_openParishVisitBook();});}return layer;
 }
-function _parishVisitBookOpen(){const m=document.getElementById('parish-visit-book');return !!(m&&m.classList.contains('show'));}
+function _parishVisitBookOpen(){const m=document.getElementById('parish-visit-book');return !!(m&&m.classList.contains('show')&&!m.classList.contains('detail-covered'));}
 function _updateParishVisitButton(){const layer=_ensureParishVisitButton();if(!layer)return;const btn=document.getElementById('parish-visit-floating-list-btn'),info=document.getElementById('info-card'),route=document.getElementById('sheet-route');const blocked=(info&&info.classList.contains('open'))||(route&&route.classList.contains('open'))||_parishVisitBookOpen()||!!document.querySelector('#parish-visit-editor.show');const show=_mode==='parish'&&_screen==='map'&&!blocked;layer.classList.toggle('show',show);layer.setAttribute('aria-hidden',show?'false':'true');if(btn)btn.classList.toggle('show',show);}
 function _ensureParishVisitBook(){
   let m=document.getElementById('parish-visit-book');if(m)return m;m=document.createElement('div');m.id='parish-visit-book';m.className='shrine-visit-cards-modal parish-visit-book';m.setAttribute('aria-hidden','true');
@@ -5596,7 +5592,7 @@ function _openParishVisitBook(opts){
   _closeOaiVisitPicker();
   _parishVisitTab='visited';_parishVisitDio='all';_parishVisitSort='recent';
   _parishVisitBookReturnScroll=0;
-  const m=_ensureParishVisitBook();m.classList.add('show');m.setAttribute('aria-hidden','false');
+  const m=_ensureParishVisitBook();m.classList.remove('detail-covered');m.classList.add('show');m.setAttribute('aria-hidden','false');
   _oaiNotifyStampListVisibility();
   const body=document.getElementById('pv-body');if(body)body.innerHTML='<div class="shrine-visit-cards-empty">전국 성당 정보를 불러오는 중입니다.</div>';
   _updateParishVisitButton();
@@ -5610,7 +5606,7 @@ function _openParishVisitBook(opts){
 }
 function _closeParishVisitBook(){
   _closeOaiVisitPicker();
-  const m=document.getElementById('parish-visit-book');if(m){m.classList.remove('show');m.setAttribute('aria-hidden','true');}
+  const m=document.getElementById('parish-visit-book');if(m){m.classList.remove('show','detail-covered');m.setAttribute('aria-hidden','true');}
   _oaiNotifyStampListVisibility();
   _updateParishVisitButton();
 }
@@ -5645,7 +5641,8 @@ function _openParishVisitDetail(p){
   const book=document.getElementById('parish-visit-book');
   const bookBody=document.getElementById('pv-body');
   _parishVisitBookReturnScroll=bookBody?bookBody.scrollTop:0;
-  if(book){book.classList.remove('show');book.setAttribute('aria-hidden','true');}
+  // Preserve the parish card DOM and its scroll offset under the detail screen.
+  if(book){book.classList.add('detail-covered');book.setAttribute('aria-hidden','true');}
   _oaiNotifyStampListVisibility();
   const v=_ensureParishVisitDetail();window.__OAI_PV_DETAIL_ITEM__=p;window.__OAI_PV_DETAIL_FROM_BOOK__=true;_renderParishVisitDetail();v.classList.add('show');v.setAttribute('aria-hidden','false');_oaiNotifyPhotoLocationActivity();const detailBody=v.querySelector('#parish-visit-detail-body');if(detailBody)detailBody.scrollTop=0;v.scrollTop=0;
 }
@@ -5653,20 +5650,21 @@ function _closeParishVisitDetail(opts){
   opts=opts||{};_oaiPhotoSelectionClear();
   /* 상세의 X와 뒤로가기는 방문 목록으로 돌아간다. */
   const v=document.getElementById('parish-visit-detail');if(v){v.classList.remove('show');v.setAttribute('aria-hidden','true');}
-  if(window.__OAI_PV_DETAIL_FROM_BOOK__&&!opts.noResume){
-    const book=_ensureParishVisitBook();book.classList.add('show');book.setAttribute('aria-hidden','false');
-    _renderParishVisitBook();
+  const fromBook=window.__OAI_PV_DETAIL_FROM_BOOK__===true;
+  if(fromBook&&!opts.noResume){
+    const book=_ensureParishVisitBook();
+    book.classList.remove('detail-covered');
+    book.classList.add('show');
+    book.setAttribute('aria-hidden','false');
+    // No rerender: the list was never removed, so its precise scroll is retained.
     const bookBody=document.getElementById('pv-body');
-    if(bookBody){
-      const savedTop=_parishVisitBookReturnScroll;
-      bookBody.scrollTop=savedTop;
-      requestAnimationFrame(function(){
-        if(book.classList.contains('show') && !document.querySelector('#parish-visit-detail.show') && bookBody.scrollTop===0 && savedTop>0){
-          bookBody.scrollTop=savedTop;
-        }
-      });
+    if(bookBody && bookBody.scrollTop!==_parishVisitBookReturnScroll){
+      bookBody.scrollTop=_parishVisitBookReturnScroll;
     }
     _oaiNotifyStampListVisibility();
+  }else if(fromBook){
+    // Navigation to the map/cover must close the preserved underlying list too.
+    _closeParishVisitBook();
   }
   window.__OAI_PV_DETAIL_FROM_BOOK__=false;_updateParishVisitButton();_oaiNotifyPhotoLocationActivity();
   if(typeof window._oaiAnniversaryDetailClosed==='function')window._oaiAnniversaryDetailClosed();
