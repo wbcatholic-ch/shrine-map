@@ -27075,13 +27075,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(mapEl){mapEl.style.display='';mapEl.style.visibility='visible';}
         if(_map&&typeof _map.relayout==='function')_map.relayout();
         if(typeof _syncMapPanelUI==='function')_syncMapPanelUI('pilgrimage-route');
-        if(_map&&_validGpsPair(exactTarget.lat,exactTarget.lng)){
-          _setPilgrimageMapCenterForBottomCard(
-            {lat:Number(exactTarget.lat),lng:Number(exactTarget.lng)},
-            null,
-            {repeat:false}
-          );
-        }
+        // The shared _calcRoute() already fits both current GPS start and destination
+        // after the result sheet opens. Do not recenter on the destination here:
+        // this delayed restore runs again on Fold and would override that fit.
       }catch(_e){}};
       requestAnimationFrame(()=>requestAnimationFrame(restoreMap));
       setTimeout(restoreMap,120);setTimeout(restoreMap,420);setTimeout(restoreMap,900);
