@@ -3011,9 +3011,12 @@ function _setShrineVisitDetailFromCardsActive(active){
     if(modal) modal.classList.toggle('detail-covered', isActive && modal.classList.contains('show'));
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
+let _shrineVisitCardsReturnScroll=0;
 function _suspendShrineVisitCardsForDetail(){
   try{
     const modal=document.getElementById('shrine-visit-cards-modal');
+    const body=document.getElementById('shrine-visit-cards-body');
+    _shrineVisitCardsReturnScroll=body?body.scrollTop:0;
     if(modal){
       modal.classList.remove('show','detail-covered');
       modal.setAttribute('aria-hidden','true');
@@ -3032,7 +3035,8 @@ function _resumeShrineVisitCardsFromDetail(){
     modal.classList.add('show');
     modal.setAttribute('aria-hidden','false');
     _oaiNotifyStampListVisibility();
-    setTimeout(_resetShrineVisitCardsTopStable, 0);
+    const body=document.getElementById('shrine-visit-cards-body');
+    if(body)body.scrollTop=_shrineVisitCardsReturnScroll;
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 function _pushShrineVisitCardsHistory(){
@@ -3043,6 +3047,7 @@ function _openShrineVisitCardsModal(opts){
   const modal=_ensureShrineVisitCardsModal();
   _syncShrineVisitCardsViewportHeight();
   window.__OAI_SHRINE_VISIT_RETURN_TO_CARDS__=false;
+  _shrineVisitCardsReturnScroll=0;
   _setShrineVisitDetailFromCardsActive(false);
   _shrineVisitCardsTab='visited';
   _shrineVisitCardsDiocese='all';
@@ -5580,6 +5585,7 @@ function _openParishVisitBook(opts){
   if(_mode!=='parish'&&!(opts&&opts.fromCompletion))return;
   _closeOaiVisitPicker();
   _parishVisitTab='visited';_parishVisitDio='all';_parishVisitSort='recent';
+  _parishVisitBookReturnScroll=0;
   const m=_ensureParishVisitBook();m.classList.add('show');m.setAttribute('aria-hidden','false');
   _oaiNotifyStampListVisibility();
   const body=document.getElementById('pv-body');if(body)body.innerHTML='<div class="shrine-visit-cards-empty">전국 성당 정보를 불러오는 중입니다.</div>';
@@ -5621,11 +5627,15 @@ function _renderParishVisitDetail(){
   b.innerHTML='<section class="shrine-visit-detail-hero"><div class="shrine-visit-detail-hero-head"><div class="shrine-visit-detail-kicker">성당 방문 기록 <button type="button" class="cgm-help-icon cgm-visit-section-help" data-cgm-help="parish_detail" aria-label="성당 방문기록 도움말">?</button></div><button type="button" class="shrine-visit-detail-register" data-pvd-register="1">방문등록</button></div><div class="shrine-visit-detail-count">방문 '+n+'회</div><div class="shrine-visit-detail-recent">최근 방문일 '+_visitHtmlEsc(recent)+'</div><div class="shrine-visit-detail-date-title">방문 날짜</div><div class="shrine-visit-detail-date-list">'+dates+'</div></section>'+journalHtml;
   setTimeout(function(){_oaiHydrateVisibleVisitThumbnails('parish');},0);
 }
+let _parishVisitBookReturnScroll=0;
 function _openParishVisitDetail(p){
   _oaiPhotoSelectionClear();
   window.__OAI_PARISH_JOURNAL_DATE__='';
   _closeOaiVisitPicker();
-  const book=document.getElementById('parish-visit-book');if(book){book.classList.remove('show');book.setAttribute('aria-hidden','true');}
+  const book=document.getElementById('parish-visit-book');
+  const bookBody=document.getElementById('pv-body');
+  _parishVisitBookReturnScroll=bookBody?bookBody.scrollTop:0;
+  if(book){book.classList.remove('show');book.setAttribute('aria-hidden','true');}
   _oaiNotifyStampListVisibility();
   const v=_ensureParishVisitDetail();window.__OAI_PV_DETAIL_ITEM__=p;window.__OAI_PV_DETAIL_FROM_BOOK__=true;_renderParishVisitDetail();v.classList.add('show');v.setAttribute('aria-hidden','false');_oaiNotifyPhotoLocationActivity();const detailBody=v.querySelector('#parish-visit-detail-body');if(detailBody)detailBody.scrollTop=0;v.scrollTop=0;
 }
@@ -5635,6 +5645,7 @@ function _closeParishVisitDetail(opts){
   const v=document.getElementById('parish-visit-detail');if(v){v.classList.remove('show');v.setAttribute('aria-hidden','true');}
   if(window.__OAI_PV_DETAIL_FROM_BOOK__&&!opts.noResume){
     const book=_ensureParishVisitBook();_renderParishVisitBook();book.classList.add('show');book.setAttribute('aria-hidden','false');
+    const bookBody=document.getElementById('pv-body');if(bookBody)bookBody.scrollTop=_parishVisitBookReturnScroll;
     _oaiNotifyStampListVisibility();
   }
   window.__OAI_PV_DETAIL_FROM_BOOK__=false;_updateParishVisitButton();_oaiNotifyPhotoLocationActivity();
@@ -20029,6 +20040,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   // V1177: 00:00에 전날 진행 순례만 강제 종료하고, 자정 이후 지난 날짜 GPS 코스를 독립 등록한다.
   let plannerReturnToCover=false, plannerEntrySource='unknown';
   let plannerView='list', currentCourseId='', pointRole='start', pendingPlanDeleteIndex=-1;
+  let pilgrimageListReturnPosition=null;
   let pilgrimageDetailMode='plan';
   let pilgrimageSuppressRouteFork=0;
   let pilgrimageTotalCalcSeq=0, detailMetricSeq=0, followMetricSeq=0;
@@ -23699,6 +23711,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function coverVisible(){try{const c=document.getElementById('cover');return !!(c&&getComputedStyle(c).display!=='none'&&!document.documentElement.classList.contains('app-active'));}catch(_e){return false;}}
   function settingsReturnToCover(){const m=document.getElementById('oai-settings-modal');return !!(m&&m.dataset.returnToCover==='1');}
   function setView(v){
+    const previousView=plannerView;
+    const panel=planner()&&planner().querySelector('.oai-pilgrimage-planner-panel');
+    if(previousView==='list'&&v==='detail'&&panel){
+      pilgrimageListReturnPosition={tab:pilgrimageCourseTab,top:panel.scrollTop};
+    }
     if(v!=='detail'){
       ++pilgrimageDetailRenderSeq;
       ++pilgrimageTotalCalcSeq;
@@ -23718,7 +23735,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(titleText)titleText.nodeValue=nextLabel+' ';else title.insertBefore(document.createTextNode(nextLabel+' '),title.firstChild);
     }
     if(sub)sub.textContent=v==='list'?'성지·성당 순례계획과 완료 기록을 관리하세요':v==='follow'?'현재 위치 기준 거리와 순례 진행 상태를 확인하세요':(pilgrimageManualCreateMode?'다녀온 성지·성당을 순서대로 등록하세요':(pilgrimageDetailMode==='complete'?'완료한 순례코스를 확인하세요':'순례 경로와 현재 위치를 확인하세요'));
-    const panel=planner()&&planner().querySelector('.oai-pilgrimage-planner-panel');if(panel)panel.scrollTop=0;
+    if(panel){
+      const returning=previousView==='detail'&&v==='list'&&pilgrimageListReturnPosition&&pilgrimageListReturnPosition.tab===pilgrimageCourseTab;
+      panel.scrollTop=returning?pilgrimageListReturnPosition.top:0;
+    }
     _bindPilgrimageScrollHints();
     _schedulePilgrimageStickyOffsetSync();
     requestAnimationFrame(function(){
@@ -23757,6 +23777,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         return;
       }
       /* 목록 화면 진입은 읽기 전용: 코스 저장/완료기록 변경 금지 */
+      pilgrimageListReturnPosition=null;
       pilgrimageCourseTab=loadLastPilgrimageTab();
       pilgrimageCourseFilterState.year='all';
       pilgrimageCourseFilterState.month='all';
@@ -23773,6 +23794,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   }
   function closePlanner(){
     const m=planner();if(!m)return;
+    pilgrimageListReturnPosition=null;
     m.classList.remove('show');m.setAttribute('aria-hidden','true');
     closePointPicker();closeCompletionModal();
     const ret=plannerReturnToCover, origin=plannerEntrySource;
