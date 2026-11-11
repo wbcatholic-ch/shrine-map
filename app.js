@@ -22855,8 +22855,19 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         });
       });
     });
+    // The same history-list render must use one normalized course snapshot.
+    // Re-read on the next invocation, never cache across actual course writes.
+    let historyCourses=null,historyCoursesLoaded=false,historyCoursesError=null;
     const result=Array.from(dates).sort().filter(date=>{
-      try{return _dailyEligibleRemaining(date,_dailyUnregisteredEvents(date,_dailyGpsEvents(date),loadCourses()),loadCourses());}
+      try{
+        if(!historyCoursesLoaded){
+          historyCoursesLoaded=true;
+          try{historyCourses=loadCourses();}catch(e){historyCoursesError=e;}
+        }
+        if(historyCoursesError)throw historyCoursesError;
+        const remaining=_dailyUnregisteredEvents(date,_dailyGpsEvents(date),historyCourses);
+        return _dailyEligibleRemaining(date,remaining,historyCourses);
+      }
       catch(e){
         // 장소 연결 실패/자료 미로딩은 '등록할 코스가 있다'는 증거가 아니다.
         // 원본 스탬프/실패 장부는 보존하며, 데이터가 준비된 다음 다시 검증한다.
@@ -22930,8 +22941,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     try{
       if(typeof _ensureShrineDataLoaded==='function')await _ensureShrineDataLoaded();
       if(typeof _ensureAllParishDiocesesLoaded==='function')await _ensureAllParishDiocesesLoaded({silent:true});
-      const events=_dailyUnregisteredEvents(date,_dailyGpsEvents(date),loadCourses());
-      if(!_dailyEligibleRemaining(date,events,loadCourses())){
+      const courses=loadCourses();
+      const events=_dailyUnregisteredEvents(date,_dailyGpsEvents(date),courses);
+      if(!_dailyEligibleRemaining(date,events,courses)){
         // 실시간 GPS 스탬프 변경 등으로 후보가 유효하지 않으면 빈 등록창을 띄우지 않는다.
         historyDatesCache=null;historyDatesSignature=null;_historyClose();_historyUpdateButton();return;
       }
@@ -22954,8 +22966,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       let error=null;
       for(let attempt=0;attempt<2;attempt++){
         try{
-          if(!Array.isArray(historyPreviewEvents)||!_dailyEligibleRemaining(date,historyPreviewEvents,loadCourses()))throw new Error('순례코스 등록 조건을 충족하지 않습니다');
-          const latest=_dailyUnregisteredEvents(date,_dailyGpsEvents(date),loadCourses());
+          if(!Array.isArray(historyPreviewEvents))throw new Error('순례코스 등록 조건을 충족하지 않습니다');
+          // Revalidate against fresh storage on each attempt, then share that snapshot.
+          const courses=loadCourses();
+          if(!_dailyEligibleRemaining(date,historyPreviewEvents,courses))throw new Error('순례코스 등록 조건을 충족하지 않습니다');
+          const latest=_dailyUnregisteredEvents(date,_dailyGpsEvents(date),courses);
           if(!_dailySameOrderedPlaces(historyPreviewEvents,latest))throw new Error('GPS 방문 목록이 변경됐습니다. 날짜를 다시 확인해 주세요');
           if(!_dailyRegisterOnce(date,latest))throw new Error('등록 가능한 장소가 없습니다');error=null;break;
         }catch(e){error=e;}
@@ -22981,8 +22996,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     try{
       if(typeof _ensureShrineDataLoaded==='function')await _ensureShrineDataLoaded();
       if(typeof _ensureAllParishDiocesesLoaded==='function')await _ensureAllParishDiocesesLoaded({silent:true});
-      const events=_dailyUnregisteredEvents(date,_dailyGpsEvents(date),loadCourses());
-      if(!_dailyEligibleRemaining(date,events,loadCourses()))return;
+      const courses=loadCourses();
+      const events=_dailyUnregisteredEvents(date,_dailyGpsEvents(date),courses);
+      if(!_dailyEligibleRemaining(date,events,courses))return;
       historyPreviewEvents=events.map(ev=>Object.assign({},ev));
       const el=_historyEnsureDialog();
       el.querySelector('#oai-history-title').textContent='미등록 순례코스 다시 등록';
@@ -23063,7 +23079,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       if(active&&_dailyIso(active.startedAt)===today){
         try{_dailyCloseFollowWithRetry(today);}catch(e){_dailyMarkUnresolved(today,e);}
       }
-      if(!_readActiveFollowRaw()||_dailyIso(_readActiveFollowRaw().startedAt)!==today)
+      const remainingActive=_readActiveFollowRaw();
+      if(!remainingActive||_dailyIso(remainingActive.startedAt)!==today)
         _dailyRegisterPrevious(today,false);
       _scheduleNextDailySettlement();
     },Math.max(50,registerAt-nowMs));
@@ -23533,8 +23550,11 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }catch(e){console.warn('[도보 순례] GPS 방문 재확인 보류',e);}
     finally{_walkingReplayBusy=false;}
   }
+  // Walking/car return belongs to one lifecycle listener per event.
+  // Keep the notification independent even if reconciliation throws.
   document.addEventListener('visibilitychange',function(){
-    if(!document.hidden){
+    if(document.hidden)return;
+    try{
       const active=_activeFollowState();
       if(active&&['walk','car'].includes(active.travelMode)){
         _reconcileWalkingNativeFix();
@@ -23548,10 +23568,12 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(active.travelMode==='walk'){if(nativeRunning)_walkingNativeRefresh(active);else _walkingNativeStart(active);}
       }
       _refreshWalkingCoverBadge();
+    }finally{
+      window._oaiOpenWalkingFromNotification();
     }
   });
-  // On a cold launch the document may start visible, so visibilitychange never fires.
-  // Only reconcile an existing walking session; do not start a new pilgrimage.
+  // On cold launch, pageshow still checks the existing session after 1200 ms.
+  // The existing notification entry is retained at its original 1700 ms delay.
   window.addEventListener('pageshow',function(){
     setTimeout(function(){
       const active=_activeFollowState();
@@ -23568,6 +23590,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       }
       _refreshWalkingCoverBadge();
     },1200);
+    setTimeout(function(){window._oaiOpenWalkingFromNotification();},1700);
   });
   window._oaiOpenWalkingFromNotification=function(){
     const native=_walkingNative(),active=_activeFollowState();
@@ -23584,12 +23607,6 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       return true;
     }catch(e){console.warn('[도보 순례] 상태창 이동 오류',e);return false;}
   };
-  document.addEventListener('visibilitychange',function(){
-    if(!document.hidden)window._oaiOpenWalkingFromNotification();
-  });
-  window.addEventListener('pageshow',function(){
-    setTimeout(function(){window._oaiOpenWalkingFromNotification();},1700);
-  });
   window._oaiSyncActivePilgrimageFromVisits=_recordActiveCourseGpsFromVisits;
   window._oaiValidateActivePilgrimageFollow=function(){return _activeFollowState();};
 
@@ -24928,7 +24945,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
       openSaveModal(false);
       return;
     }
-    if(_readActiveFollowRaw()&&_readActiveFollowRaw().courseId===String(currentCourseId)){
+    const activeFollow=_readActiveFollowRaw();
+    if(activeFollow&&activeFollow.courseId===String(currentCourseId)){
       if(_pilgrimageStructureIsDirty())_saveActiveCourseOrder();
       return;
     }
