@@ -435,7 +435,7 @@
       // Never invoke ordinary route-exit confirmation from pilgrimage or cover navigation.
       if(el && el.classList.contains('open') && !el.hidden &&
          el.style.display !== 'none' && _activeTab === 'route' &&
-         !window.__oaiPilgrimageRouteReturn &&
+         (!window.__oaiPilgrimageRouteReturn || window.__OAI_PILGRIMAGE_PLACE_NAV_RETURN__===true) &&
          !window.__OAI_PILGRIMAGE_PLACE_PICK__ &&
          !window.__OAI_PILGRIMAGE_COURSE_VIEW__ &&
          !window.__OAI_PILGRIMAGE_ROUTE_EDIT__){
