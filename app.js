@@ -8415,12 +8415,21 @@ function _isParishNearbyMapMode(){
     return !!(sheet && sheet.classList.contains('open') && (_activeTab===null || _activeTab==='nearby'));
   }catch(_e){ return false; }
 }
-function _hideAllParishDioMkrs(){
+// Stage 13: one owner for detaching ordinary category markers.
+// Route-only markers, live-location markers and selection markers are deliberately excluded.
+function _hideCategoryPlaceMarkers(){
+  try{ (_markers||[]).forEach(function(m){ if(m&&m.marker) _setMarkerMapIfChanged(m.marker,null); }); }catch(_e){}
+  try{ (_retreatMarkers||[]).forEach(function(m){ if(m&&m.marker) _setMarkerMapIfChanged(m.marker,null); }); }catch(_e){}
+}
+function _hideParishDioMarkerObjects(){
   try{
     Object.values(_dioMkrs||{}).forEach(function(arr){
       (arr||[]).forEach(function(mk){ try{ _setMarkerMapIfChanged(mk,null); }catch(_e){} });
     });
   }catch(_e){}
+}
+function _hideAllParishDioMkrs(){
+  _hideParishDioMarkerObjects();
   try{
     if(_parishIdleListener){
       kakao.maps.event.removeListener(_parishIdleListener);
@@ -8445,8 +8454,7 @@ function _clearParishNearbyResults(reason){
 function _clearParishDioLayerForNearby(){
   try{ _bumpParishDioLayerToken('nearby-clear'); }catch(_e){}
   try{ _hideAllParishDioMkrs(); }catch(_e){}
-  try{ _markers.forEach(function(m){ if(m&&m.marker) _setMarkerMapIfChanged(m.marker,null); }); }catch(_e){}
-  try{ _retreatMarkers.forEach(function(o){ if(o&&o.marker) _setMarkerMapIfChanged(o.marker,null); }); }catch(_e){}
+  _hideCategoryPlaceMarkers();
   _activeDio=null;
   // 내주변 모드에서는 현재 교구의 성당 마커만 유지하고, 교구명은 다른 교구에만 표시한다.
   // 교구명 표시 여부는 _syncParishDioLabels 한 곳에서만 결정한다.
@@ -8462,9 +8470,8 @@ function _shouldDeferFullCategoryMarkers(){
   }catch(_e){ return false; }
 }
 function _clearVisibleCategoryMapObjects(){
-  try{ _markers.forEach(function(m){ if(m && m.marker) _setMarkerMapIfChanged(m.marker,null); }); }catch(_e){}
-  try{ _retreatMarkers.forEach(function(o){ if(o && o.marker) _setMarkerMapIfChanged(o.marker,null); }); }catch(_e){}
-  try{ Object.values(_dioMkrs||{}).forEach(function(arr){ (arr||[]).forEach(function(mk){ _setMarkerMapIfChanged(mk,null); }); }); }catch(_e){}
+  _hideCategoryPlaceMarkers();
+  _hideParishDioMarkerObjects();
   try{ _hideDioOverlays(); }catch(_e){}
   try{ _clearParishNearbyMarkers(); }catch(_e){}
   try{ if(_myMkr){ _myMkr.setMap(null); _myMkr=null; } }catch(_e){}
@@ -10310,9 +10317,8 @@ function goToCover(){
   closeTab(_activeTab);
   closeInfoCard();
   resetRoute();
-  _markers.forEach(m=>{if(m)try{m.marker.setMap(null);}catch(e){ console.warn("[가톨릭길동무]", e); }});
-  _retreatMarkers.forEach(o=>{try{o.marker.setMap(null);}catch(e){ console.warn("[가톨릭길동무]", e); }});
-  Object.values(_dioMkrs).forEach(arr=>arr.forEach(mk=>{try{mk.setMap(null);}catch(e){ console.warn("[가톨릭길동무]", e); }}));
+  _hideCategoryPlaceMarkers();
+  _hideParishDioMarkerObjects();
   try{ _clearParishNearbyMarkers(); }catch(e){ console.warn('[가톨릭길동무]',e); }
   if(_myMkr){try{_myMkr.setMap(null);}catch(e){ console.warn("[가톨릭길동무]", e); } _myMkr=null;}
   _screen='cover';
@@ -15586,11 +15592,10 @@ function _pilgrimageRouteResultMustHideOrdinaryMarkers(){
 }
 function _hidePilgrimageDetailCategoryMarkers(){
   if(!_pilgrimageRouteResultMustHideOrdinaryMarkers()||!_map)return;
-  try{_markers.forEach(function(m){if(m&&m.marker)_setMarkerMapIfChanged(m.marker,null);});}catch(_e){}
+  _hideCategoryPlaceMarkers();
   try{_setParishNearbyMarkersMap(null,true);}catch(_e){}
   try{_hideAllParishDioMkrs();}catch(_e){}
   try{_hideDioOverlays();}catch(_e){}
-  try{(_retreatMarkers||[]).forEach(function(o){if(o&&o.marker)_setMarkerMapIfChanged(o.marker,null);});}catch(_e){}
   try{(_regionResultMarkers||[]).forEach(function(m){_setMarkerMapIfChanged(m,null);});}catch(_e){}
   try{if(_paSelMkr)_setMarkerMapIfChanged(_paSelMkr,null);}catch(_e){}
   try{if(_regionMarker)_setMarkerMapIfChanged(_regionMarker,null);}catch(_e){}
