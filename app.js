@@ -2712,11 +2712,8 @@ function _bindShrineVisitFloatingListButtonWatchers(){
     });
     window.__OAI_SHRINE_VISIT_FLOATING_MO__=mo;
   }catch(_e){}
-  // 화면 이벤트가 주 갱신 경로다. 보조 확인은 성지 지도 노출 시에만 느리게 실행한다.
-  setInterval(function(){
-    if(document.hidden || _mode!=='shrine' || _screen!=='map')return;
-    try{_updateShrineVisitFloatingListButtonUI();}catch(_e){}
-  }, 1500);
+  // 성지·성당 방문 버튼은 위의 공통 화면 변경 신호로만 갱신한다.
+  // 기존 성지 버튼 1.5초 상시 점검은 중복 실행이므로 제거한다.
 }
 try{ _bindShrineVisitFloatingListButtonWatchers(); }catch(_e){}
 
@@ -5809,7 +5806,8 @@ function _showParishAutoVisitNotice(place){
 // 성당 방문 버튼은 성지 버튼과 같은 화면 이벤트 갱신 경로를 사용한다.
 // 1.5초마다 반복 실행하던 별도 성당 버튼 점검 타이머는 제거했다.
 try{document.addEventListener('change',function(e){const t=e.target;if(!t||!t.matches||!t.matches('#parish-visit-book [data-pv-select]'))return;const kind=t.getAttribute('data-pv-select'),value=t.value;if(kind==='sort')_parishVisitSort=value==='oldest'?'oldest':'recent';else if(kind==='dio'){_parishVisitDio=value||'all';_parishUnvisitedLimit=80;}_renderParishVisitBook();});}catch(_e){}
-try{window.addEventListener('oai-short-background-return',function(){setTimeout(function(){_updateParishVisitButton();},120);try{if(typeof window._oaiValidateActivePilgrimageFollow==='function')window._oaiValidateActivePilgrimageFollow();}catch(_e){}},{passive:true});}catch(_e){}
+// Android 짧은 복귀는 기존 단일 수신 경로에서 두 방문 버튼을 함께 갱신한다.
+try{window.addEventListener('oai-short-background-return',function(){setTimeout(function(){_updateParishVisitButton();try{_updateShrineVisitFloatingListButtonUI();}catch(_e){}},120);try{if(typeof window._oaiValidateActivePilgrimageFollow==='function')window._oaiValidateActivePilgrimageFollow();}catch(_e){}},{passive:true});}catch(_e){}
 
 function _setMassQuickReturn(on){
   try{
