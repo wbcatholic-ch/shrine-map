@@ -252,7 +252,7 @@ html:not(.ios-device).oai-screen-compact-short {
   --oai-std-close-sz: 34px;
   --v4-close-size: 34px;
   --v4-close-size-sm: 26px;
-  --map-tab-btn-h: 56px;
+  
   
   --map-tab-gap: 4px;
   
@@ -2957,7 +2957,7 @@ html.app-active #pwa-install-btn { display: none; }
 .guide-icon { flex: 0 0 34px; width: 34px; height: 34px; border-radius: 12px; display: flex; align-items: center; justify-content: center; background: #fffdf8; box-shadow: inset 0 0 0 1.5px #eadfce; font-size: 18px; line-height: 1; }
 .guide-card h3 { margin: 0; min-width: 0; font-size: calc(17px * var(--app-font-scale)); line-height: 1.3; color: var(--v4-header-navy); font-weight: 900; letter-spacing: -.03em; }
 .guide-card p { margin: 0; font-size: calc(15px * var(--app-font-scale)); line-height: 1.62; color: #4b5563; font-weight: 650; word-break: keep-all; }
-.guide-mini-list { margin: 0; display: grid; grid-template-columns: 72px 1fr; row-gap: 4px; column-gap: 8px; font-size: calc(12.2px * var(--app-font-scale)); line-height: 1.45; }
+.guide-mini-list {   grid-template-columns: 72px 1fr; row-gap: 4px; column-gap: 8px; font-size: calc(12.2px * var(--app-font-scale)); line-height: 1.45; }
 .guide-mini-list dt { color: #7a5a2b; font-weight: 900; }
 .guide-mini-list dd { margin: 0; color: #5f6675; font-weight: 600; word-break: keep-all; }
 .guide-ok { flex: 0 0 auto; width: 100%; margin-top: 12px; min-height: 48px; font-size: calc(16px * var(--app-font-scale)); }
@@ -3114,7 +3114,7 @@ html:not(.ios-device) #ios-safari-guide-modal { display: none; }
 .ios-safari-steps { flex: 1 1 auto; min-height: 0; margin-top: 0; padding: 2px 2px 8px; gap: 10px; overflow: auto; -webkit-overflow-scrolling: touch; display: flex; flex-direction: column; }
 .ios-safari-step {
   display: grid;
-  grid-template-columns: 26px 1fr;
+  
   grid-template-rows: auto auto;
   align-items: start;
   gap: 7px 9px;
@@ -3124,7 +3124,7 @@ html:not(.ios-device) #ios-safari-guide-modal { display: none; }
   border: 2px solid rgba(212,170,106,.70);
   box-shadow: 0 8px 20px rgba(0,0,0,.13);
 }
-.ios-safari-step b { display: flex; align-items: center; justify-content: center; width: 26px; height: 26px; border-radius: 50%; background: var(--v4-header-navy); color: var(--v4-surface-white); font-size: 13px; line-height: 1; }
+.ios-safari-step b { display: flex; align-items: center; justify-content: center;   border-radius: 50%; background: var(--v4-header-navy); color: var(--v4-surface-white);  line-height: 1; }
 .ios-safari-step span { min-width: 0; font-size: 13px; font-weight: 800; line-height: 1.36; color: #3e362e; word-break: keep-all; }
 .ios-safari-step img { grid-column: 1 / 3; justify-self: center; display: block; max-width: 100%; max-height: 180px; object-fit: contain; border-radius: 14px; background: #fffaf1; box-shadow: 0 6px 18px rgba(31,42,68,.10); }
 .ios-safari-shot { grid-column: 1 / 3; justify-self: center; position: relative; display: block; max-width: 100%; border-radius: 14px; background: #fffaf1; box-shadow: 0 6px 18px rgba(31,42,68,.10); overflow: hidden; }
@@ -7046,8 +7046,8 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
   white-space:nowrap!important;padding:0!important;margin:0!important;border:0!important;
 }
 #oai-pilgrimage-detail-view .oai-pilgrimage-total-card{
-  display:block!important;padding:0!important;border:0!important;
-  margin-top:10px!important;background:transparent!important;
+  display:block!important;
+  margin-top:10px!important;
 }
 #oai-pilgrimage-detail-view .oai-pilgrimage-plan-list{
   display:block!important;
@@ -8041,7 +8041,7 @@ html:not(.oai-map-split-wide) #app #sheet-route.route-result-showing .route-btns
   border-radius:14px!important;
   
   
-  box-shadow:none!important;
+  
   font-size:calc(14px * var(--app-font-scale,1))!important;
   font-weight:950!important;
 }
@@ -9324,12 +9324,12 @@ html.oai-pilgrimage-route-direct #sheet-route #rs-pilgrimage-return-btn{
 #oai-pilgrimage-list-view .oai-pilgrimage-course-tabs button:first-child.is-active{
   background:var(--oai-complete-color)!important;
   border-color:var(--oai-complete-color)!important;
-  color:#fff!important;
+  
 }
 #oai-pilgrimage-list-view .oai-pilgrimage-course-tabs button:nth-child(2).is-active{
   background:var(--oai-plan-color)!important;
   border-color:var(--oai-plan-color)!important;
-  color:#fff!important;
+  
 }
 #oai-pilgrimage-list-view .oai-pilgrimage-course-card{
   border:2px solid var(--oai-plan-color)!important;
@@ -9341,18 +9341,18 @@ html.oai-pilgrimage-route-direct #sheet-route #rs-pilgrimage-return-btn{
   border-color:var(--oai-complete-color)!important;
 }
 #oai-pilgrimage-list-view .oai-pilgrimage-course-card .oai-pilgrimage-course-open{
-  width:100%!important;
+  
   background:#fff!important;
-  border:0!important;
-  border-radius:0!important;
+  
+  
 }
 #oai-pilgrimage-list-view .oai-pilgrimage-course-open b{
   color:#17263D!important;
-  white-space:normal!important;
-  display:-webkit-box!important;
-  -webkit-box-orient:vertical!important;
-  -webkit-line-clamp:2!important;
-  overflow:hidden!important;
+  
+  
+  
+  
+  
   line-height:1.35!important;
 }
 #oai-pilgrimage-list-view .oai-pilgrimage-course-plan-actions{
@@ -9369,7 +9369,7 @@ html.oai-pilgrimage-route-direct #sheet-route #rs-pilgrimage-return-btn{
   border-color:var(--oai-complete-color)!important;
 }
 #oai-pilgrimage-list-view .oai-pilgrimage-course-follow-btn:not(.is-active):not(:disabled){
-  color:#fff!important;
+  
   background:var(--oai-plan-color)!important;
   border-color:var(--oai-plan-color)!important;
 }
@@ -9793,7 +9793,7 @@ html.oai-pilgrimage-course-view-readonly #sheet-route #rs-kakao-btn{
   text-align:center!important;
 }
 html.oai-pilgrimage-course-view-readonly #sheet-route #rs-pilgrimage-return-btn{
-  width: 100% !important;
+  
   margin-top: 10px !important;
   width: 100% !important;
   min-width: 0 !important;
@@ -9906,24 +9906,24 @@ html.oai-screen-tablet #guide-manual-modal > .guide-manual-panel {
 
 /* V8-1-14-1120: 방문 회차별 사진 · 메모 */
 .oai-visit-journal{margin:0 0 13px;padding:16px;border:1px solid #cfd8cf;border-radius:18px;background:#fff;box-shadow:0 4px 14px rgba(31,41,51,.08)}
-.oai-visit-journal-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:13px;padding-bottom:11px;border-bottom:1px solid #e1e6df}.oai-visit-journal-head>div{min-width:0}.oai-visit-journal-head small{display:block;margin-top:4px;color:#59675f;font-size:12px;font-weight:800}.oai-visit-journal-head>strong{flex:0 0 auto;font-size:13px;color:#5e4d22;background:#f8f1d9;border:1px solid #d8c684;border-radius:999px;padding:7px 10px}
-.oai-visit-journal-dates{display:flex;gap:7px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 0 11px;margin-bottom:2px}.oai-visit-journal-date{flex:0 0 auto;border:1px solid #cbd4ca;background:#fff;color:#3f5046;border-radius:999px;padding:7px 10px;font-family:inherit;font-size:12px;font-weight:900}.oai-visit-journal-date.active{border-color:#a98d3f;background:#efe4ba;color:#24352b;box-shadow:inset 0 0 0 1px rgba(169,141,63,.14)}
-.oai-visit-journal-block{padding:12px;border:1px solid #dde4dc;border-radius:14px;background:#fbfcfa}.oai-visit-journal-block+.oai-visit-journal-block{margin-top:10px}.oai-visit-journal-row{display:flex;align-items:center;justify-content:space-between;gap:12px}.oai-visit-journal-row>div{display:flex;align-items:baseline;gap:8px}.oai-visit-journal-row b{font-size:15px;color:#1c2821}.oai-visit-journal-row small{font-size:12px;color:#7f8781;font-weight:800}.oai-visit-journal-row>button{min-height:38px;border:1px solid #bda360;border-radius:12px;background:#fff;color:#2f3b34;padding:0 12px;font-family:inherit;font-size:13px;font-weight:900}.oai-visit-journal-row>button:disabled{opacity:.45}
-.oai-visit-journal-empty{margin-top:10px;padding:11px 12px;border-radius:12px;background:#eef2ed;color:#5d6a62;font-size:13px;font-weight:800}.oai-visit-memo-preview{margin-top:10px;padding:12px;border:1px solid #e0e6df;border-radius:12px;background:#fff;color:#1f2d25;font-size:14px;line-height:1.55;word-break:break-word}
+.oai-visit-journal-head{align-items:flex-start;gap:12px;margin-bottom:13px;padding-bottom:11px;border-bottom:1px solid #e1e6df;}.oai-visit-journal-head>div{min-width:0}.oai-visit-journal-head small{display:block;margin-top:4px;color:#59675f;font-size:12px;font-weight:800}.oai-visit-journal-head>strong{flex:0 0 auto;font-size:13px;color:#5e4d22;background:#f8f1d9;border:1px solid #d8c684;border-radius:999px;padding:7px 10px}
+.oai-visit-journal-dates{padding:0 0 11px;margin-bottom:2px;}.oai-visit-journal-date{border:1px solid #cbd4ca;color:#3f5046;}.oai-visit-journal-date.active{border-color:#a98d3f;background:#efe4ba;color:#24352b;box-shadow:inset 0 0 0 1px rgba(169,141,63,.14)}
+.oai-visit-journal-block{padding:12px;border:1px solid #dde4dc;border-radius:14px;background:#fbfcfa}.oai-visit-journal-block+.oai-visit-journal-block{margin-top:10px}.oai-visit-journal-row{gap:12px;}.oai-visit-journal-row>div{gap:8px;}.oai-visit-journal-row b{color:#1c2821;}.oai-visit-journal-row small{color:#7f8781;}.oai-visit-journal-row>button{min-height:38px;border:1px solid #bda360;border-radius:12px;color:#2f3b34;padding:0 12px;}
+.oai-visit-journal-empty{margin-top:10px;padding:11px 12px;border-radius:12px;background:#eef2ed;color:#5d6a62;font-weight:800;}.oai-visit-memo-preview{margin-top:10px;padding:12px;border:1px solid #e0e6df;border-radius:12px;background:#fff;color:#1f2d25;line-height:1.55;}
 .oai-visit-photo-list{display:flex;flex-direction:column;gap:7px;margin-top:10px}.oai-visit-photo-row{display:flex;align-items:center;gap:7px}.oai-visit-photo-open{flex:1;min-width:0;display:flex;align-items:center;gap:8px;border:1px solid #e0e5df;background:#f8f9f7;border-radius:12px;min-height:42px;padding:0 11px;text-align:left;color:#26312a;font-family:inherit}.oai-visit-photo-open span{font-size:17px}.oai-visit-photo-open b{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:13px}.oai-visit-photo-delete{flex:0 0 auto;min-height:40px;border:0;background:transparent;color:#9c473f;font-family:inherit;font-size:12px;font-weight:900;padding:0 6px}
 .oai-visit-memo-modal,.oai-visit-photo-viewer{position:fixed;inset:0;z-index:2147483200;display:none}.oai-visit-memo-modal.show,.oai-visit-photo-viewer.show{display:block}.oai-visit-memo-backdrop,.oai-visit-photo-viewer-bg{position:absolute;inset:0;background:rgba(10,15,12,.58)}.oai-visit-memo-panel{position:absolute;left:14px;right:14px;top:50%;transform:translateY(-50%);max-width:560px;margin:auto;background:#fff;border-radius:20px;padding:16px;box-shadow:0 18px 44px rgba(0,0,0,.25)}.oai-visit-memo-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:12px}.oai-visit-memo-head b{display:block;font-size:18px}.oai-visit-memo-head small{display:block;margin-top:3px;color:#7a837d}.oai-visit-memo-head>button{border:0;background:transparent;font-size:28px;line-height:1;color:#515b55}.oai-visit-memo-panel textarea{box-sizing:border-box;width:100%;height:180px;resize:none;border:1px solid #cfd6cf;border-radius:14px;padding:12px;font-family:inherit;font-size:15px;line-height:1.5;color:#1f2a23;outline:none}.oai-visit-memo-panel textarea:focus{border-color:#bda360;box-shadow:0 0 0 3px rgba(189,163,96,.12)}.oai-visit-memo-actions{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:12px}.oai-visit-memo-actions button{height:44px;border-radius:13px;font-family:inherit;font-weight:900}.oai-visit-memo-actions button:first-child{border:0;background:#263d31;color:#fff}.oai-visit-memo-actions button:last-child{border:1px solid #d7ddd7;background:#fff;color:#3b4740}
-.oai-visit-photo-viewer-panel{position:absolute;inset:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);display:flex;align-items:center;justify-content:center;padding:18px}.oai-visit-photo-viewer-panel img{display:block;max-width:100%;max-height:100%;object-fit:contain;border-radius:12px;background:#111}
+.oai-visit-photo-viewer-panel{inset:env(safe-area-inset-top) 0 env(safe-area-inset-bottom);padding:18px;}.oai-visit-photo-viewer-panel img{border-radius:12px;background:#111;}
 html:not(.ios-device).oai-screen-compact-short .oai-visit-journal{padding:12px;border-radius:15px}.oai-screen-compact-short .oai-visit-journal-row>button{min-height:36px;padding:0 10px}
 
 /* V8-1-14-1127 방문 기록 UI: 큰 카드형 외곽선 제거 + 사진 썸네일 갤러리 */
-.oai-visit-journal{margin:0 0 14px!important;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;box-shadow:none!important}
+.oai-visit-journal{margin:0 0 14px!important;padding:0!important;background:transparent!important;}
 .oai-visit-journal-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin:0 0 10px!important;padding:12px 0 9px!important;border-top:1px solid #dfe3df;border-bottom:1px solid #dfe3df}
 .oai-visit-journal-head .shrine-visit-detail-section-title{font-size:17px!important;font-weight:900;color:#202a24!important}
 .oai-visit-journal-head>strong{font-size:12px;color:#5d624f;background:transparent;border:0;border-radius:0;padding:0;font-weight:800}
 .oai-visit-journal-dates{display:flex;gap:7px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding:0 0 10px;margin:0}.oai-visit-journal-date{flex:0 0 auto;border:1px solid #cdd3cd;background:#fff;color:#3d4941;border-radius:999px;padding:7px 10px;font-family:inherit;font-size:12px;font-weight:900}.oai-visit-journal-date.active{border-color:#96804c;background:#f5f0df;color:#253028;box-shadow:none}
-.oai-visit-journal-block{padding:11px 0!important;border:0!important;border-radius:0!important;background:transparent!important}.oai-visit-journal-block+.oai-visit-journal-block{margin-top:0!important;border-top:1px solid #e4e7e3!important}
+.oai-visit-journal-block{padding:11px 0!important;background:transparent!important;}.oai-visit-journal-block+.oai-visit-journal-block{border-top:1px solid #e4e7e3!important;}
 .oai-visit-journal-row{display:flex;align-items:center;justify-content:space-between;gap:10px}.oai-visit-journal-row>div{display:flex;align-items:baseline;gap:7px}.oai-visit-journal-row b{font-size:15px;color:#202a24}.oai-visit-journal-row small{font-size:12px;color:#747b76;font-weight:800}.oai-visit-journal-row>button{min-height:36px;border:1px solid #c7b26f;border-radius:9px;background:#fff;color:#26332b;padding:0 11px;font-family:inherit;font-size:13px;font-weight:900}.oai-visit-journal-row>button:disabled{opacity:.45}
-.oai-visit-journal-empty{margin-top:9px;padding:9px 0;background:transparent!important;color:#7a827d;font-size:13px;font-weight:700}
+.oai-visit-journal-empty{margin-top:9px;padding:9px 0;color:#7a827d;font-size:13px;font-weight:700;}
 .oai-visit-memo-preview{margin-top:9px;padding:0!important;border:0!important;border-radius:0!important;background:transparent!important;color:#26322b;font-size:14px;line-height:1.58;word-break:break-word}
 .oai-visit-photo-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin-top:10px}
 .oai-visit-photo-thumb{position:relative;display:block;width:100%;aspect-ratio:1/1;overflow:hidden;border:0;border-radius:7px;background:#e9ece9;padding:0;touch-action:manipulation}
@@ -9949,7 +9949,7 @@ html.oai-visit-photo-open,html.oai-visit-photo-open body{overflow:hidden!importa
 /* V8-1-14-1127 상세 상단도 카드형 외곽선 없이 한 화면 흐름으로 정리 */
 .shrine-visit-detail-view{background:#fff!important}
 .shrine-visit-detail-body{background:#fff!important}
-.shrine-visit-detail-hero{margin:0 0 2px!important;padding:4px 0 13px!important;background:transparent!important;border:0!important;border-radius:0!important;box-shadow:none!important;border-bottom:1px solid #dfe3df!important}
+.shrine-visit-detail-hero{margin:0 0 2px!important;padding:4px 0 13px!important;background:transparent!important;border-bottom:1px solid #dfe3df!important;}
 .shrine-visit-detail-kicker{font-size:17px!important;color:#27322b!important;margin-bottom:6px!important}
 html.oai-font-global .shrine-visit-detail-kicker{font-size:calc(17px * var(--app-inner-font-scale,1))!important}
 html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(17px * var(--app-inner-font-scale,1))!important}
@@ -9978,16 +9978,16 @@ html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(17px * va
 .shrine-visit-detail-date-chip{color:#17212a!important}
 .shrine-visit-detail-date-chip:before{background:#2b7bb5!important}
 .shrine-visit-detail-date-chip+.shrine-visit-detail-date-chip{border-color:#eef2f5!important}
-.shrine-visit-detail-register{border-color:#8fb8d5!important;background:#f7fbfe!important;color:#145b8c!important;box-shadow:none!important}
+.shrine-visit-detail-register{border-color:#8fb8d5!important;color:#145b8c!important;box-shadow:none!important;}
 .shrine-visit-detail-register:active{background:#edf6fc!important}
 .oai-visit-journal-head{border-top-color:#e3e8ec!important;border-bottom-color:#e3e8ec!important}
 .oai-visit-journal-head .shrine-visit-detail-section-title{color:#1f2d38!important}
-.oai-visit-journal-head>strong{color:#60717e!important;background:transparent!important;border:0!important}
-.oai-visit-journal-date{border-color:#d5dde3!important;background:#fff!important;color:#455560!important}
-.oai-visit-journal-date.active{border-color:#73a9cd!important;background:#eef7fd!important;color:#145b8c!important;box-shadow:none!important}
+.oai-visit-journal-head>strong{color:#60717e!important;}
+.oai-visit-journal-date{border-color:#d5dde3!important;color:#455560!important;}
+.oai-visit-journal-date.active{border-color:#73a9cd!important;background:#eef7fd!important;color:#145b8c!important;}
 .oai-visit-journal-block+.oai-visit-journal-block{border-top-color:#e7ecef!important}
 .oai-visit-journal-row b{color:#1e2a33!important}.oai-visit-journal-row small{color:#788691!important}
-.oai-visit-journal-row>button{border-color:#a9c7dc!important;background:#fff!important;color:#205f8a!important;box-shadow:none!important}
+.oai-visit-journal-row>button{border-color:#a9c7dc!important;background:#fff!important;color:#205f8a!important;}
 .oai-visit-journal-row>button:active{background:#f1f8fc!important}
 .oai-visit-journal-empty{color:#7b8993!important;background:transparent!important}
 .oai-visit-memo-preview{color:#26343e!important}
@@ -9995,22 +9995,22 @@ html.oai-font-global .shrine-visit-detail-section-title{font-size:calc(17px * va
 
 /* V8-1-14-1134 순례 상세: 섹션 구분 강화 + 뉴트럴 블루 디자인 + 제목 정중앙 */
 .shrine-visit-detail-view{background:#eef3f7!important}
-.shrine-visit-detail-head{position:relative!important;display:flex!important;align-items:center!important;justify-content:center!important;background:#fff!important;border-bottom:1px solid #dce5eb!important;padding-left:56px!important;padding-right:56px!important}
-.shrine-visit-detail-head-title{width:100%!important;text-align:center!important;color:#162531!important;font-weight:900!important;letter-spacing:-.2px!important}
-.shrine-visit-detail-x{position:absolute!important;right:12px!important;top:50%!important;transform:translateY(-50%)!important}
+.shrine-visit-detail-head{border-bottom:1px solid #dce5eb!important;padding-left:56px!important;padding-right:56px!important;}
+.shrine-visit-detail-head-title{color:#162531!important;font-weight:900!important;letter-spacing:-.2px!important;}
+
 .shrine-visit-detail-body{background:#eef3f7!important;padding:0!important}
-.shrine-visit-detail-hero{margin:0!important;padding:18px 16px 16px!important;background:#fff!important;border:0!important;border-bottom:8px solid #eef3f7!important;border-radius:0!important;box-shadow:none!important}
-.shrine-visit-detail-kicker,.shrine-visit-detail-section-title{position:relative!important;padding-left:10px!important;color:#182a37!important;font-size:17px!important;font-weight:950!important}
-.shrine-visit-detail-kicker:before,.shrine-visit-detail-section-title:before{content:"";position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:16px;border-radius:2px;background:#2b78a7}
-.shrine-visit-detail-count{color:#0f1d27!important}.shrine-visit-detail-recent{color:#5d6d79!important}
+.shrine-visit-detail-hero{margin:0!important;padding:18px 16px 16px!important;border:0!important;border-bottom:8px solid #eef3f7!important;border-radius:0!important;box-shadow:none!important;}
+.shrine-visit-detail-kicker,.shrine-visit-detail-section-title{padding-left:10px!important;color:#182a37!important;font-size:17px!important;}
+.shrine-visit-detail-kicker:before,.shrine-visit-detail-section-title:before{width:3px;height:16px;border-radius:2px;background:#2b78a7;}
+.shrine-visit-detail-recent{color:#5d6d79!important}
 .shrine-visit-detail-date-title{margin-top:13px!important;color:#5f707c!important;font-size:12px!important;text-transform:none!important}
-.shrine-visit-detail-date-list{margin-top:6px!important;border:1px solid #e1e8ed!important;background:#f8fafc!important;border-radius:8px!important;overflow:hidden!important}
+.shrine-visit-detail-date-list{margin-top:6px!important;border:1px solid #e1e8ed!important;background:#f8fafc!important;border-radius:8px!important;}
 .shrine-visit-detail-date-chip{background:#fff!important;color:#172630!important}.shrine-visit-detail-date-chip+.shrine-visit-detail-date-chip{border-color:#e9eef2!important}.shrine-visit-detail-date-chip:before{background:#2b78a7!important}
-.oai-visit-journal{margin:0!important;padding:0 16px 18px!important;background:#fff!important;border:0!important;border-radius:0!important;box-shadow:none!important}
-.oai-visit-journal-head{margin:0 -16px 12px!important;padding:14px 16px 12px!important;background:#f7fafc!important;border-top:0!important;border-bottom:1px solid #dde6ec!important;align-items:center!important}
+.oai-visit-journal{margin:0!important;border:0!important;border-radius:0!important;box-shadow:none!important;}
+.oai-visit-journal-head{margin:0 -16px 12px!important;padding:14px 16px 12px!important;background:#f7fafc!important;border-top:0!important;border-bottom:1px solid #dde6ec!important;}
 .oai-visit-journal-head>strong{color:#5a6d79!important;font-size:12px!important;font-weight:850!important}
 .oai-visit-journal-dates{margin:0 0 12px!important;padding:0 0 2px!important}
-.oai-visit-journal-date{border:1px solid #d7e1e8!important;background:#fff!important;color:#425664!important;border-radius:8px!important;padding:7px 10px!important}
+.oai-visit-journal-date{border:1px solid #d7e1e8!important;color:#425664!important;padding:7px 10px!important;}
 .oai-visit-journal-date.active{border-color:#6ca5c9!important;background:#eaf5fc!important;color:#155b87!important;box-shadow:none!important}
 .oai-visit-journal-block{padding:14px 0!important;border:0!important;border-radius:0!important;background:#fff!important}
 .oai-visit-journal-block.oai-visit-photo-block{padding-top:6px!important}
