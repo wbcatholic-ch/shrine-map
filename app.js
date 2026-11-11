@@ -573,6 +573,8 @@ function oaiClearExternalNavigationState(opts){
     try{ return /GildongmuAndroid\/\d+/i.test(navigator.userAgent||'') || !!window.GildongmuNative; }catch(_e){ return false; }
   }
   var _handledNativeCycles = Object.create(null);
+  var _pendingNativeResume = null;
+  var _nativeResumeDecisionTimer = 0;
 
   function removeKey(store, key){ try{ store.removeItem(key); }catch(_e){} }
   function clearLegacyBackgroundReturnState(preserveRuntimeFreeze){
@@ -1102,37 +1104,44 @@ function oaiClearExternalNavigationState(opts){
 
   function decideReturn(reason, nativeElapsed, nativeForceCover, seq){
     try{
-      if(document.visibilityState === 'hidden') return;
-      if(seq && seq !== _decisionSeq) return;
-      var elapsed = Number.isFinite(Number(nativeElapsed)) ? Math.max(0, Number(nativeElapsed)) : -1;
-      if(elapsed < 0){
-        var bg = readRuntimeBackground();
-        if(!bg){
+      if(document.visibilityState === 'hidden') return false;
+      if(seq && seq !== _decisionSeq) return false;
+      /* -1 is a request to read the actual background stamp, not 0ms.
+         The former Math.max(0, -1) silently broke PWA 30-minute returns. */
+      var suppliedElapsed=Number(nativeElapsed);
+      var elapsed=Number.isFinite(suppliedElapsed)&&suppliedElapsed>=0?suppliedElapsed:-1;
+      if(elapsed<0){
+        var bg=readRuntimeBackground();
+        if(bg) elapsed=bg.elapsed;
+        else if(nativeForceCover) elapsed=COVER_BG_RETURN_MS; // native knows a long cycle
+        else{
           clearStaleNormalBackgroundGuards(reason || 'background-return-without-runtime-stamp');
           removeLongReturnVeil(0);
           clearBgStamp();
-          return;
+          return true;
         }
-        elapsed = bg.elapsed;
       }
-      var isLongReturn=(elapsed>=COVER_BG_RETURN_MS)||(nativeForceCover&&elapsed<0);
-      /* V8-1-14-1073: background 복귀 판단도 Return Conductor를 통과시킨다.
-         긴 복귀는 높은 우선순위, 짧은 복귀는 passive로 등록한다.
-         이미 더 중요한 외부/기능별 복귀가 진행 중이면 여기서 중복 판단하지 않는다. */
+      var isLongReturn=(elapsed>=COVER_BG_RETURN_MS)||!!nativeForceCover;
+      /* One Return Conductor owns the priority decision. A preliminary busy()
+         guard used to drop a long return before its higher priority was compared. */
       var returnLeaderType=isLongReturn?'long-background':'passive';
       try{
-        if(window.oaiReturnConductorBusy && window.oaiReturnConductorBusy([returnLeaderType])) return;
-        if(window.oaiReturnConductorRequest && !window.oaiReturnConductorRequest(returnLeaderType,{ms:isLongReturn?2800:950})) return;
+        if(window.oaiReturnConductorRequest){
+          if(!window.oaiReturnConductorRequest(returnLeaderType,{ms:isLongReturn?2800:950})) return false;
+        }else if(window.oaiReturnConductorBusy && window.oaiReturnConductorBusy([returnLeaderType])){
+          return false;
+        }
       }catch(_e){}
       armBackgroundUiGuard(isLongReturn?2400:1601);
       if(isLongReturn){
         var specialResumeHandled=false;
         try{if(typeof window._oaiHandlePilgrimageBackgroundReturn==='function')specialResumeHandled=!!window._oaiHandlePilgrimageBackgroundReturn({elapsed:elapsed,reason:reason||'background-return',longReturn:true});}catch(_e){specialResumeHandled=false;}
-        if(specialResumeHandled){keepSpecialScreenForLongReturn('special-long-background-return',elapsed);return;}
+        if(specialResumeHandled){keepSpecialScreenForLongReturn('special-long-background-return',elapsed);return true;}
         applyCoverForLongReturn(reason || 'long-return');
         try{window.dispatchEvent(new CustomEvent('oai-long-background-return',{detail:{elapsed:elapsed,reason:reason||'long-return'}}));}catch(_e){}
       }else{keepOriginalForShortReturn(reason || 'short-return');}
-    }catch(e){ console.warn('[가톨릭길동무]', e); cancelBackgroundReturn(); }
+      return true;
+    }catch(e){ console.warn('[가톨릭길동무]', e); cancelBackgroundReturn(); return false; }
   }
 
   function scheduleReturn(reason){
@@ -1150,26 +1159,49 @@ function oaiClearExternalNavigationState(opts){
 
   clearLegacyBackgroundReturnState();
 
+  function acknowledgeNativeCycle(cycleId){
+    try{ if(window.GildongmuNative && typeof window.GildongmuNative.acknowledgeResumeCycle==='function') window.GildongmuNative.acknowledgeResumeCycle(cycleId); }catch(_e){}
+  }
+
+  /* Native onResume may arrive before WebView becomes visible. Keep one pending
+     cycle and consume it on the existing visibility/pageshow/focus path, never
+     by a periodic timer. Only acknowledge after the return decision runs. */
+  function deliverPendingNativeResume(){
+    var pending = _pendingNativeResume;
+    if(!pending || document.visibilityState==='hidden') return;
+    clearTimeout(_nativeResumeDecisionTimer);
+    _nativeResumeDecisionTimer=setTimeout(function(){
+      var current=_pendingNativeResume;
+      if(!current || document.visibilityState==='hidden') return;
+      clearTimeout(_returnTimer);
+      var seq=++_decisionSeq;
+      if(decideReturn('android-native-resume',current.elapsed,current.forceCover,seq)!==true) return;
+      _handledNativeCycles[current.cycleId]=1;
+      _pendingNativeResume=null;
+      acknowledgeNativeCycle(current.cycleId);
+      setTimeout(function(){
+        try{if(typeof window.oaiRefreshCurrentLocation==='function')window.oaiRefreshCurrentLocation({reason:'android-resume',cycleId:current.cycleId,preserveMapCenter:true});}catch(_e){}
+      },current.forceCover?2600:420);
+    },pending.forceCover?0:40);
+  }
+
   window.addEventListener('oai-android-native-resume', function(ev){
     try{
-      var detail = ev && ev.detail || {};
-      var elapsed = Number(detail.elapsed);
-      var forceCover = !!(detail.longReturn || detail.forceCover);
-      var cycleId = String(detail.cycleId || ('legacy-'+elapsed+'-'+(forceCover?'long':'short')));
-      if(_handledNativeCycles[cycleId]){
-        try{ if(window.GildongmuNative && typeof window.GildongmuNative.acknowledgeResumeCycle==='function') window.GildongmuNative.acknowledgeResumeCycle(cycleId); }catch(_e){}
-        return;
+      var detail=ev && ev.detail || {};
+      var elapsed=Number(detail.elapsed);
+      var forceCover=!!(detail.longReturn||detail.forceCover);
+      var cycleId=String(detail.cycleId||('legacy-'+elapsed+'-'+(forceCover?'long':'short')));
+      if(_handledNativeCycles[cycleId]){acknowledgeNativeCycle(cycleId);return;}
+      if(_pendingNativeResume && _pendingNativeResume.cycleId===cycleId){
+        deliverPendingNativeResume();return;
       }
-      _handledNativeCycles[cycleId]=1;
       window.__OAI_NATIVE_LIFECYCLE_ACTIVE__=true;
 
-      /* 앱 완전 종료 후 새 문서가 뜬 직후 Android가 전달하는 첫 resume에는
-         이전 Activity의 elapsed/forceCover 값이 남아 있을 수 있다. 현재 문서가 실제로
-         hidden 된 적이 없고 background stamp도 없다면 이것은 '복귀'가 아니라 첫 foreground다.
-         이 이벤트가 설정 화면을 몇 초 뒤 커버로 튕기게 하던 원인이었다. */
-      var isFreshDocumentResume = !_nativeInitialResumeConsumed && !_nativeDocumentHasBeenHidden &&
-        !hasRuntimeBackgroundStamp() && (now() - _documentStartedAt) < 30000;
-      _nativeInitialResumeConsumed = true;
+      /* A first native foreground in a newly opened document is not a
+         background return unless this document was hidden or has a stamp. */
+      var isFreshDocumentResume=!_nativeInitialResumeConsumed && !_nativeDocumentHasBeenHidden &&
+        !hasRuntimeBackgroundStamp() && (now()-_documentStartedAt)<30000;
+      _nativeInitialResumeConsumed=true;
       if(isFreshDocumentResume){
         clearTimeout(_returnTimer);
         ++_decisionSeq;
@@ -1178,27 +1210,16 @@ function oaiClearExternalNavigationState(opts){
         removeLongReturnVeil(0);
         clearBackgroundReturnIntroStuck('native-fresh-document-foreground');
         setTimeout(function(){
-          try{ if(typeof window.oaiRefreshCurrentLocation==='function') window.oaiRefreshCurrentLocation({reason:'android-fresh-start',cycleId:cycleId,preserveMapCenter:true}); }catch(_e){}
+          try{if(typeof window.oaiRefreshCurrentLocation==='function')window.oaiRefreshCurrentLocation({reason:'android-fresh-start',cycleId:cycleId,preserveMapCenter:true});}catch(_e){}
         },260);
-        try{ if(window.GildongmuNative && typeof window.GildongmuNative.acknowledgeResumeCycle==='function') window.GildongmuNative.acknowledgeResumeCycle(cycleId); }catch(_e){}
+        _handledNativeCycles[cycleId]=1;
+        acknowledgeNativeCycle(cycleId);
         return;
       }
-
-      clearTimeout(_returnTimer);
-      var seq = ++_decisionSeq;
-      setTimeout(function(){
-        try{
-          decideReturn('android-native-resume', elapsed, forceCover, seq);
-          var locDelay = forceCover ? 2600 : 420;
-          setTimeout(function(){
-            try{ if(typeof window.oaiRefreshCurrentLocation==='function') window.oaiRefreshCurrentLocation({reason:'android-resume',cycleId:cycleId,preserveMapCenter:true}); }catch(_e){}
-          }, locDelay);
-        }finally{
-          try{ if(window.GildongmuNative && typeof window.GildongmuNative.acknowledgeResumeCycle==='function') window.GildongmuNative.acknowledgeResumeCycle(cycleId); }catch(_e){}
-        }
-      }, forceCover ? 0 : 40);
-    }catch(e){ console.warn('[가톨릭길동무]', e); }
-  }, {passive:true});
+      _pendingNativeResume={cycleId:cycleId,elapsed:elapsed,forceCover:forceCover};
+      deliverPendingNativeResume();
+    }catch(e){console.warn('[가톨릭길동무]',e);}
+  },{passive:true});
 
   document.addEventListener('visibilitychange', function(){
     if(isNativeAndroid()){
@@ -1207,6 +1228,7 @@ function oaiClearExternalNavigationState(opts){
         markBackgrounded('visibility-hidden-native');
       }else{
         releaseExpiredBackgroundIntro('visibility-visible-native');
+        deliverPendingNativeResume();
       }
       return;
     }
@@ -1227,9 +1249,16 @@ function oaiClearExternalNavigationState(opts){
   window.addEventListener('pageshow', function(){
     releaseExpiredBackgroundIntro('pageshow');
     if(!isNativeAndroid()) scheduleReturn('pageshow');
-    else { try{ if(window.GildongmuNative && typeof window.GildongmuNative.requestPendingResumeCycle==='function') window.GildongmuNative.requestPendingResumeCycle(); }catch(_e){} }
+    else {
+      deliverPendingNativeResume();
+      try{if(window.GildongmuNative && typeof window.GildongmuNative.requestPendingResumeCycle==='function')window.GildongmuNative.requestPendingResumeCycle();}catch(_e){}
+    }
   }, {passive:true});
-  window.addEventListener('focus', function(){ releaseExpiredBackgroundIntro('focus'); if(!isNativeAndroid()) scheduleReturn('focus'); }, {passive:true});
+  window.addEventListener('focus', function(){
+    releaseExpiredBackgroundIntro('focus');
+    if(!isNativeAndroid()) scheduleReturn('focus');
+    else deliverPendingNativeResume();
+  }, {passive:true});
   setTimeout(function(){ releaseExpiredBackgroundIntro('boot-safety'); }, 900);
   setTimeout(function(){ releaseExpiredBackgroundIntro('boot-safety-late'); }, 6500);
 })();
