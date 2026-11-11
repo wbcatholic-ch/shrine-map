@@ -3030,13 +3030,23 @@ function _resumeShrineVisitCardsFromDetail(){
     const modal=_ensureShrineVisitCardsModal();
     _syncShrineVisitCardsViewportHeight();
     _setShrineVisitDetailFromCardsActive(false);
-    _renderShrineVisitCardsModal();
+    // Restore the list while it has a measurable viewport. Rendering inside
+    // display:none discards the old scroll range on some Android WebViews.
     modal.classList.remove('detail-covered');
     modal.classList.add('show');
     modal.setAttribute('aria-hidden','false');
-    _oaiNotifyStampListVisibility();
+    _renderShrineVisitCardsModal();
     const body=document.getElementById('shrine-visit-cards-body');
-    if(body)body.scrollTop=_shrineVisitCardsReturnScroll;
+    if(body){
+      const savedTop=_shrineVisitCardsReturnScroll;
+      body.scrollTop=savedTop;
+      requestAnimationFrame(function(){
+        if(modal.classList.contains('show') && !_isShrineVisitDetailOpen() && body.scrollTop===0 && savedTop>0){
+          body.scrollTop=savedTop;
+        }
+      });
+    }
+    _oaiNotifyStampListVisibility();
   }catch(e){ console.warn('[가톨릭길동무]', e); }
 }
 function _pushShrineVisitCardsHistory(){
@@ -5644,8 +5654,18 @@ function _closeParishVisitDetail(opts){
   /* 상세의 X와 뒤로가기는 방문 목록으로 돌아간다. */
   const v=document.getElementById('parish-visit-detail');if(v){v.classList.remove('show');v.setAttribute('aria-hidden','true');}
   if(window.__OAI_PV_DETAIL_FROM_BOOK__&&!opts.noResume){
-    const book=_ensureParishVisitBook();_renderParishVisitBook();book.classList.add('show');book.setAttribute('aria-hidden','false');
-    const bookBody=document.getElementById('pv-body');if(bookBody)bookBody.scrollTop=_parishVisitBookReturnScroll;
+    const book=_ensureParishVisitBook();book.classList.add('show');book.setAttribute('aria-hidden','false');
+    _renderParishVisitBook();
+    const bookBody=document.getElementById('pv-body');
+    if(bookBody){
+      const savedTop=_parishVisitBookReturnScroll;
+      bookBody.scrollTop=savedTop;
+      requestAnimationFrame(function(){
+        if(book.classList.contains('show') && !document.querySelector('#parish-visit-detail.show') && bookBody.scrollTop===0 && savedTop>0){
+          bookBody.scrollTop=savedTop;
+        }
+      });
+    }
     _oaiNotifyStampListVisibility();
   }
   window.__OAI_PV_DETAIL_FROM_BOOK__=false;_updateParishVisitButton();_oaiNotifyPhotoLocationActivity();
