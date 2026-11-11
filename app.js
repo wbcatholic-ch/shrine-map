@@ -658,8 +658,9 @@ function oaiClearExternalNavigationState(opts){
   function captureBackgroundMainMapView(){
     try{
       // Only ordinary category maps own a background-restorable viewport.
-      // Pilgrimage course/edit/pick maps own their initial framing independently.
-      if(window.__OAI_PILGRIMAGE_COURSE_VIEW__===true ||
+      // Direct place directions and pilgrimage course/edit/pick maps own their framing.
+      if(_isDirectPilgrimagePlaceRouteActive() ||
+         window.__OAI_PILGRIMAGE_COURSE_VIEW__===true ||
          window.__OAI_PILGRIMAGE_PLACE_PICK__===true ||
          window.__OAI_PILGRIMAGE_ROUTE_EDIT__ ||
          window.__OAI_PILGRIMAGE_MAP_PICK__) return null;
@@ -684,7 +685,8 @@ function oaiClearExternalNavigationState(opts){
   function isMainPlaceMapActive(){
     try{
       // A pilgrimage map also uses _mode='shrine': mode alone is insufficient.
-      if(window.__OAI_PILGRIMAGE_COURSE_VIEW__===true ||
+      if(_isDirectPilgrimagePlaceRouteActive() ||
+         window.__OAI_PILGRIMAGE_COURSE_VIEW__===true ||
          window.__OAI_PILGRIMAGE_PLACE_PICK__===true ||
          window.__OAI_PILGRIMAGE_ROUTE_EDIT__ ||
          window.__OAI_PILGRIMAGE_MAP_PICK__) return false;
@@ -10441,7 +10443,8 @@ function _onMapReady(){
       if(typeof _map.relayout==='function') _map.relayout();
       // A returning/late SDK map-ready callback must not discard a pilgrimage
       // course's waypoint viewport. The course entry handles its own framing.
-      if(window.__OAI_PILGRIMAGE_COURSE_VIEW__!==true &&
+      if(!_isDirectPilgrimagePlaceRouteActive() &&
+         window.__OAI_PILGRIMAGE_COURSE_VIEW__!==true &&
          window.__OAI_PILGRIMAGE_PLACE_PICK__!==true &&
          !window.__OAI_PILGRIMAGE_ROUTE_EDIT__ &&
          !window.__OAI_PILGRIMAGE_MAP_PICK__){
@@ -10585,6 +10588,13 @@ function _getMapPanelCandidate(){
   }catch(e){console.warn('[가톨릭길동무]',e);}
   return null;
 }
+// Place-info directions own a two-endpoint viewport. General category/location
+// recentering must not replace it while the direct route result is open.
+function _isDirectPilgrimagePlaceRouteActive(){
+  return window.__OAI_PILGRIMAGE_PLACE_NAV_RETURN__===true &&
+    window.__oaiPilgrimageRouteReturn===true &&
+    _screen==='map' && _activeTab==='route';
+}
 function _relayoutMainMapForPanel(){
   try{
     if(!_map||typeof _map.relayout!=='function') return;
@@ -10594,7 +10604,8 @@ function _relayoutMainMapForPanel(){
       try{
         _map.relayout();
         const current=_getVisibleInfoCardFocusItem();
-        if(window.__OAI_PILGRIMAGE_COURSE_VIEW__===true||window.__OAI_PILGRIMAGE_PLACE_PICK__===true){
+        if(_isDirectPilgrimagePlaceRouteActive()||
+           window.__OAI_PILGRIMAGE_COURSE_VIEW__===true||window.__OAI_PILGRIMAGE_PLACE_PICK__===true){
           // 최초 줌은 각 지도 진입 함수가 단 한 번 담당한다.
           // 패널 변경·지연된 RAF가 사용자의 현재 줌을 덮어쓰지 않는다.
           return;
@@ -11168,7 +11179,7 @@ function _nearbyMyLocationDefaultLevel(mode){
 }
 function _restoreNearbyMyLocationPlain(reason, opts){
   opts = opts || {};
-  if(_isShrineMapTargetCenterLocked()||_isPilgrimageRouteEditMode()||window.__OAI_PILGRIMAGE_COURSE_VIEW__===true||window.__OAI_PILGRIMAGE_PLACE_PICK__===true) return false;
+  if(_isDirectPilgrimagePlaceRouteActive()||_isShrineMapTargetCenterLocked()||_isPilgrimageRouteEditMode()||window.__OAI_PILGRIMAGE_COURSE_VIEW__===true||window.__OAI_PILGRIMAGE_PLACE_PICK__===true) return false;
   if(!_map || !_myLat || !_myLng || typeof _LL==='undefined') return false;
   if(!(_mode==='shrine' || _mode==='parish' || _mode==='retreat')) return false;
   try{
@@ -11394,7 +11405,7 @@ function _setPilgrimageMapCenterForBottomCard(point,level,opts){
 
 window.oaiNormalizeMainMapAfterViewport = function(reason, captured){
   try{
-    if(!_map || typeof _LL==='undefined') return;
+    if(!_map || typeof _LL==='undefined' || _isDirectPilgrimagePlaceRouteActive()) return;
     if(typeof _map.getLevel==='function' && captured && captured.level != null){
       if(_map.getLevel() !== captured.level) _map.setLevel(captured.level);
     }
@@ -13514,7 +13525,7 @@ function _autoLocate(opts){
     try{
       if(!fromCache) _setMyLoc(lat,lng);
       else { _myLat=lat; _myLng=lng; }
-      if(!_map||preserveMapCenter) return;
+      if(!_map||preserveMapCenter||_isDirectPilgrimagePlaceRouteActive()) return;
       if(_mode==='shrine'){
        _centerCurrentLocationPlain(lat,lng,8);
       } else if(_mode==='parish'){
@@ -27069,18 +27080,25 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
             _oaiShowNavigationNotice('길찾기 안내','경로를 준비하지 못했습니다. 다시 시도해 주세요.',function(){});
         });
 
-      const restoreMap=()=>{try{
+      const restoreMap=(finalLayoutPass)=>{try{
         if(typeof oaiSetMainMapLayerHidden==='function')oaiSetMainMapLayerHidden(false);
         if(mapWrap){mapWrap.style.display='';mapWrap.style.visibility='visible';}
         if(mapEl){mapEl.style.display='';mapEl.style.visibility='visible';}
         if(_map&&typeof _map.relayout==='function')_map.relayout();
         if(typeof _syncMapPanelUI==='function')_syncMapPanelUI('pilgrimage-route');
-        // The shared _calcRoute() already fits both current GPS start and destination
-        // after the result sheet opens. Do not recenter on the destination here:
-        // this delayed restore runs again on Fold and would override that fit.
+        // The shared calculator frames both endpoints. The last existing layout
+        // pass repeats that fit once after the sheet and Fold dimensions settle.
+        // Do not fit on every panel mutation or on a late road API response.
+        if(finalLayoutPass===true &&
+           window.__OAI_COURSE_LOADING_TOKEN__===directRouteToken &&
+           _isDirectPilgrimagePlaceRouteActive() && _rS && _rE &&
+           $('rs-result') && $('rs-result').style.display==='block'){
+          _fitPilgrimageWaypointBounds([_rS].concat(_getRouteWaypoints(),[_rE]),56);
+        }
       }catch(_e){}};
       requestAnimationFrame(()=>requestAnimationFrame(restoreMap));
-      setTimeout(restoreMap,120);setTimeout(restoreMap,420);setTimeout(restoreMap,900);
+      setTimeout(restoreMap,120);setTimeout(restoreMap,420);
+      setTimeout(()=>restoreMap(true),900);
     }catch(e){
       window.__oaiPilgrimageRouteReturn=false;
       window.__OAI_PILGRIMAGE_PLACE_NAV_RETURN__=false;
