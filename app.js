@@ -2688,12 +2688,19 @@ function _updateShrineVisitFloatingListButtonUI(){
 function _bindShrineVisitFloatingListButtonWatchers(){
   if(window.__OAI_SHRINE_VISIT_FLOATING_WATCH_BOUND__) return;
   window.__OAI_SHRINE_VISIT_FLOATING_WATCH_BOUND__=true;
+  // 성지·성당 방문 버튼은 동일한 화면 변경 신호를 사용한다.
+  // 연속 터치/클릭/DOM 변경이 한 번에 발생해도 UI 갱신은 한 번만 예약한다.
+  let refreshPending=false;
   const refresh=function(){
     try{ if(typeof window.__oaiIsResumeFreeze === 'function' && window.__oaiIsResumeFreeze()) return; }catch(_e){}
-    setTimeout(function(){ try{
-      if(typeof window.__oaiIsResumeFreeze === 'function' && window.__oaiIsResumeFreeze()) return;
-      _updateShrineVisitFloatingListButtonUI();
-    }catch(_e){} }, 40);
+    if(refreshPending)return;
+    refreshPending=true;
+    setTimeout(function(){
+      refreshPending=false;
+      try{ if(typeof window.__oaiIsResumeFreeze === 'function' && window.__oaiIsResumeFreeze()) return; }catch(_e){}
+      try{ _updateShrineVisitFloatingListButtonUI(); }catch(_e){}
+      try{ if(_mode==='parish' || document.getElementById('parish-visit-action-layer')) _updateParishVisitButton(); }catch(_e){}
+    }, 40);
   };
   ['focusin','focusout','click','keyup','touchend'].forEach(function(ev){ document.addEventListener(ev, refresh, true); });
   ['resize','orientationchange','pageshow'].forEach(function(ev){ window.addEventListener(ev, refresh, {passive:true}); });
@@ -5772,8 +5779,8 @@ function _showParishAutoVisitNotice(place){
   modal.classList.add('show');
   modal.setAttribute('aria-hidden','false');
 }
-// 방문 버튼 상태는 기존 화면 이벤트가 즉시 갱신하며, 타이머는 저빈도 안전망으로만 사용.
-try{setInterval(function(){if(!document.hidden)_updateParishVisitButton();},1500);}catch(_e){}
+// 성당 방문 버튼은 성지 버튼과 같은 화면 이벤트 갱신 경로를 사용한다.
+// 1.5초마다 반복 실행하던 별도 성당 버튼 점검 타이머는 제거했다.
 try{document.addEventListener('change',function(e){const t=e.target;if(!t||!t.matches||!t.matches('#parish-visit-book [data-pv-select]'))return;const kind=t.getAttribute('data-pv-select'),value=t.value;if(kind==='sort')_parishVisitSort=value==='oldest'?'oldest':'recent';else if(kind==='dio'){_parishVisitDio=value||'all';_parishUnvisitedLimit=80;}_renderParishVisitBook();});}catch(_e){}
 try{window.addEventListener('oai-short-background-return',function(){setTimeout(function(){_updateParishVisitButton();},120);try{if(typeof window._oaiValidateActivePilgrimageFollow==='function')window._oaiValidateActivePilgrimageFollow();}catch(_e){}},{passive:true});}catch(_e){}
 
@@ -10123,6 +10130,8 @@ function startApp(mode){
   document.documentElement.classList.add('app-active');
   document.documentElement.classList.toggle('parish-mode',mode==='parish');
   document.documentElement.classList.toggle('retreat-mode',mode==='retreat');
+  // 카테고리 전환은 타이머 대기 없이 방문 버튼 상태를 즉시 반영한다.
+  try{ _updateParishVisitButton(); }catch(_e){}
   if(mode==='shrine'){
     window.__OAI_SHRINE_NEARBY_DISTANCE_DONE__=false;
     window.__OAI_SHRINE_NEARBY_LOADING__=true;
