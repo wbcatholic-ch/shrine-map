@@ -1387,6 +1387,12 @@ window.APP_CONFIG = {
       <section id="oai-developer-section" class="oai-settings-group oai-dev-section" hidden aria-label="개발자 도구">
         <div class="oai-dev-title"><span class="oai-dev-icon" aria-hidden="true">⚙</span><span><b>개발자 도구</b><small>알림 테스트 · 코드 백업 · 코드 복원</small></span><span class="oai-dev-pill">관리자 전용</span></div>
         <div class="oai-dev-content">
+          <div class="oai-dev-subview" aria-label="10C 복귀 진단">
+            <div class="oai-dev-subhead"><strong>10C · 30분 복귀 진단 (읽기 전용)</strong><small>버튼을 누를 때만 현재 상태를 확인합니다. GPS·스탬프·화면 전환·저장 데이터를 변경하지 않습니다.</small></div>
+            <button type="button" data-oai-dev-10c-check="1">현재 복귀 상태 검사</button>
+            <pre id="oai-dev-10c-result" role="status" aria-live="polite" style="white-space:pre-wrap;overflow-wrap:anywhere;font-size:12px;line-height:1.55;max-height:260px;overflow:auto"></pre>
+            <small>실제 30분 복귀 시험은 폴드에서 별도로 수행해야 합니다. 이 검사는 자동으로 앱을 백그라운드로 보내거나 커버로 이동시키지 않습니다.</small>
+          </div>
           <button type="button" class="oai-dev-failure-preview" data-oai-dev-july4-completion="1" id="oai-dev-july4-completion" hidden><b>순례완료 알림 테스트</b><small>7월 4일 코스 · 1회 알림</small></button>
           <button type="button" class="oai-dev-failure-preview" data-oai-dev-july4-memory="1" id="oai-dev-july4-memory" hidden><b>순례 추억 알림 테스트</b><small>7월 4일 방문 기록 · 1회 알림</small></button>
           <div id="oai-dev-gps-test" class="oai-dev-subview" aria-label="격리된 GPS 축하 시험">

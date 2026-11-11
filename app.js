@@ -17380,40 +17380,6 @@ function _fmtTime(s){
   }, {passive: true});
 })();
 
-(function(){
-  const IDLE_MS = 30 * 60 * 1000; // 30분
-  let _idleTimer = null;
-  function _resetIdle(){
-    clearTimeout(_idleTimer);
-    _idleTimer = setTimeout(()=>{
-      const root = document.documentElement;
-      if(document.visibilityState !== 'visible'){
-        return;
-      }
-      try{
-        const coordinatorUntil = window.__OAI_RETURN_COORDINATOR_UNTIL__ || 0;
-        const bgStamp = sessionStorage.getItem('oai_bg_started_at_v356') || sessionStorage.getItem('oai_home_backgrounded_at');
-        const introUntil = parseInt(sessionStorage.getItem('oai_background_intro_return_until') || '0', 10) || 0;
-        const nowTs = Date.now ? Date.now() : new Date().getTime();
-        if(bgStamp || (coordinatorUntil && nowTs < coordinatorUntil) || (introUntil && nowTs < introUntil) || root.classList.contains('oai-cover-booting') || root.classList.contains('oai-background-return-intro')){
-          _resetIdle();
-          return;
-        }
-      }catch(_e){}
-      /* V8-1-14-621:
-         30분 백그라운드 복귀 규칙은 앱이 숨겨졌다가 돌아올 때만 사용한다.
-         앱이 켜진 상태에서 30분 동안 조작이 없어도 현재 화면을 커버로 강제 이동하지 않는다. */
-      return;
-    }, IDLE_MS);
-  }
-  ['touchstart','touchend','click','keydown','scroll'].forEach(ev=>{
-    document.addEventListener(ev, _resetIdle, {passive:true});
-  });
-  oaiAddLifecycleObserver('hidden', function(){ clearTimeout(_idleTimer); });
-  oaiAddLifecycleObserver('visible', _resetIdle);
-  _resetIdle();
-})();
-
 document.addEventListener('DOMContentLoaded', function bindEvents() {
   function on(id, evt, fn, opts) {
     var el = typeof id === 'string' ? document.getElementById(id) : id;
@@ -19119,7 +19085,7 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }finally{oaiApplyingRestore=false;}
   }
   document.addEventListener('click',async function(event){
-    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-apply],[data-oai-dev-july4-completion],[data-oai-dev-july4-memory],[data-oai-dev-gps-test-run],[data-oai-dev-gps-test-reset]');if(!button)return;
+    const button=event.target&&event.target.closest&&event.target.closest('#oai-settings-version-label,[data-oai-dev-10c-check],[data-oai-dev-export],[data-oai-dev-import],[data-oai-dev-apply],[data-oai-dev-july4-completion],[data-oai-dev-july4-memory],[data-oai-dev-gps-test-run],[data-oai-dev-gps-test-reset]');if(!button)return;
     if(button.id==='oai-settings-version-label'){
       oaiDevTapCount++;
       if(oaiDevTapCount>=10){oaiDevTapCount=0;const next=!(oaiDevEnabled()&&oaiDevPanelUnlocked);oaiDevPanelUnlocked=next;window.__OAI_DEV_RUNTIME_ACTIVE__=next;oaiRefreshDeveloperPanel();const detail=document.getElementById('parish-visit-detail');if(detail&&detail.classList.contains('show'))_renderParishVisitDetail();if(_isShrineVisitDetailOpen()&&window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__!=null)_renderShrineVisitDetail(window.__OAI_CURRENT_SHRINE_VISIT_DETAIL_IDX__);if(next){oaiDevStatus('개발자 모드가 열렸습니다.');document.getElementById('oai-developer-section').scrollIntoView({block:'nearest',behavior:'smooth'});} }
@@ -19128,7 +19094,32 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     if(!oaiDevEnabled())return;
     event.preventDefault();
     try{
-      if(button.hasAttribute('data-oai-dev-gps-test-run')){
+      if(button.hasAttribute('data-oai-dev-10c-check')){
+        if(!oaiDevPanelUnlocked)return;
+        const output=document.getElementById('oai-dev-10c-result');
+        if(output){
+          const now=Date.now();
+          const raw=sessionStorage.getItem('oai_bg_started_at_v356')||localStorage.getItem('oai_bg_started_at_v356')||'';
+          const stamp=Number(raw)||0;
+          const age=stamp?Math.max(0,now-stamp):null;
+          const leader=window.oaiReturnConductor&&typeof window.oaiReturnConductor.current==='function'?window.oaiReturnConductor.current():null;
+          const lines=[
+            '10C 시험본 · 읽기 전용 진단',
+            '복귀 관리자: '+(window.__OAI_BACKGROUND_RETURN_MANAGER_V356__?'설치됨':'미확인'),
+            '기존 유휴 재시작 감시: 10C 소스에서 제거됨 (정적 검증 대상)',
+            '현재 화면 상태: '+document.visibilityState,
+            '백그라운드 기록: '+(stamp?'있음':'없음'),
+            '기록 경과: '+(age==null?'해당 없음':Math.round(age/1000)+'초'),
+            '30분 기준 판정: '+(age==null?'판정 불가':age>=1800000?'30분 이상':'30분 미만'),
+            '복귀 처리 담당: '+(leader&&leader.type||'없음'),
+            '복귀 처리 남은 시간: '+(leader&&leader.until?Math.max(0,leader.until-now)+'ms':'해당 없음'),
+            'Android 브리지: '+(window.GildongmuNative?'연결됨':'없음 (웹/PWA)'),
+            '29:59 / 30:00 경계: '+(1799000<1800000&&1800000>=1800000?'계산 정상':'계산 오류'),
+            '※ 기능 시험 결과가 아닙니다. 실제 복귀 후 화면·인트로·커버를 직접 확인하세요.'
+          ];
+          output.textContent=lines.join('\n');
+        }
+      }else if(button.hasAttribute('data-oai-dev-gps-test-run')){
         if(!oaiDevPanelUnlocked)return;
         oaiDevGpsTestRun();
       }else if(button.hasAttribute('data-oai-dev-gps-test-reset')){
