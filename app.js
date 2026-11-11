@@ -21985,11 +21985,22 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     return planned.every(p=>{const i=available.findIndex(ev=>_dailySamePlace(p,ev));if(i<0)return false;available.splice(i,1);return true;});
   }
   // 원본 스탬프의 읽기 오류는 빈 기록으로 간주하지 않는다.
-  function _dailyRawGpsEvents(date){
-    const rows=[];
+  // 날짜별 GPS 증거 확인 동안 성지·성당 원본을 각각 1회만 읽는다.
+  // 호출 사이/화면 사이에는 보관하지 않으며 저장 시점의 원본과 오류 검사를 유지한다.
+  function _dailyReadGpsStampStores(){
+    const stores={};
     [['oai_shrine_visits_v1','shrine'],['oai_parish_visits_v1','parish']].forEach(pair=>{
       const raw=localStorage.getItem(pair[0]);let data={};
       if(raw!==null){try{data=JSON.parse(raw);}catch(e){throw new Error('GPS 스탬프 저장정보 손상: '+pair[0]);}}
+      if(!data||typeof data!=='object'||Array.isArray(data))throw new Error('GPS 스탬프 형식 오류: '+pair[0]);
+      stores[pair[1]]=data;
+    });
+    return stores;
+  }
+  function _dailyRawGpsEvents(date,preloadedStores){
+    const rows=[],stores=preloadedStores||_dailyReadGpsStampStores();
+    [['oai_shrine_visits_v1','shrine'],['oai_parish_visits_v1','parish']].forEach(pair=>{
+      const data=stores[pair[1]];
       if(!data||typeof data!=='object'||Array.isArray(data))throw new Error('GPS 스탬프 형식 오류: '+pair[0]);
       Object.entries(data).forEach(([key,rec])=>{
         if(!rec||!Array.isArray(rec.visits))throw new Error('GPS 기록 구조 확인 실패: '+pair[0]+'/'+key);
@@ -22024,8 +22035,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     localStorage.setItem(key,JSON.stringify(queue));
     if(!Array.isArray(JSON.parse(localStorage.getItem(key)||'null')))throw new Error('축하 안내 저장 실패');
   }
-  function _dailyGpsEvents(date){
-    const rawGpsRows=_dailyRawGpsEvents(date);
+  function _dailyGpsEvents(date,preloadedStores){
+    const stores=preloadedStores||_dailyReadGpsStampStores();
+    const rawGpsRows=_dailyRawGpsEvents(date,stores);
     const events=[];
     function collect(data,catalog,kind){
       Object.entries(data||{}).forEach(([storageKey,r])=>{
@@ -22058,8 +22070,8 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         });
       });
     }
-    collect(_loadShrineVisits(),typeof SHRINES!=='undefined'?SHRINES:[],'shrine');
-    collect(_loadParishVisits(),typeof PARISHES!=='undefined'?PARISHES:[],'parish');
+    collect(stores.shrine,typeof SHRINES!=='undefined'?SHRINES:[],'shrine');
+    collect(stores.parish,typeof PARISHES!=='undefined'?PARISHES:[],'parish');
     if(events.length!==rawGpsRows.length)throw new Error(date+' GPS 스탬프 누락 또는 장소 연결 오류');
     events.sort((a,b)=>a.at-b.at||a.name.localeCompare(b.name,'ko'));
     const unique=[];
@@ -22152,13 +22164,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
   function _dailyAutoEligible(events){return events.some(ev=>ev.kind==='shrine'||_dailyIsSharedParish(ev));}
   // 이미 같은 날짜에 GPS 성지순례가 성립한 경우, 뒤늦게 확인된 일반 성당도
   // 그 날짜의 남은 방문지로 등록한다. 성당만 방문한 날짜의 신규 자동 코스는 금지한다.
-  function _dailyEligibleRemaining(date,remaining,courses){
+  function _dailyEligibleRemaining(date,remaining,courses,knownGpsEvents){
     if(_dailyAutoEligible(remaining))return true;
     if(!Array.isArray(remaining)||!remaining.length)return false;
     return (courses||_dailyStoredCourses()).some(c=>_courseCompletionList(c).some(x=>
       x.method==='gps'&&_dailyIso(x.completedAt)===date&&
       Array.isArray(x.stampPlaces)&&x.stampPlaces.length>0))&&
-      _dailyAutoEligible(_dailyGpsEvents(date));
+      _dailyAutoEligible(Array.isArray(knownGpsEvents)?knownGpsEvents:_dailyGpsEvents(date));
   }
   // 과거 완료 코스에는 placeId가 없거나 GPS 인증 지점과 다른 대표 좌표가 저장될 수 있다.
   // 완료 코스 대조에서만 고유 ID 또는 이름+교구를 사용한다. 다른 장소의 동명이인
@@ -22908,6 +22920,9 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     // The same history-list render must use one normalized course snapshot.
     // Re-read on the next invocation, never cache across actual course writes.
     let historyCourses=null,historyCoursesLoaded=false,historyCoursesError=null;
+    // 이 목록 생성 동안만 스탬프 원본을 재사용한다. 화면을 벗어나면 참조도 사라진다.
+    // 저장/등록 처리는 기존처럼 항상 새 원본을 읽는다.
+    let historyGpsStores=null;
     const result=Array.from(dates).sort().filter(date=>{
       try{
         if(!historyCoursesLoaded){
@@ -22915,8 +22930,10 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
           try{historyCourses=loadCourses();}catch(e){historyCoursesError=e;}
         }
         if(historyCoursesError)throw historyCoursesError;
-        const remaining=_dailyUnregisteredEvents(date,_dailyGpsEvents(date),historyCourses);
-        return _dailyEligibleRemaining(date,remaining,historyCourses);
+        if(!historyGpsStores)historyGpsStores=_dailyReadGpsStampStores();
+        const gpsEvents=_dailyGpsEvents(date,historyGpsStores);
+        const remaining=_dailyUnregisteredEvents(date,gpsEvents,historyCourses);
+        return _dailyEligibleRemaining(date,remaining,historyCourses,gpsEvents);
       }
       catch(e){
         // 장소 연결 실패/자료 미로딩은 '등록할 코스가 있다'는 증거가 아니다.
