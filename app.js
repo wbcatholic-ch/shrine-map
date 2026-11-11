@@ -14,6 +14,20 @@ function oaiVersionedAsset(path){
 }
 try{ window.oaiVersionedAsset=oaiVersionedAsset; window.OAI_ASSET_VERSION=OAI_ASSET_VERSION; }catch(_e){}
 
+// Stage20: two native delivery paths (ready-event and cold-load consume) must
+// share one notification-open owner. A notification is consumed only once per
+// document and kind/date; the user's explicit retry button remains available.
+const _oaiOpenedNotificationKeys = new Set();
+function _oaiOpenNotificationOnce(kind,date,open){
+  const day=String(date||'');
+  if(!/^\d{4}-\d{2}-\d{2}$/.test(day))return false;
+  const key=String(kind)+':'+day;
+  if(_oaiOpenedNotificationKeys.has(key))return false;
+  _oaiOpenedNotificationKeys.add(key);
+  try{open(day);return true;}
+  catch(err){_oaiOpenedNotificationKeys.delete(key);throw err;}
+}
+
 function hideCoverAndRun(callback) {
   try{
     document.querySelectorAll('.module-view.open,#prayer-view.open,#diocese-view.open,#missa-view.open').forEach(function(v){v.classList.remove('open');});
@@ -18711,13 +18725,13 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }).finally(function(){oaiAnniversaryOpening=null;});
     return oaiAnniversaryOpening;
   }
-  window.addEventListener('oai-anniversary-notification-open',e=>oaiOpenAnniversaryWhenReady(String(e.detail&&e.detail.date||''),!!(e.detail&&e.detail.warm)));
+  window.addEventListener('oai-anniversary-notification-open',e=>_oaiOpenNotificationOnce('memory',e.detail&&e.detail.date,date=>oaiOpenAnniversaryWhenReady(date,!!(e.detail&&e.detail.warm))));
   window.__oaiAnniversaryHandlerReady=true;
   function oaiReceivePendingAnniversary(){
     try{if(window.GildongmuNative&&typeof window.GildongmuNative.consumePendingAnniversaryDate==='function'){
       const warm=typeof window.GildongmuNative.pendingAnniversaryFromExistingApp==='function' && window.GildongmuNative.pendingAnniversaryFromExistingApp();
       const date=window.GildongmuNative.consumePendingAnniversaryDate();
-      if(date)oaiOpenAnniversaryWhenReady(String(date),warm);
+      if(date)_oaiOpenNotificationOnce('memory',date,day=>oaiOpenAnniversaryWhenReady(day,warm));
     }}catch(_e){}
   }
   if(document.readyState==='complete')oaiReceivePendingAnniversary();
@@ -24078,20 +24092,22 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }catch(e){console.warn('[10월 31일 완료 알림]',e);return false;}
     finally{completionTrialOpening=false;}
   }
-  window.addEventListener('oai-completion-test-open',e=>{void _openOct31CompletionTest(String(e.detail&&e.detail.date||''),true,!!(e.detail&&e.detail.warm));});
-  window.addEventListener('oai-completion-notification-open',e=>{void _openOct31CompletionTest(String(e.detail&&e.detail.date||''),false,!!(e.detail&&e.detail.warm));});
+  window.addEventListener('oai-completion-test-open',e=>{_oaiOpenNotificationOnce('completion-test',e.detail&&e.detail.date,date=>{void _openOct31CompletionTest(date,true,!!(e.detail&&e.detail.warm));});});
+  window.addEventListener('oai-completion-notification-open',e=>{_oaiOpenNotificationOnce('completion',e.detail&&e.detail.date,date=>{void _openOct31CompletionTest(date,false,!!(e.detail&&e.detail.warm));});});
   window.__oaiCompletionTestHandlerReady=true;
   function _consumePendingCompletionTrial(){
     try{if(window.GildongmuNative){
       const native=window.GildongmuNative;
       if(typeof native.consumePendingCompletionTestDate==='function'){
+        // Read warm/cold state BEFORE consume clears the native trial flag.
+        const trialWarm=typeof native.pendingCompletionFromExistingApp==='function'&&native.pendingCompletionFromExistingApp();
         const trial=native.consumePendingCompletionTestDate();
-        if(trial)void _openOct31CompletionTest(String(trial),true,typeof native.pendingCompletionFromExistingApp==='function'&&native.pendingCompletionFromExistingApp());
+        if(trial)_oaiOpenNotificationOnce('completion-test',trial,day=>{void _openOct31CompletionTest(day,true,trialWarm);});
       }
       if(typeof native.consumePendingCompletionDate==='function'){
         const warm=typeof native.pendingCompletionFromExistingApp==='function'&&native.pendingCompletionFromExistingApp();
         const date=native.consumePendingCompletionDate();
-        if(date)void _openOct31CompletionTest(String(date),false,warm);
+        if(date)_oaiOpenNotificationOnce('completion',date,day=>{void _openOct31CompletionTest(day,false,warm);});
       }
     }}catch(e){console.warn('[순례완료 알림 복귀]',e);}
   }
