@@ -1143,7 +1143,7 @@ function oaiClearExternalNavigationState(opts){
       var returnLeaderType=isLongReturn?'long-background':'passive';
       try{
         if(window.oaiReturnConductorRequest){
-          if(!window.oaiReturnConductorRequest(returnLeaderType,{ms:isLongReturn?2800:950})) return false;
+          if(!window.oaiReturnConductorRequest(returnLeaderType,{ms:isLongReturn?2800:950,force:isLongReturn})) return false;
         }else if(window.oaiReturnConductorBusy && window.oaiReturnConductorBusy([returnLeaderType])){
           return false;
         }
@@ -23826,20 +23826,19 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
     }
   };
 
-  function _restoreFaithAfterLongBackground(context){
-    try{
-      if(context==='missa'){setTimeout(function(){try{const view=document.getElementById('missa-view');if(!(view&&view.classList.contains('open'))&&typeof openMissa==='function')openMissa();}catch(_e){}},40);return true;}
-      if(context==='prayer'){setTimeout(function(){try{if(typeof openPrayerBook==='function')openPrayerBook({restore:true,instant:true,backgroundFavorite:true});}catch(_e){}},40);return true;}
-    }catch(_e){}
-    return false;
-  }
   window._oaiHandlePilgrimageBackgroundReturn=function(info){
     try{
       if(!info||!info.longReturn)return false;
       const context=_readPilgrimageBackgroundContext();
-      if(context==='missa'||context==='prayer'){const handled=_restoreFaithAfterLongBackground(context);if(handled)_clearBackgroundScreenContext();return handled;}
+      // 30-minute contract: faith screens (missa/prayer) return to intro + cover.
+      // Only an already-running walking/car pilgrimage can restore its follow
+      // session; merely looking at a completed/planned course is not an exception.
       const active=_activeFollowState();
-      if(context==='pilgrimage'&&active){setTimeout(function(){try{window._oaiReturnToActivePilgrimage({backgroundReturn:true});}catch(_e){}},60);_clearBackgroundScreenContext();return true;}
+      if(context==='pilgrimage'&&active){
+        setTimeout(function(){try{window._oaiReturnToActivePilgrimage({backgroundReturn:true});}catch(_e){}},60);
+        _clearBackgroundScreenContext();
+        return true;
+      }
       _clearBackgroundScreenContext();
     }catch(_e){}
     return false;
