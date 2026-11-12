@@ -24683,7 +24683,15 @@ document.addEventListener('DOMContentLoaded', function bindEvents() {
         if(cached.error)throw cached.error;
         rows=cached.rows;
       }
-      const stampAt=_dailyRecordedVisitAt(point,day,0,rows);
+      // 구형 완료 코스가 성지/성당 공통화 전의 다른 쪽 ID를 보관할 수 있다.
+      // 이 표시 전용 분기는 같은 방문일의 GPS 원본과 확정된 공통화 명부만 사용한다.
+      // GPS 판정·스탬프·순례완료 저장소는 절대 변경하지 않는다.
+      let stampAt=_dailyRecordedVisitAt(point,day,0,rows);
+      if(!stampAt&&Array.isArray(rows)){
+        const linked=rows.filter(e=>e&&Number.isFinite(Number(e.at))&&_dailyLinkedGpsPair(point,e));
+        // 동률·중복 등 불명확한 GPS 근거는 시각을 추측하지 않는다.
+        if(linked.length===1)stampAt=Number(linked[0].at);
+      }
       if(!stampAt)return '방문 날짜·시간 기록 없음';
       const d=new Date(stampAt);
       if(!Number.isFinite(d.getTime()))return '방문 날짜·시간 기록 없음';
